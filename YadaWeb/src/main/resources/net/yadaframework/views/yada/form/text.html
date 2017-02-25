@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org">
+
+<!--/*
+A text input element.
+It becomes a textarea if maxlength>80
+
+Parameters:
+- fieldName = name of the field holding the value
+- labelKey = key in messages.properties for the label text
+- label = label to use, if not using a labelKey
+- placeholderKey = key in messages.properties for the placeholder text (optional)
+- placeholder = placeholder to use, if not using a placeholderKey (optional)
+- type = the input type ('text', 'hidden', 'password', 'number', 'email', 'date', ...) (optional)
+- inline = true to have label and field inline (optional)
+- min = minimum value (optional)
+- max = maximum value (optional)
+- step = numerical increment (optional)
+- required = true for a required value (optional)
+- disabled = true for a disabled field - NOT SENT TO SERVER (optional)
+- readonly = true for readonly (optional)
+- maxlength = max number of characters accepted (optional)
+- help = testo per il pulsante di help, se non c'è helpKey (optional)
+- helpKey = chiave del testo per il pulsante di help (optional)
+- editor = true/false to use ckeditor
+- noFeedback = true to remove space reserved for field feedback icon (optional)
+
+Example:
+
+<div th:replace="/yada/form/text::body(fieldName='subject',maxlength=64,required=true,labelKey='form.label.subject')"></div>
+<div th:replace="/yada/form/text::body(fieldName='id',type='hidden')"></div>
+
+
+*/-->
+<body>
+<input th:if="${#strings.equals(type,'hidden')}" th:field="*{__${fieldName}__}" th:disabled="${disabled}" th:type="hidden" th:id="${#ids.seq('fieldId')}" />
+<div th:if="${!#strings.equals(type,'hidden')}" class="form-group" 
+	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" 
+	th:classappend="|${hasError==true?'has-error':''} ${inline==true?'form-inline':''} ${noFeedback==true?'':'has-feedback'}|">
+	<label class="control-label" th:for="${#ids.next('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
+	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perché se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
+		<!--/* Can't use th:field="*{__${fieldName}__}" because somehow passwords remain blank when they already have a value */-->
+		<input th:if="${maxlength==null or maxlength le 80}" th:name="${fieldName}" th:value="*{__${fieldName}__}"
+			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
+			th:required="${required}" th:disabled="${disabled}" th:type="${type}?:'text'" th:readonly="${readonly}" 
+			th:min="${min}" th:max="${max}" th:step="${step}" 
+			th:classappend="${readonly==true?'yadaReadonly':'form-control'+(noFeedback==true?'':' has-feedback')}" th:maxlength="${maxlength}" 
+			th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}"/>
+		<span th:if="${type=='password'}" class="input-group-btn">
+			<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
+		</span>
+		<textarea th:if="${maxlength gt 80}" rows="3" th:field="*{__${fieldName}__}" 
+			th:required="${required}" th:disabled="${disabled}" th:maxlength="${maxlength}" 
+			th:classappend="${readonly==true?'yadaReadonly':'form-control'+(noFeedback==true?'':' has-feedback')}"
+			th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}"></textarea>
+		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
+			<a th:if="${help!=null}" class="yadaHelpButton input-group-addon" data-trigger="focus" data-container="body" 
+				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
+				data-html="true"
+				th:attr="data-content=${help}">
+				<i class="fa fa-question-circle fa-lg"></i>
+			</a>
+		</th:block>
+	</div>
+	<script th:if="${editor==true}" type="text/javascript" th:inline="javascript">
+		//<![CDATA[
+        document.addEventListener('DOMContentLoaded', function() {
+			$([['#'+${#ids.prev('fieldId')}]]).ckeditor(function( textarea ) {
+			}, {
+				removeButtons : 'Save,About',
+				height : 400
+			}).editor;
+        });
+		//]]>
+	</script>
+
+	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
+		<span th:text="${err}" th:id="${#ids.seq('fieldId')}">Error Text</span>
+		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+	</div>
+</div>    	
+</body>
+</html>
+		

@@ -1,0 +1,96 @@
+// plugins {
+// 	// for QueryDSL
+// 	id "com.ewerk.gradle.plugins.querydsl" version "1.0.7"
+// }
+
+apply plugin: 'java'
+
+// querydsl {
+// 	library = 'com.querydsl:querydsl-apt:4.1.4'
+// 	jpa = true
+// }
+
+repositories {
+    jcenter()
+	mavenLocal()
+}
+
+dependencies {
+	// Essential libraries:
+    compile 'ch.qos.logback:logback-classic:1.+',
+    	'org.springframework:spring-webmvc:4.2.5.RELEASE',
+    	'org.springframework:spring-context-support:4.2.5.RELEASE',
+    	'org.springframework:spring-context:4.2.5.RELEASE',
+    	'org.springframework.data:spring-data-jpa:1.9.4.RELEASE',
+		'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
+    	'org.springframework.security:spring-security-web:4.0.4.RELEASE',
+    	'org.springframework.security:spring-security-config:4.0.4.RELEASE',
+		'org.hibernate:hibernate-core:5.1.0.Final',
+		'org.hibernate:hibernate-entitymanager:5.1.0.Final',
+		'org.hibernate:hibernate-validator:5.2.4.Final', // 5.+ gets alpha
+		'org.thymeleaf:thymeleaf-spring4:3.+',
+		'org.thymeleaf.extras:thymeleaf-extras-springsecurity4:3.+',
+		'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:2.1.2', // [La 2.2.0 ha un bug: https://github.com/ultraq/thymeleaf-layout-dialect/issues/127] 2.+', 
+//		'org.thymeleaf:thymeleaf-spring4:2.+',
+//		'org.thymeleaf.extras:thymeleaf-extras-springsecurity4:2.+',
+//		'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:1.3.3',
+    	'mysql:mysql-connector-java:5.+',
+    	'org.apache.commons:commons-configuration2:2.+',
+		'org.apache.commons:commons-lang3:3.+',
+		'org.apache.tomcat:tomcat-servlet-api:8.+',
+		'commons-fileupload:commons-fileupload:1.+',
+		'com.google.guava:guava:19.+',
+		'org.apache.commons:commons-exec:1.3',
+		'com.sun.mail:javax.mail:1.5.5',
+		'org.jsoup:jsoup:1.+',
+		'commons-collections:commons-collections:3.+',
+		'org.seleniumhq.selenium:selenium-firefox-driver:2.+',
+		'org.seleniumhq.selenium:selenium-support:2.+',
+		'org.littleshoot:littleproxy:1.+'
+// 		'com.querydsl:querydsl-apt:4.+',
+// 		'com.querydsl:querydsl-jpa:4.+',
+// 		'com.querydsl:querydsl-root:4.+'
+
+		// Optional Libraries (not always needed at runtime):
+		compile 'org.quartz-scheduler:quartz:2.+'
+		
+		// http://search.maven.org/#artifactdetails%7Ccommons-beanutils%7Ccommons-beanutils%7C1.9.2%7Cjar
+		runtime 'commons-beanutils:commons-beanutils:1.9.2'
+		// http://search.maven.org/#artifactdetails%7Ccommons-jxpath%7Ccommons-jxpath%7C1.3%7Cjar
+		runtime 'commons-jxpath:commons-jxpath:1.3'
+
+		testCompile 'junit:junit:4.12'
+}
+
+task listJars {
+	doLast {
+		configurations.compile.each { File file -> println file.name }
+	}
+}
+
+group = 'net.yadaframework'
+version = '0.5'
+
+apply plugin: 'maven'
+
+// http://stackoverflow.com/a/27853822/587641
+// TODO: Il javadoc genera errori che devono essere sistemati prima di poterlo usare
+/*
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}   
+
+artifacts {
+    archives javadocJar
+}
+*/
+
+// Per usare meglio maven vedi qui: http://stackoverflow.com/questions/24751996/gradle-configuration-to-download-custom-plugin-dependencies
+
+uploadArchives {
+	dependsOn build
+	repositories {
+		mavenLocal()
+	}
+}

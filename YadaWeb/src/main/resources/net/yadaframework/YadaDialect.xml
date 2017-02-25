@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dialect xmlns="http://www.thymeleaf.org/extras/dialect"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.thymeleaf.org/extras/dialect
+	                    http://www.thymeleaf.org/xsd/thymeleaf-extras-dialect-2.1.xsd"
+	prefix="yada"
+	namespace-uri="http://www.yadaframework.net"
+	class="net.yadaframework.web.dialect.YadaDialect">
+	
+	<attribute-processor name="src"      class="net.yadaframework.web.dialect.YadaSrcAttrProcessor">
+		<documentation>
+			Cache-resetting src equivalent.
+		</documentation>
+		<!-- https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes -->
+		<restrictions tags="audio,embed,iframe,input,script,source,track,video"/>
+	</attribute-processor>
+	
+	<attribute-processor name="href"     class="net.yadaframework.web.dialect.YadaHrefAttrProcessor">
+		<documentation>
+			Cache-resetting href equivalent.
+		</documentation>
+		<!-- https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes -->
+		<restrictions tags="a,area,base,link"/>
+	</attribute-processor>
+
+</dialect>

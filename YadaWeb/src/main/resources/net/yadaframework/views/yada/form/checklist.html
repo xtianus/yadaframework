@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org">
+<!--/*
+A checkbox list for objects, maps or static (Spring-EL) elements.
+It must be used inside a form with a th:object form bean.
+
+Parameters:
+- fieldName = name of the field, in the form bean, holding the chosen value
+- labelKey = key in messages.properties for the label text
+- label = label to use, if not using a labelKey
+- options = a list of objects or a list of primitive types, like ${ {true,false} } (space is important) - can be omitted for an empty select.
+-           It can also be a map of (value-text) entries, where values are either literal text or suffixes for labelKey.
+- valueAttribute = the name of the object attribute containing the option value, e.g. "id" - must be omitted for lists of primitives
+- textAttribute = the name of the object attribute (or method with braces) containing the option text (or textKey suffix), e.g. "name" or "toString()" - must be omitted for lists of primitives
+- textKey = the prefix of the key used for texts, like 'list.enabled.'; options (or option texts) will be appended to the prefix.
+             If null, the option or option text will be used for the text.
+- help = testo per il pulsante di help, se non c'è helpKey (optional)
+- helpKey = chiave del testo per il pulsante di help (optional)
+- required = true for a required select box (optional)
+- disabled = true for a disabled select box (optional)
+- onchange = function to call on the change event. It receives the 'change' event. (optional)
+- onclick = function to call on the click event. It receives the 'click' event. (optional)
+- idPrefix = string to use as prefix for select IDs. When not set, 'fieldId' is used. Must be set to a unique value when the ajaxList is injected
+             in page many times via javascript, otherwise all selects will end up having the same ids. Not needed when the ajaxLists are not inserted via javascript.
+
+Example:
+<div th:replace="/yada/form/checklist::body(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()')"></div>
+<div th:replace="/yada/form/checklist::body(fieldName='userCredentials.enabled',options=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
+<div th:replace="/yada/form/checklist::body(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
+
+*/-->
+<body>
+<div class="form-group has-feedback" 
+	th:with="hasError=${#fields.hasErrors('__${fieldName}__')},idPrefix=${idPrefix?:'fieldId'},isMap=${options instanceof T(java.util.Map)}" 
+	th:classappend="${hasError}? has-error">
+	<label th:if="${label!=null or labelKey!=null}" 
+		class="control-label" th:for="${#ids.next(idPrefix)}" 
+		th:text="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
+	<div th:id="${#ids.seq(idPrefix)}">
+		<th:block th:if="${!isMap}">
+			<!--/* List */-->
+  			<div th:each="option : ${options}" class="yadaCheckbox">
+				<!--/* List of primitives */-->
+				<input th:if="${valueAttribute==null} or ${textAttribute==null}" 
+					th:field="*{__${fieldName}__}" th:value="${option}"
+					type="checkbox"
+					th:required="${required}" th:disabled="${disabled}" />
+					<label th:for="${#ids.prev('__${fieldName}__')}" 
+           				th:text="${textKey==null?option:#messages.msg(textKey+option)}">SomeChoice</label>
+				<!--/* List of objects */-->
+				<input th:if="${valueAttribute!=null} and ${textAttribute!=null}"
+					th:with="text = ${__${'option.'+textAttribute}__},value=__${'option.'+valueAttribute}__" 
+					th:field="*{__${fieldName}__}" th:value="${option}"
+					type="checkbox"
+					th:required="${required}" th:disabled="${disabled}" />
+					<label th:for="${#ids.prev('__${fieldName}__')}" 
+           				th:text="${textKey==null?text:#messages.msg(textKey+text)}">SomeChoice</label>
+  			</div>
+ 		</th:block>
+		<th:block th:if="${isMap}">
+			<!--/* Map */-->
+			<div th:each="entry : ${options.entrySet()}" class="yadaCheckbox">
+				<input 
+					th:field="*{__${fieldName}__}" th:value="${entry.key}"
+					type="checkbox"
+					th:required="${required}" th:disabled="${disabled}" />
+					<label th:for="${#ids.prev('__${fieldName}__')}" 
+           				th:text="${textKey==null?entry.value:#messages.msg(textKey+entry.value)}">SomeChoice</label>
+        		</div>
+		</th:block>
+	</div>
+	<script th:if="${onchange!=null}" type="text/javascript">
+		//<![CDATA[
+		$("[['#'+${#ids.prev(idPrefix)}]] input[type=checkbox]").change(function (e) {
+			[[${onchange}]](e);
+		});
+		//]]>
+	</script>
+	<script th:if="${onclick!=null}" type="text/javascript">
+		//<![CDATA[
+		$("[['#'+${#ids.prev(idPrefix)}]]").click(function (e) {
+			[[${onclick}]](e);
+		});
+		//]]>
+	</script>
+	<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
+		<a th:if="${help!=null}" class="yadaHelpButton input-group-addon" data-trigger="focus" data-container="body" 
+			data-toggle="popover" data-placement="auto bottom" tabindex="-1"
+			data-html="true"
+			th:attr="data-content=${help}">
+			<i class="fa fa-question-circle fa-lg"></i>
+		</a>
+	</th:block>
+	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
+		<span th:text="${err}" th:id="${#ids.seq(idPrefix)}">Error Text</span>
+		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+	</div>
+</div>    	
+</body>
+</html>
+

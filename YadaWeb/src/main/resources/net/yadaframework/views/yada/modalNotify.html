@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+<body>
+<!--/* Modal per le notifiche incluso fisso nel layout ma anche restituito dopo una request ajax eventualmente */-->
+<!--/* Il primo div del modal non viene usato perchè già presente nel layout, anche se in modalità ajax è comunque presente nell'html ritornato */-->
+<!--/* Infatti layout:fragment scarta il tag su cui si trova, e via js si usa .yadaNotify che sta dopo */-->
+<!--/* Do not add anything before "modal" and "yadaNotify" because yada.js relies on this sequence: body > .modal > .yadaNotify */-->
+<div class="s_modalNotify"> <!--/* Only seen when loaded via ajax */-->
+	<div th:replace="/yada/ajaxResponseData :: .yadaResponseData" th:if="${resultMap!=null}"></div>
+	<div th:fragment="modal" class="modal fade" role="dialog">
+	  <div class="modal-dialog yadaNotify"
+	  	th:with="glyphName=${YADA_TOTSEVERITY=='ok'?'ok-circle':YADA_TOTSEVERITY=='error'?'remove-circle':'exclamation-sign'}">
+
+		<!--/* Versione con tanti messaggi */-->
+	    <div class="modal-content" th:if="${YADA_NTITLE!=null and YADA_NTITLE.size()>1}">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h4>
+		        <span th:class="|glyphicon glyphicon-${glyphName} ${YADA_TOTSEVERITY}|"></span>
+		        <span class="modal-title"></span>
+	        </h4>
+	      </div>
+	      <div class="modal-body">
+	      	<div class="panel-group" id="messageAccordion" role="tablist" aria-multiselectable="true">
+				<div class="panel panel-default" th:each="title,iterStat : ${YADA_NTITLE}">
+					<div class="panel-heading" role="tab" th:id="|#heading${iterStat.index}|">
+						<h4 class="panel-title">
+							<a data-toggle="collapse" data-parent="#messageAccordion" th:href="|#collapse${iterStat.index}|" 
+							aria-expanded="true" th:attr="aria-controls=${'collapse' + iterStat.index}">
+								<span th:class="|glyphicon glyphicon-${glyphName} ${YADA_SEVERITY.get(iterStat.index)}|"></span>
+								<span th:text="${title}">Collapsible Group Item #1</span>
+							</a>
+						</h4>
+	      			</div>
+					<div th:id="|collapse${iterStat.index}|" class="panel-collapse collapse in" role="tabpanel" th:attr="aria-labelledby=${'heading' + iterStat.index}">
+						<div class="panel-body" th:utext="${YADA_NBODY.get(iterStat.index)}">
+							Anim pariatur cliche reprehenderit
+						</div>
+					</div>
+				</div>	  
+			</div>    	
+	      	<!-- 
+	      	<span th:class="|glyphicon glyphicon-${glyphName} ${YADA_TOTSEVERITY}|"></span>
+	        <p th:text="${YADA_NBODY.get(0)}">Message body here</p>
+	      	 -->
+	      </div>
+	      <div class="modal-footer" th:if="${YADA_AUTOCLOSE==null}">
+	        <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{view.modal.button.close}">Close</button>
+	      </div>
+	    </div>
+
+		<!--/* Versione con un solo messaggio */-->
+	    <div class="modal-content" th:if="${YADA_NTITLE==null or YADA_NTITLE.size()==1}">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h4>
+		        <span th:class="|glyphicon glyphicon-${glyphName} ${YADA_TOTSEVERITY}|"></span>
+		        <span th:text="${YADA_NTITLE!=null?YADA_NTITLE.get(0):''}" class="modal-title">Modal title</span>
+	        </h4>
+	      </div>
+	      <div class="modal-body">
+	        <p th:utext="${YADA_NBODY!=null?YADA_NBODY.get(0):''}">Message body here</p>
+	      </div>
+	      <div class="modal-footer" th:if="${YADA_AUTOCLOSE==null}">
+	        <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{view.modal.button.close}">Close</button>
+	      </div>
+	    </div>
+	    
+	    <script th:if="${YADA_AUTOCLOSE!=null}" type="text/javascript" th:inline="javascript">
+	    	window.setTimeout(function(){$('#yada-notification').modal('hide');}, [[${YADA_AUTOCLOSE}]])
+	    </script>
+
+		  <script th:if="${YADA_RELOADONCLOSE!=null}" type="text/javascript" th:inline="javascript">
+			$('#yada-notification').on('hidden.bs.modal', function (e) {
+				yada.loaderOn();
+				window.location.reload(true);
+			});
+		  </script>
+		  <script th:if="${YADA_RELOADONCLOSE==null and YADA_REDIRECT!=null}" type="text/javascript" th:inline="javascript">
+			$('#yada-notification').on('hidden.bs.modal', function (e) {
+				yada.loaderOn();
+				window.location.href=[[@{${YADA_REDIRECT}}]];
+			});
+		  </script>
+		  <th:block th:if="${YADA_CALLSCRIPT!=null}">
+			<th:block th:each="scriptId : ${YADA_CALLSCRIPT}">
+				<!--/* Potrebbero esserci pezzi di html a loro volta inclusi oltre che a javascript */-->
+				<div th:replace="/script :: '#'+${scriptId}"></div>
+		  	</th:block>
+		  </th:block>
+	  
+	  </div><!-- /.modal-dialog -->
+	  
+	</div><!-- /.modal -->
+</div>
+</body>
+</html>

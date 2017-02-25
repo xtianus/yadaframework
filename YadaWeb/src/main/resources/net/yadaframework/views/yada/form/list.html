@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org">
+<!--/*
+A select list for objects, maps or static (Spring-EL) elements.
+It must be used inside a form with a th:object form bean.
+
+Parameters:
+- fieldName = name of the field, in the form bean, holding the chosen value. Can be a path like "recipient.name"
+- labelKey = key in messages.properties for the label text
+- label = label to use, if not using a labelKey
+- options = a list of objects or a list of primitive types, like ${users} or ${ {true,false} } (space is important) - can be omitted for an empty select.
+-           It can also be a map of (value-text) entries, where values are either literal text or suffixes for labelKey.
+- valueAttribute = the name of the object attribute containing the option value, e.g. "id" - must be omitted for lists of primitives
+- textAttribute = the name of the object attribute (or method with braces) containing the option text (or textKey suffix), e.g. "name" or "toString()" - must be omitted for lists of primitives
+- size = number of options to show (optional)
+- textKey = the prefix of the key used for texts, like 'list.enabled.'; options (or option texts) will be appended to the prefix.
+             If null, the option or option text will be used for the text.
+- inline = true to have label and field inline (optional)
+- help = testo per il pulsante di help, se non c'è helpKey (optional)
+- helpKey = chiave del testo per il pulsante di help (optional)
+- addHeader = (optional) true to add the first "empty" option
+- multiple = true for a multiple select box (optional)
+- required = true for a required select box (optional)
+- disabled = true for a disabled select box (optional)
+- readonly = true for readonly (optional)
+- onchange = function to call on the change event. It receives the 'change' event. (optional)
+- onclick = function to call on the click event. It receives the 'click' event. (optional)
+- idPrefix = string to use as prefix for select IDs. When not set, the constant 'fieldId' is used. Must be set to a unique value when the ajaxList is injected
+             in page many times via javascript, otherwise all selects will end up having the same ids. Not needed when the ajaxLists are not inserted via javascript.
+- noFeedback = true to remove space reserved for field feedback icon (optional)
+
+Example:
+<div th:replace="/yada/form/list::body(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()',addHeader=true)"></div>
+<div th:replace="/yada/form/list::body(fieldName='userCredentials.enabled',options=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
+<div th:replace="/yada/form/list::body(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
+
+*/-->
+<body>
+<div class="form-group" 
+	th:with="hasError=${#fields.hasErrors('__${fieldName}__')},idPrefix=${idPrefix?:'fieldId'}" 
+	th:classappend="|${hasError==true?'has-error':''} ${inline==true?'form-inline':''} ${noFeedback==true?'':'has-feedback'}|">
+	<label th:if="${label!=null or labelKey!=null}" 
+		class="control-label" th:for="${#ids.next(idPrefix)}" 
+		th:text="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
+	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perché se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
+		<select th:field="*{__${fieldName}__}" th:multiple="${multiple}" 
+			th:with="isMap=${options instanceof T(java.util.Map)}"
+			th:size="${size}?:''"
+			th:required="${required}" 
+			th:readonly="${readonly}"
+			th:disabled="${disabled}"
+			th:classappend="${readonly==true?'yadaReadonly':'form-control'+(noFeedback==true?'':' has-feedback')}"
+			th:id="${#ids.seq(idPrefix)}" th:attr="aria-describedby=${#ids.next(idPrefix)}">
+			<option th:if="${addHeader==true}" value="-1">---</option>
+			<th:block th:if="${!isMap}">
+				<!--/* List */-->
+				<th:block th:each="option : ${options}">
+					<!--/* List of primitives */-->
+					<option th:if="${valueAttribute==null} or ${textAttribute==null}" 
+						th:value="${option}" 
+						th:text="${textKey==null?option:#messages.msg(textKey+option)}">SomeChoice</option>
+					<!--/* List of objects */-->
+					<th:block th:if="${valueAttribute!=null} and ${textAttribute!=null}" th:with="text = ${__${'option.'+textAttribute}__},value=${__${'option.'+valueAttribute}__}">
+						<option 
+							th:value="${value}" 
+							th:text="${textKey==null?text:#messages.msg(textKey+text)}">SomeChoice</option>
+					</th:block>
+				</th:block>
+			</th:block>
+			<th:block th:if="${isMap}">
+				<!--/* Map */-->
+				<option th:each="entry : ${options.entrySet()}"
+					th:value="${entry.key}" 
+					th:text="${textKey==null?entry.value:#messages.msg(textKey+entry.value)}">SomeChoice</option>
+			</th:block>
+		</select>
+		<script th:if="${onchange!=null}" type="text/javascript">
+			//<![CDATA[
+			$("[['#'+${#ids.prev(idPrefix)}]]").change(function (e) {
+				[[${onchange}]](e);
+			});
+			//]]>
+		</script>
+		<script th:if="${onclick!=null}" type="text/javascript">
+			//<![CDATA[
+			$("[['#'+${#ids.prev(idPrefix)}]]").click(function (e) {
+				[[${onclick}]](e);
+			});
+			//]]>
+		</script>
+		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
+			<a th:if="${help!=null}" class="yadaHelpButton input-group-addon" data-trigger="focus" data-container="body" 
+				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
+				data-html="true"
+				th:attr="data-content=${help}">
+				<i class="fa fa-question-circle fa-lg"></i>
+			</a>
+		</th:block>
+	</div>
+	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
+		<span th:text="${err}" th:id="${#ids.seq(idPrefix)}">Error Text</span>
+		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+	</div>
+</div>    	
+</body>
+</html>
+

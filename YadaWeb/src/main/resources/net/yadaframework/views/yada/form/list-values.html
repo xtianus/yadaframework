@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org">
+<!--/*
+
+OBSOLETO: usare list.html
+
+A select list for static (Spring-EL) elements.
+
+Parameters:
+- fieldName = name of the field holding the value
+- labelKey = key in messages.properties for the label text
+- label = label to use, if not using a labelKey
+- values = a static list, like ${ {true,false} } (space is important) - can be absent for empty select
+- textKey = the prefix of the key used for texts, like 'list.enabled.'; values will be appended to the prefix.
+             If null, the value will be used for the text.
+- help = testo per il pulsante di help, se non c'è helpKey (optional)
+- helpKey = chiave del testo per il pulsante di help (optional)
+- addHeader = (optional) true to add the first "empty" option
+- multiple = true for a multiple select box (optional)
+- required = true for a required select box (optional)
+- disabled = true for a disabled select box (optional)
+- onchange = function to call on the change event (optional)
+
+Example:
+<div  th:replace="/yada/form/list-values::body(fieldName='userCredentials.enabled',values=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
+
+*/-->
+<body>
+<div class="form-group has-feedback" th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
+	<label class="control-label" th:for="${#ids.next('fieldId')}" th:text="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
+	<div class="input-group" style="width:100%"> <!--/* il width serve perché se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
+		<select th:field="*{__${fieldName}__}" th:multiple="${multiple}" th:required="${required}" th:disabled="${disabled}" class="form-control has-feedback" th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}">
+			<option th:if="${addHeader==true}" value="-1">---</option>
+			<option th:each="option : ${values}" th:value="${option}"	
+				th:text="${textKey==null?option:#messages.msg(textKey+option)}">Enabled</option>
+		</select>
+		<script th:if="${onchange!=null}" type="text/javascript" th:inline="javascript">
+			//<![CDATA[
+			$([['#'+${#ids.prev('fieldId')}]]).change(function (e) {
+				eval([[${onchange}]])(e);
+			});
+			//]]>
+		</script>
+		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
+			<a th:if="${help!=null}" class="yadaHelpButton input-group-addon" data-trigger="focus" data-container="body" 
+				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
+				data-html="true"
+				th:attr="data-content=${help}">
+				<i class="fa fa-question-circle fa-lg"></i>
+			</a>
+		</th:block>
+	</div>
+	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
+		<span th:text="${err}" th:id="${#ids.seq('fieldId')}">Error Text</span>
+		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+	</div>
+</div>    	
+</body>
+</html>
+

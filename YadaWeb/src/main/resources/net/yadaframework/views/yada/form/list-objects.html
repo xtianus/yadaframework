@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org">
+<!--/*
+
+OBSOLETO: usare list.html
+
+A select list for database objects with id/name attributes.
+
+Parameters:
+- fieldName = name of the field holding the value. For multiple selects, it must be a Collection, otherwise an id.
+- labelKey = key in messages.properties for the label text
+- label = label to use, if not using a labelKey
+- listName = name of the list holding the options (each option with .id and .value)
+- noHeader = (optional) true to remove the first "empty" option
+- multiple = true for a multiple select box (optional)
+- required = true for a required select box (optional) - sembra che non funzioni, viene ignorato anche se c'è sul select
+
+Example:
+
+*/-->
+<body>
+
+<div class="form-group has-feedback" th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
+	<label class="control-label" th:for="${#ids.next('fieldId')}" th:text="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
+	<select th:field="*{__${fieldName}__}" th:multiple="${multiple}" th:required="${required}" class="form-control has-feedback" th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}">
+		<option th:unless="${noHeader==true}" value="-1">---</option>
+		<option th:each="option : ${__${listName}__}" 
+			th:value="${option.id}" 
+			th:text="${option.name}">SomeCompany</option>
+	</select>
+	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
+		<span th:text="${err}" th:id="${#ids.seq('fieldId')}">Error Text</span>
+		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+	</div>
+</div>    	
+
+</body>
+</html>

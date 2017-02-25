@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" >
+<body>
+	<div class="yadaResponseData" th:if="${resultMap!=null}">
+		<table>
+			<tr th:each="entry : ${resultMap}">
+				<td class="s_key" th:text="${entry.key}">key</td>
+				<td class="s_value" th:text="${entry.value}">value</td>
+			</tr>
+		</table>
+	</div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org">
+
+<!--/*
+A range numeric input with label and value display.
+
+Parameters:
+- fieldName = name of the field holding the value
+- min
+- max
+- step
+- labelKey = key in messages.properties for the label text
+- label = label to use, if not using a labelKey
+- required = true for a required select box (optional)
+- disabled = true for a disabled select box (optional)
+- onchange = function to call on the change event (optional)
+
+Example: <div th:replace="/yada/form/range::body(fieldName='minGrowTimeForMovie',required=false,min=0,max=500,step=2,labelKey='task.growfields.formfield.minGrowTimeForMovie',helpKey='task.growfields.formfield.minGrowTimeForMovie.help')"></div>
+
+*/-->
+<body>
+<div class="form-group has-feedback" th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
+	<label class="control-label" th:for="${#ids.next('fieldId')}"><span th:text="${labelKey!=null?#messages.msg(labelKey):label}">Lumber</span>: <span th:id="${#ids.seq('valId')}" style="font-weight: normal;" th:text="*{__${fieldName}__}">12</span></label>
+	<div class="input-group" style="width:100%"> <!--/* il width serve perché se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
+	<!--/* Not using class 'form-control' because it makes a 'tall' input slider */-->
+	<input type ="range" th:field="*{__${fieldName}__}" th:required="${required}" th:disabled="${disabled}" th:readonly="${readonly}"
+		th:min="${min}" th:max="${max}" th:step="${step}"
+		th:classappend="${readonly}? 'yadaReadonly'" class="has-feedback" th:id="${#ids.seq('fieldId')}" 
+		th:attr="aria-describedby=${#ids.next('fieldId')}"/>
+		<script type="text/javascript" th:inline="javascript">
+			//<![CDATA[
+			var onChange = eval([[${onchange}]]);
+			$([['#'+${#ids.prev('fieldId')}]]).on('input', function(e) {
+        	  		$([['#'+${#ids.prev('valId')}]]).text($(this).val());
+        	  		if (onChange!=null) {
+            	  		onChange(e);
+            	  	}
+          	});
+			//]]>
+		</script>
+		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
+			<a th:if="${help!=null}" class="yadaHelpButton input-group-addon" data-trigger="focus" data-container="body" 
+				style="background-color: inherit; border: 0; padding-top: 0px;"
+				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
+				data-html="true"
+				th:attr="data-content=${help}">
+				<i class="fa fa-question-circle fa-lg"></i>
+			</a>
+		</th:block>
+	</div>
+	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
+		<span th:text="${err}" th:id="${#ids.seq('fieldId')}">Error Text</span>
+		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+	</div>
+</div>    	
+</body>
+</html>
+		

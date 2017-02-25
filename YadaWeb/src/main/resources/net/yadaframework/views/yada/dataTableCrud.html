@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+<body>
+<!--/*
+	Generic CRUD DataTable to be included with th:replace.
+	
+	Parameters:
+	- tableId = id of the table
+	- columns = column name list, like ${ {'ID', 'Name','Surname'} }, without the 'Comandi' column (be careful about the spaces between { {)
+	- disableAdd = true per non aggiungere il pulsante di add
+	- disableEdit = true per non aggiungere il pulsante di edit
+	- disableDelete = true per non aggiungere il pulsante di delete
+	- commandsColumnText = (optional) text for the commands column header, otherwise #{column.commands} is used
+	- addButtonText = (optional) text for the add button, otherwise #{button.add} is used
+	- editButtonText = (optional) text for the add button, otherwise #{button.edit} is used
+	- deleteButtonText = (optional) text for the delete button, otherwise #{button.delete} is used
+	
+	Example:
+	<div th:replace="/yada/dataTable(tableId='dataSourceTable',columns=${ {'ID', 'Company','Location','Channel','Token'} })"></div>
+	
+ */-->
+
+<div class="yadaTableBlock">
+	<table th:id="${tableId}" cellspacing="0" width="100%" class="table table-striped no-wrap">
+		<thead>
+			<tr>
+				<th></th> 
+				<th class="yadaCheckInCell all"><input type="checkbox" class="s_columnSelector" title="Tutti/Nessuno" /></th>
+				<th th:each="column : ${columns}" th:text="${column}">Name</th>
+				<th class="all" th:text="${commandsColumnText}?:#{column.commands}">Commands</th>
+			</tr>
+		</thead>
+	</table>
+	<div class="yadaTableToolbar">
+		<a th:unless="${disableAdd==true}" class="btn btn-primary s_addButton" href="#">
+			<i class="fa fa-plus fa-lg"></i> <span th:text="${addButtonText}?:#{button.add}">Add</span>
+		</a>
+		<a th:unless="${disableEdit==true}" class="btn btn-primary disabled s_singlerowButton s_editButton" href="#">
+			<i class="fa fa-pencil-square-o fa-lg"></i> <span th:text="${editButtonText}?:#{button.edit}">Edit</span>
+		</a>
+		<a th:unless="${disableDelete==true}" class="btn btn-danger disabled s_singlerowButton s_multirowButton s_deleteButton" href="#">
+			<i class="fa fa-trash-o fa-lg"></i> <span th:text="${deleteButtonText}?:#{button.delete}">Delete</span>
+		</a>
+	</div>
+</div>
+</body>
+</html>
