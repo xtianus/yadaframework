@@ -1,0 +1,110 @@
+<!-- Logback configuration for development environments -->
+<configuration scan="true" scanPeriod="5 seconds" debug="false">
+	<logger name="ch.qos.logback" level="warn"/>
+
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>$basePath/$acronym$env/log/site.log</file>
+	 	<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+	    	<fileNamePattern>$basePath/$acronym$env/log/site.%i.log</fileNamePattern>
+			<minIndex>1</minIndex>
+			<maxIndex>9</maxIndex>
+	    </rollingPolicy>
+    	<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+      		<maxFileSize>20MB</maxFileSize>
+    	</triggeringPolicy>
+		<encoder>
+			<pattern>%d :%X{session}:%X{remoteIp}:%X{username} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>dev %d{HH:mm:ss} %-5level %logger{36} - %X{mdc}: %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="SEC" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>$basePath/$acronym$env/log/sec.log</file>
+	 	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+	    	<fileNamePattern>$basePath/$acronym$env/log/sec.%d.log</fileNamePattern>
+			<maxHistory>7</maxHistory>
+	    </rollingPolicy>
+		<encoder>
+			<pattern>%d :%X{session}:%X{remoteIp}:%X{username} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<!-- 
+  <appender name="SEC" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>security %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+	 -->
+
+<!-- 
+    <logger name="org.springframework.security" level="warn"/>
+    <logger name="freemarker" level="warn"/>
+    <logger name="org.springframework" level="warn"/>
+    <logger name="com.opensymphony" level="warn"/>
+    <logger name="com.mchange.v2.c3p0" level="warn"/>
+    <logger name="org.apache.struts2" level="warn"/>
+    <logger name="org.hibernate" level="warn"/>
+    <logger name="org.apache" level="warn"/>
+	<logger name="org.hibernate.event.def.AbstractFlushingEventListener" level="OFF" /> 
+	<logger name="org.hibernate.util.JDBCExceptionReporter" level="OFF" /> 
+ 
+ 
+-->
+ 
+    <logger name="org.springframework.core" level="INFO"/>
+    <logger name="org.springframework.web" level="INFO"/>
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" level="ERROR"/>
+    <logger name="org.springframework.jndi" level="INFO"/>
+    <logger name="org.springframework.jdbc.datasource.DataSourceUtils" level="INFO"/>
+    <logger name="org.springframework.beans" level="INFO"/>
+    <logger name="org.springframework.context" level="INFO"/>
+    <logger name="org.springframework.ui" level="INFO"/>
+    <logger name="org.springframework.security" level="INFO"/>
+    <logger name="org.springframework.aop.framework.autoproxy.InfrastructureAdvisorAutoProxyCreator" level="INFO"/>
+    <logger name="org.springframework.aop.framework.CglibAopProxy" level="INFO"/>
+    <logger name="org.springframework.aop.framework.JdkDynamicAopProxy" level="INFO"/>
+    <logger name="org.springframework.orm.jpa.JpaTransactionManager" level="INFO"/>
+    <logger name="org.springframework.orm.jpa.EntityManagerFactoryUtils" level="INFO"/>
+    <logger name="org.springframework.orm.jpa.SharedEntityManagerCreator" level="INFO"/>
+    <logger name="org.springframework.transaction.annotation.AnnotationTransactionAttributeSource" level="INFO"/>
+    <logger name="org.springframework.data.repository.config.RepositoryComponentProvider" level="INFO"/>
+    <logger name="org.springframework.data.jpa.repository.query.JpaQueryFactory" level="INFO"/>
+    <logger name="org.springframework.data.jpa.repository.query.NamedQuery" level="INFO"/>
+    <logger name="org.springframework.data.repository.config.RepositoryConfigurationDelegate" level="INFO"/>
+    <logger name="org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor" level="INFO"/>
+
+    <logger name="org.thymeleaf.templateresolver.AbstractTemplateResolver" level="INFO"/>
+    <logger name="org.thymeleaf.TemplateEngine" level="INFO"/>
+    <logger name="org.thymeleaf.TemplateEngine.CONFIG" level="INFO"/>
+    <logger name="org.thymeleaf.TemplateRepository" level="INFO"/>
+    <logger name="org.apache.commons" level="INFO"/>
+    <logger name="javax.persistence.NamedQuery" level="INFO"/>
+
+    <logger name="org.hibernate" level="INFO"/>
+
+	<logger name="org.hibernate.SQL" level="DEBUG" /> <!-- Same as hibernate.show_sql=true -->
+    
+    <logger name="security" level="debug" additivity="true">
+    	<appender-ref ref="SEC" />
+    </logger>
+
+    <logger name="org.apache.commons.configuration.DefaultConfigurationBuilder" level="ERROR"/>
+
+	<root level="debug">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
+	</root>
+
+	<!-- Developer personal settings -->
+	<!-- 
+	<include resource="logback-personal.xml" />
+	 -->
+</configuration>

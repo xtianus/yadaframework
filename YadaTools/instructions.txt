@@ -1,0 +1,32 @@
+BUILD 
+-----
+
+To create the YadaTools library:
+
+gradle -q uploadArchives --no-daemon
+
+TEST
+----
+
+To use the initTask in a project while testing:
+
+gradle yadaInit --no-daemon --stacktrace
+
+and in the build.gradle:
+
+yadaInit {
+	projectName = 'NiceProject'
+	acronym = 'npj'
+	basePackage = 'com.nice'
+	dbPasswords = ['dev': 'devpwd', 'col': 'colpwd', 'prod': 'prodpwd']
+}
+
+The daemon causes weird errors due to bad jar refreshing.
+
+DEBUG
+-----
+To debug the plugin, run the task with
+
+gradle yadaInit --no-daemon -Dorg.gradle.debug=true
+
+and attach from Eclipse on port 5005

@@ -1,0 +1,1 @@
+Qui ci vanno le risorse che non cambieranno mai per cui possono essere cachate per sempre.

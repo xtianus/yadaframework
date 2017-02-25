@@ -1,0 +1,101 @@
+package $basePackage.core;
+
+import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
+
+import net.yadaframework.security.YadaAuthenticationFailureHandler;
+import net.yadaframework.security.YadaAuthenticationSuccessHandler;
+import net.yadaframework.security.YadaSecurityConfig;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig extends YadaSecurityConfig {
+
+	@Autowired YadaAuthenticationFailureHandler failureHandler;
+	@Autowired YadaAuthenticationSuccessHandler successHandler;
+	
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+    	failureHandler.setFailureUrlAjaxRequest("/ajaxLoginForm"); 
+    	failureHandler.setFailureUrlNormalRequest("/login"); 
+    	successHandler.setDefaultTargetUrlAjaxRequest("/ajaxLoginOk"); // Ritorna "loginSuccess"
+    	successHandler.setDefaultTargetUrlNormalRequest("/");
+    	
+//    	The mapping matches URLs using the following rules:
+//    		? matches one character
+//    		* matches zero or more characters
+//    		** matches zero or more 'directories' in a path
+//		Patterns which end with /** (and have no other wildcards) are optimized by using a substring match
+        http
+        	.headers().disable()
+            .authorizeRequests()
+            	.antMatchers("/admin/**").hasRole("ADMIN")
+            	.antMatchers("/user/**").hasRole("USER")
+            	.antMatchers("/**").permitAll()
+                .and()
+             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .and()
+            .logout()
+            .logoutUrl("/logout") // POST con il CSRF attivo, GET altrimenti
+            	.logoutSuccessUrl("/") // TODO rimanere nella pagina corrente se non è protetta!
+            	// .invalidateHttpSession(false) // Lascio che la session si cancelli quando esco
+            	.and()
+            .formLogin()
+	            .loginPage("/login") // url del form di login (GET)
+	            .loginProcessingUrl("/login") // url dove postare il form (POST)
+                .failureHandler(failureHandler)
+                .successHandler(successHandler);
+//                .defaultSuccessUrl("/");
+//	        	.and()
+//	        .apply(new SpringSocialConfigurer());
+        
+        // Resetto la RequestCache in modo che salvi le request di qualunque tipo, anche ajax, 
+        // altrimenti il meccanismo del redirect alla pagina di partenza non funziona con le chiamate ajax.
+        // Questo sarebbe il filtro impostato senza il reset, configurato in RequestCacheConfigurer:
+        // AndRequestMatcher [requestMatchers=[NegatedRequestMatcher [requestMatcher=Ant [pattern='/**/favicon.ico']], NegatedRequestMatcher [requestMatcher=MediaTypeRequestMatcher [contentNegotiationStrategy=org.springframework.web.accept.HeaderContentNegotiationStrategy@16f239b, matchingMediaTypes=[application/json], useEquals=false, ignoredMediaTypes=[*/*]]], NegatedRequestMatcher [requestMatcher=RequestHeaderRequestMatcher [expectedHeaderName=X-Requested-With, expectedHeaderValue=XMLHttpRequest]]]]
+        http.requestCache().requestCache(new HttpSessionRequestCache());
+        
+//    	http.antMatcher("/**/css/**").headers().disable();
+
+        http
+        .csrf().disable();
+        // .requireCsrfProtectionMatcher(new MyRequestMatcher());
+        	//	new NegatedRequestMatcher(new AntPathRequestMatcher("/ajaxStoryBunch", null)));
+    }
+
+    // Non più usato perchè CSRF disabilitato per tutti, visto che causa troppi 403 al timeout di session
+    //
+    // Questo consente di fare delle richieste ajax in post verso le url indicate, senza incorrere in un 403 Forbidden
+    // Veniva usato per /ajaxStoryBunch ma adesso quello usa una GET quindi non serve più per ora.
+    private static class MyRequestMatcher implements RequestMatcher {
+        private Pattern allowedMethods = Pattern.compile("^(GET|HEAD|TRACE|OPTIONS)$");
+        private AntPathRequestMatcher apiMatcher = new AntPathRequestMatcher("/ajaxStoryBunch*", null);
+        // Per usare altri matcher si possono concatenare con AndRequestMatcher e simili
+        // Vedi http://docs.spring.io/spring-security/site/docs/3.2.x/apidocs/ per i matcher disponibili
+     // private RegexRequestMatcher apiMatcher = new RegexRequestMatcher("/ajax.*", null);
+
+        @Override
+        public boolean matches(HttpServletRequest request) {
+            // No CSRF due to allowedMethod
+            if(allowedMethods.matcher(request.getMethod()).matches())
+                return false;
+
+            // No CSRF due to api call
+            if(apiMatcher.matches(request))
+                return false;
+
+            // CSRF for everything else that is not an API call or an allowedMethod
+            return true; 
+        }
+    }
+}

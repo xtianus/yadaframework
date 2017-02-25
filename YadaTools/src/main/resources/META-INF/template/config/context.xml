@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mettere allowLinking="true" nel tag Context se si vuole permettere i link simbolici nelle directory -->
+<Context override="true">
+<Manager pathname="" /> <!-- Disabilito session persistence -->
+
+<Resource name="jdbc/${acronym}db$env" 
+	type="javax.sql.DataSource"
+	factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+	removeAbandoned="true"
+	removeAbandonedTimeout="600"
+	logAbandoned="true"
+	maxActive="300"
+	maxIdle="50"
+	initialSize="30"
+	maxWait="10000"
+	testOnBorrow="true"
+	validationQuery="Select 1"
+	validationInterval="60000"
+	validationQueryTimeout="30"
+	jdbcInterceptors="SlowQueryReport(threshold=2000)"
+	auth="Container" 
+	driverClassName="com.mysql.jdbc.Driver"
+	username="${acronym}user$env"
+	password="$dbpwd"
+	url="jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false"
+/>
+
+</Context>

@@ -1,0 +1,57 @@
+package $basePackage.components;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
+import $basePackage.core.${acronym.capitalize()}Configuration;
+import net.yadaframework.components.YadaSetup;
+import net.yadaframework.components.YadaUtil;
+import net.yadaframework.persistence.entity.YadaUserCredentials;
+import net.yadaframework.persistence.repository.YadaUserCredentialsRepository;
+
+@Component
+public class Setup extends YadaSetup {
+	private transient Logger log = LoggerFactory.getLogger(Setup.class);
+
+	@Autowired YadaUserCredentialsRepository userCredentialsRepository;
+	@Autowired ${acronym.capitalize()}Configuration config;
+	@Autowired YadaUtil yadaUtil;
+	@Autowired private PasswordEncoder encoder;
+	
+	@Override
+	protected void setupApplication() {
+	}
+	
+	@Override
+	protected void setupUsers(List<Map<String, Object>> userList) {
+		for (Map<String, Object> userDefinition : userList) {
+			String email = (String) userDefinition.get("email");
+			String preferredLanguage = (String) userDefinition.get("language");
+			String preferredCountry = (String) userDefinition.get("country");
+			String timezone = (String) userDefinition.get("timezone");
+			List<YadaUserCredentials> existingUserCredentials = userCredentialsRepository.findByUsername(email, new PageRequest(0, 1));
+			if (existingUserCredentials.isEmpty()) {
+				log.info("Setup: creating user {}", email);
+				YadaUserCredentials userCredentials = new YadaUserCredentials();
+				userCredentials.setUsername(email);
+				userCredentials.changePassword((String) userDefinition.get("password"), encoder);
+				userCredentials.setEnabled(true);
+				for (Integer role : (Set<Integer>)userDefinition.get("roles")) {
+					userCredentials.addRole(role);
+				}
+				userCredentialsRepository.save(userCredentials);
+			}
+		}
+	}
+
+
+
+}

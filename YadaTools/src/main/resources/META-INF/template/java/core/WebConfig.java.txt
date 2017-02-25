@@ -1,0 +1,14 @@
+package $basePackage.core;
+
+import net.yadaframework.core.YadaWebConfig;
+
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+@ComponentScan(basePackages = { "$basePackage.web" })
+@Configuration // Necessario anche se è nel padre
+public class WebConfig extends YadaWebConfig {
+
+
+}
+

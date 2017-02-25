@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.buildship.core.launch.runconfiguration">
+<listAttribute key="arguments"/>
+<stringAttribute key="gradle_distribution" value="GRADLE_DISTRIBUTION(WRAPPER)"/>
+<listAttribute key="jvm_arguments"/>
+<booleanAttribute key="show_console_view" value="true"/>
+<booleanAttribute key="show_execution_view" value="false"/>
+<listAttribute key="tasks">
+<listEntry value="build"/>
+<listEntry value="uploadArchives"/>
+</listAttribute>
+<stringAttribute key="working_dir" value="${workspace_loc:/YadaTools}"/>
+</launchConfiguration>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<!--/*
+Template per un'email composta da due sezioni, la prima con immagine a sinistra testo a destra, la seconda l'opposto.
+Solo il primo testo è obbligatorio.
+Parametri:
+- preview = true se il template è visto via browser, false se è inviato via email
+- title = titolo
+- text1 = primo testo
+- text2 = secondo testo
+- image1Url = url della prima immagine
+- image2Url = url della seconda immagine
+- image1Filename = nome del file della prima immagine (e.g. asdasd.jpg)
+- image2Filename = nome del file della seconda immagine (e.g. slkefu.jpg)
+*/-->
+<html 
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:yada="http://yada.yodadog.net"
+>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<img th:if="${!#strings.isEmpty(image1Filename)}" 
+		th:src="${preview}?@{${image1Url}}:'cid:image1'" 
+		style="max-width: 30%; float: left; margin-right: 15px; margin-bottom: 15px;"/>
+	<h1 th:if="${!#strings.isEmpty(title)}" th:text="${title}">Questa è la newsletter</h1>
+	<p th:if="${!#strings.isEmpty(text1)}" th:utext="${text1}"></p>
+	<p th:if="${!#strings.isEmpty(text2)}" style="clear: both;"></p>
+	<img th:if="${!#strings.isEmpty(image2Filename)}" 
+		th:src="${preview}?@{${image2Url}}:'cid:image2'" 
+		style="max-width: 30%; float: right;"/>
+	<p th:if="${!#strings.isEmpty(text2)}" th:utext="${text2}" ></p>
+ 
+  	<p style="clear: both; margin-bottom: 40px;"></p>
+  	<p>
+     	<img th:if="${preview}" yada:src="@{/res/img/ldmlogo.h50.png}" />
+     	<img th:unless="${preview}" src="cid:logosmall" />
+  	</p>
+  	<p style="margin-top: 10px;">Grazie, <br />
+     	<a href="http://www.letturedametropolitana.it/"><em>LettureDaMetropolitana</em></a>
+  	</p>
+  	<p style="margin-top: 30px;" th:utext="${footer}">Footer</p>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<header>
+		<result>
+			<expressionEngine config-class="org.apache.commons.configuration2.tree.xpath.XPathExpressionEngine"/>
+		</result>
+	</header>
+	<override> <!-- I file sopra sovrascrivono i file sotto -->
+		<!-- reloadingRefreshDelay è in millisecondi: 20000 = 20 secondi -->
+		<system/>
+		<env/>
+		<!-- Il file build.properties sta in WEB-INF, ovvero il folder padre del contesto di esecuzione -->
+		<properties fileName="../build.properties"/>
+		<!-- Properties usate in sviluppo (prese dal classpath) -->
+		<xml config-name="dev" config-at="config" fileName="conf.webapp.dev.xml" reloadingRefreshDelay="4000" config-optional="true" config-reload="true">
+		</xml>
+		<!-- Properties usate in collaudo (prese dal classpath) -->
+		<xml config-name="col" config-at="config" fileName="conf.webapp.col.xml" reloadingRefreshDelay="4000" config-optional="true" config-reload="true">
+		</xml>
+		<!-- Properties di produzione -->
+		<xml config-name="webapp" config-at="config" fileName="conf.webapp.prod.xml" reloadingRefreshDelay="4000" config-optional="true" config-reload="true">
+		</xml>
+	</override>
+</configuration>

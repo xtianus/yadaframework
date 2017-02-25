@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	<meta charset="utf-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>   
+	<meta name="author" content="Hon4All"/>
+	<title>Hon4All Server Down</title>
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+	<link href='http://fonts.googleapis.com/css?family=Ubuntu:700|Roboto:400,700,400italic,700italic|Noto+Sans:400,700,400italic,700italic' rel='stylesheet' type='text/css'/>
+	<style type="text/css">
+		.row {
+			height: 317px;
+			width: 100%;
+		}
+		body {
+			background-color: white;
+			margin: 0;
+			cursor: pointer;
+			height: 100%;
+		}
+		.logo {
+			margin: auto;
+			max-width: 400px;
+		}
+		.logo img {
+			max-width: 100%;
+			height: auto;
+		}
+		.warning {
+			width: 100%;
+			text-align: center;
+			background-color: #32B77E;
+			color: black;
+			font-family: 'Ubuntu', sans-serif; font-weight: bold;
+			font-size: 20px;
+			padding-top: 20px;
+		}
+		.warning h1 {
+			font-size: 40px;
+		}
+		.warning button {
+			cursor: pointer;
+			margin-bottom: 110px;
+			color: black;
+			background-color: white;
+			font-size: 40px;
+			border-radius: 16px;
+			border: 7px solid;
+			padding: 8px;
+			border-color: #3e3f41;
+		}
+		
+	</style>
+</head>
+<body onclick="document.location.href='/';">
+<div class="row top">
+<div class="logo">
+	<img src="logo.png"/>
+</div>
+</div>
+<div class="warning">
+	<h1>Aggiornamento del server in corso</h1>
+	<!-- Non modificare la linea seguente altrimenti il pattern non viene trovato in shutdown.sh -->
+	<p>Ora di inizio 11:11:11</p>
+	<p>Ci vorrà solo un minuto...</p>
+	<button>Riprova</button>
+</div>
+</body>
+</html>

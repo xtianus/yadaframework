@@ -1,0 +1,42 @@
+package $basePackage.core;
+
+import java.util.Map;
+
+import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import net.yadaframework.core.YadaConfiguration;
+
+// Usare XPath
+public class ${acronym.capitalize()}Configuration extends YadaConfiguration {
+	private static final long serialVersionUID = 1L;
+	private final transient Logger log = LoggerFactory.getLogger(getClass());
+	
+	// Cached values
+	// Questi valori li memorizzo perchè non mi aspetto che cambino a runtime
+	private Integer sessionTimeoutMinutes=null;
+	
+	/**
+	 * Add project-specific user attributes from the configuration
+	 * @param user
+	 * @param sub
+	 */
+	@Override
+	protected void addSetupUserAttributes(Map<String, Object> user, ImmutableHierarchicalConfiguration sub) {
+		// Add statements as needed
+	}
+	
+	public Integer getSessionTimeoutMinutes() {
+		if (sessionTimeoutMinutes==null) {
+			sessionTimeoutMinutes = configuration.getInt("config/security/sessionTimeoutMinutes", -1);
+			if (sessionTimeoutMinutes==-1) {
+				// Se non si configura uguale a web.xml, il js di controllo entra ogni 20 minuti e se è inferiore al timeout vero, la sessione non scade mai
+				log.error("Session timeout not configured correctly (defaulting to 20). Please configure session timeout in conf.webapp.xml equal to web.xml");
+				sessionTimeoutMinutes = 20;
+			}
+		}
+		return sessionTimeoutMinutes;
+	}
+
+}

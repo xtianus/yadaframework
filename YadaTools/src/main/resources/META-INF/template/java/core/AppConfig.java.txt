@@ -1,0 +1,24 @@
+package $basePackage.core;
+
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+import net.yadaframework.core.YadaAppConfig;
+
+@Configuration
+@ComponentScan(basePackages = { "$basePackage.components", "$basePackage.persistence.entity", "$basePackage.persistence.repository" })
+public class AppConfig extends YadaAppConfig {
+	
+	/**
+	 * Creo il bean "config" in modo da poterlo usare in pagina con @config.xy invece di @${acronym}Configuration.xy
+	 */
+	@Bean
+	public ${acronym.capitalize()}Configuration config() throws ConfigurationException {
+		${acronym.capitalize()}Configuration config = new ${acronym.capitalize()}Configuration();
+		super.makeCombinedConfiguration(config);
+		return config;
+	}
+
+}
