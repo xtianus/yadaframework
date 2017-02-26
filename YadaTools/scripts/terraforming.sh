@@ -51,16 +51,13 @@ if [[ $deployOptions ]]; then
 fi
 
 viconfig=/etc/vim/vimrc
-homedir=/home/${cgfUser}
+homedir=/home/${cfgUser}
 
 if [ ! -d ${projectBase} ]; then
 	mkdir -p ${projectBase}/log
 	mkdir ${projectBase}/bin
 	mkdir ${projectBase}/contents
 	mkdir ${projectBase}/deploy
-	chown ${cfgTomcatUser} ${projectBase}/contents ${projectBase}/log
-	chown ${cgfUser} ${projectBase}/deploy
-	chown ${cgfUser} ${projectBase}/bin
 fi
 
 if [[ $cfgHostname && $myHostName ]]; then
@@ -83,17 +80,17 @@ echo set smartcase >> $viconfig
 echo set incsearch >> $viconfig
 
 apt-get -o Dpkg::Options::="--force-confnew" install sudo cron
-echo "${cgfUser}	ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers;
+echo "${cfgUser}	ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers;
 
-groupadd ${cgfUser}
-useradd ${cgfUser} -p $cfgUserPwd -m -g ${cgfUser} -G root -s /bin/bash
+groupadd ${cfgUser}
+useradd ${cfgUser} -p $cfgUserPwd -m -g ${cfgUser} -G root -s /bin/bash
 
-echo -e "\nAllowUsers ${cgfUser}\nPasswordAuthentication no\n" >> /etc/ssh/sshd_config
+echo -e "\nAllowUsers ${cfgUser}\nPasswordAuthentication no\n" >> /etc/ssh/sshd_config
 
 mkdir ${homedir}/.ssh
 echo $cfgAuthorizedKeys > ${homedir}/.ssh/authorized_keys2
 
-chown -R ${cgfUser}:${cgfUser} ${homedir}/.ssh
+chown -R ${cfgUser}:${cfgUser} ${homedir}/.ssh
 chmod 700 ${homedir}/.ssh
 chmod 600 ${homedir}/.ssh/authorized_keys2
 
@@ -155,7 +152,7 @@ if [[ $cfgPkgTomcat || $cfgTomcatTarGz ]]; then
 	# Non uso -XX:+UseConcMarkSweepGC perché le vm economiche non hanno tante cpu  
 	sed -i 's%JAVA_OPTS=.*%JAVA_OPTS="-Xloggc:${projectBase}/log/tomcat-gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=1 -XX:GCLogFileSize=1M -XX:+PrintGCDateStamps -Djava.awt.headless=true -Xmx'${cfgTomcatRam}' -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/tomcat-outofmemory-dump"%g' ${cfgTomcatConfiguration}
 	# Utenza tomcat manager
-	sed -i 's%</tomcat-users>%<role rolename="manager-gui"/><role rolename="manager-jmx"/><role rolename="admin"/><user username="${cgfUser}" password="${cfgTomcatManagerPwd}" roles="admin,manager-gui,manager-jmx"/></tomcat-users>%g' ${cfgTomcatBase}/tomcat-users.xml
+	sed -i 's%</tomcat-users>%<role rolename="manager-gui"/><role rolename="manager-jmx"/><role rolename="admin"/><user username="${cfgUser}" password="${cfgTomcatManagerPwd}" roles="admin,manager-gui,manager-jmx"/></tomcat-users>%g' ${cfgTomcatBase}/tomcat-users.xml
 	# Compression e timeout
 	sed -i 's/connectionTimeout="20000"/connectionTimeout="'${cfgTomcatTimeout}'"\ncompression="on" compressableMimeType="text\/html,text\/xml,text\/plain,text\/css,application\/xml,text\/javascript,application\/javascript,application\/x-javascript,application\/pdf,application\/json,text\/json"/g' ${cfgTomcatBase}/server.xml
 fi
@@ -267,10 +264,10 @@ dpkg-reconfigure -f noninteractive tzdata
 # Stampa l'hostname ad ogni login
 sed -i '$aecho\necho "***********"\necho "* '$( hostname )' *"\necho "***********"\necho'  /etc/bash.bashrc
 
-# su - ${cgfUser}
+# su - ${cfgUser}
 # Cambiare il colore di ls: directory gialle
-sudo -u ${cgfUser} dircolors -p > /home/${cgfUser}/.dircolors
-sudo -u ${cgfUser} sed -i 's/DIR 01;34/DIR 01;33/g' /home/${cgfUser}/.dircolors
+sudo -u ${cfgUser} dircolors -p > /home/${cfgUser}/.dircolors
+sudo -u ${cfgUser} sed -i 's/DIR 01;34/DIR 01;33/g' /home/${cfgUser}/.dircolors
 
 # Squid 3 (prima di ubuntu 16 si chiamava squid3)
 if [ "$cfgSquidPercent" != "" ]; then
@@ -288,6 +285,11 @@ if [ "$cfgSquidPercent" != "" ]; then
 	echo Starting squid...
 	service squid start
 fi
+
+chown ${cfgTomcatUser} ${projectBase}/contents ${projectBase}/log
+chown ${cfgUser} ${projectBase}/deploy
+chown ${cfgUser} ${projectBase}/bin
+
 
 # Other
 if [[ $cfgPkgOther ]]; then
