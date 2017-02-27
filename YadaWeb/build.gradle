@@ -4,6 +4,7 @@
 // }
 
 apply plugin: 'java'
+apply plugin: 'eclipse-wtp'
 
 // querydsl {
 // 	library = 'com.querydsl:querydsl-apt:4.1.4'
