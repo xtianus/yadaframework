@@ -27,8 +27,11 @@ public class AntIncrementBuild {
 			String filename = args[0];
 			File configFile = new File(filename);
 			if (!configFile.canRead()) {
-				System.out.println("Input file unreadable: " + configFile.getCanonicalPath());
-				System.exit(0);
+				System.out.println("Input file unreadable, creating new: " + configFile.getCanonicalPath());
+				try (BufferedWriter writer = new BufferedWriter(new FileWriter(configFile))) {
+					writer.write("# This is the build number that is automatically increased at each deploy\n");
+					writer.write(PROPERTY_NAME+"=0\n");
+				}
 			}
 			AntIncrementBuild antIncrementBuild = new AntIncrementBuild(configFile);
 			System.exit(antIncrementBuild.execute());
