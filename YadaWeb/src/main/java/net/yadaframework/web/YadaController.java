@@ -28,9 +28,14 @@ public class YadaController {
 	// Error page
     @RequestMapping("/error")
     public String error(HttpServletRequest request, RedirectAttributes redirectAttributes, Model model, Locale locale) {
+    	// DOES NOT WORK!!!!!
+    	// When entering here, the request has become "/error" and we don't know the original request.
+    	// So we can't tell if it was a request for a web page or for a resource (js, css...).
+    	// TODO Must be fixed somehow
+    	//
     	int errorCode = (int) request.getAttribute("javax.servlet.error.status_code");
     	// If not a document, return a short error page
-    	int docType = yadaHttpUtil.getDocumentType(request.getContentType());
+    	int docType = yadaHttpUtil.getRequestDocumentType(request);
     	if (docType!=YadaHttpUtil.CONTENT_DOCUMENT && docType!=YadaHttpUtil.CONTENT_UNKNOWN) {
     		model.addAttribute("statusCode", errorCode);
     		return "/yada/httpError";

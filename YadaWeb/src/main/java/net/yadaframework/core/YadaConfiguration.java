@@ -571,9 +571,12 @@ public abstract class YadaConfiguration {
 	 */
 	public String getYadaVersion(){
 		if (yadaVersion==null) {
-			// TODO deve essere preso da qualcosa che viene modificato durante la creazione del jar di yada
-			log.info("!!! YADA VERSION NOT IMPLEMENTED YET !!!");
-			yadaVersion="04"; // Must be a valid url path segment
+			yadaVersion = configuration.getString("net/yadaframework/yadaweb/version");
+			if (yadaVersion==null || "@YADA_VERSION@".equals(yadaVersion)) {
+				// While working in Eclipse, the version is not set because the build is not done by Gradle
+				log.info("YADA VERSION NOT SET, using timestamp");
+				yadaVersion="dev"+System.currentTimeMillis();
+			}
 		}
 		return yadaVersion;
 	}
@@ -604,11 +607,18 @@ public abstract class YadaConfiguration {
 	 */
 	public String getApplicationBuild() {
 		if (build==null) {
-			build = configuration.getString("config/info/build", "0000");
-//			if ("@@BUILD@@".equals(build)) { // Il pattern non è stato rimpiazzato con la build
-//				build="0000"; // Non metto a null altrimenti continua a loggare
-//				log.error("Build non settato durante il rilascio (ignored)");
-//			}
+			if (isDevelopmentEnvironment()) {
+				// While developing you get a new build number each time you restart the server
+				// so that you don't get stale (cached) files
+				build = "dev" + System.currentTimeMillis();
+				log.info("Using timestamp for application build: " + build);
+			} else {
+				build = configuration.getString("config/info/build", null);
+				if (build==null) {
+					build="unset";
+					log.error("!!! BUILD NUMBER NOT SET !!! Check that .../main/webapp/WEB-INF/build.properties has been created");
+				}
+			}
 		}
 		return build;
 	}

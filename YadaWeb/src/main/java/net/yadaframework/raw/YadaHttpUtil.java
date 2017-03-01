@@ -39,6 +39,7 @@ public class YadaHttpUtil {
 	public final static int CONTENT_OTHER=3;
 	public final static int CONTENT_UNKNOWN=4;
 	public final static int CONTENT_XML=5;
+	public final static int CONTENT_IMAGE=6;
 
 	/**
 	 * Validate a proxy over a given http page, with no proxy authentication
@@ -233,6 +234,37 @@ public class YadaHttpUtil {
 			// TODO more?
 			;
 	}
+	
+	/**
+	 * Return the document type by checking the request content type and the extension of the request path
+	 * @param request
+	 * @return
+	 */
+	public int getRequestDocumentType(HttpServletRequest request) {
+		String contentType = request.getContentType();
+		int result = getDocumentType(contentType);
+		if (result!=CONTENT_UNKNOWN) {
+			return result;
+		}
+		String pathInfo = request.getPathInfo();
+		if (pathInfo==null) {
+			return CONTENT_DOCUMENT;
+		}
+		if (pathInfo.endsWith(".css")) {
+			return CONTENT_CSS;
+		}
+		if (pathInfo.endsWith(".js")) {
+			return CONTENT_JAVASCRIPT;
+		}
+		if (pathInfo.endsWith(".gif") 
+			|| pathInfo.endsWith(".jpeg") 
+			|| pathInfo.endsWith(".jpg") 
+			|| pathInfo.endsWith(".png") 
+			|| pathInfo.endsWith(".tiff")) {
+			return CONTENT_IMAGE;
+		}
+		return CONTENT_DOCUMENT;
+	}
 
 	/**
 	 * Returms the content type of a response given the content-type
@@ -256,6 +288,9 @@ public class YadaHttpUtil {
 		}
 		if ("text/css".equals(contentType)) {
 			return CONTENT_CSS;
+		}
+		if (contentType.startsWith("image/")) {
+			return CONTENT_IMAGE;
 		}
 		return CONTENT_OTHER;
 	}

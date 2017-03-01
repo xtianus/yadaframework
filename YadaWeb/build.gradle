@@ -1,15 +1,8 @@
-// plugins {
-// 	// for QueryDSL
-// 	id "com.ewerk.gradle.plugins.querydsl" version "1.0.7"
-// }
+group = 'net.yadaframework'
+version = '0.0.6'
 
 apply plugin: 'java'
 apply plugin: 'eclipse-wtp'
-
-// querydsl {
-// 	library = 'com.querydsl:querydsl-apt:4.1.4'
-// 	jpa = true
-// }
 
 repositories {
     jcenter()
@@ -69,8 +62,20 @@ task listJars {
 	}
 }
 
-group = 'net.yadaframework'
-version = '0.6'
+jar {
+    manifest {
+        attributes("Implementation-Title": "YadaWeb",
+                   "Implementation-Version": version)
+    }
+}
+
+// Set the yada version in the properties file
+processResources {
+	doLast {
+		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadaweb.properties", token: '@YADA_VERSION@', value: version)
+	}
+}
+
 
 apply plugin: 'maven'
 

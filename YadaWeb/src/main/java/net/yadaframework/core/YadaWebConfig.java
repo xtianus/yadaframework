@@ -162,6 +162,9 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 			res = StringUtils.chop(res); // Remove last character
 		}
 		registry.addResourceHandler(res + "-" + config.getApplicationBuild() + "/**").addResourceLocations(res+"/").setCachePeriod(31556926); // 1 year cache period
+		// Uso "-?*/**" per matchare anche eventuali versioni vecchie che qualcuno potrebbe avere in cache
+		// Non si può fare perché non matcha
+		// registry.addResourceHandler(res + "-*/**").addResourceLocations(res+"/").setCachePeriod(31556926); // 1 year cache period
 
 		String s = STATIC_FILE_FOLDER;
 		if (s.endsWith("/")) {
