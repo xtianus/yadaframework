@@ -55,7 +55,7 @@
 		yada.enableConfirmLinks($element);
 		yada.enableHelpButton($element);
 		yada.enableTooltip($element);
-		
+		yada.handleCustomPopover($element);
 	}
 	
 	yada.loaderOn = function() {
@@ -814,7 +814,7 @@
 	
 	/**
 	 * 
-	 * @param $element
+	 * @param $element the link or the form
 	 * @returns true if "data-yadaDeleteOnSuccess" was present
 	 */
 	function deleteOnSuccess($element) {
@@ -845,16 +845,14 @@
 	
 	/**
 	 * 
-	 * @param $element
+	 * @param $element the link or the form
 	 * @param responseHtml
 	 * @returns true if the "data-yadaUpdateOnSuccess" was present
 	 */
 	function updateOnSuccess($element, responseHtml) {
-		// Replacement happens only if the _yadaReplacement_ class is set on one or more returned elements.
 		// If "yadaUpdateOnSuccess" is set, replace its target; if it's empty, replace the original link.
 		// The target can be a parent when the css selector starts with parentSelector (currently "yadaParents:").
-		// The selector can be multiple, separated by comma. The replacement can be multiple, in the form _yadaReplacementN_
-		// where N is either "" or a number from 1
+		// The selector can be multiple, separated by comma. The replacement can be multiple, identified by _yadaReplacement_
 		var updateSelector = $element.attr("data-yadaUpdateOnSuccess");
 		if (updateSelector != null) {
 			var selectors = updateSelector.split(',');
@@ -946,15 +944,23 @@
 		});
 		$form.not('.'+markerClass).off('submit').submit(function(e) {
 			e.preventDefault();
-			var data = $(this).serializeArray();
+			// Check if it must be a multipart formdata
+			var multipart = $form.attr("enctype")=="multipart/form-data";
+			// Using FormData to send files too: https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData
+			var data = multipart ? new FormData(this) : $(this).serializeArray();
 			var buttonName = null;
 			var buttonValue = null;
 			if (clickedButton!=null) {
 				buttonName = $(clickedButton).attr("name");
 				buttonValue = $(clickedButton).attr("value") || "";
-				if (buttonName!=null && data[buttonName]==null) {
+				if (multipart && buttonName!=null && !data.has('buttonName')) {
+					data.append('buttonName', buttonValue);
+				} else if (!multipart && buttonName!=null && data[buttonName]==null) {
 					data.push({name: buttonName, value: buttonValue});
 				}
+			}
+			if (!multipart) {
+				data = $.param(data);
 			}
 			// Call, in sequence, the handler specified in data-successHandler and the one passed to this function.
 			// Extend the handler to include form and button parameters
@@ -986,7 +992,9 @@
 					}
 				}
 			})(clickedButton); // Create a closure for the button
-			yada.ajax($(this).attr('action'), $.param(data), joinedHandler.bind(this), $(this).attr('method'), $(this).attr('data-timeout'));
+			var method = $(this).attr('method') || "POST";
+			// yada.ajax($(this).attr('action'), $.param(data), joinedHandler.bind(this), $(this).attr('method'), $(this).attr('data-timeout'));
+			yada.ajax($(this).attr('action'), data, joinedHandler.bind(this), method, $(this).attr('data-timeout'));
 			clickedButton = null;
 			return false; // Important so that the form is not submitted by the browser too
 		})
@@ -1028,15 +1036,23 @@
 		if (timeout==null) {
 			timeout=0; // Default
 		}
+		var processData = !(data instanceof FormData);  // http://stackoverflow.com/a/8244082/587641
+		var contentType = data instanceof FormData ? false : undefined;
 		yada.loaderOn();
 		$.ajax({
 			type: type,
 			url: url,
-			data:data,
+			data: data,
+			processData: processData,
+			contentType: contentType,
 			error: function(jqXHR, textStatus, errorThrown ) { 
-				// textStatus is 'error', 'timeout' etc.
+				// textStatus is "error", "timeout", "abort", or"parsererror"
 				// errorThrown is ''
-				yada.showErrorModal(yada.messages.connectionError.title, yada.messages.connectionError.message + (textStatus!=null&&textStatus!='error'?' ('+textStatus+')':'')); 
+				if (textStatus==="timeout") {
+					yada.showErrorModal(yada.messages.connectionError.title, yada.messages.connectionError.message);
+				} else {
+					yada.showErrorModal(yada.messages.serverError.title, yada.messages.serverError.message + (textStatus!=null&&textStatus!='error'?' ('+textStatus+')':''));
+				}
 			},
 			success: function(responseText, statusText, jqXHR) {
 				yada.loaderOff();
@@ -1397,8 +1413,11 @@
 	////////////////////
 	/// Bootstrap Tweaks
 	
-	$(yada.handleCustomPopover = function() {
-		$("[data-yadaCustomPopoverId]").not('.s_customPopovered').each(function(){
+	yada.handleCustomPopover = function($element) {
+		if ($element==null) {
+			$element = $('body');
+		}
+		$("[data-yadaCustomPopoverId]", $element).not('.s_customPopovered').each(function(){
 			var dataIdWithHash = yada.getIdWithHash(this, "data-yadaCustomPopoverId");
 			var dataTitle = $(this).attr("data-title"); // Optional
 			var hasTitle = $(this).attr("title")==null;
@@ -1441,7 +1460,6 @@
 			$(this).on('hidden.bs.popover', makePopoverClosedHandler(popoverId, hiddenFunction));
 		});
 		$('[data-yadaCustomPopoverId]').not('.s_customPopovered').addClass('s_customPopovered');
-		initHandlers();
 		
 		// Wrap the closure
 		function makePopoverShownHandler(divId, shownFunction) {
@@ -1470,7 +1488,7 @@
 				}
 			}
 		}
-	});
+	}
 	
 	
 	

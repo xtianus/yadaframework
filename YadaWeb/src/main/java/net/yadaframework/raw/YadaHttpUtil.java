@@ -277,7 +277,8 @@ public class YadaHttpUtil {
 		}
 		String[] parts = fullContentType.toLowerCase().split("[; ]", 2);
 		String contentType = parts[0];
-		if ("text/html".equals(contentType) || "application/xhtml+xml".equals(contentType)) {
+		// TODO application/x-www-form-urlencoded could actually ask for an image, so it isn't strictly correct !
+		if ("text/html".equals(contentType) || "application/xhtml+xml".equals(contentType) || "application/x-www-form-urlencoded".equals(contentType)) {
 			return CONTENT_DOCUMENT;
 		}
 		if ("text/xml".equals(contentType)) {

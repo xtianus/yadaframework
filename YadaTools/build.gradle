@@ -2,6 +2,9 @@ plugins {
   id 'org.hidetake.ssh' version '2.7.0'
 }
 
+group = 'net.yadaframework'
+version = '0.6'
+
 apply plugin: 'groovy'
 apply plugin: 'java-gradle-plugin'
 
@@ -67,9 +70,6 @@ task terraforming << {
 //artifacts {
 //	archives file('build/libs/YadaTools.jar')
 //}
-
-group = 'net.yadaframework'
-version = '0.5'
 
 //uploadArchives {
 //	repositories {
