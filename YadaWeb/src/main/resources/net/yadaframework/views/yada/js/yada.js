@@ -18,6 +18,10 @@
 		"title": "Connection Error",
 		"message": "Failed to contact server - please try again later"
 	}; 
+	yada.messages.serverError = { // Set it via thymeleaf
+			"title": "Server Error",
+			"message": "Something is wrong - please try again later"
+	}; 
 	yada.messages.confirmButtons = { // Set it via thymeleaf
 			"ok": "Ok",
 			"cancel": "Cancel"
