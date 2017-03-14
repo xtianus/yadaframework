@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <!--/*
-Template per un'email composta da due sezioni, la prima con immagine a sinistra testo a destra, la seconda l'opposto.
-Solo il primo testo è obbligatorio.
-Parametri:
-- preview = true se il template è visto via browser, false se è inviato via email
-- title = titolo
-- text1 = primo testo
-- text2 = secondo testo
-- image1Url = url della prima immagine
-- image2Url = url della seconda immagine
-- image1Filename = nome del file della prima immagine (e.g. asdasd.jpg)
-- image2Filename = nome del file della seconda immagine (e.g. slkefu.jpg)
+This is a template for a 2-section email: the first section with a left image and text on the right, the second section the opposite.
+Only the first text is required.
+Parameters:
+- preview = true if the template is shown in the browser, falste if it is sent via email
+- title = title
+- text1 = first text
+- text2 = second text (optional)
+- image1Url = url of first image, for preview (optional)
+- image2Url = url of second image, for preview (optional)
+- image1Filename = first image filename, for email embedding (e.g. asdasd.jpg)
+- image2Filename = second image filename, for email embedding (e.g. slkefu.jpg)
 */-->
 <html 
 	xmlns:th="http://www.thymeleaf.org"
@@ -23,7 +23,7 @@ Parametri:
 	<img th:if="${!#strings.isEmpty(image1Filename)}" 
 		th:src="${preview}?@{${image1Url}}:'cid:image1'" 
 		style="max-width: 30%; float: left; margin-right: 15px; margin-bottom: 15px;"/>
-	<h1 th:if="${!#strings.isEmpty(title)}" th:text="${title}">Questa è la newsletter</h1>
+	<h1 th:if="${!#strings.isEmpty(title)}" th:text="${title}">This is your newsletter</h1>
 	<p th:if="${!#strings.isEmpty(text1)}" th:utext="${text1}"></p>
 	<p th:if="${!#strings.isEmpty(text2)}" style="clear: both;"></p>
 	<img th:if="${!#strings.isEmpty(image2Filename)}" 
@@ -36,9 +36,9 @@ Parametri:
      	<img th:if="${preview}" yada:src="@{/res/img/ldmlogo.h50.png}" />
      	<img th:unless="${preview}" src="cid:logosmall" />
   	</p>
-  	<p style="margin-top: 10px;">Grazie, <br />
-     	<a href="http://www.letturedametropolitana.it/"><em>LettureDaMetropolitana</em></a>
+  	<p style="margin-top: 10px;">Thank you, <br />
+     	<a href="http://www.example.com/"><em>EXAMPLESITE</em></a>
   	</p>
-  	<p style="margin-top: 30px;" th:utext="${footer}">Footer</p>
+  	<p style="margin-top: 30px;" th:utext="${footer}">Footer Here</p>
 </body>
 </html>

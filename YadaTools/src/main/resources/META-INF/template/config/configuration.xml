@@ -5,20 +5,20 @@
 			<expressionEngine config-class="org.apache.commons.configuration2.tree.xpath.XPathExpressionEngine"/>
 		</result>
 	</header>
-	<override> <!-- I file sopra sovrascrivono i file sotto -->
-		<!-- reloadingRefreshDelay è in millisecondi: 20000 = 20 secondi -->
+	<override> <!-- Top files overwrite bottom files -->
+		<!-- reloadingRefreshDelay is in millisecondi: 20000 = 20 seconds -->
 		<system/>
 		<env/>
-		<!-- Il file build.properties sta in WEB-INF, ovvero il folder padre del contesto di esecuzione -->
+		<!-- build.properties is in WEB-INF, which is the parent folder of the execution context -->
 		<properties fileName="../build.properties"/>
-		<!-- Properties usate in sviluppo (prese dal classpath) -->
-		<xml config-name="dev" config-at="config" fileName="conf.webapp.dev.xml" reloadingRefreshDelay="4000" config-optional="true" config-reload="true">
+		<%
+			envs.each { env ->
+		%>
+		<xml config-name="${env}" config-at="config" fileName="conf.webapp.${env}.xml" 
+			reloadingRefreshDelay="4000" config-optional="true" config-reload="true">
 		</xml>
-		<!-- Properties usate in collaudo (prese dal classpath) -->
-		<xml config-name="col" config-at="config" fileName="conf.webapp.col.xml" reloadingRefreshDelay="4000" config-optional="true" config-reload="true">
-		</xml>
-		<!-- Properties di produzione -->
-		<xml config-name="webapp" config-at="config" fileName="conf.webapp.prod.xml" reloadingRefreshDelay="4000" config-optional="true" config-reload="true">
-		</xml>
+		<%
+			}
+		%>
 	</override>
 </configuration>

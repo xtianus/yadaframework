@@ -14,24 +14,24 @@ class YadaProject extends DefaultTask {
 
 	// Optional configuration
 	/** Database passwords */
-	def dbPasswords = ['dev': 'devpwd', 'col': 'colpwd', 'prod': 'prodpwd'];
+	def dbPasswords = ['dev': 'devpwd', 'tst': 'tstpwd', 'prod': 'prodpwd'];
 	/** Path of the folder that will contain the project files when running **/ 
 	def basePath = "/srv";
 	/** Environment configuration root folder */
 	def envDirName = "env";
 	def schemaDirName = "schema";
-	/** Environment names */
-	def envs=['dev', 'col', 'prod'];
-	/** Position of the development environment in the envs array */
-	def devIndex = 0;
-	/** Position of the production environment in the envs array */
-	def prodIndex = 2;
+	/** Environment names: the first must be "development", the last must be "production" */
+	def envs=['dev', 'tst', 'prod'];
 	/** Resources folder inside webapp folder */
 	def resDirName = "res";
 	/** Messages folder inside WEB-INF folder */
 	def messagesDirName = "messages";
 
 	// Not to be changed
+	/** Position of the development environment in the envs array */
+	final int devIndex = 0;
+	/** Position of the production environment in the envs array */
+	final int prodIndex = envs.size() - 1;
 	final String RESOURCECONFIGROOT = "META-INF"; // Root folder for template configuration in the plugin jar, relative to "resources" - no leading slash!
 	final String TEMPLATEDIRNAME = "template";
 	final String DESTEMAILTEMPLATEFOLDER = "template/email"; // This must be the same as defined in YadaConstants.EMAIL_TEMPLATES_PREFIX + "/" + YadaConstants.EMAIL_TEMPLATES_FOLDER

@@ -1,24 +1,23 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
     <head>
-        <title th:remove="all">LettureDaMetropolitana</title>
+        <title th:remove="all">EXAMPLE TITLE</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     </head>
     <body>
- 	   <strong>Conferma di Registrazione - LettureDaMetropolitana</strong>
-    	<p>Gentile utente,<br/><br/> abbiamo ricevuto una richiesta di registrazione 
-    	al nostro sito per il tuo indirizzo email.</p>
+ 	   <strong>Sign-up Confirmation - EXAMPLE SITE</strong>
+    	<p>Dear user,<br/><br/> we received a sign-up request on our site for your email address.</p>
     
-    	<p>Clicca qui sotto per confermare la richiesta:</p>
-    	<p><a th:text="${fullLink}" th:href="${fullLink}" href="#">Conferma Registrazione</a></p>
+    	<p>Click on the link below to confirm the request:</p>
+    	<p><a th:text="${fullLink}" th:href="${fullLink}" href="#">Sign-up confirmation</a></p>
     
-    	<p>Se non sei stato tu a inviare la richiesta, cancella questa email e approfittane per scoprire il nostro sito: <a href="http://www.letturedametropolitana.it">www.letturedametropolitana.it</a></p>
+    	<p>If you didn't send the request, delete this email and take the chance to visit our site: <a href="http://www.example.com">EXAMPLE SITE</a></p>
      	<br />
      	<p>
-        	<img src="../../res/img/ldmlogo.h50.png" th:src="'cid:' + ${logosmall}" />
+        	<img src="../../res/img/logo.h50.png" th:src="'cid:' + ${logosmall}" />
      	</p>
-     	<p>Grazie, <br />
-        	<a href="http://www.letturedametropolitana.it/"><em>LettureDaMetropolitana</em></a>
-     	</p>
+ 	  	<p style="margin-top: 10px;">Thank you, <br />
+	     	<a href="http://www.example.com/"><em>EXAMPLESITE</em></a>
+	  	</p>
     </body>
 </html>
