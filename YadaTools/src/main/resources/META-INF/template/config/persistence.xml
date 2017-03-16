@@ -3,10 +3,11 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
              version="2.0">
              
-   <!-- Questo file serve solo a generare lo schema con ant -->
+   <!-- This file is only needed to generate the db schema with the ant task -->
    
-   		<!-- Se non aggiungo le classi di YadaCore, non vengono viste dal task ant -->
-   		<!-- Vedi il link persistence_2_1.xsd preso da http://www.oracle.com/webfolder/technetwork/jsc/xml/ns/persistence/index.html -->
+    <persistence-unit name="yadaPersistenceUnit">
+   		<!-- The Yada entities must be specified here in order for the ant task to pick them up -->
+   		<!-- See the link persistence_2_1.xsd from http://www.oracle.com/webfolder/technetwork/jsc/xml/ns/persistence/index.html -->
   		<class>net.yadaframework.persistence.entity.YadaBrowserId</class>
   		<class>net.yadaframework.persistence.entity.YadaClause</class>
   		<class>net.yadaframework.persistence.entity.YadaUserCredentials</class>

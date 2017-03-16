@@ -31,7 +31,11 @@ class YadaCreateDbSchemaTask extends DefaultTask {
 			classname: 'org.hibernate.tool.ant.HibernateToolTask',
 			classpath: project.configurations.hibtools.asPath
 			)
-		System.out.println("Creating file ${project.projectDir}/schema/" + outputfilename);
+		System.out.println("Creating file ${project.projectDir}/schema/${outputfilename}");
+		// Remove the file because the current version of the tools appends on the existing file.
+		// See org.hibernate.tool.schema.internal.exec.ScriptTargetOutputToFile
+		File outputFile = new File("${project.projectDir}/schema/${outputfilename}");
+		outputFile.delete();
 		ant.hibernatetool(destdir: "${project.projectDir}/schema") {
 			ant.jpaconfiguration(persistenceunit: 'yadaPersistenceUnit')
 			ant.hbm2ddl(drop: 'false', export: 'false', outputfilename: outputfilename)

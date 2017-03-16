@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
     <head>
-        <title th:remove="all">LettureDaMetropolitana</title>
+        <title th:remove="all">EXAMPLE TITLE</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     </head>
     <body>
- 	   <strong>Richiesta di Supporto</strong>
- 	   <p>Mittente: <span th:text="${username}"></span></p>
+ 	   <strong>Support Request - EXAMPLE SITE</strong>
+ 	   <p>Sender: <span th:text="${username}"></span></p>
  	   <p>Client IP: <span th:text="${clientIp}"></span></p>
  	   <p>Browser User-Agent: <span th:text="${userAgent}"></span></p>
        <p th:text="${supportRequest}"></p>
        
      	<br />
      	<p>
-        	<img src="../../res/img/ldmlogo.h50.png" th:src="'cid:logosmall'" />
+        	<img src="../../res/img/logo.h50.png" th:src="'cid:logosmall'" />
      	</p>
-     	<p>Grazie, <br />
-        	<a href="http://www.letturedametropolitana.it/"><em>LettureDaMetropolitana</em></a>
-     	</p>
+	  	<p style="margin-top: 10px;">Thank you, <br />
+	     	<a href="http://www.example.com/"><em>EXAMPLESITE</em></a>
+	  	</p>
     </body>
 </html>

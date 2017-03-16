@@ -19,7 +19,7 @@ mysqladmin ${"\$"}force --user=root --password=$dbpwd drop ${acronym}db$env
 # devo usare mysql e non mysqladmin perche' il secondo non mi setta il charset
 
 mysql --verbose -u root --password=$dbpwd --host=${"\$"}hostname <<SQLCOMMAND 
-create database ${acronym}db$env character set utf8;
+create database ${acronym}db$env character set utf8mb4;
 CREATE USER '${acronym}user$env'@'localhost' IDENTIFIED BY '$dbpwd';
 GRANT ALL ON ${acronym}db$env.* TO '${acronym}user$env'@'localhost';
 FLUSH PRIVILEGES;

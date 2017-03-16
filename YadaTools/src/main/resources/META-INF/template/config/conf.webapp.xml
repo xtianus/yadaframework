@@ -3,7 +3,7 @@
 		<env>$env</env>
 		<appName>$projectName</appName>
 		<version>0.1 alpha EXAMPLE</version>
-		<build>${"\$"}{build}</build> <!-- TODO iniettare tramite gradle -->
+		<build>${"\$"}{build}</build>
 		<date>@@RELEASEDATE_PLACEHOLDER@@</date> <!-- Injected by gradle -->
 	</info>
 	<paths>

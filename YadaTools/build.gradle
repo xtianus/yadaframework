@@ -32,39 +32,41 @@ dependencies {
 
 /* TODO Da finire: lanciando da eclipse la console è nulla. Vedi http://stackoverflow.com/a/24360969/587641 
         Usa il codice esistente per la richiesta conferma */
-task terraforming << {
-    def hostname, serverip, rootPassword;
-    def projectBasePath;
-    def console = System.console()
-	hostname = console.readLine('> Please enter the non-qualified host name (e.g. saturn): ')
-	serverip = console.readLine('> Please enter the server ip address: ')
-	rootPassword = console.readLine('> Please enter the root password: ')
-	projectBasePath = console.readLine('> Please enter the project base path (e.g. /srv/ldmprod: ')
-	remotes.create('targetHost') {
-	    host = serverip
-	    user = root
-	    password = rootPassword
-	}
-	ssh.run {
-		session(remotes.targetHost) {
-		  put from: "./scripts/defaultCourtesyPage", into: projectBasePath+"/contents"
+task terraforming {
+	doLast {
+	    def hostname, serverip, rootPassword;
+	    def projectBasePath;
+	    def console = System.console()
+		hostname = console.readLine('> Please enter the non-qualified host name (e.g. saturn): ')
+		serverip = console.readLine('> Please enter the server ip address: ')
+		rootPassword = console.readLine('> Please enter the root password: ')
+		projectBasePath = console.readLine('> Please enter the project base path (e.g. /srv/ldmprod: ')
+		remotes.create('targetHost') {
+		    host = serverip
+		    user = root
+		    password = rootPassword
 		}
-	}
-	/* TODO finire caricando i file ed eseguendoli
-		println "Running deploy script..."
 		ssh.run {
-			session(remotes.deployHost) {
-				execute """sudo bash -O extglob -c 'sudo rm -rf ${tomcatbase}/webapps/ROOT/WEB-INF/!(lib)' &&
-					sudo -u ${config.server.tomcatuser} unzip -o /$remoteDest/$filename -d ${tomcatbase}/webapps/ROOT &&
-					/srv/${acroenv}/bin/restart.sh"""
+			session(remotes.targetHost) {
+			  put from: "./scripts/defaultCourtesyPage", into: projectBasePath+"/contents"
 			}
 		}
-		delete "$distsDir/$filename"
-		println "Deploy of ${filename} done."
-	} else {
-		println "Aborted."
+		/* TODO finire caricando i file ed eseguendoli
+			println "Running deploy script..."
+			ssh.run {
+				session(remotes.deployHost) {
+					execute """sudo bash -O extglob -c 'sudo rm -rf ${tomcatbase}/webapps/ROOT/WEB-INF/!(lib)' &&
+						sudo -u ${config.server.tomcatuser} unzip -o /$remoteDest/$filename -d ${tomcatbase}/webapps/ROOT &&
+						/srv/${acroenv}/bin/restart.sh"""
+				}
+			}
+			delete "$distsDir/$filename"
+			println "Deploy of ${filename} done."
+		} else {
+			println "Aborted."
+		}
+		*/
 	}
-	*/
 }
 
 //artifacts {

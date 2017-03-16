@@ -155,6 +155,7 @@ class YadaInitTask extends YadaProject {
 		if (!outputFile.exists()) {
 			def binding = [
 				env : env,
+				envs : envs,
 				acronym : acronym,
 				basePath : basePath,
 				schemaFolderPath : project.file(schemaDirName),
