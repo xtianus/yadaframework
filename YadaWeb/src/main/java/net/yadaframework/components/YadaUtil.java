@@ -1191,15 +1191,15 @@ public class YadaUtil {
 		char[] lowerChars = originalFilename.toLowerCase().toCharArray();
 		for (int i = 0; i < resultChars.length; i++) {
 			char c = lowerChars[i]; // test on the lowercase version
-			if (c==224 || c==225) {
+			if (c==224 || c==225) { // à, á
 				c='a';
-			} else if (c==232 || c==233) {
+			} else if (c==232 || c==233) { // é, è
 				c='e';
-			} else if (c==236 || c==237) {
+			} else if (c==236 || c==237) { // ì, í
 				c='i';
-			} else if (c==242 || c==243) {
+			} else if (c==242 || c==243) { // ò, ó
 				c='o';
-			} else if (c==249 || c==250) {
+			} else if (c==249 || c==250) { // ù, ú
 				c='u';
 			} else if (c==167) {
 				c='s';
@@ -1216,6 +1216,6 @@ public class YadaUtil {
 			
 			resultChars[i]=c;
 		}
-		return new String(resultChars);
+		return new String(resultChars).replaceAll("__+", "_").replaceAll("--+", "-");
 	}
 }
