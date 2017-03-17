@@ -20,7 +20,7 @@ dependencies {
 		'org.hibernate:hibernate-validator:5.+',
 		'org.thymeleaf:thymeleaf-spring4:3.+',
 		'org.thymeleaf.extras:thymeleaf-extras-springsecurity4:3.+',
-		'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:2.+', 
+		'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:2.1.2', // [La 2.2.0 ha un bug: https://github.com/ultraq/thymeleaf-layout-dialect/issues/127] 2.+', 
 		'mysql:mysql-connector-java:5.+',
 		'org.apache.commons:commons-configuration2:2.+',
 		'org.apache.commons:commons-lang3:3.+',
