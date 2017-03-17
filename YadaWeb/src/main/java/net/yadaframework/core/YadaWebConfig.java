@@ -1,6 +1,5 @@
 package net.yadaframework.core;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -36,7 +35,6 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 
 import net.yadaframework.web.YadaDateFormatter;
 import net.yadaframework.web.dialect.YadaDialect;
-import nz.net.ultraq.thymeleaf.LayoutDialect;
 
 @Configuration
 @EnableWebMvc
@@ -295,8 +293,9 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		engine.addTemplateResolver(webTemplateResolver());
 		engine.addTemplateResolver(mailPreviewTemplateResolver());
 		engine.addTemplateResolver(yadaTemplateResolver());
-		// http://www.thymeleaf.org/layouts.html
-		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
+		// Do this in the subclass
+		//		// http://www.thymeleaf.org/layouts.html
+		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
 		addSpringSecurityDialect(engine); // thymeleaf-SpringSecurity-dialect
 		engine.addDialect(new YadaDialect(config));
 		return engine;
@@ -307,8 +306,9 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
 		engine.setEnableSpringELCompiler(true);
 		engine.addTemplateResolver(emailTemplateResolver());
-		// http://www.thymeleaf.org/layouts.html
-		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
+		// Do this in the subclass
+		//		// http://www.thymeleaf.org/layouts.html
+		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
 		addSpringSecurityDialect(engine); // thymeleaf-SpringSecurity-dialect
 		engine.addDialect(new YadaDialect(config));
 		return engine;
@@ -326,15 +326,20 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	// Ho aggiunto un viewResolver per gestire i file xml. Per usarlo basta che il controller restituisca il nome di un file xml senza estensione che sta in WEB-INF/views/xml
 	// prefissandolo con "/xml", per esempio "/xml/sitemap".
 	
-	@Bean
-	public ViewResolver xmlViewResolver() {
-		// Questo ha un template engine tutto suo
+	// Non need for a @Bean
+	public SpringTemplateEngine xmlTemplateEngine() {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
 		engine.addTemplateResolver(xmlTemplateResolver());
-		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
+		// Do this in the subclass
+		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
 		addSpringSecurityDialect(engine); // thymeleaf-SpringSecurity-dialect
 		engine.addDialect(new YadaDialect(config));
-		//
+		return engine;
+	}
+
+	@Bean
+	public ViewResolver xmlViewResolver() {
+		SpringTemplateEngine engine = xmlTemplateEngine();
 		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
 		viewResolver.setTemplateEngine(engine);
 		viewResolver.setCharacterEncoding("UTF-8"); // Questo è importante anche se nei tutorial non lo mettono
