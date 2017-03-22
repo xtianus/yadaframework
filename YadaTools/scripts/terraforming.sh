@@ -1,12 +1,11 @@
 #!/bin/bash
-# Script da lanciare su un server appena acquistato, per il setup iniziale.
-# Si presume che l'utente corrente sia root, visto che altri utenti ancora non ce ne sono.
-# La protezione verso server già installati è data dal fatto che root non può connettersi in ssh su tali server.
-# 12 Novembre 2016
+# Initial setup of a bare new server.
+# The current user is root.
+# 22 March 2017
 #
 # TODO: abilitare il connettore AJP di Tomcat in server.xml
 #
-# Parametri: <hostname> <virtualHost> <projectBasePath> [<myip>] [<deployOptions>]
+# Parameters: <hostname> <virtualHost> <projectBasePath> [<myip>] [<deployOptions>]
 
 if (( $# < 3 )); then
 	echo "Syntax: $( basename $0 ) <hostname> <virtualHost> <projectBasePath> [<myip>] [<deployOptions>]"
@@ -19,7 +18,7 @@ myVirtualHost=$2
 # projectBase e.g. /srv/ldbprod
 projectBase=$3
 MYIP=$4
-# Override del config
+# Configuration override
 deployOptions=$5
 
 # e.g. ldbprod
@@ -155,6 +154,7 @@ if [[ $cfgPkgTomcat || $cfgTomcatTarGz ]]; then
 	sed -i 's%</tomcat-users>%<role rolename="manager-gui"/><role rolename="manager-jmx"/><role rolename="admin"/><user username="${cfgUser}" password="${cfgTomcatManagerPwd}" roles="admin,manager-gui,manager-jmx"/></tomcat-users>%g' ${cfgTomcatBase}/tomcat-users.xml
 	# Compression e timeout
 	sed -i 's/connectionTimeout="20000"/connectionTimeout="'${cfgTomcatTimeout}'"\ncompression="on" compressableMimeType="text\/html,text\/xml,text\/plain,text\/css,application\/xml,text\/javascript,application\/javascript,application\/x-javascript,application\/pdf,application\/json,text\/json"/g' ${cfgTomcatBase}/server.xml
+	systemctl daemon-reload
 fi
 
 # MySQL + Apache + ModJK + php
