@@ -4,7 +4,7 @@
 A select list for objects, maps or static (Spring-EL) elements.
 It must be used inside a form with a th:object form bean.
 
-Parameters:
+Parameters (can be set in the replace tag or in any parent tag):
 - fieldName = name of the field, in the form bean, holding the chosen value. Can be a path like "recipient.name"
 - labelKey = key in messages.properties for the label text
 - label = label to use, if not using a labelKey
@@ -26,7 +26,9 @@ Parameters:
 - onchange = function to call on the change event. It receives the 'change' event. (optional)
 - onclick = function to call on the click event. It receives the 'click' event. (optional)
 - idPrefix = string to use as prefix for select IDs. When not set, the constant 'fieldId' is used. Must be set to a unique value when the ajaxList is injected
-             in page many times via javascript, otherwise all selects will end up having the same ids. Not needed when the ajaxLists are not inserted via javascript.
+             in page many times via javascript, otherwise all selects will end up having the same ids. For example in an ajax modal. 
+             Not needed when the ajaxLists are not inserted via javascript.
+             Could be convenient to set it in a th:with on the form, so that it doesn't have to be repeated.
 - noFeedback = true to remove space reserved for field feedback icon (optional)
 
 Example:
