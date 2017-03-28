@@ -9,7 +9,7 @@ import net.yadaframework.core.YadaConfiguration;
 /**
  * A rate limiter that sleeps to distribute calls in a time interval.
  * The sleeping time adapts itself (shortens) depending on the time spent outside of the limiter.
- *
+ * The minimum sleep time is zero, the maximum sleep time is configurable.
  */
 // This is not a Component, it has to be instantiated by new
 public class YadaSleepingRateLimiter {

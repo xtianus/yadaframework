@@ -227,7 +227,7 @@ public class YadaUtil {
 	
 	/**
 	 * Get any bean defined in the Spring ApplicationContext
-	 * @param beanClass the Class.getSimpleName()
+	 * @param beanClass
 	 * @return
 	 */
 	public static Object getBean(Class beanClass, Object ... args) {
@@ -237,11 +237,15 @@ public class YadaUtil {
 	
 	/**
 	 * Get any bean defined in the Spring ApplicationContext
-	 * @param nameInApplicationContext
+	 * @param nameInApplicationContext the Class.getSimpleName() starting lowercase, e.g. "processController"
 	 * @return
 	 */
 	public static Object getBean(String nameInApplicationContext, Object ... args) {
-		return applicationContext.getBean(nameInApplicationContext, args);
+		if (applicationContext!=null) {
+			return applicationContext.getBean(nameInApplicationContext, args);
+		}
+		log.debug("No applicationContext injected in getBean() yet - returning null");
+		return null;
 	}
 	
 	/**
@@ -625,6 +629,7 @@ public class YadaUtil {
 	 * @param source
 	 * @return
 	 */
+	// TODO why not use SerializationUtils.clone(..) of commons-lang?
 	public static Object copyEntity(CloneableFiltered source) {
 		return copyEntity(source, null);
 	}
@@ -651,6 +656,7 @@ public class YadaUtil {
 	 * @param classObject classe da usare per creare il clone quando il source è nascosto dentro a un HibernateProxy
 	 * @return
 	 */
+	// TODO why not use SerializationUtils.clone(..) of commons-lang?
 	public static Object copyEntity(CloneableFiltered source, Class classObject) {
 		if (source==null) {
 			return null;
@@ -916,12 +922,31 @@ public class YadaUtil {
 		return roundBackToMidnight(calendar).getTime();
 	}
 	
+	/**
+	 * Create a new calendar rounded back to the start of the day.
+	 * @param calendar the calendar to copy
+	 * @return a new calendar
+	 */
+	public static Calendar roundBackToMidnightClone(Calendar source) {
+		return roundBackToMidnight((Calendar) source.clone());
+	}
+	
+	/**
+	 * Rounds back the calendar to the start of the day.
+	 * @param calendar the calendar to change
+	 * @return the input calendar modified.
+	 */
+	// TODO to prevent errors, better to return void
 	public static Calendar roundBackToMidnight(Calendar calendar) {
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
 		return calendar;
+	}
+	
+	public static Calendar addDaysClone(Calendar source, int days) {
+		return addDays((Calendar) source.clone(), days);
 	}
 	
 	public static Calendar addDays(Calendar calendar, int days) {
