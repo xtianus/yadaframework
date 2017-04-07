@@ -41,6 +41,7 @@ public class YadaBrowserIdDao {
 	 * @param response
 	 * @return
 	 */
+    @Transactional(readOnly = false)
 	public YadaBrowserId ensureYadaBrowserId(String cookieName, int expirationSeconds, HttpServletRequest request, HttpServletResponse response) {
 		// Check if cookie present
 		String uuidString = yadaHttpUtil.getOneCookieValue(request, cookieName);
