@@ -47,7 +47,11 @@ public class YadaBrowserIdDao {
 		if (uuidString!=null) {
 			try {
 				UUID uuid = UUID.fromString(uuidString);
-				return yadaBrowserIdRepository.findByMostSigBitsAndLeastSigBits(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
+				YadaBrowserId yadaBrowserId = yadaBrowserIdRepository.findByMostSigBitsAndLeastSigBits(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
+				if (yadaBrowserId!=null) {
+					return yadaBrowserId;
+				}
+				// If not found in the database, keep going and create a new one
 			} catch (IllegalArgumentException e) {
 				log.warn("Invalid UUID cookie value: {}", uuidString);
 			}
