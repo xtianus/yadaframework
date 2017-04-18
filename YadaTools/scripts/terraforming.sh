@@ -274,6 +274,14 @@ if [ "$cfgSquidPercent" != "" ]; then
 	echo Setting up squid...
 	apt-get -o Dpkg::Options::="--force-confnew" -y install squid3
 	service squid stop
+	# Max response size to accept (it discards bigger responses)
+	# echo "reply_body_max_size 20 MB" >> /etc/squid/squid.conf
+	# Remove "forwarded for" headers
+	echo "forwarded_for delete" >> /etc/squid/squid.conf
+	# Max cache RAM
+	if [[ "$cfgSquidRam" != "" ]]; then
+		echo "cache_mem $cfgSquidRam" >> /etc/squid/squid.conf
+	fi
 	rm -r /var/spool/squid/*
 	freespacek=$( df --output=avail / | tail -1 )
 	cachespacek=$((freespacek*cfgSquidPercent/100))
