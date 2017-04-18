@@ -16,6 +16,11 @@ public class YadaInternalException extends RuntimeException {
 		super(message);
 	}
 
+	/**
+	 * Build the message using slf4j log format syntax
+	 * @param format a string with {} placeholders for parameters
+	 * @param params parameters to replace at the {} position
+	 */
 	public YadaInternalException(String format, Object... params) {
 		super(MessageFormatter.format(format, params).getMessage());
 	}

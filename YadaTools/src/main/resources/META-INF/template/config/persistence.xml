@@ -32,8 +32,11 @@
             <property name="hibernate.connection.username" value="${acronym}user$env"/>
             <property name="hibernate.connection.password" value="$dbpwd"/>
             <property name="hibernate.connection.url" value="jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false"/>
-            <!-- Il dialect serve a prescindere -->
+            <!-- InnoDB Dialect -->
+         	<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect"/>
+         	<!-- MyISAM Dialect (no transactions)
          	<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>
+         	 -->
       </properties>
    		 
    </persistence-unit>

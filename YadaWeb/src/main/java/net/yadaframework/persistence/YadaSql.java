@@ -19,6 +19,9 @@ import org.springframework.data.domain.Sort;
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.exceptions.InternalException;
 
+/**
+ * Incrementally and conditionally builds a sql select/update query
+ */
 // http://dev.mysql.com/doc/refman/5.7/en/select.html
 public class YadaSql implements CloneableDeep {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
@@ -65,7 +68,7 @@ public class YadaSql implements CloneableDeep {
 			}
 		} else {
 			// In a subexpression add the operand if there is a select or an update, otherwise strip it
-			if (queryBuffer.indexOf("from")>-1 || queryBuffer.indexOf("update")>-1) {
+			if (builder.indexOf(sectionOperand)<0 && (queryBuffer.indexOf("from")>-1 || queryBuffer.indexOf("update")>-1)) {
 				builder.append(sectionOperand);
 			}
 		}
@@ -77,14 +80,14 @@ public class YadaSql implements CloneableDeep {
 		return this;
 	}
 
-	private YadaSql appendWhere(String text) {
+	private YadaSql appendWhere(String text, String startingWhere) {
 		nowInHaving=false;
 		if (pendingWhereOperand!=null) {
 			String operand = pendingWhereOperand;
 			pendingWhereOperand = null;
-			appendWhere(operand);
+			appendWhere(operand, "");
 		}
-		return appendSection(whereConditions, "where ", text);
+		return appendSection(whereConditions, startingWhere, text);
 	}
 	
 	private YadaSql appendHaving(String text) {
@@ -244,7 +247,7 @@ public class YadaSql implements CloneableDeep {
 	}
 	
 	public YadaSql where(String whereConditions) {
-		return appendWhere(whereConditions);
+		return appendWhere(whereConditions, "where ");
 	}
 
 	/**
@@ -365,11 +368,29 @@ public class YadaSql implements CloneableDeep {
 //			}
 	}
 
+	/**
+	 * Ends a where/having subexpression
+	 * @return
+	 */
 	public YadaSql endSubexpression() {
+		return endSubexpression(null);
+	}
+	
+	/**
+	 * Ends a subquery
+	 * @param alias the table alias, like in "select alias.a+alias.c from ( select 2*b as a ...) alias"
+	 * @return
+	 */
+	public YadaSql endSubexpression(String alias) {
 		if (this.enabled) {
 			String sql = this.sql();
 			if (!sql.isEmpty()) {
 				sql = "(" + sql + ")";
+				if (alias!=null) {
+					// Must be a "from" subexpression like "select a from ( select ...) myTable"
+					parent.appendQuery(sql + " " +alias);
+					return parent;
+				}
 				if (!nowInHaving) {
 					parent.where(sql);
 				} else {

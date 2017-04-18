@@ -11,6 +11,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.zip.DeflaterInputStream;
 import java.util.zip.GZIPInputStream;
 
@@ -24,10 +25,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
 
+import net.yadaframework.persistence.entity.YadaBrowserId;
+import net.yadaframework.persistence.repository.YadaBrowserIdRepository;
+
 /**
  * Miscellaneous HTTP functions
  *
  */
+// TODO move to YadaBones and remove dependency from Spring
 // non usare @Component perché questa classe viene usata anche senza Spring
 // TODO (ma allora Base64Utils non deve essere usata!)
 public class YadaHttpUtil {

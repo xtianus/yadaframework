@@ -141,6 +141,11 @@ public class AuditFilter extends OncePerRequestFilter {
 					}
 					log.info("** {} = {} **", paramName, paramString);
 				}
+				if (postDataMap.isEmpty()) {
+					if (org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent(request)) {
+						log.info("** multipart request");
+					}
+				}
 			} catch (Throwable e) {
 				// Ignoro
 			}

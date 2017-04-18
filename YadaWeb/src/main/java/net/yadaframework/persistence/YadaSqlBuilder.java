@@ -22,9 +22,9 @@ import net.yadaframework.exceptions.InternalException;
 /**
  * Classe di utilità che costruisce una stringa sql o jpql partendo dagli elementi che la compongono, opzionalmente presenti.
  * Si utilizza istanziandola con new() visto che non può essere un singleton.
- *
+ * @see YadaSql
  */
-@Deprecated // Questa classe è farraginosa
+@Deprecated // Use YadaSql instead
 public class YadaSqlBuilder implements CloneableFiltered {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
