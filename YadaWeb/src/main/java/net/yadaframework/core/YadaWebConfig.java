@@ -3,6 +3,7 @@ package net.yadaframework.core;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,11 +22,14 @@ import org.springframework.format.support.FormattingConversionServiceFactoryBean
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.i18n.CookieLocaleResolver;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring4.view.ThymeleafViewResolver;
@@ -93,31 +97,39 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 //		return filterMultipartResolver;
 //	}
 	
-	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
-		//registry.addInterceptor(globalAttributesInterceptor);
-		
-		// registry.addInterceptor(new ThemeInterceptor()).addPathPatterns("/").excludePathPatterns("/admin/");
-		// registry.addInterceptor(new SecurityInterceptor()).addPathPatterns("/secure/*");
-	}
+//	@Override
+//	public void addInterceptors(InterceptorRegistry registry) {
+//		//registry.addInterceptor(globalAttributesInterceptor);
+//		// registry.addInterceptor(new ThemeInterceptor()).addPathPatterns("/").excludePathPatterns("/admin/");
+//	}
 	
 //	@Autowired Environment env;
 
-//	 @Override
-//	  public void addInterceptors(InterceptorRegistry registry) {
-//
-//	    LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
-//	    localeChangeInterceptor.setParamName("lang");
-//	    registry.addInterceptor(localeChangeInterceptor);
-//	  }
-//
-//	  @Bean
-//	  public LocaleResolver localeResolver() {
-//
-//	    CookieLocaleResolver cookieLocaleResolver = new CookieLocaleResolver();
-//	    cookieLocaleResolver.setDefaultLocale(StringUtils.parseLocaleString("en"));
-//	    return cookieLocaleResolver;
-//	  }
+	//
+	// Locale handling
+	// See http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/#mvc-localeresolver
+	//
+	
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(localeChangeInterceptor());
+	}
+
+	@Bean
+	public LocaleChangeInterceptor localeChangeInterceptor() {
+		LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
+		localeChangeInterceptor.setParamName("lang");
+		return localeChangeInterceptor;
+	}
+
+	@Bean(name = "localeResolver")
+	public LocaleResolver localeResolver() {
+		CookieLocaleResolver cookieLocaleResolver = new CookieLocaleResolver();
+		cookieLocaleResolver.setCookieMaxAge(Integer.MAX_VALUE);
+		// TODO the default locale should be determined using 'accept-language' header or IP localization
+		cookieLocaleResolver.setDefaultLocale(Locale.ENGLISH);
+		return cookieLocaleResolver;
+	}
 	
 	@Bean
 	@Autowired // L'ho spostato qui per risolvere il problema "Requested bean is currently in creation"

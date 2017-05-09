@@ -1,12 +1,14 @@
 package net.yadaframework.core;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,11 +63,13 @@ public class YadaJpaConfig {
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		// vendorAdapter.setGenerateDdl(true); // Crea la tabella e le colonne quando non esistono
 		vendorAdapter.setShowSql(config.getShowSql());
-		vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQL5Dialect");
+		vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQL5InnoDBDialect");
 		LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
 		factory.setJpaVendorAdapter(vendorAdapter);
-		log.info("Scanning packages for entities: {}, {}", config.getDbEntityPackage(), "net.yadaframework.persistence.entity");
-		factory.setPackagesToScan(config.getDbEntityPackage(), "net.yadaframework.persistence.entity");
+		List<String> packages = config.getDbEntityPackages();
+		packages.add("net.yadaframework.persistence.entity");
+		log.info("Scanning packages for entities: {}", StringUtils.join(packages, ","));
+		factory.setPackagesToScan(packages.toArray(new String[]{}));
 		factory.setDataSource(dataSource());
 		factory.afterPropertiesSet();
 		return factory.getObject();
