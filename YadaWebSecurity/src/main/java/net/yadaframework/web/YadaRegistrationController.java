@@ -18,28 +18,30 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import net.yadaframework.components.YadaTokenHandler;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaRegistrationType;
-import net.yadaframework.persistence.entity.YadaRegistrationRequest;
-import net.yadaframework.persistence.entity.YadaUserCredentials;
-import net.yadaframework.persistence.repository.YadaRegistrationRequestRepository;
-import net.yadaframework.persistence.repository.YadaUserCredentialsRepository;
 import net.yadaframework.security.YadaUserDetailsService;
+import net.yadaframework.security.components.YadaSecurityUtil;
+import net.yadaframework.security.components.YadaTokenHandler;
+import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
+import net.yadaframework.security.persistence.entity.YadaUserCredentials;
+import net.yadaframework.security.persistence.repository.YadaRegistrationRequestRepository;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
 import net.yadaframework.web.form.YadaFormPasswordChange;
 
 @Controller
 public class YadaRegistrationController {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
-	@Autowired YadaUserCredentialsRepository userCredentialsRepository;
-	@Autowired YadaWebUtil yadaWebUtil;
-	@Autowired YadaRegistrationRequestRepository registrationRequestRepository;
-	@Autowired YadaEmailService yadaEmailService;
-	@Autowired YadaTokenHandler yadaTokenHandler;
-	@Autowired YadaUserDetailsService yadaUserDetailsService;
-	@Autowired PasswordEncoder passwordEncoder;
-	@Autowired YadaConfiguration yadaConfiguration;
+	@Autowired private YadaUserCredentialsRepository userCredentialsRepository;
+	@Autowired private YadaWebUtil yadaWebUtil;
+	@Autowired private YadaSecurityUtil yadaSecurityUtil;
+	@Autowired private YadaRegistrationRequestRepository registrationRequestRepository;
+	@Autowired private YadaSecurityEmailService yadaSecurityEmailService;
+	@Autowired private YadaTokenHandler yadaTokenHandler;
+	@Autowired private YadaUserDetailsService yadaUserDetailsService;
+	@Autowired private PasswordEncoder passwordEncoder;
+	@Autowired private YadaConfiguration yadaConfiguration;
 
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,10 +143,10 @@ public class YadaRegistrationController {
 		}
 		yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
 		// Pulisco le vecchie richieste
-		yadaWebUtil.registrationRequestCleanup(yadaRegistrationRequest);
+		yadaSecurityUtil.registrationRequestCleanup(yadaRegistrationRequest);
 		yadaRegistrationRequest.setPassword("fakefake"); // La metto solo per evitare un errore di validazione al save
 		yadaRegistrationRequest = registrationRequestRepository.save(yadaRegistrationRequest); // Va fatto subito per avere l'id e il token
-		boolean emailSent = yadaEmailService.sendPasswordRecovery(yadaRegistrationRequest, request, locale);
+		boolean emailSent = yadaSecurityEmailService.sendPasswordRecovery(yadaRegistrationRequest, request, locale);
 		if (!emailSent) {
 			registrationRequestRepository.delete(yadaRegistrationRequest);
 			log.debug("Invio email a {} fallito in fase di recupero password", yadaRegistrationRequest.getEmail());

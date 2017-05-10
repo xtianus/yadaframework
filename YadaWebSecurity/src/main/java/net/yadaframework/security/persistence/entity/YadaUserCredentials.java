@@ -1,4 +1,4 @@
-package net.yadaframework.persistence.entity;
+package net.yadaframework.security.persistence.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;

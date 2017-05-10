@@ -308,7 +308,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		// Do this in the subclass
 		//		// http://www.thymeleaf.org/layouts.html
 		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
-		addSpringSecurityDialect(engine); // thymeleaf-SpringSecurity-dialect
+		addExtraDialect(engine); // thymeleaf-SpringSecurity-dialect
 		engine.addDialect(new YadaDialect(config));
 		return engine;
 	}
@@ -321,18 +321,13 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		// Do this in the subclass
 		//		// http://www.thymeleaf.org/layouts.html
 		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
-		addSpringSecurityDialect(engine); // thymeleaf-SpringSecurity-dialect
+		addExtraDialect(engine); // thymeleaf-SpringSecurity-dialect
 		engine.addDialect(new YadaDialect(config));
 		return engine;
 	}
 	
-	private void addSpringSecurityDialect(SpringTemplateEngine engine) {
-		engine.addDialect(new org.thymeleaf.extras.springsecurity4.dialect.SpringSecurityDialect());
-//		try {
-//		} catch (Exception e) {
-//			log.info("Using springsecurity3 SpringSecurityDialect for Thymeleaf");
-//			engine.addDialect(new org.thymeleaf.extras.springsecurity3.dialect.SpringSecurityDialect());
-//		}
+	protected void addExtraDialect(SpringTemplateEngine engine) {
+		// Do nothing
 	}
 
 	// Ho aggiunto un viewResolver per gestire i file xml. Per usarlo basta che il controller restituisca il nome di un file xml senza estensione che sta in WEB-INF/views/xml
@@ -344,7 +339,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		engine.addTemplateResolver(xmlTemplateResolver());
 		// Do this in the subclass
 		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
-		addSpringSecurityDialect(engine); // thymeleaf-SpringSecurity-dialect
+		addExtraDialect(engine); // thymeleaf-SpringSecurity-dialect
 		engine.addDialect(new YadaDialect(config));
 		return engine;
 	}

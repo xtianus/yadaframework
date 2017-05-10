@@ -1,0 +1,46 @@
+group = 'net.yadaframework'
+version = '0.0.1'
+
+apply plugin: 'java-library'
+apply plugin: 'eclipse-wtp'
+
+repositories {
+    jcenter()
+	mavenLocal()
+}
+
+dependencies {
+	api 'org.thymeleaf.extras:thymeleaf-extras-springsecurity4:3.0.2.RELEASE'
+
+    implementation	project(':YadaWeb'),
+    	'org.springframework.security:spring-security-web:4.2.2.RELEASE',
+		'org.springframework.security:spring-security-config:4.2.2.RELEASE',
+		'ch.qos.logback:logback-classic:1.2.2',
+		'org.apache.commons:commons-lang3:3.5',
+		'org.apache.tomcat:tomcat-servlet-api:8.0.43'
+		
+
+    // testImplementation 'junit:junit:4.12'
+}
+
+jar {
+    manifest {
+        attributes("Implementation-Title": "YadaWebSecurity",
+                   "Implementation-Version": version)
+    }
+}
+
+// Set the yada version in the properties file
+processResources {
+	doLast {
+		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadawebsecurity.properties", token: '@YADA_VERSION@', value: version)
+	}
+}
+
+apply plugin: 'maven'
+uploadArchives {
+	dependsOn build
+	repositories {
+		mavenLocal()
+	}
+}

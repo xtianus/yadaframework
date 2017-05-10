@@ -11,7 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import net.yadaframework.persistence.repository.YadaUserCredentialsRepository;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
 
 // Si può inserire il codice da eseguire dopo un login che ha avuto successo
 @Component

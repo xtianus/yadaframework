@@ -27,7 +27,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,7 +36,6 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
@@ -55,10 +53,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import net.yadaframework.core.CloneableDeep;
@@ -1029,50 +1023,6 @@ public class YadaUtil {
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	
-	
-	
-
-	
-	public static Set<String> getCurrentRoles() {
-		Set<String> roles = new HashSet<String>();
-		try {
-			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-			if (auth!=null && auth.isAuthenticated()) {
-				Object principal = auth.getPrincipal();
-				if (principal instanceof UserDetails) {
-					for (GrantedAuthority ga : ((UserDetails)principal).getAuthorities()) {
-						roles.add(ga.getAuthority());
-					}
-				}
-			}
-		} catch (Exception e) {
-			log.error("Can't get roles", e);
-		}
-		return roles;
-	}
-	
-	/**
-	 * Controlla se l'utente attuale possiede il ruolo specificato. Case Sensitive!
-	 * @param roleToCheck nel formato senza ROLE_ iniziale
-	 * @return
-	 */
-	public static boolean hasCurrentRole(String roleToCheck) {
-		Set<String> roles = getCurrentRoles();
-		return roles.contains(roleToCheck);
-	}
-
-	/**
-	 * Controlla se l'utente attuale possiede almeno un ruolo tra quelli specificati. Case Sensitive!
-	 * @param roleToCheck array di ruoli nel formato senza ROLE_ iniziale
-	 * @return
-	 */
-	public static boolean hasCurrentRole(String[] rolesToCheck) {
-		Set<String> currentRoles = getCurrentRoles();
-		Set<String> requiredRoles = new HashSet<String>(Arrays.asList(rolesToCheck));
-		return CollectionUtils.containsAny(currentRoles, requiredRoles);
-	}
-	
-
 	public static Calendar roundForwardToAlmostMidnight(Calendar calendar) {
 		calendar.set(Calendar.HOUR_OF_DAY, 23);
 		calendar.set(Calendar.MINUTE, 59);

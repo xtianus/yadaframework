@@ -1,4 +1,4 @@
-package net.yadaframework.security;
+package net.yadaframework.security.exceptions;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 

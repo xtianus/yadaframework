@@ -85,6 +85,8 @@ abstract protected void configure(HttpSecurity http) throws Exception;
 //       return super.authenticationManagerBean();
 //  }
 
+
+	// TODO not sure why this has to be in WebSecurity [xtian]
 	@Bean(name="filterMultipartResolver")
 	CommonsMultipartResolver filterMultipartResolver() {
 		CommonsMultipartResolver filterMultipartResolver = new YadaCommonsMultipartResolver();

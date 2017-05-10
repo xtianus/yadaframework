@@ -21,6 +21,9 @@ import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.unbescape.html.HtmlEscape;
 
+// TODO this used to be included in the "yada" dialect before splitting the YadaWebSecurity project.
+// Now it's not used anymore, waiting for a new "yadasec" dialect
+
 /**
  * Serve solo se il csrf è attivo.
  * Questa classe aggiunge il tag yada:actionUpload da usare quando si fa multipart file upload con Spring Security e la dimensione massima del file settata.

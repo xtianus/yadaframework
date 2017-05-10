@@ -1,4 +1,4 @@
-package net.yadaframework.persistence.entity;
+package net.yadaframework.security.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.yadaframework.core.YadaRegistrationType;
+import net.yadaframework.persistence.entity.YadaClause;
 
 @Entity
 public class YadaRegistrationRequest implements Serializable {

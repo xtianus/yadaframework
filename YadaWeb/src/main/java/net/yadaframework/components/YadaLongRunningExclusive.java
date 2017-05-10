@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.yadaframework.exceptions.YadaAlreadyRunningException;
-import net.yadaframework.persistence.entity.YadaUserCredentials;
 
 /**
  * Class that performs a long running operation that should not be invoked again before it completes.
