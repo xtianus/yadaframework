@@ -206,8 +206,15 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	@Bean
 	public ClassLoaderTemplateResolver yadaTemplateResolver() {
 		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
 		resolver.setPrefix(YadaConstants.YADA_VIEW_PREFIX); // Attenzione allo slash finale!
 //		resolver.setPrefix(YadaConstants.YADA_VIEW_PREFIX + "/"); // Attenzione allo slash finale!
+		/* From the tutorial:
+		 When several template resolvers are applied, it is recommended to specify patterns 
+		 for each template resolver so that Thymeleaf can quickly discard those template resolvers 
+		 that are not meant to resolve the template, enhancing performance. Doing this is not a 
+		 requirement, but a recommendation
+		 */
 		Set<String> patterns = new HashSet<>();
 		patterns.add("/yada/*"); // Start with "yada"
 		resolver.setResolvablePatterns(patterns);
@@ -215,7 +222,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		resolver.setCharacterEncoding("UTF-8");
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setCacheable(config.isProductionEnvironment());
-		resolver.setOrder(1); 
+		resolver.setOrder(10); 
 		return resolver;
 	}
 
@@ -230,6 +237,12 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	    resolver.setApplicationContext(applicationContext);
 //		resolver.setPrefix("/WEB-INF/classes/" + YadaConstants.EMAIL_TEMPLATES_PREFIX);
 		resolver.setPrefix("/WEB-INF/classes/" + YadaConstants.EMAIL_TEMPLATES_PREFIX + "/");
+		/* From the tutorial:
+		 When several template resolvers are applied, it is recommended to specify patterns 
+		 for each template resolver so that Thymeleaf can quickly discard those template resolvers 
+		 that are not meant to resolve the template, enhancing performance. Doing this is not a 
+		 requirement, but a recommendation
+		 */
 		Set<String> patterns = new HashSet<>();
 		patterns.add("email/*"); // Start with "email"
 		resolver.setResolvablePatterns(patterns);
@@ -237,7 +250,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		resolver.setCharacterEncoding("UTF-8");
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setCacheable(config.isProductionEnvironment());
-		resolver.setOrder(2);
+		resolver.setOrder(20);
 		return resolver;
 	}
 	
@@ -247,6 +260,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 //		ServletContextTemplateResolver resolver = new ServletContextTemplateResolver();
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
 	    resolver.setApplicationContext(applicationContext);
+		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
 		resolver.setPrefix("/WEB-INF/views");
 //		resolver.setPrefix("/WEB-INF/views/");
 		resolver.setSuffix(".html");
@@ -257,7 +271,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		// NB, selecting HTML5 as the template mode.
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setCacheable(config.isProductionEnvironment());
-		resolver.setOrder(3); // The last one, because it doesn't have any ResolvablePatterns
+		resolver.setOrder(30); // The last one, because it doesn't have any ResolvablePatterns
 		return resolver;
 	}
 	
@@ -266,6 +280,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 //		ServletContextTemplateResolver resolver = new ServletContextTemplateResolver();
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
 	    resolver.setApplicationContext(applicationContext);
+		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
 		resolver.setPrefix("/WEB-INF/views");
 //		resolver.setPrefix("/WEB-INF/views/");
 		Set<String> patterns = new HashSet<>();
@@ -276,13 +291,14 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		// NB, selecting HTML5 as the template mode.
 		resolver.setTemplateMode("XML");
 		resolver.setCacheable(config.isProductionEnvironment());
-		// resolver.setOrder(3); // Order not needed because resolver on different ViewResolver
+		// resolver.setOrder(30); // Order not needed because resolver on different ViewResolver
 		return resolver;
 	}
 	
 	
 	public ClassLoaderTemplateResolver emailTemplateResolver() {
 		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
 		resolver.setPrefix(YadaConstants.EMAIL_TEMPLATES_PREFIX); // Attenzione allo slash finale!
 //		resolver.setPrefix(YadaConstants.EMAIL_TEMPLATES_PREFIX + "/"); // Attenzione allo slash finale!
 		Set<String> patterns = new HashSet<>();
@@ -292,7 +308,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		resolver.setCharacterEncoding("UTF-8");
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setCacheable(config.isProductionEnvironment());
-		// resolver.setOrder(4); // Order not needed because resolver on different SpringTemplateEngine
+		// resolver.setOrder(40); // Order not needed because resolver on different SpringTemplateEngine
 		return resolver;
 	}
 	
@@ -326,6 +342,10 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		return engine;
 	}
 	
+	/**
+	 * To be overridden when a new dialect has to be added, e.g. engine.addDialect(new LayoutDialect());
+	 * @param engine
+	 */
 	protected void addExtraDialect(SpringTemplateEngine engine) {
 		// Do nothing
 	}
@@ -350,7 +370,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
 		viewResolver.setTemplateEngine(engine);
 		viewResolver.setCharacterEncoding("UTF-8"); // Questo è importante anche se nei tutorial non lo mettono
-		viewResolver.setOrder(1);
+		viewResolver.setOrder(10);
 		// Tutti i template devono stare nel folder /xml. Se non si usa un folder specifico, questo viewResolver non viene usato
 		viewResolver.setViewNames(new String[] { "/xml/*" }); // E' giusto mettere "*" e non "*.xml" perchè il suffisso viene attaccato grazie al resolver.setSuffix(".xml") di xmlTemplateResolver()
 		viewResolver.setContentType("text/xml");
@@ -364,7 +384,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
 		viewResolver.setTemplateEngine(templateEngine());
 		viewResolver.setCharacterEncoding("UTF-8"); // Questo è importante anche se nei tutorial non lo mettono
-		viewResolver.setOrder(2);
+		viewResolver.setOrder(20);
 		viewResolver.setViewNames(new String[] { "*" });
 		// Default is "true": caching is enabled. Disable this only for debugging and development.
 		viewResolver.setCache(config.isProductionEnvironment()); 
