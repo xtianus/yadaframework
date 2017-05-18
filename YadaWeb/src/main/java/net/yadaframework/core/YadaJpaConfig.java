@@ -68,6 +68,7 @@ public class YadaJpaConfig {
 		factory.setJpaVendorAdapter(vendorAdapter);
 		List<String> packages = config.getDbEntityPackages();
 		packages.add("net.yadaframework.persistence.entity");
+		packages.add("net.yadaframework.security.persistence.entity");
 		log.info("Scanning packages for entities: {}", StringUtils.join(packages, ","));
 		factory.setPackagesToScan(packages.toArray(new String[]{}));
 		factory.setDataSource(dataSource());
