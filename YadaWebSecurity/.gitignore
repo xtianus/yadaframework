@@ -4,4 +4,4 @@
 /.settings/
 /.classpath
 /.project
-
+!gradle-wrapper.jar
