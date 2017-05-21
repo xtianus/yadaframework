@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import net.yadaframework.web.YadaWebUtil;
+import net.yadaframework.web.YadaNotify;
 
 @Controller
 public class HomeController {

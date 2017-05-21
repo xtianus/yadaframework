@@ -1,14 +1,20 @@
 package $basePackage.core;
 
-import net.yadaframework.core.YadaWebConfig;
+import net.yadaframework.security.YadaWebSecurityConfig;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @ComponentScan(basePackages = { "$basePackage.web" })
-@Configuration // Necessario anche se è nel padre
-public class WebConfig extends YadaWebConfig {
+@Configuration
+// Extend YadaWebConfig if you're not using the YadaWebSecurity project
+public class WebConfig extends YadaWebSecurityConfig {
 
+	@Override
+	protected void addExtraDialect(SpringTemplateEngine engine) {
+		// Add any dialects you might need
+		// engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
+	}
 
 }
 

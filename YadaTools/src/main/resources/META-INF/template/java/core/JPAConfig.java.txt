@@ -5,9 +5,8 @@ import net.yadaframework.core.YadaJpaConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-// ATTENZIONE: se si rimuove @Configuration perchè tanto è usato nella superclasse, il save() dei repository fallisce senza errori!
+// Warning: do not remove @Configuration or save() operations will fail with no error message!
 @Configuration
 @EnableJpaRepositories(basePackages = "$basePackage.persistence.repository")
-// , includeFilters = @ComponentScan.Filter(value = {OrdersRepository.class}, type = FilterType.ASSIGNABLE_TYPE))
 public class JPAConfig extends YadaJpaConfig {
 }

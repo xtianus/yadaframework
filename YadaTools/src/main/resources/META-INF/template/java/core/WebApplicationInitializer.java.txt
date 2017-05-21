@@ -7,11 +7,11 @@ public class WebApplicationInitializer extends AbstractAnnotationConfigDispatche
 	@Override
 	// Configurazione dell'applicazione
 	protected Class<?>[] getRootConfigClasses() {
+		// SecurityConfig.class must be removed if you don't use the YadaWebSecurity project
 		return new Class<?>[] {AppConfig.class, JPAConfig.class, SecurityConfig.class};
 	}
 
 	@Override
-	// Configurazione delle servlet
 	protected Class<?>[] getServletConfigClasses() {
 		return new Class<?>[] { WebConfig.class };
 	}
