@@ -785,10 +785,19 @@
 			// Call, in sequence, the handler specified in data-successHandler and the one passed to this function
 			var joinedHandler = function(responseText, responseHtml) {
 				showFeedbackIfNeeded($link);
-				var handlerName = $link.attr("data-successHandler");
-				var dataHandler = window[handlerName];
-				if (typeof dataHandler === "function") {
-					dataHandler(responseText, responseHtml, $link[0]);
+				var handlerNames = $link.attr("data-yadaSuccessHandler");
+				if (handlerNames===undefined) {
+					handlerNames = $link.attr("data-successHandler"); // Legacy
+				}
+				if (handlerNames!=null) {
+					// Can be a comma-separated list of handlers, which are called in sequence
+					var handlerNameArray = yada.listToArray(handlerNames);
+					for (var i = 0; i < handlerNameArray.length; i++) {
+						var dataHandler = window[handlerNameArray[i]];
+						if (typeof dataHandler === "function") {
+							dataHandler(responseText, responseHtml, $link[0]);
+						}
+					}
 				}
 				if (handler != null) {
 					handler(responseText, responseHtml, $link[0]);
@@ -971,17 +980,35 @@
 			var joinedHandler = (function(handlerButton) { 
 				return function(responseText, responseHtml) {
 					showFeedbackIfNeeded($form);
-					var formHandlerName = $form.attr("data-successHandler"); // TODO cambiare in data-yadaSuccessHandler
-					var dataHandler = window[formHandlerName];
-					var buttonHandlerName = $(handlerButton).attr("data-yadaSuccessHandler");
-					var buttonDataHandler = window[buttonHandlerName];
-					// The button handler has precedence over the form handler, which is called only if the former returns true
-					var runFormHandler = true;
-					if (typeof buttonDataHandler === "function") {
-						runFormHandler = buttonDataHandler(responseText, responseHtml, this, handlerButton);
+					var formHandlerNames = $form.attr("data-yadaSuccessHandler");
+					if (formHandlerNames===undefined) {
+						formHandlerNames = $form.attr("data-successHandler"); // Legacy
 					}
-					if (runFormHandler == true && typeof dataHandler === "function") {
-						dataHandler(responseText, responseHtml, this, handlerButton);
+					// var dataHandler = window[formHandlerName];
+					var buttonHandlerNames = $(handlerButton).attr("data-yadaSuccessHandler");
+					// var buttonDataHandler = window[buttonHandlerName];
+					// The button handler has precedence over the form handler, which is called only if the former returns true
+					// from all handlers.
+					var runFormHandler = true;
+					if (buttonHandlerNames != null) {
+						// Can be a comma-separated list of handlers, which are called in sequence
+						var handlerNameArray = yada.listToArray(buttonHandlerNames);
+						for (var i = 0; i < handlerNameArray.length; i++) {
+							var dataHandler = window[handlerNameArray[i]];
+							if (typeof dataHandler === "function") {
+								runFormHandler &= dataHandler(responseText, responseHtml, this, handlerButton);
+							}
+						}
+					}
+					if (runFormHandler == true && formHandlerNames!=null) {
+						// Can be a comma-separated list of handlers, which are called in sequence
+						var handlerNameArray = yada.listToArray(formHandlerNames);
+						for (var i = 0; i < handlerNameArray.length; i++) {
+							var dataHandler = window[handlerNameArray[i]];
+							if (typeof dataHandler === "function") {
+								dataHandler(responseText, responseHtml, this, handlerButton);
+							}
+						}
 					}
 					if (handler != null) {
 						handler(responseText, responseHtml, this, handlerButton);
@@ -1339,6 +1366,17 @@
 	
 	////////////////////
 	/// String functions
+	
+	/**
+	 * Split a comma-separated string into an array. Commas can be followed by spaces.
+	 * If the input is null, return an empty array.
+	 */
+	yada.listToArray = function(str) {
+		if (str==null) {
+			return [];
+		}
+		return str.split(/, */);
+	}
 	
 	// Ritorna true se str contiene toFind
 	yada.stringContains = function(str, toFind) {
