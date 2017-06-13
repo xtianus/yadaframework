@@ -32,34 +32,27 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 
-import net.yadaframework.components.YadaTokenHandler;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
 import net.yadaframework.exceptions.InternalException;
-import net.yadaframework.persistence.entity.YadaAutoLoginToken;
-import net.yadaframework.persistence.entity.YadaRegistrationRequest;
-import net.yadaframework.persistence.entity.YadaUserCredentials;
-import net.yadaframework.persistence.repository.YadaAutoLoginTokenRepository;
 
 @Service
 // Deve stare in questo package perchè tirato dentro da YadaWebConfig, altrimenti SpringTemplateEngine non viene iniettato
 public class YadaEmailService {
 	private Logger log = LoggerFactory.getLogger(YadaEmailService.class);	
 	
-	@Autowired YadaConfiguration config;
-	@Autowired JavaMailSender mailSender;
+	@Autowired private YadaConfiguration config;
+	@Autowired private JavaMailSender mailSender;
 	
-	@Resource SpringTemplateEngine emailTemplateEngine;
+	@Resource private SpringTemplateEngine emailTemplateEngine;
     
-    @Autowired MessageSource messageSource;
+    @Autowired private MessageSource messageSource;
     
-    @Autowired ServletContext servletContext;
-    @Autowired ApplicationContext applicationContext;
-    @Autowired YadaTokenHandler yadaTokenHandler;
-	@Autowired YadaAutoLoginTokenRepository yadaAutoLoginTokenRepository;
-    @Autowired YadaWebUtil yadaWebUtil;
-    @Autowired YadaUtil yadaUtil;
+    @Autowired private ServletContext servletContext;
+    @Autowired private ApplicationContext applicationContext;
+    @Autowired private YadaWebUtil yadaWebUtil;
+    @Autowired private YadaUtil yadaUtil;
     
     /**
      * Convert a site-relative link to absolute, because in emails we can't use @{}.
@@ -92,134 +85,6 @@ public class YadaEmailService {
 		return sendHtmlEmail(toEmail, emailName, subjectParams, templateParams, inlineResources, locale, true);
 	}
 
-	public boolean sendEmailChangeConfirmation(YadaRegistrationRequest yadaRegistrationRequest, HttpServletRequest request, Locale locale) {
-		final String emailName = "emailChangeConfirmation";
-		final String[] toEmail = config.getSupportRequestRecipients();
-		final String[] subjectParams = {yadaRegistrationRequest.getEmail()};
-
-		// Creo il link che l'utente deve cliccare
-		String myServerAddress = yadaWebUtil.getWebappAddress(request);
-		String fullLink = myServerAddress + "/changeEmailConfirm/" + yadaTokenHandler.makeLink(yadaRegistrationRequest, null);
-		
-		final Map<String, Object> templateParams = new HashMap<String, Object>();
-		templateParams.put("fullLink", fullLink);
-		
-		Map<String, String> inlineResources = new HashMap<String, String>();
-		inlineResources.put("logosmall", config.getEmailLogoImage());
-		return sendHtmlEmail(toEmail, emailName, subjectParams, templateParams, inlineResources, locale, true);
-	}
-
-	public boolean sendRegistrationConfirmation(YadaRegistrationRequest yadaRegistrationRequest, Map<String,String> linkParameters, HttpServletRequest request, Locale locale) {
-		final String emailName = "registrationConfirmation";
-		final String[] toEmail = {yadaRegistrationRequest.getEmail()};
-		final String[] subjectParams = {timestamp(locale)};
-		
-		String myServerAddress = yadaWebUtil.getWebappAddress(request);
-		String fullLink = myServerAddress + "/registrationConfirmation/" + yadaTokenHandler.makeLink(yadaRegistrationRequest, linkParameters);
-		
-		final Map<String, Object> templateParams = new HashMap<String, Object>();
-		templateParams.put("fullLink", fullLink);
-		
-		Map<String, String> inlineResources = new HashMap<String, String>();
-		inlineResources.put("logosmall", config.getEmailLogoImage());
-		return sendHtmlEmail(toEmail, emailName, subjectParams, templateParams, inlineResources, locale, false);
-	}
-
-	/**
-	 * Invio la mail per il recupero password
-	 * @param logoImage e.g. "/res/img/logo-small.jpg"
-	 * @param yadaRegistrationRequest
-	 * @param request
-	 * @param response
-	 * @param locale
-	 * @return
-	 */
-	public boolean sendPasswordRecovery(YadaRegistrationRequest yadaRegistrationRequest, HttpServletRequest request, Locale locale) {
-		final String emailName = "passwordRecovery";
-		final String[] toEmail = new String[] {yadaRegistrationRequest.getEmail()};
-		final String[] subjectParams = {yadaRegistrationRequest.getEmail()};
-
-		String myServerAddress = yadaWebUtil.getWebappAddress(request);
-		String fullLink = myServerAddress + "/passwordReset/" + yadaTokenHandler.makeLink(yadaRegistrationRequest, null);
-
-		final Map<String, Object> templateParams = new HashMap<String, Object>();
-		templateParams.put("fullLink", fullLink);
-		
-		Map<String, String> inlineResources = new HashMap<String, String>();
-		inlineResources.put("logosmall", config.getEmailLogoImage());
-		return this.sendHtmlEmail(toEmail, emailName, subjectParams, templateParams, inlineResources, locale, true);
-	}
-
-    /**
-     * Create a link that will not require the user to log in. The server address is taken from the configuration.
-     * @param targetAction
-     * @param targetUser
-     * @param hashCommand optional "anchor" starting with #, e.g. "#storyId=49;command=showMessages"
-     * @return
-     */
-    public String makeAutologinLink(String targetAction, YadaUserCredentials targetUser, String hashCommand) {
-		String myServerAddress = config.getServerAddress();
-		Date expiration = yadaUtil.addHours(new Date(), config.getAutologinExpirationHours());
-    	return makeAutologinLink(targetAction, targetUser, expiration, hashCommand, myServerAddress);
-    }
-    
-    /**
-     * Create a link that will not require the user to log in. The server address is taken from the request.
-     * @param targetAction
-     * @param targetUser
-     * @param expiration expiration date, null for never
-     * @param hashCommand optional "anchor", e.g. "#storyId=49;command=showMessages"
-     * @return
-     */
-    public String makeAutologinLink(String targetAction, YadaUserCredentials targetUser, Date expiration, String hashCommand, HttpServletRequest request) {
-    	String myServerAddress = yadaWebUtil.getWebappAddress(request);
-    	return makeAutologinLink(targetAction, targetUser, expiration, hashCommand, myServerAddress);
-    }
-
-    /**
-     * Create a link that will not require the user to log in
-     * @param targetAction
-     * @param targetUser
-     * @param expiration expiration date, null for never
-     * @param hashCommand optional "anchor" starting with #, e.g. "#storyId=49;command=showMessages"
-     * @param myServerAddress our server address
-     * @return
-     */
-    public String makeAutologinLink(String targetAction, YadaUserCredentials targetUser, Date expiration, String hashCommand, String myServerAddress) {
-    	YadaAutoLoginToken yadaAutoLoginToken = new YadaAutoLoginToken();
-    	yadaAutoLoginToken.setExpiration(expiration);
-    	yadaAutoLoginToken.setYadaUserCredentials(targetUser);
-    	yadaAutoLoginToken = yadaAutoLoginTokenRepository.save(yadaAutoLoginToken);
-    	yadaAutoLoginTokenRepository.deleteExpired(); // Rimuovo quelle vecchie, per pulizia
-    	StringBuilder result = new StringBuilder(myServerAddress);
-    	result.append("/autologin/");
-    	result.append(yadaTokenHandler.makeLink(yadaAutoLoginToken, null));
-		result.append("?action=").append(yadaWebUtil.urlEncode(targetAction));
-		if (hashCommand!=null) {
-			result.append(hashCommand);
-		}
-    	return result.toString();
-    }
-    
-    /**
-     * Add a string of parameters to the target action link
-     * @param autologinLink a link like "xxx?action=aaa#command"
-     * @param moreParameters not-encoded request parameters like "num=1&size=10" - no "?" nor initial "&" must be specified
-     * @return the original string with the new parameters inserted at the end: "xxx?action=aaa%26num=1%26size=10#command"
-     */
-    public String extendAutologinLink(String autologinLink, String moreParameters) {
-		String[] parts = autologinLink.split("\\?");
-		String url = parts[0];
-		String actionParam = parts[1];
-		parts = actionParam.split("#");
-		String actionUrl = parts[0];
-		String actionHash = (parts.length>1 ? "#"+parts[1] : "");
-		String encodedParameters = yadaWebUtil.urlEncode("?" + moreParameters);
-		StringBuilder sb = new StringBuilder(url);
-		sb.append("?").append(actionUrl).append(encodedParameters).append(actionHash);
-		return sb.toString();
-    }
-    
     public boolean sendHtmlEmail(String[] toEmail, String emailName, Object[] subjectParams, Map<String, Object> templateParams, Map<String, String> inlineResources, Locale locale, boolean addTimestamp) {
     	return sendHtmlEmail(toEmail, null, emailName, subjectParams, templateParams, inlineResources, locale, addTimestamp);
     }

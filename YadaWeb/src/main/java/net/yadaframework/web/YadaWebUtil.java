@@ -1,13 +1,13 @@
 package net.yadaframework.web;
 
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_AUTOCLOSE;
 import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_BODY;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_CALLSCRIPT;
 import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_REDIRECT;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_RELOADONCLOSE;
 import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_SEVERITY;
 import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_TITLE;
-import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_AUTOCLOSE;
-import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_RELOADONCLOSE;
 import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_TOTALSEVERITY;
-import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_CALLSCRIPT;
 import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_ERROR;
 import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_INFO;
 import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
@@ -15,7 +15,6 @@ import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -33,10 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -47,25 +42,14 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
-import net.yadaframework.persistence.entity.YadaRegistrationRequest;
-import net.yadaframework.persistence.repository.YadaRegistrationRequestRepository;
+import net.yadaframework.core.YadaConstants;
 
 @Service
 public class YadaWebUtil {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
-
-	private final static int MAX_AGE_DAY=20; // Tempo dopo il quale una richiesta viene cancellata
-	private final static long MILLIS_IN_DAY = 24*60*60*1000; // Millesimi di secondo in un giorno
 	
-	private final static String SAVED_REQUEST = "SPRING_SECURITY_SAVED_REQUEST"; // copiato da org.springframework.security.web.savedrequest.HttpSessionRequestCache
-	
-	@Autowired HttpSession httpSession; // Funziona perchè è un proxy
-	@Autowired YadaConfiguration config;
-	@Autowired YadaUtil yadaUtil;
-	@Autowired YadaRegistrationRequestRepository registrationRequestRepository;
-	
-	private Date lastOldCleanup = null; // Data dell'ultimo cleanup, ne viene fatto uno al giorno
-	private Object lastOldCleanupMonitor = new Object();
+	@Autowired private YadaConfiguration config;
+	@Autowired private YadaUtil yadaUtil;
 	
 	public final Pageable FIND_ONE = new PageRequest(0, 1); 
 	
@@ -82,35 +66,6 @@ public class YadaWebUtil {
 			log.error("Invalid encoding: {}", encoding);
 		}
 		return source;
-	}
-	
-	/**
-	 * Ritorna la richiesta che era stata salvata da Spring Security prima del login, bloccata perchè l'utente non era autenticato
-	 * @return la url originale completa di http://, oppure null se non c'è in sessione
-	 */
-	public String getSavedRequestUrl() {
-		SavedRequest savedRequest = (SavedRequest) httpSession.getAttribute(SAVED_REQUEST);
-		if (savedRequest!=null) {
-			return savedRequest.getRedirectUrl();
-		}
-		log.debug("No saved request found in session");
-		return null;
-	}
-	
-	/**
-	 * Ritorna uno o l'altro parametro a seconda che l'utente corrente sia autenticato o meno
-	 * @param anonymousValue
-	 * @param authenticatedValue
-	 * @return
-	 */
-	public String caseAnonAuth(String anonymousValue, String authenticatedValue) {
-		boolean authenticated = false;
-		try {
-			authenticated = SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof UserDetails;
-		} catch (Exception e) {
-			log.error("Can't get user principal (ignored)");
-		}
-		return authenticated ? authenticatedValue : anonymousValue;
 	}
 	
 	/**
@@ -172,77 +127,6 @@ public class YadaWebUtil {
 	}
 
 	/**
-	 * Cancello le registration request vecchie o con lo stesso email e tipo. Se la registrationRequest passata è sul database, non viene cancellata.
-	 * @param registrationRequest prototipo di richiesta da cancellare (ne viene usato email e tipo)
-	 */
-	public void registrationRequestCleanup(YadaRegistrationRequest registrationRequest) {
-		Date now = new Date();
-		// Cancello registrazioni vecchie. Devo sincronizzare per evitare che la delete fallisca in caso di sovrapposizione di più utenti.
-		// TODO non potevo fare tutto con una semplice query?!!!
-		synchronized (lastOldCleanupMonitor) {
-			if (lastOldCleanup==null || now.getTime()-lastOldCleanup.getTime() > MILLIS_IN_DAY) { // Faccio pulizia ogni 24 ore
-				lastOldCleanup = now;
-				Date limit = new Date(now.getTime() - MAX_AGE_DAY * MILLIS_IN_DAY); // Pulisco le righe più vecchie di MAX_AGE_DAY giorni
-				List<YadaRegistrationRequest> oldRequests = registrationRequestRepository.findByTimestampBefore(limit);
-				if (oldRequests.isEmpty()) {
-					log.info("No old RegistrationRequest to delete");
-				} else {
-					for (YadaRegistrationRequest deletable : oldRequests) {
-						registrationRequestRepository.delete(deletable);
-						log.info("Expired RegistrationRequest ({}) deleted", deletable);
-					}
-				}
-			}
-			// Cancello la precedente richiesta di registrazione per lo stesso email e stesso tipo
-			List<YadaRegistrationRequest> ownRequests = registrationRequestRepository.findByEmailAndRegistrationType(registrationRequest.getEmail(), registrationRequest.getRegistrationType());
-			for (YadaRegistrationRequest deletable : ownRequests) {
-				if (deletable.getId()!=registrationRequest.getId()) {
-					registrationRequestRepository.delete(deletable);
-					log.info("Previous RegistrationRequest ({}) deleted", deletable);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Check if the current user is authenticated (logged in) not anonymously.
-	 * Use in thymeleaf with th:if="${@yadaWebUtil.loggedIn()}"
-	 * @return
-	 */
-	@Deprecated // use isLoggedIn() instead
-	public boolean loggedIn() {
-		try {
-			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-			if (auth!=null && auth.isAuthenticated()) {
-				Object principal = auth.getPrincipal();
-				return (principal instanceof UserDetails);
-			}
-		} catch (Exception e) {
-			log.error("Can't get Authentication object", e);
-		}
-		return false;
-	}
-	
-	/**
-	 * Check if the current user is authenticated (logged in) not anonymously.
-	 * Use in thymeleaf with th:if="${@yadaWebUtil.loggedIn}"
-	 * @return
-	 */
-	public boolean isLoggedIn() {
-		return loggedIn();
-	}
-	
-	/**
-	 * Check if the current user is logged in.
-	 * Use in thymeleaf with th:if="${@yadaWebUtil.loggedIn(#httpServletRequest)}"
-	 * @param request
-	 * @return
-	 */
-	public boolean loggedIn(HttpServletRequest request) {
-		return request.getRemoteUser()!=null;
-	}
-	
-	/**
 	 * Ritorna l'indirizzo completo della webapp, tipo http://www.yodadog.net:8080/site, senza slash finale
 	 * Da thymeleaf si usa con ${@yadaWebUtil.getWebappAddress(#httpServletRequest)}
 	 * @param request
@@ -285,35 +169,6 @@ public class YadaWebUtil {
 			result = yadaUtil.getFileExtension(originalName);
 		}
 		return result;
-	}
-	
-	/**
-	 * 
-	 * @return the username of the logged-in user, or null
-	 */
-	public String getUsername() {
-		String username = null;
-		try {
-			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-			if (auth!=null && auth.isAuthenticated()) {
-				Object principal = auth.getPrincipal();
-				if (principal instanceof UserDetails) {
-					username = ((UserDetails)principal).getUsername();
-				} else if (principal instanceof String) {
-					// When user is authenticated anonymously
-					username = principal.toString(); // "anonymousUser"
-					if ("anonymousUser".equals(username)) {
-						// We don't need it
-						username = null;
-					}
-				} else {
-					log.debug("principal class = " + principal.getClass().getName());
-				}
-			}
-		} catch (Exception e) {
-			log.error("Can't get username", e);
-		}
-		return username;
 	}
 	
 	/**

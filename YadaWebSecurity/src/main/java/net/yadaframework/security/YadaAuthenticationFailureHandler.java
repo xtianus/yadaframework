@@ -22,8 +22,8 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.stereotype.Component;
 
 import net.yadaframework.core.YadaConfiguration;
-import net.yadaframework.persistence.entity.YadaUserCredentials;
-import net.yadaframework.persistence.repository.YadaUserCredentialsRepository;
+import net.yadaframework.security.persistence.entity.YadaUserCredentials;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
 
 /**
  * Questa classe aggiunge un pò di informazioni in request quando il login fallisce.

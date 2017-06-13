@@ -23,8 +23,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import net.yadaframework.core.YadaConfiguration;
-import net.yadaframework.persistence.entity.YadaUserCredentials;
-import net.yadaframework.persistence.repository.YadaUserCredentialsRepository;
+import net.yadaframework.security.exceptions.InternalAuthenticationException;
+import net.yadaframework.security.persistence.entity.YadaUserCredentials;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
 
 @Component
 public class YadaUserDetailsService implements UserDetailsService {

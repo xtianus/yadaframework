@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import net.yadaframework.exceptions.InternalException;
 import net.yadaframework.exceptions.InvalidValueException;
+import net.yadaframework.exceptions.YadaConfigurationException;
 import net.yadaframework.persistence.entity.YadaClause;
 
 /**
@@ -457,10 +458,15 @@ public abstract class YadaConfiguration {
 		return configuration.getInt("config/maxFileUploadSizeBytes", 5000000); // 5 giga default
 	}
 	
-	public String getDbEntityPackage() {
-		String result = configuration.getString("config/database/entityPackage");
+	/**
+	 * Used internally to configure JPA EntityManagerFactory
+	 * @return
+	 */
+	List<String> getDbEntityPackages() {
+		String key = "config/database/entityPackage";
+		List<String> result = configuration.getList(String.class, key);
 		if (result==null) {
-			throw new InternalException("config/database/entityPackage missing in conf.webapp.xml");
+			throw new YadaConfigurationException("{} missing in configuration (conf.webapp.xml)", key);
 		}
 		return result;
 	}
@@ -593,7 +599,8 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
-	 * @return la stringa che rappresenta l'ambiente in cui è installata l'applicazione, oppure "" se non è configurato alcun ambiente
+	 * Get the configured environment name: config/info/env
+	 * @return the environment name, or ""
 	 */
 	public String getApplicationEnvironment() {
 		if (environment==null) {

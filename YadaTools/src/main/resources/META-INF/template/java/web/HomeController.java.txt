@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import net.yadaframework.web.YadaWebUtil;
+import net.yadaframework.web.YadaNotify;
 
 @Controller
 public class HomeController {
@@ -18,7 +19,9 @@ public class HomeController {
 	// Pagina aperta dopo il timeout di sessione rilevato via checkSession
 	@RequestMapping("/timeout")
 	public String timeout(Model model) {
-		yadaWebUtil.notifyModal("Sessione Scaduta", "La sessione utente è scaduta per inattività. Si prega di ripetere l'accesso.", VAL_NOTIFICATION_SEVERITY_INFO, "/", model);
+		YadaNotify.instance(model).yadaTitle("Session Expired")
+			.yadaMessage("Session expired for inactivity, please login again")
+			.yadaInfo().redirectOnClose("/").yadaSave();
 		return "/home";
 	}
 

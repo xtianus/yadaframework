@@ -1,4 +1,4 @@
-package net.yadaframework.components;
+package net.yadaframework.security.components;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import net.yadaframework.persistence.entity.YadaAutoLoginToken;
-import net.yadaframework.persistence.entity.YadaRegistrationRequest;
+import net.yadaframework.security.persistence.entity.YadaAutoLoginToken;
+import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 
 @Component
 public class YadaTokenHandler {

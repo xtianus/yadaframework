@@ -10,7 +10,6 @@ import org.thymeleaf.standard.processor.StandardXmlNsTagProcessor;
 import org.thymeleaf.templatemode.TemplateMode;
 
 import net.yadaframework.core.YadaConfiguration;
-import net.yadaframework.web.YadaActionUploadAttrProcessor;
 
 public class YadaDialect extends AbstractProcessorDialect {
 	private YadaConfiguration config;
@@ -36,7 +35,8 @@ public class YadaDialect extends AbstractProcessorDialect {
         final Set<IProcessor> processors = new HashSet<IProcessor>();
         processors.add(new YadaHrefAttrProcessor(dialectPrefix, config));
         processors.add(new YadaSrcAttrProcessor(dialectPrefix, config));
-        processors.add(new YadaActionUploadAttrProcessor(dialectPrefix));
+        // TODO move YadaActionUploadAttrProcessor to a yada security dialect
+        // processors.add(new YadaActionUploadAttrProcessor(dialectPrefix));
         // Rimuove lo yada:xxx namespace dal tag <html>
         processors.add(new StandardXmlNsTagProcessor(TemplateMode.HTML, dialectPrefix));
         return processors;

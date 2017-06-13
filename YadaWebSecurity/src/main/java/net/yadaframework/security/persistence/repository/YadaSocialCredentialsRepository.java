@@ -1,4 +1,4 @@
-package net.yadaframework.persistence.repository;
+package net.yadaframework.security.persistence.repository;
 
 import java.util.List;
 
@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import net.yadaframework.persistence.entity.YadaSocialCredentials;
-import net.yadaframework.persistence.entity.YadaUserCredentials;
+import net.yadaframework.security.persistence.entity.YadaSocialCredentials;
+import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 
 @Transactional(readOnly = true) 
 public interface YadaSocialCredentialsRepository extends JpaRepository<YadaSocialCredentials, Long> {
