@@ -32,6 +32,7 @@ class YadaCreateDbSchemaTask extends DefaultTask {
 			classpath: project.configurations.hibtools.asPath
 			)
 		System.out.println("Creating file ${project.projectDir}/schema/${outputfilename}");
+		// System.out.println("Classpath: ${project.configurations.hibtools.asPath}");
 		// Remove the file because the current version of the tools appends on the existing file.
 		// See org.hibernate.tool.schema.internal.exec.ScriptTargetOutputToFile
 		File outputFile = new File("${project.projectDir}/schema/${outputfilename}");

@@ -7,8 +7,25 @@ version = '0.6'
 
 apply plugin: 'groovy'
 apply plugin: 'java-gradle-plugin'
-
+apply plugin: 'eclipse'
 apply plugin: 'maven'
+
+eclipse {
+	jdt {
+		sourceCompatibility = 1.8
+		targetCompatibility = 1.8
+		// https://stackoverflow.com/a/35302104/587641
+		file {
+      		File dir = file('.settings')
+      		dir.mkdirs()
+      		File f = file('.settings/org.eclipse.core.resources.prefs')
+      		if (!f.exists()) {
+      			f.write('eclipse.preferences.version=1\n')
+      			f.append('encoding/<project>=utf-8')
+      		}
+    	}
+	}
+}
 
 //// Dependencies needed to check the syntax of /YadaTools/src/main/resources/META-INF/template/java/*
 //dependencies {
