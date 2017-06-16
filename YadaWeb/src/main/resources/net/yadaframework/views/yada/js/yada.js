@@ -217,8 +217,19 @@
 				}
 				History.pushState(null, null, newUrl); 
 			} 
+			$('#ajaxModal').on('hidden.bs.modal', function (e) {
+				// Rimuovo il parametro per evitare che il modal venga riaperto in automatico dopo la sua chiusura
+				var newUrl = "";
+				if (yada.hasPathVariable(previousState.url, paramName)) {
+					newUrl = yada.removePathVariable(previousState.url, paramName);
+				} else {
+					newUrl = yada.removeUrlParameters(previousState.url, paramName);
+				}
+				History.pushState(null, null, newUrl);
+			});
+
 		}
-		yada.ajax(modalUrl, null, null, null);
+		yada.ajax(modalUrl, null, handler, null);
 
 	};
 	
@@ -1171,18 +1182,6 @@
 							}, 500);
 						}
 					}, 500);
-					if (History.enabled && paramName!=null) {
-						$('#ajaxModal').on('hidden.bs.modal', function (e) {
-							// Rimuovo il parametro per evitare che il modal venga riaperto in automatico dopo la sua chiusura
-							var newUrl = "";
-							if (yada.hasPathVariable(previousState.url, paramName)) {
-								newUrl = yada.removePathVariable(previousState.url, paramName);
-							} else {
-								newUrl = yada.removeUrlParameters(previousState.url, paramName);
-							}
-							History.pushState(null, null, newUrl);
-						});
-					}
 					return;
 				}
 				// If the result is "closeModal", close all open modals
