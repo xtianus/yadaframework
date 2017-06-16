@@ -4,9 +4,9 @@
    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
    version="3.0">
 
-<!-- Pagina di default per tutti gli errori non gestiti diversamente -->   
+<!-- Default error handling when an exception exits a Controller. See YadaController -->   
 <error-page>
-	<location>/error</location>
+	<location>/yadaError</location>
 </error-page>
 
 <session-config>

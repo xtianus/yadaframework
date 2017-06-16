@@ -61,7 +61,19 @@ public abstract class YadaConfiguration {
 	private int tagFilterMax = -1;
 	private int maxPwdLen = -1;
 	private int minPwdLen = -1;
+	private String errorPageForward = null;
 
+	/**
+	 * Returns the page to forward to after an unhandled exception or HTTP error
+	 * @return
+	 */
+	public String getErrorPageForward() {
+		if (errorPageForward==null) {
+			errorPageForward = configuration.getString("/config/paths/errorPageForward", "/");
+		}
+		return errorPageForward;
+	}
+	
 	public boolean isBeta() {
 		if (beta==null) {
 			beta=configuration.getBoolean("/config/info/beta", false);
