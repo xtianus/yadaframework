@@ -19,6 +19,7 @@ public class YadaController {
 	private final Logger log = LoggerFactory.getLogger(YadaController.class);
 
 	@Autowired private YadaConfiguration config;
+	@Autowired private YadaWebUtil yadaWebUtil;
 
 	// Error page for HTTP error codes
     @RequestMapping("/yadaError")
@@ -27,6 +28,12 @@ public class YadaController {
     	int errorCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
         String errorMessage = (String) request.getAttribute("javax.servlet.error.message");
         log.error("Error code {} '{}' shown to user", errorCode, errorMessage);
+        // If it was an ajax request, return an error object
+        if (yadaWebUtil.isAjaxRequest(request)) {
+        	model.addAttribute("errorDescription", errorMessage);
+        	return "/yada/ajaxError";
+        }
+        // Otherwise forward to the configured error page (defaults to home)
         model.addAttribute("yadaHttpStatus", errorCode);
         model.addAttribute("yadaHttpMessage", errorMessage);
         return "forward:" + config.getErrorPageForward();

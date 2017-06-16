@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
 
 import net.yadaframework.core.YadaConfiguration;
 
@@ -21,6 +22,7 @@ public class YadaGlobalExceptionHandler {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
 	@Autowired private YadaConfiguration config;
+	@Autowired private YadaWebUtil yadaWebUtil;
 	
 	@ExceptionHandler(value = Exception.class)
 	public ModelAndView globalErrorHandler(HttpServletRequest request, Exception e) throws Exception {
@@ -29,11 +31,18 @@ public class YadaGlobalExceptionHandler {
         	log.info("Rethrowing @ResponseStatus exception: {}", e.toString());
             throw e;
         }
-        log.error("Unhandled exception shown to user", e);
         ModelAndView modelAndView = new ModelAndView();
-        modelAndView.addObject("yadaExceptionObject", e);
-        modelAndView.addObject("yadaExceptionUrl", request.getRequestURL());
-        modelAndView.setViewName("forward:" + config.getErrorPageForward());
+        log.error("Unhandled exception shown to user", e);
+        if (yadaWebUtil.isAjaxRequest(request)) {
+        	// If it was an ajax request, return an error object
+        	modelAndView.setViewName("/yada/ajaxError");
+        	modelAndView.addObject("errorDescription", e.getMessage());
+        } else {
+        	// Otherwise forward to the configured error page (defaults to home)
+        	modelAndView.setViewName("forward:" + config.getErrorPageForward());
+        	modelAndView.addObject("yadaExceptionObject", e);
+        	modelAndView.addObject("yadaExceptionUrl", request.getRequestURL());
+        }
         return modelAndView;   
     }
 	
