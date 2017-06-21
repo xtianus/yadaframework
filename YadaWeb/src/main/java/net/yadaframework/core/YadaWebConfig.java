@@ -56,9 +56,9 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	private final static String STATIC_YADARESOURCES_FOLDER = "/yadares";
 	private final static String STATIC_FILE_FOLDER = "/static"; // Ci vanno i file per i quali serve una url univoca immutabile
 	
-	@Autowired YadaConfiguration config;
+	@Autowired protected YadaConfiguration config;
 	
-	@Autowired ApplicationContext applicationContext;
+	@Autowired protected ApplicationContext applicationContext;
 	
 	// @Autowired YadaGlobalAttributesInterceptor globalAttributesInterceptor;
 
@@ -325,7 +325,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		//		// http://www.thymeleaf.org/layouts.html
 		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
 		addExtraDialect(engine); // thymeleaf-SpringSecurity-dialect
-		engine.addDialect(new YadaDialect(config));
+		addYadaDialect(engine);
 		return engine;
 	}
 	
@@ -338,7 +338,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		//		// http://www.thymeleaf.org/layouts.html
 		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
 		addExtraDialect(engine); // thymeleaf-SpringSecurity-dialect
-		engine.addDialect(new YadaDialect(config));
+		addYadaDialect(engine);
 		return engine;
 	}
 	
@@ -348,6 +348,10 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	 */
 	protected void addExtraDialect(SpringTemplateEngine engine) {
 		// Do nothing
+	}
+	
+	protected void addYadaDialect(SpringTemplateEngine engine) {
+		engine.addDialect(new YadaDialect(config));
 	}
 
 	// Ho aggiunto un viewResolver per gestire i file xml. Per usarlo basta che il controller restituisca il nome di un file xml senza estensione che sta in WEB-INF/views/xml
@@ -360,7 +364,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		// Do this in the subclass
 		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
 		addExtraDialect(engine); // thymeleaf-SpringSecurity-dialect
-		engine.addDialect(new YadaDialect(config));
+		addYadaDialect(engine);
 		return engine;
 	}
 

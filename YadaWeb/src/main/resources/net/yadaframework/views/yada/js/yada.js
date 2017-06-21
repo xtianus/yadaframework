@@ -1097,17 +1097,18 @@
 				}
 			},
 			success: function(responseText, statusText, jqXHR) {
+				var responseTrimmed = responseText.trim();
 				yada.loaderOff();
-				if (yada.showAjaxErrorIfPresent(responseText, statusText)==true) {
+				if (yada.showAjaxErrorIfPresent(responseTrimmed, statusText)==true) {
 					return;
 				}
-				if ("reload" == responseText) {
+				if ("reload" == responseTrimmed) {
 					yada.reload();
 					return;
 				}
 				var responseHtml=$("<div>").html(responseText);
 				// Check if we just did a login
-				if ("loginSuccess" == responseText) {
+				if ("loginSuccess" == responseTrimmed) {
 					$("#loginModal").remove();
 					// window.location.reload(true); // true = skip cache // Non va bene perchè se è stata fatta una post, viene ripetuta!
 					handlePostLoginHandler(responseHtml, responseText);
@@ -1185,7 +1186,7 @@
 					return;
 				}
 				// If the result is "closeModal", close all open modals
-				if (typeof responseText === "string" && responseText == 'closeModal') {
+				if (typeof responseText === "string" && responseTrimmed == 'closeModal') {
 					$(".modal:visible").modal('hide');
 				}
 				// Otherwise it is a full page, that must be loaded in place of the current page

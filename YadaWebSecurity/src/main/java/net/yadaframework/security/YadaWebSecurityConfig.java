@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 
 import net.yadaframework.core.YadaWebConfig;
+import net.yadaframework.web.YadaDialectWithSecurity;
 
 @Configuration
 @EnableWebMvc
@@ -20,5 +21,11 @@ public class YadaWebSecurityConfig extends YadaWebConfig {
 	protected void addExtraDialect(SpringTemplateEngine engine) {
 		engine.addDialect(new org.thymeleaf.extras.springsecurity4.dialect.SpringSecurityDialect());
 	}
+	
+	@Override
+	protected void addYadaDialect(SpringTemplateEngine engine) {
+		engine.addDialect(new YadaDialectWithSecurity(config));
+	}
+
 
 }
