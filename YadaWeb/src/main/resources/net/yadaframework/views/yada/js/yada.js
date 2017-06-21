@@ -1097,7 +1097,10 @@
 				}
 			},
 			success: function(responseText, statusText, jqXHR) {
-				var responseTrimmed = responseText.trim();
+				var responseTrimmed = "";
+				if (typeof responseText == "string") {
+					responseTrimmed = responseText.trim();
+				}
 				yada.loaderOff();
 				if (yada.showAjaxErrorIfPresent(responseTrimmed, statusText)==true) {
 					return;
@@ -1186,7 +1189,7 @@
 					return;
 				}
 				// If the result is "closeModal", close all open modals
-				if (typeof responseText === "string" && responseTrimmed == 'closeModal') {
+				if (responseTrimmed == 'closeModal') {
 					$(".modal:visible").modal('hide');
 				}
 				// Otherwise it is a full page, that must be loaded in place of the current page
