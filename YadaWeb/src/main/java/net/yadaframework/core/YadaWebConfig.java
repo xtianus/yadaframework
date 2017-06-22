@@ -244,7 +244,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		 requirement, but a recommendation
 		 */
 		Set<String> patterns = new HashSet<>();
-		patterns.add("email/*"); // Start with "email"
+		patterns.add("/email/*"); // Start with "/email/"
 		resolver.setResolvablePatterns(patterns);
 		resolver.setSuffix(".html");
 		resolver.setCharacterEncoding("UTF-8");
@@ -254,6 +254,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		return resolver;
 	}
 	
+	// x213
 	
 	@Bean
 	public ITemplateResolver webTemplateResolver() {
