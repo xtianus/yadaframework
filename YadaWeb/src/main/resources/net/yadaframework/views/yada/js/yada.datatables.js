@@ -156,6 +156,9 @@
 		    serverSide: true,
 		    ajax: function(data, callback, settings) {
 		    	yada.ajax(dataUrl, jQuery.param(data), callback, 'POST');
+		    },
+		    language: {
+		    	url: languageUrl
 		    }
 	//	    ajax: {
 	//	    	url: dataUrl,
@@ -165,11 +168,13 @@
 	//	    }
 		});
 		
+		/*
 		if (languageUrl!=null) {
 			dataTable.language = {
 				url: languageUrl	
 			}
 		}
+		*/
 		
 		dataTable.on('draw.dt', function () {
 			var thisTable = this; // DOM table
