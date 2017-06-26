@@ -760,7 +760,7 @@
 	/**
 	 * Transform links into ajax links: all anchors with a class of "s_ajaxLink" will be sent via ajax.
 	 * @param handler a function to call upon successful link submission, can be null
-	 * @param $element the element on which to enable ajax forms, can be null for the entire body
+	 * @param $element the element on which to enable ajax links, can be null for the entire body
 	 */
 	yada.enableAjaxLinks = function(handler, $element) {
 		if ($element==null) {

@@ -29,11 +29,12 @@
 	 *  - abortButtonText (optional)
 	 *  - idName the name of the id request parameter (optional - defaults to "id")
 	 *  - nameColumn the index of the column holding the text to show in the dialog when deleting one element (checkboxes = 1)
-	 * @param array of column ordering, e.g. [[1, 'asc']] or [[ 0, 'asc' ], [ 1, 'asc' ]] 
+	 * @param order array of column ordering, e.g. [ [1, 'asc'] ] or [ [ 0, 'asc' ], [ 1, 'asc' ] ]
+	 *        - be careful that in thymeleaf you need a space between two open squares: [ [ not [[
 	 * NOTE: index 1 is the checkbox column
 	 * @param pageLength the number of rows per page
-	 * @param languageUrl url to the language file, like http://server.example/path/18n/italian.lang
-	 * @param extraButtons additional command button definitions:
+	 * @param (optional) languageUrl url to the language file, like http://server.example/path/18n/italian.lang
+	 * @param (optional) extraButtons additional command button definitions in an array of objects:
 	 * - url to call when the button is clicked 
 	 * - title to show in the tooltip
 	 * - icon for the button, like '<i class="fa fa-power-off" aria-hidden="true"></i>'
@@ -42,6 +43,45 @@
 	 * @returns the DataTable object
 	 */
 	yada.dataTableCrud = function($table, dataUrl, dataAttributes, editDef, deleteDef, order, pageLength, languageUrl, extraButtons) {
+		// Method argument validation
+		if ($table == null || typeof $table != "object" || $table.length!=1 || typeof $table[0] != "object") {
+			console.error("yada.datatables: $table must be a single jQuery object");
+			return;
+		}
+		if (dataUrl==null || typeof dataUrl != "string") {
+			console.error("yada.datatables: dataUrl must be a string");
+			return;
+		}
+		if (!Array.isArray(dataAttributes) || dataAttributes.length == 0) {
+			console.error("yada.datatables: dataAttributes must be a non-empty array");
+			return;
+		}
+		if (editDef!=null && (typeof editDef != "object" || Array.isArray(editDef))) {
+			console.error("yada.datatables: editDef must be an object or null");
+			return;
+		}
+		if (deleteDef!=null && (typeof deleteDef != "object" || Array.isArray(deleteDef))) {
+			console.error("yada.datatables: deleteDef must be an object or null");
+			return;
+		}
+		if (!Array.isArray(order) || order.length == 0 ) {
+			console.error("yada.datatables: order must be a non-empty array");
+			return;
+		}
+		if (typeof pageLength != "number" ) {
+			console.error("yada.datatables: pageLength must be an integer");
+			return;
+		}
+		if (languageUrl!=null && typeof languageUrl != "string") {
+			console.error("yada.datatables: languageUrl must be a string or null");
+			return;
+		}
+		if (extraButtons!=null && (!Array.isArray(extraButtons) || extraButtons.length == 0 || typeof extraButtons[0] != "object" || Array.isArray(extraButtons[0]) ) ) {
+			console.error("yada.datatables: extraButtons must be a non-empty array of objects or null");
+			return;
+		}
+		//
+		
 		var totColumns = $('th', $table).length;
 		var neededColumns = dataAttributes.length + 3;
 		if (totColumns!=neededColumns) {
