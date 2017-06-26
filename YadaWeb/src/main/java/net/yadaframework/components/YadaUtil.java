@@ -9,6 +9,8 @@ import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -40,8 +42,6 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -163,6 +163,17 @@ public class YadaUtil {
 		String attributeName = StringUtils.substringBefore(attributePath, ".");
 		Field field = rootClass.getDeclaredField(attributeName);
 		Class attributeType = field.getType();
+		// If it's a list, look for the list type
+		if (attributeType == java.util.List.class) {
+			// TODO check if the attributeType is an instance of java.util.Collection
+			ParameterizedType parameterizedType = (ParameterizedType)field.getGenericType();
+			if (parameterizedType!=null) {
+				Type[] types = parameterizedType.getActualTypeArguments();
+				if (types.length==1) {
+					attributeType = (Class<?>) types[0];
+				}
+			}
+		}
 		return getType(attributeType, StringUtils.substringAfter(attributePath, "."));
 	}
 	
