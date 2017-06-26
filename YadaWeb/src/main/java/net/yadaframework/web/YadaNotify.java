@@ -38,13 +38,13 @@ public class YadaNotify {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
 	@Autowired private MessageSource messageSource;
-	@Autowired private Locale locale;
 	
 	@Deprecated private Model model; 
 	@Deprecated private RedirectAttributes redirectAttributes;
 	@Deprecated private String severity;
 	@Deprecated private String title;
 	@Deprecated private String message;
+	@Deprecated private Locale locale;
 		
 //	private YadaNotify() {
 //	}
@@ -56,8 +56,19 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData title(String title, Model model) {
+		return new YadaNotifyData(model, messageSource, null).setTitle(title);
+	}
+
+	/**
+	 * Initialise the instance
+	 * @param title the notification title
+	 * @param model
+	 * @return
+	 */
+	public YadaNotifyData title(String title, Model model, Locale locale) {
 		return new YadaNotifyData(model, messageSource, locale).setTitle(title);
 	}
+
 	
 	/**
 	 * Initialise the instance
@@ -66,6 +77,16 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData title(String title, RedirectAttributes redirectAttributes) {
+		return new YadaNotifyData(redirectAttributes, messageSource, null).setTitle(title);
+	}
+
+	/**
+	 * Initialise the instance
+	 * @param title the notification title
+	 * @param redirectAttributes
+	 * @return
+	 */
+	public YadaNotifyData title(String title, RedirectAttributes redirectAttributes, Locale locale) {
 		return new YadaNotifyData(redirectAttributes, messageSource, locale).setTitle(title);
 	}
 
@@ -76,6 +97,16 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData titleKey(Model model, String ... titleKeyAndArgs) {
+		return new YadaNotifyData(model, messageSource, null).setTitleKey(titleKeyAndArgs);
+	}
+
+	/**
+	 * Initialise the instance
+	 * @param model
+	 * @param titleKeyAndArgs the title key, followed by optional arguments to be replaced in the localized value
+	 * @return
+	 */
+	public YadaNotifyData titleKey(Model model, Locale locale, String ... titleKeyAndArgs) {
 		return new YadaNotifyData(model, messageSource, locale).setTitleKey(titleKeyAndArgs);
 	}
 	
@@ -86,6 +117,16 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData titleKey(RedirectAttributes redirectAttributes, String ... titleKeyAndArgs) {
+		return new YadaNotifyData(redirectAttributes, messageSource, null).setTitleKey(titleKeyAndArgs);
+	}
+	
+	/**
+	 * Initialise the instance
+	 * @param model
+	 * @param titleKeyAndArgs the title key, followed by optional arguments to be replaced in the localized value
+	 * @return
+	 */
+	public YadaNotifyData titleKey(RedirectAttributes redirectAttributes, Locale locale, String ... titleKeyAndArgs) {
 		return new YadaNotifyData(redirectAttributes, messageSource, locale).setTitleKey(titleKeyAndArgs);
 	}
 	
@@ -270,7 +311,7 @@ public class YadaNotify {
 	public YadaNotify yadaMessageKey(String ... messageKeyAndArgs) {
 		ensureLocalized();
 		String[] argsArray = Arrays.copyOfRange(messageKeyAndArgs, 1, messageKeyAndArgs.length);
-		this.title = messageSource.getMessage(messageKeyAndArgs[0], argsArray, locale);
+		this.message = messageSource.getMessage(messageKeyAndArgs[0], argsArray, locale);
 		return this;
 	}
 	

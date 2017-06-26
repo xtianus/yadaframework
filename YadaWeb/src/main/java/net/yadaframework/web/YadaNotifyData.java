@@ -124,7 +124,7 @@ public class YadaNotifyData {
 	public YadaNotifyData messageKey(String ... messageKeyAndArgs) {
 		ensureLocalized();
 		String[] argsArray = Arrays.copyOfRange(messageKeyAndArgs, 1, messageKeyAndArgs.length);
-		this.title = messageSource.getMessage(messageKeyAndArgs[0], argsArray, locale);
+		this.message = messageSource.getMessage(messageKeyAndArgs[0], argsArray, locale);
 		return this;
 	}
 	
@@ -199,7 +199,7 @@ public class YadaNotifyData {
 	
 	private void ensureLocalized() {
 		if (!isLocalized()) {
-			throw new YadaInvalidUsageException("The method yadaMessageSource() must be called before using keys");
+			throw new YadaInvalidUsageException("The Locale must be passed to YadaNotify before using keys");
 		}
 	}
 	
