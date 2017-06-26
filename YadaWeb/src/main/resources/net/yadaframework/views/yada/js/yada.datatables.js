@@ -195,6 +195,16 @@
 			columns: columnDef,					
 		    serverSide: true,
 		    ajax: function(data, callback, settings) {
+		    	// Need to add any extra parameter if a form is present
+		    	var addedData = $("form.yada_dataTable").serializeArray();
+		    	var extraParam = data['extraParam']={};
+		    	var i=0;
+		    	for (i=0; i<addedData.length; i++) {
+		    		var paramObj = addedData[i];
+		    		var paramName = paramObj.name;
+		    		var paramValue = paramObj.value;
+		    		extraParam[paramName] = paramValue;
+		    	}
 		    	yada.ajax(dataUrl, jQuery.param(data), callback, 'POST');
 		    },
 		    language: {
