@@ -12,7 +12,7 @@
 
 	/**
 	 * Create a new DataTable with the given options:
-	 * @param $table the jquery table, e.g. $('#myTable')
+	 * @param $table the jquery table, e.g. $('#myTable'). It must have an id.
 	 * @param dataUrl the ajax url to retrieve data in json format, e.g. [[@{/gestione/ajaxCompanyTablePage}]]
 	 * @param dataAttributes names of the json attributes for data of each column, e.g. ['name', 'surname', 'address']
 	 *        The array can also contain full DataTable objects with data/name/orderable/searchable fields, e.g. ['name', 'surname', {data:'address',orderable:false}]
@@ -81,6 +81,11 @@
 			return;
 		}
 		//
+		var tableId = $table.attr('id');
+		if (tableId==undefined) {
+			console.error("yada.datatables: $table must have a valid id attribute");
+			return;
+		}
 		
 		var totColumns = $('th', $table).length;
 		var neededColumns = dataAttributes.length + 3;
@@ -196,7 +201,7 @@
 		    serverSide: true,
 		    ajax: function(data, callback, settings) {
 		    	// Need to add any extra parameter if a form is present
-		    	var addedData = $("form.yada_dataTable").serializeArray();
+		    	var addedData = $("form.yada_dataTables_"+tableId).serializeArray();
 		    	var extraParam = data['extraParam']={};
 		    	var i=0;
 		    	for (i=0; i<addedData.length; i++) {
