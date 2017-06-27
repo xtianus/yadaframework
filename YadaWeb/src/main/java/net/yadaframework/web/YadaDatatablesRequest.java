@@ -1,4 +1,5 @@
 package net.yadaframework.web;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +27,7 @@ public class YadaDatatablesRequest {
 	YadaDatatablesColumnSearch search = new YadaDatatablesColumnSearch();
 	// array defining how many columns are being ordered upon - i.e. if the array length is 1, then a single column sort is being performed, otherwise a multi-column sort is being performed.
 	List<YadaDatatablesOrder> order;
-	Map<String, String> extraParam;
+	Map<String, String> extraParam = new HashMap<>();
 	
 	// Output values
 	long recordsTotal;
