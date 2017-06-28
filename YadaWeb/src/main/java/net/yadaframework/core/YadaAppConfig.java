@@ -31,16 +31,17 @@ public class YadaAppConfig {
 	private static Logger log = LoggerFactory.getLogger(YadaAppConfig.class);
 	
 	@Autowired YadaConfiguration config;
-	
-	/**
-	 * This is to prevent the logging of:
-	 * "Could not find default TaskExecutor bean - No qualifying bean of type [org.springframework.core.task.TaskExecutor] is defined"
-	 * @see http://stackoverflow.com/a/31820129/587641
-	 */
-    @Bean
-    public Executor taskExecutor() {
-        return new SimpleAsyncTaskExecutor();
-    }
+
+// Removed because it's better not to force an executor over the Spring default. The error is just logged at debug level anyway
+//	/**
+//	 * This is to prevent the logging of:
+//	 * "Could not find default TaskExecutor bean - No qualifying bean of type [org.springframework.core.task.TaskExecutor] is defined"
+//	 * @see http://stackoverflow.com/a/31820129/587641
+//	 */
+//    @Bean
+//    public Executor taskExecutor() {
+//        return new SimpleAsyncTaskExecutor();
+//    }
 	
 	@Bean
 	public MessageSource messageSource() {
