@@ -648,6 +648,11 @@ public class YadaSql implements CloneableDeep {
 		return null;
 	}
 
+	@Override
+	public String toString() {
+		return sql();
+	}
+
 //	/**
 //	 * Sets an alias used in the query. Needed to reuse the same
 //	 * @param aliasPlaceholder the alias placeholder, like "ENTITY"

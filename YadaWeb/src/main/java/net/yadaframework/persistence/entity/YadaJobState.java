@@ -4,10 +4,10 @@ import java.util.Locale;
 
 import org.springframework.context.MessageSource;
 
-import net.yadaframework.core.YadaEnum;
+import net.yadaframework.core.YadaLocalEnum;
 
 /**
- * The state of a YadaJob:
+ * The localized state of a YadaJob:
  * <ul>
  * <li>ACTIVE: the job is waiting to be run</li>
  * <li>RUNNING: the job is running</li>
@@ -17,7 +17,7 @@ import net.yadaframework.core.YadaEnum;
  * </ul>
  *
  */
-public enum YadaJobState implements YadaEnum {
+public enum YadaJobState implements YadaLocalEnum<YadaJobState> {
 	// In messages.properties:
 	//	yada.jobstate.active = Active
 	//	yada.jobstate.running = Running
@@ -46,4 +46,5 @@ public enum YadaJobState implements YadaEnum {
 	public String toString(MessageSource messageSource, Locale locale) {
 		return messageSource.getMessage(messageKey, null, locale);
 	}
+	
 }

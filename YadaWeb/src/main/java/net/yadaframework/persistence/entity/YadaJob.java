@@ -38,8 +38,8 @@ public class YadaJob {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
 
-	@OneToOne(cascade=CascadeType.ALL, orphanRemoval=true, fetch = FetchType.EAGER)
-	protected YadaPersistentEnum<YadaJobState> state;
+	@OneToOne(fetch = FetchType.EAGER)
+	protected YadaPersistentEnum<YadaJobState> jobState;
 	
 	@Column(columnDefinition="TIMESTAMP NULL")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -84,7 +84,7 @@ public class YadaJob {
 	 * When false, the job will become DISABLED after a crash
 	 * (true by default)
 	 */
-	protected boolean recoverable = true;
+	protected boolean jobRecoverable = true;
 	
 	/**
 	 * Needed for DataTables integration
@@ -193,8 +193,8 @@ public class YadaJob {
 		this.jobMustNotBeActive = jobMustNotBeActive;
 	}
 
-	public YadaPersistentEnum<YadaJobState> getState() {
-		return state;
+	public YadaPersistentEnum<YadaJobState> getJobState() {
+		return jobState;
 	}
 
 	public YadaJob getJobMustComplete() {
@@ -205,16 +205,16 @@ public class YadaJob {
 		this.jobMustComplete = jobMustComplete;
 	}
 
-	public boolean isRecoverable() {
-		return recoverable;
+	public boolean isJobRecoverable() {
+		return jobRecoverable;
 	}
 
-	public void setRecoverable(boolean recoverable) {
-		this.recoverable = recoverable;
+	public void setJobRecoverable(boolean recoverable) {
+		this.jobRecoverable = recoverable;
 	}
 
-	public void setState(YadaPersistentEnum<YadaJobState> state) {
-		this.state = state;
+	public void setJobState(YadaPersistentEnum<YadaJobState> state) {
+		this.jobState = state;
 	}
 
 	public void setJobScheduledTime(Date jobScheduledTime) {

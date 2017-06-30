@@ -1,10 +1,13 @@
 package net.yadaframework.persistence.entity;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -15,6 +18,16 @@ import javax.persistence.UniqueConstraint;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.i18n.LocaleContextHolder;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import net.yadaframework.core.YadaLocalEnum;
+import net.yadaframework.exceptions.YadaInvalidValueException;
 
 /**
  * Needed to store a localized enum in the database, on which to perform localized search and sort operations.
@@ -35,11 +48,21 @@ import org.slf4j.LoggerFactory;
  * </table>
  * </p>
  */
+@JsonSerialize(using = YadaPersistentEnum.YadaPersistentEnumSerializer.class)
 @Entity
 @Table(
 		uniqueConstraints = @UniqueConstraint(columnNames={"enumClassName", "enumOrdinal"})
 )
 public class YadaPersistentEnum<E extends Enum<E>> {
+	
+	private static class YadaPersistentEnumSerializer extends JsonSerializer<YadaPersistentEnum<?>> {
+		@Override
+		public void serialize(YadaPersistentEnum<?> value, JsonGenerator generator, SerializerProvider serializers) throws IOException, JsonProcessingException {
+			generator.writeString(value.getLocalText());
+		}
+		
+	}
+	
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
@@ -53,36 +76,55 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 	@Column(nullable=false)
 	private String enumName;		// "RUNNING"
 	
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER) // TODO ottimizzare togliendo eager??????????????????????????????
 	@MapKeyColumn(name="language")
 	@Column(name="localText")
 	Map<String, String> langToText = new HashMap<>(); // Language code to localized text: { "it_IT" = "In esecuzione", "en_US" = "Running" }
 
-	
 	/**
 	 * Check this instance with a normal enum for equality
 	 * @param enumValue
 	 * @return
 	 */
 	@Transient
-	public boolean equals(Enum<? extends Enum<?>> enumValue) {
+	public boolean equals(Enum<? extends YadaLocalEnum<?>> enumValue) {
 		return enumValue.getClass().getName().equals(this.enumClassName) && enumValue.ordinal() == this.enumOrdinal;
 	}
 	
-//	/**
-//	 * Convert the localised enum back to a normal Enum instance (must be cast)
-//	 * @return
-//	 * @throws YadaInvalidValueException 
-//	 */
-//	public <E extends Enum<E>> E toEnum(Class<E> enumClass) throws YadaInvalidValueException {
-//		if (enumClass.getName().equals(this.enumClassName))
-//		try {
-//			Class enumClassClass = Class.forName(enumClass);
-//			return Enum.valueOf(enumClassClass, enumName);
-//		} catch (ClassNotFoundException e) {
-//			throw new YadaInvalidValueException(e);
-//		}
-//	}
+	/**
+	 * Sets the attributes of a normal enum into this instance, but not the localized text
+	 * @param enumValue
+	 */
+	@Transient
+	public void setEnum(E enumValue) {
+		this.enumClassName = enumValue.getClass().getName();
+		this.enumOrdinal = enumValue.ordinal();
+		this.enumName = enumValue.name();
+	}
+	
+	/**
+	 * Returns the localized value in the current locale
+	 * @return
+	 */
+	@Transient
+	public String getLocalText() {
+		Locale locale = LocaleContextHolder.getLocale();
+		return langToText.get(locale.getLanguage());
+	}
+	
+	/**
+	 * Convert the localised enum back to a normal Enum instance
+	 * @return
+	 * @throws YadaInvalidValueException 
+	 */
+	public E getEnum() throws YadaInvalidValueException {
+		try {
+			Class<E> enumClassClass = (Class<E>) Class.forName(this.enumClassName);
+			return (E) Enum.valueOf(enumClassClass, enumName);
+		} catch (ClassNotFoundException e) {
+			throw new YadaInvalidValueException(e);
+		}
+	}
 
 	public Long getId() {
 		return id;
