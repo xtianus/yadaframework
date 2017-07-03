@@ -55,7 +55,7 @@ import net.yadaframework.exceptions.YadaInvalidValueException;
 )
 public class YadaPersistentEnum<E extends Enum<E>> {
 	
-	private static class YadaPersistentEnumSerializer extends JsonSerializer<YadaPersistentEnum<?>> {
+	static class YadaPersistentEnumSerializer extends JsonSerializer<YadaPersistentEnum<?>> {
 		@Override
 		public void serialize(YadaPersistentEnum<?> value, JsonGenerator generator, SerializerProvider serializers) throws IOException, JsonProcessingException {
 			generator.writeString(value.getLocalText());
@@ -76,7 +76,7 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 	@Column(nullable=false)
 	private String enumName;		// "RUNNING"
 	
-	@ElementCollection(fetch = FetchType.EAGER) // TODO ottimizzare togliendo eager??????????????????????????????
+	@ElementCollection(fetch = FetchType.EAGER)
 	@MapKeyColumn(name="language")
 	@Column(name="localText")
 	Map<String, String> langToText = new HashMap<>(); // Language code to localized text: { "it_IT" = "In esecuzione", "en_US" = "Running" }
