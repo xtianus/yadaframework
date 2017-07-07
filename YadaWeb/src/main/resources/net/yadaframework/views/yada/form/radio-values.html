@@ -15,11 +15,12 @@ Parameters:
 
 Example:
 
-<div th:replace="/yada/form/radio-values::body(fieldName='type',values=${ {'notifyEventMilan','notifyEventOther','newsletterUnaTantum'} },labelPrefix='form.label.',helpPrefix='form.help.')"></div>
+<div th:replace="/yada/form/radio-values::field(fieldName='type',values=${ {'notifyEventMilan','notifyEventOther','newsletterUnaTantum'} },labelPrefix='form.label.',helpPrefix='form.help.')"></div>
 
 */-->
 <body>
-<div class="form-group has-feedback" th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
+<div th:fragment="field"
+	class="form-group has-feedback" th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
 	<label th:if="${label!=null || labelKey!=null}" class="control-label" th:text="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
 	<div class="radio" th:each="value : ${values}">
 		<label class="control-label">

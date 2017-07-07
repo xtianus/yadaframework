@@ -4,6 +4,7 @@ import java.util.Locale;
 import org.springframework.context.MessageSource;
 
 import net.yadaframework.persistence.entity.YadaJobState;
+import net.yadaframework.persistence.entity.YadaPersistentEnum;
 
 /**
  * This interface must be applied to a normal enum that needs to be localized. 
@@ -17,6 +18,18 @@ import net.yadaframework.persistence.entity.YadaJobState;
  */
 public interface YadaLocalEnum<E extends Enum<E>> {
 
+	/**
+	 * Return the associated YadaPersistentEnum to be used in entities
+	 * @return
+	 */
+	YadaPersistentEnum<E> toYadaPersistentEnum();
+	
+	/**
+	 * Used internally
+	 * @param yadaPersistentEnum
+	 */
+	void setYadaPersistentEnum(YadaPersistentEnum<? extends YadaLocalEnum<E>> yadaPersistentEnum);
+	
 	/**
 	 * Convert the current enum to a localized string
 	 * @param messageSource

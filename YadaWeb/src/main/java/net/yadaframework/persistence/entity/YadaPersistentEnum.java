@@ -113,11 +113,22 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 	}
 	
 	/**
-	 * Convert the localised enum back to a normal Enum instance
+	 * Convert the localised enum back to a normal Enum instance. Same as getEnum()
 	 * @return
 	 * @throws YadaInvalidValueException 
+	 * @see #getEnum()
 	 */
-	public E getEnum() throws YadaInvalidValueException {
+	public E toEnum() throws YadaInvalidValueException {
+		return getEnum();
+	}
+	
+	/**
+	 * Convert the localised enum back to a normal Enum instance. Same as toEnum()
+	 * @return
+	 * @throws YadaInvalidValueException 
+	 * @see #toEnum()
+	 */
+		public E getEnum() throws YadaInvalidValueException {
 		try {
 			Class<E> enumClassClass = (Class<E>) Class.forName(this.enumClassName);
 			return (E) Enum.valueOf(enumClassClass, enumName);

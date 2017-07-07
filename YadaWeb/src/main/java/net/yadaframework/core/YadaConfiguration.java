@@ -800,4 +800,12 @@ public abstract class YadaConfiguration {
 		builder.getReloadingController().checkForReloading(null);
 		this.configuration = ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration());
 	}
+
+	/**
+	 * The YadaJobScheduler period in milliseconds. <1 means do not schedule
+	 * @return
+	 */
+	public long getJobSchedulerPeriod() {
+		return this.configuration.getLong("config/yada/jobSchedulerPeriodMillis", 0);
+	}
 }

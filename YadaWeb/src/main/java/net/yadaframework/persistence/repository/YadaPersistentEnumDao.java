@@ -70,12 +70,12 @@ public class YadaPersistentEnumDao {
 	public void initDatabase(List<Class<? extends YadaLocalEnum<?>>> enumClasses, List<Locale> locales) {
 		for (Class<? extends YadaLocalEnum<?>> enumClass : enumClasses) {
 			String enumClassName = enumClass.getName();
-			Enum[] enumElements = (Enum[]) enumClass.getEnumConstants(); // RUNNING, STOPPED
+			YadaLocalEnum<?>[] enumElements = (YadaLocalEnum[]) enumClass.getEnumConstants(); // RUNNING, STOPPED
 			// Check if each row is in the database
-			for (Enum<?> enumElement : enumElements) {
-				YadaPersistentEnum<? extends Enum<?>> yadaPersistentEnum;
+			for (YadaLocalEnum<?> enumElement : enumElements) {
+				YadaPersistentEnum yadaPersistentEnum; // TODO fix generics
 				String sql = "from YadaPersistentEnum where enumClassName = :enumClassName and enumName = :enumName";
-				List<YadaPersistentEnum> theEnumList = em.createQuery(sql)
+				List<YadaPersistentEnum<? extends YadaLocalEnum<?>>> theEnumList = em.createQuery(sql)
 					.setParameter("enumClassName", enumClassName)
 					.setParameter("enumName", enumElement.name())
 					.getResultList();
@@ -88,6 +88,8 @@ public class YadaPersistentEnumDao {
 				} else { // Already in the database
 					yadaPersistentEnum = theEnumList.get(0);
 				}
+				// Store reference in the normal enum
+				enumElement.setYadaPersistentEnum(yadaPersistentEnum);
 				// Always refresh the localized strings
 				Map<String, String> langToText = yadaPersistentEnum.getLangToText();
 				langToText.clear();

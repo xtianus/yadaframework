@@ -27,12 +27,13 @@ Parameters:
 
 Example:
 
-<div th:replace="/yada/form/text::body(fieldName='subject',maxlength=64,required=true,labelKey='form.label.subject')"></div>
-<div th:replace="/yada/form/text::body(fieldName='id',type='hidden')"></div>
+<div th:replace="/yada/form/text::field(fieldName='subject',maxlength=64,required=true,labelKey='form.label.subject')"></div>
+<div th:replace="/yada/form/text::field(fieldName='id',type='hidden')"></div>
 
 
 */-->
 <body>
+<div th:fragment="field"> <!--/* Top-level div container is needed for fragment replacement */-->
 <input th:if="${#strings.equals(type,'hidden')}" th:field="*{{__${fieldName}__}}" th:disabled="${disabled}" th:type="hidden" th:id="${#ids.seq('fieldId')}" />
 <div th:if="${!#strings.equals(type,'hidden')}" class="form-group" 
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" 
@@ -80,6 +81,7 @@ Example:
 		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	</div>
 </div>    	
+</div>
 </body>
 </html>
 		

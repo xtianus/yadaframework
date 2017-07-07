@@ -1,8 +1,9 @@
 package net.yadaframework.core;
 
 import java.io.File;
+import java.util.Date;
 import java.util.Properties;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
@@ -15,11 +16,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import net.yadaframework.components.YadaUtil;
 
@@ -30,7 +32,23 @@ import net.yadaframework.components.YadaUtil;
 public class YadaAppConfig {
 	private static Logger log = LoggerFactory.getLogger(YadaAppConfig.class);
 	
-	@Autowired YadaConfiguration config;
+	@Autowired private YadaConfiguration config;
+	@Autowired private TaskScheduler taskScheduler;
+
+	@Bean
+	public TaskScheduler taskScheduler() {
+	     return new ThreadPoolTaskScheduler();
+	}
+	
+	@Bean
+	public YadaJobScheduler yadaJobScheduler() {
+		YadaJobScheduler yadaJobScheduler = new YadaJobScheduler();
+		long period = config.getJobSchedulerPeriod();
+		if (period>0) {
+			taskScheduler.scheduleAtFixedRate(yadaJobScheduler, new Date(), period);
+		}
+		return yadaJobScheduler;
+	}
 
 // Removed because it's better not to force an executor over the Spring default. The error is just logged at debug level anyway
 //	/**

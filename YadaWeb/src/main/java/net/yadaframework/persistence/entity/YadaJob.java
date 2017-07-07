@@ -39,7 +39,7 @@ public class YadaJob {
 	protected Long id;
 
 	@OneToOne(fetch = FetchType.EAGER)
-	protected YadaPersistentEnum<YadaJobState> jobState;
+	protected YadaPersistentEnum<YadaJobState> jobStateObject;
 	
 	@Column(columnDefinition="TIMESTAMP NULL")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -66,7 +66,7 @@ public class YadaJob {
 	protected YadaJob jobMustBeActive; // TODO list of jobs?
 
 	/**
-	 * Run the current job only if the jobMustNotBeActive instance is not active.
+	 * Run the current job only if the jobMustNotBeActive instance is not active nor running.
 	 * If that instance is deleted or deactivated, the current job can be activated
 	 */
 	@OneToOne
@@ -93,6 +93,82 @@ public class YadaJob {
 	@JsonProperty("DT_RowId")
 	public String getDT_RowId() {
 		return this.getClass().getSimpleName()+"#"+this.id; // YadaJob#142
+	}
+	
+	/**
+	 * Returns the plain enum of the job state
+	 * @return
+	 */
+	@Transient
+	public YadaJobState getJobState() {
+		return jobStateObject.toEnum();
+	}
+	
+	/**
+	 * Set the persistent state of this job
+	 * @param jobState
+	 */
+	@Transient
+	public void setJobState(YadaJobState jobState) {
+		this.jobStateObject = jobState.toYadaPersistentEnum();
+	}
+	
+	/**
+	 * Set the job state to active and return the previous state
+	 * @return
+	 */
+	@Transient
+	public YadaJobState activate() {
+		YadaJobState result = getJobState();
+		this.jobStateObject = YadaJobState.ACTIVE.toYadaPersistentEnum();
+		return result;
+	}
+	
+	/**
+	 * Set the job state to paused and return the previous state
+	 * @return
+	 */
+	@Transient
+	public YadaJobState pause() {
+		YadaJobState result = getJobState();
+		this.jobStateObject = YadaJobState.PAUSED.toYadaPersistentEnum();
+		return result;
+	}
+	
+	/**
+	 * Set the job state to disabled and return the previous state
+	 * @return
+	 */
+	@Transient
+	public YadaJobState disable() {
+		YadaJobState result = getJobState();
+		this.jobStateObject = YadaJobState.DISABLED.toYadaPersistentEnum();
+		return result;
+	}
+	
+	@Transient
+	public boolean isActive() {
+		return getJobState() == YadaJobState.ACTIVE;
+	}
+	
+	@Transient
+	public boolean isCompleted() {
+		return getJobState() == YadaJobState.COMPLETED;
+	}
+	
+	@Transient
+	public boolean isDisabled() {
+		return getJobState() == YadaJobState.DISABLED;
+	}
+	
+	@Transient
+	public boolean isPaused() {
+		return getJobState() == YadaJobState.PAUSED;
+	}
+	
+	@Transient
+	public boolean isRunning() {
+		return getJobState() == YadaJobState.RUNNING;
 	}
 
 	/**
@@ -193,8 +269,8 @@ public class YadaJob {
 		this.jobMustNotBeActive = jobMustNotBeActive;
 	}
 
-	public YadaPersistentEnum<YadaJobState> getJobState() {
-		return jobState;
+	public YadaPersistentEnum<YadaJobState> getJobStateObject() {
+		return jobStateObject;
 	}
 
 	public YadaJob getJobMustComplete() {
@@ -213,10 +289,10 @@ public class YadaJob {
 		this.jobRecoverable = recoverable;
 	}
 
-	public void setJobState(YadaPersistentEnum<YadaJobState> state) {
-		this.jobState = state;
+	public void setJobStateObject(YadaPersistentEnum<YadaJobState> jobStateObject) {
+		this.jobStateObject = jobStateObject;
 	}
-
+	
 	public void setJobScheduledTime(Date jobScheduledTime) {
 		this.jobScheduledTime = jobScheduledTime;
 	}

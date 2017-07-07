@@ -2,7 +2,7 @@
 <html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org">
 <!--/*
 
-OBSOLETO: usare list.html
+DEPRECATED: usare list.html
 
 A select list for static (Spring-EL) elements.
 
@@ -22,7 +22,7 @@ Parameters:
 - onchange = function to call on the change event (optional)
 
 Example:
-<div  th:replace="/yada/form/list-values::body(fieldName='userCredentials.enabled',values=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
+<div  th:replace="/yada/form/list-values::field(fieldName='userCredentials.enabled',values=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
 
 */-->
 <body>

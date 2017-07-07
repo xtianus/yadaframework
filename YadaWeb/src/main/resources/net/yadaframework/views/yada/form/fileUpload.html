@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
 <!--/*
 A file-upload input element.
 
@@ -10,8 +12,10 @@ Parameters:
 - help = testo per il pulsante di help (optional)
 
 */-->
-
-<div class="form-group has-feedback" th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
+<body>
+<div class="form-group has-feedback" 
+	th:fragment="field"
+	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
 	<label class="control-label" th:for="${#ids.next('fieldId')}" th:text="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
 	<a th:if="${help!=null}" class="yadaHelpButton" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="top" tabindex="-1"
 		th:attr="data-content=${help}">
@@ -25,3 +29,5 @@ Parameters:
 		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	</div>
 </div>    	
+</body>
+</html>

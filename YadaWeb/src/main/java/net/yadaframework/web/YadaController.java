@@ -27,7 +27,7 @@ public class YadaController {
     	// The original request has been lost already, but the status code is kept
     	int errorCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
         String errorMessage = (String) request.getAttribute("javax.servlet.error.message");
-        log.error("Error code {} '{}' shown to user", errorCode, errorMessage);
+        log.error("Error (HTTP {} '{}') shown to user", errorCode, errorMessage);
         // If it was an ajax request, return an error object
         if (yadaWebUtil.isAjaxRequest(request)) {
         	model.addAttribute("errorDescription", errorMessage);

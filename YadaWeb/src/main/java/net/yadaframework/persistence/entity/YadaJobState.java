@@ -19,22 +19,33 @@ import net.yadaframework.core.YadaLocalEnum;
  */
 public enum YadaJobState implements YadaLocalEnum<YadaJobState> {
 	// In messages.properties:
-	//	yada.jobstate.active = Active
-	//	yada.jobstate.running = Running
-	//	yada.jobstate.paused = Paused
-	//	yada.jobstate.completed = Completed
-	//	yada.jobstate.disabled = Disabled	
+	//	yada.jobstate.ACTIVE = Active
+	//	yada.jobstate.RUNNING = Running
+	//	yada.jobstate.PAUSED = Paused
+	//	yada.jobstate.COMPLETED = Completed
+	//	yada.jobstate.DISABLED = Disabled	
 
-	ACTIVE("yada.jobstate.active"),
-	RUNNING("yada.jobstate.running"),
-	PAUSED("yada.jobstate.paused"),
-	COMPLETED("yada.jobstate.completed"),
-	DISABLED("yada.jobstate.disabled");
+	ACTIVE("yada.jobstate.ACTIVE"),
+	RUNNING("yada.jobstate.RUNNING"),
+	PAUSED("yada.jobstate.PAUSED"),
+	COMPLETED("yada.jobstate.COMPLETED"),
+	DISABLED("yada.jobstate.DISABLED");
 	
 	private String messageKey;
+	private YadaPersistentEnum<YadaJobState> yadaPersistentEnum;
 	
 	private YadaJobState(String messageKey) {
 		this.messageKey = messageKey;
+	}
+	
+	public YadaPersistentEnum<YadaJobState> toYadaPersistentEnum() {
+		return yadaPersistentEnum;
+	}
+	
+	// TODO fix generics
+	public void setYadaPersistentEnum(YadaPersistentEnum yadaPersistentEnum) {
+		this.yadaPersistentEnum = yadaPersistentEnum;
+		
 	}
 	
 	/**
@@ -46,5 +57,4 @@ public enum YadaJobState implements YadaLocalEnum<YadaJobState> {
 	public String toString(MessageSource messageSource, Locale locale) {
 		return messageSource.getMessage(messageKey, null, locale);
 	}
-	
 }

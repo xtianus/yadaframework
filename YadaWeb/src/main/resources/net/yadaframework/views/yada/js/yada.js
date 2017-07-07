@@ -1249,14 +1249,20 @@
 	
 	// Apre un errore se il risultato di una chiamata ajax contiene l'oggetto ajaxError o lo stato è diverso da success
 	yada.showAjaxErrorIfPresent = function(responseText, statusText, xhr, form) {
+		var errorKeyword = 'yadaError:';
 		var errorObject = null;
 		var errorPresent=(statusText!=null && statusText!=='success');
-		if (typeof responseText === "string" && yada.startsWith(responseText, 'yadaError:')) {
-			errorPresent = true;
-			try {
-				errorObject = JSON.parse(responseText.substring('yadaError:'.length));
-			} catch (e) {
-				// keep going
+		if (typeof responseText === "string") {
+			var errorPos = responseText.indexOf(errorKeyword);
+			if (errorPos>-1) {
+				// The error could be at the start or be appended at the end of the HTML when it happens in a th: fragment
+				errorPresent = true;
+				try {
+					var errorObjectString = responseText.substring(errorPos + errorKeyword.length);
+					errorObject = JSON.parse(errorObjectString);
+				} catch (e) {
+					// keep going
+				}
 			}
 		}
 		if (typeof responseText == "object" && responseText.error!=null) {

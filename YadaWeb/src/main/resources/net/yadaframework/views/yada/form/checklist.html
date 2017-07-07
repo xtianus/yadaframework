@@ -24,13 +24,14 @@ Parameters:
              in page many times via javascript, otherwise all selects will end up having the same ids. Not needed when the ajaxLists are not inserted via javascript.
 
 Example:
-<div th:replace="/yada/form/checklist::body(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()')"></div>
-<div th:replace="/yada/form/checklist::body(fieldName='userCredentials.enabled',options=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
-<div th:replace="/yada/form/checklist::body(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
+<div th:replace="/yada/form/checklist::field(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()')"></div>
+<div th:replace="/yada/form/checklist::field(fieldName='userCredentials.enabled',options=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
+<div th:replace="/yada/form/checklist::field(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
 
 */-->
 <body>
 <div class="form-group has-feedback" 
+	th:fragment="field"
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')},idPrefix=${idPrefix?:'fieldId'},isMap=${options instanceof T(java.util.Map)}" 
 	th:classappend="${hasError}? has-error">
 	<label th:if="${label!=null or labelKey!=null}" 

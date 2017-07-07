@@ -50,6 +50,24 @@ public class YadaNotify {
 //	}
 	
 	/**
+	 * Initialise an empty instance
+	 * @param model
+	 * @return
+	 */
+	public YadaNotifyData empty(Model model) {
+		return new YadaNotifyData(model, messageSource, null);
+	}
+	
+	/**
+	 * Initialise an empty instance
+	 * @param model
+	 * @return
+	 */
+	public YadaNotifyData empty(RedirectAttributes redirectAttributes) {
+		return new YadaNotifyData(redirectAttributes, messageSource, null);
+	}
+
+	/**
 	 * Initialise the instance
 	 * @param title the notification title
 	 * @param model
@@ -58,7 +76,7 @@ public class YadaNotify {
 	public YadaNotifyData title(String title, Model model) {
 		return new YadaNotifyData(model, messageSource, null).setTitle(title);
 	}
-
+	
 	/**
 	 * Initialise the instance
 	 * @param title the notification title
