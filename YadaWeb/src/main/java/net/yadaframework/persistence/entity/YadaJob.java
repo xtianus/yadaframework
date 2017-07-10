@@ -1,9 +1,9 @@
 package net.yadaframework.persistence.entity;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -12,6 +12,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -62,21 +65,24 @@ public class YadaJob {
 	 * Run the current job only while the jobMustBeActive instance is active.
 	 * If that instance is deleted, the current job is deactivated
 	 */
-	@OneToOne
-	protected YadaJob jobMustBeActive; // TODO list of jobs?
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(name="YadaJob_BeActive")
+	protected List<YadaJob> jobsMustBeActive;
 
 	/**
-	 * Run the current job only if the jobMustNotBeActive instance is not active nor running.
+	 * Run the current job only if the jobsMustBeInactive instance is not active/paused nor running.
 	 * If that instance is deleted or deactivated, the current job can be activated
 	 */
-	@OneToOne
-	protected YadaJob jobMustNotBeActive; // TODO list of jobs?
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(name="YadaJob_BeInactive")
+	protected List<YadaJob> jobsMustBeInactive;
 
 	/**
 	 * Run the current job after the jobMustComplete completes successfully.
 	 */
-	@OneToOne
-	protected YadaJob jobMustComplete; // TODO list of jobs?
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(name="YadaJob_BeCompleted")
+	protected List<YadaJob> jobsMustComplete;
 	
 	/**
 	 * Tell if a job should be started immediately again from the beginning after a system crash/shutdown while running.
@@ -253,32 +259,8 @@ public class YadaJob {
 		this.jobPriority = jobPriority;
 	}
 
-	public YadaJob getJobMustBeActive() {
-		return jobMustBeActive;
-	}
-
-	public void setJobMustBeActive(YadaJob jobMustBeActive) {
-		this.jobMustBeActive = jobMustBeActive;
-	}
-
-	public YadaJob getJobMustNotBeActive() {
-		return jobMustNotBeActive;
-	}
-
-	public void setJobMustNotBeActive(YadaJob jobMustNotBeActive) {
-		this.jobMustNotBeActive = jobMustNotBeActive;
-	}
-
 	public YadaPersistentEnum<YadaJobState> getJobStateObject() {
 		return jobStateObject;
-	}
-
-	public YadaJob getJobMustComplete() {
-		return jobMustComplete;
-	}
-
-	public void setJobMustComplete(YadaJob jobMustComplete) {
-		this.jobMustComplete = jobMustComplete;
 	}
 
 	public boolean isJobRecoverable() {
@@ -299,7 +281,31 @@ public class YadaJob {
 
 	public void setJobLastSuccessfulRun(Date jobLastSuccessfulRun) {
 		this.jobLastSuccessfulRun = jobLastSuccessfulRun;
-	} 
-	
+	}
+
+	public List<YadaJob> getJobsMustBeActive() {
+		return jobsMustBeActive;
+	}
+
+	public void setJobsMustBeActive(List<YadaJob> jobsMustBeActive) {
+		this.jobsMustBeActive = jobsMustBeActive;
+	}
+
+	public List<YadaJob> getJobsMustBeInactive() {
+		return jobsMustBeInactive;
+	}
+
+	public void setJobsMustBeInactive(List<YadaJob> jobsMustBeInactive) {
+		this.jobsMustBeInactive = jobsMustBeInactive;
+	}
+
+	public List<YadaJob> getJobsMustComplete() {
+		return jobsMustComplete;
+	}
+
+	public void setJobsMustComplete(List<YadaJob> jobsMustComplete) {
+		this.jobsMustComplete = jobsMustComplete;
+	}
+
 	
 }

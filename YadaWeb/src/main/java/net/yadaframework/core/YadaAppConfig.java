@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.ScheduledFuture;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -24,6 +26,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.persistence.repository.YadaJobScheduler;
 
 @Configuration
 @ComponentScan(basePackages = { "net.yadaframework.components" })
@@ -33,23 +36,14 @@ public class YadaAppConfig {
 	private static Logger log = LoggerFactory.getLogger(YadaAppConfig.class);
 	
 	@Autowired private YadaConfiguration config;
-	@Autowired private TaskScheduler taskScheduler;
-
-	@Bean
-	public TaskScheduler taskScheduler() {
-	     return new ThreadPoolTaskScheduler();
-	}
 	
 	@Bean
-	public YadaJobScheduler yadaJobScheduler() {
-		YadaJobScheduler yadaJobScheduler = new YadaJobScheduler();
-		long period = config.getJobSchedulerPeriod();
-		if (period>0) {
-			taskScheduler.scheduleAtFixedRate(yadaJobScheduler, new Date(), period);
-		}
-		return yadaJobScheduler;
+	public TaskScheduler taskScheduler() {
+		TaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+		return taskScheduler;
 	}
-
+	
+	
 // Removed because it's better not to force an executor over the Spring default. The error is just logged at debug level anyway
 //	/**
 //	 * This is to prevent the logging of:

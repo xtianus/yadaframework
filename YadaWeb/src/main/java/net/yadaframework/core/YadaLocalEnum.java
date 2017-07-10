@@ -31,6 +31,11 @@ public interface YadaLocalEnum<E extends Enum<E>> {
 	void setYadaPersistentEnum(YadaPersistentEnum<? extends YadaLocalEnum<E>> yadaPersistentEnum);
 	
 	/**
+	 * @return the database id for this enum value
+	 */
+	public long toId();
+	
+	/**
 	 * Convert the current enum to a localized string
 	 * @param messageSource
 	 * @param locale
