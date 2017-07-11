@@ -1,11 +1,7 @@
 package net.yadaframework.core;
 
 import java.io.File;
-import java.util.Date;
 import java.util.Properties;
-import java.util.concurrent.ScheduledFuture;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
@@ -26,7 +22,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import net.yadaframework.components.YadaUtil;
-import net.yadaframework.persistence.repository.YadaJobScheduler;
 
 @Configuration
 @ComponentScan(basePackages = { "net.yadaframework.components" })

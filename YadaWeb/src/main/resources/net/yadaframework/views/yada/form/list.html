@@ -61,11 +61,13 @@ Example:
 					<!--/* List of primitives */-->
 					<option th:if="${valueAttribute==null} or ${textAttribute==null}" 
 						th:value="${option}" 
+						th:title="${textKey==null?option:#messages.msg(textKey+option)}"
 						th:text="${textKey==null?option:#messages.msg(textKey+option)}">SomeChoice</option>
 					<!--/* List of objects */-->
 					<th:block th:if="${valueAttribute!=null} and ${textAttribute!=null}" th:with="text = ${__${'option.'+textAttribute}__},value=${__${'option.'+valueAttribute}__}">
 						<option 
 							th:value="${value}" 
+							th:title="${textKey==null?text:#messages.msg(textKey+text)}"
 							th:text="${textKey==null?text:#messages.msg(textKey+text)}">SomeChoice</option>
 					</th:block>
 				</th:block>
@@ -74,6 +76,7 @@ Example:
 				<!--/* Map */-->
 				<option th:each="entry : ${options.entrySet()}"
 					th:value="${entry.key}" 
+					th:title="${textKey==null?entry.value:#messages.msg(textKey+entry.value)}"
 					th:text="${textKey==null?entry.value:#messages.msg(textKey+entry.value)}">SomeChoice</option>
 			</th:block>
 		</select>

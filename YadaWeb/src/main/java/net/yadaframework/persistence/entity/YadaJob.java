@@ -12,7 +12,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
@@ -22,6 +21,7 @@ import javax.persistence.Transient;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -33,9 +33,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public class YadaJob {
+public abstract class YadaJob implements Runnable {
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
+	
+	@Transient
+	protected ApplicationContext applicationContext;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -43,6 +46,8 @@ public class YadaJob {
 
 	@OneToOne(fetch = FetchType.EAGER)
 	protected YadaPersistentEnum<YadaJobState> jobStateObject;
+	
+	protected boolean jobGroupPaused = false;
 	
 	@Column(columnDefinition="TIMESTAMP NULL")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -52,13 +57,20 @@ public class YadaJob {
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date jobLastSuccessfulRun;
 	
-	@Column(length=32)
+	@Column(length=128)
 	protected String jobName;
-	@Column(length=32)
+	
+	/**
+	 * Jobs in the same jobGroup are subject to preemption
+	 */
+	@Column(length=128)
 	protected String jobGroup;
-	@Column(length=64)
+	@Column(length=256)
 	protected String jobDescription;
 
+	/**
+	 * Higher priority jobs can preempt lower priority jobs of the same jobGroup
+	 */
 	protected int jobPriority = 10; // 0 = lowest priority, MAX_INTEGER = highest priority
 	
 	/**
@@ -305,6 +317,18 @@ public class YadaJob {
 
 	public void setJobsMustComplete(List<YadaJob> jobsMustComplete) {
 		this.jobsMustComplete = jobsMustComplete;
+	}
+
+	public boolean isJobGroupPaused() {
+		return jobGroupPaused;
+	}
+
+	public void setJobGroupPaused(boolean jobGroupPaused) {
+		this.jobGroupPaused = jobGroupPaused;
+	}
+
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
 	}
 
 	
