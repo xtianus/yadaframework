@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<header>
+		<result>
+			<expressionEngine config-class="org.apache.commons.configuration2.tree.xpath.XPathExpressionEngine"/>
+		</result>
+	</header>
+	<override> <!-- I file sopra sovrascrivono i file sotto -->
+		<!-- reloadingRefreshDelay è in millisecondi: 20000 = 20 secondi -->
+		<system/>
+		<env/>
+		<properties fileName="build.properties"/>
+		<xml config-name="webapp" config-at="config" fileName="conf.webapp.test.xml" reloadingRefreshDelay="4000" config-optional="true" config-reload="true">
+		</xml>
+	</override>
+</configuration>

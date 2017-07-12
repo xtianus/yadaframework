@@ -50,21 +50,23 @@ public class YadaJobScheduler implements Runnable {
 	@PostConstruct
 	public void init() throws Exception {
 		log.debug("init called");
-		// Using Guava to create a ListenableFuture: https://github.com/google/guava/wiki/ListenableFutureExplained
-		ExecutorService executorService = Executors.newFixedThreadPool(config.getYadaJobSchedulerThreadPoolSize());
-		jobScheduler = MoreExecutors.listeningDecorator(executorService);
-		// Disable any job that is already RUNNING but jobRecoverable is false
-		yadaJobDao.setUnrecoverableJobState();
-		// Recover any job that is still in the RUNNING state and its group is not paused
-		List<YadaJob> recoverableJobs = yadaJobDao.getRecoverableJobs();
-		for (YadaJob yadaJob : recoverableJobs) {
-			yadaJob.setRecovered(true);
-			runJob(yadaJob);
-		}
-		// Scheduling the YadaJobScheduler according to the configured period
 		long period = config.getYadaJobSchedulerPeriod();
 		if (period>0) {
+			// Using Guava to create a ListenableFuture: https://github.com/google/guava/wiki/ListenableFutureExplained
+			ExecutorService executorService = Executors.newFixedThreadPool(config.getYadaJobSchedulerThreadPoolSize());
+			jobScheduler = MoreExecutors.listeningDecorator(executorService);
+			// Disable any job that is already RUNNING but jobRecoverable is false
+			yadaJobDao.setUnrecoverableJobState();
+			// Recover any job that is still in the RUNNING state and its group is not paused
+			List<YadaJob> recoverableJobs = yadaJobDao.getRecoverableJobs();
+			for (YadaJob yadaJob : recoverableJobs) {
+				yadaJob.setRecovered(true);
+				runJob(yadaJob);
+			}
+			// Scheduling the YadaJobScheduler according to the configured period
 			yadaJobSchedulerTaskScheduler.scheduleAtFixedRate(this, new Date(System.currentTimeMillis() + 10000), period);
+		} else {
+			log.info("YadaJobScheduler not started");
 		}
 	}
 	
@@ -83,7 +85,7 @@ public class YadaJobScheduler implements Runnable {
 		if (yadaJob.getJobScheduledTime()==null) {
 			yadaJob.setJobScheduledTime(new Date());
 		}
-		yadaJob.setJobState(YadaJobState.ACTIVE);
+		yadaJob.activate();
 		yadaJobRepository.save(yadaJob);
 	}
 	
@@ -99,10 +101,10 @@ public class YadaJobScheduler implements Runnable {
 	/**
 	 * Pause all jobs in the given group
 	 * @param jobGroup
-	 * @param force true to interrupt a job that is in execution, false to let it complete before pausing
+	 * @param interrupt true to interrupt a job that is in execution, false to let it complete before pausing
 	 */
-	public void pauseJobGroup(String jobGroup, boolean force) {
-		if (force) {
+	public void pauseJobGroup(String jobGroup, boolean interrupt) {
+		if (interrupt) {
 			// There should be just one job in execution, but we look for many anyway
 			List<YadaJob> running = yadaJobRepository.findByJobGroupAndState(jobGroup, YadaJobState.RUNNING.toYadaPersistentEnum(), null);
 			for (YadaJob yadaJob : running) {
@@ -120,14 +122,13 @@ public class YadaJobScheduler implements Runnable {
 		yadaJobRepository.setJobGroupPaused(jobGroup, false);
 	}
 
-	
 	/**
 	 * Removes the job from the database.
 	 * @param yadaJob
 	 */
 	public void deleteJob(YadaJob yadaJob) {
 		
-		// TODO force stop the task
+		pauseJob(yadaJob, true);
 		
 		// Remove the association with other jobs
 		List<YadaJob> relatedJobs = yadaJobRepository.findByJobsMustCompleteContains(yadaJob);
@@ -161,11 +162,18 @@ public class YadaJobScheduler implements Runnable {
 		return yadaJobRepository.findByJobGroupAndStates(jobGroup, states);
 	}
 	
+	public void pauseJob(YadaJob yadaJob, boolean interrupt) {
+		if (interrupt) {
+			interruptJob(yadaJob);
+		}
+		pauseJob(yadaJob);
+	}
+
 	public void pauseJob(YadaJob yadaJob) {
 		yadaJob.pause();
 		yadaJobRepository.save(yadaJob);
 	}
-
+	
 	public void changeJobPriority(YadaJob yadaJob, int priority) {
 		yadaJob.setJobPriority(priority);
 		yadaJobRepository.save(yadaJob);
@@ -238,7 +246,6 @@ public class YadaJobScheduler implements Runnable {
 		log.debug("Running job {}", yadaJob);
 		yadaJob.setJobState(YadaJobState.RUNNING);
 		yadaJobRepository.save(yadaJob);
-		
 		@SuppressWarnings("unchecked")
 		ListenableFuture<YadaJob> jobHandle = (ListenableFuture<YadaJob>) jobScheduler.submit(yadaJob);
 		yadaJob.setJobRunTime(new Date());
@@ -257,10 +264,7 @@ public class YadaJobScheduler implements Runnable {
 			public void onFailure(Throwable thrown) {
 				log.debug("Job {} ended onFailure", yadaJob);
 				// The job must set its own state to DISABLED or PAUSED when failed, otherwise it is set to ACTIVE
-				if (yadaJob.getJobState()==YadaJobState.RUNNING) {
-					yadaJob.setJobState(YadaJobState.ACTIVE);
-					yadaJobRepository.save(yadaJob);
-				}
+				yadaJobDao.setActiveWhenRunning(yadaJob);
 				jobHandles.remove(yadaJob);
 				yadaJob.setJobRunTime(null);
 			}
@@ -281,7 +285,7 @@ public class YadaJobScheduler implements Runnable {
 //			yadaJobRepository.save(yadaJob);
 //			jobHandles.remove(yadaJob);
 		} else {
-			log.warn("No job handle found for {} when interrupting", yadaJob);
+			log.debug("No job handle found for {} when interrupting", yadaJob);
 		}
 	}
 	
