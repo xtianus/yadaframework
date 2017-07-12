@@ -27,13 +27,38 @@ public class YadaJobDao {
     @PersistenceContext private EntityManager em;
     
     /**
+     * Return the list of jobs that can be recovered after a crash.
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+	public List<YadaJob> getRecoverableJobs() {
+    	return YadaSql.instance().selectFrom("select yg from YadaJob yg left join yg.jobStateObject")
+    		.where("where yg.jobGroupPaused = false and yg.jobRecoverable = true and yg.jobStateObject = :running")
+    		.setParameter("running", YadaJobState.RUNNING.toYadaPersistentEnum())
+    		.query(em).getResultList();
+    }
+    
+	/**
+	 * Disable all RUNNING jobs that are not recoverable and not group-paused. Called at server startup.
+	 * @param stateObject
+	 */
+    @Transactional(readOnly = false)
+	public void setUnrecoverableJobState() {
+		YadaSql.instance().updateSet("update YadaJob yg set yg.jobStateObject = :disabled")
+		.where("where yg.jobGroupPaused = false and yg.jobRecoverable = false and yg.jobStateObject = :running")
+		.setParameter("disabled", YadaJobState.DISABLED.toYadaPersistentEnum())
+		.setParameter("running", YadaJobState.RUNNING.toYadaPersistentEnum())
+		.query(em).executeUpdate();
+	}
+
+    /**
      * Find job candidates: they must start before the end of the period, have no unsatisfied dependencies with other jobs, be ACTIVE and not groupPaused.
      * They are sorted first by priority then by start time.
      * @return
      */
     public List<? extends YadaJob> findJobsToRun() {
 		long now = System.currentTimeMillis();
-		long jobSchedulerPeriodMillis = config.getJobSchedulerPeriod();
+		long jobSchedulerPeriodMillis = config.getYadaJobSchedulerPeriod();
 		Timestamp periodEnd = new Timestamp(now + jobSchedulerPeriodMillis);
 		
 		//		select yg from YadaJob yg

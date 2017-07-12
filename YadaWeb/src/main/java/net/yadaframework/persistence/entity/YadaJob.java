@@ -99,10 +99,23 @@ public abstract class YadaJob implements Runnable {
 	/**
 	 * Tell if a job should be started immediately again from the beginning after a system crash/shutdown while running.
 	 * When true, the job should take care of deleting or skipping any partial results, if needed. 
-	 * When false, the job will become DISABLED after a crash
+	 * When false, the job will become DISABLED after a system crash
 	 * (true by default)
 	 */
 	protected boolean jobRecoverable = true;
+	
+	/**
+	 * The time at which the job was run - null if the job is not in the RUNNING state
+	 */
+	@Transient
+	protected Date jobRunTime = null;
+	
+	/**
+	 * True when the current invocation is on a job that was running when the server crashed and has the jobRecoverable flag true.
+	 * Implementations can choose what to do when recovering from a crash.
+	 */
+	@Transient
+	protected boolean recovered = false;
 	
 	/**
 	 * Needed for DataTables integration
@@ -227,6 +240,10 @@ public abstract class YadaJob implements Runnable {
 		this.jobScheduledTime = jobScheduledTime;
 	}
 
+	/**
+	 * Return the time that the job last ended successfully. Null if the job was never run successfully.
+	 * @return
+	 */
 	public Date getJobLastSuccessfulRun() {
 		return jobLastSuccessfulRun;
 	}
@@ -329,6 +346,22 @@ public abstract class YadaJob implements Runnable {
 
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
+	}
+
+	public Date getJobRunTime() {
+		return jobRunTime;
+	}
+
+	public void setJobRunTime(Date jobRunTime) {
+		this.jobRunTime = jobRunTime;
+	}
+
+	public boolean isRecovered() {
+		return recovered;
+	}
+
+	public void setRecovered(boolean recovered) {
+		this.recovered = recovered;
 	}
 
 	

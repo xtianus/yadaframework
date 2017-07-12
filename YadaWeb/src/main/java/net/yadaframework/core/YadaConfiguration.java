@@ -796,7 +796,7 @@ public abstract class YadaConfiguration {
 	 * @throws ConfigurationException 
 	 */
 	public void reloadIfNeeded() throws ConfigurationException {
-		// TODO ancora il reload non funziona !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// TODO Doesn't seem to work
 		builder.getReloadingController().checkForReloading(null);
 		this.configuration = ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration());
 	}
@@ -805,7 +805,24 @@ public abstract class YadaConfiguration {
 	 * The YadaJobScheduler period in milliseconds. <1 means do not schedule
 	 * @return
 	 */
-	public long getJobSchedulerPeriod() {
-		return this.configuration.getLong("config/yada/jobSchedulerPeriodMillis", 0);
+	public long getYadaJobSchedulerPeriod() {
+		return this.configuration.getLong("config/yada/jobScheduler/periodMillis", 0);
 	}
+	
+	/**
+	 * The YadaJobScheduler thread pool size. When the number of concurrent jobs is higher, they are queued.
+	 * @return
+	 */
+	public int getYadaJobSchedulerThreadPoolSize() {
+		return this.configuration.getInt("config/yada/jobScheduler/threadPoolSize", 10);
+	}
+	
+	/**
+	 * Milliseconds after a running job is considered to be stale and killed.
+	 * @return
+	 */
+	public long getYadaJobSchedulerStaleMillis() {
+		return this.configuration.getLong("config/yada/jobScheduler/jobStaleMillis", 1000*60);
+	}
+	
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +25,13 @@ public interface YadaJobRepository extends JpaRepository<YadaJob, Long> {
 	 */
 	@Query(value="select exists (select 1 from YadaJob e where e.jobGroup = :jobGroup and e.jobGroupPaused = true limit 1)", nativeQuery=true)
 	boolean isJobGroupPaused(@Param("jobGroup") String jobGroup);
-	
+
 	/**
 	 * Set the pause flag on all jobs of a jobGroup
 	 * @param jobGroup
 	 * @param paused
 	 */
+	@Modifying
 	@Query("update #{#entityName} e set e.jobGroupPaused = :paused where e.jobGroup = :jobGroup")
 	void setJobGroupPaused(@Param("jobGroup") String jobGroup, @Param("paused") boolean paused);
 
