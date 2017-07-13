@@ -10,6 +10,11 @@
 	</info>
 	
 	<database>
+		<jndiname>java:comp/env/jdbc/yadatestdb</jndiname>
+		<dbName>yadatestdb</dbName>
+		<user>yadatest</user>
+		<password>yadatest</password>
+		<server>localhost</server>
 		<showSql>false</showSql>
 		<entityPackage>net.yadaframework.persistence.entity</entityPackage>
 	</database>

@@ -1,6 +1,16 @@
 group = 'net.yadaframework'
 version = '0.0.7'
 
+buildscript {
+	repositories {
+		mavenLocal()
+	}
+	dependencies {
+		// Needed for test schema creation
+		classpath 'net.yadaframework:YadaTools:+'
+	}                    
+}
+
 apply plugin: 'java-library'
 apply plugin: 'eclipse-wtp'
 
@@ -108,3 +118,32 @@ uploadArchives {
 		mavenLocal()
 	}
 }
+
+configurations {
+	hibtools {
+		extendsFrom configurations.implementation
+	}
+}
+
+dependencies {
+	hibtools files("$buildDir/classes/main")
+	hibtools files("$buildDir/classes/test") // Needed for yadaPersistenceUnit
+	hibtools 'org.hibernate:hibernate-tools:5.+'
+}
+
+task testDbSchema(dependsOn: [testClasses], type: net.yadaframework.tools.YadaCreateDbSchemaTask) {
+	inputs.files configurations.hibtools
+	outputfilename = "yadatest.sql"
+	doFirst {
+		new File("$buildDir/classes/test/META-INF").mkdirs()
+		copy {
+			from "$buildDir/resources/test/META-INF/persistence.xml"
+			into "$buildDir/classes/test/META-INF"
+		} 
+	}
+	doLast { 
+		delete "$buildDir/classes/test/META-INF/persistence.xml"
+	}
+}
+
+

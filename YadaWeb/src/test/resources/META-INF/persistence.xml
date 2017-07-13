@@ -1,0 +1,30 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+             
+   <!-- This file is only needed for schema generation with ant -->
+   
+   <persistence-unit name="yadaPersistenceUnit">
+   		<!-- See link persistence_2_1.xsd from http://www.oracle.com/webfolder/technetwork/jsc/xml/ns/persistence/index.html -->
+  		<class>net.yadaframework.persistence.entity.YadaBrowserId</class>
+  		<class>net.yadaframework.persistence.entity.YadaClause</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaUserCredentials</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaRegistrationRequest</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaSocialCredentials</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaAutoLoginToken</class>
+  		<class>net.yadaframework.persistence.entity.YadaPersistentEnum</class>
+  		<class>net.yadaframework.persistence.entity.YadaJob</class>
+
+  		
+      <properties>
+            <property name="hibernate.id.new_generator_mappings" value="true"/> <!-- Defaults to true in Hibernate 5 -->
+            <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
+            <property name="hibernate.connection.username" value="yadatest"/>
+            <property name="hibernate.connection.password" value="yadatest"/>
+            <property name="hibernate.connection.url" value="jdbc:mysql://localhost/yadatestdb?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false"/>
+         	<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect"/>
+      </properties>
+   		 
+   </persistence-unit>
+</persistence>

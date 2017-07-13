@@ -4,7 +4,6 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -18,12 +17,11 @@ public class TestYadaJobScheduler extends AbstractJUnit4SpringContextTests {
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
-//	@Autowired private YadaJobScheduler yadaJobScheduler;
-	@Autowired ApplicationContext ctx;
+	@Autowired private YadaJobScheduler yadaJobScheduler;
 
 	@Test
 	public void firstTest() {
-		 assert ctx !=null;
+		 assert yadaJobScheduler !=null;
 	}
 
 	
