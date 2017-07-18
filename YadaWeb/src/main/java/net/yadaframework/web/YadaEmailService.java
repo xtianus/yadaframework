@@ -227,6 +227,7 @@ public class YadaEmailService {
     	String languagePart = "_" + locale.getLanguage(); // _it
     	String suffix = ".html";
     	String filename = prefix + languagePart + suffix; // emailChange_it.html
+    	// TODO check if the / before filename is still needed
 		ClassPathResource classPathResource = new ClassPathResource(YadaConstants.EMAIL_TEMPLATES_PREFIX + "/" + YadaConstants.EMAIL_TEMPLATES_FOLDER + "/" + filename);
 		if (classPathResource.exists()) {
 			return prefix + languagePart;
