@@ -42,7 +42,7 @@
 	 * - ajax (optional) false to make a normal page transition to the target link
 	 * @returns the DataTable object
 	 */
-	yada.dataTableCrud = function($table, dataUrl, dataAttributes, editDef, deleteDef, order, pageLength, languageUrl, extraButtons) {
+	yada.dataTableCrud = function($table, dataUrl, dataAttributes, editDef, deleteDef, order, pageLength, languageUrl, extraButtons, removeCheckbox) {
 		// Method argument validation
 		if ($table == null || typeof $table != "object" || $table.length!=1 || typeof $table[0] != "object") {
 			console.error("yada.datatables: $table must be a single jQuery object");
@@ -80,6 +80,11 @@
 			console.error("yada.datatables: extraButtons must be a non-empty array of objects or null");
 			return;
 		}
+		if (removeCheckbox!=null && typeof removeCheckbox != "boolean") {
+			console.error("yada.datatables: removeCheckbox must be a boolean or null");
+			return;
+		}
+		
 		//
 		var tableId = $table.attr('id');
 		if (tableId==undefined) {
@@ -88,7 +93,7 @@
 		}
 		
 		var totColumns = $('th', $table).length;
-		var neededColumns = dataAttributes.length + 3;
+		var neededColumns = dataAttributes.length + 2 + (removeCheckbox?0:1);
 		if (totColumns!=neededColumns) {
 			yada.showErrorModal("Internal Error", "Table '" + $table[0].id + "' has " + totColumns + " columns but " + neededColumns + " where expected - (ignored)");
 		}
@@ -99,22 +104,26 @@
 		    	className: 'control',
 		    	orderable: false,
 				searchable: false
-		    },
-	       {	// Colonna dei checkbox
-	       	data: null,
-	       	name: 'seleziona', // Non usato
-			orderable: false,
-			searchable: false,
-	           render: function ( data, type, row ) {
-	               if ( type === 'display' ) {
-	                   return '<input type="checkbox" class="yadaCheckInCell s_rowSelector"/>';
-	               }
-	               return data;
-	           },
-	           width: "50px",
-	           className: "yadaCheckInCell"
-	       }	                   
+		    }
 		];
+		if (!removeCheckbox) {
+			columnDef.push(
+				{	// Colonna dei checkbox
+					data: null,
+					name: 'seleziona', // Non usato
+					orderable: false,
+					searchable: false,
+					render: function ( data, type, row ) {
+						if ( type === 'display' ) {
+							return '<input type="checkbox" class="yadaCheckInCell s_rowSelector"/>';
+						}
+						return data;
+					},
+					width: "50px",
+					className: "yadaCheckInCell"
+				}	                   
+			);
+		}
 		// Add field columns
 		for (var i = 0; i < dataAttributes.length; i++) {
 			var field = dataAttributes[i];
@@ -189,11 +198,7 @@
 		    }
 	    });
 		var dataTable = $table.DataTable( {
-	        responsive: {
-	            details: {
-	                type: 'column'
-	            }
-	        },
+	        responsive: true,
 	        pageLength: pageLength,
 			orderMulti: order.length>1,
 			order: order,

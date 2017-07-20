@@ -9,7 +9,7 @@
 	// For a private property use "var xxx = "
 	// For a private function use "function xxx(..."
 	
-	yada.ignoreHistoryStateChange=false;
+	
 	yada.devMode = false; // Set to true in development mode (also via thymeleaf)
 	yada.baseUrl = null;	// Set it via thymeleaf
 	yada.resourceDir = null; // Set it via thymeleaf
@@ -173,65 +173,7 @@
 	//////////////////
 	/// Ajax Modal
 	
-	//Funzione che gestisce il back/forward del browser.
-	//Deve essere usata per aprire i modal.
-	yada.runOnBackForward = function(handler) {
-		History.Adapter.bind(window,'statechange',function() {
-			if (yada.ignoreHistoryStateChange!==true) {
-				if (typeof handler != 'undefined') {
-					handler();
-				}
-			} else {
-				yada.ignoreHistoryStateChange=false; // resetta
-			}
-		});
-	};
 	
-	// Questa funzione carica un modal dentro ad ajaxModal per la prima volta, e lo apre. Viene gestita la url e la history del browser
-	// qualora il modal possa essere identificato da un singolo parametro (opzionale).
-	// E' tipicamente chiamata al click di un pulsante, di un anchor, o di un elemento in pagina (e.g. riga di tabella).
-	// Se invece si vuole aprire il modal alla sottomissione di un form, usare la classe formShowAjaxModal sul form.
-	// modalUrl = la url da cui caricare via ajax il modal completo
-	// paramName = nome del parametro. Se viene trovato nell'url invece che nei parametri, viene gestito come una pathVariable
-	//          con la sintassi /<paramName>/<paramValue>
-	// paramValue = valore del parametro
-	// handler = callback opzionale da chiamare quando il modal è caricato e sta per essere aperto
-	
-	// NOTA questo metodo è simile al nuovo yada.ajax ma fa delle cose in più per la history e lo scroll.
-	yada.openNewAjaxModal = function(modalUrl, paramName, paramValue, handler) {
-		if (History.enabled && paramName!=null) {
-			var previousState = History.getState();
-			var paramAlreadyThere = yada.hasPathVariableWithValue(previousState.url, paramName);
-			if (!paramAlreadyThere) {
-				paramAlreadyThere = yada.hasUrlParameter(previousState.url, paramName);
-			}
-			if (!paramAlreadyThere) {
-				// Il push causa la chiamata di quanto registrato con History.Adapter.bind ovvero eventualmente l'apertura di un modal,
-				// per cui blocco la chiamata settando questo flag
-				yada.ignoreHistoryStateChange=true;
-				var newUrl = "";
-				if (yada.hasPathVariable(previousState.url, paramName)) {
-					newUrl = yada.setPathVariable(previousState.url, paramName, paramValue);
-				} else {
-					newUrl = yada.addUrlParameterIfMissing(previousState.url, paramName, paramValue);
-				}
-				History.pushState(null, null, newUrl); 
-			} 
-			$('#ajaxModal').on('hidden.bs.modal', function (e) {
-				// Rimuovo il parametro per evitare che il modal venga riaperto in automatico dopo la sua chiusura
-				var newUrl = "";
-				if (yada.hasPathVariable(previousState.url, paramName)) {
-					newUrl = yada.removePathVariable(previousState.url, paramName);
-				} else {
-					newUrl = yada.removeUrlParameters(previousState.url, paramName);
-				}
-				History.pushState(null, null, newUrl);
-			});
-
-		}
-		yada.ajax(modalUrl, null, handler, null);
-
-	};
 	
 	//////////////////////
 	/// Url Parameters ///
