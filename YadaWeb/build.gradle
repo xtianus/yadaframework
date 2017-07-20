@@ -137,8 +137,9 @@ task testDbSchema(dependsOn: [testClasses], type: net.yadaframework.tools.YadaCr
 	doFirst {
 		new File("$buildDir/classes/test/META-INF").mkdirs()
 		copy {
-			from "$buildDir/resources/test/META-INF/persistence.xml"
+			from "$buildDir/resources/test/META-INF/persistence.test.xml"
 			into "$buildDir/classes/test/META-INF"
+			rename 'persistence.test.xml', 'persistence.xml'
 		} 
 	}
 	doLast { 
