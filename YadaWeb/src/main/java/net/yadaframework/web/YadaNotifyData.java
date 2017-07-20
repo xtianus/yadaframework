@@ -1,5 +1,15 @@
 package net.yadaframework.web;
-import static net.yadaframework.core.YadaConstants.*;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_AUTOCLOSE;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_BODY;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_CALLSCRIPT;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_REDIRECT;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_RELOADONCLOSE;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_SEVERITY;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_TITLE;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_TOTALSEVERITY;
+import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_ERROR;
+import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_INFO;
+import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,20 +17,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.support.RequestContextUtils;
 
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 public class YadaNotifyData {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
+	static final String MODAL_VIEW = "/yada/modalNotify";
 	private Model model;
 	private RedirectAttributes redirectAttributes;
 	private String severity = VAL_NOTIFICATION_SEVERITY_OK;
@@ -53,7 +61,7 @@ public class YadaNotifyData {
 			return null;
 		}
 		activateNormal();
-		return "/yada/modalNotify";
+		return MODAL_VIEW;
 	}
 
 	/**

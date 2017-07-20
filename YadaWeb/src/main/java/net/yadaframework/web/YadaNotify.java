@@ -536,5 +536,14 @@ public class YadaNotify {
 		}
 		return result;
 	}
+	
+	/**
+	 * Return the view name for the notification modal. To be used only when adding many messages and the last 
+	 * message is not at the method end.
+	 * @return
+	 */
+	public String getViewName() {
+		return YadaNotifyData.MODAL_VIEW;
+	}
 
 }

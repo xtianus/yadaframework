@@ -376,7 +376,7 @@
 		
 		// yadaTableToolbar: aggiunta extraButtons
 		if (extraButtons!=null) {
-			makeToolbarExtraButtons(extraButtons, $table, dataTable);
+			makeToolbarExtraButtons(extraButtons, dataTable, $table);
 		}
 			  
 		return dataTable;
@@ -389,7 +389,7 @@
 		});
 	}
 	
-	function makeToolbarExtraButtons(extraButtons, $table, dataTable) {
+	function makeToolbarExtraButtons(extraButtons, dataTable, $table) {
 		var sortedExtraButtons = extraButtons.sort(function (a, b) { return Math.sign(a.toolbarPosition-b.toolbarPosition) });
 		for (var i=0; i<sortedExtraButtons.length; i++) {
 			var btndef = sortedExtraButtons[i];
@@ -406,12 +406,12 @@
 				} else {
 					$existing.eq(pos).before(buttonHtml);
 				}
-				makeExtraButtonHandler(btndef, $('.s_toolbarExtraButton' + i, $yadaTableToolbar), $table, dataTable);
+				makeExtraButtonHandler(btndef, $('.s_toolbarExtraButton' + i, $yadaTableToolbar), dataTable, $table);
 			}
 		}
 	}
 	
-	function makeExtraButtonHandler(extraButtonDef, $button, $table, dataTable) {
+	function makeExtraButtonHandler(extraButtonDef, $button, dataTable, $table) {
 		$button.click(function(e) {
 			e.preventDefault();
 			var ids = [];
