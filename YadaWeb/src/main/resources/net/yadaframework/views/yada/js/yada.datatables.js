@@ -452,6 +452,8 @@
 	}
 	
 	function recursiveEnableAjaxForm(responseText, responseHtml) {
+		yada.enableAjaxForm($('form.yadaAjaxForm', responseHtml), recursiveEnableAjaxForm);
+		// Legacy
 		yada.enableAjaxForm($('form.s_ajaxForm', responseHtml), recursiveEnableAjaxForm);
 	};
 

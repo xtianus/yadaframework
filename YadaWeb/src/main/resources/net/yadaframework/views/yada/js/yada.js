@@ -867,7 +867,7 @@
 	}
 
 	/**
-	 * Transform forms into ajax forms: all forms with a class of "s_ajaxForm" will be sent via ajax.
+	 * Transform forms into ajax forms: all forms with a class of "yadaAjaxForm" will be sent via ajax.
 	 * @param handler a function to call upon successful form submission. It can also be specified as a data-successHandler attribute on the form
 	 * @param $element the element on which to enable ajax forms, can be null for the entire body
 	 */
@@ -875,6 +875,11 @@
 		if ($element==null) {
 			$element = $('body');
 		}
+		$('.yadaAjaxForm', $element.parent()).each(function() {
+			$(this).removeClass('yadaAjaxForm');
+			yada.enableAjaxForm($(this), handler);
+		});
+		// Legacy
 		$('.s_ajaxForm', $element.parent()).each(function() {
 			$(this).removeClass('s_ajaxForm');
 			yada.enableAjaxForm($(this), handler);
@@ -888,7 +893,7 @@
 	};
 
 	/**
-	 * Sends a form via ajax, it doesn't have to have class .s_ajaxForm.
+	 * Sends a form via ajax, it doesn't have to have class .yadaAjaxForm.
 	 * @param $form the jquery form (could be an array), e.g. $('.niceForm')
 	 * @param successHandler funzione chiamata in caso di successo e nessun yadaWebUtil.modalError()
 	 */
@@ -901,7 +906,7 @@
 			return;
 		}
 		// From here on the $form is a single anchor, not an array.
-		var markerClass = 's_ajaxFormed'; // To prevent double submission
+		var markerClass = 'yadaAjaxFormDone'; // To prevent double submission
 		// Can't use document.activeElement to find the clicked button because of the possible "confirm" dialog
 		// http://stackoverflow.com/a/33882987/587641
 		var clickedButton = null;
