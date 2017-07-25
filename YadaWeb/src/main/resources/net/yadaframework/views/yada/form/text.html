@@ -27,20 +27,21 @@ Parameters:
 
 Example:
 
-<div th:replace="/yada/form/text::body(fieldName='subject',maxlength=64,required=true,labelKey='form.label.subject')"></div>
-<div th:replace="/yada/form/text::body(fieldName='id',type='hidden')"></div>
+<div th:replace="/yada/form/text::field(fieldName='subject',maxlength=64,required=true,labelKey='form.label.subject')"></div>
+<div th:replace="/yada/form/text::field(fieldName='id',type='hidden')"></div>
 
 
 */-->
 <body>
-<input th:if="${#strings.equals(type,'hidden')}" th:field="*{__${fieldName}__}" th:disabled="${disabled}" th:type="hidden" th:id="${#ids.seq('fieldId')}" />
+<div th:fragment="field"> <!--/* Top-level div container is needed for fragment replacement */-->
+<input th:if="${#strings.equals(type,'hidden')}" th:field="*{{__${fieldName}__}}" th:disabled="${disabled}" th:type="hidden" th:id="${#ids.seq('fieldId')}" />
 <div th:if="${!#strings.equals(type,'hidden')}" class="form-group" 
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" 
 	th:classappend="|${hasError==true?'has-error':''} ${inline==true?'form-inline':''} ${noFeedback==true?'':'has-feedback'}|">
 	<label class="control-label" th:for="${#ids.next('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
 	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perché se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
 		<!--/* Can't use th:field="*{__${fieldName}__}" because somehow passwords remain blank when they already have a value */-->
-		<input th:if="${maxlength==null or maxlength le 80}" th:name="${fieldName}" th:value="*{__${fieldName}__}"
+		<input th:if="${maxlength==null or maxlength le 80}" th:name="${fieldName}" th:value="*{{__${fieldName}__}}"
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:type="${type}?:'text'" th:readonly="${readonly}" 
 			th:min="${min}" th:max="${max}" th:step="${step}" 
@@ -49,7 +50,7 @@ Example:
 		<span th:if="${type=='password'}" class="input-group-btn">
 			<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
 		</span>
-		<textarea th:if="${maxlength gt 80}" rows="3" th:field="*{__${fieldName}__}" 
+		<textarea th:if="${maxlength gt 80}" rows="3" th:field="*{{__${fieldName}__}}" 
 			th:required="${required}" th:disabled="${disabled}" th:maxlength="${maxlength}" 
 			th:classappend="${readonly==true?'yadaReadonly':'form-control'+(noFeedback==true?'':' has-feedback')}"
 			th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}"></textarea>
@@ -80,6 +81,7 @@ Example:
 		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	</div>
 </div>    	
+</div>
 </body>
 </html>
 		

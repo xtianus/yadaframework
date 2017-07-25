@@ -2,7 +2,6 @@ package net.yadaframework.core;
 
 import java.io.File;
 import java.util.Properties;
-import java.util.concurrent.Executor;
 
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
@@ -15,11 +14,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import net.yadaframework.components.YadaUtil;
 
@@ -30,17 +30,25 @@ import net.yadaframework.components.YadaUtil;
 public class YadaAppConfig {
 	private static Logger log = LoggerFactory.getLogger(YadaAppConfig.class);
 	
-	@Autowired YadaConfiguration config;
+	@Autowired private YadaConfiguration config;
 	
-	/**
-	 * This is to prevent the logging of:
-	 * "Could not find default TaskExecutor bean - No qualifying bean of type [org.springframework.core.task.TaskExecutor] is defined"
-	 * @see http://stackoverflow.com/a/31820129/587641
-	 */
-    @Bean
-    public Executor taskExecutor() {
-        return new SimpleAsyncTaskExecutor();
-    }
+	@Bean
+	public TaskScheduler taskScheduler() {
+		TaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+		return taskScheduler;
+	}
+	
+	
+// Removed because it's better not to force an executor over the Spring default. The error is just logged at debug level anyway
+//	/**
+//	 * This is to prevent the logging of:
+//	 * "Could not find default TaskExecutor bean - No qualifying bean of type [org.springframework.core.task.TaskExecutor] is defined"
+//	 * @see http://stackoverflow.com/a/31820129/587641
+//	 */
+//    @Bean
+//    public Executor taskExecutor() {
+//        return new SimpleAsyncTaskExecutor();
+//    }
 	
 	@Bean
 	public MessageSource messageSource() {

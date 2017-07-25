@@ -17,10 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.persistence.entity.YadaPersistentEnum;
 import net.yadaframework.web.YadaDatatablesColumn;
 import net.yadaframework.web.YadaDatatablesOrder;
 import net.yadaframework.web.YadaDatatablesRequest;
@@ -85,6 +88,7 @@ public class YadaDataTableDao {
 		}
 		YadaSql yadaSql = yadaDatatablesRequest.getYadaSql();
 		YadaSql countSql = (YadaSql) YadaUtil.copyEntity(yadaSql); // Copy any conditions set before calling
+		YadaSql searchSql = YadaSql.instance();
 		
 		yadaSql.selectFrom("select e from "+targetClass.getSimpleName()+" e");
 		countSql.selectFrom("select count(*) from "+targetClass.getSimpleName()+" e");
@@ -95,7 +99,7 @@ public class YadaDataTableDao {
 			boolean columnSearchable = yadaDatatablesColumn.isSearchable();
 			if (globalSearchEnabled && columnSearchable) {
 				// First use the name as the attribute, then use the data
-				String attributeName = StringUtils.trimToNull(yadaDatatablesColumn.getNameOrData());
+				String attributeName = yadaDatatablesColumn.getNameOrData();
 				if (attributeName!=null) {
 					try {
 						// attributeName could be composite like company.name so we can't get the Field directly
@@ -103,16 +107,20 @@ public class YadaDataTableDao {
 //						Class attributeType = field.getType();
 						Class attributeType = yadaUtil.getType(targetClass, attributeName);
 						// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
-						attributeName = addLeftJoins(attributeName, yadaSql);
+						attributeName = addLeftJoins(attributeName, yadaSql, targetClass);
 						if (attributeType == String.class) {
-							yadaSql.where(attributeName + " like :globalSearchString").or();
+							searchSql.where(attributeName + " like :globalSearchString").or();
 						} else if (attributeType == Boolean.class || attributeType == boolean.class) {
 							// TODO localizzare "true"/"false" (ma anche no)
 							if ("true".indexOf(globalSearchString)>-1) {
-								yadaSql.where(attributeName + " = true").or();
+								searchSql.where(attributeName + " = true").or();
 							} else if ("false".indexOf(globalSearchString)>-1) {
-								yadaSql.where(attributeName + " = false").or();
+								searchSql.where(attributeName + " = false").or();
 							}
+						} else if (attributeType == YadaPersistentEnum.class) {
+							// No need for KEY(" + attributeName + ") = :yadalang" because it's added by addLeftJoins()
+							searchSql.where(attributeName + " like :globalSearchString").or();
+							searchSql.setParameter("yadalang", LocaleContextHolder.getLocale().getLanguage());
 						} else if (attributeType.isEnum()) {
 							// Per gli enum devo ciclare su tutte le chiavi, prendere i valori nel locale corrente, e scoprire quali enum contengono la searchkey
 							List<Integer> enumValues = new ArrayList<Integer>();
@@ -122,7 +130,7 @@ public class YadaDataTableDao {
 									enumValues.add(((Enum)enumConstant).ordinal());
 								}
 							}
-							yadaSql.whereIn(attributeName, enumValues).or();
+							searchSql.whereIn(attributeName, enumValues).or();
 						} else if (attributeType == Long.class || attributeType == long.class 
 							|| attributeType == Integer.class || attributeType == int.class 
 							|| attributeType == BigInteger.class || attributeType == BigDecimal.class
@@ -132,7 +140,7 @@ public class YadaDataTableDao {
 							) {
 							// Vorrei fare il match parziale della stringa digitata dentro al valore numerico ma JPA non supporta il like e CONVERT causa un 
 							// java.lang.NullPointerException dentro a org.hibernate.hql.internal.antlr.HqlBaseParser.identPrimary(HqlBaseParser.java:4285)
-							yadaSql.where(globalSearchNumber!=null, attributeName + " = :globalSearchNumber").or();
+							searchSql.where(globalSearchNumber!=null, attributeName + " = :globalSearchNumber").or();
 //							yadaSqlBuilder.addWhere(globalSearchNumber!=null, "CONVERT("+attributeName + " USING utf8) like :globalSearchString", "or");
 						} else {
 							log.error("Invalid attribute type for {} (skipped) ", attributeName);
@@ -144,6 +152,10 @@ public class YadaDataTableDao {
 				}
 			}
 		}
+		String searchConditions = searchSql.getWhere();
+		if (StringUtils.isNotBlank(searchConditions)) {
+			yadaSql.where("(" + searchConditions + ")").and();
+		}
 		// Sorting
 		List<YadaDatatablesOrder> orderList = yadaDatatablesRequest.getOrder();
 		for (YadaDatatablesOrder yadaDatatablesOrder : orderList) {
@@ -151,11 +163,12 @@ public class YadaDataTableDao {
 			if (columnIndex>=0) {
 				YadaDatatablesColumn yadaDatatablesColumn = yadaDatatablesColumns.get(columnIndex);
 				if (yadaDatatablesColumn.isOrderable()) {
-					String attributeName = StringUtils.trimToNull(yadaDatatablesColumn.getNameOrData());
+					String attributeName = yadaDatatablesColumn.getNameOrData();
 					if (attributeName!=null) {
 						// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
-						attributeName = addLeftJoins(attributeName, yadaSql);
+						attributeName = addLeftJoins(attributeName, yadaSql, targetClass);
 						yadaSql.orderBy(attributeName + " " + yadaDatatablesOrder.getDir());
+						// Class attributeType = yadaUtil.getType(targetClass, attributeName);
 					}
 				}
 			}
@@ -179,20 +192,42 @@ public class YadaDataTableDao {
     	return result;
 	}
 	
-	private String addLeftJoins(String attributePath, YadaSql yadaSqlBuilder) {
+	/**
+	 * From an attribute with a path, like "location.company.name", inserts needed left joins and returns the last segment "company.name".
+	 * Joins are inserted for all elements before the last dot: "location" and "company" in the example.
+	 * @param attributePath
+	 * @param yadaSqlBuilder
+	 * @return
+	 */
+	private String addLeftJoins(String attributePath, YadaSql yadaSqlBuilder, Class targetClass) {
 		if (attributePath==null) {
 			return null;
 		}
-		return addLeftJoinsRecurse(attributePath, "e", yadaSqlBuilder);
+		return addLeftJoinsRecurse(attributePath, "e", yadaSqlBuilder, targetClass);
 	}
 
-	private String addLeftJoinsRecurse(String attributePath, String context, YadaSql yadaSql) {
+	private String addLeftJoinsRecurse(String attributePath, String context, YadaSql yadaSql, Class targetClass) {
 		String[] parts = attributePath.split("\\.");
 		if (parts.length>1) { // location.company.name
 			String current = parts[0]; // location
 			yadaSql.join("left join " + context + "." + current + " " + current); // e.location location
-			return addLeftJoinsRecurse(StringUtils.substringAfter(attributePath, "."), current, yadaSql);
+			return addLeftJoinsRecurse(StringUtils.substringAfter(attributePath, "."), current, yadaSql, targetClass);
 		} else {
+			try {
+				// Last element of the path - if it's a YadaPersistentEnum we still need a join for the map
+				if (yadaUtil.getType(targetClass, attributePath) == YadaPersistentEnum.class) {
+					yadaSql.join("left join " + context + "." + attributePath + " " + attributePath); 	// left join user.status status
+					yadaSql.join("left join " + attributePath + ".langToText langToText");				// left join status.langToText langToText
+					String whereToAdd = "KEY(langToText)=:yadalang";
+					if (yadaSql.getWhere().indexOf(whereToAdd)<0) {
+						yadaSql.where(whereToAdd).and();
+						yadaSql.setParameter("yadalang", LocaleContextHolder.getLocale().getLanguage());
+					}
+					return "langToText";
+				}
+			} catch (NoSuchFieldException e) {
+				log.error("No field {} found on class {} (ignored)", attributePath, targetClass);
+			}
 			return context + "." + attributePath; // e.phone, company.name
 		}
 	}

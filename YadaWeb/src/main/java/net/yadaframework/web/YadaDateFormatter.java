@@ -46,7 +46,9 @@ public class YadaDateFormatter implements Formatter<Date> {
      * Chiamato automaticamente da Spring per convertire un oggetto Date in una stringa con il formato html5
      */
     public String print(final Date object, final Locale locale) {
-    	return html5Formatter.format(object);
+    	String result = html5Formatter.format(object);
+//    	log.debug("Formatting from {} to {}", object, result);
+    	return result;
    }
 
     /**

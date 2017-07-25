@@ -15,11 +15,12 @@ Parameters:
 - disabled = true for a disabled select box (optional)
 - onchange = function to call on the change event (optional)
 
-Example: <div th:replace="/yada/form/range::body(fieldName='minGrowTimeForMovie',required=false,min=0,max=500,step=2,labelKey='task.growfields.formfield.minGrowTimeForMovie',helpKey='task.growfields.formfield.minGrowTimeForMovie.help')"></div>
+Example: <div th:replace="/yada/form/range::field(fieldName='minGrowTimeForMovie',required=false,min=0,max=500,step=2,labelKey='task.growfields.formfield.minGrowTimeForMovie',helpKey='task.growfields.formfield.minGrowTimeForMovie.help')"></div>
 
 */-->
 <body>
-<div class="form-group has-feedback" th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
+<div th:fragment="field" 
+	class="form-group has-feedback" th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
 	<label class="control-label" th:for="${#ids.next('fieldId')}"><span th:text="${labelKey!=null?#messages.msg(labelKey):label}">Lumber</span>: <span th:id="${#ids.seq('valId')}" style="font-weight: normal;" th:text="*{__${fieldName}__}">12</span></label>
 	<div class="input-group" style="width:100%"> <!--/* il width serve perché se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
 	<!--/* Not using class 'form-control' because it makes a 'tall' input slider */-->

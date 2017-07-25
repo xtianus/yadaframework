@@ -56,9 +56,9 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	private final static String STATIC_YADARESOURCES_FOLDER = "/yadares";
 	private final static String STATIC_FILE_FOLDER = "/static"; // Ci vanno i file per i quali serve una url univoca immutabile
 	
-	@Autowired YadaConfiguration config;
+	@Autowired protected YadaConfiguration config;
 	
-	@Autowired ApplicationContext applicationContext;
+	@Autowired protected ApplicationContext applicationContext;
 	
 	// @Autowired YadaGlobalAttributesInterceptor globalAttributesInterceptor;
 
@@ -235,8 +235,9 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 //		ServletContextTemplateResolver resolver = new ServletContextTemplateResolver();
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
 	    resolver.setApplicationContext(applicationContext);
-//		resolver.setPrefix("/WEB-INF/classes/" + YadaConstants.EMAIL_TEMPLATES_PREFIX);
-		resolver.setPrefix("/WEB-INF/classes/" + YadaConstants.EMAIL_TEMPLATES_PREFIX + "/");
+		resolver.setPrefix("/WEB-INF/classes/" + YadaConstants.EMAIL_TEMPLATES_PREFIX);
+// The final slash is not needed because all email template paths must start with "/email/" as specified in the "patterns.add()" statement below
+//		resolver.setPrefix("/WEB-INF/classes/" + YadaConstants.EMAIL_TEMPLATES_PREFIX + "/");
 		/* From the tutorial:
 		 When several template resolvers are applied, it is recommended to specify patterns 
 		 for each template resolver so that Thymeleaf can quickly discard those template resolvers 
@@ -244,7 +245,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		 requirement, but a recommendation
 		 */
 		Set<String> patterns = new HashSet<>();
-		patterns.add("email/*"); // Start with "email"
+		patterns.add("/email/*"); // Start with "/email/"
 		resolver.setResolvablePatterns(patterns);
 		resolver.setSuffix(".html");
 		resolver.setCharacterEncoding("UTF-8");
@@ -254,6 +255,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		return resolver;
 	}
 	
+	// x213
 	
 	@Bean
 	public ITemplateResolver webTemplateResolver() {
@@ -325,7 +327,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		//		// http://www.thymeleaf.org/layouts.html
 		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
 		addExtraDialect(engine); // thymeleaf-SpringSecurity-dialect
-		engine.addDialect(new YadaDialect(config));
+		addYadaDialect(engine);
 		return engine;
 	}
 	
@@ -338,7 +340,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		//		// http://www.thymeleaf.org/layouts.html
 		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
 		addExtraDialect(engine); // thymeleaf-SpringSecurity-dialect
-		engine.addDialect(new YadaDialect(config));
+		addYadaDialect(engine);
 		return engine;
 	}
 	
@@ -348,6 +350,10 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	 */
 	protected void addExtraDialect(SpringTemplateEngine engine) {
 		// Do nothing
+	}
+	
+	protected void addYadaDialect(SpringTemplateEngine engine) {
+		engine.addDialect(new YadaDialect(config));
 	}
 
 	// Ho aggiunto un viewResolver per gestire i file xml. Per usarlo basta che il controller restituisca il nome di un file xml senza estensione che sta in WEB-INF/views/xml
@@ -360,7 +366,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		// Do this in the subclass
 		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
 		addExtraDialect(engine); // thymeleaf-SpringSecurity-dialect
-		engine.addDialect(new YadaDialect(config));
+		addYadaDialect(engine);
 		return engine;
 	}
 

@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
 
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.persistence.entity.YadaClause;
@@ -18,8 +19,8 @@ import net.yadaframework.persistence.repository.YadaClauseRepository;
 abstract public class YadaSetup {
 	private transient Logger log = LoggerFactory.getLogger(YadaSetup.class);
 	
-	@Autowired YadaConfiguration yadaConfiguration;
-	@Autowired YadaClauseRepository yadaClauseRepository;
+	@Autowired private YadaConfiguration yadaConfiguration;
+	@Autowired private YadaClauseRepository yadaClauseRepository;
 
 	@PostConstruct
 	public void init() throws Exception {

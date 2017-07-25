@@ -1,0 +1,35 @@
+<config>
+	<info>
+		<env>prod</env>
+		<appName>ulTraBot</appName>
+		<version>0.2 alpha</version>
+		<build>${build}</build> <!-- TODO iniettare tramite gradle -->
+		<date>@@RELEASEDATE_PLACEHOLDER@@</date> <!-- Injected by gradle -->
+		<alpha>true</alpha>
+		<beta>false</beta>
+	</info>
+	
+	<database>
+		<jndiname>java:comp/env/jdbc/yadatestdb</jndiname>
+		<dbName>yadatestdb</dbName>
+		<user>yadatest</user>
+		<password>yadatest</password>
+		<server>localhost</server>
+		<showSql>false</showSql>
+		<entityPackage>net.yadaframework.persistence.entity</entityPackage>
+	</database>
+	
+	<yada>
+		<jobScheduler>
+			<!-- How often the scheduler checks for jobs that need to start:
+		     all jobs that are scheduled to start before the next period are started -->
+			<periodMillis>10000</periodMillis>
+			<!-- How many threads to use for running jobs. 
+				Jobs in eccesso sono accodati. -->
+			<threadPoolSize>50</threadPoolSize>
+			<!-- Milliseconds after a running job is considered to be stale and killed -->
+			<jobStaleMillis>600000</jobStaleMillis> <!-- 10 minuti -->
+		</jobScheduler>
+	</yada>
+
+</config>

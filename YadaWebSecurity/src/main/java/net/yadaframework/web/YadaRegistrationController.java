@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -42,6 +43,7 @@ public class YadaRegistrationController {
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	@Autowired private PasswordEncoder passwordEncoder;
 	@Autowired private YadaConfiguration yadaConfiguration;
+	@Autowired private MessageSource messageSource;
 
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -130,7 +132,7 @@ public class YadaRegistrationController {
 	}
 
 	@RequestMapping("/passwordRecovery")
-	public String passwordRecovery(YadaRegistrationRequest yadaRegistrationRequest, BindingResult bindingResult, Model model, Locale locale, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) {
+	public String passwordRecovery(YadaRegistrationRequest yadaRegistrationRequest, BindingResult bindingResult, Locale locale, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) {
 		if (yadaRegistrationRequest==null || yadaRegistrationRequest.getEmail()==null) {
 			return "redirect:/pwdRecover";
 		}
@@ -153,8 +155,10 @@ public class YadaRegistrationController {
 			bindingResult.rejectValue("email", "email.send.failed");
 			return "/pwdRecover";
 		}
-		yadaWebUtil.modalInfo("Check your email inbox!", "An email has been sent to \""+yadaRegistrationRequest.getEmail()+
-								"\" with a link to set a new password.", redirectAttributes);
+		YadaNotify yadaNotify = YadaNotify.instance(redirectAttributes).yadaMessageSource(messageSource, locale);
+		yadaNotify.yadaTitleKey("email.passwordrecover.title");
+		yadaNotify.yadaOk().yadaMessageKey("email.passwordrecover.message", yadaRegistrationRequest.getEmail());
+		yadaNotify.yadaSave();
         return "redirect:/"; 
 	}
 }

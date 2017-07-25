@@ -14,7 +14,7 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import net.yadaframework.async.YadaQuartzJobFactory;
 
 @Configuration
-public class YadaSchedulerConfig {
+public class YadaSchedulerQuartzConfig {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
 	@Autowired

@@ -12,7 +12,7 @@
 
 	/**
 	 * Create a new DataTable with the given options:
-	 * @param $table the jquery table, e.g. $('#myTable')
+	 * @param $table the jquery table, e.g. $('#myTable'). It must have an id.
 	 * @param dataUrl the ajax url to retrieve data in json format, e.g. [[@{/gestione/ajaxCompanyTablePage}]]
 	 * @param dataAttributes names of the json attributes for data of each column, e.g. ['name', 'surname', 'address']
 	 *        The array can also contain full DataTable objects with data/name/orderable/searchable fields, e.g. ['name', 'surname', {data:'address',orderable:false}]
@@ -29,11 +29,12 @@
 	 *  - abortButtonText (optional)
 	 *  - idName the name of the id request parameter (optional - defaults to "id")
 	 *  - nameColumn the index of the column holding the text to show in the dialog when deleting one element (checkboxes = 1)
-	 * @param array of column ordering, e.g. [[1, 'asc']] or [[ 0, 'asc' ], [ 1, 'asc' ]] 
+	 * @param order array of column ordering, e.g. [ [1, 'asc'] ] or [ [ 0, 'asc' ], [ 1, 'asc' ] ]
+	 *        - be careful that in thymeleaf you need a space between two open squares: [ [ not [[
 	 * NOTE: index 1 is the checkbox column
 	 * @param pageLength the number of rows per page
-	 * @param languageUrl url to the language file, like http://server.example/path/18n/italian.lang
-	 * @param extraButtons additional command button definitions:
+	 * @param (optional) languageUrl url to the language file, like http://server.example/path/18n/italian.lang
+	 * @param (optional) extraButtons additional command button definitions in an array of objects:
 	 * - url to call when the button is clicked 
 	 * - title to show in the tooltip
 	 * - icon for the button, like '<i class="fa fa-power-off" aria-hidden="true"></i>'
@@ -41,9 +42,58 @@
 	 * - ajax (optional) false to make a normal page transition to the target link
 	 * @returns the DataTable object
 	 */
-	yada.dataTableCrud = function($table, dataUrl, dataAttributes, editDef, deleteDef, order, pageLength, languageUrl, extraButtons) {
+	yada.dataTableCrud = function($table, dataUrl, dataAttributes, editDef, deleteDef, order, pageLength, languageUrl, extraButtons, removeCheckbox) {
+		// Method argument validation
+		if ($table == null || typeof $table != "object" || $table.length!=1 || typeof $table[0] != "object") {
+			console.error("yada.datatables: $table must be a single jQuery object");
+			return;
+		}
+		if (dataUrl==null || typeof dataUrl != "string") {
+			console.error("yada.datatables: dataUrl must be a string");
+			return;
+		}
+		if (!Array.isArray(dataAttributes) || dataAttributes.length == 0) {
+			console.error("yada.datatables: dataAttributes must be a non-empty array");
+			return;
+		}
+		if (editDef!=null && (typeof editDef != "object" || Array.isArray(editDef))) {
+			console.error("yada.datatables: editDef must be an object or null");
+			return;
+		}
+		if (deleteDef!=null && (typeof deleteDef != "object" || Array.isArray(deleteDef))) {
+			console.error("yada.datatables: deleteDef must be an object or null");
+			return;
+		}
+		if (!Array.isArray(order) || order.length == 0 ) {
+			console.error("yada.datatables: order must be a non-empty array");
+			return;
+		}
+		if (typeof pageLength != "number" ) {
+			console.error("yada.datatables: pageLength must be an integer");
+			return;
+		}
+		if (languageUrl!=null && typeof languageUrl != "string") {
+			console.error("yada.datatables: languageUrl must be a string or null");
+			return;
+		}
+		if (extraButtons!=null && (!Array.isArray(extraButtons) || extraButtons.length == 0 || typeof extraButtons[0] != "object" || Array.isArray(extraButtons[0]) ) ) {
+			console.error("yada.datatables: extraButtons must be a non-empty array of objects or null");
+			return;
+		}
+		if (removeCheckbox!=null && typeof removeCheckbox != "boolean") {
+			console.error("yada.datatables: removeCheckbox must be a boolean or null");
+			return;
+		}
+		
+		//
+		var tableId = $table.attr('id');
+		if (tableId==undefined) {
+			console.error("yada.datatables: $table must have a valid id attribute");
+			return;
+		}
+		
 		var totColumns = $('th', $table).length;
-		var neededColumns = dataAttributes.length + 3;
+		var neededColumns = dataAttributes.length + 2 + (removeCheckbox?0:1);
 		if (totColumns!=neededColumns) {
 			yada.showErrorModal("Internal Error", "Table '" + $table[0].id + "' has " + totColumns + " columns but " + neededColumns + " where expected - (ignored)");
 		}
@@ -54,22 +104,26 @@
 		    	className: 'control',
 		    	orderable: false,
 				searchable: false
-		    },
-	       {	// Colonna dei checkbox
-	       	data: null,
-	       	name: 'seleziona', // Non usato
-			orderable: false,
-			searchable: false,
-	           render: function ( data, type, row ) {
-	               if ( type === 'display' ) {
-	                   return '<input type="checkbox" class="yadaCheckInCell s_rowSelector"/>';
-	               }
-	               return data;
-	           },
-	           width: "50px",
-	           className: "yadaCheckInCell"
-	       }	                   
+		    }
 		];
+		if (!removeCheckbox) {
+			columnDef.push(
+				{	// Colonna dei checkbox
+					data: null,
+					name: 'seleziona', // Non usato
+					orderable: false,
+					searchable: false,
+					render: function ( data, type, row ) {
+						if ( type === 'display' ) {
+							return '<input type="checkbox" class="yadaCheckInCell s_rowSelector"/>';
+						}
+						return data;
+					},
+					width: "50px",
+					className: "yadaCheckInCell"
+				}	                   
+			);
+		}
 		// Add field columns
 		for (var i = 0; i < dataAttributes.length; i++) {
 			var field = dataAttributes[i];
@@ -144,18 +198,27 @@
 		    }
 	    });
 		var dataTable = $table.DataTable( {
-	        responsive: {
-	            details: {
-	                type: 'column'
-	            }
-	        },
+	        responsive: true,
 	        pageLength: pageLength,
 			orderMulti: order.length>1,
 			order: order,
 			columns: columnDef,					
 		    serverSide: true,
 		    ajax: function(data, callback, settings) {
+		    	// Need to add any extra parameter if a form is present
+		    	var addedData = $("form.yada_dataTables_"+tableId).serializeArray();
+		    	var extraParam = data['extraParam']={};
+		    	var i=0;
+		    	for (i=0; i<addedData.length; i++) {
+		    		var paramObj = addedData[i];
+		    		var paramName = paramObj.name;
+		    		var paramValue = paramObj.value;
+		    		extraParam[paramName] = paramValue;
+		    	}
 		    	yada.ajax(dataUrl, jQuery.param(data), callback, 'POST');
+		    },
+		    language: {
+		    	url: languageUrl
 		    }
 	//	    ajax: {
 	//	    	url: dataUrl,
@@ -165,11 +228,13 @@
 	//	    }
 		});
 		
+		/*
 		if (languageUrl!=null) {
 			dataTable.language = {
 				url: languageUrl	
 			}
 		}
+		*/
 		
 		dataTable.on('draw.dt', function () {
 			var thisTable = this; // DOM table
@@ -316,7 +381,7 @@
 		
 		// yadaTableToolbar: aggiunta extraButtons
 		if (extraButtons!=null) {
-			makeToolbarExtraButtons(extraButtons, $table, dataTable);
+			makeToolbarExtraButtons(extraButtons, dataTable, $table);
 		}
 			  
 		return dataTable;
@@ -329,7 +394,7 @@
 		});
 	}
 	
-	function makeToolbarExtraButtons(extraButtons, $table, dataTable) {
+	function makeToolbarExtraButtons(extraButtons, dataTable, $table) {
 		var sortedExtraButtons = extraButtons.sort(function (a, b) { return Math.sign(a.toolbarPosition-b.toolbarPosition) });
 		for (var i=0; i<sortedExtraButtons.length; i++) {
 			var btndef = sortedExtraButtons[i];
@@ -346,12 +411,12 @@
 				} else {
 					$existing.eq(pos).before(buttonHtml);
 				}
-				makeExtraButtonHandler(btndef, $('.s_toolbarExtraButton' + i, $yadaTableToolbar), $table, dataTable);
+				makeExtraButtonHandler(btndef, $('.s_toolbarExtraButton' + i, $yadaTableToolbar), dataTable, $table);
 			}
 		}
 	}
 	
-	function makeExtraButtonHandler(extraButtonDef, $button, $table, dataTable) {
+	function makeExtraButtonHandler(extraButtonDef, $button, dataTable, $table) {
 		$button.click(function(e) {
 			e.preventDefault();
 			var ids = [];
@@ -387,6 +452,8 @@
 	}
 	
 	function recursiveEnableAjaxForm(responseText, responseHtml) {
+		yada.enableAjaxForm($('form.yadaAjaxForm', responseHtml), recursiveEnableAjaxForm);
+		// Legacy
 		yada.enableAjaxForm($('form.s_ajaxForm', responseHtml), recursiveEnableAjaxForm);
 	};
 

@@ -589,6 +589,20 @@ public class YadaSql implements CloneableDeep {
 	}
 	
 	/**
+	 * Sets the whole query. Useful for debugging.
+	 * @param query
+	 */
+	public void overwriteQuery(String query) {
+		queryBuffer = new StringBuilder(query);
+		joins = new StringBuilder();
+		whereConditions = new StringBuilder();
+		havingConditions = new StringBuilder();
+		groupBy = "";
+		orderBy = "";
+		limit = null;
+	}
+	
+	/**
 	 * Returns the resulting sql after replacing aliases. It can be used when reusing an existing query with a new alias, to get something like 
 	 * "select u from User u where u.type=1 and u.age = (select min(u2.age) from User u2 where u2.type=1)". In this case, create a query "where XX.type=1" and use it
 	 * twice, first replacing "XX" with "u", then replacing "XX" with "u2".
@@ -648,6 +662,11 @@ public class YadaSql implements CloneableDeep {
 		return null;
 	}
 
+	@Override
+	public String toString() {
+		return sql();
+	}
+
 //	/**
 //	 * Sets an alias used in the query. Needed to reuse the same
 //	 * @param aliasPlaceholder the alias placeholder, like "ENTITY"
@@ -656,5 +675,13 @@ public class YadaSql implements CloneableDeep {
 //	public void addAlias(String aliasPlaceholder, String aliasName) {
 //		aliasMap.put(aliasPlaceholder, aliasName);
 //	}
+	
+	/**
+	 * Returns the "where" section of the query, not starting with "where"
+	 * @return
+	 */
+	public String getWhere() {
+		return StringUtils.removeStart(whereConditions.toString(), "where ");
+	}
 
 }

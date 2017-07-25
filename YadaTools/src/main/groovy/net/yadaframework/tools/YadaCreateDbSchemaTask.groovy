@@ -25,7 +25,11 @@ class YadaCreateDbSchemaTask extends DefaultTask {
 		File toFolder = new File("$project.buildDir/classes/main/META-INF");
 		toFolder.mkdirs();
 		File toFile = new File(toFolder, "persistence.xml")
-		Files.copy(fromFile.toPath(), toFile.toPath(), StandardCopyOption.REPLACE_EXISTING) 
+		if (fromFile!=null && toFile!=null) { 
+			Files.copy(fromFile.toPath(), toFile.toPath(), StandardCopyOption.REPLACE_EXISTING) 
+		} else { 
+			System.out.println("Not copying persistence.xml from " + fromFile);
+		}
 		// Using JPA schema generation the output doesn't have ";" at line end for mysql, so it's not good
 		// Persistence.generateSchema("yadaPersistenceUnit", properties);
 		
@@ -35,6 +39,7 @@ class YadaCreateDbSchemaTask extends DefaultTask {
 			classpath: project.configurations.hibtools.asPath
 			)
 		System.out.println("Creating file ${project.projectDir}/schema/${outputfilename}");
+		// System.out.println("Classpath: ${project.configurations.hibtools.asPath}");
 		// Remove the file because the current version of the tools appends on the existing file.
 		// See org.hibernate.tool.schema.internal.exec.ScriptTargetOutputToFile
 		File outputFile = new File("${project.projectDir}/schema/${outputfilename}");

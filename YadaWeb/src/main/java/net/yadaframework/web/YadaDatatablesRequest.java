@@ -1,11 +1,12 @@
 package net.yadaframework.web;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.yadaframework.persistence.YadaSql;
-import net.yadaframework.persistence.YadaSqlBuilder;
 
 /**
  * Mapped by Spring automatically from the request
@@ -26,6 +27,7 @@ public class YadaDatatablesRequest {
 	YadaDatatablesColumnSearch search = new YadaDatatablesColumnSearch();
 	// array defining how many columns are being ordered upon - i.e. if the array length is 1, then a single column sort is being performed, otherwise a multi-column sort is being performed.
 	List<YadaDatatablesOrder> order;
+	Map<String, String> extraParam = new HashMap<>();
 	
 	// Output values
 	long recordsTotal;
@@ -121,6 +123,14 @@ public class YadaDatatablesRequest {
 	 */
 	public YadaSql getYadaSql() {
 		return yadaSql;
+	}
+
+	public Map<String, String> getExtraParam() {
+		return extraParam;
+	}
+
+	public void setExtraParam(Map<String, String> extraParam) {
+		this.extraParam = extraParam;
 	}
 	
 }

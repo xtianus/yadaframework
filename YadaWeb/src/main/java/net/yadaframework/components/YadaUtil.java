@@ -9,6 +9,8 @@ import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -40,8 +42,6 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -163,6 +163,17 @@ public class YadaUtil {
 		String attributeName = StringUtils.substringBefore(attributePath, ".");
 		Field field = rootClass.getDeclaredField(attributeName);
 		Class attributeType = field.getType();
+		// If it's a list, look for the list type
+		if (attributeType == java.util.List.class) {
+			// TODO check if the attributeType is an instance of java.util.Collection
+			ParameterizedType parameterizedType = (ParameterizedType)field.getGenericType();
+			if (parameterizedType!=null) {
+				Type[] types = parameterizedType.getActualTypeArguments();
+				if (types.length==1) {
+					attributeType = (Class<?>) types[0];
+				}
+			}
+		}
 		return getType(attributeType, StringUtils.substringAfter(attributePath, "."));
 	}
 	
@@ -323,38 +334,34 @@ public class YadaUtil {
 	            Files.delete(item);
 	            result++;
 	        }
-	    } catch (final Exception e) { // empty
+	    } catch (final Exception e) {
+	    	log.info("Exception while cleaning folder {}", folder, e);
 	    }
 	    return result;
 	}
 	
 	/**
-	 * Elimina dal folder tutti i file che matchano il nome e sono più vecchi (modify time) della data indicata
+	 * Removes files from a folder starting with the prefix (can be an empty string) and older than the given date
 	 * @param folder
 	 * @param prefix
 	 * @param olderThan
+	 * @return the number of deleted files
 	 */
-	@Deprecated // Should be rewritten with streams
-	public void cleanupFolder(File folder, String prefix, Date olderThan) {
-		try {
-			Collection<File> files = FileUtils.listFiles(folder,
-				FileFilterUtils.and(
-					FileFilterUtils.ageFileFilter(olderThan, true),
-					FileFilterUtils.prefixFileFilter(prefix)
-				),
-				null
-			);
-			for (File file : files) {
-				log.debug("Deleting file {}", file);
-				boolean deleted = file.delete();
-				if (!deleted) {
-					log.error("Failed to delete file {} during folder cleanup", file);
+	public int cleanupFolder(Path folder, String prefix, Date olderThan) {
+		int result = 0;
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(folder, prefix + "*")) {
+			for (final Path item : directoryStream) {
+				if (Files.getLastModifiedTime(item).toMillis()>olderThan.getTime()) {
+					Files.delete(item);
+					result++;
 				}
 			}
-		} catch (Exception e) {
-			log.error("Failed to cleanup folder " + folder, e);
+		} catch (final Exception e) {
+			log.info("Exception while cleaning folder {}", folder, e);
 		}
-	}	
+		return result;
+	}
+	
 	/**
 	 * Da un nome tipo abcd.JPG ritorna "jpg"
 	 * @param filename
@@ -446,7 +453,9 @@ public class YadaUtil {
 	 */
 	public boolean exec(String shellCommandKey, Map<String, String> params) {
 		String executable = config.getString(shellCommandKey + "/executable");
-		List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
+		// Need to use getProperty() to avoid interpolation on ${} arguments
+		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
+		List<String> args = (List<String>) config.getConfiguration().getProperty(shellCommandKey + "/arg");
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
 			String error = exec(executable, args, params, outputStream);

@@ -81,9 +81,16 @@ public class YadaWebUtil {
 	 * @return
 	 */
 	public boolean isAjaxRequest() {
-		// 		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
-		String ajaxHeader = getCurrentRequest().getHeader("X-Requested-With");
-		return "XMLHttpRequest".equals(ajaxHeader);
+		return isAjaxRequest(getCurrentRequest());
+	}
+	
+	/**
+	 * Ritorna true se la request passata è ajax
+	 * @return
+	 */
+	public boolean isAjaxRequest(HttpServletRequest request) {
+		String ajaxHeader = request.getHeader("X-Requested-With");
+		return "XMLHttpRequest".equalsIgnoreCase(ajaxHeader);
 	}
 	
 	/**

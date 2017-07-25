@@ -61,7 +61,19 @@ public abstract class YadaConfiguration {
 	private int tagFilterMax = -1;
 	private int maxPwdLen = -1;
 	private int minPwdLen = -1;
+	private String errorPageForward = null;
 
+	/**
+	 * Returns the page to forward to after an unhandled exception or HTTP error
+	 * @return
+	 */
+	public String getErrorPageForward() {
+		if (errorPageForward==null) {
+			errorPageForward = configuration.getString("/config/paths/errorPageForward", "/");
+		}
+		return errorPageForward;
+	}
+	
 	public boolean isBeta() {
 		if (beta==null) {
 			beta=configuration.getBoolean("/config/info/beta", false);
@@ -784,8 +796,33 @@ public abstract class YadaConfiguration {
 	 * @throws ConfigurationException 
 	 */
 	public void reloadIfNeeded() throws ConfigurationException {
-		// TODO ancora il reload non funziona !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// TODO Doesn't seem to work
 		builder.getReloadingController().checkForReloading(null);
 		this.configuration = ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration());
 	}
+
+	/**
+	 * The YadaJobScheduler period in milliseconds. <1 means do not schedule
+	 * @return
+	 */
+	public long getYadaJobSchedulerPeriod() {
+		return this.configuration.getLong("config/yada/jobScheduler/periodMillis", 0);
+	}
+	
+	/**
+	 * The YadaJobScheduler thread pool size. When the number of concurrent jobs is higher, they are queued.
+	 * @return
+	 */
+	public int getYadaJobSchedulerThreadPoolSize() {
+		return this.configuration.getInt("config/yada/jobScheduler/threadPoolSize", 10);
+	}
+	
+	/**
+	 * Milliseconds after a running job is considered to be stale and killed.
+	 * @return
+	 */
+	public long getYadaJobSchedulerStaleMillis() {
+		return this.configuration.getLong("config/yada/jobScheduler/jobStaleMillis", 1000*60);
+	}
+	
 }

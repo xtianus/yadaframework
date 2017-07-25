@@ -12,8 +12,9 @@
 	- disableDelete = true per non aggiungere il pulsante di delete
 	- commandsColumnText = (optional) text for the commands column header, otherwise #{column.commands} is used
 	- addButtonText = (optional) text for the add button, otherwise #{button.add} is used
-	- editButtonText = (optional) text for the add button, otherwise #{button.edit} is used
+	- editButtonText = (optional) text for the edit button, otherwise #{button.edit} is used
 	- deleteButtonText = (optional) text for the delete button, otherwise #{button.delete} is used
+	- checkbox = (optional) false to hide the leftmost checkbox column
 	
 	Example:
 	<div th:replace="/yada/dataTable(tableId='dataSourceTable',columns=${ {'ID', 'Company','Location','Channel','Token'} })"></div>
@@ -25,13 +26,21 @@
 		<thead>
 			<tr>
 				<th></th> 
-				<th class="yadaCheckInCell all"><input type="checkbox" class="s_columnSelector" title="Tutti/Nessuno" /></th>
+				<th th:if="${!(false==checkbox)}" class="yadaCheckInCell all"><input type="checkbox" class="s_columnSelector" title="Tutti/Nessuno" /></th>
 				<th th:each="column : ${columns}" th:text="${column}">Name</th>
 				<th class="all" th:text="${commandsColumnText}?:#{column.commands}">Commands</th>
 			</tr>
 		</thead>
+		<tfoot>
+			<tr>
+				<td></td> 
+				<td th:if="${!(false==checkbox)}"></td> 
+				<td th:each="column : ${columns}"></td>
+				<td></td>
+			</tr>
+		</tfoot>
 	</table>
-	<div class="yadaTableToolbar">
+	<div th:if="${!(false==checkbox)}" class="yadaTableToolbar">
 		<a th:unless="${disableAdd==true}" class="btn btn-primary s_addButton" href="#">
 			<i class="fa fa-plus fa-lg"></i> <span th:text="${addButtonText}?:#{button.add}">Add</span>
 		</a>

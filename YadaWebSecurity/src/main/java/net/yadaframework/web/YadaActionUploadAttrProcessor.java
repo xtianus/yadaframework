@@ -1,25 +1,16 @@
 package net.yadaframework.web;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.springframework.context.ApplicationContext;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.engine.AttributeName;
-import org.thymeleaf.model.IModel;
-import org.thymeleaf.model.IModelFactory;
 import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.element.AbstractAttributeTagProcessor;
-import org.thymeleaf.processor.element.AbstractElementTagProcessor;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
-import org.thymeleaf.spring4.context.SpringContextUtils;
 import org.thymeleaf.standard.expression.IStandardExpression;
 import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templatemode.TemplateMode;
-import org.unbescape.html.HtmlEscape;
 
 // TODO this used to be included in the "yada" dialect before splitting the YadaWebSecurity project.
 // Now it's not used anymore, waiting for a new "yadasec" dialect
@@ -53,19 +44,6 @@ public class YadaActionUploadAttrProcessor extends AbstractAttributeTagProcessor
                 ATTR_PRECEDENCE,   // Precedence (inside dialect's own precedence)
                 true);             // Remove the matched attribute afterwards
 	}
-
-//	@Override
-//	public int getPrecedence() {
-//        return ATTR_PRECEDENCE;
-//	}
-//
-//    @Override
-//    /**
-//     * Ritorna il nome finale dell'attributo, dopo la trasformazione
-//     */
-//    protected String getTargetAttributeName(final Arguments arguments, final Element element, final String attributeName) {
-//        return "action"; // non ATTR_NAME;
-//    }
 
     @Override
     protected void doProcess(
@@ -106,59 +84,5 @@ public class YadaActionUploadAttrProcessor extends AbstractAttributeTagProcessor
     	structureHandler.setAttribute("action", urlBuilder.toString());
         
     }
-    /**
-     * 
-     */
-//    @Override
-//    protected String getTargetAttributeValue(final Arguments arguments, final Element element, final String attributeName) {
-//    	CsrfToken token = (CsrfToken) arguments.getContext().getVariables().get("_csrf");
-//    	if (token!=null) { 
-//    		StringBuilder urlBuilder = new StringBuilder(super.getTargetAttributeValue(arguments, element, attributeName));
-//    		final String tokenName = token.getParameterName();
-//    		final String tokenValue = token.getToken();
-//    		if (urlBuilder.lastIndexOf("?")>-1) {
-//    			urlBuilder.append("&");
-//    		} else {
-//    			urlBuilder.append("?");
-//    		}
-//    		urlBuilder.append(tokenName).append("=").append(tokenValue);
-//    		return RequestDataValueProcessorUtils.processUrl(arguments.getConfiguration(), arguments, urlBuilder.toString());
-//    	} else {
-//    		// token è null quando il csrf è stato disabilitato
-//    		return super.getTargetAttributeValue(arguments, element, attributeName);
-//    	}
-//    }
-
-//	@Override	
-//	protected ModificationType getModificationType(Arguments arguments, Element element, String attributeName, String newAttributeName) {
-//		return ModificationType.SUBSTITUTION;
-//	}
-//
-////	@Override
-////	protected Map<String, String> getModifiedAttributeValues(Arguments arguments, Element element, String attributeName) {
-////		final Configuration configuration = arguments.getConfiguration();
-////		final String attributeValue = element.getAttributeValue(attributeName);
-////		final IStandardExpressionParser parser = StandardExpressions.getExpressionParser(configuration);
-////		String trailingUrl = attributeValue; // Nel caso sia stato usato un character literal che manda in exception il parser
-////		try {
-////			final IStandardExpression expression = parser.parseExpression(configuration, arguments, attributeValue);
-////			trailingUrl = (String) expression.execute(configuration, arguments);
-////		} catch (Exception e) {
-////			// Ignored
-////		}
-////		final Map<String,String> values = new HashMap<String, String>();
-////		values.put("href", getResourcesUrl(trailingUrl));
-////		return values;	
-////	}
-//
-//	@Override
-//	protected boolean recomputeProcessorsAfterExecution(Arguments arguments, Element element, String attributeName) {
-//		return false;
-//	}
-//
-//	@Override
-//	protected boolean removeAttributeIfEmpty(Arguments arguments, Element element, String attributeName, String newAttributeName) {
-//		return false;
-//	}
 
 }
