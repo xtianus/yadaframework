@@ -15,6 +15,15 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 public class YadaLocalePathChangeInterceptor extends HandlerInterceptorAdapter {
 	public static final String LOCALE_ATTRIBUTE_NAME = YadaLocalePathChangeInterceptor.class.getName() + ".LOCALE";
 
+	/**
+	 * Check if the current locale has been set on the url, e.g. /en/something
+	 * @param request
+	 * @return true if the locale was set using a path variable
+	 */
+	public static boolean localePathRequested(HttpServletRequest request) {
+		return request.getAttribute(LOCALE_ATTRIBUTE_NAME)!=null;
+	}
+	
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 	    Object newLocale = request.getAttribute(LOCALE_ATTRIBUTE_NAME);

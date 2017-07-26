@@ -39,8 +39,11 @@ public class YadaLocalePathVariableFilter extends OncePerRequestFilter {
 	}
 
 	private boolean isLocale(String locale) {
-	    //validate the string here against an accepted list of locales or whatever
-	    try {
+	    // TODO validate the string here against an accepted list of locales or whatever
+	    if (StringUtils.trimToNull(locale)==null) {
+	    	return false;
+	    }
+		try {
 	        LocaleUtils.toLocale(locale);
 	        return true;
 	    } catch (IllegalArgumentException e) {
