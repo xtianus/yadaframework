@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -30,6 +29,7 @@ import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -52,6 +52,18 @@ public class YadaWebUtil {
 	@Autowired private YadaUtil yadaUtil;
 	
 	public final Pageable FIND_ONE = new PageRequest(0, 1); 
+	
+	/**
+	 * Ensures that a paage
+	 * @param pagePath
+	 * @return
+	 */
+	public String getLocaleSafeForward(String pagePath) {
+		if (config.isLocalePathVariableEnabled()) {
+			return "/" + LocaleContextHolder.getLocale().getLanguage() + pagePath;
+		}
+		return pagePath;
+	}
 	
 	/**
 	 * Encodes a string with URLEncoder, handling the useless try-catch that is needed

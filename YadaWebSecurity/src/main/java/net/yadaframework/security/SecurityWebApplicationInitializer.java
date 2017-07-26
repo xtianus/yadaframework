@@ -5,6 +5,7 @@ import javax.servlet.ServletContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 import org.springframework.web.filter.CharacterEncodingFilter;
+import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.multipart.support.MultipartFilter;
 
 @Order(1)
@@ -26,6 +27,6 @@ public class SecurityWebApplicationInitializer extends AbstractSecurityWebApplic
 		characterEncodingFilter.setEncoding("UTF-8");
 		characterEncodingFilter.setForceEncoding(true);
 		// L'AuditFilter lo metto prima di tutto almeno viene eseguito prima dell'autorizzazione e riesco a capire il motivo di eventuali 403
-        insertFilters(servletContext, new CheckSessionFilter(), characterEncodingFilter, new AuditFilter(), new MultipartFilter());
+        insertFilters(servletContext, new DelegatingFilterProxy("yadaLocalePathVariableFilter"), new CheckSessionFilter(), characterEncodingFilter, new AuditFilter(), new MultipartFilter());
     }
 }

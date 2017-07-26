@@ -16,6 +16,7 @@ import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,38 @@ public abstract class YadaConfiguration {
 	private int maxPwdLen = -1;
 	private int minPwdLen = -1;
 	private String errorPageForward = null;
-
+	private List<String> languages = null;
+	private Boolean localePathVariableEnabled = null;
+	
+	/**
+	 * True if the filter enables the use of locales in the url, like /en/mypage
+	 * @return
+	 */
+	public boolean isLocalePathVariableEnabled() {
+		if (localePathVariableEnabled==null) {
+			localePathVariableEnabled = configuration.getBoolean("config/i18n/@localePathVariable", false);
+		}
+		return localePathVariableEnabled.booleanValue();
+	}
+	
+	/**
+	 * Get a list of iso2 languages that the webapp can handle
+	 * @return
+	 */
+	public List<String> getLanguages() {
+		if (languages==null) {
+			languages = Arrays.asList(configuration.getStringArray("config/i18n/language"));
+			for (String language : languages) {
+				try {
+			        LocaleUtils.toLocale(language);
+			    } catch (IllegalArgumentException e) {
+			    	throw new YadaConfigurationException("Language {} is invalid", language);
+			    }			
+			}
+		}
+		return languages;
+	}
+	
 	/**
 	 * Returns the page to forward to after an unhandled exception or HTTP error
 	 * @return
