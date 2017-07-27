@@ -163,13 +163,13 @@
 		}
 		var regex = new RegExp("[?|&]" + param + "=" + value + "&?", 'g');
 		url = url.replace(regex, '&');
-		if (ldm.endsWith(url, '&')) {
+		if (yada.endsWith(url, '&')) {
 			url = url.substring(0, url.length-1);
 		}
 		// '?' needs to be reinserted if first param was removed
 		var pos = url.indexOf('&');
 		if (pos>-1 && url.indexOf('?')==-1) {
-			url = ldm.replaceAt(url, pos, '?');
+			url = yada.replaceAt(url, pos, '?');
 		}
 	 return url;
 	};
@@ -178,13 +178,13 @@
 	yada.removeUrlParameters = function(url, param) {
 		var regex = new RegExp("[?|&]" + param + "=[^&]+&?", 'g');
 		url = url.replace(regex, '&');
-		if (ldm.endsWith(url, '&')) {
+		if (yada.endsWith(url, '&')) {
 			url = url.substring(0, url.length-1);
 		}
 		// '?' needs to be reinserted if first param was removed
 		var pos = url.indexOf('&');
 		if (url.indexOf('?')==-1 && pos>-1) {
-			url = ldm.replaceAt(url, pos, '?');
+			url = yada.replaceAt(url, pos, '?');
 		}
 		return url;
 	};
@@ -253,7 +253,17 @@
 		 var val = queryStr.replace(regex, "$1");
 		 return val == queryStr ? false : unescape(val);
 	};
-	
+
+	//Rimpiazza un singolo carattere
+	yada.replaceAt = function(str, index, character) {
+	 return str.substr(0, index) + character + str.substr(index+character.length);
+	};
+
+	// Ritorna l'url passata senza la query string
+	yada.removeQuery = function(url) {
+		return url.replace(/\?.*/, '');
+	}
+
 	//////////////////////
 	/// Path Variables ///
 	//////////////////////
@@ -302,7 +312,7 @@
 	// Se precedingSegment non è seguito da un valore, ritorna stringa vuota.
 	// Se precedingSegment non c'è, ritorna null
 	yada.getPathVariable = function(url, precedingSegment) {
-		var segments = ldm.removeQuery(url).split('/');
+		var segments = yada.removeQuery(url).split('/');
 		var found=false;
 		for (var i=1; i<segments.length; i++) {
 			if (segments[i]===precedingSegment) {
@@ -330,14 +340,6 @@
 		}
 		return null;
 	}
-	
-	////////////////
-	/// Language ///
-	////////////////
-	
-	
-	
-	
 	
 	////////////////
 	/// Facebook ///
@@ -907,6 +909,21 @@
 //	    }
 //	}
 
+	////////////
+	/// i18n ///
+	////////////
+
+	/**
+	 * Change the current language by changing the language path variable, i.e. from /en/somePage to /de/somePage
+	 * @param language the new language, e.g. "de"
+	 */
+	yada.changeLanguagePathVariable = function(language) {
+		var currentPath = window.location.pathname; // /xx/somePage
+		var regex = new RegExp("/[^/]+");
+		window.location.pathname = currentPath.replace(regex, "/"+language);
+	}
+	
+	
 }( window.yada = window.yada || {} ));
 
 
