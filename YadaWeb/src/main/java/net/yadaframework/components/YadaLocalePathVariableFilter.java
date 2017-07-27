@@ -30,7 +30,7 @@ import net.yadaframework.core.YadaLocalePathChangeInterceptor;
 public class YadaLocalePathVariableFilter implements Filter {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
-	private boolean enabled = false;
+	public static final String CALLED_FLAG = YadaLocalePathVariableFilter.class.getName() + ".CALLED";
 	
 	@Autowired private YadaConfiguration config;
 
@@ -38,10 +38,19 @@ public class YadaLocalePathVariableFilter implements Filter {
 	public void doFilter(ServletRequest servletRequest, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		String url = request.getRequestURI().substring(request.getContextPath().length());
+		// Do we handle the locale path variable?
 		if (!config.isLocalePathVariableEnabled()) {
 			filterChain.doFilter(request, response);
 			return;
 		}
+		// Have we been called already?
+		if (request.getAttribute(CALLED_FLAG)!=null) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+		request.setAttribute(CALLED_FLAG, true); // Called once per request
+				
+		// Check and set the locale
 	    String[] variables = url.split("/", 3);
 
 	    if (variables.length > 1 && isLocale(variables[1])) {
@@ -73,7 +82,4 @@ public class YadaLocalePathVariableFilter implements Filter {
 		// Empty
 	}
 
-	public boolean isEnabled() {
-		return enabled;
-	}
 }
