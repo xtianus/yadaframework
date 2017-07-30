@@ -1,4 +1,5 @@
-// yada.js
+// yada.ajax.js
+// Depends on yada.js
 
 (function( yada ) {
 	"use strict";
@@ -7,6 +8,9 @@
 	// For a public property or function, use "yada.xxx = ..."
 	// For a private property use "var xxx = "
 	// For a private function use "function xxx(..."
+	
+	yada.postLoginHandler = null; // Handler to run after login, if any
+
 	
 	/**
 	 * Init yada ajax handlers on the specified element
@@ -19,7 +23,6 @@
 
 	////////////////////
 	/// Form
-	
 	
 	yada.enableAjaxSelectOptions = function() {
 		$('.s_chain select').change(function() {
@@ -133,15 +136,15 @@
 	function handlePostLoginHandler(responseHtml, responseText) {
 		var isError = yada.isNotifyError(responseHtml);
 		yada.handleNotify(responseHtml);
-		if (postLoginHandler != null) {
+		if (yada.postLoginHandler != null) {
 			if (!isError) { // Esegue l'handler solo se non ho ricevuto una notifica di errore
-				postLoginHandler(responseText, responseHtml); 
+				yada.postLoginHandler(responseText, responseHtml); 
 			}
 		} else {
 			yada.loaderOn();
 			window.location.href=yada.removeHash(window.location.href); // Ricarico la pagina corrente (senza ripetere la post) se non ho un handler
 		}
-		postLoginHandler = null;
+		yada.postLoginHandler = null;
 	};
 	
 	// Apre il modal del login se è già presente in pagina.
@@ -152,7 +155,7 @@
 			// ?????????? A cosa servono questi postXXXX ??????????????????
 			postLoginUrl = url;
 			postLoginData = data;
-			postLoginHandler = handler;
+			yada.postLoginHandler = handler;
 			postLoginType = type;
 			$("#loginModal").on('shown.bs.modal', function (e) {
 				$('#username').focus();
@@ -166,7 +169,7 @@
 	// Apre il modal del login caricandolo via ajax.
 	// handler viene chiamato quando il login va a buon fine
 	yada.openLoginModalAjax = function(loginFormUrl, handler, errorTitle, errorText) {
-		postLoginHandler = handler;
+		yada.postLoginHandler = handler;
 		$.get(loginFormUrl, function(responseText, statusText) {
 			var responseHtml=$("<div>").html(responseText);
 			var loginReceived = openLoginModalIfPresent(responseHtml);
@@ -666,7 +669,7 @@
 				// ?????????? A cosa servono questi postXXXX ??????????????????
 				postLoginUrl = null;
 				postLoginData = null;
-				postLoginHandler = null;
+				yada.postLoginHandler = null;
 				postLoginType = null;
 				if (typeof(data)=='string') {
 					data = yada.addUrlParameterIfMissing(data, "yadaconfirmed", "true", false);
