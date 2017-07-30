@@ -36,7 +36,7 @@ public class YadaController {
         // Otherwise forward to the configured error page (defaults to home)
         model.addAttribute("yadaHttpStatus", errorCode);
         model.addAttribute("yadaHttpMessage", errorMessage);
-        return "forward:" + config.getErrorPageForward();
+        return "forward:" + yadaWebUtil.getLocaleSafeForward(config.getErrorPageForward());
     }	
 
 }

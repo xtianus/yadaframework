@@ -3,8 +3,8 @@ package net.yadaframework.core;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -52,9 +52,9 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
 
-	private final static String STATIC_RESOURCES_FOLDER = "/res";
-	private final static String STATIC_YADARESOURCES_FOLDER = "/yadares";
-	private final static String STATIC_FILE_FOLDER = "/static"; // Ci vanno i file per i quali serve una url univoca immutabile
+	protected final static String STATIC_RESOURCES_FOLDER = "/res";
+	protected final static String STATIC_YADARESOURCES_FOLDER = "/yadares";
+	protected final static String STATIC_FILE_FOLDER = "/static"; // Ci vanno i file per i quali serve una url univoca immutabile
 	
 	@Autowired protected YadaConfiguration config;
 	
@@ -68,6 +68,29 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 //	public void addFormatters(FormatterRegistry registry) {
 //		registry.addConverter(new YadaStringToEntityConverter());
 //	}
+	
+	/**
+	 * Return a string pattern to match urls that should not be localised when using a language path variable
+	 * i.e. the language code will not be added when using @{} in thymeleaf
+	 * @return "(?:/res|/yadares|/static|/contents)"
+	 */
+	public String getNotLocalizedResourcePattern() {
+		String contentUrl = config.getContentUrl();
+		boolean hasContentFolder = contentUrl!=null && contentUrl.startsWith("/");
+		StringBuilder result = new StringBuilder();
+		result.append("(?:");
+		result.append(STATIC_RESOURCES_FOLDER);
+		result.append("|");
+		result.append(STATIC_YADARESOURCES_FOLDER);
+		result.append("|");
+		result.append(STATIC_FILE_FOLDER);
+		if (hasContentFolder) {
+			result.append("|");
+			result.append(contentUrl);
+		}
+		result.append(")/");
+		return result.toString();
+	}
 	
 	public static String getResourceFolder() {
 		return STATIC_RESOURCES_FOLDER;
@@ -107,29 +130,43 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 
 	//
 	// Locale handling
-	// See http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/#mvc-localeresolver
 	//
-	
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(localeChangeInterceptor());
+		registry.addInterceptor(yadaLocalePathChangeInterceptor());
 	}
-
+	//
+	// This is the standard locale implementation using request parameters
+	// See http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/#mvc-localeresolver
+	//
 	@Bean
 	public LocaleChangeInterceptor localeChangeInterceptor() {
 		LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
 		localeChangeInterceptor.setParamName("lang");
 		return localeChangeInterceptor;
 	}
-
+	//
+	// Setting the locale based on a path variable like /en/home
+	// See https://stackoverflow.com/a/23847484/587641
+	//
+	@Bean
+	public YadaLocalePathChangeInterceptor yadaLocalePathChangeInterceptor() {
+		YadaLocalePathChangeInterceptor localeChangeInterceptor = new YadaLocalePathChangeInterceptor();
+		return localeChangeInterceptor;
+	}
+	//
+	// This is setting the locale using cookies
+	//
 	@Bean(name = "localeResolver")
 	public LocaleResolver localeResolver() {
 		CookieLocaleResolver cookieLocaleResolver = new CookieLocaleResolver();
 		cookieLocaleResolver.setCookieMaxAge(Integer.MAX_VALUE);
-		// TODO the default locale should be determined using 'accept-language' header or IP localization
-		cookieLocaleResolver.setDefaultLocale(Locale.ENGLISH);
+		// The default is taken from the request header
+		// cookieLocaleResolver.setDefaultLocale(Locale.ENGLISH);
 		return cookieLocaleResolver;
 	}
+
 	
 	@Bean
 	@Autowired // L'ho spostato qui per risolvere il problema "Requested bean is currently in creation"

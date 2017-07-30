@@ -10,6 +10,9 @@ import javax.persistence.Persistence;
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
+/**
+* Docs: https://docs.jboss.org/tools/latest/en/hibernatetools/html/ant.html
+*/
 class YadaCreateDbSchemaTask extends DefaultTask {
 	Map properties;
 	def outputfilename = "generated.sql";
