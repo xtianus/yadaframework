@@ -25,7 +25,8 @@ import net.yadaframework.core.YadaConfiguration;
  *
  */
 public class YadaHrefAttrProcessor extends AbstractAttributeTagProcessor {
-    // A value of 10000 is higher than any attribute in the
+	private YadaConfiguration config;
+   // A value of 10000 is higher than any attribute in the
     // SpringStandard dialect. So this attribute will execute
     // after all other attributes from that dialect, if in the
     // same tag.
@@ -50,6 +51,7 @@ public class YadaHrefAttrProcessor extends AbstractAttributeTagProcessor {
                 ATTR_PRECEDENCE,   // Precedence (inside dialect's own precedence)
                 true);             // Remove the matched attribute afterwards
 		yadaDialectUtil = new YadaDialectUtil(config);
+		this.config = config;
 	}
 
 
@@ -87,7 +89,7 @@ public class YadaHrefAttrProcessor extends AbstractAttributeTagProcessor {
          */
         final String semiurl = (String) expression.execute(context);
 
-        String resultUrl = yadaDialectUtil.getResAttributeValue(context, semiurl);
+        String resultUrl = yadaDialectUtil.getVersionedAttributeValue(context, semiurl);
 
         /*
          * Set the new value into the 'href' attribute

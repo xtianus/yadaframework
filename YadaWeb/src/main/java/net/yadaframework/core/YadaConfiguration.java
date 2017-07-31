@@ -38,6 +38,8 @@ public abstract class YadaConfiguration {
 	// Cached values
 	// Questi valori li memorizzo perchè probabilmente verranno controllati 
 	// ad ogni pageview e comunque non mi aspetto che cambino a runtime
+	private String contentUrl = null;
+	private String contentName = null;
 	private String environment = null;
 	private String version = null;
 	private String yadaVersion = null;
@@ -398,14 +400,16 @@ public abstract class YadaConfiguration {
 	 * @return
 	 */
 	public String getContentUrl() {
-		String c = configuration.getString("config/paths/contentDir/@url");
-		if (c!=null && c.endsWith("/")) {
-			c = StringUtils.chop(c); // Remove last character
+		if (contentUrl==null) {
+			contentUrl = configuration.getString("config/paths/contentDir/@url", "");
+			if (contentUrl.endsWith("/")) {
+				contentUrl = StringUtils.chop(contentUrl); // Remove last character
+			}
+			if (!contentUrl.startsWith("http") && !contentUrl.startsWith("/")) {
+				contentUrl = '/' + contentUrl;
+			}
 		}
-		if (c!=null && !c.startsWith("http") && !c.startsWith("/")) {
-			return '/' + c;
-		}
-		return c;
+		return contentUrl;
 	}
 
 	/**
@@ -413,8 +417,18 @@ public abstract class YadaConfiguration {
 	 * @return
 	 */
 	public String getContentPath() {
-		String contentDir = configuration.getString("config/paths/contentDir/@name");
-		return getBasePath() + "/" + contentDir;
+		return getBasePath() + "/" + getContentName();
+	}
+
+	/**
+	 * Name of the folder where uploaded contents are stored
+	 * @return
+	 */
+	public String getContentName() {
+		if (contentName==null) {
+			contentName = configuration.getString("config/paths/contentDir/@name");
+		}
+		return contentName;
 	}
 	
 	/**

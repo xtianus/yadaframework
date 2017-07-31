@@ -208,7 +208,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		if (res.endsWith("/")) {
 			res = StringUtils.chop(res); // Remove last character
 		}
-		registry.addResourceHandler(res + "-" + config.getApplicationBuild() + "/**").addResourceLocations(res+"/").setCachePeriod(31556926); // 1 year cache period
+		registry.addResourceHandler(res + "-" + config.getApplicationBuild() + "/**").addResourceLocations(res+"/").setCachePeriod(8640000); // 100 days cache period
 		// Uso "-?*/**" per matchare anche eventuali versioni vecchie che qualcuno potrebbe avere in cache
 		// Non si può fare perché non matcha
 		// registry.addResourceHandler(res + "-*/**").addResourceLocations(res+"/").setCachePeriod(31556926); // 1 year cache period
@@ -224,12 +224,12 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		if (yadares.endsWith("/")) {
 			yadares = StringUtils.chop(res); // Remove last character
 		}
-		registry.addResourceHandler(yadares + "-" + config.getYadaVersion() + "/**").addResourceLocations("classpath:" + YadaConstants.YADA_VIEW_PREFIX+"/yada/").setCachePeriod(31556926); // 1 year cache period
+		registry.addResourceHandler(yadares + "-" + config.getYadaVersion() + "/**").addResourceLocations("classpath:" + YadaConstants.YADA_VIEW_PREFIX+"/yada/").setCachePeriod(8640000); // 100 days cache period
 		
 		// Se dobbiamo gestire anche i contents su filesystem, lo facciamo
 		String contentUrl = config.getContentUrl();
 		if (StringUtils.isNotEmpty(contentUrl) && contentUrl.startsWith("/")) {
-			registry.addResourceHandler(contentUrl + "/**").addResourceLocations("file:"+config.getContentPath() + "/"); // Niente cache period
+			registry.addResourceHandler(contentUrl + "-" + config.getApplicationBuild() + "/**").addResourceLocations("file:"+config.getContentPath() + "/").setCachePeriod(8640000); // 100 days cache period
 		} // Altrimenti le url sono di tipo http e le gestisce qualcun altro
 		
 		// robots.txt is usually added by the deploy script depending on the environment

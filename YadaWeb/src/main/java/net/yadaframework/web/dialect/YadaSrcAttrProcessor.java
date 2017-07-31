@@ -80,7 +80,7 @@ public class YadaSrcAttrProcessor extends AbstractAttributeTagProcessor {
          */
         final String semiurl = (String) expression.execute(context);
 
-        String resultUrl = yadaDialectUtil.getResAttributeValue(context, semiurl);
+        String resultUrl = yadaDialectUtil.getVersionedAttributeValue(context, semiurl);
 
         /*
          * Set the new value into the 'href' attribute
