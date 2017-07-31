@@ -33,6 +33,10 @@ public class YadaLocalePathVariableFilter implements Filter {
 	public static final String CALLED_FLAG = YadaLocalePathVariableFilter.class.getName() + ".CALLED";
 	
 	@Autowired private YadaConfiguration config;
+	
+//	public final static void resetCalledFlag(HttpServletRequest request) {
+//		request.removeAttribute(CALLED_FLAG);
+//	}
 
 	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {

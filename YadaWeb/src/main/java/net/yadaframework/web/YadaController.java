@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import net.yadaframework.components.YadaLocalePathVariableFilter;
 import net.yadaframework.core.YadaConfiguration;
 
 @Controller
@@ -36,7 +37,9 @@ public class YadaController {
         // Otherwise forward to the configured error page (defaults to home)
         model.addAttribute("yadaHttpStatus", errorCode);
         model.addAttribute("yadaHttpMessage", errorMessage);
-        return "forward:" + yadaWebUtil.getLocaleSafeForward(config.getErrorPageForward());
+        return "forward:" + config.getErrorPageForward();
+//        YadaLocalePathVariableFilter.resetCalledFlag(request); // Reset so that the locale is set again and stripped
+//        return "forward:" + yadaWebUtil.getLocaleSafeForward(config.getErrorPageForward());
     }	
 
 }

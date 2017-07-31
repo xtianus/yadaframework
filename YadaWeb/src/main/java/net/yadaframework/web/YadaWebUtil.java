@@ -53,17 +53,17 @@ public class YadaWebUtil {
 	
 	public final Pageable FIND_ONE = new PageRequest(0, 1); 
 	
-	/**
-	 * Ensures that a paage
-	 * @param pagePath
-	 * @return
-	 */
-	public String getLocaleSafeForward(String pagePath) {
-		if (config.isLocalePathVariableEnabled()) {
-			return "/" + LocaleContextHolder.getLocale().getLanguage() + pagePath;
-		}
-		return pagePath;
-	}
+//	/**
+//	 * Ensures that a paage
+//	 * @param pagePath
+//	 * @return
+//	 */
+//	public String getLocaleSafeForward(String pagePath) {
+//		if (config.isLocalePathVariableEnabled()) {
+//			return "/" + LocaleContextHolder.getLocale().getLanguage() + (pagePath.equals("/")?"":pagePath);
+//		}
+//		return pagePath;
+//	}
 	
 	/**
 	 * Encodes a string with URLEncoder, handling the useless try-catch that is needed
