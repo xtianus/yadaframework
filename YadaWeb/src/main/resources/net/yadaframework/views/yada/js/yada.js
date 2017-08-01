@@ -32,8 +32,6 @@
 	var postLoginData = null;
 	var postLoginType = null;
 	
-	var parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
-	
 	$(document).ready(function() {
 		initHandlers();
 	});

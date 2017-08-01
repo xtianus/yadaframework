@@ -10,6 +10,8 @@
 	// For a private function use "function xxx(..."
 	
 	yada.postLoginHandler = null; // Handler to run after login, if any
+	
+	var parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
 
 	
 	/**
@@ -19,6 +21,7 @@
 	yada.initAjaxHandlersOn = function($element) {
 		yada.enableAjaxForms(null, $element);
 		yada.enableAjaxLinks(null, $element);
+		yada.enableAjaxSelects(null, $element);
 	}
 
 	////////////////////
@@ -213,6 +216,39 @@
 	};
 	
 	/**
+	 * Enables ajax calls on select change.
+	 * @param handler a function to call upon successful link submission, can be null
+	 * @param $element the element on which to enable ajax, can be null for the entire body
+	 */
+	yada.enableAjaxSelects = function(handler, $element) {
+		if ($element==null) {
+			$element = $('body');
+		}
+		$('select.yadaAjax', $element.parent()).each(function() {
+			$(this).removeClass('yadaAjax');
+			yada.enableAjaxSelect($(this), handler);
+		});
+	};
+	
+	yada.enableAjaxSelect = function($select, handler) {
+		// If array, recurse to unroll
+		if ($select.length>1) {
+			$select.each(function() {
+				yada.enableAjaxSelect($(this), handler);
+			});
+			return;
+		}
+		// From here on the $link is a single anchor, not an array
+		var markerClass = 'yadaAjaxed'; // To prevent double submission
+		$select.not('.'+markerClass).change(function(e) {
+			return makeAjaxCall(e, $select, handler);
+		})
+		$select.removeClass('yadaAjax');
+		$select.not('.'+markerClass).addClass(markerClass);
+	};
+
+	
+	/**
 	 * Sends a link via ajax, it doesn't have to have class .yadaAjax.
 	 * Links with a "yadaLinkDisabled" class are disabled.
 	 * @param $link the jquery anchor (could be an array), e.g. $('.niceLink')
@@ -229,53 +265,65 @@
 		// From here on the $link is a single anchor, not an array
 		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		$link.not('.'+markerClass).click(function(e) {
-			e.preventDefault();
-			if ($(this).hasClass("yadaLinkDisabled")) {
-				return false;
-			}
-			// Call, in sequence, the handler specified in data-successHandler and the one passed to this function
-			var joinedHandler = function(responseText, responseHtml) {
-				showFeedbackIfNeeded($link);
-				var handlerNames = $link.attr("data-yadaSuccessHandler");
-				if (handlerNames===undefined) {
-					handlerNames = $link.attr("data-successHandler"); // Legacy
-				}
-				if (handlerNames!=null) {
-					// Can be a comma-separated list of handlers, which are called in sequence
-					var handlerNameArray = yada.listToArray(handlerNames);
-					for (var i = 0; i < handlerNameArray.length; i++) {
-						var dataHandler = window[handlerNameArray[i]];
-						if (typeof dataHandler === "function") {
-							dataHandler(responseText, responseHtml, $link[0]);
-						}
-					}
-				}
-				if (handler != null) {
-					handler(responseText, responseHtml, $link[0]);
-				}
-				deleteOnSuccess($link);
-				updateOnSuccess($link, responseHtml);
-			}
-			
-			var url = $(this).attr('href');
-			var confirmText = $link.attr("data-confirm");
-			if (confirmText!=null) {
-				var okButton = $link.attr("data-okButton") || yada.messages.confirmButtons.ok;
-				var cancelButton = $link.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
-				yada.confirm(confirmText, function(result) {
-					if (result==true) {
-						yada.ajax(url, null, joinedHandler==null?joinedHandler:joinedHandler.bind(this), null, $link.attr('data-timeout'));
-					}
-				}, okButton, cancelButton);
-			} else {
-				yada.ajax(url, null, joinedHandler==null?joinedHandler:joinedHandler.bind(this));
-			}
-			return true; // Run other listeners
+			return makeAjaxCall(e, $link, handler);
 		})
 		$link.removeClass('yadaAjax');
 		$link.removeClass('s_ajaxLink'); // Legacy
 		$link.not('.'+markerClass).addClass(markerClass);
 	};
+	
+	function makeAjaxCall(e, $element, handler) {
+		e.preventDefault();
+		if ($element.hasClass("yadaLinkDisabled")) {
+			return false;
+		}
+		// Call, in sequence, the handler specified in data-successHandler and the one passed to this function
+		var joinedHandler = function(responseText, responseHtml) {
+			showFeedbackIfNeeded($element);
+			var handlerNames = $element.attr("data-yadaSuccessHandler");
+			if (handlerNames===undefined) {
+				handlerNames = $element.attr("data-successHandler"); // Legacy
+			}
+			if (handlerNames!=null) {
+				// Can be a comma-separated list of handlers, which are called in sequence
+				var handlerNameArray = yada.listToArray(handlerNames);
+				for (var i = 0; i < handlerNameArray.length; i++) {
+					var dataHandler = window[handlerNameArray[i]];
+					if (typeof dataHandler === "function") {
+						dataHandler(responseText, responseHtml, $element[0]);
+					}
+				}
+			}
+			if (handler != null) {
+				handler(responseText, responseHtml, $element[0]);
+			}
+			deleteOnSuccess($element);
+			updateOnSuccess($element, responseHtml);
+		}
+		
+		var url = $element.attr('href');
+		var confirmText = $element.attr("data-confirm");
+		var data = null;
+		// In a select, set the data object to the option
+		var name = $element.attr("name");
+		var value = $("option:selected", $element).val();
+		if (name !=null && value !=null) {
+			data = {};
+			data[name] = value;
+		}
+		if (confirmText!=null) {
+			var okButton = $element.attr("data-okButton") || yada.messages.confirmButtons.ok;
+			var cancelButton = $element.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
+			yada.confirm(confirmText, function(result) {
+				if (result==true) {
+					yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, $element.attr('data-timeout'));
+				}
+			}, okButton, cancelButton);
+		} else {
+			yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element));
+		}
+		return true; // Run other listeners
+	}
 	
 	/**
 	 * 
