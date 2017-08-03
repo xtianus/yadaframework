@@ -393,10 +393,20 @@ public abstract class YadaConfiguration {
 		}
 		return result;
 	}
+	
+	/**
+	 * Check if content urls must be local to the server or remote with a http address
+	 * @return
+	 */
+	public boolean isContentUrlLocal() {
+		String contentUrl = getContentUrl();
+		return contentUrl!=null && contentUrl.charAt(0)=='/' && contentUrl.charAt(1)!='/';
+	}
+	
 
 	/**
 	 * Url da cui prelevare i "contenuti" caricati dall'utente, senza slash finale.
-	 * Può essere relativa alla root della webapp oppure completa, per esempio "/contents" oppure "http://cdn.my.com/contents"
+	 * Può essere relativa alla root della webapp oppure completa, per esempio "/contents" oppure "http://cdn.my.com/contents" o "//cdn.my.com/contents"
 	 * @return
 	 */
 	public String getContentUrl() {

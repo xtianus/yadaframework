@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,6 +29,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.web.servlet.resource.VersionResourceResolver;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring4.view.ThymeleafViewResolver;
@@ -51,23 +51,14 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 //	private final static long MAXFILESIZE = 10*MB;
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
-
+	// TODO put in configuration file
 	protected final static String STATIC_RESOURCES_FOLDER = "/res";
 	protected final static String STATIC_YADARESOURCES_FOLDER = "/yadares";
-	protected final static String STATIC_FILE_FOLDER = "/static"; // Ci vanno i file per i quali serve una url univoca immutabile
+	protected final static String STATIC_FILE_FOLDER = "/static";
 	
 	@Autowired protected YadaConfiguration config;
 	
 	@Autowired protected ApplicationContext applicationContext;
-	
-	// @Autowired YadaGlobalAttributesInterceptor globalAttributesInterceptor;
-
-
-	// Questo metodo non viene mai chiamato!!! Quindi rinuncio.
-//	@Override
-//	public void addFormatters(FormatterRegistry registry) {
-//		registry.addConverter(new YadaStringToEntityConverter());
-//	}
 	
 	/**
 	 * Return a string pattern to match urls that should not be localised when using a language path variable
@@ -76,7 +67,6 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	 */
 	public String getNotLocalizedResourcePattern() {
 		String contentUrl = config.getContentUrl();
-		boolean hasContentFolder = contentUrl!=null && contentUrl.startsWith("/");
 		StringBuilder result = new StringBuilder();
 		result.append("(?:");
 		result.append(STATIC_RESOURCES_FOLDER);
@@ -84,7 +74,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		result.append(STATIC_YADARESOURCES_FOLDER);
 		result.append("|");
 		result.append(STATIC_FILE_FOLDER);
-		if (hasContentFolder) {
+		if (config.isContentUrlLocal()) {
 			result.append("|");
 			result.append(contentUrl);
 		}
@@ -103,31 +93,6 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	    argumentResolvers.add(resolver);	
 	}
 	
-// NON VAAAAAAAAAAAAAAAAAAAAAAAAA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
-//	@Bean
-//    MultipartConfigElement multipartConfigElement() {
-//		return new MultipartConfigElement(null, MAXFILESIZE, MAXFILESIZE, 0);
-//    }
-//	
-//	@Bean StandardServletMultipartResolver standardServletMultipartResolver() {
-//		return new StandardServletMultipartResolver();
-//	}
-
-//	@Bean(name="filterMultipartResolver")
-//	CommonsMultipartResolver filterMultipartResolver() {
-//		CommonsMultipartResolver filterMultipartResolver = new CommonsMultipartResolver();
-//		filterMultipartResolver.setMaxUploadSize(MAXFILESIZE);
-//		return filterMultipartResolver;
-//	}
-	
-//	@Override
-//	public void addInterceptors(InterceptorRegistry registry) {
-//		//registry.addInterceptor(globalAttributesInterceptor);
-//		// registry.addInterceptor(new ThemeInterceptor()).addPathPatterns("/").excludePathPatterns("/admin/");
-//	}
-	
-//	@Autowired Environment env;
-
 	//
 	// Locale handling
 	//
@@ -180,18 +145,6 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		return result.getObject();
 	}
 
-//	@Bean MessageSource messageSource() {
-//		// FIXME Tratto la configurazione come se fosse un resource bundle per accedere via thymeleaf (non so come fare altrimenti per ora)
-//		ResourceBundleMessageSource result = new ResourceBundleMessageSource();
-//		Properties prop = new Properties();
-//		prop.setProperty("res.version", env.getProperty("res.version"));
-//		result.setCommonMessages(prop);
-//		// http://forum.thymeleaf.org/Access-Spring-properties-td4025970.html
-//		// Perhaps it's useful to add a prefix to the keys
-//		// messageSource.setCommonMessages(furtherProperties); 
-//		return result;
-//	}
-	
 	/**
 	 * Tutti i file dentro a /res vengono indicati come cacheabili lato browser per 1 anno (tramite l'header expires).
 	 * Per evitare che nuove versioni non vengano mai prese, si usa il "trucco" di indicare il numero di build nell'url, così cambiando
@@ -204,6 +157,15 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	 */
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		
+		// The official versioning code doesn't seem to work properly: even when adding a ResourceUrlEncodingFilter to rewrite links
+		// See: 
+		// https://spring.io/blog/2014/07/24/spring-framework-4-1-handling-static-web-resources
+		// http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/#mvc-config-static-resources
+		//	registry.addResourceHandler("/resources/**").addResourceLocations("/META-INF/")
+		//		.setCachePeriod(8640000) // 100 days cache period
+		//		.resourceChain(false).addResolver(new VersionResourceResolver().addFixedVersionStrategy(config.getApplicationBuild(), "/**/"));
+		
 		String res = STATIC_RESOURCES_FOLDER;
 		if (res.endsWith("/")) {
 			res = StringUtils.chop(res); // Remove last character
@@ -225,12 +187,13 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 			yadares = StringUtils.chop(res); // Remove last character
 		}
 		registry.addResourceHandler(yadares + "-" + config.getYadaVersion() + "/**").addResourceLocations("classpath:" + YadaConstants.YADA_VIEW_PREFIX+"/yada/").setCachePeriod(8640000); // 100 days cache period
-		
-		// Se dobbiamo gestire anche i contents su filesystem, lo facciamo
-		String contentUrl = config.getContentUrl();
-		if (StringUtils.isNotEmpty(contentUrl) && contentUrl.startsWith("/")) {
-			registry.addResourceHandler(contentUrl + "-" + config.getApplicationBuild() + "/**").addResourceLocations("file:"+config.getContentPath() + "/").setCachePeriod(8640000); // 100 days cache period
-		} // Altrimenti le url sono di tipo http e le gestisce qualcun altro
+
+		// Handling the "contents" uploaded locally
+		if (config.isContentUrlLocal()) {
+			String contentUrl = config.getContentUrl();
+			// The problem with contents is that the version should be taken from the file timestamp so here it should accept any value but I don't know how to make it work with any version value
+			registry.addResourceHandler(contentUrl + "/**").addResourceLocations("file:"+config.getContentPath() + "/").setCachePeriod(8640000); // 100 days cache period
+		}
 		
 		// robots.txt is usually added by the deploy script depending on the environment
 		registry.addResourceHandler("/robots.txt").addResourceLocations("/").setCachePeriod(86400); // 1 day cache period

@@ -23,7 +23,7 @@ public class YadaDialectUtil {
     	// String contextPath = ((org.thymeleaf.context.IWebContext)context).getRequest().getContextPath();
     	int dividerPos = value.indexOf('/', 1); // Second slash
     	String valueType = value.substring(1, dividerPos); // e.g. "res"
-    	String valuePrefix = value.substring(0, dividerPos); // e.g. "/res"
+//    	String valuePrefix = value.substring(0, dividerPos); // e.g. "/res"
     	String valueSuffix = value.substring(dividerPos); // e.g. "/xxx"
     	boolean isResource = config.getResourceDir().equals(valueType);
     	if (isResource) {
@@ -33,20 +33,26 @@ public class YadaDialectUtil {
     	if (isYada) {
     		return applyVersion(config.getVersionedYadaResourceDir(), valueSuffix); // /site/yadares-7/xxx
     	}
-    	boolean isContent = config.getContentName().equals(valueType);
-    	if (isContent) {
-    		String contentUrlBase = config.getContentUrl(); // e.g. "/contents" or "http://somecdn.com/somecontext"
-    		boolean localUrl = contentUrlBase.charAt(0) == '/' && contentUrlBase.charAt(1) != '/';
-    		if (localUrl) {
-    			return applyVersion(contentUrlBase + "-" + config.getApplicationBuild(), valueSuffix); // /site/contents-002/xxx
-    		}
-    		return contentUrlBase + "/" + valueSuffix; // e.g. http://somecdn.com/somecontext/xxx
-    	}
+		// The problem with contents is that the version should be taken from the file timestamp so here it should accept any value but I don't know how to make it work with any version value
+//    	boolean isContent = config.getContentName().equals(valueType);
+//    	if (isContent) {
+//    		String contentUrlBase = config.getContentUrl(); // e.g. "/contents" or "http://somecdn.com/somecontext"
+//    		if (config.isContentUrlLocal()) {
+//    			return applyVersion(contentUrlBase.substring(1) + "/" + config.getApplicationBuild(), valueSuffix); // /site/contents/002/xxx
+//    		}
+//    		return contentUrlBase + "/" + valueSuffix; // e.g. http://somecdn.com/somecontext/xxx
+//    	}
     	return value;
     }
 
+    /**
+     * 
+     * @param versionedDir without leading /
+     * @param valueSuffix
+     * @return
+     */
 	private String applyVersion(String versionedDir, String valueSuffix) {
-		StringBuilder result = new StringBuilder(versionedDir).append(valueSuffix); // e.g. "/site/res-0002/xxx
+		StringBuilder result = new StringBuilder("/").append(versionedDir).append(valueSuffix); // e.g. "/res-0002/xxx
 		return result.toString();
 	}
 
