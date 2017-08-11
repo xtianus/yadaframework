@@ -191,7 +191,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		// Handling the "contents" uploaded locally
 		if (config.isContentUrlLocal()) {
 			String contentUrl = config.getContentUrl();
-			// The problem with contents is that the version should be taken from the file timestamp so here it should accept any value but I don't know how to make it work with any version value
+			// TODO The problem with contents is that the version should be taken from the file timestamp so here it should accept any value but I don't know how to make it work with any version value
 			registry.addResourceHandler(contentUrl + "/**").addResourceLocations("file:"+config.getContentPath() + "/").setCachePeriod(8640000); // 100 days cache period
 		}
 		

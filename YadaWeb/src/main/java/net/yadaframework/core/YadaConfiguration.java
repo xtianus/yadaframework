@@ -407,16 +407,19 @@ public abstract class YadaConfiguration {
 	/**
 	 * Url da cui prelevare i "contenuti" caricati dall'utente, senza slash finale.
 	 * Può essere relativa alla root della webapp oppure completa, per esempio "/contents" oppure "http://cdn.my.com/contents" o "//cdn.my.com/contents"
-	 * @return
+	 * @return the configured value, or "/contents" by default
 	 */
 	public String getContentUrl() {
 		if (contentUrl==null) {
-			contentUrl = configuration.getString("config/paths/contentDir/@url", "");
+			contentUrl = configuration.getString("config/paths/contentDir/@url", "/contents");
 			if (contentUrl.endsWith("/")) {
 				contentUrl = StringUtils.chop(contentUrl); // Remove last character
 			}
 			if (!contentUrl.startsWith("http") && !contentUrl.startsWith("/")) {
 				contentUrl = '/' + contentUrl;
+			}
+			if (contentUrl.length()==0 || contentUrl.equals("/")) {
+				throw new YadaConfigurationException("The configured contentDir url is invalid: it should either be a full url or a folder-like value, as in '/xxx/yyy'");
 			}
 		}
 		return contentUrl;

@@ -6,8 +6,10 @@
    <!-- This file is only needed to generate the db schema with the ant task -->
    
     <persistence-unit name="yadaPersistenceUnit">
-   		<!-- The Yada entities must be specified here in order for the ant task to pick them up -->
-   		<!-- See the link persistence_2_1.xsd from http://www.oracle.com/webfolder/technetwork/jsc/xml/ns/persistence/index.html -->
+    	<!-- These are needed for Hibernate Tools -->
+    	<jar-file>file:../../../yadaframework/YadaWeb/bin</jar-file>
+    	<jar-file>file:../../../yadaframework/YadaWebSecurity/bin</jar-file>
+    	<!-- These are needed for schema generation. You can remove the ones you don't need -->
   		<class>net.yadaframework.persistence.entity.YadaBrowserId</class>
   		<class>net.yadaframework.persistence.entity.YadaClause</class>
   		<class>net.yadaframework.security.persistence.entity.YadaUserCredentials</class>

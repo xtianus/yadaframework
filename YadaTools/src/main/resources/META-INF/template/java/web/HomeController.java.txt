@@ -15,13 +15,14 @@ import net.yadaframework.web.YadaNotify;
 @Controller
 public class HomeController {
 	@Autowired YadaWebUtil yadaWebUtil;
+	@Autowired YadaNotify yadaNotify;
 
-	// Pagina aperta dopo il timeout di sessione rilevato via checkSession
+	// Called after session timeout
 	@RequestMapping("/timeout")
 	public String timeout(Model model) {
-		YadaNotify.instance(model).yadaTitle("Session Expired")
-			.yadaMessage("Session expired for inactivity, please login again")
-			.yadaInfo().redirectOnClose("/").yadaSave();
+		yadaNotify.title("Session Expired", model)
+			.message("Session expired for inactivity, please login again")
+			.info().redirectOnClose("/").add();
 		return "/home";
 	}
 
@@ -30,7 +31,7 @@ public class HomeController {
 		return "/home";
 	}
 	
-	// La pagina di login è semplicemente la home con un attributo settato
+	// The login page is the home page with an attribute set
 	@RequestMapping("/login")
 	public String login(Model model) {
 		model.addAttribute("login", "login");
