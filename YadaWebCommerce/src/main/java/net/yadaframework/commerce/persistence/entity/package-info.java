@@ -1,0 +1,1 @@
+package net.yadaframework.commerce.persistence.entity;

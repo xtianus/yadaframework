@@ -42,13 +42,6 @@ public enum YadaJobState implements YadaLocalEnum<YadaJobState> {
 		return yadaPersistentEnum;
 	}
 	
-	/**
-	 * @return the database id for this enum value
-	 */
-	public long toId() {
-		return yadaPersistentEnum.getId();
-	}
-	
 	// TODO fix generics
 	public void setYadaPersistentEnum(YadaPersistentEnum yadaPersistentEnum) {
 		this.yadaPersistentEnum = yadaPersistentEnum;

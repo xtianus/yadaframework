@@ -33,7 +33,9 @@ public interface YadaLocalEnum<E extends Enum<E>> {
 	/**
 	 * @return the database id for this enum value
 	 */
-	public long toId();
+	default public long toId() {
+		return toYadaPersistentEnum().getId();
+	}
 	
 	/**
 	 * Convert the current enum to a localized string
