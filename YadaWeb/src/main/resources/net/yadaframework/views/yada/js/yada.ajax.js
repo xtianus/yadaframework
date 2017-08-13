@@ -13,6 +13,10 @@
 	
 	var parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
 
+	// ?????????? A cosa servono questi postXXXX ??????????????????
+	var postLoginUrl = null;
+	var postLoginData = null;
+	var postLoginType = null;
 	
 	/**
 	 * Init yada ajax handlers on the specified element

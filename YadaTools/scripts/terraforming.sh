@@ -3,7 +3,7 @@
 # The current user is root.
 # 22 March 2017
 #
-# TODO: abilitare il connettore AJP di Tomcat in server.xml
+# TODO: utf8mb4 in mysql (optional)
 #
 # Parameters: <hostname> <virtualHost> <projectBasePath> [<myip>] [<deployOptions>]
 
@@ -94,7 +94,7 @@ chmod 700 ${homedir}/.ssh
 chmod 600 ${homedir}/.ssh/authorized_keys2
 
 if [ "$noUfw" == "" ]; then
-	apt-get -o Dpkg::Options::="--force-confnew" install ufw
+	apt-get -o Dpkg::Options::="--force-confnew" -y install ufw
 	ufw allow 22
 	ufw allow 443
 	ufw allow 80
@@ -149,7 +149,7 @@ fi
 # Tomcat configuration
 if [[ $cfgPkgTomcat || $cfgTomcatTarGz ]]; then
 	# Non uso -XX:+UseConcMarkSweepGC perché le vm economiche non hanno tante cpu  
-	sed -i 's%JAVA_OPTS=.*%JAVA_OPTS="-Xloggc:${projectBase}/log/tomcat-gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=1 -XX:GCLogFileSize=1M -XX:+PrintGCDateStamps -Djava.awt.headless=true -Xmx'${cfgTomcatRam}' -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/tomcat-outofmemory-dump"%g' ${cfgTomcatConfiguration}
+	sed -i 's%JAVA_OPTS=.*%JAVA_OPTS="-Xloggc:'${projectBase}'/log/tomcat-gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=1 -XX:GCLogFileSize=1M -XX:+PrintGCDateStamps -Djava.awt.headless=true -Xmx'${cfgTomcatRam}' -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/tomcat-outofmemory-dump"%g' ${cfgTomcatConfiguration}
 	# Utenza tomcat manager
 	sed -i 's%</tomcat-users>%<role rolename="manager-gui"/><role rolename="manager-jmx"/><role rolename="admin"/><user username="${cfgUser}" password="${cfgTomcatManagerPwd}" roles="admin,manager-gui,manager-jmx"/></tomcat-users>%g' ${cfgTomcatBase}/tomcat-users.xml
 	# Compression e timeout
@@ -166,6 +166,8 @@ if [[ $cfgPkgModJk ]]; then
 	apt-get -o Dpkg::Options::="--force-confnew" -y install $cfgPkgModJk
 	sed -i 's/JkLogLevel info/JkLogLevel warn/g' /etc/apache2/mods-available/jk.conf
 	a2enmod jk
+	# Enabling AJP Connector
+	sed -i 's%\(<Connector port="8009".*\)%-->\n&\n<!--%g' ${cfgTomcatBase}/server.xml	
 fi
 if [[ $myHostName && $cfgPkgApache ]]; then
 	echo "ServerName $( hostname )" > /etc/apache2/conf-available/servername.conf
