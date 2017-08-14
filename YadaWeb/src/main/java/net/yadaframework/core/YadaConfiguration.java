@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -65,8 +66,32 @@ public abstract class YadaConfiguration {
 	private int maxPwdLen = -1;
 	private int minPwdLen = -1;
 	private String errorPageForward = null;
-	private List<String> languages = null;
+	private List<String> locales = null;
 	private Boolean localePathVariableEnabled = null;
+	private Locale defaultLocale = null;
+	private boolean defaultLocaleChecked = false;
+	
+	/**
+	 * Returns the default locale when getting a string that doesn't have a value for the requested locale.
+	 * If the default locale is not set, the string will have an empty value and no attempt on another locale will be made.
+	 * @return the default locale, or null if no default is set
+	 */
+	public Locale getDefaultLocale() {
+		if (!defaultLocaleChecked) {
+			defaultLocaleChecked = true;
+			String localeString = configuration.getString("config/i18n/locale[@default='true']", null);
+			if (localeString!=null) {
+				try {
+					defaultLocale = LocaleUtils.toLocale(localeString);
+				} catch (IllegalArgumentException e) {
+			    	throw new YadaConfigurationException("Locale {} is invalid", localeString);
+				}
+			} else {
+				log.warn("No default locale has been set with <locale default=\"true\">: set a default locale if you don't want empty strings returned for missing localized values in the database");
+			}
+		}
+		return defaultLocale;
+	}
 	
 	/**
 	 * True if the filter enables the use of locales in the url, like /en/mypage
@@ -80,21 +105,21 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
-	 * Get a list of iso2 languages that the webapp can handle
+	 * Get a list of iso2 locales that the webapp can handle
 	 * @return
 	 */
-	public List<String> getLanguages() {
-		if (languages==null) {
-			languages = Arrays.asList(configuration.getStringArray("config/i18n/language"));
-			for (String language : languages) {
+	public List<String> getLocaleStrings() {
+		if (locales==null) {
+			locales = Arrays.asList(configuration.getStringArray("config/i18n/locale"));
+			for (String locale : locales) {
 				try {
-			        LocaleUtils.toLocale(language);
+			        LocaleUtils.toLocale(locale); // Validity check
 			    } catch (IllegalArgumentException e) {
-			    	throw new YadaConfigurationException("Language {} is invalid", language);
+			    	throw new YadaConfigurationException("Locale {} is invalid", locale);
 			    }			
 			}
 		}
-		return languages;
+		return locales;
 	}
 	
 	/**

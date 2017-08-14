@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -38,10 +39,13 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -66,7 +70,7 @@ import sogei.utility.UCheckNum;
 public class YadaUtil {
 	private final static Logger log = LoggerFactory.getLogger(YadaUtil.class);
 	
-	@Autowired YadaConfiguration config;
+	@Autowired private YadaConfiguration config;
     static ApplicationContext applicationContext; 	// To access the ApplicationContext from anywhere
     static public MessageSource messageSource; 		// To access the MessageSource from anywhere
 	
@@ -75,6 +79,31 @@ public class YadaUtil {
 	public final static long MILLIS_IN_DAY = 24*MILLIS_IN_HOUR; 
 	
 	private SecureRandom secureRandom = new SecureRandom();
+	
+	private static Locale defaultLocale = null;
+	
+	@PostConstruct
+    public void init() {
+		defaultLocale = config.getDefaultLocale();
+    }
+	 
+	/**
+	 * Returns the localized value from a map of Locale -> String.
+	 * Used in entities with localized string attributes.
+	 * @param LocalizedValueMap
+	 * @param locale the needed locale for the value, can be null for the current locale
+	 * @return the localized value, or the empty string if no value has been defined and no default locale has been set
+	 */
+	public static String getLocalValue(Map<Locale, String> LocalizedValueMap, Locale locale) {
+		if (locale==null) {
+			locale = LocaleContextHolder.getLocale();
+		}
+		String result = LocalizedValueMap.get(locale);
+		if (result==null && defaultLocale!=null && !defaultLocale.equals(locale)) {
+			result = LocalizedValueMap.get(defaultLocale);
+		}
+		return result==null?"":result;
+	}
 	
 	/**
 	 * Close a closeable ignoring exceptions and null.
@@ -1202,4 +1231,6 @@ public class YadaUtil {
 		}
 		return new String(resultChars).replaceAll("__+", "_").replaceAll("--+", "-");
 	}
+
+
 }

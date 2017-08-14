@@ -2,7 +2,9 @@ package net.yadaframework.commerce.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -10,6 +12,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -22,28 +25,31 @@ public class YadaOrder implements Serializable {
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Long id;
+	protected Long id;
 	
 	@OneToOne(fetch = FetchType.EAGER)
 	protected YadaPersistentEnum<YadaOrderStatus> orderStatus;
 	
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date creationTimestamp;
+	protected Date creationTimestamp;
 	
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date stateChangeTimestamp;
+	protected Date stateChangeTimestamp;
 	
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date shippingTimestamp;
+	protected Date shippingTimestamp;
 	
 	@Column(length=512)
-	private String trackingData;
+	protected String trackingData;
 	
 	@Column(length=2048)
-	private String notes;
+	protected String notes;
 	
 	@Convert(converter = YadaMoneyConverter.class)
-	private YadaMoney totalAmount;
+	protected YadaMoney totalPrice;
+	
+	@OneToMany(mappedBy="order", cascade=CascadeType.ALL, orphanRemoval=true)
+	protected List<YadaOrderItem> orderItems;
 
 	public Long getId() {
 		return id;
@@ -101,18 +107,20 @@ public class YadaOrder implements Serializable {
 		this.notes = notes;
 	}
 
-	public YadaMoney getTotalAmount() {
-		return totalAmount;
+	public YadaMoney getTotalPrice() {
+		return totalPrice;
 	}
 
-	public void setTotalAmount(YadaMoney totalAmount) {
-		this.totalAmount = totalAmount;
+	public void setTotalPrice(YadaMoney totalPrice) {
+		this.totalPrice = totalPrice;
 	}
-	
-	
-	
-	
-	
 
+	public List<YadaOrderItem> getOrderItems() {
+		return orderItems;
+	}
+
+	public void setOrderItems(List<YadaOrderItem> orderItems) {
+		this.orderItems = orderItems;
+	}
 
 }

@@ -67,12 +67,12 @@ public class YadaLocalePathVariableFilter implements Filter {
 	    }
 	}
 
-	private boolean isLocale(String language) {
-	    if (StringUtils.trimToNull(language)==null) {
+	private boolean isLocale(String locale) {
+	    if (StringUtils.trimToNull(locale)==null) {
 	    	return false;
 	    }
-	    List<String> languages = config.getLanguages();
-	    return languages.contains(language);
+	    List<String> locales = config.getLocaleStrings();
+	    return locales.contains(locale);
 	}
 
 	@Override
