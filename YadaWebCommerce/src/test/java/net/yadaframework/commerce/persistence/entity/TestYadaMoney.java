@@ -1,6 +1,9 @@
 package net.yadaframework.commerce.persistence.entity;
 
 import org.junit.Test;
+
+import net.yadaframework.persistence.YadaMoney;
+
 import static org.junit.Assert.assertEquals;
 
 import java.util.Locale;

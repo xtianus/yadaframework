@@ -1,4 +1,4 @@
-package net.yadaframework.commerce.persistence.entity;
+package net.yadaframework.persistence;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;

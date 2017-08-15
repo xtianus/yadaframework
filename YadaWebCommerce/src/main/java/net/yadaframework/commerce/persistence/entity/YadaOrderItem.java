@@ -8,7 +8,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
+
+import net.yadaframework.persistence.YadaMoney;
+import net.yadaframework.persistence.YadaMoneyConverter;
 
 @Entity
 public class YadaOrderItem implements Serializable {
@@ -23,8 +25,8 @@ public class YadaOrderItem implements Serializable {
 	@Convert(converter = YadaMoneyConverter.class)
 	protected YadaMoney unitPrice;
 	
-	@OneToOne(optional=false)
-	protected YadaArticle article;
+	// Not a reference to YadaArticle so that we can delete old articles but still have the correct code in the order item
+	protected String articleCode; 
 	
 	@ManyToOne(optional=false)
 	protected YadaOrder order;
@@ -53,20 +55,20 @@ public class YadaOrderItem implements Serializable {
 		this.unitPrice = unitPrice;
 	}
 
-	public YadaArticle getArticle() {
-		return article;
-	}
-
-	public void setArticle(YadaArticle article) {
-		this.article = article;
-	}
-
 	public YadaOrder getOrder() {
 		return order;
 	}
 
 	public void setOrder(YadaOrder order) {
 		this.order = order;
+	}
+
+	public String getArticleCode() {
+		return articleCode;
+	}
+
+	public void setArticleCode(String articleCode) {
+		this.articleCode = articleCode;
 	}
 
 }

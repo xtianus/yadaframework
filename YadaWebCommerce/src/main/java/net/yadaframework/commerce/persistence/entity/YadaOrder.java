@@ -12,12 +12,16 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import net.yadaframework.persistence.YadaMoney;
+import net.yadaframework.persistence.YadaMoneyConverter;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
+import net.yadaframework.security.persistence.entity.YadaUserProfile;
 
 @Entity
 public class YadaOrder implements Serializable {
@@ -26,6 +30,9 @@ public class YadaOrder implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
+	
+	@ManyToOne
+	protected YadaUserProfile owner;
 	
 	@OneToOne(fetch = FetchType.EAGER)
 	protected YadaPersistentEnum<YadaOrderStatus> orderStatus;
@@ -121,6 +128,14 @@ public class YadaOrder implements Serializable {
 
 	public void setOrderItems(List<YadaOrderItem> orderItems) {
 		this.orderItems = orderItems;
+	}
+
+	public YadaUserProfile getOwner() {
+		return owner;
+	}
+
+	public void setOwner(YadaUserProfile owner) {
+		this.owner = owner;
 	}
 
 }

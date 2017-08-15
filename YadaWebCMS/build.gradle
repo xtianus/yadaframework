@@ -28,7 +28,7 @@ repositories {
 
 dependencies {
 		
-	implementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'),
+	implementation project(':YadaWeb'), project(':YadaWebSecurity'), 
 		'org.hibernate:hibernate-entitymanager:5.2.9.Final',
 		'org.springframework.data:spring-data-jpa:1.11.1.RELEASE'
 		
@@ -37,7 +37,7 @@ dependencies {
 
 jar {
     manifest {
-        attributes("Implementation-Title": "YadaWebCommerce",
+        attributes("Implementation-Title": "YadaWebCMS",
                    "Implementation-Version": version)
     }
 }
@@ -45,7 +45,7 @@ jar {
 // Set the yada version in the properties file
 processResources {
 	doLast {
-		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadawebcommerce.properties", token: '@YADA_VERSION@', value: version)
+		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadawebcms.properties", token: '@YADA_VERSION@', value: version)
 	}
 }
 
@@ -56,4 +56,3 @@ uploadArchives {
 		mavenLocal()
 	}
 }
-

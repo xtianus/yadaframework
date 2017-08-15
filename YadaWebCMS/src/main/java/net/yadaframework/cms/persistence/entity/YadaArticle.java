@@ -1,21 +1,27 @@
-package net.yadaframework.commerce.persistence.entity;
+package net.yadaframework.cms.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.MapKeyColumn;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.persistence.YadaMoney;
+import net.yadaframework.persistence.YadaMoneyConverter;
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED) // So that subclasses will have their own neat table
 public class YadaArticle implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
@@ -27,9 +33,15 @@ public class YadaArticle implements Serializable {
 	protected String code;
 	
 	@ElementCollection
-	@Column(length=1024)
+	@Column(length=32)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> color;
+	
+	@Embedded
+	protected YadaDimension dimension;
+	
+	@Convert(converter = YadaMoneyConverter.class)
+	protected YadaMoney unitPrice;
 	
 	/**
 	 * 
@@ -64,5 +76,19 @@ public class YadaArticle implements Serializable {
 		this.color = description;
 	}
 
+	public YadaDimension getDimension() {
+		return dimension;
+	}
 
+	public void setDimension(YadaDimension dimension) {
+		this.dimension = dimension;
+	}
+
+	public YadaMoney getUnitPrice() {
+		return unitPrice;
+	}
+
+	public void setUnitPrice(YadaMoney unitPrice) {
+		this.unitPrice = unitPrice;
+	}
 }

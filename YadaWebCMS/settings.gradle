@@ -1,7 +1,6 @@
 
-rootProject.name = 'YadaWebCommerce'
-include 'YadaWebCMS'
-project(':YadaWebCMS').projectDir = "../YadaWebCMS" as File
+rootProject.name = 'YadaWebCMS'
+
 include 'YadaWebSecurity'
 project(':YadaWebSecurity').projectDir = "../YadaWebSecurity" as File
 include 'YadaWeb'

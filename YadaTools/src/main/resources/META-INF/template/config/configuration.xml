@@ -14,6 +14,7 @@
 		<properties fileName="../build.properties" config-optional="true"/>
 		<properties fileName="net.yadaframework.yadaweb.properties"/>
 		<properties fileName="net.yadaframework.yadawebsecurity.properties" config-optional="true"/>
+		<properties fileName="net.yadaframework.yadawebcms.properties" config-optional="true"/>
 		<properties fileName="net.yadaframework.yadawebcommerce.properties" config-optional="true"/>
 		<%
 			envs.each { env ->
