@@ -189,6 +189,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		registry.addResourceHandler(yadares + "-" + config.getYadaVersion() + "/**").addResourceLocations("classpath:" + YadaConstants.YADA_VIEW_PREFIX+"/yada/").setCachePeriod(8640000); // 100 days cache period
 
 		// Handling the "contents" uploaded locally
+		// NOTE: if you don't need versioning but are happy with the apache file handling, just let apache serve the contents
 		if (config.isContentUrlLocal()) {
 			String contentUrl = config.getContentUrl();
 			// TODO The problem with contents is that the version should be taken from the file timestamp so here it should accept any value but I don't know how to make it work with any version value

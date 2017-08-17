@@ -444,7 +444,7 @@ public class YadaUtil {
 			log.error("Failed to execute shell command: " + command + " " + args, e);
 			return e.getMessage();
 		}
-		return exitValue>0?"":null;
+		return (exitValue>0)?"":null;
 	}
 
 	/**

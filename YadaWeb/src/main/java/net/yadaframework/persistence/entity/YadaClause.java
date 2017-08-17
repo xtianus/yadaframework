@@ -1,6 +1,7 @@
 package net.yadaframework.persistence.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,7 +10,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
 
 
 @Entity
@@ -18,6 +22,15 @@ import javax.persistence.UniqueConstraint;
 	)
 public class YadaClause implements Serializable {
 	private static final long serialVersionUID = 1L;
+
+	// For synchronization with external databases
+	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date modified;
+	
+	// For optimistic locking
+	@Version
+	private long version;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -62,6 +75,18 @@ public class YadaClause implements Serializable {
 
 	public void setClauseVersion(int version) {
 		this.clauseVersion = version;
+	}
+
+	public Date getModified() {
+		return modified;
+	}
+
+	public void setModified(Date modified) {
+		this.modified = modified;
+	}
+
+	public long getVersion() {
+		return version;
 	}
 	
 	

@@ -38,6 +38,7 @@ class YadaInitTask extends YadaProject {
 		File xmlFolder = new File(viewsFolder, "xml");
 		File javaSourceFolder = project.sourceSets.main.java.srcDirs[0];
 		File resourcesSourceFolder = project.sourceSets.main.resources.srcDirs[0];
+		File databaseMigrationFolder = new File(resourcesSourceFolder, dbMigrationFolder);
 		File emailTemplateFolder = new File(resourcesSourceFolder, "$DESTEMAILTEMPLATEFOLDER");
 		File schemaFolder = project.file(schemaDirName);
 		File cssImagesFolder = new File(resFolder, "css/images");
@@ -48,6 +49,7 @@ class YadaInitTask extends YadaProject {
 		messagesFolder.mkdir();
 		viewsFolder.mkdir();
 		xmlFolder.mkdir();
+		databaseMigrationFolder.mkdir();
 		emailTemplateFolder.mkdirs();
 		schemaFolder.mkdirs();
 		String basePackageDirnames = basePackage.replaceAll('\\.', '/');

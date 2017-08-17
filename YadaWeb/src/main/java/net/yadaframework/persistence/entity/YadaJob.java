@@ -18,6 +18,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,16 @@ public abstract class YadaJob implements Runnable {
 	
 	@Transient
 	protected ApplicationContext applicationContext;
+
+	// For synchronization with external databases
+	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Temporal(TemporalType.TIMESTAMP)
+	protected Date modified;
 	
+	// For optimistic locking
+	@Version
+	protected long version;
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
@@ -362,6 +372,18 @@ public abstract class YadaJob implements Runnable {
 
 	public void setRecovered(boolean recovered) {
 		this.recovered = recovered;
+	}
+
+	public Date getModified() {
+		return modified;
+	}
+
+	public void setModified(Date modified) {
+		this.modified = modified;
+	}
+
+	public long getVersion() {
+		return version;
 	}
 
 	

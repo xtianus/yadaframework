@@ -10,7 +10,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -28,6 +31,15 @@ public class YadaRegistrationRequest implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private final static transient Logger log = LoggerFactory.getLogger(YadaRegistrationRequest.class);
 	
+	// For synchronization with external databases
+	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date modified;
+	
+	// For optimistic locking
+	@Version
+	private long version;
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
@@ -158,6 +170,18 @@ public class YadaRegistrationRequest implements Serializable {
 
 	public void setTrattamentoDatiAccepted(boolean trattamentoDatiAccepted) {
 		this.trattamentoDatiAccepted = trattamentoDatiAccepted;
+	}
+
+	public Date getModified() {
+		return modified;
+	}
+
+	public void setModified(Date modified) {
+		this.modified = modified;
+	}
+
+	public long getVersion() {
+		return version;
 	}
 
 //	public String getGeneric1() {

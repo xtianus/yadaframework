@@ -17,6 +17,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Version;
 
 import net.yadaframework.persistence.YadaMoney;
 import net.yadaframework.persistence.YadaMoneyConverter;
@@ -27,6 +28,15 @@ import net.yadaframework.security.persistence.entity.YadaUserProfile;
 public class YadaOrder implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
+	// For synchronization with external databases
+	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Temporal(TemporalType.TIMESTAMP)
+	protected Date modified;
+	
+	// For optimistic locking
+	@Version
+	protected long version;
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
@@ -136,6 +146,18 @@ public class YadaOrder implements Serializable {
 
 	public void setOwner(YadaUserProfile owner) {
 		this.owner = owner;
+	}
+
+	public Date getModified() {
+		return modified;
+	}
+
+	public void setModified(Date modified) {
+		this.modified = modified;
+	}
+
+	public long getVersion() {
+		return version;
 	}
 
 }

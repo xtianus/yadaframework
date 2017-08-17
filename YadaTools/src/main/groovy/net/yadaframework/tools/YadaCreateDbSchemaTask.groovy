@@ -14,8 +14,8 @@ import org.gradle.api.tasks.TaskAction
 * Docs: https://docs.jboss.org/tools/latest/en/hibernatetools/html/ant.html
 */
 class YadaCreateDbSchemaTask extends DefaultTask {
-	Map properties;
-	def outputfilename = "generated.sql";
+	@Internal Map properties;
+	@OutputFile def outputfilename = "generated.sql";
 	
 	@TaskAction
 	def createDbSchema() {

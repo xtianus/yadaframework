@@ -1,14 +1,19 @@
 package net.yadaframework.persistence.entity;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.UUID;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
 
 /**
  * This class uniquely identifies the user browser.
@@ -24,6 +29,15 @@ import javax.persistence.UniqueConstraint;
 public class YadaBrowserId implements Serializable {
 	private static final long serialVersionUID = -5673120637677663672L;
 	
+	// For synchronization with external databases
+	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date modified;
+	
+	// For optimistic locking
+	@Version
+	private long version;
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
@@ -83,6 +97,26 @@ public class YadaBrowserId implements Serializable {
 		return leastSigBits;
 	}
 	public void setLeastSigBits(long leastSigBits) {
+		this.leastSigBits = leastSigBits;
+	}
+
+	public Date getModified() {
+		return modified;
+	}
+
+	public void setModified(Date modified) {
+		this.modified = modified;
+	}
+
+	public long getVersion() {
+		return version;
+	}
+
+	public void setMostSigBits(Long mostSigBits) {
+		this.mostSigBits = mostSigBits;
+	}
+
+	public void setLeastSigBits(Long leastSigBits) {
 		this.leastSigBits = leastSigBits;
 	}
 	

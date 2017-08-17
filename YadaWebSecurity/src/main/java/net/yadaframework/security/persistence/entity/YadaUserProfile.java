@@ -1,6 +1,7 @@
 package net.yadaframework.security.persistence.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.TimeZone;
 
 import javax.persistence.CascadeType;
@@ -10,10 +11,22 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Version;
 
 @Entity
 public class YadaUserProfile implements Serializable {
 	private static final long serialVersionUID = 1L;
+	
+	// For synchronization with external databases
+	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Temporal(TemporalType.TIMESTAMP)
+	protected Date modified;
+	
+	// For optimistic locking
+	@Version
+	protected long version;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -82,6 +95,18 @@ public class YadaUserProfile implements Serializable {
 
 	public void setTimezone(TimeZone timezone) {
 		this.timezone = timezone;
+	}
+
+	public Date getModified() {
+		return modified;
+	}
+
+	public void setModified(Date modified) {
+		this.modified = modified;
+	}
+
+	public long getVersion() {
+		return version;
 	}
 	
 }

@@ -3,9 +3,13 @@ package net.yadaframework.core;
 import java.io.File;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
+
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +35,18 @@ public class YadaAppConfig {
 	private static Logger log = LoggerFactory.getLogger(YadaAppConfig.class);
 	
 	@Autowired private YadaConfiguration config;
+	@Autowired DataSource dataSource;
+	
+	@PostConstruct
+	public void init() {
+		// Automatic database schema migration (aka versioning).
+		// See https://flywaydb.org
+		log.info("Running FlyWay DB migration");
+		Flyway flyway = new Flyway();
+		flyway.setLocations("classpath:database"); // Where sql scripts are stored
+		flyway.setDataSource(dataSource);
+		flyway.migrate();
+	}
 	
 	@Bean
 	public TaskScheduler taskScheduler() {
