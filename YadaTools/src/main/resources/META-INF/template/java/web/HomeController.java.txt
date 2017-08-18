@@ -1,21 +1,25 @@
 package $basePackage.web;
 
-import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_INFO;
+import java.util.Locale;
 
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import net.yadaframework.web.YadaWebUtil;
+import com.danesemilano.core.DncConfiguration;
+
+import net.yadaframework.core.YadaLocalePathChangeInterceptor;
 import net.yadaframework.web.YadaNotify;
+import net.yadaframework.web.YadaWebUtil;
 
 @Controller
 public class HomeController {
 	@Autowired YadaWebUtil yadaWebUtil;
 	@Autowired YadaNotify yadaNotify;
+	@Autowired YadaConfiguration config;
 
 	// Called after session timeout
 	@RequestMapping("/timeout")
@@ -27,8 +31,13 @@ public class HomeController {
 	}
 
 	@RequestMapping("/")
-	public String home(Model model, HttpServletResponse response) {
-		return "/home";
+	public String home(HttpServletRequest request, Locale locale) {
+		if (!config.isLocalePathVariableEnabled() || YadaLocalePathChangeInterceptor.localePathRequested(request)) {
+			// Either the locale is not in the path or it has been set already
+			return "/home";
+		}
+		// Set the locale explicitly
+		return "redirect:/" + locale.getLanguage() + "/"; // Moved temporarily
 	}
 	
 	// The login page is the home page with an attribute set

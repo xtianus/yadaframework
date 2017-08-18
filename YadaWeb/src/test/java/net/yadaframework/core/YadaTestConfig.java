@@ -1,9 +1,11 @@
 package net.yadaframework.core;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
+import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
@@ -21,7 +23,20 @@ public class YadaTestConfig extends YadaAppConfig {
 		dataSource.setServerName(config.getString("config/database/server"));
 		SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
 		builder.bind("java:comp/env/jdbc/yadatestdb", dataSource);
+		super.dataSource = dataSource;
 		builder.activate();
+		// Database
+		Flyway flyway = new Flyway();
+		flyway.setLocations("filesystem:schema"); // Where sql test scripts are stored
+		flyway.setDataSource(dataSource);
+		flyway.clean();
+		flyway.migrate();
+	}
+	
+	@Override
+	@PostConstruct
+	public void init() {
+		// Prevents the normal schema migration
 	}
 	
 	@Bean

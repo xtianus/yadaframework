@@ -1,6 +1,6 @@
-create table YadaBrowserId (id bigint not null auto_increment, leastSigBits bigint, mostSigBits bigint, primary key (id)) engine=InnoDB;
-create table YadaClause (id bigint not null auto_increment, clauseVersion integer not null, content longtext, name varchar(32) not null, primary key (id)) engine=InnoDB;
-create table YadaJob (id bigint not null auto_increment, jobDescription varchar(256), jobGroup varchar(128), jobGroupPaused bit not null, jobLastSuccessfulRun TIMESTAMP NULL, jobName varchar(128), jobPriority integer not null, jobRecoverable bit not null, jobScheduledTime TIMESTAMP NULL, jobStateObject_id bigint, primary key (id)) engine=InnoDB;
+create table YadaBrowserId (id bigint not null auto_increment, leastSigBits bigint, modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, mostSigBits bigint, version bigint not null, primary key (id)) engine=InnoDB;
+create table YadaClause (id bigint not null auto_increment, clauseVersion integer not null, content longtext, modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, name varchar(32) not null, version bigint not null, primary key (id)) engine=InnoDB;
+create table YadaJob (id bigint not null auto_increment, jobDescription varchar(256), jobGroup varchar(128), jobGroupPaused bit not null, jobLastSuccessfulRun TIMESTAMP NULL, jobName varchar(128), jobPriority integer not null, jobRecoverable bit not null, jobScheduledTime TIMESTAMP NULL, modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, version bigint not null, jobStateObject_id bigint, primary key (id)) engine=InnoDB;
 create table YadaJob_BeActive (YadaJob_id bigint not null, jobsMustBeActive_id bigint not null) engine=InnoDB;
 create table YadaJob_BeCompleted (YadaJob_id bigint not null, jobsMustComplete_id bigint not null) engine=InnoDB;
 create table YadaJob_BeInactive (YadaJob_id bigint not null, jobsMustBeInactive_id bigint not null) engine=InnoDB;

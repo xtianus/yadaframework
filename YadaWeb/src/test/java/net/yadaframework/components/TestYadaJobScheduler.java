@@ -22,6 +22,7 @@ public class TestYadaJobScheduler extends AbstractJUnit4SpringContextTests {
 	@Test
 	public void firstTest() {
 		 assert yadaJobScheduler !=null;
+		 // TODO
 	}
 
 	

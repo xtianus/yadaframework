@@ -59,7 +59,7 @@ public class YadaLocalePathVariableFilter implements Filter {
 
 	    if (variables.length > 1 && isLocale(variables[1])) {
 	        request.setAttribute(YadaLocalePathChangeInterceptor.LOCALE_ATTRIBUTE_NAME, variables[1]);
-	        String newUrl = StringUtils.removeStart(url, '/' + variables[1]);
+	        String newUrl = StringUtils.removeStart(url, '/' + variables[1]); // TODO don't we need the context path at the start?
 	        RequestDispatcher dispatcher = request.getRequestDispatcher(newUrl);
 	        dispatcher.forward(request, response);
 	    } else {
