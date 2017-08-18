@@ -41,11 +41,13 @@ public class YadaAppConfig {
 	public void init() {
 		// Automatic database schema migration (aka versioning).
 		// See https://flywaydb.org
-		log.info("Running FlyWay DB migration");
-		Flyway flyway = new Flyway();
-		flyway.setLocations("classpath:database"); // Where sql scripts are stored
-		flyway.setDataSource(dataSource);
-		flyway.migrate();
+		if (config.useDatabaseMigrationAtStartup()) {
+			log.info("Running FlyWay DB migration");
+			Flyway flyway = new Flyway();
+			flyway.setLocations("classpath:database"); // Where sql scripts are stored
+			flyway.setDataSource(dataSource);
+			flyway.migrate();
+		}
 	}
 	
 	@Bean
