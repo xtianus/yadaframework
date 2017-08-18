@@ -72,6 +72,14 @@ public abstract class YadaConfiguration {
 	private boolean defaultLocaleChecked = false;
 	
 	/**
+	 * True if during startup YadaAppConfig should run the FlyWay migrate operation
+	 * @return
+	 */
+	public boolean useDatabaseMigrationAtStartup() {
+		return configuration.getBoolean("config/application/databaseMigrationAtStartup", false);
+	}
+	
+	/**
 	 * Returns the default locale when getting a string that doesn't have a value for the requested locale.
 	 * If the default locale is not set, the string will have an empty value and no attempt on another locale will be made.
 	 * @return the default locale, or null if no default is set
