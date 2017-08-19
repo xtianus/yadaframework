@@ -9,13 +9,8 @@
    		<!-- See link persistence_2_1.xsd from http://www.oracle.com/webfolder/technetwork/jsc/xml/ns/persistence/index.html -->
   		<class>net.yadaframework.persistence.entity.YadaBrowserId</class>
   		<class>net.yadaframework.persistence.entity.YadaClause</class>
-  		<class>net.yadaframework.security.persistence.entity.YadaUserCredentials</class>
-  		<class>net.yadaframework.security.persistence.entity.YadaRegistrationRequest</class>
-  		<class>net.yadaframework.security.persistence.entity.YadaSocialCredentials</class>
-  		<class>net.yadaframework.security.persistence.entity.YadaAutoLoginToken</class>
   		<class>net.yadaframework.persistence.entity.YadaPersistentEnum</class>
   		<class>net.yadaframework.persistence.entity.YadaJob</class>
-
   		
       <properties>
             <property name="hibernate.id.new_generator_mappings" value="true"/> <!-- Defaults to true in Hibernate 5 -->

@@ -42,7 +42,7 @@ public class YadaUserProfile implements Serializable {
 	protected String lastName;
 
 	@OneToOne(optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
-	protected YadaUserCredentials yadaUserCredentials;
+	protected YadaUserCredentials userCredentials;
 	
 	@Column(length = 64)
 	protected TimeZone timezone; 	// Timezone ID: "America/Los_Angeles",
@@ -81,12 +81,12 @@ public class YadaUserProfile implements Serializable {
 		this.lastName = lastName;
 	}
 
-	public YadaUserCredentials getYadaUserCredentials() {
-		return yadaUserCredentials;
+	public YadaUserCredentials getUserCredentials() {
+		return userCredentials;
 	}
 
-	public void setYadaUserCredentials(YadaUserCredentials yadaUserCredentials) {
-		this.yadaUserCredentials = yadaUserCredentials;
+	public void setUserCredentials(YadaUserCredentials yadaUserCredentials) {
+		this.userCredentials = yadaUserCredentials;
 	}
 
 	public TimeZone getTimezone() {

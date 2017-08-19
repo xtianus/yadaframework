@@ -134,7 +134,7 @@ dependencies {
 
 task testDbSchema(dependsOn: [testClasses], type: net.yadaframework.tools.YadaCreateDbSchemaTask) {
 	inputs.files configurations.hibtools
-	outputfilename = "yadatest.sql"
+	outputfilename = "V1__yadatest.sql"
 	doFirst {
 		new File("$buildDir/classes/test/META-INF").mkdirs()
 		copy {

@@ -1,5 +1,8 @@
 package net.yadaframework.security;
 
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
 
 import org.springframework.core.annotation.Order;
@@ -27,6 +30,14 @@ public class SecurityWebApplicationInitializer extends AbstractSecurityWebApplic
 		characterEncodingFilter.setEncoding("UTF-8");
 		characterEncodingFilter.setForceEncoding(true);
 		// L'AuditFilter lo metto prima di tutto almeno viene eseguito prima dell'autorizzazione e riesco a capire il motivo di eventuali 403
-        insertFilters(servletContext, new DelegatingFilterProxy("yadaLocalePathVariableFilter"), new CheckSessionFilter(), characterEncodingFilter, new AuditFilter(), new MultipartFilter());
+        insertFilters(servletContext, new CheckSessionFilter(), new AuditFilter(), new MultipartFilter(), characterEncodingFilter, new DelegatingFilterProxy("yadaLocalePathVariableFilter"));
     }
+	
+	/**
+	 * We need to add FORWARD to the filter mapping otherwise yadaLocalePathVariableFilter will skip security on forward (and all the following filters too)
+	 */
+	protected  EnumSet<DispatcherType> getSecurityDispatcherTypes() {
+		return EnumSet.of(DispatcherType.REQUEST, DispatcherType.ERROR, DispatcherType.ASYNC, DispatcherType.FORWARD);
+	}
+
 }

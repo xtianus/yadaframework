@@ -1,1 +1,44 @@
-home
+<!DOCTYPE html>
+<html th:lang="${#ctx.locale}"
+	xmlns:th="http://www.thymeleaf.org" 
+	xmlns:yada="http://www.yadaframework.net">
+<head>
+	<th:block th:include="~{/header :: head}"/>
+</head>
+<body>
+
+<th:block th:include="~{/header :: body}"/>
+
+<main>
+	<article>
+		<header>
+			<h1>Home</h1>
+		</header>
+		<section>
+			<p>This is the default home page</p>
+		</section>
+	</article>
+</main>
+
+<th:block th:include="~{/footer :: body}"/>
+
+<th:block th:if="${login}!=null">
+	<div th:replace="/modalLogin :: #loginModal"></div>
+</th:block>
+
+<script type="text/javascript" th:inline="javascript">
+	//<![CDATA[
+		<!--/* Error modal for unhandled exceptions */-->
+		if ([[${yadaExceptionObject!=null}]]==true) {
+			yada.showErrorModal([[#{yada.error.http.other}]], [[${yadaExceptionObject!=null?yadaExceptionObject.getMessage():''}]]);
+		}
+		
+		<!--/* HTTP Error modal */-->
+		if ([[${yadaHttpStatus!=null}]]==true) {
+			yada.showErrorModal([[${#messages.msg('yada.error.http.title', yadaHttpStatus)}]], [[#{|yada.error.http.${yadaHttpStatus}|}]]);
+		}
+	//]]>
+</script>
+
+</body>
+</html>
