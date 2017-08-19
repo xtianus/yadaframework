@@ -15,6 +15,7 @@ import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -128,15 +129,20 @@ public class YadaWebUtil {
     }
 	
 	/**
-	 * Pulisce l'html lasciando solo i seguenti tag: b, em, i, strong, u, "br", "cite", "em", "i", "p", "strong", "img", "li", "ul", "ol", "sup", "sub", "s"
-	 * @param content
+	 * Cleans the html content leaving only the following tags: b, em, i, strong, u, br, cite, em, i, p, strong, img, li, ul, ol, sup, sub, s
+	 * @param content html content
+	 * @param extraTags any other tags that you may want to keep, e. g. "a"
 	 * @return
 	 */
-	public String cleanContent(String content) {
+	public String cleanContent(String content, String ... extraTags) {
 		Whitelist allowedTags = Whitelist.simpleText(); // This whitelist allows only simple text formatting: b, em, i, strong, u. All other HTML (tags and attributes) will be removed.
 		allowedTags.addTags("br", "cite", "em", "i", "p", "strong", "img", "li", "ul", "ol", "sup", "sub", "s");
+		allowedTags.addTags(extraTags);
 		allowedTags.addAttributes("p", "style"); // Serve per l'allineamento a destra e sinistra
 		allowedTags.addAttributes("img", "src", "style", "class"); 
+		if (Arrays.asList(extraTags).contains("a")) {
+			allowedTags.addAttributes("a", "href", "target"); 
+		}
 		Document dirty = Jsoup.parseBodyFragment(content, "");
 		Cleaner cleaner = new Cleaner(allowedTags);
 		Document clean = cleaner.clean(dirty);

@@ -22,18 +22,18 @@ import net.yadaframework.security.persistence.repository.YadaUserProfileReposito
 @Component
 // ScopedProxyMode.TARGET_CLASS makes so that the instance is different for each thread, even if it is injected in a singleton
 @Scope(value="session", proxyMode=ScopedProxyMode.TARGET_CLASS) 
-public class YadaSession {
+public class YadaSession<T extends YadaUserProfile> {
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaSecurityUtil yadaSecurityUtil;
 	// Attenzione: questo sarebbe da mettere transient perchè tomcat tenta di persistere la session ma non ce la fa. Pero' se lo si mette transient,
 	// quando la session viene ricaricata questo non viene valorizzato. Come si fa a inizializzare questo oggetto quando tomcat lo ricarica dallo storage?
-	@Autowired private YadaUserProfileRepository yadaUserProfileRepository;
+	@Autowired private YadaUserProfileRepository<T> yadaUserProfileRepository;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 
-	private YadaUserProfile userProfile = null;
-	private YadaUserProfile impersonificatore = null;
+	private T userProfile = null;
+	private T impersonificatore = null;
 	
 	public void clearUserProfileCache() {
 		this.userProfile = null;
@@ -48,7 +48,7 @@ public class YadaSession {
 		return impersonificatore!=null;
 	}
 	
-	public void impersonifica(YadaUserProfile theUser) {
+	public void impersonifica(T theUser) {
 		impersonificatore = this.getCurrentUserProfile();
 		userProfile = theUser;
 		YadaUserCredentials yadaUserCredentials = theUser.getUserCredentials();
@@ -57,7 +57,7 @@ public class YadaSession {
 	}
 	
 	public void depersonifica() {
-		YadaUserProfile theUser = userProfile;
+		T theUser = userProfile;
 		if (impersonificatore!=null) {
 			userProfile = impersonificatore;
 			impersonificatore = null;
@@ -88,19 +88,19 @@ public class YadaSession {
 	 * @param someUserProfile
 	 * @return
 	 */
-	public boolean isLoggedUser(YadaUserProfile someUserProfile) {
-		YadaUserProfile userProfile = getCurrentUserProfile();
+	public boolean isLoggedUser(T someUserProfile) {
+		T userProfile = getCurrentUserProfile();
 		if (userProfile!=null && someUserProfile!=null) {
 			return userProfile.getId().equals(someUserProfile.getId());
 		}
 		return false;
 	}
 	
-	public YadaUserProfile getCurrentUserProfile() {
+	public T getCurrentUserProfile() {
 		if (userProfile==null && yadaSecurityUtil!=null) {
 			String username = yadaSecurityUtil.getUsername();
 			if (username!=null) {
-				List<YadaUserProfile> userProfiles = yadaUserProfileRepository.findByUserCredentialsUsername(username, yadaWebUtil.FIND_ONE);
+				List<T> userProfiles = yadaUserProfileRepository.findByUserCredentialsUsername(username, yadaWebUtil.FIND_ONE);
 				if (userProfiles.size()==1) {
 					userProfile = userProfiles.get(0);
 				}
