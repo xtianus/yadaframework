@@ -76,7 +76,7 @@ public abstract class YadaConfiguration {
 	 * @return
 	 */
 	public boolean useDatabaseMigrationAtStartup() {
-		return configuration.getBoolean("config/application/databaseMigrationAtStartup", false);
+		return configuration.getBoolean("config/database/databaseMigrationAtStartup", false);
 	}
 	
 	/**
