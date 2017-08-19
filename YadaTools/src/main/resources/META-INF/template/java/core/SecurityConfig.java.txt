@@ -39,6 +39,7 @@ public class SecurityConfig extends YadaSecurityConfig {
         http
         	.headers().disable()
             .authorizeRequests()
+				.filterSecurityInterceptorOncePerRequest(true) // needed since we intercept FORWARDed requests because of the YadaLocalePathVariableFilter 
             	.antMatchers("/admin/**").hasRole("ADMIN")
             	.antMatchers("/user/**").hasRole("USER")
             	.antMatchers("/**").permitAll()

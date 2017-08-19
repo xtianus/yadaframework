@@ -64,7 +64,9 @@ public class YadaPersistentEnumDao {
     
 	/**
 	 * Fills the database with enum localized values, when missing. Can be used at app startup.
-	 * Any added/deleted language will be taken care of properly. You can even pass from a "en" to a "en_US" locale.
+	 * Can add new enum values for a given enum class, but not remove them (must be done manually).
+	 * Any added/deleted language will be taken care of properly. You can even change from a "en" to a "en_US" locale.
+	 * A change in the localized text is handled properly.
 	 */
     @Transactional(readOnly = false)
 	public void initDatabase(List<Class<? extends YadaLocalEnum<?>>> enumClasses, List<Locale> locales) {

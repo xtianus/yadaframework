@@ -1,5 +1,10 @@
 package net.yadaframework.persistence;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -17,10 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ReflectionUtils;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
@@ -31,7 +36,6 @@ import net.yadaframework.web.YadaDatatablesRequest;
 @Repository
 @Transactional(readOnly = true) 
 //TODO non considera il search su singola colonna "columns[i][search][value]", nel senso che usa solo il global search su tutte le colonne searchable
-//TODO gestire il search/sort per gli enum (vedi OneNote RIN TODO) 
 //TODO gestire i parametri nestati più di 2 livelli (e.g. company.location.name)
 public class YadaDataTableDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
@@ -189,9 +193,50 @@ public class YadaDataTableDao {
     	query = countSql.query(em);
     	count = (long) query.getSingleResult();
     	yadaDatatablesRequest.setRecordsTotal(count);
+    	prefetchLocalizedStrings(result, targetClass, locale);
     	return result;
 	}
 	
+	/**
+	 * Force initialization of localized strings implemented with Map&lt;Locale, String>
+	 * @param result
+	 * @param targetClass
+	 * @param locale
+	 */
+	private void prefetchLocalizedStrings(List result, Class targetClass, Locale locale) {
+		// Look for fields of type Map<Locale, String>
+		ReflectionUtils.doWithFields(targetClass, new ReflectionUtils.FieldCallback() {
+			@Override
+			public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
+				// Call the size() method on the localized field for each result object
+				for (Object object : result) {
+					try {
+						field.setAccessible(true);
+						Object fieldValue = field.get(object);
+						Method sizeMethod = Map.class.getMethod("size");
+						sizeMethod.invoke(fieldValue);
+					} catch (NoSuchMethodException | SecurityException | InvocationTargetException e) {
+						log.error("Failed to initialize field {} for object {} (ignored)", field, object);
+					}
+				}
+			}
+		}, new ReflectionUtils.FieldFilter() {
+			@Override
+			public boolean matches(Field field) {
+				Type type = field.getGenericType();
+				if (type instanceof ParameterizedType) {
+					ParameterizedType parameterizedType = (ParameterizedType) type;
+					Type[] params = parameterizedType.getActualTypeArguments();
+					return params.length==2 && Locale.class.equals(params[0]) && String.class.equals(params[1]);
+				}
+				return false;
+			}
+		});
+		
+		
+		
+	}
+
 	/**
 	 * From an attribute with a path, like "location.company.name", inserts needed left joins and returns the last segment "company.name".
 	 * Joins are inserted for all elements before the last dot: "location" and "company" in the example.

@@ -13,8 +13,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.MapKeyColumn;
@@ -23,7 +21,14 @@ import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.Version;
+
+import com.fasterxml.jackson.annotation.JsonView;
+
+import net.yadaframework.components.YadaUtil;
+import net.yadaframework.persistence.repository.YadaLocaleDao;
+import net.yadaframework.web.YadaJsonView;
 
 /**
  * A Product is an "abstract" item because it groups similar objects that differ in color and size.
@@ -37,63 +42,80 @@ public class YadaProduct implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	// For synchronization with external databases
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified;
 	
 	// For optimistic locking
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Version
 	protected long version;
 	
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
 	
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int year; // Production year
 
+	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=64)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> name; // localized because it could be different for different languages
 
+	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=128)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> subtitle; // a kind of short description
 	
+	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=8192)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> description; // a kind of small description
 	
+	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=128)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> materials;
 	
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int category;
 	
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int subCategory;
 	
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected boolean isAccessory; // Useful to know if this is an accessory without a join on the YadaProduct_accessories table
 	
+	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	@ManyToMany
 	@JoinTable(name="YadaProduct_accessories")
 	protected List<YadaProduct> accessories;
 	
+	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	@ManyToMany(mappedBy="accessories")
 	protected List<YadaProduct> accessoryOf;
 	
+	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	@OneToMany(mappedBy="product")
 	protected List<YadaArticle> articles; // The version of a product with a specific color, size, etc.
 
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected boolean published;
 	
+	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	@OneToMany(cascade=CascadeType.REMOVE, orphanRemoval=true)
 	@JoinTable(name="YadaProduct_galleryImages")
 	@OrderBy("sortOrder")
 	protected List<YadaAttachedFile> galleryImages;
 
+	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	@OneToMany(cascade=CascadeType.REMOVE, orphanRemoval=true)
 	@JoinTable(name="YadaProduct_attachments")
 	@OrderBy("sortOrder")
@@ -102,10 +124,44 @@ public class YadaProduct implements Serializable {
 	/**
 	 * The main image to show in lists etc.
 	 */
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@OneToOne(cascade=CascadeType.REMOVE, orphanRemoval=true)
 	protected YadaAttachedFile image;
+	
+	/***********************************************************************/
+	/* Useful methods                                                      */
 
+	// TODO remove
+	
+	protected @Transient YadaLocaleDao yadaLocaleDao;
 
+	public YadaProduct() {
+		yadaLocaleDao = (YadaLocaleDao) YadaUtil.getBean(YadaLocaleDao.class);
+	}
+	
+	@Transient
+	public String getLocalName() {
+		return yadaLocaleDao.getLocalValue(id, YadaProduct.class, "name", null);
+	}
+
+	@Transient
+	public String getLocalSubtitle() {
+		return yadaLocaleDao.getLocalValue(id, YadaProduct.class, "subtitle", null);
+	}
+
+	@Transient
+	public String getLocalDescription() {
+		return yadaLocaleDao.getLocalValue(id, YadaProduct.class, "description", null);
+	}
+	
+	@Transient
+	public String getLocalMaterials() {
+		return yadaLocaleDao.getLocalValue(id, YadaProduct.class, "materials", null);
+	}
+	
+	/***********************************************************************/
+	/* Plain getter / setter                                               */
+	
 	public Long getId() {
 		return id;
 	}

@@ -32,7 +32,7 @@ import net.yadaframework.components.YadaUtil;
 @EnableScheduling
 @EnableAsync
 public class YadaAppConfig {
-	private static Logger log = LoggerFactory.getLogger(YadaAppConfig.class);
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired private YadaConfiguration config;
 	@Autowired DataSource dataSource;

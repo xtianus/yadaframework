@@ -28,8 +28,18 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "net.yadaframework.persistence.repository")
-@ComponentScan(basePackages = { "net.yadaframework.persistence" })
+@EnableJpaRepositories(basePackages = {
+	"net.yadaframework.persistence.repository",
+	"net.yadaframework.security.persistence.repository",
+	"net.yadaframework.cms.persistence.repository",
+	"net.yadaframework.commerce.persistence.repository"
+})
+@ComponentScan(basePackages = { 
+	"net.yadaframework.persistence",
+	"net.yadaframework.security.persistence",
+	"net.yadaframework.cms.persistence",
+	"net.yadaframework.commerce.persistence"
+})
 public class YadaJpaConfig {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
@@ -69,6 +79,8 @@ public class YadaJpaConfig {
 		List<String> packages = config.getDbEntityPackages();
 		packages.add("net.yadaframework.persistence.entity");
 		packages.add("net.yadaframework.security.persistence.entity");
+		packages.add("net.yadaframework.cms.persistence.entity");
+		packages.add("net.yadaframework.commerce.persistence.entity");
 		log.info("Scanning packages for entities: {}", StringUtils.join(packages, ","));
 		factory.setPackagesToScan(packages.toArray(new String[]{}));
 		factory.setDataSource(dataSource());

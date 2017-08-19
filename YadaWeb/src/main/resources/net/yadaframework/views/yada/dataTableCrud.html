@@ -17,11 +17,11 @@
 	- checkbox = (optional) false to hide the leftmost checkbox column
 	
 	Example:
-	<div th:replace="/yada/dataTable(tableId='dataSourceTable',columns=${ {'ID', 'Company','Location','Channel','Token'} })"></div>
+	<div th:replace="/yada/dataTableCrud::table(tableId='dataSourceTable',columns=${ {'ID', 'Company','Location','Channel','Token'} })"></div>
 	
  */-->
 
-<div class="yadaTableBlock">
+<div class="yadaTableBlock" th:fragment="fragment">
 	<table th:id="${tableId}" cellspacing="0" width="100%" class="table table-striped no-wrap">
 		<thead>
 			<tr>
