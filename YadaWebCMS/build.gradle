@@ -30,7 +30,11 @@ dependencies {
 		
 	implementation project(':YadaWeb'), project(':YadaWebSecurity'), 
 		'org.hibernate:hibernate-entitymanager:5.2.9.Final',
-		'org.springframework.data:spring-data-jpa:1.11.1.RELEASE'
+		'org.springframework.data:spring-data-jpa:1.11.1.RELEASE',
+		'com.fasterxml.jackson.core:jackson-annotations:2.9.+',
+		'com.fasterxml.jackson.core:jackson-core:2.9.+',
+		'com.fasterxml.jackson.core:jackson-databind:2.9.+'
+		
 		
 	testImplementation 'junit:junit:4.12'
 }

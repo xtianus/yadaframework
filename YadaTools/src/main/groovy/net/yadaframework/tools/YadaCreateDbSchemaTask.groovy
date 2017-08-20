@@ -12,10 +12,13 @@ import org.gradle.api.tasks.TaskAction
 
 /**
 * Docs: https://docs.jboss.org/tools/latest/en/hibernatetools/html/ant.html
+* @param outputfilename the name of the output file
+* @param update (true/false) set to true for the schema delta (might not be accurate)
 */
 class YadaCreateDbSchemaTask extends DefaultTask {
-	@Internal Map properties;
-	@OutputFile def outputfilename = "generated.sql";
+	Map properties;
+	def outputfilename = "generated.sql";
+	def update = false;
 	
 	@TaskAction
 	def createDbSchema() {
@@ -46,7 +49,7 @@ class YadaCreateDbSchemaTask extends DefaultTask {
 		outputFile.delete();
 		ant.hibernatetool(destdir: "${project.projectDir}/schema") {
 			ant.jpaconfiguration(persistenceunit: 'yadaPersistenceUnit')
-			ant.hbm2ddl(drop: 'false', export: 'false', outputfilename: outputfilename)
+			ant.hbm2ddl(drop: 'false', update: update, export: 'false', outputfilename: outputfilename)
 		}
 	}
 	

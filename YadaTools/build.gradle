@@ -3,10 +3,10 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.6.1'
+version = '0.6.3'
 
 apply plugin: 'groovy'
-apply plugin: 'java-gradle-plugin'
+// apply plugin: 'java-gradle-plugin'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
 
@@ -44,7 +44,8 @@ repositories {
 }
 
 dependencies {
-	compile 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final' 
+	compile gradleApi(), localGroovy(),
+		'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final' 
 }
 
 /* TODO Da finire: lanciando da eclipse la console è nulla. Vedi http://stackoverflow.com/a/24360969/587641 

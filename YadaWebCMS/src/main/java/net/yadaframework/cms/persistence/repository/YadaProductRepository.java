@@ -10,6 +10,6 @@ public interface YadaProductRepository<T extends YadaProduct> extends JpaReposit
 	
 	// TODO metodo che fa il find con l'id e carica anche le stringhe localizzate
 	// ammesso che si possa fare con il join fetch di attributi multipli
-	// ma forse è meglio fare un dao generico che con la reflection tira dentro gli attributi localizzati
+	// ma forse è meglio fare un dao generico YadaLocaleDao.java che con la reflection tira dentro gli attributi localizzati
 
 }
