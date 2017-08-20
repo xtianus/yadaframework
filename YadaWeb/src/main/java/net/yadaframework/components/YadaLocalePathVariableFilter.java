@@ -31,6 +31,7 @@ public class YadaLocalePathVariableFilter implements Filter {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
 	public static final String CALLED_FLAG = YadaLocalePathVariableFilter.class.getName() + ".CALLED";
+	public static final String ORIGINAL_REQUEST = YadaLocalePathVariableFilter.class.getName() + ".ORIGINAL_REQUEST";
 	
 	@Autowired private YadaConfiguration config;
 	
@@ -58,7 +59,8 @@ public class YadaLocalePathVariableFilter implements Filter {
 	    String[] variables = url.split("/", 3);
 
 	    if (variables.length > 1 && isLocale(variables[1])) {
-	        request.setAttribute(YadaLocalePathChangeInterceptor.LOCALE_ATTRIBUTE_NAME, variables[1]);
+	    	request.setAttribute(YadaLocalePathChangeInterceptor.LOCALE_ATTRIBUTE_NAME, variables[1]);
+	        request.setAttribute(ORIGINAL_REQUEST, request); // To be used in case of authorization failure that requires a login
 	        String newUrl = StringUtils.removeStart(url, '/' + variables[1]); // TODO don't we need the context path at the start?
 	        RequestDispatcher dispatcher = request.getRequestDispatcher(newUrl);
 	        dispatcher.forward(request, response);

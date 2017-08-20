@@ -28,18 +28,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = {
-	"net.yadaframework.persistence.repository",
-	"net.yadaframework.security.persistence.repository",
-	"net.yadaframework.cms.persistence.repository",
-	"net.yadaframework.commerce.persistence.repository"
-})
-@ComponentScan(basePackages = { 
-	"net.yadaframework.persistence",
-	"net.yadaframework.security.persistence",
-	"net.yadaframework.cms.persistence",
-	"net.yadaframework.commerce.persistence"
-})
+@EnableJpaRepositories(basePackages = {"net.yadaframework.persistence.repository"})
+@ComponentScan(basePackages = {"net.yadaframework.persistence"})
 public class YadaJpaConfig {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
