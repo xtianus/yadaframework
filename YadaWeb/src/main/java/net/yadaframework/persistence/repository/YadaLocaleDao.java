@@ -2,6 +2,7 @@ package net.yadaframework.persistence.repository;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -14,6 +15,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.persistence.YadaSql;
@@ -29,6 +31,22 @@ public class YadaLocaleDao {
 
     @PersistenceContext private EntityManager em;
     
+    /**
+     * Finds an object of the given id, then initializes all localized string attributes defined as Map&lt;Locale, String>
+     * @param entityId
+     * @param entityClass
+     * @return
+     */
+    public <entityClass> entityClass findOneWithLocalValues(Long entityId, Class<?> entityClass) {
+    	@SuppressWarnings("unchecked")
+		entityClass entity = (entityClass) em.find(entityClass, entityId);
+    	if (entity!=null) {
+    		List<entityClass> list = new ArrayList<>();
+    		list.add(entity);
+    		YadaUtil.prefetchLocalizedStrings(list, entityClass);
+    	}
+    	return entity;
+    }
     
     /**
      * Get the localized value of an entity's attribute
@@ -45,7 +63,7 @@ public class YadaLocaleDao {
      * Get the localized value of an entity's attribute
      * @param entity the entity instance
      * @param attributeName the name of the attribute that must be defined as Map<Locale, String>
-     * @param locale the locale for the value, use null for the current locale
+     * @param locale the locale for the value, use null for the current request locale
      * @param returnNull (optional) true if null must be returned when no value is present instead of the empty string
      * @return the localized value in the specified locale, or in the default configured locale if the value is not set for that locale, 
      * or an empty string if no value is found or null if no value is found and returnNull is true.
@@ -66,7 +84,7 @@ public class YadaLocaleDao {
      * @param entityId the id of the entity
      * @param entityClass the class of the entity
      * @param attributeName the name of the attribute that must be defined as Map<Locale, String>
-     * @param locale the locale for the value, use null for the current locale
+     * @param locale the locale for the value, use null for the current request locale
      * @param returnNull (optional) true if null must be returned when no value is present instead of the empty string
      * @return the localized value in the specified locale, or in the default configured locale if the value is not set for that locale, 
      * or an empty string if no value is found or null if no value is found and returnNull is true.

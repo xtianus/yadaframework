@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -58,6 +59,7 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
 
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.core.CloneableFiltered;
@@ -88,11 +90,50 @@ public class YadaUtil {
     }
 	 
 	/**
+	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
+	 * It must be called in a transaction.
+	 * @param fetchedEntities objects fetched from database that may contain localized strings
+	 * @param targetClass type of fetchedEntities elements
+	 */
+	public static <targetClass> void prefetchLocalizedStrings(List<targetClass> fetchedEntities, Class<?> targetClass) {
+		// Look for fields of type Map<Locale, String>
+		ReflectionUtils.doWithFields(targetClass, new ReflectionUtils.FieldCallback() {
+			@Override
+			public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
+				// Call the size() method on the localized field for each result object
+				for (Object object : fetchedEntities) {
+					try {
+						field.setAccessible(true);
+						Object fieldValue = field.get(object);
+						Method sizeMethod = Map.class.getMethod("size");
+						sizeMethod.invoke(fieldValue);
+					} catch (NoSuchMethodException | SecurityException | InvocationTargetException e) {
+						log.error("Failed to initialize field {} for object {} (ignored)", field, object);
+					}
+				}
+			}
+		}, new ReflectionUtils.FieldFilter() {
+			@Override
+			public boolean matches(Field field) {
+				Type type = field.getGenericType();
+				if (type instanceof ParameterizedType) {
+					ParameterizedType parameterizedType = (ParameterizedType) type;
+					Type[] params = parameterizedType.getActualTypeArguments();
+					return params.length==2 && Locale.class.equals(params[0]) && String.class.equals(params[1]);
+				}
+				return false;
+			}
+		});
+	}
+	
+	/**
 	 * Returns the localized value from a map of Locale -> String.
 	 * Used in entities with localized string attributes.
+	 * If a default locale has been configured with <code>&lt;locale default='true'></code>, then that locale is attempted when 
+	 * there is no value for the needed locale (and they differ)
 	 * @param LocalizedValueMap
-	 * @param locale the needed locale for the value, can be null for the current locale
-	 * @return the localized value, or the empty string if no value has been defined and no default locale has been set
+	 * @param locale the needed locale for the value, can be null for the current request locale
+	 * @return the localized value, or the empty string if no value has been defined and no default locale has been configured
 	 */
 	public static String getLocalValue(Map<Locale, String> LocalizedValueMap, Locale locale) {
 		if (locale==null) {

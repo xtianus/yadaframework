@@ -24,6 +24,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import net.yadaframework.components.YadaUtil;
@@ -129,34 +130,78 @@ public class YadaProduct implements Serializable {
 	protected YadaAttachedFile image;
 	
 	/***********************************************************************/
-	/* Useful methods                                                      */
+	/* Lazy localized value fetching                                       */
 
-	// TODO remove
+	/* These getters can be called outside of a transaction (e.g. in the view) 
+	 * to fetch the localized value for the current request locale
+	 */
 	
 	protected @Transient YadaLocaleDao yadaLocaleDao;
+	protected @Transient String cacheName = null;
+	protected @Transient String cacheSubtitle = null;
+	protected @Transient String cacheDescription = null;
+	protected @Transient String cacheMaterials = null;
 
 	public YadaProduct() {
 		yadaLocaleDao = (YadaLocaleDao) YadaUtil.getBean(YadaLocaleDao.class);
 	}
 	
+	/**
+	 * Fetches the localized name for the current request locale or the default configured locale
+	 * @return the name or the empty string if no value has been defined
+	 */
 	@Transient
 	public String getLocalName() {
-		return yadaLocaleDao.getLocalValue(id, YadaProduct.class, "name", null);
+		if (cacheName==null) {
+			cacheName = yadaLocaleDao.getLocalValue(id, YadaProduct.class, "name", null);
+		}
+		return cacheName;
 	}
 
+	/**
+	 * Fetches the localized subtitle for the current request locale or the default configured locale
+	 * @return the name or the empty string if no value has been defined
+	 */
 	@Transient
 	public String getLocalSubtitle() {
-		return yadaLocaleDao.getLocalValue(id, YadaProduct.class, "subtitle", null);
+		if (cacheSubtitle==null) {
+			cacheSubtitle = yadaLocaleDao.getLocalValue(id, YadaProduct.class, "subtitle", null);
+		}
+		return cacheSubtitle;
 	}
 
+	/**
+	 * Fetches the localized description for the current request locale or the default configured locale
+	 * @return the name or the empty string if no value has been defined
+	 */
 	@Transient
 	public String getLocalDescription() {
-		return yadaLocaleDao.getLocalValue(id, YadaProduct.class, "description", null);
+		if (cacheDescription==null) {
+			cacheDescription = yadaLocaleDao.getLocalValue(id, YadaProduct.class, "description", null);
+		}
+		return cacheDescription;
 	}
 	
+	/**
+	 * Fetches the localized materials for the current request locale or the default configured locale
+	 * @return the name or the empty string if no value has been defined
+	 */
 	@Transient
 	public String getLocalMaterials() {
-		return yadaLocaleDao.getLocalValue(id, YadaProduct.class, "materials", null);
+		if (cacheMaterials==null) {
+			cacheMaterials = yadaLocaleDao.getLocalValue(id, YadaProduct.class, "materials", null);
+		}
+		return cacheMaterials;
+	}
+	
+	/***********************************************************************/
+	/* Id for DataTables                                                   */
+	
+	@Transient
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
+	@JsonProperty("DT_RowId")
+	public String getDT_RowId() {
+		return this.getClass().getSimpleName()+"#"+this.id; // YadaProduct#142
 	}
 	
 	/***********************************************************************/
