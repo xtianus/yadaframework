@@ -26,6 +26,10 @@ public class YadaInvalidUsageException extends RuntimeException {
 		super(MessageFormatter.format(format, params).getMessage());
 	}
 
+	public YadaInvalidUsageException(Throwable cause, String format, Object... params) {
+		super(MessageFormatter.format(format, params).getMessage(), cause);
+	}
+
 	public YadaInvalidUsageException(Throwable cause) {
 		super(cause);
 	}

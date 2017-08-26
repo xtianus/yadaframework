@@ -26,6 +26,10 @@ public class YadaInvalidValueException extends RuntimeException {
 		super(MessageFormatter.format(format, params).getMessage());
 	}
 
+	public YadaInvalidValueException(Throwable cause, String format, Object... params) {
+		super(MessageFormatter.format(format, params).getMessage(), cause);
+	}
+	
 	public YadaInvalidValueException(Throwable cause) {
 		super(cause);
 	}

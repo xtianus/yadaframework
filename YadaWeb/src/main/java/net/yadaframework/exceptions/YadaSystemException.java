@@ -25,6 +25,10 @@ public class YadaSystemException extends RuntimeException {
 		super(MessageFormatter.format(format, params).getMessage());
 	}
 
+	public YadaSystemException(Throwable cause, String format, Object... params) {
+		super(MessageFormatter.format(format, params).getMessage(), cause);
+	}
+	
 	public YadaSystemException(Throwable cause) {
 		super(cause);
 	}

@@ -44,6 +44,7 @@ public class YadaAppConfig {
 		if (config.useDatabaseMigrationAtStartup()) {
 			log.info("Running FlyWay DB migration");
 			Flyway flyway = new Flyway();
+			flyway.setCleanDisabled(true); // Just to be safe
 			flyway.setLocations("classpath:database"); // Where sql scripts are stored
 			flyway.setDataSource(dataSource);
 			flyway.migrate();
