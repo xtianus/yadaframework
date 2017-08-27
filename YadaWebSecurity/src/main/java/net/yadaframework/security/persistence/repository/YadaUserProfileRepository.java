@@ -1,6 +1,5 @@
 package net.yadaframework.security.persistence.repository;
 
-import java.io.Serializable;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -14,6 +13,18 @@ import net.yadaframework.security.persistence.entity.YadaUserProfile;
 
 @Transactional(readOnly = true) 
 public interface YadaUserProfileRepository<T extends YadaUserProfile> extends JpaRepository<T, Long> {
+	
+	@Query(value="select r.roles from YadaUserProfile yup join YadaUserCredentials yuc on yup.userCredentials_id = yuc.id " + 
+			"join YadaUserCredentials_roles r on yuc.id = r.YadaUserCredentials_id where yup.id=:userProfileId", nativeQuery=true)
+	List<Integer> findRoleIds(@Param("userProfileId") Long userProfileId);
+	
+	/**
+	 * Retrive the userprofile id given the username
+	 * @param username
+	 * @return
+	 */
+	@Query(value="select up.id from YadaUserProfile up join YadaUserCredentials uc ON uc.id = up.userCredentials_id where uc.username=:username limit 1", nativeQuery=true)
+	Long findUserProfileIdByUsername(@Param("username") String username);
 	
 	List<T> findByUserCredentials(YadaUserCredentials userCredentials, Pageable pageable);
 	

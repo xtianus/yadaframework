@@ -16,6 +16,13 @@ public interface YadaUserCredentialsRepository extends JpaRepository<YadaUserCre
 
 //	List<YadaUserCredentials> findByYadaSocialCredentialsList(YadaSocialCredentials yadaSocialCredentials); 
 
+	/**
+	 * Find the credentials for the given user profile id
+	 * @param userProfileId
+	 * @return
+	 */
+	@Query("select yuc from YadaUserProfile up join up.userCredentials yuc where up.id = :userProfileId")
+	YadaUserCredentials findByUserProfileId(@Param("userProfileId") Long userProfileId);
 
 	/**
 	 * Cerca il primo utente con lo username indicato
