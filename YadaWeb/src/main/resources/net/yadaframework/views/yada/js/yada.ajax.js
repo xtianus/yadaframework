@@ -660,11 +660,22 @@
 					return;
 				}
 				// Open any other modal
-				var loadedModalDialog=$(responseHtml).find("> .modal > .modal-dialog");
+				var loadedModalDialog=$(responseHtml).find(".modal > .modal-dialog");
 //				var loadedModalDialog=$(responseHtml).find("> .modal:not(.s_fullPage) > .modal-dialog");
 				if (loadedModalDialog.length==1) {
 					// La risposta è un qualunque modal, che viene mostrato
 					$("#loginModal").remove();
+					// Adding the modal head elements to the main document
+					if (responseText.indexOf('<head>')>-1) {
+						var parser = new DOMParser();
+						var htmlDoc = parser.parseFromString(responseText, "text/html");
+						var headNodes = $(htmlDoc.head).children();
+						$("head").append(headNodes);
+						$('#ajaxModal').on('hidden.bs.modal', function (e) {
+							headNodes.remove(); // Cleanup on modal close
+						});
+					}
+					
 					$("#ajaxModal").children().remove();
 					$("#ajaxModal").append(loadedModalDialog);
 					$('#ajaxModal:hidden').modal('show'); // Mostro il modal se non è già aperto
