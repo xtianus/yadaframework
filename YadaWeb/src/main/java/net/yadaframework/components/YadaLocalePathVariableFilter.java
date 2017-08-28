@@ -59,7 +59,15 @@ public class YadaLocalePathVariableFilter implements Filter {
 	    String[] variables = url.split("/", 3);
 
 	    if (variables.length > 1 && isLocale(variables[1])) {
-	    	request.setAttribute(YadaLocalePathChangeInterceptor.LOCALE_ATTRIBUTE_NAME, variables[1]);
+	    	String requestLocale = variables[1]; // either "en" or "en_US"
+	    	boolean languageOnly = !requestLocale.contains("_");
+	    	if (languageOnly && config.isLocaleAddCountry()) {
+	    		String country = config.getCountryForLanguage(requestLocale);
+	    		if (country!=null) {
+	    			requestLocale += "_" + country;
+	    		}
+	    	}
+	    	request.setAttribute(YadaLocalePathChangeInterceptor.LOCALE_ATTRIBUTE_NAME, requestLocale);
 	        request.setAttribute(ORIGINAL_REQUEST, request); // To be used in case of authorization failure that requires a login
 	        String newUrl = StringUtils.removeStart(url, '/' + variables[1]); // TODO don't we need the context path at the start?
 	        RequestDispatcher dispatcher = request.getRequestDispatcher(newUrl);

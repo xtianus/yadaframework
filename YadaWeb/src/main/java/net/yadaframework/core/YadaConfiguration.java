@@ -67,6 +67,8 @@ public abstract class YadaConfiguration {
 	private int minPwdLen = -1;
 	private String errorPageForward = null;
 	private List<String> locales = null;
+	private Map<String, String> languageToCountry = null;
+	private Boolean localeAddCountry = null;
 	private Boolean localePathVariableEnabled = null;
 	private Locale defaultLocale = null;
 	private boolean defaultLocaleChecked = false;
@@ -110,6 +112,40 @@ public abstract class YadaConfiguration {
 			localePathVariableEnabled = configuration.getBoolean("config/i18n/@localePathVariable", false);
 		}
 		return localePathVariableEnabled.booleanValue();
+	}
+	
+//	/**
+//	 * Returns the locale to be injected in the request.
+//	 * Used when the locale string only has the language and you want to store the full language_COUNTRY locale in your request.
+//	 * The configuration must be like &lt;locale>es&lt;request>es_ES&lt;/request>&lt;/locale>
+//	 * @param locale
+//	 * @return either the input parameter unaltered or the "request" locale if configured
+//	 */
+//	public String getLocaleForRequest(String locale) {
+//		return configuration.getString("config/i18n/locale[text()='" + locale + "']/request", locale);
+//	}
+	
+	public String getCountryForLanguage(String language) {
+		if (languageToCountry==null) {
+			languageToCountry = new HashMap<>();
+			List<ImmutableHierarchicalConfiguration> locales = configuration.immutableConfigurationsAt("config/i18n/locale");
+			for (ImmutableHierarchicalConfiguration localeConfig : locales) {
+				String languageKey = localeConfig.getString(".");
+				String countryValue = localeConfig.getString("./@country");
+				languageToCountry.put(languageKey, countryValue);
+			}
+		}
+		return languageToCountry.get(language);
+	}
+	
+	/**
+	 * True if locale paths only have the language component ("en") but you also need the country component ("US") in the request Locale 
+	 */
+	public boolean isLocaleAddCountry() {
+		if (localeAddCountry==null) {
+			localeAddCountry = configuration.containsKey("config/i18n/locale/@country");
+		}
+		return localeAddCountry.booleanValue();
 	}
 	
 	/**

@@ -234,7 +234,21 @@ public class YadaSql implements CloneableDeep {
 	}
 	
 	/**
-	 * Add a join condition if not already added
+	 * Adds a join condition if not already added
+	 * @param enabled false to prevent the join from being added
+	 * @param joinOn
+	 * @return
+	 * @see #join(String)
+	 */
+	public YadaSql join(boolean enabled, String joinOn) {
+		if (enabled) {
+			return join(joinOn);
+		}
+		return this;
+	}
+	
+	/**
+	 * Adds a join condition if not already added
 	 * @param joinOn a join that could include a ON operand, like "left join User on e.uid = u.id"
 	 * @return
 	 */
