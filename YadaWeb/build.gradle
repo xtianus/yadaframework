@@ -58,7 +58,7 @@ dependencies {
 		'com.fasterxml.jackson.core:jackson-core:2.9.+',
 		'com.fasterxml.jackson.core:jackson-databind:2.9.+',
 		'org.seleniumhq.selenium:selenium-support:2.53.1',
-		'org.littleshoot:littleproxy:1.1.2',
+		// 'org.littleshoot:littleproxy:1.1.2',
 		'org.quartz-scheduler:quartz:2.2.3', // TODO remove
 		'org.flywaydb:flyway-core:4.2.0'
 	
@@ -127,8 +127,8 @@ configurations {
 }
 
 dependencies {
-	hibtools files("$buildDir/classes/main")
-	hibtools files("$buildDir/classes/test") // Needed for yadaPersistenceUnit
+	hibtools files("$buildDir/classes/java/main")
+	hibtools files("$buildDir/classes/java/test") // Needed for yadaPersistenceUnit
 	hibtools 'org.hibernate:hibernate-tools:5.+'
 }
 
@@ -136,15 +136,15 @@ task testDbSchema(dependsOn: [testClasses], type: net.yadaframework.tools.YadaCr
 	inputs.files configurations.hibtools
 	outputfilename = "V1__yadatest.sql"
 	doFirst {
-		new File("$buildDir/classes/test/META-INF").mkdirs()
+		new File("$buildDir/classes/java/test/META-INF").mkdirs()
 		copy {
 			from "$buildDir/resources/test/META-INF/persistence.test.xml"
-			into "$buildDir/classes/test/META-INF"
+			into "$buildDir/classes/java/test/META-INF"
 			rename 'persistence.test.xml', 'persistence.xml'
 		} 
 	}
 	doLast { 
-		delete "$buildDir/classes/test/META-INF/persistence.xml"
+		delete "$buildDir/classes/java/test/META-INF/persistence.xml"
 	}
 }
 

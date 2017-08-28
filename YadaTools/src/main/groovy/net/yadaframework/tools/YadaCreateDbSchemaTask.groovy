@@ -25,7 +25,7 @@ class YadaCreateDbSchemaTask extends DefaultTask {
 		// Workaround for @Entity discovery: copy the persistence.xml file to the classes folder
 		File fromFile = project.sourceSets.main.resources.files.find({it.name=='persistence.xml'})
 		// File fromFile = new File("$project.buildDir/resources/main/META-INF/persistence.xml")
-		File toFolder = new File("$project.buildDir/classes/main/META-INF");
+		File toFolder = new File("$project.buildDir/classes/java/main/META-INF");
 		toFolder.mkdirs();
 		File toFile = new File(toFolder, "persistence.xml")
 		if (fromFile!=null && toFile!=null) { 

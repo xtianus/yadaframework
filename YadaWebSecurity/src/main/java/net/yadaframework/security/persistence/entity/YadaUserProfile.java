@@ -14,6 +14,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
 
 @Entity
 public class YadaUserProfile implements Serializable {
@@ -41,6 +42,7 @@ public class YadaUserProfile implements Serializable {
 	@Column(length = 64)
 	protected String lastName;
 
+	@NotNull
 	@OneToOne(optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
 	protected YadaUserCredentials userCredentials;
 	

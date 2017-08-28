@@ -24,6 +24,10 @@ public class YadaSocialException extends Exception {
 	public YadaSocialException(String format, Object... params) {
 		super(MessageFormatter.format(format, params).getMessage());
 	}
+
+	public YadaSocialException(Throwable cause, String format, Object... params) {
+		super(MessageFormatter.format(format, params).getMessage(), cause);
+	}
 	
 	public YadaSocialException(Throwable cause) {
 		super(cause);

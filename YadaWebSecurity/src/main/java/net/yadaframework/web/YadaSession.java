@@ -1,7 +1,5 @@
 package net.yadaframework.web;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +11,7 @@ import net.yadaframework.security.YadaUserDetailsService;
 import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
 import net.yadaframework.security.persistence.repository.YadaUserProfileRepository;
 
 /**
@@ -23,88 +22,104 @@ import net.yadaframework.security.persistence.repository.YadaUserProfileReposito
 public class YadaSession<T extends YadaUserProfile> {
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	@Autowired private YadaConfiguration config;
-	@Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaSecurityUtil yadaSecurityUtil;
 	// Attenzione: questo sarebbe da mettere transient perchè tomcat tenta di persistere la session ma non ce la fa. Pero' se lo si mette transient,
 	// quando la session viene ricaricata questo non viene valorizzato. Come si fa a inizializzare questo oggetto quando tomcat lo ricarica dallo storage?
 	@Autowired private YadaUserProfileRepository<T> yadaUserProfileRepository;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
+	@Autowired private YadaUserCredentialsRepository yadaUserCredentialsRepository;
 
-	private T userProfile = null;
-	private T impersonificatore = null;
+	protected Long impersonificatorUserId = null;
+	protected Long impersonifiedUserId = null;
+	protected Long loggedInUserProfileId = null; // id of the current logged in user, be it "real" or "impersonificated"
 	
 	public void clearUserProfileCache() {
-		this.userProfile = null;
+		loggedInUserProfileId = null;
 	}
 	
 	public void clearCaches() {
-		this.userProfile = null;
-		this.impersonificatore = null;
+		impersonificatorUserId = null;
+		loggedInUserProfileId = null;
+		impersonifiedUserId = null;
 	}
 	
-	public boolean isImpersonification() {
-		return impersonificatore!=null;
+	public boolean isImpersonificationActive() {
+		return impersonificatorUserId!=null && impersonifiedUserId!=null;
 	}
 	
-	public void impersonifica(T theUser) {
-		impersonificatore = this.getCurrentUserProfile();
-		userProfile = theUser;
-		YadaUserCredentials yadaUserCredentials = theUser.getUserCredentials();
-		yadaUserDetailsService.authenticateAs(yadaUserCredentials, false);
-		log.info("Impersonificazione di {} come {} iniziata", impersonificatore, theUser);
-	}
-	
-	public void depersonifica() {
-		T theUser = userProfile;
-		if (impersonificatore!=null) {
-			userProfile = impersonificatore;
-			impersonificatore = null;
-			YadaUserCredentials yadaUserCredentials = userProfile.getUserCredentials();
-			yadaUserDetailsService.authenticateAs(yadaUserCredentials);
-			log.info("Impersonificazione di {} come {} terminata", userProfile, theUser);
-		} else {
-			log.error("Depersonificazione fallita perchè impersonificatore assente");
-		}
-	}
-
-	public boolean isAdmin() {
-		boolean result = false;
-		if (getCurrentUserProfile()!=null) {
-			YadaUserCredentials userCredentials = userProfile.getUserCredentials();
-			if (userCredentials!=null) {
-				List<Integer> roles = userCredentials.getRoles();
-				if (roles!=null) {
-					result = roles.contains(config.getRoleId("ADMIN"));
-				}
-			}
-		}
-		return result;
+	public void impersonify(Long targetUserProfileId) {
+		impersonificatorUserId = getCurrentUserProfileId();
+		impersonifiedUserId = targetUserProfileId;
+		YadaUserCredentials targetUserCredentials = yadaUserCredentialsRepository.findByUserProfileId(targetUserProfileId);
+		yadaUserDetailsService.authenticateAs(targetUserCredentials, false);
+		loggedInUserProfileId = targetUserProfileId;
+		log.info("Impersonification by #{} as {} started", impersonificatorUserId, targetUserCredentials);
 	}
 	
 	/**
-	 * Ritorna true se lo UserProfile coincide con quello dell'utente loggato
-	 * @param someUserProfile
+	 * Terminates impersonification.
+	 * @return true if the impersonification was active, false if it was not active.
+	 */
+	public boolean depersonify() {
+		if (isImpersonificationActive()) {
+			YadaUserCredentials originalCredentials = yadaUserCredentialsRepository.findByUserProfileId(impersonificatorUserId);
+			yadaUserDetailsService.authenticateAs(originalCredentials);
+			log.info("Impersonification by {} ended", originalCredentials);
+			clearCaches();
+			return true;
+		} else {
+			log.error("Depersonification failed because of null impersonificator or null original user");
+			return false;
+		}
+	}
+
+	/**
+	 * Check if the current user has the role "ADMIN"
 	 * @return
 	 */
-	public boolean isLoggedUser(T someUserProfile) {
-		T userProfile = getCurrentUserProfile();
-		if (userProfile!=null && someUserProfile!=null) {
-			return userProfile.getId().equals(someUserProfile.getId());
+	public boolean isAdmin() {
+		Long idToCheck = getCurrentUserProfileId();
+		if (idToCheck!=null) {
+			return yadaUserProfileRepository.findRoleIds(idToCheck).contains(config.getRoleId("ADMIN"));
 		}
 		return false;
 	}
 	
-	public T getCurrentUserProfile() {
-		if (userProfile==null && yadaSecurityUtil!=null) {
+	/**
+	 * Check if the argument userProfile is the same as the currently logged-in one
+	 * @param someUserProfile
+	 * @return
+	 */
+	public boolean isLoggedUser(T someUserProfile) {
+		return someUserProfile!=null && 
+			someUserProfile.getId()!=null &&
+			someUserProfile.getId().equals(loggedInUserProfileId);
+	}
+	
+	/**
+	 * Returns the id of the YadaUserProfile for the currently logged-in user
+	 * @return
+	 */
+	public Long getCurrentUserProfileId() {
+		if (loggedInUserProfileId==null && yadaSecurityUtil!=null) {
 			String username = yadaSecurityUtil.getUsername();
 			if (username!=null) {
-				List<T> userProfiles = yadaUserProfileRepository.findByUserCredentialsUsername(username, yadaWebUtil.FIND_ONE);
-				if (userProfiles.size()==1) {
-					userProfile = userProfiles.get(0);
-				}
+				loggedInUserProfileId = yadaUserProfileRepository.findUserProfileIdByUsername(username);
 			}
 		}
-		return userProfile;
+		return loggedInUserProfileId;
 	}
+	
+	/**
+	 * Returns the currently logged-in user profile
+	 * @return
+	 */
+	public T getCurrentUserProfile() {
+		if (loggedInUserProfileId==null) {
+			getCurrentUserProfileId();
+		}
+		return loggedInUserProfileId==null?null:yadaUserProfileRepository.findOne(loggedInUserProfileId);
+	}
+	
 	
 }

@@ -1,6 +1,7 @@
 package net.yadaframework.selenium;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -13,7 +14,6 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-import org.littleshoot.proxy.HttpProxyServer;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.Dimension;
@@ -136,23 +136,23 @@ public class YadaSeleniumUtil {
 	 * Create a new browser instance positioning the window 
 	 * @param proxy
 	 * @param cookiesToSet cookies to set after the first get of a document. Can be null or empty. Cookies are set only when a 
-	 * cookie with the same name has not been received.
+	 * cookie with the same name has not been received. It's not possible to set cookies BEFORE the first get (by design of WebDriver).
 	 * @param driverType DRIVER_FIREFOX, DRIVER_CHROME
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	public WebDriver makeWebDriver(HttpProxyServer proxyToUse, Set<Cookie> cookiesToSet, int driverType) throws MalformedURLException {
+	public WebDriver makeWebDriver(InetSocketAddress proxyToUse, Set<Cookie> cookiesToSet, int driverType) throws MalformedURLException {
 		final Set<Cookie> initialCookies = new HashSet<Cookie>();
 		if (cookiesToSet!=null) {
 			// Make a copy because we need to clear the set later
 			initialCookies.addAll(cookiesToSet);
 		}
 		Proxy browserProxy = new Proxy();
-		String proxyHost = proxyToUse.getListenAddress().getHostName();
+		String proxyHost = proxyToUse.getHostName();
 		if (proxyHost.equals("0:0:0:0:0:0:0:0")) {
 			proxyHost = "localhost";
 		}
-		int proxyPort = proxyToUse.getListenAddress().getPort();
+		int proxyPort = proxyToUse.getPort();
 		log.debug("Setting browser proxy to {}:{}", proxyHost, proxyPort);
 		browserProxy.setHttpProxy(proxyHost + ":" + proxyPort);
 		browserProxy.setProxyType(ProxyType.MANUAL);

@@ -24,6 +24,10 @@ public class YadaConfigurationException extends RuntimeException {
 	public YadaConfigurationException(String format, Object... params) {
 		super(MessageFormatter.format(format, params).getMessage());
 	}
+
+	public YadaConfigurationException(Throwable cause, String format, Object... params) {
+		super(MessageFormatter.format(format, params).getMessage(), cause);
+	}
 	
 	public YadaConfigurationException(Throwable cause) {
 		super(cause);
