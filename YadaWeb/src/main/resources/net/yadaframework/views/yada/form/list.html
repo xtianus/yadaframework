@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
 <!--/*
 A select list for objects, maps or static (Spring-EL) elements.
 It must be used inside a form with a th:object form bean.
@@ -16,7 +19,7 @@ Parameters (can be set in the replace tag or in any parent tag):
 - textKey = the prefix of the key used for texts, like 'list.enabled.'; options (or option texts) will be appended to the prefix.
              If null, the option or option text will be used for the text.
 - inline = true to have label and field inline (optional)
-- help = testo per il pulsante di help, se non c'è helpKey (optional)
+- help = testo per il pulsante di help, se non c'Ã¨ helpKey (optional)
 - helpKey = chiave del testo per il pulsante di help (optional)
 - addHeader = (optional) true to add the first "empty" option
 - multiple = true for a multiple select box (optional)
@@ -45,7 +48,7 @@ Example:
 	<label th:if="${label!=null or labelKey!=null}" 
 		class="control-label" th:for="${#ids.next(idPrefix)}" 
 		th:text="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
-	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perché se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
+	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perchÃ© se non c'Ã¨ l'help il campo resta corto (ad esempio i campi password) */-->
 		<select th:field="*{__${fieldName}__}" th:multiple="${multiple}" 
 			th:with="isMap=${options instanceof T(java.util.Map)}"
 			th:size="${size}?:''"

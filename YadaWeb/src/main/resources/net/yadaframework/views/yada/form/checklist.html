@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
 <!--/*
 A checkbox list for objects, maps or static (Spring-EL) elements.
 It must be used inside a form with a th:object form bean.
@@ -8,13 +11,13 @@ Parameters:
 - fieldName = name of the field, in the form bean, holding the chosen value
 - labelKey = key in messages.properties for the label text
 - label = label to use, if not using a labelKey
-- options = a list of objects or a list of primitive types, like ${ {true,false} } (space is important) - can be omitted for an empty select.
+- options = a list of objects or a list of primitive types, like ${ {true,false} } (space is important).
 -           It can also be a map of (value-text) entries, where values are either literal text or suffixes for labelKey.
 - valueAttribute = the name of the object attribute containing the option value, e.g. "id" - must be omitted for lists of primitives
 - textAttribute = the name of the object attribute (or method with braces) containing the option text (or textKey suffix), e.g. "name" or "toString()" - must be omitted for lists of primitives
 - textKey = the prefix of the key used for texts, like 'list.enabled.'; options (or option texts) will be appended to the prefix.
              If null, the option or option text will be used for the text.
-- help = testo per il pulsante di help, se non c'è helpKey (optional)
+- help = testo per il pulsante di help, se non c'Ã¨ helpKey (optional)
 - helpKey = chiave del testo per il pulsante di help (optional)
 - required = true for a required select box (optional)
 - disabled = true for a disabled select box (optional)
@@ -41,21 +44,25 @@ Example:
 		<th:block th:if="${!isMap}">
 			<!--/* List */-->
   			<div th:each="option : ${options}" class="yadaCheckbox">
-				<!--/* List of primitives */-->
-				<input th:if="${valueAttribute==null} or ${textAttribute==null}" 
-					th:field="*{__${fieldName}__}" th:value="${option}"
-					type="checkbox"
-					th:required="${required}" th:disabled="${disabled}" />
-					<label th:for="${#ids.prev('__${fieldName}__')}" 
-           				th:text="${textKey==null?option:#messages.msg(textKey+option)}">SomeChoice</label>
-				<!--/* List of objects */-->
-				<input th:if="${valueAttribute!=null} and ${textAttribute!=null}"
-					th:with="text = ${__${'option.'+textAttribute}__},value=__${'option.'+valueAttribute}__" 
-					th:field="*{__${fieldName}__}" th:value="${option}"
-					type="checkbox"
-					th:required="${required}" th:disabled="${disabled}" />
-					<label th:for="${#ids.prev('__${fieldName}__')}" 
-           				th:text="${textKey==null?text:#messages.msg(textKey+text)}">SomeChoice</label>
+  				<th:block th:if="${valueAttribute==null} or ${textAttribute==null}">
+					<!--/* List of primitives */-->
+					<label>
+						<input th:field="*{__${fieldName}__}" th:value="${option}"
+							type="checkbox"
+							th:required="${required}" th:disabled="${disabled}" />
+						<span th:text="${textKey==null?option:#messages.msg(textKey+option)}">SomeChoice</span>
+					</label>
+   				</th:block>
+   				<th:block th:if="${valueAttribute!=null} and ${textAttribute!=null}">
+					<!--/* List of objects */-->
+					<label th:with="text = ${__${'option.'+textAttribute}__},value=${__${'option.'+valueAttribute}__}">
+						<input 
+							th:field="*{__${fieldName}__}" th:value="${value}"
+							type="checkbox"
+							th:required="${required}" th:disabled="${disabled}" />
+						<span th:text="${textKey==null?text:#messages.msg(textKey+text)}">SomeChoice</span>
+					</label>
+           		</th:block>
   			</div>
  		</th:block>
 		<th:block th:if="${isMap}">
@@ -65,7 +72,7 @@ Example:
 					th:field="*{__${fieldName}__}" th:value="${entry.key}"
 					type="checkbox"
 					th:required="${required}" th:disabled="${disabled}" />
-					<label th:for="${#ids.prev('__${fieldName}__')}" 
+					<label th:for="__${fieldName}__" 
            				th:text="${textKey==null?entry.value:#messages.msg(textKey+entry.value)}">SomeChoice</label>
         		</div>
 		</th:block>

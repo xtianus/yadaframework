@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
 <!--/*
 A select list for enums. The enum must implement a getKey() method that returns the key for messages.properties, like "enum.CompanyType." + name();
 
@@ -19,7 +22,7 @@ Parameters:
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
 	<label class="control-label" th:for="${#ids.next('fieldId')}" th:text="${labelKey!=null?#messages.msg(labelKey):label}">Tipo:</label>
 	<select th:field="*{__${fieldName}__}" class="form-control has-feedback" th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}">
-		<!--/* Non si può avere un header vuoto perché ciò impedirebbe di creare l'oggetto enum a server automaticamente */-->
+		<!--/* Non si puÃ² avere un header vuoto perchÃ© ciÃ² impedirebbe di creare l'oggetto enum a server automaticamente */-->
 		<option th:each="type : ${T(__${enumClass}__).values()}" 
 			th:value="${type.name()}" 
 			th:text="#{__${localized==false?type:type.key}__}">RETAILER</option>

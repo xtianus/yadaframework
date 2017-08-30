@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -81,23 +82,29 @@ public class YadaSql implements CloneableDeep {
 	}
 
 	private YadaSql appendWhere(String text, String startingWhere) {
-		nowInHaving=false;
-		if (pendingWhereOperand!=null) {
-			String operand = pendingWhereOperand;
-			pendingWhereOperand = null;
-			appendWhere(operand, "");
+		if (StringUtils.isNotEmpty(text)) {
+			nowInHaving=false;
+			if (pendingWhereOperand!=null) {
+				String operand = pendingWhereOperand;
+				pendingWhereOperand = null;
+				appendWhere(operand, "");
+			}
+			return appendSection(whereConditions, startingWhere, text);
 		}
-		return appendSection(whereConditions, startingWhere, text);
+		return this;
 	}
 	
 	private YadaSql appendHaving(String text) {
-		nowInHaving=true;
-		if (pendingHavingOperand!=null) {
-			String operand = pendingHavingOperand;
-			pendingHavingOperand = null;
-			appendHaving(operand);
+		if (StringUtils.isNotEmpty(text)) {
+			nowInHaving=true;
+			if (pendingHavingOperand!=null) {
+				String operand = pendingHavingOperand;
+				pendingHavingOperand = null;
+				appendHaving(operand);
+			}
+			return appendSection(havingConditions, "having ", text);
 		}
-		return appendSection(havingConditions, "having ", text);
+		return this;
 	}
 	
 	/**
@@ -235,7 +242,7 @@ public class YadaSql implements CloneableDeep {
 	
 	/**
 	 * Adds a join condition if not already added
-	 * @param enabled false to prevent the join from being added
+	 * @param enabled false to prevent the join from being added. Can be null or empty.
 	 * @param joinOn
 	 * @return
 	 * @see #join(String)
@@ -249,23 +256,30 @@ public class YadaSql implements CloneableDeep {
 	
 	/**
 	 * Adds a join condition if not already added
-	 * @param joinOn a join that could include a ON operand, like "left join User on e.uid = u.id"
+	 * @param joinOn a join that could include a ON operand, like "left join User on e.uid = u.id". Can be null or empty.
 	 * @return
 	 */
 	public YadaSql join(String joinOn) {
-		nowInHaving=false;
-		if (joins.indexOf(joinOn)<0) {
-			joins.append(joinOn).append(" ");
+		if (StringUtils.isNotEmpty(joinOn)) {
+			nowInHaving=false;
+			if (joins.indexOf(joinOn)<0) {
+				joins.append(joinOn).append(" ");
+			}
 		}
 		return this;
 	}
 	
+	/**
+	 * Adds a where condition
+	 * @param whereConditions a condition like "where a>0" or just "a>0", can be null or empty
+	 * @return
+	 */
 	public YadaSql where(String whereConditions) {
 		return appendWhere(whereConditions, "where ");
 	}
 
 	/**
-	 * 
+	 * Adds a where condition
 	 * @param enabled
 	 * @param whereConditions a condition like "where a>0" or just "a>0"
 	 * @return
@@ -291,6 +305,11 @@ public class YadaSql implements CloneableDeep {
 		return this;
 	}
 	
+	/**
+	 * Adds a having condition
+	 * @param havingConditions, can be null or empty
+	 * @return
+	 */
 	public YadaSql having(String havingConditions) {
 		return appendHaving(havingConditions);
 	}
@@ -369,10 +388,19 @@ public class YadaSql implements CloneableDeep {
 		return this;
 	}
 	
+	/**
+	 * Starts a subexpression. Be careful that the returned YadaSql object is different from the original one, so don't use the original one for ending the subexpression.
+	 * @return
+	 */
 	public YadaSql startSubexpression() {
 		return startSubexpression(true);
 	}
 	
+	/**
+	 * Starts a subexpression. Be careful that the returned YadaSql object is different from the original one, so don't use the original one for ending the subexpression.
+	 * @param enabled
+	 * @return
+	 */
 	public YadaSql startSubexpression(boolean enabled) {
 		return new YadaSql(this, enabled);
 //			if (!nowInHaving) {
@@ -383,7 +411,7 @@ public class YadaSql implements CloneableDeep {
 	}
 
 	/**
-	 * Ends a where/having subexpression
+	 * Ends a where/having subexpression. To be called on the object returned by the {@link #startSubexpression()} method (or any method called on that object)
 	 * @return
 	 */
 	public YadaSql endSubexpression() {
@@ -391,7 +419,7 @@ public class YadaSql implements CloneableDeep {
 	}
 	
 	/**
-	 * Ends a subquery
+	 * Ends a where/having subexpression. To be called on the object returned by the {@link #startSubexpression()} method (or any method called on that object)
 	 * @param alias the table alias, like in "select alias.a+alias.c from ( select 2*b as a ...) alias"
 	 * @return
 	 */
@@ -422,29 +450,43 @@ public class YadaSql implements CloneableDeep {
 		return this;
 	}
 	
+	/**
+	 * 
+	 * @param groupBy can be empty or null
+	 * @return
+	 */
 	public YadaSql groupBy(String groupBy) {
-		nowInHaving=false;
-		boolean firstGroupBy = this.groupBy.equals("");
-		if (firstGroupBy && !groupBy.toLowerCase().startsWith("group by ")) {
-			groupBy = "group by " + groupBy;
+		if (StringUtils.isNotEmpty(groupBy)) {
+	 		nowInHaving=false;
+			boolean firstGroupBy = this.groupBy.equals("");
+			if (firstGroupBy && !groupBy.toLowerCase().startsWith("group by ")) {
+				groupBy = "group by " + groupBy;
+			}
+			if (!firstGroupBy) {
+				groupBy = ", " + groupBy;
+			}
+			this.groupBy += groupBy;
 		}
-		if (!firstGroupBy) {
-			groupBy = ", " + groupBy;
-		}
-		this.groupBy += groupBy;
 		return this;
 	}
 	
+	/**
+	 * 
+	 * @param orderBy can be empty or null
+	 * @return
+	 */
 	public YadaSql orderBy(String orderBy) {
-		nowInHaving=false;
-		boolean firstOrderBy = this.orderBy.equals("");
-		if (firstOrderBy && !orderBy.toLowerCase().startsWith("order by ")) {
-			orderBy = "order by " + orderBy;
+		if (StringUtils.isNotEmpty(orderBy)) {
+			nowInHaving=false;
+			boolean firstOrderBy = this.orderBy.equals("");
+			if (firstOrderBy && !orderBy.toLowerCase().startsWith("order by ")) {
+				orderBy = "order by " + orderBy;
+			}
+			if (!firstOrderBy) {
+				orderBy = ", " + orderBy;
+			}
+			this.orderBy += orderBy;
 		}
-		if (!firstOrderBy) {
-			orderBy = ", " + orderBy;
-		}
-		this.orderBy += orderBy;
 		return this;
 	}
 	
@@ -533,9 +575,29 @@ public class YadaSql implements CloneableDeep {
 		return query;
 	}
 	
+	/**
+	 * Create an instance of Query for executing a Java Persistence query language statement.
+	 * @param em
+	 * @return
+	 * @see EntityManager#createQuery(String)
+	 */
 	public Query query(EntityManager em) {
 		nativeQuery = false;
 		Query query = em.createQuery(sql());
+		fixQuery(query);
+		return query;
+	}
+	
+	/**
+	 * Create an instance of TypedQuery for executing a Java Persistence query language statement. The select list of the query must contain only a single item, which must be assignable to the type specified by the resultClass argument.
+	 * @param em
+	 * @param targetClass
+	 * @return
+	 * @see EntityManager#createQuery(String, Class)
+	 */
+	public <T> TypedQuery<T> query(EntityManager em, Class<T> targetClass) {
+		nativeQuery = false;
+		TypedQuery<T> query = em.createQuery(sql(), targetClass);
 		fixQuery(query);
 		return query;
 	}
@@ -573,6 +635,25 @@ public class YadaSql implements CloneableDeep {
 			throw new InternalException("Parameters should be set before calling query()");
 		}
 		parameters.put(name, value);
+		return this;
+	}
+	
+	/**
+	 * Add all the joins, where, having, group, order statements and parameters of another YadaSql object
+	 * @param yadaSql the object to get items from, can be null to no nothing
+	 * @return
+	 */
+	public YadaSql add(YadaSql yadaSql) {
+		if (yadaSql!=null) {
+			this.join(yadaSql.joins.toString());
+			this.where(yadaSql.getWhere());
+			this.pendingWhereOperand = yadaSql.pendingWhereOperand;
+			this.having(yadaSql.havingConditions.toString());
+			this.pendingHavingOperand = yadaSql.pendingHavingOperand;
+			this.groupBy(yadaSql.groupBy);
+			this.orderBy(yadaSql.orderBy);
+			this.parameters.putAll(yadaSql.parameters);
+		}
 		return this;
 	}
 	

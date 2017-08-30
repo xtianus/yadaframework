@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
 <!--/*
 
 DEPRECATED: usare list.html
@@ -13,7 +16,7 @@ Parameters:
 - values = a static list, like ${ {true,false} } (space is important) - can be absent for empty select
 - textKey = the prefix of the key used for texts, like 'list.enabled.'; values will be appended to the prefix.
              If null, the value will be used for the text.
-- help = testo per il pulsante di help, se non c'è helpKey (optional)
+- help = testo per il pulsante di help, se non c'Ã¨ helpKey (optional)
 - helpKey = chiave del testo per il pulsante di help (optional)
 - addHeader = (optional) true to add the first "empty" option
 - multiple = true for a multiple select box (optional)
@@ -28,7 +31,7 @@ Example:
 <body>
 <div class="form-group has-feedback" th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
 	<label class="control-label" th:for="${#ids.next('fieldId')}" th:text="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
-	<div class="input-group" style="width:100%"> <!--/* il width serve perché se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
+	<div class="input-group" style="width:100%"> <!--/* il width serve perchÃ© se non c'Ã¨ l'help il campo resta corto (ad esempio i campi password) */-->
 		<select th:field="*{__${fieldName}__}" th:multiple="${multiple}" th:required="${required}" th:disabled="${disabled}" class="form-control has-feedback" th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}">
 			<option th:if="${addHeader==true}" value="-1">---</option>
 			<option th:each="option : ${values}" th:value="${option}"	
