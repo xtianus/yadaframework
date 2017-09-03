@@ -29,7 +29,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 if [[ ! $MYIP ]]; then
 	MYIP=$( ifconfig eth0 | awk '/inet addr/{print substr($2,6)}' )
 fi
-	if [[ ! $MYIP ]]; then
+if [[ ! $MYIP ]]; then
 	MYIP=$( ifconfig venet0:0 | awk '/inet addr/{print substr($2,6)}' )
 fi
 
@@ -252,6 +252,14 @@ fi
 if [[ $cfgPkgMysql ]]; then
 	apt-get -o Dpkg::Options::="--force-confnew" -y install $cfgPkgMysql
 	mysqladmin -u root password ${cfgMysqlRootPwd}
+fi
+
+# certbot for SSL
+if [[ $cfgCertbot != "false" ]]; then
+	apt-get -o Dpkg::Options::="--force-confnew" -y install software-properties-common
+	add-apt-repository -y ppa:certbot/certbot
+	apt-get -o Dpkg::Options::="--force-confnew" -y update
+	apt-get -o Dpkg::Options::="--force-confnew" -y install certbot 
 fi
 
 # Altro
