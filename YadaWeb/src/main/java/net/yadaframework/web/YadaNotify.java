@@ -206,7 +206,7 @@ public class YadaNotify {
 	 * Create a new YadaNotify instance.
 	 * @param model
 	 * @return
-	 * @deprecated use "@Autowired YadaNotify yadaNotify", followed by "yadaNotify.init(model)..."
+	 * @deprecated use "@Autowired YadaNotify yadaNotify", followed by "yadaNotify.title(model)..."
 	 */
 	@Deprecated
 	public static YadaNotify instance(Model model) {
@@ -219,7 +219,7 @@ public class YadaNotify {
 	 * Create a new YadaNotify instance to be shown after a redirect
 	 * @param redirectAttributes
 	 * @return
-	 * @deprecated use "@Autowired YadaNotify yadaNotify", followed by "yadaNotify.init(redirectAttributes)..."
+	 * @deprecated use "@Autowired YadaNotify yadaNotify", followed by "yadaNotify.title(redirectAttributes)..."
 	 */
 	@Deprecated
 	public static YadaNotify instance(RedirectAttributes redirectAttributes) {

@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
 
 <!--/*
 A text input element.
@@ -20,7 +23,7 @@ Parameters:
 - disabled = true for a disabled field - NOT SENT TO SERVER (optional)
 - readonly = true for readonly (optional)
 - maxlength = max number of characters accepted (optional)
-- help = testo per il pulsante di help, se non c'è helpKey (optional)
+- help = testo per il pulsante di help, se non c'Ã¨ helpKey (optional)
 - helpKey = chiave del testo per il pulsante di help (optional)
 - editor = true/false to use ckeditor
 - noFeedback = true to remove space reserved for field feedback icon (optional)
@@ -39,7 +42,7 @@ Example:
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" 
 	th:classappend="|${hasError==true?'has-error':''} ${inline==true?'form-inline':''} ${noFeedback==true?'':'has-feedback'}|">
 	<label class="control-label" th:for="${#ids.next('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
-	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perché se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
+	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perchÃ© se non c'Ã¨ l'help il campo resta corto (ad esempio i campi password) */-->
 		<!--/* Can't use th:field="*{__${fieldName}__}" because somehow passwords remain blank when they already have a value */-->
 		<input th:if="${maxlength==null or maxlength le 80}" th:name="${fieldName}" th:value="*{{__${fieldName}__}}"
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"

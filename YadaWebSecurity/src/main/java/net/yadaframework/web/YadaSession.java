@@ -3,9 +3,8 @@ package net.yadaframework.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
 
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.YadaUserDetailsService;
@@ -19,8 +18,7 @@ import net.yadaframework.security.persistence.repository.YadaUserProfileReposito
  *
  */
 @Component
-// ScopedProxyMode.TARGET_CLASS makes so that the instance is different for each thread, even if it is injected in a singleton
-@Scope(value="session", proxyMode=ScopedProxyMode.TARGET_CLASS) 
+@SessionScope
 public class YadaSession<T extends YadaUserProfile> {
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	@Autowired private YadaConfiguration config;

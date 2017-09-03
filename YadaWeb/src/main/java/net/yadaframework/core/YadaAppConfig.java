@@ -2,6 +2,7 @@ package net.yadaframework.core;
 
 import java.io.File;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -23,6 +24,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import net.yadaframework.components.YadaUtil;
@@ -57,17 +59,14 @@ public class YadaAppConfig {
 		return taskScheduler;
 	}
 	
-	
-// Removed because it's better not to force an executor over the Spring default. The error is just logged at debug level anyway
-//	/**
-//	 * This is to prevent the logging of:
-//	 * "Could not find default TaskExecutor bean - No qualifying bean of type [org.springframework.core.task.TaskExecutor] is defined"
-//	 * @see http://stackoverflow.com/a/31820129/587641
-//	 */
-//    @Bean
-//    public Executor taskExecutor() {
-//        return new SimpleAsyncTaskExecutor();
-//    }
+	/**
+	 * Creates a ThreadPoolTaskExecutor with default values.
+	 * If you need to configure it, override this method in your appConfig bean.
+	 */
+    @Bean
+    public Executor taskExecutor() {
+    	return new ThreadPoolTaskExecutor();
+    }
 	
 	@Bean
 	public MessageSource messageSource() {
