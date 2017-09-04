@@ -18,7 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import net.yadaframework.core.CloneableDeep;
-import net.yadaframework.exceptions.InternalException;
+import net.yadaframework.exceptions.YadaInternalException;
 
 /**
  * Incrementally and conditionally builds a sql select/update query
@@ -632,7 +632,7 @@ public class YadaSql implements CloneableDeep {
 	 */
 	public YadaSql setParameter(String name, Object value) {
 		if (queryDone) {
-			throw new InternalException("Parameters should be set before calling query()");
+			throw new YadaInternalException("Parameters should be set before calling query()");
 		}
 		parameters.put(name, value);
 		return this;
@@ -667,7 +667,7 @@ public class YadaSql implements CloneableDeep {
 	
 	public YadaSql setParameterNotNull(String name, Object value) {
 		if (queryDone) {
-			throw new InternalException("Parameters should be set before calling query()");
+			throw new YadaInternalException("Parameters should be set before calling query()");
 		}
 		if (value!=null) {
 			parameters.put(name, value);
