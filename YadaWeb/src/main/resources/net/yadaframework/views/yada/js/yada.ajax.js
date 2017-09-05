@@ -13,7 +13,8 @@
 	
 	var parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
 	var markerAjaxButtonOnly = 'yadaAjaxButtonOnly';
-
+	var clickedButton;
+	
 	// ?????????? A cosa servono questi postXXXX ??????????????????
 	var postLoginUrl = null;
 	var postLoginData = null;
