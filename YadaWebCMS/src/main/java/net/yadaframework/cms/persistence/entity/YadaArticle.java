@@ -25,9 +25,12 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.persistence.YadaMoney;
 import net.yadaframework.persistence.YadaMoneyConverter;
+import net.yadaframework.web.YadaJsonView;
 
 /**
  * An Article is the actual physical item that can be produced and sold, so it will have a specific color, size, price, etc.
@@ -45,19 +48,28 @@ public class YadaArticle implements Serializable {
 	// For optimistic locking
 	@Version
 	protected long version;
-
+	
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
 	
+	@JsonView(YadaJsonView.WithLocalizedStrings.class)
+	@ElementCollection
+	@Column(length=64)
+	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
+	protected Map<Locale, String> name; // localized because it could be different for different languages
+
 	@Column(length=32)
 	protected String code;
 	
+	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=32)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> color;
 	
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Embedded
 	protected YadaDimension dimension;
 	
@@ -67,6 +79,7 @@ public class YadaArticle implements Serializable {
 	@ManyToOne
 	protected YadaProduct product;
 	
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected boolean published;
 	
 	@OneToMany(cascade=CascadeType.REMOVE, orphanRemoval=true)
@@ -197,6 +210,14 @@ public class YadaArticle implements Serializable {
 
 	public void setImage(YadaAttachedFile image) {
 		this.image = image;
+	}
+
+	public Map<Locale, String> getName() {
+		return name;
+	}
+
+	public void setName(Map<Locale, String> name) {
+		this.name = name;
 	}
 
 }
