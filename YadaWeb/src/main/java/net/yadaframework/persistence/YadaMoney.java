@@ -4,6 +4,11 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+
+import net.yadaframework.web.YadaJsonView;
+
 /**
  * An amount of money with a 1/10000 precision, stored as a long both in java and in the database.
  * "The rule of thumb for storage of fixed point decimal values is to store at least one more decimal 
@@ -14,6 +19,26 @@ import java.util.Locale;
 public class YadaMoney {
 	private long amount = 0; // Amount in 1/10000 of the default currency
 	private static final int multiplier = 10000;
+	
+	public YadaMoney() {
+	}
+	
+	/**
+	 * Set the given amount expressed as an integer multiple of the base unit. For example
+	 * dollars or euro.
+	 * @param integralCurrency an amount of money with no fractional part, like $9
+	 */
+	public void setCurrency(long integralCurrency) {
+		this.amount = integralCurrency * multiplier;
+	}
+	
+	/**
+	 * Gets the amount with no decimal part. So 9.23 becomes 9, expressed as a multiple of the base unit, not as a fraction.
+	 * @return
+	 */
+	public long getCurrency() {
+		return amount / multiplier;
+	}
 	
 	/**
 	 * 
@@ -57,6 +82,8 @@ public class YadaMoney {
 	/**
 	 * Convert to a string with 2 decimal places
 	 */
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
+	@JsonProperty("value")
 	public String toString() {
 		// Decimal formats are generally not synchronized
 		NumberFormat formatter = new DecimalFormat("#0.##");

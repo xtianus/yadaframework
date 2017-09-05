@@ -25,6 +25,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
+import org.springframework.context.i18n.LocaleContextHolder;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import net.yadaframework.components.YadaUtil;
@@ -69,10 +72,10 @@ public class YadaArticle implements Serializable {
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> color;
 	
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Embedded
 	protected YadaDimension dimension;
 	
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Convert(converter = YadaMoneyConverter.class)
 	protected YadaMoney unitPrice;
 	
@@ -103,6 +106,32 @@ public class YadaArticle implements Serializable {
 	@OneToOne(cascade=CascadeType.REMOVE, orphanRemoval=true)
 	protected YadaAttachedFile image;
 
+	/**
+	 * Returns the localized name in the current request locale
+	 * @return
+	 */
+	@JsonView(YadaJsonView.WithLocalizedValue.class)
+	public String getLocalName() {
+		return name.get(LocaleContextHolder.getLocale());
+	}
+	
+	public void seLocalName (String name) {
+		this.name.put(LocaleContextHolder.getLocale(), name);
+	}
+	
+	/**
+	 * Returns the localized color in the current request locale
+	 * @return
+	 */
+	@JsonView(YadaJsonView.WithLocalizedValue.class)
+	public String getLocalColor() {
+		return color.get(LocaleContextHolder.getLocale());
+	}
+	
+	public void seLocalcolor (String color) {
+		this.color.put(LocaleContextHolder.getLocale(), color);
+	}
+	
 	/**
 	 * 
 	 * @param locale

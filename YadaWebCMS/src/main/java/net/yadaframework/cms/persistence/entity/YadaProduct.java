@@ -2,6 +2,7 @@ package net.yadaframework.cms.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -23,6 +24,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -61,29 +64,26 @@ public class YadaProduct implements Serializable {
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int year; // Production year
 
-	@JsonView(YadaJsonView.WithLocalizedStrings.class)
+	//@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=64)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
-	protected Map<Locale, String> name; // localized because it could be different for different languages
+	protected Map<Locale, String> name = new HashMap<>(); // localized because it could be different for different languages
 
-	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=128)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
-	protected Map<Locale, String> subtitle; // a kind of short description
+	protected Map<Locale, String> subtitle = new HashMap<>(); // a kind of short description
 	
-	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=8192)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
-	protected Map<Locale, String> description; // a kind of small description
+	protected Map<Locale, String> description = new HashMap<>(); // a kind of small description
 	
-	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=128)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
-	protected Map<Locale, String> materials;
+	protected Map<Locale, String> materials = new HashMap<>();
 	
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int category;
@@ -130,68 +130,121 @@ public class YadaProduct implements Serializable {
 	protected YadaAttachedFile image;
 	
 	/***********************************************************************/
-	/* Lazy localized value fetching                                       */
-
-	/* These getters can be called outside of a transaction (e.g. in the view) 
-	 * to fetch the localized value for the current request locale
-	 */
+//	/* Lazy localized value fetching                                       */
+//
+//	/* These getters can be called outside of a transaction (e.g. in the view) 
+//	 * to fetch the localized value for the current request locale
+//	 */
+//	
+//	protected @Transient YadaLocaleDao yadaLocaleDao;
+//	protected @Transient String cacheName = null;
+//	protected @Transient String cacheSubtitle = null;
+//	protected @Transient String cacheDescription = null;
+//	protected @Transient String cacheMaterials = null;
+//
+//	public YadaProduct() {
+//		yadaLocaleDao = (YadaLocaleDao) YadaUtil.getBean(YadaLocaleDao.class);
+//	}
+//	
+//	/**
+//	 * Fetches the localized name for the current request locale or the default configured locale
+//	 * @return the name or the empty string if no value has been defined
+//	 */
+//	@Transient
+//	public String getLocalName() {
+//		if (cacheName==null) {
+//			cacheName = yadaLocaleDao.getLocalValue(id, YadaProduct.class, "name", null);
+//		}
+//		return cacheName;
+//	}
+//
+//	/**
+//	 * Fetches the localized subtitle for the current request locale or the default configured locale
+//	 * @return the name or the empty string if no value has been defined
+//	 */
+//	@Transient
+//	public String getLocalSubtitle() {
+//		if (cacheSubtitle==null) {
+//			cacheSubtitle = yadaLocaleDao.getLocalValue(id, YadaProduct.class, "subtitle", null);
+//		}
+//		return cacheSubtitle;
+//	}
+//
+//	/**
+//	 * Fetches the localized description for the current request locale or the default configured locale
+//	 * @return the name or the empty string if no value has been defined
+//	 */
+//	@Transient
+//	public String getLocalDescription() {
+//		if (cacheDescription==null) {
+//			cacheDescription = yadaLocaleDao.getLocalValue(id, YadaProduct.class, "description", null);
+//		}
+//		return cacheDescription;
+//	}
+//	
+//	/**
+//	 * Fetches the localized materials for the current request locale or the default configured locale
+//	 * @return the name or the empty string if no value has been defined
+//	 */
+//	@Transient
+//	public String getLocalMaterials() {
+//		if (cacheMaterials==null) {
+//			cacheMaterials = yadaLocaleDao.getLocalValue(id, YadaProduct.class, "materials", null);
+//		}
+//		return cacheMaterials;
+//	}
 	
-	protected @Transient YadaLocaleDao yadaLocaleDao;
-	protected @Transient String cacheName = null;
-	protected @Transient String cacheSubtitle = null;
-	protected @Transient String cacheDescription = null;
-	protected @Transient String cacheMaterials = null;
-
-	public YadaProduct() {
-		yadaLocaleDao = (YadaLocaleDao) YadaUtil.getBean(YadaLocaleDao.class);
-	}
 	
 	/**
-	 * Fetches the localized name for the current request locale or the default configured locale
-	 * @return the name or the empty string if no value has been defined
+	 * Returns the localized name in the current request locale
+	 * @return
 	 */
-	@Transient
+	@JsonView(YadaJsonView.WithLocalizedValue.class)
 	public String getLocalName() {
-		if (cacheName==null) {
-			cacheName = yadaLocaleDao.getLocalValue(id, YadaProduct.class, "name", null);
-		}
-		return cacheName;
+		return name.get(LocaleContextHolder.getLocale());
 	}
-
+	
+	
+	public void seLocalName(String name) {
+		this.name.put(LocaleContextHolder.getLocale(), name);
+	}
 	/**
-	 * Fetches the localized subtitle for the current request locale or the default configured locale
-	 * @return the name or the empty string if no value has been defined
+	 * Returns the localized subtitle in the current request locale
+	 * @return
 	 */
-	@Transient
+	@JsonView(YadaJsonView.WithLocalizedValue.class)
 	public String getLocalSubtitle() {
-		if (cacheSubtitle==null) {
-			cacheSubtitle = yadaLocaleDao.getLocalValue(id, YadaProduct.class, "subtitle", null);
-		}
-		return cacheSubtitle;
+		return subtitle.get(LocaleContextHolder.getLocale());
 	}
-
-	/**
-	 * Fetches the localized description for the current request locale or the default configured locale
-	 * @return the name or the empty string if no value has been defined
-	 */
-	@Transient
-	public String getLocalDescription() {
-		if (cacheDescription==null) {
-			cacheDescription = yadaLocaleDao.getLocalValue(id, YadaProduct.class, "description", null);
-		}
-		return cacheDescription;
+	
+	public void seLocalSubtitle(String subtitle) {
+		this.subtitle.put(LocaleContextHolder.getLocale(), subtitle);
 	}
 	
 	/**
-	 * Fetches the localized materials for the current request locale or the default configured locale
-	 * @return the name or the empty string if no value has been defined
+	 * Returns the localized description in the current request locale
+	 * @return
 	 */
-	@Transient
+	@JsonView(YadaJsonView.WithLocalizedValue.class)
+	public String getLocalDescription() {
+		return description.get(LocaleContextHolder.getLocale());
+	}
+	
+	public void seLocalDescription(String description) {
+		this.description.put(LocaleContextHolder.getLocale(), description);
+	}
+	
+	/**
+	 * Returns the localized materials in the current request locale
+	 * @return
+	 */
+	@JsonView(YadaJsonView.WithLocalizedValue.class)
 	public String getLocalMaterials() {
-		if (cacheMaterials==null) {
-			cacheMaterials = yadaLocaleDao.getLocalValue(id, YadaProduct.class, "materials", null);
-		}
-		return cacheMaterials;
+		return materials.get(LocaleContextHolder.getLocale());
+	}
+	
+	public void seLocalMaterials (String materials) {
+		this.materials.put(LocaleContextHolder.getLocale(), materials);
 	}
 	
 	/***********************************************************************/
@@ -271,11 +324,11 @@ public class YadaProduct implements Serializable {
 		this.subCategory = subCategory;
 	}
 
-	public boolean isAccessory() {
+	public boolean getIsAccessory() {
 		return isAccessory;
 	}
 
-	public void setAccessory(boolean isAccessory) {
+	public void setIsAccessory(boolean isAccessory) {
 		this.isAccessory = isAccessory;
 	}
 

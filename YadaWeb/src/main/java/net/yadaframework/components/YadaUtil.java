@@ -106,7 +106,7 @@ public class YadaUtil {
 						field.setAccessible(true);
 						Object fieldValue = field.get(object);
 						Method sizeMethod = Map.class.getMethod("size");
-						sizeMethod.invoke(fieldValue);
+						sizeMethod.invoke(fieldValue); // Load all the map
 					} catch (NoSuchMethodException | SecurityException | InvocationTargetException e) {
 						log.error("Failed to initialize field {} for object {} (ignored)", field, object);
 					}
