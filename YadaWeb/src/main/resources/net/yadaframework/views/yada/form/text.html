@@ -23,7 +23,9 @@ Parameters:
 - disabled = true for a disabled field - NOT SENT TO SERVER (optional)
 - readonly = true for readonly (optional)
 - maxlength = max number of characters accepted (optional)
-- help = testo per il pulsante di help, se non c'Ã¨ helpKey (optional)
+- addonLeft = character to set as a bootstrap "input-group-addon" to the left of the input field (optional)
+- addonRight = character to set as a bootstrap "input-group-addon" to the right of the input field (optional)
+- help = testo per il pulsante di help, se non c'è helpKey (optional)
 - helpKey = chiave del testo per il pulsante di help (optional)
 - editor = true/false to use ckeditor
 - noFeedback = true to remove space reserved for field feedback icon (optional)
@@ -44,12 +46,14 @@ Example:
 	<label class="control-label" th:for="${#ids.next('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
 	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perchÃ© se non c'Ã¨ l'help il campo resta corto (ad esempio i campi password) */-->
 		<!--/* Can't use th:field="*{__${fieldName}__}" because somehow passwords remain blank when they already have a value */-->
+		<div th:if="${addonLeft!=null}" th:text="${addonLeft}" class="input-group-addon">$</div>
 		<input th:if="${maxlength==null or maxlength le 80}" th:name="${fieldName}" th:value="*{{__${fieldName}__}}"
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:type="${type}?:'text'" th:readonly="${readonly}" 
 			th:min="${min}" th:max="${max}" th:step="${step}" 
 			th:classappend="${readonly==true?'yadaReadonly':'form-control'+(noFeedback==true?'':' has-feedback')}" th:maxlength="${maxlength}" 
 			th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}"/>
+		<div th:if="${addonRight!=null}" th:text="${addonRight}" class="input-group-addon">.00</div>
 		<span th:if="${type=='password'}" class="input-group-btn">
 			<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
 		</span>

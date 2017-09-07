@@ -1,6 +1,7 @@
 package net.yadaframework.cms.persistence.entity;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
+import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.web.YadaJsonView;
 
 /**
@@ -41,7 +43,7 @@ import net.yadaframework.web.YadaJsonView;
  *
  */
 @Entity
-public class YadaProduct implements Serializable {
+public class YadaProduct implements CloneableFiltered, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	// For synchronization with external databases
@@ -197,6 +199,7 @@ public class YadaProduct implements Serializable {
 //		}
 //		return cacheMaterials;
 //	}
+	
 	
 	/**
 	 * Returns the localized name in the current request locale
@@ -401,6 +404,12 @@ public class YadaProduct implements Serializable {
 
 	public void setImage(YadaAttachedFile image) {
 		this.image = image;
+	}
+
+	@Override
+	public Field[] getExcludedFields() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public MultipartFile getGalleryImage() {
