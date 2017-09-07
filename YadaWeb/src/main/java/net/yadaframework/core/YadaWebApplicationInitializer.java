@@ -49,4 +49,15 @@ public abstract class YadaWebApplicationInitializer extends AbstractAnnotationCo
 		return securityProjectPresent;
 	}
 
+	// This implements servlet 3 file upload without commons fileupload but the configuration is not available here yet.
+	//	@Override
+	//    protected void customizeRegistration(ServletRegistration.Dynamic registration) {
+	//		MultipartConfigElement multipartConfigElement = new MultipartConfigElement(
+	//			config.getUploadTempFolder(),
+	//			config.getUploadMaxFileSizeBytes(),
+	//			config.getUploadMaxRequestSizeBytes(),
+	//			config.getUploadFileSizeThresholdBytes());
+	//        registration.setMultipartConfig(multipartConfigElement);
+	//    }
+
 }

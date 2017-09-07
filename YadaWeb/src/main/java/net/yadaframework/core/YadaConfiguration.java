@@ -72,6 +72,14 @@ public abstract class YadaConfiguration {
 	private Boolean localePathVariableEnabled = null;
 	private Locale defaultLocale = null;
 	private boolean defaultLocaleChecked = false;
+
+	/**
+	 * Folder where all files are uploaded.
+	 * @return
+	 */
+	public File getUploadFolder() {
+		return new File(getBasePath(), "uploads");
+	}
 	
 	/**
 	 * True if during startup YadaAppConfig should run the FlyWay migrate operation
@@ -509,13 +517,16 @@ public abstract class YadaConfiguration {
 	public String getContentName() {
 		if (contentName==null) {
 			contentName = configuration.getString("config/paths/contentDir/@name");
+			if (contentName==null) {
+				log.error("contentDir name missing in configuration. Example: <paths><contentDir name=\"contents\" url=\"/contents\">");
+			}
 		}
 		return contentName;
 	}
 	
 	/**
-	 * Path del filesystem che costituisce la base in cui vengono memorizzati i file dell'applicazione che non appartengono alla webapp,
-	 * per esempio /srv/ldm
+	 * Absolute path on the filesystem where application files not belonging to the webapp war are stored.
+	 * Example: /srv/myproject
 	 * @return
 	 */
 	protected String getBasePath() {
@@ -595,7 +606,7 @@ public abstract class YadaConfiguration {
 	}
 
 	public int getMaxFileUploadSizeBytes() {
-		return configuration.getInt("config/maxFileUploadSizeBytes", 5000000); // 5 giga default
+		return configuration.getInt("config/maxFileUploadSizeBytes", 5000000); // 5 mega default
 	}
 	
 	/**

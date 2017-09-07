@@ -13,14 +13,16 @@ import javax.persistence.Id;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.GenerationTime;
 
 /**
- * A "pointer" to a file that has been uploaded into the "contents" folder.
- * When a file is associated to an object, an instance of this class is created.
- * Files can still exist after the object has been deleted, and can be re-attached to many objects using different titles, sort orders etc.
+ * A "pointer" to a file that has been copied into the "contents" folder.
+ * When an uploaded file is associated to an object, an instance of this class is created and a copy of the file is made
+ * from the "uploads" folder to the "contents" folder.
+ * The file is also copied in different sizes for desktop and mobile.
  */
 @Entity
 public class YadaAttachedFile {
@@ -48,7 +50,10 @@ public class YadaAttachedFile {
 	/**
 	 * Folder where the file is stored, relative to the contents folder
 	 */
-	protected String relativePath; 
+	protected String relativeFolderPath; // Relative to the "contents" folder
+	protected String filenameMobile; // only for images on mobile, null for no specific image 
+	protected String filenameDesktop; // only for images on desktop, null for non-images
+	protected String filename; // only for non-images, or when no mobile size is specified (will be the same as filenameDesktop)
 	
 	@ElementCollection
 	@Column(length=64)
@@ -76,14 +81,6 @@ public class YadaAttachedFile {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public String getRelativePath() {
-		return relativePath;
-	}
-
-	public void setRelativePath(String relativePath) {
-		this.relativePath = relativePath;
 	}
 
 	public Map<Locale, String> getTitle() {
@@ -144,6 +141,38 @@ public class YadaAttachedFile {
 
 	public void setSortOrder(long sortOrder) {
 		this.sortOrder = sortOrder;
+	}
+
+	public String getRelativeFolderPath() {
+		return relativeFolderPath;
+	}
+
+	public void setRelativeFolderPath(String relativeFolderPath) {
+		this.relativeFolderPath = relativeFolderPath;
+	}
+
+	public String getFilenameMobile() {
+		return filenameMobile;
+	}
+
+	public void setFilenameMobile(String filenameMobile) {
+		this.filenameMobile = filenameMobile;
+	}
+
+	public String getFilenameDesktop() {
+		return filenameDesktop;
+	}
+
+	public void setFilenameDesktop(String filenameDesktop) {
+		this.filenameDesktop = filenameDesktop;
+	}
+
+	public String getFilename() {
+		return filename;
+	}
+
+	public void setFilename(String filename) {
+		this.filename = filename;
 	}
 
 }

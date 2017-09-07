@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -65,6 +66,7 @@ import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.InternalException;
+import net.yadaframework.exceptions.YadaInvalidValueException;
 import sogei.utility.UCheckDigit;
 import sogei.utility.UCheckNum;
 
@@ -88,7 +90,61 @@ public class YadaUtil {
     public void init() {
 		defaultLocale = config.getDefaultLocale();
     }
-	 
+	
+	/**
+	 * Remove a counter that has been added by {@link #findAvailableName}
+	 * @param filename
+	 * @param counterSeparator
+	 * @return
+	 */
+	public static String stripCounterFromFilename(String filename, String counterSeparator) {
+		String[] filenameParts = YadaUtil.splitFileNameAndExtension(filename);
+		// If the filename has a counter attached, strip it
+		String prefix = filenameParts[0]; // product_2
+		int pos = prefix.lastIndexOf(counterSeparator);
+		if (pos>-1 && pos<prefix.length()-1) {
+			String left = prefix.substring(0, pos); // product
+			String right = prefix.substring(pos+1); // 2
+			try {
+				Integer.parseInt(right);
+				prefix = left;
+			} catch (NumberFormatException e) {
+				// Not a number, keep going
+			}
+		}
+		return prefix;
+	}
+	
+	/**
+	 * Creates an empty file that doesn't already exist in the specified folder
+	 * with the specified leading characters (baseName).
+	 * A counter may be appended to make the file unique.
+	 * @param targetFolder the folder where the file has to be placed
+	 * @param baseName the leading characters for the file, like "product"
+	 * @param extension the extension without a dot, like "jpg"
+	 * @param counterSeparator the separator to be used before appending the number, e.g. "_"
+	 * @return a new file in that folder, with a name like "product_2.jpg" or "product.jpg"
+	 * @throws IOException 
+	 */
+	public static File findAvailableName(File targetFolder, String baseName, String extensionNoDot, String counterSeparator) throws IOException {
+		String extension = "." + extensionNoDot;
+		String filename = baseName + extension;
+		int counter = 0;
+		long startTime = System.currentTimeMillis();
+		int timeoutMillis = 20000; // 20 seconds to find a result seems to be reasonable
+		while (true) {
+			File candidateFile = new File(targetFolder, filename);
+			if (candidateFile.createNewFile()) {
+				return candidateFile;
+			}
+			counter++;
+			filename = baseName + counterSeparator + counter + extension;
+			if (System.currentTimeMillis()-startTime > timeoutMillis) {
+				throw new IOException("Timeout trying to create a unique file starting with " + baseName + " in folder " + targetFolder);
+			}
+		}
+	}
+
 	/**
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
 	 * It must be called in a transaction.
@@ -199,6 +255,7 @@ public class YadaUtil {
 	 * Use a small buffer (256) when data is over the internet to prevent timeouts somewhere. Use a big buffer for in-memory or disk operations.
 	 * @param sizeLimit the maximum number of bytes to read (inclusive)
 	 * @return the number of bytes read, or -1 if the sizeLimit has been exceeded.
+	 * @see org.apache.commons.io.IOUtils#copy(InputStream, OutputStream)
 	 * @throws IOException 
 	 */
 	public long copyStream(InputStream inputStream, OutputStream outputStream, Integer bufferSize, Long sizeLimit) throws IOException {
@@ -428,6 +485,27 @@ public class YadaUtil {
 			}
 		} catch (final Exception e) {
 			log.info("Exception while cleaning folder {}", folder, e);
+		}
+		return result;
+	}
+	
+	/**
+	 * Splits a filename in the prefix and the extension parts
+	 * @param filename
+	 * @return an array with [ filename without extension, extension without dot]
+	 */
+	public static String[] splitFileNameAndExtension(String filename) {
+		String[] result = new String[] {"", ""};
+		if (!StringUtils.isBlank(filename)) {
+			int dotpos = filename.lastIndexOf('.');
+			if (dotpos>-1) {
+				result[0] = filename.substring(0, dotpos);
+				if (filename.length()>dotpos+1) {
+					result[1] = filename.substring(dotpos+1);
+				}
+			} else {
+				result[0] = filename;
+			}
 		}
 		return result;
 	}
@@ -1304,6 +1382,18 @@ public class YadaUtil {
 		if (originalFilename==null) {
 			return "null";
 		}
+		// If the filename is a path, keep the last portion
+		int pos = originalFilename.indexOf(File.separatorChar);
+		if (pos>-1) {
+			try {
+				originalFilename = originalFilename.substring(pos+1);
+			} catch (Exception e) {
+				// The name ends with a separator char
+				log.debug("Name is empty");
+				return "";
+			}
+		}
+		
 		char[] resultChars = originalFilename.toCharArray();
 		char[] lowerChars = originalFilename.toLowerCase().toCharArray();
 		for (int i = 0; i < resultChars.length; i++) {

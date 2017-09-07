@@ -26,12 +26,11 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
-import net.yadaframework.components.YadaUtil;
-import net.yadaframework.persistence.repository.YadaLocaleDao;
 import net.yadaframework.web.YadaJsonView;
 
 /**
@@ -129,6 +128,11 @@ public class YadaProduct implements Serializable {
 	@OneToOne(cascade=CascadeType.REMOVE, orphanRemoval=true)
 	protected YadaAttachedFile image;
 	
+
+	@Transient
+	protected MultipartFile galleryImage; // Just for the upload
+
+
 	/***********************************************************************/
 //	/* Lazy localized value fetching                                       */
 //
@@ -193,7 +197,6 @@ public class YadaProduct implements Serializable {
 //		}
 //		return cacheMaterials;
 //	}
-	
 	
 	/**
 	 * Returns the localized name in the current request locale
@@ -399,6 +402,13 @@ public class YadaProduct implements Serializable {
 	public void setImage(YadaAttachedFile image) {
 		this.image = image;
 	}
-	
-	
+
+	public MultipartFile getGalleryImage() {
+		return galleryImage;
+	}
+
+	public void setGalleryImage(MultipartFile galleryImage) {
+		this.galleryImage = galleryImage;
+	}
+
 }
