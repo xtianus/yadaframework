@@ -1,6 +1,7 @@
 package net.yadaframework.cms.persistence.entity;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -30,8 +31,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
-import net.yadaframework.components.YadaUtil;
-import net.yadaframework.persistence.repository.YadaLocaleDao;
+import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.web.YadaJsonView;
 
 /**
@@ -42,8 +42,10 @@ import net.yadaframework.web.YadaJsonView;
  *
  */
 @Entity
-public class YadaProduct implements Serializable {
+public class YadaProduct implements CloneableFiltered, Serializable {
 	private static final long serialVersionUID = 1L;
+	
+	public static class SimpleJson{}
 	
 	// For synchronization with external databases
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
@@ -398,6 +400,12 @@ public class YadaProduct implements Serializable {
 
 	public void setImage(YadaAttachedFile image) {
 		this.image = image;
+	}
+
+	@Override
+	public Field[] getExcludedFields() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	

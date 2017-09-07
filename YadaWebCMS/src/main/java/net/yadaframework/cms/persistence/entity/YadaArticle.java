@@ -1,6 +1,7 @@
 package net.yadaframework.cms.persistence.entity;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -23,6 +24,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -31,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.persistence.YadaMoney;
 import net.yadaframework.persistence.YadaMoneyConverter;
 import net.yadaframework.web.YadaJsonView;
@@ -40,8 +43,10 @@ import net.yadaframework.web.YadaJsonView;
  *
  */
 @Entity
-public class YadaArticle implements Serializable {
+public class YadaArticle implements CloneableFiltered, Serializable {
 	private static final long serialVersionUID = 1L;
+	
+	public static class SimpleJson{}
 	
 	// For synchronization with external databases
 	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
@@ -139,6 +144,14 @@ public class YadaArticle implements Serializable {
 	 */
 	public String getColor(Locale locale) {
 		return YadaUtil.getLocalValue(color, locale);
+	}
+	
+	/* Id for DataTables                                                   */
+	@Transient
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
+	@JsonProperty("DT_RowId")
+	public String getDT_RowId() {
+		return this.getClass().getSimpleName()+"#"+this.id; // YadaProduct#142
 	}
 
 	public Long getId() {
@@ -247,6 +260,12 @@ public class YadaArticle implements Serializable {
 
 	public void setName(Map<Locale, String> name) {
 		this.name = name;
+	}
+
+	@Override
+	public Field[] getExcludedFields() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
