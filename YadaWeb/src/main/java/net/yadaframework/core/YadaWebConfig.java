@@ -21,6 +21,8 @@ import org.springframework.format.support.FormattingConversionServiceFactoryBean
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.multipart.commons.YadaCommonsMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -29,7 +31,6 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
-import org.springframework.web.servlet.resource.VersionResourceResolver;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring4.view.ThymeleafViewResolver;
@@ -59,6 +60,16 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	@Autowired protected YadaConfiguration config;
 	
 	@Autowired protected ApplicationContext applicationContext;
+	
+
+	// This is only used when not using YadaWebSecurity
+	@Bean(name="multipartResolver")
+	public CommonsMultipartResolver multipartResolver() {
+		CommonsMultipartResolver filterMultipartResolver = new YadaCommonsMultipartResolver();
+		filterMultipartResolver.setMaxUploadSize(config.getMaxFileUploadSizeBytes());
+		// filterMultipartResolver.setResolveLazily(true);
+		return filterMultipartResolver;
+	}
 	
 	/**
 	 * Return a string pattern to match urls that should not be localised when using a language path variable

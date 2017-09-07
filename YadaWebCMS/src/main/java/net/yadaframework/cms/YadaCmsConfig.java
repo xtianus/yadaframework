@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
 @EnableJpaRepositories(basePackages = "net.yadaframework.cms.persistence.repository")
-@ComponentScan(basePackages = { "net.yadaframework.cms.persistence" })
+@ComponentScan(basePackages = { "net.yadaframework.cms.persistence", "net.yadaframework.cms.components" })
 public class YadaCmsConfig {
 
 

@@ -27,6 +27,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -44,8 +45,6 @@ import net.yadaframework.web.YadaJsonView;
 @Entity
 public class YadaProduct implements CloneableFiltered, Serializable {
 	private static final long serialVersionUID = 1L;
-	
-	public static class SimpleJson{}
 	
 	// For synchronization with external databases
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
@@ -132,7 +131,10 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	protected YadaAttachedFile image;
 	
 
-	
+	@Transient
+	protected MultipartFile galleryImage; // Just for the upload
+
+
 	/***********************************************************************/
 //	/* Lazy localized value fetching                                       */
 //
@@ -410,4 +412,11 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 		return null;
 	}
 
+	public MultipartFile getGalleryImage() {
+		return galleryImage;
+	}
+
+	public void setGalleryImage(MultipartFile galleryImage) {
+		this.galleryImage = galleryImage;
+	}
 }

@@ -104,8 +104,8 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 			}
 		});
     }
-
-	// TODO not sure why this has to be in WebSecurity [xtian]
+	
+	// This is only used by spring security filter configured in SecurityWebApplicationInitializer
 	@Bean(name="filterMultipartResolver")
 	CommonsMultipartResolver filterMultipartResolver() {
 		CommonsMultipartResolver filterMultipartResolver = new YadaCommonsMultipartResolver();
@@ -113,7 +113,7 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 		// filterMultipartResolver.setResolveLazily(true);
 		return filterMultipartResolver;
 	}
-	
+
 	@Bean(name="passwordEncoder")
 	@Autowired PasswordEncoder passwordEncoder(YadaConfiguration yadaConfiguration) {
 		if (yadaConfiguration.encodePassword()) {
