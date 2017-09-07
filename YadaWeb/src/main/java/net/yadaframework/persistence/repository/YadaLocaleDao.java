@@ -32,6 +32,20 @@ public class YadaLocaleDao {
     @PersistenceContext private EntityManager em;
     
     /**
+     * Finds all entities of the given type, then initializes all localized string attributes defined as Map&lt;Locale, String>
+     * @param entityClass
+     * @return
+     */
+    public <entityClass> List<entityClass> findAllWithLocalValues(Class<?> entityClass) {
+    	@SuppressWarnings("unchecked")
+		List<entityClass> result = (List<entityClass>) YadaSql.instance().selectFrom("from " + entityClass.getSimpleName())
+    		.query(em, entityClass).getResultList();
+    	
+    	YadaUtil.prefetchLocalizedStrings(result, entityClass);
+    	return result;
+    }
+    
+    /**
      * Finds an object of the given id, then initializes all localized string attributes defined as Map&lt;Locale, String>
      * @param entityId
      * @param entityClass
@@ -39,7 +53,7 @@ public class YadaLocaleDao {
      */
     public <entityClass> entityClass findOneWithLocalValues(Long entityId, Class<?> entityClass) {
     	@SuppressWarnings("unchecked")
-		entityClass entity = (entityClass) em.find(entityClass, entityId);
+    	entityClass entity = (entityClass) em.find(entityClass, entityId);
     	if (entity!=null) {
     		List<entityClass> list = new ArrayList<>();
     		list.add(entity);

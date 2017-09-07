@@ -111,6 +111,12 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 	@OneToOne(cascade=CascadeType.REMOVE, orphanRemoval=true)
 	protected YadaAttachedFile image;
 
+	@Transient
+	protected Long chosenProductId;
+	
+	////////////////////////////////////////////////////////////////////77
+	
+	
 	/**
 	 * Returns the localized name in the current request locale
 	 * @return
@@ -266,6 +272,14 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 	public Field[] getExcludedFields() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public Long getChosenProductId() {
+		return chosenProductId;
+	}
+
+	public void setChosenProductId(Long chosenProductId) {
+		this.chosenProductId = chosenProductId;
 	}
 
 }

@@ -131,6 +131,8 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	@OneToOne(cascade=CascadeType.REMOVE, orphanRemoval=true)
 	protected YadaAttachedFile image;
 	
+
+	
 	/***********************************************************************/
 //	/* Lazy localized value fetching                                       */
 //
@@ -407,6 +409,5 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	
+
 }

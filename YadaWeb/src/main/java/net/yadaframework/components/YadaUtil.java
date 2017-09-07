@@ -96,6 +96,9 @@ public class YadaUtil {
 	 * @param targetClass type of fetchedEntities elements
 	 */
 	public static <targetClass> void prefetchLocalizedStrings(List<targetClass> fetchedEntities, Class<?> targetClass) {
+		if (fetchedEntities==null || fetchedEntities.isEmpty()) {
+			return;
+		}
 		// Look for fields of type Map<Locale, String>
 		ReflectionUtils.doWithFields(targetClass, new ReflectionUtils.FieldCallback() {
 			@Override
