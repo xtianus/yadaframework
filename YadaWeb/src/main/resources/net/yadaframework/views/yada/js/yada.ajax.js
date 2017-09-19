@@ -30,6 +30,32 @@
 		yada.enableAjaxSelects(null, $element);
 	}
 
+
+	////////////////////
+	/// Modal
+	
+	/**
+	 * Open a modal when the location.hash contains the needed value.
+	 * Example: openModalOnHash('/mymodal', ['id', 'name'], '/', function(data){return !isNaN(data.id);}
+	 * @param targetUrl the modal url to open via ajax
+	 * @param paramNames an array of request parameter names that are assigned to from the hash
+	 * @param separator the values contained in the hash are separated by this character
+	 * @param validator a function that returns true if the hash values are valid
+	 */
+	yada.openModalOnHash = function(targetUrl, paramNames, separator, validator) {
+		var hashValue = document.location.hash;
+		if (hashValue!=null && hashValue.length>1) {
+			try {
+				var data = yada.hashPathToMap(paramNames, hashValue, separator);
+				if (typeof validator == "function" && validator(data)) {
+					yada.ajax(targetUrl, data);
+				}
+			} catch(e) {
+				console.error(e);
+			}
+		}
+	}
+
 	////////////////////
 	/// Form
 	
@@ -707,23 +733,28 @@
 						var htmlDoc = parser.parseFromString(responseText, "text/html");
 						var headNodes = $(htmlDoc.head).children();
 						$("head").append(headNodes);
-						$('#ajaxModal').on('hidden.bs.modal', function (e) {
+						$('#ajaxModal').one('hidden.bs.modal', function (e) {
 							headNodes.remove(); // Cleanup on modal close
 						});
 					}
 					
 					$("#ajaxModal").children().remove();
 					$("#ajaxModal").append(loadedModalDialog);
-					$('#ajaxModal:hidden').modal('show'); // Mostro il modal se non è già aperto
+					// We need to show the modal after a delay or it won't show sometimes (!)
+					setTimeout(function() {
+						$('#ajaxModal:hidden').modal('show');
+					}, 100);
 					yada.enableAjaxForms();
 					// Questo permette di scrollare all'anchor (ho dovuto mettere un ritardo altrimenti non scrollava)
 					// e anche di far scendere il modal se per caso si apre scrollato (a volte capita, forse coi modal molto alti)
 					setTimeout(function() {
-						var hashValue = yada.getHashValue(window.location.href);
-						if (hashValue!=null && hashValue.length>0) {
-							$('#ajaxModal').animate({
-								scrollTop: $('#' + hashValue).offset().top
-							}, 1000);
+						var hashValue = window.location.hash; // #234
+						if (hashValue.length>1 && !isNaN(hashValue.substring(1))) {
+							try {
+								$('#ajaxModal').animate({
+									scrollTop: $(hashValue).offset().top
+								}, 1000);
+							} catch (e) {}
 						} else if ($('#ajaxModal').scrollTop()>0) {
 							// Si è aperto in mezzo quindi lo scrollo in alto
 							$('#ajaxModal').animate({
@@ -847,7 +878,10 @@
 			$('#ajaxModal').modal('hide'); // non si sa mai
 			$('#yada-notification').children().remove();
 			$('#yada-notification').append(notification);
-			$('#yada-notification').modal('show');
+			// We need to show the modal after a delay or it won't show sometimes (!)
+			setTimeout(function() {
+				$('#yada-notification').modal('show');
+			}, 100);
 			return true;
 		}
 		return false;
