@@ -23,19 +23,19 @@ public abstract class YadaWebApplicationInitializer extends AbstractAnnotationCo
 			Class.forName("net.yadaframework.security.YadaSecurityConfig");
 			securityProjectPresent=true;
 		} catch (ClassNotFoundException e) {
-			log.warn("No YadaWebSecurity project in classpath");
+			log.info("No YadaWebSecurity project in classpath");
 		}
 		try {
 			Class<?> theClass = Class.forName("net.yadaframework.cms.YadaCmsConfig");
 			configurationClasses.add(theClass);
 		} catch (ClassNotFoundException e) {
-			log.warn("No YadaWebCMS project in classpath");
+			log.info("No YadaWebCMS project in classpath");
 		}
 		try {
 			Class<?> theClass = Class.forName("net.yadaframework.commerce.YadaCommerceConfig");
 			configurationClasses.add(theClass);
 		} catch (ClassNotFoundException e) {
-			log.warn("No YadaWebCommerce project in classpath");
+			log.info("No YadaWebCommerce project in classpath");
 		}
 		return configurationClasses.toArray(new Class<?>[configurationClasses.size()]);
 	}
