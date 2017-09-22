@@ -669,6 +669,11 @@
 					yada.reload();
 					return;
 				}
+				if (responseTrimmed.startsWith("redirect:")) {
+					var targetUrl = responseTrimmed.substring("redirect:".length);
+					window.location.href=targetUrl;
+					return;
+				}
 				var responseHtml=$("<div>").html(responseText);
 				// Check if we just did a login
 				if ("loginSuccess" == responseTrimmed) {
