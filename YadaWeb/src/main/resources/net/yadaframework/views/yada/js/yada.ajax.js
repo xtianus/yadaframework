@@ -670,6 +670,7 @@
 					return;
 				}
 				if (responseTrimmed.startsWith("redirect:")) {
+					yada.loaderOn();
 					var targetUrl = responseTrimmed.substring("redirect:".length);
 					window.location.href=targetUrl;
 					return;
