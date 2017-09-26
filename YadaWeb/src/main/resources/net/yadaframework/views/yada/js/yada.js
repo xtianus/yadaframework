@@ -13,6 +13,7 @@
 	yada.devMode = false; // Set to true in development mode (also via thymeleaf)
 	yada.baseUrl = null;	// Set it via thymeleaf
 	yada.resourceDir = null; // Set it via thymeleaf
+	var loaderStart = 0;
 	yada.messages = {};
 	yada.messages.connectionError = { // Set it via thymeleaf
 		"title": "Connection Error",
@@ -60,11 +61,17 @@
 	}
 	
 	yada.loaderOn = function() {
+		loaderStart = Date.now();
 		$(".loader").show();
 	};
 	
 	yada.loaderOff = function() {
-		$(".loader").hide();
+		var elapsedMillis = Date.now() - loaderStart;
+		if (elapsedMillis>100) {
+			$(".loader").hide();
+		} else {
+			setTimeout(function(){ $(".loader").hide(); }, 100-elapsedMillis);
+		}
 	};
 	
 	/**
