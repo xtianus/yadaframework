@@ -162,8 +162,10 @@ if [[ $cfgPkgTomcat ]]; then
 	tomcatConfiguration=/etc/default/$cfgPkgTomcat
 	# Non uso -XX:+UseConcMarkSweepGC perché le vm economiche non hanno tante cpu  
 	sed -i 's%JAVA_OPTS=.*%JAVA_OPTS=$tomcatOptions%g' ${tomcatConfiguration}
-	# Utenza tomcat manager
-	sed -i 's%</tomcat-users>%<role rolename="manager-gui"/><role rolename="manager-jmx"/><role rolename="admin"/><user username="${cfgUser}" password="${cfgTomcatManagerPwd}" roles="admin,manager-gui,manager-jmx"/></tomcat-users>%g' ${CATALINA_BASE}/conf/tomcat-users.xml
+	if [[ $cfgTomcatManagerPwd ]]; then
+		# Utenza tomcat manager
+		sed -i 's%</tomcat-users>%<role rolename="manager-gui"/><role rolename="manager-jmx"/><role rolename="admin"/><user username="${cfgUser}" password="${cfgTomcatManagerPwd}" roles="admin,manager-gui,manager-jmx"/></tomcat-users>%g' ${cfgTomcatBase}/tomcat-users.xml
+	fi
 	# Compression e timeout
 	sed -i 's/connectionTimeout="20000"/connectionTimeout="'${cfgTomcatTimeout}'"\ncompression="on" compressableMimeType="text\/html,text\/xml,text\/plain,text\/css,application\/xml,text\/javascript,application\/javascript,application\/x-javascript,application\/pdf,application\/json,text\/json"/g' ${CATALINA_BASE}/conf/server.xml
 	systemctl daemon-reload
