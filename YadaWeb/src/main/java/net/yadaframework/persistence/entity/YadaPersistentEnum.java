@@ -77,8 +77,8 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 	private String enumName;		// "RUNNING"
 	
 	@ElementCollection(fetch = FetchType.EAGER)
-	@MapKeyColumn(name="language")
-	@Column(name="localText")
+	@MapKeyColumn(name="language", length=32) // th_TH_TH_#u-nu-thai
+	@Column(name="localText", length=128)
 	Map<String, String> langToText = new HashMap<>(); // Language code to localized text: { "it_IT" = "In esecuzione", "en_US" = "Running" }
 
 	/**
