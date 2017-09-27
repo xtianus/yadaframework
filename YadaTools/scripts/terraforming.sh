@@ -3,7 +3,7 @@
 # The current user is root.
 # 22 March 2017
 #
-# TODO: utf8mb4 in mysql (optional)
+# TODO: many tomcat instances (copy to different numbered folders, change ports, configure mod-jk for load balancing)
 #
 # Parameters: <hostname> <virtualHost> <projectBasePath> [<myip>] [<deployOptions>]
 
@@ -93,7 +93,7 @@ chown -R ${cfgUser}:${cfgUser} ${homedir}/.ssh
 chmod 700 ${homedir}/.ssh
 chmod 600 ${homedir}/.ssh/authorized_keys2
 
-if [ "$noUfw" == "" ]; then
+if [ "$cfgNoUfw" != "true" ]; then
 	apt-get -o Dpkg::Options::="--force-confnew" -y install ufw
 	ufw allow 22
 	ufw allow 443
@@ -110,7 +110,7 @@ service ssh restart
 
 apt-get -o Dpkg::Options::="--force-confnew" -y install $cfgPkgJava
 if [[ $cfgPkgTomcat && ! $cfgTomcatTarGz ]]; then
-	apt-get -o Dpkg::Options::="--force-confnew" -y install $cfgPkgTomcat
+	apt-get -o Dpkg::Options::="--force-confnew" -y install $cfgPkgTomcat $cfgPkgTomcatUtil
 fi
 
 if [[ $cfgTomcatTarGz ]]; then
@@ -127,18 +127,25 @@ if [[ $cfgTomcatTarGz ]]; then
 		groupadd --system $cfgTomcatUser
 		usermod -g $cfgTomcatUser $cfgTomcatUser
 	fi
+	mv $prefix $cfgTomcatTarGzHome
+	chown -R root:tomcat8 $cfgTomcatTarGzHome
+	chmod -R g+r $cfgTomcatTarGzHome
+	chmod -R g+w $cfgTomcatTarGzHome/work
+	chmod -R g+w $cfgTomcatTarGzHome/logs
+	chmod -R g+w $cfgTomcatTarGzHome/temp
+	chmod g+w $cfgTomcatTarGzHome/conf
 fi
 #
 if [[ $cfgTomcatNativeTarGz ]]; then
 	mkdir -p /srv/tomcats/native
 	cd /srv/tomcats/native
 	destination=/usr
-	apt-get install make libapr1-dev libssl-dev
+	apt install gcc make libapr1-dev libssl-dev
 	wget $cfgTomcatNativeTarGz
 	nativeFilename=${cfgTomcatNativeTarGz##*/}
 	prefix=${nativeFilename%.tar.gz}
 	tar xvzf $nativeFilename
-	cd $prefix/jni/native
+	cd $prefix/native
 	javacPath=$( readlink -f `which javac` )
 	javaHome=${javacPath%/bin/javac}
 	./configure --prefix=$destination --with-java-home=$javaHome --with-apr=`which apr-1-config` --with-ssl=yes
@@ -146,17 +153,25 @@ if [[ $cfgTomcatNativeTarGz ]]; then
 	make install
 fi
 
+tomcatOptions="-Xloggc:${projectBase}/log/tomcat-gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=1 -XX:GCLogFileSize=1M -XX:+PrintGCDateStamps -Djava.awt.headless=true -Xmx${cfgTomcatRam} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/tomcat-outofmemory-dump"
+
 # Tomcat configuration
-if [[ $cfgPkgTomcat || $cfgTomcatTarGz ]]; then
+if [[ $cfgPkgTomcat ]]; then
+	CATALINA_HOME=/usr/share/$cfgPkgTomcat
+	CATALINA_BASE=/var/lib/$cfgPkgTomcat
+	tomcatConfiguration=/etc/default/$cfgPkgTomcat
 	# Non uso -XX:+UseConcMarkSweepGC perché le vm economiche non hanno tante cpu  
-	sed -i 's%JAVA_OPTS=.*%JAVA_OPTS="-Xloggc:'${projectBase}'/log/tomcat-gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=1 -XX:GCLogFileSize=1M -XX:+PrintGCDateStamps -Djava.awt.headless=true -Xmx'${cfgTomcatRam}' -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/tomcat-outofmemory-dump"%g' ${cfgTomcatConfiguration}
+	sed -i 's%JAVA_OPTS=.*%JAVA_OPTS=$tomcatOptions%g' ${tomcatConfiguration}
 	if [[ $cfgTomcatManagerPwd ]]; then
 		# Utenza tomcat manager
 		sed -i 's%</tomcat-users>%<role rolename="manager-gui"/><role rolename="manager-jmx"/><role rolename="admin"/><user username="${cfgUser}" password="${cfgTomcatManagerPwd}" roles="admin,manager-gui,manager-jmx"/></tomcat-users>%g' ${cfgTomcatBase}/tomcat-users.xml
 	fi
 	# Compression e timeout
-	sed -i 's/connectionTimeout="20000"/connectionTimeout="'${cfgTomcatTimeout}'"\ncompression="on" compressableMimeType="text\/html,text\/xml,text\/plain,text\/css,application\/xml,text\/javascript,application\/javascript,application\/x-javascript,application\/pdf,application\/json,text\/json"/g' ${cfgTomcatBase}/server.xml
+	sed -i 's/connectionTimeout="20000"/connectionTimeout="'${cfgTomcatTimeout}'"\ncompression="on" compressableMimeType="text\/html,text\/xml,text\/plain,text\/css,application\/xml,text\/javascript,application\/javascript,application\/x-javascript,application\/pdf,application\/json,text\/json"/g' ${CATALINA_BASE}/conf/server.xml
 	systemctl daemon-reload
+fi
+if [[ $cfgTomcatTarGzHome ]]; then
+	echo "CATALINA_OPTS=\"$tomcatOptions\"" > $cfgTomcatTarGzHome/bin/setenv.sh
 fi
 
 # MySQL + Apache + ModJK + php
@@ -169,7 +184,7 @@ if [[ $cfgPkgModJk ]]; then
 	sed -i 's/JkLogLevel info/JkLogLevel warn/g' /etc/apache2/mods-available/jk.conf
 	a2enmod jk
 	# Enabling AJP Connector
-	sed -i 's%\(<Connector port="8009".*\)%-->\n&\n<!--%g' ${cfgTomcatBase}/server.xml	
+	sed -i 's%\(<Connector port="8009".*\)%-->\n&\n<!--%g' ${CATALINA_BASE}/conf/server.xml
 fi
 if [[ $myHostName && $cfgPkgApache ]]; then
 	echo "ServerName $( hostname )" > /etc/apache2/conf-available/servername.conf
@@ -254,6 +269,12 @@ fi
 if [[ $cfgPkgMysql ]]; then
 	apt-get -o Dpkg::Options::="--force-confnew" -y install $cfgPkgMysql
 	mysqladmin -u root password ${cfgMysqlRootPwd}
+	if [[ $cfgPkgMysqlConf ]]; then
+		sed -i 's#\(\[mysql\].*\)#&\ndefault-character-set = utf8mb4#g' $cfgPkgMysqlConf
+	fi
+	if [[ $cfgPkgMysqldConf ]]; then
+		sed -i 's#\(\[mysqld\].*\)#&\ncharacter-set-client-handshake = FALSE\ncharacter-set-server = utf8mb4\ncollation-server = utf8mb4_unicode_ci\n#g' $cfgPkgMysqldConf
+	fi
 fi
 
 # certbot for SSL

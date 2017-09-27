@@ -9,17 +9,17 @@ public class YadaDimension {
 	@Column(length=16)
 	protected String size; // M, L, 42, ...
 
-	protected float width;
+	protected Float width;
 	
-	protected float height; 
+	protected Float height; 
 	
-	protected float depth; 
+	protected Float depth; 
 	
-	protected float diameter; 
+	protected Float diameter; 
 
-	protected float weight; 
+	protected Float weight; 
 	
-	protected int elements;
+	protected Integer elements;
 
 	public String getSize() {
 		return size;
@@ -29,51 +29,51 @@ public class YadaDimension {
 		this.size = size;
 	}
 
-	public float getWidth() {
+	public Float getWidth() {
 		return width;
 	}
 
-	public void setWidth(float width) {
+	public void setWidth(Float width) {
 		this.width = width;
 	}
 
-	public float getHeight() {
+	public Float getHeight() {
 		return height;
 	}
 
-	public void setHeight(float height) {
+	public void setHeight(Float height) {
 		this.height = height;
 	}
 
-	public float getDepth() {
+	public Float getDepth() {
 		return depth;
 	}
 
-	public void setDepth(float depth) {
+	public void setDepth(Float depth) {
 		this.depth = depth;
 	}
 
-	public float getDiameter() {
+	public Float getDiameter() {
 		return diameter;
 	}
 
-	public void setDiameter(float diameter) {
+	public void setDiameter(Float diameter) {
 		this.diameter = diameter;
 	}
 
-	public float getWeight() {
+	public Float getWeight() {
 		return weight;
 	}
 
-	public void setWeight(float weight) {
+	public void setWeight(Float weight) {
 		this.weight = weight;
 	}
 
-	public int getElements() {
+	public Integer getElements() {
 		return elements;
 	}
 
-	public void setElements(int elements) {
+	public void setElements(Integer elements) {
 		this.elements = elements;
 	}
 	

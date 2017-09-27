@@ -13,6 +13,7 @@
 	yada.devMode = false; // Set to true in development mode (also via thymeleaf)
 	yada.baseUrl = null;	// Set it via thymeleaf
 	yada.resourceDir = null; // Set it via thymeleaf
+	var loaderStart = 0;
 	yada.messages = {};
 	yada.messages.connectionError = { // Set it via thymeleaf
 		"title": "Connection Error",
@@ -33,6 +34,9 @@
 	
 	function initHandlers() {
 		// Mostra il loader sugli elementi con le classi s_showLoaderClick oppure s_showLoaderForm
+		$('body').on('click', '.yadaShowLoader', yada.loaderOn);
+		$('body').on('submit', '.yadaShowLoader', yada.loaderOn);
+		// Legacy
 		$('body').on('click', '.s_showLoaderClick', yada.loaderOn);
 		$('body').on('submit', '.s_showLoaderForm', yada.loaderOn);
 		yada.enableScrollTopButton(); // Abilita il torna-su
@@ -53,15 +57,35 @@
 		if (typeof yada.initAjaxHandlersOn == "function") {
 			yada.initAjaxHandlersOn($element);
 		}
+		yada.enableHashing($element);
 	}
 	
 	yada.loaderOn = function() {
+		loaderStart = Date.now();
 		$(".loader").show();
 	};
 	
 	yada.loaderOff = function() {
-		$(".loader").hide();
+		var elapsedMillis = Date.now() - loaderStart;
+		if (elapsedMillis>100) {
+			$(".loader").hide();
+		} else {
+			setTimeout(function(){ $(".loader").hide(); }, 100-elapsedMillis);
+		}
 	};
+	
+	/**
+	 * Changes the browser url when an element is clicked
+	 */
+	yada.enableHashing = function($element) {
+		if ($element==null) {
+			$element = $('body');
+		}
+		$('a[data-yadaHash]', $element).click(function(){
+			var hashValue = $(this).attr('data-yadaHash')
+			history.pushState({'yadaHash': true}, null, window.location.pathname + '#' + hashValue)
+		});
+	}
 
 	yada.enableTooltip = function($element) {
 		if ($element==null) {
@@ -479,6 +503,14 @@
 		return yada.baseUrl + yada.resourceDir;
 	}
 	
+	// Ritorna ciò che segue lo hash in una stringa. Se non c'è nulla, ritorna ''
+	yada.getHashValue = function(str) {
+		if (str!=null) {
+			return str.split('#')[1];
+		}
+		return str;
+	}
+	
 	// Elimina l'hash da un url, se presente.
 	yada.removeHash = function(someUrl) {
 		var parts = someUrl.split('#');
@@ -491,11 +523,38 @@
 	yada.hashToMap = function(windowLocationHash) {
 		var result = {};
 		var hashString = yada.getHashValue(windowLocationHash); // story=132;command=message
-		if (hashString!=null) {
+		if (hashString!=null && hashString.length>0) {
 			var segments = hashString.split(';'); // ['story=132', 'command=message']
 			for (var i = 0; i < segments.length; i++) {
 				var parts = segments[i].split('='); // ['story', '132']
 				result[parts[0]]=parts[1];
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Convert a location hash value to a map. For example, if propertyList=['id', 'name'] and windowLocationHash='#123-joe' and separator='-',
+	 * the result is {'id':'123', 'name':'joe'}
+	 * When there are more properties than values, the extra properties are set to the empty string.
+	 * When there are more values than properties, the extra values are ignored.
+	 * @param propertyList an array of map keys
+	 * @param windowLocationHash the value of location.hash (starts with #)
+	 * @param separator the separator for the values in the hash
+	 * @return an object where to each property in the list corresponds a value from the hash
+	 */
+	yada.hashPathToMap = function(propertyList, windowLocationHash, separator) {
+		var result = {};
+		var hashString = yada.getHashValue(windowLocationHash); // 834753/myslug
+		if (hashString!=null && hashString.length>0) {
+			var segments = hashString.split(separator);
+			for (var i = 0; i < propertyList.length; i++) {
+				var name = propertyList[i];
+				if (i<segments.length) {
+					result[name] = segments[i];
+				} else {
+					result[name] = '';
+				}
 			}
 		}
 		return result;
@@ -543,11 +602,6 @@
 	 */
 	yada.endsWith = function(str, suffix) {
 		return str.substr(-suffix.length) === suffix;
-	}
-	
-	// Ritorna ciò che segue lo hash in una stringa. Se non c'è, ritorna undefined
-	yada.getHashValue = function(str) {
-		return str.split('#')[1];
 	}
 	
 	/**

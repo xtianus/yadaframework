@@ -12,7 +12,9 @@
 	yada.postLoginHandler = null; // Handler to run after login, if any
 	
 	var parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
-
+	var markerAjaxButtonOnly = 'yadaAjaxButtonOnly';
+	var clickedButton;
+	
 	// ?????????? A cosa servono questi postXXXX ??????????????????
 	var postLoginUrl = null;
 	var postLoginData = null;
@@ -26,6 +28,32 @@
 		yada.enableAjaxForms(null, $element);
 		yada.enableAjaxLinks(null, $element);
 		yada.enableAjaxSelects(null, $element);
+	}
+
+
+	////////////////////
+	/// Modal
+	
+	/**
+	 * Open a modal when the location.hash contains the needed value.
+	 * Example: openModalOnHash('/mymodal', ['id', 'name'], '/', function(data){return !isNaN(data.id);}
+	 * @param targetUrl the modal url to open via ajax
+	 * @param paramNames an array of request parameter names that are assigned to from the hash
+	 * @param separator the values contained in the hash are separated by this character
+	 * @param validator a function that returns true if the hash values are valid
+	 */
+	yada.openModalOnHash = function(targetUrl, paramNames, separator, validator) {
+		var hashValue = document.location.hash;
+		if (hashValue!=null && hashValue.length>1) {
+			try {
+				var data = yada.hashPathToMap(paramNames, hashValue, separator);
+				if (typeof validator == "function" && validator(data)) {
+					yada.ajax(targetUrl, data);
+				}
+			} catch(e) {
+				console.error(e);
+			}
+		}
 	}
 
 	////////////////////
@@ -208,12 +236,16 @@
 		if ($element==null) {
 			$element = $('body');
 		}
-		$('a.yadaAjax', $element.parent()).each(function() {
+		var $target = $element.parent();
+		if ($target.length==0) {
+			$target = $element;
+		}
+		$('a.yadaAjax', $target).each(function() {
 			$(this).removeClass('yadaAjax');
 			yada.enableAjaxLink($(this), handler);
 		});
 		// Legacy
-		$('.s_ajaxLink', $element.parent()).each(function() {
+		$('.s_ajaxLink', $target).each(function() {
 			$(this).removeClass('s_ajaxLink');
 			yada.enableAjaxLink($(this), handler);
 		});
@@ -228,7 +260,11 @@
 		if ($element==null) {
 			$element = $('body');
 		}
-		$('select.yadaAjax', $element.parent()).each(function() {
+		var $target = $element.parent();
+		if ($target.length==0) {
+			$target = $element;
+		}
+		$('select.yadaAjax', $target).each(function() {
 			$(this).removeClass('yadaAjax');
 			yada.enableAjaxSelect($(this), handler);
 		});
@@ -426,15 +462,24 @@
 		if ($element==null) {
 			$element = $('body');
 		}
-		$('form.yadaAjax', $element.parent()).each(function() {
+		var $target = $element.parent();
+		if ($target.length==0) {
+			$target = $element;
+		}
+		// This needs to be done every time because the ajax result might have new submit buttons inside, without a form wrapping them
+		yada.enableSubmitButtons($target);
+		//
+		$('form.yadaAjax', $target).each(function() {
 			$(this).removeClass('yadaAjax');
 			yada.enableAjaxForm($(this), handler);
 		});
 		// Legacy
-		$('.s_ajaxForm', $element.parent()).each(function() {
+		$('.s_ajaxForm', $target).each(function() {
 			$(this).removeClass('s_ajaxForm');
 			yada.enableAjaxForm($(this), handler);
 		});
+		
+		
 		// TODO questo aggiunge la posizione verticale del modal, ma non credo serva per un form ajax
 		//			beforeSubmit: function(formDataArray) {
 		//					// Aggiunge la posizione verticale del modal tra i parametri del form
@@ -442,6 +487,15 @@
 		//					ldm.loaderOn();
 		//				},
 	};
+	
+	yada.enableSubmitButtons = function($element) {
+		$element.find("button[type='submit']").not('.yadaClickedButtonHandler').each(function() {
+			$(this).click(function() {
+				clickedButton = this;
+			});
+			$(this).addClass('yadaClickedButtonHandler');
+		});
+	}
 
 	/**
 	 * Sends a form via ajax, it doesn't have to have class .yadaAjax.
@@ -456,15 +510,24 @@
 			});
 			return;
 		}
+		yada.enableSubmitButtons($form);
 		// From here on the $form is a single anchor, not an array.
-		var markerClass = 'yadaAjaxDone'; // To prevent double submission
+		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		// Can't use document.activeElement to find the clicked button because of the possible "confirm" dialog
 		// http://stackoverflow.com/a/33882987/587641
-		var clickedButton = null;
-		$form.find("button[type='submit']").click(function() {
-			clickedButton = this;
+		$form.find("button[type='submit']").not('.yadaClickedButtonHandler').each(function() {
+			$(this).click(function() {
+				clickedButton = this;
+			});
+			$(this).addClass('yadaClickedButtonHandler');
 		});
 		$form.not('.'+markerClass).off('submit').submit(function(e) {
+			// If the form is marked as markerAjaxButtonOnly do not submit it via ajax unless the clicked button is marked with 'yadaAjax'
+			if ($form.hasClass(markerAjaxButtonOnly)) {
+				if (clickedButton==null || !$(clickedButton).hasClass('yadaAjax')) {
+					return; // Do a normal submit
+				}
+			}
 			e.preventDefault();
 			// Check if it must be a multipart formdata
 			var multipart = $form.attr("enctype")=="multipart/form-data";
@@ -486,52 +549,50 @@
 			}
 			// Call, in sequence, the handler specified in data-successHandler and the one passed to this function.
 			// Extend the handler to include form and button parameters
-			var joinedHandler = (function(handlerButton) { 
-				return function(responseText, responseHtml) {
-					showFeedbackIfNeeded($form);
-					var formHandlerNames = $form.attr("data-yadaSuccessHandler");
-					if (formHandlerNames===undefined) {
-						formHandlerNames = $form.attr("data-successHandler"); // Legacy
-					}
-					// var dataHandler = window[formHandlerName];
-					var buttonHandlerNames = $(handlerButton).attr("data-yadaSuccessHandler");
-					// var buttonDataHandler = window[buttonHandlerName];
-					// The button handler has precedence over the form handler, which is called only if the former returns true
-					// from all handlers.
-					var runFormHandler = true;
-					if (buttonHandlerNames != null) {
-						// Can be a comma-separated list of handlers, which are called in sequence
-						var handlerNameArray = yada.listToArray(buttonHandlerNames);
-						for (var i = 0; i < handlerNameArray.length; i++) {
-							var dataHandler = window[handlerNameArray[i]];
-							if (typeof dataHandler === "function") {
-								runFormHandler &= dataHandler(responseText, responseHtml, this, handlerButton);
-							}
+			var joinedHandler = function(responseText, responseHtml) {
+				showFeedbackIfNeeded($form);
+				var formHandlerNames = $form.attr("data-yadaSuccessHandler");
+				if (formHandlerNames===undefined) {
+					formHandlerNames = $form.attr("data-successHandler"); // Legacy
+				}
+				// var dataHandler = window[formHandlerName];
+				var buttonHandlerNames = $(clickedButton).attr("data-yadaSuccessHandler");
+				// var buttonDataHandler = window[buttonHandlerName];
+				// The button handler has precedence over the form handler, which is called only if the former returns true
+				// from all handlers.
+				var runFormHandler = true;
+				if (buttonHandlerNames != null) {
+					// Can be a comma-separated list of handlers, which are called in sequence
+					var handlerNameArray = yada.listToArray(buttonHandlerNames);
+					for (var i = 0; i < handlerNameArray.length; i++) {
+						var dataHandler = window[handlerNameArray[i]];
+						if (typeof dataHandler === "function") {
+							runFormHandler &= dataHandler(responseText, responseHtml, this, clickedButton);
 						}
-					}
-					if (runFormHandler == true && formHandlerNames!=null) {
-						// Can be a comma-separated list of handlers, which are called in sequence
-						var handlerNameArray = yada.listToArray(formHandlerNames);
-						for (var i = 0; i < handlerNameArray.length; i++) {
-							var dataHandler = window[handlerNameArray[i]];
-							if (typeof dataHandler === "function") {
-								dataHandler(responseText, responseHtml, this, handlerButton);
-							}
-						}
-					}
-					if (handler != null) {
-						handler(responseText, responseHtml, this, handlerButton);
-					}
-					var deleted = deleteOnSuccess($(handlerButton));
-					if (!deleted) {
-						deleteOnSuccess($form);
-					}
-					var updated = updateOnSuccess($(handlerButton), responseHtml);
-					if (!updated) {
-						updateOnSuccess($form, responseHtml);
 					}
 				}
-			})(clickedButton); // Create a closure for the button
+				if (runFormHandler == true && formHandlerNames!=null) {
+					// Can be a comma-separated list of handlers, which are called in sequence
+					var handlerNameArray = yada.listToArray(formHandlerNames);
+					for (var i = 0; i < handlerNameArray.length; i++) {
+						var dataHandler = window[handlerNameArray[i]];
+						if (typeof dataHandler === "function") {
+							dataHandler(responseText, responseHtml, this, clickedButton);
+						}
+					}
+				}
+				if (handler != null) {
+					handler(responseText, responseHtml, this, clickedButton);
+				}
+				var deleted = deleteOnSuccess($(clickedButton));
+				if (!deleted) {
+					deleteOnSuccess($form);
+				}
+				var updated = updateOnSuccess($(clickedButton), responseHtml);
+				if (!updated) {
+					updateOnSuccess($form, responseHtml);
+				}
+			};
 			var method = $(this).attr('method') || "POST";
 			// yada.ajax($(this).attr('action'), $.param(data), joinedHandler.bind(this), $(this).attr('method'), $(this).attr('data-timeout'));
 			yada.ajax($(this).attr('action'), data, joinedHandler.bind(this), method, $(this).attr('data-timeout'));
@@ -539,7 +600,7 @@
 			return false; // Important so that the form is not submitted by the browser too
 		})
 		// Set the confirm handlers on form buttons
-	    $form.find("button[type='submit']").each(function() {
+	    $form.not('.'+markerClass).find("button[type='submit']").each(function() {
 	    	var $button = $(this);
 	    	var confirmText = $button.attr("data-confirm");
 	    	if (confirmText!=null) {
@@ -557,6 +618,7 @@
 	    		});
 	    	}
 	    });
+		$form.not('.'+markerClass).addClass(markerClass);
 	};
 	
 	/**
@@ -605,6 +667,12 @@
 				}
 				if ("reload" == responseTrimmed) {
 					yada.reload();
+					return;
+				}
+				if (responseTrimmed.startsWith("redirect:")) {
+					yada.loaderOn();
+					var targetUrl = responseTrimmed.substring("redirect:".length);
+					window.location.href=targetUrl;
 					return;
 				}
 				var responseHtml=$("<div>").html(responseText);
@@ -671,23 +739,28 @@
 						var htmlDoc = parser.parseFromString(responseText, "text/html");
 						var headNodes = $(htmlDoc.head).children();
 						$("head").append(headNodes);
-						$('#ajaxModal').on('hidden.bs.modal', function (e) {
+						$('#ajaxModal').one('hidden.bs.modal', function (e) {
 							headNodes.remove(); // Cleanup on modal close
 						});
 					}
 					
 					$("#ajaxModal").children().remove();
 					$("#ajaxModal").append(loadedModalDialog);
-					$('#ajaxModal:hidden').modal('show'); // Mostro il modal se non è già aperto
+					// We need to show the modal after a delay or it won't show sometimes (!)
+					setTimeout(function() {
+						$('#ajaxModal:hidden').modal('show');
+					}, 100);
 					yada.enableAjaxForms();
 					// Questo permette di scrollare all'anchor (ho dovuto mettere un ritardo altrimenti non scrollava)
 					// e anche di far scendere il modal se per caso si apre scrollato (a volte capita, forse coi modal molto alti)
 					setTimeout(function() {
-						var hashValue = yada.getHashValue(window.location.href);
-						if (hashValue!=null && hashValue.length>0) {
-							$('#ajaxModal').animate({
-								scrollTop: $('#' + hashValue).offset().top
-							}, 1000);
+						var hashValue = window.location.hash; // #234
+						if (hashValue.length>1 && !isNaN(hashValue.substring(1))) {
+							try {
+								$('#ajaxModal').animate({
+									scrollTop: $(hashValue).offset().top
+								}, 1000);
+							} catch (e) {}
 						} else if ($('#ajaxModal').scrollTop()>0) {
 							// Si è aperto in mezzo quindi lo scrollo in alto
 							$('#ajaxModal').animate({
@@ -811,7 +884,10 @@
 			$('#ajaxModal').modal('hide'); // non si sa mai
 			$('#yada-notification').children().remove();
 			$('#yada-notification').append(notification);
-			$('#yada-notification').modal('show');
+			// We need to show the modal after a delay or it won't show sometimes (!)
+			setTimeout(function() {
+				$('#yada-notification').modal('show');
+			}, 100);
 			return true;
 		}
 		return false;

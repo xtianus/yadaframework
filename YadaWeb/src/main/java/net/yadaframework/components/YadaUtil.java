@@ -702,9 +702,19 @@ public class YadaUtil {
 	 * @param source
 	 * @return
 	 */
-	// TODO why not use SerializationUtils.clone(..) of commons-lang?
+	// TODO why not use SerializationUtils.clone(..) of commons-lang? This is many times slower than writing clone methods by hand on all objects in your object graph. However, for complex object graphs, or for those that don't support deep cloning this can be a simple alternative implementation. Of course all the objects must be Serializable.
 	public static Object copyEntity(CloneableFiltered source) {
-		return copyEntity(source, null);
+		return copyEntity(source, false);
+	}
+	
+	/**
+	 * 
+	 * @param source
+	 * @param setFieldDirectly true to copy using fields and not getter/setter
+	 * @return
+	 */
+	public static Object copyEntity(CloneableFiltered source, boolean setFieldDirectly) {
+		return copyEntity(source, null, setFieldDirectly);
 	}
 	
 	/**
@@ -731,6 +741,10 @@ public class YadaUtil {
 	 */
 	// TODO why not use SerializationUtils.clone(..) of commons-lang?
 	public static Object copyEntity(CloneableFiltered source, Class classObject) {
+		return copyEntity(source, classObject, false);
+	}
+	
+	public static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly) {
 		if (source==null) {
 			return null;
 		}
@@ -745,11 +759,11 @@ public class YadaUtil {
 			if(target instanceof org.hibernate.proxy.HibernateProxy && classObject!=null)
 				target = classObject.newInstance();	
 				
-			copyFields(source, sourceClass, target);
+			copyFields(source, sourceClass, target, setFieldDirectly);
 			Class<?> superclass = sourceClass.getSuperclass();
 			while (superclass!=null && superclass!=Object.class) {
 				sourceClass = superclass;
-				copyFields(source, sourceClass, target);
+				copyFields(source, sourceClass, target, setFieldDirectly);
 				superclass = sourceClass.getSuperclass();
 			}
 			return target;
@@ -759,14 +773,50 @@ public class YadaUtil {
 			throw new InternalException(msg, e);
 		}
 	}
+	
+	/**
+	 * Copy a value either by getter or by field
+	 * @param setFieldDirectly
+	 * @param field
+	 * @param getter
+	 * @param setter
+	 * @param source
+	 * @param target
+	 * @param args
+	 */
+	private static void copyValue(boolean setFieldDirectly, Field field, Method getter, Method setter, Object source, Object target, Object... args) {
+		try {
+			if (setFieldDirectly) {
+				if (args.length==0) {
+					field.set(target, field.get(source));
+				} else {
+					field.set(target, args);
+				}
+			} else {
+				if (args.length==0) {
+					setter.invoke(target, getter.invoke(source));
+				} else {
+					setter.invoke(target, args);
+				}
+			}
+		} catch (Exception e) {
+			log.debug("Failed to set field {}", field.getName());
+		}
+	}
 
-	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target) {
+//	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target) {
+//		copyFields(source, sourceClass, target, false);
+//	}
+	
+	// TODO StringBuilder is not cloned (as it doesn't implement CloneableFiltered)
+	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target, boolean setFieldDirectly) {
 		log.debug("Copio oggetto {} di tipo {}", source, sourceClass);
 		Field[] fields = sourceClass.getDeclaredFields();
 		Field[] excludedFields = source.getExcludedFields();
 		List<Field>filteredFields = excludedFields!=null? (List<Field>) Arrays.asList(excludedFields):new ArrayList<Field>();
 		for (int i = 0; i < fields.length; i++) {
 			Field field = fields[i];
+			field.setAccessible(true);
 			// "id" viene filtrato d'ufficio, per detacchare l'oggetto
 			if ("id".equals(field.getName()) || filteredFields.contains(field)) {
 				continue; // Skip the filtered fields
@@ -778,21 +828,28 @@ public class YadaUtil {
 				String getterName = prefix + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
 				String setterName = "set" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
 				try {
-					Method getter=null;
-					try{
-						getter= sourceClass.getDeclaredMethod(getterName);
-					}catch(NoSuchMethodException exc){
-						//per i boolean posso avere il getXXXX anzichè l' isXXXXXXX
-						if  (fieldType==boolean.class || fieldType==Boolean.class){
-							getterName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+					Method getter = null;
+					Method setter = null;
+					
+					if (!setFieldDirectly) {
+					
+						try{
 							getter = sourceClass.getDeclaredMethod(getterName);
-						} else {
-							throw exc;
+						} catch(NoSuchMethodException exc){
+							//per i boolean posso avere il getXXXX anzichè l' isXXXXXXX
+							if  (fieldType==boolean.class || fieldType==Boolean.class){
+								getterName = "get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+								getter = sourceClass.getDeclaredMethod(getterName);
+							} else {
+									throw exc;
+							}
 						}
+						getter.setAccessible(true);
+						setter = sourceClass.getDeclaredMethod(setterName, fieldType);
+						setter.setAccessible(true);	
+					
 					}
-					getter.setAccessible(true);
-					Method setter = sourceClass.getDeclaredMethod(setterName, fieldType);
-					setter.setAccessible(true);		
+					
 					if (fieldType.isPrimitive() 
 							 || fieldType==Boolean.class 
 							 || fieldType==Integer.class
@@ -805,7 +862,8 @@ public class YadaUtil {
 							) {
 						// Mi immagino che isPrimitive() sia veloce, per cui lo controllo prima dei giochi sulle interfacce
 						// Just copy
-						setter.invoke(target, getter.invoke(source));
+						copyValue(setFieldDirectly, field, getter, setter, source, target);
+//						setter.invoke(target, getter.invoke(source));
 					} else {
 						if (isType(fieldType, Collection.class)) {
 							// E' una collection, quindi copio solo i contenuti.
@@ -815,7 +873,8 @@ public class YadaUtil {
 							if (targetCollection==null) {
 								// Se il costruttore non istanzia la mappa, ne creo una arbitrariamente di tipo ArrayList
 								targetCollection = new ArrayList();
-								setter.invoke(target, targetCollection);
+								copyValue(setFieldDirectly, field, getter, setter, source, target, targetCollection);
+//								setter.invoke(target, targetCollection);
 							}
 							// Faccio la copia shallow di tutti gli elementi che non implementano CloneableDeep;
 							// per questi faccio la copia deep.
@@ -828,12 +887,13 @@ public class YadaUtil {
 							}
 //									targetCollection.addAll(sourceCollection);
 						} else if (isType(fieldType, Map.class)) {
-							Map sourceMap = (Map) getter.invoke(source);
-							Map targetMap = (Map) getter.invoke(target);
+							Map sourceMap = setFieldDirectly ? (Map) field.get(source) : (Map) getter.invoke(source);
+							Map targetMap = setFieldDirectly ? (Map) field.get(target) : (Map) getter.invoke(target);
 							if (targetMap==null) {
 								// Se il costruttore non istanzia la mappa, ne creo una arbitrariamente di tipo HashMap
 								targetMap = new HashMap();
-								setter.invoke(target, targetMap);
+								copyValue(setFieldDirectly, field, getter, setter, source, target, targetMap);
+//								setter.invoke(target, targetMap);
 							}
 							// Faccio la copia shallow di tutti gli elementi che non implementano CloneableFiltered;
 							// per questi faccio la copia deep.
@@ -850,10 +910,13 @@ public class YadaUtil {
 							// Non è una collection nè una mappa.
 							if (isType(fieldType, CloneableDeep.class)) {
 								// Siccome implementa CloneableDeep, lo duplico deep
-								setter.invoke(target, YadaUtil.copyEntity((CloneableFiltered) getter.invoke(source))); // deep but detached
+								CloneableFiltered fieldValue = setFieldDirectly ? (CloneableFiltered) field.get(source) : (CloneableFiltered) getter.invoke(source);
+								copyValue(setFieldDirectly, field, getter, setter, source, target, YadaUtil.copyEntity(fieldValue, setFieldDirectly)); // deep but detached
+//								setter.invoke(target, YadaUtil.copyEntity(fieldValue)); // deep but detached
 							} else {
 								// E' un oggetto normale, per cui copio il riferimento
-								setter.invoke(target, getter.invoke(source)); // shallow
+								copyValue(setFieldDirectly, field, getter, setter, source, target);
+//								setter.invoke(target, getter.invoke(source)); // shallow
 							}
 						}
 					}
