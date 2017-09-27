@@ -150,8 +150,10 @@ fi
 if [[ $cfgPkgTomcat || $cfgTomcatTarGz ]]; then
 	# Non uso -XX:+UseConcMarkSweepGC perché le vm economiche non hanno tante cpu  
 	sed -i 's%JAVA_OPTS=.*%JAVA_OPTS="-Xloggc:'${projectBase}'/log/tomcat-gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=1 -XX:GCLogFileSize=1M -XX:+PrintGCDateStamps -Djava.awt.headless=true -Xmx'${cfgTomcatRam}' -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/tomcat-outofmemory-dump"%g' ${cfgTomcatConfiguration}
-	# Utenza tomcat manager
-	sed -i 's%</tomcat-users>%<role rolename="manager-gui"/><role rolename="manager-jmx"/><role rolename="admin"/><user username="${cfgUser}" password="${cfgTomcatManagerPwd}" roles="admin,manager-gui,manager-jmx"/></tomcat-users>%g' ${cfgTomcatBase}/tomcat-users.xml
+	if [[ $cfgTomcatManagerPwd ]]; then
+		# Utenza tomcat manager
+		sed -i 's%</tomcat-users>%<role rolename="manager-gui"/><role rolename="manager-jmx"/><role rolename="admin"/><user username="${cfgUser}" password="${cfgTomcatManagerPwd}" roles="admin,manager-gui,manager-jmx"/></tomcat-users>%g' ${cfgTomcatBase}/tomcat-users.xml
+	fi
 	# Compression e timeout
 	sed -i 's/connectionTimeout="20000"/connectionTimeout="'${cfgTomcatTimeout}'"\ncompression="on" compressableMimeType="text\/html,text\/xml,text\/plain,text\/css,application\/xml,text\/javascript,application\/javascript,application\/x-javascript,application\/pdf,application\/json,text\/json"/g' ${cfgTomcatBase}/server.xml
 	systemctl daemon-reload
