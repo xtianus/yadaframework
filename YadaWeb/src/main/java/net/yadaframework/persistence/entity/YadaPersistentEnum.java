@@ -70,7 +70,7 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable=false)
+	@Column(nullable=false, length=191)
 	private String enumClassName; 	// ProcessState
 	private int enumOrdinal;		// 2
 	@Column(nullable=false)
