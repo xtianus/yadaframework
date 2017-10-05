@@ -1,6 +1,8 @@
 package net.yadaframework.web;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,7 +47,58 @@ public class YadaRegistrationController {
 	@Autowired private YadaConfiguration yadaConfiguration;
 	@Autowired private MessageSource messageSource;
 
-
+	/**
+	 * 
+	 * @param yadaRegistrationRequest
+	 * @param bindingResult
+	 * @param model the flag "yadaUserExists" il set to true when the user already exists
+	 * @param locale
+	 * @return true if the user has been registered, false otherwise
+	 */
+	// TODO modal conferma email inviata (nel chiamante?)
+	// TODO antispam hidden field
+	public boolean handleRegistrationRequest(YadaRegistrationRequest yadaRegistrationRequest, BindingResult bindingResult, Model model, HttpServletRequest request, Locale locale) {
+		// 
+		// Validation
+		//
+		String email = yadaRegistrationRequest.getEmail();
+		// Simple email validation, email blacklisting
+		if (StringUtils.isBlank(email) || email.indexOf("@")<0 || email.indexOf(".")<0 || yadaConfiguration.emailBlacklisted(email)) {
+			bindingResult.rejectValue("email", "yada.validation.email.invalid");
+		} else {
+			email = email.toLowerCase(locale);
+		}
+		// Check if user exists
+		YadaUserCredentials existing = userCredentialsRepository.findFirstByUsername(email);
+		if (existing!=null) {
+			log.debug("Email {} already found in database while registering new user", email);
+			bindingResult.rejectValue("email", "yada.registration.username.exists");
+			model.addAttribute("yadaUserExists", true);
+		}
+		if (!yadaUserDetailsService.validatePasswordSyntax(yadaRegistrationRequest.getPassword())) {
+			bindingResult.rejectValue("password", "yada.validation.password.length", new Object[]{yadaConfiguration.getMinPasswordLength(), yadaConfiguration.getMaxPasswordLength()}, "Wrong password length");
+		}
+		if (bindingResult.hasErrors()) {
+			return false;
+		}
+		
+		//
+		// Add registration request to database
+		//
+		yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.REGISTRATION);
+		// Cleanup of old requests
+		yadaSecurityUtil.registrationRequestCleanup(yadaRegistrationRequest);
+		yadaRegistrationRequest = registrationRequestRepository.save(yadaRegistrationRequest); // To get id and token
+		boolean emailSent = yadaSecurityEmailService.sendRegistrationConfirmation(yadaRegistrationRequest, null, request, locale);
+		if (!emailSent) {
+			registrationRequestRepository.delete(yadaRegistrationRequest);
+			log.debug("Registration mail not sent to {}", email);
+			bindingResult.rejectValue("email", "yada.registration.email.failed");
+			return false;
+		}
+		return true;
+	}
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////// Recupero Password                                                                            /////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////

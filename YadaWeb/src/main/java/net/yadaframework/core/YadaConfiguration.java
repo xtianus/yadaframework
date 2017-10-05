@@ -73,6 +73,24 @@ public abstract class YadaConfiguration {
 	private Locale defaultLocale = null;
 	private boolean defaultLocaleChecked = false;
 	
+
+	/**
+	 * Checks if an email address has been blacklisted in the configuration
+	 * @param email
+	 * @return true for a blacklisted email address
+	 */
+	public boolean emailBlacklisted(String email) {
+		String[] patternStrings = configuration.getStringArray("config/email/blacklistPattern");
+		for (String patternString : patternStrings) {
+			if (email.matches(patternString)) {
+				log.warn("Email '{}' blacklisted by '{}'", email, patternString);
+				return false;
+			}
+		}
+		return true;
+	}
+
+	
 	/**
 	 * True if during startup YadaAppConfig should run the FlyWay migrate operation
 	 * @return

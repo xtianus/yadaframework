@@ -76,6 +76,14 @@ public class YadaSecurityEmailService {
 		return yadaEmailService.sendHtmlEmail(toEmail, emailName, subjectParams, templateParams, inlineResources, locale, true);
 	}
 
+	/**
+	 * 
+	 * @param yadaRegistrationRequest
+	 * @param linkParameters can be null
+	 * @param request
+	 * @param locale
+	 * @return
+	 */
 	public boolean sendRegistrationConfirmation(YadaRegistrationRequest yadaRegistrationRequest, Map<String,String> linkParameters, HttpServletRequest request, Locale locale) {
 		final String emailName = "registrationConfirmation";
 		final String[] toEmail = {yadaRegistrationRequest.getEmail()};
