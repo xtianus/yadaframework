@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 // Warning: do not remove @Configuration or save() operations will fail with no error message!
 @Configuration
 @EnableJpaRepositories(basePackages = "$basePackage.persistence.repository")
-public class JPAConfig extends YadaJpaConfig {
+public class JpaConfig extends YadaJpaConfig {
 }

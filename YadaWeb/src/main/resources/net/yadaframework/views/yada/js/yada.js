@@ -13,6 +13,7 @@
 	yada.devMode = false; // Set to true in development mode (also via thymeleaf)
 	yada.baseUrl = null;	// Set it via thymeleaf
 	yada.resourceDir = null; // Set it via thymeleaf
+	var loaderStart = 0;
 	yada.messages = {};
 	yada.messages.connectionError = { // Set it via thymeleaf
 		"title": "Connection Error",
@@ -33,6 +34,9 @@
 	
 	function initHandlers() {
 		// Mostra il loader sugli elementi con le classi s_showLoaderClick oppure s_showLoaderForm
+		$('body').on('click', '.yadaShowLoader', yada.loaderOn);
+		$('body').on('submit', '.yadaShowLoader', yada.loaderOn);
+		// Legacy
 		$('body').on('click', '.s_showLoaderClick', yada.loaderOn);
 		$('body').on('submit', '.s_showLoaderForm', yada.loaderOn);
 		yada.enableScrollTopButton(); // Abilita il torna-su
@@ -57,11 +61,17 @@
 	}
 	
 	yada.loaderOn = function() {
+		loaderStart = Date.now();
 		$(".loader").show();
 	};
 	
 	yada.loaderOff = function() {
-		$(".loader").hide();
+		var elapsedMillis = Date.now() - loaderStart;
+		if (elapsedMillis>100) {
+			$(".loader").hide();
+		} else {
+			setTimeout(function(){ $(".loader").hide(); }, 100-elapsedMillis);
+		}
 	};
 	
 	/**
@@ -359,62 +369,6 @@
 			}
 		});	
 	}
-	
-//	// Deprecated !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//	yada.enableEmbeddedLogin = function($theForm, handler) {
-//		$theForm.submit(function(e) {
-//			e.preventDefault();
-//			$this=$(this);
-//	        $.ajax({
-//	            type: $this.attr('method'),
-//	            url: $this.attr('action'),
-//	            data: $this.serialize(),
-//	            success: function (responseText) {
-//	            	var responseHtml=$("<div>").html(responseText);
-//	    			var dialog=$("#loginModalDialog", responseHtml);
-//	    			if (dialog.length>0) {
-//	    				$('#ajaxModal').modal('hide');
-//	    				// La risposta è il form di login, che deve essere mostrato con gli errori
-//	    				$("#loginModal").children().remove();
-//	    				$("#loginModal").append(dialog);
-//	    				$('#loginForm').ajaxForm(formLoginOptions); // Login POST via Ajax
-//	    				$("#loginModal").modal('show');
-//	    			    return;
-//	    			}
-//	    			// Il login ha avuto successo quindi si esegue l'handler
-//	            	if (handler!=null) {
-//	            		handler(responseText, responseHtml);
-//	            	}
-//	            }
-//	        });
-//	        return false;
-//		});
-//	};
-	
-	//Occhietto della password
-	yada.enableShowPassword = function(element) {
-		if (element==null) {
-			element = $('body');
-		}
-		var $target = $('.yadaShowPassword', element).not('.yadaShowPassworded');
-		// Cycle password visibility
-		$target.click(function(e) {
-			e.preventDefault();
-			var $hiddenField = $(this).parent().parent().find("input[type='password']");
-			// Show if not shown already
-			var madeVisible=$hiddenField.attr('type', 'text').length>0;
-			if (madeVisible) {
-				// Restore hidden field before submit (to prevent browsers from storing it in field autocomplete history, maybe)
-				$(this).parents('form').find('button[type="submit"]').click(function(e) {
-					$hiddenField.attr('type', 'password');
-				});
-			} else {
-				// Already visible: back to hidden
-				$(this).parent().parent().find("input[type='text']").attr('type', 'password');
-			}
-		});
-		$target.addClass('yadaShowPassworded');
-	};
 	
 	/**
 	 * Transform links into confirm links: all anchors with a "data-confirm" attribute that don't have a class of "yadaAjax" 
@@ -869,6 +823,87 @@
 		var currentPath = window.location.pathname; // /xx/somePage
 		var regex = new RegExp("/[^/]+");
 		window.location.pathname = currentPath.replace(regex, "/"+language);
+	}
+
+	/////////////
+	/// Forms ///
+	/////////////
+
+	/**
+	 * Icon that shows a password field in cleartext
+	 */
+	yada.enableShowPassword = function(element) {
+		if (element==null) {
+			element = $('body');
+		}
+		var $target = $('.yadaShowPassword', element).not('.yadaShowPassworded');
+		// Cycle password visibility
+		$target.click(function(e) {
+			e.preventDefault();
+			var $hiddenField = $(this).parent().parent().find("input[type='password']");
+			// Show if not shown already
+			var madeVisible=$hiddenField.attr('type', 'text').length>0;
+			if (madeVisible) {
+				// Restore hidden field before submit (to prevent browsers from storing it in field autocomplete history, maybe)
+				$(this).parents('form').find('button[type="submit"]').click(function(e) {
+					$hiddenField.attr('type', 'password');
+				});
+			} else {
+				// Already visible: back to hidden
+				$(this).parent().parent().find("input[type='text']").attr('type', 'password');
+			}
+		});
+		$target.addClass('yadaShowPassworded');
+	};
+	
+	
+	function checkMatchingPasswords($oneForm) {
+		var $pwd = $('input[name=password]', $oneForm);
+		var $check = $('input[name=confirmPassword]', $oneForm);
+		var $submit = $('button[type="submit"]', $oneForm);
+		if ($pwd==null || $check==null) {
+			return;
+		}
+		var v1 = $pwd.val();
+		var v2 = $check.val();
+        if(v1 != "" && v2 != "" && v1 != v2){
+	        $submit.attr("disabled", "disabled");
+	        $check.parents('.form-group').addClass('has-error');
+	        $check.parent().append('<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>');
+        }
+    }
+
+	function resetPasswordError($oneForm){
+		var $pwd = $('input[name=password]', $oneForm);
+		var $check = $('input[name=confirmPassword]', $oneForm);
+		var $submit = $('button[type="submit"]', $oneForm);
+        $submit.removeAttr("disabled");
+        $($check).parents('.form-group').removeClass('has-error');
+        $('span.form-control-feedback.glyphicon-remove', $check.parent()).remove();
+    }
+
+	/**
+	 * Prevent form submission when the password field and its confirmation field don't match.
+	 * The password field must be named "password". The confirmation field must be named "confirmPassword".
+	 * The password confirmation field gets a 'has-error' class on its parent form-group (bootstrap standard).
+	 * @param $forms the form on which to enable the check
+	 */
+	yada.enablePasswordMatch = function($forms) {
+		$('input[name=password], input[name=confirmPassword]', $forms).on("keydown", function(e){
+	        /* only check when the tab or enter keys are pressed
+	         * to prevent the method from being called needlessly  */
+	        if(e.keyCode == 13 || e.keyCode == 9) {
+	            checkMatchingPasswords($(this).parents("form"));
+	        }
+	     })
+	     .on("blur", function(){                    
+	        // also check when the element looses focus (clicks somewhere else)
+	        checkMatchingPasswords($(this).parents("form"));
+	    })
+	    .on("focus", function(){
+	        // reset the error message when they go to make a change
+	        resetPasswordError($(this).parents("form"));
+	    })
 	}
 	
 	

@@ -1,0 +1,4 @@
+[mysqldump]
+user=root
+# password=<thepassword>
+default-character-set = utf8mb4

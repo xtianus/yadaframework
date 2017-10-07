@@ -13,6 +13,7 @@ import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_INF
 import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +31,6 @@ import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -65,6 +65,21 @@ public class YadaWebUtil {
 //		}
 //		return pagePath;
 //	}
+	
+	/**
+	 * Decodes a string with URLDecoder, handling the useless try-catch that is needed
+	 * @param source
+	 * @return
+	 */
+	public String urlDecode(String source) {
+		final String encoding = "UTF-8";
+		try {
+			return URLDecoder.decode(source, encoding);
+		} catch (UnsupportedEncodingException e) {
+			log.error("Invalid encoding: {}", encoding);
+		}
+		return source;
+	}
 	
 	/**
 	 * Encodes a string with URLEncoder, handling the useless try-catch that is needed

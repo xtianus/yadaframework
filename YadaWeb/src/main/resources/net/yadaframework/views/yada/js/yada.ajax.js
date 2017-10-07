@@ -28,6 +28,7 @@
 		yada.enableAjaxForms(null, $element);
 		yada.enableAjaxLinks(null, $element);
 		yada.enableAjaxSelects(null, $element);
+		yada.enableAjaxFragments(null, $element);
 	}
 
 
@@ -226,6 +227,33 @@
 		}
 		return false;
 	}	
+
+	/**
+	 * Enables the loading of page fragments via ajax.
+	 * @param handler a function to call upon successful insertion, can be null
+	 * @param $element the element on which to enable the fragment insertion, can be null for the entire body
+	 */
+	yada.enableAjaxFragments = function(handler, $element) {
+		if ($element==null) {
+			$element = $('body');
+		}
+		var $target = $element.parent();
+		if ($target.length==0) {
+			$target = $element;
+		}
+		$('[data-yadaAjaxFragment]', $target).each(function() {
+			var $toBeReplaced=$(this);
+			var fetchUrl = $toBeReplaced.attr("data-yadaAjaxFragment");
+			if (fetchUrl!=null) {
+				$toBeReplaced.removeAttr('data-yadaAjaxFragment');
+				yada.ajax(fetchUrl, null, (function($target){
+					return function(responseText, responseHtml) {
+						$target.replaceWith(responseHtml.children());
+					}
+				})($toBeReplaced));
+			}
+		});
+	};
 	
 	/**
 	 * Transform links into ajax links: all anchors with a class of "yadaAjax" will be sent via ajax.
@@ -667,6 +695,12 @@
 				}
 				if ("reload" == responseTrimmed) {
 					yada.reload();
+					return;
+				}
+				if (responseTrimmed.startsWith("redirect:")) {
+					yada.loaderOn();
+					var targetUrl = responseTrimmed.substring("redirect:".length);
+					window.location.href=targetUrl;
 					return;
 				}
 				var responseHtml=$("<div>").html(responseText);

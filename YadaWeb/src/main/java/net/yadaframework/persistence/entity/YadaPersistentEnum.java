@@ -70,15 +70,15 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable=false)
+	@Column(nullable=false, length=191)
 	private String enumClassName; 	// ProcessState
 	private int enumOrdinal;		// 2
 	@Column(nullable=false)
 	private String enumName;		// "RUNNING"
 	
 	@ElementCollection(fetch = FetchType.EAGER)
-	@MapKeyColumn(name="language")
-	@Column(name="localText")
+	@MapKeyColumn(name="language", length=32) // th_TH_TH_#u-nu-thai
+	@Column(name="localText", length=128)
 	Map<String, String> langToText = new HashMap<>(); // Language code to localized text: { "it_IT" = "In esecuzione", "en_US" = "Running" }
 
 	/**
