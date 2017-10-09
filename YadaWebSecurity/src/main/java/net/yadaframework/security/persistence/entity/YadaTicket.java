@@ -1,4 +1,4 @@
-package net.yadaframework.persistence.entity;
+package net.yadaframework.security.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -9,6 +9,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.persistence.entity.YadaPersistentEnum;
 import net.yadaframework.persistence.repository.YadaLocaleDao;
 import net.yadaframework.web.YadaJsonView;
 
@@ -59,7 +61,8 @@ public class YadaTicket implements Serializable {
 	@Column(length=8192)
 	protected String message;
 	
-	protected Long submitterId; // id of the user profile
+	@ManyToOne(optional = false)
+	protected YadaUserProfile owner;
 	
 	
 // TODO allegare uno o più file	

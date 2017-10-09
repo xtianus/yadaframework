@@ -2,6 +2,7 @@ package net.yadaframework.security.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 import javax.persistence.CascadeType;
@@ -10,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -51,6 +53,9 @@ public class YadaUserProfile implements Serializable {
 									// "America/Argentina/ComodRivadavia"
 									// https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
+	@OneToMany(mappedBy="owner", cascade=CascadeType.ALL)
+	protected List<YadaTicket> tickets;
+	
 	public Long getId() {
 		return id;
 	}
