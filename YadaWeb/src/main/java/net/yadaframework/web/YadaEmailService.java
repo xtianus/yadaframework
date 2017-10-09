@@ -156,7 +156,7 @@ public class YadaEmailService {
 		boolean addTimestamp = yadaEmailParam.addTimestamp;
 		//
 		final String emailTemplate = getMailTemplateFile(emailName, locale);
-		final String subject = messageSource.getMessage("email.subject." + emailName, subjectParams, subjectParams[0].toString(),  locale);
+		final String subject = messageSource.getMessage("email.subject." + emailName, subjectParams,  locale);
 //		String myServerAddress = yadaWebUtil.getWebappAddress(request);
 //		final WebContext ctx = new WebContext(request, response, servletContext, locale);
 		// Using Context instead of WebContext, we can't access WebContent files and can't use @{somelink}
