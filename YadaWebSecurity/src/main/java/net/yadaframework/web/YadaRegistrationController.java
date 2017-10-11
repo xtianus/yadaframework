@@ -1,8 +1,6 @@
 package net.yadaframework.web;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,18 +26,21 @@ import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.security.components.YadaTokenHandler;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
+import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.security.persistence.repository.YadaRegistrationRequestRepository;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
+import net.yadaframework.security.persistence.repository.YadaUserProfileRepository;
 import net.yadaframework.web.form.YadaFormPasswordChange;
 
 @Controller
 public class YadaRegistrationController {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
-	@Autowired private YadaUserCredentialsRepository userCredentialsRepository;
+	@Autowired private YadaUserCredentialsRepository yadaUserCredentialsRepository;
+	@Autowired private YadaUserProfileRepository yadaUserProfileRepository;
 	@Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaSecurityUtil yadaSecurityUtil;
-	@Autowired private YadaRegistrationRequestRepository registrationRequestRepository;
+	@Autowired private YadaRegistrationRequestRepository yadaRegistrationRequestRepository;
 	@Autowired private YadaSecurityEmailService yadaSecurityEmailService;
 	@Autowired private YadaTokenHandler yadaTokenHandler;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
@@ -47,16 +48,103 @@ public class YadaRegistrationController {
 	@Autowired private YadaConfiguration yadaConfiguration;
 	@Autowired private MessageSource messageSource;
 
+	
+	public enum YadaRegistrationStatus {
+		OK,					// Good registration
+		ERROR,				// Some exception
+		REQUEST_INVALID,	// URL format invalid
+		LINK_EXPIRED,		// Link expired
+		USER_EXISTS;		// User exists
+	}
+	
 	/**
-	 * 
+	 * The outcome of a registration. When successful, the userProfile field should be saved by the caller
+	 * @param <T> the subclass of YadaUserProfile
+	 */
+	public class YadaRegistrationOutcome<T extends YadaUserProfile> {
+		/**
+		 * The outcome of the registration
+		 */
+		public YadaRegistrationStatus registrationStatus;
+		/**
+		 * The new user profile
+		 */
+		public T userProfile;
+		/**
+		 * The user email, is null when the registration link is expired
+		 */
+		public String email;
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////// Registration helpers                                                                         /////
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * To be called when the link in the registration confirmation email has been clicked. 
+	 * It creates a YadaUserCredential instance with basic YadaUserProfile values which should be refined and saved by the caller 
+	 * @param token
+	 * @param userRoles
+	 * @param locale
+	 * @return a {@link YadaRegistrationOutcome}
+	 */
+	public <T extends YadaUserProfile> YadaRegistrationOutcome<T> handleRegistrationConfirmation(String token, String[] userRoles, Locale locale, Class<T> userProfileClass) {
+		YadaRegistrationOutcome<T> result = new YadaRegistrationOutcome<T>();
+		long[] parts = yadaTokenHandler.parseLink(token);
+		try {
+			if (parts!=null) {
+				List<YadaRegistrationRequest> registrationRequests = yadaRegistrationRequestRepository.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]);
+				if (registrationRequests.isEmpty()) {
+					log.warn("registrationRequests.isEmpty()");
+					result.registrationStatus = YadaRegistrationStatus.LINK_EXPIRED;
+					return result;
+				}
+				YadaRegistrationRequest registrationRequest = registrationRequests.get(0);
+				String email = registrationRequest.getEmail();
+				result.email = email;
+				YadaUserCredentials existing = yadaUserCredentialsRepository.findFirstByUsername(email);
+				if (existing!=null) {
+					log.warn("Email '{}' already exists", email);
+					result.registrationStatus = YadaRegistrationStatus.USER_EXISTS;
+					return result;
+				}
+				// Create new user
+				YadaUserCredentials userCredentials = new YadaUserCredentials();
+				userCredentials.setUsername(registrationRequest.getEmail());
+				userCredentials.changePassword(registrationRequest.getPassword(), passwordEncoder);
+				userCredentials.setEnabled(true);
+				userCredentials.addRoles(yadaConfiguration.getRoleIds(userRoles));
+				T userProfile = userProfileClass.newInstance();
+				userProfile.setLocale(locale);
+				userProfile.setUserCredentials(userCredentials);
+				result.userProfile = userProfile;
+				//
+				yadaRegistrationRequestRepository.delete(registrationRequest);
+				yadaUserDetailsService.authenticateAs(userCredentials);
+				log.info("Registration: user='{}' password='{}'", registrationRequest.getEmail(), registrationRequest.getPassword());
+				//
+				log.info("Registration of '{}' successful", email);
+				result.registrationStatus = YadaRegistrationStatus.OK;
+				return result;
+			} else {
+				result.registrationStatus = YadaRegistrationStatus.REQUEST_INVALID;
+				log.error("Invalid registration url");
+			}
+		} catch (Exception e) {
+			result.registrationStatus = YadaRegistrationStatus.ERROR;
+			log.error("Registration of token {} failed", token, e);
+		}
+		return result;
+	}
+	
+	/**
+	 * This method should be called by a registration controller to perform the actual registration
 	 * @param yadaRegistrationRequest
 	 * @param bindingResult
 	 * @param model the flag "yadaUserExists" il set to true when the user already exists
 	 * @param locale
 	 * @return true if the user has been registered, false otherwise
 	 */
-	// TODO modal conferma email inviata (nel chiamante?)
-	// TODO antispam hidden field
 	public boolean handleRegistrationRequest(YadaRegistrationRequest yadaRegistrationRequest, BindingResult bindingResult, Model model, HttpServletRequest request, Locale locale) {
 		// 
 		// Validation
@@ -64,19 +152,19 @@ public class YadaRegistrationController {
 		String email = yadaRegistrationRequest.getEmail();
 		// Simple email validation, email blacklisting
 		if (StringUtils.isBlank(email) || email.indexOf("@")<0 || email.indexOf(".")<0 || yadaConfiguration.emailBlacklisted(email)) {
-			bindingResult.rejectValue("email", "yada.validation.email.invalid");
+			bindingResult.rejectValue("email", "yada.form.registration.email.invalid");
 		} else {
 			email = email.toLowerCase(locale);
 		}
 		// Check if user exists
-		YadaUserCredentials existing = userCredentialsRepository.findFirstByUsername(email);
+		YadaUserCredentials existing = yadaUserCredentialsRepository.findFirstByUsername(email);
 		if (existing!=null) {
 			log.debug("Email {} already found in database while registering new user", email);
-			bindingResult.rejectValue("email", "yada.registration.username.exists");
+			bindingResult.rejectValue("email", "yada.form.registration.username.exists");
 			model.addAttribute("yadaUserExists", true);
 		}
 		if (!yadaUserDetailsService.validatePasswordSyntax(yadaRegistrationRequest.getPassword())) {
-			bindingResult.rejectValue("password", "yada.validation.password.length", new Object[]{yadaConfiguration.getMinPasswordLength(), yadaConfiguration.getMaxPasswordLength()}, "Wrong password length");
+			bindingResult.rejectValue("password", "yada.form.registration.password.length", new Object[]{yadaConfiguration.getMinPasswordLength(), yadaConfiguration.getMaxPasswordLength()}, "Wrong password length");
 		}
 		if (bindingResult.hasErrors()) {
 			return false;
@@ -88,19 +176,19 @@ public class YadaRegistrationController {
 		yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.REGISTRATION);
 		// Cleanup of old requests
 		yadaSecurityUtil.registrationRequestCleanup(yadaRegistrationRequest);
-		yadaRegistrationRequest = registrationRequestRepository.save(yadaRegistrationRequest); // To get id and token
+		yadaRegistrationRequest = yadaRegistrationRequestRepository.save(yadaRegistrationRequest); // To get id and token
 		boolean emailSent = yadaSecurityEmailService.sendRegistrationConfirmation(yadaRegistrationRequest, null, request, locale);
 		if (!emailSent) {
-			registrationRequestRepository.delete(yadaRegistrationRequest);
+			yadaRegistrationRequestRepository.delete(yadaRegistrationRequest);
 			log.debug("Registration mail not sent to {}", email);
-			bindingResult.rejectValue("email", "yada.registration.email.failed");
+			bindingResult.rejectValue("email", "yada.form.registration.email.failed");
 			return false;
 		}
 		return true;
 	}
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-	////// Recupero Password                                                                            /////
+	////// Password Recovery                                                                            /////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/** Metodo chiamato al submit del form di cambio password.
@@ -117,15 +205,15 @@ public class YadaRegistrationController {
 		boolean fatalError=true;
 		try {
 			if (parts!=null) {
-				YadaRegistrationRequest registrationRequest = registrationRequestRepository.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]).get(0);
+				YadaRegistrationRequest registrationRequest = yadaRegistrationRequestRepository.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]).get(0);
 				YadaUserCredentials yadaUserCredentials = null;
 				String username = registrationRequest.getEmail();
-				List<YadaUserCredentials> credentials = userCredentialsRepository.findByUsername(StringUtils.trimToEmpty(username).toLowerCase(locale), yadaWebUtil.FIND_ONE);
+				List<YadaUserCredentials> credentials = yadaUserCredentialsRepository.findByUsername(StringUtils.trimToEmpty(username).toLowerCase(locale), yadaWebUtil.FIND_ONE);
 				if (credentials.size()==1) {
 					yadaUserCredentials = credentials.get(0);
 					yadaUserCredentials.changePassword(yadaFormPasswordChange.getPassword(), passwordEncoder);
-					userCredentialsRepository.save(yadaUserCredentials);
-					registrationRequestRepository.delete(registrationRequest);
+					yadaUserCredentialsRepository.save(yadaUserCredentials);
+					yadaRegistrationRequestRepository.delete(registrationRequest);
 					fatalError=false;
 					if (yadaUserCredentials.isEnabled()) {
 						yadaUserDetailsService.authenticateAs(yadaUserCredentials);
@@ -166,7 +254,7 @@ public class YadaRegistrationController {
 		long[] parts = yadaTokenHandler.parseLink(token);
 		try {
 			if (parts!=null) {
-				List<YadaRegistrationRequest> registrationRequests = registrationRequestRepository.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]);
+				List<YadaRegistrationRequest> registrationRequests = yadaRegistrationRequestRepository.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]);
 				if (registrationRequests.isEmpty()) {
 					yadaWebUtil.modalError("Password change failed", "The link for password change is expired. Please repeat the change request from the start.", redirectAttributes);
 					return false;
@@ -191,7 +279,7 @@ public class YadaRegistrationController {
 		}
 		// Controllo se esiste un utente
 		String email = yadaRegistrationRequest.getEmail();
-		List<YadaUserCredentials> existing = userCredentialsRepository.findByUsername(StringUtils.trimToEmpty(email).toLowerCase(locale), yadaWebUtil.FIND_ONE);
+		List<YadaUserCredentials> existing = yadaUserCredentialsRepository.findByUsername(StringUtils.trimToEmpty(email).toLowerCase(locale), yadaWebUtil.FIND_ONE);
 		if (existing.isEmpty()) {
 			bindingResult.rejectValue("email", "passwordrecover.username.notfound");
 			return "/pwdRecover";
@@ -200,10 +288,10 @@ public class YadaRegistrationController {
 		// Pulisco le vecchie richieste
 		yadaSecurityUtil.registrationRequestCleanup(yadaRegistrationRequest);
 		yadaRegistrationRequest.setPassword("fakefake"); // La metto solo per evitare un errore di validazione al save
-		yadaRegistrationRequest = registrationRequestRepository.save(yadaRegistrationRequest); // Va fatto subito per avere l'id e il token
+		yadaRegistrationRequest = yadaRegistrationRequestRepository.save(yadaRegistrationRequest); // Va fatto subito per avere l'id e il token
 		boolean emailSent = yadaSecurityEmailService.sendPasswordRecovery(yadaRegistrationRequest, request, locale);
 		if (!emailSent) {
-			registrationRequestRepository.delete(yadaRegistrationRequest);
+			yadaRegistrationRequestRepository.delete(yadaRegistrationRequest);
 			log.debug("Invio email a {} fallito in fase di recupero password", yadaRegistrationRequest.getEmail());
 			bindingResult.rejectValue("email", "email.send.failed");
 			return "/pwdRecover";

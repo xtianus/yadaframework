@@ -23,8 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.yadaframework.exceptions.InternalException;
-import net.yadaframework.exceptions.InvalidValueException;
 import net.yadaframework.exceptions.YadaConfigurationException;
+import net.yadaframework.exceptions.YadaInternalException;
+import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.persistence.entity.YadaClause;
 
 /**
@@ -73,6 +74,13 @@ public abstract class YadaConfiguration {
 	private Locale defaultLocale = null;
 	private boolean defaultLocaleChecked = false;
 	
+	
+	/**
+	 * @return the link (only a part of it) to use for the registration confirmation
+	 */
+	public String getRegistrationConfirmationLink() {
+		return configuration.getString("config/security/registration/confirmationLink", "/registrationConfirmation");
+	}
 
 	/**
 	 * Checks if an email address has been blacklisted in the configuration
@@ -84,10 +92,10 @@ public abstract class YadaConfiguration {
 		for (String patternString : patternStrings) {
 			if (email.matches(patternString)) {
 				log.warn("Email '{}' blacklisted by '{}'", email, patternString);
-				return false;
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	
@@ -413,6 +421,24 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
+	 * Convert from role names to role ids
+	 * @param roleNames an array of role names, like ["USER", "ADMIN"]
+	 * @return the corresponding role ids
+	 */
+	public Integer[] getRoleIds(String[] roleNames) {
+		ensureRoleMaps();
+		Integer[] result = new Integer[roleNames.length];
+		for (int i = 0; i < roleNames.length; i++) {
+			Integer roleId = roleKeyToIdMap.get(roleNames[i]);
+			if (roleId==null) {
+				throw new YadaConfigurationException("Invalid role name " + roleNames[i]);
+			}
+			result[i]=roleId;
+		}
+		return result;
+	}
+	
+	/**
 	 * @param roleKey e.g. "ADMIN"
 	 * @return e.g. 9
 	 */
@@ -420,7 +446,7 @@ public abstract class YadaConfiguration {
 		ensureRoleMaps();
 		Integer id = roleKeyToIdMap.get(roleKey.toUpperCase());
 		if (id==null) {
-			throw new InvalidValueException("Role " + roleKey + " not configured");
+			throw new YadaInvalidValueException("Role " + roleKey + " not configured");
 		}
 		return id;
 	}
@@ -433,7 +459,7 @@ public abstract class YadaConfiguration {
 		ensureRoleMaps();
 		String key = roleIdToKeyMap.get(roleId);
 		if (key==null) {
-			throw new InvalidValueException("Role " + roleId + " not configured");
+			throw new YadaInvalidValueException("Role " + roleId + " not configured");
 		}
 		return key;
 	}
@@ -450,11 +476,11 @@ public abstract class YadaConfiguration {
 				String key = sub.getString("key", null);
 				// Controllo che non ci sia duplicazione di id
 				if (id==null || roleIdToKeyMap.get(id)!=null) {
-					throw new InternalException("Invalid role configuration in conf.webapp.xml");
+					throw new YadaInternalException("Invalid role configuration in conf.webapp.xml");
 				}
 				// Controllo che non ci sia duplicazione di key
 				if (key==null || roleKeyToIdMap.get(key)!=null) {
-					throw new InternalException("Invalid role configuration in conf.webapp.xml");
+					throw new YadaInternalException("Invalid role configuration in conf.webapp.xml");
 				}
 				roleIdToKeyMap.put(id, key.toUpperCase());
 				roleKeyToIdMap.put(key.toUpperCase(), id);
@@ -603,7 +629,7 @@ public abstract class YadaConfiguration {
 			for (String code : configRoles) { // 'ADMIN'
 				Integer role = getRoleId(code);
 				if (role==null) {
-					throw new InternalException("Invalid user role name (skipped): " + code);
+					throw new YadaInternalException("Invalid user role name (skipped): " + code);
 				} else {
 					roles.add(role);
 				}
