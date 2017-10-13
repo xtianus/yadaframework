@@ -725,7 +725,7 @@
 				}
 				
 				// Gestisce la pwd scaduta
-				var pwdChange=$(responseHtml).find("form[name='form-change-password']");
+				var pwdChange=$(responseHtml).find("body.yadaChangePassword");
 				if (pwdChange.length>0) {
 					$("#loginModal").remove();
 					document.open();
