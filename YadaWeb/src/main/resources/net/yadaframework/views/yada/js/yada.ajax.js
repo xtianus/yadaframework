@@ -246,9 +246,10 @@
 			var fetchUrl = $toBeReplaced.attr("data-yadaAjaxFragment");
 			if (fetchUrl!=null) {
 				$toBeReplaced.removeAttr('data-yadaAjaxFragment');
-				yada.ajax(fetchUrl, null, (function($target){
+				yada.ajax(fetchUrl, null, (function($replaceable){
 					return function(responseText, responseHtml) {
-						$target.replaceWith(responseHtml.children());
+						yada.initAjaxHandlersOn(responseHtml.children());
+						$replaceable.replaceWith(responseHtml.children());
 					}
 				})($toBeReplaced));
 			}
@@ -448,13 +449,16 @@
 					$replacement = $replacementArray[count];
 				}
 				if (selector == "") {
+					// TODO find a better way because replaceWith empties the responseHtml and the caller can't call other methods on it
 					$element.replaceWith($replacement);
 				} else {
 					var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
 					if (fromParents==false) {
+						// TODO find a better way because replaceWith empties the responseHtml and the caller can't call other methods on it
 						$(selector).replaceWith($replacement);
 					} else {
 						selector = selector.replace(parentSelector, "").trim();
+						// TODO find a better way because replaceWith empties the responseHtml and the caller can't call other methods on it
 						$element.parents(selector).replaceWith($replacement);
 					}
 				}
@@ -734,6 +738,9 @@
 				if (yada.handleModalConfirm(responseHtml, url, data, successHandler, type)) {
 					return;
 				}
+				// Per mostrare una notification al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify" 
+				// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
+				var notify=yada.handleNotify(responseHtml);
 				
 				// Il successHandler viene eseguito solo se non c'è un errore, oppure se il flag executeAnyway è true
 				if (successHandler != null) {
@@ -743,16 +750,14 @@
 						// Keep going...
 					}
 				}
-				// Per mostrare una notification al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify" 
-				// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
-				if (yada.handleNotify(responseHtml)) {
-					return;
-				}
 				// If it is a full page, overwrite the current one
 				if ($('.s_fullPage', responseHtml).length>0) {
 					document.open();
 					document.write(responseText);
 					document.close();
+					return;
+				}
+				if (notify) {
 					return;
 				}
 				// Open any other modal

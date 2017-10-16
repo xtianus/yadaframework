@@ -27,6 +27,7 @@ Parameters:
 - helpKey = chiave del testo per il pulsante di help (optional)
 - editor = true/false to use ckeditor
 - noFeedback = true to remove space reserved for field feedback icon (optional)
+- noShowPassword = true to remove the icon that shows the password in cleartext
 - tabindex = the tabindex for the field (optional)
 
 Example:
@@ -52,7 +53,7 @@ Example:
 			th:classappend="${readonly==true?'yadaReadonly':'form-control'+(noFeedback==true?'':' has-feedback')}" th:maxlength="${maxlength}" 
 			th:tabindex="${tabindex}"
 			th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}"/>
-		<span th:if="${type=='password'}" class="input-group-btn">
+		<span th:if="${type=='password' && noShowPassword!=true}" class="input-group-btn">
 			<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
 		</span>
 		<textarea th:if="${maxlength gt 80}" rows="3" th:field="*{{__${fieldName}__}}" 
