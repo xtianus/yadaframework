@@ -58,10 +58,28 @@ public class YadaSecurityEmailService {
     	String relative = StringUtils.prependIfMissing(relativeLink, "/");
     	return myServerAddress + relative;
     }
+    
+    public boolean sendEmailChangeConfirmationToUser(YadaRegistrationRequest yadaRegistrationRequest, HttpServletRequest request, Locale locale) {
+		final String emailName = "emailChangeConfirmation";
+		final String[] toEmail = {yadaRegistrationRequest.getEmail()};
+		final String[] subjectParams = {yadaRegistrationRequest.getEmail()};
+
+		// Creo il link che l'utente deve cliccare
+		String myServerAddress = yadaWebUtil.getWebappAddress(request);
+		String fullLink = myServerAddress + "/changeEmailConfirm/" + yadaTokenHandler.makeLink(yadaRegistrationRequest, null);
+		
+		final Map<String, Object> templateParams = new HashMap<String, Object>();
+		templateParams.put("fullLink", fullLink);
+		
+		Map<String, String> inlineResources = new HashMap<String, String>();
+		inlineResources.put("logosmall", config.getEmailLogoImage());
+		return yadaEmailService.sendHtmlEmail(toEmail, emailName, subjectParams, templateParams, inlineResources, locale, true);
+	}
 
 	public boolean sendEmailChangeConfirmation(YadaRegistrationRequest yadaRegistrationRequest, HttpServletRequest request, Locale locale) {
 		final String emailName = "emailChangeConfirmation";
-		final String[] toEmail = config.getSupportRequestRecipients();
+		final String[] toEmail = {yadaRegistrationRequest.getEmail()};
+		//final String[] toEmail = config.getSupportRequestRecipients();
 		final String[] subjectParams = {yadaRegistrationRequest.getEmail()};
 
 		// Creo il link che l'utente deve cliccare
