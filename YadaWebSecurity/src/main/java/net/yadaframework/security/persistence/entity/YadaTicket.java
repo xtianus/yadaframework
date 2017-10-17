@@ -19,9 +19,9 @@ import javax.persistence.Version;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
-import net.yadaframework.components.YadaUtil;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
-import net.yadaframework.persistence.repository.YadaLocaleDao;
+import net.yadaframework.persistence.entity.YadaTicketStatus;
+import net.yadaframework.persistence.entity.YadaTicketType;
 import net.yadaframework.web.YadaJsonView;
 
 /**
@@ -92,6 +92,56 @@ public class YadaTicket implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+	
+	/////////////////////////
+	
+	public YadaPersistentEnum<YadaTicketType> getType() {
+		return type;
+	}
+
+	public void setType(YadaPersistentEnum<YadaTicketType> type) {
+		this.type = type;
+	}
+
+	public YadaPersistentEnum<YadaTicketStatus> getStatus() {
+		return status;
+	}
+
+	public void setStatus(YadaPersistentEnum<YadaTicketStatus> status) {
+		this.status = status;
+	}
+
+	public String getSubject() {
+		return subject;
+	}
+
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public Date getModified() {
+		return modified;
+	}
+
+	public void setModified(Date modified) {
+		this.modified = modified;
+	}
+
+	public YadaUserProfile getOwner() {
+		return owner;
+	}
+
+	public void setOwner(YadaUserProfile owner) {
+		this.owner = owner;
 	}
 
 
