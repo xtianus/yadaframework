@@ -28,9 +28,9 @@
 		yada.enableAjaxForms(null, $element);
 		yada.enableAjaxLinks(null, $element);
 		yada.enableAjaxSelects(null, $element);
+		yada.enableAjaxCheckboxes(null, $element);
 		yada.enableAjaxFragments(null, $element);
 	}
-
 
 	////////////////////
 	/// Modal
@@ -281,6 +281,45 @@
 	};
 	
 	/**
+	 * Enables ajax on a checkbox change.
+	 */
+	yada.enableAjaxCheckboxes = function(handler, $element) {
+		if ($element==null) {
+			$element = $('body');
+		}
+		var $target = $element.parent();
+		if ($target.length==0) {
+			$target = $element;
+		}
+		$("input[type='checkbox'].yadaAjax", $target).each(function() {
+			$(this).removeClass('yadaAjax');
+			yada.enableAjaxCheckbox($(this), handler);
+		});
+	};
+	yada.enableAjaxCheckbox = function($checkbox, handler) {
+		// If array, recurse to unroll
+		if ($checkbox.length>1) {
+			$checkbox.each(function() {
+				yada.enableAjaxCheckbox($(this), handler);
+			});
+			return;
+		}
+		// From here on the $checkbox is a single element, not an array
+		var markerClass = 'yadaAjaxed'; // To prevent double submission
+		$checkbox.not('.'+markerClass).change(function(e) {
+			// If there is a parent form, submit it, otherwise make an ajax call defined on the checkbox
+			var $form = $checkbox.parents("form.yadaAjaxed");
+			if ($form!=null) {
+				$form.submit();
+				return;
+			}
+			return makeAjaxCall(e, $checkbox, handler);
+		})
+		$checkbox.removeClass('yadaAjax');
+		$checkbox.not('.'+markerClass).addClass(markerClass);
+	};
+
+	/**
 	 * Enables ajax calls on select change.
 	 * @param handler a function to call upon successful link submission, can be null
 	 * @param $element the element on which to enable ajax, can be null for the entire body
@@ -307,7 +346,7 @@
 			});
 			return;
 		}
-		// From here on the $link is a single anchor, not an array
+		// From here on the $select is a single element, not an array
 		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		$select.not('.'+markerClass).change(function(e) {
 			return makeAjaxCall(e, $select, handler);
@@ -341,6 +380,9 @@
 		$link.not('.'+markerClass).addClass(markerClass);
 	};
 	
+	/**
+	 * Make an ajax call when a link is clicked, a select is chosen, a checkbox is selected
+	 */
 	function makeAjaxCall(e, $element, handler) {
 		e.preventDefault();
 		if ($element.hasClass("yadaLinkDisabled")) {
@@ -369,16 +411,28 @@
 			deleteOnSuccess($element);
 			updateOnSuccess($element, responseHtml);
 		}
-		
 		var url = $element.attr('href');
+		if (url==null) {
+			url = $element.attr('data-yadaHref');
+		}
 		var confirmText = $element.attr("data-confirm");
+		// Create data for submission
 		var data = null;
-		// In a select, set the data object to the option
+		var value = [];
 		var name = $element.attr("name");
-		var value = $("option:selected", $element).val();
-		if (name !=null && value !=null) {
+		// In a select, set the data object to the selected option
+		if ($element.is("select")) {
+			$("option:selected", $element).each(function(){ // Could be a multiselect!
+				value.push($(this).val());
+			});
+		} else if ($element.is("input") && $element.prop('checked')) {
+			value.push($element.val()); // Send the element value only when checked
+		}
+		if (name !=null) {
 			data = {};
-			data[name] = value;
+			if (value.lengt>0) {
+				data[name] = value;
+			}
 		}
 		if (confirmText!=null) {
 			var okButton = $element.attr("data-okButton") || yada.messages.confirmButtons.ok;
