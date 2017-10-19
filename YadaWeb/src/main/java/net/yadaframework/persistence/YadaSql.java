@@ -308,6 +308,7 @@ public class YadaSql implements CloneableDeep {
 	/**
 	 * Add a "where aaa in (x, y, z)" clause. Skipped if the collection is null or empty.
 	 * The collection is converted to a comma-separated strings.
+	 * It is sometimes better to use collections as a parameter, like "aaa in :someCollection"
 	 * @param attributeName attribute or column name
 	 * @param values a list of values (e.g. integers)
 	 */
@@ -316,6 +317,18 @@ public class YadaSql implements CloneableDeep {
 			String valueListString = StringUtils.join(values, ',');
 			where(attributeName + " in ("+valueListString+")");
 		}
+		return this;
+	}
+	
+	/**
+	 * Add a "where aaa in (select ...)" clause.
+	 * @param attributeName attribute (can also be a collection) or column name
+	 * @param subselect a subselect that returns any number of results compatibile with attributeName. Parameters set on the subquery are carried over.
+	 * @return
+	 */
+	public YadaSql whereIn(String attributeName, YadaSql subselect) {
+		where(attributeName + " in ("+subselect.sql()+")");
+		this.parameters.putAll(subselect.parameters);
 		return this;
 	}
 	
