@@ -78,8 +78,7 @@ public class YadaSecurityEmailService {
 
 	public boolean sendEmailChangeConfirmation(YadaRegistrationRequest yadaRegistrationRequest, HttpServletRequest request, Locale locale) {
 		final String emailName = "emailChangeConfirmation";
-		final String[] toEmail = {yadaRegistrationRequest.getEmail()};
-		//final String[] toEmail = config.getSupportRequestRecipients();
+		final String[] toEmail = config.getSupportRequestRecipients();
 		final String[] subjectParams = {yadaRegistrationRequest.getEmail()};
 
 		// Creo il link che l'utente deve cliccare
