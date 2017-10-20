@@ -27,6 +27,8 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -134,6 +136,7 @@ public class YadaSeleniumUtil {
 	
 	/**
 	 * Create a new browser instance positioning the window 
+	 * @param customProfileDir the folder where to store the user profile, can be null to use the default temporary profile. The folder is created when missing.
 	 * @param proxy
 	 * @param cookiesToSet cookies to set after the first get of a document. Can be null or empty. Cookies are set only when a 
 	 * cookie with the same name has not been received. It's not possible to set cookies BEFORE the first get (by design of WebDriver).
@@ -141,7 +144,7 @@ public class YadaSeleniumUtil {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	public WebDriver makeWebDriver(InetSocketAddress proxyToUse, Set<Cookie> cookiesToSet, int driverType) throws MalformedURLException {
+	public WebDriver makeWebDriver(File customProfileDir, InetSocketAddress proxyToUse, Set<Cookie> cookiesToSet, int driverType) throws MalformedURLException {
 		final Set<Cookie> initialCookies = new HashSet<Cookie>();
 		if (cookiesToSet!=null) {
 			// Make a copy because we need to clear the set later
@@ -161,9 +164,25 @@ public class YadaSeleniumUtil {
 		switch (driverType) {
 		case DRIVER_FIREFOX:
 			capability = DesiredCapabilities.firefox();
+			if (customProfileDir!=null) {
+				customProfileDir.mkdirs();
+				FirefoxOptions options = new FirefoxOptions();
+				String path = customProfileDir.getAbsolutePath();
+				log.debug("Setting Firefox user profile folder to {}", path);
+				options.addArguments("-profile", path);
+				capability.setCapability(FirefoxOptions.FIREFOX_OPTIONS, options);
+			}
 			break;
 		case DRIVER_CHROME:
 			capability = DesiredCapabilities.chrome();
+			if (customProfileDir!=null) {
+				customProfileDir.mkdirs();
+				ChromeOptions options = new ChromeOptions();
+				String path = customProfileDir.getAbsolutePath();
+				log.debug("Setting Chrome user profile folder to {}", path);
+				options.addArguments("user-data-dir=" + path);
+				capability.setCapability(ChromeOptions.CAPABILITY, options);
+			}
 			break;
 		default:
 			throw new YadaInternalException("Invalid WebDriver type: " + driverType);

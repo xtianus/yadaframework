@@ -30,7 +30,11 @@ import net.yadaframework.persistence.repository.YadaJobRepository;
 
 /**
  * Takes care of running and managing YadaJob instances.
- * It is itself scheduled by a TaskScheduler configured in YadaAppConfig and run every config/yada/jobSchedulerPeriodMillis milliseconds
+ * It is invoked every config/yada/jobSchedulerPeriodMillis milliseconds.
+ * At every invocation, it starts all jobs that have a start date that falls in the next period.
+ * This means that the jobSchedulerPeriodMillis is the minimum resolution for job scheduling.
+ * So if the jobSchedulerPeriodMillis is set to 9000 it means that the real start time of a job can 
+ * be anticipated by 9 seconds from the expected start time. It is up to the job itself to delay start if needed.
  * @see YadaConfiguration#getYadaJobSchedulerPeriod()
  */
 @Service
@@ -49,6 +53,7 @@ public class YadaJobScheduler implements Runnable {
 	
 	@PostConstruct
 	public void init() throws Exception {
+		// It is itself scheduled by a TaskScheduler configured in YadaAppConfig and run every config/yada/jobSchedulerPeriodMillis milliseconds
 		log.debug("init called");
 		long period = config.getYadaJobSchedulerPeriod();
 		if (period>0) {
@@ -78,15 +83,24 @@ public class YadaJobScheduler implements Runnable {
 	}
 
 	/**
-	 * Activate the job. The start time is left unchanged unless null, when it is set to NOW.
-	 * @param yadaJob
+	 * Activate the job so that it becomes available for the scheduler to start it. 
+	 * The scheduled time is left unchanged unless null, when it is set to NOW (start ASAP).
+	 * This method does nothing to a job that is already scheduled and in the ACTIVE state.
+	 * @param yadaJob the job to start
+	 * @return true if the job has been activated, false if it doesn't exist
 	 */
-	public void startJob(YadaJob yadaJob) {
+	public boolean startJob(YadaJob yadaJob) {
+		// If the job has been deleted, return false
+		if (yadaJobRepository.findOne(yadaJob.getId())==null) {
+			log.debug("Job {} not found in DB when activating", yadaJob);
+			return false;
+		}
 		if (yadaJob.getJobScheduledTime()==null) {
 			yadaJob.setJobScheduledTime(new Date());
 		}
 		yadaJob.activate();
 		yadaJobRepository.save(yadaJob);
+		return true;
 	}
 	
 	/**
@@ -95,7 +109,7 @@ public class YadaJobScheduler implements Runnable {
 	 * @return
 	 */
 	public boolean isJobGroupPaused(String jobGroup) {
-		return yadaJobRepository.isJobGroupPaused(jobGroup);
+		return yadaJobRepository.isJobGroupPaused(jobGroup)!=null;
 	}
 	
 	/**
