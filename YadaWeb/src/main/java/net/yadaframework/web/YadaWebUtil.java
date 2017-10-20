@@ -66,6 +66,21 @@ public class YadaWebUtil {
 //		return pagePath;
 //	}
 	
+
+	/**
+	 * From a given string, creates a "slug" that can be inserted in a url and still be readable
+	 * @param source the string to convert
+	 * @return the slug
+	 */
+	public final static String makeSlug(String source) {
+		String slug = source.toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
+		slug = slug.replaceAll("[^\\w:,;=&!+~\\(\\)@\\*\\$\\'\\-]", "");
+		slug = StringUtils.removeEnd(slug, ".");
+		slug = StringUtils.removeEnd(slug, ";");
+		slug = StringUtils.removeEnd(slug, "\\");
+		return slug;
+	}
+
 	/**
 	 * Decodes a string with URLDecoder, handling the useless try-catch that is needed
 	 * @param source

@@ -1,9 +1,11 @@
 package net.yadaframework.persistence;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -44,6 +46,7 @@ public class YadaSql implements CloneableDeep {
 	Map<String, Object> insertValues = new HashMap<>();
 	Map<String, Object> parameters = new HashMap<>();
 	boolean queryDone = false;
+	List<YadaSql> unions = new ArrayList<>();
 //	Map<String, String> aliasMap = new HashMap<>();
 	
 	private YadaSql() {
@@ -52,6 +55,16 @@ public class YadaSql implements CloneableDeep {
 	private YadaSql(YadaSql parent, boolean enabled) {
 		this.parent = parent;
 		this.enabled = enabled;
+	}
+	
+	/**
+	 * Add a query as a union of the current one.
+	 * @param unioned the query to add as a union
+	 * @return the current object
+	 */
+	public YadaSql union(YadaSql unioned) {
+		unions.add(unioned);
+		return this;
 	}
 
 	private YadaSql appendQuery(String text) {
@@ -293,7 +306,19 @@ public class YadaSql implements CloneableDeep {
 	}
 	
 	/**
+	 * Adds a where condition only if the collection is not null and non empty
+	 * @param enabled
+	 * @param whereConditions a condition like "where a in :someCollection"
+	 * @return
+	 */
+	public YadaSql whereNotEmpty(Collection collection, String whereConditions) {
+		return where(collection!=null && !collection.isEmpty(), whereConditions);
+	}
+	
+	/**
 	 * Add a "where aaa in (x, y, z)" clause. Skipped if the collection is null or empty.
+	 * The collection is converted to a comma-separated strings.
+	 * <b>NOTE:</b> It is always better to use collections as a parameter, like "aaa in :someCollection"
 	 * @param attributeName attribute or column name
 	 * @param values a list of values (e.g. integers)
 	 */
@@ -302,6 +327,18 @@ public class YadaSql implements CloneableDeep {
 			String valueListString = StringUtils.join(values, ',');
 			where(attributeName + " in ("+valueListString+")");
 		}
+		return this;
+	}
+	
+	/**
+	 * Add a "where aaa in (select ...)" clause.
+	 * @param attributeName attribute (can also be a collection) or column name
+	 * @param subselect a subselect that returns any number of results compatibile with attributeName. Parameters set on the subquery are carried over.
+	 * @return
+	 */
+	public YadaSql whereIn(String attributeName, YadaSql subselect) {
+		where(attributeName + " in ("+subselect.sql()+")");
+		this.parameters.putAll(subselect.parameters);
 		return this;
 	}
 	
@@ -416,6 +453,15 @@ public class YadaSql implements CloneableDeep {
 	 */
 	public YadaSql endSubexpression() {
 		return endSubexpression(null);
+	}
+	
+	/**
+	 * Ending a subexpression is always safe even if the startSubexpression had an "enabled" condition
+	 * @param enabled
+	 * @return
+	 */
+	public YadaSql endSubexpression(boolean enabled) {
+		return endSubexpression();
 	}
 	
 	/**
@@ -608,6 +654,9 @@ public class YadaSql implements CloneableDeep {
 				query.setParameter(name, parameters.get(name));
 			}
 		}
+		for (YadaSql unioned : unions) {
+			unioned.setAllParameters(query);
+		}
 	}
 	
 	private boolean hasParameter(String parameter) {
@@ -720,6 +769,10 @@ public class YadaSql implements CloneableDeep {
 				log.debug(builder.toString());
 			}
 //		}
+		for (YadaSql unioned : unions) {
+			builder.append(" union ");
+			builder.append(unioned.sql(oldAliasName, newAliasName, oldToNew));
+		}
 		String result = builder.toString().trim();
 		if (oldAliasName!=null && newAliasName!=null) {
 			result = result.replaceAll(oldAliasName, newAliasName);

@@ -92,17 +92,19 @@ public class YadaUtil {
 	/**
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
 	 * It must be called in a transaction.
-	 * @param fetchedEntities objects fetched from database that may contain localized strings
-	 * @param targetClass type of fetchedEntities elements
+	 * @param entities objects fetched from database that may contain localized strings
+	 * @param entityClass type of fetchedEntities elements
+	 * @param attributes the attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
 	 */
-	public static <targetClass> void prefetchLocalizedStrings(List<targetClass> fetchedEntities, Class<?> targetClass) {
+	public static <entityClass> void prefetchLocalizedStrings(List<entityClass> entities, Class<?> entityClass, String...attributes) {
+		List<String> attributeNames = Arrays.asList(attributes);
 		// Look for fields of type Map<Locale, String>
-		ReflectionUtils.doWithFields(targetClass, new ReflectionUtils.FieldCallback() {
+		ReflectionUtils.doWithFields(entityClass, new ReflectionUtils.FieldCallback() {
 			@Override
 			public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
-				// Call the size() method on the localized field for each result object
-				for (Object object : fetchedEntities) {
+				for (Object object : entities) {
 					try {
+						// Call the size() method on the localized field for each result object
 						field.setAccessible(true);
 						Object fieldValue = field.get(object);
 						Method sizeMethod = Map.class.getMethod("size");
@@ -115,6 +117,9 @@ public class YadaUtil {
 		}, new ReflectionUtils.FieldFilter() {
 			@Override
 			public boolean matches(Field field) {
+				if (attributeNames.size()>0 && !attributeNames.contains(field.getName())) {
+					return false; // Handle only the specified attributes
+				}
 				Type type = field.getGenericType();
 				if (type instanceof ParameterizedType) {
 					ParameterizedType parameterizedType = (ParameterizedType) type;
