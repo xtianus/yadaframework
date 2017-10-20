@@ -978,7 +978,7 @@ public abstract class YadaConfiguration {
 	 * @return
 	 */
 	public long getYadaJobSchedulerPeriod() {
-		return this.configuration.getLong("config/yada/jobScheduler/periodMillis", 0);
+		return this.configuration.getLong("config/yada/jobScheduler/periodMillis", 0); // by default it doesn't start
 	}
 	
 	/**

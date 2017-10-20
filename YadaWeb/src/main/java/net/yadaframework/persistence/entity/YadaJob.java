@@ -156,7 +156,7 @@ public abstract class YadaJob implements Runnable {
 	
 	/**
 	 * Set the job state to active and return the previous state
-	 * @return
+	 * @return the previous state
 	 */
 	@Transient
 	public YadaJobState activate() {
@@ -167,7 +167,7 @@ public abstract class YadaJob implements Runnable {
 	
 	/**
 	 * Set the job state to paused and return the previous state
-	 * @return
+	 * @return the previous state
 	 */
 	@Transient
 	public YadaJobState pause() {

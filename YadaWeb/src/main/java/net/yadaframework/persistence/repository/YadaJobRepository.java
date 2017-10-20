@@ -21,10 +21,10 @@ public interface YadaJobRepository extends JpaRepository<YadaJob, Long> {
 	/**
 	 * Check if the job group has been paused. It is considered paused if at least one job in the group has the jobGroupPaused set
 	 * @param jobGroup
-	 * @return
+	 * @return 1 if the group is paused, null otherwise.
 	 */
-	@Query(value="select exists (select 1 from YadaJob e where e.jobGroup = :jobGroup and e.jobGroupPaused = true limit 1)", nativeQuery=true)
-	boolean isJobGroupPaused(@Param("jobGroup") String jobGroup);
+	@Query(value="select 1 from YadaJob e where e.jobGroup = :jobGroup and e.jobGroupPaused = true limit 1", nativeQuery=true)
+	Integer isJobGroupPaused(@Param("jobGroup") String jobGroup);
 
 	/**
 	 * Set the pause flag on all jobs of a jobGroup
@@ -32,6 +32,7 @@ public interface YadaJobRepository extends JpaRepository<YadaJob, Long> {
 	 * @param paused
 	 */
 	@Modifying
+	@Transactional(readOnly = false)
 	@Query("update #{#entityName} e set e.jobGroupPaused = :paused where e.jobGroup = :jobGroup")
 	void setJobGroupPaused(@Param("jobGroup") String jobGroup, @Param("paused") boolean paused);
 
