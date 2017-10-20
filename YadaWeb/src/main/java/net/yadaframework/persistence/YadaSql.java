@@ -306,9 +306,19 @@ public class YadaSql implements CloneableDeep {
 	}
 	
 	/**
+	 * Adds a where condition only if the collection is not null and non empty
+	 * @param enabled
+	 * @param whereConditions a condition like "where a in :someCollection"
+	 * @return
+	 */
+	public YadaSql whereNotEmpty(Collection collection, String whereConditions) {
+		return where(collection!=null && !collection.isEmpty(), whereConditions);
+	}
+	
+	/**
 	 * Add a "where aaa in (x, y, z)" clause. Skipped if the collection is null or empty.
 	 * The collection is converted to a comma-separated strings.
-	 * It is sometimes better to use collections as a parameter, like "aaa in :someCollection"
+	 * <b>NOTE:</b> It is always better to use collections as a parameter, like "aaa in :someCollection"
 	 * @param attributeName attribute or column name
 	 * @param values a list of values (e.g. integers)
 	 */
