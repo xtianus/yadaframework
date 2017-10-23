@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.raw.YadaHttpUtil;
@@ -51,8 +52,26 @@ public class YadaSeleniumUtil {
 	public final static int DRIVER_FIREFOX=0;
 	public final static int DRIVER_CHROME=1;
     
-	@Autowired YadaConfiguration config;
+	@Autowired private YadaConfiguration config;
+	@Autowired private YadaUtil yadaUtil;
+	
 	YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
+	
+	private void sleepRandomShort() {
+    	yadaUtil.sleepRandom(100, 900); // min-max sleep
+    }
+	
+	/**
+	 * Insert some text slowly into a field
+	 * @param inputField
+	 * @param text
+	 */
+	public void typeAsHuman(WebElement inputField, String text) {
+		for (Character letter : text.toCharArray()) {
+			sleepRandomShort();
+			inputField.sendKeys(letter.toString());
+		}
+	}
 
 	/**
 	 * From now on, page load timeout will be set to the "slow" value defined in the "slowPageLoadSeconds" confg property
@@ -82,7 +101,7 @@ public class YadaSeleniumUtil {
 	
 	/**
 	 * Return the first element matched by the selector, or null if not found
-	 * @param from
+	 * @param from a WebElement to start the search from, or the WebDriver to search in all the page
 	 * @param by
 	 * @return
 	 */
@@ -96,7 +115,7 @@ public class YadaSeleniumUtil {
 	
 	/**
 	 * Search for text
-	 * @param from a WebElement to start the search from
+	 * @param from a WebElement to start the search from, or the WebDriver to search in all the page
 	 * @param by
 	 * @return the text found, or ""
 	 */
@@ -124,11 +143,23 @@ public class YadaSeleniumUtil {
 		return false;
 	}
 
+	/**
+	 * Check if an element with a given id exists
+	 * @param id
+	 * @param webDriver
+	 * @return
+	 */
 	public boolean foundById(String id, WebDriver webDriver) {
 		List<WebElement> contents = webDriver.findElements(By.id(id));
 		return !contents.isEmpty();
 	}
 	
+	/**
+	 * Check if at least one element with the given class exists
+	 * @param className
+	 * @param webDriver
+	 * @return
+	 */
 	public boolean foundByClass(String className, WebDriver webDriver) {
 		List<WebElement> contents = webDriver.findElements(By.className(className));
 		return !contents.isEmpty();
