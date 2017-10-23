@@ -29,7 +29,7 @@ import net.yadaframework.persistence.entity.YadaClause;
 @Entity
 public class YadaRegistrationRequest implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private final static transient Logger log = LoggerFactory.getLogger(YadaRegistrationRequest.class);
+	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
 	// For synchronization with external databases
 	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
@@ -44,9 +44,8 @@ public class YadaRegistrationRequest implements Serializable {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 	
-	// TODO localizzare i messaggi !!!
-	@NotNull(message="Specificare un''email")
-	@Email(message="Formato email non valido")
+	@NotNull(message="{validation.registration.email.missing}")
+	@Email(message="{validation.registration.email.invalid}")
 	@Size(min=6, max=64, message="La lunghezza dell''email deve essere compresa tra {min} e {max} caratteri")
 	// Non è NaturalId perchè posso avere una richiesta di cambio email e contemporaneamente una di cambio password
 	// @NaturalId
@@ -81,6 +80,12 @@ public class YadaRegistrationRequest implements Serializable {
 	
 	@Transient
 	private boolean trattamentoDatiAccepted=true; // usato nel form
+	
+	/**
+	 * Password confirm, only used on the frontend but needed by thymeleaf to make things simpler
+	 */
+	@Transient
+	private String confirmPassword; 
 
 	@PrePersist
 	void setDefaults() {
@@ -182,6 +187,14 @@ public class YadaRegistrationRequest implements Serializable {
 
 	public long getVersion() {
 		return version;
+	}
+
+	public String getConfirmPassword() {
+		return confirmPassword;
+	}
+
+	public void setConfirmPassword(String confirm) {
+		this.confirmPassword = confirm;
 	}
 
 //	public String getGeneric1() {

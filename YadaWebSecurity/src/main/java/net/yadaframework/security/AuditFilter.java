@@ -136,7 +136,7 @@ public class AuditFilter extends OncePerRequestFilter {
 						}
 						paramString.append(paramValue[i]);
 					}
-					if ("password".equals(paramName)) {
+					if ("password".equals(paramName) || "confirmPassword".equals(paramName)) {
 						paramString=new StringBuffer("[value hidden from log]");
 					}
 					log.info("** {} = {} **", paramName, paramString);

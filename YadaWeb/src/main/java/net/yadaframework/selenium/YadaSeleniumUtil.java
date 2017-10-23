@@ -27,6 +27,8 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -38,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.raw.YadaHttpUtil;
@@ -49,8 +52,26 @@ public class YadaSeleniumUtil {
 	public final static int DRIVER_FIREFOX=0;
 	public final static int DRIVER_CHROME=1;
     
-	@Autowired YadaConfiguration config;
+	@Autowired private YadaConfiguration config;
+	@Autowired private YadaUtil yadaUtil;
+	
 	YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
+	
+	private void sleepRandomShort() {
+    	yadaUtil.sleepRandom(100, 900); // min-max sleep
+    }
+	
+	/**
+	 * Insert some text slowly into a field
+	 * @param inputField
+	 * @param text
+	 */
+	public void typeAsHuman(WebElement inputField, String text) {
+		for (Character letter : text.toCharArray()) {
+			sleepRandomShort();
+			inputField.sendKeys(letter.toString());
+		}
+	}
 
 	/**
 	 * From now on, page load timeout will be set to the "slow" value defined in the "slowPageLoadSeconds" confg property
@@ -80,7 +101,7 @@ public class YadaSeleniumUtil {
 	
 	/**
 	 * Return the first element matched by the selector, or null if not found
-	 * @param from
+	 * @param from a WebElement to start the search from, or the WebDriver to search in all the page
 	 * @param by
 	 * @return
 	 */
@@ -94,7 +115,7 @@ public class YadaSeleniumUtil {
 	
 	/**
 	 * Search for text
-	 * @param from a WebElement to start the search from
+	 * @param from a WebElement to start the search from, or the WebDriver to search in all the page
 	 * @param by
 	 * @return the text found, or ""
 	 */
@@ -122,11 +143,23 @@ public class YadaSeleniumUtil {
 		return false;
 	}
 
+	/**
+	 * Check if an element with a given id exists
+	 * @param id
+	 * @param webDriver
+	 * @return
+	 */
 	public boolean foundById(String id, WebDriver webDriver) {
 		List<WebElement> contents = webDriver.findElements(By.id(id));
 		return !contents.isEmpty();
 	}
 	
+	/**
+	 * Check if at least one element with the given class exists
+	 * @param className
+	 * @param webDriver
+	 * @return
+	 */
 	public boolean foundByClass(String className, WebDriver webDriver) {
 		List<WebElement> contents = webDriver.findElements(By.className(className));
 		return !contents.isEmpty();
@@ -134,6 +167,7 @@ public class YadaSeleniumUtil {
 	
 	/**
 	 * Create a new browser instance positioning the window 
+	 * @param customProfileDir the folder where to store the user profile, can be null to use the default temporary profile. The folder is created when missing.
 	 * @param proxy
 	 * @param cookiesToSet cookies to set after the first get of a document. Can be null or empty. Cookies are set only when a 
 	 * cookie with the same name has not been received. It's not possible to set cookies BEFORE the first get (by design of WebDriver).
@@ -141,7 +175,7 @@ public class YadaSeleniumUtil {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	public WebDriver makeWebDriver(InetSocketAddress proxyToUse, Set<Cookie> cookiesToSet, int driverType) throws MalformedURLException {
+	public WebDriver makeWebDriver(File customProfileDir, InetSocketAddress proxyToUse, Set<Cookie> cookiesToSet, int driverType) throws MalformedURLException {
 		final Set<Cookie> initialCookies = new HashSet<Cookie>();
 		if (cookiesToSet!=null) {
 			// Make a copy because we need to clear the set later
@@ -161,9 +195,25 @@ public class YadaSeleniumUtil {
 		switch (driverType) {
 		case DRIVER_FIREFOX:
 			capability = DesiredCapabilities.firefox();
+			if (customProfileDir!=null) {
+				customProfileDir.mkdirs();
+				FirefoxOptions options = new FirefoxOptions();
+				String path = customProfileDir.getAbsolutePath();
+				log.debug("Setting Firefox user profile folder to {}", path);
+				options.addArguments("-profile", path);
+				capability.setCapability(FirefoxOptions.FIREFOX_OPTIONS, options);
+			}
 			break;
 		case DRIVER_CHROME:
 			capability = DesiredCapabilities.chrome();
+			if (customProfileDir!=null) {
+				customProfileDir.mkdirs();
+				ChromeOptions options = new ChromeOptions();
+				String path = customProfileDir.getAbsolutePath();
+				log.debug("Setting Chrome user profile folder to {}", path);
+				options.addArguments("user-data-dir=" + path);
+				capability.setCapability(ChromeOptions.CAPABILITY, options);
+			}
 			break;
 		default:
 			throw new YadaInternalException("Invalid WebDriver type: " + driverType);

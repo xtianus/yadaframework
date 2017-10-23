@@ -29,8 +29,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 // TODO spostare in YadaBones?
 
 /**
- * The base class for jobs handled by the YadaScheduler
- *
+ * The base class for jobs handled by the YadaScheduler.
+ * Subclasses must implement the run() method.
+ * Uses joined inheritance so that subclasses have their own table.
+ * The subclass id, which must not be declared in java but exists in the table, gets the same value as the YadaJob id.
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -115,10 +117,9 @@ public abstract class YadaJob implements Runnable {
 	protected boolean jobRecoverable = true;
 	
 	/**
-	 * The time at which the job was run - null if the job is not in the RUNNING state
+	 * The time at which the job was started - null if the job is not in the RUNNING state.
 	 */
-	@Transient
-	protected Date jobRunTime = null;
+	protected Date jobStartTime = null;
 	
 	/**
 	 * True when the current invocation is on a job that was running when the server crashed and has the jobRecoverable flag true.
@@ -156,7 +157,7 @@ public abstract class YadaJob implements Runnable {
 	
 	/**
 	 * Set the job state to active and return the previous state
-	 * @return
+	 * @return the previous state
 	 */
 	@Transient
 	public YadaJobState activate() {
@@ -167,7 +168,7 @@ public abstract class YadaJob implements Runnable {
 	
 	/**
 	 * Set the job state to paused and return the previous state
-	 * @return
+	 * @return the previous state
 	 */
 	@Transient
 	public YadaJobState pause() {
@@ -358,12 +359,12 @@ public abstract class YadaJob implements Runnable {
 		this.applicationContext = applicationContext;
 	}
 
-	public Date getJobRunTime() {
-		return jobRunTime;
+	public Date getJobStartTime() {
+		return jobStartTime;
 	}
 
-	public void setJobRunTime(Date jobRunTime) {
-		this.jobRunTime = jobRunTime;
+	public void setJobStartTime(Date jobRunTime) {
+		this.jobStartTime = jobRunTime;
 	}
 
 	public boolean isRecovered() {

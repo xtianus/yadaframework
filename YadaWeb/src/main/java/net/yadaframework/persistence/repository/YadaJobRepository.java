@@ -1,5 +1,6 @@
 package net.yadaframework.persistence.repository;
 
+import java.sql.Date;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,12 +20,20 @@ import net.yadaframework.persistence.entity.YadaPersistentEnum;
 public interface YadaJobRepository extends JpaRepository<YadaJob, Long> {
 	
 	/**
+	 * Returns the start time of a job
+	 * @param yadaJobId
+	 * @return might be null when not running or not existing
+	 */
+	@Query("select job.jobStartTime from YadaJob job where id=:id")
+	Date getJobStartTime(@Param("id") Long yadaJobId);
+	
+	/**
 	 * Check if the job group has been paused. It is considered paused if at least one job in the group has the jobGroupPaused set
 	 * @param jobGroup
-	 * @return
+	 * @return 1 if the group is paused, null otherwise.
 	 */
-	@Query(value="select exists (select 1 from YadaJob e where e.jobGroup = :jobGroup and e.jobGroupPaused = true limit 1)", nativeQuery=true)
-	boolean isJobGroupPaused(@Param("jobGroup") String jobGroup);
+	@Query(value="select 1 from YadaJob e where e.jobGroup = :jobGroup and e.jobGroupPaused = true limit 1", nativeQuery=true)
+	Integer isJobGroupPaused(@Param("jobGroup") String jobGroup);
 
 	/**
 	 * Set the pause flag on all jobs of a jobGroup
@@ -32,14 +41,9 @@ public interface YadaJobRepository extends JpaRepository<YadaJob, Long> {
 	 * @param paused
 	 */
 	@Modifying
+	@Transactional(readOnly = false)
 	@Query("update #{#entityName} e set e.jobGroupPaused = :paused where e.jobGroup = :jobGroup")
 	void setJobGroupPaused(@Param("jobGroup") String jobGroup, @Param("paused") boolean paused);
-
-	List<YadaJob> findByJobsMustBeActiveContains(YadaJob jadaJob);
-
-	List<YadaJob> findByJobsMustBeInactiveContains(YadaJob jadaJob);
-	
-	List<YadaJob> findByJobsMustCompleteContains(YadaJob jadaJob);
 
 	/**
 	 * Returns all jobs for the given group that are in the given state

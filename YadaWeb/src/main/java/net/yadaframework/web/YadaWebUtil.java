@@ -13,6 +13,7 @@ import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_INF
 import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +31,6 @@ import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -65,6 +65,36 @@ public class YadaWebUtil {
 //		}
 //		return pagePath;
 //	}
+	
+
+	/**
+	 * From a given string, creates a "slug" that can be inserted in a url and still be readable
+	 * @param source the string to convert
+	 * @return the slug
+	 */
+	public final static String makeSlug(String source) {
+		String slug = source.toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
+		slug = slug.replaceAll("[^\\w:,;=&!+~\\(\\)@\\*\\$\\'\\-]", "");
+		slug = StringUtils.removeEnd(slug, ".");
+		slug = StringUtils.removeEnd(slug, ";");
+		slug = StringUtils.removeEnd(slug, "\\");
+		return slug;
+	}
+
+	/**
+	 * Decodes a string with URLDecoder, handling the useless try-catch that is needed
+	 * @param source
+	 * @return
+	 */
+	public String urlDecode(String source) {
+		final String encoding = "UTF-8";
+		try {
+			return URLDecoder.decode(source, encoding);
+		} catch (UnsupportedEncodingException e) {
+			log.error("Invalid encoding: {}", encoding);
+		}
+		return source;
+	}
 	
 	/**
 	 * Encodes a string with URLEncoder, handling the useless try-catch that is needed

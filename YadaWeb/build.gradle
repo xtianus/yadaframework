@@ -31,6 +31,9 @@ eclipse {
 	}
 }
 
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
 repositories {
     jcenter()
 	mavenLocal()
@@ -57,7 +60,9 @@ dependencies {
 		'com.fasterxml.jackson.core:jackson-annotations:2.9.+',
 		'com.fasterxml.jackson.core:jackson-core:2.9.+',
 		'com.fasterxml.jackson.core:jackson-databind:2.9.+',
-		'org.seleniumhq.selenium:selenium-support:2.53.1',
+		'org.seleniumhq.selenium:selenium-support:3.6.0',
+		'org.seleniumhq.selenium:selenium-firefox-driver:3.6.0',
+		'org.seleniumhq.selenium:selenium-chrome-driver:3.6.0',
 		// 'org.littleshoot:littleproxy:1.1.2',
 		'org.quartz-scheduler:quartz:2.2.3', // TODO remove
 		'org.flywaydb:flyway-core:4.2.0'

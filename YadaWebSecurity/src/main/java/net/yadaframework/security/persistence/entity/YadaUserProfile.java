@@ -2,6 +2,7 @@ package net.yadaframework.security.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import javax.persistence.CascadeType;
@@ -45,6 +46,9 @@ public class YadaUserProfile implements Serializable {
 	@NotNull
 	@OneToOne(optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
 	protected YadaUserCredentials userCredentials;
+	
+	@Column(length = 32)
+	protected Locale locale;
 	
 	@Column(length = 64)
 	protected TimeZone timezone; 	// Timezone ID: "America/Los_Angeles",
@@ -109,6 +113,14 @@ public class YadaUserProfile implements Serializable {
 
 	public long getVersion() {
 		return version;
+	}
+
+	public Locale getLocale() {
+		return locale;
+	}
+
+	public void setLocale(Locale locale) {
+		this.locale = locale;
 	}
 	
 }

@@ -124,6 +124,17 @@ public class YadaUserCredentials implements Serializable {
 	}
 	
 	/**
+	 * Add all roles if not already present
+	 * @param roles
+	 */
+	@Transient
+	public void addRoles(Integer[] roles) {
+		for (Integer role : roles) {
+			addRole(role);
+		}
+	}
+	
+	/**
 	 * Add a role if not already present
 	 * @param role
 	 */

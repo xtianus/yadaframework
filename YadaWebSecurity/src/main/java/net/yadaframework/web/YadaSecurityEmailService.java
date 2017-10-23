@@ -58,6 +58,23 @@ public class YadaSecurityEmailService {
     	String relative = StringUtils.prependIfMissing(relativeLink, "/");
     	return myServerAddress + relative;
     }
+    
+    public boolean sendEmailChangeConfirmationToUser(YadaRegistrationRequest yadaRegistrationRequest, HttpServletRequest request, Locale locale) {
+		final String emailName = "emailChangeConfirmation";
+		final String[] toEmail = {yadaRegistrationRequest.getEmail()};
+		final String[] subjectParams = {yadaRegistrationRequest.getEmail()};
+
+		// Creo il link che l'utente deve cliccare
+		String myServerAddress = yadaWebUtil.getWebappAddress(request);
+		String fullLink = myServerAddress + "/changeEmailConfirm/" + yadaTokenHandler.makeLink(yadaRegistrationRequest, null);
+		
+		final Map<String, Object> templateParams = new HashMap<String, Object>();
+		templateParams.put("fullLink", fullLink);
+		
+		Map<String, String> inlineResources = new HashMap<String, String>();
+		inlineResources.put("logosmall", config.getEmailLogoImage());
+		return yadaEmailService.sendHtmlEmail(toEmail, emailName, subjectParams, templateParams, inlineResources, locale, true);
+	}
 
 	public boolean sendEmailChangeConfirmation(YadaRegistrationRequest yadaRegistrationRequest, HttpServletRequest request, Locale locale) {
 		final String emailName = "emailChangeConfirmation";
@@ -75,13 +92,31 @@ public class YadaSecurityEmailService {
 		return yadaEmailService.sendHtmlEmail(toEmail, emailName, null, templateParams, inlineResources, locale, true);
 	}
 
+	/**
+	 * 
+	 * @param yadaRegistrationRequest
+	 * @param linkParameters can be null
+	 * @param request
+	 * @param locale
+	 * @return
+	 */
 	public boolean sendRegistrationConfirmation(YadaRegistrationRequest yadaRegistrationRequest, Map<String,String> linkParameters, HttpServletRequest request, Locale locale) {
 		final String emailName = "registrationConfirmation";
 		final String[] toEmail = {yadaRegistrationRequest.getEmail()};
 		final String[] subjectParams = {yadaEmailService.timestamp(locale)};
-		
+		String link = config.getRegistrationConfirmationLink();
+		if (!link.endsWith("/")) {
+			link = link + "/";
+		}
+		if (!link.startsWith("/")) {
+			link = "/" + link;
+		}
+		if (config.isLocalePathVariableEnabled()) {
+			// Add the locale
+			link = "/" + locale.getLanguage() + link;
+		}
 		String myServerAddress = yadaWebUtil.getWebappAddress(request);
-		String fullLink = myServerAddress + "/registrationConfirmation/" + yadaTokenHandler.makeLink(yadaRegistrationRequest, linkParameters);
+		String fullLink = myServerAddress + link + yadaTokenHandler.makeLink(yadaRegistrationRequest, linkParameters);
 		
 		final Map<String, Object> templateParams = new HashMap<String, Object>();
 		templateParams.put("fullLink", fullLink);
