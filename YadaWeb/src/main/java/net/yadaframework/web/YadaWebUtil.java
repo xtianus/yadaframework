@@ -74,6 +74,7 @@ public class YadaWebUtil {
 	 */
 	public final static String makeSlug(String source) {
 		String slug = source.toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
+		slug = slug.replaceAll(" +", "-"); // Gli spazi diventano dash
 		slug = slug.replaceAll("[^\\w:,;=&!+~\\(\\)@\\*\\$\\'\\-]", "");
 		slug = StringUtils.removeEnd(slug, ".");
 		slug = StringUtils.removeEnd(slug, ";");
