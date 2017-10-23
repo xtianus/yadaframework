@@ -61,8 +61,7 @@ public class YadaSecurityEmailService {
 
 	public boolean sendEmailChangeConfirmation(YadaRegistrationRequest yadaRegistrationRequest, HttpServletRequest request, Locale locale) {
 		final String emailName = "emailChangeConfirmation";
-		final String[] toEmail = config.getSupportRequestRecipients();
-		final String[] subjectParams = {yadaRegistrationRequest.getEmail()};
+		final String[] toEmail = {yadaRegistrationRequest.getEmail()};
 
 		// Creo il link che l'utente deve cliccare
 		String myServerAddress = yadaWebUtil.getWebappAddress(request);
@@ -73,7 +72,7 @@ public class YadaSecurityEmailService {
 		
 		Map<String, String> inlineResources = new HashMap<String, String>();
 		inlineResources.put("logosmall", config.getEmailLogoImage());
-		return yadaEmailService.sendHtmlEmail(toEmail, emailName, subjectParams, templateParams, inlineResources, locale, true);
+		return yadaEmailService.sendHtmlEmail(toEmail, emailName, null, templateParams, inlineResources, locale, true);
 	}
 
 	public boolean sendRegistrationConfirmation(YadaRegistrationRequest yadaRegistrationRequest, Map<String,String> linkParameters, HttpServletRequest request, Locale locale) {
