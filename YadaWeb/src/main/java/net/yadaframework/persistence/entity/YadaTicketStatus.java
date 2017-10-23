@@ -3,7 +3,9 @@ package net.yadaframework.persistence.entity;
 import java.util.Locale;
 
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaLocalEnum;
 
 /**
@@ -49,6 +51,13 @@ public enum YadaTicketStatus implements YadaLocalEnum<YadaTicketStatus> {
 	 * @return
 	 */
 	public String toString(MessageSource messageSource, Locale locale) {
+		return messageSource.getMessage(messageKey, null, locale);
+	}
+	
+	@Override
+	public String toString() {
+		Locale locale = LocaleContextHolder.getLocale();
+		MessageSource messageSource = (MessageSource) YadaUtil.getBean("messageSource");
 		return messageSource.getMessage(messageKey, null, locale);
 	}
 }
