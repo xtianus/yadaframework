@@ -1,4 +1,4 @@
-package net.yadaframework.cms.persistence.entity;
+package net.yadaframework.persistence.entity;
 
 import java.util.Date;
 import java.util.Locale;
@@ -14,8 +14,6 @@ import javax.persistence.MapKeyColumn;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
-
-import org.hibernate.annotations.GenerationTime;
 
 /**
  * A "pointer" to a file that has been uploaded into the "contents" folder.

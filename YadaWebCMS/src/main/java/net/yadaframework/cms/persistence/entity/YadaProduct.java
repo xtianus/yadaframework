@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.repository.YadaLocaleDao;
 import net.yadaframework.web.YadaJsonView;
 

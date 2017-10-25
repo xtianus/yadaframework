@@ -42,8 +42,8 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired private YadaUserDetailsService userDetailsService;
 	@Autowired private YadaConfiguration yadaConfiguration;
 
-	@Autowired YadaAuthenticationFailureHandler failureHandler;
-	@Autowired YadaAuthenticationSuccessHandler successHandler;
+	@Autowired protected YadaAuthenticationFailureHandler failureHandler;
+	@Autowired protected YadaAuthenticationSuccessHandler successHandler;
 	
 	/**
 	 * Configures basic security settings. Must be overridden to configure url protections.
