@@ -66,14 +66,23 @@ public class YadaWebUtil {
 //		return pagePath;
 //	}
 	
-
 	/**
-	 * From a given string, creates a "slug" that can be inserted in a url and still be readable
+	 * From a given string, creates a "slug" that can be inserted in a url and still be readable.
 	 * @param source the string to convert
 	 * @return the slug
 	 */
-	public final static String makeSlug(String source) {
-		String slug = source.toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
+	public String makeSlug(String source) {
+		return makeSlugStatic(source);
+	}
+
+	/**
+	 * From a given string, creates a "slug" that can be inserted in a url and still be readable.
+	 * It is static so that it can be used in Entity objects (no context)
+	 * @param source the string to convert
+	 * @return the slug
+	 */
+	public static String makeSlugStatic(String source) {
+		String slug = source.trim().toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
 		slug = slug.replaceAll(" +", "-"); // Gli spazi diventano dash
 		slug = slug.replaceAll("[^\\w:,;=&!+~\\(\\)@\\*\\$\\'\\-]", "");
 		slug = StringUtils.removeEnd(slug, ".");
