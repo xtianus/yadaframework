@@ -52,7 +52,7 @@ public class YadaTicket implements Serializable {
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int priority;
 	
-	protected Date creationDate;
+	protected Date creationDate = new Date();
 	
 	@OneToOne(fetch = FetchType.EAGER)
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
@@ -61,12 +61,12 @@ public class YadaTicket implements Serializable {
 	@OneToOne(fetch = FetchType.EAGER)
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected YadaPersistentEnum<YadaTicketStatus> status;
-
+	
+	/*
 	@Column(length=80)
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected String subject;
 	
-	/*
 	@Column(length=8192)
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected String message;
@@ -79,8 +79,12 @@ public class YadaTicket implements Serializable {
 	
 	
 	@ManyToOne(optional = false)
-	// @JsonView(YadaJsonView.WithLazyAttributes.class)
+	//@JsonView(YadaJsonView.WithLazyAttributes.class)
 	protected YadaUserProfile owner;
+	
+	@ManyToOne(optional = true)
+	//@JsonView(YadaJsonView.WithLazyAttributes.class)
+	protected YadaUserProfile assigned;
 	
 	
 // TODO allegare uno o più file	
@@ -107,6 +111,25 @@ public class YadaTicket implements Serializable {
 		return owner.getUserCredentials().getUsername();
 	}
 	
+	@JsonProperty
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
+	public String getAdmin() {
+		return assigned!=null?assigned.getUserCredentials().getUsername():"---";
+	}
+	
+	/* //new
+	@JsonProperty
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
+	public String getSubject() {
+		String subject="";
+		if (messages.size()>0) {
+			subject = messages.get(0).getTitle();
+		}
+		
+		return subject;
+	}
+	*/
+		
 	/*
 	@JsonProperty("message")
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
@@ -146,7 +169,7 @@ public class YadaTicket implements Serializable {
 	public void setStatus(YadaPersistentEnum<YadaTicketStatus> status) {
 		this.status = status;
 	}
-
+	/*
 	public String getSubject() {
 		return subject;
 	}
@@ -155,7 +178,7 @@ public class YadaTicket implements Serializable {
 		this.subject = subject;
 	}
 	
-	/*
+	
 	public String getMessage() {
 		return message;
 	}
@@ -194,6 +217,30 @@ public class YadaTicket implements Serializable {
 
 	public void setMessages(List<YadaTicketMessage> messages) {
 		this.messages = messages;
+	}
+
+	public YadaUserProfile getAssigned() {
+		return assigned;
+	}
+
+	public void setAssigned(YadaUserProfile assigned) {
+		this.assigned = assigned;
+	}
+
+	public long getVersion() {
+		return version;
+	}
+
+	public void setVersion(long version) {
+		this.version = version;
+	}
+
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
 	}
 
 

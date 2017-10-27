@@ -45,5 +45,13 @@ public interface YadaUserProfileRepository<T extends YadaUserProfile> extends Jp
 	@Query("select up from #{#entityName} up join up.userCredentials uc where uc.enabled = true ")
 	List<T> findEnabledUsers();
 	
+	/**
+	 * Find the profile for the given user credentials id
+	 * @param userProfileId
+	 * @return
+	 */
+	@Query("select up from YadaUserProfile up join up.userCredentials yuc where userCredentials_id = :userCredentialsId")
+	YadaUserProfile findByUserCredentialsId(@Param("userCredentialsId") Long userProfileId);
+	
 	
 }

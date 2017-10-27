@@ -35,14 +35,16 @@ public class YadaUserMessageDao {
     @Transactional(readOnly = false) 
     public void createOrIncrement(YadaUserMessage<?> m) {
     	log.debug("YadaUserMessage to {} from {}: [{}] '{}' - {} ({})", 
-    		m.getReceiverName(), m.getSenderUser()!=null?m.getSenderName():"-", 
+    		m.getReceiverName()!=null?m.getReceiverName():"-", 
+    		m.getSender()!=null?m.getSenderName():"-", 
     		m.getPriority(), m.getTitle(), m.getMessage(), m.getData());
     	if (m.getId()!=null) {
     		throw new YadaInvalidUsageException("Message already exists with id=" + m.getId());
     	}
+    	/* il Recipient può essere null.
     	if (m.getRecipient()==null) {
     		throw new YadaInvalidUsageException("Message with no recipient - title=" + m.getTitle());
-    	}
+    	}*/
     	if (!m.isStackable()) {
     		em.persist(m);
     		return;
@@ -52,16 +54,16 @@ public class YadaUserMessageDao {
     	// TODO the time window could be a (configured) parameter
     	Date oldestStackTime = yadaUtil.daysAgo(1); // Time window: one day ago
     	m.computeHash(); // Needed
-    	List<YadaUserMessage> existingList = YadaSql.instance().selectFrom("select m from YadaTicketMessage m")
+    	List<YadaUserMessage> existingList = YadaSql.instance().selectFrom("select m from YadaUserMessage m") //YadaTicketMessage?
     		.where("m.contentHash=:contentHash").and()
     		.where("m.modified > :oldestStackTime").and()
     		.where("m.recipient = :recipient").and()
-    		.where(m.getSenderUser()!=null, "m.senderUser = :senderUser").and()
+    		.where(m.getSender()!=null, "m.sender = :sender").and()
     		.where(m.getData()!=null, "m.data = :data").and()
     		.setParameter("contentHash", m.getContentHash())
     		.setParameter("oldestStackTime", oldestStackTime)
     		.setParameter("recipient", m.getRecipient())
-    		.setParameter("senderUser", m.getSenderUser())
+    		.setParameter("sender", m.getSender())
     		.setParameter("data", m.getData())
     		.query(em, YadaUserMessage.class).setMaxResults(1).getResultList();
     	
@@ -69,8 +71,8 @@ public class YadaUserMessageDao {
     		em.persist(m);
     	} else {
     		m = existingList.get(1);
-    		m.setStackSize(m.getStackSize()+1);
-    		m.setRead(false);
+    		m.incrementStack();
+    		m.setReadByRecipient(false);
     	}
     }
 }

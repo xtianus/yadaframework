@@ -1,12 +1,14 @@
 package net.yadaframework.security.persistence.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -24,6 +26,7 @@ import javax.persistence.Version;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
+import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
 import net.yadaframework.web.YadaJsonView;
@@ -53,13 +56,15 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 	protected int priority; // Priority or severity, 0 is lowest
 	
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
-	protected boolean read = false; // Read by recipient
+	protected boolean readByRecipient = false; // Read by recipient
 	
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected boolean emailed = false; // Emailed to recipient
 	
+	@ElementCollection
 	@Temporal(TemporalType.TIMESTAMP)
-	protected Date created = new Date(); // Creation date of the message, should never change even for a stack
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
+	protected List<Date> created; // Creation date of the message, a new date is added for each stacked message
 
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int stackSize = 0; // Counter for identical messages (stacked)
@@ -78,9 +83,9 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 	
 	@ManyToOne(optional = true)
 	@JsonView(YadaJsonView.WithLazyAttributes.class)
-	protected YadaUserProfile senderUser;
+	protected YadaUserProfile sender;
 	
-	@ManyToOne(optional = false)
+	@ManyToOne(optional = true)
 	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	protected YadaUserProfile recipient;
 	
@@ -103,8 +108,29 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 	 * Override this method if your subclass add more fields that should be checked when computing stackability of messages
 	 */
 	@PrePersist
+	public void init() {
+		computeHash();
+		setInitialDate();
+	}
+	
 	public void computeHash() {
 		this.contentHash = Objects.hash(type.getEnum(), title, message, data);
+	}
+
+	public void setInitialDate() {
+		if (created==null) {
+			created = new ArrayList<Date>();
+			created.add(new Date());
+		}
+	}
+	
+	public void incrementStack() {
+		this.stackSize++;
+		this.created.add(new Date());
+	}
+	
+	public void setType(YadaLocalEnum<T> localEnum) {
+		this.type = localEnum.toYadaPersistentEnum();
 	}
 	
 	/***********************************************************************/
@@ -121,8 +147,8 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 	@JsonProperty
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	public String getSenderName() {
-		if (senderUser!=null) {
-			return senderUser.getUserCredentials().getUsername();
+		if (sender!=null) {
+			return sender.getUserCredentials().getUsername();
 		}
 		return null;
 	}
@@ -131,7 +157,7 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 	@JsonProperty
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	public String getReceiverName() {
-		return recipient.getUserCredentials().getUsername();
+		return recipient!=null?recipient.getUserCredentials().getUsername():"-";
 	}
 	
 	/***********************************************************************/
@@ -167,14 +193,6 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 
 	public void setPriority(int priority) {
 		this.priority = priority;
-	}
-
-	public boolean isRead() {
-		return read;
-	}
-
-	public void setRead(boolean read) {
-		this.read = read;
 	}
 
 	public boolean isEmailed() {
@@ -217,12 +235,12 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 		this.message = message;
 	}
 
-	public YadaUserProfile getSenderUser() {
-		return senderUser;
+	public YadaUserProfile getSender() {
+		return sender;
 	}
 
-	public void setSenderUser(YadaUserProfile senderUser) {
-		this.senderUser = senderUser;
+	public void setSender(YadaUserProfile senderUser) {
+		this.sender = senderUser;
 	}
 
 	public YadaUserProfile getRecipient() {
@@ -265,14 +283,21 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 		this.stackable = stackable;
 	}
 
-	public Date getCreated() {
+	public List<Date> getCreated() {
 		return created;
 	}
 
-	public void setCreated(Date created) {
+	public void setCreated(List<Date> created) {
 		this.created = created;
 	}
 
+	public boolean isReadByRecipient() {
+		return readByRecipient;
+	}
+
+	public void setReadByRecipient(boolean readByRecipient) {
+		this.readByRecipient = readByRecipient;
+	}
 
 	
 }

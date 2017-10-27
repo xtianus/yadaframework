@@ -16,8 +16,8 @@ public interface YadaTicketMessageRepository extends JpaRepository<YadaTicketMes
 	 * @param yadaTicket
 	 * @return
 	 */
-	List<YadaTicketMessage> findByYadaTicketOrderByDateSentDesc(YadaTicket yadaTicket);
+	List<YadaTicketMessage> findByYadaTicketOrderByCreatedDesc(YadaTicket yadaTicket);
 	
-	List<YadaTicketMessage> findByYadaTicketOrderByDateSentAsc(YadaTicket yadaTicket);
+	List<YadaTicketMessage>findByYadaTicketOrderByCreatedAsc(YadaTicket yadaTicket);
 
 }
