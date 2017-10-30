@@ -10,7 +10,6 @@
 		<system/>
 		<env/>
 		<!-- build.properties is in WEB-INF, which is the parent folder of the execution context -->
-		<properties fileName="../build.properties"/>
 		<properties fileName="../build.properties" config-optional="true"/>
 		<properties fileName="net.yadaframework.yadaweb.properties"/>
 		<properties fileName="net.yadaframework.yadawebsecurity.properties" config-optional="true"/>
