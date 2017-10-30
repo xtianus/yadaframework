@@ -172,6 +172,8 @@ if [[ $cfgPkgTomcat ]]; then
 fi
 if [[ $cfgTomcatTarGzHome ]]; then
 	echo "CATALINA_OPTS=\"$tomcatOptions\"" > $cfgTomcatTarGzHome/bin/setenv.sh
+	# Compression e timeout
+	sed -i 's/connectionTimeout="20000"/connectionTimeout="'${cfgTomcatTimeout}'"\ncompression="on" compressableMimeType="text\/html,text\/xml,text\/plain,text\/css,application\/xml,text\/javascript,application\/javascript,application\/x-javascript,application\/pdf,application\/json,text\/json"/g' $cfgTomcatTarGzHome/conf/server.xml
 fi
 
 # MySQL + Apache + ModJK + php
