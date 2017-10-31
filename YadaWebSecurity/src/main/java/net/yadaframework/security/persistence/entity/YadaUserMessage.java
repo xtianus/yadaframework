@@ -14,6 +14,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -35,6 +37,8 @@ import net.yadaframework.web.YadaJsonView;
  * A message sent to some user by another user or by the system
  */
 @Entity
+// Use a joined table for inheritance so that the subclasses can independently add any attributes without interference
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 	private static final long serialVersionUID = 7008892353441772768L;
 

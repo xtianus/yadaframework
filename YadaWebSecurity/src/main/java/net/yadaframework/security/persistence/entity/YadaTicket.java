@@ -113,7 +113,7 @@ public class YadaTicket implements Serializable {
 	
 	@JsonProperty
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
-	public String getAdmin() {
+	public String getAdminName() {
 		return assigned!=null?assigned.getUserCredentials().getUsername():"---";
 	}
 	

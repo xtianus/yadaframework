@@ -53,5 +53,8 @@ public interface YadaUserProfileRepository<T extends YadaUserProfile> extends Jp
 	@Query("select up from YadaUserProfile up join up.userCredentials yuc where userCredentials_id = :userCredentialsId")
 	YadaUserProfile findByUserCredentialsId(@Param("userCredentialsId") Long userProfileId);
 	
+	@Query(value="select up from YadaUserProfile up join up.userCredentials yuc where username=:username")
+	YadaUserProfile findUserProfileByUsername(@Param("username") String username);
+	
 	
 }
