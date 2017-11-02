@@ -43,7 +43,7 @@ Example:
 <div th:if="${!#strings.equals(type,'hidden')}" class="form-group" 
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" 
 	th:classappend="|${hasError==true?'has-error':''} ${inline==true?'form-inline':''} ${noFeedback==true?'':'has-feedback'}|">
-	<label class="control-label" th:for="${#ids.next('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
+	<label th:if="${label!=null || labelKey!=null}" class="control-label" th:for="${#ids.next('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
 	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perchÃ© se non c'Ã¨ l'help il campo resta corto (ad esempio i campi password) */-->
 		<!--/* Can't use th:field="*{__${fieldName}__}" because somehow passwords remain blank when they already have a value */-->
 		<input th:if="${maxlength==null or maxlength le 80}" th:name="${fieldName}" th:value="*{{__${fieldName}__}}"
@@ -57,6 +57,7 @@ Example:
 			<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
 		</span>
 		<textarea th:if="${maxlength gt 80}" rows="3" th:field="*{{__${fieldName}__}}" 
+			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:maxlength="${maxlength}" 
 			th:classappend="${readonly==true?'yadaReadonly':'form-control'+(noFeedback==true?'':' has-feedback')}"
 			th:tabindex="${tabindex}"
