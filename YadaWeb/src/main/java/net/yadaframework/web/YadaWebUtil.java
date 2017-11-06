@@ -12,6 +12,11 @@ import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_ERR
 import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_INFO;
 import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -22,6 +27,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -66,14 +72,50 @@ public class YadaWebUtil {
 //		return pagePath;
 //	}
 	
-
 	/**
-	 * From a given string, creates a "slug" that can be inserted in a url and still be readable
+	 * Save an uploaded file to a temporary file
+	 * @param attachment
+	 * @return the temporary file holding the uploaded file
+	 * @throws IOException
+	 */
+	public File saveAttachment(MultipartFile attachment) throws IOException {
+		File targetFile = File.createTempFile("upload-", null);
+		saveAttachment(attachment, targetFile);
+		return targetFile;
+	}
+	
+	/**
+	 * Save an uploaded file to the given target file
+	 * @param attachment
+	 * @param targetFile
+	 * @throws IOException
+	 */
+	public void saveAttachment(MultipartFile attachment, File targetFile) throws IOException {
+		try (InputStream inputStream = attachment.getInputStream(); OutputStream outputStream = new FileOutputStream(targetFile)) {
+			IOUtils.copy(inputStream, outputStream);
+		} catch (IOException e) {
+			throw e;
+		}
+	}
+	
+	/**
+	 * From a given string, creates a "slug" that can be inserted in a url and still be readable.
 	 * @param source the string to convert
 	 * @return the slug
 	 */
-	public final static String makeSlug(String source) {
-		String slug = source.toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
+	public String makeSlug(String source) {
+		return makeSlugStatic(source);
+	}
+
+	/**
+	 * From a given string, creates a "slug" that can be inserted in a url and still be readable.
+	 * It is static so that it can be used in Entity objects (no context)
+	 * @param source the string to convert
+	 * @return the slug
+	 */
+	public static String makeSlugStatic(String source) {
+		String slug = source.trim().toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
+		slug = slug.replaceAll(" +", "-"); // Gli spazi diventano dash
 		slug = slug.replaceAll("[^\\w:,;=&!+~\\(\\)@\\*\\$\\'\\-]", "");
 		slug = StringUtils.removeEnd(slug, ".");
 		slug = StringUtils.removeEnd(slug, ";");
