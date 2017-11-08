@@ -70,7 +70,7 @@ public class YadaUserMessageDao {
     	if (existingList.isEmpty()) {
     		em.persist(m);
     	} else {
-    		m = existingList.get(1);
+    		m = existingList.get(0);
     		m.incrementStack();
     		m.setReadByRecipient(false);
     	}
