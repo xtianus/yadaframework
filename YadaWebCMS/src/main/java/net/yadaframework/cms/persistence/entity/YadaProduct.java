@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.repository.YadaLocaleDao;
 import net.yadaframework.web.YadaJsonView;
 
@@ -224,6 +225,7 @@ public class YadaProduct implements Serializable {
 	}
 
 	public Map<Locale, String> getName() {
+		cacheName=null;
 		return name;
 	}
 
@@ -232,6 +234,7 @@ public class YadaProduct implements Serializable {
 	}
 
 	public Map<Locale, String> getSubtitle() {
+		cacheSubtitle = null;
 		return subtitle;
 	}
 
@@ -240,6 +243,7 @@ public class YadaProduct implements Serializable {
 	}
 
 	public Map<Locale, String> getDescription() {
+		cacheDescription = null;
 		return description;
 	}
 
@@ -248,6 +252,7 @@ public class YadaProduct implements Serializable {
 	}
 
 	public Map<Locale, String> getMaterials() {
+		cacheMaterials = null;
 		return materials;
 	}
 

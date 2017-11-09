@@ -25,9 +25,11 @@ import org.hibernate.annotations.FetchMode;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import net.yadaframework.web.YadaJsonDateTimeShortSerializer;
+import net.yadaframework.web.YadaJsonView;
 
 @Entity
 public class YadaUserCredentials implements Serializable {
@@ -48,6 +50,7 @@ public class YadaUserCredentials implements Serializable {
 	
 	// Non può essere NaturalId perchè sarebbe immutable
 	// @NaturalId 
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Column(nullable=false, unique=true, length=128)
 	private String username; // uso sempre l'email
 	
