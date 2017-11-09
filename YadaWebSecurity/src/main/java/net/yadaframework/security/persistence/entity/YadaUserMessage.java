@@ -27,10 +27,12 @@ import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
+import net.yadaframework.web.YadaJsonDateTimeShortSerializer;
 import net.yadaframework.web.YadaJsonView;
 
 /**
@@ -44,7 +46,7 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 
 	// For synchronization with external databases
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified;
 	
@@ -67,7 +69,8 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 	
 	@ElementCollection
 	@Temporal(TemporalType.TIMESTAMP)
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
+	//@JsonView(YadaJsonView.WithEagerAttributes.class)
+	//@JsonView(YadaJsonView.WithLazyAttributes.class)
 	protected List<Date> created; // Creation date of the message, a new date is added for each stacked message
 
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
@@ -93,7 +96,7 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	protected YadaUserProfile recipient;
 	
-	@JsonView(YadaJsonView.WithLazyAttributes.class)
+	//@JsonView(YadaJsonView.WithLazyAttributes.class)
 	@OneToMany(cascade=CascadeType.REMOVE, orphanRemoval=true)
 	protected List<YadaAttachedFile> attachment;
 	
@@ -166,7 +169,7 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 	
 	/***********************************************************************/
 	/* Plain getter / setter                                               */
-	
+	@JsonSerialize(using=YadaJsonDateTimeShortSerializer.class)
 	public Date getModified() {
 		return modified;
 	}

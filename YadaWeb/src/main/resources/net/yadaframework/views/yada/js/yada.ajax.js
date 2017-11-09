@@ -309,7 +309,7 @@
 		$checkbox.not('.'+markerClass).change(function(e) {
 			// If there is a parent form, submit it, otherwise make an ajax call defined on the checkbox
 			var $form = $checkbox.parents("form.yadaAjaxed");
-			if ($form!=null) {
+			if ($form.length>0) {
 				$form.submit();
 				return;
 			}
@@ -425,12 +425,12 @@
 			$("option:selected", $element).each(function(){ // Could be a multiselect!
 				value.push($(this).val());
 			});
-		} else if ($element.is("input") && $element.prop('checked')) {
-			value.push($element.val()); // Send the element value only when checked
+		} else if ($element.is("input") && $element.prop('type')=="checkbox") {
+			value.push($element.prop('checked')); // Always send the element value
 		}
 		if (name !=null) {
 			data = {};
-			if (value.lengt>0) {
+			if (value.length>0) {
 				data[name] = value;
 			}
 		}
