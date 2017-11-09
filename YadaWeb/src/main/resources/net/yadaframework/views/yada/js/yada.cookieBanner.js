@@ -54,7 +54,7 @@
 	/**
 	 * Function to call externally for showing the cookie banner when needed
 	 * @param infoText
-	 * @param acceptButtonText
+	 * @param acceptButtonText can be null for the default text, empty for no accept link.
 	 */
 	yada.cookieBanner = function(infoText, acceptButtonText) {
 		// If cookie not present, insert banner in page
@@ -67,9 +67,11 @@
 			}
 			var bannerHtml = '<div id="'+bannerId+'">'
 				+ '<div class="closeIcon"></div>'
-				+ '<p>' + infoText + '</p>'
-				+ '<a href="#">' + acceptButtonText + '</a>'
-				+ '</div>';
+				+ '<p>' + infoText + '</p>';
+			if (acceptButtonText!="") {
+				bannerHtml+= '<a href="#">' + acceptButtonText + '</a>';
+			}
+			bannerHtml+= '</div>';
 			
 			document.body.insertAdjacentHTML('afterbegin', bannerHtml);
 

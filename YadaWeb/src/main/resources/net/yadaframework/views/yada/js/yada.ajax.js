@@ -60,6 +60,7 @@
 	////////////////////
 	/// Form
 	
+	// This is for coupled selects
 	yada.enableAjaxSelectOptions = function() {
 		$('.s_chain select').change(function() {
 			var selectedValue = $('option:selected', this).val();
