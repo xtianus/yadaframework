@@ -762,7 +762,8 @@
 					return;
 				}
 				var responseHtml=$("<div>").html(responseText);
-				// Check if we just did a login
+				// Check if we just did a login.
+				// A successful login can also return a redirect, which will skip the PostLoginHandler 
 				if ("loginSuccess" == responseTrimmed) {
 					$("#loginModal").remove();
 					// window.location.reload(true); // true = skip cache // Non va bene perchè se è stata fatta una post, viene ripetuta!

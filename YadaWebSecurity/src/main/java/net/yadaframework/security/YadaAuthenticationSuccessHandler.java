@@ -45,7 +45,7 @@ public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 	}
 
 	/**
-	 * Target url when the request is Ajax
+	 * Target url to redirect after login when the request is Ajax
 	 */
 	public void setDefaultTargetUrlAjaxRequest(String defaultTargetUrlAjaxRequest) {
 		this.defaultTargetUrlAjaxRequest = defaultTargetUrlAjaxRequest;
@@ -56,7 +56,7 @@ public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 	}
 
 	/**
-	 * Target url when the request is not Ajax
+	 * Target url to redirect after login when the request is not Ajax
 	 */
 	public void setDefaultTargetUrlNormalRequest(String defaultTargetUrlNormalRequest) {
 		this.defaultTargetUrlNormalRequest = defaultTargetUrlNormalRequest;
