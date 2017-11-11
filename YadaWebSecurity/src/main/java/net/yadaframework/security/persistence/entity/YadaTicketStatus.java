@@ -1,4 +1,4 @@
-package net.yadaframework.persistence.entity;
+package net.yadaframework.security.persistence.entity;
 
 import java.util.Locale;
 
@@ -7,6 +7,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaLocalEnum;
+import net.yadaframework.persistence.entity.YadaPersistentEnum;
 
 /**
  * The localized state of a YadaJob:

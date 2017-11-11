@@ -8,8 +8,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
-import net.yadaframework.persistence.entity.YadaTicketStatus;
 import net.yadaframework.security.persistence.entity.YadaTicket;
+import net.yadaframework.security.persistence.entity.YadaTicketStatus;
 
 @Transactional(readOnly = true) 
 public interface YadaTicketRepository extends JpaRepository<YadaTicket, Long> {

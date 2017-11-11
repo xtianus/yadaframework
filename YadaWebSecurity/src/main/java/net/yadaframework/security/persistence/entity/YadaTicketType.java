@@ -1,13 +1,14 @@
-package net.yadaframework.persistence.entity;
+package net.yadaframework.security.persistence.entity;
 
 import java.util.Locale;
 
 import org.springframework.context.MessageSource;
 
 import net.yadaframework.core.YadaLocalEnum;
+import net.yadaframework.persistence.entity.YadaPersistentEnum;
 
 /**
- * The localized state of a YadaJob:
+ * The localized type of a YadaTicket:
  * <ul>
  * <li>TECHNICAL_SUPPORT: the type is technical support</li>
  * <li>BILLING: the type is billing</li>
@@ -22,7 +23,9 @@ public enum YadaTicketType implements YadaLocalEnum<YadaTicketType> {
 	// yada.tickettype.other = Other
 
 	TECHNICAL_SUPPORT("yada.tickettype.technicalsupport"),
+	COMMERCIAL_SUPPORT("yada.tickettype.commercialsupport"),
 	BILLING("yada.tickettype.billing"),
+	FEEDBACK("yada.tickettype.feedback"),
 	OTHER("yada.tickettype.other");
 	
 	private String messageKey;
@@ -36,10 +39,9 @@ public enum YadaTicketType implements YadaLocalEnum<YadaTicketType> {
 		return yadaPersistentEnum;
 	}
 	
-	// TODO fix generics
-	public void setYadaPersistentEnum(YadaPersistentEnum yadaPersistentEnum) {
+	@Override
+	public void setYadaPersistentEnum(YadaPersistentEnum<YadaTicketType> yadaPersistentEnum) {
 		this.yadaPersistentEnum = yadaPersistentEnum;
-		
 	}
 	
 	/**

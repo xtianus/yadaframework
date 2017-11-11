@@ -8,6 +8,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaSocialCredentials implements Serializable {
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());

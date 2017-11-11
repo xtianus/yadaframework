@@ -10,6 +10,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -21,6 +23,7 @@ import javax.persistence.Version;
  * Files can still exist after the object has been deleted, and can be re-attached to many objects using different titles, sort orders etc.
  */
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaAttachedFile {
 	
 	// For synchronization with external databases

@@ -12,6 +12,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
@@ -25,6 +27,8 @@ import com.fasterxml.jackson.annotation.JsonView;
 import net.yadaframework.web.YadaJsonView;
 
 @Entity
+// We keep it simple and use a discriminator for inheritance. It's very unlikely that someone might need a joined table with no other options
+// @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaUserProfile implements Serializable {
 	private static final long serialVersionUID = 1L;
 	

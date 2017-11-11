@@ -11,6 +11,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -53,6 +55,7 @@ import net.yadaframework.exceptions.YadaInvalidValueException;
 @Table(
 		uniqueConstraints = @UniqueConstraint(columnNames={"enumClassName", "enumOrdinal"})
 )
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaPersistentEnum<E extends Enum<E>> {
 	
 	static class YadaPersistentEnumSerializer extends JsonSerializer<YadaPersistentEnum<?>> {

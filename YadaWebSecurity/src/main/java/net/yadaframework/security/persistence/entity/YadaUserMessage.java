@@ -37,11 +37,13 @@ import net.yadaframework.web.YadaJsonView;
 
 /**
  * A message sent to some user by another user or by the system
+ * 
+ * @param <E> a localized enum for the message type
  */
 @Entity
 // Use a joined table for inheritance so that the subclasses can independently add any attributes without interference
 @Inheritance(strategy = InheritanceType.JOINED)
-public class YadaUserMessage<T extends Enum<T>> implements Serializable {
+public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	private static final long serialVersionUID = 7008892353441772768L;
 
 	// For synchronization with external databases
@@ -76,9 +78,9 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int stackSize = 0; // Counter for identical messages (stacked)
 
-	@OneToOne(fetch = FetchType.EAGER)
+	@OneToOne(fetch = FetchType.EAGER, optional=true)
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
-	protected YadaPersistentEnum<T> type;
+	protected YadaPersistentEnum<E> type;
 
 	@Column(length=80)
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
@@ -136,7 +138,7 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 		this.created.add(new Date());
 	}
 	
-	public void setType(YadaLocalEnum<T> localEnum) {
+	public void setType(YadaLocalEnum<E> localEnum) {
 		this.type = localEnum.toYadaPersistentEnum();
 	}
 	
@@ -218,11 +220,11 @@ public class YadaUserMessage<T extends Enum<T>> implements Serializable {
 		this.stackSize = count;
 	}
 
-	public YadaPersistentEnum<T> getType() {
+	public YadaPersistentEnum<E> getType() {
 		return type;
 	}
 
-	public void setType(YadaPersistentEnum<T> type) {
+	public void setType(YadaPersistentEnum<E> type) {
 		this.type = type;
 	}
 

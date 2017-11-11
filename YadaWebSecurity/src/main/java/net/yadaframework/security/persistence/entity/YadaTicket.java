@@ -11,6 +11,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -23,20 +25,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
-import net.yadaframework.persistence.entity.YadaTicketStatus;
-import net.yadaframework.persistence.entity.YadaTicketType;
 import net.yadaframework.web.YadaJsonView;
 
 /**
  *
  */
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaTicket implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	// For synchronization with external databases
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(columnDefinition="DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified;
 	
@@ -117,6 +118,11 @@ public class YadaTicket implements Serializable {
 		return assigned!=null?assigned.getUserCredentials().getUsername():"---";
 	}
 	
+	@Transient
+	public void setType(YadaTicketType type) {
+		this.type = type.toYadaPersistentEnum();
+	}
+	
 	/* //new
 	@JsonProperty
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
@@ -169,6 +175,12 @@ public class YadaTicket implements Serializable {
 	public void setStatus(YadaPersistentEnum<YadaTicketStatus> status) {
 		this.status = status;
 	}
+	
+	public void setStatus(YadaTicketStatus status) {
+		this.status = status.toYadaPersistentEnum();
+	}
+	
+	
 	/*
 	public String getSubject() {
 		return subject;
