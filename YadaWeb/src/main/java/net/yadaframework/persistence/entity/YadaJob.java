@@ -43,11 +43,6 @@ public abstract class YadaJob implements Runnable {
 	@Transient
 	protected ApplicationContext applicationContext;
 
-	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
-	protected Date modified;
-	
 	// For optimistic locking
 	@Version
 	protected long version;
@@ -373,14 +368,6 @@ public abstract class YadaJob implements Runnable {
 
 	public void setRecovered(boolean recovered) {
 		this.recovered = recovered;
-	}
-
-	public Date getModified() {
-		return modified;
-	}
-
-	public void setModified(Date modified) {
-		this.modified = modified;
 	}
 
 	public long getVersion() {

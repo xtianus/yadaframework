@@ -739,6 +739,8 @@
 				// errorThrown is ''
 				if (textStatus==="timeout") {
 					yada.showErrorModal(yada.messages.connectionError.title, yada.messages.connectionError.message);
+				} else if (errorThrown==="Forbidden") {
+					yada.showErrorModal(yada.messages.forbiddenError.title, yada.messages.forbiddenError.message);
 				} else {
 					yada.showErrorModal(yada.messages.serverError.title, yada.messages.serverError.message + (textStatus!=null&&textStatus!='error'?' ('+textStatus+')':''));
 				}
@@ -839,7 +841,7 @@
 					setTimeout(function() {
 						$('#ajaxModal:hidden').modal('show');
 					}, 100);
-					yada.enableAjaxForms();
+					yada.initAjaxHandlersOn($("#ajaxModal"));
 					// Questo permette di scrollare all'anchor (ho dovuto mettere un ritardo altrimenti non scrollava)
 					// e anche di far scendere il modal se per caso si apre scrollato (a volte capita, forse coi modal molto alti)
 					setTimeout(function() {

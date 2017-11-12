@@ -7,13 +7,14 @@ import javax.persistence.PersistenceContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.security.persistence.entity.YadaTicket;
 import net.yadaframework.security.persistence.entity.YadaTicketMessage;
 import net.yadaframework.security.persistence.entity.YadaTicketStatus;
-import net.yadaframework.security.persistence.entity.YadaTicketType;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 
 @Repository
@@ -33,7 +34,11 @@ public class YadaTicketDao {
      * @param closeTicket true if the replyer has closed the ticket on this reply
      * @return the new message added to the ticket
      */
-    public YadaTicketMessage replyTicket(YadaTicket yadaTicket, String messageText, YadaUserProfile replySender, boolean supportStaffReply, boolean closeTicket) {
+    @Modifying
+    @Transactional(readOnly = false) 
+    public YadaTicketMessage replyTicket(Long yadaTicketId, String messageText, YadaUserProfile replySender, boolean supportStaffReply, boolean closeTicket) {
+    	YadaTicket yadaTicket = em.find(YadaTicket.class, yadaTicketId); 
+    	// Altrimenti si prende "could not initialize proxy - no Session" alla getMessages()
 		YadaTicketMessage yadaTicketMessage = new YadaTicketMessage();	
 		yadaTicket.getMessages().add(yadaTicketMessage);
 		yadaTicketMessage.setYadaTicket(yadaTicket);
@@ -66,7 +71,9 @@ public class YadaTicketDao {
 	 * @param severity
 	 * @return the newly created ticket
 	 */
-    public YadaTicket addTicket(YadaTicketType type, String title, String messageText, YadaUserProfile sender, int severity) {
+    @Modifying
+    @Transactional(readOnly = false) 
+    public YadaTicket addTicket(YadaLocalEnum<?> type, String title, String messageText, YadaUserProfile sender, int severity) {
     	List<YadaTicketMessage> yadaTicketMessages = new ArrayList<>();
 		YadaTicket yadaTicket = new YadaTicket();
 		yadaTicket.setStatus(YadaTicketStatus.OPEN);

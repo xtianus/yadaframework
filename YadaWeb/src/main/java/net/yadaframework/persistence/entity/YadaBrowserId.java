@@ -32,11 +32,6 @@ import javax.persistence.Version;
 public class YadaBrowserId implements Serializable {
 	private static final long serialVersionUID = -5673120637677663672L;
 	
-	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date modified;
-	
 	// For optimistic locking
 	@Version
 	private long version;
@@ -101,14 +96,6 @@ public class YadaBrowserId implements Serializable {
 	}
 	public void setLeastSigBits(long leastSigBits) {
 		this.leastSigBits = leastSigBits;
-	}
-
-	public Date getModified() {
-		return modified;
-	}
-
-	public void setModified(Date modified) {
-		this.modified = modified;
 	}
 
 	public long getVersion() {

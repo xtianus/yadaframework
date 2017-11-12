@@ -34,12 +34,6 @@ public class YadaAutoLoginToken implements Serializable {
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
-	// For synchronization with external databases
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
-	protected Date modified;
-	
 	// For optimistic locking
 	@Version
 	protected long version;
@@ -100,14 +94,6 @@ public class YadaAutoLoginToken implements Serializable {
 
 	public void setTimestamp(Date timestamp) {
 		this.timestamp = timestamp;
-	}
-
-	public Date getModified() {
-		return modified;
-	}
-
-	public void setModified(Date modified) {
-		this.modified = modified;
 	}
 
 	public long getVersion() {

@@ -19,6 +19,10 @@
 		"title": "Connection Error",
 		"message": "Failed to contact server - please try again later"
 	}; 
+	yada.messages.forbiddenError = { // Set it via thymeleaf
+			"title": "Authorization Error",
+			"message": "You don't have permission to access the requested page"
+	}; 
 	yada.messages.serverError = { // Set it via thymeleaf
 			"title": "Server Error",
 			"message": "Something is wrong - please try again later"

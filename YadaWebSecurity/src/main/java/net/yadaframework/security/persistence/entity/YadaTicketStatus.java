@@ -10,13 +10,7 @@ import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
 
 /**
- * The localized state of a YadaJob:
- * <ul>
- * <li>OPEN: the ticket is open</li>
- * <li>ANSWERED: the ticket is answered</li>
- * <li>CLOSED: the ticket is closed</li>
- * </ul>
- *
+ * The localized state of a YadaTicket
  */
 public enum YadaTicketStatus implements YadaLocalEnum<YadaTicketStatus> {
 	// In messages.properties:

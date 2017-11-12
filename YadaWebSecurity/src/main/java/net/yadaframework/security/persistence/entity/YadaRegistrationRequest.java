@@ -34,11 +34,6 @@ public class YadaRegistrationRequest implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
-	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date modified;
-	
 	// For optimistic locking
 	@Version
 	private long version;
@@ -178,14 +173,6 @@ public class YadaRegistrationRequest implements Serializable {
 
 	public void setTrattamentoDatiAccepted(boolean trattamentoDatiAccepted) {
 		this.trattamentoDatiAccepted = trattamentoDatiAccepted;
-	}
-
-	public Date getModified() {
-		return modified;
-	}
-
-	public void setModified(Date modified) {
-		this.modified = modified;
 	}
 
 	public long getVersion() {

@@ -8,12 +8,7 @@ import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
 
 /**
- * The localized type of a YadaTicket:
- * <ul>
- * <li>TECHNICAL_SUPPORT: the type is technical support</li>
- * <li>BILLING: the type is billing</li>
- * <li>OTHER: all other types</li>
- * </ul>
+ * The localized type of a YadaTicket. Can be used as-is, or an application-specific one can be created.
  *
  */
 public enum YadaTicketType implements YadaLocalEnum<YadaTicketType> {

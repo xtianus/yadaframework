@@ -31,11 +31,6 @@ import net.yadaframework.web.YadaJsonView;
 public class YadaUserProfile implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
-	protected Date modified;
-	
 	// For optimistic locking
 	@Version
 	protected long version;
@@ -53,7 +48,7 @@ public class YadaUserProfile implements Serializable {
 	@Column(length = 64)
 	protected String lastName;
 
-	@JsonView(YadaJsonView.WithLazyAttributes.class)
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@NotNull
 	@OneToOne(optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
 	protected YadaUserCredentials userCredentials;
@@ -116,14 +111,6 @@ public class YadaUserProfile implements Serializable {
 
 	public void setTimezone(TimeZone timezone) {
 		this.timezone = timezone;
-	}
-
-	public Date getModified() {
-		return modified;
-	}
-
-	public void setModified(Date modified) {
-		this.modified = modified;
 	}
 
 	public long getVersion() {

@@ -26,11 +26,6 @@ import javax.persistence.Version;
 public class YadaClause implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date modified;
-	
 	// For optimistic locking
 	@Version
 	private long version;
@@ -78,14 +73,6 @@ public class YadaClause implements Serializable {
 
 	public void setClauseVersion(int version) {
 		this.clauseVersion = version;
-	}
-
-	public Date getModified() {
-		return modified;
-	}
-
-	public void setModified(Date modified) {
-		this.modified = modified;
 	}
 
 	public long getVersion() {

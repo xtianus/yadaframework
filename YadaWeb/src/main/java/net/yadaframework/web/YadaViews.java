@@ -7,6 +7,11 @@ package net.yadaframework.web;
 public interface YadaViews {
 
 	/**
+	 * Ajax method causes a browser redirect. Set the "targetUrl" attribute in the model.
+	 */
+	String AJAX_REDIRECT = "/yada/ajaxRedirect";
+	
+	/**
 	 * Ajax method returns cleanly.
 	 */
 	String AJAX_SUCCESS = "/yada/ajaxSuccess";

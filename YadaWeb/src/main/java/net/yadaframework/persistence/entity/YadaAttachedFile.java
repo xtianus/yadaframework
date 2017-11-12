@@ -26,11 +26,6 @@ import javax.persistence.Version;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaAttachedFile {
 	
-	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
-	protected Date modified;
-	
 	// For optimistic locking
 	@Version
 	protected long version;
@@ -113,14 +108,6 @@ public class YadaAttachedFile {
 
 	public long getVersion() {
 		return version;
-	}
-
-	public Date getModified() {
-		return modified;
-	}
-
-	public void setModified(Date modified) {
-		this.modified = modified;
 	}
 
 	public boolean isPublished() {
