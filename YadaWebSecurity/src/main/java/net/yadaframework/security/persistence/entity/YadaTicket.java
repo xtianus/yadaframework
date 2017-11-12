@@ -50,6 +50,10 @@ public class YadaTicket implements Serializable {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
 	
+	@Column(length=80)
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
+	protected String title;
+
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int priority;
 	
@@ -121,6 +125,21 @@ public class YadaTicket implements Serializable {
 	@Transient
 	public void setType(YadaTicketType type) {
 		this.type = type.toYadaPersistentEnum();
+	}
+	
+	@Transient
+	public boolean isOpen() {
+		return status!=null && status.getEnum().equals(YadaTicketStatus.OPEN);
+	}
+	
+	@Transient
+	public boolean isClosed() {
+		return status!=null && status.getEnum().equals(YadaTicketStatus.CLOSED);
+	}
+	
+	@Transient
+	public boolean isAnswered() {
+		return status!=null && status.getEnum().equals(YadaTicketStatus.ANSWERED);
 	}
 	
 	/* //new
@@ -253,6 +272,14 @@ public class YadaTicket implements Serializable {
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 

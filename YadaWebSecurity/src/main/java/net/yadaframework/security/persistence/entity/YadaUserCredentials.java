@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -186,18 +187,25 @@ public class YadaUserCredentials implements Serializable {
 
 	@Override
 	public int hashCode() {
-		if (username!=null) {
-			return username.hashCode();
+		if (id!=null) {
+			return id.hashCode();
 		}
-		return 0;
+		return Objects.hash(username, password);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof YadaUserCredentials) {
-			return this.username.equals(((YadaUserCredentials)obj).username);
+		if (obj==null) {
+			return false;
 		}
-		return false;
+		if (obj instanceof YadaUserCredentials) {
+			if (this.id!=null) {
+				return this.id.equals(((YadaUserCredentials)obj).getId());
+			} else if (this.username!=null) {
+				return this.username.equals(((YadaUserCredentials)obj).username);
+			}
+		}
+		return super.equals(obj);
 	}
 
 	public boolean isEnabled() {

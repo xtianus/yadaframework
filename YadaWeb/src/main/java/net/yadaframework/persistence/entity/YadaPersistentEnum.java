@@ -33,6 +33,7 @@ import net.yadaframework.exceptions.YadaInvalidValueException;
 
 /**
  * Needed to store a localized enum in the database, on which to perform localized search and sort operations.
+ * To retrieve the localized value call {@link YadaPersistentEnum#getLocalText()}
  * For every Enum class in Java there is a number of rows in the database holding the enum class name and its ordinals.
  * For each such row there are a number of rows holding the localized values.
  * E.g. the "ProcessState" enum with values "RUNNING" and "STOPPED" produces the following rows:<p>

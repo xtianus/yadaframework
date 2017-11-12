@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import javax.persistence.CascadeType;
@@ -12,8 +13,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
@@ -137,6 +136,25 @@ public class YadaUserProfile implements Serializable {
 
 	public void setLocale(Locale locale) {
 		this.locale = locale;
+	}
+
+	@Override
+	public int hashCode() {
+		if (id!=null) {
+			return id.hashCode();
+		}
+		return Objects.hash(firstName, lastName, middleName, userCredentials);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj==null) {
+			return false;
+		}
+		if (obj instanceof YadaUserProfile && this.id!=null) {
+			return this.id.equals(((YadaUserProfile)obj).getId());
+		}
+		return super.equals(obj);
 	}
 	
 }
