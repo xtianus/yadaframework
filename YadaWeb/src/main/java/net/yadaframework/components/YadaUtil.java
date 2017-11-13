@@ -457,6 +457,8 @@ public class YadaUtil {
 	 * Esegue un comando di shell
 	 * @param command comando
 	 * @param args lista di argomenti (ogni elemento puo' contenere spazi), puo' essere null
+	 * @param substitutionMap key-value of placeholders to replace in the command. A placeholder in the command is like ${key}, a substitution
+	 * pair is like "key"-->"value" 
 	 * @param outputStream ByteArrayOutputStream che conterrà l'output del comando (out + err)
 	 * @return the error message (will be empty for a return code >0), or null if there was no error
 	 */
@@ -524,16 +526,17 @@ public class YadaUtil {
 	/**
 	 * Esegue il comando configurato
 	 * @param shellCommandKey chiave completa xpath del comando shell da eseguire e.g. "config/shell/processTunableWhiteImage"
-	 * @param params mappa nome-valore delle variabili da sostituire nel comando, per esempio "${NAME}"="pippo"
+	 * @param substitutionMap key-value of placeholders to replace in the command. A placeholder in the command is like ${key}, a substitution
+	 * pair is like "key"-->"value" 
 	 */
-	public boolean exec(String shellCommandKey, Map<String, String> params) {
+	public boolean exec(String shellCommandKey, Map<String, String> substitutionMap) {
 		String executable = config.getString(shellCommandKey + "/executable");
 		// Need to use getProperty() to avoid interpolation on ${} arguments
 		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
 		List<String> args = (List<String>) config.getConfiguration().getProperty(shellCommandKey + "/arg");
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
-			String error = exec(executable, args, params, outputStream);
+			String error = exec(executable, args, substitutionMap, outputStream);
 			String commandOutput = outputStream.toString();
 			if (error!=null) {
 				log.error("Can't execute shell command \"{}\": {} - {}", shellCommandKey, error, commandOutput);

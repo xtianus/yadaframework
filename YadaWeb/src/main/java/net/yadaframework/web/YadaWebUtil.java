@@ -115,11 +115,12 @@ public class YadaWebUtil {
 	 */
 	public static String makeSlugStatic(String source) {
 		String slug = source.trim().toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
-		slug = slug.replaceAll(" +", "-"); // Gli spazi diventano dash
+		slug = slug.replaceAll(" +", "-"); // Spaces become dashes
 		slug = slug.replaceAll("[^\\w:,;=&!+~\\(\\)@\\*\\$\\'\\-]", "");
 		slug = StringUtils.removeEnd(slug, ".");
 		slug = StringUtils.removeEnd(slug, ";");
 		slug = StringUtils.removeEnd(slug, "\\");
+		slug = slug.replaceAll("-+", "-"); // Multiple dashes become one dash
 		return slug;
 	}
 
