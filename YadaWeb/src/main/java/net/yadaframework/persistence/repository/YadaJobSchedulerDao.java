@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.persistence.YadaSql;
 import net.yadaframework.persistence.entity.YadaJob;
@@ -35,7 +36,7 @@ public class YadaJobSchedulerDao {
     
     @Autowired private YadaConfiguration config;
     @Autowired private YadaJobDao yadaJobDao;
-    
+    @Autowired private YadaUtil yadaUtil;
     
     /**
      * Do not use directly.
@@ -56,9 +57,10 @@ public class YadaJobSchedulerDao {
      */
     // Called by the YadaJobScheduler when a job fails
     @Transactional(readOnly = false)
-	public void internalJobFailed(Long yadaJobId, Throwable thrown) {
-		log.debug("Job id {} ended onFailure: {}", yadaJobId, thrown);
-		YadaJob yadaJob = em.find(YadaJob.class, yadaJobId);
+	public void internalJobFailed(YadaJob yadaJob, Throwable thrown) {
+		log.debug("Job id {} ended onFailure: {}", yadaJob.getId(), thrown);
+		yadaJob = em.merge(yadaJob);
+//		YadaJob yadaJob = em.find(YadaJob.class, yadaJob);
 		// The job must set its own state to DISABLED or PAUSED when failed, otherwise it is set to ACTIVE
 		yadaJobDao.setActiveWhenRunning(yadaJob);
 		yadaJob.setJobStartTime(null);
@@ -69,29 +71,23 @@ public class YadaJobSchedulerDao {
      */
     // Called by the YadaJobScheduler when a job completes
     @Transactional(readOnly = false)
-    public void internalJobSuccessful(Long yadaJobId) {
-    	log.debug("Job id {} ended successfully", yadaJobId);
-    	YadaJob yadaJob = em.find(YadaJob.class, yadaJobId);
+    public void internalJobSuccessful(YadaJob yadaJob) {
+    	// TODO need to reattach the job here
+    	//em.merge(yadaJob);
+//    	if ( session.contains( myEntity ) ) {
+//    	    // nothing to do... myEntity is already associated with the session
+//    	}
+//    	else {
+//    	    session.saveOrUpdate( myEntity );
+//    	}
+    	log.debug("Job id {} ended successfully", yadaJob.getId());
+    	yadaJob = em.merge(yadaJob);
+//    	YadaJob yadaJob = em.find(YadaJob.class, yadaJob);
 		yadaJob.setJobState(YadaJobState.ACTIVE);
 		yadaJob.setJobLastSuccessfulRun(new Date());
 		yadaJob.setJobStartTime(null);
 	}   
     
-    /**
-     * Do not use directly.
-     */
-    // Starts a job, adding it to the job scheduler.
-    @Transactional(readOnly = false)
-    public ListenableFuture<YadaJob> internalRunJob(Long yadaJobId, ListeningExecutorService jobScheduler) {
-    	log.debug("Running job id {}", yadaJobId);
-    	YadaJob yadaJob = em.find(YadaJob.class, yadaJobId);
-		yadaJob.setJobState(YadaJobState.RUNNING);
-		yadaJob.setJobStartTime(new Date());
-		@SuppressWarnings("unchecked")
-		ListenableFuture<YadaJob> jobHandle = (ListenableFuture<YadaJob>) jobScheduler.submit(yadaJob);
-    	return jobHandle;
-    }    
-
     /**
      * Do not use directly.
      */

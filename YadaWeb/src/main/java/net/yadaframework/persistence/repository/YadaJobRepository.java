@@ -1,6 +1,6 @@
 package net.yadaframework.persistence.repository;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.Collection;
 import java.util.List;
 
@@ -18,6 +18,26 @@ import net.yadaframework.persistence.entity.YadaPersistentEnum;
 
 @Transactional(readOnly = true) 
 public interface YadaJobRepository extends JpaRepository<YadaJob, Long> {
+	
+	/**
+	 * Invoked by the scheduler classes.
+	 * @param yadaJobId
+	 * @param jobStateId
+	 */
+	@Modifying
+	@Transactional(readOnly = false)
+	@Query("update YadaJob set jobStateObject=:stateObject where id=:id")
+	void internalSetState(@Param("id") Long yadaJobId, @Param("stateObject") YadaPersistentEnum<YadaJobState> stateObject);
+	
+	/**
+	 * Invoked by the scheduler classes when starting a job. Only an active job can become running
+	 * @param yadaJobId
+	 * @param stateObject
+	 */
+	@Modifying
+	@Transactional(readOnly = false)
+	@Query("update YadaJob set jobStartTime=NOW(), jobStateObject.id=:runningId where id=:id and jobStateObject.id=:activeId")
+	void internalSetRunning(@Param("id") Long yadaJobId, @Param("runningId") Long runningId, @Param("activeId") Long activeId);
 	
 	/**
 	 * Returns the start time of a job

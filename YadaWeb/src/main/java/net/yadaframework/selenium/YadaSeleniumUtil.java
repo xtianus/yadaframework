@@ -58,7 +58,7 @@ public class YadaSeleniumUtil {
 	YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
 	
 	private void sleepRandomShort() {
-    	yadaUtil.sleepRandom(100, 900); // min-max sleep
+    	yadaUtil.sleepRandom(50, 600); // min-max sleep
     }
 	
 	/**
