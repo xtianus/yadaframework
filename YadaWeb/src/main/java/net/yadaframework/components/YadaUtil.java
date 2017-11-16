@@ -438,6 +438,19 @@ public class YadaUtil {
 	}
 	
 	/**
+	 * Returns the file name given the file path
+	 * @param fileWithPath
+	 * @return
+	 */
+	public String getFileNoPath(String fileWithPath) {
+		if (StringUtils.trimToNull(fileWithPath)==null) {
+			return null;
+		}
+		File file = new File(fileWithPath);
+		return file.getName();
+	}
+	
+	/**
 	 * Da un nome tipo abcd.JPG ritorna "jpg"
 	 * @param filename
 	 * @return l'estensione, oppure null
