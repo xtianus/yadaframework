@@ -33,7 +33,7 @@ public class YadaUserMessageDao {
      */
     @Modifying
     @Transactional(readOnly = false) 
-    public void createOrIncrement(YadaUserMessage m) {
+    public void createOrIncrement(YadaUserMessage<?> m) {
     	log.debug("YadaUserMessage to {} from {}: [{}] '{}' - {} ({})", 
     		m.getReceiverName()!=null?m.getReceiverName():"-", 
     		m.getSender()!=null?m.getSenderName():"-", 
