@@ -46,12 +46,12 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
@@ -64,7 +64,7 @@ import org.springframework.util.ReflectionUtils;
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.core.YadaConfiguration;
-import net.yadaframework.exceptions.InternalException;
+import net.yadaframework.exceptions.YadaInternalException;
 import sogei.utility.UCheckDigit;
 import sogei.utility.UCheckNum;
 
@@ -73,6 +73,8 @@ public class YadaUtil {
 	private final static Logger log = LoggerFactory.getLogger(YadaUtil.class);
 	
 	@Autowired private YadaConfiguration config;
+    @Autowired private AutowireCapableBeanFactory autowireCapableBeanFactory; // For autowiring entities
+
     static ApplicationContext applicationContext; 	// To access the ApplicationContext from anywhere
     static public MessageSource messageSource; 		// To access the MessageSource from anywhere
 	
@@ -88,6 +90,17 @@ public class YadaUtil {
     public void init() {
 		defaultLocale = config.getDefaultLocale();
     }
+	
+	/**
+	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity.
+	 * Post processing (@PostConstruct etc) is also performed.
+	 * @param instance to autowire
+	 * @return autowired instance
+	 */
+	public Object autowire(Object instance) {
+		autowireCapableBeanFactory.autowireBean(instance);
+		return autowireCapableBeanFactory.initializeBean(instance, instance.getClass().getSimpleName());
+	}
 	 
 	/**
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
@@ -277,10 +290,10 @@ public class YadaUtil {
 			return objectClass.newInstance();
 		} catch (ClassNotFoundException e) {
 			log.error("Class {} not found in package {}", simpleClassName, packageString, e);
-			throw new InternalException("Class not implemented: " + simpleClassName);
+			throw new YadaInternalException("Class not implemented: " + simpleClassName);
 		} catch (Exception e) {
 			log.error("Instantiation error for class {}", objectClass, e);
-			throw new InternalException("Error while creating instance of " + fullClassName);
+			throw new YadaInternalException("Error while creating instance of " + fullClassName);
 		}
 	}
 
@@ -791,7 +804,7 @@ public class YadaUtil {
 		} catch (Exception e) {
 			String msg = "Can't duplicate object '" + source + "'";
 			log.error(msg + ": " + e);
-			throw new InternalException(msg, e);
+			throw new YadaInternalException(msg, e);
 		}
 	}
 	

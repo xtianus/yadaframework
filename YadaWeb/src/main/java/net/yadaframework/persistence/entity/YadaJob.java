@@ -22,7 +22,6 @@ import javax.persistence.Version;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -31,8 +30,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * The base class for jobs handled by the YadaScheduler.
  * Subclasses must implement the run() method.
- * Uses joined inheritance so that subclasses have their own table.
- * The subclass id, which must not be declared in java but exists in the table, gets the same value as the YadaJob id.
+ * Uses joined inheritance so that subclasses have their own table; the subclass id, which must not be declared in java but exists in the table, gets the same value as the YadaJob id.
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -40,9 +38,6 @@ public abstract class YadaJob implements Runnable {
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
-	@Transient
-	protected ApplicationContext applicationContext;
-
 	// For optimistic locking
 	@Version
 	protected long version;
@@ -110,6 +105,11 @@ public abstract class YadaJob implements Runnable {
 	 * (true by default)
 	 */
 	protected boolean jobRecoverable = true;
+
+	/**
+	 * Should be incremented every time a job does not execute successfully and set to zero on successful execution.
+	 */
+	protected int errorStreakCount = 0;
 	
 	/**
 	 * The time at which the job was started - null if the job is not in the RUNNING state.
@@ -350,10 +350,6 @@ public abstract class YadaJob implements Runnable {
 		this.jobGroupPaused = jobGroupPaused;
 	}
 
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
-
 	public Date getJobStartTime() {
 		return jobStartTime;
 	}
@@ -372,6 +368,14 @@ public abstract class YadaJob implements Runnable {
 
 	public long getVersion() {
 		return version;
+	}
+
+	public int getErrorStreakCount() {
+		return errorStreakCount;
+	}
+
+	public void setErrorStreakCount(int errorStreakCount) {
+		this.errorStreakCount = errorStreakCount;
 	}
 
 	
