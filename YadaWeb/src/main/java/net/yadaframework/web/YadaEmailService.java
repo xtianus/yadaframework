@@ -36,6 +36,7 @@ import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
 import net.yadaframework.exceptions.InternalException;
+import net.yadaframework.exceptions.YadaEmailException;
 
 @Service
 // Deve stare in questo package perchè tirato dentro da YadaWebConfig, altrimenti SpringTemplateEngine non viene iniettato
@@ -198,7 +199,7 @@ public class YadaEmailService {
 				i++;
 			}
 	    }
-	    if (attachments!=null) {
+	    if (attachments!=null && attachments.size()>0) {
 	    	Set<String> keySet = attachments.keySet();
 	    	int size = keySet.size();
 	    	ec.attachedFilenames = new String[size];
@@ -279,6 +280,9 @@ public class YadaEmailService {
 				return true;
 			}
 		} catch (Exception e) {
+			if (config.isEmailThrowExceptions()) {
+				throw new YadaEmailException(e);
+			}
 			log.error("Error while sending email message to '{}'", Arrays.asList(yadaEmailContent.to), e);
 		}
 		return false;

@@ -75,13 +75,16 @@ public class YadaWebUtil {
 	/**
 	 * Save an uploaded file to a temporary file
 	 * @param attachment
-	 * @return the temporary file holding the uploaded file
+	 * @return the temporary file holding the uploaded file, or null if no file has bee attached
 	 * @throws IOException
 	 */
 	public File saveAttachment(MultipartFile attachment) throws IOException {
-		File targetFile = File.createTempFile("upload-", null);
-		saveAttachment(attachment, targetFile);
-		return targetFile;
+		if (!attachment.isEmpty()) {
+			File targetFile = File.createTempFile("upload-", null);
+			saveAttachment(attachment, targetFile);
+			return targetFile;
+		}
+		return null;
 	}
 	
 	/**

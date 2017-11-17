@@ -74,7 +74,14 @@ public abstract class YadaConfiguration {
 	private Locale defaultLocale = null;
 	private boolean defaultLocaleChecked = false;
 	
-	
+	/**
+	 * Returns true if YadaEmaiService should throw an exception instead of returning false when it receives an exception on send
+	 * @return
+	 */
+	public boolean isEmailThrowExceptions() {
+		return configuration.getBoolean("config/email/@throwExceptions", false);
+	}
+
 	/**
 	 * @return the link (only a part of it) to use for the registration confirmation
 	 */
