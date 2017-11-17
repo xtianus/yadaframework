@@ -183,6 +183,17 @@ public abstract class YadaJob implements Runnable {
 		return result;
 	}
 	
+	/**
+	 * Set the job state to completed and return the previous state
+	 * @return
+	 */
+	@Transient
+	public YadaJobState complete() {
+		YadaJobState result = getJobState();
+		this.jobStateObject = YadaJobState.COMPLETED.toYadaPersistentEnum();
+		return result;
+	}
+	
 	@Transient
 	public boolean isActive() {
 		return getJobState() == YadaJobState.ACTIVE;
