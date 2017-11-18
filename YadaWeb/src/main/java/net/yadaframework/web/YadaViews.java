@@ -12,6 +12,11 @@ public interface YadaViews {
 	String AJAX_REDIRECT = "/yada/ajaxRedirect";
 	
 	/**
+	 * The name of the attribute to set with the target redirect url
+	 */
+	String AJAX_REDIRECT_URL = "targetUrl";
+	
+	/**
 	 * Ajax method returns cleanly.
 	 */
 	String AJAX_SUCCESS = "/yada/ajaxSuccess";

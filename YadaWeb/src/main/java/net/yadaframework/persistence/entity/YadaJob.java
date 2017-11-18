@@ -3,6 +3,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -34,7 +35,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class YadaJob implements Runnable {
+public abstract class YadaJob implements Callable<Void> {
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
@@ -154,7 +155,6 @@ public abstract class YadaJob implements Runnable {
 	 * Set the job state to active and return the previous state
 	 * @return the previous state
 	 */
-	@Transient
 	public YadaJobState activate() {
 		YadaJobState result = getJobState();
 		this.jobStateObject = YadaJobState.ACTIVE.toYadaPersistentEnum();
@@ -165,7 +165,6 @@ public abstract class YadaJob implements Runnable {
 	 * Set the job state to paused and return the previous state
 	 * @return the previous state
 	 */
-	@Transient
 	public YadaJobState pause() {
 		YadaJobState result = getJobState();
 		this.jobStateObject = YadaJobState.PAUSED.toYadaPersistentEnum();
@@ -176,7 +175,6 @@ public abstract class YadaJob implements Runnable {
 	 * Set the job state to disabled and return the previous state
 	 * @return
 	 */
-	@Transient
 	public YadaJobState disable() {
 		YadaJobState result = getJobState();
 		this.jobStateObject = YadaJobState.DISABLED.toYadaPersistentEnum();
@@ -187,7 +185,6 @@ public abstract class YadaJob implements Runnable {
 	 * Set the job state to completed and return the previous state
 	 * @return
 	 */
-	@Transient
 	public YadaJobState complete() {
 		YadaJobState result = getJobState();
 		this.jobStateObject = YadaJobState.COMPLETED.toYadaPersistentEnum();
@@ -217,6 +214,14 @@ public abstract class YadaJob implements Runnable {
 	@Transient
 	public boolean isRunning() {
 		return getJobState() == YadaJobState.RUNNING;
+	}
+	
+	/**
+	 * Increment the error streak count returning the new value
+	 * @return
+	 */
+	public int incrementErrorStreak() {
+		return ++errorStreakCount;
 	}
 
 	/**

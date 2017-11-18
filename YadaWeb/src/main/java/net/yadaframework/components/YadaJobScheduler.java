@@ -53,7 +53,7 @@ class YadaJobScheduler implements Runnable {
 	/**
 	 * Map from YadaJob id to its running thread handle
 	 */
-	private ConcurrentMap<Long, ListenableFuture<Object>> jobHandles = new ConcurrentHashMap<>();
+	private ConcurrentMap<Long, ListenableFuture<Void>> jobHandles = new ConcurrentHashMap<>();
 	
 	@PostConstruct
 	public void init() throws Exception {
@@ -133,11 +133,12 @@ class YadaJobScheduler implements Runnable {
 		}
 		yadaJobRepository.internalSetRunning(yadaJobId, YadaJobState.RUNNING.toId(), YadaJobState.ACTIVE.toId());
 		final YadaJob wiredYadaJob = (YadaJob) yadaUtil.autowire(toRun); // YadaJob instances can have @Autowire fields
-		ListenableFuture<Object> jobHandle = (ListenableFuture<Object>) jobScheduler.submit(wiredYadaJob);
+		ListenableFuture<Void> jobHandle = jobScheduler.submit(wiredYadaJob);
 		jobHandles.put(yadaJobId, jobHandle);
-		Futures.addCallback(jobHandle, new FutureCallback<Object>() {
+		Futures.addCallback(jobHandle, new FutureCallback<Void>() {
 			// The callback is run in executor
-			public void onSuccess(Object result) {
+			public void onSuccess(Void result) {
+				// result is always null
 				jobHandles.remove(yadaJobId);
 				yadaJobSchedulerDao.internalJobSuccessful(wiredYadaJob);
 			}

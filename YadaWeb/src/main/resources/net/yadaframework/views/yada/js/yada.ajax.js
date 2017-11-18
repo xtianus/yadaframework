@@ -809,7 +809,7 @@
 					}
 				}
 				// If it is a full page, overwrite the current one
-				if ($('.s_fullPage', responseHtml).length>0) {
+				if ($('.yadafullPage', responseHtml).length>0 || $('.s_fullPage', responseHtml).length>0) {
 					document.open();
 					document.write(responseText);
 					document.close();

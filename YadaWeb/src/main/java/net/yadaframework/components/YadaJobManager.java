@@ -4,12 +4,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import javax.annotation.PostConstruct;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
@@ -34,15 +35,24 @@ public class YadaJobManager {
     @Autowired private YadaJobDao yadaJobDao;
     @Autowired private YadaConfiguration config;
 	@Autowired private TaskScheduler yadaJobSchedulerTaskScheduler; // Used only to schedule the YadaJobScheduler
-
-	@PostConstruct
-	public void init() throws Exception {
+	
+	private AtomicBoolean initialized = new AtomicBoolean(false);
+	
+	/**
+	 * Start the scheduler.
+	 * Method called after Spring has finished initializing the Application Context, so that YadaPersistentEnums have been initialized.
+	 * @param event
+	 * @throws Exception
+	 */
+	@EventListener
+	public void init(ContextRefreshedEvent event) {
+		if (initialized.getAndSet(true)) {
+			return;
+		}
 		// It is itself scheduled by a TaskScheduler configured in YadaAppConfig and run every config/yada/jobSchedulerPeriodMillis milliseconds
 		log.debug("init called");
 		long period = config.getYadaJobSchedulerPeriod();
 		if (period>0) {
-			// Using Guava to create a ListenableFuture: https://github.com/google/guava/wiki/ListenableFutureExplained
-			ExecutorService executorService = Executors.newFixedThreadPool(config.getYadaJobSchedulerThreadPoolSize());
 			// Disable any job that is already RUNNING but jobRecoverable is false
 			yadaJobDao.setUnrecoverableJobState();
 			// Recover any job that is still in the RUNNING state and its group is not paused

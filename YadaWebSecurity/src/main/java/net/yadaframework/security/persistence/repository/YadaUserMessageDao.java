@@ -41,7 +41,7 @@ public class YadaUserMessageDao {
     	if (m.getId()!=null) {
     		throw new YadaInvalidUsageException("Message already exists with id=" + m.getId());
     	}
-    	/* il Recipient può essere null.
+    	/* Recipient can be null. For example in a ticket.
     	if (m.getRecipient()==null) {
     		throw new YadaInvalidUsageException("Message with no recipient - title=" + m.getTitle());
     	}*/

@@ -60,10 +60,13 @@ public class YadaJobSchedulerDao {
 	public void internalJobFailed(YadaJob yadaJob, Throwable thrown) {
 		log.debug("Job id {} ended onFailure: {}", yadaJob.getId(), thrown);
 		yadaJob = em.merge(yadaJob);
-//		YadaJob yadaJob = em.find(YadaJob.class, yadaJob);
-		// The job must set its own state to DISABLED or PAUSED when failed, otherwise it is set to ACTIVE
-		yadaJobDao.setActiveWhenRunning(yadaJob);
-		yadaJob.setJobStartTime(null);
+		setActiveWhenRunning(yadaJob);
+		yadaJob.incrementErrorStreak();
+		Date now = new Date();
+		if (yadaJob.getJobScheduledTime().before(now)) {
+			yadaJob.setJobScheduledTime(now);
+		}
+		yadaJob.setJobStartTime(null); // The time at which the job was started - null if the job is not in the RUNNING state.
 	}
 	
     /**
@@ -72,8 +75,6 @@ public class YadaJobSchedulerDao {
     // Called by the YadaJobScheduler when a job completes
     @Transactional(readOnly = false)
     public void internalJobSuccessful(YadaJob yadaJob) {
-    	// TODO need to reattach the job here
-    	//em.merge(yadaJob);
 //    	if ( session.contains( myEntity ) ) {
 //    	    // nothing to do... myEntity is already associated with the session
 //    	}
@@ -82,11 +83,18 @@ public class YadaJobSchedulerDao {
 //    	}
     	log.debug("Job id {} ended successfully", yadaJob.getId());
     	yadaJob = em.merge(yadaJob);
-//    	YadaJob yadaJob = em.find(YadaJob.class, yadaJob);
-		yadaJob.setJobState(YadaJobState.ACTIVE);
+    	setActiveWhenRunning(yadaJob);
 		yadaJob.setJobLastSuccessfulRun(new Date());
-		yadaJob.setJobStartTime(null);
+		yadaJob.setErrorStreakCount(0);
+		yadaJob.setJobStartTime(null); // The time at which the job was started - null if the job is not in the RUNNING state.
 	}   
+    
+	// The job must set its own state to DISABLED or PAUSED when failed, otherwise it is set to ACTIVE
+    private void setActiveWhenRunning(YadaJob yadaJob) {
+    	if (yadaJob.getJobState().equals(YadaJobState.RUNNING)) {
+    		yadaJob.setJobState(YadaJobState.ACTIVE);
+    	}
+    }
     
     /**
      * Do not use directly.

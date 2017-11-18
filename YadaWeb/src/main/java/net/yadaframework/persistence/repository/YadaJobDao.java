@@ -59,19 +59,20 @@ public class YadaJobDao {
        	em.remove(deletable);
     }
     
-    /**
-     * If the job is RUNNING, set the state to ACTIVE
-     * @param yadaJob
-     */
-    @Transactional(readOnly = false)
-    public void setActiveWhenRunning(YadaJob yadaJob) {
-    	YadaSql.instance().updateSet("update YadaJob yg set yg.jobStateObject = :active")
-		.where("where yg = :job and yg.jobStateObject = :running")
-		.setParameter("active", YadaJobState.ACTIVE.toYadaPersistentEnum())
-		.setParameter("job", yadaJob)
-		.setParameter("running", YadaJobState.RUNNING.toYadaPersistentEnum())
-		.query(em).executeUpdate();
-    }
+//    /**
+//     * If the job is RUNNING, set the state to ACTIVE
+//     * @param yadaJob
+//     */
+//    @Transactional(readOnly = false)
+//    public void setActiveWhenRunning(YadaJob yadaJob) {
+//    	// Wrong:
+//    	YadaSql.instance().updateSet("update YadaJob yg join yg. set yg.jobStateObject = :active")
+//		.where("where yg = :job and yg.jobStateObject = :running")
+//		.setParameter("active", YadaJobState.ACTIVE.toYadaPersistentEnum())
+//		.setParameter("job", yadaJob)
+//		.setParameter("running", YadaJobState.RUNNING.toYadaPersistentEnum())
+//		.query(em).executeUpdate();
+//    }
     
     /**
      * Return the list of jobs that can be recovered after a crash.
