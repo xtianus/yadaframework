@@ -62,7 +62,7 @@ public interface YadaJobRepository extends JpaRepository<YadaJob, Long> {
 	 */
 	@Modifying
 	@Transactional(readOnly = false)
-	@Query("update #{#entityName} e set e.jobGroupPaused = :paused where e.jobGroup = :jobGroup")
+	@Query(value="update YadaJob yj set yj.jobGroupPaused = :paused where yj.jobGroup = :jobGroup", nativeQuery=true)
 	void setJobGroupPaused(@Param("jobGroup") String jobGroup, @Param("paused") boolean paused);
 
 	/**
