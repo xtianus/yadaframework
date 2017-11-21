@@ -390,7 +390,8 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	public ViewResolver viewResolver() {
 		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
 		viewResolver.setTemplateEngine(templateEngine());
-		viewResolver.setCharacterEncoding("UTF-8"); // Questo è importante anche se nei tutorial non lo mettono
+		viewResolver.setCharacterEncoding("UTF-8");
+		viewResolver.setContentType("text/html; charset=UTF-8");
 		viewResolver.setOrder(20);
 		viewResolver.setViewNames(new String[] { "*" });
 		// Default is "true": caching is enabled. Disable this only for debugging and development.

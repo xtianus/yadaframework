@@ -30,7 +30,8 @@ public class SecurityWebApplicationInitializer extends AbstractSecurityWebApplic
 		characterEncodingFilter.setEncoding("UTF-8");
 		characterEncodingFilter.setForceEncoding(true);
 		// L'AuditFilter lo metto prima di tutto almeno viene eseguito prima dell'autorizzazione e riesco a capire il motivo di eventuali 403
-        insertFilters(servletContext, new CheckSessionFilter(), new AuditFilter(), new MultipartFilter(), characterEncodingFilter, new DelegatingFilterProxy("yadaLocalePathVariableFilter"));
+		// For some reason the characterEncodingFilter can not be after the MultipartFilter otherwise encoding in forms doesn't work (for non-multipart forms).
+        insertFilters(servletContext, new CheckSessionFilter(), characterEncodingFilter, new AuditFilter(), new MultipartFilter(), new DelegatingFilterProxy("yadaLocalePathVariableFilter"));
     }
 	
 	/**

@@ -318,7 +318,7 @@ public class YadaEmailService {
 				List<String> invalidEmails = new ArrayList<String>(Arrays.asList(addresses)); // Il doppio passaggio serve perchè asList è fixed size
 				invalidEmails.removeAll(validEmail);
 				for (String address : invalidEmails) {
-					log.warn("Email non autorizzata (non in <validEmail>). Skipping message for '{}' from='{}' subject='{}' body='{}'",
+					log.warn("Email not authorized in configuration (not in <validEmail>). Skipping message for '{}' from='{}' subject='{}' body='{}'",
 						new Object[]{address, yadaEmailContent.from, yadaEmailContent.subject, yadaEmailContent.body});
 				}
 			}
