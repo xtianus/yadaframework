@@ -75,6 +75,7 @@ public class YadaAppConfig {
 		messageSource.setBasename("WEB-INF/messages/messages"); // e.g. WEB-INF/messages/messages.properties, WEB-INF/messages/messages_en.properties
 		// if true, the key of the message will be displayed if the key is not
 		// found, instead of throwing a NoSuchMessageException
+		messageSource.setFallbackToSystemLocale(false);
 		messageSource.setUseCodeAsDefaultMessage(true);
 		messageSource.setDefaultEncoding("UTF-8");
 		// # -1 : never reload, 0 always reload

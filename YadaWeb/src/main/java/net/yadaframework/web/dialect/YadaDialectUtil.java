@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.thymeleaf.context.ITemplateContext;
 
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.exceptions.YadaInvalidValueException;
 
 public class YadaDialectUtil {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
@@ -25,6 +26,9 @@ public class YadaDialectUtil {
 			// The contextPath is applied by @{} so it's not needed here
 			// String contextPath = ((org.thymeleaf.context.IWebContext)context).getRequest().getContextPath();
 			int dividerPos = value.indexOf('/', 1); // Second slash
+			if (dividerPos<0) {
+				throw new YadaInvalidValueException("Invalid url: {}", value);
+			}
 			String valueType = value.substring(1, dividerPos); // e.g. "res"
 //    	String valuePrefix = value.substring(0, dividerPos); // e.g. "/res"
 			String valueSuffix = value.substring(dividerPos); // e.g. "/xxx"
