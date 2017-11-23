@@ -554,6 +554,7 @@ public class YadaUtil {
 	 * @param shellCommandKey chiave completa xpath del comando shell da eseguire e.g. "config/shell/processTunableWhiteImage"
 	 * @param substitutionMap key-value of placeholders to replace in the command. A placeholder in the command is like ${key}, a substitution
 	 * pair is like "key"-->"value" 
+	 * @return true if successful
 	 */
 	public boolean exec(String shellCommandKey, Map<String, String> substitutionMap) {
 		String executable = config.getString(shellCommandKey + "/executable");

@@ -24,14 +24,31 @@ public class YadaGlobalExceptionHandler {
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaWebUtil yadaWebUtil;
 	
+	private final static String LOOPCOUNTER_KEY="yada-loop-counter";
+	private final static int LOOPCOUNTER_MAX=2;
+	
 	@ExceptionHandler(value = Exception.class)
 	public ModelAndView globalErrorHandler(HttpServletRequest request, Exception e) throws Exception {
+		ModelAndView modelAndView = new ModelAndView();
+		// Count the times we get here, to avoid looping in case of repeating errors on forward
+		Integer loops = (Integer) request.getAttribute(LOOPCOUNTER_KEY);
+		if (loops==null) {
+			loops = new Integer(1);
+		} else {
+			loops = loops+1;
+		}
+		request.setAttribute(LOOPCOUNTER_KEY, loops);
+		if (loops>=LOOPCOUNTER_MAX) {
+			log.error("Emergency exit from request after {} loops - redirecting to home", loops);
+			modelAndView.setViewName("redirect:/");
+			return modelAndView; 
+		}
+		
 		// If the exception is annotated with @ResponseStatus rethrow it and let the framework handle it.
         if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null) {
         	log.info("Rethrowing @ResponseStatus exception: {}", e.toString());
             throw e;
         }
-        ModelAndView modelAndView = new ModelAndView();
         log.error("Unhandled exception shown to user", e);
         if (yadaWebUtil.isAjaxRequest(request)) {
         	// If it was an ajax request, return an error object

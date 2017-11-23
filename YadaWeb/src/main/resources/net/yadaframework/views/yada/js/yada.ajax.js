@@ -758,10 +758,22 @@
 					yada.reload();
 					return;
 				}
-				if (responseTrimmed.startsWith("redirect:")) {
-					yada.loaderOn();
-					var targetUrl = responseTrimmed.substring("redirect:".length);
-					window.location.href=targetUrl;
+				if (responseTrimmed.startsWith("{\"redirect\":")) {
+					var redirectObject = JSON.parse(responseTrimmed);
+					var targetUrl = redirectObject.redirect;
+					if (redirectObject.newTab!="true") {
+						yada.loaderOn();
+						window.location.href=targetUrl;
+					} else {
+						var win = window.open(targetUrl, '_blank');
+						if (win) {
+						    //Browser has allowed it to be opened
+						    win.focus();
+						} else {
+						    //Browser has blocked it
+						    alert('Please allow popups for this website');
+						}
+					}
 					return;
 				}
 				var responseHtml=$("<div>").html(responseText);
