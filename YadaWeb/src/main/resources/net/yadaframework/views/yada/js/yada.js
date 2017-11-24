@@ -45,6 +45,12 @@
 		$('body').on('submit', '.s_showLoaderForm', yada.loaderOn);
 		yada.enableScrollTopButton(); // Abilita il torna-su
 		yada.initHandlersOn();
+		// When the page is pulled from bfcache (firefox/safari) turn the loader off
+		$(window).bind("pageshow", function(event) {
+		    if (event.originalEvent.persisted) {
+		        yada.loaderOff();
+		    }
+		});		
 	}
 	
 	/**

@@ -382,6 +382,20 @@
 	};
 	
 	/**
+	 * Execute function by name.
+	 * See https://stackoverflow.com/a/359910/587641
+	 */
+	function executeFunctionByName(functionName, context /*, args */) {
+		  var args = Array.prototype.slice.call(arguments, 2);
+		  var namespaces = functionName.split(".");
+		  var func = namespaces.pop();
+		  for(var i = 0; i < namespaces.length; i++) {
+		    context = context[namespaces[i]];
+		  }
+		  return context[func].apply(context, args);
+	}
+	
+	/**
 	 * Make an ajax call when a link is clicked, a select is chosen, a checkbox is selected
 	 */
 	function makeAjaxCall(e, $element, handler) {
@@ -392,6 +406,8 @@
 		// Call, in sequence, the handler specified in data-successHandler and the one passed to this function
 		var joinedHandler = function(responseText, responseHtml) {
 			showFeedbackIfNeeded($element);
+			deleteOnSuccess($element);
+			updateOnSuccess($element, responseHtml);
 			var handlerNames = $element.attr("data-yadaSuccessHandler");
 			if (handlerNames===undefined) {
 				handlerNames = $element.attr("data-successHandler"); // Legacy
@@ -400,17 +416,12 @@
 				// Can be a comma-separated list of handlers, which are called in sequence
 				var handlerNameArray = yada.listToArray(handlerNames);
 				for (var i = 0; i < handlerNameArray.length; i++) {
-					var dataHandler = window[handlerNameArray[i]];
-					if (typeof dataHandler === "function") {
-						dataHandler(responseText, responseHtml, $element[0]);
-					}
+					executeFunctionByName(handlerNameArray[i], window, responseText, responseHtml, $element[0]);
 				}
 			}
 			if (handler != null) {
 				handler(responseText, responseHtml, $element[0]);
 			}
-			deleteOnSuccess($element);
-			updateOnSuccess($element, responseHtml);
 		}
 		var url = $element.attr('href');
 		if (url==null) {
@@ -638,6 +649,14 @@
 			// Extend the handler to include form and button parameters
 			var joinedHandler = function(responseText, responseHtml) {
 				showFeedbackIfNeeded($form);
+				var deleted = deleteOnSuccess($(clickedButton));
+				if (!deleted) {
+					deleteOnSuccess($form);
+				}
+				var updated = updateOnSuccess($(clickedButton), responseHtml);
+				if (!updated) {
+					updateOnSuccess($form, responseHtml);
+				}
 				var formHandlerNames = $form.attr("data-yadaSuccessHandler");
 				if (formHandlerNames===undefined) {
 					formHandlerNames = $form.attr("data-successHandler"); // Legacy
@@ -652,32 +671,18 @@
 					// Can be a comma-separated list of handlers, which are called in sequence
 					var handlerNameArray = yada.listToArray(buttonHandlerNames);
 					for (var i = 0; i < handlerNameArray.length; i++) {
-						var dataHandler = window[handlerNameArray[i]];
-						if (typeof dataHandler === "function") {
-							runFormHandler &= dataHandler(responseText, responseHtml, this, clickedButton);
-						}
+						runFormHandler &= executeFunctionByName(handlerNameArray[i], window, responseText, responseHtml, this, clickedButton);
 					}
 				}
 				if (runFormHandler == true && formHandlerNames!=null) {
 					// Can be a comma-separated list of handlers, which are called in sequence
 					var handlerNameArray = yada.listToArray(formHandlerNames);
 					for (var i = 0; i < handlerNameArray.length; i++) {
-						var dataHandler = window[handlerNameArray[i]];
-						if (typeof dataHandler === "function") {
-							dataHandler(responseText, responseHtml, this, clickedButton);
-						}
+						executeFunctionByName(handlerNameArray[i], window, responseText, responseHtml, this, clickedButton);
 					}
 				}
 				if (handler != null) {
 					handler(responseText, responseHtml, this, clickedButton);
-				}
-				var deleted = deleteOnSuccess($(clickedButton));
-				if (!deleted) {
-					deleteOnSuccess($form);
-				}
-				var updated = updateOnSuccess($(clickedButton), responseHtml);
-				if (!updated) {
-					updateOnSuccess($form, responseHtml);
 				}
 			};
 			var method = $(this).attr('method') || "POST";
