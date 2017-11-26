@@ -713,6 +713,12 @@
 		$form.not('.'+markerClass).addClass(markerClass);
 	};
 	
+	function showFullPage(html) {
+		document.open();
+		document.write(html);
+		document.close();
+	}
+	
 	/**
 	 * Esegue una get/post ajax passando data (stringa od oggetto). Gestisce il caso che sia necessario il login.
 	 * Il metodo chiamato lato java può ritornare un notify chiamando yadaWebUtil.modalOk() o anche yadaWebUtil.modalError() etc.
@@ -741,7 +747,11 @@
 			contentType: contentType,
 			error: function(jqXHR, textStatus, errorThrown ) { 
 				// textStatus is "error", "timeout", "abort", or"parsererror"
-				// errorThrown is ''
+				var responseText = jqXHR.responseText;
+				if (jqXHR.status==503 && responseText!=null && responseText.startsWith("<html")) {
+					showFullPage(responseText);
+					return;
+				}
 				if (textStatus==="timeout") {
 					yada.showErrorModal(yada.messages.connectionError.title, yada.messages.connectionError.message);
 				} else if (errorThrown==="Forbidden") {
@@ -803,9 +813,7 @@
 				var pwdChange=$(responseHtml).find("body.yadaChangePassword");
 				if (pwdChange.length>0) {
 					$("#loginModal").remove();
-					document.open();
-					document.write(responseText);
-					document.close();
+					showFullPage(responseText);
 					return;
 				}			
 				
@@ -827,9 +835,7 @@
 				}
 				// If it is a full page, overwrite the current one
 				if ($('.yadafullPage', responseHtml).length>0 || $('.s_fullPage', responseHtml).length>0) {
-					document.open();
-					document.write(responseText);
-					document.close();
+					showFullPage(responseText);
 					return;
 				}
 				if (notify) {

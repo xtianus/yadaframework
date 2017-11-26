@@ -114,9 +114,12 @@ public class YadaWebUtil {
 	 * From a given string, creates a "slug" that can be inserted in a url and still be readable.
 	 * It is static so that it can be used in Entity objects (no context)
 	 * @param source the string to convert
-	 * @return the slug
+	 * @return the slug, which is empty for a null string
 	 */
 	public static String makeSlugStatic(String source) {
+		if (StringUtils.isBlank(source)) {
+			return "";
+		}
 		String slug = source.trim().toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
 		slug = slug.replaceAll(" +", "-"); // Spaces become dashes
 		slug = slug.replaceAll("[^\\w:,;=&!+~\\(\\)@\\*\\$\\'\\-]", "");
