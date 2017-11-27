@@ -512,19 +512,17 @@
 			for (var count=0; count<selectors.length; count++) {
 				var selector = selectors[count];
 				if (count<$replacementArray.length) {
-					$replacement = $replacementArray[count];
+					$replacement = $replacementArray[count].clone(); // Clone so that the original responseHtml is not removed by replaceWith 
 				}
 				if (selector == "") {
-					// TODO find a better way because replaceWith empties the responseHtml and the caller can't call other methods on it
+					// 
 					$element.replaceWith($replacement);
 				} else {
 					var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
 					if (fromParents==false) {
-						// TODO find a better way because replaceWith empties the responseHtml and the caller can't call other methods on it
 						$(selector).replaceWith($replacement);
 					} else {
 						selector = selector.replace(parentSelector, "").trim();
-						// TODO find a better way because replaceWith empties the responseHtml and the caller can't call other methods on it
 						$element.parents(selector).replaceWith($replacement);
 					}
 				}
@@ -791,7 +789,7 @@
 					}
 					return;
 				}
-				var responseHtml=$("<div>").html(responseText);
+				var responseHtml=$("<div>").html(responseTrimmed);
 				// Check if we just did a login.
 				// A successful login can also return a redirect, which will skip the PostLoginHandler 
 				if ("loginSuccess" == responseTrimmed) {
