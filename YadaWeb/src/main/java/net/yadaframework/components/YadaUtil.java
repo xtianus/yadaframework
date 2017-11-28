@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
@@ -484,21 +485,45 @@ public class YadaUtil {
 	 * @param command comando
 	 * @param args lista di argomenti (ogni elemento puo' contenere spazi), puo' essere null
 	 * @param substitutionMap key-value of placeholders to replace in the command. A placeholder in the command is like ${key}, a substitution
-	 * pair is like "key"-->"value" 
+	 * pair is like "key"-->"value" . If the value is a collection, arguments are unrolled.
 	 * @param outputStream ByteArrayOutputStream che conterrà l'output del comando (out + err)
 	 * @return the error message (will be empty for a return code >0), or null if there was no error
 	 */
-	public String exec(String command, List<String> args, Map<String, ?> substitutionMap, ByteArrayOutputStream outputStream) {
+	public String exec(String command, List<String> args, Map substitutionMap, ByteArrayOutputStream outputStream) {
 		int exitValue=1;
 		try {
 			CommandLine commandLine = new CommandLine(command);
 			if (args!=null) {
+				Pattern keyPattern = Pattern.compile("\\$\\{([^}]+)}"); // ${PARAMNAME}
 				for (String arg : args) {
-					commandLine.addArgument(arg);
+					boolean added=false;
+					// Convert collections to multiple arguments when needed
+					if (substitutionMap!=null) {
+						Matcher m = keyPattern.matcher(arg);
+						if (m.find()) {
+							String key = m.group(1); // PARAMNAME
+							Object values = substitutionMap.get(key);
+							if (values instanceof Collection) {
+								int countArg=0;
+								added=true;
+								for (Object extractedValue : (Collection)values) {
+									String newKey = key + countArg; // PARAMNAME0
+									String newArg = "${" + newKey  + "}"; // ${PARAMNAME0}
+									commandLine.addArgument(newArg);
+									substitutionMap.put(newKey, extractedValue);
+									countArg++;
+								}
+							}
+						}
+					}
+					if (!added) {
+						commandLine.addArgument(arg);
+					}
 				}
 			}
 			if (log.isDebugEnabled()) {
-				for (String key : substitutionMap.keySet()) {
+				for (Object keyObj : substitutionMap.keySet()) {
+					String key = (String) keyObj;
 					log.debug("{}={}", key, substitutionMap.get(key));
 					if (key.startsWith("{") || key.startsWith("${")) { // Checking { just for extra precaution
 						log.error("Invalid substitution {}: should NOT start with ${", key);
@@ -556,7 +581,7 @@ public class YadaUtil {
 	 * pair is like "key"-->"value" 
 	 * @return true if successful
 	 */
-	public boolean exec(String shellCommandKey, Map<String, String> substitutionMap) {
+	public boolean exec(String shellCommandKey, Map substitutionMap) {
 		String executable = config.getString(shellCommandKey + "/executable");
 		// Need to use getProperty() to avoid interpolation on ${} arguments
 		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);

@@ -482,7 +482,7 @@
 						$(selector).remove();
 					} else {
 						selector = selector.replace(parentSelector, "").trim();
-						$element.parents(selector).remove();
+						$element.parent().closest(selector).remove();
 					}
 				}
 			}
