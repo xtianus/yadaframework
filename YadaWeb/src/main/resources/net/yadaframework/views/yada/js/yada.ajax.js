@@ -617,7 +617,7 @@
 			});
 			$(this).addClass('yadaClickedButtonHandler');
 		});
-		$form.not('.'+markerClass).off('submit').submit(function(e) {
+		$form.not('.'+markerClass).submit(function(e) {
 			// If the form is marked as markerAjaxButtonOnly do not submit it via ajax unless the clicked button is marked with 'yadaAjax'
 			if ($form.hasClass(markerAjaxButtonOnly)) {
 				if (clickedButton==null || !$(clickedButton).hasClass('yadaAjax')) {
