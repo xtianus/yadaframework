@@ -509,7 +509,7 @@ public class YadaUtil {
 								for (Object extractedValue : (Collection)values) {
 									String newKey = key + countArg; // PARAMNAME0
 									String newArg = "${" + newKey  + "}"; // ${PARAMNAME0}
-									commandLine.addArgument(newArg);
+									commandLine.addArgument(newArg, false); // Don't handle quoting
 									substitutionMap.put(newKey, extractedValue);
 									countArg++;
 								}
@@ -517,7 +517,7 @@ public class YadaUtil {
 						}
 					}
 					if (!added) {
-						commandLine.addArgument(arg);
+						commandLine.addArgument(arg, false); // Don't handle quoting
 					}
 				}
 			}
@@ -559,7 +559,7 @@ public class YadaUtil {
 			CommandLine commandLine = new CommandLine(command);
 			if (args!=null) {
 				for (String arg : args) {
-					commandLine.addArgument(arg);
+					commandLine.addArgument(arg, false); // Don't handle quoting
 				}
 			}
 			DefaultExecutor executor = new DefaultExecutor();

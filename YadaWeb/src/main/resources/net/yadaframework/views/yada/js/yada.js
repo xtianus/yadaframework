@@ -518,6 +518,17 @@
 	/// String functions
 	
 	/**
+	 * Returns the portion of string that follows the first match of some substring
+	 */
+	yada.getAfter = function(str, toFind, fromIndex) {
+		var pos = str.indexOf(toFind, fromIndex);
+		if (pos>=0) {
+			return str.substring(pos+toFind.length);
+		}
+		return str;
+	}
+	
+	/**
 	 * Split a comma-separated string into an array. Commas can be followed by spaces.
 	 * If the input is null, return an empty array.
 	 */

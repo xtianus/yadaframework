@@ -235,7 +235,7 @@
 	 * @param $element the element on which to enable the fragment insertion, can be null for the entire body
 	 */
 	yada.enableAjaxFragments = function(handler, $element) {
-		if ($element==null) {
+		if ($element==null || $element=="") {
 			$element = $('body');
 		}
 		var $target = $element.parent();
@@ -263,7 +263,7 @@
 	 * @param $element the element on which to enable ajax links, can be null for the entire body
 	 */
 	yada.enableAjaxLinks = function(handler, $element) {
-		if ($element==null) {
+		if ($element==null || $element=="") {
 			$element = $('body');
 		}
 		var $target = $element.parent();
@@ -285,7 +285,7 @@
 	 * Enables ajax on a checkbox change.
 	 */
 	yada.enableAjaxCheckboxes = function(handler, $element) {
-		if ($element==null) {
+		if ($element==null || $element=="") {
 			$element = $('body');
 		}
 		var $target = $element.parent();
@@ -326,7 +326,7 @@
 	 * @param $element the element on which to enable ajax, can be null for the entire body
 	 */
 	yada.enableAjaxSelects = function(handler, $element) {
-		if ($element==null) {
+		if ($element==null || $element=="") {
 			$element = $('body');
 		}
 		var $target = $element.parent();
@@ -555,7 +555,7 @@
 	 * @param $element the element on which to enable ajax forms, can be null for the entire body
 	 */
 	yada.enableAjaxForms = function(handler, $element) {
-		if ($element==null) {
+		if ($element==null || $element=="") {
 			$element = $('body');
 		}
 		var $target = $element.parent();
