@@ -512,7 +512,7 @@
 			for (var count=0; count<selectors.length; count++) {
 				var selector = selectors[count];
 				if (count<$replacementArray.length) {
-					$replacement = $replacementArray[count].clone(); // Clone so that the original responseHtml is not removed by replaceWith 
+					$replacement = $replacementArray[count].clone(true, true); // Clone so that the original responseHtml is not removed by replaceWith 
 				}
 				if (selector == "") {
 					// 
@@ -722,7 +722,7 @@
 	 * Il metodo chiamato lato java può ritornare un notify chiamando yadaWebUtil.modalOk() o anche yadaWebUtil.modalError() etc.
 	 * In caso di notify di un errore, l'handler non viene chiamato.
 	 * @param url target url
-	 * @param data dati da inviare (stringa od oggetto)
+	 * @param data dati da inviare (stringa od oggetto) - can be null
 	 * @param successHandler(responseText, responseHtml);) funzione chiamata in caso di successo e nessun yadaWebUtil.modalError(). Viene chiamata anche in caso di errore se il suo flag executeAnyway è true
 	 * @param type "POST" per il post oppure null o "GET" per il get
 	 * @param timeout milliseconds timeout, null for default (set by the browser)
@@ -826,6 +826,7 @@
 				// Il successHandler viene eseguito solo se non c'è un errore, oppure se il flag executeAnyway è true
 				if (successHandler != null) {
 					if (!yada.isNotifyError(responseHtml) || successHandler.executeAnyway==true) {
+						yada.initAjaxHandlersOn(responseHtml);
 						// Non c'era un login, eseguo l'handler, se passato
 						successHandler(responseText, responseHtml);
 						// Keep going...
