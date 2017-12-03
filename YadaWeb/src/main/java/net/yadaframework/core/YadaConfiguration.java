@@ -805,7 +805,8 @@ public abstract class YadaConfiguration {
 	 */
 	public String getApplicationBuild() {
 		if (build==null) {
-			if (isDevelopmentEnvironment()) {
+			boolean canOverride = configuration.getBoolean("config/info/build/@canOverride", true);
+			if (canOverride && isDevelopmentEnvironment()) {
 				// While developing you get a new build number each time you restart the server
 				// so that you don't get stale (cached) files
 				build = "dev" + System.currentTimeMillis();
