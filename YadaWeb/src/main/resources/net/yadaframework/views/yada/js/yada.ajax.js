@@ -746,7 +746,7 @@
 			error: function(jqXHR, textStatus, errorThrown ) { 
 				// textStatus is "error", "timeout", "abort", or"parsererror"
 				var responseText = jqXHR.responseText;
-				if (jqXHR.status==503 && responseText!=null && responseText.startsWith("<html")) {
+				if (jqXHR.status==503 && responseText!=null && yada.startsWith(responseText, "<html")) {
 					showFullPage(responseText);
 					return;
 				}
@@ -771,7 +771,7 @@
 					yada.reload();
 					return;
 				}
-				if (responseTrimmed.startsWith("{\"redirect\":")) {
+				if (yada.startsWith(responseTrimmed, "{\"redirect\":")) {
 					var redirectObject = JSON.parse(responseTrimmed);
 					var targetUrl = redirectObject.redirect;
 					if (redirectObject.newTab!="true") {
