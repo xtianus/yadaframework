@@ -106,7 +106,7 @@ public class YadaNotifyData {
 		if (model!=null) {
 			model.addAttribute(KEY_NOTIFICATION_AUTOCLOSE, milliseconds);
 		} else {
-			redirectAttributes.addAttribute(KEY_NOTIFICATION_AUTOCLOSE, milliseconds);
+			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_AUTOCLOSE, milliseconds);
 		}
 		return this;
 	}
@@ -118,7 +118,7 @@ public class YadaNotifyData {
 		if (model!=null) {
 			model.addAttribute(KEY_NOTIFICATION_RELOADONCLOSE, KEY_NOTIFICATION_RELOADONCLOSE);
 		} else {
-			redirectAttributes.addAttribute(KEY_NOTIFICATION_RELOADONCLOSE, KEY_NOTIFICATION_RELOADONCLOSE);
+			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_RELOADONCLOSE, KEY_NOTIFICATION_RELOADONCLOSE);
 		}
 		return this;
 	}
@@ -145,7 +145,7 @@ public class YadaNotifyData {
 		if (model!=null) {
 			model.addAttribute(KEY_NOTIFICATION_REDIRECT, path);
 		} else {
-			redirectAttributes.addAttribute(KEY_NOTIFICATION_REDIRECT, path);
+			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_REDIRECT, path);
 		}
 		return this;
 	}
