@@ -343,6 +343,19 @@ public class YadaUtil {
 	}
 	
 	/**
+	 * Get any bean defined in the Spring ApplicationContext
+	 * @param nameInApplicationContext the Class.getSimpleName() starting lowercase, e.g. "processController"
+	 * @return
+	 */
+	public static Object getBean(String nameInApplicationContext) {
+		if (applicationContext!=null) {
+			return applicationContext.getBean(nameInApplicationContext);
+		}
+		log.debug("No applicationContext injected in getBean() yet - returning null");
+		return null;
+	}
+	
+	/**
 	 * Genera una password casuale di 16 caratteri
 	 * @return a string like "XFofvGEtBlZIa5sH"
 	 */
