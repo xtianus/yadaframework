@@ -308,6 +308,7 @@
 		// From here on the $checkbox is a single element, not an array
 		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		$checkbox.not('.'+markerClass).change(function(e) {
+			$checkbox = $(this); // Needed otherwise $checkbox could be stale (from a previous ajax replacement) 
 			// If there is a parent form, submit it, otherwise make an ajax call defined on the checkbox
 			var $form = $checkbox.parents("form.yadaAjaxed");
 			if ($form.length>0) {
@@ -350,6 +351,7 @@
 		// From here on the $select is a single element, not an array
 		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		$select.not('.'+markerClass).change(function(e) {
+			$select = $(this); // Needed otherwise $select could be stale (from a previous ajax replacement) 
 			return makeAjaxCall(e, $select, handler);
 		})
 		$select.removeClass('yadaAjax');
@@ -374,6 +376,7 @@
 		// From here on the $link is a single anchor, not an array
 		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		$link.not('.'+markerClass).click(function(e) {
+			$link = $(this); // Needed otherwise $link could be stale (from a previous ajax replacement) 
 			return makeAjaxCall(e, $link, handler);
 		})
 		$link.removeClass('yadaAjax');
@@ -520,13 +523,15 @@
 				} else {
 					var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
 					if (fromParents==false) {
-						$(selector).replaceWith($replacement);
+						var $oldElement = $(selector);
+						$oldElement.replaceWith($replacement);
 					} else {
 						selector = selector.replace(parentSelector, "").trim();
 						$element.parents(selector).replaceWith($replacement);
 					}
 				}
-				yada.initHandlersOn($replacement);
+				// Not needed  because handlers are initialized before entering this method, then cloned
+				// yada.initHandlersOn($replacement);
 			}
 			return true;
 		}
@@ -697,6 +702,7 @@
 	    		var okButton = $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
 	    		var cancelButton = $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 	    		$button.click(function() {
+	    			$button = $(this); // Needed otherwise $button could be stale (from a previous ajax replacement) 
 	    			yada.confirm(confirmText, function(result) {
 	    				if (result==true) {
 	    					$button.off("click");
@@ -746,7 +752,7 @@
 			error: function(jqXHR, textStatus, errorThrown ) { 
 				// textStatus is "error", "timeout", "abort", or"parsererror"
 				var responseText = jqXHR.responseText;
-				if (jqXHR.status==503 && responseText!=null && responseText.startsWith("<html")) {
+				if (jqXHR.status==503 && responseText!=null && yada.startsWith(responseText, "<html")) {
 					showFullPage(responseText);
 					return;
 				}
@@ -771,7 +777,7 @@
 					yada.reload();
 					return;
 				}
-				if (responseTrimmed.startsWith("{\"redirect\":")) {
+				if (yada.startsWith(responseTrimmed, "{\"redirect\":")) {
 					var redirectObject = JSON.parse(responseTrimmed);
 					var targetUrl = redirectObject.redirect;
 					if (redirectObject.newTab!="true") {

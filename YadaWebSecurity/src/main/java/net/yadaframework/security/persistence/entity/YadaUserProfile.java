@@ -61,9 +61,10 @@ public class YadaUserProfile implements Serializable {
 									// "America/Argentina/ComodRivadavia"
 									// https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
-	@JsonIgnore
-	@OneToMany(mappedBy="owner", cascade=CascadeType.ALL)
-	protected List<YadaTicket> tickets;
+// Removed because I don't want to force the use of a YadaTicket table
+//	@JsonIgnore
+//	@OneToMany(mappedBy="owner", cascade=CascadeType.ALL)
+//	protected List<YadaTicket> tickets;
 	
 	public Long getId() {
 		return id;

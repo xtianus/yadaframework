@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +31,7 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
-import org.springframework.web.servlet.resource.VersionResourceResolver;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring4.view.ThymeleafViewResolver;
@@ -60,6 +62,16 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	
 	@Autowired protected ApplicationContext applicationContext;
 	
+    @Autowired
+    private RequestMappingHandlerAdapter requestMappingHandlerAdapter;
+
+    @PostConstruct
+    public void init() {
+    	// the content of the default Model should never be used if a controller method redirects
+    	// http://www.logicbig.com/tutorials/spring-framework/spring-web-mvc/redirect-attributes/
+       requestMappingHandlerAdapter.setIgnoreDefaultModelOnRedirect(true);
+    }
+    
 	/**
 	 * Return a string pattern to match urls that should not be localised when using a language path variable
 	 * i.e. the language code will not be added when using @{} in thymeleaf
