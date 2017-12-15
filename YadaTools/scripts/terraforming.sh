@@ -161,7 +161,11 @@ if [[ $cfgPkgTomcat ]]; then
 	CATALINA_BASE=/var/lib/$cfgPkgTomcat
 	tomcatConfiguration=/etc/default/$cfgPkgTomcat
 	# Non uso -XX:+UseConcMarkSweepGC perché le vm economiche non hanno tante cpu  
-	sed -i 's%JAVA_OPTS=.*%JAVA_OPTS=$tomcatOptions%g' ${tomcatConfiguration}
+	sed -i 's%^JAVA_OPTS=.*%JAVA_OPTS=$tomcatOptions%g' ${tomcatConfiguration}
+	# Enable default remote debugger
+	if [[ $cfgPkgTomcatDebugger ]]; then
+		sed -i 's%^#JAVA_OPTS="${JAVA_OPTS} -Xdebug%JAVA_OPTS="${JAVA_OPTS} -Xdebug%' ${tomcatConfiguration}
+	fi
 	if [[ $cfgTomcatManagerPwd ]]; then
 		# Utenza tomcat manager
 		sed -i 's%</tomcat-users>%<role rolename="manager-gui"/><role rolename="manager-jmx"/><role rolename="admin"/><user username="${cfgUser}" password="${cfgTomcatManagerPwd}" roles="admin,manager-gui,manager-jmx"/></tomcat-users>%g' ${cfgTomcatBase}/tomcat-users.xml
