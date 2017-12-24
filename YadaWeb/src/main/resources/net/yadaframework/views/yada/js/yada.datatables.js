@@ -45,7 +45,6 @@
 	yada.dataTableCrud = function($table, dataUrl, dataAttributes, editDef, deleteDef, order, pageLength, languageUrl, extraButtons, removeCheckbox) {
 		// Method argument validation
 		if ($table == null || typeof $table != "object" || $table.length!=1 || typeof $table[0] != "object") {
-			console.error("yada.datatables: $table must be a single jQuery object");
 			return;
 		}
 		if (dataUrl==null || typeof dataUrl != "string") {
