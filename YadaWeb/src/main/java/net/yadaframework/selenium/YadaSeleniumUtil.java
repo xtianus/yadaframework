@@ -189,6 +189,7 @@ public class YadaSeleniumUtil {
 		int proxyPort = proxyToUse.getPort();
 		log.debug("Setting browser proxy to {}:{}", proxyHost, proxyPort);
 		browserProxy.setHttpProxy(proxyHost + ":" + proxyPort);
+		browserProxy.setSslProxy(proxyHost + ":" + proxyPort);
 		browserProxy.setProxyType(ProxyType.MANUAL);
 		
 		DesiredCapabilities capability;

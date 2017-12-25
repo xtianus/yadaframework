@@ -117,7 +117,7 @@ public class AuditFilter extends OncePerRequestFilter {
 	
 	// Stampo i parametri di request (get e post)
 	protected void beforeRequest(HttpServletRequest request) {
-		if (log.isInfoEnabled()) {
+		if (log.isDebugEnabled()) {
 			try {
 				String requestUri = request.getRequestURI();
 				String queryString = request.getQueryString();
