@@ -197,7 +197,8 @@ public class YadaSeleniumUtil {
 		case DRIVER_FIREFOX:
 			capability = DesiredCapabilities.firefox();
 			if (customProfileDir!=null) {
-				customProfileDir.mkdirs();
+				// Creating the folder is wrong because of permissions mismatch
+				// customProfileDir.mkdirs();
 				FirefoxOptions options = new FirefoxOptions();
 				String path = customProfileDir.getAbsolutePath();
 				log.debug("Setting Firefox user profile folder to {}", path);
@@ -208,7 +209,8 @@ public class YadaSeleniumUtil {
 		case DRIVER_CHROME:
 			capability = DesiredCapabilities.chrome();
 			if (customProfileDir!=null) {
-				customProfileDir.mkdirs();
+				// Creating the folder is wrong because of permissions mismatch
+				// customProfileDir.mkdirs();
 				ChromeOptions options = new ChromeOptions();
 				String path = customProfileDir.getAbsolutePath();
 				log.debug("Setting Chrome user profile folder to {}", path);
