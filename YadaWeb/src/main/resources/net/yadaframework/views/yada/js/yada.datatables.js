@@ -451,6 +451,7 @@
 			var requestData = {};
 			requestData[idName] = param;
 			var handler = function(responseText, responseHtml) {
+				dataTable.draw(false); // Always reload table content on return from ajax call (there could be no modal)
 				yada.datatableDrawOnModalClose(dataTable);
 				recursiveEnableAjaxForm(responseText, responseHtml);
 			};

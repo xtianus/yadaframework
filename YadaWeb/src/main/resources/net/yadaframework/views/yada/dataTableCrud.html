@@ -6,6 +6,7 @@
 	
 	Parameters:
 	- tableId = id of the table
+	- classes = classes to add to the <table> tag class (optional - defaults to "table-striped no-wrap")
 	- columns = column name list, like ${ {'ID', 'Name','Surname'} }, without the 'Comandi' column (be careful about the spaces between { {)
 	- disableAdd = true per non aggiungere il pulsante di add
 	- disableEdit = true per non aggiungere il pulsante di edit
@@ -22,11 +23,11 @@
  */-->
 
 <div class="yadaTableBlock" th:fragment="fragment">
-	<table th:id="${tableId}" cellspacing="0" width="100%" class="table table-striped no-wrap">
+	<table th:id="${tableId}" cellspacing="0" width="100%" class="table" th:classappend="${classes}?:'table-striped no-wrap'">
 		<thead>
 			<tr>
 				<th></th> 
-				<th th:if="${!(false==checkbox)}" class="yadaCheckInCell all"><input type="checkbox" class="s_columnSelector" title="Tutti/Nessuno" /></th>
+				<th th:if="${!(false==checkbox)}" class="yadaCheckInCell all"><input type="checkbox" class="s_columnSelector" title="All/None" /></th>
 				<th th:each="column : ${columns}" th:text="${column}">Name</th>
 				<th class="all" th:text="${commandsColumnText}?:#{column.commands}">Commands</th>
 			</tr>
