@@ -238,11 +238,11 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Reflection to get the type of a given field, even nested
+	 * Reflection to get the type of a given field, even nested or in a superclass.
 	 * @param rootClass
 	 * @param attributePath field name like "surname" or even a path like "friend.name"
 	 * @return
-	 * @throws NoSuchFieldException
+	 * @throws NoSuchFieldException if the field is not found in the class hierarchy
 	 * @throws SecurityException
 	 */
 	public Class getType(Class rootClass, String attributePath) throws NoSuchFieldException, SecurityException {
@@ -250,7 +250,25 @@ public class YadaUtil {
 			return rootClass;
 		}
 		String attributeName = StringUtils.substringBefore(attributePath, ".");
-		Field field = rootClass.getDeclaredField(attributeName);
+		Field field = null;
+		NoSuchFieldException exception = null;
+		while (field==null && rootClass!=null) {
+			try {
+				field = rootClass.getDeclaredField(attributeName);
+			} catch (NoSuchFieldException e) {
+				if (exception==null) {
+					exception=e;
+				}
+				rootClass = rootClass.getSuperclass();
+			}
+		}
+		if (field==null) {
+			if (exception!=null) {
+				throw exception;
+			} else {
+				throw new NoSuchFieldException("No field " + attributeName + " found in hierarchy");
+			}
+		}
 		Class attributeType = field.getType();
 		// If it's a list, look for the list type
 		if (attributeType == java.util.List.class) {
