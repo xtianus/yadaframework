@@ -59,6 +59,8 @@ public class YadaJobManager {
 			List<YadaJob> recoverableJobs = yadaJobDao.getRecoverableJobs();
 			for (YadaJob yadaJob : recoverableJobs) {
 				yadaJob.setRecovered(true);
+				yadaJob.setJobStartTime(new Date()); // Needed to prevent stale cleaning
+				yadaJobRepository.save(yadaJob);
 				yadaJobScheduler.runJob(yadaJob.getId());
 			}
 			// Scheduling the YadaJobScheduler according to the configured period

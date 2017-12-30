@@ -167,11 +167,6 @@ class YadaJobScheduler implements Runnable {
 		ListenableFuture<?> jobHandle = jobHandles.get(yadaJobId);
 		if (jobHandle!=null) {
 			jobHandle.cancel(true);
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// TODO controllare che onFailure sia chiamato, altrimenti fare le cose che seguono
-//			yadaJob.setJobState(YadaJobState.ACTIVE);
-//			yadaJobRepository.save(yadaJob);
-//			jobHandles.remove(yadaJob);
 		} else {
 			log.debug("No job handle found for job id {} when interrupting", yadaJobId);
 		}

@@ -14,9 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.persistence.YadaSql;
@@ -58,15 +55,19 @@ public class YadaJobSchedulerDao {
     // Called by the YadaJobScheduler when a job fails
     @Transactional(readOnly = false)
 	public void internalJobFailed(YadaJob yadaJob, Throwable thrown) {
-		log.debug("Job id {} ended onFailure: {}", yadaJob.getId(), thrown);
-		yadaJob = em.merge(yadaJob);
-		setActiveWhenRunning(yadaJob);
-		yadaJob.incrementErrorStreak();
-		Date now = new Date();
-		if (yadaJob.getJobScheduledTime().before(now)) {
-			yadaJob.setJobScheduledTime(now);
+		log.debug("Job id {} ended onFailure", yadaJob.getId(), thrown);
+		try {
+			yadaJob = em.merge(yadaJob);
+			setActiveWhenRunning(yadaJob);
+			yadaJob.incrementErrorStreak();
+			Date now = new Date();
+			if (yadaJob.getJobScheduledTime().before(now)) {
+				yadaJob.setJobScheduledTime(now);
+			}
+			yadaJob.setJobStartTime(null); // The time at which the job was started - null if the job is not in the RUNNING state.
+		} catch (Exception e) {
+			log.error("internalJobFailed failed to update Job id {} with db version {}", yadaJob.getId(), yadaJob.getVersion(), e);
 		}
-		yadaJob.setJobStartTime(null); // The time at which the job was started - null if the job is not in the RUNNING state.
 	}
 	
     /**
@@ -82,11 +83,15 @@ public class YadaJobSchedulerDao {
 //    	    session.saveOrUpdate( myEntity );
 //    	}
     	log.debug("Job id {} ended successfully", yadaJob.getId());
-    	yadaJob = em.merge(yadaJob);
-    	setActiveWhenRunning(yadaJob);
-		yadaJob.setJobLastSuccessfulRun(new Date());
-		yadaJob.setErrorStreakCount(0);
-		yadaJob.setJobStartTime(null); // The time at which the job was started - null if the job is not in the RUNNING state.
+		try {
+	    	yadaJob = em.merge(yadaJob);
+	    	setActiveWhenRunning(yadaJob);
+			yadaJob.setJobLastSuccessfulRun(new Date());
+			yadaJob.setErrorStreakCount(0);
+			yadaJob.setJobStartTime(null); // The time at which the job was started - null if the job is not in the RUNNING state.
+		} catch (Exception e) {
+			log.error("internalJobSuccessful failed to update Job id {} with db version {}", yadaJob.getId(), yadaJob.getVersion(), e);
+		}
 	}   
     
 	// The job must set its own state to DISABLED or PAUSED when failed, otherwise it is set to ACTIVE

@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -91,6 +92,30 @@ public class YadaUtil {
     public void init() {
 		defaultLocale = config.getDefaultLocale();
     }
+	
+	/**
+	 * Convert from an amount of time to a string in the format xxd:hh:mm:ss
+	 * @param amount interval that needs to be formatted
+	 * @param timeUnit the unit of the interval
+	 * @return a formatted string representing the input interval
+	 */
+	public static String formatTimeInterval(long amount, TimeUnit timeUnit) {
+		long totSeconds = timeUnit.toSeconds(amount);
+		long seconds = totSeconds % 60;
+		long totMinutes = timeUnit.toMinutes(amount);
+		long minutes = totMinutes % 60;
+		long totHours = timeUnit.toHours(amount);
+		long hours = totHours % 24;
+		long days = timeUnit.toDays(amount);
+		String result = String.format("%02d:%02d", minutes, seconds);
+		if (hours+days>0) {
+			result = String.format("%02d:", hours) + result;
+			if (days>0) {
+				result = String.format("%dd:", days) + result;
+			}
+		}
+		return result;
+	}
 	
 	/**
 	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity.
