@@ -34,7 +34,7 @@ public class YadaUserMessageDao {
     @Modifying
     @Transactional(readOnly = false) 
     public void createOrIncrement(YadaUserMessage<?> m) {
-    	log.debug("YadaUserMessage to {} from {}: [{}] '{}' - {} ({})", 
+    	log.debug("YadaUserMessage to {} from {}: [{}] '{}' - {} (data={})", 
     		m.getReceiverName()!=null?m.getReceiverName():"-", 
     		m.getSender()!=null?m.getSenderName():"-", 
     		m.getPriority(), m.getTitle(), m.getMessage(), m.getData());
@@ -60,6 +60,7 @@ public class YadaUserMessageDao {
     		.where("m.recipient = :recipient").and()
     		.where(m.getSender()!=null, "m.sender = :sender").and()
     		.where(m.getData()!=null, "m.data = :data").and()
+    		.orderBy("m.modified desc")
     		.setParameter("contentHash", m.getContentHash())
     		.setParameter("oldestStackTime", oldestStackTime)
     		.setParameter("recipient", m.getRecipient())
@@ -73,6 +74,7 @@ public class YadaUserMessageDao {
     		m = existingList.get(0);
     		m.incrementStack();
     		m.setReadByRecipient(false);
+    		m.setModified(new Date());
     	}
     }
 }

@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Objects;
 
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInvalidValueException;
@@ -93,6 +94,22 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 	@Transient
 	public boolean equals(Enum<? extends YadaLocalEnum<?>> enumValue) {
 		return enumValue.getClass().getName().equals(this.enumClassName) && enumValue.ordinal() == this.enumOrdinal;
+	}
+	
+	@Transient
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof YadaPersistentEnum == false || obj==null) {
+			return false;
+		}
+		YadaPersistentEnum<E> other = (YadaPersistentEnum<E>) obj;
+		return (this.enumClassName.equals(other.enumClassName) && this.enumOrdinal == other.enumOrdinal);
+	}
+
+	@Transient
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(this.enumClassName, this.enumOrdinal);
 	}
 	
 	/**
@@ -180,5 +197,6 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 	public void setEnumClassName(String enumClassName) {
 		this.enumClassName = enumClassName;
 	}
+
 	
 }
