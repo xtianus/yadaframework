@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaRegistrationType;
 import net.yadaframework.security.YadaUserDetailsService;
+import net.yadaframework.security.components.YadaSecurityEmailService;
 import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.security.components.YadaTokenHandler;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;

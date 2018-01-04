@@ -310,23 +310,6 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		return resolver;
 	}
 	
-	
-	public ClassLoaderTemplateResolver emailTemplateResolver() {
-		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
-		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
-		resolver.setPrefix(YadaConstants.EMAIL_TEMPLATES_PREFIX); // Attenzione allo slash finale!
-//		resolver.setPrefix(YadaConstants.EMAIL_TEMPLATES_PREFIX + "/"); // Attenzione allo slash finale!
-		Set<String> patterns = new HashSet<>();
-		patterns.add("/email/*"); // Start with "email"
-		resolver.setResolvablePatterns(patterns);
-		resolver.setSuffix(".html");
-		resolver.setCharacterEncoding("UTF-8");
-		resolver.setTemplateMode(TemplateMode.HTML);
-		resolver.setCacheable(config.isProductionEnvironment());
-		// resolver.setOrder(40); // Order not needed because resolver on different SpringTemplateEngine
-		return resolver;
-	}
-	
 	@Bean
 	public SpringTemplateEngine templateEngine() {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
@@ -336,19 +319,6 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		engine.addTemplateResolver(webTemplateResolver());
 		engine.addTemplateResolver(mailPreviewTemplateResolver());
 		engine.addTemplateResolver(yadaTemplateResolver());
-		// Do this in the subclass
-		//		// http://www.thymeleaf.org/layouts.html
-		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
-		addExtraDialect(engine); // thymeleaf-SpringSecurity-dialect
-		addYadaDialect(engine);
-		return engine;
-	}
-	
-	@Bean
-	public SpringTemplateEngine emailTemplateEngine() {
-		SpringTemplateEngine engine = new SpringTemplateEngine();
-		engine.setEnableSpringELCompiler(true);
-		engine.addTemplateResolver(emailTemplateResolver());
 		// Do this in the subclass
 		//		// http://www.thymeleaf.org/layouts.html
 		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect

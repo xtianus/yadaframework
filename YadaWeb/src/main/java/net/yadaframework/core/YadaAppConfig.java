@@ -1,7 +1,9 @@
 package net.yadaframework.core;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.annotation.PostConstruct;
@@ -26,8 +28,12 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.thymeleaf.spring4.SpringTemplateEngine;
+import org.thymeleaf.templatemode.TemplateMode;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.web.dialect.YadaDialect;
 
 @Configuration
 @ComponentScan(basePackages = { "net.yadaframework.components" })
@@ -51,6 +57,44 @@ public class YadaAppConfig {
 			flyway.setDataSource(dataSource);
 			flyway.migrate();
 		}
+	}
+	
+	
+	public ClassLoaderTemplateResolver emailTemplateResolver() {
+		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
+		resolver.setPrefix(YadaConstants.EMAIL_TEMPLATES_PREFIX); // Attenzione allo slash finale!
+//		resolver.setPrefix(YadaConstants.EMAIL_TEMPLATES_PREFIX + "/"); // Attenzione allo slash finale!
+		Set<String> patterns = new HashSet<>();
+		patterns.add("/email/*"); // Start with "email"
+		resolver.setResolvablePatterns(patterns);
+		resolver.setSuffix(".html");
+		resolver.setCharacterEncoding("UTF-8");
+		resolver.setTemplateMode(TemplateMode.HTML);
+		resolver.setCacheable(config.isProductionEnvironment());
+		// resolver.setOrder(40); // Order not needed because resolver on different SpringTemplateEngine
+		return resolver;
+	}
+	
+	@Bean
+	public SpringTemplateEngine emailTemplateEngine() {
+		SpringTemplateEngine engine = new SpringTemplateEngine();
+		engine.setEnableSpringELCompiler(true);
+		engine.addTemplateResolver(emailTemplateResolver());
+		// Do this in the subclass
+		//		// http://www.thymeleaf.org/layouts.html
+		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
+		addExtraDialect(engine); // thymeleaf-SpringSecurity-dialect
+		engine.addDialect(new YadaDialect(config));
+		return engine;
+	}
+
+	/**
+	 * To be overridden when a new dialect has to be added, e.g. engine.addDialect(new LayoutDialect());
+	 * @param engine
+	 */
+	protected void addExtraDialect(SpringTemplateEngine engine) {
+		// Do nothing
 	}
 	
 	@Bean
