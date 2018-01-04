@@ -218,7 +218,7 @@
 	
 	// Chiama la funzione javascript yadaCallback() se presente nell'html ricevuto dal server.
 	// - responseHtml = l'html ricevuto dal server, creato con $("<div>").html(responseText)
-	function callYadaCallbackIfPresent(responseHtml) {
+	yada.callYadaCallbackIfPresent = function(responseHtml) {
 		// Cerco se c'è una funzione js da eseguire chiamata "yadaCallback".
 		var scriptNodes = $(responseHtml).find("script#yadaCallback");
 		if (scriptNodes.length>0) {

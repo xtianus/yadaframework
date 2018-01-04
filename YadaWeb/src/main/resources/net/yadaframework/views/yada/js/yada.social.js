@@ -37,7 +37,7 @@
 				yada.loaderOff();
 				var responseHtml=$("<div>").html(responseText);
 				var modalShown = handleLoadedModal(responseHtml); // Il risultato è il modal di registrazione social, che viene mostrato
-				var callbackCalled = callYadaCallbackIfPresent(responseHtml); // Qui succede il redirect
+				var callbackCalled = yada.callYadaCallbackIfPresent(responseHtml); // Qui succede il redirect
 				if (!modalShown && !callbackCalled) {
 					// Il risultato è il contenuto originariamente richiesto, che viene passato all'handler, oppure se non c'è l'handler si ricarica la pagina corrente
 					handlePostLoginHandler(responseHtml, responseText);
