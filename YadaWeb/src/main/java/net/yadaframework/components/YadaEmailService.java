@@ -17,6 +17,7 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
@@ -282,10 +283,11 @@ public class YadaEmailService {
 				return true;
 			}
 		} catch (Exception e) {
+			String to = ArrayUtils.toString(yadaEmailContent.to, "");
+			log.error("Error while sending email message to '{}'", to, e);
 			if (config.isEmailThrowExceptions()) {
 				throw new YadaEmailException(e);
 			}
-			log.error("Error while sending email message to '{}'", Arrays.asList(yadaEmailContent.to), e);
 		}
 		return false;
 	}
