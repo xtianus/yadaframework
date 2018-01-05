@@ -172,6 +172,7 @@
 		// Colonna dei comandi
 		columnDef.push({ 
 			data: null, 
+			className: 'yadaCommandButtonCell',
 			name: 'comandi',
 			orderable: false,
 			searchable: false,

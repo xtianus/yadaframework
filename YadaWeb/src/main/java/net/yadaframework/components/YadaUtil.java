@@ -94,6 +94,18 @@ public class YadaUtil {
     }
 	
 	/**
+	 * Returns the current stack trace as a string, formatted on separate lines
+	 * @return
+	 */
+	public String getCurrentStackTraceFormatted() {
+		StringBuilder stringBuilder = new StringBuilder();
+		for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+			stringBuilder.append("\tat ").append(element).append('\n');
+		}
+		return stringBuilder.toString();
+	}
+	
+	/**
 	 * Returns a random element from the list
 	 * @param list
 	 * @return a random element from the list, or null if the list is empty
