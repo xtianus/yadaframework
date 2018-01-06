@@ -57,6 +57,18 @@ public class YadaSeleniumUtil {
 	
 	YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
 	
+	/**
+	 * Return a value calculated via javascript.
+	 * @param javascriptCode Any valid javascript code with a return value
+	 * @param webDriver
+	 * @return
+	 */
+	public String getByJavascript(String javascriptCode, WebDriver webDriver) {
+		JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
+		return (String) javascriptExecutor.executeScript(javascriptCode);
+	}
+	
+	
 	private void sleepRandomShort() {
     	yadaUtil.sleepRandom(50, 600); // min-max sleep
     }
