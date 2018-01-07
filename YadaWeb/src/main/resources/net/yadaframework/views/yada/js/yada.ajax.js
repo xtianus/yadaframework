@@ -515,7 +515,9 @@
 			for (var count=0; count<selectors.length; count++) {
 				var selector = selectors[count];
 				if (count<$replacementArray.length) {
-					$replacement = $replacementArray[count].clone(true, true); // Clone so that the original responseHtml is not removed by replaceWith 
+					// Clone so that the original responseHtml is not removed by replaceWith.
+					// All handlers are also cloned.
+					$replacement = $replacementArray[count].clone(true, true); 
 				}
 				if (selector == "") {
 					// 
@@ -829,10 +831,13 @@
 				// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
 				var notify=yada.handleNotify(responseHtml);
 				
+				// Always initialize all handlers on the returned content
+				yada.initHandlersOn(responseHtml);
+
 				// Il successHandler viene eseguito solo se non c'è un errore, oppure se il flag executeAnyway è true
 				if (successHandler != null) {
 					if (!yada.isNotifyError(responseHtml) || successHandler.executeAnyway==true) {
-						yada.initAjaxHandlersOn(responseHtml);
+						// yada.initAjaxHandlersOn(responseHtml);
 						// Non c'era un login, eseguo l'handler, se passato
 						successHandler(responseText, responseHtml);
 						// Keep going...

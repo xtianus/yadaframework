@@ -58,7 +58,7 @@
 	 * @param $element the element, or null for the entire body
 	 */
 	yada.initHandlersOn = function($element) {
-		yada.enableShowPassword($element); // Abilita l'occhietto
+		yada.enableShowPassword($element);
 		yada.enableRefreshButtons($element);
 		yada.enableConfirmLinks($element);
 		yada.enableHelpButton($element);
@@ -91,10 +91,10 @@
 		if ($element==null) {
 			$element = $('body');
 		}
-		$('a[data-yadaHash]', $element).click(function(){
+		$('a[data-yadaHash]', $element).not(".yadaHashed").click(function(){
 			var hashValue = $(this).attr('data-yadaHash')
 			history.pushState({'yadaHash': true}, null, window.location.pathname + '#' + hashValue)
-		});
+		}).addClass("yadaHashed");
 	}
 
 	yada.enableTooltip = function($element) {
