@@ -151,6 +151,14 @@ table.dataTable .yadaRowCommandButton {
   	vertical-align: top;
 }
 
+table.dataTable .yadaCommandButtonCell {
+	white-space: nowrap;
+}
+
+table.dataTable.compact .yadaCheckInCell {
+	padding-right: 4px;
+}
+
 table.dataTable th.sorting_asc, table.dataTable th.sorting_desc {
 	/* background-color: #fafafa; */
 	border-style: solid !important;

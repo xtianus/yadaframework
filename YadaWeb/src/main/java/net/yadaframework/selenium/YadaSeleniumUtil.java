@@ -57,6 +57,18 @@ public class YadaSeleniumUtil {
 	
 	YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
 	
+	/**
+	 * Return a value calculated via javascript.
+	 * @param javascriptCode Any valid javascript code with a return value
+	 * @param webDriver
+	 * @return
+	 */
+	public String getByJavascript(String javascriptCode, WebDriver webDriver) {
+		JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
+		return (String) javascriptExecutor.executeScript(javascriptCode);
+	}
+	
+	
 	private void sleepRandomShort() {
     	yadaUtil.sleepRandom(50, 600); // min-max sleep
     }
@@ -291,10 +303,22 @@ public class YadaSeleniumUtil {
 	 * @param webDriver
 	 */
 	public void randomClick(WebElement webElement, WebDriver webDriver) {
+		randomClick(webElement, webDriver, 20, 80, 20, 80);
+	}
+	/**
+	 * Click on the given element in a range between min and max % of the dimensions
+	 * @param webElement
+	 * @param webDriver
+	 * @param minPercentX e.g. 10
+	 * @param maxPercentX e.g. 90
+	 * @param minPercentY 
+	 * @param maxPercentY
+	 */
+	public void randomClick(WebElement webElement, WebDriver webDriver, int minPercentX, int maxPercentX, int minPercentY, int maxPercentY) {
 		Dimension dimension = webElement.getSize();
-		// Clicco in un range compreso tra il 20% e l'80% della larghezza e altezza
-		int offx = (int) ThreadLocalRandom.current().nextDouble(dimension.width*0.20, dimension.width*0.80+1); // Faccio +1 per evitare "bound must be greater than origin" nel caso di zero
-		int offy = (int) ThreadLocalRandom.current().nextDouble(dimension.height*0.20, dimension.height*0.80+1);
+		// Clicco in un range compreso tra min% e max% della larghezza e altezza
+		int offx = (int) ThreadLocalRandom.current().nextDouble(dimension.width*minPercentX/100d, dimension.width*maxPercentX/100d+1); // Faccio +1 per evitare "bound must be greater than origin" nel caso di zero
+		int offy = (int) ThreadLocalRandom.current().nextDouble(dimension.height*minPercentY/100d, dimension.height*maxPercentY/100d+1);
 		if (log.isDebugEnabled()) {
 			log.debug("Clicco elemento che misura {} in {},{}", dimension, offx, offy);
 		}

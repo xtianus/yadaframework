@@ -94,6 +94,31 @@ public class YadaUtil {
     }
 	
 	/**
+	 * Returns the current stack trace as a string, formatted on separate lines
+	 * @return
+	 */
+	public String getCurrentStackTraceFormatted() {
+		StringBuilder stringBuilder = new StringBuilder();
+		for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+			stringBuilder.append("\tat ").append(element).append('\n');
+		}
+		return stringBuilder.toString();
+	}
+	
+	/**
+	 * Returns a random element from the list
+	 * @param list
+	 * @return a random element from the list, or null if the list is empty
+	 */
+	public <T> T getRandomElement(List<T> list) {
+		if (list.size()>0) {
+			int pos = secureRandom.nextInt(list.size());
+			return list.get(pos);
+		}
+		return null;
+	}
+	
+	/**
 	 * Convert from an amount of time to a string in the format xxd:hh:mm:ss
 	 * @param amount interval that needs to be formatted
 	 * @param timeUnit the unit of the interval
