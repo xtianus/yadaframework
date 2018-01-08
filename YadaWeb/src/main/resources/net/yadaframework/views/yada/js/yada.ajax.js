@@ -385,17 +385,20 @@
 	};
 	
 	/**
-	 * Execute function by name.
+	 * Execute function by name
 	 * See https://stackoverflow.com/a/359910/587641
+	 * @param functionName the name of the function, the window scope, that can have namespaces like "mylib.myfunc"
+	 * @param thisObject the object that will become the this object in the called function
 	 */
-	function executeFunctionByName(functionName, context /*, args */) {
+	function executeFunctionByName(functionName, thisObject /*, args */) {
+			var context = window; // The functionName is always searched in the current window
 		  var args = Array.prototype.slice.call(arguments, 2);
 		  var namespaces = functionName.split(".");
 		  var func = namespaces.pop();
 		  for(var i = 0; i < namespaces.length; i++) {
 		    context = context[namespaces[i]];
 		  }
-		  return context[func].apply(context, args);
+		  return context[func].apply(thisObject, args);
 	}
 	
 	/**
@@ -419,7 +422,7 @@
 				// Can be a comma-separated list of handlers, which are called in sequence
 				var handlerNameArray = yada.listToArray(handlerNames);
 				for (var i = 0; i < handlerNameArray.length; i++) {
-					executeFunctionByName(handlerNameArray[i], window, responseText, responseHtml, $element[0]);
+					executeFunctionByName(handlerNameArray[i], $element, responseText, responseHtml, $element[0]);
 				}
 			}
 			if (handler != null) {
@@ -676,14 +679,14 @@
 					// Can be a comma-separated list of handlers, which are called in sequence
 					var handlerNameArray = yada.listToArray(buttonHandlerNames);
 					for (var i = 0; i < handlerNameArray.length; i++) {
-						runFormHandler &= executeFunctionByName(handlerNameArray[i], window, responseText, responseHtml, this, clickedButton);
+						runFormHandler &= executeFunctionByName(handlerNameArray[i], $form, responseText, responseHtml, this, clickedButton);
 					}
 				}
 				if (runFormHandler == true && formHandlerNames!=null) {
 					// Can be a comma-separated list of handlers, which are called in sequence
 					var handlerNameArray = yada.listToArray(formHandlerNames);
 					for (var i = 0; i < handlerNameArray.length; i++) {
-						executeFunctionByName(handlerNameArray[i], window, responseText, responseHtml, this, clickedButton);
+						executeFunctionByName(handlerNameArray[i], $form, responseText, responseHtml, this, clickedButton);
 					}
 				}
 				if (handler != null) {
