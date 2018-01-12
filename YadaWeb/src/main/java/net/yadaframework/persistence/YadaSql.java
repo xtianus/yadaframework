@@ -435,7 +435,7 @@ public class YadaSql implements CloneableDeep {
 	
 	/**
 	 * Starts a subexpression. Be careful that the returned YadaSql object is different from the original one, so don't use the original one for ending the subexpression.
-	 * @param enabled
+	 * @param enabled when false, the whole content of the subexpression will be ignored
 	 * @return
 	 */
 	public YadaSql startSubexpression(boolean enabled) {
@@ -457,9 +457,10 @@ public class YadaSql implements CloneableDeep {
 	
 	/**
 	 * Ending a subexpression is always safe even if the startSubexpression had an "enabled" condition
-	 * @param enabled
+	 * @param enabled is ignored
 	 * @return
 	 */
+	@Deprecated
 	public YadaSql endSubexpression(boolean enabled) {
 		return endSubexpression();
 	}
