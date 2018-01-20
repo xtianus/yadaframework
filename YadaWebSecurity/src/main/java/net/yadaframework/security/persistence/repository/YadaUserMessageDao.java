@@ -16,6 +16,7 @@ import net.yadaframework.components.YadaUtil;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.YadaSql;
 import net.yadaframework.security.persistence.entity.YadaUserMessage;
+import net.yadaframework.security.persistence.entity.YadaUserProfile;
 
 @Repository
 @Transactional(readOnly = true) 
@@ -25,6 +26,27 @@ public class YadaUserMessageDao {
     @Autowired private YadaUtil yadaUtil;
 	
     @PersistenceContext EntityManager em;
+    
+    /**
+     * Delete all messages that do not involve users other than the one specified (no other users as sender o recipient)
+     * @param userProfile the receiver/sender of the message
+     */
+    @Modifying
+    @Transactional(readOnly = false) 
+    public void deleteBelongingTo(YadaUserProfile userProfile) {
+    	// Messages that have the user as sender or recipient, and nobody else involved, or
+    	// where the user is both sender and recipient
+    	List <YadaUserMessage> toDelete = YadaSql.instance().selectFrom("select yum from YadaUserMessage yum")
+    	    .where("(sender=:userProfile and recipient=null)").or()
+    	    .where("(sender=null and recipient=:userProfile)").or()
+    	    .where("(sender=:userProfile and recipient=:userProfile)")
+	    	.setParameter("userProfile", userProfile)
+	    	.query(em, YadaUserMessage.class).getResultList();
+    	// Need to fetch them all then delete them, in order to cascade deletes to "created" and "attachment"
+    	for (YadaUserMessage yadaUserMessage : toDelete) {
+			em.remove(yadaUserMessage);
+		}
+    }
     
     /**
      * Save a message. If the message is stackable, only increment the counter of an existing message with identical

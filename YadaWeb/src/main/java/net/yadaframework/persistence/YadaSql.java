@@ -90,7 +90,10 @@ public class YadaSql implements CloneableDeep {
 		if (text.toLowerCase().startsWith(sectionOperand)) {
 			text = text.substring(sectionOperand.length());
 		}
-		builder.append(text).append(" ");
+		builder.append(text);
+		if (StringUtils.isNotBlank(text)) {
+			builder.append(" ");
+		}
 		return this;
 	}
 
@@ -280,6 +283,18 @@ public class YadaSql implements CloneableDeep {
 			}
 		}
 		return this;
+	}
+
+	/**
+	 * Add an empty where. Needed for example when the where is followed by a subexpression: where (a=1 or b=2) and (c=3 or d=4)
+	 * becomes where().startSubexpression().where("a=1").or("b=2").endSubexpression().and().startSubexpression().where("c=3").or("d=4").endSubexpression()
+	 * Usually it's clearer if you just put the subexpression in the string: .where("(a=1 or b=2)").and().where("(c=3 or d=4)")
+	 * @return
+	 */
+	// WARNING: NOT TESTED!
+	public YadaSql where() {
+		nowInHaving=false;
+		return appendSection(whereConditions, "where ", "");
 	}
 	
 	/**

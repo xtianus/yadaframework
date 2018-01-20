@@ -168,7 +168,7 @@ public class YadaSeleniumUtil {
 	
 	/**
 	 * Check if at least one element with the given class exists
-	 * @param className
+	 * @param className without initial dot
 	 * @param webDriver
 	 * @return
 	 */
