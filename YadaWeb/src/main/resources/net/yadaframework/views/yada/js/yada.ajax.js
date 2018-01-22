@@ -755,6 +755,7 @@
 			processData: processData,
 			contentType: contentType,
 			error: function(jqXHR, textStatus, errorThrown ) { 
+				yada.loaderOff();
 				// textStatus is "error", "timeout", "abort", or"parsererror"
 				var responseText = jqXHR.responseText;
 				if (jqXHR.status==503 && responseText!=null && yada.startsWith(responseText, "<html")) {
@@ -774,8 +775,8 @@
 				if (typeof responseText == "string") {
 					responseTrimmed = responseText.trim();
 				}
-				yada.loaderOff();
 				if (yada.showAjaxErrorIfPresent(responseTrimmed, statusText)==true) {
+					yada.loaderOff();
 					return;
 				}
 				if ("reload" == responseTrimmed) {
@@ -786,9 +787,9 @@
 					var redirectObject = JSON.parse(responseTrimmed);
 					var targetUrl = redirectObject.redirect;
 					if (redirectObject.newTab!="true") {
-						yada.loaderOn();
 						window.location.href=targetUrl;
 					} else {
+						yada.loaderOff();
 						var win = window.open(targetUrl, '_blank');
 						if (win) {
 						    //Browser has allowed it to be opened
@@ -805,16 +806,19 @@
 				// A successful login can also return a redirect, which will skip the PostLoginHandler 
 				if ("loginSuccess" == responseTrimmed) {
 					$("#loginModal").remove();
+					yada.loaderOff();
 					// window.location.reload(true); // true = skip cache // Non va bene perchè se è stata fatta una post, viene ripetuta!
 					handlePostLoginHandler(responseHtml, responseText);
 					return;
 				}
 				if (openLoginModalIfPresent(responseHtml)) {
+					yada.loaderOff();
 					return;
 				}
 				// Controllo se è stata ritornata la home con una richiesta di login
 				if ((typeof responseText == 'string' || responseText instanceof String) && responseText.indexOf('s_loginRequested') !== -1) {
 					yada.openLoginModal(url, data, successHandler, type); // E' necessario il login. Viene fatto, e poi eseguito l'handler.
+					yada.loaderOff();
 					return;
 				}
 				
@@ -823,11 +827,13 @@
 				if (pwdChange.length>0) {
 					$("#loginModal").remove();
 					showFullPage(responseText);
+					yada.loaderOff();
 					return;
 				}			
 				
 				// Se è stato ritornato un confirm, lo mostro e abilito l'esecuzione dell'ajax e dell'handler
 				if (yada.handleModalConfirm(responseHtml, url, data, successHandler, type)) {
+					yada.loaderOff();
 					return;
 				}
 				// Per mostrare una notification al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify" 
@@ -849,9 +855,11 @@
 				// If it is a full page, overwrite the current one
 				if ($('.yadafullPage', responseHtml).length>0 || $('.s_fullPage', responseHtml).length>0) {
 					showFullPage(responseText);
+					yada.loaderOff();
 					return;
 				}
 				if (notify) {
+					yada.loaderOff();
 					return;
 				}
 				// Open any other modal
@@ -876,6 +884,10 @@
 					// We need to show the modal after a delay or it won't show sometimes (!)
 					setTimeout(function() {
 						$('#ajaxModal:hidden').modal('show');
+						// The loader is removed after the modal is opened to prevent background flickering (if the loader background is not transparent)
+						$('#ajaxModal').on('shown.bs.modal', function (e) {
+							yada.loaderOff();
+						})
 					}, 100);
 					yada.initAjaxHandlersOn($("#ajaxModal"));
 					// Questo permette di scrollare all'anchor (ho dovuto mettere un ritardo altrimenti non scrollava)
@@ -901,6 +913,7 @@
 				if (responseTrimmed == 'closeModal') {
 					$(".modal:visible").modal('hide');
 				}
+				yada.loaderOff();
 				// Otherwise it is a full page, that must be loaded in place of the current page
 				// WRONG: in questo modo anche le chiamate ajax che ritornano frammenti riscrivono la pagina intera.
 				// TODO aggiungere un qualcosa per indicare che la pagina va sovrascritta
