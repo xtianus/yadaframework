@@ -114,7 +114,18 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	
 	@Transient
 	protected boolean stackable; // true if same-content messages should be counted not added 
-	
+
+	/**
+	 * Used in Datatables to define the row class.
+	 * @See {@link https://datatables.net/manual/server-side}
+	 */
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
+	@JsonProperty("DT_RowClass")
+	public String getDT_RowClass() {
+		// We set the class according to the read state of the message
+		return this.readByRecipient?"yadaUserMessage-read":"yadaUserMessage-unread";
+	}
+
 	/**
 	 * Computes the content hash before persisting.
 	 * The hash does not consider attachments, sender, receiver or status flags.

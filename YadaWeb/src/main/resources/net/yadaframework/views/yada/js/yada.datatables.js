@@ -45,7 +45,6 @@
 	yada.dataTableCrud = function($table, dataUrl, dataAttributes, editDef, deleteDef, order, pageLength, languageUrl, extraButtons, removeCheckbox) {
 		// Method argument validation
 		if ($table == null || typeof $table != "object" || $table.length!=1 || typeof $table[0] != "object") {
-			console.error("yada.datatables: $table must be a single jQuery object");
 			return;
 		}
 		if (dataUrl==null || typeof dataUrl != "string") {
@@ -173,6 +172,7 @@
 		// Colonna dei comandi
 		columnDef.push({ 
 			data: null, 
+			className: 'yadaCommandButtonCell',
 			name: 'comandi',
 			orderable: false,
 			searchable: false,
@@ -452,6 +452,7 @@
 			var requestData = {};
 			requestData[idName] = param;
 			var handler = function(responseText, responseHtml) {
+				dataTable.draw(false); // Always reload table content on return from ajax call (there could be no modal)
 				yada.datatableDrawOnModalClose(dataTable);
 				recursiveEnableAjaxForm(responseText, responseHtml);
 			};

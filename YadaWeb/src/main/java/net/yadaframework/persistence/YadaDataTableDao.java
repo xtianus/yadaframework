@@ -226,7 +226,7 @@ public class YadaDataTableDao {
 					return "langToText";
 				}
 			} catch (NoSuchFieldException e) {
-				log.error("No field {} found on class {} (ignored)", attributePath, targetClass);
+				log.error("No field {} found on class {} (ignored)", attributePath, targetClass.getName());
 			}
 			return context + "." + attributePath; // e.phone, company.name
 		}

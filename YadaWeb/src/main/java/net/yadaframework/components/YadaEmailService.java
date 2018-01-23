@@ -1,4 +1,4 @@
-package net.yadaframework.web;
+package net.yadaframework.components;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,6 +17,7 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
@@ -32,11 +33,13 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 
-import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
 import net.yadaframework.exceptions.InternalException;
 import net.yadaframework.exceptions.YadaEmailException;
+import net.yadaframework.web.YadaEmailContent;
+import net.yadaframework.web.YadaEmailParam;
+import net.yadaframework.web.YadaWebUtil;
 
 @Service
 // Deve stare in questo package perchè tirato dentro da YadaWebConfig, altrimenti SpringTemplateEngine non viene iniettato
@@ -50,10 +53,10 @@ public class YadaEmailService {
     
     @Autowired private MessageSource messageSource;
     
-    @Autowired private ServletContext servletContext;
-    @Autowired private ApplicationContext applicationContext;
+//    @Autowired private ServletContext servletContext;
+//    @Autowired private ApplicationContext applicationContext;
     @Autowired private YadaWebUtil yadaWebUtil;
-    @Autowired private YadaUtil yadaUtil;
+//    @Autowired private YadaUtil yadaUtil;
     
     /**
      * Convert a site-relative link to absolute, because in emails we can't use @{}.
@@ -280,10 +283,11 @@ public class YadaEmailService {
 				return true;
 			}
 		} catch (Exception e) {
+			String to = ArrayUtils.toString(yadaEmailContent.to, "");
+			log.error("Error while sending email message to '{}'", to, e);
 			if (config.isEmailThrowExceptions()) {
 				throw new YadaEmailException(e);
 			}
-			log.error("Error while sending email message to '{}'", Arrays.asList(yadaEmailContent.to), e);
 		}
 		return false;
 	}

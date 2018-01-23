@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaRegistrationType;
 import net.yadaframework.security.YadaUserDetailsService;
+import net.yadaframework.security.components.YadaSecurityEmailService;
 import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.security.components.YadaTokenHandler;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
@@ -100,7 +101,7 @@ public class YadaRegistrationController {
 					return result;
 				}
 				YadaRegistrationRequest registrationRequest = registrationRequests.get(0);
-				String email = registrationRequest.getEmail();
+				String email = registrationRequest.getEmail().toLowerCase();
 				result.email = email;
 				YadaUserCredentials existing = yadaUserCredentialsRepository.findFirstByUsername(email);
 				if (existing!=null) {
@@ -110,7 +111,7 @@ public class YadaRegistrationController {
 				}
 				// Create new user
 				YadaUserCredentials userCredentials = new YadaUserCredentials();
-				userCredentials.setUsername(registrationRequest.getEmail());
+				userCredentials.setUsername(registrationRequest.getEmail().toLowerCase());
 				userCredentials.changePassword(registrationRequest.getPassword(), passwordEncoder);
 				userCredentials.setEnabled(true);
 				userCredentials.addRoles(yadaConfiguration.getRoleIds(userRoles));
@@ -155,6 +156,7 @@ public class YadaRegistrationController {
 			bindingResult.rejectValue("email", "yada.form.registration.email.invalid");
 		} else {
 			email = email.toLowerCase(locale);
+			yadaRegistrationRequest.setEmail(email);
 		}
 		// Check if user exists
 		YadaUserCredentials existing = yadaUserCredentialsRepository.findFirstByUsername(email);

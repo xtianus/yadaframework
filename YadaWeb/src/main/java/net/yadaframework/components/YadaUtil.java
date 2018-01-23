@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -91,6 +92,55 @@ public class YadaUtil {
     public void init() {
 		defaultLocale = config.getDefaultLocale();
     }
+	
+	/**
+	 * Returns the current stack trace as a string, formatted on separate lines
+	 * @return
+	 */
+	public String getCurrentStackTraceFormatted() {
+		StringBuilder stringBuilder = new StringBuilder();
+		for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+			stringBuilder.append("\tat ").append(element).append('\n');
+		}
+		return stringBuilder.toString();
+	}
+	
+	/**
+	 * Returns a random element from the list
+	 * @param list
+	 * @return a random element from the list, or null if the list is empty
+	 */
+	public <T> T getRandomElement(List<T> list) {
+		if (list.size()>0) {
+			int pos = secureRandom.nextInt(list.size());
+			return list.get(pos);
+		}
+		return null;
+	}
+	
+	/**
+	 * Convert from an amount of time to a string in the format xxd:hh:mm:ss
+	 * @param amount interval that needs to be formatted
+	 * @param timeUnit the unit of the interval
+	 * @return a formatted string representing the input interval
+	 */
+	public static String formatTimeInterval(long amount, TimeUnit timeUnit) {
+		long totSeconds = timeUnit.toSeconds(amount);
+		long seconds = totSeconds % 60;
+		long totMinutes = timeUnit.toMinutes(amount);
+		long minutes = totMinutes % 60;
+		long totHours = timeUnit.toHours(amount);
+		long hours = totHours % 24;
+		long days = timeUnit.toDays(amount);
+		String result = String.format("%02d:%02d", minutes, seconds);
+		if (hours+days>0) {
+			result = String.format("%02d:", hours) + result;
+			if (days>0) {
+				result = String.format("%dd:", days) + result;
+			}
+		}
+		return result;
+	}
 	
 	/**
 	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity.
@@ -238,11 +288,11 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Reflection to get the type of a given field, even nested
+	 * Reflection to get the type of a given field, even nested or in a superclass.
 	 * @param rootClass
 	 * @param attributePath field name like "surname" or even a path like "friend.name"
 	 * @return
-	 * @throws NoSuchFieldException
+	 * @throws NoSuchFieldException if the field is not found in the class hierarchy
 	 * @throws SecurityException
 	 */
 	public Class getType(Class rootClass, String attributePath) throws NoSuchFieldException, SecurityException {
@@ -250,7 +300,25 @@ public class YadaUtil {
 			return rootClass;
 		}
 		String attributeName = StringUtils.substringBefore(attributePath, ".");
-		Field field = rootClass.getDeclaredField(attributeName);
+		Field field = null;
+		NoSuchFieldException exception = null;
+		while (field==null && rootClass!=null) {
+			try {
+				field = rootClass.getDeclaredField(attributeName);
+			} catch (NoSuchFieldException e) {
+				if (exception==null) {
+					exception=e;
+				}
+				rootClass = rootClass.getSuperclass();
+			}
+		}
+		if (field==null) {
+			if (exception!=null) {
+				throw exception;
+			} else {
+				throw new NoSuchFieldException("No field " + attributeName + " found in hierarchy");
+			}
+		}
 		Class attributeType = field.getType();
 		// If it's a list, look for the list type
 		if (attributeType == java.util.List.class) {

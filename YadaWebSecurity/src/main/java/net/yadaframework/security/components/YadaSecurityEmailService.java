@@ -1,4 +1,4 @@
-package net.yadaframework.web;
+package net.yadaframework.security.components;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -19,13 +19,14 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 
+import net.yadaframework.components.YadaEmailService;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
-import net.yadaframework.security.components.YadaTokenHandler;
 import net.yadaframework.security.persistence.entity.YadaAutoLoginToken;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaAutoLoginTokenRepository;
+import net.yadaframework.web.YadaWebUtil;
 
 @Service
 // Deve stare in questo package perchè tirato dentro da YadaWebConfig, altrimenti SpringTemplateEngine non viene iniettato

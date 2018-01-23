@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.persistence.entity.YadaJob;
 import net.yadaframework.persistence.entity.YadaJobState;
-import net.yadaframework.persistence.repository.YadaJobDao;
 import net.yadaframework.persistence.repository.YadaJobRepository;
 import net.yadaframework.persistence.repository.YadaJobSchedulerDao;
 
@@ -65,7 +65,7 @@ class YadaJobScheduler implements Runnable {
 	
 	@Override
 	public void run() {
-		log.debug("RUN");
+//		log.debug("RUN");
 		cleanupStaleJobs();
 		startJobs();
 	}
@@ -75,7 +75,9 @@ class YadaJobScheduler implements Runnable {
 	 */
 	private void startJobs() {
 		List<String> runCache = new ArrayList<>();
+		MDC.put("yadaThreadLevel", "info"); // Increase the log level to info so that you can remove sql dumps when in debug mode.
 		List<? extends YadaJob> jobsToRun = yadaJobSchedulerDao.internalFindJobsToRun();
+		MDC.remove("yadaThreadLevel");
 		log.debug("Found {} job candidates to run", jobsToRun.size());
 		// The list contains all candidate jobs for any jobGroup.
 		for (YadaJob candidate : jobsToRun) {
@@ -167,11 +169,6 @@ class YadaJobScheduler implements Runnable {
 		ListenableFuture<?> jobHandle = jobHandles.get(yadaJobId);
 		if (jobHandle!=null) {
 			jobHandle.cancel(true);
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// TODO controllare che onFailure sia chiamato, altrimenti fare le cose che seguono
-//			yadaJob.setJobState(YadaJobState.ACTIVE);
-//			yadaJobRepository.save(yadaJob);
-//			jobHandles.remove(yadaJob);
 		} else {
 			log.debug("No job handle found for job id {} when interrupting", yadaJobId);
 		}

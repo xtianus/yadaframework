@@ -126,24 +126,26 @@ public class AuditFilter extends OncePerRequestFilter {
 				if (queryString!=null) {
 					log.info("queryString:{}", queryString);
 				}
-				Map<String, String[]> postDataMap = request.getParameterMap();
-				for (String paramName : postDataMap.keySet()) {
-					String[] paramValue = postDataMap.get(paramName);
-					StringBuffer paramString = new StringBuffer();
-					for (int i = 0; i < paramValue.length; i++) {
-						if (i>0) {
-							paramString.append(" & ");
+				if (log.isDebugEnabled()) {
+					Map<String, String[]> postDataMap = request.getParameterMap();
+					for (String paramName : postDataMap.keySet()) {
+						String[] paramValue = postDataMap.get(paramName);
+						StringBuffer paramString = new StringBuffer();
+						for (int i = 0; i < paramValue.length; i++) {
+							if (i>0) {
+								paramString.append(" & ");
+							}
+							paramString.append(paramValue[i]);
 						}
-						paramString.append(paramValue[i]);
+						if ("password".equals(paramName) || "confirmPassword".equals(paramName)) {
+							paramString=new StringBuffer("[value hidden from log]");
+						}
+						log.debug("** {} = {} **", paramName, paramString);
 					}
-					if ("password".equals(paramName) || "confirmPassword".equals(paramName)) {
-						paramString=new StringBuffer("[value hidden from log]");
-					}
-					log.info("** {} = {} **", paramName, paramString);
-				}
-				if (postDataMap.isEmpty()) {
-					if (org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent(request)) {
-						log.info("** multipart request");
+					if (postDataMap.isEmpty()) {
+						if (org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent(request)) {
+							log.debug("** multipart request");
+						}
 					}
 				}
 			} catch (Throwable e) {

@@ -66,7 +66,7 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 		    	.and()
 		    .formLogin()
 		        .loginPage("/login") // url del form di login (GET)
-		        .loginProcessingUrl("/login") // url dove postare il form (POST)
+		        .loginProcessingUrl("/loginPost") // url dove postare il form (POST)
 		        .failureHandler(failureHandler)
 		        .successHandler(successHandler);
 	//        .defaultSuccessUrl("/");
