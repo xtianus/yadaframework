@@ -2,8 +2,7 @@ package net.yadaframework.components;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -15,6 +14,11 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -22,6 +26,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.persistence.entity.YadaJob;
 import net.yadaframework.persistence.entity.YadaJobState;
 import net.yadaframework.persistence.repository.YadaJobRepository;
@@ -39,7 +44,7 @@ import net.yadaframework.persistence.repository.YadaJobSchedulerDao;
 @Service
 // For some reason @Transactional+Runnable causes autowiring problems, so I created a YadaJobSchedulerDao:
 // org.springframework.beans.factory.BeanNotOfRequiredTypeException: Bean named 'yadaJobScheduler' is expected to be of type '...YadaJobScheduler' but was actually of type 'com.sun.proxy.$Proxy112'
-// Package visibility
+// Package visibility - it should not be used by the application
 class YadaJobScheduler implements Runnable {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
@@ -50,10 +55,15 @@ class YadaJobScheduler implements Runnable {
 	
 	private ListeningExecutorService jobScheduler;
 	
+//	/**
+//	 * Map from YadaJob id to its running thread handle
+//	 */
+//	private ConcurrentMap<Long, ListenableFuture<Void>> jobHandles = new ConcurrentHashMap<>();
+	
 	/**
-	 * Map from YadaJob id to its running thread handle
+	 * Cache for detached YadaObject entities
 	 */
-	private ConcurrentMap<Long, ListenableFuture<Void>> jobHandles = new ConcurrentHashMap<>();
+	private LoadingCache<Long, YadaJob> jobCache;
 	
 	@PostConstruct
 	void init() throws Exception {
@@ -61,6 +71,37 @@ class YadaJobScheduler implements Runnable {
 		// Using Guava to create a ListenableFuture: https://github.com/google/guava/wiki/ListenableFutureExplained
 		ExecutorService executorService = Executors.newFixedThreadPool(config.getYadaJobSchedulerThreadPoolSize());
 		jobScheduler = MoreExecutors.listeningDecorator(executorService);
+		// Job cache
+		RemovalListener<Long, YadaJob> removalListener = new RemovalListener<Long, YadaJob>() {
+			  public void onRemoval(RemovalNotification<Long, YadaJob> removal) {
+				  // If a job is being removed before being stopped (should only happen if the cache is too small), we stop it
+				  // otherwise we can't tell if its running anymore
+				  YadaJob removed = removal.getValue();
+				  if (removed.yadaInternalJobHandle!=null) {
+					  if (!removed.yadaInternalJobHandle.isDone()) {
+						  log.error("Evicting job {} while still running - interrupting job", removed);
+						  long totCached = jobCache.size();
+						  if (totCached >= config.getYadaJobSchedulerCacheSize()*0.9) {
+							  log.error("Job cache has {} elements. Consider increasing the configured jobCacheSize", totCached);
+						  } else {
+							  log.error("There is still space in the cache, so this could be due to a programming error");
+						  }
+						  removed.yadaInternalJobHandle.cancel(true);
+					  }
+				  }
+			  }
+			};
+		jobCache = CacheBuilder.newBuilder()
+			.weakValues() // This allows entries to be garbage-collected if there are no other references to the values
+			.maximumSize(config.getYadaJobSchedulerCacheSize()) 
+			.removalListener(removalListener)
+			.build(
+				new CacheLoader<Long, YadaJob>() {
+					public YadaJob load(Long id) {
+						return yadaJobRepository.findOne(id);
+					}
+				}
+			);
 	}
 	
 	@Override
@@ -85,20 +126,24 @@ class YadaJobScheduler implements Runnable {
 			if (runCache.contains(candidateGroup)) {
 				continue; // We just started a job in this group, which can't be of lower priority because of the query order
 			}
-			// Check if a job of the same group is already running
-			YadaJob running = yadaJobRepository.findRunning(candidateGroup);
-			if (running!=null) {
+			// Check if a job of the same group is already running, by looking into the cache.
+			// This works because when a job is evicted we interrupt it if still running.
+			YadaJob runningSameGroup = yadaJobRepository.findRunning(candidateGroup);
+			if (runningSameGroup!=null) {
+				// The running instance is NOT the same as the one in the jobCache, so replace the instance
+				YadaJob cachedRunning = jobCache.getIfPresent(runningSameGroup.getId());
 				// If a job is already running, compare the priority for preemption
-				if (running.getJobPriority()<candidate.getJobPriority()) {
+				if (runningSameGroup.getJobPriority()<candidate.getJobPriority()) {
 					// Preemption
-					interruptJob(running.getId());
-				} else if (jobIsRunning(running.getId())) {
+					// Can't use "running" here because the instance is different from the cached one
+					interruptJob(cachedRunning);
+				} else if (jobIsRunning(cachedRunning)) {
 					runCache.add(candidateGroup); // The running job has higher priority and is actually running, so no other job in the group can have a higher priority because of the query order
 					continue; // Next candidate
 				}
 			}
 			// Either there was no running job or it has been preempted
-			runJob(candidate.getId());
+			runJob(candidate);
 			runCache.add(candidateGroup);
 		}
 	}
@@ -108,13 +153,13 @@ class YadaJobScheduler implements Runnable {
 	 * @param yadaJob
 	 * @return
 	 */
-	boolean jobIsRunning(Long yadaJobId) {
-		ListenableFuture<?> jobHandle = jobHandles.get(yadaJobId);
+	boolean jobIsRunning(YadaJob yadaJob) {
+		if (yadaJob==null) {
+			return false;
+		}
+		ListenableFuture<?> jobHandle = yadaJob.yadaInternalJobHandle;
 		if (jobHandle!=null) {
 			boolean running = !jobHandle.isDone();
-//			if (!running) {
-//				jobHandles.remove(yadaJob); // As a side effect, the map is cleaned up
-//			}
 			return running;
 		}
 		return false;
@@ -126,66 +171,126 @@ class YadaJobScheduler implements Runnable {
 	 * @param yadaJob
 	 * @return
 	 */
-	void runJob(Long yadaJobId) {
-		log.debug("Running job id {}", yadaJobId);
-		YadaJob toRun = yadaJobRepository.findOne(yadaJobId);
-		if (toRun==null) {
-			log.info("Job not found when trying to run it, id={}", toRun);
-			return;
+	void runJob(final YadaJob yadaJobToWire) {
+		log.debug("Running job {}", yadaJobToWire);
+		YadaJob existing = jobCache.getIfPresent(yadaJobToWire.getId());
+		if (existing!=null && existing.yadaInternalJobHandle!=null) {
+			// We can do nothing about it because if we interrupt it, the onFailure will mess with the new job.
+			throw new YadaInternalException("Starting a job when another with the same id is still running: {}", existing);
 		}
-		yadaJobRepository.stateChangeFromTo(toRun, YadaJobState.ACTIVE, YadaJobState.RUNNING);
+		final YadaJob yadaJob = (YadaJob) yadaUtil.autowire(yadaJobToWire); // YadaJob instances can have @Autowire fields
+		jobCache.put(yadaJob.getId(), yadaJob);
+//		YadaJob toRun = yadaJobRepository.findOne(yadaJobId);
+//		if (toRun==null) {
+//			log.info("Job not found when trying to run it, id={}", toRun);
+//			return;
+//		}
+		yadaJobRepository.stateChangeFromTo(yadaJob, YadaJobState.ACTIVE, YadaJobState.RUNNING); // Needed for database queries on running jobs
+		yadaJob.setJobStateObject(YadaJobState.RUNNING.toYadaPersistentEnum()); // Needed to check for stale jobs
 		Date startTime = new Date();
-		toRun.setJobStartTime(startTime);
-		yadaJobRepository.setStartTime(yadaJobId, startTime);
-		final YadaJob wiredYadaJob = (YadaJob) yadaUtil.autowire(toRun); // YadaJob instances can have @Autowire fields
-		ListenableFuture<Void> jobHandle = jobScheduler.submit(wiredYadaJob);
-		jobHandles.put(yadaJobId, jobHandle);
+		yadaJobRepository.setStartTime(yadaJob.getId(), startTime);
+		yadaJob.setJobStartTime(startTime); // Needed to check for stale jobs
+		ListenableFuture<Void> jobHandle = jobScheduler.submit(yadaJob);
+		yadaJob.yadaInternalJobHandle = jobHandle;
+//		jobHandles.put(yadaJobId, jobHandle);
 		Futures.addCallback(jobHandle, new FutureCallback<Void>() {
 			// The callback is run in executor
 			public void onSuccess(Void result) {
 				// result is always null
-				jobHandles.remove(yadaJobId);
-				yadaJobSchedulerDao.internalJobSuccessful(wiredYadaJob);
+				yadaJobSchedulerDao.internalJobSuccessful(yadaJob);
 				// Change back to active if the state has not been changed already
-				yadaJobRepository.stateChangeFromTo(toRun, YadaJobState.RUNNING, YadaJobState.ACTIVE);
+//				yadaJobRepository.stateChangeFromTo(yadaJob, YadaJobState.RUNNING, YadaJobState.ACTIVE);
+				invalidateCompletedJob(yadaJob);
+//				jobHandles.remove(yadaJobId);
 			}
 			public void onFailure(Throwable thrown) {
-				jobHandles.remove(yadaJobId);
-				yadaJobSchedulerDao.internalJobFailed(wiredYadaJob, thrown);
+//				jobHandles.remove(yadaJobId);
+				yadaJobSchedulerDao.internalJobFailed(yadaJob, thrown);
 				// Change back to active if the state has not been changed already
-				yadaJobRepository.stateChangeFromTo(toRun, YadaJobState.RUNNING, YadaJobState.ACTIVE);
+//				yadaJobRepository.stateChangeFromTo(toRun, YadaJobState.RUNNING, YadaJobState.ACTIVE);
+				invalidateCompletedJob(yadaJob);
 			}
 		},  MoreExecutors.directExecutor());
+	}
+	
+	private void invalidateCompletedJob(YadaJob yadaJob) {
+		// Always remove the handle first, so that the removelistener doesn't get fooled
+		yadaJob.yadaInternalJobHandle = null;
+		jobCache.invalidate(yadaJob.getId());
 	}
 	
 	/**
 	 * Interrupt the job and make it ACTIVE
 	 * @param yadaJob
+	 * @return true if the job could be interrupted
 	 */
-	void interruptJob(Long yadaJobId) {
-		log.debug("Interrupting job id {}", yadaJobId);
-		ListenableFuture<?> jobHandle = jobHandles.get(yadaJobId);
-		if (jobHandle!=null) {
-			jobHandle.cancel(true);
-		} else {
-			log.debug("No job handle found for job id {} when interrupting", yadaJobId);
-		}
+	boolean interruptJob(Long yadaJobId) {
+		YadaJob yadaJob = jobCache.getIfPresent(yadaJobId);
+		return interruptJob(yadaJob);
 	}
 	
+	/**
+	 * Interrupt the job and make it ACTIVE
+	 * @param yadaJob
+	 * @return true if the job could be interrupted
+	 */
+	boolean interruptJob(YadaJob yadaJob) {
+		if (yadaJob==null) {
+			return false;
+		}
+		log.debug("Interrupting job {}", yadaJob);
+		ListenableFuture<?> jobHandle = yadaJob.yadaInternalJobHandle;
+		if (jobHandle!=null) {
+			jobHandle.cancel(true);
+			return true;
+		} else {
+			log.debug("No job handle found for job {} when interrupting", yadaJob);
+		}
+		return false;
+	}
+
 	private void cleanupStaleJobs() {
-		for (Long yadaJobId : jobHandles.keySet()) {
-			long timeToLive = config.getYadaJobSchedulerStaleMillis();
-			Date jobStartTime = yadaJobRepository.getJobStartTime(yadaJobId);
+		long timeToLive = config.getYadaJobSchedulerStaleMillis();
+		Map<Long, YadaJob> jobMap = jobCache.asMap();
+		for (Map.Entry<Long, YadaJob> entry : jobMap.entrySet()) {
+			YadaJob toCheck = entry.getValue();
+			if (!toCheck.isRunning()) {
+				continue;
+			}
+			Date jobStartTime = toCheck.getJobStartTime();
 			if (jobStartTime!=null) {
 				Date staleDate = new Date(System.currentTimeMillis() - timeToLive);
 				if (jobStartTime.before(staleDate)) {
-					log.warn("Job id {} is stale", yadaJobId);
-					interruptJob(yadaJobId);
+					log.warn("Job {} is stale", toCheck);
+					interruptJob(toCheck);
 				}
 			}
 		}
 	}
-
 	
+	/**
+	 * Returns an instance of a YadaJob. The instance is freshly loaded from the database if no other thread
+	 * already holds a reference to it, otherwise the instance is shared among threads.
+	 * It is thus possible for concurrent threads to modify the same entity (= table row) without incurring in a
+	 * concurrent modification exception. The instance is removed from the cache when no one holds a reference to it anymore.
+	 * The typical scenario is when a job is already running (an instance has been cached by the scheduler) and a user 
+	 * from the web interface changes its name.
+	 * @param id the job id
+	 * @return a YadaJob instance that can be freely modified and saved
+	 */
+	public YadaJob getJobInstance(Long id) {
+		return jobCache.getUnchecked(id);
+	}
+
+	/**
+	 * Returns an instance of YadaJob only if the job is currently running.
+	 * @param id
+	 * @return the instance or null
+	 */
+	public YadaJob getJobInstanceIfRunning(Long id) {
+		return jobCache.getIfPresent(id);
+	}
+	
+
 
 }

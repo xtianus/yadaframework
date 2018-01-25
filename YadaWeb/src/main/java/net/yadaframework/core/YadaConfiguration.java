@@ -1004,5 +1004,25 @@ public abstract class YadaConfiguration {
 	public long getYadaJobSchedulerStaleMillis() {
 		return this.configuration.getLong("config/yada/jobScheduler/jobStaleMillis", 1000*60);
 	}
+
+	/**
+	 * Number of YadaJob entities to keep in cache. It should be equal to the estimated maximum number
+	 * of concurrent running jobs.
+	 * If the number is too small, concurrent writes to the same job data could result in "concurrent modification" 
+	 * exceptions. Also the running job could be evicted from cache and terminated prematurely with a log saying "Evicting job {} while still running". 
+	 * This is a possible scenario:
+	 * <pre>
+	 * - thread A loads instance J1 for a job, puts it in the cache and starts a long running job
+	 * - after some time, while the job is still running, the J1 instance is evicted because of cache size limits
+	 * - thread B asks for a job instance of the same job, which is not found and loaded new from db as J2. It then
+	 * changes some values and saves J2 to database, incrementing @version
+	 * - thread A terminates the long running job by writing J1 to the database
+	 * In this scenario, thread A will receive an exception because its @version differs from what is in the database
+	 * </pre>
+	 * @return
+	 */
+	public int getYadaJobSchedulerCacheSize() {
+		return this.configuration.getInt("config/yada/jobScheduler/jobCacheSize", 500);
+	}
 	
 }

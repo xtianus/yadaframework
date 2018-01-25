@@ -60,11 +60,16 @@ public class YadaJobSchedulerDao {
 		try {
 			yadaJob = em.merge(yadaJob); // Saves any changes to db when exiting the method
 			yadaJob.incrementErrorStreak();
-			Date now = new Date();
-			if (yadaJob.getJobScheduledTime().before(now)) {
-				yadaJob.setJobScheduledTime(now);
+			// If not scheduled in the future, run again in 1 minute
+			Date inOneMinute = new Date(System.currentTimeMillis()+60000); 
+			if (yadaJob.getJobScheduledTime().before(inOneMinute)) {
+				yadaJob.setJobScheduledTime(inOneMinute);
 			}
 			yadaJob.setJobStartTime(null); // The time at which the job was started - null if the job is not in the RUNNING state.
+			if (yadaJob.isRunning()) {
+				// A failed job will still be run next time, unless someone disables it
+				yadaJob.activate(); // Ready for the next run
+			}
 		} catch (Exception e) {
 			log.error("internalJobFailed failed to update Job id {} with db version {}", yadaJob.getId(), yadaJob.getVersion(), e);
 		}
@@ -82,6 +87,9 @@ public class YadaJobSchedulerDao {
 			yadaJob.setJobLastSuccessfulRun(new Date());
 			yadaJob.setErrorStreakCount(0);
 			yadaJob.setJobStartTime(null); // The time at which the job was started - null if the job is not in the RUNNING state.
+			if (yadaJob.isRunning()) {
+				yadaJob.activate(); // Ready for the next run
+			}
 		} catch (Exception e) {
 			log.error("internalJobSuccessful failed to update Job id {} with db version {}", yadaJob.getId(), yadaJob.getVersion(), e);
 		}

@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.util.concurrent.ListenableFuture;
 
 // TODO spostare in YadaBones?
 
@@ -47,12 +48,7 @@ public abstract class YadaJob implements Callable<Void> {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
 
-	/**
-	 * This is here only for the sake of schema creation.
-	 * The jobStateObject should never be read/written using an EntityManager because it could be changed
-	 * in parallel threads and this value could become stale or even overwrite a more recent value in the db. 
-	 */
-	@OneToOne(fetch = FetchType.LAZY, optional=false)
+	@OneToOne(fetch = FetchType.EAGER)
 	private YadaPersistentEnum<YadaJobState> jobStateObject = YadaJobState.PAUSED.toYadaPersistentEnum();
 	
 	protected boolean jobGroupPaused = false;
@@ -130,6 +126,12 @@ public abstract class YadaJob implements Callable<Void> {
 	protected boolean recovered = false;
 	
 	/**
+	 * Handle returned by ListeningExecutorService.submit() - internal use only
+	 */
+	@Transient
+	public ListenableFuture<Void> yadaInternalJobHandle;
+	
+	/**
 	 * Needed for DataTables integration
 	 */
 	@Transient 
@@ -138,88 +140,88 @@ public abstract class YadaJob implements Callable<Void> {
 		return this.getClass().getSimpleName()+"#"+this.id; // YadaJob#142
 	}
 	
-//	/**
-//	 * Returns the plain enum of the job state
-//	 * @return
-//	 */
-//	@Transient
-//	public YadaJobState getJobState() {
-//		return jobStateObject.toEnum();
-//	}
-//	
-//	/**
-//	 * Set the persistent state of this job
-//	 * @param jobState
-//	 */
-//	@Transient
-//	public void setJobState(YadaJobState jobState) {
-//		this.jobStateObject = jobState.toYadaPersistentEnum();
-//	}
-//	
-//	/**
-//	 * Set the job state to active and return the previous state
-//	 * @return the previous state
-//	 */
-//	public YadaJobState activate() {
-//		YadaJobState result = getJobState();
-//		this.jobStateObject = YadaJobState.ACTIVE.toYadaPersistentEnum();
-//		return result;
-//	}
-//	
-//	/**
-//	 * Set the job state to paused and return the previous state
-//	 * @return the previous state
-//	 */
-//	public YadaJobState pause() {
-//		YadaJobState result = getJobState();
-//		this.jobStateObject = YadaJobState.PAUSED.toYadaPersistentEnum();
-//		return result;
-//	}
-//	
-//	/**
-//	 * Set the job state to disabled and return the previous state
-//	 * @return
-//	 */
-//	public YadaJobState disable() {
-//		YadaJobState result = getJobState();
-//		this.jobStateObject = YadaJobState.DISABLED.toYadaPersistentEnum();
-//		return result;
-//	}
-//	
-//	/**
-//	 * Set the job state to completed and return the previous state
-//	 * @return
-//	 */
-//	public YadaJobState complete() {
-//		YadaJobState result = getJobState();
-//		this.jobStateObject = YadaJobState.COMPLETED.toYadaPersistentEnum();
-//		return result;
-//	}
-//	
-//	@Transient
-//	public boolean isActive() {
-//		return getJobState() == YadaJobState.ACTIVE;
-//	}
-//	
-//	@Transient
-//	public boolean isCompleted() {
-//		return getJobState() == YadaJobState.COMPLETED;
-//	}
-//	
-//	@Transient
-//	public boolean isDisabled() {
-//		return getJobState() == YadaJobState.DISABLED;
-//	}
-//	
-//	@Transient
-//	public boolean isPaused() {
-//		return getJobState() == YadaJobState.PAUSED;
-//	}
-//	
-//	@Transient
-//	public boolean isRunning() {
-//		return getJobState() == YadaJobState.RUNNING;
-//	}
+	/**
+	 * Returns the plain enum of the job state
+	 * @return
+	 */
+	@Transient
+	public YadaJobState getJobState() {
+		return jobStateObject.toEnum();
+	}
+	
+	/**
+	 * Set the persistent state of this job
+	 * @param jobState
+	 */
+	@Transient
+	public void setJobState(YadaJobState jobState) {
+		this.jobStateObject = jobState.toYadaPersistentEnum();
+	}
+	
+	/**
+	 * Set the job state to active and return the previous state
+	 * @return the previous state
+	 */
+	public YadaJobState activate() {
+		YadaJobState result = getJobState();
+		this.jobStateObject = YadaJobState.ACTIVE.toYadaPersistentEnum();
+		return result;
+	}
+	
+	/**
+	 * Set the job state to paused and return the previous state
+	 * @return the previous state
+	 */
+	public YadaJobState pause() {
+		YadaJobState result = getJobState();
+		this.jobStateObject = YadaJobState.PAUSED.toYadaPersistentEnum();
+		return result;
+	}
+	
+	/**
+	 * Set the job state to disabled and return the previous state
+	 * @return
+	 */
+	public YadaJobState disable() {
+		YadaJobState result = getJobState();
+		this.jobStateObject = YadaJobState.DISABLED.toYadaPersistentEnum();
+		return result;
+	}
+	
+	/**
+	 * Set the job state to completed and return the previous state
+	 * @return
+	 */
+	public YadaJobState complete() {
+		YadaJobState result = getJobState();
+		this.jobStateObject = YadaJobState.COMPLETED.toYadaPersistentEnum();
+		return result;
+	}
+	
+	@Transient
+	public boolean isActive() {
+		return getJobState() == YadaJobState.ACTIVE;
+	}
+	
+	@Transient
+	public boolean isCompleted() {
+		return getJobState() == YadaJobState.COMPLETED;
+	}
+	
+	@Transient
+	public boolean isDisabled() {
+		return getJobState() == YadaJobState.DISABLED;
+	}
+	
+	@Transient
+	public boolean isPaused() {
+		return getJobState() == YadaJobState.PAUSED;
+	}
+	
+	@Transient
+	public boolean isRunning() {
+		return getJobState() == YadaJobState.RUNNING;
+	}
 	
 	/**
 	 * Increment the error streak count returning the new value

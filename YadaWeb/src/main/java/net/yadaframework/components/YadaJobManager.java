@@ -2,6 +2,7 @@ package net.yadaframework.components;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
@@ -60,7 +61,7 @@ public class YadaJobManager {
 				yadaJob.setRecovered(true);
 				yadaJob.setJobStartTime(new Date()); // Needed to prevent stale cleaning
 				yadaJobRepository.save(yadaJob);
-				yadaJobScheduler.runJob(yadaJob.getId());
+				yadaJobScheduler.runJob(yadaJob);
 			}
 			// Scheduling the YadaJobScheduler according to the configured period
 			yadaJobSchedulerTaskScheduler.scheduleAtFixedRate(yadaJobScheduler, new Date(System.currentTimeMillis() + 10000), period);
@@ -74,7 +75,7 @@ public class YadaJobManager {
 	 * The scheduled time is left unchanged unless null, when it is set to NOW (start ASAP).
 	 * This method does nothing to a job that is already scheduled and in the ACTIVE state.
 	 * @param yadaJob the job to start
-	 * @return true if the job has been activated, false if it doesn't exist
+	 * @return true if the job has been activated, false if it doesn't exist in the database
 	 */
 	public boolean startJob(YadaJob yadaJob) {
 		// If the job has been deleted, return false
@@ -85,7 +86,6 @@ public class YadaJobManager {
 		if (yadaJob.getJobScheduledTime()==null) {
 			yadaJob.setJobScheduledTime(new Date());
 		}
-		// Shouldn't set the state by calling setJobStateObject() but we don't care here because we want to force our value onto the database
 		yadaJob.setJobStateObject(YadaJobState.ACTIVE.toYadaPersistentEnum());
 		yadaJobRepository.save(yadaJob);
 		return true;
@@ -134,7 +134,8 @@ public class YadaJobManager {
 	}
 	
 	/**
-	 * Returns all jobs for the given group that are in the ACTIVE/RUNNING state, ordered by state and scheduled time
+	 * Returns all jobs for the given group that are in the ACTIVE/RUNNING state, ordered by state and scheduled time.
+	 * The running jobs are the actual cached instances present in the YadaJobScheduler.
 	 * @param jobGroup
 	 * @return
 	 */
@@ -142,7 +143,19 @@ public class YadaJobManager {
 		List<YadaPersistentEnum<YadaJobState>> states = new ArrayList<>();
 		states.add(YadaJobState.ACTIVE.toYadaPersistentEnum());
 		states.add(YadaJobState.RUNNING.toYadaPersistentEnum());
-		return yadaJobRepository.findByJobGroupAndStates(jobGroup, states);
+		List<YadaJob> result = yadaJobRepository.findByJobGroupAndStates(jobGroup, states);
+		// If a job is running, replace its instance with the cached one
+		ListIterator<YadaJob> iter = result.listIterator();
+		while (iter.hasNext()) {
+			YadaJob yadaJob = iter.next();
+			if (yadaJob.isRunning()) {
+				YadaJob cached = yadaJobScheduler.getJobInstanceIfRunning(yadaJob.getId());
+				if (cached!=null) {
+					iter.set(cached); // Replace with the cached one
+				}
+			}
+		}
+		return result;
 	}
 	
 	/**
@@ -152,10 +165,20 @@ public class YadaJobManager {
 	 */
 	public void disableAndInterruptJobs(List<? extends YadaJob> yadaJobs) {
 		for (YadaJob yadaJob : yadaJobs) {
-			yadaJobRepository.setState(yadaJob.getId(), YadaJobState.DISABLED.toYadaPersistentEnum());
+			YadaJob cached = yadaJobScheduler.getJobInstanceIfRunning(yadaJob.getId());
+			if (cached!=null) {
+				yadaJob = cached;
+			}
+			yadaJob.disable();
 		}
 		for (YadaJob yadaJob : yadaJobs) {
-			yadaJobScheduler.interruptJob(yadaJob.getId());
+			YadaJob cached = yadaJobScheduler.getJobInstanceIfRunning(yadaJob.getId());
+			if (cached!=null) {
+				yadaJob = cached;
+			}
+			if (!yadaJobScheduler.interruptJob(yadaJob)) {
+				yadaJobRepository.save(yadaJob); // Save it because nobody else will
+			}
 		}
 	}
 	
@@ -164,7 +187,9 @@ public class YadaJobManager {
 	 * @param yadaJob
 	 */
 	public void completeJob(Long yadaJobId) {
-		yadaJobRepository.setState(yadaJobId, YadaJobState.COMPLETED.toYadaPersistentEnum());
+		YadaJob yadaJob = yadaJobScheduler.getJobInstance(yadaJobId);
+		yadaJob.complete();
+		yadaJobRepository.save(yadaJob);
 	}
 	
 	/**
@@ -172,7 +197,14 @@ public class YadaJobManager {
 	 * @param yadaJob
 	 */
 	public void toggleDisabledAndPaused(Long yadaJobId) {
-		yadaJobRepository.stateToggleBetween(yadaJobId, YadaJobState.PAUSED.toYadaPersistentEnum(), YadaJobState.DISABLED.toYadaPersistentEnum());
+		YadaJob yadaJob = yadaJobScheduler.getJobInstance(yadaJobId);
+		if (yadaJob.isPaused()) {
+			yadaJob.disable();
+		} else if (yadaJob.isDisabled()) {
+			yadaJob.pause();
+		}
+		yadaJobRepository.save(yadaJob);
+//		yadaJobRepository.stateToggleBetween(yadaJobId, YadaJobState.PAUSED.toYadaPersistentEnum(), YadaJobState.DISABLED.toYadaPersistentEnum());
 	}
 	
 	/**
@@ -180,8 +212,11 @@ public class YadaJobManager {
 	 * @param yadaJob
 	 */
 	public void disableAndInterruptJob(Long yadaJobId) {
-		yadaJobRepository.setState(yadaJobId, YadaJobState.DISABLED.toYadaPersistentEnum());
-		yadaJobScheduler.interruptJob(yadaJobId);
+		YadaJob yadaJob = yadaJobScheduler.getJobInstance(yadaJobId);
+		yadaJob.disable();
+		if (!yadaJobScheduler.interruptJob(yadaJob)) {
+			yadaJobRepository.save(yadaJob); // Save it because nobody else will
+		}	
 	}
 	
 	/**
@@ -189,8 +224,11 @@ public class YadaJobManager {
 	 * @param yadaJob
 	 */
 	public void pauseAndInterruptJob(Long yadaJobId) {
-		yadaJobRepository.setState(yadaJobId, YadaJobState.PAUSED.toYadaPersistentEnum());
-		yadaJobScheduler.interruptJob(yadaJobId);
+		YadaJob yadaJob = yadaJobScheduler.getJobInstance(yadaJobId);
+		yadaJob.pause();
+		if (!yadaJobScheduler.interruptJob(yadaJob)) {
+			yadaJobRepository.save(yadaJob); // Save it because nobody else will
+		}	
 	}
 
 	public void changeJobPriority(YadaJob yadaJob, int priority) {
@@ -202,5 +240,41 @@ public class YadaJobManager {
 		yadaJob.setJobScheduledTime(newScheduling);
 		yadaJobRepository.save(yadaJob);
 	}
+	
+	/**
+	 * Returns an instance of a YadaJob. The instance is freshly loaded from the database if no other thread
+	 * already holds a reference to it, otherwise the instance is shared among threads.
+	 * It is thus possible for concurrent threads to modify the same entity (= table row) without incurring in a
+	 * concurrent modification exception. The instance is removed from the cache when no one holds a reference to it anymore.
+	 * The typical scenario is when a job is already running (an instance has been cached by the scheduler) and a user 
+	 * from the web interface changes its name.
+	 * @param id the job id
+	 * @return a YadaJob instance that can be freely modified and saved
+	 */
+	public YadaJob getJobInstance(Long id) {
+		return yadaJobScheduler.getJobInstance(id);
+	}
+	
+	/**
+	 * Call this method after fetching a job instance from the database to replace it with a cached running instance if any.
+	 * @param yadaJob
+	 * @return the cached instance or the original argument
+	 */
+	public YadaJob replaceWithCached(YadaJob yadaJob) {
+		YadaJob result =  yadaJobScheduler.getJobInstanceIfRunning(yadaJob.getId());
+		if (result == null) {
+			result = yadaJob;
+		}
+		return result;
+	}
+
+//	/**
+//	 * Returns an instance of YadaJob only if the job is currently running.
+//	 * @param id
+//	 * @return the instance or null
+//	 */
+//	public YadaJob getJobInstanceIfRunning(Long id) {
+//		return yadaJobScheduler.getJobInstanceIfRunning(id);
+//	}
 
 }

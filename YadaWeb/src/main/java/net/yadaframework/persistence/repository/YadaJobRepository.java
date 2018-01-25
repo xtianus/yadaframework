@@ -27,27 +27,27 @@ public interface YadaJobRepository extends JpaRepository<YadaJob, Long> {
 	@Query("select job.jobStateObject from YadaJob job where id=:id")
 	YadaPersistentEnum<YadaJobState> getJobState(@Param("id") Long yadaJobId);
 	
-	/**
-	 * Invoked by the scheduler classes to set the job state.
-	 * @param yadaJobId
-	 * @param jobStateId
-	 */
-	@Modifying
-	@Transactional(readOnly = false)
-	@Query("update YadaJob set jobStateObject=:stateObject where id=:id")
-	void setState(@Param("id") Long yadaJobId, @Param("stateObject") YadaPersistentEnum<YadaJobState> stateObject);
+//	/**
+//	 * Invoked by the scheduler classes to set the job state.
+//	 * @param yadaJobId
+//	 * @param jobStateId
+//	 */
+//	@Modifying
+//	@Transactional(readOnly = false)
+//	@Query("update YadaJob set jobStateObject=:stateObject where id=:id")
+//	void setState(@Param("id") Long yadaJobId, @Param("stateObject") YadaPersistentEnum<YadaJobState> stateObject);
 	
-	/**
-	 * Toggle between two states. No change is done if the state is another.
-	 * @param yadaJobId
-	 * @param aStateEnum
-	 * @param bStateEnum
-	 */
-	@Modifying
-	@Transactional(readOnly = false)
-	@Query("update YadaJob y set y.jobStateObject = CASE y.jobStateObject "
-		+ "WHEN :aStateEnum THEN :bStateEnum WHEN :bStateEnum THEN :aStateEnum END where y.id=:id")
-	void stateToggleBetween(@Param("id") Long yadaJobId, @Param("aStateEnum") YadaPersistentEnum<YadaJobState> aStateEnum, @Param("bStateEnum") YadaPersistentEnum<YadaJobState> bStateEnum);
+//	/**
+//	 * Toggle between two states. No change is done if the state is another.
+//	 * @param yadaJobId
+//	 * @param aStateEnum
+//	 * @param bStateEnum
+//	 */
+//	@Modifying
+//	@Transactional(readOnly = false)
+//	@Query("update YadaJob y set y.jobStateObject = CASE y.jobStateObject "
+//		+ "WHEN :aStateEnum THEN :bStateEnum WHEN :bStateEnum THEN :aStateEnum END where y.id=:id")
+//	void stateToggleBetween(@Param("id") Long yadaJobId, @Param("aStateEnum") YadaPersistentEnum<YadaJobState> aStateEnum, @Param("bStateEnum") YadaPersistentEnum<YadaJobState> bStateEnum);
 
 	/**
 	 * Invoked by the scheduler classes when starting a job. Only an active job can become running
