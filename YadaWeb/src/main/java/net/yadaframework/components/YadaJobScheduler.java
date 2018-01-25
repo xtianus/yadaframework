@@ -56,7 +56,7 @@ class YadaJobScheduler implements Runnable {
 	private ConcurrentMap<Long, ListenableFuture<Void>> jobHandles = new ConcurrentHashMap<>();
 	
 	@PostConstruct
-	public void init() throws Exception {
+	void init() throws Exception {
 		log.debug("init called");
 		// Using Guava to create a ListenableFuture: https://github.com/google/guava/wiki/ListenableFutureExplained
 		ExecutorService executorService = Executors.newFixedThreadPool(config.getYadaJobSchedulerThreadPoolSize());
@@ -108,7 +108,7 @@ class YadaJobScheduler implements Runnable {
 	 * @param yadaJob
 	 * @return
 	 */
-	public boolean jobIsRunning(Long yadaJobId) {
+	boolean jobIsRunning(Long yadaJobId) {
 		ListenableFuture<?> jobHandle = jobHandles.get(yadaJobId);
 		if (jobHandle!=null) {
 			boolean running = !jobHandle.isDone();
@@ -126,14 +126,17 @@ class YadaJobScheduler implements Runnable {
 	 * @param yadaJob
 	 * @return
 	 */
-	public void runJob(Long yadaJobId) {
+	void runJob(Long yadaJobId) {
 		log.debug("Running job id {}", yadaJobId);
 		YadaJob toRun = yadaJobRepository.findOne(yadaJobId);
 		if (toRun==null) {
 			log.info("Job not found when trying to run it, id={}", toRun);
 			return;
 		}
-		yadaJobRepository.internalSetRunning(yadaJobId, YadaJobState.RUNNING.toId(), YadaJobState.ACTIVE.toId());
+		yadaJobRepository.stateChangeFromTo(toRun, YadaJobState.ACTIVE, YadaJobState.RUNNING);
+		Date startTime = new Date();
+		toRun.setJobStartTime(startTime);
+		yadaJobRepository.setStartTime(yadaJobId, startTime);
 		final YadaJob wiredYadaJob = (YadaJob) yadaUtil.autowire(toRun); // YadaJob instances can have @Autowire fields
 		ListenableFuture<Void> jobHandle = jobScheduler.submit(wiredYadaJob);
 		jobHandles.put(yadaJobId, jobHandle);
@@ -143,28 +146,23 @@ class YadaJobScheduler implements Runnable {
 				// result is always null
 				jobHandles.remove(yadaJobId);
 				yadaJobSchedulerDao.internalJobSuccessful(wiredYadaJob);
+				// Change back to active if the state has not been changed already
+				yadaJobRepository.stateChangeFromTo(toRun, YadaJobState.RUNNING, YadaJobState.ACTIVE);
 			}
 			public void onFailure(Throwable thrown) {
 				jobHandles.remove(yadaJobId);
 				yadaJobSchedulerDao.internalJobFailed(wiredYadaJob, thrown);
+				// Change back to active if the state has not been changed already
+				yadaJobRepository.stateChangeFromTo(toRun, YadaJobState.RUNNING, YadaJobState.ACTIVE);
 			}
 		},  MoreExecutors.directExecutor());
 	}
-//	
-//    // Starts a job, adding it to the job scheduler.
-//    private ListenableFuture<YadaJob> internalRunJob(Long yadaJobId) {
-// 		// Perform autowiring of the job instance
-//		yadaJob = (YadaJob) yadaUtil.autowire(yadaJob);
-//		@SuppressWarnings("unchecked")
-//    	return jobHandle;
-//    }    
-
 	
 	/**
 	 * Interrupt the job and make it ACTIVE
 	 * @param yadaJob
 	 */
-	public void interruptJob(Long yadaJobId) {
+	void interruptJob(Long yadaJobId) {
 		log.debug("Interrupting job id {}", yadaJobId);
 		ListenableFuture<?> jobHandle = jobHandles.get(yadaJobId);
 		if (jobHandle!=null) {

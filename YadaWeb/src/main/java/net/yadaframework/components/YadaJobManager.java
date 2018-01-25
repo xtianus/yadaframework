@@ -20,7 +20,8 @@ import net.yadaframework.persistence.repository.YadaJobDao;
 import net.yadaframework.persistence.repository.YadaJobRepository;
 
 /**
- * Job handling
+ * Job handling.
+ * Use this class to add/delete/remove jobs. Do not use the YadaJobScheduler directly.
  *
  */
 @Service
@@ -84,7 +85,8 @@ public class YadaJobManager {
 		if (yadaJob.getJobScheduledTime()==null) {
 			yadaJob.setJobScheduledTime(new Date());
 		}
-		yadaJob.activate();
+		// Shouldn't set the state by calling setJobStateObject() but we don't care here because we want to force our value onto the database
+		yadaJob.setJobStateObject(YadaJobState.ACTIVE.toYadaPersistentEnum());
 		yadaJobRepository.save(yadaJob);
 		return true;
 	}
@@ -145,27 +147,40 @@ public class YadaJobManager {
 	
 	/**
 	 * Set a list of jobs to DISABLED then interrupt the threads.
-	 * All jobs are first set to disabled, then they are all interrupted, so that if the current thread is one that is going to be
-	 * interrupted, the disabled state will still be applied.
+	 * All jobs are first set to disabled, then they are all interrupted.
 	 * @param yadaJob
 	 */
 	public void disableAndInterruptJobs(List<? extends YadaJob> yadaJobs) {
 		for (YadaJob yadaJob : yadaJobs) {
-			yadaJobRepository.internalSetState(yadaJob.getId(), YadaJobState.DISABLED.toYadaPersistentEnum());
+			yadaJobRepository.setState(yadaJob.getId(), YadaJobState.DISABLED.toYadaPersistentEnum());
 		}
 		for (YadaJob yadaJob : yadaJobs) {
 			yadaJobScheduler.interruptJob(yadaJob.getId());
 		}
 	}
 	
+	/**
+	 * Set a job to COMPLETED
+	 * @param yadaJob
+	 */
+	public void completeJob(Long yadaJobId) {
+		yadaJobRepository.setState(yadaJobId, YadaJobState.COMPLETED.toYadaPersistentEnum());
+	}
+	
+	/**
+	 * Toggle between paused and disabled.
+	 * @param yadaJob
+	 */
+	public void toggleDisabledAndPaused(Long yadaJobId) {
+		yadaJobRepository.stateToggleBetween(yadaJobId, YadaJobState.PAUSED.toYadaPersistentEnum(), YadaJobState.DISABLED.toYadaPersistentEnum());
+	}
 	
 	/**
 	 * Set a job to DISABLED then interrupt its thread
 	 * @param yadaJob
 	 */
 	public void disableAndInterruptJob(Long yadaJobId) {
-		// FIRST set the state, then interrupt, otherwise the state might end up being ACTIVE because of concurrency
-		yadaJobRepository.internalSetState(yadaJobId, YadaJobState.DISABLED.toYadaPersistentEnum());
+		yadaJobRepository.setState(yadaJobId, YadaJobState.DISABLED.toYadaPersistentEnum());
 		yadaJobScheduler.interruptJob(yadaJobId);
 	}
 	
@@ -174,8 +189,7 @@ public class YadaJobManager {
 	 * @param yadaJob
 	 */
 	public void pauseAndInterruptJob(Long yadaJobId) {
-		// FIRST set the state, then interrupt, otherwise the state might end up being ACTIVE because of concurrency
-		yadaJobRepository.internalSetState(yadaJobId, YadaJobState.PAUSED.toYadaPersistentEnum());
+		yadaJobRepository.setState(yadaJobId, YadaJobState.PAUSED.toYadaPersistentEnum());
 		yadaJobScheduler.interruptJob(yadaJobId);
 	}
 

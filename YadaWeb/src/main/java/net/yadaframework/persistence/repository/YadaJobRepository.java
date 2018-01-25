@@ -20,24 +20,57 @@ import net.yadaframework.persistence.entity.YadaPersistentEnum;
 public interface YadaJobRepository extends JpaRepository<YadaJob, Long> {
 	
 	/**
-	 * Invoked by the scheduler classes.
+	 * Get the current job state from the database
+	 * @param yadaJobId
+	 * @return
+	 */
+	@Query("select job.jobStateObject from YadaJob job where id=:id")
+	YadaPersistentEnum<YadaJobState> getJobState(@Param("id") Long yadaJobId);
+	
+	/**
+	 * Invoked by the scheduler classes to set the job state.
 	 * @param yadaJobId
 	 * @param jobStateId
 	 */
 	@Modifying
 	@Transactional(readOnly = false)
 	@Query("update YadaJob set jobStateObject=:stateObject where id=:id")
-	void internalSetState(@Param("id") Long yadaJobId, @Param("stateObject") YadaPersistentEnum<YadaJobState> stateObject);
+	void setState(@Param("id") Long yadaJobId, @Param("stateObject") YadaPersistentEnum<YadaJobState> stateObject);
 	
 	/**
-	 * Invoked by the scheduler classes when starting a job. Only an active job can become running
+	 * Toggle between two states. No change is done if the state is another.
 	 * @param yadaJobId
-	 * @param stateObject
+	 * @param aStateEnum
+	 * @param bStateEnum
 	 */
 	@Modifying
 	@Transactional(readOnly = false)
-	@Query("update YadaJob set jobStartTime=NOW(), jobStateObject.id=:runningId where id=:id and jobStateObject.id=:activeId")
-	void internalSetRunning(@Param("id") Long yadaJobId, @Param("runningId") Long runningId, @Param("activeId") Long activeId);
+	@Query("update YadaJob y set y.jobStateObject = CASE y.jobStateObject "
+		+ "WHEN :aStateEnum THEN :bStateEnum WHEN :bStateEnum THEN :aStateEnum END where y.id=:id")
+	void stateToggleBetween(@Param("id") Long yadaJobId, @Param("aStateEnum") YadaPersistentEnum<YadaJobState> aStateEnum, @Param("bStateEnum") YadaPersistentEnum<YadaJobState> bStateEnum);
+
+	/**
+	 * Invoked by the scheduler classes when starting a job. Only an active job can become running
+	 * @param yadaJobId the id of the job
+	 * @param fromId the id of the state enum that the job must have in order to be changed
+	 * @param toId the id of the state enum to assign
+	 * 
+	 */
+	@Modifying
+	@Transactional(readOnly = false)
+	@Query("update YadaJob set jobStateObject=:toStateEnum where id=:id and jobStateObject=:fromStateEnum")
+	void stateChangeFromTo(@Param("id") Long yadaJobId, @Param("fromStateEnum") YadaPersistentEnum<YadaJobState> fromStateEnum, @Param("toStateEnum") YadaPersistentEnum<YadaJobState> toStateEnum);
+	
+	/**
+	 * Invoked by the scheduler classes when starting a job. Only an active job can become running
+	 * @param yadaJob the job
+	 * @param fromState the state enum that the job must have in order to be changed
+	 * @param toState the state enum to assign
+	 * 
+	 */
+	default void stateChangeFromTo(YadaJob yadaJob, YadaJobState fromStateObject, YadaJobState toStateObject) {
+		stateChangeFromTo(yadaJob.getId(), fromStateObject.toYadaPersistentEnum(), toStateObject.toYadaPersistentEnum());
+	}
 	
 	/**
 	 * Returns the start time of a job
@@ -96,5 +129,15 @@ public interface YadaJobRepository extends JpaRepository<YadaJob, Long> {
 	 */
 	@Query("select e from #{#entityName} e join e.jobStateObject where e.jobGroup=:jobGroup and e.jobStateObject in :stateObjects order by e.jobStateObject.enumOrdinal desc, e.jobScheduledTime asc")
 	List<YadaJob> findByJobGroupAndStates(@Param("jobGroup") String jobGroup, @Param("stateObjects") Collection<YadaPersistentEnum<YadaJobState>> stateObjects);
+
+	/**
+	 * 
+	 * @param jobId
+	 * @param startTime
+	 */
+	@Modifying
+	@Transactional(readOnly = false)
+	@Query("update YadaJob set jobStartTime=:startTime where id=:id")
+	void setStartTime(@Param("id") long jobId, @Param("startTime") Date startTime);
 
 }
