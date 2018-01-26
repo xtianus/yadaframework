@@ -79,9 +79,11 @@ class YadaInitTask extends YadaProject {
 		File javaWebFolder = new File(basePackageFolder, "web");
 		File javaCoreFolder = new File(basePackageFolder, "core");
 		File javaComponentsFolder = new File(basePackageFolder, "components");
+		File javaPersistenceFolder = new File(basePackageFolder, "persistence");
 		javaWebFolder.mkdir();
 		javaCoreFolder.mkdir();
 		javaComponentsFolder.mkdir();
+		javaPersistenceFolder.mkdir();
 //		new File(basePackageFolder, "components").mkdir();
 		new File(resFolder, "ckeditor").mkdir();
 		cssImagesFolder.mkdirs();
@@ -123,7 +125,7 @@ class YadaInitTask extends YadaProject {
 		//
 		List coreFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/core");
 		for (filename in coreFiles) {
-			def target = filename-".txt";
+			def target = filename-".txt"; // Remove the .txt
 			if (target == "XXXConfiguration.java") {
 				target = acronym.capitalize() + "XXXConfiguration.java"-"XXX";
 			}
@@ -131,11 +133,19 @@ class YadaInitTask extends YadaProject {
 		}
 		List webFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/web");
 		for (filename in webFiles) {
+			def target = filename-".txt";
+			if (target == "XXXSession.java") {
+				target = acronym.capitalize() + "XXXSession.java"-"XXX";
+			}
 			processTemplate("java/web", filename, filename-".txt", javaWebFolder);
 		}
 		List componentsFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/components");
 		for (filename in componentsFiles) {
 			processTemplate("java/components", filename, filename-".txt", javaComponentsFolder);
+		}
+		List entityFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/persistence/entity");
+		for (filename in entityFiles) {
+			processTemplate("java/persistence/entity", filename, filename-".txt", new File(javaPersistenceFolder, "entity"));
 		}
 	}
 
