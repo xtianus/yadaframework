@@ -17,6 +17,36 @@
      	<% out.print (yadaWebCommerceFound?"":"<!--"); %> 
   	 	<jar-file>file:../../yadaframework/YadaWebCommerce/bin</jar-file>
      	<% out.print (yadaWebCommerceFound?"":"-->"); %>
+    	<!-- These are used for schema generation. You can remove the ones you don't need -->
+  		<class>net.yadaframework.persistence.entity.YadaAttachedFile</class>
+  		<class>net.yadaframework.persistence.entity.YadaBrowserId</class>
+  		<class>net.yadaframework.persistence.entity.YadaClause</class>
+  		<class>net.yadaframework.persistence.entity.YadaJob</class>
+  		<class>net.yadaframework.persistence.entity.YadaPersistentEnum</class>
+     	<% out.print (yadaWebSecurityFound?"":"<!--"); %> 
+  		<class>net.yadaframework.security.persistence.entity.YadaUserCredentials</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaUserProfile</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaRegistrationRequest</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaSocialCredentials</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaAutoLoginToken</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaTicket</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaTicketMessage</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaUserMessage</class>
+     	<% out.print (yadaWebSecurityFound?"":"-->"); %>
+     	<% out.print (yadaWebCmsFound?"":"<!--"); %> 
+  		<class>net.yadaframework.cms.persistence.entity.YadaArticle</class>
+  		<class>net.yadaframework.cms.persistence.entity.YadaProduct</class>
+  		<class>net.yadaframework.cms.persistence.entity.YadaAttachedFile</class>
+       	<% out.print (yadaWebCmsFound?"":"-->"); %>
+     	<% out.print (yadaWebCommerceFound?"":"<!--"); %> 
+  		<class>net.yadaframework.commerce.persistence.entity.YadaOrder</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaOrderItem</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaArticle</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaAddress</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaCart</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaCartItem</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaCommerceArticle</class>
+      	<% out.print (yadaWebCommerceFound?"":"-->"); %>
  	
       <properties>
       		<!-- 

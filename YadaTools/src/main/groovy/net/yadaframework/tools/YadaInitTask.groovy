@@ -99,10 +99,12 @@ class YadaInitTask extends YadaProject {
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/web.xml", webinfFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/build.properties", webinfFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/home.html", viewsFolder);
-		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/header.html", viewsFolder);
-		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/footer.html", viewsFolder);
+//		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/header.html", viewsFolder);
+//		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/footer.html", viewsFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/modalLogin.html", viewsFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/example_gitignore", project.projectDir);
+		processTemplate(HTMLDIRNAME, "header.html", null, viewsFolder);
+		processTemplate(HTMLDIRNAME, "footer.html", null, viewsFolder);
 		//
 		// Environment configuration
 		//

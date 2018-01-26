@@ -38,6 +38,7 @@ class YadaProject extends DefaultTask {
 	final String TEMPLATEDIRNAME = "template";
 	final String DESTEMAILTEMPLATEFOLDER = "template/email"; // This must be the same as defined in YadaConstants.EMAIL_TEMPLATES_PREFIX + "/" + YadaConstants.EMAIL_TEMPLATES_FOLDER
 	final String CONFIGURATIONDIRNAME = "config";
+	final String HTMLDIRNAME = "html";
 	final String SCRIPTDIRNAME = "script";
 	final String INFODIRNAME = "info";
 	final String CONFWEBAPPFILENAME = "conf.webapp.xml";

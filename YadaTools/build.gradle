@@ -1,9 +1,9 @@
 plugins {
-  id 'org.hidetake.ssh' version '2.7.0'
+	id 'org.hidetake.ssh' version '2.7.0'
 }
 
 group = 'net.yadaframework'
-version = '0.6.6'
+version = '0.6.7'
 
 apply plugin: 'groovy'
 // apply plugin: 'java-gradle-plugin'
