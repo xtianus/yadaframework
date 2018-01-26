@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.util.concurrent.ListenableFuture;
 
 // TODO spostare in YadaBones?
 
@@ -48,7 +49,7 @@ public abstract class YadaJob implements Callable<Void> {
 	protected Long id;
 
 	@OneToOne(fetch = FetchType.EAGER)
-	protected YadaPersistentEnum<YadaJobState> jobStateObject;
+	private YadaPersistentEnum<YadaJobState> jobStateObject = YadaJobState.PAUSED.toYadaPersistentEnum();
 	
 	protected boolean jobGroupPaused = false;
 	
@@ -123,6 +124,12 @@ public abstract class YadaJob implements Callable<Void> {
 	 */
 	@Transient
 	protected boolean recovered = false;
+	
+	/**
+	 * Handle returned by ListeningExecutorService.submit() - internal use only
+	 */
+	@Transient
+	public ListenableFuture<Void> yadaInternalJobHandle;
 	
 	/**
 	 * Needed for DataTables integration
@@ -310,10 +317,22 @@ public abstract class YadaJob implements Callable<Void> {
 		this.jobPriority = jobPriority;
 	}
 
+	/**
+	 * Do not use directly unless you know the implications. It could be stale and be different from the database value.
+	 * @return
+	 */
 	public YadaPersistentEnum<YadaJobState> getJobStateObject() {
 		return jobStateObject;
 	}
 
+	/**
+	 * Do not use directly unless you know the implications. It could be stale and overwrite a more recent value in the database.
+	 * @param jobStateObject
+	 */
+	public void setJobStateObject(YadaPersistentEnum<YadaJobState> jobStateObject) {
+		this.jobStateObject = jobStateObject;
+	}
+	
 	public boolean isJobRecoverable() {
 		return jobRecoverable;
 	}
@@ -322,10 +341,6 @@ public abstract class YadaJob implements Callable<Void> {
 		this.jobRecoverable = recoverable;
 	}
 
-	public void setJobStateObject(YadaPersistentEnum<YadaJobState> jobStateObject) {
-		this.jobStateObject = jobStateObject;
-	}
-	
 	public void setJobScheduledTime(Date jobScheduledTime) {
 		this.jobScheduledTime = jobScheduledTime;
 	}

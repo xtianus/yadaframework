@@ -35,19 +35,20 @@ public class YadaJobSchedulerDao {
     @Autowired private YadaJobDao yadaJobDao;
     @Autowired private YadaUtil yadaUtil;
     
-    /**
-     * Do not use directly.
-     */
-	//    * Sets the state of a job directly in the database
-	//    * @param yadaJobId
-	//    * @param state
-    public void internalSetState(Long yadaJobId, YadaJobState state) {
-    	YadaSql.instance().updateSet("update YadaJob y set y.jobStateObject_id = :stateId")
-		.where("where y.id = :yadaJobId")
-		.setParameter("stateId", state.toYadaPersistentEnum().getId())
-		.setParameter("yadaJobId", yadaJobId)
-		.nativeQuery(em).executeUpdate();
-    }
+//    /**
+//     * Do not use directly.
+//     */
+//	//    * Sets the state of a job directly in the database
+//	//    * @param yadaJobId
+//	//    * @param state
+//    public void internalSetState(Long yadaJobId, YadaJobState state) {
+////    	YadaSql.instance().updateSet("update YadaJob y set y.jobStateObject_id = :stateId")
+//    	YadaSql.instance().updateSet("update YadaJob y set y.jobStateObjec = :state")
+//		.where("where y.id = :yadaJobId")
+//		.setParameter("state", state.toYadaPersistentEnum())
+//		.setParameter("yadaJobId", yadaJobId)
+//		.query(em).executeUpdate();
+//    }
 
     /**
      * Do not use directly.
@@ -57,14 +58,18 @@ public class YadaJobSchedulerDao {
 	public void internalJobFailed(YadaJob yadaJob, Throwable thrown) {
 		log.debug("Job id {} ended onFailure", yadaJob.getId(), thrown);
 		try {
-			yadaJob = em.merge(yadaJob);
-			setActiveWhenRunning(yadaJob);
+			yadaJob = em.merge(yadaJob); // Saves any changes to db when exiting the method
 			yadaJob.incrementErrorStreak();
-			Date now = new Date();
-			if (yadaJob.getJobScheduledTime().before(now)) {
-				yadaJob.setJobScheduledTime(now);
+			// If not scheduled in the future, run again in 1 minute
+			Date inOneMinute = new Date(System.currentTimeMillis()+60000); 
+			if (yadaJob.getJobScheduledTime().before(inOneMinute)) {
+				yadaJob.setJobScheduledTime(inOneMinute);
 			}
 			yadaJob.setJobStartTime(null); // The time at which the job was started - null if the job is not in the RUNNING state.
+			if (yadaJob.isRunning()) {
+				// A failed job will still be run next time, unless someone disables it
+				yadaJob.activate(); // Ready for the next run
+			}
 		} catch (Exception e) {
 			log.error("internalJobFailed failed to update Job id {} with db version {}", yadaJob.getId(), yadaJob.getVersion(), e);
 		}
@@ -76,30 +81,19 @@ public class YadaJobSchedulerDao {
     // Called by the YadaJobScheduler when a job completes
     @Transactional(readOnly = false)
     public void internalJobSuccessful(YadaJob yadaJob) {
-//    	if ( session.contains( myEntity ) ) {
-//    	    // nothing to do... myEntity is already associated with the session
-//    	}
-//    	else {
-//    	    session.saveOrUpdate( myEntity );
-//    	}
     	log.debug("Job id {} ended successfully", yadaJob.getId());
 		try {
-	    	yadaJob = em.merge(yadaJob);
-	    	setActiveWhenRunning(yadaJob);
+	    	yadaJob = em.merge(yadaJob); // Saves any changes to db when exiting the method
 			yadaJob.setJobLastSuccessfulRun(new Date());
 			yadaJob.setErrorStreakCount(0);
 			yadaJob.setJobStartTime(null); // The time at which the job was started - null if the job is not in the RUNNING state.
+			if (yadaJob.isRunning()) {
+				yadaJob.activate(); // Ready for the next run
+			}
 		} catch (Exception e) {
 			log.error("internalJobSuccessful failed to update Job id {} with db version {}", yadaJob.getId(), yadaJob.getVersion(), e);
 		}
 	}   
-    
-	// The job must set its own state to DISABLED or PAUSED when failed, otherwise it is set to ACTIVE
-    private void setActiveWhenRunning(YadaJob yadaJob) {
-    	if (yadaJob.getJobState().equals(YadaJobState.RUNNING)) {
-    		yadaJob.setJobState(YadaJobState.ACTIVE);
-    	}
-    }
     
     /**
      * Do not use directly.
