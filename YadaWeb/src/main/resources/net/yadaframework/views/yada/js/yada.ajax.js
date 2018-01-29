@@ -635,6 +635,7 @@
 				}
 			}
 			e.preventDefault();
+			var action = $(this).attr('action');
 			// Check if it must be a multipart formdata
 			var multipart = $form.attr("enctype")=="multipart/form-data";
 			// Using FormData to send files too: https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData
@@ -648,6 +649,10 @@
 					data.append('buttonName', buttonValue);
 				} else if (!multipart && buttonName!=null && data[buttonName]==null) {
 					data.push({name: buttonName, value: buttonValue});
+				}
+				var buttonAction = $(clickedButton).attr("formaction");
+				if (buttonAction!=null) {
+					action = buttonAction;
 				}
 			}
 			if (!multipart) {
@@ -695,7 +700,7 @@
 			};
 			var method = $(this).attr('method') || "POST";
 			// yada.ajax($(this).attr('action'), $.param(data), joinedHandler.bind(this), $(this).attr('method'), $(this).attr('data-timeout'));
-			yada.ajax($(this).attr('action'), data, joinedHandler.bind(this), method, $(this).attr('data-timeout'));
+			yada.ajax(action, data, joinedHandler.bind(this), method, $(this).attr('data-timeout'));
 			clickedButton = null;
 			return false; // Important so that the form is not submitted by the browser too
 		})
