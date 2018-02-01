@@ -48,6 +48,7 @@ public class YadaRegistrationController {
 	@Autowired private PasswordEncoder passwordEncoder;
 	@Autowired private YadaConfiguration yadaConfiguration;
 	@Autowired private MessageSource messageSource;
+	@Autowired private YadaNotify yadaNotify;
 
 	
 	public enum YadaRegistrationStatus {
@@ -193,7 +194,7 @@ public class YadaRegistrationController {
 	////// Password Recovery                                                                            /////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/** Metodo chiamato al submit del form di cambio password.
+	/** Default method to change a user password.
 	 * 
 	 * @return
 	 */
@@ -203,54 +204,33 @@ public class YadaRegistrationController {
 			bindingResult.rejectValue("password", "validation.password.length", new Object[]{yadaConfiguration.getMinPasswordLength(), yadaConfiguration.getMaxPasswordLength()}, "Wrong password length");
 			return "/yada/modalPasswordChange";
 		}
-		long[] parts = yadaTokenHandler.parseLink(yadaFormPasswordChange.getToken());
-		boolean fatalError=true;
-		try {
-			if (parts!=null) {
-				YadaRegistrationRequest registrationRequest = yadaRegistrationRequestRepository.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]).get(0);
-				YadaUserCredentials yadaUserCredentials = null;
-				String username = registrationRequest.getEmail();
-				List<YadaUserCredentials> credentials = yadaUserCredentialsRepository.findByUsername(StringUtils.trimToEmpty(username).toLowerCase(locale), yadaWebUtil.FIND_ONE);
-				if (credentials.size()==1) {
-					yadaUserCredentials = credentials.get(0);
-					yadaUserCredentials.changePassword(yadaFormPasswordChange.getPassword(), passwordEncoder);
-					yadaUserCredentialsRepository.save(yadaUserCredentials);
-					yadaRegistrationRequestRepository.delete(registrationRequest);
-					fatalError=false;
-					if (yadaUserCredentials.isEnabled()) {
-						yadaUserDetailsService.authenticateAs(yadaUserCredentials);
-					}
-					log.info("PASSWORD CHANGE: user='{}' password='{}'", username, yadaFormPasswordChange.getPassword());
-					yadaWebUtil.modalOk("Password Changed", "Your password has been changed.", model);
-					model.addAttribute("pwdChangeOk", "pwdChangeOk");
-				}
-			}
-		} catch (Exception e) {
-			fatalError=true;
-			log.info("Password change failed", e);
-		}
-		if (fatalError) {
-			log.error("Password change failed (fatalError)");
+		boolean done = yadaSecurityUtil.performPasswordChange(yadaFormPasswordChange);
+		if (done) {
+			log.info("Password changed for user '{}'", yadaFormPasswordChange.getUsername());
+			yadaNotify.title("Password Changed", model).ok().message("Your password has been changed").add();
+			model.addAttribute("pwdChangeOk", "pwdChangeOk");
+		} else {
+			log.error("Password change failed for user '{}'", yadaFormPasswordChange.getUsername());
 			model.addAttribute("fatalError", "fatalError");
-			yadaWebUtil.modalError("Password change failed", "An error occurred while changing the password. Please try again and contact us if the problem persists.", model);
+			yadaNotify.title("Password change failed", model).ok().message("An error occurred while changing the password. Please try again and contact us if the problem persists").add();
 		}
 		return "/yada/modalPasswordChange";
-		
 	}
 	
 	/**
-	 * Chiamato dalla home per aprire il modal di cambio password la prima volta
+	 * Called via ajax to open the final password change modal
 	 * @param token
 	 * @param username
 	 * @return
 	 */
-	@RequestMapping("/passwordChangeModal/{token}/{username}/end")
+	@RequestMapping("/yadaPasswordChangeModal/{token}/{username}/end")
 	public String passwordChangeModal(@PathVariable String token, @PathVariable String username, @ModelAttribute YadaFormPasswordChange yadaFormPasswordChange) {
 		return "/yada/modalPasswordChange";
 	}
 
-	/** Metodo chiamato cliccando il link di password recovery nell'email.
-	 * @return true se ok, false se la request è invalida
+	/** To be called in the controller that handles the password recovery link in the email.
+	 * It creates these model attributes: username, token, dialogType=passwordRecovery
+	 * @return false for an invalid request, true if valid
 	 */
 	public boolean passwordResetForm(String token, Model model, RedirectAttributes redirectAttributes) {
 		long[] parts = yadaTokenHandler.parseLink(token);
@@ -274,17 +254,17 @@ public class YadaRegistrationController {
 		return false;
 	}
 
-	@RequestMapping("/passwordRecovery")
+	@RequestMapping("/yadaPasswordResetPost")
 	public String passwordRecovery(YadaRegistrationRequest yadaRegistrationRequest, BindingResult bindingResult, Locale locale, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) {
 		if (yadaRegistrationRequest==null || yadaRegistrationRequest.getEmail()==null) {
-			return "redirect:/pwdRecover";
+			return "redirect:/passwordReset";
 		}
 		// Controllo se esiste un utente
 		String email = yadaRegistrationRequest.getEmail();
 		List<YadaUserCredentials> existing = yadaUserCredentialsRepository.findByUsername(StringUtils.trimToEmpty(email).toLowerCase(locale), yadaWebUtil.FIND_ONE);
 		if (existing.isEmpty()) {
-			bindingResult.rejectValue("email", "passwordrecover.username.notfound");
-			return "/pwdRecover";
+			bindingResult.rejectValue("email", "yada.passwordrecover.username.notfound");
+			return "/passwordReset";
 		}
 		yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
 		// Pulisco le vecchie richieste
@@ -294,14 +274,16 @@ public class YadaRegistrationController {
 		boolean emailSent = yadaSecurityEmailService.sendPasswordRecovery(yadaRegistrationRequest, request, locale);
 		if (!emailSent) {
 			yadaRegistrationRequestRepository.delete(yadaRegistrationRequest);
-			log.debug("Invio email a {} fallito in fase di recupero password", yadaRegistrationRequest.getEmail());
-			bindingResult.rejectValue("email", "email.send.failed");
-			return "/pwdRecover";
+			log.debug("Sending email to {} failed while resetting password", yadaRegistrationRequest.getEmail());
+			bindingResult.rejectValue("email", "yada.email.send.failed");
+			return "/passwordReset";
 		}
-		YadaNotify yadaNotify = YadaNotify.instance(redirectAttributes).yadaMessageSource(messageSource, locale);
-		yadaNotify.yadaTitleKey("email.passwordrecover.title");
-		yadaNotify.yadaOk().yadaMessageKey("email.passwordrecover.message", yadaRegistrationRequest.getEmail());
-		yadaNotify.yadaSave();
-        return "redirect:/"; 
+		yadaNotify.titleKey(redirectAttributes, locale, "yada.email.passwordrecover.title")
+			.ok()
+			.messageKey("yada.email.passwordrecover.message", yadaRegistrationRequest.getEmail())
+			.add();
+		String address = yadaConfiguration.getPasswordResetSent(locale);
+
+        return "redirect:" + address; 
 	}
 }

@@ -72,7 +72,7 @@ public class YadaSession<T extends YadaUserProfile> {
 			return false;
 		}
 	}
-
+	
 	/**
 	 * Check if the current user has the role "ADMIN"
 	 * @return

@@ -37,8 +37,8 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
 	private String failureUrlAjaxRequest = null;
 	private String failureUrlNormalRequest = null;
 	
-	@Autowired YadaUserCredentialsRepository userCredentialsRepository;
-	@Autowired YadaConfiguration yadaConfiguration;
+	@Autowired private YadaUserCredentialsRepository userCredentialsRepository;
+	@Autowired private YadaConfiguration yadaConfiguration;
 
 	public YadaAuthenticationFailureHandler() {
 	}
@@ -48,6 +48,7 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
 		request.setAttribute(WebAttributes.AUTHENTICATION_EXCEPTION, exception); // Lo faccio per compatibilità con li modo standard di gestire la cosa, ma non serve
 		String username = request.getParameter("username");
 		request.setAttribute("username", username);
+		request.setAttribute("loginErrorFlag", "loginErrorFlag");
 		try {
 			if (exception instanceof BadCredentialsException) {
 				request.setAttribute("passwordError", "passwordError");

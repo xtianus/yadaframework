@@ -88,17 +88,7 @@ public class YadaSecurityEmailService {
 		final String emailName = "registrationConfirmation";
 		final String[] toEmail = {yadaRegistrationRequest.getEmail()};
 		final String[] subjectParams = {yadaEmailService.timestamp(locale)};
-		String link = config.getRegistrationConfirmationLink();
-		if (!link.endsWith("/")) {
-			link = link + "/";
-		}
-		if (!link.startsWith("/")) {
-			link = "/" + link;
-		}
-		if (config.isLocalePathVariableEnabled()) {
-			// Add the locale
-			link = "/" + locale.getLanguage() + link;
-		}
+		String link = config.getRegistrationConfirmationLink(locale);
 		String myServerAddress = yadaWebUtil.getWebappAddress(request);
 		String fullLink = myServerAddress + link + yadaTokenHandler.makeLink(yadaRegistrationRequest, linkParameters);
 		
