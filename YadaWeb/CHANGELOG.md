@@ -3,6 +3,10 @@ Changelog
 Notable changes to this project are documented in the current file. For more details about individual changes, see the Git log. 
 The version of the sources you're using can be seen at the top of the `/YadaWeb/build.gradle` file.
 
+master
+-------------------
+- YadaTools init task improved
+
 stable
 -------------------
 - button formaction support in ajax forms

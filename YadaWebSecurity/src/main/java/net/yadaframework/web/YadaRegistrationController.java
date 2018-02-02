@@ -249,8 +249,12 @@ public class YadaRegistrationController {
 		return "/yada/modalPasswordChange";
 	}
 
-	/** Metodo chiamato cliccando il link di password recovery nell'email.
-	 * @return true se ok, false se la request è invalida
+	/**
+	 * This method should be called by the controller that responds to the email reset link sent by email
+	 * @param token
+	 * @param model
+	 * @param redirectAttributes
+	 * @return true if the reset request is valid, false otherwise
 	 */
 	public boolean passwordResetForm(String token, Model model, RedirectAttributes redirectAttributes) {
 		long[] parts = yadaTokenHandler.parseLink(token);
