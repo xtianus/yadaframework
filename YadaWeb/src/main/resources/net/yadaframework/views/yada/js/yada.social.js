@@ -40,7 +40,7 @@
 				var callbackCalled = yada.callYadaCallbackIfPresent(responseHtml); // Qui succede il redirect
 				if (!modalShown && !callbackCalled) {
 					// Il risultato è il contenuto originariamente richiesto, che viene passato all'handler, oppure se non c'è l'handler si ricarica la pagina corrente
-					handlePostLoginHandler(responseHtml, responseText);
+					yada.handlePostLoginHandler(responseHtml, responseText);
 				}
 			}
 		);
