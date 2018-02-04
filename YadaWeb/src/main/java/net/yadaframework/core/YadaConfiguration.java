@@ -83,10 +83,33 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
-	 * @return the link (only a part of it) to use for the registration confirmation
+	 * @return the url to redirect to after sending the password reset email
 	 */
-	public String getRegistrationConfirmationLink() {
-		return configuration.getString("config/security/registration/confirmationLink", "/registrationConfirmation");
+	public String getPasswordResetSent(Locale locale) {
+		String link = configuration.getString("config/security/passwordReset/passwordResetSent", "/");
+		return fixLink(link, locale);
+	}
+	
+	/**
+	 * @return the link to use for the registration confirmation, e.g. "/my/registrationConfirmation" or "/en/my/registrationConfirmation"
+	 */
+	public String getRegistrationConfirmationLink(Locale locale) {
+		String link = configuration.getString("config/security/registration/confirmationLink", "/registrationConfirmation");
+		return fixLink(link, locale);
+	}
+	
+	private String fixLink(String link, Locale locale) {
+		if (!link.endsWith("/")) {
+			link = link + "/";
+		}
+		if (!link.startsWith("/")) {
+			link = "/" + link;
+		}
+		if (isLocalePathVariableEnabled()) {
+			// Add the locale
+			link = "/" + locale.getLanguage() + link;
+		}
+		return link;
 	}
 
 	/**

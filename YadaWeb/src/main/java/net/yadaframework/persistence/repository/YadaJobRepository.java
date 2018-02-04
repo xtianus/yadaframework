@@ -68,6 +68,8 @@ public interface YadaJobRepository extends JpaRepository<YadaJob, Long> {
 	 * @param toState the state enum to assign
 	 * 
 	 */
+	@Modifying
+	@Transactional(readOnly = false)
 	default void stateChangeFromTo(YadaJob yadaJob, YadaJobState fromStateObject, YadaJobState toStateObject) {
 		stateChangeFromTo(yadaJob.getId(), fromStateObject.toYadaPersistentEnum(), toStateObject.toYadaPersistentEnum());
 	}

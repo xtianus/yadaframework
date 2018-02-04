@@ -71,7 +71,7 @@ public class YadaJobSchedulerDao {
 				yadaJob.activate(); // Ready for the next run
 			}
 		} catch (Exception e) {
-			log.error("internalJobFailed failed to update Job id {} with db version {}", yadaJob.getId(), yadaJob.getVersion(), e);
+			log.error("internalJobFailed failed to update Job id {} ", yadaJob.getId(), e);
 		}
 	}
 	
@@ -91,7 +91,7 @@ public class YadaJobSchedulerDao {
 				yadaJob.activate(); // Ready for the next run
 			}
 		} catch (Exception e) {
-			log.error("internalJobSuccessful failed to update Job id {} with db version {}", yadaJob.getId(), yadaJob.getVersion(), e);
+			log.error("internalJobSuccessful failed to update Job id {}", yadaJob.getId(), e);
 		}
 	}   
     

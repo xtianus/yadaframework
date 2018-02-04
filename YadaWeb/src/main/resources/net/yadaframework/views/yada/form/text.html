@@ -29,6 +29,7 @@ Parameters:
 - noFeedback = true to remove space reserved for field feedback icon (optional)
 - noShowPassword = true to remove the icon that shows the password in cleartext
 - tabindex = the tabindex for the field (optional)
+- autocomplete = the autocomplete value (optional)
 
 Example:
 
@@ -50,8 +51,10 @@ Example:
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:type="${type}?:'text'" th:readonly="${readonly}" 
 			th:min="${min}" th:max="${max}" th:step="${step}" 
-			th:classappend="${readonly==true?'yadaReadonly':'form-control'+(noFeedback==true?'':' has-feedback')}" th:maxlength="${maxlength}" 
+			class="form-control"
+			th:classappend="${readonly==true?'yadaReadonly':(noFeedback==true?'':' has-feedback')}" th:maxlength="${maxlength}" 
 			th:tabindex="${tabindex}"
+			th:autocomplete="${autocomplete}"
 			th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}"/>
 		<span th:if="${type=='password' && noShowPassword!=true}" class="input-group-btn">
 			<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
@@ -59,8 +62,10 @@ Example:
 		<textarea th:if="${maxlength gt 80}" rows="3" th:field="*{{__${fieldName}__}}" 
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:maxlength="${maxlength}" 
-			th:classappend="${readonly==true?'yadaReadonly':'form-control'+(noFeedback==true?'':' has-feedback')}"
+			class="form-control"
+			th:classappend="${readonly==true?'yadaReadonly':(noFeedback==true?'':' has-feedback')}"
 			th:tabindex="${tabindex}"
+			th:autocomplete="${autocomplete}"
 			th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}"></textarea>
 		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
 			<a th:if="${help!=null}" class="yadaHelpButton input-group-addon" data-trigger="focus" data-container="body" 

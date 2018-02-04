@@ -164,21 +164,25 @@ public class YadaJobManager {
 	 * @param yadaJob
 	 */
 	public void disableAndInterruptJobs(List<? extends YadaJob> yadaJobs) {
-		for (YadaJob yadaJob : yadaJobs) {
-			YadaJob cached = yadaJobScheduler.getJobInstanceIfRunning(yadaJob.getId());
-			if (cached!=null) {
-				yadaJob = cached;
+		try {
+			for (YadaJob yadaJob : yadaJobs) {
+				YadaJob cached = yadaJobScheduler.getJobInstanceIfRunning(yadaJob.getId());
+				if (cached!=null) {
+					yadaJob = cached;
+				}
+				yadaJob.disable();
 			}
-			yadaJob.disable();
-		}
-		for (YadaJob yadaJob : yadaJobs) {
-			YadaJob cached = yadaJobScheduler.getJobInstanceIfRunning(yadaJob.getId());
-			if (cached!=null) {
-				yadaJob = cached;
+			for (YadaJob yadaJob : yadaJobs) {
+				YadaJob cached = yadaJobScheduler.getJobInstanceIfRunning(yadaJob.getId());
+				if (cached!=null) {
+					yadaJob = cached;
+				}
+				if (!yadaJobScheduler.interruptJob(yadaJob)) {
+					yadaJobRepository.save(yadaJob); // Save it because nobody else will
+				}
 			}
-			if (!yadaJobScheduler.interruptJob(yadaJob)) {
-				yadaJobRepository.save(yadaJob); // Save it because nobody else will
-			}
+		} catch (Exception e) {
+			log.error("Error while disabling and interrupting jobs", e);
 		}
 	}
 	

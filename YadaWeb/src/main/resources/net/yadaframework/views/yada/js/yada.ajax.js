@@ -170,7 +170,7 @@
 //		}; 
 	
 	// Al ritorno di un post di login, mostra eventuali notify ed esegue l'eventuale handler, oppure ricarica la pagina corrente se l'handler non c'è.
-	function handlePostLoginHandler(responseHtml, responseText) {
+	yada.handlePostLoginHandler = function(responseHtml, responseText) {
 		var isError = yada.isNotifyError(responseHtml);
 		yada.handleNotify(responseHtml);
 		if (yada.postLoginHandler != null) {
@@ -813,7 +813,7 @@
 					$("#loginModal").remove();
 					yada.loaderOff();
 					// window.location.reload(true); // true = skip cache // Non va bene perchè se è stata fatta una post, viene ripetuta!
-					handlePostLoginHandler(responseHtml, responseText);
+					yada.handlePostLoginHandler(responseHtml, responseText);
 					return;
 				}
 				if (openLoginModalIfPresent(responseHtml)) {

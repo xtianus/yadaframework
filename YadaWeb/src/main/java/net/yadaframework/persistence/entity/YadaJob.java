@@ -40,9 +40,9 @@ public abstract class YadaJob implements Callable<Void> {
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
-	// For optimistic locking
-	@Version
-	protected long version;
+//	// For optimistic locking
+//	@Version
+//	protected long version;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -397,9 +397,9 @@ public abstract class YadaJob implements Callable<Void> {
 		this.recovered = recovered;
 	}
 
-	public long getVersion() {
-		return version;
-	}
+//	public long getVersion() {
+//		return version;
+//	}
 
 	public int getErrorStreakCount() {
 		return errorStreakCount;

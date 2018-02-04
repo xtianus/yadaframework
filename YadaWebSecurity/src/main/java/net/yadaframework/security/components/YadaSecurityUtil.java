@@ -4,11 +4,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +18,21 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
+import org.springframework.validation.BindingResult;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.security.YadaUserDetailsService;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
+import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaRegistrationRequestRepository;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
+import net.yadaframework.security.persistence.repository.YadaUserProfileRepository;
+import net.yadaframework.web.form.YadaFormPasswordChange;
 
 @Component
 public class YadaSecurityUtil {
@@ -38,6 +48,40 @@ public class YadaSecurityUtil {
 	private final static String SAVED_REQUEST = "SPRING_SECURITY_SAVED_REQUEST"; // copiato da org.springframework.security.web.savedrequest.HttpSessionRequestCache
 	
 	@Autowired private HttpSession httpSession; // Funziona perchè è un proxy
+	@Autowired private YadaTokenHandler yadaTokenHandler;
+	@Autowired private YadaRegistrationRequestRepository yadaRegistrationRequestRepository;
+	@Autowired private YadaUserDetailsService yadaUserDetailsService;
+	@Autowired private YadaUserCredentialsRepository yadaUserCredentialsRepository;
+	@Autowired private PasswordEncoder passwordEncoder;
+
+	/**
+	 * Change the user password and log in
+	 * @param yadaFormPasswordChange
+	 * @return
+	 */
+	public boolean performPasswordChange(YadaFormPasswordChange yadaFormPasswordChange) {
+		long[] parts = yadaTokenHandler.parseLink(yadaFormPasswordChange.getToken());
+		try {
+			if (parts!=null) {
+				YadaRegistrationRequest registrationRequest = yadaRegistrationRequestRepository.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]).get(0);
+				String username = registrationRequest.getEmail();
+				YadaUserCredentials yadaUserCredentials = yadaUserCredentialsRepository.findFirstByUsername(StringUtils.trimToEmpty(username).toLowerCase());
+				if (yadaUserCredentials!=null) {
+					yadaUserCredentials.changePassword(yadaFormPasswordChange.getPassword(), passwordEncoder);
+					yadaUserCredentialsRepository.save(yadaUserCredentials);
+					yadaRegistrationRequestRepository.delete(registrationRequest);
+					if (yadaUserCredentials.isEnabled()) {
+						yadaUserDetailsService.authenticateAs(yadaUserCredentials);
+					}
+					log.info("PASSWORD CHANGE for user='{}'", username);
+					return true;
+				}
+			}
+		} catch (Exception e) {
+			log.info("Password change failed", e);
+		}
+		return false;
+	}
 
 	/**
 	 * 
@@ -70,11 +114,20 @@ public class YadaSecurityUtil {
 
 	/**
 	 * Check if the current user is authenticated (logged in) not anonymously.
-	 * Use in thymeleaf with th:if="${@yadaWebUtil.loggedIn()}"
+	 * Use in thymeleaf with th:if="${@YadaSecurityUtil.loggedIn()}"
 	 * @return
 	 */
 	@Deprecated // use isLoggedIn() instead
 	public boolean loggedIn() {
+		return isLoggedIn();
+	}
+	
+	/**
+	 * Check if the current user is authenticated (logged in) not anonymously.
+	 * Use in thymeleaf with th:if="${@YadaSecurityUtil.loggedIn}"
+	 * @return
+	 */
+	public boolean isLoggedIn() {
 		try {
 			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 			if (auth!=null && auth.isAuthenticated()) {
@@ -85,15 +138,6 @@ public class YadaSecurityUtil {
 			log.error("Can't get Authentication object", e);
 		}
 		return false;
-	}
-	
-	/**
-	 * Check if the current user is authenticated (logged in) not anonymously.
-	 * Use in thymeleaf with th:if="${@yadaWebUtil.loggedIn}"
-	 * @return
-	 */
-	public boolean isLoggedIn() {
-		return loggedIn();
 	}
 	
 	/**
