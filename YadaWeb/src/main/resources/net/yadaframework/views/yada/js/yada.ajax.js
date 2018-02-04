@@ -887,13 +887,18 @@
 					$("#ajaxModal").children().remove();
 					$("#ajaxModal").append(loadedModalDialog);
 					// We need to show the modal after a delay or it won't show sometimes (!)
-					setTimeout(function() {
-						$('#ajaxModal:hidden').modal('show');
-						// The loader is removed after the modal is opened to prevent background flickering (if the loader background is not transparent)
-						$('#ajaxModal').on('shown.bs.modal', function (e) {
-							yada.loaderOff();
-						})
-					}, 100);
+					var modalIsHidden = $('#ajaxModal:visible').length==0;
+					if (modalIsHidden) {
+						setTimeout(function() {
+							$('#ajaxModal:hidden').modal('show');
+							// The loader is removed after the modal is opened to prevent background flickering (if the loader background is not transparent)
+							$('#ajaxModal').on('shown.bs.modal', function (e) {
+								yada.loaderOff();
+							})
+						}, 100);
+					} else {
+						yada.loaderOff();
+					}
 					yada.initAjaxHandlersOn($("#ajaxModal"));
 					// Questo permette di scrollare all'anchor (ho dovuto mettere un ritardo altrimenti non scrollava)
 					// e anche di far scendere il modal se per caso si apre scrollato (a volte capita, forse coi modal molto alti)
