@@ -91,7 +91,7 @@
 		if ($element==null) {
 			$element = $('body');
 		}
-		$('a[data-yadaHash]', $element).not(".yadaHashed").click(function(){
+		$('a[data-yadaHash], button[data-yadaHash]', $element).not(".yadaHashed").click(function(){
 			var hashValue = $(this).attr('data-yadaHash')
 			history.pushState({'yadaHash': true}, null, window.location.pathname + '#' + hashValue)
 		}).addClass("yadaHashed");
