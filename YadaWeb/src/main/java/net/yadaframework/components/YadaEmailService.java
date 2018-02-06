@@ -14,7 +14,6 @@ import java.util.Set;
 import javax.annotation.Resource;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -23,7 +22,6 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -35,8 +33,8 @@ import org.thymeleaf.spring4.SpringTemplateEngine;
 
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
-import net.yadaframework.exceptions.InternalException;
 import net.yadaframework.exceptions.YadaEmailException;
+import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.web.YadaEmailContent;
 import net.yadaframework.web.YadaEmailParam;
 import net.yadaframework.web.YadaWebUtil;
@@ -241,7 +239,7 @@ public class YadaEmailService {
 		if (classPathResource.exists()) {
 			return prefix;
 		}
-    	throw new InternalException("Email template not found: " + templateNameNoHtml);
+    	throw new YadaInternalException("Email template not found: " + templateNameNoHtml);
     }
 
     /**

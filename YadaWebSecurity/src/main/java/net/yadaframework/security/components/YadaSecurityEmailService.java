@@ -94,6 +94,7 @@ public class YadaSecurityEmailService {
 		
 		final Map<String, Object> templateParams = new HashMap<String, Object>();
 		templateParams.put("fullLink", fullLink);
+		templateParams.put("email", yadaRegistrationRequest.getEmail());
 		
 		Map<String, String> inlineResources = new HashMap<String, String>();
 		inlineResources.put("logosmall", config.getEmailLogoImage());
@@ -119,6 +120,7 @@ public class YadaSecurityEmailService {
 
 		final Map<String, Object> templateParams = new HashMap<String, Object>();
 		templateParams.put("fullLink", fullLink);
+		templateParams.put("email", yadaRegistrationRequest.getEmail());
 		
 		Map<String, String> inlineResources = new HashMap<String, String>();
 		inlineResources.put("logosmall", config.getEmailLogoImage());
