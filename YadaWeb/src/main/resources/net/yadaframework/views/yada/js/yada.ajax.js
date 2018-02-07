@@ -433,7 +433,7 @@
 		if (url==null) {
 			url = $element.attr('data-yadaHref');
 		}
-		var confirmText = $element.attr("data-confirm");
+		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
 		// Create data for submission
 		var data = null;
 		var value = [];
@@ -708,7 +708,7 @@
 		// Set the confirm handlers on form buttons
 	    $form.not('.'+markerClass).find("button[type='submit']").each(function() {
 	    	var $button = $(this);
-	    	var confirmText = $button.attr("data-confirm");
+	    	var confirmText = $button.attr("data-yadaConfirm") || $button.attr("data-confirm");
 	    	if (confirmText!=null) {
 	    		var okButton = $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
 	    		var cancelButton = $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
