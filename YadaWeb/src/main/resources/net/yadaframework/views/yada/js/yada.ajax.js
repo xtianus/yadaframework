@@ -398,7 +398,12 @@
 		  for(var i = 0; i < namespaces.length; i++) {
 		    context = context[namespaces[i]];
 		  }
-		  return context[func].apply(thisObject, args);
+		  var functionObject = context[func];
+		  if (functionObject==null) {
+			  console.log("[yada] Function " + func + " not found (ignored)");
+			  return true; // so that other handlers can be called
+		  }
+		  return functionObject.apply(thisObject, args);
 	}
 	
 	/**

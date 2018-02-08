@@ -33,6 +33,8 @@
 	}; 
 	
 	$(document).ready(function() {
+		// Be aware that all ajax links and forms will NOT be ajax if the user clicks while the document is still loading.
+		// To prevent that, call yada.initAjaxHandlersOn($('form,a')); at the html bottom and just after including the yada.ajax.js script
 		initHandlers();
 	});
 	
