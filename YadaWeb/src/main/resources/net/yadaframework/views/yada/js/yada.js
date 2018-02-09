@@ -616,6 +616,7 @@
 			$element = $('body');
 		}
 		$("[data-yadaCustomPopoverId]", $element).not('.s_customPopovered').each(function(){
+			$(this).addClass('s_customPopovered');
 			var dataIdWithHash = yada.getIdWithHash(this, "data-yadaCustomPopoverId");
 			var dataTitle = $(this).attr("data-title"); // Optional
 			var hasTitle = $(this).attr("title")==null;
@@ -657,7 +658,6 @@
 			$(this).on('shown.bs.popover', makePopoverShownHandler(popoverId, shownFunction));
 			$(this).on('hidden.bs.popover', makePopoverClosedHandler(popoverId, hiddenFunction));
 		});
-		$('[data-yadaCustomPopoverId]').not('.s_customPopovered').addClass('s_customPopovered');
 		
 		// Wrap the closure
 		function makePopoverShownHandler(divId, shownFunction) {
