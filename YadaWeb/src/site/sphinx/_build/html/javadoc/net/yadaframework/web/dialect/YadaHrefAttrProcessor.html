@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>YadaHrefAttrProcessor &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="../../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     'master',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../../index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../intro.html">     intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../tutorial.html">     tutorial</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">YadaHrefAttrProcessor</a><ul>
+<li><a class="reference internal" href="#fields">Fields</a><ul>
+<li><a class="reference internal" href="#attr-name">ATTR_NAME</a></li>
+<li><a class="reference internal" href="#attr-precedence">ATTR_PRECEDENCE</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#constructors">Constructors</a><ul>
+<li><a class="reference internal" href="#id1">YadaHrefAttrProcessor</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#doprocess">doProcess</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../../../../../_sources/javadoc/net/yadaframework/web/dialect/YadaHrefAttrProcessor.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="yadahrefattrprocessor">
+<h1>YadaHrefAttrProcessor<a class="headerlink" href="#yadahrefattrprocessor" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.yadaframework.web.dialect.YadaHrefAttrProcessor">
+public class <code class="descname">YadaHrefAttrProcessor</code> extends <a class="reference external" href="http://www.thymeleaf.org/apidocs/thymeleaf/3.0.9.RELEASE/org/thymeleaf/processor/element/AbstractAttributeTagProcessor.html" title="org.thymeleaf.processor.element.AbstractAttributeTagProcessor">AbstractAttributeTagProcessor</a><a class="headerlink" href="#net.yadaframework.web.dialect.YadaHrefAttrProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Questa classe aggiunge il tag yada:href per il calcolo di un url tipo /res-0001/js/a.js dove 0001 è calcolato dinamicamente e coincide con il numero di build. Questo permette di evitare una sintassi tipo: th:href=”&#64;{<a href="#id2"><span class="problematic" id="id3">|${res}/css/bootstrap.min.css|</span></a>}” dove “res” è un valore iniettato da un HandlerInterceptorAdapter e usare invece yada:href=”&#64;{/res/css/bootstrap.min.css}” Tutorial: http://www.thymeleaf.org/doc/html/Extending-Thymeleaf.html</p>
+</dd></dl>
+
+<div class="section" id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="attr-name">
+<h3>ATTR_NAME<a class="headerlink" href="#attr-name" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.web.dialect.YadaHrefAttrProcessor.ATTR_NAME">
+public static final <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">ATTR_NAME</code><a class="headerlink" href="#net.yadaframework.web.dialect.YadaHrefAttrProcessor.ATTR_NAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="attr-precedence">
+<h3>ATTR_PRECEDENCE<a class="headerlink" href="#attr-precedence" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.web.dialect.YadaHrefAttrProcessor.ATTR_PRECEDENCE">
+public static final int <code class="descname">ATTR_PRECEDENCE</code><a class="headerlink" href="#net.yadaframework.web.dialect.YadaHrefAttrProcessor.ATTR_PRECEDENCE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+<div class="section" id="constructors">
+<h2>Constructors<a class="headerlink" href="#constructors" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>YadaHrefAttrProcessor<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="constructor">
+<dt id="net.yadaframework.web.dialect.YadaHrefAttrProcessor.YadaHrefAttrProcessor(String, YadaConfiguration)">
+public <code class="descname">YadaHrefAttrProcessor</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> dialectPrefix</em>, <a class="reference internal" href="../../core/YadaConfiguration.html#net.yadaframework.core.YadaConfiguration" title="net.yadaframework.core.YadaConfiguration">YadaConfiguration</a><em> config</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.dialect.YadaHrefAttrProcessor.YadaHrefAttrProcessor(String, YadaConfiguration)" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>resFolder</strong> – Folder contenente le risorse da “versionare”, per esempio “/res/”</li>
+<li><strong>config</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="doprocess">
+<h3>doProcess<a class="headerlink" href="#doprocess" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.dialect.YadaHrefAttrProcessor.doProcess(ITemplateContext, IProcessableElementTag, AttributeName, String, IElementTagStructureHandler)">
+protected void <code class="descname">doProcess</code><span class="sig-paren">(</span><a class="reference external" href="http://www.thymeleaf.org/apidocs/thymeleaf/3.0.9.RELEASE/org/thymeleaf/context/ITemplateContext.html" title="org.thymeleaf.context.ITemplateContext">ITemplateContext</a><em> context</em>, <a class="reference external" href="http://www.thymeleaf.org/apidocs/thymeleaf/3.0.9.RELEASE/org/thymeleaf/model/IProcessableElementTag.html" title="org.thymeleaf.model.IProcessableElementTag">IProcessableElementTag</a><em> tag</em>, <a class="reference external" href="http://www.thymeleaf.org/apidocs/thymeleaf/3.0.9.RELEASE/org/thymeleaf/engine/AttributeName.html" title="org.thymeleaf.engine.AttributeName">AttributeName</a><em> attributeName</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> attributeValue</em>, <a class="reference external" href="http://www.thymeleaf.org/apidocs/thymeleaf/3.0.9.RELEASE/org/thymeleaf/processor/element/IElementTagStructureHandler.html" title="org.thymeleaf.processor.element.IElementTagStructureHandler">IElementTagStructureHandler</a><em> structureHandler</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.dialect.YadaHrefAttrProcessor.doProcess(ITemplateContext, IProcessableElementTag, AttributeName, String, IElementTagStructureHandler)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

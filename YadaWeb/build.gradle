@@ -4,15 +4,18 @@ version = '0.2.0'
 buildscript {
 	repositories {
 		mavenLocal()
+		mavenCentral()
 	}
 	dependencies {
 		// Needed for test schema creation
 		classpath 'net.yadaframework:YadaTools:+'
+		classpath 'kr.motd.gradle:sphinx-gradle-plugin:1.+'
 	}                    
 }
 
 apply plugin: 'java-library'
 apply plugin: 'eclipse-wtp'
+apply plugin: 'kr.motd.sphinx'
 
 eclipse {
 	jdt {

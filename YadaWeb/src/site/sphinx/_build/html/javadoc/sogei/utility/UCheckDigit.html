@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>UCheckDigit &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     'master',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">     intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">     tutorial</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">UCheckDigit</a><ul>
+<li><a class="reference internal" href="#constructors">Constructors</a><ul>
+<li><a class="reference internal" href="#id1">UCheckDigit</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#controllacheckdigit">controllaCheckDigit</a></li>
+<li><a class="reference internal" href="#controllacorrettezza">controllaCorrettezza</a></li>
+<li><a class="reference internal" href="#controllacorrettezzachar">controllaCorrettezzaChar</a></li>
+<li><a class="reference internal" href="#controllacorrettezzaint">controllaCorrettezzaInt</a></li>
+<li><a class="reference internal" href="#controlladata">controllaData</a></li>
+<li><a class="reference internal" href="#creacaratteredispari">creaCarattereDispari</a></li>
+<li><a class="reference internal" href="#creacaratterepari">creaCaratterePari</a></li>
+<li><a class="reference internal" href="#creamese">creaMese</a></li>
+<li><a class="reference internal" href="#creanumerodispari">creaNumeroDispari</a></li>
+<li><a class="reference internal" href="#creanumeropari">creaNumeroPari</a></li>
+<li><a class="reference internal" href="#crea-ctr-giorno">crea_ctr_giorno</a></li>
+<li><a class="reference internal" href="#getcodfisc">getCodFisc</a></li>
+<li><a class="reference internal" href="#getctr-giorno">getCtr_giorno</a></li>
+<li><a class="reference internal" href="#getvectcardisp">getVectCarDisp</a></li>
+<li><a class="reference internal" href="#getvectcarpari">getVectCarPari</a></li>
+<li><a class="reference internal" href="#getvectmese">getVectMese</a></li>
+<li><a class="reference internal" href="#getvectnumdisp">getVectNumDisp</a></li>
+<li><a class="reference internal" href="#getvectnumpari">getVectNumPari</a></li>
+<li><a class="reference internal" href="#setcodfisc">setCodFisc</a></li>
+<li><a class="reference internal" href="#setctr-giorno">setCtr_giorno</a></li>
+<li><a class="reference internal" href="#trasforma-giorno">trasforma_giorno</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../../../_sources/javadoc/sogei/utility/UCheckDigit.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="ucheckdigit">
+<h1>UCheckDigit<a class="headerlink" href="#ucheckdigit" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="sogei.utility.UCheckDigit">
+public class <code class="descname">UCheckDigit</code><a class="headerlink" href="#sogei.utility.UCheckDigit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downloaded from <a class="reference external" href="http://www.agenziaentrate.gov.it/wps/content/Nsilib/Nsi/Home/CosaDeviFare/Richiedere/Codice+fiscale+e+tessera+sanitaria/Richiesta+TS_CF/SchedaI/Programma+correttezza+formale+CF/">http://www.agenziaentrate.gov.it/wps/content/Nsilib/Nsi/Home/CosaDeviFare/Richiedere/Codice+fiscale+e+tessera+sanitaria/Richiesta+TS_CF/SchedaI/Programma+correttezza+formale+CF/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Author:</th><td class="field-body">Sogei S.p.A.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="constructors">
+<h2>Constructors<a class="headerlink" href="#constructors" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>UCheckDigit<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="constructor">
+<dt id="sogei.utility.UCheckDigit.UCheckDigit(String)">
+public <code class="descname">UCheckDigit</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> g</em><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.UCheckDigit(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Costruttore della classe.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="controllacheckdigit">
+<h3>controllaCheckDigit<a class="headerlink" href="#controllacheckdigit" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.controllaCheckDigit()">
+public boolean <code class="descname">controllaCheckDigit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.controllaCheckDigit()" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="controllacorrettezza">
+<h3>controllaCorrettezza<a class="headerlink" href="#controllacorrettezza" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.controllaCorrettezza()">
+public boolean <code class="descname">controllaCorrettezza</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.controllaCorrettezza()" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="controllacorrettezzachar">
+<h3>controllaCorrettezzaChar<a class="headerlink" href="#controllacorrettezzachar" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.controllaCorrettezzaChar()">
+public char <code class="descname">controllaCorrettezzaChar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.controllaCorrettezzaChar()" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">char</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="controllacorrettezzaint">
+<h3>controllaCorrettezzaInt<a class="headerlink" href="#controllacorrettezzaint" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.controllaCorrettezzaInt()">
+public int <code class="descname">controllaCorrettezzaInt</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.controllaCorrettezzaInt()" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="controlladata">
+<h3>controllaData<a class="headerlink" href="#controlladata" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.controllaData(String)">
+public boolean <code class="descname">controllaData</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> s</em><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.controllaData(String)" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="creacaratteredispari">
+<h3>creaCarattereDispari<a class="headerlink" href="#creacaratteredispari" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.creaCarattereDispari()">
+public static Vector <code class="descname">creaCarattereDispari</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.creaCarattereDispari()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tabella (di tipo Vector) dei valori dei caratteri con posizione di ordine dispari.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="creacaratterepari">
+<h3>creaCaratterePari<a class="headerlink" href="#creacaratterepari" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.creaCaratterePari()">
+public static Vector <code class="descname">creaCaratterePari</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.creaCaratterePari()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tabella (di tipo Vector) dei valori dei caratteri con posizione di ordine pari.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="creamese">
+<h3>creaMese<a class="headerlink" href="#creamese" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.creaMese()">
+public static Vector <code class="descname">creaMese</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.creaMese()" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">vector</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="creanumerodispari">
+<h3>creaNumeroDispari<a class="headerlink" href="#creanumerodispari" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.creaNumeroDispari()">
+public static Vector <code class="descname">creaNumeroDispari</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.creaNumeroDispari()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tabella (di tipo Vector) dei valori dei numeri con posizione di ordine dispari.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="creanumeropari">
+<h3>creaNumeroPari<a class="headerlink" href="#creanumeropari" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.creaNumeroPari()">
+public static Vector <code class="descname">creaNumeroPari</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.creaNumeroPari()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tabella (di tipo Vector) dei valori dei numeri con posizione di ordine pari.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="crea-ctr-giorno">
+<h3>crea_ctr_giorno<a class="headerlink" href="#crea-ctr-giorno" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.crea_ctr_giorno()">
+public static Hashtable&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt; <code class="descname">crea_ctr_giorno</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.crea_ctr_giorno()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getcodfisc">
+<h3>getCodFisc<a class="headerlink" href="#getcodfisc" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.getCodFisc()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getCodFisc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.getCodFisc()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Questo metodo prende il codice fiscale come parametro e torna una stringa.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">java.lang.String</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getctr-giorno">
+<h3>getCtr_giorno<a class="headerlink" href="#getctr-giorno" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.getCtr_giorno()">
+public Hashtable&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt; <code class="descname">getCtr_giorno</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.getCtr_giorno()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getvectcardisp">
+<h3>getVectCarDisp<a class="headerlink" href="#getvectcardisp" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.getVectCarDisp(String)">
+public int <code class="descname">getVectCarDisp</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> elem</em><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.getVectCarDisp(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calcola valore del carattere dispari.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="getvectcarpari">
+<h3>getVectCarPari<a class="headerlink" href="#getvectcarpari" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.getVectCarPari(String)">
+public int <code class="descname">getVectCarPari</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> elem</em><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.getVectCarPari(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calcola valore del carattere pari.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getvectmese">
+<h3>getVectMese<a class="headerlink" href="#getvectmese" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.getVectMese(String)">
+public int <code class="descname">getVectMese</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> stringa</em><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.getVectMese(String)" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>elem</strong> – java.lang.String</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getvectnumdisp">
+<h3>getVectNumDisp<a class="headerlink" href="#getvectnumdisp" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.getVectNumDisp(String)">
+public int <code class="descname">getVectNumDisp</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> elem</em><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.getVectNumDisp(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calcola valore del numero dispari.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getvectnumpari">
+<h3>getVectNumPari<a class="headerlink" href="#getvectnumpari" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.getVectNumPari(String)">
+public int <code class="descname">getVectNumPari</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> elem</em><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.getVectNumPari(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calcola valore del numero pari.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="setcodfisc">
+<h3>setCodFisc<a class="headerlink" href="#setcodfisc" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.setCodFisc(String)">
+public void <code class="descname">setCodFisc</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> s</em><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.setCodFisc(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inizializzazione di un codice fiscale come stringa.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>s</strong> – java.lang.String</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="setctr-giorno">
+<h3>setCtr_giorno<a class="headerlink" href="#setctr-giorno" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.setCtr_giorno(Hashtable)">
+public void <code class="descname">setCtr_giorno</code><span class="sig-paren">(</span>Hashtable&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a>&gt;<em> ctr_giorno</em><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.setCtr_giorno(Hashtable)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="trasforma-giorno">
+<h3>trasforma_giorno<a class="headerlink" href="#trasforma-giorno" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="sogei.utility.UCheckDigit.trasforma_giorno(int)">
+public int <code class="descname">trasforma_giorno</code><span class="sig-paren">(</span>int<em> c</em><span class="sig-paren">)</span><a class="headerlink" href="#sogei.utility.UCheckDigit.trasforma_giorno(int)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

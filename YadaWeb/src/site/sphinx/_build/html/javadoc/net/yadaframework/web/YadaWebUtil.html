@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>YadaWebUtil &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'master',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">     intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">     tutorial</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">YadaWebUtil</a><ul>
+<li><a class="reference internal" href="#fields">Fields</a><ul>
+<li><a class="reference internal" href="#find-one">FIND_ONE</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#callscriptonmodal">callScriptOnModal</a></li>
+<li><a class="reference internal" href="#cleancontent">cleanContent</a></li>
+<li><a class="reference internal" href="#getclientip">getClientIp</a></li>
+<li><a class="reference internal" href="#getcurrentrequest">getCurrentRequest</a></li>
+<li><a class="reference internal" href="#getfileextension">getFileExtension</a></li>
+<li><a class="reference internal" href="#getwebappaddress">getWebappAddress</a></li>
+<li><a class="reference internal" href="#isajaxrequest">isAjaxRequest</a></li>
+<li><a class="reference internal" href="#id1">isAjaxRequest</a></li>
+<li><a class="reference internal" href="#ismodalerror">isModalError</a></li>
+<li><a class="reference internal" href="#isnotifymodalpending">isNotifyModalPending</a></li>
+<li><a class="reference internal" href="#isnotifymodalrequested">isNotifyModalRequested</a></li>
+<li><a class="reference internal" href="#iswebimage">isWebImage</a></li>
+<li><a class="reference internal" href="#makeslug">makeSlug</a></li>
+<li><a class="reference internal" href="#makeslugstatic">makeSlugStatic</a></li>
+<li><a class="reference internal" href="#modalautoclose">modalAutoclose</a></li>
+<li><a class="reference internal" href="#id2">modalAutoclose</a></li>
+<li><a class="reference internal" href="#modalconfirm">modalConfirm</a></li>
+<li><a class="reference internal" href="#id3">modalConfirm</a></li>
+<li><a class="reference internal" href="#modalconfirmandreload">modalConfirmAndReload</a></li>
+<li><a class="reference internal" href="#modalerror">modalError</a></li>
+<li><a class="reference internal" href="#id4">modalError</a></li>
+<li><a class="reference internal" href="#modalinfo">modalInfo</a></li>
+<li><a class="reference internal" href="#id5">modalInfo</a></li>
+<li><a class="reference internal" href="#modalok">modalOk</a></li>
+<li><a class="reference internal" href="#id6">modalOk</a></li>
+<li><a class="reference internal" href="#modalreloadonclose">modalReloadOnClose</a></li>
+<li><a class="reference internal" href="#id7">modalReloadOnClose</a></li>
+<li><a class="reference internal" href="#notifymodal">notifyModal</a></li>
+<li><a class="reference internal" href="#saveattachment">saveAttachment</a></li>
+<li><a class="reference internal" href="#id8">saveAttachment</a></li>
+<li><a class="reference internal" href="#urldecode">urlDecode</a></li>
+<li><a class="reference internal" href="#urlencode">urlEncode</a></li>
+<li><a class="reference internal" href="#versionifyresourceurl">versionifyResourceUrl</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../../../../_sources/javadoc/net/yadaframework/web/YadaWebUtil.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="yadawebutil">
+<h1>YadaWebUtil<a class="headerlink" href="#yadawebutil" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.yadaframework.web.YadaWebUtil">
+public class <code class="descname">YadaWebUtil</code><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="section" id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="find-one">
+<h3>FIND_ONE<a class="headerlink" href="#find-one" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.web.YadaWebUtil.FIND_ONE">
+public final <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/data/domain/Pageable.html" title="org.springframework.data.domain.Pageable">Pageable</a> <code class="descname">FIND_ONE</code><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.FIND_ONE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="callscriptonmodal">
+<h3>callScriptOnModal<a class="headerlink" href="#callscriptonmodal" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.callScriptOnModal(String, Model)">
+public void <code class="descname">callScriptOnModal</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> scriptId</em>, <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/ui/Model.html" title="org.springframework.ui.Model">Model</a><em> model</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.callScriptOnModal(String, Model)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a script id to call when opening the notification modal</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>scriptId</strong> – </li>
+<li><strong>model</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="cleancontent">
+<h3>cleanContent<a class="headerlink" href="#cleancontent" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.cleanContent(String, String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">cleanContent</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> content</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>...<em> extraTags</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.cleanContent(String, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cleans the html content leaving only the following tags: b, em, i, strong, u, br, cite, em, i, p, strong, img, li, ul, ol, sup, sub, s</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>content</strong> – html content</li>
+<li><strong>extraTags</strong> – any other tags that you may want to keep, e. g. “a”</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getclientip">
+<h3>getClientIp<a class="headerlink" href="#getclientip" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.getClientIp(HttpServletRequest)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getClientIp</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a><em> request</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.getClientIp(HttpServletRequest)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getcurrentrequest">
+<h3>getCurrentRequest<a class="headerlink" href="#getcurrentrequest" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.getCurrentRequest()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a> <code class="descname">getCurrentRequest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.getCurrentRequest()" title="Permalink to this definition">¶</a></dt>
+<dd><p>ATTENZIONE: non sempre va!</p>
+</dd></dl>
+
+</div>
+<div class="section" id="getfileextension">
+<h3>getFileExtension<a class="headerlink" href="#getfileextension" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.getFileExtension(MultipartFile)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getFileExtension</code><span class="sig-paren">(</span><a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/multipart/MultipartFile.html" title="org.springframework.web.multipart.MultipartFile">MultipartFile</a><em> multipartFile</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.getFileExtension(MultipartFile)" title="Permalink to this definition">¶</a></dt>
+<dd><p>ritorna ad esempio “jpg” lowercase</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>multipartFile</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getwebappaddress">
+<h3>getWebappAddress<a class="headerlink" href="#getwebappaddress" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.getWebappAddress(HttpServletRequest)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getWebappAddress</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a><em> request</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.getWebappAddress(HttpServletRequest)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ritorna l’indirizzo completo della webapp, tipo <a class="reference external" href="http://www.yodadog.net:8080/site">http://www.yodadog.net:8080/site</a>, senza slash finale Da thymeleaf si usa con <a class="reference external" href="mailto:${&#37;&#52;&#48;yadaWebUtil">${<span>&#64;</span>yadaWebUtil</a>.getWebappAddress(#httpServletRequest)}</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>request</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="isajaxrequest">
+<h3>isAjaxRequest<a class="headerlink" href="#isajaxrequest" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.isAjaxRequest()">
+public boolean <code class="descname">isAjaxRequest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.isAjaxRequest()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ritorna true se la request corrente è ajax</p>
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h3>isAjaxRequest<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.isAjaxRequest(HttpServletRequest)">
+public boolean <code class="descname">isAjaxRequest</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a><em> request</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.isAjaxRequest(HttpServletRequest)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ritorna true se la request passata è ajax</p>
+</dd></dl>
+
+</div>
+<div class="section" id="ismodalerror">
+<h3>isModalError<a class="headerlink" href="#ismodalerror" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.isModalError(Model)">
+public boolean <code class="descname">isModalError</code><span class="sig-paren">(</span><a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/ui/Model.html" title="org.springframework.ui.Model">Model</a><em> model</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.isModalError(Model)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true if modalError has been called before</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="isnotifymodalpending">
+<h3>isNotifyModalPending<a class="headerlink" href="#isnotifymodalpending" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.isNotifyModalPending(HttpServletRequest)">
+public boolean <code class="descname">isNotifyModalPending</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a><em> request</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.isNotifyModalPending(HttpServletRequest)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if a modal is going to be opened when back to the view (usually after a redirect)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>request</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">true if a modal is going to be opened</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="isnotifymodalrequested">
+<h3>isNotifyModalRequested<a class="headerlink" href="#isnotifymodalrequested" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.isNotifyModalRequested(Model)">
+public boolean <code class="descname">isNotifyModalRequested</code><span class="sig-paren">(</span><a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/ui/Model.html" title="org.springframework.ui.Model">Model</a><em> model</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.isNotifyModalRequested(Model)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true if for this thread the notifyModal (or a variant) has been called</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="iswebimage">
+<h3>isWebImage<a class="headerlink" href="#iswebimage" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.isWebImage(String)">
+public boolean <code class="descname">isWebImage</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> extension</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.isWebImage(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indica se l’estensione appartiene a un’immagine accettabile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>extension</strong> – e.g. “jpg”</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="makeslug">
+<h3>makeSlug<a class="headerlink" href="#makeslug" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.makeSlug(String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">makeSlug</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> source</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.makeSlug(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>From a given string, creates a “slug” that can be inserted in a url and still be readable.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>source</strong> – the string to convert</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the slug</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="makeslugstatic">
+<h3>makeSlugStatic<a class="headerlink" href="#makeslugstatic" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.makeSlugStatic(String)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">makeSlugStatic</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> source</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.makeSlugStatic(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>From a given string, creates a “slug” that can be inserted in a url and still be readable. It is static so that it can be used in Entity objects (no context)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>source</strong> – the string to convert</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the slug, which is empty for a null string</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="modalautoclose">
+<h3>modalAutoclose<a class="headerlink" href="#modalautoclose" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.modalAutoclose(long, Model)">
+public void <code class="descname">modalAutoclose</code><span class="sig-paren">(</span>long<em> milliseconds</em>, <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/ui/Model.html" title="org.springframework.ui.Model">Model</a><em> model</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.modalAutoclose(long, Model)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the automatic closing time for the notification - no close button is shown</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>milliseconds</strong> – </li>
+<li><strong>model</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id2">
+<h3>modalAutoclose<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.modalAutoclose(long, RedirectAttributes)">
+public void <code class="descname">modalAutoclose</code><span class="sig-paren">(</span>long<em> milliseconds</em>, <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/servlet/mvc/support/RedirectAttributes.html" title="org.springframework.web.servlet.mvc.support.RedirectAttributes">RedirectAttributes</a><em> redirectAttributes</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.modalAutoclose(long, RedirectAttributes)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the automatic closing time for the notification - no close button is shown</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>milliseconds</strong> – </li>
+<li><strong>redirectAttributes</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="modalconfirm">
+<h3>modalConfirm<a class="headerlink" href="#modalconfirm" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.modalConfirm(String, String, String, Model)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">modalConfirm</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> message</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> confirmButton</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> cancelButton</em>, <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/ui/Model.html" title="org.springframework.ui.Model">Model</a><em> model</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.modalConfirm(String, String, String, Model)" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>message</strong> – text to be displayed (can be null for default value)</li>
+<li><strong>confirmButton</strong> – text of the confirm button (can be null for default value)</li>
+<li><strong>cancelButton</strong> – text of the cancel button (can be null for default value)</li>
+<li><strong>model</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id3">
+<h3>modalConfirm<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.modalConfirm(String, String, String, Model, Boolean, Boolean)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">modalConfirm</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> message</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> confirmButton</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> cancelButton</em>, <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/ui/Model.html" title="org.springframework.ui.Model">Model</a><em> model</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Boolean.html" title="java.lang.Boolean">Boolean</a><em> reloadOnConfirm</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Boolean.html" title="java.lang.Boolean">Boolean</a><em> openModal</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.modalConfirm(String, String, String, Model, Boolean, Boolean)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show the confirm modal and optionally reloads when the confirm button is pressed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>message</strong> – text to be displayed (can be null for default value)</li>
+<li><strong>confirmButton</strong> – text of the confirm button (can be null for default value)</li>
+<li><strong>cancelButton</strong> – text of the cancel button (can be null for default value)</li>
+<li><strong>model</strong> – </li>
+<li><strong>reloadOnConfirm</strong> – (optional) when true, the browser will reload on confirm, adding the confirmation parameter to the url</li>
+<li><strong>openModal</strong> – (optional) when true, the modal will be opened. To be used when the call is not ajax</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="modalconfirmandreload">
+<h3>modalConfirmAndReload<a class="headerlink" href="#modalconfirmandreload" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.modalConfirmAndReload(String, String, String, Model)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">modalConfirmAndReload</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> message</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> confirmButton</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> cancelButton</em>, <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/ui/Model.html" title="org.springframework.ui.Model">Model</a><em> model</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.modalConfirmAndReload(String, String, String, Model)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show the confirm modal and reloads when the confirm button is pressed, adding the confirmation parameter to the url. The modal will be opened on load. Usually used by non-ajax methods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>message</strong> – text to be displayed (can be null for default value)</li>
+<li><strong>confirmButton</strong> – text of the confirm button (can be null for default value)</li>
+<li><strong>cancelButton</strong> – text of the cancel button (can be null for default value)</li>
+<li><strong>model</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="modalerror">
+<h3>modalError<a class="headerlink" href="#modalerror" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.modalError(String, String, Model)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">modalError</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> title</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> message</em>, <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/ui/Model.html" title="org.springframework.ui.Model">Model</a><em> model</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.modalError(String, String, Model)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualizza un errore se non viene fatto redirect</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>title</strong> – </li>
+<li><strong>message</strong> – </li>
+<li><strong>model</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id4">
+<h3>modalError<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.modalError(String, String, RedirectAttributes)">
+public void <code class="descname">modalError</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> title</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> message</em>, <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/servlet/mvc/support/RedirectAttributes.html" title="org.springframework.web.servlet.mvc.support.RedirectAttributes">RedirectAttributes</a><em> redirectAttributes</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.modalError(String, String, RedirectAttributes)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualizza un errore se viene fatto redirect</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>title</strong> – </li>
+<li><strong>message</strong> – </li>
+<li><strong>redirectAttributes</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="modalinfo">
+<h3>modalInfo<a class="headerlink" href="#modalinfo" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.modalInfo(String, String, Model)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">modalInfo</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> title</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> message</em>, <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/ui/Model.html" title="org.springframework.ui.Model">Model</a><em> model</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.modalInfo(String, String, Model)" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>title</strong> – </li>
+<li><strong>message</strong> – </li>
+<li><strong>model</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id5">
+<h3>modalInfo<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.modalInfo(String, String, RedirectAttributes)">
+public void <code class="descname">modalInfo</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> title</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> message</em>, <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/servlet/mvc/support/RedirectAttributes.html" title="org.springframework.web.servlet.mvc.support.RedirectAttributes">RedirectAttributes</a><em> redirectAttributes</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.modalInfo(String, String, RedirectAttributes)" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>title</strong> – </li>
+<li><strong>message</strong> – </li>
+<li><strong>redirectAttributes</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="modalok">
+<h3>modalOk<a class="headerlink" href="#modalok" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.modalOk(String, String, Model)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">modalOk</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> title</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> message</em>, <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/ui/Model.html" title="org.springframework.ui.Model">Model</a><em> model</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.modalOk(String, String, Model)" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>title</strong> – </li>
+<li><strong>message</strong> – </li>
+<li><strong>model</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id6">
+<h3>modalOk<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.modalOk(String, String, RedirectAttributes)">
+public void <code class="descname">modalOk</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> title</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> message</em>, <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/servlet/mvc/support/RedirectAttributes.html" title="org.springframework.web.servlet.mvc.support.RedirectAttributes">RedirectAttributes</a><em> redirectAttributes</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.modalOk(String, String, RedirectAttributes)" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>title</strong> – </li>
+<li><strong>message</strong> – </li>
+<li><strong>redirectAttributes</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="modalreloadonclose">
+<h3>modalReloadOnClose<a class="headerlink" href="#modalreloadonclose" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.modalReloadOnClose(Model)">
+public void <code class="descname">modalReloadOnClose</code><span class="sig-paren">(</span><a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/ui/Model.html" title="org.springframework.ui.Model">Model</a><em> model</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.modalReloadOnClose(Model)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the page to reload when the modal is closed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id7">
+<h3>modalReloadOnClose<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.modalReloadOnClose(RedirectAttributes)">
+public void <code class="descname">modalReloadOnClose</code><span class="sig-paren">(</span><a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/servlet/mvc/support/RedirectAttributes.html" title="org.springframework.web.servlet.mvc.support.RedirectAttributes">RedirectAttributes</a><em> redirectAttributes</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.modalReloadOnClose(RedirectAttributes)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the page to reload when the modal is closed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>redirectAttributes</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="notifymodal">
+<h3>notifyModal<a class="headerlink" href="#notifymodal" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.notifyModal(String, String, String, String, Model)">
+public void <code class="descname">notifyModal</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> title</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> message</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> severity</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> redirectSemiurl</em>, <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/ui/Model.html" title="org.springframework.ui.Model">Model</a><em> model</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.notifyModal(String, String, String, String, Model)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Da usare direttamente solo quando si vuole fare un redirect dopo aver mostrato un messaggio. Se chiamato tante volte, i messaggi si sommano e vengono mostrati tutti all’utente.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>title</strong> – </li>
+<li><strong>message</strong> – </li>
+<li><strong>severity</strong> – a string like YadaConstants.VAL_NOTIFICATION_SEVERITY_OK</li>
+<li><strong>redirectSemiurl</strong> – e.g. “/user/profile”</li>
+<li><strong>model</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>See also:</strong> <a class="reference internal" href="../core/YadaConstants.html#net.yadaframework.core.YadaConstants" title="net.yadaframework.core.YadaConstants"><code class="xref java java-ref docutils literal"><span class="pre">YadaConstants</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="saveattachment">
+<h3>saveAttachment<a class="headerlink" href="#saveattachment" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.saveAttachment(MultipartFile)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/io/File.html" title="java.io.File">File</a> <code class="descname">saveAttachment</code><span class="sig-paren">(</span><a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/multipart/MultipartFile.html" title="org.springframework.web.multipart.MultipartFile">MultipartFile</a><em> attachment</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.saveAttachment(MultipartFile)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save an uploaded file to a temporary file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>attachment</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><ul class="first simple">
+<li><strong>IOException</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the temporary file holding the uploaded file, or null if no file has bee attached</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id8">
+<h3>saveAttachment<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.saveAttachment(MultipartFile, File)">
+public void <code class="descname">saveAttachment</code><span class="sig-paren">(</span><a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/multipart/MultipartFile.html" title="org.springframework.web.multipart.MultipartFile">MultipartFile</a><em> attachment</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/io/File.html" title="java.io.File">File</a><em> targetFile</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.saveAttachment(MultipartFile, File)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save an uploaded file to the given target file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>attachment</strong> – </li>
+<li><strong>targetFile</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><ul class="first last simple">
+<li><strong>IOException</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="urldecode">
+<h3>urlDecode<a class="headerlink" href="#urldecode" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.urlDecode(String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">urlDecode</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> source</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.urlDecode(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes a string with URLDecoder, handling the useless try-catch that is needed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="urlencode">
+<h3>urlEncode<a class="headerlink" href="#urlencode" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.urlEncode(String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">urlEncode</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> source</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.urlEncode(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes a string with URLEncoder, handling the useless try-catch that is needed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="versionifyresourceurl">
+<h3>versionifyResourceUrl<a class="headerlink" href="#versionifyresourceurl" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.YadaWebUtil.versionifyResourceUrl(String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">versionifyResourceUrl</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> urlNotVersioned</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.YadaWebUtil.versionifyResourceUrl(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trasforma /res/img/favicon.ico in /res-0002/img/favicon.ico</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>urlNotVersioned</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
