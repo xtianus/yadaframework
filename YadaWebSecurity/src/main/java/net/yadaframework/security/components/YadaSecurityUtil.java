@@ -1,5 +1,6 @@
 package net.yadaframework.security.components;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -10,6 +11,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,12 +49,32 @@ public class YadaSecurityUtil {
 	private final static long MILLIS_IN_DAY = 24*60*60*1000; // Millesimi di secondo in un giorno
 	private final static String SAVED_REQUEST = "SPRING_SECURITY_SAVED_REQUEST"; // copiato da org.springframework.security.web.savedrequest.HttpSessionRequestCache
 	
+	private SecureRandom secureRandom = new SecureRandom();
+	
 	@Autowired private HttpSession httpSession; // Funziona perchè è un proxy
 	@Autowired private YadaTokenHandler yadaTokenHandler;
 	@Autowired private YadaRegistrationRequestRepository yadaRegistrationRequestRepository;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	@Autowired private YadaUserCredentialsRepository yadaUserCredentialsRepository;
 	@Autowired private PasswordEncoder passwordEncoder;
+	
+	/**
+	 * Generate a 32 characters random password
+	 * @return a string like "XFofvGEtBlZIa5sH"
+	 */
+	public String generateClearPassword() {
+		return generateClearPassword(32);
+	}
+
+	/**
+	 * Generate a random password
+	 * @param length password length
+	 * @return a string like "XFofvGEtBlZIa5sH"
+	 */
+	public String generateClearPassword(int length) {
+		// http://stackoverflow.com/a/8448493/587641
+		return RandomStringUtils.random(length, 0, 0, true, true, null, secureRandom);
+	}
 
 	/**
 	 * Change the user password and log in

@@ -424,24 +424,6 @@ public class YadaUtil {
 	}
 	
 	/**
-	 * Genera una password casuale di 16 caratteri
-	 * @return a string like "XFofvGEtBlZIa5sH"
-	 */
-	public String generateClearPassword() {
-		return generateClearPassword(16);
-	}
-
-	/**
-	 * Genera una password casuale
-	 * @param length max password length
-	 * @return a string like "XFofvGEtBlZIa5sH"
-	 */
-	public String generateClearPassword(int length) {
-		// http://stackoverflow.com/a/8448493/587641
-		return RandomStringUtils.random(length, 0, 0, true, true, null, secureRandom);
-	}
-	
-	/**
 	 * Ritorna la data nel passato per il numero di minuti indicati
 	 * @param days numero di minuti fa
 	 * @return
