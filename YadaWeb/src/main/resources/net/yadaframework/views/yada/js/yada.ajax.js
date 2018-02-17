@@ -398,7 +398,12 @@
 		  for(var i = 0; i < namespaces.length; i++) {
 		    context = context[namespaces[i]];
 		  }
-		  return context[func].apply(thisObject, args);
+		  var functionObject = context[func];
+		  if (functionObject==null) {
+			  console.log("[yada] Function " + func + " not found (ignored)");
+			  return true; // so that other handlers can be called
+		  }
+		  return functionObject.apply(thisObject, args);
 	}
 	
 	/**
@@ -433,7 +438,7 @@
 		if (url==null) {
 			url = $element.attr('data-yadaHref');
 		}
-		var confirmText = $element.attr("data-confirm");
+		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
 		// Create data for submission
 		var data = null;
 		var value = [];
@@ -708,7 +713,7 @@
 		// Set the confirm handlers on form buttons
 	    $form.not('.'+markerClass).find("button[type='submit']").each(function() {
 	    	var $button = $(this);
-	    	var confirmText = $button.attr("data-confirm");
+	    	var confirmText = $button.attr("data-yadaConfirm") || $button.attr("data-confirm");
 	    	if (confirmText!=null) {
 	    		var okButton = $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
 	    		var cancelButton = $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;

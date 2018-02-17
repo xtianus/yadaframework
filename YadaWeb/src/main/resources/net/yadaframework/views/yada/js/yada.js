@@ -33,6 +33,8 @@
 	}; 
 	
 	$(document).ready(function() {
+		// Be aware that all ajax links and forms will NOT be ajax if the user clicks while the document is still loading.
+		// To prevent that, call yada.initAjaxHandlersOn($('form,a')); at the html bottom and just after including the yada.ajax.js script
 		initHandlers();
 	});
 	
@@ -381,7 +383,7 @@
 	}
 	
 	/**
-	 * Transform links into confirm links: all anchors with a "data-confirm" attribute that don't have a class of "yadaAjax" 
+	 * Transform links into confirm links: all anchors with a "data-yadaConfirm" attribute that don't have a class of "yadaAjax" 
 	 * will show a confirm box before submission.
 	 */
 	yada.enableConfirmLinks = function($element) {
@@ -389,12 +391,12 @@
 			$element = $('body');
 		}
 		var markerClass = 's_dataConfirmed';
-		$('a[data-confirm]', $element.parent()).not('.'+markerClass).not('.yadaAjax').each(function() {
+		$('a[data-yadaConfirm], a[data-confirm]', $element.parent()).not('.'+markerClass).not('.yadaAjax').each(function() {
 			$(this).click(function(e) {
 				var $link = $(this);
 				e.preventDefault();
 				var href = $link.attr("href");
-				var confirmText = $link.attr("data-confirm");
+				var confirmText = $link.attr("data-yadaConfirm") || $link.attr("data-confirm");
 				if (confirmText!=null) {
 					var okButton = $link.attr("data-okButton") || yada.messages.confirmButtons.ok;
 					var cancelButton = $link.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
