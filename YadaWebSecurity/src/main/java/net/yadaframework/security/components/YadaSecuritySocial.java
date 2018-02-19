@@ -1,18 +1,30 @@
 package net.yadaframework.security.components;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
-
+import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.api.User;
 import org.springframework.social.facebook.api.impl.FacebookTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
+
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.YadaUserDetailsService;
@@ -20,10 +32,8 @@ import net.yadaframework.security.persistence.entity.YadaSocialCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaSocialCredentialsRepository;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
-import net.yadaframework.web.YadaNotify;
 import net.yadaframework.web.YadaSocialRegistrationData;
 import net.yadaframework.web.YadaViews;
-import net.yadaframework.web.YadaWebUtil;
 
 /**
  * Social network login
@@ -71,17 +81,28 @@ public class YadaSecuritySocial {
 		
 	}
 
-	@Autowired private YadaWebUtil yadaWebUtil;
-	@Autowired private YadaNotify yadaNotify;
+//	@Autowired private YadaWebUtil yadaWebUtil;
+//	@Autowired private YadaNotify yadaNotify;
 	@Autowired private YadaSecurityUtil yadaSecurityUtil;
 	@Autowired private YadaSocialCredentialsRepository yadaSocialCredentialsRepository;
 	@Autowired private YadaUserCredentialsRepository yadaUserCredentialsRepository;
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
+	
+	private GoogleIdTokenVerifier googleIdTokenVerifier;
 
 	private class Credentials {
 		YadaSocialCredentials yadaSocialCredential = null;
 		YadaUserCredentials yadaUserCredential = null;
+	}
+	
+	@EventListener
+	public void init(ContextRefreshedEvent event) throws GeneralSecurityException, IOException {
+		HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+		JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+		googleIdTokenVerifier = new GoogleIdTokenVerifier.Builder(httpTransport, jsonFactory)
+		    .setAudience(Collections.singletonList(config.getGoogleClientId()))
+		    .build();
 	}
 	
 	/**
@@ -99,6 +120,57 @@ public class YadaSecuritySocial {
 		credentials.yadaSocialCredential.setSocialId(socialId);
 		credentials.yadaSocialCredential.setType(config.getFacebookType());
 		yadaSocialCredentialsRepository.save(credentials.yadaSocialCredential);
+	}
+	
+	/**
+	 * Perform google authentication. The accessToken must be retrieved using the google SDK.
+	 * @param accessToken retrieved using the google SDK
+	 * @param verifiedOnly true to prevent login with non-verified accounts
+	 * @param model
+	 * @return the authentication outcome containing the user social profile
+	 */
+	public YadaSocialAuthenticationOutcome googleLogin(String accessToken, boolean verifiedOnly, Model model) {
+		try {
+			GoogleIdToken idToken = googleIdTokenVerifier.verify(accessToken);
+			if (idToken != null) {
+				Payload profile = idToken.getPayload();
+				
+				// Get profile information from payload
+				String email = profile.getEmail();
+				  
+				if (StringUtils.isBlank(email)) {
+					return YadaSocialAuthenticationOutcome.UNAUTHENTICATED_NOPROFILE;
+				}
+				  
+				boolean emailVerified = Boolean.TRUE.equals(profile.getEmailVerified());
+				if (verifiedOnly && !emailVerified) {
+					return YadaSocialAuthenticationOutcome.UNAUTHENTICATED_NOTVERIFIED;
+				}
+				YadaSocialRegistrationData yadaSocialRegistrationData = new YadaSocialRegistrationData();
+				yadaSocialRegistrationData.socialId = profile.getSubject();
+				yadaSocialRegistrationData.email = StringUtils.trimToEmpty(email.toLowerCase());
+				yadaSocialRegistrationData.name = (String) profile.get("name");
+				yadaSocialRegistrationData.surname = (String) profile.get("family_name");
+				yadaSocialRegistrationData.accessToken = accessToken;
+				yadaSocialRegistrationData.socialType = config.getGoogleType();
+				yadaSocialRegistrationData.pictureUrl = (String) profile.get("picture");
+				String localeString = (String) profile.get("locale");
+				try {
+					yadaSocialRegistrationData.locale = LocaleUtils.toLocale(localeString);
+				} catch (Exception e) {
+					log.info("Can't parse locale '{}' (ignored)", localeString);
+				}
+				
+				return finalizeLogin(yadaSocialRegistrationData, model);
+				
+			} else {
+				return YadaSocialAuthenticationOutcome.UNAUTHENTICATED_NOPROFILE;
+			}
+		} catch (Exception e) {
+			log.error("Google Exception", e);
+			return YadaSocialAuthenticationOutcome.UNAUTHENTICATED_OTHER;
+		}
+
 	}
 	
 	/**
@@ -128,44 +200,49 @@ public class YadaSecuritySocial {
 			yadaSocialRegistrationData.accessToken = accessToken;
 			yadaSocialRegistrationData.socialType = config.getFacebookType();
 			
-			String savedRequestUrl = yadaSecurityUtil.getSavedRequestUrl();
+			return finalizeLogin(yadaSocialRegistrationData, model);
 			
-			// Check if we already got the social credentials, and log in
-			List<YadaSocialCredentials> yadaSocialCredentialsList = yadaSocialCredentialsRepository.findBySocialIdAndType(yadaSocialRegistrationData.socialId, config.getFacebookType());
-			if (!yadaSocialCredentialsList.isEmpty()) {
-				YadaSocialCredentials yadaSocialCredentials = yadaSocialCredentialsList.get(0);
-				YadaUserCredentials userCredentials = yadaSocialCredentials.getYadaUserCredentials();
-				yadaUserDetailsService.authenticateAs(userCredentials);
-				log.debug("Social Login: user='{}'", userCredentials.getUsername());
-				if (savedRequestUrl!=null) {
-					model.addAttribute(YadaViews.AJAX_REDIRECT_URL, savedRequestUrl);
-					return YadaSocialAuthenticationOutcome.AUTHENTICATED_REDIRECT.setYadaSocialRegistrationData(yadaSocialRegistrationData);
-				}
-				return YadaSocialAuthenticationOutcome.AUTHENTICATED_NORMAL.setYadaSocialRegistrationData(yadaSocialRegistrationData);
-			}
-			
-			// Check if we already got the email, and log in after creating the social credentials
-			YadaUserCredentials yadaUserCredentials = yadaUserCredentialsRepository.findFirstByUsername(yadaSocialRegistrationData.email);
-			if (yadaUserCredentials!=null) {
-				Credentials credentials = new Credentials();
-				credentials.yadaUserCredential = yadaUserCredentials;
-				linkSocialCredentials(credentials, yadaSocialRegistrationData.email, yadaSocialRegistrationData.socialId);
-				yadaUserDetailsService.authenticateAs(credentials.yadaUserCredential);
-				log.debug("Social Login: user='{}'", credentials.yadaUserCredential.getUsername());
-				
-				if (savedRequestUrl!=null) {
-					model.addAttribute(YadaViews.AJAX_REDIRECT_URL, savedRequestUrl);
-					return YadaSocialAuthenticationOutcome.AUTHENTICATED_REDIRECT.setYadaSocialRegistrationData(yadaSocialRegistrationData);
-				}
-				return YadaSocialAuthenticationOutcome.AUTHENTICATED_NORMAL.setYadaSocialRegistrationData(yadaSocialRegistrationData);
-			}
-			
-			// User does not exist, proceed with registration
-			return YadaSocialAuthenticationOutcome.AUTHENTICATED_UNREGISTERED.setYadaSocialRegistrationData(yadaSocialRegistrationData);
 		} catch (Throwable e) {
 			log.error("Facebook Exception", e);
 			return YadaSocialAuthenticationOutcome.UNAUTHENTICATED_OTHER;
 		}
+	}
+	
+	private YadaSocialAuthenticationOutcome finalizeLogin(YadaSocialRegistrationData yadaSocialRegistrationData, Model model) {
+		String savedRequestUrl = yadaSecurityUtil.getSavedRequestUrl();
+		
+		// Check if we already got the social credentials, and log in
+		List<YadaSocialCredentials> yadaSocialCredentialsList = yadaSocialCredentialsRepository.findBySocialIdAndType(yadaSocialRegistrationData.socialId, config.getFacebookType());
+		if (!yadaSocialCredentialsList.isEmpty()) {
+			YadaSocialCredentials yadaSocialCredentials = yadaSocialCredentialsList.get(0);
+			YadaUserCredentials userCredentials = yadaSocialCredentials.getYadaUserCredentials();
+			yadaUserDetailsService.authenticateAs(userCredentials);
+			log.debug("Social Login: user='{}'", userCredentials.getUsername());
+			if (savedRequestUrl!=null) {
+				model.addAttribute(YadaViews.AJAX_REDIRECT_URL, savedRequestUrl);
+				return YadaSocialAuthenticationOutcome.AUTHENTICATED_REDIRECT.setYadaSocialRegistrationData(yadaSocialRegistrationData);
+			}
+			return YadaSocialAuthenticationOutcome.AUTHENTICATED_NORMAL.setYadaSocialRegistrationData(yadaSocialRegistrationData);
+		}
+		
+		// Check if we already got the email, and log in after creating the social credentials
+		YadaUserCredentials yadaUserCredentials = yadaUserCredentialsRepository.findFirstByUsername(yadaSocialRegistrationData.email);
+		if (yadaUserCredentials!=null) {
+			Credentials credentials = new Credentials();
+			credentials.yadaUserCredential = yadaUserCredentials;
+			linkSocialCredentials(credentials, yadaSocialRegistrationData.email, yadaSocialRegistrationData.socialId);
+			yadaUserDetailsService.authenticateAs(credentials.yadaUserCredential);
+			log.debug("Social Login: user='{}'", credentials.yadaUserCredential.getUsername());
+			
+			if (savedRequestUrl!=null) {
+				model.addAttribute(YadaViews.AJAX_REDIRECT_URL, savedRequestUrl);
+				return YadaSocialAuthenticationOutcome.AUTHENTICATED_REDIRECT.setYadaSocialRegistrationData(yadaSocialRegistrationData);
+			}
+			return YadaSocialAuthenticationOutcome.AUTHENTICATED_NORMAL.setYadaSocialRegistrationData(yadaSocialRegistrationData);
+		}
+		
+		// User does not exist, proceed with registration
+		return YadaSocialAuthenticationOutcome.AUTHENTICATED_UNREGISTERED.setYadaSocialRegistrationData(yadaSocialRegistrationData);
 	}
 
 //	private YadaRegistrationRequest makeRegistrationRequest(YadaRegistrationRequest yadaRegistrationRequest) {
