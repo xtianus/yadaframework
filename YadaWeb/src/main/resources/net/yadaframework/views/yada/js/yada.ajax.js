@@ -748,8 +748,9 @@
 	 * @param successHandler(responseText, responseHtml);) funzione chiamata in caso di successo e nessun yadaWebUtil.modalError(). Viene chiamata anche in caso di errore se il suo flag executeAnyway è true
 	 * @param type "POST" per il post oppure null o "GET" per il get
 	 * @param timeout milliseconds timeout, null for default (set by the browser)
+	 * @param hideLoader true for not showing the loader
 	 */
-	yada.ajax = function(url, data, successHandler, type, timeout) {
+	yada.ajax = function(url, data, successHandler, type, timeout, hideLoader) {
 		if (type==null) {
 			type="GET"
 		}
@@ -758,7 +759,9 @@
 		}
 		var processData = !(data instanceof FormData);  // http://stackoverflow.com/a/8244082/587641
 		var contentType = data instanceof FormData ? false : undefined;
-		yada.loaderOn();
+		if (hideLoader!=true) {
+			yada.loaderOn();
+		}
 		$.ajax({
 			type: type,
 			url: url,
