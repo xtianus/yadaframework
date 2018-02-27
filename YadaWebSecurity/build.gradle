@@ -47,7 +47,9 @@ dependencies {
 		'com.fasterxml.jackson.core:jackson-databind:2.9.+',
 		'ch.qos.logback:logback-classic:1.2.3',
 		'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
-		'org.apache.commons:commons-lang3:3.7'
+		'org.apache.commons:commons-lang3:3.7',
+		'com.google.api-client:google-api-client:1.23.+'
+		;
 		
 
     // testImplementation 'junit:junit:4.12'

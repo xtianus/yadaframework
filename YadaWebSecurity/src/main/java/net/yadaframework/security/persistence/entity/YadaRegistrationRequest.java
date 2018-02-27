@@ -28,6 +28,10 @@ import org.slf4j.LoggerFactory;
 import net.yadaframework.core.YadaRegistrationType;
 import net.yadaframework.persistence.entity.YadaClause;
 
+/**
+ * Data to submit during user registration.
+ * Subclasses must not define a id field.
+ */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaRegistrationRequest implements Serializable {

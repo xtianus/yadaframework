@@ -100,7 +100,7 @@ public class YadaJobDao {
 	}
 
     /**
-     * Change the state of all jobs in the group
+     * TODO Change the state of all jobs in the group
      * @param jobGroup
      * @param fromState
      * @param toState

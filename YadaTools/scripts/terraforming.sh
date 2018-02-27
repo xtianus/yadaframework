@@ -82,7 +82,10 @@ apt-get -o Dpkg::Options::="--force-confnew" install sudo cron
 echo "${cfgUser}	ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers;
 
 groupadd ${cfgUser}
-useradd ${cfgUser} -p $cfgUserPwd -m -g ${cfgUser} -G root -s /bin/bash
+
+# The \"'$cfgUserPwd'\" syntax is needed to cope with special characters in the password
+# See https://askubuntu.com/questions/644092/bash-script-and-escaping-special-characters-in-password
+useradd ${cfgUser} -p \"'$cfgUserPwd'\" -m -g ${cfgUser} -G root -s /bin/bash
 
 echo -e "\nAllowUsers ${cfgUser}\nPasswordAuthentication no\n" >> /etc/ssh/sshd_config
 
