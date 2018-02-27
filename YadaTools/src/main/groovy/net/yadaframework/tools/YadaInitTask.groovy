@@ -147,6 +147,10 @@ class YadaInitTask extends YadaProject {
 		for (filename in entityFiles) {
 			processTemplate("java/persistence/entity", filename, filename-".txt", new File(javaPersistenceFolder, "entity"));
 		}
+		List repositoryFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/persistence/repository");
+		for (filename in repositoryFiles) {
+			processTemplate("java/persistence/repository", filename, filename-".txt", new File(javaPersistenceFolder, "repository"));
+		}
 	}
 
 	private copyEnvFiles(env, File envFolderFile, File resourcesSourceFolder, File webAppRootFolder) {
