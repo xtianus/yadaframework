@@ -232,7 +232,7 @@ public class YadaUtil {
 	 */
 	public static <entityClass> void prefetchLocalizedStrings(List<entityClass> entities, Class<?> entityClass, String...attributes) {
 		List<String> attributeNames = Arrays.asList(attributes);
-		if (fetchedEntities==null || fetchedEntities.isEmpty()) {
+		if (entities==null || entities.isEmpty()) {
 			return;
 		}
 		// Look for fields of type Map<Locale, String>

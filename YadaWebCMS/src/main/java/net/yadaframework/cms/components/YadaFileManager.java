@@ -33,9 +33,45 @@ public class YadaFileManager {
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
 	
-	
 	protected String COUNTER_SEPARATOR="_";
+	
+	public void deleteFileAttachment(Long yadaAttachedFileId) {
+		// TODO !!!!!!!!!!!!!!!!!!!!!!!!!! qui devo cancellare il file da filesystem
+		
+		
+	}
 
+	/**
+	 * Returns the (relative) url of the mobile image if any, otherwise fallback to the desktop image
+	 * @param yadaAttachedFile
+	 * @return
+	 */
+	public String getMobileImageUrl(YadaAttachedFile yadaAttachedFile) {
+		String imageName = yadaAttachedFile.getFilenameMobile();
+		if (imageName==null) {
+			return getDesktopImageUrl(yadaAttachedFile);
+		}
+		StringBuilder result = new StringBuilder(config.getContentUrl());
+		result.append(yadaAttachedFile.getRelativeFolderPath())
+			.append("/")
+			.append(imageName);
+		return result.toString();
+	}
+	
+	/**
+	 * Returns the (relative) url of the desktop image
+	 * @param yadaAttachedFile
+	 * @return
+	 */
+	public String getDesktopImageUrl(YadaAttachedFile yadaAttachedFile) {
+		String imageName = yadaAttachedFile.getFilenameDesktop();
+		StringBuilder result = new StringBuilder(config.getContentUrl());
+		result.append(yadaAttachedFile.getRelativeFolderPath())
+		.append("/")
+		.append(imageName);
+		return result.toString();
+	}
+	
 	/**
 	 * Copies a received file to the upload folder
 	 * @param multipartFile file coming from the http request
@@ -108,8 +144,7 @@ public class YadaFileManager {
 			}
 		}
 		yadaAttachedFile.setRelativeFolderPath(relativeFolderPath);
-//		return yadaAttachedFileRepository.save(yadaAttachedFile); // No need to save it now
-		return yadaAttachedFile;
+		return yadaAttachedFileRepository.save(yadaAttachedFile);
 	}
 	
 	private File resizeIfNeeded(File managedFile, File targetFolder, String targetFilenamePrefix, String targetExtension, Integer targetWidth) {
