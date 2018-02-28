@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +63,16 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	
 	@Autowired protected ApplicationContext applicationContext;
 	
+    @Autowired
+    private RequestMappingHandlerAdapter requestMappingHandlerAdapter;
 
+    @PostConstruct
+    public void init() {
+    	// the content of the default Model should never be used if a controller method redirects
+    	// http://www.logicbig.com/tutorials/spring-framework/spring-web-mvc/redirect-attributes/
+       requestMappingHandlerAdapter.setIgnoreDefaultModelOnRedirect(true);
+    }
+    
 	// This is only used when not using YadaWebSecurity
 	@Bean(name="multipartResolver")
 	public CommonsMultipartResolver multipartResolver() {
@@ -80,16 +91,17 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		String contentUrl = config.getContentUrl();
 		StringBuilder result = new StringBuilder();
 		result.append("(?:");
-		result.append(STATIC_RESOURCES_FOLDER);
+		result.append(STATIC_RESOURCES_FOLDER+"/");
 		result.append("|");
-		result.append(STATIC_YADARESOURCES_FOLDER);
+		result.append(STATIC_YADARESOURCES_FOLDER+"/");
 		result.append("|");
-		result.append(STATIC_FILE_FOLDER);
+		result.append(STATIC_FILE_FOLDER+"/");
+		result.append("|/loginPost");
 		if (config.isContentUrlLocal()) {
 			result.append("|");
-			result.append(contentUrl);
+			result.append(contentUrl+"/");
 		}
-		result.append(")/");
+		result.append(")");
 		return result.toString();
 	}
 	
@@ -310,23 +322,6 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		return resolver;
 	}
 	
-	
-	public ClassLoaderTemplateResolver emailTemplateResolver() {
-		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
-		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
-		resolver.setPrefix(YadaConstants.EMAIL_TEMPLATES_PREFIX); // Attenzione allo slash finale!
-//		resolver.setPrefix(YadaConstants.EMAIL_TEMPLATES_PREFIX + "/"); // Attenzione allo slash finale!
-		Set<String> patterns = new HashSet<>();
-		patterns.add("/email/*"); // Start with "email"
-		resolver.setResolvablePatterns(patterns);
-		resolver.setSuffix(".html");
-		resolver.setCharacterEncoding("UTF-8");
-		resolver.setTemplateMode(TemplateMode.HTML);
-		resolver.setCacheable(config.isProductionEnvironment());
-		// resolver.setOrder(40); // Order not needed because resolver on different SpringTemplateEngine
-		return resolver;
-	}
-	
 	@Bean
 	public SpringTemplateEngine templateEngine() {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
@@ -336,19 +331,6 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		engine.addTemplateResolver(webTemplateResolver());
 		engine.addTemplateResolver(mailPreviewTemplateResolver());
 		engine.addTemplateResolver(yadaTemplateResolver());
-		// Do this in the subclass
-		//		// http://www.thymeleaf.org/layouts.html
-		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
-		addExtraDialect(engine); // thymeleaf-SpringSecurity-dialect
-		addYadaDialect(engine);
-		return engine;
-	}
-	
-	@Bean
-	public SpringTemplateEngine emailTemplateEngine() {
-		SpringTemplateEngine engine = new SpringTemplateEngine();
-		engine.setEnableSpringELCompiler(true);
-		engine.addTemplateResolver(emailTemplateResolver());
 		// Do this in the subclass
 		//		// http://www.thymeleaf.org/layouts.html
 		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
@@ -402,7 +384,8 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	public ViewResolver viewResolver() {
 		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
 		viewResolver.setTemplateEngine(templateEngine());
-		viewResolver.setCharacterEncoding("UTF-8"); // Questo è importante anche se nei tutorial non lo mettono
+		viewResolver.setCharacterEncoding("UTF-8");
+		viewResolver.setContentType("text/html; charset=UTF-8");
 		viewResolver.setOrder(20);
 		viewResolver.setViewNames(new String[] { "*" });
 		// Default is "true": caching is enabled. Disable this only for debugging and development.

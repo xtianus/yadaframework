@@ -1,1 +1,7 @@
-redirect:[[${targetUrl}]]
+<!--/* Returning this file will result in a redirect of the current page */-->
+<!--/* If "newTab" is true, a new tab will be opened instead */-->
+<!--/* DO NOT insert a newline after the opening { or it won't work anymore */-->
+{"redirect":"[[${targetUrl}?:@{${targetUrlRelative}}]]",
+"newTab":"[[${newTab}]]"
+}
+

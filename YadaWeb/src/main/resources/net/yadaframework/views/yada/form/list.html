@@ -11,7 +11,7 @@ Parameters (can be set in the replace tag or in any parent tag):
 - fieldName = name of the field, in the form bean, holding the chosen value. Can be a path like "recipient.name"
 - labelKey = key in messages.properties for the label text
 - label = label to use, if not using a labelKey
-- options = a list of objects or a list of primitive types, like ${users} or ${ {true,false} } (space is important) - can be omitted for an empty select.
+- options = a list of objects or an instance of YadaLocalEnum or a list of primitive types, like ${users} or ${ {true,false} } (space is important) - can be omitted for an empty select.
 -           It can also be a map of (value-text) entries, where values are either literal text or suffixes for labelKey.
 - valueAttribute = the name of the object attribute containing the option value, e.g. "id" - must be omitted for lists of primitives
 - textAttribute = the name of the object attribute (or method with braces) containing the option text (or textKey suffix), e.g. "name" or "toString()" - must be omitted for lists of primitives
@@ -19,7 +19,7 @@ Parameters (can be set in the replace tag or in any parent tag):
 - textKey = the prefix of the key used for texts, like 'list.enabled.'; options (or option texts) will be appended to the prefix.
              If null, the option or option text will be used for the text.
 - inline = true to have label and field inline (optional)
-- help = testo per il pulsante di help, se non c'Ã¨ helpKey (optional)
+- help = testo per il pulsante di help, se non c'è helpKey (optional)
 - helpKey = chiave del testo per il pulsante di help (optional)
 - addHeader = (optional) true to add the first "empty" option
 - multiple = true for a multiple select box (optional)
@@ -50,7 +50,7 @@ Example:
 		th:text="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
 	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perchÃ© se non c'Ã¨ l'help il campo resta corto (ad esempio i campi password) */-->
 		<select th:field="*{__${fieldName}__}" th:multiple="${multiple}" 
-			th:with="isMap=${options instanceof T(java.util.Map)}"
+			th:with="isMap=${options instanceof T(java.util.Map)},isYadaLocalEnum=${@yadaFormHelper.isYadaLocalEnum(options)}"
 			th:size="${size}?:''"
 			th:required="${required}" 
 			th:readonly="${readonly}"
@@ -58,7 +58,7 @@ Example:
 			th:classappend="${readonly==true?'yadaReadonly':'form-control'+(noFeedback==true?'':' has-feedback')}"
 			th:id="${#ids.seq(idPrefix)}" th:attr="aria-describedby=${#ids.next(idPrefix)}">
 			<option th:if="${addHeader==true}" value="-1">---</option>
-			<th:block th:if="${!isMap}">
+			<th:block th:if="${!isMap && !isYadaLocalEnum}">
 				<!--/* List */-->
 				<th:block th:each="option : ${options}">
 					<!--/* List of primitives */-->
@@ -81,6 +81,13 @@ Example:
 					th:value="${entry.key}" 
 					th:title="${textKey==null?entry.value:#messages.msg(textKey+entry.value)}"
 					th:text="${textKey==null?entry.value:#messages.msg(textKey+entry.value)}">SomeChoice</option>
+			</th:block>
+			<th:block th:if="${isYadaLocalEnum}">
+				<!--/* YadaLocalEnum */-->
+				<option th:each="enum : ${options.getEnumConstants()}"
+					th:value="${enum}" 
+					th:title="${enum.toString(@messageSource, #locale)}"
+					th:text="${enum.toString(@messageSource, #locale)}">SomeChoice</option>
 			</th:block>
 		</select>
 		<script th:if="${onchange!=null}" type="text/javascript">

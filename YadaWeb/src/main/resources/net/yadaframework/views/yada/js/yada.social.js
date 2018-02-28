@@ -31,16 +31,17 @@
 	// - serverUrl = "/showFacebookConfirm"
 	// name, surname, email = non usati
 	function sendFacebookToServer(serverUrl, accessToken, name, surname, email) {
+		// TODO replace with yada.ajax and get rid of yada.handlePostLoginHandler
 		$.get(serverUrl, 
 			{ accessToken: accessToken }, 
 			function(responseText, statusText) {
 				yada.loaderOff();
 				var responseHtml=$("<div>").html(responseText);
 				var modalShown = handleLoadedModal(responseHtml); // Il risultato è il modal di registrazione social, che viene mostrato
-				var callbackCalled = callYadaCallbackIfPresent(responseHtml); // Qui succede il redirect
+				var callbackCalled = yada.callYadaCallbackIfPresent(responseHtml); // Qui succede il redirect
 				if (!modalShown && !callbackCalled) {
 					// Il risultato è il contenuto originariamente richiesto, che viene passato all'handler, oppure se non c'è l'handler si ricarica la pagina corrente
-					handlePostLoginHandler(responseHtml, responseText);
+					yada.handlePostLoginHandler(responseHtml, responseText);
 				}
 			}
 		);
@@ -80,16 +81,58 @@
 		 });
 	}
 	
-	// Abilita il pulsante di login facebook usando l'api
-	// - serverUrl = url da chiamare lato server per autenticare
-	// - handler = opzionale da chiamare a fine login con i dati ritornati
+	/**
+	 * Google log out
+	 */
+	yada.googleSignOut = function() {
+		if (gapi!=undefined && gapi.auth2!=undefined) {
+			var authInstance = gapi.auth2.getAuthInstance();
+			if (authInstance!=undefined) {
+				authInstance.signOut();
+			}
+		}
+	}
+	
+	/**
+	 * Function called by the google login button
+	 */
+	var handleGoogleLoginButton = function(serverUrl, googleUser) {
+		var profile = googleUser.getBasicProfile();
+		//		console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+		//		console.log('Name: ' + profile.getName());
+		//		console.log('Image URL: ' + profile.getImageUrl());
+		//		console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+		var accessToken = googleUser.getAuthResponse().id_token;
+		yada.ajax(serverUrl, { accessToken: accessToken }, function(responseText, responseHtml) {
+			// Nothing to do (remove the function)
+		}, "POST");
+	}
+
+	/**
+	 * Enables the google login button via Google API.
+	 * @param id the element that will be replaced by the generated button
+	 * @param serverUrl the application url where the token will be sent
+	 * @param options the google render options: https://developers.google.com/identity/sign-in/web/reference#gapisignin2renderid-options
+	 */
+	yada.enableGoogleLoginButton = function(serverUrl, id, options) {
+		options.onsuccess = function(googleUser) {
+			handleGoogleLoginButton(serverUrl, googleUser);
+		}
+		gapi.signin2.render(id, options);
+	}
+	
+	/**
+	 * Enables the facebook login button via Facebook SDK.
+	 * @param serverUrl the application url where the token will be sent
+	 * @param handler a function to call after login
+	 */
 	yada.enableFacebookLoginButton = function(serverUrl, handler) {
 		$('.facebookLoginButton').click(function(e) {
 			e.preventDefault();
 			yada.loaderOn();
 			$('#loginModal').modal('hide');
 			FB.login(function(response) {
-				yada.postLoginHandler = handler;
+				yada.postLoginHandler = handler; // To be removed
 				facebookLoginResult(response, serverUrl);
 			}, {scope: 'email'}); 
 		});

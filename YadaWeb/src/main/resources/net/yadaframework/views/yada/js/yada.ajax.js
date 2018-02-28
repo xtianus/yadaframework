@@ -28,9 +28,9 @@
 		yada.enableAjaxForms(null, $element);
 		yada.enableAjaxLinks(null, $element);
 		yada.enableAjaxSelects(null, $element);
+		yada.enableAjaxCheckboxes(null, $element);
 		yada.enableAjaxFragments(null, $element);
 	}
-
 
 	////////////////////
 	/// Modal
@@ -60,6 +60,7 @@
 	////////////////////
 	/// Form
 	
+	// This is for coupled selects
 	yada.enableAjaxSelectOptions = function() {
 		$('.s_chain select').change(function() {
 			var selectedValue = $('option:selected', this).val();
@@ -169,7 +170,7 @@
 //		}; 
 	
 	// Al ritorno di un post di login, mostra eventuali notify ed esegue l'eventuale handler, oppure ricarica la pagina corrente se l'handler non c'è.
-	function handlePostLoginHandler(responseHtml, responseText) {
+	yada.handlePostLoginHandler = function(responseHtml, responseText) {
 		var isError = yada.isNotifyError(responseHtml);
 		yada.handleNotify(responseHtml);
 		if (yada.postLoginHandler != null) {
@@ -217,7 +218,7 @@
 	
 	// Chiama la funzione javascript yadaCallback() se presente nell'html ricevuto dal server.
 	// - responseHtml = l'html ricevuto dal server, creato con $("<div>").html(responseText)
-	function callYadaCallbackIfPresent(responseHtml) {
+	yada.callYadaCallbackIfPresent = function(responseHtml) {
 		// Cerco se c'è una funzione js da eseguire chiamata "yadaCallback".
 		var scriptNodes = $(responseHtml).find("script#yadaCallback");
 		if (scriptNodes.length>0) {
@@ -234,7 +235,7 @@
 	 * @param $element the element on which to enable the fragment insertion, can be null for the entire body
 	 */
 	yada.enableAjaxFragments = function(handler, $element) {
-		if ($element==null) {
+		if ($element==null || $element=="") {
 			$element = $('body');
 		}
 		var $target = $element.parent();
@@ -246,9 +247,10 @@
 			var fetchUrl = $toBeReplaced.attr("data-yadaAjaxFragment");
 			if (fetchUrl!=null) {
 				$toBeReplaced.removeAttr('data-yadaAjaxFragment');
-				yada.ajax(fetchUrl, null, (function($target){
+				yada.ajax(fetchUrl, null, (function($replaceable){
 					return function(responseText, responseHtml) {
-						$target.replaceWith(responseHtml.children());
+						yada.initAjaxHandlersOn(responseHtml.children());
+						$replaceable.replaceWith(responseHtml.children());
 					}
 				})($toBeReplaced));
 			}
@@ -261,7 +263,7 @@
 	 * @param $element the element on which to enable ajax links, can be null for the entire body
 	 */
 	yada.enableAjaxLinks = function(handler, $element) {
-		if ($element==null) {
+		if ($element==null || $element=="") {
 			$element = $('body');
 		}
 		var $target = $element.parent();
@@ -280,12 +282,52 @@
 	};
 	
 	/**
+	 * Enables ajax on a checkbox change.
+	 */
+	yada.enableAjaxCheckboxes = function(handler, $element) {
+		if ($element==null || $element=="") {
+			$element = $('body');
+		}
+		var $target = $element.parent();
+		if ($target.length==0) {
+			$target = $element;
+		}
+		$("input[type='checkbox'].yadaAjax", $target).each(function() {
+			$(this).removeClass('yadaAjax');
+			yada.enableAjaxCheckbox($(this), handler);
+		});
+	};
+	yada.enableAjaxCheckbox = function($checkbox, handler) {
+		// If array, recurse to unroll
+		if ($checkbox.length>1) {
+			$checkbox.each(function() {
+				yada.enableAjaxCheckbox($(this), handler);
+			});
+			return;
+		}
+		// From here on the $checkbox is a single element, not an array
+		var markerClass = 'yadaAjaxed'; // To prevent double submission
+		$checkbox.not('.'+markerClass).change(function(e) {
+			$checkbox = $(this); // Needed otherwise $checkbox could be stale (from a previous ajax replacement) 
+			// If there is a parent form, submit it, otherwise make an ajax call defined on the checkbox
+			var $form = $checkbox.parents("form.yadaAjaxed");
+			if ($form.length>0) {
+				$form.submit();
+				return;
+			}
+			return makeAjaxCall(e, $checkbox, handler);
+		})
+		$checkbox.removeClass('yadaAjax');
+		$checkbox.not('.'+markerClass).addClass(markerClass);
+	};
+
+	/**
 	 * Enables ajax calls on select change.
 	 * @param handler a function to call upon successful link submission, can be null
 	 * @param $element the element on which to enable ajax, can be null for the entire body
 	 */
 	yada.enableAjaxSelects = function(handler, $element) {
-		if ($element==null) {
+		if ($element==null || $element=="") {
 			$element = $('body');
 		}
 		var $target = $element.parent();
@@ -306,9 +348,10 @@
 			});
 			return;
 		}
-		// From here on the $link is a single anchor, not an array
+		// From here on the $select is a single element, not an array
 		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		$select.not('.'+markerClass).change(function(e) {
+			$select = $(this); // Needed otherwise $select could be stale (from a previous ajax replacement) 
 			return makeAjaxCall(e, $select, handler);
 		})
 		$select.removeClass('yadaAjax');
@@ -333,6 +376,7 @@
 		// From here on the $link is a single anchor, not an array
 		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		$link.not('.'+markerClass).click(function(e) {
+			$link = $(this); // Needed otherwise $link could be stale (from a previous ajax replacement) 
 			return makeAjaxCall(e, $link, handler);
 		})
 		$link.removeClass('yadaAjax');
@@ -340,6 +384,31 @@
 		$link.not('.'+markerClass).addClass(markerClass);
 	};
 	
+	/**
+	 * Execute function by name
+	 * See https://stackoverflow.com/a/359910/587641
+	 * @param functionName the name of the function, the window scope, that can have namespaces like "mylib.myfunc"
+	 * @param thisObject the object that will become the this object in the called function
+	 */
+	function executeFunctionByName(functionName, thisObject /*, args */) {
+			var context = window; // The functionName is always searched in the current window
+		  var args = Array.prototype.slice.call(arguments, 2);
+		  var namespaces = functionName.split(".");
+		  var func = namespaces.pop();
+		  for(var i = 0; i < namespaces.length; i++) {
+		    context = context[namespaces[i]];
+		  }
+		  var functionObject = context[func];
+		  if (functionObject==null) {
+			  console.log("[yada] Function " + func + " not found (ignored)");
+			  return true; // so that other handlers can be called
+		  }
+		  return functionObject.apply(thisObject, args);
+	}
+	
+	/**
+	 * Make an ajax call when a link is clicked, a select is chosen, a checkbox is selected
+	 */
 	function makeAjaxCall(e, $element, handler) {
 		e.preventDefault();
 		if ($element.hasClass("yadaLinkDisabled")) {
@@ -348,6 +417,8 @@
 		// Call, in sequence, the handler specified in data-successHandler and the one passed to this function
 		var joinedHandler = function(responseText, responseHtml) {
 			showFeedbackIfNeeded($element);
+			deleteOnSuccess($element);
+			updateOnSuccess($element, responseHtml);
 			var handlerNames = $element.attr("data-yadaSuccessHandler");
 			if (handlerNames===undefined) {
 				handlerNames = $element.attr("data-successHandler"); // Legacy
@@ -356,28 +427,35 @@
 				// Can be a comma-separated list of handlers, which are called in sequence
 				var handlerNameArray = yada.listToArray(handlerNames);
 				for (var i = 0; i < handlerNameArray.length; i++) {
-					var dataHandler = window[handlerNameArray[i]];
-					if (typeof dataHandler === "function") {
-						dataHandler(responseText, responseHtml, $element[0]);
-					}
+					executeFunctionByName(handlerNameArray[i], $element, responseText, responseHtml, $element[0]);
 				}
 			}
 			if (handler != null) {
 				handler(responseText, responseHtml, $element[0]);
 			}
-			deleteOnSuccess($element);
-			updateOnSuccess($element, responseHtml);
 		}
-		
 		var url = $element.attr('href');
-		var confirmText = $element.attr("data-confirm");
+		if (url==null) {
+			url = $element.attr('data-yadaHref');
+		}
+		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
+		// Create data for submission
 		var data = null;
-		// In a select, set the data object to the option
+		var value = [];
 		var name = $element.attr("name");
-		var value = $("option:selected", $element).val();
-		if (name !=null && value !=null) {
+		// In a select, set the data object to the selected option
+		if ($element.is("select")) {
+			$("option:selected", $element).each(function(){ // Could be a multiselect!
+				value.push($(this).val());
+			});
+		} else if ($element.is("input") && $element.prop('type')=="checkbox") {
+			value.push($element.prop('checked')); // Always send the element value
+		}
+		if (name !=null) {
 			data = {};
-			data[name] = value;
+			if (value.length>0) {
+				data[name] = value;
+			}
 		}
 		if (confirmText!=null) {
 			var okButton = $element.attr("data-okButton") || yada.messages.confirmButtons.ok;
@@ -415,7 +493,7 @@
 						$(selector).remove();
 					} else {
 						selector = selector.replace(parentSelector, "").trim();
-						$element.parents(selector).remove();
+						$element.parent().closest(selector).remove();
 					}
 				}
 			}
@@ -445,20 +523,25 @@
 			for (var count=0; count<selectors.length; count++) {
 				var selector = selectors[count];
 				if (count<$replacementArray.length) {
-					$replacement = $replacementArray[count];
+					// Clone so that the original responseHtml is not removed by replaceWith.
+					// All handlers are also cloned.
+					$replacement = $replacementArray[count].clone(true, true); 
 				}
 				if (selector == "") {
+					// 
 					$element.replaceWith($replacement);
 				} else {
 					var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
 					if (fromParents==false) {
-						$(selector).replaceWith($replacement);
+						var $oldElement = $(selector);
+						$oldElement.replaceWith($replacement);
 					} else {
 						selector = selector.replace(parentSelector, "").trim();
 						$element.parents(selector).replaceWith($replacement);
 					}
 				}
-				yada.initHandlersOn($replacement);
+				// Not needed  because handlers are initialized before entering this method, then cloned
+				// yada.initHandlersOn($replacement);
 			}
 			return true;
 		}
@@ -487,7 +570,7 @@
 	 * @param $element the element on which to enable ajax forms, can be null for the entire body
 	 */
 	yada.enableAjaxForms = function(handler, $element) {
-		if ($element==null) {
+		if ($element==null || $element=="") {
 			$element = $('body');
 		}
 		var $target = $element.parent();
@@ -543,13 +626,13 @@
 		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		// Can't use document.activeElement to find the clicked button because of the possible "confirm" dialog
 		// http://stackoverflow.com/a/33882987/587641
-		$form.find("button[type='submit']").not('.yadaClickedButtonHandler').each(function() {
-			$(this).click(function() {
-				clickedButton = this;
-			});
-			$(this).addClass('yadaClickedButtonHandler');
-		});
-		$form.not('.'+markerClass).off('submit').submit(function(e) {
+//		$form.find("button[type='submit']").not('.yadaClickedButtonHandler').each(function() {
+//			$(this).click(function() {
+//				clickedButton = this;
+//			});
+//			$(this).addClass('yadaClickedButtonHandler');
+//		});
+		$form.not('.'+markerClass).submit(function(e) {
 			// If the form is marked as markerAjaxButtonOnly do not submit it via ajax unless the clicked button is marked with 'yadaAjax'
 			if ($form.hasClass(markerAjaxButtonOnly)) {
 				if (clickedButton==null || !$(clickedButton).hasClass('yadaAjax')) {
@@ -557,6 +640,7 @@
 				}
 			}
 			e.preventDefault();
+			var action = $(this).attr('action');
 			// Check if it must be a multipart formdata
 			var multipart = $form.attr("enctype")=="multipart/form-data";
 			// Using FormData to send files too: https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData
@@ -571,20 +655,33 @@
 				} else if (!multipart && buttonName!=null && data[buttonName]==null) {
 					data.push({name: buttonName, value: buttonValue});
 				}
+				var buttonAction = $(clickedButton).attr("formaction");
+				if (buttonAction!=null) {
+					action = buttonAction;
+				}
 			}
 			if (!multipart) {
 				data = $.param(data);
 			}
 			// Call, in sequence, the handler specified in data-successHandler and the one passed to this function.
 			// Extend the handler to include form and button parameters
+			var localClickedButton = clickedButton; // Create a closure otherwise the clicked button is lost
 			var joinedHandler = function(responseText, responseHtml) {
 				showFeedbackIfNeeded($form);
+				var deleted = deleteOnSuccess($(localClickedButton));
+				if (!deleted) {
+					deleteOnSuccess($form);
+				}
+				var updated = updateOnSuccess($(localClickedButton), responseHtml);
+				if (!updated) {
+					updateOnSuccess($form, responseHtml);
+				}
 				var formHandlerNames = $form.attr("data-yadaSuccessHandler");
 				if (formHandlerNames===undefined) {
 					formHandlerNames = $form.attr("data-successHandler"); // Legacy
 				}
 				// var dataHandler = window[formHandlerName];
-				var buttonHandlerNames = $(clickedButton).attr("data-yadaSuccessHandler");
+				var buttonHandlerNames = $(localClickedButton).attr("data-yadaSuccessHandler");
 				// var buttonDataHandler = window[buttonHandlerName];
 				// The button handler has precedence over the form handler, which is called only if the former returns true
 				// from all handlers.
@@ -593,48 +690,35 @@
 					// Can be a comma-separated list of handlers, which are called in sequence
 					var handlerNameArray = yada.listToArray(buttonHandlerNames);
 					for (var i = 0; i < handlerNameArray.length; i++) {
-						var dataHandler = window[handlerNameArray[i]];
-						if (typeof dataHandler === "function") {
-							runFormHandler &= dataHandler(responseText, responseHtml, this, clickedButton);
-						}
+						runFormHandler &= executeFunctionByName(handlerNameArray[i], $form, responseText, responseHtml, this, localClickedButton);
 					}
 				}
 				if (runFormHandler == true && formHandlerNames!=null) {
 					// Can be a comma-separated list of handlers, which are called in sequence
 					var handlerNameArray = yada.listToArray(formHandlerNames);
 					for (var i = 0; i < handlerNameArray.length; i++) {
-						var dataHandler = window[handlerNameArray[i]];
-						if (typeof dataHandler === "function") {
-							dataHandler(responseText, responseHtml, this, clickedButton);
-						}
+						executeFunctionByName(handlerNameArray[i], $form, responseText, responseHtml, this, localClickedButton);
 					}
 				}
 				if (handler != null) {
-					handler(responseText, responseHtml, this, clickedButton);
-				}
-				var deleted = deleteOnSuccess($(clickedButton));
-				if (!deleted) {
-					deleteOnSuccess($form);
-				}
-				var updated = updateOnSuccess($(clickedButton), responseHtml);
-				if (!updated) {
-					updateOnSuccess($form, responseHtml);
+					handler(responseText, responseHtml, this, localClickedButton);
 				}
 			};
 			var method = $(this).attr('method') || "POST";
 			// yada.ajax($(this).attr('action'), $.param(data), joinedHandler.bind(this), $(this).attr('method'), $(this).attr('data-timeout'));
-			yada.ajax($(this).attr('action'), data, joinedHandler.bind(this), method, $(this).attr('data-timeout'));
+			yada.ajax(action, data, joinedHandler.bind(this), method, $(this).attr('data-timeout'));
 			clickedButton = null;
 			return false; // Important so that the form is not submitted by the browser too
 		})
 		// Set the confirm handlers on form buttons
 	    $form.not('.'+markerClass).find("button[type='submit']").each(function() {
 	    	var $button = $(this);
-	    	var confirmText = $button.attr("data-confirm");
+	    	var confirmText = $button.attr("data-yadaConfirm") || $button.attr("data-confirm");
 	    	if (confirmText!=null) {
 	    		var okButton = $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
 	    		var cancelButton = $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 	    		$button.click(function() {
+	    			$button = $(this); // Needed otherwise $button could be stale (from a previous ajax replacement) 
 	    			yada.confirm(confirmText, function(result) {
 	    				if (result==true) {
 	    					$button.off("click");
@@ -649,17 +733,24 @@
 		$form.not('.'+markerClass).addClass(markerClass);
 	};
 	
+	function showFullPage(html) {
+		document.open();
+		document.write(html);
+		document.close();
+	}
+	
 	/**
 	 * Esegue una get/post ajax passando data (stringa od oggetto). Gestisce il caso che sia necessario il login.
 	 * Il metodo chiamato lato java può ritornare un notify chiamando yadaWebUtil.modalOk() o anche yadaWebUtil.modalError() etc.
 	 * In caso di notify di un errore, l'handler non viene chiamato.
 	 * @param url target url
-	 * @param data dati da inviare (stringa od oggetto)
+	 * @param data dati da inviare (stringa od oggetto) - can be null
 	 * @param successHandler(responseText, responseHtml);) funzione chiamata in caso di successo e nessun yadaWebUtil.modalError(). Viene chiamata anche in caso di errore se il suo flag executeAnyway è true
 	 * @param type "POST" per il post oppure null o "GET" per il get
 	 * @param timeout milliseconds timeout, null for default (set by the browser)
+	 * @param hideLoader true for not showing the loader
 	 */
-	yada.ajax = function(url, data, successHandler, type, timeout) {
+	yada.ajax = function(url, data, successHandler, type, timeout, hideLoader) {
 		if (type==null) {
 			type="GET"
 		}
@@ -668,7 +759,9 @@
 		}
 		var processData = !(data instanceof FormData);  // http://stackoverflow.com/a/8244082/587641
 		var contentType = data instanceof FormData ? false : undefined;
-		yada.loaderOn();
+		if (hideLoader!=true) {
+			yada.loaderOn();
+		}
 		$.ajax({
 			type: type,
 			url: url,
@@ -676,10 +769,17 @@
 			processData: processData,
 			contentType: contentType,
 			error: function(jqXHR, textStatus, errorThrown ) { 
+				yada.loaderOff();
 				// textStatus is "error", "timeout", "abort", or"parsererror"
-				// errorThrown is ''
+				var responseText = jqXHR.responseText;
+				if (jqXHR.status==503 && responseText!=null && yada.startsWith(responseText, "<html")) {
+					showFullPage(responseText);
+					return;
+				}
 				if (textStatus==="timeout") {
 					yada.showErrorModal(yada.messages.connectionError.title, yada.messages.connectionError.message);
+				} else if (errorThrown==="Forbidden") {
+					yada.showErrorModal(yada.messages.forbiddenError.title, yada.messages.forbiddenError.message);
 				} else {
 					yada.showErrorModal(yada.messages.serverError.title, yada.messages.serverError.message + (textStatus!=null&&textStatus!='error'?' ('+textStatus+')':''));
 				}
@@ -689,70 +789,91 @@
 				if (typeof responseText == "string") {
 					responseTrimmed = responseText.trim();
 				}
-				yada.loaderOff();
 				if (yada.showAjaxErrorIfPresent(responseTrimmed, statusText)==true) {
+					yada.loaderOff();
 					return;
 				}
 				if ("reload" == responseTrimmed) {
 					yada.reload();
 					return;
 				}
-				if (responseTrimmed.startsWith("redirect:")) {
-					yada.loaderOn();
-					var targetUrl = responseTrimmed.substring("redirect:".length);
-					window.location.href=targetUrl;
+				if (yada.startsWith(responseTrimmed, "{\"redirect\":")) {
+					var redirectObject = JSON.parse(responseTrimmed);
+					var targetUrl = redirectObject.redirect;
+					if (redirectObject.newTab!="true") {
+						window.location.href=targetUrl;
+					} else {
+						yada.loaderOff();
+						var win = window.open(targetUrl, '_blank');
+						if (win) {
+						    //Browser has allowed it to be opened
+						    win.focus();
+						} else {
+						    //Browser has blocked it
+						    alert('Please allow popups for this website');
+						}
+					}
 					return;
 				}
-				var responseHtml=$("<div>").html(responseText);
-				// Check if we just did a login
+				var responseHtml=$("<div>").html(responseTrimmed);
+				// Check if we just did a login.
+				// A successful login can also return a redirect, which will skip the PostLoginHandler 
 				if ("loginSuccess" == responseTrimmed) {
 					$("#loginModal").remove();
+					yada.loaderOff();
 					// window.location.reload(true); // true = skip cache // Non va bene perchè se è stata fatta una post, viene ripetuta!
-					handlePostLoginHandler(responseHtml, responseText);
+					yada.handlePostLoginHandler(responseHtml, responseText);
 					return;
 				}
 				if (openLoginModalIfPresent(responseHtml)) {
+					yada.loaderOff();
 					return;
 				}
 				// Controllo se è stata ritornata la home con una richiesta di login
 				if ((typeof responseText == 'string' || responseText instanceof String) && responseText.indexOf('s_loginRequested') !== -1) {
 					yada.openLoginModal(url, data, successHandler, type); // E' necessario il login. Viene fatto, e poi eseguito l'handler.
+					yada.loaderOff();
 					return;
 				}
 				
 				// Gestisce la pwd scaduta
-				var pwdChange=$(responseHtml).find("form[name='form-change-password']");
+				var pwdChange=$(responseHtml).find("body.yadaChangePassword");
 				if (pwdChange.length>0) {
 					$("#loginModal").remove();
-					document.open();
-					document.write(responseText);
-					document.close();
+					showFullPage(responseText);
+					yada.loaderOff();
 					return;
 				}			
 				
 				// Se è stato ritornato un confirm, lo mostro e abilito l'esecuzione dell'ajax e dell'handler
 				if (yada.handleModalConfirm(responseHtml, url, data, successHandler, type)) {
+					yada.loaderOff();
 					return;
 				}
+				// Per mostrare una notification al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify" 
+				// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
+				var notify=yada.handleNotify(responseHtml);
 				
+				// Always initialize all handlers on the returned content
+				yada.initHandlersOn(responseHtml);
+
 				// Il successHandler viene eseguito solo se non c'è un errore, oppure se il flag executeAnyway è true
 				if (successHandler != null) {
 					if (!yada.isNotifyError(responseHtml) || successHandler.executeAnyway==true) {
+						// yada.initAjaxHandlersOn(responseHtml);
 						// Non c'era un login, eseguo l'handler, se passato
 						successHandler(responseText, responseHtml);
 						// Keep going...
 					}
 				}
-				// Per mostrare una notification al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify" 
-				// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
-				if (yada.handleNotify(responseHtml)) {
+				// If it is a full page, overwrite the current one
+				if ($('.yadafullPage', responseHtml).length>0 || $('.s_fullPage', responseHtml).length>0) {
+					showFullPage(responseText);
+					yada.loaderOff();
 					return;
 				}
-				// If it is a full page, overwrite the current one
-				if ($('.s_fullPage', responseHtml).length>0) {
-					document.open();
-					document.write(responseText);
-					document.close();
+				if (notify) {
+					yada.loaderOff();
 					return;
 				}
 				// Open any other modal
@@ -775,10 +896,19 @@
 					$("#ajaxModal").children().remove();
 					$("#ajaxModal").append(loadedModalDialog);
 					// We need to show the modal after a delay or it won't show sometimes (!)
-					setTimeout(function() {
-						$('#ajaxModal:hidden').modal('show');
-					}, 100);
-					yada.enableAjaxForms();
+					var modalIsHidden = $('#ajaxModal:visible').length==0;
+					if (modalIsHidden) {
+						setTimeout(function() {
+							$('#ajaxModal:hidden').modal('show');
+							// The loader is removed after the modal is opened to prevent background flickering (if the loader background is not transparent)
+							$('#ajaxModal').on('shown.bs.modal', function (e) {
+								yada.loaderOff();
+							})
+						}, 100);
+					} else {
+						yada.loaderOff();
+					}
+					yada.initAjaxHandlersOn($("#ajaxModal"));
 					// Questo permette di scrollare all'anchor (ho dovuto mettere un ritardo altrimenti non scrollava)
 					// e anche di far scendere il modal se per caso si apre scrollato (a volte capita, forse coi modal molto alti)
 					setTimeout(function() {
@@ -802,6 +932,7 @@
 				if (responseTrimmed == 'closeModal') {
 					$(".modal:visible").modal('hide');
 				}
+				yada.loaderOff();
 				// Otherwise it is a full page, that must be loaded in place of the current page
 				// WRONG: in questo modo anche le chiamate ajax che ritornano frammenti riscrivono la pagina intera.
 				// TODO aggiungere un qualcosa per indicare che la pagina va sovrascritta

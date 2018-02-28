@@ -36,6 +36,7 @@ import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.persistence.YadaMoney;
 import net.yadaframework.persistence.YadaMoneyConverter;
+import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.web.YadaJsonView;
 
 /**

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>YadaSeleniumUtil &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'master',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">     intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">     tutorial</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">YadaSeleniumUtil</a><ul>
+<li><a class="reference internal" href="#fields">Fields</a><ul>
+<li><a class="reference internal" href="#driver-chrome">DRIVER_CHROME</a></li>
+<li><a class="reference internal" href="#driver-firefox">DRIVER_FIREFOX</a></li>
+<li><a class="reference internal" href="#yadahttputil">yadaHttpUtil</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#findornull">findOrNull</a></li>
+<li><a class="reference internal" href="#foundbyclass">foundByClass</a></li>
+<li><a class="reference internal" href="#foundbyid">foundById</a></li>
+<li><a class="reference internal" href="#foundbytext">foundByText</a></li>
+<li><a class="reference internal" href="#getbyjavascript">getByJavascript</a></li>
+<li><a class="reference internal" href="#gettextifexists">getTextIfExists</a></li>
+<li><a class="reference internal" href="#makewebdriver">makeWebDriver</a></li>
+<li><a class="reference internal" href="#positionwindow">positionWindow</a></li>
+<li><a class="reference internal" href="#randomclick">randomClick</a></li>
+<li><a class="reference internal" href="#id1">randomClick</a></li>
+<li><a class="reference internal" href="#relativetoabsolute">relativeToAbsolute</a></li>
+<li><a class="reference internal" href="#setnormalpageloadtimeout">setNormalPageLoadTimeout</a></li>
+<li><a class="reference internal" href="#setpageloadtimeoutseconds">setPageloadTimeoutSeconds</a></li>
+<li><a class="reference internal" href="#setslowpageloadtimeout">setSlowPageLoadTimeout</a></li>
+<li><a class="reference internal" href="#takescreenshot">takeScreenshot</a></li>
+<li><a class="reference internal" href="#typeashuman">typeAsHuman</a></li>
+<li><a class="reference internal" href="#waituntilpresent">waitUntilPresent</a></li>
+<li><a class="reference internal" href="#waituntilvisible">waitUntilVisible</a></li>
+<li><a class="reference internal" href="#waitwhilepresent">waitWhilePresent</a></li>
+<li><a class="reference internal" href="#waitwhilevisible">waitWhileVisible</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../../../../_sources/javadoc/net/yadaframework/selenium/YadaSeleniumUtil.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="yadaseleniumutil">
+<h1>YadaSeleniumUtil<a class="headerlink" href="#yadaseleniumutil" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil">
+public class <code class="descname">YadaSeleniumUtil</code><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="section" id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="driver-chrome">
+<h3>DRIVER_CHROME<a class="headerlink" href="#driver-chrome" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.DRIVER_CHROME">
+public static final int <code class="descname">DRIVER_CHROME</code><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.DRIVER_CHROME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="driver-firefox">
+<h3>DRIVER_FIREFOX<a class="headerlink" href="#driver-firefox" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.DRIVER_FIREFOX">
+public static final int <code class="descname">DRIVER_FIREFOX</code><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.DRIVER_FIREFOX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="yadahttputil">
+<h3>yadaHttpUtil<a class="headerlink" href="#yadahttputil" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.yadaHttpUtil">
+ <a class="reference internal" href="../raw/YadaHttpUtil.html#net.yadaframework.raw.YadaHttpUtil" title="net.yadaframework.raw.YadaHttpUtil">YadaHttpUtil</a> <code class="descname">yadaHttpUtil</code><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.yadaHttpUtil" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="findornull">
+<h3>findOrNull<a class="headerlink" href="#findornull" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.findOrNull(SearchContext, By)">
+public WebElement <code class="descname">findOrNull</code><span class="sig-paren">(</span>SearchContext<em> from</em>, By<em> by</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.findOrNull(SearchContext, By)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the first element matched by the selector, or null if not found</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>from</strong> – a WebElement to start the search from, or the WebDriver to search in all the page</li>
+<li><strong>by</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="foundbyclass">
+<h3>foundByClass<a class="headerlink" href="#foundbyclass" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.foundByClass(String, WebDriver)">
+public boolean <code class="descname">foundByClass</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> className</em>, WebDriver<em> webDriver</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.foundByClass(String, WebDriver)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if at least one element with the given class exists</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>className</strong> – without initial dot</li>
+<li><strong>webDriver</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="foundbyid">
+<h3>foundById<a class="headerlink" href="#foundbyid" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.foundById(String, WebDriver)">
+public boolean <code class="descname">foundById</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> id</em>, WebDriver<em> webDriver</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.foundById(String, WebDriver)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if an element with a given id exists</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> – </li>
+<li><strong>webDriver</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="foundbytext">
+<h3>foundByText<a class="headerlink" href="#foundbytext" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.foundByText(List, String)">
+public boolean <code class="descname">foundByText</code><span class="sig-paren">(</span><a class="reference internal" href="../../../../index.html#List" title="List">List</a>&lt;WebElement&gt;<em> webElements</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> text</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.foundByText(List, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if an element contains the given text (literally)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>webElements</strong> – to search text int</li>
+<li><strong>text</strong> – to search</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">true if the text is found</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getbyjavascript">
+<h3>getByJavascript<a class="headerlink" href="#getbyjavascript" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.getByJavascript(String, WebDriver)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getByJavascript</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> javascriptCode</em>, WebDriver<em> webDriver</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.getByJavascript(String, WebDriver)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a value calculated via javascript.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>javascriptCode</strong> – Any valid javascript code with a return value</li>
+<li><strong>webDriver</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="gettextifexists">
+<h3>getTextIfExists<a class="headerlink" href="#gettextifexists" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.getTextIfExists(SearchContext, By)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getTextIfExists</code><span class="sig-paren">(</span>SearchContext<em> from</em>, By<em> by</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.getTextIfExists(SearchContext, By)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search for text</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>from</strong> – a WebElement to start the search from, or the WebDriver to search in all the page</li>
+<li><strong>by</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the text found, or “”</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="makewebdriver">
+<h3>makeWebDriver<a class="headerlink" href="#makewebdriver" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.makeWebDriver(File, InetSocketAddress, Set, int)">
+public WebDriver <code class="descname">makeWebDriver</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/io/File.html" title="java.io.File">File</a><em> customProfileDir</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/net/InetSocketAddress.html" title="java.net.InetSocketAddress">InetSocketAddress</a><em> proxyToUse</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Set.html" title="java.util.Set">Set</a>&lt;Cookie&gt;<em> cookiesToSet</em>, int<em> driverType</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.makeWebDriver(File, InetSocketAddress, Set, int)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new browser instance positioning the window</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>customProfileDir</strong> – the folder where to store the user profile, can be null to use the default temporary profile. The folder is created when missing.</li>
+<li><strong>proxy</strong> – </li>
+<li><strong>cookiesToSet</strong> – cookies to set after the first get of a document. Can be null or empty. Cookies are set only when a cookie with the same name has not been received. It’s not possible to set cookies BEFORE the first get (by design of WebDriver).</li>
+<li><strong>driverType</strong> – DRIVER_FIREFOX, DRIVER_CHROME</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><ul class="first last simple">
+<li><strong>MalformedURLException</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="positionwindow">
+<h3>positionWindow<a class="headerlink" href="#positionwindow" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.positionWindow(int, int, int, int, WebDriver)">
+public void <code class="descname">positionWindow</code><span class="sig-paren">(</span>int<em> posx</em>, int<em> posy</em>, int<em> width</em>, int<em> height</em>, WebDriver<em> webDriver</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.positionWindow(int, int, int, int, WebDriver)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="randomclick">
+<h3>randomClick<a class="headerlink" href="#randomclick" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.randomClick(WebElement, WebDriver)">
+public void <code class="descname">randomClick</code><span class="sig-paren">(</span>WebElement<em> webElement</em>, WebDriver<em> webDriver</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.randomClick(WebElement, WebDriver)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Click on the given element in a range between 20% and 80% of the dimensions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>webElement</strong> – </li>
+<li><strong>webDriver</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h3>randomClick<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.randomClick(WebElement, WebDriver, int, int, int, int)">
+public void <code class="descname">randomClick</code><span class="sig-paren">(</span>WebElement<em> webElement</em>, WebDriver<em> webDriver</em>, int<em> minPercentX</em>, int<em> maxPercentX</em>, int<em> minPercentY</em>, int<em> maxPercentY</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.randomClick(WebElement, WebDriver, int, int, int, int)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Click on the given element in a range between min and max % of the dimensions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>webElement</strong> – </li>
+<li><strong>webDriver</strong> – </li>
+<li><strong>minPercentX</strong> – e.g. 10</li>
+<li><strong>maxPercentX</strong> – e.g. 90</li>
+<li><strong>minPercentY</strong> – </li>
+<li><strong>maxPercentY</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="relativetoabsolute">
+<h3>relativeToAbsolute<a class="headerlink" href="#relativetoabsolute" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.relativeToAbsolute(String, WebDriver)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">relativeToAbsolute</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> relativeAddress</em>, WebDriver<em> webDriver</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.relativeToAbsolute(String, WebDriver)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a relative address, computes the new full address. If the relative address starts with / then it is considered relative to the server, not to the servlet context Do not use it to convert href attributes because this is done by WebDriver automatically.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>relativeAddress</strong> – like ccc.go or /xxx/yyy.go</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="setnormalpageloadtimeout">
+<h3>setNormalPageLoadTimeout<a class="headerlink" href="#setnormalpageloadtimeout" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.setNormalPageLoadTimeout(WebDriver)">
+public void <code class="descname">setNormalPageLoadTimeout</code><span class="sig-paren">(</span>WebDriver<em> webDriver</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.setNormalPageLoadTimeout(WebDriver)" title="Permalink to this definition">¶</a></dt>
+<dd><p>From now on, page load timeout will be set to the “normale” value defined in the “pageLoadSeconds” confg property</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>webDriver</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="setpageloadtimeoutseconds">
+<h3>setPageloadTimeoutSeconds<a class="headerlink" href="#setpageloadtimeoutseconds" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.setPageloadTimeoutSeconds(WebDriver, long)">
+public void <code class="descname">setPageloadTimeoutSeconds</code><span class="sig-paren">(</span>WebDriver<em> webDriver</em>, long<em> timeoutSeconds</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.setPageloadTimeoutSeconds(WebDriver, long)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the pageload timeout for the following requests</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>webDriver</strong> – </li>
+<li><strong>timeoutSeconds</strong> – timeout in seconds</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="setslowpageloadtimeout">
+<h3>setSlowPageLoadTimeout<a class="headerlink" href="#setslowpageloadtimeout" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.setSlowPageLoadTimeout(WebDriver)">
+public void <code class="descname">setSlowPageLoadTimeout</code><span class="sig-paren">(</span>WebDriver<em> webDriver</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.setSlowPageLoadTimeout(WebDriver)" title="Permalink to this definition">¶</a></dt>
+<dd><p>From now on, page load timeout will be set to the “slow” value defined in the “slowPageLoadSeconds” confg property</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>webDriver</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="takescreenshot">
+<h3>takeScreenshot<a class="headerlink" href="#takescreenshot" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.takeScreenshot(WebDriver, Path)">
+public void <code class="descname">takeScreenshot</code><span class="sig-paren">(</span>WebDriver<em> webDriver</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html" title="java.nio.file.Path">Path</a><em> toPath</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.takeScreenshot(WebDriver, Path)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a browser screenshot and move it to the specified path</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>webDriver</strong> – </li>
+<li><strong>toPath</strong> – destination for the screenshot</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="typeashuman">
+<h3>typeAsHuman<a class="headerlink" href="#typeashuman" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.typeAsHuman(WebElement, String)">
+public void <code class="descname">typeAsHuman</code><span class="sig-paren">(</span>WebElement<em> inputField</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> text</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.typeAsHuman(WebElement, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert some text slowly into a field</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>inputField</strong> – </li>
+<li><strong>text</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="waituntilpresent">
+<h3>waitUntilPresent<a class="headerlink" href="#waituntilpresent" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.waitUntilPresent(String, WebDriver, long)">
+public void <code class="descname">waitUntilPresent</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> cssSelector</em>, WebDriver<em> webDriver</em>, long<em> timeOutInSeconds</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.waitUntilPresent(String, WebDriver, long)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait until the selector matches an element</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cssSelector</strong> – </li>
+<li><strong>webDriver</strong> – </li>
+<li><strong>timeOutInSeconds</strong> – </li>
+<li><strong>sleepInMillis</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="waituntilvisible">
+<h3>waitUntilVisible<a class="headerlink" href="#waituntilvisible" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.waitUntilVisible(String, WebDriver, long)">
+public void <code class="descname">waitUntilVisible</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> cssSelector</em>, WebDriver<em> webDriver</em>, long<em> timeOutInSeconds</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.waitUntilVisible(String, WebDriver, long)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait until the selector matches a visible element</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cssSelector</strong> – </li>
+<li><strong>webDriver</strong> – </li>
+<li><strong>timeOutInSeconds</strong> – </li>
+<li><strong>sleepInMillis</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="waitwhilepresent">
+<h3>waitWhilePresent<a class="headerlink" href="#waitwhilepresent" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.waitWhilePresent(String, WebDriver, long)">
+public void <code class="descname">waitWhilePresent</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> cssSelector</em>, WebDriver<em> webDriver</em>, long<em> timeOutInSeconds</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.waitWhilePresent(String, WebDriver, long)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait until the selector matches zero elements</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cssSelector</strong> – </li>
+<li><strong>webDriver</strong> – </li>
+<li><strong>timeOutInSeconds</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="waitwhilevisible">
+<h3>waitWhileVisible<a class="headerlink" href="#waitwhilevisible" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.selenium.YadaSeleniumUtil.waitWhileVisible(String, WebDriver, long)">
+public void <code class="descname">waitWhileVisible</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> cssSelector</em>, WebDriver<em> webDriver</em>, long<em> timeOutInSeconds</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.selenium.YadaSeleniumUtil.waitWhileVisible(String, WebDriver, long)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

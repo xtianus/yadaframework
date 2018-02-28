@@ -20,7 +20,7 @@ public class WebApplicationInitializer extends YadaWebApplicationInitializer {
 		configurationClasses.add(AppConfig.class);
 		configurationClasses.add(JpaConfig.class);
 		try {
-			Class<?> theClass = Class.forName("$basePackage.SecurityConfig");
+			Class<?> theClass = Class.forName("$basePackage.core.SecurityConfig");
 			configurationClasses.add(theClass);
 		} catch (ClassNotFoundException e) {
 			if (super.isSecurityProjectPresent()) {

@@ -28,7 +28,7 @@ public interface YadaLocalEnum<E extends Enum<E>> {
 	 * Used internally
 	 * @param yadaPersistentEnum
 	 */
-	void setYadaPersistentEnum(YadaPersistentEnum<? extends YadaLocalEnum<E>> yadaPersistentEnum);
+	void setYadaPersistentEnum(YadaPersistentEnum<E> yadaPersistentEnum);
 	
 	/**
 	 * @return the database id for this enum value

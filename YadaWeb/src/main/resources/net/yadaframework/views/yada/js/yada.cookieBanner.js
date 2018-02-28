@@ -22,6 +22,7 @@
 	#yadaCookieBanner .closeIcon {
 		position: absolute;
 	    right: 10px;
+	    top: -8px;
 	    cursor: pointer;
 	    width: 20px;
 	    height: 20px;
@@ -54,9 +55,11 @@
 	/**
 	 * Function to call externally for showing the cookie banner when needed
 	 * @param infoText
-	 * @param acceptButtonText
+	 * @param acceptButtonText can be null for the default text, empty for no accept link.
+	 * @param noHideOnScroll true to prevent banner close on scroll
+	 * @param noHideOnClick true to prevent banner close on site click
 	 */
-	yada.cookieBanner = function(infoText, acceptButtonText) {
+	yada.cookieBanner = function(infoText, acceptButtonText, noHideOnScroll, noHideOnClick) {
 		// If cookie not present, insert banner in page
 		if (document.cookie.indexOf(cookieAcceptName+"=true")<0) {
 			if (infoText==null) {
@@ -66,16 +69,23 @@
 				acceptButtonText = 'Accept';
 			}
 			var bannerHtml = '<div id="'+bannerId+'">'
-				+ '<div class="closeIcon"></div>'
 				+ '<p>' + infoText + '</p>'
-				+ '<a href="#">' + acceptButtonText + '</a>'
-				+ '</div>';
+				+ '<div class="closeIcon"></div>'
+				;
+			if (acceptButtonText!="") {
+				bannerHtml+= '<a href="#">' + acceptButtonText + '</a>';
+			}
+			bannerHtml+= '</div>';
 			
 			document.body.insertAdjacentHTML('afterbegin', bannerHtml);
 
 			// Add the handlers
-			document.body.addEventListener("click", bodyClickHandler);
-			window.addEventListener("scroll", scrollHandler);
+			if (noHideOnClick!=true) {
+				document.body.addEventListener("click", bodyClickHandler);
+			}
+			if (noHideOnScroll!=true) {
+				window.addEventListener("scroll", scrollHandler);
+			}
 		}
 	}
 	

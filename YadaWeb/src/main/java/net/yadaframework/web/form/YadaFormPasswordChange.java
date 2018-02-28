@@ -7,6 +7,8 @@ public class YadaFormPasswordChange {
 	
 	private String password;
 
+	private String confirmPassword;
+
 	public String getPassword() {
 		return password;
 	}
@@ -29,6 +31,14 @@ public class YadaFormPasswordChange {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public String getConfirmPassword() {
+		return confirmPassword;
+	}
+
+	public void setConfirmPassword(String confirmPassword) {
+		this.confirmPassword = confirmPassword;
 	}
 	
 }

@@ -19,6 +19,10 @@
 		"title": "Connection Error",
 		"message": "Failed to contact server - please try again later"
 	}; 
+	yada.messages.forbiddenError = { // Set it via thymeleaf
+			"title": "Authorization Error",
+			"message": "You don't have permission to access the requested page"
+	}; 
 	yada.messages.serverError = { // Set it via thymeleaf
 			"title": "Server Error",
 			"message": "Something is wrong - please try again later"
@@ -29,6 +33,8 @@
 	}; 
 	
 	$(document).ready(function() {
+		// Be aware that all ajax links and forms will NOT be ajax if the user clicks while the document is still loading.
+		// To prevent that, call yada.initAjaxHandlersOn($('form,a')); at the html bottom and just after including the yada.ajax.js script
 		initHandlers();
 	});
 	
@@ -41,6 +47,12 @@
 		$('body').on('submit', '.s_showLoaderForm', yada.loaderOn);
 		yada.enableScrollTopButton(); // Abilita il torna-su
 		yada.initHandlersOn();
+		// When the page is pulled from bfcache (firefox/safari) turn the loader off
+		$(window).bind("pageshow", function(event) {
+		    if (event.originalEvent.persisted) {
+		        yada.loaderOff();
+		    }
+		});		
 	}
 	
 	/**
@@ -48,7 +60,7 @@
 	 * @param $element the element, or null for the entire body
 	 */
 	yada.initHandlersOn = function($element) {
-		yada.enableShowPassword($element); // Abilita l'occhietto
+		yada.enableShowPassword($element);
 		yada.enableRefreshButtons($element);
 		yada.enableConfirmLinks($element);
 		yada.enableHelpButton($element);
@@ -81,10 +93,10 @@
 		if ($element==null) {
 			$element = $('body');
 		}
-		$('a[data-yadaHash]', $element).click(function(){
+		$('a[data-yadaHash], button[data-yadaHash]', $element).not(".yadaHashed").click(function(){
 			var hashValue = $(this).attr('data-yadaHash')
 			history.pushState({'yadaHash': true}, null, window.location.pathname + '#' + hashValue)
-		});
+		}).addClass("yadaHashed");
 	}
 
 	yada.enableTooltip = function($element) {
@@ -371,7 +383,7 @@
 	}
 	
 	/**
-	 * Transform links into confirm links: all anchors with a "data-confirm" attribute that don't have a class of "yadaAjax" 
+	 * Transform links into confirm links: all anchors with a "data-yadaConfirm" attribute that don't have a class of "yadaAjax" 
 	 * will show a confirm box before submission.
 	 */
 	yada.enableConfirmLinks = function($element) {
@@ -379,12 +391,12 @@
 			$element = $('body');
 		}
 		var markerClass = 's_dataConfirmed';
-		$('a[data-confirm]', $element.parent()).not('.'+markerClass).not('.yadaAjax').each(function() {
+		$('a[data-yadaConfirm], a[data-confirm]', $element.parent()).not('.'+markerClass).not('.yadaAjax').each(function() {
 			$(this).click(function(e) {
 				var $link = $(this);
 				e.preventDefault();
 				var href = $link.attr("href");
-				var confirmText = $link.attr("data-confirm");
+				var confirmText = $link.attr("data-yadaConfirm") || $link.attr("data-confirm");
 				if (confirmText!=null) {
 					var okButton = $link.attr("data-okButton") || yada.messages.confirmButtons.ok;
 					var cancelButton = $link.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
@@ -508,6 +520,17 @@
 	/// String functions
 	
 	/**
+	 * Returns the portion of string that follows the first match of some substring
+	 */
+	yada.getAfter = function(str, toFind, fromIndex) {
+		var pos = str.indexOf(toFind, fromIndex);
+		if (pos>=0) {
+			return str.substring(pos+toFind.length);
+		}
+		return str;
+	}
+	
+	/**
 	 * Split a comma-separated string into an array. Commas can be followed by spaces.
 	 * If the input is null, return an empty array.
 	 */
@@ -595,6 +618,7 @@
 			$element = $('body');
 		}
 		$("[data-yadaCustomPopoverId]", $element).not('.s_customPopovered').each(function(){
+			$(this).addClass('s_customPopovered');
 			var dataIdWithHash = yada.getIdWithHash(this, "data-yadaCustomPopoverId");
 			var dataTitle = $(this).attr("data-title"); // Optional
 			var hasTitle = $(this).attr("title")==null;
@@ -636,7 +660,6 @@
 			$(this).on('shown.bs.popover', makePopoverShownHandler(popoverId, shownFunction));
 			$(this).on('hidden.bs.popover', makePopoverClosedHandler(popoverId, hiddenFunction));
 		});
-		$('[data-yadaCustomPopoverId]').not('.s_customPopovered').addClass('s_customPopovered');
 		
 		// Wrap the closure
 		function makePopoverShownHandler(divId, shownFunction) {

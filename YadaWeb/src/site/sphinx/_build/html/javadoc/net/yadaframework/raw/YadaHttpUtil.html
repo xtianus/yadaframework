@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>YadaHttpUtil &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'master',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">     intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">     tutorial</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">YadaHttpUtil</a><ul>
+<li><a class="reference internal" href="#fields">Fields</a><ul>
+<li><a class="reference internal" href="#content-css">CONTENT_CSS</a></li>
+<li><a class="reference internal" href="#content-document">CONTENT_DOCUMENT</a></li>
+<li><a class="reference internal" href="#content-image">CONTENT_IMAGE</a></li>
+<li><a class="reference internal" href="#content-javascript">CONTENT_JAVASCRIPT</a></li>
+<li><a class="reference internal" href="#content-other">CONTENT_OTHER</a></li>
+<li><a class="reference internal" href="#content-unknown">CONTENT_UNKNOWN</a></li>
+<li><a class="reference internal" href="#content-xml">CONTENT_XML</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#extractaddress">extractAddress</a></li>
+<li><a class="reference internal" href="#extractpath">extractPath</a></li>
+<li><a class="reference internal" href="#forward">forward</a></li>
+<li><a class="reference internal" href="#getcookies">getCookies</a></li>
+<li><a class="reference internal" href="#getdocumenttype">getDocumentType</a></li>
+<li><a class="reference internal" href="#getonecookievalue">getOneCookieValue</a></li>
+<li><a class="reference internal" href="#getrequestdocumenttype">getRequestDocumentType</a></li>
+<li><a class="reference internal" href="#getwebappfulladdress">getWebappFullAddress</a></li>
+<li><a class="reference internal" href="#hascookie">hasCookie</a></li>
+<li><a class="reference internal" href="#isajax">isAjax</a></li>
+<li><a class="reference internal" href="#iscontenttypetext">isContentTypeText</a></li>
+<li><a class="reference internal" href="#redirectpermanent">redirectPermanent</a></li>
+<li><a class="reference internal" href="#redirecttemporary">redirectTemporary</a></li>
+<li><a class="reference internal" href="#relativetoabsolute">relativeToAbsolute</a></li>
+<li><a class="reference internal" href="#removeport">removePort</a></li>
+<li><a class="reference internal" href="#setattribute">setAttribute</a></li>
+<li><a class="reference internal" href="#setcookie">setCookie</a></li>
+<li><a class="reference internal" href="#uncompress">uncompress</a></li>
+<li><a class="reference internal" href="#validateproxy">validateProxy</a></li>
+<li><a class="reference internal" href="#id1">validateProxy</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../../../../_sources/javadoc/net/yadaframework/raw/YadaHttpUtil.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="yadahttputil">
+<h1>YadaHttpUtil<a class="headerlink" href="#yadahttputil" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.yadaframework.raw.YadaHttpUtil">
+public class <code class="descname">YadaHttpUtil</code><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Miscellaneous HTTP functions</p>
+</dd></dl>
+
+<div class="section" id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="content-css">
+<h3>CONTENT_CSS<a class="headerlink" href="#content-css" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.raw.YadaHttpUtil.CONTENT_CSS">
+public static final int <code class="descname">CONTENT_CSS</code><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.CONTENT_CSS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="content-document">
+<h3>CONTENT_DOCUMENT<a class="headerlink" href="#content-document" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.raw.YadaHttpUtil.CONTENT_DOCUMENT">
+public static final int <code class="descname">CONTENT_DOCUMENT</code><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.CONTENT_DOCUMENT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="content-image">
+<h3>CONTENT_IMAGE<a class="headerlink" href="#content-image" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.raw.YadaHttpUtil.CONTENT_IMAGE">
+public static final int <code class="descname">CONTENT_IMAGE</code><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.CONTENT_IMAGE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="content-javascript">
+<h3>CONTENT_JAVASCRIPT<a class="headerlink" href="#content-javascript" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.raw.YadaHttpUtil.CONTENT_JAVASCRIPT">
+public static final int <code class="descname">CONTENT_JAVASCRIPT</code><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.CONTENT_JAVASCRIPT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="content-other">
+<h3>CONTENT_OTHER<a class="headerlink" href="#content-other" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.raw.YadaHttpUtil.CONTENT_OTHER">
+public static final int <code class="descname">CONTENT_OTHER</code><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.CONTENT_OTHER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="content-unknown">
+<h3>CONTENT_UNKNOWN<a class="headerlink" href="#content-unknown" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.raw.YadaHttpUtil.CONTENT_UNKNOWN">
+public static final int <code class="descname">CONTENT_UNKNOWN</code><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.CONTENT_UNKNOWN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="content-xml">
+<h3>CONTENT_XML<a class="headerlink" href="#content-xml" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.raw.YadaHttpUtil.CONTENT_XML">
+public static final int <code class="descname">CONTENT_XML</code><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.CONTENT_XML" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="extractaddress">
+<h3>extractAddress<a class="headerlink" href="#extractaddress" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.extractAddress(String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">extractAddress</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> url</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.extractAddress(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract the address from a url, without schema and path but with port</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>url</strong> – an url like <a class="reference external" href="http://www.myserver.net:8080/context/path">http://www.myserver.net:8080/context/path</a> or //www.myserver.net:8080/context/path</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the host[:port] like www.myserver.net:8080, or “”</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="extractpath">
+<h3>extractPath<a class="headerlink" href="#extractpath" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.extractPath(String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">extractPath</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> url</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.extractPath(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract the path from a url (the servlet context will be included)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>url</strong> – an url like <a class="reference external" href="http://www.myserver.net:8080/xxx/yyy/zzz">http://www.myserver.net:8080/xxx/yyy/zzz</a> or //www.myserver.net:8080/xxx/yyy/zzz or www.myserver.net:8080/xxx/yyy/zzz</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the path like “/xxx/yyy/zzz” or “/” at the least</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="forward">
+<h3>forward<a class="headerlink" href="#forward" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.forward(String, HttpServletRequest, HttpServletResponse)">
+public void <code class="descname">forward</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> page</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a><em> request</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletResponse.html" title="javax.servlet.http.HttpServletResponse">HttpServletResponse</a><em> response</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.forward(String, HttpServletRequest, HttpServletResponse)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getcookies">
+<h3>getCookies<a class="headerlink" href="#getcookies" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.getCookies(HttpServletRequest)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Map.html" title="java.util.Map">Map</a>&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt; <code class="descname">getCookies</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a><em> request</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.getCookies(HttpServletRequest)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ritorna tutti i cookie mandati con la request</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>request</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getdocumenttype">
+<h3>getDocumentType<a class="headerlink" href="#getdocumenttype" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.getDocumentType(String)">
+public int <code class="descname">getDocumentType</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> fullContentType</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.getDocumentType(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returms the content type of a response given the content-type</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fullContentType</strong> – the content-type (from request.getContentType()), also with charset or other attributes like “text/html; charset=UTF-8”</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an integer for the type of the content</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getonecookievalue">
+<h3>getOneCookieValue<a class="headerlink" href="#getonecookievalue" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.getOneCookieValue(HttpServletRequest, String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getOneCookieValue</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a><em> request</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> name</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.getOneCookieValue(HttpServletRequest, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the value of the first cookie found with the given name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>request</strong> – </li>
+<li><strong>name</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the cookie value or null if none is found</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getrequestdocumenttype">
+<h3>getRequestDocumentType<a class="headerlink" href="#getrequestdocumenttype" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.getRequestDocumentType(HttpServletRequest)">
+public int <code class="descname">getRequestDocumentType</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a><em> request</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.getRequestDocumentType(HttpServletRequest)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the document type by checking the request content type and the extension of the request path</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>request</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getwebappfulladdress">
+<h3>getWebappFullAddress<a class="headerlink" href="#getwebappfulladdress" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.getWebappFullAddress(HttpServletRequest)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getWebappFullAddress</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a><em> request</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.getWebappFullAddress(HttpServletRequest)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the current webapp address, e.g. <a class="reference external" href="http://www.myserver.net:8080/context/">http://www.myserver.net:8080/context/</a> with a trailing slash</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>request</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="hascookie">
+<h3>hasCookie<a class="headerlink" href="#hascookie" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.hasCookie(String, HttpServletRequest)">
+public boolean <code class="descname">hasCookie</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> name</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a><em> request</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.hasCookie(String, HttpServletRequest)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ritorna true se il cookie specificato è presente</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> – cookie name ignorecase</li>
+<li><strong>request</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="isajax">
+<h3>isAjax<a class="headerlink" href="#isajax" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.isAjax(HttpServletRequest)">
+public boolean <code class="descname">isAjax</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a><em> request</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.isAjax(HttpServletRequest)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if a request is an Ajax request</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>request</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="iscontenttypetext">
+<h3>isContentTypeText<a class="headerlink" href="#iscontenttypetext" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.isContentTypeText(String)">
+public static boolean <code class="descname">isContentTypeText</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> contentType</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.isContentTypeText(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true if the contentType is of text type: html, css, javascript…</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>contentType</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="redirectpermanent">
+<h3>redirectPermanent<a class="headerlink" href="#redirectpermanent" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.redirectPermanent(String, HttpServletRequest, HttpServletResponse)">
+public void <code class="descname">redirectPermanent</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> newUrl</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a><em> request</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletResponse.html" title="javax.servlet.http.HttpServletResponse">HttpServletResponse</a><em> response</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.redirectPermanent(String, HttpServletRequest, HttpServletResponse)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="redirecttemporary">
+<h3>redirectTemporary<a class="headerlink" href="#redirecttemporary" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.redirectTemporary(String, HttpServletRequest, HttpServletResponse)">
+public void <code class="descname">redirectTemporary</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> newUrl</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a><em> request</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletResponse.html" title="javax.servlet.http.HttpServletResponse">HttpServletResponse</a><em> response</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.redirectTemporary(String, HttpServletRequest, HttpServletResponse)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="relativetoabsolute">
+<h3>relativeToAbsolute<a class="headerlink" href="#relativetoabsolute" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.relativeToAbsolute(String, String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">relativeToAbsolute</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> currentFullAddress</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> newRelativeAddress</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.relativeToAbsolute(String, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the current full address and a relative address, computes the new full address. If the relative address starts with / then it is considered relative to the server, not to the servlet context. The relative address can be a url parameter like ?xx=yy or an anchor like #aaa</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>currentFullAddress</strong> – like <a class="reference external" href="http://some.server.com/aaa/bbb.go">http://some.server.com/aaa/bbb.go</a></li>
+<li><strong>newRelativeAddress</strong> – like ccc.go or /xxx/yyy.go</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="removeport">
+<h3>removePort<a class="headerlink" href="#removeport" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.removePort(String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">removePort</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> hostAddress</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.removePort(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the port from a host address, which could also be ipv4 or ipv6</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>hostAddress</strong> – like “www.myserver.net”, “www.myserver.net:8080”, “123.12.13.125:8080”, “[1fff:0:a88:85a3::ac1f]:8001”</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the host with no port like www.myserver.net or “123.12.13.125” or the original string on error</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="setattribute">
+<h3>setAttribute<a class="headerlink" href="#setattribute" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.setAttribute(HttpServletRequest, String, Object)">
+public void <code class="descname">setAttribute</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletRequest.html" title="javax.servlet.http.HttpServletRequest">HttpServletRequest</a><em> request</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> name</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a><em> value</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.setAttribute(HttpServletRequest, String, Object)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setcookie">
+<h3>setCookie<a class="headerlink" href="#setcookie" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.setCookie(String, String, HttpServletResponse)">
+public void <code class="descname">setCookie</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> name</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> value</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/javax/servlet/http/HttpServletResponse.html" title="javax.servlet.http.HttpServletResponse">HttpServletResponse</a><em> response</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.setCookie(String, String, HttpServletResponse)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggiunge un cookie alla response, senza scadenza e per tutte le pagine</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> – </li>
+<li><strong>value</strong> – </li>
+<li><strong>response</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="uncompress">
+<h3>uncompress<a class="headerlink" href="#uncompress" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.uncompress(byte[], String)">
+public byte[] <code class="descname">uncompress</code><span class="sig-paren">(</span>byte[]<em> compressedContent</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> encodingName</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.uncompress(byte[], String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uncompress an InputStream</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>compressedContent</strong> – </li>
+<li><strong>encodingName</strong> – can be “gzip” or “deflate”</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the uncompressed input when uncompressed successfully, null when failed or the contentEncoding is not recognized</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="validateproxy">
+<h3>validateProxy<a class="headerlink" href="#validateproxy" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.validateProxy(String, int, URL, int)">
+public long <code class="descname">validateProxy</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> proxyAddress</em>, int<em> proxyPort</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/net/URL.html" title="java.net.URL">URL</a><em> testUrl</em>, int<em> timeoutMillis</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.validateProxy(String, int, URL, int)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate a proxy over a given http page, with no proxy authentication</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>proxyAddress</strong> – </li>
+<li><strong>proxyPort</strong> – </li>
+<li><strong>testUrl</strong> – </li>
+<li><strong>timeoutMillis</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h3>validateProxy<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaHttpUtil.validateProxy(String, int, URL, int, String, String, String)">
+public long <code class="descname">validateProxy</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> proxyAddress</em>, int<em> proxyPort</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/net/URL.html" title="java.net.URL">URL</a><em> testUrl</em>, int<em> timeoutMillis</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> username</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> password</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> userAgent</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaHttpUtil.validateProxy(String, int, URL, int, String, String, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate a proxy over a given http page</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>proxyAddress</strong> – </li>
+<li><strong>proxyPort</strong> – </li>
+<li><strong>testUrl</strong> – the page to fetch (must include the third slash if just the host, like “<a class="reference external" href="http://somehost.com/">http://somehost.com/</a>”</li>
+<li><strong>timeoutMillis</strong> – </li>
+<li><strong>username</strong> – proxy basic authentication, or null when not needed</li>
+<li><strong>password</strong> – proxy basic authentication, or null when not needed</li>
+<li><strong>userAgent</strong> – to use when connecting (can be null for the default). E.g. “Mozilla/5.0 (Windows NT 6.3; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0”</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the milliseconds taken to fetch the page, or -1 in case of error/timeout</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

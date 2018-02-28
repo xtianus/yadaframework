@@ -23,8 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.yadaframework.exceptions.InternalException;
-import net.yadaframework.exceptions.InvalidValueException;
 import net.yadaframework.exceptions.YadaConfigurationException;
+import net.yadaframework.exceptions.YadaInternalException;
+import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.persistence.entity.YadaClause;
 
 /**
@@ -54,11 +55,14 @@ public abstract class YadaConfiguration {
 	private Map<Integer, String> roleIdToKeyMap = null;
 	private Map<String, Integer> roleKeyToIdMap = null;
 	private Object roleMapMonitor = new Object();
+	private String googleClientId = null;
+	private String googleSecret = null;
 	private String facebookAppId = null;
 	private String facebookSecret = null;
 	private String serverAddress = null;
 	private String webappAddress = null;
 	private int facebookType = -1;
+	private int googleType = -1;
 	private String tagReservedPrefix = null;
 	private int tagMaxNum = -1;
 	private int tagMaxSuggested = -1;
@@ -81,6 +85,43 @@ public abstract class YadaConfiguration {
 		return new File(getBasePath(), "uploads");
 	}
 	
+	/**
+	 * Returns true if YadaEmaiService should throw an exception instead of returning false when it receives an exception on send
+	 * @return
+	 */
+	public boolean isEmailThrowExceptions() {
+		return configuration.getBoolean("config/email/@throwExceptions", false);
+	}
+
+	/**
+	 * @return the url to redirect to after sending the password reset email
+	 */
+	public String getPasswordResetSent(Locale locale) {
+		String link = configuration.getString("config/security/passwordReset/passwordResetSent", "/");
+		return fixLink(link, locale);
+	}
+	
+	/**
+	 * @return the link to use for the registration confirmation, e.g. "/my/registrationConfirmation" or "/en/my/registrationConfirmation"
+	 */
+	public String getRegistrationConfirmationLink(Locale locale) {
+		String link = configuration.getString("config/security/registration/confirmationLink", "/registrationConfirmation");
+		return fixLink(link, locale);
+	}
+	
+	private String fixLink(String link, Locale locale) {
+		if (!link.endsWith("/")) {
+			link = link + "/";
+		}
+		if (!link.startsWith("/")) {
+			link = "/" + link;
+		}
+		if (isLocalePathVariableEnabled()) {
+			// Add the locale
+			link = "/" + locale.getLanguage() + link;
+		}
+		return link;
+	}
 
 	/**
 	 * Checks if an email address has been blacklisted in the configuration
@@ -90,12 +131,12 @@ public abstract class YadaConfiguration {
 	public boolean emailBlacklisted(String email) {
 		String[] patternStrings = configuration.getStringArray("config/email/blacklistPattern");
 		for (String patternString : patternStrings) {
-			if (email.matches(patternString)) {
+			if (email.toLowerCase().matches(patternString)) {
 				log.warn("Email '{}' blacklisted by '{}'", email, patternString);
-				return false;
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	
@@ -352,6 +393,13 @@ public abstract class YadaConfiguration {
 		}
  		return facebookType;
 	}
+	
+	public int getGoogleType() {
+		if (googleType==-1) {
+			googleType = configuration.getInt("config/social/google/type", -1);
+		}
+		return googleType;
+	}
 
 	/**
 	 * Ritorna la url da usare per postare una story su facebook (a cui appendere l'id)
@@ -361,16 +409,7 @@ public abstract class YadaConfiguration {
  		return configuration.getString("config/social/facebook/baseStoryUrl", "unset");
 	}
 	
-//	/**
-//	 * Ritorna il Facebook page ID
-//	 * @return
-//	 */
-//	public String getFacebookPageId() {
-//		return configuration.getString("config/social/facebook/pageId", "unset");
-//	}
-//	
 	/**
-	 * Ritorna il Facebook pageAccessToken
 	 * @return
 	 */
 	public String getFacebookPageAccessToken() {
@@ -378,7 +417,6 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
-	 * Ritorna il Facebook Secret
 	 * @return
 	 */
 	public String getFacebookSecret() {
@@ -389,7 +427,6 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
-	 * Ritorna la Facebook AppID
 	 * @return
 	 */
 	public String getFacebookAppId() {
@@ -397,6 +434,26 @@ public abstract class YadaConfiguration {
 			facebookAppId = configuration.getString("config/social/facebook/appId", "unset");
 		}
 		return facebookAppId;
+	}
+
+	/**
+	 * @return
+	 */
+	public String getGoogleSecret() {
+		if (googleSecret==null) {
+			googleSecret = configuration.getString("config/social/google/secret", "unset");
+		}
+		return googleSecret;
+	}
+	
+	/**
+	 * @return
+	 */
+	public String getGoogleClientId() {
+		if (googleClientId==null) {
+			googleClientId = configuration.getString("config/social/google/clientId", "unset");
+		}
+		return googleClientId;
 	}
 
 	/**
@@ -421,6 +478,24 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
+	 * Convert from role names to role ids
+	 * @param roleNames an array of role names, like ["USER", "ADMIN"]
+	 * @return the corresponding role ids
+	 */
+	public Integer[] getRoleIds(String[] roleNames) {
+		ensureRoleMaps();
+		Integer[] result = new Integer[roleNames.length];
+		for (int i = 0; i < roleNames.length; i++) {
+			Integer roleId = roleKeyToIdMap.get(roleNames[i]);
+			if (roleId==null) {
+				throw new YadaConfigurationException("Invalid role name " + roleNames[i]);
+			}
+			result[i]=roleId;
+		}
+		return result;
+	}
+	
+	/**
 	 * @param roleKey e.g. "ADMIN"
 	 * @return e.g. 9
 	 */
@@ -428,7 +503,7 @@ public abstract class YadaConfiguration {
 		ensureRoleMaps();
 		Integer id = roleKeyToIdMap.get(roleKey.toUpperCase());
 		if (id==null) {
-			throw new InvalidValueException("Role " + roleKey + " not configured");
+			throw new YadaInvalidValueException("Role " + roleKey + " not configured");
 		}
 		return id;
 	}
@@ -441,7 +516,7 @@ public abstract class YadaConfiguration {
 		ensureRoleMaps();
 		String key = roleIdToKeyMap.get(roleId);
 		if (key==null) {
-			throw new InvalidValueException("Role " + roleId + " not configured");
+			throw new YadaInvalidValueException("Role " + roleId + " not configured");
 		}
 		return key;
 	}
@@ -458,11 +533,11 @@ public abstract class YadaConfiguration {
 				String key = sub.getString("key", null);
 				// Controllo che non ci sia duplicazione di id
 				if (id==null || roleIdToKeyMap.get(id)!=null) {
-					throw new InternalException("Invalid role configuration in conf.webapp.xml");
+					throw new YadaInternalException("Invalid role configuration in conf.webapp.xml");
 				}
 				// Controllo che non ci sia duplicazione di key
 				if (key==null || roleKeyToIdMap.get(key)!=null) {
-					throw new InternalException("Invalid role configuration in conf.webapp.xml");
+					throw new YadaInternalException("Invalid role configuration in conf.webapp.xml");
 				}
 				roleIdToKeyMap.put(id, key.toUpperCase());
 				roleKeyToIdMap.put(key.toUpperCase(), id);
@@ -614,7 +689,7 @@ public abstract class YadaConfiguration {
 			for (String code : configRoles) { // 'ADMIN'
 				Integer role = getRoleId(code);
 				if (role==null) {
-					throw new InternalException("Invalid user role name (skipped): " + code);
+					throw new YadaInternalException("Invalid user role name (skipped): " + code);
 				} else {
 					roles.add(role);
 				}
@@ -783,7 +858,8 @@ public abstract class YadaConfiguration {
 	 */
 	public String getApplicationBuild() {
 		if (build==null) {
-			if (isDevelopmentEnvironment()) {
+			boolean canOverride = configuration.getBoolean("config/info/build/@canOverride", true);
+			if (canOverride && isDevelopmentEnvironment()) {
 				// While developing you get a new build number each time you restart the server
 				// so that you don't get stale (cached) files
 				build = "dev" + System.currentTimeMillis();
@@ -963,7 +1039,7 @@ public abstract class YadaConfiguration {
 	 * @return
 	 */
 	public long getYadaJobSchedulerPeriod() {
-		return this.configuration.getLong("config/yada/jobScheduler/periodMillis", 0);
+		return this.configuration.getLong("config/yada/jobScheduler/periodMillis", 0); // by default it doesn't start
 	}
 	
 	/**
@@ -980,6 +1056,26 @@ public abstract class YadaConfiguration {
 	 */
 	public long getYadaJobSchedulerStaleMillis() {
 		return this.configuration.getLong("config/yada/jobScheduler/jobStaleMillis", 1000*60);
+	}
+
+	/**
+	 * Number of YadaJob entities to keep in cache. It should be equal to the estimated maximum number
+	 * of concurrent running jobs.
+	 * If the number is too small, concurrent writes to the same job data could result in "concurrent modification" 
+	 * exceptions. Also the running job could be evicted from cache and terminated prematurely with a log saying "Evicting job {} while still running". 
+	 * This is a possible scenario:
+	 * <pre>
+	 * - thread A loads instance J1 for a job, puts it in the cache and starts a long running job
+	 * - after some time, while the job is still running, the J1 instance is evicted because of cache size limits
+	 * - thread B asks for a job instance of the same job, which is not found and loaded new from db as J2. It then
+	 * changes some values and saves J2 to database, incrementing @version
+	 * - thread A terminates the long running job by writing J1 to the database
+	 * In this scenario, thread A will receive an exception because its @version differs from what is in the database
+	 * </pre>
+	 * @return
+	 */
+	public int getYadaJobSchedulerCacheSize() {
+		return this.configuration.getInt("config/yada/jobScheduler/jobCacheSize", 500);
 	}
 	
 }

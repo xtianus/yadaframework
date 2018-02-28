@@ -7,6 +7,26 @@ package net.yadaframework.web;
 public interface YadaViews {
 
 	/**
+	 * Ajax method causes a browser redirect. Set the "targetUrl" attribute in the model.
+	 */
+	String AJAX_REDIRECT = "/yada/ajaxRedirect";
+	
+	/**
+	 * The name of the attribute to set with the full target redirect url
+	 */
+	String AJAX_REDIRECT_URL = "targetUrl";
+
+	/**
+	 * The name of the attribute to set with the relative target redirect url: it will be put inside @{ }
+	 */
+	String AJAX_REDIRECT_URL_RELATIVE = "targetUrlRelative";
+	
+	/**
+	 * Set this attribute to true to open the redirect page in a new tab
+	 */
+	String AJAX_REDIRECT_NEWTAB = "newTab";
+	
+	/**
 	 * Ajax method returns cleanly.
 	 */
 	String AJAX_SUCCESS = "/yada/ajaxSuccess";

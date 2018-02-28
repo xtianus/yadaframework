@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>YadaJobManager &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'master',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">     intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">     tutorial</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">YadaJobManager</a><ul>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#changejobpriority">changeJobPriority</a></li>
+<li><a class="reference internal" href="#completejob">completeJob</a></li>
+<li><a class="reference internal" href="#deletejob">deleteJob</a></li>
+<li><a class="reference internal" href="#disableandinterruptjob">disableAndInterruptJob</a></li>
+<li><a class="reference internal" href="#disableandinterruptjobs">disableAndInterruptJobs</a></li>
+<li><a class="reference internal" href="#getallactiveorrunningjobs">getAllActiveOrRunningJobs</a></li>
+<li><a class="reference internal" href="#getjobinstance">getJobInstance</a></li>
+<li><a class="reference internal" href="#init">init</a></li>
+<li><a class="reference internal" href="#isjobgrouppaused">isJobGroupPaused</a></li>
+<li><a class="reference internal" href="#pauseandinterruptjob">pauseAndInterruptJob</a></li>
+<li><a class="reference internal" href="#pausejobgroup">pauseJobGroup</a></li>
+<li><a class="reference internal" href="#replacewithcached">replaceWithCached</a></li>
+<li><a class="reference internal" href="#reschedule">reschedule</a></li>
+<li><a class="reference internal" href="#resumejobgroup">resumeJobGroup</a></li>
+<li><a class="reference internal" href="#startjob">startJob</a></li>
+<li><a class="reference internal" href="#toggledisabledandpaused">toggleDisabledAndPaused</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../../../../_sources/javadoc/net/yadaframework/components/YadaJobManager.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="yadajobmanager">
+<h1>YadaJobManager<a class="headerlink" href="#yadajobmanager" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.yadaframework.components.YadaJobManager">
+public class <code class="descname">YadaJobManager</code><a class="headerlink" href="#net.yadaframework.components.YadaJobManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Job handling. Use this class to add/delete/remove jobs. Do not use the YadaJobScheduler directly.</p>
+</dd></dl>
+
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="changejobpriority">
+<h3>changeJobPriority<a class="headerlink" href="#changejobpriority" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.changeJobPriority(YadaJob, int)">
+public void <code class="descname">changeJobPriority</code><span class="sig-paren">(</span><a class="reference internal" href="../persistence/entity/YadaJob.html#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a><em> yadaJob</em>, int<em> priority</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.changeJobPriority(YadaJob, int)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="completejob">
+<h3>completeJob<a class="headerlink" href="#completejob" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.completeJob(Long)">
+public void <code class="descname">completeJob</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="java.lang.Long">Long</a><em> yadaJobId</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.completeJob(Long)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a job to COMPLETED</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>yadaJob</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="deletejob">
+<h3>deleteJob<a class="headerlink" href="#deletejob" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.deleteJob(YadaJob)">
+public void <code class="descname">deleteJob</code><span class="sig-paren">(</span><a class="reference internal" href="../persistence/entity/YadaJob.html#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a><em> yadaJob</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.deleteJob(YadaJob)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the job from the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>yadaJob</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="disableandinterruptjob">
+<h3>disableAndInterruptJob<a class="headerlink" href="#disableandinterruptjob" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.disableAndInterruptJob(Long)">
+public void <code class="descname">disableAndInterruptJob</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="java.lang.Long">Long</a><em> yadaJobId</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.disableAndInterruptJob(Long)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a job to DISABLED then interrupt its thread</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>yadaJob</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="disableandinterruptjobs">
+<h3>disableAndInterruptJobs<a class="headerlink" href="#disableandinterruptjobs" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.disableAndInterruptJobs(List)">
+public void <code class="descname">disableAndInterruptJobs</code><span class="sig-paren">(</span><a class="reference internal" href="../../../../index.html#List" title="List">List</a>&lt;? extends <a class="reference internal" href="../persistence/entity/YadaJob.html#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a>&gt;<em> yadaJobs</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.disableAndInterruptJobs(List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a list of jobs to DISABLED then interrupt the threads. All jobs are first set to disabled, then they are all interrupted.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>yadaJob</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getallactiveorrunningjobs">
+<h3>getAllActiveOrRunningJobs<a class="headerlink" href="#getallactiveorrunningjobs" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.getAllActiveOrRunningJobs(String)">
+public <a class="reference internal" href="../../../../index.html#List" title="List">List</a>&lt;<a class="reference internal" href="../persistence/entity/YadaJob.html#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a>&gt; <code class="descname">getAllActiveOrRunningJobs</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> jobGroup</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.getAllActiveOrRunningJobs(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all jobs for the given group that are in the ACTIVE/RUNNING state, ordered by state and scheduled time. The running jobs are the actual cached instances present in the YadaJobScheduler.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>jobGroup</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getjobinstance">
+<h3>getJobInstance<a class="headerlink" href="#getjobinstance" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.getJobInstance(Long)">
+public <a class="reference internal" href="../persistence/entity/YadaJob.html#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a> <code class="descname">getJobInstance</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="java.lang.Long">Long</a><em> id</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.getJobInstance(Long)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an instance of a YadaJob. The instance is freshly loaded from the database if no other thread already holds a reference to it, otherwise the instance is shared among threads. It is thus possible for concurrent threads to modify the same entity (= table row) without incurring in a concurrent modification exception. The instance is removed from the cache when no one holds a reference to it anymore. The typical scenario is when a job is already running (an instance has been cached by the scheduler) and a user from the web interface changes its name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>id</strong> – the job id</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a YadaJob instance that can be freely modified and saved</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="init">
+<h3>init<a class="headerlink" href="#init" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.init(ContextRefreshedEvent)">
+public void <code class="descname">init</code><span class="sig-paren">(</span><a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/event/ContextRefreshedEvent.html" title="org.springframework.context.event.ContextRefreshedEvent">ContextRefreshedEvent</a><em> event</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.init(ContextRefreshedEvent)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the scheduler. Method called after Spring has finished initializing the Application Context, so that YadaPersistentEnums have been initialized.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>event</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Exception.html" title="java.lang.Exception"><strong>Exception</strong></a> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="isjobgrouppaused">
+<h3>isJobGroupPaused<a class="headerlink" href="#isjobgrouppaused" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.isJobGroupPaused(String)">
+public boolean <code class="descname">isJobGroupPaused</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> jobGroup</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.isJobGroupPaused(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the job group has been paused</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>jobGroup</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="pauseandinterruptjob">
+<h3>pauseAndInterruptJob<a class="headerlink" href="#pauseandinterruptjob" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.pauseAndInterruptJob(Long)">
+public void <code class="descname">pauseAndInterruptJob</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="java.lang.Long">Long</a><em> yadaJobId</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.pauseAndInterruptJob(Long)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a job to PAUSED then interrupt its thread</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>yadaJob</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="pausejobgroup">
+<h3>pauseJobGroup<a class="headerlink" href="#pausejobgroup" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.pauseJobGroup(String, boolean)">
+public void <code class="descname">pauseJobGroup</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> jobGroup</em>, boolean<em> interrupt</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.pauseJobGroup(String, boolean)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pause all jobs in the given group</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>jobGroup</strong> – </li>
+<li><strong>interrupt</strong> – true to interrupt a job that is in execution, false to let it complete before pausing</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="replacewithcached">
+<h3>replaceWithCached<a class="headerlink" href="#replacewithcached" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.replaceWithCached(YadaJob)">
+public <a class="reference internal" href="../persistence/entity/YadaJob.html#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a> <code class="descname">replaceWithCached</code><span class="sig-paren">(</span><a class="reference internal" href="../persistence/entity/YadaJob.html#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a><em> yadaJob</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.replaceWithCached(YadaJob)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this method after fetching a job instance from the database to replace it with a cached running instance if any.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>yadaJob</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the cached instance or the original argument</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="reschedule">
+<h3>reschedule<a class="headerlink" href="#reschedule" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.reschedule(YadaJob, Date)">
+public void <code class="descname">reschedule</code><span class="sig-paren">(</span><a class="reference internal" href="../persistence/entity/YadaJob.html#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a><em> yadaJob</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> newScheduling</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.reschedule(YadaJob, Date)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="resumejobgroup">
+<h3>resumeJobGroup<a class="headerlink" href="#resumejobgroup" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.resumeJobGroup(String)">
+public void <code class="descname">resumeJobGroup</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> jobGroup</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.resumeJobGroup(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resume jobs of the given group</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>jobGroup</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="startjob">
+<h3>startJob<a class="headerlink" href="#startjob" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.startJob(YadaJob)">
+public boolean <code class="descname">startJob</code><span class="sig-paren">(</span><a class="reference internal" href="../persistence/entity/YadaJob.html#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a><em> yadaJob</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.startJob(YadaJob)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Activate the job so that it becomes available for the scheduler to start it. The scheduled time is left unchanged unless null, when it is set to NOW (start ASAP). This method does nothing to a job that is already scheduled and in the ACTIVE state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>yadaJob</strong> – the job to start</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">true if the job has been activated, false if it doesn’t exist in the database</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="toggledisabledandpaused">
+<h3>toggleDisabledAndPaused<a class="headerlink" href="#toggledisabledandpaused" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaJobManager.toggleDisabledAndPaused(Long)">
+public void <code class="descname">toggleDisabledAndPaused</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="java.lang.Long">Long</a><em> yadaJobId</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaJobManager.toggleDisabledAndPaused(Long)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggle between paused and disabled.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>yadaJob</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

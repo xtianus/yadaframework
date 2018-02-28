@@ -39,6 +39,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
@@ -47,12 +49,12 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
@@ -65,7 +67,7 @@ import org.springframework.util.ReflectionUtils;
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.core.YadaConfiguration;
-import net.yadaframework.exceptions.InternalException;
+import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaInvalidValueException;
 import sogei.utility.UCheckDigit;
 import sogei.utility.UCheckNum;
@@ -75,6 +77,8 @@ public class YadaUtil {
 	private final static Logger log = LoggerFactory.getLogger(YadaUtil.class);
 	
 	@Autowired private YadaConfiguration config;
+    @Autowired private AutowireCapableBeanFactory autowireCapableBeanFactory; // For autowiring entities
+
     static ApplicationContext applicationContext; 	// To access the ApplicationContext from anywhere
     static public MessageSource messageSource; 		// To access the MessageSource from anywhere
 	
@@ -90,6 +94,66 @@ public class YadaUtil {
     public void init() {
 		defaultLocale = config.getDefaultLocale();
     }
+	
+	/**
+	 * Returns the current stack trace as a string, formatted on separate lines
+	 * @return
+	 */
+	public String getCurrentStackTraceFormatted() {
+		StringBuilder stringBuilder = new StringBuilder();
+		for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+			stringBuilder.append("\tat ").append(element).append('\n');
+		}
+		return stringBuilder.toString();
+	}
+	
+	/**
+	 * Returns a random element from the list
+	 * @param list
+	 * @return a random element from the list, or null if the list is empty
+	 */
+	public <T> T getRandomElement(List<T> list) {
+		if (list.size()>0) {
+			int pos = secureRandom.nextInt(list.size());
+			return list.get(pos);
+		}
+		return null;
+	}
+	
+	/**
+	 * Convert from an amount of time to a string in the format xxd:hh:mm:ss
+	 * @param amount interval that needs to be formatted
+	 * @param timeUnit the unit of the interval
+	 * @return a formatted string representing the input interval
+	 */
+	public static String formatTimeInterval(long amount, TimeUnit timeUnit) {
+		long totSeconds = timeUnit.toSeconds(amount);
+		long seconds = totSeconds % 60;
+		long totMinutes = timeUnit.toMinutes(amount);
+		long minutes = totMinutes % 60;
+		long totHours = timeUnit.toHours(amount);
+		long hours = totHours % 24;
+		long days = timeUnit.toDays(amount);
+		String result = String.format("%02d:%02d", minutes, seconds);
+		if (hours+days>0) {
+			result = String.format("%02d:", hours) + result;
+			if (days>0) {
+				result = String.format("%dd:", days) + result;
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity.
+	 * Post processing (@PostConstruct etc) is also performed.
+	 * @param instance to autowire
+	 * @return autowired instance
+	 */
+	public Object autowire(Object instance) {
+		autowireCapableBeanFactory.autowireBean(instance);
+		return autowireCapableBeanFactory.initializeBean(instance, instance.getClass().getSimpleName());
+	}
 	
 	/**
 	 * Remove a counter that has been added by {@link #findAvailableName}
@@ -162,19 +226,20 @@ public class YadaUtil {
 	/**
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
 	 * It must be called in a transaction.
-	 * @param fetchedEntities objects fetched from database that may contain localized strings
-	 * @param targetClass type of fetchedEntities elements
+	 * @param entities objects fetched from database that may contain localized strings
+	 * @param entityClass type of fetchedEntities elements
+	 * @param attributes the attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
 	 */
-	public static <targetClass> void prefetchLocalizedStrings(List<targetClass> fetchedEntities, Class<?> targetClass) {
+	public static <entityClass> void prefetchLocalizedStrings(List<entityClass> entities, Class<?> entityClass, String...attributes) {
+		List<String> attributeNames = Arrays.asList(attributes);
 		if (fetchedEntities==null || fetchedEntities.isEmpty()) {
 			return;
 		}
 		// Look for fields of type Map<Locale, String>
-		ReflectionUtils.doWithFields(targetClass, new ReflectionUtils.FieldCallback() {
+		ReflectionUtils.doWithFields(entityClass, new ReflectionUtils.FieldCallback() {
 			@Override
 			public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
-				// Call the size() method on the localized field for each result object
-				for (Object object : fetchedEntities) {
+				for (Object object : entities) {
 					if (object!=null) {
 						try {
 							field.setAccessible(true);
@@ -190,6 +255,9 @@ public class YadaUtil {
 		}, new ReflectionUtils.FieldFilter() {
 			@Override
 			public boolean matches(Field field) {
+				if (attributeNames.size()>0 && !attributeNames.contains(field.getName())) {
+					return false; // Handle only the specified attributes
+				}
 				Type type = field.getGenericType();
 				if (type instanceof ParameterizedType) {
 					ParameterizedType parameterizedType = (ParameterizedType) type;
@@ -295,11 +363,11 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Reflection to get the type of a given field, even nested
+	 * Reflection to get the type of a given field, even nested or in a superclass.
 	 * @param rootClass
 	 * @param attributePath field name like "surname" or even a path like "friend.name"
 	 * @return
-	 * @throws NoSuchFieldException
+	 * @throws NoSuchFieldException if the field is not found in the class hierarchy
 	 * @throws SecurityException
 	 */
 	public Class getType(Class rootClass, String attributePath) throws NoSuchFieldException, SecurityException {
@@ -307,7 +375,25 @@ public class YadaUtil {
 			return rootClass;
 		}
 		String attributeName = StringUtils.substringBefore(attributePath, ".");
-		Field field = rootClass.getDeclaredField(attributeName);
+		Field field = null;
+		NoSuchFieldException exception = null;
+		while (field==null && rootClass!=null) {
+			try {
+				field = rootClass.getDeclaredField(attributeName);
+			} catch (NoSuchFieldException e) {
+				if (exception==null) {
+					exception=e;
+				}
+				rootClass = rootClass.getSuperclass();
+			}
+		}
+		if (field==null) {
+			if (exception!=null) {
+				throw exception;
+			} else {
+				throw new NoSuchFieldException("No field " + attributeName + " found in hierarchy");
+			}
+		}
 		Class attributeType = field.getType();
 		// If it's a list, look for the list type
 		if (attributeType == java.util.List.class) {
@@ -348,10 +434,10 @@ public class YadaUtil {
 			return objectClass.newInstance();
 		} catch (ClassNotFoundException e) {
 			log.error("Class {} not found in package {}", simpleClassName, packageString, e);
-			throw new InternalException("Class not implemented: " + simpleClassName);
+			throw new YadaInternalException("Class not implemented: " + simpleClassName);
 		} catch (Exception e) {
 			log.error("Instantiation error for class {}", objectClass, e);
-			throw new InternalException("Error while creating instance of " + fullClassName);
+			throw new YadaInternalException("Error while creating instance of " + fullClassName);
 		}
 	}
 
@@ -400,21 +486,16 @@ public class YadaUtil {
 	}
 	
 	/**
-	 * Genera una password casuale di 16 caratteri
-	 * @return a string like "XFofvGEtBlZIa5sH"
+	 * Get any bean defined in the Spring ApplicationContext
+	 * @param nameInApplicationContext the Class.getSimpleName() starting lowercase, e.g. "processController"
+	 * @return
 	 */
-	public String generateClearPassword() {
-		return generateClearPassword(16);
-	}
-
-	/**
-	 * Genera una password casuale
-	 * @param length max password length
-	 * @return a string like "XFofvGEtBlZIa5sH"
-	 */
-	public String generateClearPassword(int length) {
-		// http://stackoverflow.com/a/8448493/587641
-		return RandomStringUtils.random(length, 0, 0, true, true, null, secureRandom);
+	public static Object getBean(String nameInApplicationContext) {
+		if (applicationContext!=null) {
+			return applicationContext.getBean(nameInApplicationContext);
+		}
+		log.debug("No applicationContext injected in getBean() yet - returning null");
+		return null;
 	}
 	
 	/**
@@ -509,6 +590,19 @@ public class YadaUtil {
 	}
 	
 	/**
+	 * Returns the file name given the file path
+	 * @param fileWithPath
+	 * @return
+	 */
+	public String getFileNoPath(String fileWithPath) {
+		if (StringUtils.trimToNull(fileWithPath)==null) {
+			return null;
+		}
+		File file = new File(fileWithPath);
+		return file.getName();
+	}	
+	
+	/**
 	 * Splits a filename in the prefix and the extension parts
 	 * @param filename
 	 * @return an array with [ filename without extension, extension without dot]
@@ -549,20 +643,46 @@ public class YadaUtil {
 	 * Esegue un comando di shell
 	 * @param command comando
 	 * @param args lista di argomenti (ogni elemento puo' contenere spazi), puo' essere null
+	 * @param substitutionMap key-value of placeholders to replace in the command. A placeholder in the command is like ${key}, a substitution
+	 * pair is like "key"-->"value" . If the value is a collection, arguments are unrolled.
 	 * @param outputStream ByteArrayOutputStream che conterrà l'output del comando (out + err)
 	 * @return the error message (will be empty for a return code >0), or null if there was no error
 	 */
-	public String exec(String command, List<String> args, Map<String, ?> substitutionMap, ByteArrayOutputStream outputStream) {
+	public String exec(String command, List<String> args, Map substitutionMap, ByteArrayOutputStream outputStream) {
 		int exitValue=1;
 		try {
 			CommandLine commandLine = new CommandLine(command);
 			if (args!=null) {
+				Pattern keyPattern = Pattern.compile("\\$\\{([^}]+)}"); // ${PARAMNAME}
 				for (String arg : args) {
-					commandLine.addArgument(arg);
+					boolean added=false;
+					// Convert collections to multiple arguments when needed
+					if (substitutionMap!=null) {
+						Matcher m = keyPattern.matcher(arg);
+						if (m.find()) {
+							String key = m.group(1); // PARAMNAME
+							Object values = substitutionMap.get(key);
+							if (values instanceof Collection) {
+								int countArg=0;
+								added=true;
+								for (Object extractedValue : (Collection)values) {
+									String newKey = key + countArg; // PARAMNAME0
+									String newArg = "${" + newKey  + "}"; // ${PARAMNAME0}
+									commandLine.addArgument(newArg, false); // Don't handle quoting
+									substitutionMap.put(newKey, extractedValue);
+									countArg++;
+								}
+							}
+						}
+					}
+					if (!added) {
+						commandLine.addArgument(arg, false); // Don't handle quoting
+					}
 				}
 			}
 			if (log.isDebugEnabled()) {
-				for (String key : substitutionMap.keySet()) {
+				for (Object keyObj : substitutionMap.keySet()) {
+					String key = (String) keyObj;
 					log.debug("{}={}", key, substitutionMap.get(key));
 					if (key.startsWith("{") || key.startsWith("${")) { // Checking { just for extra precaution
 						log.error("Invalid substitution {}: should NOT start with ${", key);
@@ -598,7 +718,7 @@ public class YadaUtil {
 			CommandLine commandLine = new CommandLine(command);
 			if (args!=null) {
 				for (String arg : args) {
-					commandLine.addArgument(arg);
+					commandLine.addArgument(arg, false); // Don't handle quoting
 				}
 			}
 			DefaultExecutor executor = new DefaultExecutor();
@@ -616,16 +736,18 @@ public class YadaUtil {
 	/**
 	 * Esegue il comando configurato
 	 * @param shellCommandKey chiave completa xpath del comando shell da eseguire e.g. "config/shell/processTunableWhiteImage"
-	 * @param params mappa nome-valore delle variabili da sostituire nel comando, per esempio "${NAME}"="pippo"
+	 * @param substitutionMap key-value of placeholders to replace in the command. A placeholder in the command is like ${key}, a substitution
+	 * pair is like "key"-->"value" 
+	 * @return true if successful
 	 */
-	public boolean exec(String shellCommandKey, Map<String, String> params) {
+	public boolean exec(String shellCommandKey, Map substitutionMap) {
 		String executable = config.getString(shellCommandKey + "/executable");
 		// Need to use getProperty() to avoid interpolation on ${} arguments
 		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
 		List<String> args = (List<String>) config.getConfiguration().getProperty(shellCommandKey + "/arg");
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
-			String error = exec(executable, args, params, outputStream);
+			String error = exec(executable, args, substitutionMap, outputStream);
 			String commandOutput = outputStream.toString();
 			if (error!=null) {
 				log.error("Can't execute shell command \"{}\": {} - {}", shellCommandKey, error, commandOutput);
@@ -867,7 +989,7 @@ public class YadaUtil {
 		} catch (Exception e) {
 			String msg = "Can't duplicate object '" + source + "'";
 			log.error(msg + ": " + e);
-			throw new InternalException(msg, e);
+			throw new YadaInternalException(msg, e);
 		}
 	}
 	

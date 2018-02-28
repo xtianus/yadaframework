@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>YadaJob &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="../../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     'master',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../../index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../intro.html">     intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../tutorial.html">     tutorial</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">YadaJob</a><ul>
+<li><a class="reference internal" href="#fields">Fields</a><ul>
+<li><a class="reference internal" href="#errorstreakcount">errorStreakCount</a></li>
+<li><a class="reference internal" href="#id">id</a></li>
+<li><a class="reference internal" href="#jobdescription">jobDescription</a></li>
+<li><a class="reference internal" href="#jobgroup">jobGroup</a></li>
+<li><a class="reference internal" href="#jobgrouppaused">jobGroupPaused</a></li>
+<li><a class="reference internal" href="#joblastsuccessfulrun">jobLastSuccessfulRun</a></li>
+<li><a class="reference internal" href="#jobname">jobName</a></li>
+<li><a class="reference internal" href="#jobpriority">jobPriority</a></li>
+<li><a class="reference internal" href="#jobrecoverable">jobRecoverable</a></li>
+<li><a class="reference internal" href="#jobscheduledtime">jobScheduledTime</a></li>
+<li><a class="reference internal" href="#jobstarttime">jobStartTime</a></li>
+<li><a class="reference internal" href="#jobsmustbeactive">jobsMustBeActive</a></li>
+<li><a class="reference internal" href="#jobsmustbeinactive">jobsMustBeInactive</a></li>
+<li><a class="reference internal" href="#jobsmustcomplete">jobsMustComplete</a></li>
+<li><a class="reference internal" href="#recovered">recovered</a></li>
+<li><a class="reference internal" href="#yadainternaljobhandle">yadaInternalJobHandle</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#activate">activate</a></li>
+<li><a class="reference internal" href="#complete">complete</a></li>
+<li><a class="reference internal" href="#disable">disable</a></li>
+<li><a class="reference internal" href="#equals">equals</a></li>
+<li><a class="reference internal" href="#getdt-rowid">getDT_RowId</a></li>
+<li><a class="reference internal" href="#geterrorstreakcount">getErrorStreakCount</a></li>
+<li><a class="reference internal" href="#getid">getId</a></li>
+<li><a class="reference internal" href="#getjobdescription">getJobDescription</a></li>
+<li><a class="reference internal" href="#getjobgroup">getJobGroup</a></li>
+<li><a class="reference internal" href="#getjoblastsuccessfulrun">getJobLastSuccessfulRun</a></li>
+<li><a class="reference internal" href="#getjobname">getJobName</a></li>
+<li><a class="reference internal" href="#getjobpriority">getJobPriority</a></li>
+<li><a class="reference internal" href="#getjobscheduledtime">getJobScheduledTime</a></li>
+<li><a class="reference internal" href="#getjobstarttime">getJobStartTime</a></li>
+<li><a class="reference internal" href="#getjobstate">getJobState</a></li>
+<li><a class="reference internal" href="#getjobstateobject">getJobStateObject</a></li>
+<li><a class="reference internal" href="#getjobsmustbeactive">getJobsMustBeActive</a></li>
+<li><a class="reference internal" href="#getjobsmustbeinactive">getJobsMustBeInactive</a></li>
+<li><a class="reference internal" href="#getjobsmustcomplete">getJobsMustComplete</a></li>
+<li><a class="reference internal" href="#hashcode">hashCode</a></li>
+<li><a class="reference internal" href="#incrementerrorstreak">incrementErrorStreak</a></li>
+<li><a class="reference internal" href="#isactive">isActive</a></li>
+<li><a class="reference internal" href="#iscompleted">isCompleted</a></li>
+<li><a class="reference internal" href="#isdisabled">isDisabled</a></li>
+<li><a class="reference internal" href="#isjobgrouppaused">isJobGroupPaused</a></li>
+<li><a class="reference internal" href="#isjobrecoverable">isJobRecoverable</a></li>
+<li><a class="reference internal" href="#ispaused">isPaused</a></li>
+<li><a class="reference internal" href="#isrecovered">isRecovered</a></li>
+<li><a class="reference internal" href="#isrunning">isRunning</a></li>
+<li><a class="reference internal" href="#pause">pause</a></li>
+<li><a class="reference internal" href="#seterrorstreakcount">setErrorStreakCount</a></li>
+<li><a class="reference internal" href="#setid">setId</a></li>
+<li><a class="reference internal" href="#setjobdescription">setJobDescription</a></li>
+<li><a class="reference internal" href="#setjobgroup">setJobGroup</a></li>
+<li><a class="reference internal" href="#setjobgrouppaused">setJobGroupPaused</a></li>
+<li><a class="reference internal" href="#setjoblastsuccessfulrun">setJobLastSuccessfulRun</a></li>
+<li><a class="reference internal" href="#id1">setJobLastSuccessfulRun</a></li>
+<li><a class="reference internal" href="#setjobname">setJobName</a></li>
+<li><a class="reference internal" href="#setjobpriority">setJobPriority</a></li>
+<li><a class="reference internal" href="#setjobrecoverable">setJobRecoverable</a></li>
+<li><a class="reference internal" href="#setjobscheduledtime">setJobScheduledTime</a></li>
+<li><a class="reference internal" href="#id2">setJobScheduledTime</a></li>
+<li><a class="reference internal" href="#setjobstarttime">setJobStartTime</a></li>
+<li><a class="reference internal" href="#setjobstate">setJobState</a></li>
+<li><a class="reference internal" href="#setjobstateobject">setJobStateObject</a></li>
+<li><a class="reference internal" href="#setjobsmustbeactive">setJobsMustBeActive</a></li>
+<li><a class="reference internal" href="#setjobsmustbeinactive">setJobsMustBeInactive</a></li>
+<li><a class="reference internal" href="#setjobsmustcomplete">setJobsMustComplete</a></li>
+<li><a class="reference internal" href="#setrecovered">setRecovered</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../../../../../_sources/javadoc/net/yadaframework/persistence/entity/YadaJob.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="yadajob">
+<h1>YadaJob<a class="headerlink" href="#yadajob" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.yadaframework.persistence.entity.YadaJob">
+public abstract class <code class="descname">YadaJob</code> implements <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/Callable.html" title="java.util.concurrent.Callable">Callable</a>&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Void.html" title="java.lang.Void">Void</a>&gt;<a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob" title="Permalink to this definition">¶</a></dt>
+<dd><p>The base class for jobs handled by the YadaScheduler. Subclasses must implement the run() method. Uses joined inheritance so that subclasses have their own table; the subclass id, which must not be declared in java but exists in the table, gets the same value as the YadaJob id.</p>
+</dd></dl>
+
+<div class="section" id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="errorstreakcount">
+<h3>errorStreakCount<a class="headerlink" href="#errorstreakcount" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.errorStreakCount">
+protected int <code class="descname">errorStreakCount</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.errorStreakCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should be incremented every time a job does not execute successfully and set to zero on successful execution.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="id">
+<h3>id<a class="headerlink" href="#id" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.id">
+protected <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="java.lang.Long">Long</a> <code class="descname">id</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="jobdescription">
+<h3>jobDescription<a class="headerlink" href="#jobdescription" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.jobDescription">
+protected <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">jobDescription</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.jobDescription" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="jobgroup">
+<h3>jobGroup<a class="headerlink" href="#jobgroup" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.jobGroup">
+protected <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">jobGroup</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.jobGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jobs in the same jobGroup are subject to preemption</p>
+</dd></dl>
+
+</div>
+<div class="section" id="jobgrouppaused">
+<h3>jobGroupPaused<a class="headerlink" href="#jobgrouppaused" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.jobGroupPaused">
+protected boolean <code class="descname">jobGroupPaused</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.jobGroupPaused" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="joblastsuccessfulrun">
+<h3>jobLastSuccessfulRun<a class="headerlink" href="#joblastsuccessfulrun" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.jobLastSuccessfulRun">
+protected <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">jobLastSuccessfulRun</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.jobLastSuccessfulRun" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="jobname">
+<h3>jobName<a class="headerlink" href="#jobname" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.jobName">
+protected <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">jobName</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.jobName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="jobpriority">
+<h3>jobPriority<a class="headerlink" href="#jobpriority" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.jobPriority">
+protected int <code class="descname">jobPriority</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.jobPriority" title="Permalink to this definition">¶</a></dt>
+<dd><p>Higher priority jobs can preempt lower priority jobs of the same jobGroup</p>
+</dd></dl>
+
+</div>
+<div class="section" id="jobrecoverable">
+<h3>jobRecoverable<a class="headerlink" href="#jobrecoverable" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.jobRecoverable">
+protected boolean <code class="descname">jobRecoverable</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.jobRecoverable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tell if a job should be started immediately again from the beginning after a system crash/shutdown while running. When true, the job should take care of deleting or skipping any partial results, if needed. When false, the job will become DISABLED after a system crash (true by default)</p>
+</dd></dl>
+
+</div>
+<div class="section" id="jobscheduledtime">
+<h3>jobScheduledTime<a class="headerlink" href="#jobscheduledtime" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.jobScheduledTime">
+protected <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">jobScheduledTime</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.jobScheduledTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="jobstarttime">
+<h3>jobStartTime<a class="headerlink" href="#jobstarttime" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.jobStartTime">
+protected <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">jobStartTime</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.jobStartTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time at which the job was started - null if the job is not in the RUNNING state.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="jobsmustbeactive">
+<h3>jobsMustBeActive<a class="headerlink" href="#jobsmustbeactive" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.jobsMustBeActive">
+protected <a class="reference internal" href="../../../../../index.html#List" title="List">List</a>&lt;<a class="reference internal" href="#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a>&gt; <code class="descname">jobsMustBeActive</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.jobsMustBeActive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the current job only while the jobMustBeActive instance is active. If that instance is deleted, the current job is deactivated</p>
+</dd></dl>
+
+</div>
+<div class="section" id="jobsmustbeinactive">
+<h3>jobsMustBeInactive<a class="headerlink" href="#jobsmustbeinactive" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.jobsMustBeInactive">
+protected <a class="reference internal" href="../../../../../index.html#List" title="List">List</a>&lt;<a class="reference internal" href="#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a>&gt; <code class="descname">jobsMustBeInactive</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.jobsMustBeInactive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the current job only if the jobsMustBeInactive instance is not active/paused nor running. If that instance is deleted or deactivated, the current job can be activated</p>
+</dd></dl>
+
+</div>
+<div class="section" id="jobsmustcomplete">
+<h3>jobsMustComplete<a class="headerlink" href="#jobsmustcomplete" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.jobsMustComplete">
+protected <a class="reference internal" href="../../../../../index.html#List" title="List">List</a>&lt;<a class="reference internal" href="#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a>&gt; <code class="descname">jobsMustComplete</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.jobsMustComplete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the current job after the jobMustComplete completes successfully.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="recovered">
+<h3>recovered<a class="headerlink" href="#recovered" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.recovered">
+protected boolean <code class="descname">recovered</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.recovered" title="Permalink to this definition">¶</a></dt>
+<dd><p>True when the current invocation is on a job that was running when the server crashed and has the jobRecoverable flag true. Implementations can choose what to do when recovering from a crash.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="yadainternaljobhandle">
+<h3>yadaInternalJobHandle<a class="headerlink" href="#yadainternaljobhandle" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaJob.yadaInternalJobHandle">
+public ListenableFuture&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Void.html" title="java.lang.Void">Void</a>&gt; <code class="descname">yadaInternalJobHandle</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.yadaInternalJobHandle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle returned by ListeningExecutorService.submit() - internal use only</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="activate">
+<h3>activate<a class="headerlink" href="#activate" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.activate()">
+public <a class="reference internal" href="YadaJobState.html#net.yadaframework.persistence.entity.YadaJobState" title="net.yadaframework.persistence.entity.YadaJobState">YadaJobState</a> <code class="descname">activate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.activate()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the job state to active and return the previous state</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the previous state</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="complete">
+<h3>complete<a class="headerlink" href="#complete" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.complete()">
+public <a class="reference internal" href="YadaJobState.html#net.yadaframework.persistence.entity.YadaJobState" title="net.yadaframework.persistence.entity.YadaJobState">YadaJobState</a> <code class="descname">complete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.complete()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the job state to completed and return the previous state</p>
+</dd></dl>
+
+</div>
+<div class="section" id="disable">
+<h3>disable<a class="headerlink" href="#disable" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.disable()">
+public <a class="reference internal" href="YadaJobState.html#net.yadaframework.persistence.entity.YadaJobState" title="net.yadaframework.persistence.entity.YadaJobState">YadaJobState</a> <code class="descname">disable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.disable()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the job state to disabled and return the previous state</p>
+</dd></dl>
+
+</div>
+<div class="section" id="equals">
+<h3>equals<a class="headerlink" href="#equals" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.equals(Object)">
+public boolean <code class="descname">equals</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a><em> obj</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.equals(Object)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Two YadaJob are equal only if the ids are equal and not null</p>
+</dd></dl>
+
+</div>
+<div class="section" id="getdt-rowid">
+<h3>getDT_RowId<a class="headerlink" href="#getdt-rowid" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getDT_RowId()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getDT_RowId</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getDT_RowId()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Needed for DataTables integration</p>
+</dd></dl>
+
+</div>
+<div class="section" id="geterrorstreakcount">
+<h3>getErrorStreakCount<a class="headerlink" href="#geterrorstreakcount" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getErrorStreakCount()">
+public int <code class="descname">getErrorStreakCount</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getErrorStreakCount()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getid">
+<h3>getId<a class="headerlink" href="#getid" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getId()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="java.lang.Long">Long</a> <code class="descname">getId</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getId()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getjobdescription">
+<h3>getJobDescription<a class="headerlink" href="#getjobdescription" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getJobDescription()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getJobDescription</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getJobDescription()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getjobgroup">
+<h3>getJobGroup<a class="headerlink" href="#getjobgroup" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getJobGroup()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getJobGroup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getJobGroup()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getjoblastsuccessfulrun">
+<h3>getJobLastSuccessfulRun<a class="headerlink" href="#getjoblastsuccessfulrun" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getJobLastSuccessfulRun()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">getJobLastSuccessfulRun</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getJobLastSuccessfulRun()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the time that the job last ended successfully. Null if the job was never run successfully.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="getjobname">
+<h3>getJobName<a class="headerlink" href="#getjobname" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getJobName()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getJobName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getJobName()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getjobpriority">
+<h3>getJobPriority<a class="headerlink" href="#getjobpriority" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getJobPriority()">
+public int <code class="descname">getJobPriority</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getJobPriority()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getjobscheduledtime">
+<h3>getJobScheduledTime<a class="headerlink" href="#getjobscheduledtime" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getJobScheduledTime()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">getJobScheduledTime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getJobScheduledTime()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getjobstarttime">
+<h3>getJobStartTime<a class="headerlink" href="#getjobstarttime" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getJobStartTime()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">getJobStartTime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getJobStartTime()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getjobstate">
+<h3>getJobState<a class="headerlink" href="#getjobstate" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getJobState()">
+public <a class="reference internal" href="YadaJobState.html#net.yadaframework.persistence.entity.YadaJobState" title="net.yadaframework.persistence.entity.YadaJobState">YadaJobState</a> <code class="descname">getJobState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getJobState()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the plain enum of the job state</p>
+</dd></dl>
+
+</div>
+<div class="section" id="getjobstateobject">
+<h3>getJobStateObject<a class="headerlink" href="#getjobstateobject" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getJobStateObject()">
+public <a class="reference internal" href="YadaPersistentEnum.html#net.yadaframework.persistence.entity.YadaPersistentEnum" title="net.yadaframework.persistence.entity.YadaPersistentEnum">YadaPersistentEnum</a>&lt;<a class="reference internal" href="YadaJobState.html#net.yadaframework.persistence.entity.YadaJobState" title="net.yadaframework.persistence.entity.YadaJobState">YadaJobState</a>&gt; <code class="descname">getJobStateObject</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getJobStateObject()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do not use directly unless you know the implications. It could be stale and be different from the database value.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="getjobsmustbeactive">
+<h3>getJobsMustBeActive<a class="headerlink" href="#getjobsmustbeactive" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getJobsMustBeActive()">
+public <a class="reference internal" href="../../../../../index.html#List" title="List">List</a>&lt;<a class="reference internal" href="#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a>&gt; <code class="descname">getJobsMustBeActive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getJobsMustBeActive()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getjobsmustbeinactive">
+<h3>getJobsMustBeInactive<a class="headerlink" href="#getjobsmustbeinactive" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getJobsMustBeInactive()">
+public <a class="reference internal" href="../../../../../index.html#List" title="List">List</a>&lt;<a class="reference internal" href="#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a>&gt; <code class="descname">getJobsMustBeInactive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getJobsMustBeInactive()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getjobsmustcomplete">
+<h3>getJobsMustComplete<a class="headerlink" href="#getjobsmustcomplete" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.getJobsMustComplete()">
+public <a class="reference internal" href="../../../../../index.html#List" title="List">List</a>&lt;<a class="reference internal" href="#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a>&gt; <code class="descname">getJobsMustComplete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.getJobsMustComplete()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="hashcode">
+<h3>hashCode<a class="headerlink" href="#hashcode" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.hashCode()">
+public int <code class="descname">hashCode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.hashCode()" title="Permalink to this definition">¶</a></dt>
+<dd><p>The hashCode is derived from the id</p>
+</dd></dl>
+
+</div>
+<div class="section" id="incrementerrorstreak">
+<h3>incrementErrorStreak<a class="headerlink" href="#incrementerrorstreak" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.incrementErrorStreak()">
+public int <code class="descname">incrementErrorStreak</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.incrementErrorStreak()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increment the error streak count returning the new value</p>
+</dd></dl>
+
+</div>
+<div class="section" id="isactive">
+<h3>isActive<a class="headerlink" href="#isactive" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.isActive()">
+public boolean <code class="descname">isActive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.isActive()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="iscompleted">
+<h3>isCompleted<a class="headerlink" href="#iscompleted" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.isCompleted()">
+public boolean <code class="descname">isCompleted</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.isCompleted()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="isdisabled">
+<h3>isDisabled<a class="headerlink" href="#isdisabled" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.isDisabled()">
+public boolean <code class="descname">isDisabled</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.isDisabled()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="isjobgrouppaused">
+<h3>isJobGroupPaused<a class="headerlink" href="#isjobgrouppaused" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.isJobGroupPaused()">
+public boolean <code class="descname">isJobGroupPaused</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.isJobGroupPaused()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="isjobrecoverable">
+<h3>isJobRecoverable<a class="headerlink" href="#isjobrecoverable" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.isJobRecoverable()">
+public boolean <code class="descname">isJobRecoverable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.isJobRecoverable()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="ispaused">
+<h3>isPaused<a class="headerlink" href="#ispaused" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.isPaused()">
+public boolean <code class="descname">isPaused</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.isPaused()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="isrecovered">
+<h3>isRecovered<a class="headerlink" href="#isrecovered" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.isRecovered()">
+public boolean <code class="descname">isRecovered</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.isRecovered()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="isrunning">
+<h3>isRunning<a class="headerlink" href="#isrunning" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.isRunning()">
+public boolean <code class="descname">isRunning</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.isRunning()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="pause">
+<h3>pause<a class="headerlink" href="#pause" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.pause()">
+public <a class="reference internal" href="YadaJobState.html#net.yadaframework.persistence.entity.YadaJobState" title="net.yadaframework.persistence.entity.YadaJobState">YadaJobState</a> <code class="descname">pause</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.pause()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the job state to paused and return the previous state</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the previous state</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="seterrorstreakcount">
+<h3>setErrorStreakCount<a class="headerlink" href="#seterrorstreakcount" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setErrorStreakCount(int)">
+public void <code class="descname">setErrorStreakCount</code><span class="sig-paren">(</span>int<em> errorStreakCount</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setErrorStreakCount(int)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setid">
+<h3>setId<a class="headerlink" href="#setid" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setId(Long)">
+public void <code class="descname">setId</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="java.lang.Long">Long</a><em> id</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setId(Long)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setjobdescription">
+<h3>setJobDescription<a class="headerlink" href="#setjobdescription" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobDescription(String)">
+public void <code class="descname">setJobDescription</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> jobDescription</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobDescription(String)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setjobgroup">
+<h3>setJobGroup<a class="headerlink" href="#setjobgroup" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobGroup(String)">
+public void <code class="descname">setJobGroup</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> jobGroup</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobGroup(String)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setjobgrouppaused">
+<h3>setJobGroupPaused<a class="headerlink" href="#setjobgrouppaused" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobGroupPaused(boolean)">
+public void <code class="descname">setJobGroupPaused</code><span class="sig-paren">(</span>boolean<em> jobGroupPaused</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobGroupPaused(boolean)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setjoblastsuccessfulrun">
+<h3>setJobLastSuccessfulRun<a class="headerlink" href="#setjoblastsuccessfulrun" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobLastSuccessfulRun(Timestamp)">
+public void <code class="descname">setJobLastSuccessfulRun</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/sql/Timestamp.html" title="java.sql.Timestamp">Timestamp</a><em> jobLastSuccessfulRun</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobLastSuccessfulRun(Timestamp)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h3>setJobLastSuccessfulRun<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobLastSuccessfulRun(Date)">
+public void <code class="descname">setJobLastSuccessfulRun</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> jobLastSuccessfulRun</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobLastSuccessfulRun(Date)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setjobname">
+<h3>setJobName<a class="headerlink" href="#setjobname" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobName(String)">
+public void <code class="descname">setJobName</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> jobName</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobName(String)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setjobpriority">
+<h3>setJobPriority<a class="headerlink" href="#setjobpriority" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobPriority(int)">
+public void <code class="descname">setJobPriority</code><span class="sig-paren">(</span>int<em> jobPriority</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobPriority(int)" title="Permalink to this definition">¶</a></dt>
+<dd><p>0 = lowest priority, MAX_INTEGER = highest priority</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>jobPriority</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="setjobrecoverable">
+<h3>setJobRecoverable<a class="headerlink" href="#setjobrecoverable" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobRecoverable(boolean)">
+public void <code class="descname">setJobRecoverable</code><span class="sig-paren">(</span>boolean<em> recoverable</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobRecoverable(boolean)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setjobscheduledtime">
+<h3>setJobScheduledTime<a class="headerlink" href="#setjobscheduledtime" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobScheduledTime(Timestamp)">
+public void <code class="descname">setJobScheduledTime</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/sql/Timestamp.html" title="java.sql.Timestamp">Timestamp</a><em> jobScheduledTime</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobScheduledTime(Timestamp)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id2">
+<h3>setJobScheduledTime<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobScheduledTime(Date)">
+public void <code class="descname">setJobScheduledTime</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> jobScheduledTime</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobScheduledTime(Date)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setjobstarttime">
+<h3>setJobStartTime<a class="headerlink" href="#setjobstarttime" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobStartTime(Date)">
+public void <code class="descname">setJobStartTime</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> jobRunTime</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobStartTime(Date)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setjobstate">
+<h3>setJobState<a class="headerlink" href="#setjobstate" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobState(YadaJobState)">
+public void <code class="descname">setJobState</code><span class="sig-paren">(</span><a class="reference internal" href="YadaJobState.html#net.yadaframework.persistence.entity.YadaJobState" title="net.yadaframework.persistence.entity.YadaJobState">YadaJobState</a><em> jobState</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobState(YadaJobState)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the persistent state of this job</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>jobState</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="setjobstateobject">
+<h3>setJobStateObject<a class="headerlink" href="#setjobstateobject" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobStateObject(YadaPersistentEnum)">
+public void <code class="descname">setJobStateObject</code><span class="sig-paren">(</span><a class="reference internal" href="YadaPersistentEnum.html#net.yadaframework.persistence.entity.YadaPersistentEnum" title="net.yadaframework.persistence.entity.YadaPersistentEnum">YadaPersistentEnum</a>&lt;<a class="reference internal" href="YadaJobState.html#net.yadaframework.persistence.entity.YadaJobState" title="net.yadaframework.persistence.entity.YadaJobState">YadaJobState</a>&gt;<em> jobStateObject</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobStateObject(YadaPersistentEnum)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do not use directly unless you know the implications. It could be stale and overwrite a more recent value in the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>jobStateObject</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="setjobsmustbeactive">
+<h3>setJobsMustBeActive<a class="headerlink" href="#setjobsmustbeactive" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobsMustBeActive(List)">
+public void <code class="descname">setJobsMustBeActive</code><span class="sig-paren">(</span><a class="reference internal" href="../../../../../index.html#List" title="List">List</a>&lt;<a class="reference internal" href="#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a>&gt;<em> jobsMustBeActive</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobsMustBeActive(List)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setjobsmustbeinactive">
+<h3>setJobsMustBeInactive<a class="headerlink" href="#setjobsmustbeinactive" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobsMustBeInactive(List)">
+public void <code class="descname">setJobsMustBeInactive</code><span class="sig-paren">(</span><a class="reference internal" href="../../../../../index.html#List" title="List">List</a>&lt;<a class="reference internal" href="#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a>&gt;<em> jobsMustBeInactive</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobsMustBeInactive(List)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setjobsmustcomplete">
+<h3>setJobsMustComplete<a class="headerlink" href="#setjobsmustcomplete" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setJobsMustComplete(List)">
+public void <code class="descname">setJobsMustComplete</code><span class="sig-paren">(</span><a class="reference internal" href="../../../../../index.html#List" title="List">List</a>&lt;<a class="reference internal" href="#net.yadaframework.persistence.entity.YadaJob" title="net.yadaframework.persistence.entity.YadaJob">YadaJob</a>&gt;<em> jobsMustComplete</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setJobsMustComplete(List)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setrecovered">
+<h3>setRecovered<a class="headerlink" href="#setrecovered" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaJob.setRecovered(boolean)">
+public void <code class="descname">setRecovered</code><span class="sig-paren">(</span>boolean<em> recovered</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaJob.setRecovered(boolean)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

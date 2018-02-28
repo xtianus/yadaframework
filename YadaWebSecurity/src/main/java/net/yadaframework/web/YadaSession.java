@@ -22,12 +22,12 @@ import net.yadaframework.security.persistence.repository.YadaUserProfileReposito
 public class YadaSession<T extends YadaUserProfile> {
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	@Autowired private YadaConfiguration config;
-	@Autowired private YadaSecurityUtil yadaSecurityUtil;
+	@Autowired protected YadaSecurityUtil yadaSecurityUtil;
 	// Attenzione: questo sarebbe da mettere transient perchè tomcat tenta di persistere la session ma non ce la fa. Pero' se lo si mette transient,
 	// quando la session viene ricaricata questo non viene valorizzato. Come si fa a inizializzare questo oggetto quando tomcat lo ricarica dallo storage?
-	@Autowired private YadaUserProfileRepository<T> yadaUserProfileRepository;
-	@Autowired private YadaUserDetailsService yadaUserDetailsService;
-	@Autowired private YadaUserCredentialsRepository yadaUserCredentialsRepository;
+	@Autowired protected YadaUserProfileRepository<T> yadaUserProfileRepository;
+	@Autowired protected YadaUserDetailsService yadaUserDetailsService;
+	@Autowired protected YadaUserCredentialsRepository yadaUserCredentialsRepository;
 
 	protected Long impersonificatorUserId = null;
 	protected Long impersonifiedUserId = null;
@@ -72,7 +72,7 @@ public class YadaSession<T extends YadaUserProfile> {
 			return false;
 		}
 	}
-
+	
 	/**
 	 * Check if the current user has the role "ADMIN"
 	 * @return
@@ -98,7 +98,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	
 	/**
 	 * Returns the id of the YadaUserProfile for the currently logged-in user
-	 * @return
+	 * @return the id or null
 	 */
 	public Long getCurrentUserProfileId() {
 		if (loggedInUserProfileId==null && yadaSecurityUtil!=null) {

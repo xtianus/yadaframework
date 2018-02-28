@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>YadaQuartzJobFactory &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'master',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">     intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">     tutorial</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">YadaQuartzJobFactory</a><ul>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#createjobinstance">createJobInstance</a></li>
+<li><a class="reference internal" href="#getapplicationcontext">getApplicationContext</a></li>
+<li><a class="reference internal" href="#getfromapplicationcontext">getFromApplicationContext</a></li>
+<li><a class="reference internal" href="#initjob">initJob</a></li>
+<li><a class="reference internal" href="#iseligibleforpropertypopulation">isEligibleForPropertyPopulation</a></li>
+<li><a class="reference internal" href="#setapplicationcontext">setApplicationContext</a></li>
+<li><a class="reference internal" href="#setignoredunknownproperties">setIgnoredUnknownProperties</a></li>
+<li><a class="reference internal" href="#setschedulercontext">setSchedulerContext</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../../../../_sources/javadoc/net/yadaframework/async/YadaQuartzJobFactory.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="yadaquartzjobfactory">
+<h1>YadaQuartzJobFactory<a class="headerlink" href="#yadaquartzjobfactory" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.yadaframework.async.YadaQuartzJobFactory">
+public class <code class="descname">YadaQuartzJobFactory</code> extends <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/scheduling/quartz/AdaptableJobFactory.html" title="org.springframework.scheduling.quartz.AdaptableJobFactory">AdaptableJobFactory</a> implements <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/scheduling/quartz/SchedulerContextAware.html" title="org.springframework.scheduling.quartz.SchedulerContextAware">SchedulerContextAware</a><a class="headerlink" href="#net.yadaframework.async.YadaQuartzJobFactory" title="Permalink to this definition">¶</a></dt>
+<dd><p>A copy of SpringBeanJobFactory (from spring-context-support-4.2.5.RELEASE) that pulls job instances from the Spring ApplicationContext. Jobs must be &#64;Component, either singleton or prototype. Remember that singletons must be thread-safe.</p>
+<p><strong>See also:</strong> <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/scheduling/quartz/SpringBeanJobFactory.html" title="org.springframework.scheduling.quartz.SpringBeanJobFactory"><code class="xref java java-ref docutils literal"><span class="pre">SpringBeanJobFactory</span></code></a></p>
+</dd></dl>
+
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="createjobinstance">
+<h3>createJobInstance<a class="headerlink" href="#createjobinstance" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.async.YadaQuartzJobFactory.createJobInstance(TriggerFiredBundle)">
+protected <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a> <code class="descname">createJobInstance</code><span class="sig-paren">(</span>TriggerFiredBundle<em> bundle</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.async.YadaQuartzJobFactory.createJobInstance(TriggerFiredBundle)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the job instance, populating it with property values taken from the scheduler context, job data map and trigger data map.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="getapplicationcontext">
+<h3>getApplicationContext<a class="headerlink" href="#getapplicationcontext" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.async.YadaQuartzJobFactory.getApplicationContext()">
+public <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html" title="org.springframework.context.ApplicationContext">ApplicationContext</a> <code class="descname">getApplicationContext</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.async.YadaQuartzJobFactory.getApplicationContext()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getfromapplicationcontext">
+<h3>getFromApplicationContext<a class="headerlink" href="#getfromapplicationcontext" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.async.YadaQuartzJobFactory.getFromApplicationContext(TriggerFiredBundle)">
+protected <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a> <code class="descname">getFromApplicationContext</code><span class="sig-paren">(</span>TriggerFiredBundle<em> bundle</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.async.YadaQuartzJobFactory.getFromApplicationContext(TriggerFiredBundle)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="initjob">
+<h3>initJob<a class="headerlink" href="#initjob" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.async.YadaQuartzJobFactory.initJob(TriggerFiredBundle, Object)">
+protected void <code class="descname">initJob</code><span class="sig-paren">(</span>TriggerFiredBundle<em> bundle</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a><em> job</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.async.YadaQuartzJobFactory.initJob(TriggerFiredBundle, Object)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="iseligibleforpropertypopulation">
+<h3>isEligibleForPropertyPopulation<a class="headerlink" href="#iseligibleforpropertypopulation" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.async.YadaQuartzJobFactory.isEligibleForPropertyPopulation(Object)">
+protected boolean <code class="descname">isEligibleForPropertyPopulation</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a><em> jobObject</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.async.YadaQuartzJobFactory.isEligibleForPropertyPopulation(Object)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the given job object is eligible for having its bean properties populated.</p>
+<p>The default implementation ignores <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/scheduling/quartz/QuartzJobBean.html" title="org.springframework.scheduling.quartz.QuartzJobBean"><code class="xref java java-ref docutils literal"><span class="pre">QuartzJobBean</span></code></a> instances, which will inject bean properties themselves.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>jobObject</strong> – the job object to introspect</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>See also:</strong> <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/scheduling/quartz/QuartzJobBean.html" title="org.springframework.scheduling.quartz.QuartzJobBean"><code class="xref java java-ref docutils literal"><span class="pre">QuartzJobBean</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="setapplicationcontext">
+<h3>setApplicationContext<a class="headerlink" href="#setapplicationcontext" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.async.YadaQuartzJobFactory.setApplicationContext(ApplicationContext)">
+public void <code class="descname">setApplicationContext</code><span class="sig-paren">(</span><a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html" title="org.springframework.context.ApplicationContext">ApplicationContext</a><em> applicationContext</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.async.YadaQuartzJobFactory.setApplicationContext(ApplicationContext)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setignoredunknownproperties">
+<h3>setIgnoredUnknownProperties<a class="headerlink" href="#setignoredunknownproperties" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.async.YadaQuartzJobFactory.setIgnoredUnknownProperties(String)">
+public void <code class="descname">setIgnoredUnknownProperties</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>...<em> ignoredUnknownProperties</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.async.YadaQuartzJobFactory.setIgnoredUnknownProperties(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify the unknown properties (not found in the bean) that should be ignored.</p>
+<p>Default is <code class="docutils literal"><span class="pre">null</span></code>, indicating that all unknown properties should be ignored. Specify an empty array to throw an exception in case of any unknown properties, or a list of property names that should be ignored if there is no corresponding property found on the particular job class (all other unknown properties will still trigger an exception).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="setschedulercontext">
+<h3>setSchedulerContext<a class="headerlink" href="#setschedulercontext" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.async.YadaQuartzJobFactory.setSchedulerContext(SchedulerContext)">
+public void <code class="descname">setSchedulerContext</code><span class="sig-paren">(</span>SchedulerContext<em> schedulerContext</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.async.YadaQuartzJobFactory.setSchedulerContext(SchedulerContext)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

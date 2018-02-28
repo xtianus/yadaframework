@@ -18,7 +18,7 @@
     		<div class="modal-body">
 				<form th:action="@{/login}" role="form" method="post" id="loginForm">
 					<fieldset>
-						<div th:if="${lockoutMinutes}" class="alert alert-danger">Too many failed attempts: login disabled.<br/>Wait <span th:text="${lockoutMinutes}">5</span> minute<span th:text="${lockoutMinutes>1?'s':''}">s</span> and retry, or <a th:href="@{/pwdRecover(email=${username})}">recover your password</a> in the meantime</div>
+						<div th:if="${lockoutMinutes}" class="alert alert-danger">Too many failed attempts: login disabled.<br/>Wait <span th:text="${lockoutMinutes}">5</span> minute<span th:text="${lockoutMinutes>1?'s':''}">s</span> and retry, or <a th:href="@{/passwordReset(email=${username})}">recover your password</a> in the meantime</div>
 						<div th:if="${loginError}" class="alert alert-danger">Can't login. Please try again later and contact us if the problem persists.</div>
 		  				<div class="form-group has-feedback" th:classappend="${usernameNotFound!=null || userDisabled!=null?'has-error':''}" >
 		    				<label class="control-label" for="username">E-Mail</label>
@@ -38,7 +38,7 @@
 										<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
 									</span>
 		    					</div>
-		    					<span th:if="${passwordError}" class="help-block">Invalid password. If you forgot it, <a th:href="@{/pwdRecover(email=${username})}">click here</a>.</span>
+		    					<span th:if="${passwordError}" class="help-block">Invalid password. If you forgot it, <a th:href="@{/passwordReset(email=${username})}">click here</a>.</span>
 		    				</div>
 		  				</div>
 		  				<div class="form-group">
@@ -48,7 +48,7 @@
 					</fieldset>
 				</form>
 				
-				<form th:action="@{/pwdRecover}" class="s_showLoaderForm" role="form" method="post" id="pwdRecoverForm">
+				<form th:action="@{/passwordReset}" class="s_showLoaderForm" role="form" method="post" id="pwdRecoverForm">
 					<input type="hidden" name="email" th:value="${username}" />
 					<p><a href="#" th:text="#{view.link.forgotPassword}">Forgot my password</a></p>
 				</form>

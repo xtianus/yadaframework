@@ -82,7 +82,10 @@ apt-get -o Dpkg::Options::="--force-confnew" install sudo cron
 echo "${cfgUser}	ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers;
 
 groupadd ${cfgUser}
-useradd ${cfgUser} -p $cfgUserPwd -m -g ${cfgUser} -G root -s /bin/bash
+
+# The \"'$cfgUserPwd'\" syntax is needed to cope with special characters in the password
+# See https://askubuntu.com/questions/644092/bash-script-and-escaping-special-characters-in-password
+useradd ${cfgUser} -p \"'$cfgUserPwd'\" -m -g ${cfgUser} -G root -s /bin/bash
 
 echo -e "\nAllowUsers ${cfgUser}\nPasswordAuthentication no\n" >> /etc/ssh/sshd_config
 
@@ -161,7 +164,11 @@ if [[ $cfgPkgTomcat ]]; then
 	CATALINA_BASE=/var/lib/$cfgPkgTomcat
 	tomcatConfiguration=/etc/default/$cfgPkgTomcat
 	# Non uso -XX:+UseConcMarkSweepGC perché le vm economiche non hanno tante cpu  
-	sed -i 's%JAVA_OPTS=.*%JAVA_OPTS=$tomcatOptions%g' ${tomcatConfiguration}
+	sed -i 's%^JAVA_OPTS=.*%JAVA_OPTS=$tomcatOptions%g' ${tomcatConfiguration}
+	# Enable default remote debugger
+	if [[ $cfgPkgTomcatDebugger ]]; then
+		sed -i 's%^#JAVA_OPTS="${JAVA_OPTS} -Xdebug%JAVA_OPTS="${JAVA_OPTS} -Xdebug%' ${tomcatConfiguration}
+	fi
 	if [[ $cfgTomcatManagerPwd ]]; then
 		# Utenza tomcat manager
 		sed -i 's%</tomcat-users>%<role rolename="manager-gui"/><role rolename="manager-jmx"/><role rolename="admin"/><user username="${cfgUser}" password="${cfgTomcatManagerPwd}" roles="admin,manager-gui,manager-jmx"/></tomcat-users>%g' ${cfgTomcatBase}/tomcat-users.xml
@@ -172,6 +179,8 @@ if [[ $cfgPkgTomcat ]]; then
 fi
 if [[ $cfgTomcatTarGzHome ]]; then
 	echo "CATALINA_OPTS=\"$tomcatOptions\"" > $cfgTomcatTarGzHome/bin/setenv.sh
+	# Compression e timeout
+	sed -i 's/connectionTimeout="20000"/connectionTimeout="'${cfgTomcatTimeout}'"\ncompression="on" compressableMimeType="text\/html,text\/xml,text\/plain,text\/css,application\/xml,text\/javascript,application\/javascript,application\/x-javascript,application\/pdf,application\/json,text\/json"/g' $cfgTomcatTarGzHome/conf/server.xml
 fi
 
 # MySQL + Apache + ModJK + php

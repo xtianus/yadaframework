@@ -6,6 +6,9 @@ import org.gradle.api.tasks.TaskAction
 
 class YadaInitTask extends YadaProject {
 	// TaskOutputs outputs = getOutputs()
+	boolean yadaWebSecurityFound=false;
+	boolean yadaWebCmsFound=false;
+	boolean yadaWebCommerceFound=false;
 
 	@TaskAction
 	def initWebApp() {
@@ -22,6 +25,22 @@ class YadaInitTask extends YadaProject {
 		if (basePackage=="") {
 			throw new Exception("'basePackage' task property undefined");
 		}
+		
+		// Check for Yada projects
+		// TODO this should check that the projects are actually in the dependencies, not just on the filesystem		
+		yadaWebSecurityFound=project.file("../../yadaframework/YadaWebSecurity").canRead();
+		yadaWebCmsFound=project.file("../../yadaframework/YadaWebCMS").canRead();
+		yadaWebCommerceFound=project.file("../../yadaframework/YadaWebCommerce").canRead();
+		if (!yadaWebSecurityFound) { 
+			println "No YadaWebSecurity project in classpath - configuration skipped";
+		}
+		if (!yadaWebCmsFound) { 
+			println "No YadaWebCMS project in classpath - configuration skipped";
+		}
+		if (!yadaWebCommerceFound) { 
+			println "No YadaWebCommerce project in classpath - configuration skipped";
+		}
+		
 		//
 		// Ensure folder structure
 		//
@@ -60,9 +79,11 @@ class YadaInitTask extends YadaProject {
 		File javaWebFolder = new File(basePackageFolder, "web");
 		File javaCoreFolder = new File(basePackageFolder, "core");
 		File javaComponentsFolder = new File(basePackageFolder, "components");
+		File javaPersistenceFolder = new File(basePackageFolder, "persistence");
 		javaWebFolder.mkdir();
 		javaCoreFolder.mkdir();
 		javaComponentsFolder.mkdir();
+		javaPersistenceFolder.mkdir();
 //		new File(basePackageFolder, "components").mkdir();
 		new File(resFolder, "ckeditor").mkdir();
 		cssImagesFolder.mkdirs();
@@ -73,17 +94,19 @@ class YadaInitTask extends YadaProject {
 		new File(resFolder, "jcrop").mkdir();
 		new File(resFolder, "js").mkdir();
 		yadaToolsUtil.copyAllFromClasspathFolder("$RESOURCECONFIGROOT/email", emailTemplateFolder);
-		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/info/ckeditor.howto.txt", resFolder, true);
-		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/info/static.txt", staticFolder, true);
+		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/info/ckeditor.howto.txt", resFolder);
+		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/info/static.txt", staticFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/messages/messages.properties", messagesFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/sitemap.xml", xmlFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/web.xml", webinfFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/build.properties", webinfFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/home.html", viewsFolder);
-		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/header.html", viewsFolder);
-		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/footer.html", viewsFolder);
+//		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/header.html", viewsFolder);
+//		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/footer.html", viewsFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/modalLogin.html", viewsFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/example_gitignore", project.projectDir);
+		processTemplate(HTMLDIRNAME, "header.html", null, viewsFolder);
+		processTemplate(HTMLDIRNAME, "footer.html", null, viewsFolder);
 		//
 		// Environment configuration
 		//
@@ -102,7 +125,7 @@ class YadaInitTask extends YadaProject {
 		//
 		List coreFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/core");
 		for (filename in coreFiles) {
-			def target = filename-".txt";
+			def target = filename-".txt"; // Remove the .txt
 			if (target == "XXXConfiguration.java") {
 				target = acronym.capitalize() + "XXXConfiguration.java"-"XXX";
 			}
@@ -110,11 +133,23 @@ class YadaInitTask extends YadaProject {
 		}
 		List webFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/web");
 		for (filename in webFiles) {
+			def target = filename-".txt";
+			if (target == "XXXSession.java") {
+				target = acronym.capitalize() + "XXXSession.java"-"XXX";
+			}
 			processTemplate("java/web", filename, filename-".txt", javaWebFolder);
 		}
 		List componentsFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/components");
 		for (filename in componentsFiles) {
 			processTemplate("java/components", filename, filename-".txt", javaComponentsFolder);
+		}
+		List entityFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/persistence/entity");
+		for (filename in entityFiles) {
+			processTemplate("java/persistence/entity", filename, filename-".txt", new File(javaPersistenceFolder, "entity"));
+		}
+		List repositoryFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/persistence/repository");
+		for (filename in repositoryFiles) {
+			processTemplate("java/persistence/repository", filename, filename-".txt", new File(javaPersistenceFolder, "repository"));
 		}
 	}
 
@@ -127,7 +162,7 @@ class YadaInitTask extends YadaProject {
 			processTemplate(CONFIGURATIONDIRNAME, LOGTESTCONFIGFILENAME, LOGCONFIGFILENAME, resourcesSourceFolder, env);
 			processTemplate(SCRIPTDIRNAME, "createDatabaseAndUser.bat", null, envFolderFile, env);
 			processTemplate(SCRIPTDIRNAME, "dropAndCreateDatabase.bat", null, envFolderFile, env);
-			processTemplate(CONFIGURATIONDIRNAME, "persistence.xml", null, new File(resourcesSourceFolder, "META-INF"), env);
+			processTemplate(CONFIGURATIONDIRNAME, "persistence.xml.txt", "persistence.xml", new File(resourcesSourceFolder, "META-INF"), env);
 			processTemplate(CONFIGURATIONDIRNAME, TOMCATCONTEXTFILENAME, null, new File(webAppRootFolder, "META-INF"), env);
 		} else if (isProduction(env)) {
 			processTemplate(CONFIGURATIONDIRNAME, CONFWEBAPPFILENAME, targetFilename, resourcesSourceFolder, env);
@@ -166,14 +201,17 @@ class YadaInitTask extends YadaProject {
 				schemaFolderPath : project.file(schemaDirName),
 				basePackage : basePackage,
 				projectName: projectName,
-				dbpwd: dbPasswords[env]
+				dbpwd: dbPasswords[env],
+				yadaWebSecurityFound : yadaWebSecurityFound,
+				yadaWebCmsFound : yadaWebCmsFound,
+				yadaWebCommerceFound : yadaWebCommerceFound
 			]
 			ClassLoader classLoader = this.getClass().getClassLoader();
-			InputStream inputStream = classLoader.getResourceAsStream("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/$sourceDirname/$sourceFilename");
-			def engine = new StreamingTemplateEngine();
-			def writer = engine.createTemplate(new InputStreamReader(inputStream)).make(binding);
 			FileWriter fileWriter = null;
 			try {
+				InputStream inputStream = classLoader.getResourceAsStream("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/$sourceDirname/$sourceFilename");
+				def engine = new StreamingTemplateEngine();
+				def writer = engine.createTemplate(new InputStreamReader(inputStream)).make(binding);
 				fileWriter = new FileWriter(outputFile);
 				writer.writeTo(fileWriter);
 				yadaToolsUtil.printCopied("$outputFile");

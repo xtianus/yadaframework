@@ -45,7 +45,6 @@
 	yada.dataTableCrud = function($table, dataUrl, dataAttributes, editDef, deleteDef, order, pageLength, languageUrl, extraButtons, removeCheckbox) {
 		// Method argument validation
 		if ($table == null || typeof $table != "object" || $table.length!=1 || typeof $table[0] != "object") {
-			console.error("yada.datatables: $table must be a single jQuery object");
 			return;
 		}
 		if (dataUrl==null || typeof dataUrl != "string") {
@@ -173,6 +172,7 @@
 		// Colonna dei comandi
 		columnDef.push({ 
 			data: null, 
+			className: 'yadaCommandButtonCell',
 			name: 'comandi',
 			orderable: false,
 			searchable: false,
@@ -181,7 +181,7 @@
 		        	var buttons = '';
 		        	for (var i=0; extraButtons!=null && i<extraButtons.length; i++) {
 		        		buttons +=
-		        			'<a class="s_extraButton' + i + ' yadaRowCommandButton" href="#' +
+		        			'<a class="yadaTableExtraButton' + i + ' yadaRowCommandButton" href="#' +
 		        			data.id + '" title="' + extraButtons[i].title + '">' + extraButtons[i].icon + '</a>';
 		        	}
 		        	if (editDef!=null) {
@@ -283,7 +283,9 @@
 			
 			// Handler per gli extra buttons
 			for (var i=0; extraButtons!=null && i<extraButtons.length; i++) {
-				makeExtraButtonHandler(extraButtons[i], $('a.s_extraButton' + i, thisTable), thisDataTable, $(thisTable));
+				makeExtraButtonHandler(extraButtons[i], $('a.yadaTableExtraButton' + i, thisTable), thisDataTable, $(thisTable));
+				// Legacy
+				// makeExtraButtonHandler(extraButtons[i], $('a.s_extraButton' + i, thisTable), thisDataTable, $(thisTable));
 			}
 			
 			// Seleziona/deseleziona tutto
@@ -302,9 +304,15 @@
 				});
 				// Abilito i bottoni della toolbar
 				if (totChecked == 1) {
+					$(this).parents('div.yadaTableBlock').find('div.yadaTableToolbar .yadaTableSinglerowButton').removeClass('disabled');
+					$(this).parents('div.yadaTableBlock').find('div.yadaTableToolbar .yadaTableMultirowButton:not(.yadaTableSinglerowButton)').addClass('disabled');
+					// Legacy:
 					$(this).parents('div.yadaTableBlock').find('div.yadaTableToolbar .s_singlerowButton').removeClass('disabled');
 					$(this).parents('div.yadaTableBlock').find('div.yadaTableToolbar .s_multirowButton:not(.s_singlerowButton)').addClass('disabled');
 				} else if (totChecked > 1) {
+					$(this).parents('div.yadaTableBlock').find('div.yadaTableToolbar .yadaTableMultirowButton').removeClass('disabled');
+					$(this).parents('div.yadaTableBlock').find('div.yadaTableToolbar .yadaTableSinglerowButton:not(.yadaTableMultirowButton)').addClass('disabled');
+					// Legacy:
 					$(this).parents('div.yadaTableBlock').find('div.yadaTableToolbar .s_multirowButton').removeClass('disabled');
 					$(this).parents('div.yadaTableBlock').find('div.yadaTableToolbar .s_singlerowButton:not(.s_multirowButton)').addClass('disabled');
 				} else {
@@ -444,6 +452,7 @@
 			var requestData = {};
 			requestData[idName] = param;
 			var handler = function(responseText, responseHtml) {
+				dataTable.draw(false); // Always reload table content on return from ajax call (there could be no modal)
 				yada.datatableDrawOnModalClose(dataTable);
 				recursiveEnableAjaxForm(responseText, responseHtml);
 			};

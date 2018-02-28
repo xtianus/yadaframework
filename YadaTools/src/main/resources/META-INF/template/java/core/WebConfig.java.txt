@@ -4,6 +4,7 @@ import net.yadaframework.security.YadaWebSecurityConfig;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.thymeleaf.spring4.SpringTemplateEngine;
 
 @ComponentScan(basePackages = { "$basePackage.web" })
 @Configuration

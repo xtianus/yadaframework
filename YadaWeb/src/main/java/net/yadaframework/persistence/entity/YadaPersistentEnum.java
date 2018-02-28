@@ -11,6 +11,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -25,12 +27,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Objects;
 
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInvalidValueException;
 
 /**
  * Needed to store a localized enum in the database, on which to perform localized search and sort operations.
+ * To retrieve the localized value call {@link YadaPersistentEnum#getLocalText()}
  * For every Enum class in Java there is a number of rows in the database holding the enum class name and its ordinals.
  * For each such row there are a number of rows holding the localized values.
  * E.g. the "ProcessState" enum with values "RUNNING" and "STOPPED" produces the following rows:<p>
@@ -53,6 +57,7 @@ import net.yadaframework.exceptions.YadaInvalidValueException;
 @Table(
 		uniqueConstraints = @UniqueConstraint(columnNames={"enumClassName", "enumOrdinal"})
 )
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaPersistentEnum<E extends Enum<E>> {
 	
 	static class YadaPersistentEnumSerializer extends JsonSerializer<YadaPersistentEnum<?>> {
@@ -89,6 +94,22 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 	@Transient
 	public boolean equals(Enum<? extends YadaLocalEnum<?>> enumValue) {
 		return enumValue.getClass().getName().equals(this.enumClassName) && enumValue.ordinal() == this.enumOrdinal;
+	}
+	
+	@Transient
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof YadaPersistentEnum == false || obj==null) {
+			return false;
+		}
+		YadaPersistentEnum<E> other = (YadaPersistentEnum<E>) obj;
+		return (this.enumClassName.equals(other.enumClassName) && this.enumOrdinal == other.enumOrdinal);
+	}
+
+	@Transient
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(this.enumClassName, this.enumOrdinal);
 	}
 	
 	/**
@@ -176,5 +197,6 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 	public void setEnumClassName(String enumClassName) {
 		this.enumClassName = enumClassName;
 	}
+
 	
 }

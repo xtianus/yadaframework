@@ -2,6 +2,9 @@ package net.yadaframework.security.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import javax.persistence.CascadeType;
@@ -10,20 +13,23 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+
+import net.yadaframework.web.YadaJsonView;
+
 @Entity
+// We keep it simple and use a discriminator for inheritance. It's very unlikely that someone might need a joined table with no other options
+// @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaUserProfile implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
-	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
-	protected Date modified;
 	
 	// For optimistic locking
 	@Version
@@ -42,15 +48,24 @@ public class YadaUserProfile implements Serializable {
 	@Column(length = 64)
 	protected String lastName;
 
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@NotNull
 	@OneToOne(optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
 	protected YadaUserCredentials userCredentials;
+	
+	@Column(length = 32)
+	protected Locale locale;
 	
 	@Column(length = 64)
 	protected TimeZone timezone; 	// Timezone ID: "America/Los_Angeles",
 									// "America/Argentina/ComodRivadavia"
 									// https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
+// Removed because I don't want to force the use of a YadaTicket table
+//	@JsonIgnore
+//	@OneToMany(mappedBy="owner", cascade=CascadeType.ALL)
+//	protected List<YadaTicket> tickets;
+	
 	public Long getId() {
 		return id;
 	}
@@ -99,16 +114,35 @@ public class YadaUserProfile implements Serializable {
 		this.timezone = timezone;
 	}
 
-	public Date getModified() {
-		return modified;
-	}
-
-	public void setModified(Date modified) {
-		this.modified = modified;
-	}
-
 	public long getVersion() {
 		return version;
+	}
+
+	public Locale getLocale() {
+		return locale;
+	}
+
+	public void setLocale(Locale locale) {
+		this.locale = locale;
+	}
+
+	@Override
+	public int hashCode() {
+		if (id!=null) {
+			return id.hashCode();
+		}
+		return Objects.hash(firstName, lastName, middleName, userCredentials);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj==null) {
+			return false;
+		}
+		if (obj instanceof YadaUserProfile && this.id!=null) {
+			return this.id.equals(((YadaUserProfile)obj).getId());
+		}
+		return super.equals(obj);
 	}
 	
 }

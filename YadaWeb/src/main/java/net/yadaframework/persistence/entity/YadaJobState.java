@@ -45,7 +45,6 @@ public enum YadaJobState implements YadaLocalEnum<YadaJobState> {
 	// TODO fix generics
 	public void setYadaPersistentEnum(YadaPersistentEnum yadaPersistentEnum) {
 		this.yadaPersistentEnum = yadaPersistentEnum;
-		
 	}
 	
 	/**

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -13,6 +14,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Temporal;
@@ -25,18 +28,16 @@ import org.hibernate.annotations.FetchMode;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import net.yadaframework.web.YadaJsonDateTimeShortSerializer;
+import net.yadaframework.web.YadaJsonView;
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaUserCredentials implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
-	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date modified;
 	
 	// For optimistic locking
 	@Version
@@ -48,6 +49,7 @@ public class YadaUserCredentials implements Serializable {
 	
 	// Non può essere NaturalId perchè sarebbe immutable
 	// @NaturalId 
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Column(nullable=false, unique=true, length=128)
 	private String username; // uso sempre l'email
 	
@@ -124,6 +126,17 @@ public class YadaUserCredentials implements Serializable {
 	}
 	
 	/**
+	 * Add all roles if not already present
+	 * @param roles
+	 */
+	@Transient
+	public void addRoles(Integer[] roles) {
+		for (Integer role : roles) {
+			addRole(role);
+		}
+	}
+	
+	/**
 	 * Add a role if not already present
 	 * @param role
 	 */
@@ -169,18 +182,25 @@ public class YadaUserCredentials implements Serializable {
 
 	@Override
 	public int hashCode() {
-		if (username!=null) {
-			return username.hashCode();
+		if (id!=null) {
+			return id.hashCode();
 		}
-		return 0;
+		return Objects.hash(username, password);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof YadaUserCredentials) {
-			return this.username.equals(((YadaUserCredentials)obj).username);
+		if (obj==null) {
+			return false;
 		}
-		return false;
+		if (obj instanceof YadaUserCredentials) {
+			if (this.id!=null) {
+				return this.id.equals(((YadaUserCredentials)obj).getId());
+			} else if (this.username!=null) {
+				return this.username.equals(((YadaUserCredentials)obj).username);
+			}
+		}
+		return super.equals(obj);
 	}
 
 	public boolean isEnabled() {
@@ -284,14 +304,6 @@ public class YadaUserCredentials implements Serializable {
 
 	public void setNewPassword(String newPassword) {
 		this.newPassword = newPassword;
-	}
-
-	public Date getModified() {
-		return modified;
-	}
-
-	public void setModified(Date modified) {
-		this.modified = modified;
 	}
 
 	public long getVersion() {

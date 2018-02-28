@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>YadaUtil &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'master',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">     intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">     tutorial</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">YadaUtil</a><ul>
+<li><a class="reference internal" href="#fields">Fields</a><ul>
+<li><a class="reference internal" href="#millis-in-day">MILLIS_IN_DAY</a></li>
+<li><a class="reference internal" href="#millis-in-hour">MILLIS_IN_HOUR</a></li>
+<li><a class="reference internal" href="#millis-in-minute">MILLIS_IN_MINUTE</a></li>
+<li><a class="reference internal" href="#applicationcontext">applicationContext</a></li>
+<li><a class="reference internal" href="#messagesource">messageSource</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#abbreviate">abbreviate</a></li>
+<li><a class="reference internal" href="#id1">abbreviate</a></li>
+<li><a class="reference internal" href="#adddays">addDays</a></li>
+<li><a class="reference internal" href="#id2">addDays</a></li>
+<li><a class="reference internal" href="#adddaysclone">addDaysClone</a></li>
+<li><a class="reference internal" href="#addhours">addHours</a></li>
+<li><a class="reference internal" href="#addminutes">addMinutes</a></li>
+<li><a class="reference internal" href="#id3">addMinutes</a></li>
+<li><a class="reference internal" href="#addyears">addYears</a></li>
+<li><a class="reference internal" href="#autowire">autowire</a></li>
+<li><a class="reference internal" href="#cleanupfolder">cleanupFolder</a></li>
+<li><a class="reference internal" href="#id4">cleanupFolder</a></li>
+<li><a class="reference internal" href="#closesilently">closeSilently</a></li>
+<li><a class="reference internal" href="#copyentity">copyEntity</a></li>
+<li><a class="reference internal" href="#id5">copyEntity</a></li>
+<li><a class="reference internal" href="#id6">copyEntity</a></li>
+<li><a class="reference internal" href="#id7">copyEntity</a></li>
+<li><a class="reference internal" href="#copystream">copyStream</a></li>
+<li><a class="reference internal" href="#daysago">daysAgo</a></li>
+<li><a class="reference internal" href="#daysdifference">daysDifference</a></li>
+<li><a class="reference internal" href="#deleteifempty">deleteIfEmpty</a></li>
+<li><a class="reference internal" href="#deletesilently">deleteSilently</a></li>
+<li><a class="reference internal" href="#exec">exec</a></li>
+<li><a class="reference internal" href="#id8">exec</a></li>
+<li><a class="reference internal" href="#id9">exec</a></li>
+<li><a class="reference internal" href="#formattimeinterval">formatTimeInterval</a></li>
+<li><a class="reference internal" href="#generateclearpassword">generateClearPassword</a></li>
+<li><a class="reference internal" href="#id10">generateClearPassword</a></li>
+<li><a class="reference internal" href="#getapplicationcontext">getApplicationContext</a></li>
+<li><a class="reference internal" href="#getbean">getBean</a></li>
+<li><a class="reference internal" href="#id11">getBean</a></li>
+<li><a class="reference internal" href="#id12">getBean</a></li>
+<li><a class="reference internal" href="#getclassesinpackage">getClassesInPackage</a></li>
+<li><a class="reference internal" href="#getcurrentstacktraceformatted">getCurrentStackTraceFormatted</a></li>
+<li><a class="reference internal" href="#getfileextension">getFileExtension</a></li>
+<li><a class="reference internal" href="#getfilenopath">getFileNoPath</a></li>
+<li><a class="reference internal" href="#getlocalvalue">getLocalValue</a></li>
+<li><a class="reference internal" href="#getmessage">getMessage</a></li>
+<li><a class="reference internal" href="#getnewinstancesamepackage">getNewInstanceSamePackage</a></li>
+<li><a class="reference internal" href="#getrandomelement">getRandomElement</a></li>
+<li><a class="reference internal" href="#getrootexception">getRootException</a></li>
+<li><a class="reference internal" href="#gettype">getType</a></li>
+<li><a class="reference internal" href="#init">init</a></li>
+<li><a class="reference internal" href="#iscodicefiscalevalid">isCodiceFiscaleValid</a></li>
+<li><a class="reference internal" href="#istype">isType</a></li>
+<li><a class="reference internal" href="#md5hash">md5Hash</a></li>
+<li><a class="reference internal" href="#millissincemidnight">millisSinceMidnight</a></li>
+<li><a class="reference internal" href="#minutesago">minutesAgo</a></li>
+<li><a class="reference internal" href="#minutesdifference">minutesDifference</a></li>
+<li><a class="reference internal" href="#normalizzacellulareitaliano">normalizzaCellulareItaliano</a></li>
+<li><a class="reference internal" href="#prefetchlocalizedstrings">prefetchLocalizedStrings</a></li>
+<li><a class="reference internal" href="#reducetosafefilename">reduceToSafeFilename</a></li>
+<li><a class="reference internal" href="#id13">reduceToSafeFilename</a></li>
+<li><a class="reference internal" href="#roundbacktohour">roundBackToHour</a></li>
+<li><a class="reference internal" href="#id14">roundBackToHour</a></li>
+<li><a class="reference internal" href="#id15">roundBackToHour</a></li>
+<li><a class="reference internal" href="#roundbacktolastmonthstart">roundBackToLastMonthStart</a></li>
+<li><a class="reference internal" href="#roundbacktomidnight">roundBackToMidnight</a></li>
+<li><a class="reference internal" href="#id16">roundBackToMidnight</a></li>
+<li><a class="reference internal" href="#roundbacktomidnightclone">roundBackToMidnightClone</a></li>
+<li><a class="reference internal" href="#roundbacktomonth">roundBackToMonth</a></li>
+<li><a class="reference internal" href="#id17">roundBackToMonth</a></li>
+<li><a class="reference internal" href="#roundforwardtoalmostmidnight">roundForwardToAlmostMidnight</a></li>
+<li><a class="reference internal" href="#roundforwardtohour">roundForwardToHour</a></li>
+<li><a class="reference internal" href="#roundfowardtomonth">roundFowardToMonth</a></li>
+<li><a class="reference internal" href="#sameday">sameDay</a></li>
+<li><a class="reference internal" href="#setapplicationcontext">setApplicationContext</a></li>
+<li><a class="reference internal" href="#sleep">sleep</a></li>
+<li><a class="reference internal" href="#sleeprandom">sleepRandom</a></li>
+<li><a class="reference internal" href="#sortbykey">sortByKey</a></li>
+<li><a class="reference internal" href="#sortbyvalue">sortByValue</a></li>
+<li><a class="reference internal" href="#splitatword">splitAtWord</a></li>
+<li><a class="reference internal" href="#validacellulare">validaCellulare</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../../../../_sources/javadoc/net/yadaframework/components/YadaUtil.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="yadautil">
+<h1>YadaUtil<a class="headerlink" href="#yadautil" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.yadaframework.components.YadaUtil">
+public class <code class="descname">YadaUtil</code><a class="headerlink" href="#net.yadaframework.components.YadaUtil" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="section" id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="millis-in-day">
+<h3>MILLIS_IN_DAY<a class="headerlink" href="#millis-in-day" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.components.YadaUtil.MILLIS_IN_DAY">
+public static final long <code class="descname">MILLIS_IN_DAY</code><a class="headerlink" href="#net.yadaframework.components.YadaUtil.MILLIS_IN_DAY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="millis-in-hour">
+<h3>MILLIS_IN_HOUR<a class="headerlink" href="#millis-in-hour" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.components.YadaUtil.MILLIS_IN_HOUR">
+public static final long <code class="descname">MILLIS_IN_HOUR</code><a class="headerlink" href="#net.yadaframework.components.YadaUtil.MILLIS_IN_HOUR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="millis-in-minute">
+<h3>MILLIS_IN_MINUTE<a class="headerlink" href="#millis-in-minute" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.components.YadaUtil.MILLIS_IN_MINUTE">
+public static final long <code class="descname">MILLIS_IN_MINUTE</code><a class="headerlink" href="#net.yadaframework.components.YadaUtil.MILLIS_IN_MINUTE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="applicationcontext">
+<h3>applicationContext<a class="headerlink" href="#applicationcontext" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.components.YadaUtil.applicationContext">
+static <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html" title="org.springframework.context.ApplicationContext">ApplicationContext</a> <code class="descname">applicationContext</code><a class="headerlink" href="#net.yadaframework.components.YadaUtil.applicationContext" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="messagesource">
+<h3>messageSource<a class="headerlink" href="#messagesource" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.components.YadaUtil.messageSource">
+public static <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/MessageSource.html" title="org.springframework.context.MessageSource">MessageSource</a> <code class="descname">messageSource</code><a class="headerlink" href="#net.yadaframework.components.YadaUtil.messageSource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="abbreviate">
+<h3>abbreviate<a class="headerlink" href="#abbreviate" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.abbreviate(String, int, boolean)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">abbreviate</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> string</em>, int<em> length</em>, boolean<em> breakAtWord</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.abbreviate(String, int, boolean)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h3>abbreviate<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.abbreviate(String, int, boolean, String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">abbreviate</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> string</em>, int<em> length</em>, boolean<em> breakAtWord</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> ellipsis</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.abbreviate(String, int, boolean, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accorcia una stringa mettendo “…”, eventualmente senza troncare le parole</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>string</strong> – </li>
+<li><strong>length</strong> – </li>
+<li><strong>breakAtWord</strong> – true per non troncare le parole</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="adddays">
+<h3>addDays<a class="headerlink" href="#adddays" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.addDays(Calendar, int)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a> <code class="descname">addDays</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a><em> calendar</em>, int<em> days</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.addDays(Calendar, int)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id2">
+<h3>addDays<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.addDays(Date, int)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">addDays</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> date</em>, int<em> days</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.addDays(Date, int)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggiunge (o rimuove) i giorni indicati dalla data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>date</strong> – </li>
+<li><strong>days</strong> – numero di giorni, può essere negativo</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="adddaysclone">
+<h3>addDaysClone<a class="headerlink" href="#adddaysclone" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.addDaysClone(Calendar, int)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a> <code class="descname">addDaysClone</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a><em> source</em>, int<em> days</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.addDaysClone(Calendar, int)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="addhours">
+<h3>addHours<a class="headerlink" href="#addhours" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.addHours(Date, int)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">addHours</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> date</em>, int<em> hours</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.addHours(Date, int)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggiunge (o rimuove) le ore indicate dalla data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>date</strong> – </li>
+<li><strong>hours</strong> – numero di ore, può essere negativo</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="addminutes">
+<h3>addMinutes<a class="headerlink" href="#addminutes" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.addMinutes(Calendar, int)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a> <code class="descname">addMinutes</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a><em> calendar</em>, int<em> minutes</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.addMinutes(Calendar, int)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id3">
+<h3>addMinutes<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.addMinutes(Date, int)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">addMinutes</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> date</em>, int<em> minutes</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.addMinutes(Date, int)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggiunge (o rimuove) i minuti indicati dalla data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>date</strong> – </li>
+<li><strong>hours</strong> – numero di minuti, può essere negativo</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="addyears">
+<h3>addYears<a class="headerlink" href="#addyears" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.addYears(Date, int)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">addYears</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> date</em>, int<em> years</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.addYears(Date, int)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggiunge (o rimuove) gli anni indicati dalla data (approssimato)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>date</strong> – </li>
+<li><strong>years</strong> – numero di 365 giorni, può essere negativo</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="autowire">
+<h3>autowire<a class="headerlink" href="#autowire" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.autowire(Object)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a> <code class="descname">autowire</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a><em> instance</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.autowire(Object)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform autowiring of an instance that doesn’t come from the Spring context, e.g. a JPA &#64;Entity. Post processing (&#64;PostConstruct etc) is also performed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>instance</strong> – to autowire</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">autowired instance</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="cleanupfolder">
+<h3>cleanupFolder<a class="headerlink" href="#cleanupfolder" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.cleanupFolder(Path, String)">
+public int <code class="descname">cleanupFolder</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html" title="java.nio.file.Path">Path</a><em> folder</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> prefix</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.cleanupFolder(Path, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes files from a folder starting with the prefix (can be an empty string)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>folder</strong> – </li>
+<li><strong>prefix</strong> – the initial part of the filename or “” for any file return the number of deleted files</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id4">
+<h3>cleanupFolder<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.cleanupFolder(Path, String, Date)">
+public int <code class="descname">cleanupFolder</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html" title="java.nio.file.Path">Path</a><em> folder</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> prefix</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> olderThan</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.cleanupFolder(Path, String, Date)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes files from a folder starting with the prefix (can be an empty string) and older than the given date</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>folder</strong> – </li>
+<li><strong>prefix</strong> – </li>
+<li><strong>olderThan</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the number of deleted files</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="closesilently">
+<h3>closeSilently<a class="headerlink" href="#closesilently" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.closeSilently(Closeable)">
+public boolean <code class="descname">closeSilently</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/io/Closeable.html" title="java.io.Closeable">Closeable</a><em> closeable</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.closeSilently(Closeable)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close a closeable ignoring exceptions and null.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>closeable</strong> – the object to close(), can be null</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">true if closed cleanly (or null), false in case of exception</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="copyentity">
+<h3>copyEntity<a class="headerlink" href="#copyentity" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.copyEntity(CloneableFiltered)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a> <code class="descname">copyEntity</code><span class="sig-paren">(</span><a class="reference internal" href="../core/CloneableFiltered.html#net.yadaframework.core.CloneableFiltered" title="net.yadaframework.core.CloneableFiltered">CloneableFiltered</a><em> source</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.copyEntity(CloneableFiltered)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Questo metodo crea la copia di un oggetto TRAMITE I SUOI GETTER (anche privati), facendo in modo che alcune collection/mappe vengano copiate pur restando indipendenti. In pratica le collection/mappe sono ricreate come istanze nuove con i medesimi oggetti di quelle originali. Questo permette di condividere gli oggetti tra le copie, ma di mantenere le associazioni slegate. Così se copio un Prodotto (in Artemide), mi trovo gli stessi componenti dell’originale (gli Articolo sono gli stessi) ma posso in seguito toglierli/aggiungerli senza influire sull’altra istanza da cui son partito a copiare. E’ possibile specificare quali attributi non copiare grazie all’interfaccia CloneableFiltered. La id non è mai copiata. Gli attributi senza getter/setter non sono copiati a prescindere dal filtro. Per esempio se l’oggetto che si vuole copiare ha l’attributo pippo e l’attributo pluto, si può fare in modo che sia copiato solo pippo e non pluto (che rimane quindi null). Se una collection/mappa deve essere clonata anche nel contenuto, i suoi elementi devono implementare CloneableDeep (vedi LocalString). Per esempio se l’attributo pippo è una collection di oggetti Cane che non implementa ClonableDeep, nella copia verr? creata una nuova collection di oggetti Cane che saranno gli stessi della collection di partenza. Se invcece Cane implementa ClonableDeep, allora gli oggetti Cane contenuti nella copia di pippo sono essi stessi delle copie che seguono le stesse regole qui indicate. ATTENZIONE: - da verificare se gli attributi dei parent sono duplicati pure loro</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id5">
+<h3>copyEntity<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.copyEntity(CloneableFiltered, boolean)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a> <code class="descname">copyEntity</code><span class="sig-paren">(</span><a class="reference internal" href="../core/CloneableFiltered.html#net.yadaframework.core.CloneableFiltered" title="net.yadaframework.core.CloneableFiltered">CloneableFiltered</a><em> source</em>, boolean<em> setFieldDirectly</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.copyEntity(CloneableFiltered, boolean)" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source</strong> – </li>
+<li><strong>setFieldDirectly</strong> – true to copy using fields and not getter/setter</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id6">
+<h3>copyEntity<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.copyEntity(CloneableFiltered, Class)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a> <code class="descname">copyEntity</code><span class="sig-paren">(</span><a class="reference internal" href="../core/CloneableFiltered.html#net.yadaframework.core.CloneableFiltered" title="net.yadaframework.core.CloneableFiltered">CloneableFiltered</a><em> source</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="java.lang.Class">Class</a><em> classObject</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.copyEntity(CloneableFiltered, Class)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Questo metodo crea la copia di un oggetto TRAMITE I SUOI GETTER (anche privati), facendo in modo che alcune collection/mappe vengano copiate pur restando indipendenti. In pratica le collection/mappe sono ricreate come istanze nuove con i medesimi oggetti di quelle originali. Questo permette di condividere gli oggetti tra le copie, ma di mantenere le associazioni slegate. Così se copio un Prodotto (in Artemide), mi trovo gli stessi componenti dell’originale (gli Articolo sono gli stessi) ma posso in seguito toglierli/aggiungerli senza influire sull’altra istanza da cui son partito a copiare. E’ possibile specificare quali attributi non copiare grazie all’interfaccia CloneableFiltered. La id non è mai copiata. Per esempio se l’oggetto che si vuole copiare ha l’attributo pippo e l’attributo pluto, si può fare in modo che sia copiato solo pippo e non pluto (che rimane quindi null). Se una collection/mappa deve essere clonata anche nel contenuto, i suoi elementi devono implementare CloneableDeep (vedi LocalString). Per esempio se l’attributo pippo è una collection di oggetti Cane che non implementa ClonableDeep, nella copia verr? creata una nuova collection di oggetti Cane che saranno gli stessi della collection di partenza. Se invcece Cane implementa ClonableDeep, allora gli oggetti Cane contenuti nella copia di pippo sono essi stessi delle copie che seguono le stesse regole qui indicate. ATTENZIONE: - da verificare se gli attributi dei parent sono duplicati pure loro</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source</strong> – </li>
+<li><strong>classObject</strong> – classe da usare per creare il clone quando il source è nascosto dentro a un HibernateProxy</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id7">
+<h3>copyEntity<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.copyEntity(CloneableFiltered, Class, boolean)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a> <code class="descname">copyEntity</code><span class="sig-paren">(</span><a class="reference internal" href="../core/CloneableFiltered.html#net.yadaframework.core.CloneableFiltered" title="net.yadaframework.core.CloneableFiltered">CloneableFiltered</a><em> source</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="java.lang.Class">Class</a><em> classObject</em>, boolean<em> setFieldDirectly</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.copyEntity(CloneableFiltered, Class, boolean)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="copystream">
+<h3>copyStream<a class="headerlink" href="#copystream" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.copyStream(InputStream, OutputStream, Integer, Long)">
+public long <code class="descname">copyStream</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html" title="java.io.InputStream">InputStream</a><em> inputStream</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/io/OutputStream.html" title="java.io.OutputStream">OutputStream</a><em> outputStream</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html" title="java.lang.Integer">Integer</a><em> bufferSize</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="java.lang.Long">Long</a><em> sizeLimit</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.copyStream(InputStream, OutputStream, Integer, Long)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies an inputStream to an outputStream. This method blocks until input data is available, end of file is detected, or an exception is thrown. Streams are not closed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>inputStream</strong> – </li>
+<li><strong>outputStream</strong> – </li>
+<li><strong>bufferSize</strong> – the size in bytes of the temporary buffer to use on the copy loop; null for the default of 4096 bytes. Use a small buffer (256) when data is over the internet to prevent timeouts somewhere. Use a big buffer for in-memory or disk operations.</li>
+<li><strong>sizeLimit</strong> – the maximum number of bytes to read (inclusive)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><ul class="first simple">
+<li><strong>IOException</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the number of bytes read, or -1 if the sizeLimit has been exceeded.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="daysago">
+<h3>daysAgo<a class="headerlink" href="#daysago" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.daysAgo(int)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">daysAgo</code><span class="sig-paren">(</span>int<em> days</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.daysAgo(int)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ritorna la data nel passato per il numero di giorni indicati</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>days</strong> – numero di giorni fa</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="daysdifference">
+<h3>daysDifference<a class="headerlink" href="#daysdifference" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.daysDifference(Date, Date)">
+public int <code class="descname">daysDifference</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> date1</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> date2</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.daysDifference(Date, Date)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Counts the days interval between two dates. Time component is ignored.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>date1</strong> – </li>
+<li><strong>date2</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="deleteifempty">
+<h3>deleteIfEmpty<a class="headerlink" href="#deleteifempty" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.deleteIfEmpty(Path)">
+public boolean <code class="descname">deleteIfEmpty</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/nio/file/Path.html" title="java.nio.file.Path">Path</a><em> folder</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.deleteIfEmpty(Path)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deleted a folder only when empty</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>folder</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">true if deleted, false otherwise</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="deletesilently">
+<h3>deleteSilently<a class="headerlink" href="#deletesilently" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.deleteSilently(File)">
+public boolean <code class="descname">deleteSilently</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/io/File.html" title="java.io.File">File</a><em> file</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.deleteSilently(File)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a file ignoring errors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file</strong> – the file to delete, can be null</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">true if the file has been deleted, false if the file didn’t exist or was null or in case of exception</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="exec">
+<h3>exec<a class="headerlink" href="#exec" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.exec(String, List, Map, ByteArrayOutputStream)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">exec</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> command</em>, <a class="reference internal" href="../../../../index.html#List" title="List">List</a>&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> args</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Map.html" title="java.util.Map">Map</a><em> substitutionMap</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/io/ByteArrayOutputStream.html" title="java.io.ByteArrayOutputStream">ByteArrayOutputStream</a><em> outputStream</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.exec(String, List, Map, ByteArrayOutputStream)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Esegue un comando di shell</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>command</strong> – comando</li>
+<li><strong>args</strong> – lista di argomenti (ogni elemento puo’ contenere spazi), puo’ essere null</li>
+<li><strong>substitutionMap</strong> – key-value of placeholders to replace in the command. A placeholder in the command is like ${key}, a substitution pair is like “key”–&gt;”value” . If the value is a collection, arguments are unrolled.</li>
+<li><strong>outputStream</strong> – ByteArrayOutputStream che conterr? l’output del comando (out + err)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the error message (will be empty for a return code &gt;0), or null if there was no error</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id8">
+<h3>exec<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.exec(String, List, ByteArrayOutputStream)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">exec</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> command</em>, <a class="reference internal" href="../../../../index.html#List" title="List">List</a>&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> args</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/io/ByteArrayOutputStream.html" title="java.io.ByteArrayOutputStream">ByteArrayOutputStream</a><em> outputStream</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.exec(String, List, ByteArrayOutputStream)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Esegue un comando di shell</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>command</strong> – comando</li>
+<li><strong>args</strong> – lista di argomenti (ogni elemento puo’ contenere spazi), puo’ essere null</li>
+<li><strong>outputStream</strong> – ByteArrayOutputStream che conterr? l’output del comando</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the error message (will be empty for a return code &gt;0), or null if there was no error</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id9">
+<h3>exec<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.exec(String, Map)">
+public boolean <code class="descname">exec</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> shellCommandKey</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Map.html" title="java.util.Map">Map</a><em> substitutionMap</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.exec(String, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Esegue il comando configurato</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>shellCommandKey</strong> – chiave completa xpath del comando shell da eseguire e.g. “config/shell/processTunableWhiteImage”</li>
+<li><strong>substitutionMap</strong> – key-value of placeholders to replace in the command. A placeholder in the command is like ${key}, a substitution pair is like “key”–&gt;”value”</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">true if successful</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="formattimeinterval">
+<h3>formatTimeInterval<a class="headerlink" href="#formattimeinterval" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.formatTimeInterval(long, TimeUnit)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">formatTimeInterval</code><span class="sig-paren">(</span>long<em> amount</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/TimeUnit.html" title="java.util.concurrent.TimeUnit">TimeUnit</a><em> timeUnit</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.formatTimeInterval(long, TimeUnit)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert from an amount of time to a string in the format xxd:hh:mm:ss</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>amount</strong> – interval that needs to be formatted</li>
+<li><strong>timeUnit</strong> – the unit of the interval</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a formatted string representing the input interval</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="generateclearpassword">
+<h3>generateClearPassword<a class="headerlink" href="#generateclearpassword" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.generateClearPassword()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">generateClearPassword</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.generateClearPassword()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Genera una password casuale di 16 caratteri</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a string like “XFofvGEtBlZIa5sH”</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id10">
+<h3>generateClearPassword<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.generateClearPassword(int)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">generateClearPassword</code><span class="sig-paren">(</span>int<em> length</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.generateClearPassword(int)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Genera una password casuale</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>length</strong> – max password length</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a string like “XFofvGEtBlZIa5sH”</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getapplicationcontext">
+<h3>getApplicationContext<a class="headerlink" href="#getapplicationcontext" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.getApplicationContext()">
+public static <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html" title="org.springframework.context.ApplicationContext">ApplicationContext</a> <code class="descname">getApplicationContext</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.getApplicationContext()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ritorna un riferimento all’ApplicationContext per l’utilizzo fuori dal Container (ad esempio negli Entity)</p>
+</dd></dl>
+
+</div>
+<div class="section" id="getbean">
+<h3>getBean<a class="headerlink" href="#getbean" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.getBean(Class, Object)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a> <code class="descname">getBean</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="java.lang.Class">Class</a><em> beanClass</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a>...<em> args</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.getBean(Class, Object)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get any bean defined in the Spring ApplicationContext</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>beanClass</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id11">
+<h3>getBean<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.getBean(String, Object)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a> <code class="descname">getBean</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> nameInApplicationContext</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a>...<em> args</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.getBean(String, Object)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get any bean defined in the Spring ApplicationContext</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nameInApplicationContext</strong> – the Class.getSimpleName() starting lowercase, e.g. “processController”</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id12">
+<h3>getBean<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.getBean(String)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a> <code class="descname">getBean</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> nameInApplicationContext</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.getBean(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get any bean defined in the Spring ApplicationContext</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nameInApplicationContext</strong> – the Class.getSimpleName() starting lowercase, e.g. “processController”</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getclassesinpackage">
+<h3>getClassesInPackage<a class="headerlink" href="#getclassesinpackage" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.getClassesInPackage(Package)">
+public static <a class="reference internal" href="../../../../index.html#List" title="List">List</a>&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="java.lang.Class">Class</a>&gt; <code class="descname">getClassesInPackage</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Package.html" title="java.lang.Package">Package</a><em> thePackage</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.getClassesInPackage(Package)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the classes of a given package.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>thePackage</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>See also:</strong> <code class="xref java java-ref docutils literal"><span class="pre">http://stackoverflow.com/a/21430849/587641</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="getcurrentstacktraceformatted">
+<h3>getCurrentStackTraceFormatted<a class="headerlink" href="#getcurrentstacktraceformatted" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.getCurrentStackTraceFormatted()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getCurrentStackTraceFormatted</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.getCurrentStackTraceFormatted()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the current stack trace as a string, formatted on separate lines</p>
+</dd></dl>
+
+</div>
+<div class="section" id="getfileextension">
+<h3>getFileExtension<a class="headerlink" href="#getfileextension" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.getFileExtension(String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getFileExtension</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> filename</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.getFileExtension(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Da un nome tipo abcd.JPG ritorna “jpg”</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">l’estensione, oppure null</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getfilenopath">
+<h3>getFileNoPath<a class="headerlink" href="#getfilenopath" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.getFileNoPath(String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getFileNoPath</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> fileWithPath</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.getFileNoPath(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the file name given the file path</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fileWithPath</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getlocalvalue">
+<h3>getLocalValue<a class="headerlink" href="#getlocalvalue" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.getLocalValue(Map, Locale)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getLocalValue</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Map.html" title="java.util.Map">Map</a>&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Locale.html" title="java.util.Locale">Locale</a>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> LocalizedValueMap</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Locale.html" title="java.util.Locale">Locale</a><em> locale</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.getLocalValue(Map, Locale)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the localized value from a map of Locale -&gt; String. Used in entities with localized string attributes. If a default locale has been configured with <code class="docutils literal"><span class="pre">&lt;locale</span> <span class="pre">default='true'&gt;</span></code>, then that locale is attempted when there is no value for the needed locale (and they differ)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>LocalizedValueMap</strong> – </li>
+<li><strong>locale</strong> – the needed locale for the value, can be null for the current request locale</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the localized value, or the empty string if no value has been defined and no default locale has been configured</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getmessage">
+<h3>getMessage<a class="headerlink" href="#getmessage" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.getMessage(String, Object)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getMessage</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> key</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a>...<em> params</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.getMessage(String, Object)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ritorna un messaggio localizzato da un contesto fuori da Spring (ad esempio in un enum o un Entity)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> – </li>
+<li><strong>params</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getnewinstancesamepackage">
+<h3>getNewInstanceSamePackage<a class="headerlink" href="#getnewinstancesamepackage" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.getNewInstanceSamePackage(Class, String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a> <code class="descname">getNewInstanceSamePackage</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="java.lang.Class">Class</a><em> anyClassInPackage</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> simpleClassName</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.getNewInstanceSamePackage(Class, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an instance of a class that belongs to the same package of some given class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>anyClassInPackage</strong> – a class that is in the same package of the one to instantiate (it could be the one to instantiate)</li>
+<li><strong>simpleClassName</strong> – the simple name of the class to instantiate, like “UserProfile”</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getrandomelement">
+<h3>getRandomElement<a class="headerlink" href="#getrandomelement" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.getRandomElement(List)">
+public &lt;T&gt; T <code class="descname">getRandomElement</code><span class="sig-paren">(</span><a class="reference internal" href="../../../../index.html#List" title="List">List</a>&lt;T&gt;<em> list</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.getRandomElement(List)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a random element from the list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>list</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a random element from the list, or null if the list is empty</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getrootexception">
+<h3>getRootException<a class="headerlink" href="#getrootexception" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.getRootException(Throwable)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html" title="java.lang.Throwable">Throwable</a> <code class="descname">getRootException</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Throwable.html" title="java.lang.Throwable">Throwable</a><em> exception</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.getRootException(Throwable)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trova l’eccezione che ha causato questa, nella catena delle eccezioni</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>exception</strong> – eccezione conseguente</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">throwable originario, preso con getCause()</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="gettype">
+<h3>getType<a class="headerlink" href="#gettype" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.getType(Class, String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="java.lang.Class">Class</a> <code class="descname">getType</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="java.lang.Class">Class</a><em> rootClass</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> attributePath</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.getType(Class, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reflection to get the type of a given field, even nested or in a superclass.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rootClass</strong> – </li>
+<li><strong>attributePath</strong> – field name like “surname” or even a path like “friend.name”</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/NoSuchFieldException.html" title="java.lang.NoSuchFieldException"><strong>NoSuchFieldException</strong></a> – if the field is not found in the class hierarchy</li>
+<li><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/SecurityException.html" title="java.lang.SecurityException"><strong>SecurityException</strong></a> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="init">
+<h3>init<a class="headerlink" href="#init" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.init()">
+public void <code class="descname">init</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.init()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="iscodicefiscalevalid">
+<h3>isCodiceFiscaleValid<a class="headerlink" href="#iscodicefiscalevalid" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.isCodiceFiscaleValid(String)">
+public boolean <code class="descname">isCodiceFiscaleValid</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> codiceFiscale</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.isCodiceFiscaleValid(String)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="istype">
+<h3>isType<a class="headerlink" href="#istype" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.isType(Class, Class)">
+public static boolean <code class="descname">isType</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="java.lang.Class">Class</a>&lt;?&gt;<em> fieldType</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="java.lang.Class">Class</a><em> requiredType</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.isType(Class, Class)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a class is of a given type, considering superclasses and interfaces (of superclasses)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fieldType</strong> – </li>
+<li><strong>requiredType</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="md5hash">
+<h3>md5Hash<a class="headerlink" href="#md5hash" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.md5Hash(String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">md5Hash</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> clear</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.md5Hash(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a MD5 hash of a string (from <a class="reference external" href="http://snippets.dzone.com/posts/show/3686">http://snippets.dzone.com/posts/show/3686</a>)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>clear</strong> – the source text</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><ul class="first last simple">
+<li><strong>NoSuchAlgorithmException</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="millissincemidnight">
+<h3>millisSinceMidnight<a class="headerlink" href="#millissincemidnight" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.millisSinceMidnight(Calendar)">
+public static long <code class="descname">millisSinceMidnight</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a><em> calendar</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.millisSinceMidnight(Calendar)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of milliseconds since midnight</p>
+</dd></dl>
+
+</div>
+<div class="section" id="minutesago">
+<h3>minutesAgo<a class="headerlink" href="#minutesago" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.minutesAgo(int)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">minutesAgo</code><span class="sig-paren">(</span>int<em> minuti</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.minutesAgo(int)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ritorna la data nel passato per il numero di minuti indicati</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>days</strong> – numero di minuti fa</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="minutesdifference">
+<h3>minutesDifference<a class="headerlink" href="#minutesdifference" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.minutesDifference(Date, Date)">
+public static long <code class="descname">minutesDifference</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> recentDate</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> oldDate</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.minutesDifference(Date, Date)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the minutes between two dates</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>recentDate</strong> – </li>
+<li><strong>oldDate</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="normalizzacellulareitaliano">
+<h3>normalizzaCellulareItaliano<a class="headerlink" href="#normalizzacellulareitaliano" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.normalizzaCellulareItaliano(String)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">normalizzaCellulareItaliano</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> cellulare</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.normalizzaCellulareItaliano(String)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="prefetchlocalizedstrings">
+<h3>prefetchLocalizedStrings<a class="headerlink" href="#prefetchlocalizedstrings" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.prefetchLocalizedStrings(List, Class, String)">
+public static &lt;entityClass&gt; void <code class="descname">prefetchLocalizedStrings</code><span class="sig-paren">(</span><a class="reference internal" href="../../../../index.html#List" title="List">List</a>&lt;entityClass&gt;<em> entities</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Class.html" title="java.lang.Class">Class</a>&lt;?&gt;<em> entityClass</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>...<em> attributes</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.prefetchLocalizedStrings(List, Class, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Force initialization of localized strings implemented with Map&lt;Locale, String&gt;. It must be called in a transaction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>entities</strong> – objects fetched from database that may contain localized strings</li>
+<li><strong>entityClass</strong> – type of fetchedEntities elements</li>
+<li><strong>attributes</strong> – the attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="reducetosafefilename">
+<h3>reduceToSafeFilename<a class="headerlink" href="#reducetosafefilename" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.reduceToSafeFilename(String)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">reduceToSafeFilename</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> originalFilename</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.reduceToSafeFilename(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converte un filename in modo che sia valido sia per il filesystem (unix/dos) sia per il browser. E’ molto distruttiva in quanto i caratteri non previsti vengono eliminati. Per questo si chiama “reduce” :-) Converte anche a lowercase.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>originalFilename</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">un filename safe, dove i caratteri speciali sono scomparsi</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id13">
+<h3>reduceToSafeFilename<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.reduceToSafeFilename(String, boolean)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">reduceToSafeFilename</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> originalFilename</em>, boolean<em> toLowercase</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.reduceToSafeFilename(String, boolean)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converte un filename in modo che sia valido sia per il filesystem (unix/dos) sia per il browser. E’ molto distruttiva in quanto i caratteri non previsti vengono eliminati. Per questo si chiama “reduce” :-) Converte anche a lowercase.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>originalFilename</strong> – </li>
+<li><strong>toLowercase</strong> – true for a lowercase name</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">un filename safe, dove i caratteri speciali sono scomparsi</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="roundbacktohour">
+<h3>roundBackToHour<a class="headerlink" href="#roundbacktohour" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.roundBackToHour(Date)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">roundBackToHour</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> date</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.roundBackToHour(Date)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ritorna l’ora più vicina nel passato alla data specificata</p>
+</dd></dl>
+
+</div>
+<div class="section" id="id14">
+<h3>roundBackToHour<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.roundBackToHour(Calendar)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a> <code class="descname">roundBackToHour</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a><em> calendar</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.roundBackToHour(Calendar)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the same calendar object aligned to the previous hour</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>calendar</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id15">
+<h3>roundBackToHour<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.roundBackToHour(Date, TimeZone)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">roundBackToHour</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> date</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html" title="java.util.TimeZone">TimeZone</a><em> timezone</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.roundBackToHour(Date, TimeZone)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets minutes to zero</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>date</strong> – </li>
+<li><strong>timezone</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="roundbacktolastmonthstart">
+<h3>roundBackToLastMonthStart<a class="headerlink" href="#roundbacktolastmonthstart" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.roundBackToLastMonthStart(Calendar)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a> <code class="descname">roundBackToLastMonthStart</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a><em> calendar</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.roundBackToLastMonthStart(Calendar)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="roundbacktomidnight">
+<h3>roundBackToMidnight<a class="headerlink" href="#roundbacktomidnight" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.roundBackToMidnight(Date, TimeZone)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">roundBackToMidnight</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> date</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html" title="java.util.TimeZone">TimeZone</a><em> timezone</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.roundBackToMidnight(Date, TimeZone)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id16">
+<h3>roundBackToMidnight<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.roundBackToMidnight(Calendar)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a> <code class="descname">roundBackToMidnight</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a><em> calendar</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.roundBackToMidnight(Calendar)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rounds back the calendar to the start of the day.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>calendar</strong> – the calendar to change</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the input calendar modified.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="roundbacktomidnightclone">
+<h3>roundBackToMidnightClone<a class="headerlink" href="#roundbacktomidnightclone" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.roundBackToMidnightClone(Calendar)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a> <code class="descname">roundBackToMidnightClone</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a><em> source</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.roundBackToMidnightClone(Calendar)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new calendar rounded back to the start of the day.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>calendar</strong> – the calendar to copy</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new calendar</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="roundbacktomonth">
+<h3>roundBackToMonth<a class="headerlink" href="#roundbacktomonth" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.roundBackToMonth(Calendar)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a> <code class="descname">roundBackToMonth</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a><em> calendar</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.roundBackToMonth(Calendar)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id17">
+<h3>roundBackToMonth<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.roundBackToMonth(Date, TimeZone)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">roundBackToMonth</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> date</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html" title="java.util.TimeZone">TimeZone</a><em> timezone</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.roundBackToMonth(Date, TimeZone)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="roundforwardtoalmostmidnight">
+<h3>roundForwardToAlmostMidnight<a class="headerlink" href="#roundforwardtoalmostmidnight" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.roundForwardToAlmostMidnight(Calendar)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a> <code class="descname">roundForwardToAlmostMidnight</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a><em> calendar</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.roundForwardToAlmostMidnight(Calendar)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="roundforwardtohour">
+<h3>roundForwardToHour<a class="headerlink" href="#roundforwardtohour" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.roundForwardToHour(Calendar)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a> <code class="descname">roundForwardToHour</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html" title="java.util.Calendar">Calendar</a><em> calendar</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.roundForwardToHour(Calendar)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the same calendar object aligned to the next hour</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>calendar</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="roundfowardtomonth">
+<h3>roundFowardToMonth<a class="headerlink" href="#roundfowardtomonth" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.roundFowardToMonth(Date, TimeZone)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a> <code class="descname">roundFowardToMonth</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> date</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html" title="java.util.TimeZone">TimeZone</a><em> timezone</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.roundFowardToMonth(Date, TimeZone)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="sameday">
+<h3>sameDay<a class="headerlink" href="#sameday" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.sameDay(Date, Date)">
+public boolean <code class="descname">sameDay</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> a</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Date.html" title="java.util.Date">Date</a><em> b</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.sameDay(Date, Date)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the two dates are on the same day</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>a</strong> – </li>
+<li><strong>b</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="setapplicationcontext">
+<h3>setApplicationContext<a class="headerlink" href="#setapplicationcontext" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.setApplicationContext(ApplicationContext)">
+public void <code class="descname">setApplicationContext</code><span class="sig-paren">(</span><a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html" title="org.springframework.context.ApplicationContext">ApplicationContext</a><em> applicationContext</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.setApplicationContext(ApplicationContext)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="sleep">
+<h3>sleep<a class="headerlink" href="#sleep" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.sleep(long)">
+public void <code class="descname">sleep</code><span class="sig-paren">(</span>long<em> milliseconds</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.sleep(long)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="sleeprandom">
+<h3>sleepRandom<a class="headerlink" href="#sleeprandom" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.sleepRandom(long, long)">
+public void <code class="descname">sleepRandom</code><span class="sig-paren">(</span>long<em> minMilliseconds</em>, long<em> maxMilliseconds</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.sleepRandom(long, long)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="sortbykey">
+<h3>sortByKey<a class="headerlink" href="#sortbykey" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.sortByKey(Map)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/SortedSet.html" title="java.util.SortedSet">SortedSet</a>&lt;Entry&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;&gt; <code class="descname">sortByKey</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Map.html" title="java.util.Map">Map</a><em> data</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.sortByKey(Map)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="sortbyvalue">
+<h3>sortByValue<a class="headerlink" href="#sortbyvalue" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.sortByValue(Map)">
+public static <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/SortedSet.html" title="java.util.SortedSet">SortedSet</a>&lt;Entry&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;&gt; <code class="descname">sortByValue</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Map.html" title="java.util.Map">Map</a><em> data</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.sortByValue(Map)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="splitatword">
+<h3>splitAtWord<a class="headerlink" href="#splitatword" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.splitAtWord(String, int)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>[] <code class="descname">splitAtWord</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> value</em>, int<em> splitPoint</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.splitAtWord(String, int)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="validacellulare">
+<h3>validaCellulare<a class="headerlink" href="#validacellulare" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.components.YadaUtil.validaCellulare(String)">
+public static boolean <code class="descname">validaCellulare</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> cellulare</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.components.YadaUtil.validaCellulare(String)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

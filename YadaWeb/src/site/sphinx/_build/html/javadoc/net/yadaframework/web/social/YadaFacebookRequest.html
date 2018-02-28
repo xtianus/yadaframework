@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>YadaFacebookRequest &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="../../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     'master',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../../index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../intro.html">     intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../tutorial.html">     tutorial</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">YadaFacebookRequest</a><ul>
+<li><a class="reference internal" href="#fields">Fields</a><ul>
+<li><a class="reference internal" href="#api-page-post-as-admin">API_PAGE_POST_AS_ADMIN</a></li>
+<li><a class="reference internal" href="#api-profile">API_PROFILE</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#constructors">Constructors</a><ul>
+<li><a class="reference internal" href="#id1">YadaFacebookRequest</a></li>
+<li><a class="reference internal" href="#id2">YadaFacebookRequest</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#checkforerrors">checkForErrors</a></li>
+<li><a class="reference internal" href="#facebookcurrentprofile">facebookCurrentProfile</a></li>
+<li><a class="reference internal" href="#facebookpagepostasadmin">facebookPagePostAsAdmin</a></li>
+<li><a class="reference internal" href="#gethttpmethod">getHttpMethod</a></li>
+<li><a class="reference internal" href="#getparameters">getParameters</a></li>
+<li><a class="reference internal" href="#geturl">getUrl</a></li>
+<li><a class="reference internal" href="#setparameter">setParameter</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../../../../../_sources/javadoc/net/yadaframework/web/social/YadaFacebookRequest.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="yadafacebookrequest">
+<h1>YadaFacebookRequest<a class="headerlink" href="#yadafacebookrequest" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.yadaframework.web.social.YadaFacebookRequest">
+public class <code class="descname">YadaFacebookRequest</code><a class="headerlink" href="#net.yadaframework.web.social.YadaFacebookRequest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="section" id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="api-page-post-as-admin">
+<h3>API_PAGE_POST_AS_ADMIN<a class="headerlink" href="#api-page-post-as-admin" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.web.social.YadaFacebookRequest.API_PAGE_POST_AS_ADMIN">
+public static final <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">API_PAGE_POST_AS_ADMIN</code><a class="headerlink" href="#net.yadaframework.web.social.YadaFacebookRequest.API_PAGE_POST_AS_ADMIN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="api-profile">
+<h3>API_PROFILE<a class="headerlink" href="#api-profile" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.web.social.YadaFacebookRequest.API_PROFILE">
+public static final <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">API_PROFILE</code><a class="headerlink" href="#net.yadaframework.web.social.YadaFacebookRequest.API_PROFILE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch profile</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="constructors">
+<h2>Constructors<a class="headerlink" href="#constructors" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>YadaFacebookRequest<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="constructor">
+<dt id="net.yadaframework.web.social.YadaFacebookRequest.YadaFacebookRequest(String)">
+public <code class="descname">YadaFacebookRequest</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> accessToken</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.social.YadaFacebookRequest.YadaFacebookRequest(String)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id2">
+<h3>YadaFacebookRequest<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="constructor">
+<dt id="net.yadaframework.web.social.YadaFacebookRequest.YadaFacebookRequest(String, String, HttpMethod)">
+public <code class="descname">YadaFacebookRequest</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> api</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> accessToken</em>, <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/http/HttpMethod.html" title="org.springframework.http.HttpMethod">HttpMethod</a><em> httpMethod</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.social.YadaFacebookRequest.YadaFacebookRequest(String, String, HttpMethod)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic request</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>api</strong> – </li>
+<li><strong>accessToken</strong> – </li>
+<li><strong>httpMethod</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="checkforerrors">
+<h3>checkForErrors<a class="headerlink" href="#checkforerrors" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.social.YadaFacebookRequest.checkForErrors(String)">
+ void <code class="descname">checkForErrors</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> body</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.social.YadaFacebookRequest.checkForErrors(String)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="facebookcurrentprofile">
+<h3>facebookCurrentProfile<a class="headerlink" href="#facebookcurrentprofile" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.social.YadaFacebookRequest.facebookCurrentProfile()">
+public void <code class="descname">facebookCurrentProfile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.social.YadaFacebookRequest.facebookCurrentProfile()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="facebookpagepostasadmin">
+<h3>facebookPagePostAsAdmin<a class="headerlink" href="#facebookpagepostasadmin" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.social.YadaFacebookRequest.facebookPagePostAsAdmin(String)">
+public void <code class="descname">facebookPagePostAsAdmin</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> linkToPost</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.social.YadaFacebookRequest.facebookPagePostAsAdmin(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a request for a Post as the page admin (not as the user)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>linkToPost</strong> – the link to post</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="gethttpmethod">
+<h3>getHttpMethod<a class="headerlink" href="#gethttpmethod" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.social.YadaFacebookRequest.getHttpMethod()">
+ <a class="reference external" href="https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/http/HttpMethod.html" title="org.springframework.http.HttpMethod">HttpMethod</a> <code class="descname">getHttpMethod</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.social.YadaFacebookRequest.getHttpMethod()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getparameters">
+<h3>getParameters<a class="headerlink" href="#getparameters" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.social.YadaFacebookRequest.getParameters()">
+ <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Map.html" title="java.util.Map">Map</a>&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt; <code class="descname">getParameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.social.YadaFacebookRequest.getParameters()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="geturl">
+<h3>getUrl<a class="headerlink" href="#geturl" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.social.YadaFacebookRequest.getUrl()">
+ <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getUrl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.social.YadaFacebookRequest.getUrl()" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">he url like “<a class="reference external" href="https://graph.facebook.com/v2.3/me?access_token=uefbise&amp;id=23423">https://graph.facebook.com/v2.3/me?access_token=uefbise&amp;id=23423</a>”</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="setparameter">
+<h3>setParameter<a class="headerlink" href="#setparameter" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.web.social.YadaFacebookRequest.setParameter(String, String)">
+public void <code class="descname">setParameter</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> name</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> value</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.web.social.YadaFacebookRequest.setParameter(String, String)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

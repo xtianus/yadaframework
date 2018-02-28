@@ -8,6 +8,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -21,14 +23,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaSocialCredentials implements Serializable {
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
-	
-	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date modified;
 	
 	// For optimistic locking
 	@Version
@@ -88,14 +86,6 @@ public class YadaSocialCredentials implements Serializable {
 
 	public void setYadaUserCredentials(YadaUserCredentials yadaUserCredentials) {
 		this.yadaUserCredentials = yadaUserCredentials;
-	}
-
-	public Date getModified() {
-		return modified;
-	}
-
-	public void setModified(Date modified) {
-		this.modified = modified;
 	}
 
 	public long getVersion() {

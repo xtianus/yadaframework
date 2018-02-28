@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>YadaRegexUtil &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     'master',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">     intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">     tutorial</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">YadaRegexUtil</a><ul>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#creatematcher">createMatcher</a></li>
+<li><a class="reference internal" href="#id1">createMatcher</a></li>
+<li><a class="reference internal" href="#escapedots">escapeDots</a></li>
+<li><a class="reference internal" href="#getorcreatepattern">getOrCreatePattern</a></li>
+<li><a class="reference internal" href="#id2">getOrCreatePattern</a></li>
+<li><a class="reference internal" href="#replaceinregion">replaceInRegion</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../../../../_sources/javadoc/net/yadaframework/raw/YadaRegexUtil.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="yadaregexutil">
+<h1>YadaRegexUtil<a class="headerlink" href="#yadaregexutil" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.yadaframework.raw.YadaRegexUtil">
+public class <code class="descname">YadaRegexUtil</code><a class="headerlink" href="#net.yadaframework.raw.YadaRegexUtil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Miscellaneous Regular Expression functions</p>
+</dd></dl>
+
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="creatematcher">
+<h3>createMatcher<a class="headerlink" href="#creatematcher" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaRegexUtil.createMatcher(String, String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/regex/Matcher.html" title="java.util.regex.Matcher">Matcher</a> <code class="descname">createMatcher</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> source</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> pattern</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaRegexUtil.createMatcher(String, String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a matcher for the given source document and pattern. Compiled Pattern objects are cached.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>source</strong> – the document that has to be matched against the pattern</li>
+<li><strong>pattern</strong> – the pattern to find in the document, or null for null result</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Matcher ready for use, or null if pattern is null</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h3>createMatcher<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaRegexUtil.createMatcher(String, String, Map)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/regex/Matcher.html" title="java.util.regex.Matcher">Matcher</a> <code class="descname">createMatcher</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> source</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> pattern</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Map.html" title="java.util.Map">Map</a>&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" title="java.util.regex.Pattern">Pattern</a>&gt;<em> patternCache</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaRegexUtil.createMatcher(String, String, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a matcher for the given source document and pattern. Compiled Pattern objects are cached.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>source</strong> – the document that has to be matched against the pattern</li>
+<li><strong>pattern</strong> – the pattern to find in the document, or null for null result</li>
+<li><strong>patternCache</strong> – the Hastable that holds compiled patterns, can be null to use the default cache</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new Matcher ready for use, or null if pattern is null</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="escapedots">
+<h3>escapeDots<a class="headerlink" href="#escapedots" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaRegexUtil.escapeDots(String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">escapeDots</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> source</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaRegexUtil.escapeDots(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Escapes dots in regular expressions, replacing them with .</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getorcreatepattern">
+<h3>getOrCreatePattern<a class="headerlink" href="#getorcreatepattern" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaRegexUtil.getOrCreatePattern(String)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" title="java.util.regex.Pattern">Pattern</a> <code class="descname">getOrCreatePattern</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> pattern</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaRegexUtil.getOrCreatePattern(String)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a compiled Pattern, either from the cache or new.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pattern</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a Pattern or null id the pattern parameter is null</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id2">
+<h3>getOrCreatePattern<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaRegexUtil.getOrCreatePattern(String, Map)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" title="java.util.regex.Pattern">Pattern</a> <code class="descname">getOrCreatePattern</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> pattern</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Map.html" title="java.util.Map">Map</a>&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" title="java.util.regex.Pattern">Pattern</a>&gt;<em> patternCache</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaRegexUtil.getOrCreatePattern(String, Map)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a compiled Pattern, either from the cache or new, with case-insensitive and dotall flags set.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pattern</strong> – </li>
+<li><strong>patternCache</strong> – a Hashtable to store compiled patterns. Can be null to use the default.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a Pattern or null id the pattern parameter is null</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="replaceinregion">
+<h3>replaceInRegion<a class="headerlink" href="#replaceinregion" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.raw.YadaRegexUtil.replaceInRegion(String, String, String, boolean, YadaRegexReplacer)">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">replaceInRegion</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> source</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> startPattern</em>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> endPattern</em>, boolean<em> repeatRegion</em>, <a class="reference internal" href="YadaRegexReplacer.html#net.yadaframework.raw.YadaRegexReplacer" title="net.yadaframework.raw.YadaRegexReplacer">YadaRegexReplacer</a><em> replacer</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.raw.YadaRegexUtil.replaceInRegion(String, String, String, boolean, YadaRegexReplacer)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a find-and-replace in a delimited area of the source</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>source</strong> – the text to be searched</li>
+<li><strong>startPattern</strong> – pattern that identifies the region start</li>
+<li><strong>endPattern</strong> – pattern that identifies the region end</li>
+<li><strong>repeatRegion</strong> – true if the region has to be searched many times in the source</li>
+<li><strong>replacer</strong> – the object performing the replacement within the region</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the replaced text</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

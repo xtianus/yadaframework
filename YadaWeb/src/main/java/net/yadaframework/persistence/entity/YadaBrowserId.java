@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -26,13 +28,9 @@ import javax.persistence.Version;
 		uniqueConstraints = @UniqueConstraint(columnNames={"mostSigBits", "leastSigBits"})
 )
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaBrowserId implements Serializable {
 	private static final long serialVersionUID = -5673120637677663672L;
-	
-	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date modified;
 	
 	// For optimistic locking
 	@Version
@@ -98,14 +96,6 @@ public class YadaBrowserId implements Serializable {
 	}
 	public void setLeastSigBits(long leastSigBits) {
 		this.leastSigBits = leastSigBits;
-	}
-
-	public Date getModified() {
-		return modified;
-	}
-
-	public void setModified(Date modified) {
-		this.modified = modified;
 	}
 
 	public long getVersion() {

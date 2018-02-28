@@ -42,8 +42,8 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired private YadaUserDetailsService userDetailsService;
 	@Autowired private YadaConfiguration yadaConfiguration;
 
-	@Autowired YadaAuthenticationFailureHandler failureHandler;
-	@Autowired YadaAuthenticationSuccessHandler successHandler;
+	@Autowired protected YadaAuthenticationFailureHandler failureHandler;
+	@Autowired protected YadaAuthenticationSuccessHandler successHandler;
 	
 	/**
 	 * Configures basic security settings. Must be overridden to configure url protections.
@@ -51,7 +51,7 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 	public void configure(HttpSecurity http) throws Exception {
 		failureHandler.setFailureUrlAjaxRequest("/ajaxLoginForm"); 
 		failureHandler.setFailureUrlNormalRequest("/login"); 
-		successHandler.setDefaultTargetUrlAjaxRequest("/ajaxLoginOk"); // Ritorna "loginSuccess"
+		successHandler.setDefaultTargetUrlAjaxRequest("/ajaxLoginOk"); // Returns the string "loginSuccess"
 		successHandler.setDefaultTargetUrlNormalRequest("/");
 		
 		http
@@ -66,7 +66,7 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 		    	.and()
 		    .formLogin()
 		        .loginPage("/login") // url del form di login (GET)
-		        .loginProcessingUrl("/login") // url dove postare il form (POST)
+		        .loginProcessingUrl("/loginPost") // url dove postare il form (POST)
 		        .failureHandler(failureHandler)
 		        .successHandler(successHandler);
 	//        .defaultSuccessUrl("/");

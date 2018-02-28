@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -20,14 +22,10 @@ import javax.persistence.Version;
 @Table(
 	    uniqueConstraints = @UniqueConstraint(columnNames={"name", "clauseVersion"})
 	)
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaClause implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date modified;
-	
 	// For optimistic locking
 	@Version
 	private long version;
@@ -75,14 +73,6 @@ public class YadaClause implements Serializable {
 
 	public void setClauseVersion(int version) {
 		this.clauseVersion = version;
-	}
-
-	public Date getModified() {
-		return modified;
-	}
-
-	public void setModified(Date modified) {
-		this.modified = modified;
 	}
 
 	public long getVersion() {

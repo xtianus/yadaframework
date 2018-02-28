@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>YadaPersistentEnum &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="../../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     'master',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../../index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../intro.html">     intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../tutorial.html">     tutorial</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">YadaPersistentEnum</a><ul>
+<li><a class="reference internal" href="#fields">Fields</a><ul>
+<li><a class="reference internal" href="#langtotext">langToText</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#equals">equals</a></li>
+<li><a class="reference internal" href="#id1">equals</a></li>
+<li><a class="reference internal" href="#getenum">getEnum</a></li>
+<li><a class="reference internal" href="#getenumclassname">getEnumClassName</a></li>
+<li><a class="reference internal" href="#getenumname">getEnumName</a></li>
+<li><a class="reference internal" href="#getenumordinal">getEnumOrdinal</a></li>
+<li><a class="reference internal" href="#getid">getId</a></li>
+<li><a class="reference internal" href="#getlangtotext">getLangToText</a></li>
+<li><a class="reference internal" href="#getlocaltext">getLocalText</a></li>
+<li><a class="reference internal" href="#hashcode">hashCode</a></li>
+<li><a class="reference internal" href="#setenum">setEnum</a></li>
+<li><a class="reference internal" href="#setenumclassname">setEnumClassName</a></li>
+<li><a class="reference internal" href="#setenumname">setEnumName</a></li>
+<li><a class="reference internal" href="#setenumordinal">setEnumOrdinal</a></li>
+<li><a class="reference internal" href="#setid">setId</a></li>
+<li><a class="reference internal" href="#setlangtotext">setLangToText</a></li>
+<li><a class="reference internal" href="#toenum">toEnum</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../../../../../_sources/javadoc/net/yadaframework/persistence/entity/YadaPersistentEnum.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <div class="section" id="yadapersistentenum">
+<h1>YadaPersistentEnum<a class="headerlink" href="#yadapersistentenum" title="Permalink to this headline">¶</a></h1>
+<dl class="type">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum">
+public class <code class="descname">YadaPersistentEnum</code>&lt;E extends Enum&lt;E&gt;&gt;<a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Needed to store a localized enum in the database, on which to perform localized search and sort operations. To retrieve the localized value call <a class="reference internal" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.getLocalText()" title="net.yadaframework.persistence.entity.YadaPersistentEnum.getLocalText()"><code class="xref java java-ref docutils literal"><span class="pre">YadaPersistentEnum.getLocalText()</span></code></a> For every Enum class in Java there is a number of rows in the database holding the enum class name and its ordinals. For each such row there are a number of rows holding the localized values. E.g. the “ProcessState” enum with values “RUNNING” and “STOPPED” produces the following rows:</p>
+<p>Table YadaPersistentEnum (logical view)</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="21%" />
+<col width="21%" />
+<col width="19%" />
+<col width="39%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">enumClassName</th>
+<th class="head">enumName</th>
+<th class="head">enumOrdinal</th>
+<th class="head">langToText</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>ProcessState</td>
+<td>RUNNING</td>
+<td>0</td>
+<td><table border="1" class="first last docutils">
+<colgroup>
+<col width="32%" />
+<col width="68%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>en_US</td>
+<td>Executing</td>
+</tr>
+<tr class="row-even"><td>it_IT</td>
+<td>In esecuzione</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr class="row-odd"><td>en_US</td>
+<td>Executing</td>
+<td colspan="2">&#160;</td>
+</tr>
+<tr class="row-even"><td>it_IT</td>
+<td>In esecuzione</td>
+<td colspan="2">&#160;</td>
+</tr>
+<tr class="row-odd"><td>ProcessState</td>
+<td>STOPPED</td>
+<td>1</td>
+<td><table border="1" class="first last docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>en_US</td>
+<td>Idle</td>
+</tr>
+<tr class="row-even"><td>it_IT</td>
+<td>Fermo</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr class="row-odd"><td>en_US</td>
+<td>Idle</td>
+<td colspan="2">&#160;</td>
+</tr>
+<tr class="row-even"><td>it_IT</td>
+<td>Fermo</td>
+<td colspan="2">&#160;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="langtotext">
+<h3>langToText<a class="headerlink" href="#langtotext" title="Permalink to this headline">¶</a></h3>
+<dl class="field">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.langToText">
+ <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Map.html" title="java.util.Map">Map</a>&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt; <code class="descname">langToText</code><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.langToText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="equals">
+<h3>equals<a class="headerlink" href="#equals" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.equals(Enum)">
+public boolean <code class="descname">equals</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Enum.html" title="java.lang.Enum">Enum</a>&lt;? extends <a class="reference internal" href="../../core/YadaLocalEnum.html#net.yadaframework.core.YadaLocalEnum" title="net.yadaframework.core.YadaLocalEnum">YadaLocalEnum</a>&lt;?&gt;&gt;<em> enumValue</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.equals(Enum)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check this instance with a normal enum for equality</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>enumValue</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h3>equals<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.equals(Object)">
+public boolean <code class="descname">equals</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html" title="java.lang.Object">Object</a><em> obj</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.equals(Object)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getenum">
+<h3>getEnum<a class="headerlink" href="#getenum" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.getEnum()">
+public E <code class="descname">getEnum</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.getEnum()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the localised enum back to a normal Enum instance. Same as toEnum()</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference internal" href="../../exceptions/YadaInvalidValueException.html#net.yadaframework.exceptions.YadaInvalidValueException" title="net.yadaframework.exceptions.YadaInvalidValueException"><strong>YadaInvalidValueException</strong></a> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>See also:</strong> <code class="xref java java-ref docutils literal"><span class="pre">.toEnum()</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="getenumclassname">
+<h3>getEnumClassName<a class="headerlink" href="#getenumclassname" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.getEnumClassName()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getEnumClassName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.getEnumClassName()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getenumname">
+<h3>getEnumName<a class="headerlink" href="#getenumname" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.getEnumName()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getEnumName</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.getEnumName()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getenumordinal">
+<h3>getEnumOrdinal<a class="headerlink" href="#getenumordinal" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.getEnumOrdinal()">
+public int <code class="descname">getEnumOrdinal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.getEnumOrdinal()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getid">
+<h3>getId<a class="headerlink" href="#getid" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.getId()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="java.lang.Long">Long</a> <code class="descname">getId</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.getId()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getlangtotext">
+<h3>getLangToText<a class="headerlink" href="#getlangtotext" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.getLangToText()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Map.html" title="java.util.Map">Map</a>&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt; <code class="descname">getLangToText</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.getLangToText()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getlocaltext">
+<h3>getLocalText<a class="headerlink" href="#getlocaltext" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.getLocalText()">
+public <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a> <code class="descname">getLocalText</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.getLocalText()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the localized value in the current locale</p>
+</dd></dl>
+
+</div>
+<div class="section" id="hashcode">
+<h3>hashCode<a class="headerlink" href="#hashcode" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.hashCode()">
+public int <code class="descname">hashCode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.hashCode()" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setenum">
+<h3>setEnum<a class="headerlink" href="#setenum" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.setEnum(E)">
+public void <code class="descname">setEnum</code><span class="sig-paren">(</span>E<em> enumValue</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.setEnum(E)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the attributes of a normal enum into this instance, but not the localized text</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>enumValue</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="setenumclassname">
+<h3>setEnumClassName<a class="headerlink" href="#setenumclassname" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.setEnumClassName(String)">
+public void <code class="descname">setEnumClassName</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> enumClassName</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.setEnumClassName(String)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setenumname">
+<h3>setEnumName<a class="headerlink" href="#setenumname" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.setEnumName(String)">
+public void <code class="descname">setEnumName</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a><em> enumName</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.setEnumName(String)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setenumordinal">
+<h3>setEnumOrdinal<a class="headerlink" href="#setenumordinal" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.setEnumOrdinal(int)">
+public void <code class="descname">setEnumOrdinal</code><span class="sig-paren">(</span>int<em> enumOrdinal</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.setEnumOrdinal(int)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setid">
+<h3>setId<a class="headerlink" href="#setid" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.setId(Long)">
+public void <code class="descname">setId</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/Long.html" title="java.lang.Long">Long</a><em> id</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.setId(Long)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="setlangtotext">
+<h3>setLangToText<a class="headerlink" href="#setlangtotext" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.setLangToText(Map)">
+public void <code class="descname">setLangToText</code><span class="sig-paren">(</span><a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/util/Map.html" title="java.util.Map">Map</a>&lt;<a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>, <a class="reference external" href="http://docs.oracle.com/javase/8/docs/api/java/lang/String.html" title="java.lang.String">String</a>&gt;<em> langToText</em><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.setLangToText(Map)" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="toenum">
+<h3>toEnum<a class="headerlink" href="#toenum" title="Permalink to this headline">¶</a></h3>
+<dl class="method">
+<dt id="net.yadaframework.persistence.entity.YadaPersistentEnum.toEnum()">
+public E <code class="descname">toEnum</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#net.yadaframework.persistence.entity.YadaPersistentEnum.toEnum()" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the localised enum back to a normal Enum instance. Same as getEnum()</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference internal" href="../../exceptions/YadaInvalidValueException.html#net.yadaframework.exceptions.YadaInvalidValueException" title="net.yadaframework.exceptions.YadaInvalidValueException"><strong>YadaInvalidValueException</strong></a> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>See also:</strong> <code class="xref java java-ref docutils literal"><span class="pre">.getEnum()</span></code></p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

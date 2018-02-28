@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<%/* Careful when editing html templates because $ must be escaped with ${"\$"} unless it is a groovy variable */%>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:yada="http://www.yadaframework.net">
+<head>
+	<meta charset="UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1">
+	<!-- 
+    <link rel="stylesheet" type="text/css" yada:href="@{/static/bootstrap-3.3.7/css/bootstrap-theme.min.css}"/>
+    <link rel="stylesheet" type="text/css" yada:href="@{/static/bootstrap-3.3.7/css/bootstrap.min.css}"/>
+    <script th:src="@{/static/jquery-3.3.1.min.js}"></script>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+	 -->
+	<link th:if="${"\$"}{@config.developmentEnvironment}" rel="stylesheet" type="text/css" yada:href="@{/yadares/css/yada.css}" />
+    <link th:if="${"\$"}{!@config.developmentEnvironment}" rel="stylesheet" type="text/css" yada:href="@{/res/css/yada.min.css}" />
+	<link rel="stylesheet" type="text/css" yada:href="@{|/res/css/$acronym${"\$"}{@config.min}.css|}" />
+</head>
+<body>
+<header>
+	<p>This is the header</p>
+</header>
+</body>
+</html>

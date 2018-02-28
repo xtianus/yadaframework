@@ -20,6 +20,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -41,14 +42,14 @@ public class YadaNotifyData {
 	YadaNotifyData(Model model, MessageSource messageSource, Locale locale) {
 		this.model = model;
 		this.messageSource = messageSource;
-		this.locale = locale;
+		this.locale = locale==null?LocaleContextHolder.getLocale():locale;
 	}
 	
 	// Package visibility
 	YadaNotifyData(RedirectAttributes redirectAttributes, MessageSource messageSource, Locale locale) {
 		this.redirectAttributes = redirectAttributes;
 		this.messageSource = messageSource;
-		this.locale = locale;
+		this.locale = locale==null?LocaleContextHolder.getLocale():locale;
 	}
 	
 	/**
@@ -106,7 +107,7 @@ public class YadaNotifyData {
 		if (model!=null) {
 			model.addAttribute(KEY_NOTIFICATION_AUTOCLOSE, milliseconds);
 		} else {
-			redirectAttributes.addAttribute(KEY_NOTIFICATION_AUTOCLOSE, milliseconds);
+			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_AUTOCLOSE, milliseconds);
 		}
 		return this;
 	}
@@ -118,7 +119,7 @@ public class YadaNotifyData {
 		if (model!=null) {
 			model.addAttribute(KEY_NOTIFICATION_RELOADONCLOSE, KEY_NOTIFICATION_RELOADONCLOSE);
 		} else {
-			redirectAttributes.addAttribute(KEY_NOTIFICATION_RELOADONCLOSE, KEY_NOTIFICATION_RELOADONCLOSE);
+			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_RELOADONCLOSE, KEY_NOTIFICATION_RELOADONCLOSE);
 		}
 		return this;
 	}
@@ -145,7 +146,7 @@ public class YadaNotifyData {
 		if (model!=null) {
 			model.addAttribute(KEY_NOTIFICATION_REDIRECT, path);
 		} else {
-			redirectAttributes.addAttribute(KEY_NOTIFICATION_REDIRECT, path);
+			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_REDIRECT, path);
 		}
 		return this;
 	}

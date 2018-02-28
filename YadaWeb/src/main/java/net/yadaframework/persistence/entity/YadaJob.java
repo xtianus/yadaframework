@@ -3,6 +3,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,40 +23,33 @@ import javax.persistence.Version;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.util.concurrent.ListenableFuture;
 
 // TODO spostare in YadaBones?
 
 /**
- * The base class for jobs handled by the YadaScheduler
- *
+ * The base class for jobs handled by the YadaScheduler.
+ * Subclasses must implement the run() method.
+ * Uses joined inheritance so that subclasses have their own table; the subclass id, which must not be declared in java but exists in the table, gets the same value as the YadaJob id.
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class YadaJob implements Runnable {
+public abstract class YadaJob implements Callable<Void> {
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
-	@Transient
-	protected ApplicationContext applicationContext;
-
-	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
-	protected Date modified;
-	
-	// For optimistic locking
-	@Version
-	protected long version;
+//	// For optimistic locking
+//	@Version
+//	protected long version;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
 
 	@OneToOne(fetch = FetchType.EAGER)
-	protected YadaPersistentEnum<YadaJobState> jobStateObject;
+	private YadaPersistentEnum<YadaJobState> jobStateObject = YadaJobState.PAUSED.toYadaPersistentEnum();
 	
 	protected boolean jobGroupPaused = false;
 	
@@ -113,12 +107,16 @@ public abstract class YadaJob implements Runnable {
 	 * (true by default)
 	 */
 	protected boolean jobRecoverable = true;
+
+	/**
+	 * Should be incremented every time a job does not execute successfully and set to zero on successful execution.
+	 */
+	protected int errorStreakCount = 0;
 	
 	/**
-	 * The time at which the job was run - null if the job is not in the RUNNING state
+	 * The time at which the job was started - null if the job is not in the RUNNING state.
 	 */
-	@Transient
-	protected Date jobRunTime = null;
+	protected Date jobStartTime = null;
 	
 	/**
 	 * True when the current invocation is on a job that was running when the server crashed and has the jobRecoverable flag true.
@@ -126,6 +124,12 @@ public abstract class YadaJob implements Runnable {
 	 */
 	@Transient
 	protected boolean recovered = false;
+	
+	/**
+	 * Handle returned by ListeningExecutorService.submit() - internal use only
+	 */
+	@Transient
+	public ListenableFuture<Void> yadaInternalJobHandle;
 	
 	/**
 	 * Needed for DataTables integration
@@ -156,9 +160,8 @@ public abstract class YadaJob implements Runnable {
 	
 	/**
 	 * Set the job state to active and return the previous state
-	 * @return
+	 * @return the previous state
 	 */
-	@Transient
 	public YadaJobState activate() {
 		YadaJobState result = getJobState();
 		this.jobStateObject = YadaJobState.ACTIVE.toYadaPersistentEnum();
@@ -167,9 +170,8 @@ public abstract class YadaJob implements Runnable {
 	
 	/**
 	 * Set the job state to paused and return the previous state
-	 * @return
+	 * @return the previous state
 	 */
-	@Transient
 	public YadaJobState pause() {
 		YadaJobState result = getJobState();
 		this.jobStateObject = YadaJobState.PAUSED.toYadaPersistentEnum();
@@ -180,10 +182,19 @@ public abstract class YadaJob implements Runnable {
 	 * Set the job state to disabled and return the previous state
 	 * @return
 	 */
-	@Transient
 	public YadaJobState disable() {
 		YadaJobState result = getJobState();
 		this.jobStateObject = YadaJobState.DISABLED.toYadaPersistentEnum();
+		return result;
+	}
+	
+	/**
+	 * Set the job state to completed and return the previous state
+	 * @return
+	 */
+	public YadaJobState complete() {
+		YadaJobState result = getJobState();
+		this.jobStateObject = YadaJobState.COMPLETED.toYadaPersistentEnum();
 		return result;
 	}
 	
@@ -210,6 +221,14 @@ public abstract class YadaJob implements Runnable {
 	@Transient
 	public boolean isRunning() {
 		return getJobState() == YadaJobState.RUNNING;
+	}
+	
+	/**
+	 * Increment the error streak count returning the new value
+	 * @return
+	 */
+	public int incrementErrorStreak() {
+		return ++errorStreakCount;
 	}
 
 	/**
@@ -298,10 +317,22 @@ public abstract class YadaJob implements Runnable {
 		this.jobPriority = jobPriority;
 	}
 
+	/**
+	 * Do not use directly unless you know the implications. It could be stale and be different from the database value.
+	 * @return
+	 */
 	public YadaPersistentEnum<YadaJobState> getJobStateObject() {
 		return jobStateObject;
 	}
 
+	/**
+	 * Do not use directly unless you know the implications. It could be stale and overwrite a more recent value in the database.
+	 * @param jobStateObject
+	 */
+	public void setJobStateObject(YadaPersistentEnum<YadaJobState> jobStateObject) {
+		this.jobStateObject = jobStateObject;
+	}
+	
 	public boolean isJobRecoverable() {
 		return jobRecoverable;
 	}
@@ -310,10 +341,6 @@ public abstract class YadaJob implements Runnable {
 		this.jobRecoverable = recoverable;
 	}
 
-	public void setJobStateObject(YadaPersistentEnum<YadaJobState> jobStateObject) {
-		this.jobStateObject = jobStateObject;
-	}
-	
 	public void setJobScheduledTime(Date jobScheduledTime) {
 		this.jobScheduledTime = jobScheduledTime;
 	}
@@ -354,16 +381,12 @@ public abstract class YadaJob implements Runnable {
 		this.jobGroupPaused = jobGroupPaused;
 	}
 
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
+	public Date getJobStartTime() {
+		return jobStartTime;
 	}
 
-	public Date getJobRunTime() {
-		return jobRunTime;
-	}
-
-	public void setJobRunTime(Date jobRunTime) {
-		this.jobRunTime = jobRunTime;
+	public void setJobStartTime(Date jobRunTime) {
+		this.jobStartTime = jobRunTime;
 	}
 
 	public boolean isRecovered() {
@@ -374,16 +397,16 @@ public abstract class YadaJob implements Runnable {
 		this.recovered = recovered;
 	}
 
-	public Date getModified() {
-		return modified;
+//	public long getVersion() {
+//		return version;
+//	}
+
+	public int getErrorStreakCount() {
+		return errorStreakCount;
 	}
 
-	public void setModified(Date modified) {
-		this.modified = modified;
-	}
-
-	public long getVersion() {
-		return version;
+	public void setErrorStreakCount(int errorStreakCount) {
+		this.errorStreakCount = errorStreakCount;
 	}
 
 	

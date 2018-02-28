@@ -121,6 +121,7 @@ public class YadaNotify {
 	/**
 	 * Initialise the instance
 	 * @param model
+	 * @param locale
 	 * @param titleKeyAndArgs the title key, followed by optional arguments to be replaced in the localized value
 	 * @return
 	 */

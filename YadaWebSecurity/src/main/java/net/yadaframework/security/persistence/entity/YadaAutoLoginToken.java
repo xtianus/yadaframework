@@ -2,26 +2,41 @@ package net.yadaframework.security.persistence.entity;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Version;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonView;
+
+import net.yadaframework.web.YadaJsonView;
 
 /**
  * Consente di creare un'url da cui accedere direttamente a una pagina con login automatico
  *
  */
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaAutoLoginToken implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
+	
+	// For optimistic locking
+	@Version
+	protected long version;
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -79,6 +94,14 @@ public class YadaAutoLoginToken implements Serializable {
 
 	public void setTimestamp(Date timestamp) {
 		this.timestamp = timestamp;
+	}
+
+	public long getVersion() {
+		return version;
+	}
+
+	public void setVersion(long version) {
+		this.version = version;
 	}
 
 	
