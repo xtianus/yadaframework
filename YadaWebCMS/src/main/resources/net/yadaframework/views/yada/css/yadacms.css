@@ -1,0 +1,23 @@
+
+.yadaImageSorter {
+	position: relative;
+	max-width: 400px;
+	display: block;
+    margin: auto;
+    padding: 10px;
+}
+
+.yadaImageSorter img {
+	width: 100%;
+}
+
+.yadaImageSorter .commandBar {
+	font-size: 1.8em;
+}
+
+.yadaImageSorter .delete {
+    float: right;
+    padding-top: 5px;
+    color: red;
+}
+	

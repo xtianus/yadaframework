@@ -130,11 +130,6 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	@OneToOne(cascade=CascadeType.REMOVE, orphanRemoval=true)
 	protected YadaAttachedFile image;
 	
-
-	@Transient
-	protected MultipartFile galleryImage; // Just for the upload
-
-
 	/***********************************************************************/
 //	/* Lazy localized value fetching                                       */
 //
@@ -412,11 +407,4 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 		return null;
 	}
 
-	public MultipartFile getGalleryImage() {
-		return galleryImage;
-	}
-
-	public void setGalleryImage(MultipartFile galleryImage) {
-		this.galleryImage = galleryImage;
-	}
 }

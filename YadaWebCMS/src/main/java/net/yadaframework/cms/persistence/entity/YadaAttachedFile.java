@@ -13,10 +13,10 @@ import javax.persistence.Id;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 
-import org.hibernate.annotations.GenerationTime;
+import net.yadaframework.components.YadaUtil;
+import net.yadaframework.core.YadaConfiguration;
 
 /**
  * A "pointer" to a file that has been copied into the "contents" folder.
@@ -51,9 +51,18 @@ public class YadaAttachedFile {
 	 * Folder where the file is stored, relative to the contents folder
 	 */
 	protected String relativeFolderPath; // Relative to the "contents" folder
+	/**
+	 * When the CMS creates a mobile version of an image, the name is found here
+	 */
 	protected String filenameMobile; // only for images on mobile, null for no specific image 
+	/**
+	 * The desktop version of an image is here
+	 */
 	protected String filenameDesktop; // only for images on desktop, null for non-images
-	protected String filename; // only for non-images, or when no mobile size is specified (will be the same as filenameDesktop)
+	/**
+	 * Only for non-images, or when no mobile size is specified (will be the same as filenameDesktop)
+	 */
+	protected String filename;
 	
 	@ElementCollection
 	@Column(length=64)
@@ -74,7 +83,7 @@ public class YadaAttachedFile {
 	 * When set, the file is available only for the locale specified
 	 */
 	protected Locale forLocale;
-
+	
 	public Long getId() {
 		return id;
 	}
