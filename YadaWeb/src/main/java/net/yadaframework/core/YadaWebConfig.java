@@ -229,6 +229,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		 */
 		Set<String> patterns = new HashSet<>();
 		patterns.add("/yada/*"); // Start with "yada"
+		patterns.add("/yadacms/*"); // Start with "yadacms"
 		resolver.setResolvablePatterns(patterns);
 		resolver.setSuffix(".html");
 		resolver.setCharacterEncoding("UTF-8");

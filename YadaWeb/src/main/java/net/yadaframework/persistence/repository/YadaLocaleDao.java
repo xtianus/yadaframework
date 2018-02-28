@@ -2,10 +2,8 @@ package net.yadaframework.persistence.repository;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -55,9 +53,7 @@ public class YadaLocaleDao {
     	@SuppressWarnings("unchecked")
     	entityClass entity = (entityClass) em.find(entityClass, entityId);
     	if (entity!=null) {
-    		List<entityClass> list = new ArrayList<>();
-    		list.add(entity);
-    		YadaUtil.prefetchLocalizedStrings(list, entityClass);
+    		YadaUtil.prefetchLocalizedStrings(entity, entityClass);
     	}
     	return entity;
     }

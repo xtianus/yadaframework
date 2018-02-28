@@ -144,6 +144,20 @@ public class YadaUtil {
 			}
 		}
 	}
+	
+	/**
+	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
+	 * It must be called in a transaction.
+	 * @param fetchedEntity object fetched from database that may contain localized strings
+	 * @param targetClass type of fetchedEntities elements
+	 */
+	public static <targetClass> void prefetchLocalizedStrings(targetClass fetchedEntity, Class<?> targetClass) {
+		if (fetchedEntity!=null) {
+			List<targetClass> list = new ArrayList<>();
+			list.add(fetchedEntity);
+			prefetchLocalizedStrings(list, targetClass);
+		}
+	}
 
 	/**
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
@@ -161,13 +175,15 @@ public class YadaUtil {
 			public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
 				// Call the size() method on the localized field for each result object
 				for (Object object : fetchedEntities) {
-					try {
-						field.setAccessible(true);
-						Object fieldValue = field.get(object);
-						Method sizeMethod = Map.class.getMethod("size");
-						sizeMethod.invoke(fieldValue); // Load all the map
-					} catch (NoSuchMethodException | SecurityException | InvocationTargetException e) {
-						log.error("Failed to initialize field {} for object {} (ignored)", field, object);
+					if (object!=null) {
+						try {
+							field.setAccessible(true);
+							Object fieldValue = field.get(object);
+							Method sizeMethod = Map.class.getMethod("size");
+							sizeMethod.invoke(fieldValue); // Load all the map
+						} catch (NoSuchMethodException | SecurityException | InvocationTargetException e) {
+							log.error("Failed to initialize field {} for object {} (ignored)", field, object);
+						}
 					}
 				}
 			}
@@ -365,9 +381,9 @@ public class YadaUtil {
 	 * @param beanClass
 	 * @return
 	 */
-	public static Object getBean(Class beanClass, Object ... args) {
+	public static <beanClass> beanClass getBean(Class<?> beanClass, Object ... args) {
 		String beanName = StringUtils.uncapitalize(beanClass.getSimpleName());
-		return getBean(beanName, args);
+		return (beanClass) getBean(beanName, args);
 	}
 	
 	/**
