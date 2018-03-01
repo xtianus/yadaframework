@@ -219,7 +219,7 @@ public class YadaUtil {
 		if (fetchedEntity!=null) {
 			List<targetClass> list = new ArrayList<>();
 			list.add(fetchedEntity);
-			prefetchLocalizedStrings(list, targetClass);
+			prefetchLocalizedStringList(list, targetClass);
 		}
 	}
 
@@ -230,7 +230,7 @@ public class YadaUtil {
 	 * @param entityClass type of fetchedEntities elements
 	 * @param attributes the attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
 	 */
-	public static <entityClass> void prefetchLocalizedStrings(List<entityClass> entities, Class<?> entityClass, String...attributes) {
+	public static <entityClass> void prefetchLocalizedStringList(List<entityClass> entities, Class<?> entityClass, String...attributes) {
 		List<String> attributeNames = Arrays.asList(attributes);
 		if (entities==null || entities.isEmpty()) {
 			return;
