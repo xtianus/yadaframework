@@ -127,7 +127,7 @@ class YadaInitTask extends YadaProject {
 		for (filename in coreFiles) {
 			def target = filename-".txt"; // Remove the .txt
 			if (target == "XXXConfiguration.java") {
-				target = acronym.capitalize() + "XXXConfiguration.java"-"XXX";
+				target = acronym.capitalize() + (target-"XXX");
 			}
 			processTemplate("java/core", filename, target, javaCoreFolder);
 		}
@@ -135,7 +135,7 @@ class YadaInitTask extends YadaProject {
 		for (filename in webFiles) {
 			def target = filename-".txt";
 			if (target == "XXXSession.java") {
-				target = acronym.capitalize() + "XXXSession.java"-"XXX";
+				target = acronym.capitalize() + (target-"XXX");
 			}
 			processTemplate("java/web", filename, filename-".txt", javaWebFolder);
 		}
