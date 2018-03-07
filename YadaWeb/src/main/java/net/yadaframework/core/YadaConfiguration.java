@@ -141,8 +141,7 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
-	 * Returns the default locale when getting a string that doesn't have a value for the requested locale.
-	 * If the default locale is not set, the string will have an empty value and no attempt on another locale will be made.
+	 * Returns the configured default locale.
 	 * @return the default locale, or null if no default is set
 	 */
 	public Locale getDefaultLocale() {
