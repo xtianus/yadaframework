@@ -323,9 +323,14 @@ public class YadaSeleniumUtil {
 			log.debug("Clicco elemento che misura {} in {},{}", dimension, offx, offy);
 		}
 		try {
-			// Clicco sull'elemento
-			Actions actions = new Actions(webDriver); 
-			actions.moveToElement(webElement, offx, offy).click().build().perform();
+			if (dimension.width==0 && dimension.height==0) {
+				log.debug("Uso webElement.click()");
+				webElement.click();
+			} else {
+				// Clicco sull'elemento
+				Actions actions = new Actions(webDriver); 
+				actions.moveToElement(webElement, offx, offy).click().build().perform();
+			}
 		} catch (org.openqa.selenium.TimeoutException e) {
 			// The click worked but the page load failed
 			throw e;
