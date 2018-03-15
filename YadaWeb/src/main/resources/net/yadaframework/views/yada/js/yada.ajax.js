@@ -228,7 +228,39 @@
 		}
 		return false;
 	}	
+	
+	// Loads a data-yadaAjaxFragment
+	function loadAjaxFragment($toBeReplaced) {
+		var fetchUrl = $toBeReplaced.attr("data-yadaAjaxFragment");
+		if (fetchUrl!=null) {
+			$toBeReplaced.removeAttr('data-yadaAjaxFragment');
+			yada.ajax(fetchUrl, null, (function($replaceable){
+				return function(responseText, responseHtml) {
+					yada.initAjaxHandlersOn(responseHtml.children());
+					$replaceable.replaceWith(responseHtml.children());
+				}
+			})($toBeReplaced));
+		}
+	}
 
+	// The observer is called whenever a hidden parent (or self) of a yadaAjaxFragment becomes visible
+	var ajaxFragmentsVisibilityObserver = new MutationObserver(function(mutationsList) {
+		for (var record of mutationsList) {
+			var $node = $(record.target);
+			if ($node.is(":visible")) {
+				// Check the current node and all its children
+				var $nodeSet = $('[data-yadaAjaxFragment]:visible', $node);
+				if ($node.attr('data-yadaAjaxFragment')!=undefined) {
+					$nodeSet.push($node);
+				}
+				$nodeSet.each(function(){
+					loadAjaxFragment($(this));
+				});
+			}
+		}
+	});
+
+	
 	/**
 	 * Enables the loading of page fragments via ajax.
 	 * @param handler a function to call upon successful insertion, can be null
@@ -242,17 +274,24 @@
 		if ($target.length==0) {
 			$target = $element;
 		}
+
+		var config = { attributes: true, attributeFilter: ['style', 'class'] };
 		$('[data-yadaAjaxFragment]', $target).each(function() {
 			var $toBeReplaced=$(this);
 			var fetchUrl = $toBeReplaced.attr("data-yadaAjaxFragment");
 			if (fetchUrl!=null) {
-				$toBeReplaced.removeAttr('data-yadaAjaxFragment');
-				yada.ajax(fetchUrl, null, (function($replaceable){
-					return function(responseText, responseHtml) {
-						yada.initAjaxHandlersOn(responseHtml.children());
-						$replaceable.replaceWith(responseHtml.children());
-					}
-				})($toBeReplaced));
+				// If the element is visible, replace it now.
+				// If the element is not visible, set an observer to replace it when it becomes visible
+				var visible = $toBeReplaced.is(":visible");
+				if (visible) {
+					loadAjaxFragment($toBeReplaced);
+				} else {
+					ajaxFragmentsVisibilityObserver.observe(this, config);
+					// As the observer is not called when a parent changes, I have to set an observer on all the parents that are not currently visible
+					$toBeReplaced.parents(':hidden').each(function() {
+						ajaxFragmentsVisibilityObserver.observe(this, config);
+					});
+				}
 			}
 		});
 	};
