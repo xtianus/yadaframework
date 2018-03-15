@@ -119,7 +119,7 @@ public class AuditFilter extends OncePerRequestFilter {
 	protected void beforeRequest(HttpServletRequest request) {
 		String requestUri = request.getRequestURI();
 		String queryString = request.getQueryString();
-		boolean maliciousString = requestUri.contains(";") || queryString.contains(";");
+		boolean maliciousString = (requestUri!=null && requestUri.contains(";")) || (queryString!=null && queryString.contains(";"));
 		if (log.isInfoEnabled() || maliciousString) {
 			try {
 				String ajaxFlag = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"))?" (ajax)":"";
