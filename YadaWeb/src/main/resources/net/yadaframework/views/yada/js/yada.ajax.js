@@ -245,7 +245,7 @@
 
 	// The observer is called whenever a hidden parent (or self) of a yadaAjaxFragment becomes visible
 	var ajaxFragmentsVisibilityObserver = new MutationObserver(function(mutationsList) {
-		for (var record of mutationsList) {
+		for (var record in mutationsList) {
 			var $node = $(record.target);
 			if ($node.is(":visible")) {
 				// Check the current node and all its children
