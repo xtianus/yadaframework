@@ -109,66 +109,7 @@
 		}
 		return false;
 	}
-	
-//	// Opzioni per il form di login, gestito via ajaxForms (TODO da riscrivere senza ajaxForms che ormai viene usato solo per il login)
-//	var formLoginOptions = { 
-//			
-//			success: function(responseText, statusText, xhr, form) {
-//				yada.loaderOff();
-//				var responseHtml=$("<div>").html(responseText);
-//				if ("loginSuccess"==responseText) {
-//					$("#loginModal").remove();
-//					// window.location.reload(true); // true = skip cache // Non va bene perchè se è stata fatta una post, viene ripetuta!
-//					handlePostLoginHandler(responseHtml, responseText);
-//					return;
-//				}
-//				var dialog=$("#loginModalDialog", responseHtml);
-//				if (dialog.length>0) {
-//					// La risposta è ancora il form di login, che deve essere aggiornato
-//					$("#loginModal").children().remove();
-//					$("#loginModal").append(dialog);
-//					$('#loginForm').ajaxForm(formLoginOptions); // Login POST via Ajax
-//					//$("#loginModal").modal('show');
-//				    return;
-//				}
-//	
-//				// Se è stato ritornato un confirm, lo mostro e abilito l'esecuzione dell'ajax e dell'handler
-//				if (yada.handleModalConfirm(responseHtml, postLoginUrl, postLoginData, postLoginHandler, postLoginType)) {
-//					return;
-//				}
-//				
-//				// Gestisce la pwd scaduta
-//				var pwdChange=$(responseHtml).find("form[name='form-change-password']");
-//				if (pwdChange.length>0) {
-//					$("#loginModal").modal('hide');
-//					document.open();
-//					document.write(responseText);
-//					document.close();
-//					return;
-//				}			
-//				
-//				var loadedModalDialog=$(responseHtml).find(".modal-dialog");
-//				if (loadedModalDialog.length>0) {
-//					// La risposta è un qualunque modal, che viene mostrato alla chiusura del modal di login
-//					// (se aprissi subito il nuovo modal, per qualche ragione non scrollerebbe)
-//					$("#loginModal").on('hidden.bs.modal', function (e) {
-//						$("#ajaxModal").children().remove();
-//						$("#ajaxModal").append(loadedModalDialog);
-//						$('#ajaxModal:hidden').modal('show'); // Mostro il modal se non è già aperto
-//						enableAjaxForms(); // Abilita l'invio di un eventuale form via ajax
-//					});
-//					$("#loginModal").modal('hide');
-//					return;
-//				}
-//				
-//				// Era una chiamata ajax che è andata in session timeout e ha richiesto un form login.
-//				// Viene eseguito l'eventale handler passandogli la pagina inizialmente richiesta.
-//				$("#loginModal").modal('hide');
-//				handlePostLoginHandler(responseHtml, responseText);
-//				
-//			}
-//		}; 
-	
+
 	// Al ritorno di un post di login, mostra eventuali notify ed esegue l'eventuale handler, oppure ricarica la pagina corrente se l'handler non c'è.
 	yada.handlePostLoginHandler = function(responseHtml, responseText) {
 		var isError = yada.isNotifyError(responseHtml);
@@ -230,7 +171,7 @@
 	}	
 	
 	function hasNoLoader($element) {
-		return $element.hasClass("noLoader") || $toBeReplaced.hasClass("noloader");
+		return $element.hasClass("noLoader") || $element.hasClass("noloader");
 	}
 	
 	// Loads a data-yadaAjaxFragment
@@ -896,7 +837,7 @@
 				}			
 				
 				// Se è stato ritornato un confirm, lo mostro e abilito l'esecuzione dell'ajax e dell'handler
-				if (yada.handleModalConfirm(responseHtml, url, data, successHandler, type)) {
+				if (yada.handleModalConfirm(responseHtml, url, data, successHandler, method)) {
 					yada.loaderOff();
 					return;
 				}
