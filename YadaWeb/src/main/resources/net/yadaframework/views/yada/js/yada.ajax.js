@@ -229,17 +229,22 @@
 		return false;
 	}	
 	
+	function hasNoLoader($element) {
+		return $element.hasClass("noLoader") || $toBeReplaced.hasClass("noloader");
+	}
+	
 	// Loads a data-yadaAjaxFragment
 	function loadAjaxFragment($toBeReplaced) {
 		var fetchUrl = $toBeReplaced.attr("data-yadaAjaxFragment");
 		if (fetchUrl!=null) {
 			$toBeReplaced.removeAttr('data-yadaAjaxFragment');
+			var noLoader = hasNoLoader($toBeReplaced);
 			yada.ajax(fetchUrl, null, (function($replaceable){
 				return function(responseText, responseHtml) {
 					yada.initAjaxHandlersOn(responseHtml.children());
 					$replaceable.replaceWith(responseHtml.children());
 				}
-			})($toBeReplaced));
+			})($toBeReplaced), "POST", null, noLoader);
 		}
 	}
 
@@ -484,6 +489,7 @@
 		var data = null;
 		var value = [];
 		var name = $element.attr("name");
+		var noLoader = hasNoLoader($element);	
 		// In a select, set the data object to the selected option
 		if ($element.is("select")) {
 			$("option:selected", $element).each(function(){ // Could be a multiselect!
@@ -503,11 +509,11 @@
 			var cancelButton = $element.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 			yada.confirm(confirmText, function(result) {
 				if (result==true) {
-					yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, $element.attr('data-timeout'));
+					yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, $element.attr('data-timeout'), noLoader);
 				}
 			}, okButton, cancelButton);
 		} else {
-			yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element));
+			yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, null, noLoader);
 		}
 		return true; // Run other listeners
 	}
@@ -681,6 +687,7 @@
 				}
 			}
 			e.preventDefault();
+			var noLoader = hasNoLoader($form);
 			var action = $(this).attr('action');
 			// Check if it must be a multipart formdata
 			var multipart = $form.attr("enctype")=="multipart/form-data";
@@ -700,6 +707,7 @@
 				if (buttonAction!=null) {
 					action = buttonAction;
 				}
+				noLoader = hasNoLoader($(clickedButton));
 			}
 			if (!multipart) {
 				data = $.param(data);
@@ -747,7 +755,8 @@
 			};
 			var method = $(this).attr('method') || "POST";
 			// yada.ajax($(this).attr('action'), $.param(data), joinedHandler.bind(this), $(this).attr('method'), $(this).attr('data-timeout'));
-			yada.ajax(action, data, joinedHandler.bind(this), method, $(this).attr('data-timeout'));
+			
+			yada.ajax(action, data, joinedHandler.bind(this), method, $(this).attr('data-timeout'), noLoader);
 			clickedButton = null;
 			return false; // Important so that the form is not submitted by the browser too
 		})
@@ -787,13 +796,13 @@
 	 * @param url target url
 	 * @param data dati da inviare (stringa od oggetto) - can be null
 	 * @param successHandler(responseText, responseHtml);) funzione chiamata in caso di successo e nessun yadaWebUtil.modalError(). Viene chiamata anche in caso di errore se il suo flag executeAnyway è true
-	 * @param type "POST" per il post oppure null o "GET" per il get
+	 * @param method "POST" per il post oppure null o "GET" per il get
 	 * @param timeout milliseconds timeout, null for default (set by the browser)
 	 * @param hideLoader true for not showing the loader
 	 */
-	yada.ajax = function(url, data, successHandler, type, timeout, hideLoader) {
-		if (type==null) {
-			type="GET"
+	yada.ajax = function(url, data, successHandler, method, timeout, hideLoader) {
+		if (method==null) {
+			method="GET"
 		}
 		if (timeout==null) {
 			timeout=0; // Default
@@ -804,7 +813,7 @@
 			yada.loaderOn();
 		}
 		$.ajax({
-			type: type,
+			type: method,
 			url: url,
 			data: data,
 			processData: processData,
@@ -872,7 +881,7 @@
 				}
 				// Controllo se è stata ritornata la home con una richiesta di login
 				if ((typeof responseText == 'string' || responseText instanceof String) && responseText.indexOf('s_loginRequested') !== -1) {
-					yada.openLoginModal(url, data, successHandler, type); // E' necessario il login. Viene fatto, e poi eseguito l'handler.
+					yada.openLoginModal(url, data, successHandler, method); // E' necessario il login. Viene fatto, e poi eseguito l'handler.
 					yada.loaderOff();
 					return;
 				}
