@@ -109,66 +109,7 @@
 		}
 		return false;
 	}
-	
-//	// Opzioni per il form di login, gestito via ajaxForms (TODO da riscrivere senza ajaxForms che ormai viene usato solo per il login)
-//	var formLoginOptions = { 
-//			
-//			success: function(responseText, statusText, xhr, form) {
-//				yada.loaderOff();
-//				var responseHtml=$("<div>").html(responseText);
-//				if ("loginSuccess"==responseText) {
-//					$("#loginModal").remove();
-//					// window.location.reload(true); // true = skip cache // Non va bene perchè se è stata fatta una post, viene ripetuta!
-//					handlePostLoginHandler(responseHtml, responseText);
-//					return;
-//				}
-//				var dialog=$("#loginModalDialog", responseHtml);
-//				if (dialog.length>0) {
-//					// La risposta è ancora il form di login, che deve essere aggiornato
-//					$("#loginModal").children().remove();
-//					$("#loginModal").append(dialog);
-//					$('#loginForm').ajaxForm(formLoginOptions); // Login POST via Ajax
-//					//$("#loginModal").modal('show');
-//				    return;
-//				}
-//	
-//				// Se è stato ritornato un confirm, lo mostro e abilito l'esecuzione dell'ajax e dell'handler
-//				if (yada.handleModalConfirm(responseHtml, postLoginUrl, postLoginData, postLoginHandler, postLoginType)) {
-//					return;
-//				}
-//				
-//				// Gestisce la pwd scaduta
-//				var pwdChange=$(responseHtml).find("form[name='form-change-password']");
-//				if (pwdChange.length>0) {
-//					$("#loginModal").modal('hide');
-//					document.open();
-//					document.write(responseText);
-//					document.close();
-//					return;
-//				}			
-//				
-//				var loadedModalDialog=$(responseHtml).find(".modal-dialog");
-//				if (loadedModalDialog.length>0) {
-//					// La risposta è un qualunque modal, che viene mostrato alla chiusura del modal di login
-//					// (se aprissi subito il nuovo modal, per qualche ragione non scrollerebbe)
-//					$("#loginModal").on('hidden.bs.modal', function (e) {
-//						$("#ajaxModal").children().remove();
-//						$("#ajaxModal").append(loadedModalDialog);
-//						$('#ajaxModal:hidden').modal('show'); // Mostro il modal se non è già aperto
-//						enableAjaxForms(); // Abilita l'invio di un eventuale form via ajax
-//					});
-//					$("#loginModal").modal('hide');
-//					return;
-//				}
-//				
-//				// Era una chiamata ajax che è andata in session timeout e ha richiesto un form login.
-//				// Viene eseguito l'eventale handler passandogli la pagina inizialmente richiesta.
-//				$("#loginModal").modal('hide');
-//				handlePostLoginHandler(responseHtml, responseText);
-//				
-//			}
-//		}; 
-	
+
 	// Al ritorno di un post di login, mostra eventuali notify ed esegue l'eventuale handler, oppure ricarica la pagina corrente se l'handler non c'è.
 	yada.handlePostLoginHandler = function(responseHtml, responseText) {
 		var isError = yada.isNotifyError(responseHtml);
@@ -228,7 +169,46 @@
 		}
 		return false;
 	}	
+	
+	function hasNoLoader($element) {
+		return $element.hasClass("noLoader") || $element.hasClass("noloader");
+	}
+	
+	// Loads a data-yadaAjaxFragment
+	function loadAjaxFragment($toBeReplaced) {
+		var fetchUrl = $toBeReplaced.attr("data-yadaAjaxFragment");
+		if (fetchUrl!=null) {
+			$toBeReplaced.removeAttr('data-yadaAjaxFragment');
+			var noLoader = hasNoLoader($toBeReplaced);
+			yada.ajax(fetchUrl, null, (function($replaceable){
+				return function(responseText, responseHtml) {
+					yada.initAjaxHandlersOn(responseHtml.children());
+					$replaceable.replaceWith(responseHtml.children());
+				}
+			})($toBeReplaced), "POST", null, noLoader);
+		}
+	}
 
+	// The observer is called whenever a hidden parent (or self) of a yadaAjaxFragment becomes visible
+	var ajaxFragmentsVisibilityObserver = new MutationObserver(function(mutationsList) {
+		for (var i = 0; i < mutationsList.length; i++) { 
+			// Can't use "of" because yuicompressor fails
+			// for (var record of mutationsList) { 
+			var $node = $(mutationsList[i].target);
+			if ($node.is(":visible")) {
+				// Check the current node and all its children
+				var $nodeSet = $('[data-yadaAjaxFragment]:visible', $node);
+				if ($node.attr('data-yadaAjaxFragment')!=undefined) {
+					$nodeSet.push($node);
+				}
+				$nodeSet.each(function(){
+					loadAjaxFragment($(this));
+				});
+			}
+		}
+	});
+
+	
 	/**
 	 * Enables the loading of page fragments via ajax.
 	 * @param handler a function to call upon successful insertion, can be null
@@ -242,17 +222,24 @@
 		if ($target.length==0) {
 			$target = $element;
 		}
+
+		var config = { attributes: true, attributeFilter: ['style', 'class'] };
 		$('[data-yadaAjaxFragment]', $target).each(function() {
 			var $toBeReplaced=$(this);
 			var fetchUrl = $toBeReplaced.attr("data-yadaAjaxFragment");
 			if (fetchUrl!=null) {
-				$toBeReplaced.removeAttr('data-yadaAjaxFragment');
-				yada.ajax(fetchUrl, null, (function($replaceable){
-					return function(responseText, responseHtml) {
-						yada.initAjaxHandlersOn(responseHtml.children());
-						$replaceable.replaceWith(responseHtml.children());
-					}
-				})($toBeReplaced));
+				// If the element is visible, replace it now.
+				// If the element is not visible, set an observer to replace it when it becomes visible
+				var visible = $toBeReplaced.is(":visible");
+				if (visible) {
+					loadAjaxFragment($toBeReplaced);
+				} else {
+					ajaxFragmentsVisibilityObserver.observe(this, config);
+					// As the observer is not called when a parent changes, I have to set an observer on all the parents that are not currently visible
+					$toBeReplaced.parents(':hidden').each(function() {
+						ajaxFragmentsVisibilityObserver.observe(this, config);
+					});
+				}
 			}
 		});
 	};
@@ -443,6 +430,7 @@
 		var data = null;
 		var value = [];
 		var name = $element.attr("name");
+		var noLoader = hasNoLoader($element);	
 		// In a select, set the data object to the selected option
 		if ($element.is("select")) {
 			$("option:selected", $element).each(function(){ // Could be a multiselect!
@@ -462,11 +450,11 @@
 			var cancelButton = $element.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 			yada.confirm(confirmText, function(result) {
 				if (result==true) {
-					yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, $element.attr('data-timeout'));
+					yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, $element.attr('data-timeout'), noLoader);
 				}
 			}, okButton, cancelButton);
 		} else {
-			yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element));
+			yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, null, noLoader);
 		}
 		return true; // Run other listeners
 	}
@@ -640,6 +628,7 @@
 				}
 			}
 			e.preventDefault();
+			var noLoader = hasNoLoader($form);
 			var action = $(this).attr('action');
 			// Check if it must be a multipart formdata
 			var multipart = $form.attr("enctype")=="multipart/form-data";
@@ -659,6 +648,7 @@
 				if (buttonAction!=null) {
 					action = buttonAction;
 				}
+				noLoader = hasNoLoader($(clickedButton));
 			}
 			if (!multipart) {
 				data = $.param(data);
@@ -706,7 +696,8 @@
 			};
 			var method = $(this).attr('method') || "POST";
 			// yada.ajax($(this).attr('action'), $.param(data), joinedHandler.bind(this), $(this).attr('method'), $(this).attr('data-timeout'));
-			yada.ajax(action, data, joinedHandler.bind(this), method, $(this).attr('data-timeout'));
+			
+			yada.ajax(action, data, joinedHandler.bind(this), method, $(this).attr('data-timeout'), noLoader);
 			clickedButton = null;
 			return false; // Important so that the form is not submitted by the browser too
 		})
@@ -746,13 +737,13 @@
 	 * @param url target url
 	 * @param data dati da inviare (stringa od oggetto) - can be null
 	 * @param successHandler(responseText, responseHtml);) funzione chiamata in caso di successo e nessun yadaWebUtil.modalError(). Viene chiamata anche in caso di errore se il suo flag executeAnyway è true
-	 * @param type "POST" per il post oppure null o "GET" per il get
+	 * @param method "POST" per il post oppure null o "GET" per il get
 	 * @param timeout milliseconds timeout, null for default (set by the browser)
 	 * @param hideLoader true for not showing the loader
 	 */
-	yada.ajax = function(url, data, successHandler, type, timeout, hideLoader) {
-		if (type==null) {
-			type="GET"
+	yada.ajax = function(url, data, successHandler, method, timeout, hideLoader) {
+		if (method==null) {
+			method="GET"
 		}
 		if (timeout==null) {
 			timeout=0; // Default
@@ -763,7 +754,7 @@
 			yada.loaderOn();
 		}
 		$.ajax({
-			type: type,
+			type: method,
 			url: url,
 			data: data,
 			processData: processData,
@@ -831,7 +822,7 @@
 				}
 				// Controllo se è stata ritornata la home con una richiesta di login
 				if ((typeof responseText == 'string' || responseText instanceof String) && responseText.indexOf('s_loginRequested') !== -1) {
-					yada.openLoginModal(url, data, successHandler, type); // E' necessario il login. Viene fatto, e poi eseguito l'handler.
+					yada.openLoginModal(url, data, successHandler, method); // E' necessario il login. Viene fatto, e poi eseguito l'handler.
 					yada.loaderOff();
 					return;
 				}
@@ -846,7 +837,7 @@
 				}			
 				
 				// Se è stato ritornato un confirm, lo mostro e abilito l'esecuzione dell'ajax e dell'handler
-				if (yada.handleModalConfirm(responseHtml, url, data, successHandler, type)) {
+				if (yada.handleModalConfirm(responseHtml, url, data, successHandler, method)) {
 					yada.loaderOff();
 					return;
 				}
