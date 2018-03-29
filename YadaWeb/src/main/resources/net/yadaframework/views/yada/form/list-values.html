@@ -30,7 +30,7 @@ Example:
 */-->
 <body>
 <div class="form-group has-feedback" th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
-	<label class="control-label" th:for="${#ids.next('fieldId')}" th:text="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
+	<label class="control-label" th:for="${#ids.next('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
 	<div class="input-group" style="width:100%"> <!--/* il width serve perchÃ© se non c'Ã¨ l'help il campo resta corto (ad esempio i campi password) */-->
 		<select th:field="*{__${fieldName}__}" th:multiple="${multiple}" th:required="${required}" th:disabled="${disabled}" class="form-control has-feedback" th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}">
 			<option th:if="${addHeader==true}" value="-1">---</option>

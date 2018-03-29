@@ -29,7 +29,7 @@ Example: <div th:replace="/yada/form/boolean::field(fieldName='useGold',label='U
 		<label th:if="${switch==null or switch!=true}" class="control-label">
 			<input type="checkbox" th:field="*{__${fieldName}__}" th:required="${required}" th:disabled="${disabled}" 
 				class="has-feedback" th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}"/>
-			<span th:text="${labelKey!=null?#messages.msg(labelKey):label}">Subscribe</span> 
+			<span th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Subscribe</span> 
 		</label>
 		<th:block th:if="${switch==true}">
 			<span> <!-- Span to protect the outside label -->
@@ -37,7 +37,7 @@ Example: <div th:replace="/yada/form/boolean::field(fieldName='useGold',label='U
 					class="yadaSwitch yadaSwitch-round" th:id="${#ids.seq('fieldId')}"/>
 				<label th:for="${#ids.prev('fieldId')}"></label>
 			</span>
-			<label class="yadaSwitchLabel" th:for="${#ids.prev('fieldId')}" th:text="${labelKey!=null?#messages.msg(labelKey):label}" >
+			<label class="yadaSwitchLabel" th:for="${#ids.prev('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}" >
 				Subscribe
 			</label>
 		</th:block>

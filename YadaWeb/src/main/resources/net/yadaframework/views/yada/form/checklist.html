@@ -39,7 +39,7 @@ Example:
 	th:classappend="${hasError}? has-error">
 	<label th:if="${label!=null or labelKey!=null}" 
 		class="control-label" th:for="${#ids.next(idPrefix)}" 
-		th:text="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
+		th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
 	<div th:id="${#ids.seq(idPrefix)}">
 		<th:block th:if="${!isMap}">
 			<!--/* List */-->

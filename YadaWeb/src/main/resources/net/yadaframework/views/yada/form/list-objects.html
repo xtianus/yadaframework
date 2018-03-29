@@ -24,7 +24,7 @@ Example:
 <body>
 
 <div class="form-group has-feedback" th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
-	<label class="control-label" th:for="${#ids.next('fieldId')}" th:text="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
+	<label class="control-label" th:for="${#ids.next('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
 	<select th:field="*{__${fieldName}__}" th:multiple="${multiple}" th:required="${required}" class="form-control has-feedback" th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}">
 		<option th:unless="${noHeader==true}" value="-1">---</option>
 		<option th:each="option : ${__${listName}__}" 

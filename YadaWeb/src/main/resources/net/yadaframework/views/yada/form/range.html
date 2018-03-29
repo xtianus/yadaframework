@@ -24,7 +24,7 @@ Example: <div th:replace="/yada/form/range::field(fieldName='minGrowTimeForMovie
 <body>
 <div th:fragment="field" 
 	class="form-group has-feedback" th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
-	<label class="control-label" th:for="${#ids.next('fieldId')}"><span th:text="${labelKey!=null?#messages.msg(labelKey):label}">Lumber</span>: <span th:id="${#ids.seq('valId')}" style="font-weight: normal;" th:text="*{__${fieldName}__}">12</span></label>
+	<label class="control-label" th:for="${#ids.next('fieldId')}"><span th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Lumber</span>: <span th:id="${#ids.seq('valId')}" style="font-weight: normal;" th:text="*{__${fieldName}__}">12</span></label>
 	<div class="input-group" style="width:100%"> <!--/* il width serve perchÃ© se non c'Ã¨ l'help il campo resta corto (ad esempio i campi password) */-->
 	<!--/* Not using class 'form-control' because it makes a 'tall' input slider */-->
 	<input type ="range" th:field="*{__${fieldName}__}" th:required="${required}" th:disabled="${disabled}" th:readonly="${readonly}"
