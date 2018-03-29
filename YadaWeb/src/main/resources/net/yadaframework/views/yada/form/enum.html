@@ -20,7 +20,7 @@ Parameters:
 <div class="form-group has-feedback" 
 	th:fragment="field"
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
-	<label class="control-label" th:for="${#ids.next('fieldId')}" th:text="${labelKey!=null?#messages.msg(labelKey):label}">Tipo:</label>
+	<label class="control-label" th:for="${#ids.next('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Tipo:</label>
 	<select th:field="*{__${fieldName}__}" class="form-control has-feedback" th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}">
 		<!--/* Non si puÃ² avere un header vuoto perchÃ© ciÃ² impedirebbe di creare l'oggetto enum a server automaticamente */-->
 		<option th:each="type : ${T(__${enumClass}__).values()}" 

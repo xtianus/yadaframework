@@ -19,7 +19,7 @@ Parameters:
 <div class="form-group has-feedback" 
 	th:fragment="field"
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
-	<label class="control-label" th:for="${#ids.next('fieldId')}" th:text="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
+	<label class="control-label" th:for="${#ids.next('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
 	<a th:if="${help!=null}" class="yadaHelpButton" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="top" tabindex="-1"
 		th:attr="data-content=${help}">
 		<i class="fa fa-question-circle fa-lg"></i>

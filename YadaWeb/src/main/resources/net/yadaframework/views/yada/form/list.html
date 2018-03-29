@@ -47,7 +47,7 @@ Example:
 	th:classappend="|${hasError==true?'has-error':''} ${inline==true?'form-inline':''} ${noFeedback==true?'':'has-feedback'}|">
 	<label th:if="${label!=null or labelKey!=null}" 
 		class="control-label" th:for="${#ids.next(idPrefix)}" 
-		th:text="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
+		th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
 	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perchÃ© se non c'Ã¨ l'help il campo resta corto (ad esempio i campi password) */-->
 		<select th:field="*{__${fieldName}__}" th:multiple="${multiple}" 
 			th:with="isMap=${options instanceof T(java.util.Map)},isYadaLocalEnum=${@yadaFormHelper.isYadaLocalEnum(options)}"
