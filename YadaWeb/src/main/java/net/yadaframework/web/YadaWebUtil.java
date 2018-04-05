@@ -273,8 +273,8 @@ public class YadaWebUtil {
 	 */
 	public String getWebappAddress(HttpServletRequest request) {
 		int port = request.getServerPort();
-		String pattern = port==80?"%s://%s%s":"%s://%s:%d%s";
-		String myServerAddress = port==80? 
+		String pattern = port==80||port==443?"%s://%s%s":"%s://%s:%d%s";
+		String myServerAddress = port==80||port==443? 
 				String.format(pattern, request.getScheme(),  request.getServerName(), request.getContextPath())
 				:
 				String.format(pattern, request.getScheme(),  request.getServerName(), request.getServerPort(), request.getContextPath());
