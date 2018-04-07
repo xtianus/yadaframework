@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaRegistrationType;
+import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.security.YadaUserDetailsService;
 import net.yadaframework.security.components.YadaSecurityEmailService;
 import net.yadaframework.security.components.YadaSecurityUtil;
@@ -86,7 +87,7 @@ public class YadaRegistrationController {
 	 * To be called when the link in the registration confirmation email has been clicked. 
 	 * It creates a YadaUserCredential instance with basic YadaUserProfile values which should be refined and saved by the caller 
 	 * @param token
-	 * @param userRoles
+	 * @param userRoles an array of configured roles, like <pre>new String[]{"USER"}</pre>
 	 * @param locale
 	 * @return a {@link YadaRegistrationOutcome}
 	 */
@@ -111,19 +112,11 @@ public class YadaRegistrationController {
 					return result;
 				}
 				// Create new user
-				YadaUserCredentials userCredentials = new YadaUserCredentials();
-				userCredentials.setUsername(registrationRequest.getEmail().toLowerCase());
-				userCredentials.changePassword(registrationRequest.getPassword(), passwordEncoder);
-				userCredentials.setEnabled(true);
-				userCredentials.addRoles(yadaConfiguration.getRoleIds(userRoles));
-				T userProfile = userProfileClass.newInstance();
-				userProfile.setLocale(locale);
-				userProfile.setUserCredentials(userCredentials);
+				T userProfile = createNewUser(registrationRequest.getEmail(), registrationRequest.getPassword(), userRoles, locale, userProfileClass);
 				result.userProfile = userProfile;
 				//
 				yadaRegistrationRequestRepository.delete(registrationRequest);
-				yadaUserDetailsService.authenticateAs(userCredentials);
-				log.info("Registration: user='{}' password='{}'", registrationRequest.getEmail(), registrationRequest.getPassword());
+				yadaUserDetailsService.authenticateAs(userProfile.getUserCredentials());
 				//
 				log.info("Registration of '{}' successful", email);
 				result.registrationStatus = YadaRegistrationStatus.OK;
@@ -137,6 +130,31 @@ public class YadaRegistrationController {
 			log.error("Registration of token {} failed", token, e);
 		}
 		return result;
+	}
+	
+	/**
+	 * Create a new user. Throws a runtime exception if the email already exists
+	 * @param email
+	 * @param clearPassword cleartext password
+	 * @param userRoles
+	 * @param locale
+	 * @param userProfileClass
+	 * @return
+	 */
+	public <T extends YadaUserProfile> T createNewUser(String email, String clearPassword, String[] userRoles, Locale locale, Class<T> userProfileClass) {
+		try {
+			YadaUserCredentials userCredentials = new YadaUserCredentials();
+			userCredentials.setUsername(email.toLowerCase());
+			userCredentials.changePassword(clearPassword, passwordEncoder);
+			userCredentials.setEnabled(true);
+			userCredentials.addRoles(yadaConfiguration.getRoleIds(userRoles));
+			T userProfile = userProfileClass.newInstance();
+			userProfile.setLocale(locale);
+			userProfile.setUserCredentials(userCredentials);
+			return (T) yadaUserProfileRepository.save(userProfile);
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new YadaInternalException("Can't create instance of {}", userProfileClass);
+		}
 	}
 	
 	/**

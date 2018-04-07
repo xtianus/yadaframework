@@ -21,6 +21,7 @@ import org.springframework.data.domain.Sort;
 
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.exceptions.YadaInternalException;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 /**
  * Incrementally and conditionally builds a sql select/update query
@@ -435,7 +436,7 @@ public class YadaSql implements CloneableDeep {
 	
 	/**
 	 * Starts a subexpression. Be careful that the returned YadaSql object is different from the original one, so don't use the original one for ending the subexpression.
-	 * @param enabled
+	 * @param enabled If the subexpression is disabled, the whole subquery is not included, not just the parenthesis
 	 * @return
 	 */
 	public YadaSql startSubexpression(boolean enabled) {
@@ -470,6 +471,9 @@ public class YadaSql implements CloneableDeep {
 	 * @return
 	 */
 	public YadaSql endSubexpression(String alias) {
+		if (parent==null) {
+			throw new YadaInvalidUsageException("endSubexpression must always be called on the object returned by startSubexpression");
+		}
 		if (this.enabled) {
 			String sql = this.sql();
 			if (!sql.isEmpty()) {
@@ -680,7 +684,7 @@ public class YadaSql implements CloneableDeep {
 	 * @return
 	 */
 	public YadaSql setParameter(String name, Object value) {
-		if (queryDone) {
+		if (queryDone && parameters.isEmpty()) {
 			throw new YadaInternalException("Parameters should be set before calling query()");
 		}
 		parameters.put(name, value);

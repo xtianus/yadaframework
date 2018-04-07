@@ -55,11 +55,14 @@ public abstract class YadaConfiguration {
 	private Map<Integer, String> roleIdToKeyMap = null;
 	private Map<String, Integer> roleKeyToIdMap = null;
 	private Object roleMapMonitor = new Object();
+	private String googleClientId = null;
+	private String googleSecret = null;
 	private String facebookAppId = null;
 	private String facebookSecret = null;
 	private String serverAddress = null;
 	private String webappAddress = null;
 	private int facebookType = -1;
+	private int googleType = -1;
 	private String tagReservedPrefix = null;
 	private int tagMaxNum = -1;
 	private int tagMaxSuggested = -1;
@@ -138,8 +141,7 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
-	 * Returns the default locale when getting a string that doesn't have a value for the requested locale.
-	 * If the default locale is not set, the string will have an empty value and no attempt on another locale will be made.
+	 * Returns the configured default locale.
 	 * @return the default locale, or null if no default is set
 	 */
 	public Locale getDefaultLocale() {
@@ -382,6 +384,13 @@ public abstract class YadaConfiguration {
 		}
  		return facebookType;
 	}
+	
+	public int getGoogleType() {
+		if (googleType==-1) {
+			googleType = configuration.getInt("config/social/google/type", -1);
+		}
+		return googleType;
+	}
 
 	/**
 	 * Ritorna la url da usare per postare una story su facebook (a cui appendere l'id)
@@ -391,16 +400,7 @@ public abstract class YadaConfiguration {
  		return configuration.getString("config/social/facebook/baseStoryUrl", "unset");
 	}
 	
-//	/**
-//	 * Ritorna il Facebook page ID
-//	 * @return
-//	 */
-//	public String getFacebookPageId() {
-//		return configuration.getString("config/social/facebook/pageId", "unset");
-//	}
-//	
 	/**
-	 * Ritorna il Facebook pageAccessToken
 	 * @return
 	 */
 	public String getFacebookPageAccessToken() {
@@ -408,7 +408,6 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
-	 * Ritorna il Facebook Secret
 	 * @return
 	 */
 	public String getFacebookSecret() {
@@ -419,7 +418,6 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
-	 * Ritorna la Facebook AppID
 	 * @return
 	 */
 	public String getFacebookAppId() {
@@ -427,6 +425,26 @@ public abstract class YadaConfiguration {
 			facebookAppId = configuration.getString("config/social/facebook/appId", "unset");
 		}
 		return facebookAppId;
+	}
+
+	/**
+	 * @return
+	 */
+	public String getGoogleSecret() {
+		if (googleSecret==null) {
+			googleSecret = configuration.getString("config/social/google/secret", "unset");
+		}
+		return googleSecret;
+	}
+	
+	/**
+	 * @return
+	 */
+	public String getGoogleClientId() {
+		if (googleClientId==null) {
+			googleClientId = configuration.getString("config/social/google/clientId", "unset");
+		}
+		return googleClientId;
 	}
 
 	/**

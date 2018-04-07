@@ -3,15 +3,14 @@ package net.yadaframework.exceptions;
 import org.slf4j.helpers.MessageFormatter;
 
 /**
- * 
- *
+ * Error while using the social functions
  */
 public class YadaSocialException extends Exception {
 	private static final long serialVersionUID = -1L;
-
+	
 	public YadaSocialException() {
 	}
-
+	
 	public YadaSocialException(String message) {
 		super(message);
 	}

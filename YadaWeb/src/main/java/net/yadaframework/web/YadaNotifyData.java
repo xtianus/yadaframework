@@ -20,6 +20,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -41,14 +42,14 @@ public class YadaNotifyData {
 	YadaNotifyData(Model model, MessageSource messageSource, Locale locale) {
 		this.model = model;
 		this.messageSource = messageSource;
-		this.locale = locale;
+		this.locale = locale==null?LocaleContextHolder.getLocale():locale;
 	}
 	
 	// Package visibility
 	YadaNotifyData(RedirectAttributes redirectAttributes, MessageSource messageSource, Locale locale) {
 		this.redirectAttributes = redirectAttributes;
 		this.messageSource = messageSource;
-		this.locale = locale;
+		this.locale = locale==null?LocaleContextHolder.getLocale():locale;
 	}
 	
 	/**

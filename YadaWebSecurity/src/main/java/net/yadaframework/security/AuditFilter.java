@@ -117,14 +117,22 @@ public class AuditFilter extends OncePerRequestFilter {
 	
 	// Stampo i parametri di request (get e post)
 	protected void beforeRequest(HttpServletRequest request) {
-		if (log.isInfoEnabled()) {
+		String requestUri = request.getRequestURI();
+		String queryString = request.getQueryString();
+		boolean maliciousString = (requestUri!=null && requestUri.contains(";")) || (queryString!=null && queryString.contains(";"));
+		if (log.isInfoEnabled() || maliciousString) {
 			try {
-				String requestUri = request.getRequestURI();
-				String queryString = request.getQueryString();
 				String ajaxFlag = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"))?" (ajax)":"";
-				log.info("requestUri:{}" + ajaxFlag, requestUri);
-				if (queryString!=null) {
-					log.info("queryString:{}", queryString);
+				if (maliciousString) {
+					log.warn("requestUri:{}" + ajaxFlag, requestUri);
+					if (queryString!=null) {
+						log.warn("queryString:{}", queryString);
+					}
+				} else {
+					log.info("requestUri:{}" + ajaxFlag, requestUri);
+					if (queryString!=null) {
+						log.info("queryString:{}", queryString);
+					}
 				}
 				if (log.isDebugEnabled()) {
 					Map<String, String[]> postDataMap = request.getParameterMap();
