@@ -4,7 +4,7 @@ import java.io.File;
 import org.springframework.core.io.Resource;
 
 public class YadaEmailContent {
-	public String from;
+	public String[] from;
 	public String[] to;
 	public String replyTo;
 	public String[] cc;

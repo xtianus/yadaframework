@@ -8,9 +8,10 @@ import org.slf4j.LoggerFactory;
 
 public class YadaEmailParam {
 	/**
-	 * The email to show as sender. If null it will get its value from config.getEmailFrom()
+	 * The email to show as sender: [ address, name ]. 
+	 * If null it will get its value from config.getEmailFrom()
 	 */
-	public String fromEmail;
+	public String[] fromEmail;
 	/**
 	 * The recipient email(s), must not be null or empty
 	 */

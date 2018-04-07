@@ -1,6 +1,7 @@
 package net.yadaframework.components;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -124,7 +125,7 @@ public class YadaEmailService {
      * @param addTimestamp true to add a timestamp to the subject
      * @return true se l'email è stata spedita
      */
-	public boolean sendHtmlEmail(String fromEmail, String[] toEmail, String replyTo, String emailName, Object[] subjectParams, Map<String, Object> templateParams, Map<String, String> inlineResources, Map<String, File> attachments, Locale locale, boolean addTimestamp) {
+	public boolean sendHtmlEmail(String[] fromEmail, String[] toEmail, String replyTo, String emailName, Object[] subjectParams, Map<String, Object> templateParams, Map<String, String> inlineResources, Map<String, File> attachments, Locale locale, boolean addTimestamp) {
 		YadaEmailParam yadaEmailParam = new YadaEmailParam();
 		yadaEmailParam.fromEmail = fromEmail;
 		yadaEmailParam.toEmail = toEmail;
@@ -146,7 +147,7 @@ public class YadaEmailService {
      * @return true se l'email è stata spedita
      */
 	public boolean sendHtmlEmail(YadaEmailParam yadaEmailParam) {
-		String fromEmail = yadaEmailParam.fromEmail;
+		String[] fromEmail = yadaEmailParam.fromEmail;
 		String[] toEmail = yadaEmailParam.toEmail;
 		String replyTo = yadaEmailParam.replyTo;
 		String emailName = yadaEmailParam.emailName;
@@ -244,7 +245,7 @@ public class YadaEmailService {
 
     /**
      * Send an email by specifying the content directly, without a template
-	 * @param from
+	 * @param from [address, name]
 	 * @param to
 	 * @param replyTo
 	 * @param cc
@@ -256,7 +257,7 @@ public class YadaEmailService {
 	 * @param inlineFilename
 	 * @return
 	 */
-	public boolean sendEmail(String from, String to, String replyTo, String cc, String bcc, String subject, String body, boolean html, File inlineFile, String inlineFilename) {
+	public boolean sendEmail(String[] from, String to, String replyTo, String cc, String bcc, String subject, String body, boolean html, File inlineFile, String inlineFilename) {
 		YadaEmailContent content = new YadaEmailContent();
 		content.from = from;
 		content.replyTo = replyTo;
@@ -361,7 +362,12 @@ public class YadaEmailService {
 		
 		MimeMessage msg = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8"); // true = multipart
-		helper.setFrom(yadaEmailContent.from);
+		try {
+			helper.setFrom(yadaEmailContent.from[0], yadaEmailContent.from[1]);
+		} catch (UnsupportedEncodingException e) {
+			log.error("Invalid encoding - ignoring 'from' personal name", e);
+			helper.setFrom(yadaEmailContent.from[0]);
+		}
 		if(yadaEmailContent.replyTo!=null) {
 			helper.setReplyTo(yadaEmailContent.replyTo);
 		}
