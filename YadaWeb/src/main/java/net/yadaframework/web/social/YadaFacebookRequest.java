@@ -5,8 +5,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 import net.yadaframework.exceptions.InternalException;
 import net.yadaframework.exceptions.YadaSocialException;
@@ -18,8 +16,10 @@ public class YadaFacebookRequest {
 	/**
 	 * Fetch profile
 	 */
-	public final static String API_PROFILE="/v2.3/me";
-	public final static String API_PAGE_POST_AS_ADMIN="/v2.3/me/feed";
+	public final static String API_PROFILE="/v2.12/me";
+	// Docs: https://developers.facebook.com/docs/graph-api/reference/v2.12/page/feed#publish
+	// You can use "me" instead of the page access token
+	public final static String API_PAGE_POST_AS_ADMIN="/v2.12/me/feed";
 	
 	private String BASE_URL = "https://graph.facebook.com";
 
