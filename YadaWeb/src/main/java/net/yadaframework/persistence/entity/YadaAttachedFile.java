@@ -18,13 +18,21 @@ import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 /**
- * A "pointer" to a file that has been uploaded into the "contents" folder.
- * When a file is associated to an object, an instance of this class is created.
- * Files can still exist after the object has been deleted, and can be re-attached to many objects using different titles, sort orders etc.
+ * A "pointer" to a file that has been copied into the "contents" folder.
+ * When an uploaded file is associated to an object, an instance of this class is created and a copy of the file is made
+ * from the "uploads" folder to the "contents" folder.
+ * The file is also copied in different sizes for desktop and mobile.
+ * The original files can still exist after the object has been deleted, and can be re-attached to many objects using different titles, sort orders etc.
+ * NOTE: this class is not part of YadaWebCMS because it's used by YadaWebSecurity
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaAttachedFile {
+	
+	// For synchronization with external databases
+	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Temporal(TemporalType.TIMESTAMP)
+	protected Date modified;
 	
 	// For optimistic locking
 	@Version
@@ -44,7 +52,20 @@ public class YadaAttachedFile {
 	/**
 	 * Folder where the file is stored, relative to the contents folder
 	 */
-	protected String relativePath; 
+	protected String relativeFolderPath; // Relative to the "contents" folder
+	/**
+	 * When the CMS creates a mobile version of an image, the name is found here.
+	 * NOTE: to have different images for portrait/landscape, you need to upload different files hence have different instances of this class
+	 */
+	protected String filenameMobile; // only for images on mobile, null for no specific image 
+	/**
+	 * The desktop version of an image is here
+	 */
+	protected String filenameDesktop; // only for images on desktop, null for non-images
+	/**
+	 * Only for non-images, or when no mobile size is specified (will be the same as filenameDesktop)
+	 */
+	protected String filename;
 	
 	@ElementCollection
 	@Column(length=64)
@@ -72,14 +93,6 @@ public class YadaAttachedFile {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public String getRelativePath() {
-		return relativePath;
-	}
-
-	public void setRelativePath(String relativePath) {
-		this.relativePath = relativePath;
 	}
 
 	public Map<Locale, String> getTitle() {
@@ -110,6 +123,14 @@ public class YadaAttachedFile {
 		return version;
 	}
 
+	public Date getModified() {
+		return modified;
+	}
+
+	public void setModified(Date modified) {
+		this.modified = modified;
+	}
+
 	public boolean isPublished() {
 		return published;
 	}
@@ -132,6 +153,38 @@ public class YadaAttachedFile {
 
 	public void setSortOrder(long sortOrder) {
 		this.sortOrder = sortOrder;
+	}
+
+	public String getRelativeFolderPath() {
+		return relativeFolderPath;
+	}
+
+	public void setRelativeFolderPath(String relativeFolderPath) {
+		this.relativeFolderPath = relativeFolderPath;
+	}
+
+	public String getFilenameMobile() {
+		return filenameMobile;
+	}
+
+	public void setFilenameMobile(String filenameMobile) {
+		this.filenameMobile = filenameMobile;
+	}
+
+	public String getFilenameDesktop() {
+		return filenameDesktop;
+	}
+
+	public void setFilenameDesktop(String filenameDesktop) {
+		this.filenameDesktop = filenameDesktop;
+	}
+
+	public String getFilename() {
+		return filename;
+	}
+
+	public void setFilename(String filename) {
+		this.filename = filename;
 	}
 
 }
