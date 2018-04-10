@@ -136,7 +136,7 @@ configurations {
 dependencies {
 	hibtools files("$buildDir/classes/java/main")
 	hibtools files("$buildDir/classes/java/test") // Needed for yadaPersistenceUnit
-	hibtools 'org.hibernate:hibernate-tools:5.+'
+	hibtools 'org.hibernate:hibernate-tools:5.2.10.Final'
 }
 
 task testDbSchema(dependsOn: [testClasses], type: net.yadaframework.tools.YadaCreateDbSchemaTask) {
