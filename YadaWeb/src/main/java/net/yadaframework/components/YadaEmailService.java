@@ -404,7 +404,7 @@ public class YadaEmailService {
 				// helper.addInline(filename, file);
 			}
 		}
-		log.info("Mando email to={}, from={}, replyTo={}, cc={}, bcc={}, subject={}", new Object[] {yadaEmailContent.to, yadaEmailContent.from, yadaEmailContent.replyTo, yadaEmailContent.cc, yadaEmailContent.bcc, yadaEmailContent.subject});
+		log.info("Sending email to={}, from={}, replyTo={}, cc={}, bcc={}, subject={}", new Object[] {yadaEmailContent.to, yadaEmailContent.from, yadaEmailContent.replyTo, yadaEmailContent.cc, yadaEmailContent.bcc, yadaEmailContent.subject});
 		log.debug("Email body = {}", yadaEmailContent.body);
 		return msg;
 	}

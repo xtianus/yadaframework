@@ -153,7 +153,7 @@ if [[ $cfgTomcatNativeTarGz ]]; then
 	make install
 fi
 
-tomcatOptions="-Xloggc:${projectBase}/log/tomcat-gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=1 -XX:GCLogFileSize=1M -XX:+PrintGCDateStamps -Djava.awt.headless=true -Xmx${cfgTomcatRam} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/tomcat-outofmemory-dump"
+tomcatOptions="-Xloggc:${projectBase}/log/tomcat-gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=1 -XX:GCLogFileSize=1M -XX:+PrintGCDateStamps -Djava.awt.headless=true -Xmx${cfgTomcatRam} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/tomcat-outofmemory-dump.hprof"
 
 # Tomcat configuration
 if [[ $cfgPkgTomcat ]]; then
@@ -274,6 +274,7 @@ if [[ $cfgPkgPhp ]]; then
 fi
 if [[ $cfgPkgMysql ]]; then
 	apt-get -o Dpkg::Options::="--force-confnew" -y install $cfgPkgMysql
+	# TODO DOES NOT WORK ANYMORE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	mysqladmin -u root password ${cfgMysqlRootPwd}
 	if [[ $cfgPkgMysqlConf ]]; then
 		sed -i 's#\(\[mysql\].*\)#&\ndefault-character-set = utf8mb4#g' $cfgPkgMysqlConf
@@ -288,7 +289,7 @@ if [[ $cfgCertbot != "false" ]]; then
 	apt-get -o Dpkg::Options::="--force-confnew" -y install software-properties-common
 	add-apt-repository -y ppa:certbot/certbot
 	apt-get -o Dpkg::Options::="--force-confnew" -y update
-	apt-get -o Dpkg::Options::="--force-confnew" -y install certbot 
+	apt-get -o Dpkg::Options::="--force-confnew" -y install python-certbot-apache 
 fi
 
 # Altro
