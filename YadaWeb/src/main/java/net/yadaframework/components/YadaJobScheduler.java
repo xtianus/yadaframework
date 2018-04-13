@@ -128,7 +128,7 @@ class YadaJobScheduler implements Runnable {
 	 */
 	public void runJob(Long yadaJobId) {
 		log.debug("Running job id {}", yadaJobId);
-		YadaJob toRun = yadaJobRepository.findOne(yadaJobId);
+		YadaJob toRun = yadaJobRepository.findById(yadaJobId).orElse(null);
 		if (toRun==null) {
 			log.info("Job not found when trying to run it, id={}", toRun);
 			return;

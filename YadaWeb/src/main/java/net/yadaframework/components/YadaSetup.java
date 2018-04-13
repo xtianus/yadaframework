@@ -35,7 +35,7 @@ abstract public class YadaSetup {
 		if (yadaClauseRepository.count()==0) {
 			List<YadaClause> yadaClauses = yadaConfiguration.getSetupClauses();
 			if (!yadaClauses.isEmpty()) {
-				yadaClauseRepository.save(yadaClauses);
+				yadaClauseRepository.saveAll(yadaClauses);
 			}
 		}
 		

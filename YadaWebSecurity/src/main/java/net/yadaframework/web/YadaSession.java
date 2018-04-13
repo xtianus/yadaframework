@@ -118,7 +118,7 @@ public class YadaSession<T extends YadaUserProfile> {
 		if (loggedInUserProfileId==null) {
 			getCurrentUserProfileId();
 		}
-		return loggedInUserProfileId==null?null:yadaUserProfileRepository.findOne(loggedInUserProfileId);
+		return loggedInUserProfileId==null?null:yadaUserProfileRepository.findById(loggedInUserProfileId).orElse(null);
 	}
 	
 	
