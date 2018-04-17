@@ -27,6 +27,9 @@
 		</encoder>
 	</appender>
 
+	<!-- Log an exception when the max file upload limit is reached (in debug) -->
+    <logger name="org.springframework.web.multipart.commons.YadaCommonsMultipartResolver" level="DEBUG"/>
+
     <logger name="org.springframework.web.multipart.commons.CommonsFileUploadSupport" level="DEBUG"/>
     <logger name="org.thymeleaf.TemplateEngine.CONFIG" level="INFO"/>
     <logger name="org.apache.commons.configuration.DefaultConfigurationBuilder" level="ERROR"/>

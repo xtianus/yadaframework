@@ -174,7 +174,43 @@ public class YadaNotifyData {
 			((List<String>)modelMap.get(KEY_NOTIFICATION_CALLSCRIPT)).add(scriptId);		}
 		return this;
 	}
-
+	
+	/**
+	 * Set the notification severity if active is true
+	 * @param active true to set the severity, false for not setting it
+	 * @return
+	 */
+	public YadaNotifyData ok(boolean active) {
+		if (active) {
+			return this.ok();
+		}
+		return this;
+	}
+	
+	/**
+	 * Set the notification severity if active is true
+	 * @param active true to set the severity, false for not setting it
+	 * @return
+	 */
+	public YadaNotifyData info(boolean active) {
+		if (active) {
+			return this.info();
+		}
+		return this;
+	}
+	
+	/**
+	 * Set the notification severity if active is true
+	 * @param active true to set the severity, false for not setting it
+	 * @return
+	 */
+	public YadaNotifyData error(boolean active) {
+		if (active) {
+			return this.error();
+		}
+		return this;
+	}
+	
 	/**
 	 * Set the notification severity. This is the default.
 	 * @return
