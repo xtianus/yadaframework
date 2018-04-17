@@ -27,12 +27,12 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import net.yadaframework.core.CloneableFiltered;
+import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.web.YadaJsonView;
 
 /**

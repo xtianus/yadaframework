@@ -16,10 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import net.yadaframework.cms.persistence.entity.YadaAttachedFile;
-import net.yadaframework.cms.persistence.repository.YadaAttachedFileRepository;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.persistence.entity.YadaAttachedFile;
+import net.yadaframework.persistence.repository.YadaAttachedFileRepository;
 
 /**
  * The File Manager handles uploaded files. They are kept in a specific folder where they can be chosen to be attached to entities. 
@@ -40,6 +40,10 @@ public class YadaFileManager {
 		
 		
 	}
+	
+	// TODO distinguere tra mobile portrait e mobile landscape
+	// TODO le dimensioni mobile/desktop devono essere configurabili
+	// TODO mantenere l'immagine caricata nella versione originale
 
 	/**
 	 * Returns the (relative) url of the mobile image if any, otherwise fallback to the desktop image

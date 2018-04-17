@@ -39,7 +39,7 @@ public class YadaLocaleDao {
 		List<entityClass> result = (List<entityClass>) YadaSql.instance().selectFrom("from " + entityClass.getSimpleName())
     		.query(em, entityClass).getResultList();
     	
-    	YadaUtil.prefetchLocalizedStrings(result, entityClass);
+    	YadaUtil.prefetchLocalizedStringList(result, entityClass);
     	return result;
     }
     
