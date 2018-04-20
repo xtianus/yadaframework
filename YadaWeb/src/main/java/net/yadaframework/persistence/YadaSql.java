@@ -530,7 +530,7 @@ public class YadaSql implements CloneableDeep {
 			if (!firstGroupBy) {
 				groupBy = ", " + groupBy;
 			}
-			this.groupBy += groupBy;
+			this.groupBy += groupBy + " ";
 		}
 		return this;
 	}

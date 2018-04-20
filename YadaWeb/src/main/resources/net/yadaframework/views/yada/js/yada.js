@@ -707,6 +707,8 @@
 		// okButtonText e cancelButtonText sono opzionali
 		var $currentModals = $(".modal:visible");
 		hideAllModals();
+		// Turn off the loader else the confirm dialog won't show
+		yada.loaderOff();
 		// $('#yada-confirm').modal('hide'); // Eventualmente fosse già aperto
 		$('#yada-confirm .modal-body p').html(message);
 		var previousOkButtonText = $('#yada-confirm .okButton').text();
