@@ -1,9 +1,10 @@
 #!/bin/bash
 # Initial setup of a bare new server.
 # The current user is root.
-# 22 March 2017
+# 26 April 2018
 #
 # TODO: many tomcat instances (copy to different numbered folders, change ports, configure mod-jk for load balancing)
+# TODO: mysql root password
 #
 # Parameters: <hostname> <virtualHost> <projectBasePath> [<myip>] [<deployOptions>]
 
@@ -53,7 +54,7 @@ viconfig=/etc/vim/vimrc
 homedir=/home/${cfgUser}
 
 if [ ! -d ${projectBase} ]; then
-	mkdir -p ${projectBase}/log
+	mkdir -p ${projectBase}/logs
 	mkdir ${projectBase}/bin
 	mkdir ${projectBase}/contents
 	mkdir ${projectBase}/deploy
@@ -131,7 +132,7 @@ if [[ $cfgTomcatTarGz ]]; then
 		usermod -g $cfgTomcatUser $cfgTomcatUser
 	fi
 	mv $prefix $cfgTomcatTarGzHome
-	chown -R root:tomcat8 $cfgTomcatTarGzHome
+	chown -R root:$cfgTomcatUser $cfgTomcatTarGzHome
 	chmod -R g+r $cfgTomcatTarGzHome
 	chmod -R g+w $cfgTomcatTarGzHome/work
 	chmod -R g+w $cfgTomcatTarGzHome/logs
@@ -156,7 +157,10 @@ if [[ $cfgTomcatNativeTarGz ]]; then
 	make install
 fi
 
-tomcatOptions="-Xloggc:${projectBase}/log/tomcat-gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=1 -XX:GCLogFileSize=1M -XX:+PrintGCDateStamps -Djava.awt.headless=true -Xmx${cfgTomcatRam} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/tomcat-outofmemory-dump"
+# Options for java 9
+tomcatOptions="-Xmx${cfgTomcatRam} -Djava.awt.headless=true -Xlog:gc*:file=${projectBase}/logs/tomcat-gc.log:time:filecount=4,filesize=8192 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${projectBase}/logs/tomcat-outofmemory-dump.hprof"
+# Options for java 8
+# tomcatOptions="-Xloggc:${projectBase}/log/tomcat-gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=1 -XX:GCLogFileSize=1M -XX:+PrintGCDateStamps -Djava.awt.headless=true -Xmx${cfgTomcatRam} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/tomcat-outofmemory-dump"
 
 # Tomcat configuration
 if [[ $cfgPkgTomcat ]]; then
@@ -336,7 +340,7 @@ if [ "$cfgSquidPercent" != "" ]; then
 	service squid start
 fi
 
-chown ${cfgTomcatUser} ${projectBase}/contents ${projectBase}/log
+chown ${cfgTomcatUser} ${projectBase}/contents ${projectBase}/logs
 chown ${cfgUser} ${projectBase}/deploy
 chown ${cfgUser} ${projectBase}/bin
 
