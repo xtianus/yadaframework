@@ -40,6 +40,7 @@
 		<jndiname>java:comp/env/jdbc/${acronym}db$env</jndiname>
 		<showSql>false</showSql>
 		<entityPackage>${basePackage}.persistence.entity</entityPackage>
+		<databaseMigrationAtStartup>false</databaseMigrationAtStartup>
 	</database>
 
 	<social>
