@@ -137,7 +137,7 @@ if [[ $cfgTomcatTarGz ]]; then
 	chmod -R g+w $cfgTomcatTarGzHome/work
 	chmod -R g+w $cfgTomcatTarGzHome/logs
 	chmod -R g+w $cfgTomcatTarGzHome/temp
-	chmod g+w $cfgTomcatTarGzHome/conf
+	chmod g+wx $cfgTomcatTarGzHome/conf
 fi
 #
 if [[ $cfgTomcatNativeTarGz ]]; then
