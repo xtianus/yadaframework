@@ -35,6 +35,7 @@ public class YadaDialect extends AbstractProcessorDialect {
         final Set<IProcessor> processors = new HashSet<IProcessor>();
         processors.add(new YadaHrefAttrProcessor(dialectPrefix, config));
         processors.add(new YadaSrcAttrProcessor(dialectPrefix, config));
+        processors.add(new YadaAjaxAttrProcessor(dialectPrefix));
         // TODO move YadaActionUploadAttrProcessor to a yada security dialect
         // processors.add(new YadaActionUploadAttrProcessor(dialectPrefix));
         // Rimuove lo yada:xxx namespace dal tag <html>

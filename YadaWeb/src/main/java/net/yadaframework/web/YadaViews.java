@@ -32,6 +32,11 @@ public interface YadaViews {
 	String AJAX_SUCCESS = "/yada/ajaxSuccess";
 	
 	/**
+	 * Ajax method not allowed.
+	 */
+	String AJAX_FORBIDDEN = "/yada/ajaxForbidden";
+	
+	/**
 	 * Perform a page reload when returning from ajax method
 	 */
 	String AJAX_RELOAD = "/yada/ajaxReload";
