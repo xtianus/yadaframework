@@ -26,10 +26,12 @@ if [ "$myPid" != "" ]; then
                 fi
         done
 
-        if [ "$COUNTER" != "99" ]; then
-                echo "!!!! Can't stop server !!!!"
-                exit 1
-        fi
+	if [ "$COUNTER" != "99" ]; then
+		echo "!!!! Can't stop server !!!!"
+		echo "killing process"
+		kill -9 $myPid
+		exit 1
+	fi
 fi
 
 

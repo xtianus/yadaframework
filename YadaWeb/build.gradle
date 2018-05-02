@@ -45,11 +45,11 @@ repositories {
 dependencies {
 	api 'org.apache.commons:commons-configuration2:2.2'
 	
-    implementation 'org.springframework:spring-webmvc:4.3.13.RELEASE',
-		'org.springframework:spring-context-support:4.3.13.RELEASE',
-		'org.springframework.data:spring-data-jpa:1.11.9.RELEASE',
+    implementation 'org.springframework:spring-webmvc:4.3.15.RELEASE',
+		'org.springframework:spring-context-support:4.3.15.RELEASE',
+		'org.springframework.data:spring-data-jpa:1.11.11.RELEASE',
 		'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
-		'org.hibernate:hibernate-entitymanager:5.2.12.Final',
+		'org.hibernate:hibernate-entitymanager:5.2.16.Final',
 		'org.hibernate:hibernate-validator:5.4.2.Final',
 		'org.thymeleaf:thymeleaf-spring4:3.0.9.RELEASE',
 		'mysql:mysql-connector-java:5.1.46',

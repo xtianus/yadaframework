@@ -718,8 +718,19 @@ public abstract class YadaConfiguration {
 		return configuration.getString("config/database/jndiname");
 	}
 	
-	public String getEmailFrom() {
-		return configuration.getString("config/email/from");
+	/**
+	 * Get the email address and the personal name of the sender.
+	 * @return an array with email and personal name
+	 */
+	public String[] getEmailFrom() {
+		try {
+			String address = configuration.getString("config/email/from/address");
+			String personal = configuration.getString("config/email/from/name");
+			return new String[] {address, personal};
+		} catch (Exception e) {
+			// Legacy
+			return new String[] { configuration.getString("config/email/from"), null };
+		}
 	}
 	
 	public boolean isEmailEnabled() {

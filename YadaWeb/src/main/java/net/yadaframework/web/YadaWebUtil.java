@@ -73,6 +73,41 @@ public class YadaWebUtil {
 //	}
 	
 	/**
+	 * Returns the first language in the request language header as a string.
+	 * @return the language string, like "en_US", or "" if not found
+	 */
+	public String getBrowserLanguage() {
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+		String languageHeader = StringUtils.trimToEmpty(request.getHeader("Accept-Language")); // en-US,en-GB;q=0.9,en;q=0.8,it;q=0.7,es;q=0.6,la;q=0.5
+		int pos = languageHeader.indexOf(',');
+		if (pos>4) {
+			try {
+				return languageHeader.substring(0, pos);
+			} catch (Exception e) {
+				// Invalid header - ignored
+			}
+		}
+		return "";
+	}
+	
+	/**
+	 * Returns the first country in the request language header as a string.
+	 * @return the country string, like "US", or "" if not found
+	 */
+	public String getBrowserCountry() {
+		String browserLanguage = getBrowserLanguage();
+		int pos = browserLanguage.indexOf('-');
+		if (pos>1) {
+			try {
+				return browserLanguage.substring(pos+1);
+			} catch (Exception e) {
+				// Invalid header - ignored
+			}
+		}
+		return "";
+	}
+	
+	/**
 	 * Save an uploaded file to a temporary file
 	 * @param attachment
 	 * @return the temporary file holding the uploaded file, or null if no file has bee attached
@@ -238,8 +273,8 @@ public class YadaWebUtil {
 	 */
 	public String getWebappAddress(HttpServletRequest request) {
 		int port = request.getServerPort();
-		String pattern = port==80?"%s://%s%s":"%s://%s:%d%s";
-		String myServerAddress = port==80? 
+		String pattern = port==80||port==443?"%s://%s%s":"%s://%s:%d%s";
+		String myServerAddress = port==80||port==443? 
 				String.format(pattern, request.getScheme(),  request.getServerName(), request.getContextPath())
 				:
 				String.format(pattern, request.getScheme(),  request.getServerName(), request.getServerPort(), request.getContextPath());

@@ -88,7 +88,7 @@ public class YadaDataTableDao {
 		YadaSql countSql = (YadaSql) YadaUtil.copyEntity(yadaSql); // Copy any conditions set before calling
 		YadaSql searchSql = YadaSql.instance();
 		
-		yadaSql.selectFrom("select e from "+targetClass.getSimpleName()+" e");
+		yadaSql.selectFrom("select distinct e from "+targetClass.getSimpleName()+" e");
 		countSql.selectFrom("select count(*) from "+targetClass.getSimpleName()+" e");
 		
 		// Searching
