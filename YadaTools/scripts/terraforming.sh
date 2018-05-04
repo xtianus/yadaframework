@@ -291,6 +291,8 @@ if [[ $cfgCertbot != "false" ]]; then
 	apt-get -o Dpkg::Options::="--force-confnew" -y update
 	if [[ $cfgPkgApache ]]; then
 		apt-get -o Dpkg::Options::="--force-confnew" -y install python-certbot-apache
+	else
+		apt-get -o Dpkg::Options::="--force-confnew" -y install certbot
 	fi 
 fi
 
