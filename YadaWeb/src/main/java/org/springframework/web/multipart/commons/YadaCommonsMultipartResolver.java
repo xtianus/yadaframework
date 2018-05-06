@@ -5,11 +5,14 @@ import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.fileupload.FileItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 
 // Nota: forse in locale non funziona ma in remoto pare di sì
 public class YadaCommonsMultipartResolver extends CommonsMultipartResolver {
+	private final Logger log = LoggerFactory.getLogger(getClass());
 	public static final String MAX_UPLOAD_SIZE_EXCEEDED_KEY = "MaxUploadSizeExceededException";
 
 	@Override
@@ -18,6 +21,7 @@ public class YadaCommonsMultipartResolver extends CommonsMultipartResolver {
 			return super.parseRequest(request);
 		} catch (MaxUploadSizeExceededException e) {
 			request.setAttribute(MAX_UPLOAD_SIZE_EXCEEDED_KEY, e);
+			log.debug("Max upload file size exceeded", e);
 			return parseFileItems(Collections.<FileItem> emptyList(), null);
 		}
 	}

@@ -8,7 +8,7 @@ stopCommand='sudo -u tomcat8 $basePath/$acronym$env/tomcat/bin/shutdown.sh'
 # Identification string for the process
 ident='/srv/$acronym$env/tomcat/bin/bootstrap.jar'
 
-myPid=$( ps -ww -C java -o pid,args | grep $ident | cut -f 1 -d ' ' )
+myPid=$( ps -ww -C java -o pid,args | grep $ident | awk '{print $1}' )
 
 $stopCommand
 
@@ -26,10 +26,12 @@ if [ "$myPid" != "" ]; then
                 fi
         done
 
-        if [ "$COUNTER" != "99" ]; then
-                echo "!!!! Can't stop server !!!!"
-                exit 1
-        fi
+	if [ "$COUNTER" != "99" ]; then
+		echo "!!!! Can't stop server !!!!"
+		echo "killing process"
+		kill -9 $myPid
+		exit 1
+	fi
 fi
 
 

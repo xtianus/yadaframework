@@ -88,7 +88,7 @@ public class YadaDataTableDao {
 		YadaSql countSql = (YadaSql) YadaUtil.copyEntity(yadaSql); // Copy any conditions set before calling
 		YadaSql searchSql = YadaSql.instance();
 		
-		yadaSql.selectFrom("select e from "+targetClass.getSimpleName()+" e");
+		yadaSql.selectFrom("select distinct e from "+targetClass.getSimpleName()+" e");
 		countSql.selectFrom("select count(*) from "+targetClass.getSimpleName()+" e");
 		
 		// Searching
@@ -189,7 +189,7 @@ public class YadaDataTableDao {
     	count = (long) query.getSingleResult();
     	yadaDatatablesRequest.setRecordsTotal(count);
     	// Eagerly fetching localized strings. This should not be a performance problem as DataTables is generally used in internal admin pages.
-    	YadaUtil.prefetchLocalizedStrings(result, targetClass);
+    	YadaUtil.prefetchLocalizedStringList(result, targetClass);
     	return result;
 	}
 	

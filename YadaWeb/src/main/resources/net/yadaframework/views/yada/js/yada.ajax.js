@@ -245,7 +245,7 @@
 	};
 	
 	/**
-	 * Transform links into ajax links: all anchors with a class of "yadaAjax" will be sent via ajax.
+	 * Transform links and non-submit buttons into ajax links: all anchors/buttons with a class of "yadaAjax" will be sent via ajax.
 	 * @param handler a function to call upon successful link submission, can be null
 	 * @param $element the element on which to enable ajax links, can be null for the entire body
 	 */
@@ -257,7 +257,7 @@
 		if ($target.length==0) {
 			$target = $element;
 		}
-		$('a.yadaAjax', $target).each(function() {
+		$('a.yadaAjax, button.yadaAjax:not([type="submit"])', $target).each(function() {
 			$(this).removeClass('yadaAjax');
 			yada.enableAjaxLink($(this), handler);
 		});
@@ -347,9 +347,10 @@
 
 	
 	/**
-	 * Sends a link via ajax, it doesn't have to have class .yadaAjax.
+	 * Sends a link/button via ajax, it doesn't have to have class .yadaAjax.
+	 * Buttons must have a yada-href attribute and not be submit buttons.
 	 * Links with a "yadaLinkDisabled" class are disabled.
-	 * @param $link the jquery anchor (could be an array), e.g. $('.niceLink')
+	 * @param $link the jquery anchor or button (could be an array), e.g. $('.niceLink')
 	 * @param handler funzione chiamata in caso di successo e nessun yadaWebUtil.modalError()
 	 */
 	yada.enableAjaxLink = function($link, handler) {
