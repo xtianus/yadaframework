@@ -123,13 +123,15 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	protected boolean published;
 	
 	@JsonView(YadaJsonView.WithLazyAttributes.class)
-	@OneToMany(cascade=CascadeType.REMOVE, orphanRemoval=true)
+	// A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance
+	@OneToMany // (cascade=CascadeType.REMOVE, orphanRemoval=true)
 	@JoinTable(name="YadaProduct_galleryImages")
 	@OrderBy("sortOrder")
 	protected List<YadaAttachedFile> galleryImages;
 
 	@JsonView(YadaJsonView.WithLazyAttributes.class)
-	@OneToMany(cascade=CascadeType.REMOVE, orphanRemoval=true)
+	// A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance
+	@OneToMany // (cascade=CascadeType.REMOVE, orphanRemoval=true)
 	@JoinTable(name="YadaProduct_attachments")
 	@OrderBy("sortOrder")
 	protected List<YadaAttachedFile> attachments;
