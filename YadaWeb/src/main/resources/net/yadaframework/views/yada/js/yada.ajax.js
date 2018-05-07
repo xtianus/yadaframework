@@ -171,7 +171,7 @@
 	}	
 	
 	function hasNoLoader($element) {
-		return $element.hasClass("noLoader") || $element.hasClass("noloader");
+		return $element.hasClass("noLoader") || $element.hasClass("noloader") || $element.hasClass("yadaNoLoader");
 	}
 	
 	// Loads a data-yadaAjaxFragment
@@ -269,7 +269,7 @@
 	};
 	
 	/**
-	 * Enables ajax on a checkbox change.
+	 * Enables ajax on a checkbox change. Will either submit a parent form or make an ajax call directly.
 	 */
 	yada.enableAjaxCheckboxes = function(handler, $element) {
 		if ($element==null || $element=="") {
@@ -622,9 +622,27 @@
 //			$(this).addClass('yadaClickedButtonHandler');
 //		});
 		$form.not('.'+markerClass).submit(function(e) {
+			var $formGroup = $form;
+			// Check if this form belongs to a yadaFormGroup
+			var yadaFormGroup = $form.attr('data-yadaFormGroup');
+			if (yadaFormGroup!=null) {
+				// Find all forms of the same group
+				$formGroup = $('form[data-yadaFormGroup='+yadaFormGroup+']');
+			}
 			// If the form is marked as markerAjaxButtonOnly do not submit it via ajax unless the clicked button is marked with 'yadaAjax'
 			if ($form.hasClass(markerAjaxButtonOnly)) {
 				if (clickedButton==null || !$(clickedButton).hasClass('yadaAjax')) {
+					// If it is a group of forms, append all other inputs to the current form and let it submit normally.
+					// Non need to clone anything because the page will be reloaded anyway (not ajax here)
+					if ($formGroup.length>1) {
+						$formGroup.each(function() {
+							var $eachForm = $(this);
+							if (!$eachForm.is($form)) {
+								$eachForm.find(":input").appendTo($form); // All inputs including textarea etc.
+							}
+						});
+					}
+					// In any case, let it continue with the submit
 					return; // Do a normal submit
 				}
 			}
@@ -635,6 +653,22 @@
 			var multipart = $form.attr("enctype")=="multipart/form-data";
 			// Using FormData to send files too: https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData
 			var data = multipart ? new FormData(this) : $(this).serializeArray();
+			// Add data from the form group if any
+			if ($formGroup.length>1) {
+				$formGroup.each(function() {
+					var $eachForm = $(this);
+					if (!$eachForm.is($form)) {
+						if (multipart) {
+							var eachFormdata = new FormData(this);
+							for (var pair of eachFormdata.entries()) {
+								data.append(pair[0], pair[1]);
+							}
+						} else {
+							$.merge(data, $eachForm.serializeArray());
+						}
+					}
+				});
+			}
 			var buttonName = null;
 			var buttonValue = null;
 			if (clickedButton!=null) {
