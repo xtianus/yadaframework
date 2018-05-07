@@ -7,8 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -24,6 +26,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -65,35 +68,43 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int year; // Production year
 
-	//@JsonView(YadaJsonView.WithLocalizedStrings.class)
+	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=64)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> name = new HashMap<>(); // localized because it could be different for different languages
 
+	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=128)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> subtitle = new HashMap<>(); // a kind of short description
 	
+	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=8192)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> description = new HashMap<>(); // a kind of small description
 	
+	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=128)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> materials = new HashMap<>();
 	
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
-	protected int category;
+	@ElementCollection
+	@CollectionTable(uniqueConstraints=@UniqueConstraint(columnNames={"YadaProduct_id", "categories"}))
+	protected Set<Integer> categories;
 	
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
-	protected int subCategory;
+	@ElementCollection
+	@CollectionTable(uniqueConstraints=@UniqueConstraint(columnNames={"YadaProduct_id", "subCategories"}))
+	protected Set<Integer> subCategories;
 	
+	/**
+	 * true if the YadaProduct is an accessory
+	 */
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
-	protected boolean isAccessory; // Useful to know if this is an accessory without a join on the YadaProduct_accessories table
+	protected boolean accessoryFlag; // Useful to know if this is an accessory without a join on the YadaProduct_accessories table
 	
 	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	@ManyToMany
@@ -309,30 +320,6 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 		this.materials = materials;
 	}
 
-	public int getCategory() {
-		return category;
-	}
-
-	public void setCategory(int category) {
-		this.category = category;
-	}
-
-	public int getSubCategory() {
-		return subCategory;
-	}
-
-	public void setSubCategory(int subCategory) {
-		this.subCategory = subCategory;
-	}
-
-	public boolean getIsAccessory() {
-		return isAccessory;
-	}
-
-	public void setIsAccessory(boolean isAccessory) {
-		this.isAccessory = isAccessory;
-	}
-
 	public List<YadaProduct> getAccessories() {
 		return accessories;
 	}
@@ -405,6 +392,36 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	public Field[] getExcludedFields() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+
+	public Set<Integer> getCategories() {
+		return categories;
+	}
+
+
+	public void setCategories(Set<Integer> categories) {
+		this.categories = categories;
+	}
+
+
+	public Set<Integer> getSubCategories() {
+		return subCategories;
+	}
+
+
+	public void setSubCategories(Set<Integer> subCategories) {
+		this.subCategories = subCategories;
+	}
+
+
+	public boolean isAccessoryFlag() {
+		return accessoryFlag;
+	}
+
+
+	public void setAccessoryFlag(boolean accessoryFlag) {
+		this.accessoryFlag = accessoryFlag;
 	}
 
 }
