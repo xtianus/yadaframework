@@ -30,4 +30,14 @@ public interface YadaProductRepository<T extends YadaProduct> extends JpaReposit
 	@Modifying
 	@Query(value="insert into YadaProduct_galleryImages (YadaProduct_id, galleryImages_id) values (:yadaProductId, :yadaAttachedFileId)", nativeQuery=true)
 	void addGalleryImage(@Param("yadaProductId") Long productId, @Param("yadaAttachedFileId") Long yadaAttachedFileId);
+	
+	/**
+	 * Update a new thumbnail image attachment to a product
+	 * @param productId
+	 * @param yadaAttachedFileId
+	 */
+	@Transactional(readOnly = false) 
+	@Modifying
+	@Query(value="UPDATE YadaProduct SET image_id=:yadaAttachedFileId where id=:yadaProductId", nativeQuery=true)
+	void setThumbnailImage(@Param("yadaProductId") Long productId, @Param("yadaAttachedFileId") Long yadaAttachedFileId);
 }

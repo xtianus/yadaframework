@@ -190,6 +190,7 @@ public class YadaDataTableDao {
     	yadaDatatablesRequest.setRecordsTotal(count);
     	// Eagerly fetching localized strings. This should not be a performance problem as DataTables is generally used in internal admin pages.
     	YadaUtil.prefetchLocalizedStringList(result, targetClass);
+//    	TODO YadaUtil.prefetchLocalizedStringListRecursive(result, targetClass);
     	return result;
 	}
 	
