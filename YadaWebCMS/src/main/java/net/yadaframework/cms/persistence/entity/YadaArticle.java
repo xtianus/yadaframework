@@ -71,6 +71,7 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> name = new HashMap<>(); // localized because it could be different for different languages
 
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Column(length=32)
 	protected String code;
 	

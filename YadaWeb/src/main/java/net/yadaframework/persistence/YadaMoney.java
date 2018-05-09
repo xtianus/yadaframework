@@ -50,13 +50,23 @@ public class YadaMoney {
 		}	
 	}
 
+	/**
+	 * 
+	 * @param toAdd value expressed in 1/10000 of the base unit
+	 * @return
+	 */
 	public YadaMoney add(YadaMoney toAdd) {
 		this.amount += toAdd.amount;
 		return this;
 	}
-	
-	public YadaMoney subtract(YadaMoney toAdd) {
-		this.amount -= toAdd.amount;
+
+	/**
+	 * 
+	 * @param toRemove value expressed in 1/10000 of the base unit
+	 * @return
+	 */
+	public YadaMoney subtract(YadaMoney toRemove) {
+		this.amount -= toRemove.amount;
 		return this;
 	}
 	
