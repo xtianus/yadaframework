@@ -399,6 +399,28 @@ public class YadaUtil {
 		}
 		return totBytes;
 	}
+	
+	/**
+	 * Get the Field of a given class, even from a superclass but not "nested" in a path
+	 * @param rootClass
+	 * @param attributeName
+	 * @return the Field found or null
+	 * @throws YadaInvalidValueException if attributeName is a path (with a dot in it)
+	 */
+	public Field getFieldNoTraversing(Class rootClass, String attributeName) {
+		if (attributeName.indexOf('.')>-1) {
+			throw new YadaInvalidValueException("Attribute name expected, attribute path found: {}", attributeName);
+		}
+		Field field = null;
+		while (field==null && rootClass!=null) {
+			try {
+				field = rootClass.getDeclaredField(attributeName);
+			} catch (NoSuchFieldException e) {
+				rootClass = rootClass.getSuperclass();
+			}
+		}
+		return field;
+	}
 
 	/**
 	 * Reflection to get the type of a given field, even nested or in a superclass.
