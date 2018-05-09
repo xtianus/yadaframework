@@ -2,6 +2,10 @@ package net.yadaframework.persistence.repository;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -10,12 +14,14 @@ import javax.persistence.PersistenceContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInternalException;
+import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.persistence.YadaSql;
 
 /**
@@ -26,6 +32,7 @@ import net.yadaframework.persistence.YadaSql;
 public class YadaLocaleDao {
 	
     @Autowired private YadaConfiguration config;
+    @Autowired private JdbcTemplate jdbcTemplate;
 
     @PersistenceContext private EntityManager em;
     
@@ -104,7 +111,10 @@ public class YadaLocaleDao {
 		if (locale==null) {
 			locale = LocaleContextHolder.getLocale();
 		}
-    	String className = entityClass.getSimpleName();
+		String className = findClass(entityClass, attributeName);
+		if (className==null) {
+			throw new YadaInvalidValueException("The requested attirbute {} does not exist on {}", attributeName, entityClass);
+		}
     	String tableName = className + "_" + attributeName;
     	String idColumn = className + "_id";
     	YadaSql yadaSql = YadaSql.instance().selectFrom("select " + attributeName + " from " + tableName)
@@ -113,7 +123,8 @@ public class YadaLocaleDao {
     		.setParameter("entityId", entityId)
     		.setParameter("localeString", locale.toString());
     	List<?> result = yadaSql.nativeQuery(em).getResultList();
-    	if (result.isEmpty()) {
+
+		if (result.isEmpty()) {
     		// Try with the default locale
     		Locale defaultLocale = config.getDefaultLocale();
     		if (defaultLocale!=null && !defaultLocale.equals(locale)) {
@@ -128,6 +139,33 @@ public class YadaLocaleDao {
     		return "";
     	}
     	return (String) result.get(0);
+    }
+
+    private boolean tableExists(String tableName) {
+    	try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+	    	DatabaseMetaData meta = connection.getMetaData();
+	    	ResultSet res = meta.getTables(null, null, tableName, new String[] {"TABLE"});
+	    	boolean result = res.first();
+	    	res.close();
+	    	return result;
+    	} catch(Exception e) {
+    		return false;
+    	}
+    }
+    
+    private String findClass(Class<?> entityClass, String attributeName) {
+    	String className = entityClass.getSimpleName();
+    	String tableName = className + "_" + attributeName;
+    	boolean exists = tableExists(tableName);
+    	if (!exists) {
+			// Try with the superclass
+			entityClass = entityClass.getSuperclass();
+			if (entityClass.equals(Object.class)) {
+				return null; // Bottom of the hierarchy
+			}
+			return findClass(entityClass, attributeName);
+    	}
+    	return className;
     }
 
 }
