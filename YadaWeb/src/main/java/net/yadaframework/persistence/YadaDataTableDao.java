@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -110,31 +112,39 @@ public class YadaDataTableDao {
 			for (YadaDatatablesColumn  column : yadaDatatablesRequest.getColumns()) {
 				String attributePath = column.getNameOrData();
 				if (attributePath!=null) {
-					addAttributeValue(entity, entityJson, attributePath, null);
+					addAttributeValue(entity, entityJson, attributePath);
 				}
 			}
 		}
 		return json;
 	}
 
-	private <entityClass> void addAttributeValue(entityClass entity, Map<String, Object> entityJson, String attributePath, Type keyType) {
+	private <entityClass> void addAttributeValue(entityClass entity, Map<String, Object> entityJson, String attributePath) {
 		try {
 			Object value = "";
 			String[] parts = attributePath.split("\\.", 2);
 			String attributeName = parts[0];
-			if (keyType!=null) {
-				if (entity instanceof java.util.Map) {
-					Map mapEntity = (Map) entity;
-					// If the field is a map, handle String and Locale keys only
-					if (keyType.getTypeName().equals(String.class.getName())) {
-						value = mapEntity.get(attributeName);
-					} else if (keyType.getTypeName().equals(Locale.class.getName())) {
-						value = mapEntity.get(new Locale(attributeName));
-					} else {
-						log.debug("Invalid map key type {} - value ignored", keyType);
+			if (entity instanceof java.util.Map) {
+				Map<Object,Object> mapEntity = (Map<Object,Object>) entity;
+				// The old version was generating a key from the String value, but needed to know how to do that,
+				// so only String and Locale keys were supported.
+				//	// If the field is a map, handle String and Locale keys only
+				//	if (keyType.getTypeName().equals(String.class.getName())) {
+				//		value = mapEntity.get(attributeName);
+				//	} else if (keyType.getTypeName().equals(Locale.class.getName())) {
+				//		value = mapEntity.get(new Locale(attributeName));
+				//	} else {
+				//		log.debug("Invalid map key type {} - value ignored", keyType);
+				//	}
+				
+				// The new version is a bit less efficient but can cope with any key type because
+				// it relies on the toString iterating on all the keys
+				Set<Entry<Object, Object>> entrySet = mapEntity.entrySet();
+				for (Entry<Object, Object> entry : entrySet) {
+					if (entry.getKey().toString().equals(attributeName)) {
+						value = entry.getValue();
+						break;
 					}
-				} else {
-					throw new YadaInvalidUsageException("Map key type {} passed when object is not a map");
 				}
 			} else {
 				Field field = yadaUtil.getFieldNoTraversing(entity.getClass(), attributeName);
@@ -144,10 +154,11 @@ public class YadaDataTableDao {
 				}
 				field.setAccessible(true);
 				value = field.get(entity);
-				if (value instanceof java.util.Map) {
-					ParameterizedType type = (ParameterizedType) field.getGenericType();
-					keyType = type.getActualTypeArguments()[0];
-				}
+				// The old version
+				//	if (value instanceof java.util.Map) {
+				//		ParameterizedType type = (ParameterizedType) field.getGenericType();
+				//		keyType = type.getActualTypeArguments()[0];
+				//	}
 			}
 				
 			if (parts.length==1) {
@@ -158,7 +169,7 @@ public class YadaDataTableDao {
 			// Recurse into the path
 			Map<String, Object> jsonValue = new HashMap<>();
 			entityJson.put(attributeName, jsonValue);
-			addAttributeValue(value, jsonValue, parts[1], keyType);
+			addAttributeValue(value, jsonValue, parts[1] /*, keyType*/);
 		} catch (Exception e) {
 			log.error("Can't get value of {} for entity {} - ignored", attributePath, entity, e);
 		}
