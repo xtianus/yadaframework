@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,9 @@ public class YadaFileManager {
 	 */
 	public String getDesktopImageUrl(YadaAttachedFile yadaAttachedFile) {
 		String imageName = yadaAttachedFile.getFilenameDesktop();
+		if (imageName==null) {
+			imageName = yadaAttachedFile.getFilename();
+		}
 		StringBuilder result = new StringBuilder(config.getContentUrl());
 		result.append(yadaAttachedFile.getRelativeFolderPath())
 		.append("/")
@@ -99,10 +103,11 @@ public class YadaFileManager {
 	}
 	
 	/**
-	 * Copies (and resizes) a managed file to the destination folder, creating a database association to assign to an Entity
-	 * @param managedFile
+	 * Copies (and resizes) a managed file to the destination folder, creating a database association to assign to an Entity.
+	 * The name of the file is in the format [basename]managedFileName_id.ext
+	 * @param managedFile an uploaded file, can be an image or not
 	 * @param relativeFolderPath path of the target folder relative to the contents folder
-	 * @param baseName
+	 * @param baseName prefix to attach on the file name. Add a separator if you need one. Can be null.
 	 * @param targetExtension optional, to convert image file formats
 	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
 	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
@@ -113,13 +118,14 @@ public class YadaFileManager {
 		File targetFolder = new File(config.getContentPath(), relativeFolderPath);
 		targetFolder.mkdirs();
 		String[] filenameParts = YadaUtil.splitFileNameAndExtension(managedFile.getName());
+		String filenameNoCounter = filenameParts[0];
 		String origExtension = filenameParts[1]; // jpg or pdf
-		String filenameNoCounter = YadaUtil.stripCounterFromFilename(managedFile.getName(), COUNTER_SEPARATOR);
+//		String filenameNoCounter = YadaUtil.stripCounterFromFilename(managedFile.getName(), COUNTER_SEPARATOR);
 		//
 		// Now prefix doesn't have any counter at the end
 		YadaAttachedFile yadaAttachedFile = new YadaAttachedFile();
 		yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile); // Get the id
-		String targetFilenamePrefix = filenameNoCounter + COUNTER_SEPARATOR + yadaAttachedFile.getId(); // product_2631
+		String targetFilenamePrefix = StringUtils.trimToEmpty(baseName) + filenameNoCounter + COUNTER_SEPARATOR + yadaAttachedFile.getId(); // product_2631
 		boolean imageExtensionChanged = targetExtension!=null && targetExtension.compareToIgnoreCase(origExtension)!=0;
 		boolean requiresTransofmation = imageExtensionChanged || desktopWidth!=null || mobileWidth!=null; 
 		if (targetExtension==null) {

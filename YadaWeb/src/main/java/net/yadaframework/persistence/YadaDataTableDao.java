@@ -1,5 +1,8 @@
 package net.yadaframework.persistence;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -7,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -22,6 +27,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
 import net.yadaframework.web.YadaDatatablesColumn;
 import net.yadaframework.web.YadaDatatablesOrder;
@@ -40,38 +46,144 @@ public class YadaDataTableDao {
     @PersistenceContext EntityManager em;
 	
     /**
-     * Ritorna la mappa dei valori come richiesta da DataTables
+	 * Returns a map with the result in the format needed by DataTables.
+	 * All values that are included in the annotated json view (on the caller) will end up in the resulting json
      * @param yadaDatatablesRequest
      * @param entityClass
      * @param locale
      * @return
      */
-	public Map<String, Object> getJsonPage(YadaDatatablesRequest yadaDatatablesRequest, Class<?> entityClass, Locale locale) {
+    @Deprecated // Use getConvertedJsonPage instead
+	public <entityClass> Map<String, Object> getJsonPage(YadaDatatablesRequest yadaDatatablesRequest, Class<?> entityClass, Locale locale) {
 		Map<String, Object> json = new HashMap<String, Object>();
 		try {
-			List data = getPage(yadaDatatablesRequest, entityClass, em, locale);
+			List<entityClass> data = getPage(yadaDatatablesRequest, entityClass, locale);
+	    	// Eagerly fetching localized strings. This should not be a performance problem as DataTables is generally used in internal admin pages with a few lines.
+	    	YadaUtil.prefetchLocalizedStringList(data, entityClass);
 			json.put("draw", yadaDatatablesRequest.getDraw());
 			json.put("recordsTotal", yadaDatatablesRequest.getRecordsTotal());
 			json.put("recordsFiltered", yadaDatatablesRequest.getRecordsFiltered());
 			json.put("data", data);
 		} catch (Exception e) {
-			log.error("Impossibile recuperare la pagina di dati", e);
-			json.put("error", e.toString()); 
+			log.error("Can't retrieve data", e);
+			json.put("error", e.toString()); // TODO handle the error in javascript 
 		}
 		return json;
 	}
  
 	/**
+	 * Returns a map with the result in the format needed by DataTables.
+	 * Only requested values are returned in the map. There is no need to call a json converter because everything is a map already.
+	 * @param yadaDatatablesRequest
+	 * @param entityClass
+	 * @param locale
+	 * @return
+	 */
+	public <entityClass> Map<String, Object> getConvertedJsonPage(YadaDatatablesRequest yadaDatatablesRequest, Class<?> entityClass, Locale locale) {
+		Map<String, Object> json = new HashMap<String, Object>();
+		try {
+			List<entityClass> entityPage = getPage(yadaDatatablesRequest, entityClass, locale);
+			List<Map<String, Object>> jsonData = convertToJson(entityPage, yadaDatatablesRequest, entityClass, locale);
+			json.put("draw", yadaDatatablesRequest.getDraw());
+			json.put("recordsTotal", yadaDatatablesRequest.getRecordsTotal());
+			json.put("recordsFiltered", yadaDatatablesRequest.getRecordsFiltered());
+			json.put("data", jsonData);
+		} catch (Exception e) {
+			log.error("Can't retrieve data", e);
+			json.put("error", e.toString()); // TODO handle the error in javascript 
+		}
+		return json;
+	}
+	
+	/**
+	 * Retrieve all values requested and put them in a json-like structure
+	 * @param entityPage
+	 * @param yadaDatatablesRequest
+	 * @param entityClass
+	 * @param locale
+	 * @return
+	 */
+	private <entityClass> List<Map<String, Object>> convertToJson(List<entityClass> entityPage, YadaDatatablesRequest yadaDatatablesRequest, Class<?> entityClass, Locale locale) {
+		List<Map<String, Object>> json = new ArrayList<Map<String, Object>>();
+		for (entityClass entity : entityPage) {
+			Map<String, Object> entityJson = new HashMap<String, Object>();
+			json.add(entityJson);
+			// Conversion from java to map
+			for (YadaDatatablesColumn  column : yadaDatatablesRequest.getColumns()) {
+				String attributePath = column.getNameOrData();
+				if (attributePath!=null) {
+					addAttributeValue(entity, entityJson, attributePath);
+				}
+			}
+		}
+		return json;
+	}
+
+	private <entityClass> void addAttributeValue(entityClass entity, Map<String, Object> entityJson, String attributePath) {
+		try {
+			Object value = "";
+			String[] parts = attributePath.split("\\.", 2);
+			String attributeName = parts[0];
+			if (entity instanceof java.util.Map) {
+				Map<Object,Object> mapEntity = (Map<Object,Object>) entity;
+				// The old version was generating a key from the String value, but needed to know how to do that,
+				// so only String and Locale keys were supported.
+				//	// If the field is a map, handle String and Locale keys only
+				//	if (keyType.getTypeName().equals(String.class.getName())) {
+				//		value = mapEntity.get(attributeName);
+				//	} else if (keyType.getTypeName().equals(Locale.class.getName())) {
+				//		value = mapEntity.get(new Locale(attributeName));
+				//	} else {
+				//		log.debug("Invalid map key type {} - value ignored", keyType);
+				//	}
+				
+				// The new version is a bit less efficient but can cope with any key type because
+				// it relies on the toString iterating on all the keys
+				Set<Entry<Object, Object>> entrySet = mapEntity.entrySet();
+				for (Entry<Object, Object> entry : entrySet) {
+					if (entry.getKey().toString().equals(attributeName)) {
+						value = entry.getValue();
+						break;
+					}
+				}
+			} else {
+				Field field = yadaUtil.getFieldNoTraversing(entity.getClass(), attributeName);
+				if (field==null) {
+					log.debug("Field {} in entity {} not found (ignored)", attributeName, entity.getClass());
+					return;
+				}
+				field.setAccessible(true);
+				value = field.get(entity);
+				// The old version
+				//	if (value instanceof java.util.Map) {
+				//		ParameterizedType type = (ParameterizedType) field.getGenericType();
+				//		keyType = type.getActualTypeArguments()[0];
+				//	}
+			}
+				
+			if (parts.length==1) {
+				// End of the path
+				entityJson.put(attributeName, value.toString());
+				return;
+			}
+			// Recurse into the path
+			Map<String, Object> jsonValue = new HashMap<>();
+			entityJson.put(attributeName, jsonValue);
+			addAttributeValue(value, jsonValue, parts[1] /*, keyType*/);
+		} catch (Exception e) {
+			log.error("Can't get value of {} for entity {} - ignored", attributePath, entity, e);
+		}
+	}
+
+	/**
 	 * Preleva una pagina di risultati che rispettino i parametri inviati via web.
 	 * Il nome delle colonne su cui fare le query e il sort viene preso da "name" oppure da "data" di DataTables.
 	 * @param yadaDatatablesRequest parametri della query, conterrà anche il count finale
 	 * @param targetClass tipo dell'oggetto da cercare
-	 * @param em
 	 * @return Pagina di oggetti di tipo targetClass. Il numero totale è reperibile in yadaDatatablesRequest.recordsFiltered
 	 */
 	@SuppressWarnings("rawtypes")
-	protected <targetClass> List<targetClass> getPage(YadaDatatablesRequest yadaDatatablesRequest, Class targetClass, EntityManager em, Locale locale) {
-		//
+	protected <targetClass> List<targetClass> getPage(YadaDatatablesRequest yadaDatatablesRequest, Class targetClass, Locale locale) {
 		String globalSearchString = StringUtils.trimToNull(yadaDatatablesRequest.getSearch().getValue().toLowerCase(locale));
 //		String globalCondition = StringUtils.trimToNull(yadaDatatablesRequest.getGlobalCondition());
 		Long globalSearchNumber = null;
@@ -188,8 +300,6 @@ public class YadaDataTableDao {
     	query = countSql.query(em);
     	count = (long) query.getSingleResult();
     	yadaDatatablesRequest.setRecordsTotal(count);
-    	// Eagerly fetching localized strings. This should not be a performance problem as DataTables is generally used in internal admin pages.
-    	YadaUtil.prefetchLocalizedStringList(result, targetClass);
     	return result;
 	}
 	

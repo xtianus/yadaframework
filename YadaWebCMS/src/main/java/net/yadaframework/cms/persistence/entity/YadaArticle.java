@@ -3,6 +3,7 @@ package net.yadaframework.cms.persistence.entity;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -13,6 +14,7 @@ import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -67,8 +69,9 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 	@ElementCollection
 	@Column(length=64)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
-	protected Map<Locale, String> name; // localized because it could be different for different languages
+	protected Map<Locale, String> name = new HashMap<>(); // localized because it could be different for different languages
 
+	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Column(length=32)
 	protected String code;
 	
@@ -76,7 +79,7 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 	@ElementCollection
 	@Column(length=32)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
-	protected Map<Locale, String> color;
+	protected Map<Locale, String> color = new HashMap<>();
 	
 	@Embedded
 	protected YadaDimension dimension;
@@ -85,7 +88,8 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 	@Convert(converter = YadaMoneyConverter.class)
 	protected YadaMoney unitPrice;
 	
-	@ManyToOne
+	// @JsonView(YadaJsonView.WithEagerAttributes.class)
+	@ManyToOne // TODO !!!!!!!!!!!!!!!!! (fetch=FetchType.EAGER)
 	protected YadaProduct product;
 	
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
@@ -127,10 +131,18 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 		return name.get(LocaleContextHolder.getLocale());
 	}
 	
-	public void seLocalName (String name) {
+	public void seLocalName(String name) {
 		this.name.put(LocaleContextHolder.getLocale(), name);
 	}
-	
+
+	@JsonProperty("localProductName")
+	@JsonView(YadaJsonView.WithLocalizedValue.class)
+	@Transient
+	public String getLocalProductName() {
+		return "TODO"; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//		return product!=null?product.getLocalName():"";
+	}
+
 	/**
 	 * Returns the localized color in the current request locale
 	 * @return

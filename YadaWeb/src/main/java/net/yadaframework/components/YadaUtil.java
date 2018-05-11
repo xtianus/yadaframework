@@ -222,6 +222,42 @@ public class YadaUtil {
 			prefetchLocalizedStringList(list, targetClass);
 		}
 	}
+	
+	public static <entityClass> void prefetchLocalizedStringListRecursive(List<entityClass> entities, Class<?> entityClass, String...attributes) {
+		if (entities==null || entities.isEmpty()) {
+			return;
+		}
+		// Prefetch first level strings for all objects
+		prefetchLocalizedStringList(entities, entityClass, attributes);
+		// Look for strings in all attributes recursively
+		ReflectionUtils.doWithFields(entityClass, new ReflectionUtils.FieldCallback() {
+			@Override
+			public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
+				for (Object object : entities) {
+					if (object!=null) {
+						try {
+							field.setAccessible(true);
+							Object fieldValue = field.get(object);
+							if (fieldValue!=null) {
+								Class fieldClass = field.getType();
+								List secondLevel = new ArrayList<>();
+								secondLevel.add(fieldValue);
+								prefetchLocalizedStringList(secondLevel, fieldClass, attributes);
+							}
+						} catch (Exception e) {
+							log.error("Failed to initialize field {} for object {} (ignored)", field, object);
+						}
+					}
+				}
+			}
+		}, new ReflectionUtils.FieldFilter() {
+			@Override
+			public boolean matches(Field field) {
+				Type type = field.getGenericType();
+				return !(type instanceof ParameterizedType);
+			}
+		});	
+	}
 
 	/**
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
@@ -244,8 +280,10 @@ public class YadaUtil {
 						try {
 							field.setAccessible(true);
 							Object fieldValue = field.get(object);
-							Method sizeMethod = Map.class.getMethod("size");
-							sizeMethod.invoke(fieldValue); // Load all the map
+							if (fieldValue!=null) {
+								Method sizeMethod = Map.class.getMethod("size");
+								sizeMethod.invoke(fieldValue); // Load all the map
+							}
 						} catch (NoSuchMethodException | SecurityException | InvocationTargetException e) {
 							log.error("Failed to initialize field {} for object {} (ignored)", field, object);
 						}
@@ -360,6 +398,28 @@ public class YadaUtil {
 			}
 		}
 		return totBytes;
+	}
+	
+	/**
+	 * Get the Field of a given class, even from a superclass but not "nested" in a path
+	 * @param rootClass
+	 * @param attributeName
+	 * @return the Field found or null
+	 * @throws YadaInvalidValueException if attributeName is a path (with a dot in it)
+	 */
+	public Field getFieldNoTraversing(Class rootClass, String attributeName) {
+		if (attributeName.indexOf('.')>-1) {
+			throw new YadaInvalidValueException("Attribute name expected, attribute path found: {}", attributeName);
+		}
+		Field field = null;
+		while (field==null && rootClass!=null) {
+			try {
+				field = rootClass.getDeclaredField(attributeName);
+			} catch (NoSuchFieldException e) {
+				rootClass = rootClass.getSuperclass();
+			}
+		}
+		return field;
 	}
 
 	/**
