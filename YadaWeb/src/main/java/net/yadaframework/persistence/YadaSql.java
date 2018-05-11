@@ -24,7 +24,8 @@ import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 /**
- * Incrementally and conditionally builds a sql select/update query
+ * Incrementally and conditionally builds a sql select/update query.
+ * Example: YadaSql.instance().selectFrom("select * from MyTable").query(em).getResultList();
  */
 // http://dev.mysql.com/doc/refman/5.7/en/select.html
 public class YadaSql implements CloneableDeep {
