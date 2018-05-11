@@ -660,9 +660,17 @@
 					if (!$eachForm.is($form)) {
 						if (multipart) {
 							var eachFormdata = new FormData(this);
-							for (var pair of eachFormdata.entries()) {
-								data.append(pair[0], pair[1]);
-							}
+							// Can't use for - of with the current minifyjs version, so trying with a while loop
+							//	for (var pair of eachFormdata.entries()) {
+							//		data.append(pair[0], pair[1]);
+							//	}
+							var iterator = eachFormdata.entries();
+							var iterElem = iterator.next();
+						    while ( ! iterElem.done ) {
+						    	var pair = iterElem.value;
+						        data.append(pair[0], pair[1]);
+						        iterElem = iterator.next();
+						    }
 						} else {
 							$.merge(data, $eachForm.serializeArray());
 						}
