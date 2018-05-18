@@ -192,20 +192,22 @@ if [[ ! $cfgPkgApache ]]; then
 	service apache2 stop
 	dpkg --purge apache2-mpm-prefork apache2
 fi
-if [[ $cfgPkgModJk ]]; then
-	apt-get -o Dpkg::Options::="--force-confnew" -y install $cfgPkgModJk
-	sed -i 's/JkLogLevel info/JkLogLevel warn/g' /etc/apache2/mods-available/jk.conf
-	a2enmod jk
-	# Enabling AJP Connector
-	sed -i 's%\(<Connector port="8009".*\)%-->\n&\n<!--%g' ${CATALINA_BASE}/conf/server.xml
-fi
-if [[ $myHostName && $cfgPkgApache ]]; then
-	echo "ServerName $( hostname )" > /etc/apache2/conf-available/servername.conf
-	a2enconf servername
-fi
 if [[ $cfgPkgApache ]]; then
 	apt-get -o Dpkg::Options::="--force-confnew" -y install $cfgPkgApache
 	a2enmod rewrite
+	
+	if [[ $cfgPkgModJk ]]; then
+		apt-get -o Dpkg::Options::="--force-confnew" -y install $cfgPkgModJk
+		sed -i 's/JkLogLevel info/JkLogLevel warn/g' /etc/apache2/mods-available/jk.conf
+		a2enmod jk
+		# Enabling AJP Connector
+		sed -i 's%\(<Connector port="8009".*\)%-->\n&\n<!--%g' ${CATALINA_BASE}/conf/server.xml
+	fi
+	if [[ $myHostName ]]; then
+		echo "ServerName $( hostname )" > /etc/apache2/conf-available/servername.conf
+		a2enconf servername
+	fi
+	
 	# Courtesy page
 	if [ -d defaultCourtesyPage ]; then
 		mv defaultCourtesyPage ${projectBase}/contents/pleaseWait
