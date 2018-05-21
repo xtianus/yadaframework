@@ -104,6 +104,9 @@ public class YadaDataTableDao {
 	 * @return
 	 */
 	private <entityClass> List<Map<String, Object>> convertToJson(List<entityClass> entityPage, YadaDatatablesRequest yadaDatatablesRequest, Class<?> entityClass, Locale locale) {
+		Field idField = yadaUtil.getFieldNoTraversing(entityClass, "id");
+		idField.setAccessible(true);
+		//
 		List<Map<String, Object>> json = new ArrayList<Map<String, Object>>();
 		for (entityClass entity : entityPage) {
 			Map<String, Object> entityJson = new HashMap<String, Object>();
@@ -114,6 +117,15 @@ public class YadaDataTableDao {
 				if (attributePath!=null) {
 					addAttributeValue(entity, entityJson, attributePath);
 				}
+			}
+			// Add DT_RowId for DataTables id
+			// TODO when on a single page there are multiple tables with the same object, the ids are not unique.
+			// We should prefix them with the table id, if any.
+			try {
+				Long id = (Long) idField.get(entity);
+				entityJson.put("DT_RowId", entityClass.getSimpleName()+"#"+id);
+			} catch (Exception e) {
+				log.error("Failed to set DT_RowId for entity {} (ignored)", entity);
 			}
 		}
 		return json;

@@ -23,7 +23,8 @@ import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.repository.YadaAttachedFileRepository;
 
 /**
- * The File Manager handles uploaded files. They are kept in a specific folder where they can be chosen to be attached to entities. 
+ * The File Manager handles uploaded files. They are kept in a specific folder where they can be 
+ * chosen to be attached to entities. 
  *
  */
 @Service

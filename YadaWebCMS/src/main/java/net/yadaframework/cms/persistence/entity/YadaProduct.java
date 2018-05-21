@@ -39,7 +39,7 @@ import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.web.YadaJsonView;
 
 /**
- * A Product is an "abstract" item because it groups similar objects that differ in color and size.
+ * A Product is an "abstract" item because it groups similar objects that differ in color, size or other attributes.
  * So a "Paris T-Shirt" is a very specific product but it comes in different sizes, so it doesn't exist unless
  * you specify the size. 
  * The Medium Paris T-Shirt is an article that actually exists and can be sold.
@@ -50,43 +50,35 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	// For synchronization with external databases
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified;
 	
 	// For optimistic locking
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Version
 	protected long version;
 	
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
 	
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int year; // Production year
 
-	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=64)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> name = new HashMap<>(); // localized because it could be different for different languages
 
-	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=128)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> subtitle = new HashMap<>(); // a kind of short description
 	
-	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=8192)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> description = new HashMap<>(); // a kind of small description
 	
-	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=128)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
@@ -103,33 +95,26 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	/**
 	 * true if the YadaProduct is an accessory
 	 */
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected boolean accessoryFlag; // Useful to know if this is an accessory without a join on the YadaProduct_accessories table
 	
-	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	@ManyToMany
 	@JoinTable(name="YadaProduct_accessories")
 	protected List<YadaProduct> accessories;
 	
-	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	@ManyToMany(mappedBy="accessories")
 	protected List<YadaProduct> accessoryOf;
 	
-	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	@OneToMany(mappedBy="product")
 	protected List<YadaArticle> articles; // The version of a product with a specific color, size, etc.
 
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected boolean published;
 	
-	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	// A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance
 	@OneToMany // (cascade=CascadeType.REMOVE, orphanRemoval=true)
 	@JoinTable(name="YadaProduct_galleryImages")
 	@OrderBy("sortOrder")
 	protected List<YadaAttachedFile> galleryImages;
 
-	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	// A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance
 	@OneToMany // (cascade=CascadeType.REMOVE, orphanRemoval=true)
 	@JoinTable(name="YadaProduct_attachments")
@@ -139,7 +124,6 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	/**
 	 * The main image to show in lists etc.
 	 */
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@OneToOne(cascade=CascadeType.REMOVE, orphanRemoval=true)
 	protected YadaAttachedFile image;
 	
@@ -213,12 +197,12 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	 * Returns the localized name in the current request locale
 	 * @return
 	 */
-	@JsonView(YadaJsonView.WithLocalizedValue.class)
+	@Transient
 	public String getLocalName() {
 		return name.get(LocaleContextHolder.getLocale());
 	}
 	
-	
+	@Transient
 	public void seLocalName(String name) {
 		this.name.put(LocaleContextHolder.getLocale(), name);
 	}
@@ -226,11 +210,12 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	 * Returns the localized subtitle in the current request locale
 	 * @return
 	 */
-	@JsonView(YadaJsonView.WithLocalizedValue.class)
+	@Transient
 	public String getLocalSubtitle() {
 		return subtitle.get(LocaleContextHolder.getLocale());
 	}
 	
+	@Transient
 	public void seLocalSubtitle(String subtitle) {
 		this.subtitle.put(LocaleContextHolder.getLocale(), subtitle);
 	}
@@ -239,11 +224,12 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	 * Returns the localized description in the current request locale
 	 * @return
 	 */
-	@JsonView(YadaJsonView.WithLocalizedValue.class)
+	@Transient
 	public String getLocalDescription() {
 		return description.get(LocaleContextHolder.getLocale());
 	}
 	
+	@Transient
 	public void seLocalDescription(String description) {
 		this.description.put(LocaleContextHolder.getLocale(), description);
 	}
@@ -252,23 +238,14 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	 * Returns the localized materials in the current request locale
 	 * @return
 	 */
-	@JsonView(YadaJsonView.WithLocalizedValue.class)
+	@Transient
 	public String getLocalMaterials() {
 		return materials.get(LocaleContextHolder.getLocale());
 	}
 	
+	@Transient
 	public void seLocalMaterials (String materials) {
 		this.materials.put(LocaleContextHolder.getLocale(), materials);
-	}
-	
-	/***********************************************************************/
-	/* Id for DataTables                                                   */
-	
-	@Transient
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
-	@JsonProperty("DT_RowId")
-	public String getDT_RowId() {
-		return this.getClass().getSimpleName()+"#"+this.id; // YadaProduct#142
 	}
 	
 	/***********************************************************************/

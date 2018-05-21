@@ -14,7 +14,6 @@ import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -31,15 +30,11 @@ import javax.persistence.Version;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.persistence.YadaMoney;
 import net.yadaframework.persistence.YadaMoneyConverter;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
-import net.yadaframework.web.YadaJsonView;
 
 /**
  * An Article is the actual physical item that can be produced and sold, so it will have a specific color, size, price, etc.
@@ -60,22 +55,18 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 	@Version
 	protected long version;
 	
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
 	
-	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=64)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> name = new HashMap<>(); // localized because it could be different for different languages
 
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Column(length=32)
 	protected String code;
 	
-	@JsonView(YadaJsonView.WithLocalizedStrings.class)
 	@ElementCollection
 	@Column(length=32)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
@@ -84,15 +75,12 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 	@Embedded
 	protected YadaDimension dimension;
 	
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Convert(converter = YadaMoneyConverter.class)
 	protected YadaMoney unitPrice;
 	
-	// @JsonView(YadaJsonView.WithEagerAttributes.class)
-	@ManyToOne // TODO !!!!!!!!!!!!!!!!! (fetch=FetchType.EAGER)
+	@ManyToOne
 	protected YadaProduct product;
 	
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected boolean published;
 	
 	@OneToMany(cascade=CascadeType.REMOVE, orphanRemoval=true)
@@ -121,12 +109,10 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 	
 	////////////////////////////////////////////////////////////////////77
 	
-	
 	/**
 	 * Returns the localized name in the current request locale
 	 * @return
 	 */
-	@JsonView(YadaJsonView.WithLocalizedValue.class)
 	public String getLocalName() {
 		return name.get(LocaleContextHolder.getLocale());
 	}
@@ -135,19 +121,10 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 		this.name.put(LocaleContextHolder.getLocale(), name);
 	}
 
-	@JsonProperty("localProductName")
-	@JsonView(YadaJsonView.WithLocalizedValue.class)
-	@Transient
-	public String getLocalProductName() {
-		return "TODO"; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//		return product!=null?product.getLocalName():"";
-	}
-
 	/**
 	 * Returns the localized color in the current request locale
 	 * @return
 	 */
-	@JsonView(YadaJsonView.WithLocalizedValue.class)
 	public String getLocalColor() {
 		return color.get(LocaleContextHolder.getLocale());
 	}
@@ -165,14 +142,6 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 		return YadaUtil.getLocalValue(color, locale);
 	}
 	
-	/* Id for DataTables                                                   */
-	@Transient
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
-	@JsonProperty("DT_RowId")
-	public String getDT_RowId() {
-		return this.getClass().getSimpleName()+"#"+this.id; // YadaProduct#142
-	}
-
 	public Long getId() {
 		return id;
 	}

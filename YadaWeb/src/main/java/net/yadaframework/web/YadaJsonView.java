@@ -1,5 +1,6 @@
 package net.yadaframework.web;
 
+@Deprecated // This was part of the old DataTable implementation
 public class YadaJsonView {
 
 	// Returns all attributes that are fetched in a single query
