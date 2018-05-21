@@ -279,6 +279,7 @@ public class YadaDataTableDao {
 			yadaSql.where("(" + searchConditions + ")").and();
 		}
 		// Sorting
+		boolean needsExtraction = false;
 		List<YadaDatatablesOrder> orderList = yadaDatatablesRequest.getOrder();
 		for (YadaDatatablesOrder yadaDatatablesOrder : orderList) {
 			int columnIndex = yadaDatatablesOrder.getColumnIndex();
@@ -288,8 +289,12 @@ public class YadaDataTableDao {
 					String attributeName = yadaDatatablesColumn.getNameOrData();
 					if (attributeName!=null) {
 						// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
-						attributeName = addLeftJoins(attributeName, yadaSql, targetClass);
-						yadaSql.orderBy(attributeName + " " + yadaDatatablesOrder.getDir());
+						String sortColumn = addLeftJoins(attributeName, yadaSql, targetClass);
+						yadaSql.orderBy(sortColumn + " " + yadaDatatablesOrder.getDir());
+						if (attributeName.indexOf('.')>-1) {
+							yadaSql.selectFrom(sortColumn); // Needed to avoid "ORDER BY clause is not in SELECT list"
+							needsExtraction = true;
+						}
 						// Class attributeType = yadaUtil.getType(targetClass, attributeName);
 					}
 				}
@@ -303,6 +308,17 @@ public class YadaDataTableDao {
 		query.setFirstResult(yadaDatatablesRequest.getStart());
     	@SuppressWarnings("unchecked")
 		List<targetClass> result = query.getResultList();
+		if (needsExtraction) {
+			// When doing an "order by" on a joined column we add the column to the select clause to prevent the "ORDER BY clause is not in SELECT list" error.
+			// This means that the result now is a list of Object[] where only the first element is what we need.
+			@SuppressWarnings("unchecked")
+			List<Object[]> realResult = (List<Object[]>) result; // Just a type cast
+			List<targetClass> extractedResult = new ArrayList<>();
+			for (Object[] arrayResult : realResult) {
+				extractedResult.add((targetClass) arrayResult[0]);
+			}
+			result = extractedResult;
+		}
     	// Count con where
     	yadaSql.toCount(); // Trasforma in un count
     	query = yadaSql.query(em);
@@ -329,16 +345,50 @@ public class YadaDataTableDao {
 		return addLeftJoinsRecurse(attributePath, "e", yadaSqlBuilder, targetClass);
 	}
 
-	private String addLeftJoinsRecurse(String attributePath, String context, YadaSql yadaSql, Class targetClass) {
+	private String addLeftJoinsRecurse(String attributePath, String context, YadaSql yadaSql, Class<?> contextClass) {
 		String[] parts = attributePath.split("\\.");
+		String current = parts[0]; // location
+		Field currentField = yadaUtil.getFieldNoTraversing(contextClass, current);
+		Class<?> currentClass = null;
+		if (currentField!=null) {
+			currentClass = currentField.getType();
+		}
 		if (parts.length>1) { // location.company.name
-			String current = parts[0]; // location
-			yadaSql.join("left join " + context + "." + current + " " + current); // e.location location
-			return addLeftJoinsRecurse(StringUtils.substringAfter(attributePath, "."), current, yadaSql, targetClass);
+			String alias = context + "_" + current; // Adding the context to the alias to prevent name clashes - TODO maybe all the preceding path should be added?
+			yadaSql.join("left join " + context + "." + current + " " + alias); // e.location location
+			if (currentClass.equals(Map.class)) {
+				// Need to add a condition on the map key
+				String keyValue = parts[1]; // en
+				String whereToAdd = "KEY("+alias+")='" + keyValue + "'"; // KEY(name)='en';
+				if (yadaSql.getWhere().indexOf(whereToAdd)<0) {
+					yadaSql.where(whereToAdd).and();
+				}
+				// If the current attribute is a map, continue only if there is something more after the map key
+				if (parts.length>2) {
+					// Need to find the type of the map value in order to set the proper join
+					ParameterizedType type = (ParameterizedType) currentField.getGenericType();
+					currentClass = (Class<?>) type.getActualTypeArguments()[1];
+					// Also skip the key in the path
+					attributePath = StringUtils.substringAfter(attributePath, "."); // Here we skip the current name, so that below we skip the key of the map
+				} else {
+					// No need to go deeper, just return the current attribute alias for sorting.
+					return alias;
+				}
+			}
+			return addLeftJoinsRecurse(StringUtils.substringAfter(attributePath, "."), current, yadaSql, currentClass);
+//			if (!contextClass.equals(Map.class)) {
+//				attributeClass = field.getType();
+//			} else {
+//				// If the targetClass is a map, then the current attribute is the key of the map so there's no need to add a join
+//				// but we need to know the type of the value in the map.
+//				// TODO don't we need to add a KEY(current)=:xxx? What would xxx be?
+//			}
+//			return addLeftJoinsRecurse(StringUtils.substringAfter(attributePath, "."), current, yadaSql, attributeClass);
 		} else {
-			try {
+//			try {
 				// Last element of the path - if it's a YadaPersistentEnum we still need a join for the map
-				if (yadaUtil.getType(targetClass, attributePath) == YadaPersistentEnum.class) {
+				// if (yadaUtil.getType(targetClass, attributePath) == YadaPersistentEnum.class) {
+				if (YadaPersistentEnum.class.equals(currentClass)) {
 					yadaSql.join("left join " + context + "." + attributePath + " " + attributePath); 	// left join user.status status
 					yadaSql.join("left join " + attributePath + ".langToText langToText");				// left join status.langToText langToText
 					String whereToAdd = "KEY(langToText)=:yadalang";
@@ -348,9 +398,9 @@ public class YadaDataTableDao {
 					}
 					return "langToText";
 				}
-			} catch (NoSuchFieldException e) {
-				log.error("No field {} found on class {} (ignored)", attributePath, targetClass.getName());
-			}
+//			} catch (NoSuchFieldException e) {
+//				log.error("No field {} found on class {} (ignored)", attributePath, targetClass.getName());
+//			}
 			return context + "." + attributePath; // e.phone, company.name
 		}
 	}

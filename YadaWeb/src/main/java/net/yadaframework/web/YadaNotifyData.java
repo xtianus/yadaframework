@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.MessageFormatter;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.Model;
@@ -95,6 +96,17 @@ public class YadaNotifyData {
 	 */
 	public YadaNotifyData message(String message) {
 		this.message = message;
+		return this;
+	}
+	
+	/**
+	 * Set the notification message with slf4j-style parameters. Can be HTML.
+	 * @param messageFormat the message format with slf4j syntax: use {} as placeholders
+	 * @param params values to be inserted at placeholder positions
+	 * @return
+	 */
+	public YadaNotifyData message(String messageFormat, Object... params) {
+		this.message = MessageFormatter.format(messageFormat, params).getMessage();
 		return this;
 	}
 	
