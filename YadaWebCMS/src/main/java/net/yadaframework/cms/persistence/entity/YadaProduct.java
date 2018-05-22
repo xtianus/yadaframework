@@ -31,12 +31,10 @@ import javax.persistence.Version;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-
 import net.yadaframework.core.CloneableFiltered;
+import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
-import net.yadaframework.web.YadaJsonView;
+import net.yadaframework.persistence.entity.YadaPersistentEnum;
 
 /**
  * A Product is an "abstract" item because it groups similar objects that differ in color, size or other attributes.
@@ -84,13 +82,17 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> materials = new HashMap<>();
 	
-	@ElementCollection
-	@CollectionTable(uniqueConstraints=@UniqueConstraint(columnNames={"YadaProduct_id", "categories"}))
-	protected Set<Integer> categories;
+//	@ElementCollection
+//	@CollectionTable(uniqueConstraints=@UniqueConstraint(columnNames={"YadaProduct_id", "categories"}))
+//	protected Set<Integer> categories;
 	
-	@ElementCollection
-	@CollectionTable(uniqueConstraints=@UniqueConstraint(columnNames={"YadaProduct_id", "subCategories"}))
-	protected Set<Integer> subCategories;
+	@OneToMany
+	@JoinTable(name="YadaProduct_categories")
+	protected List<YadaPersistentEnum<?>> categories;
+	
+	@OneToMany
+	@JoinTable(name="YadaProduct_subcategories")
+	protected List<YadaPersistentEnum<?>> subcategories;
 	
 	/**
 	 * true if the YadaProduct is an accessory
@@ -373,27 +375,6 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 		return null;
 	}
 
-
-	public Set<Integer> getCategories() {
-		return categories;
-	}
-
-
-	public void setCategories(Set<Integer> categories) {
-		this.categories = categories;
-	}
-
-
-	public Set<Integer> getSubCategories() {
-		return subCategories;
-	}
-
-
-	public void setSubCategories(Set<Integer> subCategories) {
-		this.subCategories = subCategories;
-	}
-
-
 	public boolean isAccessoryFlag() {
 		return accessoryFlag;
 	}
@@ -402,5 +383,22 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	public void setAccessoryFlag(boolean accessoryFlag) {
 		this.accessoryFlag = accessoryFlag;
 	}
+
+	public List<YadaPersistentEnum<?>> getCategories() {
+		return categories;
+	}
+
+	public void setCategories(List<YadaPersistentEnum<?>> categories) {
+		this.categories = categories;
+	}
+
+	public List<YadaPersistentEnum<?>> getSubcategories() {
+		return subcategories;
+	}
+
+	public void setSubcategories(List<YadaPersistentEnum<?>> subcategories) {
+		this.subcategories = subcategories;
+	}
+
 
 }
