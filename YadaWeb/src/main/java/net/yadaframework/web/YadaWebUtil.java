@@ -65,6 +65,10 @@ public class YadaWebUtil {
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private MessageSource messageSource;
+<<<<<<< HEAD
+=======
+	@Autowired private Locale locale;
+>>>>>>> branch 'master' of https://github.com/xtianus/yadaframework.git
 	
 	public final Pageable FIND_ONE = new PageRequest(0, 1); 
 	
@@ -83,12 +87,20 @@ public class YadaWebUtil {
 //	}
 	
 	/**
+<<<<<<< HEAD
 	 * Sorts a localized enum according to the locale specified
 	 * @param localEnum the class of the enum, e.g. net.yadaframework.persistence.entity.YadaJobState.class
 	 * @param locale
 	 * @return a list of sorted enums of the given class
 	 */
 	public <T extends YadaLocalEnum<?>> List<T> sortLocalEnum(Class<T> localEnum, Locale locale) {
+=======
+	 * Sorts a localized enum according to the current locale
+	 * @param localEnum
+	 * @return
+	 */
+	public <T extends YadaLocalEnum<?>> List<T> sortLocalEnum(Class<T> localEnum) {
+>>>>>>> branch 'master' of https://github.com/xtianus/yadaframework.git
 		String key = localEnum.getName() + "." + locale.toString();
 		@SuppressWarnings("unchecked")
 		List<T> result = (List<T>) sortedLocalEnumCache.get(key);
