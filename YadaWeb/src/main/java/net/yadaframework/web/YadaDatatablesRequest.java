@@ -1,4 +1,5 @@
 package net.yadaframework.web;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ public class YadaDatatablesRequest {
 	int start;
 	// Number of records that the table can display in the current draw. It is expected that the number of records returned will be equal to this number, unless the server has fewer records to return. Note that this can be -1 to indicate that all records should be returned
 	int length;
-	List<YadaDatatablesColumn> columns = null;
+	List<YadaDatatablesColumn> columns = new ArrayList<>();
 	// Global search. To be applied to all columns which have searchable as true
 	YadaDatatablesColumnSearch search = new YadaDatatablesColumnSearch();
 	// array defining how many columns are being ordered upon - i.e. if the array length is 1, then a single column sort is being performed, otherwise a multi-column sort is being performed.

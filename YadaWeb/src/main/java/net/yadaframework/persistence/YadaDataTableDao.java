@@ -90,7 +90,10 @@ public class YadaDataTableDao {
 			json.put("data", jsonData);
 		} catch (Exception e) {
 			log.error("Can't retrieve data", e);
-			json.put("error", e.toString()); // TODO handle the error in javascript 
+			// The error object must have the same structure of the one inside ajaxError.html
+			Map<String, String> inner = new HashMap<>();
+			inner.put("error", e.toString());
+			json.put("yadaError", inner);
 		}
 		return json;
 	}
@@ -196,7 +199,8 @@ public class YadaDataTableDao {
 	 */
 	@SuppressWarnings("rawtypes")
 	protected <targetClass> List<targetClass> getPage(YadaDatatablesRequest yadaDatatablesRequest, Class targetClass, Locale locale) {
-		String globalSearchString = StringUtils.trimToNull(yadaDatatablesRequest.getSearch().getValue().toLowerCase(locale));
+		String requestSearchValue = yadaDatatablesRequest.getSearch().getValue();
+		String globalSearchString = requestSearchValue!=null?StringUtils.trimToNull(requestSearchValue.toLowerCase(locale)):null;
 //		String globalCondition = StringUtils.trimToNull(yadaDatatablesRequest.getGlobalCondition());
 		Long globalSearchNumber = null;
 		boolean globalSearchEnabled = globalSearchString!=null;

@@ -820,10 +820,13 @@
 			},
 			success: function(responseText, statusText, jqXHR) {
 				var responseTrimmed = "";
+				var responseObject = null;
 				if (typeof responseText == "string") {
 					responseTrimmed = responseText.trim();
+				} else if (typeof responseText == "object") {
+					responseObject = responseText;
 				}
-				if (yada.showAjaxErrorIfPresent(responseTrimmed, statusText)==true) {
+				if (yada.showAjaxErrorIfPresent(responseTrimmed, statusText, responseObject)==true) {
 					yada.loaderOff();
 					return;
 				}
@@ -1023,10 +1026,10 @@
 	
 	
 	// Apre un errore se il risultato di una chiamata ajax contiene l'oggetto ajaxError o lo stato è diverso da success
-	yada.showAjaxErrorIfPresent = function(responseText, statusText, xhr, form) {
+	yada.showAjaxErrorIfPresent = function(responseText, statusText, errorObject) {
 		var errorKeyword = 'yadaError:';
-		var errorObject = null;
-		var errorPresent=(statusText!=null && statusText!=='success');
+		// var errorPresent=(statusText!=null && statusText!=='success');
+		var errorPresent=errorObject!=null && errorObject[errorKeyword]!=null;
 		if (typeof responseText === "string") {
 			var errorPos = responseText.indexOf(errorKeyword);
 			if (errorPos>-1) {
