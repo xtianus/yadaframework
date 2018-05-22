@@ -22,8 +22,13 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -37,6 +42,7 @@ import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -50,6 +56,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
+import net.yadaframework.core.YadaLocalEnum;
 
 @Service
 public class YadaWebUtil {
@@ -57,8 +64,12 @@ public class YadaWebUtil {
 	
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
+	@Autowired private MessageSource messageSource;
+	@Autowired private Locale locale;
 	
 	public final Pageable FIND_ONE = new PageRequest(0, 1); 
+	
+	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
 	
 //	/**
 //	 * Ensures that a paage
@@ -71,6 +82,31 @@ public class YadaWebUtil {
 //		}
 //		return pagePath;
 //	}
+	
+	/**
+	 * Sorts a localized enum according to the current locale
+	 * @param localEnum
+	 * @return
+	 */
+	public <T extends YadaLocalEnum<?>> List<T> sortLocalEnum(Class<T> localEnum) {
+		String key = localEnum.getName() + "." + locale.toString();
+		@SuppressWarnings("unchecked")
+		List<T> result = (List<T>) sortedLocalEnumCache.get(key);
+		if (result==null) {
+			T[] enums = localEnum.getEnumConstants();
+			Arrays.sort(enums, new Comparator<T>() {
+				@Override
+				public int compare(T o1, T o2) {
+					String v1 = o1.toString(messageSource, locale);
+					String v2 = o2.toString(messageSource, locale);
+					return v1.compareTo(v2);
+				}
+			});
+			result = Arrays.asList(enums);
+			sortedLocalEnumCache.put(key, result);
+		}
+		return result;
+	}
 	
 	/**
 	 * Returns the first language in the request language header as a string.
