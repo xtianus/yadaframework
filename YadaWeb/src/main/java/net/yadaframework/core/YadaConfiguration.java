@@ -1,17 +1,22 @@
 package net.yadaframework.core;
 
 import java.io.File;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
@@ -21,8 +26,8 @@ import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
 
-import net.yadaframework.exceptions.InternalException;
 import net.yadaframework.exceptions.YadaConfigurationException;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaInvalidValueException;
@@ -76,7 +81,69 @@ public abstract class YadaConfiguration {
 	private Boolean localePathVariableEnabled = null;
 	private Locale defaultLocale = null;
 	private boolean defaultLocaleChecked = false;
+	private Map<String, SortedSet<Entry<Integer,String>>> localSetCache = new HashMap<>();
 
+	/**
+	 * Looks in the configuration for a list of ids, then fetches from message.properties the localized text corresponding to the ids.
+	 * The id is appended to the messageBaseKey parameter after a dot.
+	 * The result is a sorted set of id-text, sorted on the text.
+	 * <br>
+	 * Example:<br>
+	 * In the config we have
+	 * <pre>
+	 * &lt;countries>
+	 * 	&lt;countryId>1&lt;/countryId>
+	 * 	&lt;countryId>2&lt;/countryId>
+	 * 	&lt;countryId>3&lt;/countryId>
+	 * 	&lt;countryId>4&lt;/countryId>
+	 * &lt;/countries>
+	 * </pre>
+	 * In message.properties we have
+	 * <pre>
+	 * customer.country.1 = England
+	 * customer.country.2 = France
+	 * customer.country.3 = USA
+	 * customer.country.4 = Albania
+	 * </pre>
+	 * The call to this method will be:
+	 * <pre>
+	 * config.getLocalSet("config/countries/countryId", "customer.country", locale, messageSource);
+	 * </pre>
+	 * The resulting set will have the countries in the following order: Albania, England, France, USA.
+	 * Results are cached forever.
+	 * 
+	 * @param configPath item in the configuration file that holds the id. There should be more than one such item in the configuration.
+	 * Example: config/countries/countryId
+	 * @param messageBaseKey the prefix of the message.properties key to which the id should be appended in order to retrieve the localized text.
+	 * Example: customer.country
+	 * @param locale
+	 * @param messageSource
+	 * @return
+	 * @see YadaLocalEnum
+	 */
+	@Deprecated // Never tested and never used. You are probably better off with a YadaLocalEnum
+	public SortedSet<Entry<Integer,String>> getLocalSet(String configPath, String messageBaseKey, Locale locale, MessageSource messageSource) {
+		String cacheKey = configPath + messageBaseKey + locale.toString();
+		SortedSet<Entry<Integer,String>> result = localSetCache.get(cacheKey);
+		if (result!=null) {
+			return result;
+		}
+		result = new TreeSet<>(new Comparator<Entry<Integer, String>>() {
+			public int compare(Entry<Integer, String> element1, Entry<Integer, String> element2) {
+				return element1.getValue().compareTo(element2.getValue());
+			}
+		});
+		List<Integer> ids = configuration.getList(Integer.class, configPath);
+		for (Integer id : ids) {
+			String key = messageBaseKey + "." + id;
+			String localizedText = messageSource.getMessage(key, null, key, locale);
+			Entry<Integer,String> entry = new AbstractMap.SimpleImmutableEntry<Integer,String>(id, localizedText);
+			result.add(entry);
+		}
+		localSetCache.put(cacheKey, result);
+		return result;
+	}
+	
 	/**
 	 * Folder where all files are uploaded.
 	 * @return
