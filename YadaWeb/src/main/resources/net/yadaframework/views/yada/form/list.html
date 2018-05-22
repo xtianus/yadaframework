@@ -84,7 +84,7 @@ Example:
 			</th:block>
 			<th:block th:if="${isYadaLocalEnum}">
 				<!--/* YadaLocalEnum */-->
-				<option th:each="enum : ${@YadaWebUtil.sortLocalEnum(options, #locale)}"
+				<option th:each="enum : ${@yadaWebUtil.sortLocalEnum(options, #locale)}"
 					th:value="${enum}" 
 					th:title="${enum.toString(@messageSource, #locale)}"
 					th:text="${enum.toString(@messageSource, #locale)}">SomeChoice</option>
