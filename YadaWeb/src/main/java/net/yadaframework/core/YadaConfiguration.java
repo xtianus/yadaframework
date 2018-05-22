@@ -81,7 +81,16 @@ public abstract class YadaConfiguration {
 	private Boolean localePathVariableEnabled = null;
 	private Locale defaultLocale = null;
 	private boolean defaultLocaleChecked = false;
-	private Map<String, SortedSet<Entry<Integer,String>>> localSetCache = new HashMap<>();
+	private Map<String, SortedSet<Entry<Integer,String>>> localSetCache = new HashMap<>(); // Deprecated
+	
+	/**
+	 * Tells if the YadaFileManager has to delete uploaded files when attaching them, or to keep them in the uploads folder
+	 * for later use. true by default.
+	 * @return
+	 */
+	public boolean isFileManagerDeletingUploads() {
+		return configuration.getBoolean("config/yadaFileManager/deleteUploads", true);
+	}
 
 	/**
 	 * Looks in the configuration for a list of ids, then fetches from message.properties the localized text corresponding to the ids.

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
@@ -37,15 +38,40 @@ public class YadaFileManager {
 	
 	protected String COUNTER_SEPARATOR="_";
 	
-	public void deleteFileAttachment(Long yadaAttachedFileId) {
-		// TODO !!!!!!!!!!!!!!!!!!!!!!!!!! qui devo cancellare il file da filesystem
-		
-		
-	}
-	
 	// TODO distinguere tra mobile portrait e mobile landscape
 	// TODO le dimensioni mobile/desktop devono essere configurabili
 	// TODO mantenere l'immagine caricata nella versione originale
+	
+	/**
+	 * Returns the absolute path of a file
+	 * @param yadaAttachedFile the attachment
+	 * @param filename the relative file name
+	 * @return
+	 */
+	public File getAbsoluteFile(YadaAttachedFile yadaAttachedFile, String filename) {
+		File targetFolder = new File(config.getContentPath(), yadaAttachedFile.getRelativeFolderPath());
+		return new File(targetFolder, filename);
+	}
+	
+	/**
+	 * Deletes from the filesystem all files related to the attachment
+	 * @param yadaAttachedFile the attachment
+	 */
+	public void deleteFileAttachment(YadaAttachedFile yadaAttachedFile) {
+		getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilename()).delete();
+		getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenameDesktop()).delete();
+		getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenameMobile()).delete();
+	}
+	
+	/**
+	 * Deletes from the filesystem all files related to the attachments
+	 * @param yadaAttachedFiles the attachments
+	 */
+	public void deleteFileAttachment(List<YadaAttachedFile> yadaAttachedFiles) {
+		for (YadaAttachedFile yadaAttachedFile : yadaAttachedFiles) {
+			deleteFileAttachment(yadaAttachedFile);
+		}
+	}
 
 	/**
 	 * Returns the (relative) url of the mobile image if any, otherwise fallback to the desktop image
@@ -153,6 +179,10 @@ public class YadaFileManager {
 				yadaAttachedFile.setFilenameMobile(mobileFile.getName());
 				yadaAttachedFile.setFilename(null);
 			}
+		}
+		if (config.isFileManagerDeletingUploads()) {
+			log.debug("Deleting file {}", managedFile.getAbsolutePath());
+			managedFile.delete();
 		}
 		yadaAttachedFile.setRelativeFolderPath(relativeFolderPath);
 		return yadaAttachedFileRepository.save(yadaAttachedFile);
