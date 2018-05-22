@@ -456,13 +456,18 @@ public class YadaUtil {
 		}
 		Class attributeType = field.getType();
 		// If it's a list, look for the list type
-		if (attributeType == java.util.List.class) {
+		if (java.util.List.class.equals(attributeType) || java.util.Map.class.equals(attributeType)) {
 			// TODO check if the attributeType is an instance of java.util.Collection
 			ParameterizedType parameterizedType = (ParameterizedType)field.getGenericType();
 			if (parameterizedType!=null) {
 				Type[] types = parameterizedType.getActualTypeArguments();
-				if (types.length==1) {
-					attributeType = (Class<?>) types[0];
+				if (types.length>0) {
+					if (java.util.Map.class.equals(attributeType)) {
+						// For maps, skip the key path element
+						attributePath = StringUtils.substringAfter(attributePath, ".");
+					}
+					// For Maps, we get the type of the value
+					attributeType = (Class<?>) types[types.length-1];
 				}
 			}
 		}

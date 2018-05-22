@@ -208,7 +208,7 @@ public class YadaDataTableDao {
 			try {
 				globalSearchNumber = Long.parseLong(globalSearchString);
 			} catch (NumberFormatException e) {
-				log.debug("Invalid globalSearchString '{}'", globalSearchString);
+				// log.debug("Invalid globalSearchString '{}'", globalSearchString);
 				// Ignore
 			}
 		}
