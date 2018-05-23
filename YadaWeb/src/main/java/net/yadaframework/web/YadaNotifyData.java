@@ -106,7 +106,7 @@ public class YadaNotifyData {
 	 * @return
 	 */
 	public YadaNotifyData message(String messageFormat, Object... params) {
-		this.message = MessageFormatter.format(messageFormat, params).getMessage();
+		this.message = MessageFormatter.arrayFormat(messageFormat, params).getMessage();
 		return this;
 	}
 	
