@@ -172,6 +172,9 @@ public class YadaDataTableDao {
 				}
 				field.setAccessible(true);
 				value = field.get(entity);
+				if (field.getType().equals(YadaPersistentEnum.class)) {
+					value = ((YadaPersistentEnum)value).getLocalText();
+				}
 				// The old version
 				//	if (value instanceof java.util.Map) {
 				//		ParameterizedType type = (ParameterizedType) field.getGenericType();

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:yada="http://www.yadaframework.net" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 </head>
 <!--/*
-A component to view, sort and delete a set of uploaded images.
+A component to add, view, sort and delete a set of uploaded images.
+Parameters:
+- images = A list of images, can be empty but never null
 
 Example:
 <div th:replace="/yadacms/imageSorter::component()"></div>
@@ -14,7 +16,52 @@ Example:
 <th:block th:fragment="component">
 
 
-Imagesorter here (TODO)
+
+
+	<div th:if="${!#lists.isEmpty(images)}"  class="yadaImageSorter">
+			<div class="dropup">
+			  <button class="btn btn-default dropdown-toggle" type="button" id="addGalleryImageId" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+			    <i class="fa fa-plus" th:title="#{form.label.product.addGallery}"></i>
+			  </button>
+			  <ul class="dropdown-menu" aria-labelledby="addGalleryImageId">
+			    <li style="padding: 10px;">
+			    	<form th:action="@{/cms/ajaxAddGalleryImage}" th:object="${product}" data-yadaUpdateOnSuccess="#gallery" enctype="multipart/form-data"
+						th:classappend="${#fields.hasErrors('*')}? has-error" class="yadaAjax" method="post" role="form">
+						<fieldset>
+							<th:block th:if="${product.id!=null}">
+								<div th:replace="/yada/form/text::field(fieldName='id',type='hidden')"></div>
+							</th:block>
+							<label for="galleryImage" th:text="#{form.label.product.addGallery}">Upload gallery image</label><input type="file" name="galleryImage">
+							<div style="margin-top: 10px;"></div>
+							<div class="form-group">
+								<button class="btn btn-success btn-xs" type="submit" name="Save"><span class="fa fa-ok"></span> Confirm</button>
+								<button class="btn btn-default btn-xs" type="button" name="Cancel" data-dismiss="modal"><span class="fa fa-cancel"></span> Cancel</button>
+							</div>
+						</fieldset>
+					</form>
+				</li>
+			  </ul>
+			</div>
+		<div th:each="galleryImage : ${images}">
+			<img th:src="@{${@yadaFileManager.getMobileImageUrl(galleryImage)}}" />
+			<div class="commandBar">
+				<i class="moveup fa fa-chevron-up" aria-hidden="true"></i>
+				<i class="movedown fa fa-chevron-down" aria-hidden="true"></i>
+				<a class="yadaAjax" th:href="@{/cms/product/deleteImage(imageId=${galleryImage.id})}" data-yadaConfirm="Delete image?">
+					<i class="delete fa fa-trash-o" aria-hidden="true"></i>
+				</a>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+
+
+
 
 
 

@@ -60,6 +60,7 @@ import net.yadaframework.exceptions.YadaInvalidValueException;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaPersistentEnum<E extends Enum<E>> {
 	
+	@Deprecated // TODO delete because not used anymore for datatables
 	static class YadaPersistentEnumSerializer extends JsonSerializer<YadaPersistentEnum<?>> {
 		@Override
 		public void serialize(YadaPersistentEnum<?> value, JsonGenerator generator, SerializerProvider serializers) throws IOException, JsonProcessingException {
