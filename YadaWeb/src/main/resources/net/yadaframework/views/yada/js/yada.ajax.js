@@ -805,7 +805,7 @@
 			error: function(jqXHR, textStatus, errorThrown ) { 
 				yada.loaderOff();
 				// textStatus is "error", "timeout", "abort", or"parsererror"
-				var responseText = jqXHR.responseText.trim();
+				var responseText = jqXHR.responseText!= null ? jqXHR.responseText.trim() : jqXHR.responseText;
 				if (jqXHR.status==503 && responseText!=null && yada.startsWith(responseText, "<html")) {
 					showFullPage(responseText);
 					return;

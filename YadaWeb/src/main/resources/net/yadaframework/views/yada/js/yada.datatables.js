@@ -409,7 +409,7 @@
 		for (var i=0; i<sortedExtraButtons.length; i++) {
 			var btndef = sortedExtraButtons[i];
 			if (btndef.toolbarClass != null) {
-				var disabled = btndef.toolbarClass != "yadaTableAlwaysButton";
+				var disabled = (btndef.toolbarClass != "yadaTableAlwaysButton") ? "disabled" : "";
 				var buttonHtml = '<a class="btn btn-primary '+disabled+' '+btndef.toolbarClass+' s_toolbarExtraButton' + i + '"' +
 				' href="#" title="'+ btndef.title +'">' +
 				btndef.icon.replace('fa ', 'fa fa-lg ') + ' <span>'+btndef.toolbarText+'</span>' +
