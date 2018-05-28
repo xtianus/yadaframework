@@ -136,6 +136,9 @@ public class YadaDataTableDao {
 
 	private <entityClass> void addAttributeValue(entityClass entity, Map<String, Object> entityJson, String attributePath) {
 		try {
+			if (entity==null) {
+				return;
+			}
 			Object value = "";
 			String[] parts = attributePath.split("\\.", 2);
 			String attributeName = parts[0];

@@ -4,6 +4,7 @@ import java.beans.PropertyEditorSupport;
 
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.persistence.entity.YadaPersistentEnum;
 
 /**
  * Used by thymeleaf to convert between string representation and YadaPersistentEnum.
@@ -28,6 +29,9 @@ public class YadaPersistentEnumEditor extends PropertyEditorSupport {
 	
 	@Override
 	public void setAsText(String enumName) throws IllegalArgumentException {
+		if (enumName.equals("-1")) {
+			return; // Select header
+		}
 		for (Class someEnum : allEnums) {
 			try {
 				YadaLocalEnum result = (YadaLocalEnum) Enum.valueOf(someEnum, enumName);
@@ -42,8 +46,8 @@ public class YadaPersistentEnumEditor extends PropertyEditorSupport {
 	
 	@Override
 	public String getAsText() {
-		Enum toConvert = (Enum) getValue();
-		return toConvert!=null?toConvert.name():null;
+		YadaPersistentEnum toConvert = (YadaPersistentEnum) getValue();
+		return toConvert!=null?toConvert.getLocalText():null;
 	}
 }
 
