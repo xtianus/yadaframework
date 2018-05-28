@@ -805,7 +805,7 @@
 			error: function(jqXHR, textStatus, errorThrown ) { 
 				yada.loaderOff();
 				// textStatus is "error", "timeout", "abort", or"parsererror"
-				var responseText = jqXHR.responseText;
+				var responseText = jqXHR.responseText.trim();
 				if (jqXHR.status==503 && responseText!=null && yada.startsWith(responseText, "<html")) {
 					showFullPage(responseText);
 					return;
@@ -815,7 +815,12 @@
 				} else if (errorThrown==="Forbidden") {
 					yada.showErrorModal(yada.messages.forbiddenError.title, yada.messages.forbiddenError.message);
 				} else {
-					yada.showErrorModal(yada.messages.serverError.title, yada.messages.serverError.message + (textStatus!=null&&textStatus!='error'?' ('+textStatus+')':''));
+					var title = yada.messages.serverError.title;
+					var message = extractError(responseText);
+					if (message==null || message=="") {
+						message = yada.messages.serverError.message;
+					}
+					yada.showErrorModal(title, message + (textStatus!=null&&textStatus!='error'?' ('+textStatus+')':''));
 				}
 			},
 			success: function(responseText, statusText, jqXHR) {
@@ -1024,35 +1029,30 @@
 		return false;
 	}
 	
+	function extractError(responseText) {
+		var errorKeyword = 'yadaError:';
+		if (typeof responseText === "string") {
+			var trimmedText = responseText.trim();
+			if (yada.startsWith(trimmedText, errorKeyword)) {
+				return trimmedText.substring(errorKeyword.length);
+			}
+		}
+		return null;
+	}
 	
 	// Apre un errore se il risultato di una chiamata ajax contiene l'oggetto ajaxError o lo stato è diverso da success
 	yada.showAjaxErrorIfPresent = function(responseText, statusText, errorObject) {
-		var errorKeyword = 'yadaError:';
-		// var errorPresent=(statusText!=null && statusText!=='success');
-		var errorPresent=errorObject!=null && errorObject[errorKeyword]!=null;
-		if (typeof responseText === "string") {
-			var errorPos = responseText.indexOf(errorKeyword);
-			if (errorPos>-1) {
-				// The error could be at the start or be appended at the end of the HTML when it happens in a th: fragment
-				errorPresent = true;
-				try {
-					var errorObjectString = responseText.substring(errorPos + errorKeyword.length);
-					errorObject = JSON.parse(errorObjectString);
-				} catch (e) {
-					// keep going
-				}
-			}
-		}
+		var errorMessage = null;
 		if (typeof responseText == "object" && responseText.error!=null) {
-			errorPresent = true;
-			errorObject = responseText;
+			errorMessage = responseText.error;
+		} else if (errorObject!=null && errorObject.error!=null) {
+			errorMessage = errorObject.error;
+		} else {
+			errorMessage = extractError(responseText);
 		}
-		if (errorPresent) {
-			var errorMessage = "Generic Error";
-			if (errorObject!=null) {
-				errorMessage = errorObject.error;
-			}
-			yada.showErrorModal("Error", errorMessage);
+		
+		if (errorMessage!=null) {
+			yada.showErrorModal("Error", errorMessage!=""?errorMessage:"Generic Error");
 			return true;
 		}
 		return false;

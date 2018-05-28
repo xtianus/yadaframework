@@ -78,14 +78,16 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> materials = new HashMap<>();
 	
-//	@ElementCollection
-//	@CollectionTable(uniqueConstraints=@UniqueConstraint(columnNames={"YadaProduct_id", "categories"}))
-//	protected Set<Integer> categories;
-	
-	// This can not be done because Thymeleaf wouldn't be able to convert from string to the appropriate subclass of YadaPersistentEnum
-	//	@OneToMany
-	//	@JoinTable(name="YadaProduct_categories")
-	//	protected List<YadaPersistentEnum<?>> categories;
+	// For Thymeleaf to convert between the enum string and the list of YadaPersistentEnum, you need to configure an "editor"
+	// in your @Controller:
+	// 
+	//	@InitBinder
+	//	public void initBinder(WebDataBinder binder) {
+	//		binder.registerCustomEditor(YadaPersistentEnum.class, new YadaPersistentEnumEditor(new Class[] {EnumCategory.class}));
+	//	}	
+	@OneToMany
+	@JoinTable(name="YadaProduct_categories")
+	protected List<YadaPersistentEnum<?>> categories;
 	
 	@OneToMany
 	@JoinTable(name="YadaProduct_subcategories")
@@ -381,13 +383,13 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 		this.accessoryFlag = accessoryFlag;
 	}
 
-//	public List<YadaPersistentEnum<?>> getCategories() {
-//		return categories;
-//	}
-//
-//	public void setCategories(List<YadaPersistentEnum<?>> categories) {
-//		this.categories = categories;
-//	}
+	public List<YadaPersistentEnum<?>> getCategories() {
+		return categories;
+	}
+
+	public void setCategories(List<YadaPersistentEnum<?>> categories) {
+		this.categories = categories;
+	}
 
 	public List<YadaPersistentEnum<?>> getSubcategories() {
 		return subcategories;
@@ -396,5 +398,6 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	public void setSubcategories(List<YadaPersistentEnum<?>> subcategories) {
 		this.subcategories = subcategories;
 	}
+
 
 }
