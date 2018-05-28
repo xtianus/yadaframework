@@ -805,15 +805,15 @@
 	/// Cookie ///
 	//////////////
 
-	// NON USATI NE' CONTROLLATI nè visibili esternamente fatti così
-	function setCookie(cname, cvalue, exdays) {
+	yada.setCookie = function(name, value, expiryDays) {
 	    var d = new Date();
-	    d.setTime(d.getTime() + (exdays*24*60*60*1000));
-	    var expires = "expires="+d.toUTCString();
-	    document.cookie = cname + "=" + cvalue + "; " + expires;
+	    // d.setTime(d.getTime() + (expiryDays*24*60*60*1000));
+	    d.setDate(d.getDate() + expiryDays);
+	    var expires = "expires="+d.toGMTString()+"; path=/";
+	    document.cookie = name + "=" + value + "; " + expires;
 	}
 	
-	function getCookie(cname) {
+	yada.getCookie = function(cname) {
 	    var name = cname + "=";
 	    var ca = document.cookie.split(';');
 	    for(var i=0; i<ca.length; i++) {
