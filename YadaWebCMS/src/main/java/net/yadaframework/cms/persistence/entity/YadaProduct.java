@@ -7,10 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -26,13 +24,11 @@ import javax.persistence.OrderBy;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 
 import net.yadaframework.core.CloneableFiltered;
-import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
 
@@ -86,9 +82,10 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 //	@CollectionTable(uniqueConstraints=@UniqueConstraint(columnNames={"YadaProduct_id", "categories"}))
 //	protected Set<Integer> categories;
 	
-	@OneToMany
-	@JoinTable(name="YadaProduct_categories")
-	protected List<YadaPersistentEnum<?>> categories;
+	// This can not be done because Thymeleaf wouldn't be able to convert from string to the appropriate subclass of YadaPersistentEnum
+	//	@OneToMany
+	//	@JoinTable(name="YadaProduct_categories")
+	//	protected List<YadaPersistentEnum<?>> categories;
 	
 	@OneToMany
 	@JoinTable(name="YadaProduct_subcategories")
@@ -384,13 +381,13 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 		this.accessoryFlag = accessoryFlag;
 	}
 
-	public List<YadaPersistentEnum<?>> getCategories() {
-		return categories;
-	}
-
-	public void setCategories(List<YadaPersistentEnum<?>> categories) {
-		this.categories = categories;
-	}
+//	public List<YadaPersistentEnum<?>> getCategories() {
+//		return categories;
+//	}
+//
+//	public void setCategories(List<YadaPersistentEnum<?>> categories) {
+//		this.categories = categories;
+//	}
 
 	public List<YadaPersistentEnum<?>> getSubcategories() {
 		return subcategories;
@@ -399,6 +396,5 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	public void setSubcategories(List<YadaPersistentEnum<?>> subcategories) {
 		this.subcategories = subcategories;
 	}
-
 
 }
