@@ -180,9 +180,11 @@
 		        if ( type === 'display' ) {
 		        	var buttons = '';
 		        	for (var i=0; extraButtons!=null && i<extraButtons.length; i++) {
-		        		buttons +=
-		        			'<a class="yadaTableExtraButton' + i + ' yadaRowCommandButton" href="#' +
-		        			data.id + '" title="' + extraButtons[i].title + '">' + extraButtons[i].icon + '</a>';
+		        		if (extraButtons[i].noRowIcon!=true) {
+			        		buttons +=
+			        			'<a class="yadaTableExtraButton' + i + ' yadaRowCommandButton" href="#' +
+			        			data.id + '" title="' + extraButtons[i].title + '">' + extraButtons[i].icon + '</a>';
+		        		}
 		        	}
 		        	if (editDef!=null) {
 		        		buttons +=
@@ -316,7 +318,7 @@
 					$(this).parents('div.yadaTableBlock').find('div.yadaTableToolbar .s_multirowButton').removeClass('disabled');
 					$(this).parents('div.yadaTableBlock').find('div.yadaTableToolbar .s_singlerowButton:not(.s_multirowButton)').addClass('disabled');
 				} else {
-					var toolbarButtons = $(this).parents('div.yadaTableBlock').find('div.yadaTableToolbar .btn:not(.s_addButton)');
+					var toolbarButtons = $(this).parents('div.yadaTableBlock').find('div.yadaTableToolbar .btn:not(.s_addButton):not(.yadaTableAlwaysButton)');
 					toolbarButtons.addClass('disabled');
 				}
 			});
@@ -407,7 +409,8 @@
 		for (var i=0; i<sortedExtraButtons.length; i++) {
 			var btndef = sortedExtraButtons[i];
 			if (btndef.toolbarClass != null) {
-				var buttonHtml = '<a class="btn btn-primary disabled '+btndef.toolbarClass+' s_toolbarExtraButton' + i + '"' +
+				var disabled = btndef.toolbarClass != "yadaTableAlwaysButton";
+				var buttonHtml = '<a class="btn btn-primary '+disabled+' '+btndef.toolbarClass+' s_toolbarExtraButton' + i + '"' +
 				' href="#" title="'+ btndef.title +'">' +
 				btndef.icon.replace('fa ', 'fa fa-lg ') + ' <span>'+btndef.toolbarText+'</span>' +
 				'</a> ';
