@@ -68,9 +68,15 @@ public class YadaFileManager {
 	 * @see #deleteFileAttachment(Long)
 	 */
 	public void deleteFileAttachment(YadaAttachedFile yadaAttachedFile) {
-		getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilename()).delete();
-		getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenameDesktop()).delete();
-		getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenameMobile()).delete();
+		if (yadaAttachedFile.getFilename() != null) {
+			getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilename()).delete();
+		}
+		if (yadaAttachedFile.getFilenameDesktop() != null) {
+			getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenameDesktop()).delete();
+		}
+		if (yadaAttachedFile.getFilenameMobile() != null) {
+			getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenameMobile()).delete();
+		}
 	}
 	
 	/**

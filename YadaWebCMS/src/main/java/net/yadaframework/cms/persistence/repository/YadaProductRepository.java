@@ -18,7 +18,7 @@ public interface YadaProductRepository<T extends YadaProduct> extends JpaReposit
 	 */
 	@Transactional(readOnly = false) 
 	@Modifying
-	@Query(value="delete from YadaProduct_galleryImages where YadaProduct_id = :yadaProductId and galleryImages_id = :yadaAttachedFileId)", nativeQuery=true)
+	@Query(value="delete from YadaProduct_galleryImages where YadaProduct_id = :yadaProductId and galleryImages_id = :yadaAttachedFileId", nativeQuery=true)
 	void removeGalleryImage(@Param("yadaProductId") Long productId, @Param("yadaAttachedFileId") Long yadaAttachedFileId);
 	
 	/**
