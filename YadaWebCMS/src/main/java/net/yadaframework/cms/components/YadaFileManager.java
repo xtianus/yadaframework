@@ -55,7 +55,17 @@ public class YadaFileManager {
 	
 	/**
 	 * Deletes from the filesystem all files related to the attachment
+	 * @param yadaAttachedFileId the attachment id
+	 * @see #deleteFileAttachment(YadaAttachedFile)
+	 */
+	public void deleteFileAttachment(Long yadaAttachedFileId) {
+		deleteFileAttachment(yadaAttachedFileRepository.findOne(yadaAttachedFileId));
+	}
+	
+	/**
+	 * Deletes from the filesystem all files related to the attachment
 	 * @param yadaAttachedFile the attachment
+	 * @see #deleteFileAttachment(Long)
 	 */
 	public void deleteFileAttachment(YadaAttachedFile yadaAttachedFile) {
 		getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilename()).delete();
