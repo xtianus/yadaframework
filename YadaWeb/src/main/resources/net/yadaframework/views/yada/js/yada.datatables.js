@@ -176,6 +176,7 @@
 			name: 'comandi',
 			orderable: false,
 			searchable: false,
+			width: '50px',
 		    render: function ( data, type, row ) {
 		        if ( type === 'display' ) {
 		        	var buttons = '';
