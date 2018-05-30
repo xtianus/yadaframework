@@ -621,6 +621,7 @@
 //			$(this).addClass('yadaClickedButtonHandler');
 //		});
 		$form.not('.'+markerClass).submit(function(e) {
+			var $form=$(this); // Needed to overwrite the outside variable with the current form, otherwise we may handle the wrong form (because of cloning)
 			// If the form is marked as markerAjaxButtonOnly do not submit it via ajax unless the clicked button is marked with 'yadaAjax'
 			if ($form.hasClass(markerAjaxButtonOnly)) {
 				if (clickedButton==null || !$(clickedButton).hasClass('yadaAjax')) {
