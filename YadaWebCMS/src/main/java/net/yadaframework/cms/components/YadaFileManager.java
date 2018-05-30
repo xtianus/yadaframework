@@ -146,6 +146,21 @@ public class YadaFileManager {
 	}
 	
 	/**
+	 * Copies a managed file to the destination folder, creating a database association to assign to an Entity.
+	 * The name of the file is in the format [basename]managedFileName_id.ext.
+	 * Images are not resized.
+	 * @param managedFile an uploaded file, can be an image or not
+	 * @param relativeFolderPath path of the target folder relative to the contents folder
+	 * @param baseName prefix to attach on the file name. Add a separator if you need one. Can be null.
+	 * @return
+	 * @throws IOException 
+	 * @see {@link #attach(File, String, String, String, Integer, Integer)}
+	 */
+	public YadaAttachedFile attach(File managedFile, String relativeFolderPath, String baseName) throws IOException {
+		return attach(managedFile, relativeFolderPath, baseName, null, null, null);
+	}
+	
+	/**
 	 * Copies (and resizes) a managed file to the destination folder, creating a database association to assign to an Entity.
 	 * The name of the file is in the format [basename]managedFileName_id.ext
 	 * @param managedFile an uploaded file, can be an image or not
@@ -155,7 +170,8 @@ public class YadaFileManager {
 	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
 	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
+	 * @see {@link #attach(File, String, String, String)} 
 	 */
 	public YadaAttachedFile attach(File managedFile, String relativeFolderPath, String baseName, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
 		File targetFolder = new File(config.getContentPath(), relativeFolderPath);

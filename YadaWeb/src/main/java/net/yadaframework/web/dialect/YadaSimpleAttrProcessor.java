@@ -1,6 +1,5 @@
 package net.yadaframework.web.dialect;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.IEngineConfiguration;
@@ -15,11 +14,9 @@ import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templatemode.TemplateMode;
 
 /**
- * Class that handles the convenience attribute yada:ajax="url".
- * The result will be a data-yadaHref="url" attribute, and yadaAjax added to class.
- *
+ * Converts from a "yada:xxx" thymeleaf attribute to a plain html attribute. 
  */
-public class YadaAjaxAttrProcessor extends AbstractAttributeTagProcessor {
+public class YadaSimpleAttrProcessor extends AbstractAttributeTagProcessor {
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	// Tutorial: http://www.thymeleaf.org/doc/html/Extending-Thymeleaf.html
    // A value of 10000 is higher than any attribute in the
@@ -27,24 +24,27 @@ public class YadaAjaxAttrProcessor extends AbstractAttributeTagProcessor {
     // after all other attributes from that dialect, if in the
     // same tag.
 	public static final int ATTR_PRECEDENCE = 9000;
-    public static final String ATTR_NAME = "ajax";
-    public static final String RESULT_ATTRIBUTE = "data-yadaHref";
+	
+	private String replacementAttribute;
    
 	/**
-	 * @param config
+	 * Creates a new attribute processor that converts from the thymeleaf attribute to a html attribute.
+	 * @param dialectPrefix dialect prefix ("yada")
+	 * @param attributeFrom attribute to convert from (e.g. "confirm")
+	 * @param attributeTo attribute to convert to (e.g. "data-yadaConfirm")
 	 */
-	public YadaAjaxAttrProcessor(final String dialectPrefix) {
+	public YadaSimpleAttrProcessor(final String dialectPrefix, String attributeFrom, String attributeTo) {
         super(
                 TemplateMode.HTML, // This processor will apply only to HTML mode
                 dialectPrefix,     // Prefix to be applied to name for matching
                 null,              // No tag name: match any tag name
                 false,             // No prefix to be applied to tag name
-                ATTR_NAME,         // Name of the attribute that will be matched
+                attributeFrom,         // Name of the attribute that will be matched
                 true,              // Apply dialect prefix to attribute name
                 ATTR_PRECEDENCE,   // Precedence (inside dialect's own precedence)
                 true);             // Remove the matched attribute afterwards
+        replacementAttribute = attributeTo;
 	}
-
 
 //	@Override
 //	public int getPrecedence() {
@@ -63,12 +63,6 @@ public class YadaAjaxAttrProcessor extends AbstractAttributeTagProcessor {
             final AttributeName attributeName, final String attributeValue,
             final IElementTagStructureHandler structureHandler) {
 
-    	// Prevent use on button type="submit"
-    	if (tag.getElementCompleteName().equals("button") && tag.getAttributeValue("type").equals("submit")) {
-    		log.error("yada:ajax can not be used on submit buttons because they have a different usage");
-    		return;
-    	}
-    	
         final IEngineConfiguration configuration = context.getConfiguration();
 
         /*
@@ -84,18 +78,16 @@ public class YadaAjaxAttrProcessor extends AbstractAttributeTagProcessor {
         /*
          * Execute the expression just parsed
          */
-        final String targetUrl = (String) expression.execute(context);
+        final String value = (String) expression.execute(context);
         
         /*
-         * Set the value into the 'data-yadaHref' attribute
+         * Set the value into the 'data-updateOnSuccess' attribute
          */
-        if (targetUrl != null) {
-        	structureHandler.setAttribute(RESULT_ATTRIBUTE, targetUrl);
-        	String currentClasses = StringUtils.trimToEmpty(tag.getAttributeValue("class"));
-        	structureHandler.setAttribute("class", currentClasses + (StringUtils.isEmpty(currentClasses)?"":" ") + "yadaAjax");
+        if (value != null) {
+        	structureHandler.setAttribute(replacementAttribute, value);
         }
-
     }
+
     /**
      * 
      */

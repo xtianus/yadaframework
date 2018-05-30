@@ -726,7 +726,6 @@
 			if (callback) callback(true);
 		});
 		$('#yada-confirm .cancelButton').off().click(function(){
-			$currentModals.modal('show');
 			if (callback) callback(false);
 		});
 		var $modal = $('#yada-confirm .modal');
@@ -737,6 +736,7 @@
 		$modal.on('hidden.bs.modal', function (e) {
 			$('#yada-confirm .okButton').text(previousOkButtonText);
 			$('#yada-confirm .cancelButton').text(previousCancelButtonText);
+			$currentModals.modal('show');
 		});		
 	}
 	

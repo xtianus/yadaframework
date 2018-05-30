@@ -7,6 +7,19 @@
 A component to add, view, sort and delete a set of uploaded images.
 Parameters:
 - images = A list of images, can be empty but never null
+- entityIdValue = the id of the entity holding the gallery. 
+  				  It will be sent to the controller as a "id" request parameter if entityIdName is not defined.
+- entityIdName = (optional) the name of the id request parameter - defaults to "id"
+- urlAdd - url to post the new image form. The uploaded image parameter is called "newImage"
+- urlDelete - url to delete an image. It receives the "imageId" parameter.
+- sorterId - (optional) The id of this sorter, useful when there is more than one on page. Defaults to "yadaImageSorter"
+- labelKeyAdd = key in messages.properties for the label of the upload form
+- labelAdd = label to use, if not using a labelKey. When none is defined, no label is shown.
+- uploadButtonKey = key in messages.properties for the upload button unescaped text (can have html for icons).
+- uploadButton = upload button text to use, if not using a uploadButtonKey. Defaults to "Upload"
+- deleteConfirmKey = key in messages.properties for the delete image confirmation modal.
+- deleteConfirm = delete image confirmation text, if not using a deleteConfirmKey. 
+				  If neither deleteConfirmKey nor deleteConfirm is given, no confirmation on delete is asked.
 
 Example:
 <div th:replace="/yadacms/imageSorter::component()"></div>
@@ -14,56 +27,33 @@ Example:
 */-->
 <body>
 <th:block th:fragment="component">
-
-
-
-
-	<div th:if="${!#lists.isEmpty(images)}"  class="yadaImageSorter">
-			<div class="dropup">
-			  <button class="btn btn-default dropdown-toggle" type="button" id="addGalleryImageId" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-			    <i class="fa fa-plus" th:title="#{form.label.product.addGallery}"></i>
-			  </button>
-			  <ul class="dropdown-menu" aria-labelledby="addGalleryImageId">
-			    <li style="padding: 10px;">
-			    	<form th:action="@{/cms/ajaxAddGalleryImage}" th:object="${product}" data-yadaUpdateOnSuccess="#gallery" enctype="multipart/form-data"
-						th:classappend="${#fields.hasErrors('*')}? has-error" class="yadaAjax" method="post" role="form">
-						<fieldset>
-							<th:block th:if="${product.id!=null}">
-								<div th:replace="/yada/form/text::field(fieldName='id',type='hidden')"></div>
-							</th:block>
-							<label for="galleryImage" th:text="#{form.label.product.addGallery}">Upload gallery image</label><input type="file" name="galleryImage">
-							<div style="margin-top: 10px;"></div>
-							<div class="form-group">
-								<button class="btn btn-success btn-xs" type="submit" name="Save"><span class="fa fa-ok"></span> Confirm</button>
-								<button class="btn btn-default btn-xs" type="button" name="Cancel" data-dismiss="modal"><span class="fa fa-cancel"></span> Cancel</button>
-							</div>
-						</fieldset>
-					</form>
-				</li>
-			  </ul>
-			</div>
-		<div th:each="galleryImage : ${images}">
-			<img th:src="@{${@yadaFileManager.getMobileImageUrl(galleryImage)}}" />
-			<div class="commandBar">
-				<i class="moveup fa fa-chevron-up" aria-hidden="true"></i>
-				<i class="movedown fa fa-chevron-down" aria-hidden="true"></i>
-				<a class="yadaAjax" th:href="@{/cms/product/deleteImage(imageId=${galleryImage.id})}" data-yadaConfirm="Delete image?">
-					<i class="delete fa fa-trash-o" aria-hidden="true"></i>
-				</a>
+	<div th:if="${entityIdValue!=null}" class="yadaImageSorter" th:with="sorterId=${sorterId}?:'yadaImageSorter',entityIdName=${entityIdName}?:'id'" th:id="${sorterId}">
+    	<form th:action="${urlAdd}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaImageSorterImages" 
+    		enctype="multipart/form-data" class="yadaAjax" method="post" role="form">
+			<fieldset>
+				<input type="hidden" th:name="${entityIdName}" th:value="${entityIdValue}">
+				<div class="form-group">
+					<label th:if="${labelAdd!=null || labelKeyAdd!=null}" th:for="|${sorterId}-newImage|" th:utext="${labelKeyAdd!=null?#messages.msg(labelKeyAdd):labelAdd}">Upload gallery image</label>
+					<input type="file" th:id="|${sorterId}-newImage|" name="newImage">
+				</div>
+				<button class="btn btn-success" type="submit" name="Upload" th:utext="${uploadButtonKey!=null?#messages.msg(uploadButtonKey):uploadButton?:'Upload'}">Upload</button>
+			</fieldset>
+		</form>
+		<div class="yadaImageSorterImages">
+			<div th:each="galleryImage : ${images}" class="yadaImageControl">
+				<img th:src="@{${@yadaFileManager.getMobileImageUrl(galleryImage)}}" />
+				<div class="commandBar">
+					<i class="moveup fa fa-chevron-up" aria-hidden="true"></i>
+					<i class="movedown fa fa-chevron-down" aria-hidden="true"></i>
+					<a class="yadaAjax" th:href="|${urlDelete}?imageId=${galleryImage.id}&${entityIdName}=${entityIdValue}|" 
+						data-yadaUpdateOnSuccess="yadaParents:.yadaImageSorterImages"
+						yada:confirm="${deleteConfirmKey!=null?#messages.msg(deleteConfirmKey):deleteConfirm?:''}">
+						<i class="delete fa fa-trash-o" aria-hidden="true"></i>
+					</a>
+				</div>
 			</div>
 		</div>
 	</div>
-
-
-
-
-
-
-
-
-
-
-
 
 </th:block>    	
 </body>

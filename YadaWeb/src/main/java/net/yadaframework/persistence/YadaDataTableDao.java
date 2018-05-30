@@ -291,21 +291,23 @@ public class YadaDataTableDao {
 		// Sorting
 		boolean needsExtraction = false;
 		List<YadaDatatablesOrder> orderList = yadaDatatablesRequest.getOrder();
-		for (YadaDatatablesOrder yadaDatatablesOrder : orderList) {
-			int columnIndex = yadaDatatablesOrder.getColumnIndex();
-			if (columnIndex>=0) {
-				YadaDatatablesColumn yadaDatatablesColumn = yadaDatatablesColumns.get(columnIndex);
-				if (yadaDatatablesColumn.isOrderable()) {
-					String attributeName = yadaDatatablesColumn.getNameOrData();
-					if (attributeName!=null) {
-						// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
-						String sortColumn = addLeftJoins(attributeName, yadaSql, targetClass);
-						yadaSql.orderBy(sortColumn + " " + yadaDatatablesOrder.getDir());
-						if (attributeName.indexOf('.')>-1) {
-							yadaSql.selectFrom(sortColumn); // Needed to avoid "ORDER BY clause is not in SELECT list"
-							needsExtraction = true;
+		if (orderList!=null) {
+			for (YadaDatatablesOrder yadaDatatablesOrder : orderList) {
+				int columnIndex = yadaDatatablesOrder.getColumnIndex();
+				if (columnIndex>=0) {
+					YadaDatatablesColumn yadaDatatablesColumn = yadaDatatablesColumns.get(columnIndex);
+					if (yadaDatatablesColumn.isOrderable()) {
+						String attributeName = yadaDatatablesColumn.getNameOrData();
+						if (attributeName!=null) {
+							// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
+							String sortColumn = addLeftJoins(attributeName, yadaSql, targetClass);
+							yadaSql.orderBy(sortColumn + " " + yadaDatatablesOrder.getDir());
+							if (attributeName.indexOf('.')>-1) {
+								yadaSql.selectFrom(sortColumn); // Needed to avoid "ORDER BY clause is not in SELECT list"
+								needsExtraction = true;
+							}
+							// Class attributeType = yadaUtil.getType(targetClass, attributeName);
 						}
-						// Class attributeType = yadaUtil.getType(targetClass, attributeName);
 					}
 				}
 			}

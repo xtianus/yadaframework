@@ -36,6 +36,8 @@ public class YadaDialect extends AbstractProcessorDialect {
         processors.add(new YadaHrefAttrProcessor(dialectPrefix, config));
         processors.add(new YadaSrcAttrProcessor(dialectPrefix, config));
         processors.add(new YadaAjaxAttrProcessor(dialectPrefix));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "updateOnSuccess", "data-updateOnSuccess"));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "confirm", "data-yadaConfirm"));
         // TODO move YadaActionUploadAttrProcessor to a yada security dialect
         // processors.add(new YadaActionUploadAttrProcessor(dialectPrefix));
         // Rimuove lo yada:xxx namespace dal tag <html>

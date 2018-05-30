@@ -12,6 +12,7 @@
 	yada.postLoginHandler = null; // Handler to run after login, if any
 	
 	var parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
+	var siblingSelector = "yadaSiblings:"; // Used to indicate that a CSS selector should be searched in the siblings()
 	var markerAjaxButtonOnly = 'yadaAjaxButtonOnly';
 	var clickedButton;
 	
@@ -446,7 +447,7 @@
 				data[name] = value;
 			}
 		}
-		if (confirmText!=null) {
+		if (confirmText!=null && confirmText!="") {
 			var okButton = $element.attr("data-okButton") || yada.messages.confirmButtons.ok;
 			var cancelButton = $element.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 			yada.confirm(confirmText, function(result) {
@@ -478,11 +479,15 @@
 					$element.remove();
 				} else {
 					var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
-					if (fromParents==false) {
+					var fromSiblings = yada.startsWith(selector, siblingSelector); // yadaSiblings:
+					if (fromParents==false && fromSiblings==false) {
 						$(selector).remove();
-					} else {
+					} else if (fromParents) {
 						selector = selector.replace(parentSelector, "").trim();
 						$element.parent().closest(selector).remove();
+					} else if (fromSiblings) {
+						selector = selector.replace(siblingSelector, "").trim();
+						$element.siblings(selector).remove();
 					}
 				}
 			}
@@ -521,12 +526,16 @@
 					$element.replaceWith($replacement);
 				} else {
 					var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
-					if (fromParents==false) {
+					var fromSiblings = yada.startsWith(selector, siblingSelector); // yadaSiblings:
+					if (fromParents==false && fromSiblings==false) {
 						var $oldElement = $(selector);
 						$oldElement.replaceWith($replacement);
-					} else {
+					} else if (fromParents) {
 						selector = selector.replace(parentSelector, "").trim();
-						$element.parents(selector).replaceWith($replacement);
+						$element.parent().closest(selector).replaceWith($replacement);
+					} else if (fromSiblings) {
+						selector = selector.replace(siblingSelector, "").trim();
+						$element.siblings(selector).replaceWith($replacement);
 					}
 				}
 				// Not needed  because handlers are initialized before entering this method, then cloned
@@ -748,7 +757,7 @@
 	    $form.not('.'+markerClass).find("button[type='submit']").each(function() {
 	    	var $button = $(this);
 	    	var confirmText = $button.attr("data-yadaConfirm") || $button.attr("data-confirm");
-	    	if (confirmText!=null) {
+	    	if (confirmText!=null && confirmText!="") {
 	    		var okButton = $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
 	    		var cancelButton = $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 	    		$button.click(function() {
@@ -1045,8 +1054,8 @@
 		var errorMessage = null;
 		if (typeof responseText == "object" && responseText.error!=null) {
 			errorMessage = responseText.error;
-		} else if (errorObject!=null && errorObject.error!=null) {
-			errorMessage = errorObject.error;
+		} else if (errorObject!=null && errorObject.yadaError!=null) {
+			errorMessage = errorObject.yadaError.error;
 		} else {
 			errorMessage = extractError(responseText);
 		}

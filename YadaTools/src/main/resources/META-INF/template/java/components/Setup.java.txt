@@ -22,6 +22,7 @@ public class Setup extends YadaSetup {
 	private transient Logger log = LoggerFactory.getLogger(Setup.class);
 
 	@Autowired YadaUserCredentialsRepository userCredentialsRepository;
+	@Autowired UserProfileRepository userProfileRepository;
 	@Autowired ${acronym.capitalize()}Configuration config;
 	@Autowired YadaUtil yadaUtil;
 	@Autowired private PasswordEncoder encoder;
@@ -41,12 +42,17 @@ public class Setup extends YadaSetup {
 			if (existingUserCredentials.isEmpty()) {
 				log.info("Setup: creating user {}", email);
 				YadaUserCredentials userCredentials = new YadaUserCredentials();
+				
 				userCredentials.setUsername(email);
 				userCredentials.changePassword((String) userDefinition.get("password"), encoder);
 				userCredentials.setEnabled(true);
 				for (Integer role : (Set<Integer>)userDefinition.get("roles")) {
 					userCredentials.addRole(role);
 				}
+				UserProfile userProfile = new UserProfile();
+				userProfile.setUserCredentials(userCredentials);
+				userProfile.setTimezone(timezone);
+				userProfile = userProfileRepository.save(userProfile);
 				userCredentialsRepository.save(userCredentials);
 			}
 		}
