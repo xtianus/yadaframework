@@ -631,6 +631,7 @@
 //			$(this).addClass('yadaClickedButtonHandler');
 //		});
 		$form.not('.'+markerClass).submit(function(e) {
+			var $form=$(this); // Needed to overwrite the outside variable with the current form, otherwise we may handle the wrong form (because of cloning)
 			var $formGroup = $form;
 			// Check if this form belongs to a yadaFormGroup
 			var yadaFormGroup = $form.attr('data-yadaFormGroup');

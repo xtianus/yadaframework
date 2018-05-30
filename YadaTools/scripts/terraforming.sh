@@ -284,7 +284,7 @@ fi
 if [[ $cfgPkgMysql ]]; then
 	apt-get -o Dpkg::Options::="--force-confnew" -y install $cfgPkgMysql
 	# TODO DOES NOT WORK ANYMORE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	mysqladmin -u root password ${cfgMysqlRootPwd}
+	# mysqladmin -u root password ${cfgMysqlRootPwd}
 	if [[ $cfgPkgMysqlConf ]]; then
 		sed -i 's#\(\[mysql\].*\)#&\ndefault-character-set = utf8mb4#g' $cfgPkgMysqlConf
 	fi
@@ -298,7 +298,11 @@ if [[ $cfgCertbot != "false" ]]; then
 	apt-get -o Dpkg::Options::="--force-confnew" -y install software-properties-common
 	add-apt-repository -y ppa:certbot/certbot
 	apt-get -o Dpkg::Options::="--force-confnew" -y update
-	apt-get -o Dpkg::Options::="--force-confnew" -y install python-certbot-apache 
+	if [[ $cfgPkgApache ]]; then
+		apt-get -o Dpkg::Options::="--force-confnew" -y install python-certbot-apache
+	else
+		apt-get -o Dpkg::Options::="--force-confnew" -y install certbot
+	fi 
 fi
 
 # Altro
