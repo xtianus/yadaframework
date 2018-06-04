@@ -27,6 +27,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
 import net.yadaframework.web.YadaDatatablesColumn;
@@ -173,6 +174,10 @@ public class YadaDataTableDao {
 				field.setAccessible(true);
 				value = field.get(entity);
 				if (field.getType().equals(YadaPersistentEnum.class)) {
+					if (value==null) {
+						ParameterizedType type = (ParameterizedType) field.getGenericType();
+						throw new YadaInternalException("Mssing value for enum {} - did you add it to the YadaSetup.setupApplication() method?", type.getActualTypeArguments()[0]);
+					}
 					value = ((YadaPersistentEnum)value).getLocalText();
 				}
 				// The old version
