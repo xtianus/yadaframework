@@ -32,6 +32,10 @@
 			"cancel": "Cancel"
 	}; 
 	
+	var parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
+	var siblingSelector = "yadaSiblings:"; // Used to indicate that a CSS selector should be searched in the siblings()
+	var closestFindSelector = "yadaClosestFind:"; // Used to indicate that a two-part CSS selector should be searched with closest() then with find()
+	
 	$(document).ready(function() {
 		// Be aware that all ajax links and forms will NOT be ajax if the user clicks while the document is still loading.
 		// To prevent that, call yada.initAjaxHandlersOn($('form,a')); at the html bottom and just after including the yada.ajax.js script
@@ -60,6 +64,7 @@
 	 * @param $element the element, or null for the entire body
 	 */
 	yada.initHandlersOn = function($element) {
+		yada.enableParentForm($element);
 		yada.enableShowPassword($element);
 		yada.enableRefreshButtons($element);
 		yada.enableConfirmLinks($element);
@@ -931,6 +936,90 @@
 	    })
 	}
 	
+	/**
+	 * Returns a jquery element searched using the extended yada selector prefixes. The empty selector is the $fromElement
+	 * @param $fromElement the element to start from. Ignored if no yada prefix is used.
+	 * @param selector the CSS selector prefixed with a yada prefix (or not)
+	 */
+	yada.extendedSelect = function($fromElement, selector) {
+		if (selector == null || selector.trim()=="") {
+			return $fromElement;
+		}
+		var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
+		var fromSiblings = yada.startsWith(selector, siblingSelector); // yadaSiblings:
+		var fromClosestFind = yada.startsWith(selector, closestFindSelector); // yadaClosestFind:
+		if (fromParents==false && fromSiblings==false && fromClosestFind==false) {
+			return $(selector);
+		} else if (fromParents) {
+			selector = selector.replace(parentSelector, "").trim();
+			return $fromElement.parent().closest(selector);
+		} else if (fromSiblings) {
+			selector = selector.replace(siblingSelector, "").trim();
+			return $fromElement.siblings(selector);
+		} else if (fromClosestFind) {
+			selector = selector.replace(closestFindSelector, "").trim();
+			var splitSelector = selector.split(" ", 2);
+			return $fromElement.parent().closest(splitSelector[0]).find(splitSelector[1]);
+		}
+		// Should never get here
+		return $fromElement;
+	}
+	
+	/**
+	 * Enable yadaParentForm
+	 */
+	yada.enableParentForm = function($element) {
+		if ($element==null) {
+			$element = $('body');
+		}
+		var $target = $element.parent();
+		if ($target.length==0) {
+			$target = $element;
+		}
+		// Set the form hierarchy
+		$('form[data-yadaParentForm]', $target).each(function() {
+			$(this).submit(function(e) {
+				// When the form is submitted, set this form as the child of the parent and submit the parent instead
+				e.preventDefault();
+				var $thisForm = $(this);
+				var parentFormSelector =  $thisForm.attr('data-yadaParentForm');
+				// Find and submit all parent forms (only one parent makes sense generally)
+				var $parentFormArray = yada.extendedSelect($thisForm, parentFormSelector); 
+				if ($parentFormArray!=null) {
+					for (var i = 0; i < $parentFormArray.length; i++) {
+						var parentForm = $parentFormArray[i];
+						if (parentForm.nodeName.toLowerCase()=="form") {
+							parentForm['yadaChildForm'] = $thisForm; // Overwrite any previous child form
+						}
+					}
+					$parentFormArray.submit();
+//					var parentForm = $parentFormArray[0];
+//					if (parentForm.nodeName.toLowerCase()=="form") {
+//						// Replace the current form with a new form composed of all merged input elements
+//						var $newform=$(parentForm).clone(true); // Clone also the submit handlers
+//						$thisForm.children().appendTo($newform);
+//						// Submit the new form and stop the current submission
+//						e.preventDefault();
+//						$newform.submit();
+//					}
+				}
+				
+			});
+		});
+		// Handle the submission of non-ajax forms
+		$('form').not('yadaAjax').not('yadaAjaxed').submit(function(e) {
+			// Recursively add all child forms
+			var $form = $(this);
+			var $childForm = $form['yadaChildForm'];
+			while ($childForm != null) {
+				$childForm.children().appendTo($form);
+				$childForm = $childForm['yadaChildForm'];
+			}
+			// continue normal submission...
+		});
+	}
+	
+
 	
 }( window.yada = window.yada || {} ));
 

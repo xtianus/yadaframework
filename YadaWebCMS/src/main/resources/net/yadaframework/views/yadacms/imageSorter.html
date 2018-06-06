@@ -12,6 +12,8 @@ Parameters:
 - entityIdName = (optional) the name of the id request parameter - defaults to "id"
 - urlAdd - url to post the new image form. The uploaded image parameter is called "newImage"
 - urlDelete - url to delete an image. It receives the "imageId" parameter.
+- urlSort - url to sort an image. It receives the "currentId", "otherId" and "${entityIdName}" parameters. The controller should just 
+            call yadaAttachedFileRepository.swapSortOrder(currentId, otherId);
 - sorterId - (optional) The id of this sorter, useful when there is more than one on page. Defaults to "yadaImageSorter"
 - labelKeyAdd = key in messages.properties for the label of the upload form
 - labelAdd = label to use, if not using a labelKey. When none is defined, no label is shown.
@@ -39,17 +41,43 @@ Example:
 				<button class="btn btn-success" type="submit" name="Upload" th:utext="${uploadButtonKey!=null?#messages.msg(uploadButtonKey):uploadButton?:'Upload'}">Upload</button>
 			</fieldset>
 		</form>
+
+		<form th:action="${urlSort}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaImageSorterImages" class="yadaAjax sortForm">
+			<input type="hidden" th:name="${entityIdName}" th:value="${entityIdValue}">
+		</form>
+		<form th:action="${urlDelete}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaImageSorterImages" class="yadaAjax deleteForm"
+			yada:confirm="${deleteConfirmKey!=null?#messages.msg(deleteConfirmKey):deleteConfirm?:''}">
+			<input type="hidden" th:name="${entityIdName}" th:value="${entityIdValue}">
+		</form>
+		
+		
 		<div class="yadaImageSorterImages">
-			<div th:each="galleryImage : ${images}" class="yadaImageControl">
+			<div th:each="galleryImage,iter : ${images}" class="yadaImageControl">
 				<img th:src="@{${@yadaFileManager.getMobileImageUrl(galleryImage)}}" />
 				<div class="commandBar">
-					<i class="moveup fa fa-chevron-up" aria-hidden="true"></i>
-					<i class="movedown fa fa-chevron-down" aria-hidden="true"></i>
-					<a class="yadaAjax" th:href="|${urlDelete}?imageId=${galleryImage.id}&${entityIdName}=${entityIdValue}|" 
-						data-yadaUpdateOnSuccess="yadaParents:.yadaImageSorterImages"
-						yada:confirm="${deleteConfirmKey!=null?#messages.msg(deleteConfirmKey):deleteConfirm?:''}">
-						<i class="delete fa fa-trash-o" aria-hidden="true"></i>
-					</a>
+					<!--/* Move up */-->
+					<form th:unless="${iter.last}" th:action="${urlSort}" data-yadaParentForm="yadaClosestFind:.yadaImageSorter .sortForm" >
+						<input type="hidden" name="currentId" th:value="${galleryImage.id}">
+						<input type="hidden" name="otherId" th:value="${images.get(iter.index+1).id}">
+						<a href="#" onclick="$(this).closest('form').submit(); return false;">
+							<i class="moveup fa fa-chevron-down" aria-hidden="true"></i>
+						</a>
+					</form>
+					<!--/* Move down */-->
+					<form th:unless="${iter.first}" data-yadaParentForm="yadaClosestFind:.yadaImageSorter .sortForm" >
+						<input type="hidden" name="currentId" th:value="${galleryImage.id}">
+						<input type="hidden" name="otherId" th:value="${images.get(iter.index-1).id}">
+						<a href="#" onclick="$(this).closest('form').submit(); return false;">
+							<i class="moveup fa fa-chevron-up" aria-hidden="true"></i>
+						</a>
+					</form>
+					<!--/* Delete */-->
+					<form th:action="${urlDelete}" data-yadaParentForm="yadaClosestFind:.yadaImageSorter .deleteForm" >
+						<input type="hidden" name="imageId" th:value="${galleryImage.id}">
+						<a href="#" onclick="$(this).closest('form').submit(); return false;">
+							<i class="delete fa fa-trash-o" aria-hidden="true"></i>
+						</a>
+					</form>
 				</div>
 			</div>
 		</div>

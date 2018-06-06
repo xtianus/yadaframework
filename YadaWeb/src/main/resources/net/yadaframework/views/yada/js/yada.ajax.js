@@ -11,8 +11,6 @@
 	
 	yada.postLoginHandler = null; // Handler to run after login, if any
 	
-	var parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
-	var siblingSelector = "yadaSiblings:"; // Used to indicate that a CSS selector should be searched in the siblings()
 	var markerAjaxButtonOnly = 'yadaAjaxButtonOnly';
 	var clickedButton;
 	
@@ -475,21 +473,27 @@
 			var selectors = deleteSelector.split(',');
 			for (var count=0; count<selectors.length; count++) {
 				var selector = selectors[count];
-				if (selector=="") {
-					$element.remove();
-				} else {
-					var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
-					var fromSiblings = yada.startsWith(selector, siblingSelector); // yadaSiblings:
-					if (fromParents==false && fromSiblings==false) {
-						$(selector).remove();
-					} else if (fromParents) {
-						selector = selector.replace(parentSelector, "").trim();
-						$element.parent().closest(selector).remove();
-					} else if (fromSiblings) {
-						selector = selector.replace(siblingSelector, "").trim();
-						$element.siblings(selector).remove();
-					}
-				}
+				yada.extendedSelect($element, selector).remove();
+//				if (selector=="") {
+//					$element.remove();
+//				} else {
+//					var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
+//					var fromSiblings = yada.startsWith(selector, siblingSelector); // yadaSiblings:
+//					var fromClosestFind = yada.startsWith(selector, closestFindSelector); // yadaClosestFind:
+//					if (fromParents==false && fromSiblings==false && fromClosestFind==false) {
+//						$(selector).remove();
+//					} else if (fromParents) {
+//						selector = selector.replace(parentSelector, "").trim();
+//						$element.parent().closest(selector).remove();
+//					} else if (fromSiblings) {
+//						selector = selector.replace(siblingSelector, "").trim();
+//						$element.siblings(selector).remove();
+//					} else if (fromClosestFind) {
+//						selector = selector.replace(closestFindSelector, "").trim();
+//						var splitSelector = selector.split(" ", 2);
+//						$element.closest(splitSelector[0]).find(splitSelector[1]).remove();
+//					}
+//				}
 			}
 			return true;
 		}
@@ -521,23 +525,30 @@
 					// All handlers are also cloned.
 					$replacement = $replacementArray[count].clone(true, true); 
 				}
-				if (selector == "") {
-					// 
-					$element.replaceWith($replacement);
-				} else {
-					var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
-					var fromSiblings = yada.startsWith(selector, siblingSelector); // yadaSiblings:
-					if (fromParents==false && fromSiblings==false) {
-						var $oldElement = $(selector);
-						$oldElement.replaceWith($replacement);
-					} else if (fromParents) {
-						selector = selector.replace(parentSelector, "").trim();
-						$element.parent().closest(selector).replaceWith($replacement);
-					} else if (fromSiblings) {
-						selector = selector.replace(siblingSelector, "").trim();
-						$element.siblings(selector).replaceWith($replacement);
-					}
-				}
+				yada.extendedSelect($element, selector).replaceWith($replacement);
+
+//				if (selector == "") {
+//					// 
+//					$element.replaceWith($replacement);
+//				} else {
+//					var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
+//					var fromSiblings = yada.startsWith(selector, siblingSelector); // yadaSiblings:
+//					var fromClosestFind = yada.startsWith(selector, closestFindSelector); // yadaClosestFind:
+//					if (fromParents==false && fromSiblings==false && fromClosestFind==false) {
+//						var $oldElement = $(selector);
+//						$oldElement.replaceWith($replacement);
+//					} else if (fromParents) {
+//						selector = selector.replace(parentSelector, "").trim();
+//						$element.parent().closest(selector).replaceWith($replacement);
+//					} else if (fromSiblings) {
+//						selector = selector.replace(siblingSelector, "").trim();
+//						$element.siblings(selector).replaceWith($replacement);
+//					} else if (fromClosestFind) {
+//						selector = selector.replace(closestFindSelector, "").trim();
+//						var splitSelector = selector.split(" ", 2);
+//						$element.closest(splitSelector[0]).find(splitSelector[1]).replaceWith($replacement);
+//					}
+//				}
 				// Not needed  because handlers are initialized before entering this method, then cloned
 				// yada.initHandlersOn($replacement);
 			}
@@ -630,8 +641,56 @@
 //			});
 //			$(this).addClass('yadaClickedButtonHandler');
 //		});
+		
+		// Set the confirm handlers on the form itself if no button has it
+		$form.filter('[data-yadaConfirm]').not('.'+markerClass).each(function() {
+			var $thisForm = $(this);
+			// Check if there is no submit button with a data-yadaConfirm attribute
+			var $button = $thisForm.find('button[type="submit"][data-yadaConfirm]');
+			if ($button.length==0) {
+				$thisForm.submit(function(e){
+					if ($thisForm[0]['yadaConfirmed']==true) {
+						$thisForm[0]['yadaConfirmed']=false;
+						return; // Continue submission
+					}
+					$thisForm = $(this); // just in case
+					var confirmText = $thisForm.attr("data-yadaConfirm");
+					if (confirmText!=null && confirmText!="") {
+						e.preventDefault(); // Stop form submission
+						var okButton = $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
+						var cancelButton = $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
+		    			yada.confirm(confirmText, function(result) {
+		    				if (result==true) {
+		    					$thisForm[0]['yadaConfirmed']=true;
+		    					$thisForm.submit();
+		    				}
+		    			}, okButton, cancelButton);
+		    			return false;
+		    		};
+				});
+			}
+		});
+
 		$form.not('.'+markerClass).submit(function(e) {
+			if (e.isDefaultPrevented()) {
+				return; // Do not send the form - probably a cancel has been made
+			}
+			// Only ajax forms enter here
 			var $form=$(this); // Needed to overwrite the outside variable with the current form, otherwise we may handle the wrong form (because of cloning)
+//			// Form alias: submit another form after merging the current form children
+//			var formAliasSelector = $form.attr('data-yadaFormAlias');
+//			if (formAliasSelector!=null) {
+//				var $formAliasArray = $(formAliasSelector);
+//				if ($formAliasArray!=null && $formAliasArray.length>0) {
+//					var formAlias = $formAliasArray[0];
+//					if (formAlias.nodeName.toLowerCase()=="form") {
+//						// Replace the current form with a new form composed of all input elements
+//						var $newform=$(formAlias).clone(true);
+//						$form.children().appendTo($newform);
+//						$form = $newform; // Work on the merged form
+//					}
+//				}
+//			}
 			var $formGroup = $form;
 			// Check if this form belongs to a yadaFormGroup
 			var yadaFormGroup = $form.attr('data-yadaFormGroup');
@@ -656,7 +715,7 @@
 					return; // Do a normal submit
 				}
 			}
-			e.preventDefault();
+			e.preventDefault(); // From now on the form can only be ajax-submitted
 			var noLoader = hasNoLoader($form);
 			var action = $(this).attr('action');
 			// Check if it must be a multipart formdata
@@ -687,6 +746,28 @@
 					}
 				});
 			}
+			// Add data from any child form recursively, if any
+			var $childForm = $form[0]['yadaChildForm'];
+			while ($childForm != null) {
+				if (multipart) {
+					var childFormData = new FormData($childForm);
+					// Can't use for - of with the current minifyjs version, so trying with a while loop
+					//	for (var pair of eachFormdata.entries()) {
+					//		data.append(pair[0], pair[1]);
+					//	}
+					var iterator = childFormData.entries();
+					var iterElem = iterator.next();
+				    while ( ! iterElem.done ) {
+				    	var pair = iterElem.value;
+				        data.append(pair[0], pair[1]);
+				        iterElem = iterator.next();
+				    }
+				} else {
+					$.merge(data, $childForm.serializeArray());
+				}
+				$childForm = $childForm[0]['yadaChildForm'];
+			}
+			
 			var buttonName = null;
 			var buttonValue = null;
 			if (clickedButton!=null) {
@@ -753,7 +834,8 @@
 			yada.ajax(action, data, joinedHandler.bind(this), method, $(this).attr('data-timeout'), noLoader);
 			clickedButton = null;
 			return false; // Important so that the form is not submitted by the browser too
-		})
+		}) // submit()
+		
 		// Set the confirm handlers on form buttons
 	    $form.not('.'+markerClass).find("button[type='submit']").each(function() {
 	    	var $button = $(this);
