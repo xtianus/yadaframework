@@ -42,6 +42,8 @@ public class YadaAttachedFile {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
 	
+	protected Long attachedToId; // If of the Entity to which this file is attached
+	
 	/**
 	 * Value for ordering files of the same type (e.g. gallery images)
 	 */
@@ -185,6 +187,14 @@ public class YadaAttachedFile {
 
 	public void setFilename(String filename) {
 		this.filename = filename;
+	}
+
+	public Long getAttachedToId() {
+		return attachedToId;
+	}
+
+	public void setAttachedToId(Long attachedToId) {
+		this.attachedToId = attachedToId;
 	}
 
 }

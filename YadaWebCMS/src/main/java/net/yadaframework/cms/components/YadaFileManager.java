@@ -149,6 +149,7 @@ public class YadaFileManager {
 	 * Copies a managed file to the destination folder, creating a database association to assign to an Entity.
 	 * The name of the file is in the format [basename]managedFileName_id.ext.
 	 * Images are not resized.
+	 * @param attachToId the id of the entity to which the file should be attached
 	 * @param managedFile an uploaded file, can be an image or not
 	 * @param relativeFolderPath path of the target folder relative to the contents folder
 	 * @param baseName prefix to attach on the file name. Add a separator if you need one. Can be null.
@@ -156,13 +157,14 @@ public class YadaFileManager {
 	 * @throws IOException 
 	 * @see {@link #attach(File, String, String, String, Integer, Integer)}
 	 */
-	public YadaAttachedFile attach(File managedFile, String relativeFolderPath, String baseName) throws IOException {
-		return attach(managedFile, relativeFolderPath, baseName, null, null, null);
+	public YadaAttachedFile attach(Long attachToId, File managedFile, String relativeFolderPath, String baseName) throws IOException {
+		return attach(attachToId, managedFile, relativeFolderPath, baseName, null, null, null);
 	}
 	
 	/**
 	 * Copies (and resizes) a managed file to the destination folder, creating a database association to assign to an Entity.
 	 * The name of the file is in the format [basename]managedFileName_id.ext
+	 * @param attachToId the id of the entity to which the file should be attached
 	 * @param managedFile an uploaded file, can be an image or not
 	 * @param relativeFolderPath path of the target folder relative to the contents folder
 	 * @param baseName prefix to attach on the file name. Add a separator if you need one. Can be null.
@@ -173,7 +175,7 @@ public class YadaFileManager {
 	 * @throws IOException
 	 * @see {@link #attach(File, String, String, String)} 
 	 */
-	public YadaAttachedFile attach(File managedFile, String relativeFolderPath, String baseName, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+	public YadaAttachedFile attach(Long attachToId, File managedFile, String relativeFolderPath, String baseName, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
 		File targetFolder = new File(config.getContentPath(), relativeFolderPath);
 		targetFolder.mkdirs();
 		String[] filenameParts = YadaUtil.splitFileNameAndExtension(managedFile.getName());
@@ -183,7 +185,9 @@ public class YadaFileManager {
 		//
 		// Now prefix doesn't have any counter at the end
 		YadaAttachedFile yadaAttachedFile = new YadaAttachedFile();
+		yadaAttachedFile.setAttachedToId(attachToId);
 		yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile); // Get the id
+		yadaAttachedFile.setSortOrder(yadaAttachedFile.getId()); // Set the sort order to the id, so that this will be the last image in a list
 		String targetFilenamePrefix = StringUtils.trimToEmpty(baseName) + filenameNoCounter + COUNTER_SEPARATOR + yadaAttachedFile.getId(); // product_2631
 		boolean imageExtensionChanged = targetExtension!=null && targetExtension.compareToIgnoreCase(origExtension)!=0;
 		boolean requiresTransofmation = imageExtensionChanged || desktopWidth!=null || mobileWidth!=null; 
