@@ -186,6 +186,7 @@ public class YadaFileManager {
 		// Now prefix doesn't have any counter at the end
 		YadaAttachedFile yadaAttachedFile = new YadaAttachedFile();
 		yadaAttachedFile.setAttachedToId(attachToId);
+		yadaAttachedFile.setClientFilename(managedFile.getName());
 		yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile); // Get the id
 		yadaAttachedFile.setSortOrder(yadaAttachedFile.getId()); // Set the sort order to the id, so that this will be the last image in a list
 		String targetFilenamePrefix = baseName.trim() + filenameNoCounter + COUNTER_SEPARATOR + yadaAttachedFile.getId(); // product_2631

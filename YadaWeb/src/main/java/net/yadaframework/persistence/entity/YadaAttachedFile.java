@@ -55,19 +55,27 @@ public class YadaAttachedFile {
 	 * Folder where the file is stored, relative to the contents folder
 	 */
 	protected String relativeFolderPath; // Relative to the "contents" folder
+	
 	/**
 	 * When the CMS creates a mobile version of an image, the name is found here.
 	 * NOTE: to have different images for portrait/landscape, you need to upload different files hence have different instances of this class
 	 */
 	protected String filenameMobile; // only for images on mobile, null for no specific image 
+	
 	/**
 	 * The desktop version of an image is here
 	 */
 	protected String filenameDesktop; // only for images on desktop, null for non-images
+	
 	/**
 	 * Only for non-images, or when no mobile size is specified (will be the same as filenameDesktop)
 	 */
 	protected String filename;
+	
+	/**
+	 * The original name that the file had when it was loaded, or the name that it will have when downloaded by a user.
+	 */
+	protected String clientFilename;
 	
 	@ElementCollection
 	@Column(length=64)
@@ -195,6 +203,14 @@ public class YadaAttachedFile {
 
 	public void setAttachedToId(Long attachedToId) {
 		this.attachedToId = attachedToId;
+	}
+
+	public String getClientFilename() {
+		return clientFilename;
+	}
+
+	public void setClientFilename(String clientFilename) {
+		this.clientFilename = clientFilename;
 	}
 
 }
