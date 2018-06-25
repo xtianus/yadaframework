@@ -85,11 +85,11 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	//	public void initBinder(WebDataBinder binder) {
 	//		binder.registerCustomEditor(YadaPersistentEnum.class, new YadaPersistentEnumEditor(new Class[] {EnumCategory.class}));
 	//	}	
-	@OneToMany
+	@ManyToMany
 	@JoinTable(name="YadaProduct_categories")
 	protected List<YadaPersistentEnum<?>> categories;
 	
-	@OneToMany
+	@ManyToMany
 	@JoinTable(name="YadaProduct_subcategories")
 	protected List<YadaPersistentEnum<?>> subcategories;
 	
