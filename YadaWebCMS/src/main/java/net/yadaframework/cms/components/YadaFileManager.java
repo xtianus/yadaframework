@@ -188,7 +188,8 @@ public class YadaFileManager {
 		yadaAttachedFile.setAttachedToId(attachToId);
 		yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile); // Get the id
 		yadaAttachedFile.setSortOrder(yadaAttachedFile.getId()); // Set the sort order to the id, so that this will be the last image in a list
-		String targetFilenamePrefix = StringUtils.trimToEmpty(baseName) + filenameNoCounter + COUNTER_SEPARATOR + yadaAttachedFile.getId(); // product_2631
+		String targetFilenamePrefix = baseName.trim() + filenameNoCounter + COUNTER_SEPARATOR + yadaAttachedFile.getId(); // product_2631
+		targetFilenamePrefix = YadaUtil.reduceToSafeFilename(targetFilenamePrefix, true);
 		boolean imageExtensionChanged = targetExtension!=null && targetExtension.compareToIgnoreCase(origExtension)!=0;
 		boolean requiresTransofmation = imageExtensionChanged || desktopWidth!=null || mobileWidth!=null; 
 		if (targetExtension==null) {
