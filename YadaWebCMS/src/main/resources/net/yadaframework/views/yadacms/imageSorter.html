@@ -24,7 +24,8 @@ Parameters:
 				  If neither deleteConfirmKey nor deleteConfirm is given, no confirmation on delete is asked.
 
 Example:
-<div th:replace="/yadacms/imageSorter::component()"></div>
+<div th:replace="~{/yadacms/imageSorter::component(images=${product.galleryImages},entityIdValue=${product.id},urlAdd=@{/cms/ajaxAddGalleryImage},urlDelete=@{/cms/product/deleteGalleryImage},urlSort=@{/cms/product/ajaxSortGalleryImage},labelKeyAdd='form.label.product.addGallery',deleteConfirmKey='confirm.imageGallery.delete')}"></div>
+
 
 */-->
 <body>

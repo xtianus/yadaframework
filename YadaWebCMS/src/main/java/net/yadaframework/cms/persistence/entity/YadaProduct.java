@@ -24,6 +24,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -86,11 +87,17 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	//		binder.registerCustomEditor(YadaPersistentEnum.class, new YadaPersistentEnumEditor(new Class[] {EnumCategory.class}));
 	//	}	
 	@ManyToMany
-	@JoinTable(name="YadaProduct_categories")
+	@JoinTable(
+		name="YadaProduct_categories",
+		uniqueConstraints = @UniqueConstraint(columnNames={"YadaProduct_id", "categories_id"})
+	)
 	protected List<YadaPersistentEnum<?>> categories;
 	
 	@ManyToMany
-	@JoinTable(name="YadaProduct_subcategories")
+	@JoinTable(
+		name="YadaProduct_subcategories",
+		uniqueConstraints = @UniqueConstraint(columnNames={"YadaProduct_id", "subcategories_id"})
+	)
 	protected List<YadaPersistentEnum<?>> subcategories;
 	
 	/**

@@ -158,9 +158,9 @@ if [[ $cfgTomcatNativeTarGz ]]; then
 fi
 
 # Options for java 9
-tomcatOptions="-Xmx${cfgTomcatRam} -Djava.awt.headless=true -Xlog:gc*:file=${projectBase}/logs/tomcat-gc.log:time:filecount=4,filesize=8192 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${projectBase}/logs/tomcat-outofmemory-dump.hprof"
+# tomcatOptions="-Xmx${cfgTomcatRam} -Djava.awt.headless=true -Xlog:gc*:file=${projectBase}/logs/tomcat-gc.log:time:filecount=4,filesize=8192 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${projectBase}/logs/tomcat-outofmemory-dump.hprof"
 # Options for java 8
-# tomcatOptions="-Xloggc:${projectBase}/log/tomcat-gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=1 -XX:GCLogFileSize=1M -XX:+PrintGCDateStamps -Djava.awt.headless=true -Xmx${cfgTomcatRam} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/tomcat-outofmemory-dump"
+tomcatOptions="-Xloggc:${projectBase}/logs/tomcat-gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=1 -XX:GCLogFileSize=1M -XX:+PrintGCDateStamps -Djava.awt.headless=true -Xmx${cfgTomcatRam} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${projectBase}/logs/tomcat-outofmemory-dump.hprof"
 
 # Tomcat configuration
 if [[ $cfgPkgTomcat ]]; then
@@ -253,6 +253,8 @@ if [[ $cfgPkgApache ]]; then
 
         JkMount /* $WORKER
         JkUnMount /contents/* $WORKER
+        # For certbot
+        JkUnMount /.well-known/* $WORKER
         
 	</VirtualHost>"
 	a2ensite $myVirtualHost
