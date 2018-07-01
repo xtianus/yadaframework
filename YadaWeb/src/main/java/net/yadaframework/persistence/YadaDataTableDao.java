@@ -176,9 +176,10 @@ public class YadaDataTableDao {
 				if (field.getType().equals(YadaPersistentEnum.class)) {
 					if (value==null) {
 						ParameterizedType type = (ParameterizedType) field.getGenericType();
-						throw new YadaInternalException("Mssing value for enum {} - did you add it to the YadaSetup.setupApplication() method?", type.getActualTypeArguments()[0]);
+						log.debug("null value for {}.{} - did you add enum {} to the YadaSetup.setupApplication() method?", entity.getClass().getSimpleName(), field.getName(), type.getActualTypeArguments()[0]);
+					} else {
+						value = ((YadaPersistentEnum)value).getLocalText();
 					}
-					value = ((YadaPersistentEnum)value).getLocalText();
 				}
 				// The old version
 				//	if (value instanceof java.util.Map) {
@@ -189,7 +190,7 @@ public class YadaDataTableDao {
 				
 			if (parts.length==1) {
 				// End of the path
-				entityJson.put(attributeName, value.toString());
+				entityJson.put(attributeName, value==null?null:value.toString());
 				return;
 			}
 			// Recurse into the path
