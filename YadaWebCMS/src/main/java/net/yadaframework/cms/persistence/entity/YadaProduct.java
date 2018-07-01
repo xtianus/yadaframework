@@ -130,7 +130,7 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	protected List<YadaAttachedFile> attachments;
 	
 	/**
-	 * The main image to show in lists etc.
+	 * The main image to show in lists etc. (for example a thumbnail)
 	 */
 	@OneToOne(cascade=CascadeType.REMOVE, orphanRemoval=true)
 	protected YadaAttachedFile image;

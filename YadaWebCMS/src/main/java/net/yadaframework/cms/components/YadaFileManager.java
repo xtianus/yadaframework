@@ -107,7 +107,7 @@ public class YadaFileManager {
 	}
 	
 	/**
-	 * Returns the (relative) url of the desktop image
+	 * Returns the (relative) url of the desktop image. If not defined, falls back to the plain file.
 	 * @param yadaAttachedFile
 	 * @return
 	 */
