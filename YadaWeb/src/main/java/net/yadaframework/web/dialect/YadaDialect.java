@@ -36,6 +36,7 @@ public class YadaDialect extends AbstractProcessorDialect {
         processors.add(new YadaHrefAttrProcessor(dialectPrefix, config));
         processors.add(new YadaSrcAttrProcessor(dialectPrefix, config));
         processors.add(new YadaAjaxAttrProcessor(dialectPrefix));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "successHandler", "data-yadaSuccessHandler"));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "updateOnSuccess", "data-updateOnSuccess"));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "confirm", "data-yadaConfirm"));
         processors.add(new YadaNewlineTextAttrProcessor(dialectPrefix));
