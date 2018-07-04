@@ -105,6 +105,9 @@ public class YadaFileManager {
 	 * @return
 	 */
 	public String getMobileImageUrl(YadaAttachedFile yadaAttachedFile) {
+		if (yadaAttachedFile==null) {
+			return null;
+		}
 		String imageName = yadaAttachedFile.getFilenameMobile();
 		if (imageName==null) {
 			return getDesktopImageUrl(yadaAttachedFile);
@@ -122,6 +125,9 @@ public class YadaFileManager {
 	 * @return
 	 */
 	public String getDesktopImageUrl(YadaAttachedFile yadaAttachedFile) {
+		if (yadaAttachedFile==null) {
+			return null;
+		}
 		String imageName = yadaAttachedFile.getFilenameDesktop();
 		if (imageName==null) {
 			imageName = yadaAttachedFile.getFilename();
