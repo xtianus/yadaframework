@@ -13,6 +13,7 @@ import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_INF
 import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,10 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -69,18 +69,32 @@ public class YadaWebUtil {
 	public final Pageable FIND_ONE = new PageRequest(0, 1); 
 	
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
-	
-//	/**
-//	 * Ensures that a paage
-//	 * @param pagePath
-//	 * @return
-//	 */
-//	public String getLocaleSafeForward(String pagePath) {
-//		if (config.isLocalePathVariableEnabled()) {
-//			return "/" + LocaleContextHolder.getLocale().getLanguage() + (pagePath.equals("/")?"":pagePath);
-//		}
-//		return pagePath;
-//	}
+
+	/**
+	 * Make a zip file and send it to the client. The temp file is automatically deleted.
+	 * @param returnedFilename the name of the file to create and send, with extension. E.g.: data.zip
+	 * @param sourceFiles the files to zip
+	 * @param filenamesNoExtension the name of each file in the zip - null to keep the original names
+	 * @param ignoreErrors true to ignore errors when adding a file and keep going, false for an exception when a file can't be zipped
+	 * @param response
+	 */
+	public void downloadZip(String returnedFilename, File[] sourceFiles, String[] filenamesNoExtension, boolean ignoreErrors, HttpServletResponse response) throws Exception {
+		File zipFile = null;
+		try {
+			zipFile = File.createTempFile("downloadZip", null);
+			yadaUtil.createZipFile(zipFile, sourceFiles, filenamesNoExtension, ignoreErrors);
+			response.setContentType("application/zip");
+			response.setHeader("Content-disposition", "attachment; filename=" + returnedFilename);
+			try (OutputStream out = response.getOutputStream(); FileInputStream in = new FileInputStream(zipFile)) {
+				IOUtils.copy(in,out);
+			}
+		} finally {
+			if (zipFile!=null) {
+				zipFile.delete();
+			}
+		}
+
+	}
 	
 	/**
 	 * Sorts a localized enum according to the locale specified

@@ -43,9 +43,19 @@ public class YadaFileManager {
 	// TODO mantenere l'immagine caricata nella versione originale
 	
 	/**
+	 * Returns the absolute path of the default file (no mobile/desktop variant)
+	 * @param yadaAttachedFile the attachment
+	 * @return
+	 */
+	public File getAbsoluteFile(YadaAttachedFile yadaAttachedFile) {
+		File targetFolder = new File(config.getContentPath(), yadaAttachedFile.getRelativeFolderPath());
+		return new File(targetFolder, yadaAttachedFile.getFilename());
+	}
+
+	/**
 	 * Returns the absolute path of a file
 	 * @param yadaAttachedFile the attachment
-	 * @param filename the relative file name
+	 * @param filename the relative file name, can be yadaAttachedFile.getFilename(), yadaAttachedFile.getFilenameDesktop(), yadaAttachedFile.getFilenameMobile()
 	 * @return
 	 */
 	public File getAbsoluteFile(YadaAttachedFile yadaAttachedFile, String filename) {
