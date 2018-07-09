@@ -91,7 +91,10 @@ public class YadaSql implements CloneableDeep {
 		if (text.toLowerCase().startsWith(sectionOperand)) {
 			text = text.substring(sectionOperand.length());
 		}
-		builder.append(text).append(" ");
+		builder.append(text);
+		if (StringUtils.isNotBlank(text)) {
+			builder.append(" ");
+		}
 		return this;
 	}
 
@@ -145,13 +148,14 @@ public class YadaSql implements CloneableDeep {
 	
 	/**
 	 * Start a "select ... from ..." query
+	 * If this method has already been called, the new select text is inserted before the "from" after a comma
 	 * @param enabled
 	 * @param selectFrom
 	 * @return
 	 */
 	public YadaSql selectFrom(boolean enabled, String selectFrom) {
 		if (enabled) {
-			return appendQuery(selectFrom);
+			return selectFrom(selectFrom);
 		}
 		return this;
 	}
@@ -202,12 +206,22 @@ public class YadaSql implements CloneableDeep {
 //	// TODO more parameter types
 	
 	/**
-	 * Start a "select ... from ..." query
+	 * Start or extend a "select ... from ..." query.
+	 * If this method has already been called, the new select text is inserted before the "from" after a comma
 	 * @param selectFrom
 	 * @return
 	 */
 	public YadaSql selectFrom(String selectFrom) {
-		return appendQuery(selectFrom);
+		String currentQuery = queryBuffer.toString().toLowerCase();
+		boolean alreadyThere = currentQuery.startsWith("from ") || currentQuery.indexOf(" from ")>-1;
+		if (!alreadyThere) {
+			return appendQuery(selectFrom);
+		}
+		// The selectFrom is already in the query, so add the new one before the from
+		int pos = queryBuffer.indexOf("from");
+		queryBuffer.insert(pos, ", " + selectFrom + " ");
+		lastSkipped = false;
+		return this;
 	}
 	
 	/**

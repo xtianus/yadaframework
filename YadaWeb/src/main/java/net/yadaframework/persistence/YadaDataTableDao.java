@@ -155,7 +155,9 @@ public class YadaDataTableDao {
 			yadaSql.where("(" + searchConditions + ")").and();
 		}
 		// Sorting
+		boolean needsExtraction = false;
 		List<YadaDatatablesOrder> orderList = yadaDatatablesRequest.getOrder();
+		if (orderList!=null) {
 		for (YadaDatatablesOrder yadaDatatablesOrder : orderList) {
 			int columnIndex = yadaDatatablesOrder.getColumnIndex();
 			if (columnIndex>=0) {
@@ -164,12 +166,17 @@ public class YadaDataTableDao {
 					String attributeName = yadaDatatablesColumn.getNameOrData();
 					if (attributeName!=null) {
 						// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
-						attributeName = addLeftJoins(attributeName, yadaSql, targetClass);
-						yadaSql.orderBy(attributeName + " " + yadaDatatablesOrder.getDir());
+							String sortColumn = addLeftJoins(attributeName, yadaSql, targetClass);
+							yadaSql.orderBy(sortColumn + " " + yadaDatatablesOrder.getDir());
+							if (attributeName.indexOf('.')>-1) {
+								yadaSql.selectFrom(sortColumn); // Needed to avoid "ORDER BY clause is not in SELECT list"
+								needsExtraction = true;
+							}
 						// Class attributeType = yadaUtil.getType(targetClass, attributeName);
 					}
 				}
 			}
+		}
 		}
 		yadaSql.setParameter("globalSearchString", "%"+globalSearchString+"%");
 		yadaSql.setParameter("globalSearchNumber", globalSearchNumber);
@@ -179,6 +186,17 @@ public class YadaDataTableDao {
 		query.setFirstResult(yadaDatatablesRequest.getStart());
     	@SuppressWarnings("unchecked")
 		List<targetClass> result = query.getResultList();
+		if (needsExtraction) {
+			// When doing an "order by" on a joined column we add the column to the select clause to prevent the "ORDER BY clause is not in SELECT list" error.
+			// This means that the result now is a list of Object[] where only the first element is what we need.
+			@SuppressWarnings("unchecked")
+			List<Object[]> realResult = (List<Object[]>) result; // Just a type cast
+			List<targetClass> extractedResult = new ArrayList<>();
+			for (Object[] arrayResult : realResult) {
+				extractedResult.add((targetClass) arrayResult[0]);
+			}
+			result = extractedResult;
+		}
     	// Count con where
     	yadaSql.toCount(); // Trasforma in un count
     	query = yadaSql.query(em);

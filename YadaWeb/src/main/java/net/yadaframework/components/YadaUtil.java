@@ -3,6 +3,8 @@ package net.yadaframework.components;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -41,6 +43,8 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
 
@@ -48,7 +52,6 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +70,8 @@ import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInternalException;
+import net.yadaframework.exceptions.YadaInvalidValueException;
+import net.yadaframework.exceptions.YadaSystemException;
 import sogei.utility.UCheckDigit;
 import sogei.utility.UCheckNum;
 
@@ -268,6 +273,7 @@ public class YadaUtil {
 	 * Use a small buffer (256) when data is over the internet to prevent timeouts somewhere. Use a big buffer for in-memory or disk operations.
 	 * @param sizeLimit the maximum number of bytes to read (inclusive)
 	 * @return the number of bytes read, or -1 if the sizeLimit has been exceeded.
+	 * @see org.apache.commons.io.IOUtils#copy(InputStream, OutputStream)
 	 * @throws IOException 
 	 */
 	public long copyStream(InputStream inputStream, OutputStream outputStream, Integer bufferSize, Long sizeLimit) throws IOException {
@@ -285,6 +291,28 @@ public class YadaUtil {
 			}
 		}
 		return totBytes;
+	}
+	
+	/**
+	 * Get the Field of a given class, even from a superclass but not "nested" in a path
+	 * @param rootClass
+	 * @param attributeName
+	 * @return the Field found or null
+	 * @throws YadaInvalidValueException if attributeName is a path (with a dot in it)
+	 */
+	public Field getFieldNoTraversing(Class rootClass, String attributeName) {
+		if (attributeName.indexOf('.')>-1) {
+			throw new YadaInvalidValueException("Attribute name expected, attribute path found: {}", attributeName);
+		}
+		Field field = null;
+		while (field==null && rootClass!=null) {
+			try {
+				field = rootClass.getDeclaredField(attributeName);
+			} catch (NoSuchFieldException e) {
+				rootClass = rootClass.getSuperclass();
+			}
+		}
+		return field;
 	}
 
 	/**
@@ -321,13 +349,18 @@ public class YadaUtil {
 		}
 		Class attributeType = field.getType();
 		// If it's a list, look for the list type
-		if (attributeType == java.util.List.class) {
+		if (java.util.List.class.equals(attributeType) || java.util.Map.class.equals(attributeType)) {
 			// TODO check if the attributeType is an instance of java.util.Collection
 			ParameterizedType parameterizedType = (ParameterizedType)field.getGenericType();
 			if (parameterizedType!=null) {
 				Type[] types = parameterizedType.getActualTypeArguments();
-				if (types.length==1) {
-					attributeType = (Class<?>) types[0];
+				if (types.length>0) {
+					if (java.util.Map.class.equals(attributeType)) {
+						// For maps, skip the key path element
+						attributePath = StringUtils.substringAfter(attributePath, ".");
+					}
+					// For Maps, we get the type of the value
+					attributeType = (Class<?>) types[types.length-1];
 				}
 			}
 		}
@@ -525,6 +558,27 @@ public class YadaUtil {
 		}
 		File file = new File(fileWithPath);
 		return file.getName();
+	}	
+	
+	/**
+	 * Splits a filename in the prefix and the extension parts
+	 * @param filename
+	 * @return an array with [ filename without extension, extension without dot]
+	 */
+	public static String[] splitFileNameAndExtension(String filename) {
+		String[] result = new String[] {"", ""};
+		if (!StringUtils.isBlank(filename)) {
+			int dotpos = filename.lastIndexOf('.');
+			if (dotpos>-1) {
+				result[0] = filename.substring(0, dotpos);
+				if (filename.length()>dotpos+1) {
+					result[1] = filename.substring(dotpos+1);
+				}
+			} else {
+				result[0] = filename;
+			}
+		}
+		return result;
 	}
 	
 	/**
@@ -543,6 +597,10 @@ public class YadaUtil {
 		return result;
 	}
 	
+	public String getFileExtension(File file) {
+		return getFileExtension(file.getName());
+	}
+
 	/**
 	 * Esegue un comando di shell
 	 * @param command comando
@@ -1275,6 +1333,95 @@ public class YadaUtil {
 		int bDay = bCalendar.get(Calendar.DAY_OF_YEAR);
 		int bYear = bCalendar.get(Calendar.YEAR);
 		return aDay==bDay && aYear == bYear;
+	}
+	
+	/**
+	 * Create a zip file of a folder
+	 * @param zipFile the target zip file
+	 * @param foldersToZip the folders to zip
+	 * @throws IOException
+	 */
+	public void createZipFileFromFolders(File zipFile, File[] foldersToZip) throws IOException {
+		try (ZipOutputStream zs = new ZipOutputStream(new FileOutputStream(zipFile))) {
+			for (int i = 0; i < foldersToZip.length; i++) {
+				Path parentOfFolder = foldersToZip[i].getParentFile().toPath();
+				Path pathToZip = foldersToZip[i].toPath();
+				Files.walk(pathToZip).filter(path -> !Files.isDirectory(path)).forEach(path -> {
+					String pathInZip = parentOfFolder.relativize(path).toString();
+					log.debug("Zipping {} with path {}", path, pathInZip);
+					ZipEntry zipEntry = new ZipEntry(pathInZip);
+					try {
+						zs.putNextEntry(zipEntry);
+						zs.write(Files.readAllBytes(path));
+						zs.closeEntry();
+					} catch (Exception e) {
+						log.error("Can't create zip file", e);
+						throw new YadaSystemException("Can't create zip file", e);
+					}
+				});
+			}
+		}
+	}
+	
+	/**
+	 * Crea un file zip contenente una serie di file.
+	 * Lancia un'eccezione in caso di errore.
+	 * Preso da http://www.exampledepot.com/egs/java.util.zip/CreateZip.html
+	 * @param zipFile File da creare
+	 * @param sourceFiles lista di File da zippare
+	 * @param filenamesNoExtension lista di nomi da assegnare ai file nello zip senza estensione, oppure null se si usano gli originali
+	 */
+	public void createZipFile(File zipFile, File[] sourceFiles, String[] filenamesNoExtension) {
+		createZipFile(zipFile, sourceFiles, filenamesNoExtension, false);
+	}	
+	
+	/**
+	 * Crea un file zip contenente una serie di file. 
+	 * Può continuare con i file successivi se uno dei file va in errore.
+	 * Preso da http://www.exampledepot.com/egs/java.util.zip/CreateZip.html
+	 * @param zipFile File da creare
+	 * @param sourceFiles lista di File da zippare
+	 * @param filenamesNoExtension lista di nomi da assegnare ai file nello zip senza estensione, oppure null se si usano gli originali
+	 * @param ignoreErrors true per ignorare gli errori e continuare
+	 */
+	public void createZipFile(File zipFile, File[] sourceFiles, String[] filenamesNoExtension, boolean ignoreErrors) {
+		byte[] buf = new byte[1024]; // Create a buffer for reading the files
+		// Create the ZIP file
+		try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile))) {
+		    // Compress the files
+		    for (int i=0; i<sourceFiles.length; i++) {
+		    	if (sourceFiles[i]!=null && sourceFiles[i].canRead()) {
+			        // Add ZIP entry to output stream.
+			        String entryName;
+			        if (filenamesNoExtension!=null) {
+			        	String extension = "." + getFileExtension(sourceFiles[i]);
+			        	entryName = filenamesNoExtension[i].toLowerCase().endsWith(extension)? filenamesNoExtension[i] : filenamesNoExtension[i] + extension;
+			        } else {
+			        	entryName = sourceFiles[i].getName();
+			        }
+			        try (FileInputStream in = new FileInputStream(sourceFiles[i])) {
+						out.putNextEntry(new ZipEntry(entryName));
+						// Transfer bytes from the file to the ZIP file
+						int len;
+						while ((len = in.read(buf)) > 0) {
+						    out.write(buf, 0, len);
+						}
+						// Complete the entry
+						out.closeEntry();
+					} catch (Exception e) {
+						if (!ignoreErrors) {
+							log.error("Error while adding file {} to zip {}" , entryName, zipFile.getAbsolutePath(), e);
+							throw e;
+						} else {
+							log.debug("Error while adding file {} to zip {}" , entryName, zipFile.getAbsolutePath(), e);
+						}
+					}
+		    	}
+		    }
+		} catch (IOException e) {
+			log.error("Can't create zip file", e);
+			throw new YadaSystemException("Can't create zip file", e);
+		}
 	}
 	
 	
