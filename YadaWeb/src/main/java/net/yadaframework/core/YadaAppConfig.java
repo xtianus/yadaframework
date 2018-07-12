@@ -55,6 +55,8 @@ public class YadaAppConfig {
 			flyway.setCleanDisabled(true); // Just to be safe
 			flyway.setLocations("classpath:database"); // Where sql scripts are stored
 			flyway.setDataSource(dataSource);
+			// If the db is not empty and there is no metadata, add the metadata instead of failing, setting the version to 1
+			flyway.setBaselineOnMigrate(true); 
 			flyway.migrate();
 		}
 	}

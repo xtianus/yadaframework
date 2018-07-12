@@ -77,7 +77,7 @@ class YadaJobScheduler implements Runnable {
 				  // If a job is being removed before being stopped (should only happen if the cache is too small), we stop it
 				  // otherwise we can't tell if its running anymore
 				  YadaJob removed = removal.getValue();
-				  if (removed.yadaInternalJobHandle!=null) {
+				  if (removed!=null && removed.yadaInternalJobHandle!=null) {
 					  if (!removed.yadaInternalJobHandle.isDone()) {
 						  log.error("Evicting job {} while still running - interrupting job", removed);
 						  long totCached = jobCache.size();

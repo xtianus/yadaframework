@@ -349,9 +349,11 @@ if [ "$cfgSquidPercent" != "" ]; then
 	service squid start
 fi
 
-chown ${cfgTomcatUser} ${projectBase}/contents ${projectBase}/logs
-chown ${cfgUser} ${projectBase}/deploy
-chown ${cfgUser} ${projectBase}/bin
+if [[ $cfgTomcatUser ]]; then
+	chown ${cfgTomcatUser} ${projectBase}/contents ${projectBase}/logs
+	chown ${cfgUser} ${projectBase}/deploy
+	chown ${cfgUser} ${projectBase}/bin
+fi
 
 
 # Other
