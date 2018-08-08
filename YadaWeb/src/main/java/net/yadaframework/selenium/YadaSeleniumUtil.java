@@ -18,6 +18,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Proxy;
@@ -42,6 +43,7 @@ import org.springframework.stereotype.Component;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.exceptions.YadaConfigurationException;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.raw.YadaHttpUtil;
 
@@ -185,9 +187,8 @@ public class YadaSeleniumUtil {
 	 * cookie with the same name has not been received. It's not possible to set cookies BEFORE the first get (by design of WebDriver).
 	 * @param driverType DRIVER_FIREFOX, DRIVER_CHROME
 	 * @return
-	 * @throws MalformedURLException
 	 */
-	public WebDriver makeWebDriver(File customProfileDir, InetSocketAddress proxyToUse, Set<Cookie> cookiesToSet, int driverType) throws MalformedURLException {
+	public WebDriver makeWebDriver(File customProfileDir, InetSocketAddress proxyToUse, Set<Cookie> cookiesToSet, int driverType) {
 		final Set<Cookie> initialCookies = new HashSet<Cookie>();
 		if (cookiesToSet!=null) {
 			// Make a copy because we need to clear the set later
@@ -204,30 +205,28 @@ public class YadaSeleniumUtil {
 		browserProxy.setSslProxy(proxyHost + ":" + proxyPort);
 		browserProxy.setProxyType(ProxyType.MANUAL);
 		
-		DesiredCapabilities capability;
+		MutableCapabilities capability;
 		switch (driverType) {
 		case DRIVER_FIREFOX:
-			capability = DesiredCapabilities.firefox();
+			capability = new FirefoxOptions();
 			if (customProfileDir!=null) {
 				// Creating the folder is wrong because of permissions mismatch
 				// customProfileDir.mkdirs();
-				FirefoxOptions options = new FirefoxOptions();
 				String path = customProfileDir.getAbsolutePath();
 				log.debug("Setting Firefox user profile folder to {}", path);
-				options.addArguments("-profile", path);
-				capability.setCapability(FirefoxOptions.FIREFOX_OPTIONS, options);
+				((FirefoxOptions)capability).addArguments("-profile", path);
+				// capability.setCapability(FirefoxOptions.FIREFOX_OPTIONS, options);
 			}
 			break;
 		case DRIVER_CHROME:
-			capability = DesiredCapabilities.chrome();
+			capability = new ChromeOptions();
 			if (customProfileDir!=null) {
 				// Creating the folder is wrong because of permissions mismatch
 				// customProfileDir.mkdirs();
-				ChromeOptions options = new ChromeOptions();
 				String path = customProfileDir.getAbsolutePath();
 				log.debug("Setting Chrome user profile folder to {}", path);
-				options.addArguments("user-data-dir=" + path);
-				capability.setCapability(ChromeOptions.CAPABILITY, options);
+				((ChromeOptions)capability).addArguments("user-data-dir=" + path);
+				// capability.setCapability(ChromeOptions.CAPABILITY, options);
 			}
 			break;
 		default:
@@ -238,7 +237,12 @@ public class YadaSeleniumUtil {
 		// http://www.seleniumhq.org/docs/04_webdriver_advanced.jsp
 		
 		capability.setCapability(CapabilityType.PROXY, browserProxy);
-		URL remoteAddress = new URL(config.getSeleniumHubAddress());
+		URL remoteAddress;
+		try {
+			remoteAddress = new URL(config.getSeleniumHubAddress());
+		} catch (MalformedURLException e1) {
+			throw new YadaConfigurationException("Invalid Selenium Hub Address: {}", config.getSeleniumHubAddress(), e1);
+		}
 		WebDriver driver = new RemoteWebDriver(remoteAddress, capability) {
 			@Override
 			public void get(String url) {

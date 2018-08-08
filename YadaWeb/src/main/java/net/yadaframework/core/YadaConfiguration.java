@@ -1067,6 +1067,10 @@ public abstract class YadaConfiguration {
 		return configuration.getInt("config/selenium/timeout/slowPageLoadSeconds", 60);
 	}
 	
+	public long getSeleniumTimeoutProxyTestPageLoadSeconds() {
+		return configuration.getInt("config/selenium/timeout/proxyTestPageLoadSeconds", 10);
+	}
+	
 	public long getSeleniumTimeoutPageLoadSeconds() {
 		return configuration.getInt("config/selenium/timeout/pageLoadSeconds", 10);
 	}
