@@ -20,6 +20,18 @@ public class YadaDatatablesColumn extends HashMap<String, Object> {
 	}
 	
 	/**
+	 * Returns the column data if any, the column name otherwise.
+	 * @return data or name or null
+	 */
+	public String getDataOrName() {
+		String result = StringUtils.trimToNull(getData());
+		if (result==null) {
+			result = StringUtils.trimToNull(getName());
+		}
+		return result;
+	}
+	
+	/**
 	 * Returns the column name if any, the column data otherwise.
 	 * @return name or data or null
 	 */
