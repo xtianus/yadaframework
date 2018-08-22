@@ -117,7 +117,7 @@ public class YadaDataTableDao {
 			json.add(entityJson);
 			// Conversion from java to map
 			for (YadaDatatablesColumn  column : yadaDatatablesRequest.getColumns()) {
-				String attributePath = column.getNameOrData();
+				String attributePath = column.getDataOrName();
 				if (attributePath!=null) {
 					addAttributeValue(entity, entityJson, attributePath);
 				}
@@ -167,13 +167,23 @@ public class YadaDataTableDao {
 				}
 			} else {
 				Field field = yadaUtil.getFieldNoTraversing(entity.getClass(), attributeName);
-				if (field==null) {
-					log.debug("Field {} in entity {} not found (ignored)", attributeName, entity.getClass());
-					return;
+				Type valueType = null;
+				if (field!=null) {
+					field.setAccessible(true);
+					value = field.get(entity);
+					valueType = field.getType();
+				} else {
+					try {
+						// Not a field, but it could be a method
+						value = org.apache.commons.beanutils.PropertyUtils.getProperty(entity, attributeName);
+						valueType = value.getClass();
+					} catch (Exception e) {
+						// Not even a method
+						log.debug("Field {} in entity {} not found (ignored)", attributeName, entity.getClass());
+						return;
+					}
 				}
-				field.setAccessible(true);
-				value = field.get(entity);
-				if (field.getType().equals(YadaPersistentEnum.class)) {
+				if (valueType.equals(YadaPersistentEnum.class)) {
 					if (value==null) {
 						ParameterizedType type = (ParameterizedType) field.getGenericType();
 						log.debug("null value for {}.{} - did you add enum {} to the YadaSetup.setupApplication() method?", entity.getClass().getSimpleName(), field.getName(), type.getActualTypeArguments()[0]);
