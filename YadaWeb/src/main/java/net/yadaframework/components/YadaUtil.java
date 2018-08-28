@@ -1360,16 +1360,23 @@ public class YadaUtil {
 	
 	/**
 	 * Rounds back the calendar to the start of the day.
-	 * @param calendar the calendar to change
+	 * @param calendar the calendar to change: the parameter will be modified by this method
 	 * @return the input calendar modified.
 	 */
-	// TODO to prevent errors, better to return void
 	public static Calendar roundBackToMidnight(Calendar calendar) {
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
 		return calendar;
+	}
+	
+	/**
+	 * Returns the last midnight
+	 * @return
+	 */
+	public static Calendar getLastMidnight() {
+		return YadaUtil.roundBackToMidnight(new GregorianCalendar());
 	}
 	
 	public static Calendar addDaysClone(Calendar source, int days) {
