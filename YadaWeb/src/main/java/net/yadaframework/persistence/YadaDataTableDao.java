@@ -117,7 +117,13 @@ public class YadaDataTableDao {
 			json.add(entityJson);
 			// Conversion from java to map
 			for (YadaDatatablesColumn  column : yadaDatatablesRequest.getColumns()) {
-				String attributePath = column.getDataOrName();
+				String attributePath = column.getNameOrData(); // Name is the database attribute, data is the json attribute and could also be a javascript function
+				if (attributePath!=null) {
+					addAttributeValue(entity, entityJson, attributePath);
+				}
+			}
+			// Add any extra json attributes
+			for (String  attributePath : yadaDatatablesRequest.getExtraJsonAttributes()) {
 				if (attributePath!=null) {
 					addAttributeValue(entity, entityJson, attributePath);
 				}

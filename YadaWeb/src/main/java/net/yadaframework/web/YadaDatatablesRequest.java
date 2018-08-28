@@ -29,6 +29,7 @@ public class YadaDatatablesRequest {
 	// array defining how many columns are being ordered upon - i.e. if the array length is 1, then a single column sort is being performed, otherwise a multi-column sort is being performed.
 	List<YadaDatatablesOrder> order;
 	Map<String, String> extraParam = new HashMap<>();
+	List<String> extraJsonAttributes = new ArrayList<>();
 	
 	// Output values
 	long recordsTotal;
@@ -36,6 +37,14 @@ public class YadaDatatablesRequest {
 	
 	// Query builder to use for additional JPL filtering
 	private YadaSql yadaSql = YadaSql.instance();
+	
+	/**
+	 * Add any entity attribute you need to return in the json object. Can be a path.
+	 * @param attributePath
+	 */
+	public void addExtraJsonAttribute(String attributePath) {
+		extraJsonAttributes.add(attributePath);
+	}
 
 	/**
 	 * 
@@ -132,6 +141,14 @@ public class YadaDatatablesRequest {
 
 	public void setExtraParam(Map<String, String> extraParam) {
 		this.extraParam = extraParam;
+	}
+
+	public List<String> getExtraJsonAttributes() {
+		return extraJsonAttributes;
+	}
+
+	public void setExtraJsonAttributes(List<String> extraJsonAttributes) {
+		this.extraJsonAttributes = extraJsonAttributes;
 	}
 	
 }
