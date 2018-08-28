@@ -409,7 +409,7 @@ public class YadaDataTableDao {
 					return alias;
 				}
 			}
-			return addLeftJoinsRecurse(StringUtils.substringAfter(attributePath, "."), current, yadaSql, currentClass);
+			return addLeftJoinsRecurse(StringUtils.substringAfter(attributePath, "."), alias, yadaSql, currentClass);
 //			if (!contextClass.equals(Map.class)) {
 //				attributeClass = field.getType();
 //			} else {
