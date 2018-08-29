@@ -173,6 +173,7 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	@Transient
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@JsonProperty("DT_RowId")
+	@Deprecated // can be removed now that it is added automatically by YadaDataTableDao
 	public String getDT_RowId() {
 		return this.getClass().getSimpleName()+"#"+this.id; // YadaUserMessage#142
 	}

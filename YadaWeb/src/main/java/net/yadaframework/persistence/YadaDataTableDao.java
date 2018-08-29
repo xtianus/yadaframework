@@ -128,6 +128,8 @@ public class YadaDataTableDao {
 					addAttributeValue(entity, entityJson, attributePath);
 				}
 			}
+			// Add DT_RowClass
+			addAttributeValue(entity, entityJson, "DT_RowClass");
 			// Add DT_RowId for DataTables id
 			// TODO when on a single page there are multiple tables with the same object, the ids are not unique.
 			// We should prefix them with the table id, if any.
@@ -185,7 +187,9 @@ public class YadaDataTableDao {
 						valueType = value.getClass();
 					} catch (Exception e) {
 						// Not even a method
-						log.debug("Field {} in entity {} not found (ignored)", attributeName, entity.getClass());
+						if (!"DT_RowClass".equals(attributeName)) {
+							log.debug("Field {} in entity {} not found (ignored)", attributeName, entity.getClass());
+						}
 						return;
 					}
 				}

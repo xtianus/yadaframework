@@ -324,7 +324,7 @@ public class YadaHttpUtil {
 	}
 	
 	/**
-	 * Extract the address from a url, without schema and path but with port
+	 * Extract the address from a url, without schema and path but with port. The schema or path can be missing.
 	 * @param url an url like http://www.myserver.net:8080/context/path or //www.myserver.net:8080/context/path
 	 * @return the host[:port] like www.myserver.net:8080, or ""
 	 */
