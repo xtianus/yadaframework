@@ -141,7 +141,10 @@
 			$element = $('body');
 		}
 		$('.yadaRefresh', $element).not('.yadaRefreshed').each(function(){
-			var handlerName = $(this).attr('data-handler');
+			var handlerName = $(this).attr('data-yadaRefreshHandler');
+			if (handlerName===undefined) {
+				handlerName = $(this).attr('data-handler'); // Legacy
+			}
 			var dataHandler = window[handlerName];
 			if (typeof dataHandler === "function") {
 				$(this).click(dataHandler);
