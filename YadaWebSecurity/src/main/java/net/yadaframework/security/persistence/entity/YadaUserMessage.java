@@ -103,8 +103,8 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	protected YadaUserProfile recipient;
 	
 	//@JsonView(YadaJsonView.WithLazyAttributes.class)
-	@OneToMany(cascade=CascadeType.REMOVE, orphanRemoval=true)
-	protected List<YadaAttachedFile> attachment;
+	@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true) // It was REMOVE - why?
+	protected List<YadaAttachedFile> attachment = new ArrayList<>();
 	
 	@Column(length=1024)
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
@@ -193,6 +193,13 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	public String getReceiverName() {
 		return recipient!=null?recipient.getUserCredentials().getUsername():"-";
+	}
+	
+	/** Adds a new attachment to this message
+	 * 
+	 */
+	public void addAttachment(YadaAttachedFile newAttachment) {
+		attachment.add(newAttachment);
 	}
 	
 	/***********************************************************************/

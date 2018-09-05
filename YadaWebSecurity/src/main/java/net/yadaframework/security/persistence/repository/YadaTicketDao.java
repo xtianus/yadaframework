@@ -1,4 +1,6 @@
 package net.yadaframework.security.persistence.repository;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,15 +9,20 @@ import javax.persistence.PersistenceContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaLocalEnum;
+import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.security.persistence.entity.YadaTicket;
 import net.yadaframework.security.persistence.entity.YadaTicketMessage;
 import net.yadaframework.security.persistence.entity.YadaTicketStatus;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
+import net.yadaframework.web.YadaWebUtil;
 
 @Repository
 @Transactional(readOnly = true) 
@@ -24,6 +31,9 @@ public class YadaTicketDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
     @PersistenceContext private EntityManager em;
+    
+    @Autowired private YadaWebUtil yadaWebUtil;
+    @Autowired private YadaConfiguration config;
     
     /**
      * Send a reply to a ticket.
@@ -69,11 +79,12 @@ public class YadaTicketDao {
 	 * @param messageText initial ticket message
 	 * @param sender User opening the ticket
 	 * @param severity
+	 * @param attachment 
 	 * @return the newly created ticket
 	 */
     @Modifying
     @Transactional(readOnly = false) 
-    public YadaTicket addTicket(YadaLocalEnum<?> type, String title, String messageText, YadaUserProfile sender, int severity) {
+    public YadaTicket addTicket(YadaLocalEnum<?> type, String title, String messageText, YadaUserProfile sender, int severity, MultipartFile attachmentFile) throws IOException {
     	List<YadaTicketMessage> yadaTicketMessages = new ArrayList<>();
 		YadaTicket yadaTicket = new YadaTicket();
 		yadaTicket.setStatus(YadaTicketStatus.OPEN);
@@ -94,6 +105,21 @@ public class YadaTicketDao {
 		yadaTicket.setMessages(yadaTicketMessages);
 		yadaTicketMessage.setYadaTicket(yadaTicket);
 		yadaTicketMessages.add(yadaTicketMessage);
+		
+		// Attachment
+		if (attachmentFile!=null && !attachmentFile.isEmpty()) {
+			File attachmentFolder = new File(config.getContentPath(), "tmp");
+			String nameFile = sender.getId() + "_" + System.currentTimeMillis() +  "_" + attachmentFile.getOriginalFilename();
+			File uploadedFile = new File(attachmentFolder, nameFile);
+			yadaWebUtil.saveAttachment(attachmentFile, uploadedFile);
+			
+			YadaAttachedFile yadaAttachedFile = new YadaAttachedFile();
+			// yadaAttachedFile.setAttachedToId(attachToId);
+			yadaAttachedFile.setClientFilename(attachmentFile.getOriginalFilename());
+			yadaAttachedFile.setFilenameDesktop(nameFile);
+
+			yadaTicketMessage.addAttachment(yadaAttachedFile);
+		}
 		
 		em.persist(yadaTicket); // Cascade save
 		return yadaTicket;
