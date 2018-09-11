@@ -12,7 +12,8 @@ Parameters (can be set in the replace tag or in any parent tag):
 - labelKey = key in messages.properties for the label text
 - label = label to use, if not using a labelKey
 - options = a list of objects or an instance of YadaLocalEnum or a list of primitive types, like ${users} or ${ {true,false} } (space is important) - can be omitted for an empty select.
--           It can also be a map of (value-text) entries, where values are either literal text or suffixes for labelKey.
+-           It can also be a map of (value-text) entries, 
+			where values are either literal text or suffixes for labelKey (the key of the map is the value returned, the value of the map is the text/key shown).
 - valueAttribute = the name of the object attribute containing the option value, e.g. "id" - must be omitted for lists of primitives
 - textAttribute = the name of the object attribute (or method with braces) containing the option text (or textKey suffix), e.g. "name" or "toString()" - must be omitted for lists of primitives
 - size = number of options to show (optional)
