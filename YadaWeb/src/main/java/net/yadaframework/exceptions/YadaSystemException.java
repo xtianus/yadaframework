@@ -22,11 +22,11 @@ public class YadaSystemException extends RuntimeException {
 	 * @param params parameters to replace at the {} position
 	 */
 	public YadaSystemException(String format, Object... params) {
-		super(MessageFormatter.format(format, params).getMessage());
+		super(MessageFormatter.arrayFormat(format, params).getMessage());
 	}
 
 	public YadaSystemException(Throwable cause, String format, Object... params) {
-		super(MessageFormatter.format(format, params).getMessage(), cause);
+		super(MessageFormatter.arrayFormat(format, params).getMessage(), cause);
 	}
 	
 	public YadaSystemException(Throwable cause) {

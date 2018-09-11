@@ -23,11 +23,11 @@ public class YadaInvalidUserException extends RuntimeException {
 	 * @param params parameters to replace at the {} position
 	 */
 	public YadaInvalidUserException(String format, Object... params) {
-		super(MessageFormatter.format(format, params).getMessage());
+		super(MessageFormatter.arrayFormat(format, params).getMessage());
 	}
 
 	public YadaInvalidUserException(Throwable cause, String format, Object... params) {
-		super(MessageFormatter.format(format, params).getMessage(), cause);
+		super(MessageFormatter.arrayFormat(format, params).getMessage(), cause);
 	}
 	
 	public YadaInvalidUserException(Throwable cause) {

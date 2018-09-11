@@ -18,7 +18,7 @@ public class SystemException extends RuntimeException {
 	}
 
 	public SystemException(String format, Object... params) {
-		super(MessageFormatter.format(format, params).getMessage());
+		super(MessageFormatter.arrayFormat(format, params).getMessage());
 	}
 
 	public SystemException(Throwable cause) {

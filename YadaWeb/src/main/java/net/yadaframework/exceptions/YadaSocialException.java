@@ -21,11 +21,11 @@ public class YadaSocialException extends Exception {
 	 * @param params parameters to replace at the {} position
 	 */
 	public YadaSocialException(String format, Object... params) {
-		super(MessageFormatter.format(format, params).getMessage());
+		super(MessageFormatter.arrayFormat(format, params).getMessage());
 	}
 
 	public YadaSocialException(Throwable cause, String format, Object... params) {
-		super(MessageFormatter.format(format, params).getMessage(), cause);
+		super(MessageFormatter.arrayFormat(format, params).getMessage(), cause);
 	}
 	
 	public YadaSocialException(Throwable cause) {

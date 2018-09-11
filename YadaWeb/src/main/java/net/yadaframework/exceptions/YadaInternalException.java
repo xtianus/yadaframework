@@ -22,7 +22,7 @@ public class YadaInternalException extends RuntimeException {
 	 * @param params parameters to replace at the {} position
 	 */
 	public YadaInternalException(String format, Object... params) {
-		super(MessageFormatter.format(format, params).getMessage());
+		super(MessageFormatter.arrayFormat(format, params).getMessage());
 	}
 	
 	/**
@@ -31,7 +31,7 @@ public class YadaInternalException extends RuntimeException {
 	 * @param params parameters to replace at the {} position
 	 */
 	public YadaInternalException(Throwable cause, String format, Object... params) {
-		super(MessageFormatter.format(format, params).getMessage(), cause);
+		super(MessageFormatter.arrayFormat(format, params).getMessage(), cause);
 	}
 	
 	public YadaInternalException(Throwable cause) {

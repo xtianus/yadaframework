@@ -18,7 +18,7 @@ public class InternalException extends RuntimeException {
 	}
 
 	public InternalException(String format, Object... params) {
-		super(MessageFormatter.format(format, params).getMessage());
+		super(MessageFormatter.arrayFormat(format, params).getMessage());
 	}
 	
 	public InternalException(Throwable cause) {

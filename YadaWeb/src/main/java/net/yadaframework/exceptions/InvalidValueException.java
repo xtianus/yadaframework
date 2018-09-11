@@ -19,7 +19,7 @@ public class InvalidValueException extends RuntimeException {
 	}
 
 	public InvalidValueException(String format, Object... params) {
-		super(MessageFormatter.format(format, params).getMessage());
+		super(MessageFormatter.arrayFormat(format, params).getMessage());
 	}
 
 	public InvalidValueException(Throwable cause) {
