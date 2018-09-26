@@ -178,22 +178,23 @@
 			searchable: false,
 			width: '50px',
 		    render: function ( data, type, row ) {
+		    	var rowId = yada.getHashValue(data.DT_RowId);
 		        if ( type === 'display' ) {
 		        	var buttons = '';
 		        	for (var i=0; extraButtons!=null && i<extraButtons.length; i++) {
 		        		if (extraButtons[i].noRowIcon!=true) {
 			        		buttons +=
 			        			'<a class="yadaTableExtraButton' + i + ' yadaRowCommandButton" href="#' +
-			        			data.id + '" title="' + extraButtons[i].title + '">' + extraButtons[i].icon + '</a>';
+			        			rowId + '" title="' + extraButtons[i].title + '">' + extraButtons[i].icon + '</a>';
 		        		}
 		        	}
 		        	if (editDef!=null) {
 		        		buttons +=
-		        			'<a class="s_editRow yadaRowCommandButton" href="#'+data.id+'" title="'+editDef.title+'"><i class="fa fa-pencil-square-o"></i></a>';
+		        			'<a class="s_editRow yadaRowCommandButton" href="#'+rowId+'" title="'+editDef.title+'"><i class="fa fa-pencil-square-o"></i></a>';
 		        	}
 		        	if (deleteDef!=null) {
 		        		buttons +=
-		        			'<a class="s_deleteRow yadaRowCommandButton" href="#'+data.id+'" title="'+deleteDef.title+'"><i class="fa fa-trash-o"></i></a>';
+		        			'<a class="s_deleteRow yadaRowCommandButton" href="#'+rowId+'" title="'+deleteDef.title+'"><i class="fa fa-trash-o"></i></a>';
 		        	}
 		        	return buttons;
 		        }

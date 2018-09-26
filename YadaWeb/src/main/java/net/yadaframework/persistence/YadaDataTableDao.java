@@ -143,6 +143,12 @@ public class YadaDataTableDao {
 		return json;
 	}
 
+	/**
+	 * 
+	 * @param entity The object containing the data
+	 * @param entityJson the map that will be populated with values
+	 * @param attributePath the path in the entity that contains the value. Can be an attribute path or a method path
+	 */
 	private <entityClass> void addAttributeValue(entityClass entity, Map<String, Object> entityJson, String attributePath) {
 		try {
 			if (entity==null) {
@@ -214,8 +220,11 @@ public class YadaDataTableDao {
 				return;
 			}
 			// Recurse into the path
-			Map<String, Object> jsonValue = new HashMap<>();
-			entityJson.put(attributeName, jsonValue);
+			Map<String, Object> jsonValue = (Map<String, Object>) entityJson.get(attributeName);
+			if (jsonValue==null) {
+				jsonValue = new HashMap<>();
+				entityJson.put(attributeName, jsonValue);
+			}
 			addAttributeValue(value, jsonValue, parts[1] /*, keyType*/);
 		} catch (Exception e) {
 			log.error("Can't get value of {} for entity {} - ignored", attributePath, entity, e);
