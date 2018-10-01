@@ -25,4 +25,7 @@ public interface YadaTicketRepository extends JpaRepository<YadaTicket, Long> {
 	
 	@Query(value="select * from YadaTicket  where creationDate <= (NOW() - INTERVAL 7 DAY) AND status_id = '10'", nativeQuery = true)
 	List<YadaTicket> findOldAnsweredYadaTicketNative();
+	
+	@Query(value="SELECT count(*) from YadaTicket  where status_id = '13'", nativeQuery = true)
+	long  countAllYadaTicketOpenNative();
 }
