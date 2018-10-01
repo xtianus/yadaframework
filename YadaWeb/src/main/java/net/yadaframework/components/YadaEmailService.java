@@ -23,6 +23,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -31,6 +32,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring4.SpringTemplateEngine;
+import org.thymeleaf.spring4.expression.ThymeleafEvaluationContext;
 
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
@@ -53,7 +55,7 @@ public class YadaEmailService {
     @Autowired private MessageSource messageSource;
     
 //    @Autowired private ServletContext servletContext;
-//    @Autowired private ApplicationContext applicationContext;
+    @Autowired private ApplicationContext applicationContext;
     @Autowired private YadaWebUtil yadaWebUtil;
 //    @Autowired private YadaUtil yadaUtil;
     
@@ -164,9 +166,12 @@ public class YadaEmailService {
 //		final WebContext ctx = new WebContext(request, response, servletContext, locale);
 		// Using Context instead of WebContext, we can't access WebContent files and can't use @{somelink}
 		final Context ctx = new Context(locale);
-		// FIXME se uso @config ottengo EL1057E:(pos 1): No bean resolver registered in the context to resolve access to bean 'config'
+		// This allows the use of @beans inside the email template
+		ctx.setVariable(ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME, new ThymeleafEvaluationContext(applicationContext, null));
 		// Non so come si registra un bean resolver dentro a ctx, quindi uso "config" invece di "@config"
-		ctx.setVariable("config", config); // Posso usare config nei template (ma non @config!)
+		// TODO This "config" bean is deprecated and should be removed one day
+		ctx.setVariable("config", config);
+		//
 		if (templateParams!=null) {
 			for (Entry<String, Object> entry : templateParams.entrySet()) {
 				ctx.setVariable(entry.getKey(), entry.getValue());
