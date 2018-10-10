@@ -134,6 +134,18 @@ public class YadaJobManager {
 	}
 	
 	/**
+	 * Returns the number of jobs for the given group that are in the ACTIVE/RUNNING state 
+	 * @param jobGroup
+	 * @return
+	 */
+	public int countActiveOrRunningJobs(String jobGroup) {
+		List<YadaPersistentEnum<YadaJobState>> states = new ArrayList<>();
+		states.add(YadaJobState.ACTIVE.toYadaPersistentEnum());
+		states.add(YadaJobState.RUNNING.toYadaPersistentEnum());
+		return yadaJobRepository.countByJobGroupAndStates(jobGroup, states);
+	}
+	
+	/**
 	 * Returns all jobs for the given group that are in the ACTIVE/RUNNING state, ordered by state and scheduled time.
 	 * The running jobs are the actual cached instances present in the YadaJobScheduler.
 	 * @param jobGroup

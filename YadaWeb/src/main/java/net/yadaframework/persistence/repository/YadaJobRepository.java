@@ -124,6 +124,15 @@ public interface YadaJobRepository extends JpaRepository<YadaJob, Long> {
 	}
 	
 	/**
+	 * Returns the number of jobs for the given group, that are in one of the given states
+	 * @param jobGroup
+	 * @param stateObjects a collection of job states
+	 * @return
+	 */
+	@Query("select count(*) from #{#entityName} e join e.jobStateObject where e.jobGroup=:jobGroup and e.jobStateObject in :stateObjects")
+	int countByJobGroupAndStates(@Param("jobGroup") String jobGroup, @Param("stateObjects") Collection<YadaPersistentEnum<YadaJobState>> stateObjects);
+	
+	/**
 	 * Returns all jobs for the given group, that are in one of the given states
 	 * @param jobGroup
 	 * @param stateObjects a collection of job states

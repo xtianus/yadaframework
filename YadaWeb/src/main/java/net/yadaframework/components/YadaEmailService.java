@@ -61,7 +61,7 @@ public class YadaEmailService {
     
     /**
      * Convert a site-relative link to absolute, because in emails we can't use @{}.
-     * Example: th:href="${beans.yadaEmailService.buildLink('/read/234')}"
+     * Example: th:href="${@yadaEmailService.buildLink('/read/234')}"
      * @param relativeLink
      * @return absolute link
      */
