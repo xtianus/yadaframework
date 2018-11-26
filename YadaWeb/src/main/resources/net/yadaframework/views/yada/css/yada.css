@@ -151,6 +151,10 @@ table.dataTable .yadaRowCommandButton {
   	vertical-align: top;
 }
 
+table.dataTable .yadaRowCommandButton.disabled {
+	cursor: no-drop;
+}
+
 table.dataTable .yadaCommandButtonCell {
 	white-space: nowrap;
 }
