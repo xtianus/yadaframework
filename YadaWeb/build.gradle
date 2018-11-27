@@ -49,7 +49,7 @@ dependencies {
 		'org.springframework:spring-context-support:4.3.20.RELEASE',
 		'org.springframework.data:spring-data-jpa:1.11.11.RELEASE',
 		'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
-		'org.hibernate:hibernate-entitymanager:5.2.16.Final',
+		'org.hibernate:hibernate-entitymanager:5.3.7.Final',
 		'org.hibernate:hibernate-validator:5.4.2.Final',
 		'org.thymeleaf:thymeleaf-spring4:3.0.9.RELEASE',
 		'mysql:mysql-connector-java:5.1.46',
@@ -69,8 +69,7 @@ dependencies {
 		// 'org.littleshoot:littleproxy:1.1.2',
 		'org.quartz-scheduler:quartz:2.2.3', // TODO remove
 		'org.flywaydb:flyway-core:5.0.5',
-		'commons-beanutils:commons-beanutils:1.9.3',
-		'org.dom4j:dom4j:2.1.1' // Previous versions pulled by hibernate-entitymanager have a security vulnerability: https://app.snyk.io/vuln/SNYK-JAVA-DOM4J-72444
+		'commons-beanutils:commons-beanutils:1.9.3'
 	
 	// Needed to run in Tomcat
 	// runtime 'commons-jxpath:commons-jxpath:1.3'
