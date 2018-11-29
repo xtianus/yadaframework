@@ -201,7 +201,9 @@ if [[ $cfgPkgApache ]]; then
 		sed -i 's/JkLogLevel info/JkLogLevel warn/g' /etc/apache2/mods-available/jk.conf
 		a2enmod jk
 		# Enabling AJP Connector
+		if [[ $CATALINA_BASE ]]; then
 		sed -i 's%\(<Connector port="8009".*\)%-->\n&\n<!--%g' ${CATALINA_BASE}/conf/server.xml
+		fi
 	fi
 	if [[ $myHostName ]]; then
 		echo "ServerName $( hostname )" > /etc/apache2/conf-available/servername.conf
