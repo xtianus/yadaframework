@@ -134,7 +134,7 @@
 			FB.login(function(response) {
 				yada.postLoginHandler = handler; // To be removed
 				facebookLoginResult(response, serverUrl);
-			}, {scope: 'email'}); 
+			}, {scope: 'email', auth_type: 'rerequest'}); // auth_type is because if someone doesn't give email permission, access would be prevented forever 
 		});
 	}
 }( window.yada = window.yada || {} ));
