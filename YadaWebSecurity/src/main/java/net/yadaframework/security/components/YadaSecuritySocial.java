@@ -189,11 +189,12 @@ public class YadaSecuritySocial {
 			// Workaround (https://stackoverflow.com/a/39902266/587641)
 			// Available fields: { "id", "about", "age_range", "birthday", "context", "cover", "currency", "devices", "education", "email", "favorite_athletes", "favorite_teams", "first_name", "gender", "hometown", "inspirational_people", "installed", "install_type", "is_verified", "languages", "last_name", "link", "locale", "location", "meeting_for", "middle_name", "name", "name_format", "political", "quotes", "payment_pricepoints", "relationship_status", "religion", "security_settings", "significant_other", "sports", "test_group", "timezone", "third_party_id", "updated_time", "verified", "video_upload_limits", "viewer_can_send_gift", "website", "work"}
 			String [] fields = { "id", "email", "first_name", "last_name", "verified" };
+			// The field 'email' is only accessible on the User object after the user grants the 'email' permission.
 			User profile = facebook.fetchObject("me", User.class, fields);
 			if (profile==null || StringUtils.isBlank(profile.getEmail())) {
 				return YadaSocialAuthenticationOutcome.UNAUTHENTICATED_NOPROFILE;
 			}
-			log.debug("Social login for {}", profile.getEmail());
+			log.debug("Social login for {} - {}", profile.getName(), profile.getEmail());
 			if (verifiedOnly && !profile.isVerified()) {
 				return YadaSocialAuthenticationOutcome.UNAUTHENTICATED_NOTVERIFIED;
 			}
