@@ -22,7 +22,7 @@ Parameters (can be set in the replace tag or in any parent tag):
 - inline = true to have label and field inline (optional)
 - help = testo per il pulsante di help, se non c'è helpKey (optional)
 - helpKey = chiave del testo per il pulsante di help (optional)
-- addHeader = (optional) true to add the first "empty" option
+- addHeader = (optional) true to add the first "empty" (value="-1") option, or a string to set that first option value to the string. For example if options is a list of enums then the addHeader string, if present, should be an enum name.
 - multiple = true for a multiple select box (optional)
 - required = true for a required select box (optional)
 - disabled = true for a disabled select box (optional)
@@ -39,6 +39,7 @@ Example:
 <div th:replace="/yada/form/list::field(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()',addHeader=true)"></div>
 <div th:replace="/yada/form/list::field(fieldName='userCredentials.enabled',options=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
 <div th:replace="/yada/form/list::field(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
+<div th:replace="/yada/form/list::field(fieldName='building',options=${buildingEnumList},addHeader='UNKNOWN')"></div> where 'UNKNOWN' is an enum name to use for the header value
 
 */-->
 <body>
@@ -49,16 +50,16 @@ Example:
 	<label th:if="${label!=null or labelKey!=null}" 
 		class="control-label" th:for="${#ids.next(idPrefix)}" 
 		th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
-	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perchÃ© se non c'Ã¨ l'help il campo resta corto (ad esempio i campi password) */-->
+	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* width is needed when help is not present e.g. in password fields */-->
 		<select th:field="*{__${fieldName}__}" th:multiple="${multiple}" 
-			th:with="isMap=${options instanceof T(java.util.Map)},isYadaLocalEnum=${@yadaFormHelper.isYadaLocalEnum(options)}"
+			th:with="isMap=${options instanceof T(java.util.Map)},isYadaLocalEnum=${@yadaFormHelper.isYadaLocalEnum(options)},headerValue=${addHeader==true?'-1':addHeader==false?null:addHeader}"
 			th:size="${size}?:''"
 			th:required="${required}" 
 			th:readonly="${readonly}"
 			th:disabled="${disabled}"
 			th:classappend="${readonly==true?'yadaReadonly':'form-control'+(noFeedback==true?'':' has-feedback')}"
 			th:id="${#ids.seq(idPrefix)}" th:attr="aria-describedby=${#ids.next(idPrefix)}">
-			<option th:if="${addHeader==true}" value="-1">---</option>
+			<option th:if="${headerValue!=null}" th:value="${headerValue}">---</option>
 			<th:block th:if="${!isMap && !isYadaLocalEnum}">
 				<!--/* List */-->
 				<th:block th:each="option : ${options}">

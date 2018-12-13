@@ -533,11 +533,12 @@ public class YadaUtil {
 	/**
 	 * Get any bean defined in the Spring ApplicationContext
 	 * @param beanClass
+	 * @param args constructor arguments, can be null or not present
 	 * @return
 	 */
-	public static <beanClass> beanClass getBean(Class<?> beanClass, Object ... args) {
+	public static <T> T getBean(Class<T> beanClass, Object ... args) {
 		String beanName = StringUtils.uncapitalize(beanClass.getSimpleName());
-		return (beanClass) getBean(beanName, args);
+		return (T) getBean(beanName, args);
 	}
 	
 	/**

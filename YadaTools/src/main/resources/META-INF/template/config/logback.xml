@@ -35,6 +35,9 @@
     <logger name="org.apache.commons.configuration.DefaultConfigurationBuilder" level="ERROR"/>
     <logger name="net.yodadog.yada.security.CheckSessionFilter" level="DEBUG"/>
     
+    <logger name="net.yadaframework.security.AuditFilter" level="INFO"/>
+    <logger name="net.yadaframework.security.AuditFilter.files" level="ERROR"/> <!-- Remove or set to INFO to show files -->
+    
     <!-- To hide WARN: bad write method arg count: public final void org.apache.commons.configuration2.AbstractConfiguration.setProperty -->
     <logger name="org.apache.commons.beanutils.FluentPropertyBeanIntrospector" level="ERROR"/> 
     

@@ -106,8 +106,28 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		return result.toString();
 	}
 	
+	/**
+	 * Name of the folder where versioned static yada files are to be found, starting with /
+	 * @return
+	 */
+	public static String getYadaResourceFolder() {
+		return STATIC_YADARESOURCES_FOLDER;
+	}
+	
+	/**
+	 * Name of the folder where versioned static files are to be found, starting with /
+	 * @return
+	 */
 	public static String getResourceFolder() {
 		return STATIC_RESOURCES_FOLDER;
+	}
+	
+	/**
+	 * Name of the folder where non-versioned static files are to be found, starting with /
+	 * @return
+	 */
+	public static String getStaticFileFolder() {
+		return STATIC_FILE_FOLDER;
 	}
 	
 	// Questo permette di usare Pageable nei Controller (Spring Data)

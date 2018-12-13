@@ -1,7 +1,6 @@
 package net.yadaframework.security;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.Map;
 
 import javax.servlet.FilterChain;
@@ -14,9 +13,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import net.yadaframework.components.YadaUtil;
+import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaWebConfig;
 
 
@@ -28,12 +30,16 @@ import net.yadaframework.core.YadaWebConfig;
  */
 public class AuditFilter extends OncePerRequestFilter {
 	private final static Logger log = LoggerFactory.getLogger(AuditFilter.class);
+	private final static Logger filesLog = LoggerFactory.getLogger(AuditFilter.class.getName() + ".files");
 //	private final static Logger actionLog = LoggerFactory.getLogger("actionDuration");
 	private static final String MDC_USERNAME = "username";
 	private static final String MDC_SESSION = "session";
 	private static final String MDC_REMOTEIP = "remoteIp";
 	
-	private String resourceUrlStart = null;
+	private String yadaResourceUrlStart = null; // Prefix for resource urls from /src/main/webapp/yadares
+	private String resourceUrlStart = null; // Prefix for resource urls from /src/main/webapp/res
+	private String staticUrlStart = null; // Prefix for resource urls from /src/main/webapp/static
+	private String contentUrlStart = null; // Prefix for contents urls (usually they are served by apache anyway)
 	
 	/**
 	 * Forwards the request to the next filter in the chain and delegates down to the subclasses to perform the actual
@@ -46,6 +52,26 @@ public class AuditFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		if (resourceUrlStart==null) {
 			resourceUrlStart = request.getContextPath() + YadaWebConfig.getResourceFolder() + "-"; // /site/res-
+		}
+		if (staticUrlStart==null) {
+			staticUrlStart = request.getContextPath() + YadaWebConfig.getStaticFileFolder(); // /site/static
+		}
+		if (yadaResourceUrlStart==null) {
+			yadaResourceUrlStart = request.getContextPath() + YadaWebConfig.getYadaResourceFolder(); // /site/yadares
+		}
+		if (contentUrlStart==null) {
+			try {
+				YadaConfiguration config = (YadaConfiguration) YadaUtil.getBean("config"); // Throws NoSuchBeanDefinitionException
+				contentUrlStart = request.getContextPath() + config.getContentUrl();  // /site/contents
+			} catch (NoSuchBeanDefinitionException e) {
+				log.debug("No YadaConfiguration found yet");
+			}
+		}
+		if (!filesLog.isInfoEnabled() && isFile(request)) {
+			// If the logger is configured to skip files, continue and return.
+			// Example: <logger name="net.yadaframework.security.AuditFilter.files" level="ERROR"/>
+			filterChain.doFilter(request, response);
+			return;
 		}
 		boolean isFirstRequest = !isAsyncDispatch(request);
 		long startTime = -1;
@@ -90,7 +116,8 @@ public class AuditFilter extends OncePerRequestFilter {
 		try {
 			filterChain.doFilter(request, response);
 			int status = response.getStatus();
-			if (!skipDuration(requestUri) && !isAsyncStarted(request)) {
+			if (!isFile(request) && !isAsyncStarted(request)) {
+				// The time taken is for non-files only
 				if (startTime>-1) {
 					long timetaken = System.currentTimeMillis()-startTime;
 					log.info("{}: {} ms (HTTP {})", requestUri, timetaken, status);
@@ -105,15 +132,18 @@ public class AuditFilter extends OncePerRequestFilter {
 		}
 	}
 	
-	private boolean skipDuration(String requestUri) {
-		return requestUri.startsWith(resourceUrlStart) // Skippo tutte le res
-			// Solo che i /contents sono configurati e non ho accesso alla configurazione, quindi skippo in base all'estensione
-			|| requestUri.endsWith(".jpg")
-			|| requestUri.endsWith(".png")
-			|| requestUri.endsWith(".gif");
-//		return requestUri.endsWith(".css")
-//			|| requestUri.endsWith(".js")
-	}
+	/**
+	 * Returns true if the request is for a file, not for a controller
+	 * @param requestUri
+	 * @return
+	 */
+	private boolean isFile(HttpServletRequest request) {
+		String requestUri = request.getRequestURI();
+		return (resourceUrlStart!=null && requestUri.startsWith(resourceUrlStart)) 
+			|| (yadaResourceUrlStart!=null && requestUri.startsWith(yadaResourceUrlStart))
+			|| (staticUrlStart!=null && requestUri.startsWith(staticUrlStart))
+			|| (contentUrlStart!=null && requestUri.startsWith(contentUrlStart));
+		}
 	
 	// Stampo i parametri di request (get e post)
 	protected void beforeRequest(HttpServletRequest request) {
