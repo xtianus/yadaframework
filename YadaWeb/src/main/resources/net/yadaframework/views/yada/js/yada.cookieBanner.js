@@ -49,8 +49,11 @@
 	// For a private property use "var xxx = "
 	// For a private function use "function xxx(..."
 
+	yada.cookieBannerAcceptClass = "cookieBannerAcceptClass";
+	
 	var cookieAcceptName="yadacba";
 	var bannerId = "yadaCookieBanner";
+	
 
 	/**
 	 * Function to call externally for showing the cookie banner when needed
@@ -73,7 +76,7 @@
 				+ '<div class="closeIcon"></div>'
 				;
 			if (acceptButtonText!="") {
-				bannerHtml+= '<a href="#">' + acceptButtonText + '</a>';
+				bannerHtml+= '<a class="'+yada.cookieBannerAcceptClass+'" href="#">' + acceptButtonText + '</a>';
 			}
 			bannerHtml+= '</div>';
 			
