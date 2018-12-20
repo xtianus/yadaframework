@@ -146,18 +146,31 @@ public class YadaUtil {
 		}
 		return result;
 	}
+
+	
 	
 	/**
 	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity.
-	 * Post processing (@PostConstruct etc) is also performed.
+	 * Post processing (@PostConstruct etc) is also performed but initialization is not.
 	 * @param instance to autowire
-	 * @return autowired instance
+	 * @see AutowireCapableBeanFactory#autowireBean(Object) 
 	 */
-	public Object autowire(Object instance) {
+	public void autowire(Object instance) {
+		autowireCapableBeanFactory.autowireBean(instance);
+	}
+	
+	/**
+	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity.
+	 * Post processing (@PostConstruct etc) and initialization are also performed.
+	 * @param instance to autowire
+	 * @return the autowired/initialized bean instance, either the original or a wrapped one
+	 * @see {@link AutowireCapableBeanFactory#autowireBean(Object)}, {@link AutowireCapableBeanFactory#initializeBean(Object, String)}, {@link #autowire(Object)}
+	 */
+	public Object autowireAndInitialize(Object instance) {
 		autowireCapableBeanFactory.autowireBean(instance);
 		return autowireCapableBeanFactory.initializeBean(instance, instance.getClass().getSimpleName());
 	}
-	
+
 	/**
 	 * Remove a counter that has been added by {@link #findAvailableName}
 	 * @param filename

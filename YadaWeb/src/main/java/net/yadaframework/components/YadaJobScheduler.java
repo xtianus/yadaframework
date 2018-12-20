@@ -178,7 +178,7 @@ class YadaJobScheduler implements Runnable {
 			// We can do nothing about it because if we interrupt it, the onFailure will mess with the new job.
 			throw new YadaInternalException("Starting a job when another with the same id is still running: {}", existing);
 		}
-		final YadaJob yadaJob = (YadaJob) yadaUtil.autowire(yadaJobToWire); // YadaJob instances can have @Autowire fields
+		final YadaJob yadaJob = (YadaJob) yadaUtil.autowireAndInitialize(yadaJobToWire); // YadaJob instances can have @Autowire fields
 		jobCache.put(yadaJob.getId(), yadaJob);
 //		YadaJob toRun = yadaJobRepository.findOne(yadaJobId);
 //		if (toRun==null) {
