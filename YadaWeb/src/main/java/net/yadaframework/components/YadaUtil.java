@@ -989,7 +989,7 @@ public class YadaUtil {
 	 * Questo metodo crea la copia di un oggetto TRAMITE I SUOI GETTER (anche privati), facendo in modo che alcune collection/mappe vengano copiate pur restando indipendenti.
 	 * In pratica le collection/mappe sono ricreate come istanze nuove con i medesimi oggetti di quelle originali.
 	 * Questo permette di condividere gli oggetti tra le copie, ma di mantenere le associazioni slegate.
-	 * Così se copio un Prodotto (in Artemide), mi trovo gli stessi componenti dell'originale (gli Articolo sono gli stessi) ma posso in seguito toglierli/aggiungerli
+	 * Così se copio un Prodotto, mi trovo gli stessi componenti dell'originale (gli Articolo sono gli stessi) ma posso in seguito toglierli/aggiungerli
 	 * senza influire sull'altra istanza da cui son partito a copiare.
 	 * 
 	 * E' possibile specificare quali attributi non copiare grazie all'interfaccia CloneableFiltered. La id non è mai copiata.
@@ -1026,7 +1026,7 @@ public class YadaUtil {
 	 * Questo metodo crea la copia di un oggetto TRAMITE I SUOI GETTER (anche privati), facendo in modo che alcune collection/mappe vengano copiate pur restando indipendenti.
 	 * In pratica le collection/mappe sono ricreate come istanze nuove con i medesimi oggetti di quelle originali.
 	 * Questo permette di condividere gli oggetti tra le copie, ma di mantenere le associazioni slegate.
-	 * Così se copio un Prodotto (in Artemide), mi trovo gli stessi componenti dell'originale (gli Articolo sono gli stessi) ma posso in seguito toglierli/aggiungerli
+	 * Così se copio un Prodotto mi trovo gli stessi componenti dell'originale (gli Articolo sono gli stessi) ma posso in seguito toglierli/aggiungerli
 	 * senza influire sull'altra istanza da cui son partito a copiare.
 	 * 
 	 * E' possibile specificare quali attributi non copiare grazie all'interfaccia CloneableFiltered. La id non è mai copiata.
