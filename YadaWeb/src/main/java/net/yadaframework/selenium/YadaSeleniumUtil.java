@@ -300,6 +300,38 @@ public class YadaSeleniumUtil {
 			log.debug("", e);
 		}
 	}
+	
+	/**
+	 * Click on the given element using javascript. This is useful when any other form of clicking fails with the error 
+	 * "Element is not clickable". Can't be used on HTML elements that don't have the "click()" method
+	 * @param webElement
+	 * @param webDriver
+	 */
+	public void clickByJavascript(WebElement webElement, WebDriver webDriver) {
+		clickByJavascript(webElement, webDriver, 20, 80, 20, 80);
+	}
+	
+	/**
+	 * Click on the given element using javascript. This is useful when any other form of clicking fails with the error 
+	 * "Element is not clickable". Can't be used on HTML elements that don't have the "click()" method
+	 * @param webElement
+	 * @param webDriver
+	 * @param minPercentX e.g. 10
+	 * @param maxPercentX e.g. 90
+	 * @param minPercentY 
+	 * @param maxPercentY
+	 */
+	public void clickByJavascript(WebElement webElement, WebDriver webDriver, int minPercentX, int maxPercentX, int minPercentY, int maxPercentY) {
+		// Move the mouse over the element, just in case
+		Dimension dimension = webElement.getSize();
+		int offx = (int) ThreadLocalRandom.current().nextDouble(dimension.width*minPercentX/100d, dimension.width*maxPercentX/100d+1); // Faccio +1 per evitare "bound must be greater than origin" nel caso di zero
+		int offy = (int) ThreadLocalRandom.current().nextDouble(dimension.height*minPercentY/100d, dimension.height*maxPercentY/100d+1);
+		Actions actions = new Actions(webDriver); 
+		actions.moveToElement(webElement, offx, offy);
+		//
+		JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
+		javascriptExecutor.executeScript("arguments[0].dispatchEvent(new Event('click'));", webElement);
+	}
 
 	/**
 	 * Click on the given element in a range between 20% and 80% of the dimensions
@@ -341,9 +373,10 @@ public class YadaSeleniumUtil {
 		} catch (WebDriverException e) {
 			// Try an alternative clicking method
 //			log.error("Click failed", e);
-			log.warn("randomClick didn't work - trying with javascript");
+			log.warn("randomClick didn't work - trying via javascript");
 //			log.debug("randomClick didn't work for element of type '{}' - trying with javascript (ricorda di inserire un wait dopo)", webElement.getTagName());
-			((JavascriptExecutor)webDriver).executeScript("arguments[0].click();", webElement);
+			// ((JavascriptExecutor)webDriver).executeScript("arguments[0].click();", webElement);
+			clickByJavascript(webElement, webDriver);
 			// In questo caso bisogna fare un wait di qualche tipo perché quello implicito non credo venga usato visto che è il js che naviga pagina
 			// Attendo che il webElement scompaia, usando un trucco
 			long timeoutMillis = 20*1000;

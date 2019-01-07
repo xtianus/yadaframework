@@ -129,8 +129,8 @@ public class YadaJobSchedulerDao {
 				.where("yg.jobScheduledTime < :nextPeriod").and() 						
 				// must obey the job precedence if any
 				.where("(jmba is null or jmba.jobStateObject.id = :jobStateActive)").and()
-				.where("jmbi is null or jmbi.jobStateObject.id in :jobStateInactive").and()
-				.where("jmc is null or jmc.jobStateObject.id = :jobStateCompleted")
+				.where("(jmbi is null or jmbi.jobStateObject.id in :jobStateInactive)").and()
+				.where("(jmc is null or jmc.jobStateObject.id = :jobStateCompleted)")
 				// high priority first, ordered by start time
 				.orderBy("order by yg.jobPriority desc, yg.jobScheduledTime asc")
 				.setParameter("nextPeriod", periodEnd)
