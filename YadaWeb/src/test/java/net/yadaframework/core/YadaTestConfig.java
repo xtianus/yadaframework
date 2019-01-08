@@ -41,11 +41,7 @@ public class YadaTestConfig extends YadaAppConfig {
 	
 	@Bean
 	public YadaConfiguration config() throws Exception {
-		YadaConfiguration config = new YadaConfiguration() {
-			@Override
-			protected void addSetupUserAttributes(Map<String, Object> user, ImmutableHierarchicalConfiguration sub) {
-			}
-		};
+		YadaConfiguration config = new YadaConfiguration() {};
 		super.makeCombinedConfiguration(config);
 		initDatasource(config);
 		return config;

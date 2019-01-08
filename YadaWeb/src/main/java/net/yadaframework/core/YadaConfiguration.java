@@ -733,14 +733,18 @@ public abstract class YadaConfiguration {
 		return getYadaResourceDir() + "-" + getYadaVersion();
 	}
 	
-	/**
-	 * Add project-specific user attributes from the configuration 
-	 * @param user
-	 * @param sub
-	 */
-	@Deprecated // should not be needed anymore, now that any tag can be used to define a user
-	abstract protected void addSetupUserAttributes(Map<String, Object> user, ImmutableHierarchicalConfiguration sub);
+//	/**
+//	 * Add project-specific user attributes from the configuration 
+//	 * @param user
+//	 * @param sub
+//	 */
+//	@Deprecated // should not be needed anymore, now that any tag can be used to define a user
+//	abstract protected void addSetupUserAttributes(Map<String, Object> user, ImmutableHierarchicalConfiguration sub);
 	
+	/**
+	 * Every tag in the config/setup/users/user configuration is added to the map as a key-value pair 
+	 * except roles, added as a list to the "roles" key.
+	 */
 	public List<Map<String, Object>> getSetupUsers() {
 		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
 		for (ImmutableHierarchicalConfiguration sub : configuration.immutableConfigurationsAt("config/setup/users/user")) {
@@ -759,7 +763,7 @@ public abstract class YadaConfiguration {
 //			user.put("email", sub.getString("email"));
 //			user.put("password", sub.getString("password"));
 			user.put("roles", roles);
-			addSetupUserAttributes(user, sub);
+//			addSetupUserAttributes(user, sub);
 			List<String> configRoles = sub.getList(String.class, "role");
 			for (String code : configRoles) { // 'ADMIN'
 				Integer role = getRoleId(code);
