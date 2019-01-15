@@ -544,7 +544,7 @@ public class YadaNotify {
 	 * @return
 	 */
 	public String getViewName() {
-		return YadaNotifyData.MODAL_VIEW;
+		return YadaViews.AJAX_NOTIFY;
 	}
 
 }
