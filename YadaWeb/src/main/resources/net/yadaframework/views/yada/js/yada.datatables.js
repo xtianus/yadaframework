@@ -192,7 +192,7 @@
 			        			'<a class="yadaTableExtraButton' + i + ' yadaRowCommandButton" href="#' +
 			        			rowId + '" title="' + extraButtons[i].title + '">' + extraButtons[i].icon + '</a>';
 		        		} else {
-		        			buttons += '<span class="yadaTableExtraButton' + i + ' yadaRowCommandButton disabled">' + extraButtons[i].icon + '</span>';
+		        			buttons += '<span class="yadaTableExtraButton' + i + ' yadaRowCommandButton disabled" ' + 'title="' + extraButtons[i].title + '"' + '>' + extraButtons[i].icon + '</span>';
 		        		}
 		        	}
 		        	if (editDef!=null) {
