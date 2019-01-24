@@ -9,13 +9,13 @@ buildscript {
 	dependencies {
 		// Needed for test schema creation
 		classpath 'net.yadaframework:YadaTools:+'
-		classpath 'kr.motd.gradle:sphinx-gradle-plugin:2.2.0'
+		// classpath 'kr.motd.gradle:sphinx-gradle-plugin:2.2.0'
 	}                    
 }
 
 apply plugin: 'java-library'
 apply plugin: 'eclipse-wtp'
-apply plugin: 'kr.motd.sphinx'
+// apply plugin: 'kr.motd.sphinx'
 
 eclipse {
 	jdt {
@@ -105,9 +105,13 @@ processResources {
 
 apply plugin: 'maven'
 
+javadoc {
+    options.encoding = 'UTF-8'
+    options.docEncoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+}
+
 // http://stackoverflow.com/a/27853822/587641
-// TODO: Il javadoc genera errori che devono essere sistemati prima di poterlo usare
-/*
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from javadoc
@@ -116,7 +120,6 @@ task javadocJar(type: Jar) {
 artifacts {
     archives javadocJar
 }
-*/
 
 // Per usare meglio maven vedi qui: http://stackoverflow.com/questions/24751996/gradle-configuration-to-download-custom-plugin-dependencies
 
