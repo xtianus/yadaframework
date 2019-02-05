@@ -183,7 +183,7 @@
 		        	var buttons = '';
 		        	for (var i=0; extraButtons!=null && i<extraButtons.length; i++) {
 		        		var noRowIcon = extraButtons[i].noRowIcon;
-		        		var showRowIcon = noRowIcon!=false; // True when noRowIcon == true, false when noRowIcon == false
+		        		var showRowIcon = noRowIcon!=true; // True when noRowIcon == false, false when noRowIcon == true
 		        		if (noRowIcon != null && typeof noRowIcon == "function") {
 		        			showRowIcon = noRowIcon(data, row);
 		        		}
