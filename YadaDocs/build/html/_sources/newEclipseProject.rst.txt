@@ -21,14 +21,14 @@ Prerequisites
 -------------
 
 You should have `Java`_ and a working copy of `Eclipse`_.
-To make your installation future-proof, save the java JDK in some folder like C:\Local\Javas\jdk1.8.0_152 and
+To make your installation future-proof, save the java JDK in some folder like ``C:\Local\Javas\jdk1.8.0_152`` and
 make a symbolic link to it with a generic name, like
 
 .. code-block:: bat
 
 	mklink /D /J C:\Local\jdk8 C:\Local\Javas\jdk1.8.0_152
 
-Now you can refer to C:\\Local\\jdk8 in your scripts and when you update the java (minor) version you just create a new link without changing the scripts.
+Now you can refer to C:\\Local\\jdk8 in your scripts and when you update the java (minor) version you just change the link, not the scripts.
 
 .. _Java: https://www.oracle.com/technetwork/java/javase/downloads/index.html
 .. _Eclipse: https://www.eclipse.org

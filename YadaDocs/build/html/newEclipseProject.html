@@ -166,12 +166,12 @@
 <div class="section" id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
 <p>You should have <a class="reference external" href="https://www.oracle.com/technetwork/java/javase/downloads/index.html">Java</a> and a working copy of <a class="reference external" href="https://www.eclipse.org">Eclipse</a>.
-To make your installation future-proof, save the java JDK in some folder like C:LocalJavasjdk1.8.0_152 and
+To make your installation future-proof, save the java JDK in some folder like <code class="docutils literal notranslate"><span class="pre">C:\Local\Javas\jdk1.8.0_152</span></code> and
 make a symbolic link to it with a generic name, like</p>
 <div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="k">mklink</span> /D /J C:\Local\jdk8 C:\Local\Javas\jdk1.8.0_152
 </pre></div>
 </div>
-<p>Now you can refer to C:\Local\jdk8 in your scripts and when you update the java (minor) version you just create a new link without changing the scripts.</p>
+<p>Now you can refer to C:\Local\jdk8 in your scripts and when you update the java (minor) version you just change the link, not the scripts.</p>
 </div>
 <div class="section" id="the-project-skeleton">
 <h2>The Project Skeleton<a class="headerlink" href="#the-project-skeleton" title="Permalink to this headline">¶</a></h2>
@@ -189,13 +189,13 @@ make a symbolic link to it with a generic name, like</p>
 <li>Share ExamplePrj to git so that Eclipse moves all files to the git location: “Team &gt; Share Project…” (No need to commit yet)</li>
 <li>Edit .gitignore in the root of ExamplePrj to look like the following:</li>
 </ul>
-<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="o">/.</span><span class="na">gradle</span><span class="o">/</span>
-<span class="o">/</span><span class="n">build</span><span class="o">/</span>
-<span class="o">/</span><span class="n">bin</span><span class="o">/</span>
-<span class="o">/.</span><span class="na">settings</span><span class="o">/</span>
-<span class="o">/.</span><span class="na">classpath</span>
-<span class="o">/.</span><span class="na">project</span>
-<span class="o">!</span><span class="n">gradle</span><span class="o">-</span><span class="n">wrapper</span><span class="o">.</span><span class="na">jar</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>/.gradle/
+/build/
+/bin/
+/.settings/
+/.classpath
+/.project
+!gradle-wrapper.jar
 </pre></div>
 </div>
 </div>
@@ -412,7 +412,7 @@ make a symbolic link to it with a generic name, like</p>
       
     </p>
     <p>
-        &copy; Copyright 2018, Cristian Ghezzi.<br/>
+        &copy; Copyright 2019, Cristian Ghezzi.<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.<br/>
     </p>
   </div>

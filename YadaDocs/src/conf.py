@@ -57,7 +57,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Yada Framework'
-copyright = '2018, Cristian Ghezzi'
+copyright = '2019, Cristian Ghezzi'
 author = 'Cristian Ghezzi'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -193,4 +193,4 @@ def setup(app):
     app.add_stylesheet('yadaDocs.css')
     app.add_javascript('yadaDocs.js')
     
-highlight_language = 'java'
+# highlight_language = 'java'

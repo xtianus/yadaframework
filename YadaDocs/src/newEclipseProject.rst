@@ -21,7 +21,7 @@ Prerequisites
 -------------
 
 You should have `Java`_ and a working copy of `Eclipse`_.
-To make your installation future-proof, save the java JDK in some folder like C:\Local\Javas\jdk1.8.0_152 and
+To make your installation future-proof, save the java JDK in some folder like ``C:\Local\Javas\jdk1.8.0_152`` and
 make a symbolic link to it with a generic name, like
 
 .. code-block:: bat

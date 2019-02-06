@@ -1,4 +1,3 @@
 
-.. role:: windows
-  :class: windows
+.. role:: abstract
 	

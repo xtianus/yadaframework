@@ -153,13 +153,13 @@
 <h1>Ajax<a class="headerlink" href="#ajax" title="Permalink to this headline">¶</a></h1>
 <p>The Yada Framework support for ajax calls is implemented in <code class="docutils literal notranslate"><span class="pre">yada.ajax.js</span></code>.
 It is automatically included in production, merged with the other yada javascript files. To use it in development, add:</p>
-<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">script</span> <span class="n">th</span><span class="o">:</span><span class="k">if</span><span class="o">=</span><span class="s">&quot;${@config.developmentEnvironment}&quot;</span> <span class="n">yada</span><span class="o">:</span><span class="n">src</span><span class="o">=</span><span class="s">&quot;@{/yadares/js/yada.ajax.js}&quot;</span><span class="o">&gt;&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">script</span> <span class="n">th</span><span class="p">:</span><span class="k">if</span><span class="o">=</span><span class="s2">&quot;${@config.developmentEnvironment}&quot;</span> <span class="n">yada</span><span class="p">:</span><span class="n">src</span><span class="o">=</span><span class="s2">&quot;@{/yadares/js/yada.ajax.js}&quot;</span><span class="o">&gt;&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 <div class="section" id="ajax-links">
 <h2>Ajax Links<a class="headerlink" href="#ajax-links" title="Permalink to this headline">¶</a></h2>
 <p>To make an ajax request, add the “yadaAjax” class:</p>
-<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s">&quot;/some/endpoint&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s">&quot;yadaAjax&quot;</span><span class="o">&gt;</span><span class="n">Click</span> <span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/some/endpoint&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;yadaAjax&quot;</span><span class="o">&gt;</span><span class="n">Click</span> <span class="n">here</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 </div>
@@ -188,7 +188,7 @@ Otherwise the form will be sent with a normal non-ajax request.</dd>
       
     </p>
     <p>
-        &copy; Copyright 2018, Cristian Ghezzi.<br/>
+        &copy; Copyright 2019, Cristian Ghezzi.<br/>
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.<br/>
     </p>
   </div>
