@@ -1,0 +1,27 @@
+.windows {
+	color: red;
+}
+
+/* https://github.com/choldgraf/sphinx-copybutton */
+a.copybtn {
+    top: 2px;
+    right: 1px;
+    width: 2em;
+}
+
+.highlight-bat {
+	padding-left: 25px;
+}
+
+.highlight-bat::before { 
+	content: '';
+	background:url('img/winlogo.svg');
+    width: 20px;
+    height: 20px;
+    display: block;
+    position: relative;
+    top: 28px;
+    left: -25px;
+    background-repeat: no-repeat;
+    background-size: contain;
+}

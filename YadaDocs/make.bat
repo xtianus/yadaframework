@@ -10,8 +10,8 @@ REM Command file for Sphinx documentation
 if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
-set SOURCEDIR=.
-set BUILDDIR=../build
+set SOURCEDIR=src
+set BUILDDIR=build
 set SPHINXPROJ=YadaFramework
 
 set TARGET=html
@@ -39,4 +39,8 @@ goto end
 :end
 popd
 
-pause
+REM Copy _static files too when changed
+xcopy %SOURCEDIR%\_static %BUILDDIR%\html\_static /f/d/y/s/e
+
+
+REM pause

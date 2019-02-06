@@ -8,9 +8,10 @@ Yada Framework
    :maxdepth: 1
    :caption: Contents
 
-	Forms <forms/forms>
+	Forms <forms/overview>
 	Ajax <ajax>
-	tutorial <tutorial>
+	Ajax Modal <ajaxModal>
+	New Project <newEclipseProject>
 ..	TODO: packages <javadoc/packages>
 	
 Indices and tables

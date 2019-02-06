@@ -1,0 +1,4 @@
+
+.. role:: windows
+  :class: windows
+	

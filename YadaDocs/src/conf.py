@@ -21,7 +21,7 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-# import sphinx_bootstrap_theme
+import sphinx_bootstrap_theme
 
 
 # -- General configuration ------------------------------------------------
@@ -41,7 +41,7 @@
 # sphinx.ext.todo - See http://www.sphinx-doc.org/en/master/usage/extensions/todo.html
 # sphinx.ext.githubpages - See http://www.sphinx-doc.org/en/master/usage/extensions/githubpages.html
 # javasphinx - See https://javasphinx.readthedocs.io/en/latest/
-extensions = ['sphinx.ext.todo', 'javasphinx']
+extensions = ['sphinx.ext.todo', 'javasphinx', 'sphinx_copybutton']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -79,7 +79,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'globalHeader.rst']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -93,9 +93,9 @@ todo_include_todos = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
-#html_theme = 'bootstrap'
-#html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+# html_theme = 'alabaster'
+html_theme = 'bootstrap'
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -106,7 +106,7 @@ html_theme = 'alabaster'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['../static']
+html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -184,3 +184,13 @@ javadoc_url_map = {
     'org.springframework.data.jpa' : ('https://docs.spring.io/spring-data/data-jpa/docs/current/api/', 'javadoc8')
 }
 
+# Global header import
+# See https://stackoverflow.com/a/9707879/587641
+rst_prolog = open('globalHeader.rst', 'r').read()
+
+# Additional CSS file
+def setup(app):
+    app.add_stylesheet('yadaDocs.css')
+    app.add_javascript('yadaDocs.js')
+    
+highlight_language = 'java'
