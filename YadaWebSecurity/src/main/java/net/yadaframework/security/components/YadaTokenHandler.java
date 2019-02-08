@@ -1,26 +1,142 @@
 package net.yadaframework.security.components;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import net.yadaframework.components.YadaUtil;
+import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.security.persistence.entity.YadaAutoLoginToken;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
+import net.yadaframework.security.persistence.entity.YadaUserCredentials;
+import net.yadaframework.security.persistence.repository.YadaAutoLoginTokenRepository;
+import net.yadaframework.web.YadaWebUtil;
+
+/**
+ * Handles autologin links: creation and parsing.
+ * The autologin link has the following format: /autologin/id-token?action=someAction#hashCommand
+ * id and token are from the same YadaAutoLoginToken stored in the database.
+ */
 
 @Component
 public class YadaTokenHandler {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
+	
+    @Autowired private YadaUtil yadaUtil;
+    @Autowired private YadaWebUtil yadaWebUtil;
+	@Autowired private YadaConfiguration config;
+	@Autowired private YadaAutoLoginTokenRepository yadaAutoLoginTokenRepository;
+	
+	/**
+	 * Create a new YadaAutoLoginToken for the given user that expires after the configured amount of hours (config/security/autologinExpirationHours)
+	 * @param targetUser
+	 * @return
+	 */
+	public YadaAutoLoginToken makeAutoLoginToken(YadaUserCredentials targetUser) {
+		Date expiration = yadaUtil.addHours(new Date(), config.getAutologinExpirationHours());
+		return makeAutoLoginToken(targetUser, expiration);
+	}
+	
+	/**
+	 * Create a new YadaAutoLoginToken for the given user
+	 * @param targetUser
+	 * @param expiration can be null to not expire ever
+	 * @return
+	 */
+    public YadaAutoLoginToken makeAutoLoginToken(YadaUserCredentials targetUser, Date expiration) {
+    	yadaAutoLoginTokenRepository.deleteExpired(); // Cleanup expired ones
+    	YadaAutoLoginToken yadaAutoLoginToken = new YadaAutoLoginToken();
+    	yadaAutoLoginToken.setExpiration(expiration);
+    	yadaAutoLoginToken.setYadaUserCredentials(targetUser);
+    	yadaAutoLoginToken = yadaAutoLoginTokenRepository.save(yadaAutoLoginToken);
+    	return yadaAutoLoginToken;
+    }
 
 	/**
-	 * Crea un token-link unendo le due componenti passate.
+	 * If the myServerAddress param is null, fetch it either from request or from the configuration, in this order.
+	 * @param myServerAddress can be null
+	 * @param request can be null
+	 * @return
+	 */
+	private String ensureServerAddress(String myServerAddress, HttpServletRequest request) {
+		if (myServerAddress==null && request!=null) {
+			myServerAddress = yadaWebUtil.getWebappAddress(request);
+		}
+		if (myServerAddress==null) {
+			myServerAddress = config.getServerAddress();
+		}
+		if (myServerAddress==null) {
+			throw new YadaInvalidUsageException("The server address should be specified in the configuration when both arguments are null");
+		}
+		return myServerAddress;
+	}
+
+	/**
+	 * Return the autologin link generated from the given parameters
+	 * @param yadaAutoLoginToken
+	 * @param targetAction
+	 * @param hashCommand
+	 * @param myServerAddress
+	 * @param request
+	 * @return
+	 */
+	public String makeAutologinLink(YadaAutoLoginToken yadaAutoLoginToken, String targetAction, String hashCommand, String myServerAddress, HttpServletRequest request) {
+		myServerAddress = ensureServerAddress(myServerAddress, request);
+    	StringBuilder result = new StringBuilder(myServerAddress);
+    	result.append("/autologin/");
+    	result.append(makeLink(yadaAutoLoginToken.getId(), yadaAutoLoginToken.getToken(), null));
+		result.append("?action=").append(yadaWebUtil.urlEncode(targetAction));
+		if (hashCommand!=null) {
+			result.append(hashCommand);
+		}
+    	return result.toString();
+	}
+			
+	/**
+	 * Create a token-link
+	 * @param yadaRegistrationRequest
+	 * @param linkParameters name-value paris of url parameters to add at the end - can be null or empty
+	 * @return una stringa <ID>-<token>
+	 */
+	// used by YadaSecurityEmailService
+	public String makeLink(YadaRegistrationRequest yadaRegistrationRequest, Map<String, String> linkParameters) {
+		return makeLink(yadaRegistrationRequest.getId(), yadaRegistrationRequest.getToken(), linkParameters);
+	}
+
+    /**
+     * Add a string of parameters to the target action link
+     * @param autologinLink a link like "xxx?action=aaa#command"
+     * @param moreParameters not-encoded request parameters like "num=1&size=10" - no "?" nor initial "&" must be specified
+     * @return the original string with the new parameters inserted at the end: "xxx?action=aaa%26num=1%26size=10#command"
+     */
+    public String extendAutologinLink(String autologinLink, String moreParameters) {
+		String[] parts = autologinLink.split("\\?");
+		String url = parts[0];
+		String actionParam = parts[1];
+		parts = actionParam.split("#");
+		String actionUrl = parts[0];
+		String actionHash = (parts.length>1 ? "#"+parts[1] : "");
+		String encodedParameters = yadaWebUtil.urlEncode("?" + moreParameters);
+		StringBuilder sb = new StringBuilder(url);
+		sb.append("?").append(actionUrl).append(encodedParameters).append(actionHash);
+		return sb.toString();
+    }
+
+	/**
+	 * Create a token-link, used both for autologin links and registration links.
 	 * @param id
 	 * @param token
 	 * @param linkParameters name-value paris of url parameters to add at the end - can be null or empty
-	 * @return una stringa <ID>-<token>
+	 * @return a string <ID>-<token>
 	 */
 	public String makeLink(long id, long token, Map<String, String> linkParameters) {
 		StringBuilder result = new StringBuilder(id + "-" + token).append("?");
@@ -42,29 +158,9 @@ public class YadaTokenHandler {
 	}
 
 	/**
-	 * Crea un token-link
-	 * @param yadaAutoLoginToken
-	 * @param linkParameters name-value paris of url parameters to add at the end - can be null or empty
-	 * @return una stringa <ID>-<token>
-	 */
-	public String makeLink(YadaAutoLoginToken yadaAutoLoginToken, Map<String, String> linkParameters) {
-		return makeLink(yadaAutoLoginToken.getId(), yadaAutoLoginToken.getToken(), null);
-	}
-	
-	/**
-	 * Crea un token-link
-	 * @param yadaRegistrationRequest
-	 * @param linkParameters name-value paris of url parameters to add at the end - can be null or empty
-	 * @return una stringa <ID>-<token>
-	 */
-	public String makeLink(YadaRegistrationRequest yadaRegistrationRequest, Map<String, String> linkParameters) {
-		return makeLink(yadaRegistrationRequest.getId(), yadaRegistrationRequest.getToken(), linkParameters);
-	}
-
-	/**
-	 * Splitta un token-link nelle sue due componenti id e token.
-	 * @param linkId nel formato <ID>-<token>
-	 * @return un array {<ID>, <token>}
+	 * Splits a token-link string into the two components: id and token.
+	 * @param linkId with the format <ID>-<token>
+	 * @return a two dimensional array with {<ID>, <token>}
 	 */
 	public long[] parseLink(String linkId) {
 		try {
