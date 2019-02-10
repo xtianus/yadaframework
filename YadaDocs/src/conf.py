@@ -41,6 +41,7 @@ import sphinx_bootstrap_theme
 # sphinx.ext.todo - See http://www.sphinx-doc.org/en/master/usage/extensions/todo.html
 # sphinx.ext.githubpages - See http://www.sphinx-doc.org/en/master/usage/extensions/githubpages.html
 # javasphinx - See https://javasphinx.readthedocs.io/en/latest/
+# sphinx_copybutton - https://github.com/choldgraf/sphinx-copybutton
 extensions = ['sphinx.ext.todo', 'javasphinx', 'sphinx_copybutton']
 
 # Add any paths that contain templates here, relative to this directory.

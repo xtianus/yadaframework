@@ -40,7 +40,7 @@ goto end
 popd
 
 REM Copy _static files too when changed
-xcopy %SOURCEDIR%\_static %BUILDDIR%\html\_static /f/d/y/s/e
+xcopy %SOURCEDIR%\_static %BUILDDIR%\html\_static /f/d/y/s
 
 
 REM pause
