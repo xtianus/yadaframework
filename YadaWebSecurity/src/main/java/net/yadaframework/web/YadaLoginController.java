@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.security.YadaAuthenticationFailureHandler;
 import net.yadaframework.security.YadaUserDetailsService;
 import net.yadaframework.security.components.YadaTokenHandler;
 import net.yadaframework.security.persistence.entity.YadaAutoLoginToken;
@@ -39,6 +40,8 @@ public class YadaLoginController {
 	@Autowired private YadaTokenHandler yadaTokenHandler;
 	@Autowired private YadaAutoLoginTokenRepository yadaAutoLoginTokenRepository;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
+	@Autowired private YadaAuthenticationFailureHandler failureHandler;
+
 
 	@RequestMapping("/ajaxLoginForm")
 	public String ajaxLoginForm(Model model) {
@@ -74,17 +77,24 @@ public class YadaLoginController {
 					// Questo l'ho disabilitato fintanto che non aggiusto che l'autenticazione (social) non ti porta sulla pagina inizialmente richiesta
 					// yadaAutoLoginTokenRepository.delete(yadaAutoLoginToken); // Tokens are deleted at first use (for security reasons)
 				} else {
-					log.debug("YadaAutoLoginToken expired for {}", tokenLink);
+					log.info("YadaAutoLoginToken expired for {}", tokenLink);
+					// TODO localized message
+					yadaNotify.title("Link expired", redirectAttributes).error().message("The provided address is no longer valid").add();
+					return "redirect:"+failureHandler.getFailureUrlNormalRequest(); // Redirect to login page
 				}
 			} else {
 				// Token expired or forged
-				log.debug("No yadaAutoLoginToken found for {}", tokenLink);
+				log.info("No yadaAutoLoginToken found for {}", tokenLink);
+				// TODO localized message
+				yadaNotify.title("Link expired", redirectAttributes).error().message("The provided address is no longer valid").add();
+				return "redirect:"+failureHandler.getFailureUrlNormalRequest(); // Redirect to login page
 			}
 		} else {
 			// TODO localized message
 			yadaNotify.title("Invalid URL", redirectAttributes).error().message("The provided address is invalid").add();
+			return "redirect:"+failureHandler.getFailureUrlNormalRequest(); // Redirect to login page
 		}
-		// If not authenticated, this will trigger authentication.
+		// If not authenticated, this will trigger authentication but will clear any yadaNotify because of the double redirect.
 		return "redirect:"+action;
 	}
 
