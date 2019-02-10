@@ -156,7 +156,7 @@ public class YadaNotifyData {
 	public YadaNotifyData redirectOnClose(String path) {
 		if (model!=null) {
 			model.addAttribute(KEY_NOTIFICATION_REDIRECT, path);
-		} else {
+		} else if (redirectAttributes!=null) {
 			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_REDIRECT, path);
 		}
 		return this;

@@ -1,5 +1,6 @@
+**********
 Ajax Modal
-==========
+**********
 
 .. rubric::
 	Opening a modal with an ajax call
@@ -73,11 +74,20 @@ The fragments are:
 	Some custom script to be run when the modal code is inserted on page.
 	
 The code uses standard Thymeleaf `fragment <https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#template-layout>`_ syntax.
-In the following example, four fragments have been defined in the same html file.
+To remove a fragment from the modal, use the ~{} expression. To keep the default value use the _ character: 
+
+In the following example, three fragments have been defined in the same html file and the footer has been removed.
 
 .. code-block:: html
 
-	<div th:replace="/yada/modalGeneric::fragment(~{::modalTitle},~{::modalHeader},~{::modalBody},~{::modalFooter},~{::modalScript})">
+	<!DOCTYPE html>
+	<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="UTF-8"/>
+	</head>
+	<body>
+
+	<div th:replace="/yada/modalGeneric::fragment(~{::modalTitle},_,~{::modalBody},~{},~{::modalScript})">
 
 		<div th:fragment="modalTitle">This is the title</div>
 		
@@ -87,24 +97,15 @@ In the following example, four fragments have been defined in the same html file
 			</div>
 		</th:block>
 		
-		<div th:fragment="modalFooter">
-			<div class="modal-footer">
-				The footer here
-			</div>
-		</div>
-		
 		<script th:fragment="modalScript">
-			${"This is the script"}
+			/* This is the script */
 		</script>
 	
 	</div>
+	</body>
+	</html>
 
 .. todo:: Check that the example works
 
-To remove a fragment from the modal, use the ~{} syntax. To keep the default value use the _ character: 
-
-.. code-block:: html
-
-	<div th:replace="/yada/modalGeneric::fragment(~{::modalTitle},_,~{::modalBody},~{},~{})">
 
 

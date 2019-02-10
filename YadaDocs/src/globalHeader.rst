@@ -1,3 +1,3 @@
 
-.. role:: abstract
+.. role:: putSomeClassHere
 	

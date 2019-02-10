@@ -33,6 +33,9 @@ Now you can refer to C:\\Local\\jdk8 in your scripts and when you update the jav
 .. _Java: https://www.oracle.com/technetwork/java/javase/downloads/index.html
 .. _Eclipse: https://www.eclipse.org
 
+.. todo:: configure eclipse ini, run with shortcut
+
+
 The Project Skeleton
 --------------------
 
