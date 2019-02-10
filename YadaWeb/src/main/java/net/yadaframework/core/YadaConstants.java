@@ -9,7 +9,8 @@ public interface YadaConstants {
 //	String YADA_VIEW_FOLDER = "yada"; // Folder in the classpath containing yada view snippets (NO LEADING SLASH!)
 
 	/**
-	 * Chiave per il messaggio che appare in un dialog modal: testo, severity e contenuto
+	 * Chiave per il messaggio che appare in un dialog modal: testo, severity e contenuto.
+	 * 
 	 */
 	String KEY_NOTIFICATION_TOTALSEVERITY="YADA_TOTSEVERITY"; // La severity più alta tra tutti i messaggi 
 	String KEY_NOTIFICATION_TITLE="YADA_NTITLE"; 
@@ -18,9 +19,20 @@ public interface YadaConstants {
 	String KEY_NOTIFICATION_REDIRECT="YADA_REDIRECT"; 
 	String KEY_NOTIFICATION_AUTOCLOSE="YADA_AUTOCLOSE"; 
 	String KEY_NOTIFICATION_RELOADONCLOSE="YADA_RELOADONCLOSE"; 
+	String KEY_NOTIFICATION_CALLSCRIPT="YADA_CALLSCRIPT"; 
+	// Keep in sync with the above keys
+	String[] KEY_ALL = {
+		KEY_NOTIFICATION_TOTALSEVERITY, 
+		KEY_NOTIFICATION_TITLE, 
+		KEY_NOTIFICATION_BODY, 
+		KEY_NOTIFICATION_SEVERITY, 
+		KEY_NOTIFICATION_REDIRECT,
+		KEY_NOTIFICATION_AUTOCLOSE,
+		KEY_NOTIFICATION_RELOADONCLOSE,
+		KEY_NOTIFICATION_CALLSCRIPT
+	};
+
 	String VAL_NOTIFICATION_SEVERITY_ERROR="error"; 
 	String VAL_NOTIFICATION_SEVERITY_OK="ok"; 
 	String VAL_NOTIFICATION_SEVERITY_INFO="info"; 
-
-	String KEY_NOTIFICATION_CALLSCRIPT="YADA_CALLSCRIPT"; 
 }

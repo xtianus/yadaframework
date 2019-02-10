@@ -23,8 +23,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import net.yadaframework.web.YadaJsonView;
 
 /**
- * Consente di creare un'url da cui accedere direttamente a una pagina con login automatico
- *
+ * Used to create an url to access the site with an automatic login.
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -44,8 +43,8 @@ public class YadaAutoLoginToken implements Serializable {
 
 	private long token;
 	
-	private Date timestamp; // data di creazione
-	private Date expiration; // Scadenza. Null = never expire
+	private Date timestamp; // Token creation date
+	private Date expiration; // Token expiration. Null = never expire
 
 	@OneToOne
 	private YadaUserCredentials yadaUserCredentials;
