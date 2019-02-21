@@ -105,7 +105,9 @@ In the following example, three fragments have been defined in the same html fil
 	</body>
 	</html>
 
-.. todo:: Check that the example works
+
+.. image:: _static/img/modal-example.nofooter.jpg
+
 
 
 
