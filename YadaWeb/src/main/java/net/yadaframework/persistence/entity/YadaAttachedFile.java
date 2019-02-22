@@ -68,7 +68,7 @@ public class YadaAttachedFile {
 	protected String filenameDesktop; // only for images on desktop, null for non-images
 	
 	/**
-	 * Only for non-images, or when no mobile size is specified (will be the same as filenameDesktop)
+	 * Only for non-images, or when no alternative size is specified (will be the same as filenameDesktop)
 	 */
 	protected String filename;
 	
