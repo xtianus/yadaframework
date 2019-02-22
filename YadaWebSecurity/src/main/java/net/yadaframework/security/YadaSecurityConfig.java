@@ -44,6 +44,7 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired protected YadaAuthenticationFailureHandler failureHandler;
 	@Autowired protected YadaAuthenticationSuccessHandler successHandler;
+	@Autowired protected YadaLogoutSuccessHandler logoutSuccessHandler;
 	
 	/**
 	 * Configures basic security settings. Must be overridden to configure url protections.
@@ -53,6 +54,7 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 		failureHandler.setFailureUrlNormalRequest("/login"); 
 		successHandler.setDefaultTargetUrlAjaxRequest("/ajaxLoginOk"); // Returns the string "loginSuccess"
 		successHandler.setDefaultTargetUrlNormalRequest("/");
+		logoutSuccessHandler.setDefaultTargetUrl("/"); // language path will be added in the handler
 		
 		http
 			.headers().disable()
@@ -60,8 +62,9 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 			.csrf().disable()
 	        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED).and()
 		    .logout()
-		    .logoutUrl("/logout") // POST con il CSRF attivo, GET altrimenti
-		    	.logoutSuccessUrl("/") // TODO rimanere nella pagina corrente se non è protetta!
+		    	.logoutUrl("/logout") // POST con il CSRF attivo, GET altrimenti
+		    	// .logoutSuccessUrl("/") // TODO rimanere nella pagina corrente se non è protetta!
+		    	.logoutSuccessHandler(logoutSuccessHandler)
 		    	// .invalidateHttpSession(false) // Lascio che la session si cancelli quando esco
 		    	.and()
 		    .formLogin()
@@ -74,11 +77,11 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 	//    .apply(new SpringSocialConfigurer());        // .requireCsrfProtectionMatcher(new MyRequestMatcher());
 	        	//	new NegatedRequestMatcher(new AntPathRequestMatcher("/ajaxStoryBunch", null)));
 		
-		// Resetto la RequestCache in modo che salvi le request di qualunque tipo, anche ajax, 
-		// altrimenti il meccanismo del redirect alla pagina di partenza non funziona con le chiamate ajax.
-		// Questo sarebbe il filtro impostato senza il reset, configurato in RequestCacheConfigurer:
-		// AndRequestMatcher [requestMatchers=[NegatedRequestMatcher [requestMatcher=Ant [pattern='/**/favicon.ico']], NegatedRequestMatcher [requestMatcher=MediaTypeRequestMatcher [contentNegotiationStrategy=org.springframework.web.accept.HeaderContentNegotiationStrategy@16f239b, matchingMediaTypes=[application/json], useEquals=false, ignoredMediaTypes=[*/*]]], NegatedRequestMatcher [requestMatcher=RequestHeaderRequestMatcher [expectedHeaderName=X-Requested-With, expectedHeaderValue=XMLHttpRequest]]]]
 		if (yadaConfiguration.isLocalePathVariableEnabled()) {
+			// Resetto la RequestCache in modo che salvi le request di qualunque tipo, anche ajax, 
+			// altrimenti il meccanismo del redirect alla pagina di partenza non funziona con le chiamate ajax.
+			// Questo sarebbe il filtro impostato senza il reset, configurato in RequestCacheConfigurer:
+			// AndRequestMatcher [requestMatchers=[NegatedRequestMatcher [requestMatcher=Ant [pattern='/**/favicon.ico']], NegatedRequestMatcher [requestMatcher=MediaTypeRequestMatcher [contentNegotiationStrategy=org.springframework.web.accept.HeaderContentNegotiationStrategy@16f239b, matchingMediaTypes=[application/json], useEquals=false, ignoredMediaTypes=[*/*]]], NegatedRequestMatcher [requestMatcher=RequestHeaderRequestMatcher [expectedHeaderName=X-Requested-With, expectedHeaderValue=XMLHttpRequest]]]]
 			http.requestCache().requestCache(new YadaLocalePathRequestCache());
 		} else {
 			http.requestCache().requestCache(new HttpSessionRequestCache());
