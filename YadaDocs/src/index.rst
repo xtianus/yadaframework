@@ -5,13 +5,16 @@ Yada Framework
 ==============
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Contents
 
 	Forms <forms/overview>
+	File Upload <forms/uploads>
+	Data Tables <datatables>
 	Ajax <ajax>
 	Ajax Modal <ajaxModal>
-	New Project <newEclipseProject>
+	Notification Modal <notificationModal>
+	New Eclipse Project <newEclipseProject>
 ..	TODO: packages <javadoc/packages>
 	
 Indices and tables
