@@ -404,9 +404,9 @@ public class YadaDataTableDao {
 			String alias = context + "_" + current; // Adding the context to the alias to prevent name clashes - TODO maybe all the preceding path should be added?
 			yadaSql.join("left join " + context + "." + current + " " + alias); // e.location location
 			if (currentClass.equals(Map.class)) {
-				// Need to add a condition on the map key
+				// Need to add a condition on the map key. Need to check for null to handle absent data
 				String keyValue = parts[1]; // en
-				String whereToAdd = "KEY("+alias+")='" + keyValue + "'"; // KEY(name)='en';
+				String whereToAdd = "(KEY("+alias+") is null or KEY("+alias+")='" + keyValue + "')"; // (KEY(name) is null or KEY(name)='en');
 				if (yadaSql.getWhere().indexOf(whereToAdd)<0) {
 					yadaSql.where(whereToAdd).and();
 				}
@@ -436,14 +436,15 @@ public class YadaDataTableDao {
 				// Last element of the path - if it's a YadaPersistentEnum we still need a join for the map
 				// if (yadaUtil.getType(targetClass, attributePath) == YadaPersistentEnum.class) {
 				if (YadaPersistentEnum.class.equals(currentClass)) {
+					String alias = attributePath + "_langToText";
 					yadaSql.join("left join " + context + "." + attributePath + " " + attributePath); 	// left join user.status status
-					yadaSql.join("left join " + attributePath + ".langToText langToText");				// left join status.langToText langToText
-					String whereToAdd = "KEY(langToText)=:yadalang";
+					yadaSql.join("left join " + attributePath + ".langToText " + alias);	// left join status.langToText status_langToText
+					String whereToAdd = "(KEY("+alias+") is null or KEY("+alias+")=:yadalang)";
 					if (yadaSql.getWhere().indexOf(whereToAdd)<0) {
 						yadaSql.where(whereToAdd).and();
 						yadaSql.setParameter("yadalang", LocaleContextHolder.getLocale().getLanguage());
 					}
-					return "langToText";
+					return alias;
 				}
 //			} catch (NoSuchFieldException e) {
 //				log.error("No field {} found on class {} (ignored)", attributePath, targetClass.getName());
