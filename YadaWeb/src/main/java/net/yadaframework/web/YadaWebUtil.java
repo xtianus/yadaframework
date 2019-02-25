@@ -57,6 +57,7 @@ import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
 import net.yadaframework.core.YadaLocalEnum;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 @Service
 public class YadaWebUtil {
@@ -69,6 +70,47 @@ public class YadaWebUtil {
 	public final Pageable FIND_ONE = new PageRequest(0, 1); 
 	
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
+	
+	/**
+	 * Create a redirect string to be returned by a @Controller, taking into account the locale in the path.
+	 * If you can do a redirect with a relative url ("some/url") you don't need to use this method because the language path
+	 * won't be overwritten. Otherwise if you need to use an absolute url ("/some/url") then this method inserts the appropriate language path
+	 * in the url (and any parameters at the end too).
+	 * @param targetUrl the redirect target, like "/some/place"
+	 * @param locale can be null if the locale is not in the path, but then why use this method?
+	 * @param params optional request parameters to be set on the url
+	 * @return
+	 */
+	public String redirectString(String targetUrl, Locale locale, String...params) {
+		StringBuilder result = new StringBuilder("redirect:");
+		if (config.isLocalePathVariableEnabled()) {
+			// The language is added only to absolute urls
+			if (targetUrl.startsWith("/")) {
+				if (locale==null) {
+					throw new YadaInvalidUsageException("Locale is needed when using the locale path variable with an absolute redirect");
+				}
+				result.append("/").append(locale.getLanguage());
+			}
+		}
+		result.append(targetUrl);
+		if (params!=null && params.length>0) {
+			result.append("?");
+			boolean name = true;
+			boolean start=true;
+			for (String param : params) {
+				if (name && !start) {
+					result.append("&");
+				}
+				result.append(param);
+				if (name) {
+					result.append("=");
+				}
+				start=false;
+				name=!name;
+			}
+		}
+		return result.toString();
+	}
 
 	/**
 	 * Make a zip file and send it to the client. The temp file is automatically deleted.

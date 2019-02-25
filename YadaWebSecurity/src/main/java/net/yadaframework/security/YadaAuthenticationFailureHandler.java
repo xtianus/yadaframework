@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
@@ -31,6 +32,7 @@ import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepo
  *
  */
 @Component
+@Scope("prototype") // In case you have more than one YadaSecurityConfig bean
 public class YadaAuthenticationFailureHandler implements AuthenticationFailureHandler {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	

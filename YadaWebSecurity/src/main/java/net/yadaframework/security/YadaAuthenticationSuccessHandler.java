@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -20,6 +21,7 @@ import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepo
 
 // Si può inserire il codice da eseguire dopo un login che ha avuto successo
 @Component
+@Scope("prototype") // In case you have more than one YadaSecurityConfig bean
 public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	

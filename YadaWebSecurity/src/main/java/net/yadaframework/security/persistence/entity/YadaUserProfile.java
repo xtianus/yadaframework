@@ -16,6 +16,8 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.LocaleUtils;
+
 import com.fasterxml.jackson.annotation.JsonView;
 
 import net.yadaframework.web.YadaJsonView;
@@ -124,6 +126,14 @@ public class YadaUserProfile implements Serializable {
 
 	public void setLocale(Locale locale) {
 		this.locale = locale;
+	}
+	
+	/**
+	 * Set the locale from a locale string in the form ll_CC like en_US. Case sensitive.
+	 */
+	@Transient
+	public void setLocale(String localeString) {
+		this.locale = LocaleUtils.toLocale(localeString);
 	}
 
 	@Override

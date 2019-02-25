@@ -150,6 +150,19 @@ public class YadaUserCredentials implements Serializable {
 		}
 	}
 	
+	/**
+	 * Remove a role if present
+	 * @param role
+	 */
+	@Transient
+	public void removeRole(Integer role) {
+		if (roles!=null) {
+			if (hasRole(role)) {
+				roles.remove(role);
+			}
+		}
+	}
+	
 	public String getUsername() {
 		return username;
 	}

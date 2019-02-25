@@ -6,6 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +81,9 @@ public class YadaFileManager {
 	 * @see #deleteFileAttachment(Long)
 	 */
 	public void deleteFileAttachment(YadaAttachedFile yadaAttachedFile) {
+		if (yadaAttachedFile==null) {
+			return;
+		}
 		if (yadaAttachedFile.getFilename() != null) {
 			getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilename()).delete();
 		}
@@ -112,11 +118,7 @@ public class YadaFileManager {
 		if (imageName==null) {
 			return getDesktopImageUrl(yadaAttachedFile);
 		}
-		StringBuilder result = new StringBuilder(config.getContentUrl());
-		result.append(yadaAttachedFile.getRelativeFolderPath())
-			.append("/")
-			.append(imageName);
-		return result.toString();
+		return computeUrl(yadaAttachedFile, imageName);
 	}
 	
 	/**
@@ -130,8 +132,25 @@ public class YadaFileManager {
 		}
 		String imageName = yadaAttachedFile.getFilenameDesktop();
 		if (imageName==null) {
-			imageName = yadaAttachedFile.getFilename();
+			return getFileUrl(yadaAttachedFile);
 		}
+		return computeUrl(yadaAttachedFile, imageName);
+	}
+	
+	/**
+	 * Returns the (relative) url of the file.
+	 * @param yadaAttachedFile
+	 * @return
+	 */
+	public String getFileUrl(YadaAttachedFile yadaAttachedFile) {
+		if (yadaAttachedFile==null) {
+			return null;
+		}
+		String imageName = yadaAttachedFile.getFilename();
+		return computeUrl(yadaAttachedFile, imageName);
+	}
+
+	private String computeUrl(YadaAttachedFile yadaAttachedFile, String imageName) {
 		StringBuilder result = new StringBuilder(config.getContentUrl());
 		result.append(yadaAttachedFile.getRelativeFolderPath())
 		.append("/")
@@ -162,19 +181,46 @@ public class YadaFileManager {
 	}
 	
 	/**
+	 * Replace the file associated with the current attachment
+	 * @param currentAttachedFile an existing attachment 
+	 * @param managedFile the new file to set
+	 * @param targetExtension optional, to convert image file formats
+	 * @return
+	 * @throws IOException
+	 */
+	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, String namePrefix, String targetExtension) throws IOException {
+		return attachReplace(currentAttachedFile, managedFile, namePrefix, targetExtension, null, null);
+	}
+	
+	/**
+	 * Replace the file associated with the current attachment
+	 * @param currentAttachedFile an existing attachment 
+	 * @param managedFile the new file to set
+	 * @param targetExtension optional, to convert image file formats
+	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
+	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
+	 * @return
+	 * @throws IOException
+	 */
+	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+		deleteFileAttachment(currentAttachedFile); // Delete any previous attached files
+		return attach(currentAttachedFile, managedFile, namePrefix, targetExtension, desktopWidth, mobileWidth);
+	}
+	
+	/**
 	 * Copies a managed file to the destination folder, creating a database association to assign to an Entity.
 	 * The name of the file is in the format [basename]managedFileName_id.ext.
 	 * Images are not resized.
 	 * @param attachToId the id of the entity to which the file should be attached
 	 * @param managedFile an uploaded file, can be an image or not
 	 * @param relativeFolderPath path of the target folder relative to the contents folder
-	 * @param baseName prefix to attach on the file name. Add a separator if you need one. Can be null.
+	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
 	 * @return
 	 * @throws IOException 
 	 * @see {@link #attach(File, String, String, String, Integer, Integer)}
 	 */
-	public YadaAttachedFile attach(Long attachToId, File managedFile, String relativeFolderPath, String baseName) throws IOException {
-		return attach(attachToId, managedFile, relativeFolderPath, baseName, null, null, null);
+	public YadaAttachedFile attachNew(Long attachToId, File managedFile, String relativeFolderPath, String namePrefix) throws IOException {
+		return attachNew(attachToId, managedFile, relativeFolderPath, namePrefix, null, null, null);
 	}
 	
 	/**
@@ -182,8 +228,8 @@ public class YadaFileManager {
 	 * The name of the file is in the format [basename]managedFileName_id.ext
 	 * @param attachToId the id of the entity to which the file should be attached
 	 * @param managedFile an uploaded file, can be an image or not
-	 * @param relativeFolderPath path of the target folder relative to the contents folder
-	 * @param baseName prefix to attach on the file name. Add a separator if you need one. Can be null.
+	 * @param relativeFolderPath path of the target folder relative to the contents folder, starting with a slash /
+	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
 	 * @param targetExtension optional, to convert image file formats
 	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
 	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
@@ -191,54 +237,70 @@ public class YadaFileManager {
 	 * @throws IOException
 	 * @see {@link #attach(File, String, String, String)} 
 	 */
-	public YadaAttachedFile attach(Long attachToId, File managedFile, String relativeFolderPath, String baseName, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
-		File targetFolder = new File(config.getContentPath(), relativeFolderPath);
-		targetFolder.mkdirs();
-		String[] filenameParts = YadaUtil.splitFileNameAndExtension(managedFile.getName());
-		String filenameNoCounter = filenameParts[0];
-		String origExtension = filenameParts[1]; // jpg or pdf
-//		String filenameNoCounter = YadaUtil.stripCounterFromFilename(managedFile.getName(), COUNTER_SEPARATOR);
-		//
-		// Now prefix doesn't have any counter at the end
+	public YadaAttachedFile attachNew(Long attachToId, File managedFile, String relativeFolderPath, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+		if (!relativeFolderPath.startsWith("/") && !relativeFolderPath.startsWith("\\")) {
+			relativeFolderPath = "/" + relativeFolderPath;
+			log.warn("The relativeFolderPath '{}' should have a leading slash (fixed)", relativeFolderPath);
+		}
 		YadaAttachedFile yadaAttachedFile = new YadaAttachedFile();
 		yadaAttachedFile.setAttachedToId(attachToId);
-		yadaAttachedFile.setClientFilename(managedFile.getName());
+		yadaAttachedFile.setRelativeFolderPath(relativeFolderPath);
 		yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile); // Get the id
+		File targetFolder = new File(config.getContentPath(), relativeFolderPath);
+		targetFolder.mkdirs();
+		return attach(yadaAttachedFile, managedFile, namePrefix, targetExtension, desktopWidth, mobileWidth);
+	}
+	
+	private YadaAttachedFile attach(YadaAttachedFile yadaAttachedFile, File managedFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+		//
+		String relativeFolderPath = yadaAttachedFile.getRelativeFolderPath();
+		File targetFolder = new File(config.getContentPath(), relativeFolderPath);
+		String[] filenameParts = YadaUtil.splitFileNameAndExtension(managedFile.getName());
+		String origFilename = filenameParts[0];
+		String origExtension = filenameParts[1]; // jpg or pdf
+		//
+		yadaAttachedFile.setUploadTimestamp(new Date());
+		yadaAttachedFile.setClientFilename(managedFile.getName());
 		yadaAttachedFile.setSortOrder(yadaAttachedFile.getId()); // Set the sort order to the id, so that this will be the last image in a list
-		String targetFilenamePrefix = baseName.trim() + filenameNoCounter + COUNTER_SEPARATOR + yadaAttachedFile.getId(); // product_2631
+		String targetFilenamePrefix = StringUtils.trimToEmpty(namePrefix) + origFilename + COUNTER_SEPARATOR + yadaAttachedFile.getId(); // product_2631
 		targetFilenamePrefix = YadaUtil.reduceToSafeFilename(targetFilenamePrefix, true);
 		boolean imageExtensionChanged = targetExtension!=null && targetExtension.compareToIgnoreCase(origExtension)!=0;
 		boolean requiresTransofmation = imageExtensionChanged || desktopWidth!=null || mobileWidth!=null; 
 		if (targetExtension==null) {
 			targetExtension = origExtension;
 		}
+		boolean needToDeleteOriginal =  config.isFileManagerDeletingUploads();
 		if (!requiresTransofmation) {
-			// No transformation: copy bytes
 			File targetFile = new File(targetFolder, targetFilenamePrefix + "." + targetExtension);
-			try (InputStream inputStream = new FileInputStream(managedFile); OutputStream outputStream = new FileOutputStream(targetFile)) {
-				IOUtils.copy(inputStream, outputStream);
-			} catch (IOException e) {
-				throw e;
+			if (needToDeleteOriginal) {
+				// Just move the old file to the new destination
+				Files.move(managedFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			} else {
+				// Copy bytes
+				try (InputStream inputStream = new FileInputStream(managedFile); OutputStream outputStream = new FileOutputStream(targetFile)) {
+					IOUtils.copy(inputStream, outputStream);
+				} catch (IOException e) {
+					throw e;
+				}
 			}
 			yadaAttachedFile.setFilename(targetFile.getName());
 		} else {
 			// Transformation: copy with imagemagick
+			// If desktopWidth is null, the image original size does not change
 			File desktopFile = resizeIfNeeded(managedFile, targetFolder, targetFilenamePrefix, targetExtension, desktopWidth);
 			yadaAttachedFile.setFilenameDesktop(desktopFile.getName());
+			yadaAttachedFile.setFilename(desktopFile.getName());
 			if (mobileWidth==null) {
 				yadaAttachedFile.setFilenameMobile(null); // No mobile image
-				yadaAttachedFile.setFilename(desktopFile.getName());
 			} else {
 				File mobileFile = resizeIfNeeded(managedFile, targetFolder, targetFilenamePrefix, targetExtension, mobileWidth);
 				yadaAttachedFile.setFilenameMobile(mobileFile.getName());
-				yadaAttachedFile.setFilename(null);
+			}
+			if (needToDeleteOriginal) {
+				log.debug("Deleting original file {}", managedFile.getAbsolutePath());
+				managedFile.delete();
 			}
 		}
-		if (config.isFileManagerDeletingUploads()) {
-			log.debug("Deleting file {}", managedFile.getAbsolutePath());
-			managedFile.delete();
-		}
-		yadaAttachedFile.setRelativeFolderPath(relativeFolderPath);
 		return yadaAttachedFileRepository.save(yadaAttachedFile);
 	}
 	
