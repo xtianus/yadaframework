@@ -321,6 +321,9 @@ public class YadaDataTableDao {
 		}
 		String searchConditions = searchSql.getWhere();
 		if (StringUtils.isNotBlank(searchConditions)) {
+			if (StringUtils.isNotBlank(yadaSql.getWhere())) {
+				yadaSql.and();
+			}
 			yadaSql.where("(" + searchConditions + ")").and();
 		}
 		// Sorting

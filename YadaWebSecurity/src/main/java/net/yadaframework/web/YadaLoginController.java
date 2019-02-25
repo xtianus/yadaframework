@@ -4,11 +4,14 @@ import java.net.URLDecoder;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.security.YadaAuthenticationFailureHandler;
 import net.yadaframework.security.YadaUserDetailsService;
 import net.yadaframework.security.components.YadaTokenHandler;
 import net.yadaframework.security.persistence.entity.YadaAutoLoginToken;
@@ -39,6 +42,8 @@ public class YadaLoginController {
 	@Autowired private YadaTokenHandler yadaTokenHandler;
 	@Autowired private YadaAutoLoginTokenRepository yadaAutoLoginTokenRepository;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
+	@Autowired private YadaAuthenticationFailureHandler failureHandler;
+
 
 	@RequestMapping("/ajaxLoginForm")
 	public String ajaxLoginForm(Model model) {
@@ -52,11 +57,22 @@ public class YadaLoginController {
 	}
 	
 	@RequestMapping("/autologin/{tokenLink}")
-	public String autologin(@PathVariable String tokenLink, String action, RedirectAttributes  redirectAttributes, HttpSession session) {
+	public String autologin(@PathVariable String tokenLink, String action, RedirectAttributes  redirectAttributes, HttpSession session, HttpServletRequest request) {
 		try {
 			action = URLDecoder.decode(action, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			log.error("This will never happen (ignored)", e);
+		}
+		// I wanted to logout the current user but it doesn't work: if I use SecurityContextLogoutHandler().logout() the Session is cleared
+		// and I get a login page, while if I use request.logout() the session is not clear but a new session copy of the current one before
+		// the yadaSession.clearCaches() call is created, so that I have a mixed situation where the spring user is the new one and the session
+		// contains the old UserProfile id.
+		// This is probably because the HTTPSession contains the UserPrincipal and other stuff that is not reset.	
+		// So I just exit.
+		if (yadaSession.getCurrentUserProfileId()!=null) {
+			// TODO localized message
+			yadaNotify.title("Invalid Link", redirectAttributes).error().message("You can't perform an autologin while logged in").add();
+			return "redirect:"+action;
 		}
 		long[] parts = yadaTokenHandler.parseLink(tokenLink);
 		if (parts!=null && parts.length==2) {
@@ -70,21 +86,36 @@ public class YadaLoginController {
 					YadaUserCredentials yadaUserCredentials = yadaAutoLoginToken.getYadaUserCredentials();
 					log.info("Performing autologin with token {} to username {} ", tokenLink, yadaUserCredentials.getUsername());
 					yadaSession.clearCaches();
+//					try {
+//						// Attempt logout of current user
+//						// https://stackoverflow.com/questions/5727380/how-to-manually-log-out-a-user-with-spring-security/5727444
+//						request.logout();
+//						// new SecurityContextLogoutHandler().logout(request, null, null);
+//					} catch (ServletException e) {
+//						log.debug("Can't logout current user (ignored)");
+//					}
 					yadaUserDetailsService.authenticateAs(yadaUserCredentials);
 					// Questo l'ho disabilitato fintanto che non aggiusto che l'autenticazione (social) non ti porta sulla pagina inizialmente richiesta
 					// yadaAutoLoginTokenRepository.delete(yadaAutoLoginToken); // Tokens are deleted at first use (for security reasons)
 				} else {
-					log.debug("YadaAutoLoginToken expired for {}", tokenLink);
+					log.info("YadaAutoLoginToken expired for {}", tokenLink);
+					// TODO localized message
+					yadaNotify.title("Link expired", redirectAttributes).error().message("The provided address is no longer valid").add();
+					return "redirect:"+failureHandler.getFailureUrlNormalRequest(); // Redirect to login page
 				}
 			} else {
 				// Token expired or forged
-				log.debug("No yadaAutoLoginToken found for {}", tokenLink);
+				log.info("No yadaAutoLoginToken found for {}", tokenLink);
+				// TODO localized message
+				yadaNotify.title("Link expired", redirectAttributes).error().message("The provided address is no longer valid").add();
+				return "redirect:"+failureHandler.getFailureUrlNormalRequest(); // Redirect to login page
 			}
 		} else {
 			// TODO localized message
 			yadaNotify.title("Invalid URL", redirectAttributes).error().message("The provided address is invalid").add();
+			return "redirect:"+failureHandler.getFailureUrlNormalRequest(); // Redirect to login page
 		}
-		// If not authenticated, this will trigger authentication.
+		// If not authenticated, this will trigger authentication but will clear any yadaNotify because of the double redirect.
 		return "redirect:"+action;
 	}
 

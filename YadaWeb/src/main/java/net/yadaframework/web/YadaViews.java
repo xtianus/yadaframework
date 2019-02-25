@@ -34,7 +34,7 @@ public interface YadaViews {
 	/**
 	 * Ajax method not allowed.
 	 */
-	String AJAX_FORBIDDEN = "/yada/ajaxForbidden";
+	String AJAX_FORBIDDEN = "/yada/ajaxForbidden"; // NEVER USED?
 	
 	/**
 	 * Perform a page reload when returning from ajax method
@@ -57,4 +57,9 @@ public interface YadaViews {
 	 * can be added as a model attribute named "errorDescription" before returning.
 	 */
 	String AJAX_SERVER_ERROR = "/yada/ajaxError";
+	
+	/**
+	 * Model attribute that contains the custom error description
+	 */
+	String AJAX_SERVER_ERROR_DESCRIPTION = "errorDescription";
 }

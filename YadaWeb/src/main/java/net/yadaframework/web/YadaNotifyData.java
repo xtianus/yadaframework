@@ -30,7 +30,6 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 public class YadaNotifyData {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
-	static final String MODAL_VIEW = "/yada/modalNotify";
 	private Model model;
 	private RedirectAttributes redirectAttributes;
 	private String severity = VAL_NOTIFICATION_SEVERITY_OK;
@@ -63,7 +62,7 @@ public class YadaNotifyData {
 			return null;
 		}
 		activateNormal();
-		return MODAL_VIEW;
+		return YadaViews.AJAX_NOTIFY;
 	}
 
 	/**
@@ -157,7 +156,7 @@ public class YadaNotifyData {
 	public YadaNotifyData redirectOnClose(String path) {
 		if (model!=null) {
 			model.addAttribute(KEY_NOTIFICATION_REDIRECT, path);
-		} else {
+		} else if (redirectAttributes!=null) {
 			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_REDIRECT, path);
 		}
 		return this;

@@ -34,20 +34,13 @@ public class YadaSecurityEmailService {
 	private transient final Logger log = LoggerFactory.getLogger(getClass());	
 	
 	@Autowired private YadaConfiguration config;
-	@Autowired private JavaMailSender mailSender;
-	
 	@Resource private SpringTemplateEngine emailTemplateEngine;
-    
-    @Autowired private MessageSource messageSource;
-    
-    @Autowired private ServletContext servletContext;
-    @Autowired private ApplicationContext applicationContext;
     @Autowired private YadaTokenHandler yadaTokenHandler;
-	@Autowired private YadaAutoLoginTokenRepository yadaAutoLoginTokenRepository;
     @Autowired private YadaWebUtil yadaWebUtil;
     @Autowired private YadaEmailService yadaEmailService;
-    @Autowired private YadaUtil yadaUtil;
-    
+	@Autowired private YadaAutoLoginTokenRepository yadaAutoLoginTokenRepository;
+	@Autowired private YadaUtil yadaUtil;
+	
     /**
      * Convert a site-relative link to absolute, because in emails we can't use @{}.
      * Example: th:href="${beans.yadaEmailService.buildLink('/read/234')}"
@@ -134,6 +127,7 @@ public class YadaSecurityEmailService {
      * @param hashCommand optional "anchor" starting with #, e.g. "#storyId=49;command=showMessages"
      * @return
      */
+    @Deprecated // Use the same method on yadaTokenHandler
     public String makeAutologinLink(String targetAction, YadaUserCredentials targetUser, String hashCommand) {
 		String myServerAddress = config.getServerAddress();
 		Date expiration = yadaUtil.addHours(new Date(), config.getAutologinExpirationHours());
@@ -148,6 +142,7 @@ public class YadaSecurityEmailService {
      * @param hashCommand optional "anchor", e.g. "#storyId=49;command=showMessages"
      * @return
      */
+    @Deprecated // Use the same method on yadaTokenHandler
     public String makeAutologinLink(String targetAction, YadaUserCredentials targetUser, Date expiration, String hashCommand, HttpServletRequest request) {
     	String myServerAddress = yadaWebUtil.getWebappAddress(request);
     	return makeAutologinLink(targetAction, targetUser, expiration, hashCommand, myServerAddress);
@@ -162,6 +157,7 @@ public class YadaSecurityEmailService {
      * @param myServerAddress our server address
      * @return
      */
+    @Deprecated // Use the same method on yadaTokenHandler
     public String makeAutologinLink(String targetAction, YadaUserCredentials targetUser, Date expiration, String hashCommand, String myServerAddress) {
     	YadaAutoLoginToken yadaAutoLoginToken = new YadaAutoLoginToken();
     	yadaAutoLoginToken.setExpiration(expiration);
@@ -170,7 +166,7 @@ public class YadaSecurityEmailService {
     	yadaAutoLoginTokenRepository.deleteExpired(); // Rimuovo quelle vecchie, per pulizia
     	StringBuilder result = new StringBuilder(myServerAddress);
     	result.append("/autologin/");
-    	result.append(yadaTokenHandler.makeLink(yadaAutoLoginToken, null));
+    	result.append(yadaTokenHandler.makeLink(yadaAutoLoginToken.getId(), yadaAutoLoginToken.getToken(), null));
 		result.append("?action=").append(yadaWebUtil.urlEncode(targetAction));
 		if (hashCommand!=null) {
 			result.append(hashCommand);
@@ -184,6 +180,7 @@ public class YadaSecurityEmailService {
      * @param moreParameters not-encoded request parameters like "num=1&size=10" - no "?" nor initial "&" must be specified
      * @return the original string with the new parameters inserted at the end: "xxx?action=aaa%26num=1%26size=10#command"
      */
+    @Deprecated // Use the same method on yadaTokenHandler
     public String extendAutologinLink(String autologinLink, String moreParameters) {
 		String[] parts = autologinLink.split("\\?");
 		String url = parts[0];

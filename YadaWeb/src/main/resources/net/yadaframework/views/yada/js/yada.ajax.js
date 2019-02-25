@@ -450,13 +450,21 @@
 			var cancelButton = $element.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 			yada.confirm(confirmText, function(result) {
 				if (result==true) {
-					yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, $element.attr('data-timeout'), noLoader);
+					yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, getTimeoutValue($element), noLoader);
 				}
 			}, okButton, cancelButton);
 		} else {
 			yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, null, noLoader);
 		}
 		return true; // Run other listeners
+	}
+	
+	function getTimeoutValue($element) {
+		var timeout = $element.attr('data-yadaTimeout');
+		if (timeout==null) {
+			timeout = $element.attr('data-timeout'); // Legacy
+		}
+		return timeout;
 	}
 	
 	/**
@@ -829,9 +837,8 @@
 				}
 			};
 			var method = $(this).attr('method') || "POST";
-			// yada.ajax($(this).attr('action'), $.param(data), joinedHandler.bind(this), $(this).attr('method'), $(this).attr('data-timeout'));
 			
-			yada.ajax(action, data, joinedHandler.bind(this), method, $(this).attr('data-timeout'), noLoader);
+			yada.ajax(action, data, joinedHandler.bind(this), method, getTimeoutValue($(this)), noLoader);
 			clickedButton = null;
 			return false; // Important so that the form is not submitted by the browser too
 		}) // submit()

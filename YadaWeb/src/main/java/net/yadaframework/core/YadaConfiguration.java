@@ -778,7 +778,7 @@ public abstract class YadaConfiguration {
 	}
 
 	public int getMaxFileUploadSizeBytes() {
-		return configuration.getInt("config/maxFileUploadSizeBytes", 10000000); // 10 mega default
+		return configuration.getInt("config/maxFileUploadSizeBytes", 50000000); // 50 mega default
 	}
 	
 	/**

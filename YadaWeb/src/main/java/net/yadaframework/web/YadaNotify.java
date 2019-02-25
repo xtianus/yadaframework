@@ -23,13 +23,14 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 /**
  * Build a notification dialog to be shown on the response page or after a redirect.
  * More than one notification can be saved for the same request: all messages will be shown in one dialog.
- * A single instance can be reused after changing its parameters. Multiple instances can be used too. 
- * The last method called on the instance must be yadaSave() to store the configuration values.
+ * A single instance can be reused after changing its parameters (but not the title). Multiple instances can be used too.
+ * By setting the title you create a new instance so previous parameters are reset. 
+ * The last method called on the instance must be add() to store the configuration values.
  * Example: <br/>
  * <pre>
-return YadaNotify.instance(model).yadaOk()
-	.yadaTitle("Info Accepted").yadaMessage("Thank you for your support")
-	.yadaAutoclose(2000).yadaReloadOnClose().yadaSave();
+return yadaNotify.title("All good").ok()
+	.message("Thank you for your support")
+	.autoclose(2000).reloadOnClose().add();
 </pre>
  */
 @Component
@@ -45,10 +46,7 @@ public class YadaNotify {
 	@Deprecated private String title;
 	@Deprecated private String message;
 	@Deprecated private Locale locale;
-		
-//	private YadaNotify() {
-//	}
-	
+
 	/**
 	 * Initialise an empty instance
 	 * @param model
@@ -68,7 +66,7 @@ public class YadaNotify {
 	}
 
 	/**
-	 * Initialise the instance
+	 * Initialise the instance with a title
 	 * @param title the notification title
 	 * @param model
 	 * @return
@@ -78,7 +76,7 @@ public class YadaNotify {
 	}
 	
 	/**
-	 * Initialise the instance
+	 * Initialise the instance with a title and a specific locale
 	 * @param title the notification title
 	 * @param model
 	 * @return
@@ -89,7 +87,7 @@ public class YadaNotify {
 
 	
 	/**
-	 * Initialise the instance
+	 * Initialise the instance with a title, to be displayed after a redirect
 	 * @param title the notification title
 	 * @param redirectAttributes
 	 * @return
@@ -99,7 +97,7 @@ public class YadaNotify {
 	}
 
 	/**
-	 * Initialise the instance
+	 * Initialise the instance with a title and a specific locale, to be displayed after a redirect
 	 * @param title the notification title
 	 * @param redirectAttributes
 	 * @return
@@ -109,7 +107,7 @@ public class YadaNotify {
 	}
 
 	/**
-	 * Initialise the instance
+	 * Initialise the instance with a title formed with a key and its optional parameters for the message.properties in the Request locale
 	 * @param model
 	 * @param titleKeyAndArgs the title key, followed by optional arguments to be replaced in the localized value
 	 * @return
@@ -149,6 +147,37 @@ public class YadaNotify {
 		return new YadaNotifyData(redirectAttributes, messageSource, locale).setTitleKey(titleKeyAndArgs);
 	}
 	
+	private void clearAll(Map keyMap) {
+		for (String key : KEY_ALL) {
+			keyMap.remove(key);
+		}
+	}
+	/**
+	 * Clear all previously added messages.
+	 * @param model can be null
+	 * @param redirectAttributes can be null
+	 * @param request can be null
+	 * @return true if some previous message was found before deleting it
+	 */
+	public boolean clearAll(Model model, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+		boolean result = false;
+		if (model!=null) {
+			result = model.containsAttribute(KEY_NOTIFICATION_TITLE);
+			clearAll(model.asMap());
+		}
+		if (redirectAttributes!=null) {
+			result |= redirectAttributes.getFlashAttributes().containsKey(KEY_NOTIFICATION_TITLE);
+			clearAll(redirectAttributes.getFlashAttributes());
+		}
+		if (request!=null) {
+			Map<String, ?> flashMap = RequestContextUtils.getInputFlashMap(request);
+			if (flashMap!=null) {
+				result |= flashMap.containsKey(KEY_NOTIFICATION_TITLE);
+				clearAll(flashMap);
+			}
+		}
+		return result;
+	}
 	
 	/**
 	 * Test if a modal is going to be opened when back to the view (usually after a redirect)
@@ -544,7 +573,7 @@ public class YadaNotify {
 	 * @return
 	 */
 	public String getViewName() {
-		return YadaNotifyData.MODAL_VIEW;
+		return YadaViews.AJAX_NOTIFY;
 	}
 
 }

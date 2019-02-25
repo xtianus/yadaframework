@@ -29,6 +29,8 @@
 			<properties>mail.smtp.auth=true</properties>
 			<properties>mail.smtp.starttls.enable=true</properties>
 			<properties>mail.smtp.quitwait=false</properties>
+			<!-- Set this option to your mail server if you trust it and don't care checking the certificate validity, e.g. it is on your localhost -->
+			<properties>mail.smtp.ssl.trust=smtp.EXAMPLE.com</properties>
 		</smtpserver>
 		<!-- Remove this list to enable email to everyone -->
 		<validEmail>EXAMPLE@EXAMPLE.com</validEmail>

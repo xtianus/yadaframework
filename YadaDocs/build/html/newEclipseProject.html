@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>New Eclipse Project &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/yadaDocs.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
+    <script type="text/javascript" src="_static/copybutton.js"></script>
+    <script type="text/javascript" src="_static/yadaDocs.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Ajax Modal" href="ajaxModal.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">     Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajax.html">     Ajax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">     Ajax Modal</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">     New Project</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">New Eclipse Project</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#the-project-skeleton">The Project Skeleton</a></li>
+<li><a class="reference internal" href="#the-build-file">The Build File</a></li>
+<li><a class="reference internal" href="#code-generation-just-a-bit">Code Generation (just a bit)</a></li>
+<li><a class="reference internal" href="#initial-customization">Initial Customization</a></li>
+<li><a class="reference internal" href="#database-setup">Database Setup</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="ajaxModal.html" title="Previous Chapter: Ajax Modal"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Ajax Modal</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/newEclipseProject.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+  <li>
+    <a href="ajaxModal.html" title="Previous Chapter: Ajax Modal"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Ajax Modal</span>
+    </a>
+  </li>
+<form action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
+      
+  <p></p>
+<div class="section" id="new-eclipse-project">
+<h1>New Eclipse Project<a class="headerlink" href="#new-eclipse-project" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The following procedure will guide you through the creation of a new Eclipse project for your web app. At the end you will have a Web Project that can be run in a Java EE server (e.g. Tomcat) with all the needed layers set up and ready for customization:</p>
+<ul class="simple">
+<li>Database access layer with transactions (Hibernate / JPA / Spring)</li>
+<li>Web application controller (Spring)</li>
+<li>Page templates (Thymeleaf)</li>
+<li>Security (Spring)</li>
+</ul>
+<p>You will also have a basic deployment procedure already set up:</p>
+<ul class="simple">
+<li>Database schema generator</li>
+<li>Configurations for development, test and production</li>
+<li>Deployment script</li>
+</ul>
+</div>
+<div class="section" id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<p>You should have <a class="reference external" href="https://www.oracle.com/technetwork/java/javase/downloads/index.html">Java</a> and a working copy of <a class="reference external" href="https://www.eclipse.org">Eclipse</a>.
+To make your installation future-proof, save the java JDK in some folder like <code class="docutils literal notranslate"><span class="pre">C:\Local\Javas\jdk1.8.0_152</span></code> and
+make a symbolic link to it with a generic name, like</p>
+<div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="k">mklink</span> /D /J C:\Local\jdk8 C:\Local\Javas\jdk1.8.0_152
+</pre></div>
+</div>
+<p>Now you can refer to C:\Local\jdk8 in your scripts and when you update the java (minor) version you just change the link, not the scripts.</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">configure eclipse ini, run with shortcut</p>
+</div>
+</div>
+<div class="section" id="the-project-skeleton">
+<h2>The Project Skeleton<a class="headerlink" href="#the-project-skeleton" title="Permalink to this headline">¶</a></h2>
+<p>These are the steps needed to create a new Eclipse project that uses the Yada Framework.</p>
+<ul class="simple">
+<li>Add a Tomcat server to Eclipse</li>
+<li>Follow the Eclipse [[Setup|Setup]] procedure:<ul>
+<li>Clone the yadaframework git repository locally</li>
+<li>Import the Yada projects in Eclipse from the local git clone with “File &gt; Import… &gt; Gradle &gt; Existing Gradle project”</li>
+</ul>
+</li>
+<li>Create a local git repository to store your own sources</li>
+<li>Create a new Gradle project in the workspace (let’s call it “ExamplePrj”)</li>
+<li>Delete any example files that might have been created, like “Library.java”</li>
+<li>Share ExamplePrj to git so that Eclipse moves all files to the git location: “Team &gt; Share Project…” (No need to commit yet)</li>
+<li>Edit .gitignore in the root of ExamplePrj to look like the following:</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>/.gradle/
+/build/
+/bin/
+/.settings/
+/.classpath
+/.project
+!gradle-wrapper.jar
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-build-file">
+<h2>The Build File<a class="headerlink" href="#the-build-file" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Replace build.gradle with the following:</li>
+</ul>
+<div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="n">buildscript</span> <span class="o">{</span>
+    <span class="n">repositories</span> <span class="o">{</span>
+        <span class="n">mavenLocal</span><span class="o">()</span>
+    <span class="o">}</span>
+    <span class="n">dependencies</span> <span class="o">{</span>
+        <span class="n">classpath</span> <span class="s1">&#39;net.yadaframework:YadaTools:+&#39;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="n">plugins</span> <span class="o">{</span>
+    <span class="n">id</span> <span class="s1">&#39;org.hidetake.ssh&#39;</span> <span class="n">version</span> <span class="s1">&#39;2.9.0&#39;</span>
+<span class="o">}</span>
+
+<span class="n">ext</span><span class="o">.</span><span class="na">acronym</span> <span class="o">=</span> <span class="s1">&#39;**myprj**&#39;</span>
+<span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;war&#39;</span>
+<span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;eclipse-wtp&#39;</span>
+<span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;net.yadaframework.tools&#39;</span>
+<span class="n">apply</span> <span class="nl">plugin:</span> <span class="s1">&#39;org.hidetake.ssh&#39;</span>        <span class="c1">// https://gradle-ssh-plugin.github.io</span>
+
+<span class="n">eclipse</span> <span class="o">{</span>
+    <span class="n">jdt</span> <span class="o">{</span>
+        <span class="n">sourceCompatibility</span> <span class="o">=</span> <span class="mf">1.8</span>
+        <span class="n">targetCompatibility</span> <span class="o">=</span> <span class="mf">1.8</span>
+        <span class="c1">// https://stackoverflow.com/a/35302104/587641</span>
+        <span class="n">file</span> <span class="o">{</span>
+                <span class="n">File</span> <span class="n">dir</span> <span class="o">=</span> <span class="n">file</span><span class="o">(</span><span class="s1">&#39;.settings&#39;</span><span class="o">)</span>
+                <span class="n">dir</span><span class="o">.</span><span class="na">mkdirs</span><span class="o">()</span>
+                <span class="n">File</span> <span class="n">f</span> <span class="o">=</span> <span class="n">file</span><span class="o">(</span><span class="s1">&#39;.settings/org.eclipse.core.resources.prefs&#39;</span><span class="o">)</span>
+            <span class="k">if</span> <span class="o">(!</span><span class="n">f</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span> <span class="o">{</span>
+                    <span class="n">f</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="s1">&#39;eclipse.preferences.version=1\n&#39;</span><span class="o">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="s1">&#39;encoding/&lt;project&gt;=utf-8&#39;</span><span class="o">)</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="n">wtp</span> <span class="o">{</span>
+            <span class="n">component</span> <span class="o">{</span>
+        <span class="n">contextPath</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span>
+        <span class="o">}</span>
+        <span class="n">facet</span> <span class="o">{</span>
+        <span class="n">facet</span> <span class="nl">name:</span> <span class="s1">&#39;jst.web&#39;</span><span class="o">,</span> <span class="nl">version:</span> <span class="s1">&#39;3.1&#39;</span>
+        <span class="c1">// This is a workaround to remove the old facet from</span>
+        <span class="c1">// .settings/org.eclipse.wst.common.project.facet.core.xml</span>
+        <span class="kt">def</span> <span class="n">oldJstWebFacet</span> <span class="o">=</span> <span class="n">facets</span><span class="o">.</span><span class="na">findAll</span> <span class="o">{</span>
+                    <span class="n">it</span><span class="o">.</span><span class="na">name</span> <span class="o">--</span> <span class="s1">&#39;jst.web&#39;</span> <span class="o">&amp;&amp;</span> <span class="n">it</span><span class="o">.</span><span class="na">version</span> <span class="o">--</span> <span class="s1">&#39;2.4&#39;</span>
+                <span class="o">}</span>
+                <span class="n">facets</span><span class="o">.</span><span class="na">removeAll</span><span class="o">(</span><span class="n">oldJstWebFacet</span><span class="o">)</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="n">compileJava</span><span class="o">.</span><span class="na">options</span><span class="o">.</span><span class="na">encoding</span> <span class="o">=</span> <span class="s1">&#39;UTF-8&#39;</span>
+<span class="n">compileTestJava</span><span class="o">.</span><span class="na">options</span><span class="o">.</span><span class="na">encoding</span> <span class="o">=</span> <span class="s1">&#39;UTF-8&#39;</span>
+
+<span class="kt">def</span> <span class="n">YadaWebLib</span> <span class="o">=</span> <span class="s2">&quot;$projectDir/../../yadaframework/YadaWeb&quot;</span><span class="o">;</span>
+
+<span class="n">repositories</span> <span class="o">{</span>
+    <span class="n">jcenter</span><span class="o">()</span>
+    <span class="n">mavenLocal</span><span class="o">()</span>
+<span class="o">}</span>
+
+<span class="n">dependencies</span> <span class="o">{</span>
+
+    <span class="c1">// Add here any library that you might need (then run &quot;Refresh Gradle Project&quot;)</span>
+    <span class="c1">// compile  &#39;joda-time:joda-time:2.+&#39;</span>
+
+    <span class="n">compile</span> <span class="nf">project</span><span class="o">(</span><span class="s1">&#39;:YadaWeb&#39;</span><span class="o">),</span> <span class="n">project</span><span class="o">(</span><span class="s1">&#39;:YadaWebSecurity&#39;</span><span class="o">),</span>
+        <span class="s1">&#39;org.springframework:spring-webmvc:4.3.7.RELEASE&#39;</span><span class="o">,</span>
+        <span class="s1">&#39;org.springframework:spring-context-support:4.3.7.RELEASE&#39;</span><span class="o">,</span>
+        <span class="s1">&#39;org.springframework.data:spring-data-jpa:1.11.1.RELEASE&#39;</span><span class="o">,</span>
+        <span class="s1">&#39;org.springframework.security:spring-security-web:4.2.2.RELEASE&#39;</span><span class="o">,</span>
+        <span class="s1">&#39;org.hibernate:hibernate-entitymanager:5.2.9.Final&#39;</span><span class="o">,</span>
+        <span class="s1">&#39;mysql:mysql-connector-java:5.1.41&#39;</span><span class="o">,</span>
+        <span class="s1">&#39;com.fasterxml.jackson.core:jackson-annotations:2.9.+&#39;</span><span class="o">,</span>
+        <span class="s1">&#39;com.fasterxml.jackson.core:jackson-core:2.9.+&#39;</span><span class="o">,</span>
+        <span class="s1">&#39;com.fasterxml.jackson.core:jackson-databind:2.9.+&#39;</span><span class="o">,</span>
+            <span class="s1">&#39;org.thymeleaf:thymeleaf-spring4:3.0.3.RELEASE&#39;</span>
+
+    <span class="c1">// Needed in Tomcat 8 at runtime</span>
+    <span class="n">runtime</span> <span class="s1">&#39;commons-beanutils:commons-beanutils:1.9.2&#39;</span>
+    <span class="n">runtime</span> <span class="s1">&#39;commons-jxpath:commons-jxpath:1.3&#39;</span>
+
+    <span class="n">testCompile</span> <span class="s1">&#39;junit:junit:4.12&#39;</span>
+<span class="o">}</span>
+
+<span class="n">yadaInit</span> <span class="o">{</span>
+    <span class="n">projectName</span> <span class="o">=</span> <span class="n">rootProject</span><span class="o">.</span><span class="na">name</span>
+    <span class="n">acronym</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="na">acronym</span>
+    <span class="n">basePackage</span> <span class="o">=</span> <span class="s1">&#39;**com.example**&#39;</span>
+    <span class="n">dbPasswords</span> <span class="o">=</span> <span class="o">[**</span><span class="s1">&#39;dev&#39;</span><span class="o">:</span> <span class="s1">&#39;mydevpwd&#39;</span><span class="o">,</span> <span class="s1">&#39;tst&#39;</span><span class="o">:</span> <span class="s1">&#39;mytstpwd&#39;</span><span class="o">,</span> <span class="s1">&#39;prod&#39;</span><span class="o">:</span> <span class="s1">&#39;myprodpwd&#39;</span><span class="o">**]</span>
+    <span class="n">envs</span><span class="o">=[**</span><span class="s1">&#39;dev&#39;</span><span class="o">,</span> <span class="s1">&#39;tst&#39;</span><span class="o">,</span> <span class="s1">&#39;prod&#39;</span><span class="o">**]</span>
+        <span class="c1">// See YadaTools/src/main/groovy/net/yadaframework/tools/YadaProject.groovy</span>
+        <span class="c1">// for more configuration options</span>
+<span class="o">}</span>
+
+<span class="n">configurations</span> <span class="o">{</span>
+    <span class="n">hibtools</span> <span class="o">{</span>
+        <span class="n">extendsFrom</span> <span class="n">configurations</span><span class="o">.</span><span class="na">compile</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+<span class="n">dependencies</span> <span class="o">{</span>
+    <span class="n">hibtools</span> <span class="nf">files</span><span class="o">(</span><span class="s2">&quot;$buildDir/classes/java/main&quot;</span><span class="o">)</span> <span class="c1">// Needed for yadaPersistenceUnit</span>
+    <span class="n">hibtools</span> <span class="s1">&#39;org.hibernate:hibernate-tools:5.+&#39;</span>
+<span class="o">}</span>
+<span class="n">task</span> <span class="nf">dbSchema</span><span class="o">(</span><span class="nl">dependsOn:</span> <span class="o">[</span><span class="n">classes</span><span class="o">],</span> <span class="nl">type:</span> <span class="n">net</span><span class="o">.</span><span class="na">yadaframework</span><span class="o">.</span><span class="na">tools</span><span class="o">.</span><span class="na">YadaCreateDbSchemaTask</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">inputs</span><span class="o">.</span><span class="na">files</span> <span class="n">configurations</span><span class="o">.</span><span class="na">hibtools</span><span class="o">;</span>
+    <span class="n">outputfilename</span> <span class="o">=</span> <span class="s2">&quot;${acronym}.sql&quot;</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>(wtp syntax <a class="reference external" href="https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpComponent.html">here</a> and <a class="reference external" href="https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpFacet.html">here</a>)</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">**marked**</span></code>items should be edited to suit your needs.</p>
+<p>The default environments are “dev” for “Development”, “tst” for “Test” and “prod” for “Production”. You can rename them (or also add/remove some) using the “envs” property as shown above, but the envs array must always have the “development” environtment first and the “production” environment last in order to produce a correct configuration.xml file.</p>
+<p>[TODO: YadaConfiguration.isProductionEnvironment() and similar methods should use the configured environment names]</p>
+<p>For a list of all other options for the yadaInit task see <code class="docutils literal notranslate"><span class="pre">/YadaTools/src/main/groovy/net/yadaframework/tools/YadaProject.groovy</span></code></p>
+<ul class="simple">
+<li>Replace settings.gradle with the following:</li>
+</ul>
+<div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span>    <span class="n">rootProject</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s1">&#39;ExamplePrj&#39;</span>
+    <span class="n">include</span> <span class="s1">&#39;YadaWeb&#39;</span>
+    <span class="n">project</span><span class="o">(</span><span class="s1">&#39;:YadaWeb&#39;</span><span class="o">).</span><span class="na">projectDir</span> <span class="o">=</span> <span class="s2">&quot;../../yadaframework/YadaWeb&quot;</span> <span class="k">as</span> <span class="n">File</span>
+    <span class="n">include</span> <span class="s1">&#39;YadaWebSecurity&#39;</span>
+    <span class="n">project</span><span class="o">(</span><span class="s1">&#39;:YadaWebSecurity&#39;</span><span class="o">).</span><span class="na">projectDir</span> <span class="o">=</span> <span class="s2">&quot;../../yadaframework/YadaWebSecurity&quot;</span> <span class="k">as</span> <span class="n">File</span>
+
+<span class="n">This</span> <span class="n">assumes</span> <span class="n">that</span> <span class="n">you</span> <span class="n">cloned</span> <span class="n">the</span> <span class="n">yadaframework</span> <span class="n">repository</span> <span class="k">in</span> <span class="n">the</span> <span class="n">same</span> <span class="n">root</span> <span class="n">folder</span> <span class="n">of</span> <span class="n">your</span> <span class="n">project</span> <span class="n">repository</span><span class="o">,</span> <span class="nl">like:</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="n">rootfolder</span>
+     <span class="o">|---------</span> <span class="n">exampleProject</span>
+                      <span class="o">|---------</span> <span class="o">.</span><span class="n">git</span>
+                      <span class="o">|---------</span> <span class="n">ExamplePrj</span>
+     <span class="o">|---------</span> <span class="n">yadaframework</span>
+                      <span class="o">|---------</span> <span class="o">.</span><span class="n">git</span>
+                      <span class="o">|---------</span> <span class="n">YadaWeb</span>
+                      <span class="o">|---------</span> <span class="n">YadaWebSecurity</span>
+
+<span class="n">This</span> <span class="n">setup</span> <span class="ow">is</span> <span class="n">needed</span> <span class="n">to</span> <span class="n">use</span> <span class="n">YadaWeb</span> <span class="k">class</span> <span class="nc">files</span> <span class="n">directly</span> <span class="n">instead</span> <span class="n">of</span> <span class="n">going</span> <span class="n">through</span> <span class="n">the</span> <span class="n">jar</span><span class="p">,</span> <span class="ow">and</span> <span class="ow">is</span> <span class="n">handy</span> <span class="n">when</span> <span class="n">you</span> <span class="n">plan</span> <span class="n">to</span> <span class="n">work</span> <span class="n">on</span> <span class="n">the</span> <span class="n">YadaWeb</span> <span class="n">sources</span> <span class="n">to</span> <span class="n">fix</span> <span class="ow">and</span> <span class="n">improve</span> <span class="n">them</span><span class="o">.</span> <span class="n">The</span> <span class="n">YadaWebSecurity</span> <span class="n">project</span> <span class="ow">is</span> <span class="n">needed</span> <span class="n">only</span> <span class="k">if</span> <span class="n">you</span> <span class="n">plan</span> <span class="n">to</span> <span class="n">implement</span> <span class="n">a</span> <span class="n">password</span><span class="o">-</span><span class="n">protected</span> <span class="n">restricted</span> <span class="n">section</span><span class="p">,</span> <span class="n">otherwise</span> <span class="n">it</span> <span class="n">can</span> <span class="n">be</span> <span class="n">omitted</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="code-generation-just-a-bit">
+<h2>Code Generation (just a bit)<a class="headerlink" href="#code-generation-just-a-bit" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>ensure you have these folders in your project before the next step:</dt>
+<dd><ul class="first last">
+<li><code class="docutils literal notranslate"><span class="pre">src/main/java</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">src/main/webapp</span></code></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li>run <code class="docutils literal notranslate"><span class="pre">gradlew</span> <span class="pre">-q</span> <span class="pre">eclipse</span></code>, either from a command prompt or from the “Eclipse gradle tasks” view (under Gradle Tasks &gt; ExamplePrj &gt; ide &gt; eclipse)</li>
+<li>run the “YadaTools - uploadArchives” gradle task (under Gradle Tasks &gt; YadaTools &gt; upload &gt; uploadArchives) so that the latest version of the YadaTools library is loaded to the local maven repository. The task should already be available in “Run &gt; Run Configurations…” but can also be run from the command line with <code class="docutils literal notranslate"><span class="pre">gradle</span> <span class="pre">uploadArchives</span></code> from inside the YadaTools project folder</li>
+<li><dl class="first docutils">
+<dt>from the “ExamplePrj” folder run the task <code class="docutils literal notranslate"><span class="pre">gradlew</span> <span class="pre">yadaInit</span></code></dt>
+<dd><ul class="first last">
+<li>This task will add the java core Spring configuration and some default files that will have to be either deleted or customised</li>
+<li>You can run the task multiple times and it will never overwrite existing files: to revert a change, delete the file and run the task again</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li>run either the <code class="docutils literal notranslate"><span class="pre">gradle</span> <span class="pre">eclipse</span></code> task, or more simply click the <code class="docutils literal notranslate"><span class="pre">Gradle</span> <span class="pre">&gt;</span> <span class="pre">Refresh</span> <span class="pre">Gradle</span> <span class="pre">Project</span></code> project menu item in order to import all jar dependencies thus clearing compilation errors</li>
+</ul>
+</div>
+<div class="section" id="initial-customization">
+<h2>Initial Customization<a class="headerlink" href="#initial-customization" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>edit the generated .xml/.html files to suit your needs. You can skip the “tst” and “prod” files until you’re ready to deploy to a test/production server</dt>
+<dd><ul class="first last">
+<li>the <code class="docutils literal notranslate"><span class="pre">env/dev</span></code> and <code class="docutils literal notranslate"><span class="pre">env/prod</span></code> folders now have a couple of script files that you can use to create the initial database and db user</li>
+<li>the <code class="docutils literal notranslate"><span class="pre">/src/main/resources/template/email</span></code> folder now contains some typical email templates that you can decide to delete or customize</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li>you can add all the dependencies that you need</li>
+<li>run either the <code class="docutils literal notranslate"><span class="pre">gradle</span> <span class="pre">eclipse</span></code> task again, or more simply click the <code class="docutils literal notranslate"><span class="pre">Gradle</span> <span class="pre">&gt;</span> <span class="pre">Refresh</span> <span class="pre">Gradle</span> <span class="pre">Project</span></code> project context menu item</li>
+</ul>
+</div>
+<div class="section" id="database-setup">
+<h2>Database Setup<a class="headerlink" href="#database-setup" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>create the local database by running the scripts inside <code class="docutils literal notranslate"><span class="pre">env/dev</span></code> (if you’re not on windows, just copy the content and adapt it to your platform)</li>
+<li>create the database schema by running the <code class="docutils literal notranslate"><span class="pre">gradlew</span> <span class="pre">dbSchema</span></code> task<ul>
+<li>If you can’t connect to the database check that /src/main/resources/META-INF/persistence.xml (and /src/main/webapp/META-INF/context.xml) has the right credentials</li>
+</ul>
+</li>
+<li>run the /env/dev/dropAndCreateDatabase.bat (or a linux equivalent) each time you want to create a new empty database with the generated schema</li>
+<li>create a new Tomcat Server in Eclipse and add the ExamplePrj project, then start it</li>
+<li>if the server starts with no errors, you can see the homepage placeholder at <a class="reference external" href="http://localhost:8080/">http://localhost:8080/</a></li>
+</ul>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2019, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
