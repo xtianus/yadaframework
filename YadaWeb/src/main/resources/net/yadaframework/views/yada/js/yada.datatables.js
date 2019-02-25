@@ -226,7 +226,8 @@
 		    		var paramValue = paramObj.value;
 		    		extraParam[paramName] = paramValue;
 		    	}
-		    	yada.ajax(dataUrl, jQuery.param(data), callback, 'POST');
+		    	var noLoader = $table.hasClass('noLoader');
+		    	yada.ajax(dataUrl, jQuery.param(data), callback, 'POST', null, noLoader);
 		    },
 		    language: {
 		    	url: languageUrl
@@ -260,6 +261,7 @@
 				var idName = deleteDef.idName || "id";
 				var nameColumn = deleteDef.nameColumn || 3;
 				var requestData = {};
+				var noLoader = deleteDef.noLoader || false;
 				requestData[idName] = id;
 				var $row = $(this).parents('tr');
 				// var dtrow = dataTable.row($row);
@@ -272,7 +274,7 @@
 					if (result==true) {
 						yada.ajax(deleteDef.url, requestData, function() {
 							thisDataTable.draw(false);
-						});
+						}, null, null, noLoader);
 					}
 				}, confirmButtonText + ' "' + rowName + '"', abortButtonText);
 			});
@@ -283,13 +285,14 @@
 				var id = yada.getHashValue($(this).attr('href'));
 				var idName = editDef.idName || "id";
 				var requestData = {};
+				var noLoader = deleteDef.noLoader || false;
 				requestData[idName] = id;
 				// Devo abilitare ajax ricorsivamente per quando il form ritorna con un errore di validazione
 				var handler = function(responseText, responseHtml) {
 					yada.datatableDrawOnModalClose(thisDataTable);
 					recursiveEnableAjaxForm(responseText, responseHtml);
 				};
-				yada.ajax(editDef.url, requestData, handler);
+				yada.ajax(editDef.url, requestData, handler, null, null, noLoader);
 			});
 			
 			// Handler per gli extra buttons
@@ -344,7 +347,8 @@
 					yada.datatableDrawOnModalClose(dataTable);
 					recursiveEnableAjaxForm(responseText, responseHtml);
 				};
-				yada.ajax(editDef.url, null, handler);
+				var noLoader = editDef.noLoader || false;
+				yada.ajax(editDef.url, null, handler, null, null, noLoader);
 			});
 	
 			// yadaTableToolbar "edit button"
@@ -360,7 +364,8 @@
 				var idName = editDef.idName || "id";
 				var requestData = {};
 				requestData[idName] = id;
-				yada.ajax(editDef.url, requestData, handler);
+				var noLoader = editDef.noLoader || false;
+				yada.ajax(editDef.url, requestData, handler, null, null, noLoader);
 			});
 		}
 		
@@ -383,6 +388,7 @@
 				confirmMessage = confirmMessage.replace("{0}", totElements);
 				var confirmButtonText = deleteDef.confirmButtonText || "Delete";
 				var abortButtonText = deleteDef.abortButtonText || "Cancel";
+				var noLoader = deleteDef.noLoader || false;
 				yada.confirm(confirmMessage, function(result) {
 					if (result==true) {
 						var idName = deleteDef.idName || "id";
@@ -392,7 +398,7 @@
 							dataTable.draw(false);
 						};
 						handler.executeAnyway=true;
-						yada.ajax(deleteDef.url, requestData, handler);
+						yada.ajax(deleteDef.url, requestData, handler, null, null, noLoader);
 					}
 				}, confirmButtonText + ' ' + totElements, abortButtonText);
 			});
@@ -456,6 +462,7 @@
 				ids = [id];
 			}
 			var idName = extraButtonDef.idName || "id";
+			var noLoader = extraButtonDef.noLoader || false;
 			var param = (ids.length>1?ids:ids[0]); // Either send one id or all of them
 			if (extraButtonDef.ajax === false) {
 				window.location.replace(yada.addOrUpdateUrlParameter(extraButtonDef.url, idName, param));
@@ -468,7 +475,7 @@
 				yada.datatableDrawOnModalClose(dataTable);
 				recursiveEnableAjaxForm(responseText, responseHtml);
 			};
-			yada.ajax(extraButtonDef.url, requestData, handler);
+			yada.ajax(extraButtonDef.url, requestData, handler, null, null, noLoader);
 		});
 	}
 	
