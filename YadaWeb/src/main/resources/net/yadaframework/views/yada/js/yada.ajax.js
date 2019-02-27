@@ -421,9 +421,9 @@
 				handler(responseText, responseHtml, $element[0]);
 			}
 		}
-		var url = $element.attr('href');
+		var url = $element.attr('data-yadaHref');
 		if (url==null) {
-			url = $element.attr('data-yadaHref');
+			url = $element.attr('href');
 		}
 		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
 		// Create data for submission
@@ -1014,7 +1014,6 @@
 					return;
 				}
 				if (notify) {
-					yada.loaderOff();
 					return;
 				}
 				// Open any other modal
@@ -1181,8 +1180,13 @@
 			$('#yada-notification').append(notification);
 			// We need to show the modal after a delay or it won't show sometimes (!)
 			setTimeout(function() {
+				$('#yada-notification').on('shown.bs.modal', function (e) {
+					// Keep the loader open until the modal is fully shown, to prevent "flashing".
+					// This should become a configurable option maybe
+					yada.loaderOff();
+				});
 				$('#yada-notification').modal('show');
-			}, 100);
+			}, 200);
 			return true;
 		}
 		return false;
