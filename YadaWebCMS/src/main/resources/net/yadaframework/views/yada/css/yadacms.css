@@ -1,3 +1,34 @@
+/* **************** */
+/* yadaEntitySorter */
+
+.yadaEntitySorter img {
+	width: 100%;
+}
+
+.yadaEntitySorter .commandBar {
+	font-size: 1.8em;
+}
+
+.yadaEntitySorter .delete {
+    float: right;
+    padding: 5px 0 0 5px;
+    color: red;
+}
+	
+.yadaEntitySorter .commandBar form {
+	display: inline;
+}
+
+.yadaEntitySorter .form-group {
+	margin-bottom: 0;
+}
+
+.yadaEntitySorter .yadaImageControl {
+	margin-top:50px;
+}
+
+/* *************** */
+/* yadaImageSorter */
 
 /* .yadaImageSorter {
 	position: relative;
