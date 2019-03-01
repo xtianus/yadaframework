@@ -1013,7 +1013,7 @@
 		$('form').not('yadaAjax').not('yadaAjaxed').submit(function(e) {
 			// Recursively add all child forms
 			var $form = $(this);
-			var $childForm = $form['yadaChildForm'];
+			var $childForm = this['yadaChildForm'];
 			while ($childForm != null) {
 				$childForm.children().appendTo($form);
 				$childForm = $childForm['yadaChildForm'];
