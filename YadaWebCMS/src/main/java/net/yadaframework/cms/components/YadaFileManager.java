@@ -161,10 +161,14 @@ public class YadaFileManager {
 	/**
 	 * Copies a received file to the upload folder
 	 * @param multipartFile file coming from the http request
-	 * @return the uploaded file with a unique name
+	 * @return the uploaded file with a unique name, or null if the user did not send any file
 	 * @throws IOException
 	 */
 	public File uploadFile(MultipartFile multipartFile) throws IOException {
+		if (multipartFile==null || multipartFile.getSize()==0) {
+			log.debug("No file sent for upload");
+			return null;
+		}
 		String originalFilename = multipartFile.getOriginalFilename();
 		String targetName = YadaUtil.reduceToSafeFilename(originalFilename);
 		String[] filenameParts = YadaUtil.splitFileNameAndExtension(targetName);
@@ -184,25 +188,27 @@ public class YadaFileManager {
 	 * Replace the file associated with the current attachment
 	 * @param currentAttachedFile an existing attachment 
 	 * @param managedFile the new file to set
-	 * @param targetExtension optional, to convert image file formats
 	 * @return
 	 * @throws IOException
 	 */
-	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, String namePrefix, String targetExtension) throws IOException {
-		return attachReplace(currentAttachedFile, managedFile, namePrefix, targetExtension, null, null);
+	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, String namePrefix) throws IOException {
+		return attachReplace(currentAttachedFile, managedFile, namePrefix, null, null, null);
 	}
 	
 	/**
-	 * Replace the file associated with the current attachment
+	 * Replace the file associated with the current attachment, only if a file was actually attached
 	 * @param currentAttachedFile an existing attachment 
 	 * @param managedFile the new file to set
 	 * @param targetExtension optional, to convert image file formats
 	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
 	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
-	 * @return
+	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
 	 * @throws IOException
 	 */
 	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+		if (managedFile==null) {
+			return null;
+		}
 		deleteFileAttachment(currentAttachedFile); // Delete any previous attached files
 		return attach(currentAttachedFile, managedFile, namePrefix, targetExtension, desktopWidth, mobileWidth);
 	}
@@ -215,7 +221,7 @@ public class YadaFileManager {
 	 * @param managedFile an uploaded file, can be an image or not
 	 * @param relativeFolderPath path of the target folder relative to the contents folder
 	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
-	 * @return
+	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
 	 * @throws IOException 
 	 * @see {@link #attach(File, String, String, String, Integer, Integer)}
 	 */
@@ -227,17 +233,20 @@ public class YadaFileManager {
 	 * Copies (and resizes) a managed file to the destination folder, creating a database association to assign to an Entity.
 	 * The name of the file is in the format [basename]managedFileName_id.ext
 	 * @param attachToId the id of the entity to which the file should be attached
-	 * @param managedFile an uploaded file, can be an image or not
+	 * @param managedFile an uploaded file, can be an image or not. When null, nothing is done.
 	 * @param relativeFolderPath path of the target folder relative to the contents folder, starting with a slash /
 	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
 	 * @param targetExtension optional, to convert image file formats
 	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
 	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
-	 * @return
+	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
 	 * @throws IOException
 	 * @see {@link #attach(File, String, String, String)} 
 	 */
 	public YadaAttachedFile attachNew(Long attachToId, File managedFile, String relativeFolderPath, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+		if (managedFile==null) {
+			return null;
+		}
 		if (!relativeFolderPath.startsWith("/") && !relativeFolderPath.startsWith("\\")) {
 			relativeFolderPath = "/" + relativeFolderPath;
 			log.warn("The relativeFolderPath '{}' should have a leading slash (fixed)", relativeFolderPath);

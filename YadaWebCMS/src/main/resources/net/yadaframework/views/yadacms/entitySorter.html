@@ -44,13 +44,14 @@ Example:
 		<!--/* These forms have been split so that we don't need to carry over these parameters
 				when replacing some HTML element coming back from an ajax call: they stay put here */-->
 		
-		<form th:action="${urlSort}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" class="yadaAjax sortForm">
+		<form th:action="${urlSort}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" class="yadaAjax sortForm" method="post">
 		</form>
 
-		<form th:if="${urlEdit!=null}" th:action="${urlEdit}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" class="editForm" th:classappend="${true==ajax}?'yadaAjax':''">
+		<form th:if="${urlEdit!=null}" th:action="${urlEdit}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" 
+			class="editForm" th:classappend="${true==ajax}?'yadaAjax':''"  method="post">
 		</form>
 				
-		<form th:action="${urlDelete}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" class="yadaAjax deleteForm"
+		<form th:action="${urlDelete}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" class="yadaAjax deleteForm" method="post"
 			yada:confirm="${deleteConfirmKey!=null?#messages.msg(deleteConfirmKey):deleteConfirm?:''}">
 		</form>
 		
