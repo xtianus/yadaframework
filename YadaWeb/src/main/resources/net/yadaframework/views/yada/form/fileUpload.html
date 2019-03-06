@@ -13,10 +13,11 @@ Parameters:
 - required = true for a required value (optional)
 - disabled = true for a disabled field - NOT SENT TO SERVER (optional)
 - help = testo per il pulsante di help (optional)
+- attachedFile = (optional) YadaAttachedFile instance for which to add a download link if not null
 
 */-->
 <body>
-<div class="form-group has-feedback" 
+<div class="form-group has-feedback yadaFileUpload" 
 	th:fragment="field"
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
 	<label class="control-label" th:for="${#ids.next('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
@@ -31,6 +32,10 @@ Parameters:
 		<span th:text="${err}" th:id="${#ids.seq('fieldId')}">Error Text</span>
 		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	</div>
+	<p th:if="${attachedFile!=null}">
+		<a th:href="@{${@yadaFileManager.getFileUrl(attachedFile)}}" target="_blank" class="yadaNoLoader">[[${attachedFile.clientFilename}]]</a>
+	</p>
+	
 </div>    	
 </body>
 </html>

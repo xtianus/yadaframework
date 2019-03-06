@@ -985,7 +985,7 @@
 				// When the form is submitted, set this form as the child of the parent and submit the parent instead
 				e.preventDefault();
 				var $thisForm = $(this);
-				var parentFormSelector =  $thisForm.attr('data-yadaParentForm');
+				var parentFormSelector = $thisForm.attr('data-yadaParentForm');
 				// Find and submit all parent forms (only one parent makes sense generally)
 				var $parentFormArray = yada.extendedSelect($thisForm, parentFormSelector); 
 				if ($parentFormArray!=null) {
@@ -1010,12 +1010,12 @@
 			});
 		});
 		// Handle the submission of non-ajax forms
-		$('form').not('yadaAjax').not('yadaAjaxed').submit(function(e) {
+		$('form').not('.yadaAjax').not('.yadaAjaxed').submit(function(e) {
 			// Recursively add all child forms
 			var $form = $(this);
 			var $childForm = this['yadaChildForm'];
 			while ($childForm != null) {
-				$childForm.children().appendTo($form);
+				$childForm.children().filter("input, textarea, select").appendTo($form);
 				$childForm = $childForm['yadaChildForm'];
 			}
 			// continue normal submission...
