@@ -231,6 +231,9 @@ either be used in the @Controller or directly in the HTML:
 	<img th:src="@{${@yadaFileManager.getDesktopImageUrl(user.icon)}}">
 	<a th:href="@{${@yadaFileManager.getFileUrl(product.manual)}}">Download manual</a>
 
+If you call ``getMobileImageUrl()`` and a mobile image is not present, it will fall back to ``getDesktopImageUrl()`` which in turn
+falls back to ``getFileUrl()``. 
+
 Delete Files
 ^^^^^^^^^^^^^^^
 Files can be removed from the filesystem with ``YadaFileManager.deleteFileAttachment()``. All database objects must then be deleted manually.
@@ -238,7 +241,7 @@ Files can be removed from the filesystem with ``YadaFileManager.deleteFileAttach
 .. code-block:: java
 
 	YadaAttachedFile icon = user.getIcon();
-	YadaFileManager.deleteFileAttachment(icon);
+	yadaFileManager.deleteFileAttachment(icon);
 	yadaAttachedFileRepository.delete(icon);
 	user.setIcon(null);
 	userRepository.save(user);

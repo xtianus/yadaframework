@@ -24,7 +24,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Ajax Modal" href="ajaxModal.html" />
-    <link rel="prev" title="Forms" href="forms/overview.html" />
+    <link rel="prev" title="DataTables" href="datatables.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -61,9 +61,12 @@
       aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="forms/overview.html">     Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">     File Upload</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datatables.html">     Data Tables</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">     Ajax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">     Ajax Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">     New Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">     Notification Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">     New Eclipse Project</a></li>
 </ul>
 </ul>
 </li>
@@ -95,7 +98,14 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#ajax-forms">Ajax Forms</a></li>
-<li><a class="reference internal" href="#ajax-on-other-elements">Ajax on other elements</a></li>
+<li><a class="reference internal" href="#ajax-on-other-elements">Ajax on other elements</a><ul>
+<li><a class="reference internal" href="#ajax-on-checkbox">Ajax on checkbox</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ajax-method">Ajax method</a><ul>
+<li><a class="reference internal" href="#success-handler">Success Handler</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#class-reference">Class Reference</a></li>
 </ul>
 </li>
@@ -108,7 +118,7 @@
               
                 
   <li>
-    <a href="forms/overview.html" title="Previous Chapter: Forms"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Forms</span>
+    <a href="datatables.html" title="Previous Chapter: DataTables"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; DataTables</span>
     </a>
   </li>
   <li>
@@ -147,7 +157,7 @@
       <div class="col-md-3">
         <div id="sidebar" class="bs-sidenav" role="complementary">
   <li>
-    <a href="forms/overview.html" title="Previous Chapter: Forms"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Forms</span>
+    <a href="datatables.html" title="Previous Chapter: DataTables"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; DataTables</span>
     </a>
   </li>
   <li>
@@ -189,7 +199,7 @@ It is automatically included in production, merged with the other yada javascrip
 <p>When clicking on the anchor, the <code class="docutils literal notranslate"><span class="pre">/some/endpoint</span></code> url is called via ajax.</p>
 <div class="admonition-todo admonition" id="index-0">
 <p class="first admonition-title">Todo</p>
-<p class="last">Can I use yada:ajax=”url” and data-yadaHref=”url” instead of href and class?</p>
+<p class="last">Check that I can use yada:ajax=”url” and data-yadaHref=”url” instead of href and class. href should be “javascript:;” in that case.</p>
 </div>
 <div class="section" id="miscellaneous">
 <h4>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h4>
@@ -425,10 +435,81 @@ When there are more targets than replacements, the last replacement is repeated.
 <div class="section" id="ajax-on-other-elements">
 <h2>Ajax on other elements<a class="headerlink" href="#ajax-on-other-elements" title="Permalink to this headline">¶</a></h2>
 <p>Ajax calls can also be made on other HTML elements like buttons and selects by means of the <code class="docutils literal notranslate"><span class="pre">data-yadahref</span></code> attribute or the equivalent <code class="docutils literal notranslate"><span class="pre">yada:ajax</span></code> dialect.</p>
+<div class="section" id="ajax-on-checkbox">
+<h3>Ajax on checkbox<a class="headerlink" href="#ajax-on-checkbox" title="Permalink to this headline">¶</a></h3>
+<p>An ajax call can be originated by a state change in a checkbox. The checkbox must NOT be inside a form otherwise the form would be submitted instead.</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">input</span> <span class="na">yada:ajax</span><span class="o">=</span><span class="s">&quot;@{/product/onOff(productId=${product.id})}&quot;</span>
+        <span class="na">th:name</span><span class="o">=</span><span class="s">&quot;enabled&quot;</span> <span class="na">th:checked</span><span class="o">=</span><span class="s">&quot;${product.enabled}&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;checkbox&quot;</span> <span class="p">/&gt;</span>
+</pre></div>
+</div>
 <div class="admonition-todo admonition" id="index-4">
 <p class="first admonition-title">Todo</p>
 <p class="last">complete list of ajaxifyable elements. Is the yadaAjax class needed? Examples.
 showFeedbackIfNeeded</p>
+</div>
+</div>
+</div>
+<div class="section" id="ajax-method">
+<h2>Ajax method<a class="headerlink" href="#ajax-method" title="Permalink to this headline">¶</a></h2>
+<p>You can call the low-level yada.ajax() method directly.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">yada</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">successHandler</span><span class="p">,</span> <span class="nx">method</span><span class="p">,</span> <span class="nx">timeout</span><span class="p">,</span> <span class="nx">hideLoader</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>url</dt>
+<dd>the server address to call</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>data</dt>
+<dd>(optional) string or object to send to the server</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>successHandler</dt>
+<dd>(optional) javascript method to call after returning from the server (see below)</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>method</dt>
+<dd>(optional) either “GET” (default) or “POST”</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>timeout</dt>
+<dd>(optional) milliseconds timeout, null for default (set by the browser)</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>hideLoader</dt>
+<dd>(optional) true for not showing the spinning loader (shown by default)</dd>
+</dl>
+</li>
+</ul>
+<p>Everything that applies to the other forms of invocation (opening modals, showing login pages, …) also applies.</p>
+<div class="section" id="success-handler">
+<h3>Success Handler<a class="headerlink" href="#success-handler" title="Permalink to this headline">¶</a></h3>
+<p>The success handler is called when the server returns without errors:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">successHandler</span><span class="p">(</span><span class="nx">responseText</span><span class="p">,</span> <span class="nx">responseHtml</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>responseText</dt>
+<dd>the raw original text returned by the server</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>responseHtml</dt>
+<dd>the original response converted with jQuery.html()</dd>
+</dl>
+</li>
+</ul>
+<p>The successHandler is not invoked if the call returns with a YadaNotify error, unless the <code class="docutils literal notranslate"><span class="pre">executeAnyway</span></code> flag is true:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">successHandler</span><span class="p">.</span><span class="nx">executeAnyway</span><span class="o">=</span><span class="kc">true</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="class-reference">

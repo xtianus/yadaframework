@@ -29,7 +29,7 @@ To make an ajax request, add the ``yadaAjax`` class:
 
 When clicking on the anchor, the ``/some/endpoint`` url is called via ajax.
 
-.. todo:: Can I use yada:ajax="url" and data-yadaHref="url" instead of href and class?
+.. todo:: Check that I can use yada:ajax="url" and data-yadaHref="url" instead of href and class. href should be "javascript:;" in that case.
 
 Miscellaneous
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -215,9 +215,62 @@ Ajax on other elements
 ========================
 Ajax calls can also be made on other HTML elements like buttons and selects by means of the ``data-yadahref`` attribute or the equivalent ``yada:ajax`` dialect.
 
+Ajax on checkbox
+----------------
+An ajax call can be originated by a state change in a checkbox. The checkbox must NOT be inside a form otherwise the form would be submitted instead.
+
+.. code-block:: html
+	
+	<input yada:ajax="@{/product/onOff(productId=${product.id})}" 
+		th:name="enabled" th:checked="${product.enabled}" type="checkbox" />
+
+
+
+
 .. todo:: complete list of ajaxifyable elements. Is the yadaAjax class needed? Examples.
 	showFeedbackIfNeeded
 
+Ajax method
+========================
+You can call the low-level yada.ajax() method directly.
+
+.. code-block:: javascript
+
+	yada.ajax(url, data, successHandler, method, timeout, hideLoader)
+
+- url
+	the server address to call
+- data
+	(optional) string or object to send to the server
+- successHandler
+	(optional) javascript method to call after returning from the server (see below)
+- method
+	(optional) either "GET" (default) or "POST"
+- timeout
+	(optional) milliseconds timeout, null for default (set by the browser)
+- hideLoader
+	(optional) true for not showing the spinning loader (shown by default)
+
+Everything that applies to the other forms of invocation (opening modals, showing login pages, ...) also applies.
+
+Success Handler
+----------------
+The success handler is called when the server returns without errors:
+
+.. code-block:: javascript
+
+	successHandler(responseText, responseHtml)
+	
+- responseText
+	the raw original text returned by the server
+- responseHtml
+	the original response converted with jQuery.html()
+	
+The successHandler is not invoked if the call returns with a YadaNotify error, unless the ``executeAnyway`` flag is true:
+
+.. code-block:: javascript
+
+	successHandler.executeAnyway=true
 
 
 Class Reference
