@@ -46,22 +46,79 @@ public class YadaFileManager {
 	// TODO mantenere l'immagine caricata nella versione originale
 	
 	/**
+	 * Makes a copy of just the filesystem files. New names are generated from the old ones by appending an incremental number. 
+	 * The source YadaAttachedFile is updated with the new names. The old files are not deleted.
+	 * Use case: you clone an instance of YadaAttachedFile with YadaUtil.copyEntity() then you need to copy its files too.
+	 * @param yadaAttachedFile
+	 * @return the saved YadaAttachedFile
+	 * @throws IOException 
+	 */
+	public YadaAttachedFile duplicateFiles(YadaAttachedFile yadaAttachedFile) throws IOException {
+		File newFile = null;
+		File sourceFile = getAbsoluteMobileFile(yadaAttachedFile);
+		if (sourceFile!=null) {
+			newFile = YadaUtil.findAvailableName(sourceFile, null);
+			try (InputStream inputStream = new FileInputStream(sourceFile); OutputStream outputStream = new FileOutputStream(newFile)) {
+				IOUtils.copy(inputStream, outputStream);
+			}
+			yadaAttachedFile.setFilenameMobile(newFile.getName());
+		}
+		sourceFile = getAbsoluteDesktopFile(yadaAttachedFile);
+		if (sourceFile!=null) {
+			newFile = YadaUtil.findAvailableName(sourceFile, null);
+			try (InputStream inputStream = new FileInputStream(sourceFile); OutputStream outputStream = new FileOutputStream(newFile)) {
+				IOUtils.copy(inputStream, outputStream);
+			}
+			yadaAttachedFile.setFilenameDesktop(newFile.getName());
+		}
+		sourceFile = getAbsoluteFile(yadaAttachedFile);
+		if (sourceFile!=null) {
+			newFile = YadaUtil.findAvailableName(sourceFile, null);
+			try (InputStream inputStream = new FileInputStream(sourceFile); OutputStream outputStream = new FileOutputStream(newFile)) {
+				IOUtils.copy(inputStream, outputStream);
+			}
+			yadaAttachedFile.setFilename(newFile.getName());
+		}
+		return yadaAttachedFileRepository.save(yadaAttachedFile);
+	}
+	
+	/**
+	 * Returns the absolute path of the mobile file
+	 * @param yadaAttachedFile the attachment
+	 * @return the File or null
+	 */
+	public File getAbsoluteMobileFile(YadaAttachedFile yadaAttachedFile) {
+		return getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenameMobile());
+	}
+	
+	/**
+	 * Returns the absolute path of the desktop file
+	 * @param yadaAttachedFile the attachment
+	 * @return the File or null
+	 */
+	public File getAbsoluteDesktopFile(YadaAttachedFile yadaAttachedFile) {
+		return getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenameDesktop());
+	}
+	
+	/**
 	 * Returns the absolute path of the default file (no mobile/desktop variant)
 	 * @param yadaAttachedFile the attachment
-	 * @return
+	 * @return the File or null
 	 */
 	public File getAbsoluteFile(YadaAttachedFile yadaAttachedFile) {
-		File targetFolder = new File(config.getContentPath(), yadaAttachedFile.getRelativeFolderPath());
-		return new File(targetFolder, yadaAttachedFile.getFilename());
+		return getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilename());
 	}
 
 	/**
 	 * Returns the absolute path of a file
 	 * @param yadaAttachedFile the attachment
 	 * @param filename the relative file name, can be yadaAttachedFile.getFilename(), yadaAttachedFile.getFilenameDesktop(), yadaAttachedFile.getFilenameMobile()
-	 * @return
+	 * @return the File or null
 	 */
 	public File getAbsoluteFile(YadaAttachedFile yadaAttachedFile, String filename) {
+		if (filename==null) {
+			return null;
+		}
 		File targetFolder = new File(config.getContentPath(), yadaAttachedFile.getRelativeFolderPath());
 		return new File(targetFolder, filename);
 	}

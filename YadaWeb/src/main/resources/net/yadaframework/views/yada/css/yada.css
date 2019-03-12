@@ -48,7 +48,7 @@
     margin: 0;
     padding: 0;
     opacity: .2;
-}​
+}
 
 .yadaResponseData {
 	display: none;
@@ -121,6 +121,19 @@ input.yadaReadonly {
 .yadaWidth80 input {
 	width: 80%;
 }
+
+.yadaHideEdit .yadaEditButton {
+	display: none;
+}
+
+.yadaHideClone .yadaClonetButton {
+	display: none;
+}
+
+.yadaHideDelete .yadaDeletetButton {
+	display: none;
+}
+
 /*************/
 /* DataTable */
 /*************/
@@ -170,6 +183,7 @@ table.dataTable th.sorting_asc, table.dataTable th.sorting_desc {
 	border-color: #e5e5e5 !important;
 	border-bottom-style: none !important;
 }
+
 /****************/
 /* Notification */
 /****************/

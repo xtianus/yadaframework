@@ -51,7 +51,7 @@ dependencies {
 		'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
 		'org.hibernate:hibernate-entitymanager:5.3.7.Final',
 		'org.hibernate:hibernate-validator:5.4.2.Final',
-		'org.thymeleaf:thymeleaf-spring4:3.0.9.RELEASE',
+		'org.thymeleaf:thymeleaf-spring4:3.0.11.RELEASE',
 		'mysql:mysql-connector-java:5.1.46',
 		'commons-collections:commons-collections:3.2.2',
 		'org.apache.tomcat:tomcat-servlet-api:8.0.48',

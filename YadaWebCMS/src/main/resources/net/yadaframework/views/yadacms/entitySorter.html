@@ -16,11 +16,12 @@ Parameters:
 - ajax = (optional) true to make an ajax call for add/edit. Defaults to false.
 - urlAdd = (optional) url to open the "add" page/modal. When missing, no 'Add' button will be shown.
 - urlEdit = (optional) url to open the "edit" page/modal. Defaults to urlAdd. When missing, no 'Edit' button will be shown.
+- urlClone = (optional) url to clone the element, always ajax. When missing, no 'Clone' button will be shown.
+- urlDelete - (optional) url to delete an entity, always ajax. It receives the "entityIdName" parameter. Example: bookId=412
 - urlSort - url to sort an Entity, always ajax. It receives the "currentId" and "otherId" parameters.
 	currentId is the id of the entity that is being moved to a new destination position.
 	otherId is the id of the entity that is in the destination position and should be moved to the currentId's position.
 	The @Controller implementation can use YadaWebCmsDao.swapAttributes() to swap positions, the add to the model the sorted "entities" list.
-- urlDelete - url to delete an entity, always ajax. It receives the "entityIdName" parameter. Example: bookId=412
 - deleteConfirmKey = key in messages.properties for the delete image confirmation modal.
 - deleteConfirm = delete image confirmation text, if not using a deleteConfirmKey. 
 				  If neither deleteConfirmKey nor deleteConfirm is given, no confirmation on delete is asked.
@@ -36,60 +37,74 @@ Example:
 <th:block th:fragment="component">
 	<div th:if="${entities!=null}" class="yadaEntitySorter" th:id="${sorterName}"
 		th:with="sorterName=${sorterName}?:'yadaEntitySorter',entityIdName=${entityIdName}?:'id',urlEdit=${urlEdit}?:${urlAdd}" >
-		
-		<!--/* Add */-->
-		<a th:if="${urlAdd!=null}" th:href="${urlAdd}" class="btn btn-success yadaAdd" th:classappend="${true==ajax}?'yadaAjax':''" role="button"
-			th:utext="${addButtonKey!=null?#messages.msg(addButtonKey):addButton?:'Add'}">Add</a>
 
-		<!--/* These forms have been split so that we don't need to carry over these parameters
-				when replacing some HTML element coming back from an ajax call: they stay put here */-->
+		<div th:class="|${urlEdit==null?'yadaHideEdit':''} ${urlClone==null?'yadaHideClone':''} ${urlDelete==null?'yadaHideDelete':''}|">
 		
-		<form th:action="${urlSort}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" class="yadaAjax sortForm" method="post">
-		</form>
-
-		<form th:if="${urlEdit!=null}" th:action="${urlEdit}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" 
-			class="editForm" th:classappend="${true==ajax}?'yadaAjax':''"  method="post">
-		</form>
-				
-		<form th:action="${urlDelete}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" class="yadaAjax deleteForm" method="post"
-			yada:confirm="${deleteConfirmKey!=null?#messages.msg(deleteConfirmKey):deleteConfirm?:''}">
-		</form>
+			<!--/* Add */-->
+			<a th:if="${urlAdd!=null}" th:href="${urlAdd}" class="btn btn-success yadaAdd" th:classappend="${true==ajax}?'yadaAjax':''" role="button"
+				th:utext="${addButtonKey!=null?#messages.msg(addButtonKey):addButton?:'Add'}">Add</a>
+	
+			<!--/* These forms have been split so that we don't need to carry over these parameters
+					when replacing some HTML element coming back from an ajax call: they stay put here */-->
+			
+			<form th:action="${urlSort}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" class="yadaAjax sortForm" method="post">
+			</form>
+	
+			<form th:if="${urlEdit!=null}" th:action="${urlEdit}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" 
+				class="editForm" th:classappend="${true==ajax}?'yadaAjax':''"  method="post">
+			</form>
+					
+			<form th:if="${urlClone!=null}" th:action="${urlClone}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" 
+				class="yadaAjax cloneForm" th:classappend="${true==ajax}?'yadaAjax':''"  method="post">
+			</form>
+					
+			<form th:if="${urlDelete!=null}" th:action="${urlDelete}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" class="yadaAjax deleteForm" method="post"
+				yada:confirm="${deleteConfirmKey!=null?#messages.msg(deleteConfirmKey):deleteConfirm?:''}">
+			</form>
 		
-		<div class="yadaEntitySorterEntities">
-			<div th:each="sorterEntity,iter : ${entities}" class="yadaImageControl">
-				<img th:src="@{${@yadaFileManager.getDesktopImageUrl(sorterEntity.getThumbnail())}}" />
-				<div class="yadaEntityTitle" th:text="${sorterEntity.title}">Title</div>
-				<div class="commandBar">
-					<!--/* Move up */-->
-					<form th:unless="${iter.last}" action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .sortForm" >
-						<input type="hidden" name="currentId" th:value="${sorterEntity.id}">
-						<input type="hidden" name="otherId" th:value="${entities.get(iter.index+1).id}">
-						<a href="javascript:" onclick="$(this).closest('form').submit(); return false;">
-							<i class="moveup fa fa-chevron-down" aria-hidden="true"></i>
-						</a>
-					</form>
-					<!--/* Move down */-->
-					<form th:unless="${iter.first}" action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .sortForm" >
-						<input type="hidden" name="currentId" th:value="${sorterEntity.id}">
-						<input type="hidden" name="otherId" th:value="${entities.get(iter.index-1).id}">
-						<a href="javascript:" onclick="$(this).closest('form').submit(); return false;">
-							<i class="moveup fa fa-chevron-up" aria-hidden="true"></i>
-						</a>
-					</form>
-					<!--/* Delete */-->
-					<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .deleteForm" class="pull-right">
-						<input type="hidden" th:name="${entityIdName}" th:value="${sorterEntity.id}">
-						<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" class="yadaNoLoader">
-							<i class="delete fa fa-trash-o" aria-hidden="true"></i>
-						</a>
-					</form>
-					<!--/* Edit */-->
-					<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .editForm" class="pull-right" >
-						<input type="hidden" th:name="${entityIdName}" th:value="${sorterEntity.id}">
-						<a href="javascript:" onclick="$(this).closest('form').submit(); return false;">
-							<i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-						</a>
-					</form>
+			<div class="yadaEntitySorterEntities">
+				<div th:each="sorterEntity,iter : ${entities}" class="yadaImageControl">
+					<img th:src="@{${@yadaFileManager.getDesktopImageUrl(sorterEntity.getThumbnail())}}" />
+					<div class="yadaEntityTitle" th:text="${sorterEntity.title}">Title</div>
+					<div class="commandBar">
+						<!--/* Move up */-->
+						<form th:unless="${iter.last}" action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .sortForm" >
+							<input type="hidden" name="currentId" th:value="${sorterEntity.id}">
+							<input type="hidden" name="otherId" th:value="${entities.get(iter.index+1).id}">
+							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;">
+								<i class="moveup fa fa-chevron-down" aria-hidden="true"></i>
+							</a>
+						</form>
+						<!--/* Move down */-->
+						<form th:unless="${iter.first}" action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .sortForm" >
+							<input type="hidden" name="currentId" th:value="${sorterEntity.id}">
+							<input type="hidden" name="otherId" th:value="${entities.get(iter.index-1).id}">
+							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;">
+								<i class="moveup fa fa-chevron-up" aria-hidden="true"></i>
+							</a>
+						</form>
+						<!--/* Delete */-->
+						<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .deleteForm" class="pull-right yadaDeletetButton">
+							<input type="hidden" th:name="${entityIdName}" th:value="${sorterEntity.id}">
+							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" class="yadaNoLoader">
+								<i class="delete fa fa-trash-o" aria-hidden="true"></i>
+							</a>
+						</form>
+						<!--/* Clone */-->
+						<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .cloneForm" class="pull-right yadaClonetButton" >
+							<input type="hidden" th:name="${entityIdName}" th:value="${sorterEntity.id}">
+							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;">
+								<i class="fa fa-clone" aria-hidden="true"></i>
+							</a>
+						</form>
+						<!--/* Edit */-->
+						<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .editForm" class="pull-right yadaEditButton" >
+							<input type="hidden" th:name="${entityIdName}" th:value="${sorterEntity.id}">
+							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;">
+								<i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+							</a>
+						</form>
+					</div>
 				</div>
 			</div>
 		</div>

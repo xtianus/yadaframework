@@ -1,5 +1,6 @@
 package net.yadaframework.persistence.entity;
 
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
@@ -17,6 +18,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
+import net.yadaframework.core.CloneableDeep;
+
 /**
  * A "pointer" to a file that has been copied into the "contents" folder.
  * When an uploaded file is associated to an object, an instance of this class is created and a copy of the file is made
@@ -27,7 +30,7 @@ import javax.persistence.Version;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public class YadaAttachedFile {
+public class YadaAttachedFile implements CloneableDeep {
 	
 	// For synchronization with external databases
 	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
@@ -42,7 +45,7 @@ public class YadaAttachedFile {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
 	
-	protected Long attachedToId; // If of the Entity to which this file is attached
+	protected Long attachedToId; // Id of the Entity to which this file is attached
 	
 	/**
 	 * Value for ordering files of the same type (e.g. gallery images)
@@ -211,6 +214,18 @@ public class YadaAttachedFile {
 
 	public void setClientFilename(String clientFilename) {
 		this.clientFilename = clientFilename;
+	}
+
+	@Override
+	public Field[] getExcludedFields() {
+		try {
+			return new Field[] {
+				this.getClass().getField("modified"), 
+				this.getClass().getField("version")
+			};
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 }

@@ -226,6 +226,27 @@ public class YadaUtil {
 	}
 	
 	/**
+	 * Creates a file with a unique filename by appending a number after the specified separator if needed.
+	 * If the sourceFile exists already, a new file is created with a proper counter at the end. The counter may be stripped
+	 * altogether (if the original file had a counter and no file without counter exists) or added or incremented.
+	 * The new counter might not be higher than the original one, nor sequential. It depends on what's already on 
+	 * the filesystem.
+	 * @param sourceFile the file that we want to create.
+	 * @param counterSeparator (optional) when null, "_" is used.
+	 * @return
+	 * @throws IOException
+	 */
+	public static File findAvailableName(File sourceFile, String counterSeparator) throws IOException {
+		if (counterSeparator==null) {
+			counterSeparator="_";
+		}
+		String sourceFilename = sourceFile.getName();
+		String extension = splitFileNameAndExtension(sourceFilename)[1];
+		String strippedName = stripCounterFromFilename(sourceFilename, counterSeparator);
+		return findAvailableName(sourceFile.getParentFile(), strippedName, extension, counterSeparator);
+	}
+	
+	/**
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
 	 * It must be called in a transaction.
 	 * @param fetchedEntity object fetched from database that may contain localized strings
@@ -685,7 +706,7 @@ public class YadaUtil {
 	}	
 	
 	/**
-	 * Splits a filename in the prefix and the extension parts
+	 * Splits a filename in the prefix and the extension parts. If there is no extension, the second array cell is the empty string
 	 * @param filename
 	 * @return an array with [ filename without extension, extension without dot]
 	 */
@@ -986,6 +1007,13 @@ public class YadaUtil {
 	}	
 	
 	/**
+	 * Copy an object via getter/setter.
+	 * The object must implement CloneableFiltered and optionally state what fields should be excluded and left null.
+	 * The id is always excluded.
+	 * All collections are recreated with the same instances unless their classes implement CloneableDeep, in which case the instances are copied with this same method.
+	 * All objects are shallow copied unless they implement CloneableDeep, in which case they are copied with this same method.
+	 * Map keys are never cloned.
+	 * 
 	 * Questo metodo crea la copia di un oggetto TRAMITE I SUOI GETTER (anche privati), facendo in modo che alcune collection/mappe vengano copiate pur restando indipendenti.
 	 * In pratica le collection/mappe sono ricreate come istanze nuove con i medesimi oggetti di quelle originali.
 	 * Questo permette di condividere gli oggetti tra le copie, ma di mantenere le associazioni slegate.
