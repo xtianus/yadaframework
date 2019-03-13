@@ -248,7 +248,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	// Thymeleaf
 	//
 
-	@Bean
+	// Non need for a @Bean
 	public ClassLoaderTemplateResolver yadaTemplateResolver() {
 		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
 		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
@@ -261,8 +261,8 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		 requirement, but a recommendation
 		 */
 		Set<String> patterns = new HashSet<>();
-		patterns.add("/yada/*"); // Start with "yada"
-		patterns.add("/yadacms/*"); // Start with "yadacms"
+		patterns.add("/yada/*"); // Start with "yada". Patterns are NOT regexp
+		patterns.add("/yadacms/*"); // Start with "yadacms". Patterns are NOT regexp
 		resolver.setResolvablePatterns(patterns);
 		resolver.setSuffix(".html");
 		resolver.setCharacterEncoding("UTF-8");
@@ -291,7 +291,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		 requirement, but a recommendation
 		 */
 		Set<String> patterns = new HashSet<>();
-		patterns.add("/email/*"); // Start with "/email/"
+		patterns.add("/email/*"); // Start with "/email/". Patterns are NOT regexp
 		resolver.setResolvablePatterns(patterns);
 		resolver.setSuffix(".html");
 		resolver.setCharacterEncoding("UTF-8");
@@ -303,7 +303,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	
 	// x213
 	
-	@Bean
+	// Non need for a @Bean
 	public ITemplateResolver webTemplateResolver() {
 //		ServletContextTemplateResolver resolver = new ServletContextTemplateResolver();
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
@@ -323,7 +323,24 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		return resolver;
 	}
 	
-	@Bean
+	// Non need for a @Bean
+	public ITemplateResolver jsonTemplateResolver() {
+		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
+	    resolver.setApplicationContext(applicationContext);
+		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
+		resolver.setPrefix("/WEB-INF/views");
+		Set<String> patterns = new HashSet<>();
+		patterns.add("/*.json"); // Ends with ".json"
+		resolver.setResolvablePatterns(patterns);
+		resolver.setSuffix(".json");
+		resolver.setCharacterEncoding("UTF-8");
+		resolver.setTemplateMode(TemplateMode.JAVASCRIPT);
+		resolver.setCacheable(config.isProductionEnvironment());
+		// resolver.setOrder(30); // Order not needed because resolver on different ViewResolver
+		return resolver;
+	}
+	
+	// Non need for a @Bean
 	public ITemplateResolver xmlTemplateResolver() {
 //		ServletContextTemplateResolver resolver = new ServletContextTemplateResolver();
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
@@ -332,18 +349,17 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		resolver.setPrefix("/WEB-INF/views");
 //		resolver.setPrefix("/WEB-INF/views/");
 		Set<String> patterns = new HashSet<>();
-		patterns.add("/xml/*"); // Start with "xml"
+		patterns.add("/xml/*"); // Start with "xml". Patterns are NOT regexp
 		resolver.setResolvablePatterns(patterns);
 		resolver.setSuffix(".xml");
 		resolver.setCharacterEncoding("UTF-8");
-		// NB, selecting HTML5 as the template mode.
-		resolver.setTemplateMode("XML");
+		resolver.setTemplateMode(TemplateMode.XML);
 		resolver.setCacheable(config.isProductionEnvironment());
 		// resolver.setOrder(30); // Order not needed because resolver on different ViewResolver
 		return resolver;
 	}
 	
-	@Bean
+	// Non need for a @Bean
 	public SpringTemplateEngine templateEngine() {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
 		engine.setEnableSpringELCompiler(true);
@@ -372,9 +388,19 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		engine.addDialect(new YadaDialect(config));
 	}
 
+	// Non need for a @Bean
+	public SpringTemplateEngine jsonTemplateEngine() {
+		SpringTemplateEngine engine = new SpringTemplateEngine();
+		engine.addTemplateResolver(jsonTemplateResolver());
+		// Do this in the subclass
+		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
+		addExtraDialect(engine); // thymeleaf-SpringSecurity-dialect
+		addYadaDialect(engine);
+		return engine;
+	}
+	
 	// Ho aggiunto un viewResolver per gestire i file xml. Per usarlo basta che il controller restituisca il nome di un file xml senza estensione che sta in WEB-INF/views/xml
 	// prefissandolo con "/xml", per esempio "/xml/sitemap".
-	
 	// Non need for a @Bean
 	public SpringTemplateEngine xmlTemplateEngine() {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
@@ -386,6 +412,30 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		return engine;
 	}
 
+	/**
+	 * View resolver for json files that can be anywhere in the views folder.
+	 * Contrary to usual practice, the view name MUST include the .json extension: return "/some/path/myfile.json". 
+	 * @return
+	 */
+	@Bean
+	public ViewResolver jsonViewResolver() {
+		SpringTemplateEngine engine = jsonTemplateEngine();
+		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
+		viewResolver.setTemplateEngine(engine);
+		viewResolver.setCharacterEncoding("UTF-8"); // Questo è importante anche se nei tutorial non lo mettono
+		viewResolver.setOrder(5);
+		// This is needed to skip this resolver for all html files
+		viewResolver.setViewNames(new String[] { "*.json" });
+		viewResolver.setContentType("application/json ");
+		// Default is "true": caching is enabled. Disable this only for debugging and development.
+		viewResolver.setCache(config.isProductionEnvironment()); 
+		return viewResolver;
+	}
+
+	/**
+	 * View resolver for xml files that are inside the /xml folder.
+	 * @return
+	 */
 	@Bean
 	public ViewResolver xmlViewResolver() {
 		SpringTemplateEngine engine = xmlTemplateEngine();
@@ -401,6 +451,10 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		return viewResolver;
 	}
 	
+	/**
+	 * View resolver for html pages. It handles web pages, mail preview pages from classpath, yada snippets from classpath
+	 * @return
+	 */
 	@Bean
 	public ViewResolver viewResolver() {
 		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();

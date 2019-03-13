@@ -32,6 +32,13 @@ Parameters:
 Example:
 <div th:replace="~{/yadacms/entitySorter::component(entities=${shelf.books},entityIdName='bookId',urlAdd=@{/library/bookForm(shelfId=${shelf.id})},urlDelete=@{/library/deleteBook},urlSort=@{/library/sortBook},deleteConfirm='Do you really want to delete this book?')}"></div>
 
+Ajax calls for add/edit/sort/delete/clone should return just the yadaEntitySorterEntities fragment.
+The needed model attributes are "entities" and "entityIdName".
+Example:
+	model.addAttribute("entities", bookList);
+	model.addAttribute("entityIdName", "bookId");
+	return "/yadacms/entitySorter :: .yadaEntitySorterEntities";
+				
 */-->
 <body>
 <th:block th:fragment="component">

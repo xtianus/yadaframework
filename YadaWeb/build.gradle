@@ -32,6 +32,10 @@ eclipse {
       		}
     	}
 	}
+	classpath {
+        downloadJavadoc = true
+        downloadSources = true
+    }
 }
 
 compileJava.options.encoding = 'UTF-8'
