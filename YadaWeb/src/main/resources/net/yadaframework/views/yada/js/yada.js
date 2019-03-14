@@ -44,7 +44,7 @@
 	
 	function initHandlers() {
 		// Mostra il loader sugli elementi con le classi s_showLoaderClick oppure s_showLoaderForm
-		$('body').on('click', '.yadaShowLoader', yada.loaderOn);
+		$('body').on('click', ':not(form).yadaShowLoader', yada.loaderOn);
 		$('body').on('submit', '.yadaShowLoader', yada.loaderOn);
 		// Legacy
 		$('body').on('click', '.s_showLoaderClick', yada.loaderOn);
