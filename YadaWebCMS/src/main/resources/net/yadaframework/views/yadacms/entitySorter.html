@@ -71,6 +71,7 @@ Example:
 		
 			<div class="yadaEntitySorterEntities">
 				<div th:each="sorterEntity,iter : ${entities}" class="yadaImageControl">
+					<p th:text="|#${sorterEntity.id}|">#123</p>
 					<img th:src="@{${@yadaFileManager.getDesktopImageUrl(sorterEntity.getThumbnail())}}" />
 					<div class="yadaEntityTitle" th:text="${sorterEntity.title}">Title</div>
 					<div class="commandBar">

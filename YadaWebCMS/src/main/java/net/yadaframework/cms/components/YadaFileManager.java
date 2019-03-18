@@ -245,29 +245,31 @@ public class YadaFileManager {
 	 * Replace the file associated with the current attachment
 	 * @param currentAttachedFile an existing attachment 
 	 * @param managedFile the new file to set
+	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
 	 * @return
 	 * @throws IOException
 	 */
-	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, String namePrefix) throws IOException {
-		return attachReplace(currentAttachedFile, managedFile, namePrefix, null, null, null);
+	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix) throws IOException {
+		return attachReplace(currentAttachedFile, managedFile, multipartFile, namePrefix, null, null, null);
 	}
 	
 	/**
 	 * Replace the file associated with the current attachment, only if a file was actually attached
 	 * @param currentAttachedFile an existing attachment 
 	 * @param managedFile the new file to set
+	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
 	 * @param targetExtension optional, to convert image file formats
 	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
 	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
 	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
 	 * @throws IOException
 	 */
-	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
 		if (managedFile==null) {
 			return null;
 		}
 		deleteFileAttachment(currentAttachedFile); // Delete any previous attached files
-		return attach(currentAttachedFile, managedFile, namePrefix, targetExtension, desktopWidth, mobileWidth);
+		return attach(currentAttachedFile, managedFile, multipartFile, namePrefix, targetExtension, desktopWidth, mobileWidth);
 	}
 	
 	/**
@@ -276,14 +278,15 @@ public class YadaFileManager {
 	 * Images are not resized.
 	 * @param attachToId the id of the entity to which the file should be attached
 	 * @param managedFile an uploaded file, can be an image or not
+	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not set.
 	 * @param relativeFolderPath path of the target folder relative to the contents folder
 	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
 	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
 	 * @throws IOException 
 	 * @see {@link #attach(File, String, String, String, Integer, Integer)}
 	 */
-	public YadaAttachedFile attachNew(Long attachToId, File managedFile, String relativeFolderPath, String namePrefix) throws IOException {
-		return attachNew(attachToId, managedFile, relativeFolderPath, namePrefix, null, null, null);
+	public YadaAttachedFile attachNew(Long attachToId, File managedFile, MultipartFile multipartFile, String relativeFolderPath, String namePrefix) throws IOException {
+		return attachNew(attachToId, managedFile, multipartFile, relativeFolderPath, namePrefix, null, null, null);
 	}
 	
 	/**
@@ -291,6 +294,7 @@ public class YadaFileManager {
 	 * The name of the file is in the format [basename]managedFileName_id.ext
 	 * @param attachToId the id of the entity to which the file should be attached
 	 * @param managedFile an uploaded file, can be an image or not. When null, nothing is done.
+	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
 	 * @param relativeFolderPath path of the target folder relative to the contents folder, starting with a slash /
 	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
 	 * @param targetExtension optional, to convert image file formats
@@ -300,7 +304,7 @@ public class YadaFileManager {
 	 * @throws IOException
 	 * @see {@link #attach(File, String, String, String)} 
 	 */
-	public YadaAttachedFile attachNew(Long attachToId, File managedFile, String relativeFolderPath, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+	public YadaAttachedFile attachNew(Long attachToId, File managedFile, MultipartFile multipartFile, String relativeFolderPath, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
 		if (managedFile==null) {
 			return null;
 		}
@@ -314,10 +318,10 @@ public class YadaFileManager {
 		yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile); // Get the id
 		File targetFolder = new File(config.getContentPath(), relativeFolderPath);
 		targetFolder.mkdirs();
-		return attach(yadaAttachedFile, managedFile, namePrefix, targetExtension, desktopWidth, mobileWidth);
+		return attach(yadaAttachedFile, managedFile, multipartFile, namePrefix, targetExtension, desktopWidth, mobileWidth);
 	}
 	
-	private YadaAttachedFile attach(YadaAttachedFile yadaAttachedFile, File managedFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+	private YadaAttachedFile attach(YadaAttachedFile yadaAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
 		//
 		String relativeFolderPath = yadaAttachedFile.getRelativeFolderPath();
 		File targetFolder = new File(config.getContentPath(), relativeFolderPath);
@@ -326,7 +330,9 @@ public class YadaFileManager {
 		String origExtension = filenameParts[1]; // jpg or pdf
 		//
 		yadaAttachedFile.setUploadTimestamp(new Date());
-		yadaAttachedFile.setClientFilename(managedFile.getName());
+		if (multipartFile!=null) {
+			yadaAttachedFile.setClientFilename(multipartFile.getOriginalFilename());
+		}
 		yadaAttachedFile.setSortOrder(yadaAttachedFile.getId()); // Set the sort order to the id, so that this will be the last image in a list
 		String targetFilenamePrefix = StringUtils.trimToEmpty(namePrefix) + origFilename + COUNTER_SEPARATOR + yadaAttachedFile.getId(); // product_2631
 		targetFilenamePrefix = YadaUtil.reduceToSafeFilename(targetFilenamePrefix, true);
