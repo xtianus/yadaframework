@@ -54,7 +54,7 @@ Example:
 			<!--/* These forms have been split so that we don't need to carry over these parameters
 					when replacing some HTML element coming back from an ajax call: they stay put here */-->
 			
-			<form th:action="${urlSort}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" class="yadaAjax sortForm" method="post">
+			<form th:action="${urlSort}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" class="yadaAjax yadaNoLoader sortForm" method="post">
 			</form>
 	
 			<form th:if="${urlEdit!=null}" th:action="${urlEdit}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" 
@@ -79,7 +79,7 @@ Example:
 						<form th:unless="${iter.last}" action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .sortForm" >
 							<input type="hidden" name="currentId" th:value="${sorterEntity.id}">
 							<input type="hidden" name="otherId" th:value="${entities.get(iter.index+1).id}">
-							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;">
+							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" class="yadaNoLoader">
 								<i class="moveup fa fa-chevron-down" aria-hidden="true"></i>
 							</a>
 						</form>
@@ -87,7 +87,7 @@ Example:
 						<form th:unless="${iter.first}" action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .sortForm" >
 							<input type="hidden" name="currentId" th:value="${sorterEntity.id}">
 							<input type="hidden" name="otherId" th:value="${entities.get(iter.index-1).id}">
-							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;">
+							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" class="yadaNoLoader">
 								<i class="moveup fa fa-chevron-up" aria-hidden="true"></i>
 							</a>
 						</form>

@@ -745,6 +745,13 @@ public class YadaSql implements CloneableDeep {
 		return setParameter(name, Arrays.asList(values));
 	}
 	
+	/**
+	 * Set a parameter only when not null. Quite useless because setting a parameter that is not used has no effect.
+	 * @param name
+	 * @param value
+	 * @return
+	 * @deprecated
+	 */
 	public YadaSql setParameterNotNull(String name, Object value) {
 		if (queryDone) {
 			throw new YadaInternalException("Parameters should be set before calling query()");

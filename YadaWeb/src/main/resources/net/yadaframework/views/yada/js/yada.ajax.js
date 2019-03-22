@@ -422,7 +422,7 @@
 			}
 		}
 		var url = $element.attr('data-yadaHref');
-		if (url==null) {
+		if (url==null || url=='') {
 			url = $element.attr('href');
 		}
 		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");

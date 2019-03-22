@@ -14,8 +14,12 @@ Parameters (can be set in the replace tag or in any parent tag):
 - options = a list of objects or an instance of YadaLocalEnum or a list of primitive types, like ${users} or ${ {true,false} } (space is important) - can be omitted for an empty select.
 -           It can also be a map of (value-text) entries, 
 			where values are either literal text or suffixes for labelKey (the key of the map is the value returned, the value of the map is the text/key shown).
-- valueAttribute = the name of the object attribute containing the option value, e.g. "id" - must be omitted for lists of primitives
-- textAttribute = the name of the object attribute (or method with braces) containing the option text (or textKey suffix), e.g. "name" or "toString()" - must be omitted for lists of primitives
+- valueAttribute = (optional) the name of the object attribute containing the option value, e.g. "id" - must be omitted for lists of primitives.
+			Careful that if fieldName is an object and options is a list of the same objects, this parameter should not be set
+			otherwise the select list won't be correctly preselected to the current value.
+			In this case is probably always better to specify the object attribute both in fieldName and in valueAttribute.
+			Example: fieldName='product.id',valueAttribute='id'
+- textAttribute = the name of the object attribute (or method with braces) containing the option text (or textKey suffix), e.g. "name" or "toString()", needed for objects - must be omitted for lists of primitives
 - size = number of options to show (optional)
 - textKey = the prefix of the key used for texts, like 'list.enabled.'; options (or option texts) will be appended to the prefix.
              If null, the option or option text will be used for the text.
@@ -24,7 +28,7 @@ Parameters (can be set in the replace tag or in any parent tag):
 - helpKey = chiave del testo per il pulsante di help (optional)
 - addHeader = (optional) true to add the first "empty" (value="-1") option, or a string to set that first option value to the string. For example if options is a list of enums then the addHeader string, if present, should be an enum name.
 - multiple = true for a multiple select box (optional)
-- required = true for a required select box (optional)
+- required = true for a required select box (optional) - does not work when addHeader is true (TODO FIX)
 - disabled = true for a disabled select box (optional)
 - readonly = true for readonly (optional)
 - onchange = function to call on the change event. It receives the 'change' event. (optional)
@@ -34,6 +38,8 @@ Parameters (can be set in the replace tag or in any parent tag):
              Not needed when the ajaxLists are not inserted via javascript.
              Could be convenient to set it in a th:with on the form, so that it doesn't have to be repeated.
 - noFeedback = true to remove space reserved for field feedback icon (optional)
+- yadahref = (optional) url to make an ajax call on select change. The value of the select is sent with the call.
+- yadaUpdateOnSuccess = (optional) css selector of an element to update after returning from the ajax call.
 
 Example:
 <div th:replace="/yada/form/list::field(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()',addHeader=true)"></div>
@@ -57,18 +63,22 @@ Example:
 			th:required="${required}" 
 			th:readonly="${readonly}"
 			th:disabled="${disabled}"
-			th:classappend="${readonly==true?'yadaReadonly':'form-control'+(noFeedback==true?'':' has-feedback')}"
-			th:id="${#ids.seq(idPrefix)}" th:attr="aria-describedby=${#ids.next(idPrefix)}">
+			th:classappend="|${yadahref!=null?'yadaAjax':''} ${readonly==true?'yadaReadonly':'form-control'+(noFeedback==true?'':' has-feedback')}|"
+			th:id="${#ids.seq(idPrefix)}" 
+			th:aria-describedby="${#ids.next(idPrefix)}"
+			th:data-yadahref="${yadahref}"
+			th:attr="__${yadaUpdateOnSuccess!=''?'data-yadaUpdateOnSuccess':'dummy'}__=${yadaUpdateOnSuccess}"
+			>
 			<option th:if="${headerValue!=null}" th:value="${headerValue}">---</option>
 			<th:block th:if="${!isMap && !isYadaLocalEnum}">
 				<!--/* List */-->
 				<th:block th:each="option : ${options}">
-					<!--/* List of primitives */-->
+					<!--/* List of primitives or objects */-->
 					<option th:if="${valueAttribute==null} or ${textAttribute==null}" 
 						th:value="${option}" 
 						th:title="${textKey==null?option:#messages.msg(textKey+option)}"
 						th:text="${textKey==null?option:#messages.msg(textKey+option)}">SomeChoice</option>
-					<!--/* List of objects */-->
+					<!--/* List of object attributes */-->
 					<th:block th:if="${valueAttribute!=null} and ${textAttribute!=null}" th:with="text = ${__${'option.'+textAttribute}__},value=${__${'option.'+valueAttribute}__}">
 						<option 
 							th:value="${value}" 
