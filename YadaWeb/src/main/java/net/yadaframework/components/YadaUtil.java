@@ -260,6 +260,28 @@ public class YadaUtil {
 		}
 	}
 	
+	/**
+	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
+	 * It must be called in a transaction.
+	 * @param fetchedEntity object fetched from database that may contain localized strings
+	 * @param targetClass type of fetchedEntities elements
+	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
+	 */
+	public static <targetClass> void prefetchLocalizedStringsRecursive(targetClass fetchedEntity, Class<?> targetClass, String...attributes) {
+		if (fetchedEntity!=null) {
+			List<targetClass> list = new ArrayList<>();
+			list.add(fetchedEntity);
+			prefetchLocalizedStringListRecursive(list, targetClass, attributes);
+		}
+	}
+	
+	/**
+	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
+	 * It must be called in a transaction.
+	 * @param entities objects fetched from database that may contain localized strings
+	 * @param entityClass type of fetchedEntities elements
+	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
+	 */
 	public static <entityClass> void prefetchLocalizedStringListRecursive(List<entityClass> entities, Class<?> entityClass, String...attributes) {
 		if (entities==null || entities.isEmpty()) {
 			return;
@@ -301,7 +323,7 @@ public class YadaUtil {
 	 * It must be called in a transaction.
 	 * @param entities objects fetched from database that may contain localized strings
 	 * @param entityClass type of fetchedEntities elements
-	 * @param attributes the attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
+	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
 	 */
 	public static <entityClass> void prefetchLocalizedStringList(List<entityClass> entities, Class<?> entityClass, String...attributes) {
 		List<String> attributeNames = Arrays.asList(attributes);
@@ -1007,12 +1029,17 @@ public class YadaUtil {
 	}	
 	
 	/**
-	 * Copy an object via getter/setter.
+	 * Copy (clone) an object via getter/setter.
 	 * The object must implement CloneableFiltered and optionally state what fields should be excluded and left null.
 	 * The id is always excluded.
 	 * All collections are recreated with the same instances unless their classes implement CloneableDeep, in which case the instances are copied with this same method.
 	 * All objects are shallow copied unless they implement CloneableDeep, in which case they are copied with this same method.
 	 * Map keys are never cloned.
+	 * 
+	 * NOTE: the object doesn't have to be an @Entity
+	 * NOTE: any @Entity in the hierarchy is cloned without id and should be explicitly persisted after cloning unless there's PERSIST propagation.
+	 * NOTE: this method works quite well and should be trusted to copy even complex hierarchies.
+	 * NOTE: a transaction should be active to copy entities with lazy associations
 	 * 
 	 * Questo metodo crea la copia di un oggetto TRAMITE I SUOI GETTER (anche privati), facendo in modo che alcune collection/mappe vengano copiate pur restando indipendenti.
 	 * In pratica le collection/mappe sono ricreate come istanze nuove con i medesimi oggetti di quelle originali.
@@ -1035,7 +1062,9 @@ public class YadaUtil {
 	 * @param source
 	 * @return
 	 */
-	// TODO why not use SerializationUtils.clone(..) of commons-lang? This is many times slower than writing clone methods by hand on all objects in your object graph. However, for complex object graphs, or for those that don't support deep cloning this can be a simple alternative implementation. Of course all the objects must be Serializable.
+	// why not use SerializationUtils.clone(..) of commons-lang? 
+	// This is many times slower than writing clone methods by hand on all objects in your object graph. 
+	// However, for complex object graphs, or for those that don't support deep cloning this can be a simple alternative implementation. Of course all the objects must be Serializable.
 	public static Object copyEntity(CloneableFiltered source) {
 		return copyEntity(source, false);
 	}
@@ -1072,7 +1101,6 @@ public class YadaUtil {
 	 * @param classObject classe da usare per creare il clone quando il source è nascosto dentro a un HibernateProxy
 	 * @return
 	 */
-	// TODO why not use SerializationUtils.clone(..) of commons-lang?
 	public static Object copyEntity(CloneableFiltered source, Class classObject) {
 		return copyEntity(source, classObject, false);
 	}
