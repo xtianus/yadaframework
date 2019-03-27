@@ -324,7 +324,7 @@ input.yadaSwitch-round:checked ~ label:after {
 /* This is for fontawesome 5 but can be overridden for any other icon library */
 
 .yadaIcon {
-	font-family: "Font Awesome 5 Pro";
+	font-family: "Font Awesome 5 Free";
 	-moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
     display: inline-block;
