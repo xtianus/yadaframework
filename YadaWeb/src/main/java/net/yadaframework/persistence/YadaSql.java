@@ -760,11 +760,17 @@ public class YadaSql implements CloneableDeep {
 	}
 	
 	public YadaSql setParameter(String name, String[] values) {
-		return setParameter(name, Arrays.asList(values));
+		if (values!=null) {
+			return setParameter(name, Arrays.asList(values));
+		}
+		return this;
 	}
 	
 	public YadaSql setParameter(String name, Long[] values) {
-		return setParameter(name, Arrays.asList(values));
+		if (values!=null) {
+			return setParameter(name, Arrays.asList(values));
+		}
+		return this;
 	}
 	
 	/**
