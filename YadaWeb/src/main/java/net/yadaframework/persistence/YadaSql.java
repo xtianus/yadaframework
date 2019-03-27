@@ -607,6 +607,28 @@ public class YadaSql implements CloneableDeep {
 	}
 	
 	/*
+	 * Replaces the current "select ... from"
+	 * @param enabled false to skip this operation
+	 * @param newSelectFrom the new select...from sql
+	 */
+	public YadaSql toSelectFrom(boolean enabled, String newSelectFrom) {
+		if (enabled) {
+			return toSelectFrom(newSelectFrom);
+		}
+		return this;
+	}
+	
+	/*
+	 * Replaces the current "select ... from"
+	 * @param newSelectFrom the new select...from sql
+	 */
+	public YadaSql toSelectFrom(String newSelectFrom) {
+		queryBuffer = new StringBuilder();
+		appendQuery(newSelectFrom);
+		return this;
+	}
+	
+	/*
 	 * Transforms a "select ... from" to a "select count(*) from"
 	 * @param sql null for "select count(*)", or something like "select count(distinct e)"
 	 */
@@ -618,10 +640,10 @@ public class YadaSql implements CloneableDeep {
 		} else {
 			queryBuffer.insert(0, "select count(*) ");
 		}
-	    this.orderBy = "";
-	    this.limit = null;
-	    this.groupBy = "";
-	    return this;
+		this.orderBy = "";
+		this.limit = null;
+		this.groupBy = "";
+		return this;
 	}
 	
 	private void fixQuery(Query query) {

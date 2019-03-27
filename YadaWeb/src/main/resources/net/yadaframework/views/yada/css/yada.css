@@ -187,7 +187,7 @@ table.dataTable th.sorting_asc, table.dataTable th.sorting_desc {
 /****************/
 /* Notification */
 /****************/
-.yadaNotify .modal-header .glyphicon {
+.yadaNotify .modal-header .yadaIcon:not(.yadaIcon-close) {
 	font-size: 40px;
 	vertical-align: middle;
 	padding-right: 10px;
@@ -196,13 +196,13 @@ table.dataTable th.sorting_asc, table.dataTable th.sorting_desc {
 	max-height: 400px;
 	overflow: auto;
 } 
-.yadaNotify .glyphicon.ok {
+.yadaNotify .yadaIcon.ok {
 	color: #25B72E;
 }
-.yadaNotify .glyphicon.error {
+.yadaNotify .yadaIcon.error {
 	color: #E81111;
 }
-.yadaNotify .glyphicon.info {
+.yadaNotify .yadaIcon.info {
 	color: #209EF9;
 }
 
@@ -301,3 +301,53 @@ input.yadaSwitch-round:checked ~ label:before {
 input.yadaSwitch-round:checked ~ label:after {
   margin-left: 20px;
 }
+
+/****************/
+/* Bootstrap 5  */
+/****************/
+/* These are needed to use Bootstrap 5 */
+
+.btn-default {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+}
+.btn-default:hover {
+    color: #333;
+    background-color: #e6e6e6;
+    border-color: #adadad;
+}
+
+/***************/
+/* Yada Icons  */
+/***************/
+/* This is for fontawesome 5 but can be overridden for any other icon library */
+
+.yadaIcon {
+	font-family: "Font Awesome 5 Pro";
+	-moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+}
+
+.yadaIcon-ok:before {
+    content: "\f058";
+}
+
+.yadaIcon-warning:before {
+    content: "\f06a";
+}
+
+.yadaIcon-warning:before {
+    content: "\f057";
+}
+
+.yadaIcon-close:before {
+    content: "\f00d";
+}
+
+
