@@ -332,6 +332,7 @@ input.yadaSwitch-round:checked ~ label:after {
     font-variant: normal;
     text-rendering: auto;
     line-height: 1;
+    font-weight: 400;
 }
 
 .yadaIcon-ok:before {
@@ -342,12 +343,37 @@ input.yadaSwitch-round:checked ~ label:after {
     content: "\f06a";
 }
 
-.yadaIcon-warning:before {
+.yadaIcon-error:before {
     content: "\f057";
 }
 
 .yadaIcon-close:before {
     content: "\f00d";
+    font-weight: 600;	
 }
+
+.yadaIcon-down:before {
+    content: "\f107";
+    font-weight: 600;	
+}
+
+.yadaIcon-up:before {
+    content: "\f106";
+    font-weight: 600;	
+}
+
+.yadaIcon-edit:before {
+    content: "\f303";
+    font-weight: 900;
+}
+
+.yadaIcon-delete:before {
+    content: "\f2ed";
+}
+
+.yadaIcon-clone:before {
+    content: "\f24d";
+}
+
 
 

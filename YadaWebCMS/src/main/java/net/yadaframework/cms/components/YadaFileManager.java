@@ -54,6 +54,9 @@ public class YadaFileManager {
 	 * @throws IOException 
 	 */
 	public YadaAttachedFile duplicateFiles(YadaAttachedFile yadaAttachedFile) throws IOException {
+		if (yadaAttachedFile==null) {
+			return null;
+		}
 		File newFile = null;
 		File sourceFile = getAbsoluteMobileFile(yadaAttachedFile);
 		if (sourceFile!=null) {
@@ -88,7 +91,10 @@ public class YadaFileManager {
 	 * @return the File or null
 	 */
 	public File getAbsoluteMobileFile(YadaAttachedFile yadaAttachedFile) {
-		return getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenameMobile());
+		if (yadaAttachedFile!=null) {
+			return getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenameMobile());
+		}
+		return null;
 	}
 	
 	/**
@@ -97,7 +103,10 @@ public class YadaFileManager {
 	 * @return the File or null
 	 */
 	public File getAbsoluteDesktopFile(YadaAttachedFile yadaAttachedFile) {
-		return getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenameDesktop());
+		if (yadaAttachedFile!=null) {
+			return getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenameDesktop());
+		}
+		return null;
 	}
 	
 	/**
@@ -106,7 +115,10 @@ public class YadaFileManager {
 	 * @return the File or null
 	 */
 	public File getAbsoluteFile(YadaAttachedFile yadaAttachedFile) {
-		return getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilename());
+		if (yadaAttachedFile!=null) {
+			return getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilename());
+		}
+		return null;
 	}
 
 	/**
@@ -116,7 +128,7 @@ public class YadaFileManager {
 	 * @return the File or null
 	 */
 	public File getAbsoluteFile(YadaAttachedFile yadaAttachedFile, String filename) {
-		if (filename==null) {
+		if (filename==null || yadaAttachedFile==null) {
 			return null;
 		}
 		File targetFolder = new File(config.getContentPath(), yadaAttachedFile.getRelativeFolderPath());
