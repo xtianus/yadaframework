@@ -324,15 +324,15 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	}
 	
 	// Non need for a @Bean
-	public ITemplateResolver jsonTemplateResolver() {
+	public ITemplateResolver javascriptTemplateResolver() {
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
 	    resolver.setApplicationContext(applicationContext);
 		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
 		resolver.setPrefix("/WEB-INF/views");
 		Set<String> patterns = new HashSet<>();
-		patterns.add("/*.json"); // Ends with ".json"
+		patterns.add("/*.js"); // Ends with ".js"
 		resolver.setResolvablePatterns(patterns);
-		resolver.setSuffix(".json");
+		resolver.setSuffix(".js");
 		resolver.setCharacterEncoding("UTF-8");
 		resolver.setTemplateMode(TemplateMode.JAVASCRIPT);
 		resolver.setCacheable(config.isProductionEnvironment());
@@ -389,9 +389,9 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	}
 
 	// Non need for a @Bean
-	public SpringTemplateEngine jsonTemplateEngine() {
+	public SpringTemplateEngine javascriptTemplateEngine() {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
-		engine.addTemplateResolver(jsonTemplateResolver());
+		engine.addTemplateResolver(javascriptTemplateResolver());
 		// Do this in the subclass
 		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
 		addExtraDialect(engine); // thymeleaf-SpringSecurity-dialect
@@ -413,20 +413,20 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	}
 
 	/**
-	 * View resolver for json files that can be anywhere in the views folder.
-	 * Contrary to usual practice, the view name MUST include the .json extension: return "/some/path/myfile.json". 
+	 * View resolver for js files that can be anywhere in the views folder.
+	 * Contrary to usual practice, the view name MUST include the .js extension: return "/some/path/myfile.js". 
 	 * @return
 	 */
 	@Bean
-	public ViewResolver jsonViewResolver() {
-		SpringTemplateEngine engine = jsonTemplateEngine();
+	public ViewResolver javascriptViewResolver() {
+		SpringTemplateEngine engine = javascriptTemplateEngine();
 		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
 		viewResolver.setTemplateEngine(engine);
 		viewResolver.setCharacterEncoding("UTF-8"); // Questo è importante anche se nei tutorial non lo mettono
 		viewResolver.setOrder(5);
-		// This is needed to skip this resolver for all html files
-		viewResolver.setViewNames(new String[] { "*.json" });
-		viewResolver.setContentType("application/json ");
+		// This is needed to skip this resolver for all html files but it forces the use of .js in the view name
+		viewResolver.setViewNames(new String[] { "*.js" });
+		viewResolver.setContentType("application/javascript");
 		// Default is "true": caching is enabled. Disable this only for debugging and development.
 		viewResolver.setCache(config.isProductionEnvironment()); 
 		return viewResolver;

@@ -17,7 +17,7 @@ Parameters:
 - textAttribute = the name of the object attribute (or method with braces) containing the option text (or textKey suffix), e.g. "name" or "toString()" - must be omitted for lists of primitives
 - textKey = the prefix of the key used for texts, like 'list.enabled.'; options (or option texts) will be appended to the prefix.
              If null, the option or option text will be used for the text.
-- help = testo per il pulsante di help, se non c'Ã¨ helpKey (optional)
+- help = testo per il pulsante di help, se non c'è helpKey (optional)
 - helpKey = chiave del testo per il pulsante di help (optional)
 - addHeader = (optional) true to add the first "empty" option
 - multiple = true for a multiple select box (optional)
@@ -42,7 +42,7 @@ Example:
 	<label th:if="${label!=null or labelKey!=null}" 
 		class="control-label" th:for="${#ids.next(idPrefix)}" 
 		th:text="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
-	<div class="input-group" style="width:100%"> <!--/* il width serve perchÃ© se non c'Ã¨ l'help il campo resta corto (ad esempio i campi password) */-->
+	<div class="input-group" style="width:100%"> <!--/* il width serve perchè se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
 		<select th:multiple="${multiple}" th:name="${name?:''}"
 			th:with="isMap=${options instanceof T(java.util.Map)}"
 			th:required="${required}" 

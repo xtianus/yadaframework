@@ -305,7 +305,7 @@ input.yadaSwitch-round:checked ~ label:after {
 /****************/
 /* Bootstrap 5  */
 /****************/
-/* These are needed to use Bootstrap 5 */
+/* These are needed to use Bootstrap 5 on Bootstrap 4 code */
 
 .btn-default {
     color: #333;
