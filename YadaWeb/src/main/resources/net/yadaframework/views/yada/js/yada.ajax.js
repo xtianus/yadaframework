@@ -1175,7 +1175,7 @@
 		var notification=$(responseHtml).find(".s_modalNotify .yadaNotify");
 		if (notification.length==1) {
 			// Mostro la notification
-			$('#ajaxModal').modal('hide'); // non si sa mai
+			$('#ajaxModal.show').modal('hide'); // non si sa mai
 			$('#yada-notification').children().remove();
 			$('#yada-notification').append(notification);
 			// We need to show the modal after a delay or it won't show sometimes (!)
