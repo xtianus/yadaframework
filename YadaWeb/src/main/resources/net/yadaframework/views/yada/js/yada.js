@@ -783,10 +783,10 @@
 	}
 	
 	function hideAllModals() {
-		$("#loginModal").modal('hide');
-		$("#ajaxModal").modal('hide');
-		$('#yada-notification').modal('hide');
-		$('#yada-confirm').modal('hide');
+		$("#loginModal.show").modal('hide');
+		$("#ajaxModal.show").modal('hide');
+		$('#yada-notification.show').modal('hide');
+		$('#yada-confirm.show').modal('hide');
 	}
 	
 
