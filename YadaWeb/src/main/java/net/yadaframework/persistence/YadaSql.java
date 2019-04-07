@@ -30,7 +30,7 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 // http://dev.mysql.com/doc/refman/5.7/en/select.html
 public class YadaSql implements CloneableDeep {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	YadaSql parent = null; // Used for subexpressions
 	boolean enabled = true; // Used for subexpressions
 	StringBuilder queryBuffer = new StringBuilder();
@@ -50,15 +50,15 @@ public class YadaSql implements CloneableDeep {
 	boolean queryDone = false;
 	List<YadaSql> unions = new ArrayList<>();
 //	Map<String, String> aliasMap = new HashMap<>();
-	
+
 	private YadaSql() {
 	}
-	
+
 	private YadaSql(YadaSql parent, boolean enabled) {
 		this.parent = parent;
 		this.enabled = enabled;
 	}
-	
+
 	/**
 	 * Add a query as a union of the current one.
 	 * @param unioned the query to add as a union
@@ -74,7 +74,7 @@ public class YadaSql implements CloneableDeep {
 		queryBuffer.append(text).append(" ");
 		return this;
 	}
-	
+
 	private YadaSql appendSection(StringBuilder builder, String sectionOperand, String text) {
 		lastSkipped = false;
 		if (this.parent == null) {
@@ -111,7 +111,7 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	private YadaSql appendHaving(String text) {
 		if (StringUtils.isNotEmpty(text)) {
 			nowInHaving=true;
@@ -124,7 +124,7 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Start a "delete from ..." query
 	 * @param enabled
@@ -137,7 +137,7 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Start a "delete from ..." query
 	 * @param deleteFrom like "delete from User"
@@ -146,7 +146,7 @@ public class YadaSql implements CloneableDeep {
 	public YadaSql deleteFrom(String deleteFrom) {
 		return deleteFrom(true, deleteFrom);
 	}
-	
+
 	/**
 	 * Start a "select ... from ..." query
 	 * If this method has already been called, the new select text is inserted before the "from" after a comma
@@ -160,9 +160,9 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	// insert removed because it should handle more parameter types and most of all special characters like ' in the value
-	
+
 //	/**
 //	 * Start a "insert ... values ..." query
 //	 * @param enabled
@@ -175,37 +175,37 @@ public class YadaSql implements CloneableDeep {
 //		}
 //		return this;
 //	}
-//	
+//
 //	public YadaSql insertInto(boolean enabled, String columnName, String value) {
 //		if (enabled) {
 //			insertValues.put(columnName, value);
 //		}
 //		return this;
 //	}
-//	
+//
 //	public YadaSql insertInto(boolean enabled, String columnName, Long value) {
 //		if (enabled) {
 //			insertValues.put(columnName, value);
 //		}
 //		return this;
 //	}
-//	
+//
 //	public YadaSql insertInto(boolean enabled, String columnName, Integer value) {
 //		if (enabled) {
 //			insertValues.put(columnName, value);
 //		}
 //		return this;
 //	}
-//	
+//
 //	public YadaSql insertInto(boolean enabled, String columnName, Object value) {
 //		if (enabled) {
 //			insertValues.put(columnName, value);
 //		}
 //		return this;
 //	}
-//	
+//
 //	// TODO more parameter types
-	
+
 	/**
 	 * Start or extend a "select ... from ..." query.
 	 * If this method has already been called, the new select text is inserted before the "from" after a comma
@@ -224,7 +224,7 @@ public class YadaSql implements CloneableDeep {
 		lastSkipped = false;
 		return this;
 	}
-	
+
 	/**
 	 * Continues an update - set query with name=value, e.g. "name=:usename"
 	 * @param nameValue
@@ -237,7 +237,7 @@ public class YadaSql implements CloneableDeep {
 		}
 		return appendQuery(nameValue);
 	}
-	
+
 	/**
 	 * Continues an update - set query with name=value, e.g. "name=:usename"
 	 * @param enabled
@@ -250,7 +250,7 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Start a "update ... set ..." query
 	 * @param updateSet e.g. "update Uset set name=:username"
@@ -259,7 +259,7 @@ public class YadaSql implements CloneableDeep {
 	public YadaSql updateSet(String updateSet) {
 		return appendQuery(updateSet);
 	}
-	
+
 	/**
 	 * Returns an empty YadaSql for later use
 	 * @return
@@ -268,7 +268,7 @@ public class YadaSql implements CloneableDeep {
 		YadaSql yadaSql = new YadaSql();
 		return yadaSql;
 	}
-	
+
 	/**
 	 * Adds a join condition if not already added (the join keyword is required).
 	 * @param enabled false to prevent the join from being added. Can be null or empty.
@@ -282,13 +282,14 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Adds a join condition if not already added (the join keyword is required).
 	 * @param joinOn a join that could include a ON operand, like "left join User on e.uid = u.id". Can be null or empty.
 	 * @return
 	 */
 	public YadaSql join(String joinOn) {
+		// The "join" keyword is required
 		if (StringUtils.isNotEmpty(joinOn)) {
 			nowInHaving=false;
 			if (joins.indexOf(joinOn)<0) {
@@ -309,7 +310,7 @@ public class YadaSql implements CloneableDeep {
 		nowInHaving=false;
 		return appendSection(whereConditions, "where ", "");
 	}
-	
+
 	/**
 	 * Adds a where condition
 	 * @param whereConditions a condition like "where a>0" or just "a>0", can be null or empty
@@ -332,7 +333,7 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Adds a where condition only if the collection is not null and non empty
 	 * @param enabled
@@ -342,7 +343,7 @@ public class YadaSql implements CloneableDeep {
 	public YadaSql whereNotEmpty(Collection collection, String whereConditions) {
 		return where(collection!=null && !collection.isEmpty(), whereConditions);
 	}
-	
+
 	/**
 	 * Add a "where aaa in (x, y, z)" clause. Skipped if the collection is null or empty.
 	 * The collection is converted to a comma-separated strings.
@@ -357,7 +358,7 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Add a "where aaa in (select ...)" clause.
 	 * @param attributeName attribute (can also be a collection) or column name
@@ -369,7 +370,7 @@ public class YadaSql implements CloneableDeep {
 		this.parameters.putAll(subselect.parameters);
 		return this;
 	}
-	
+
 	/**
 	 * Adds a having condition
 	 * @param havingConditions, can be null or empty
@@ -378,9 +379,9 @@ public class YadaSql implements CloneableDeep {
 	public YadaSql having(String havingConditions) {
 		return appendHaving(havingConditions);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param enabled
 	 * @param havingConditions a condition like "having a>0" or just "a>0"
 	 * @return
@@ -392,14 +393,14 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	public YadaSql and(boolean enabled) {
 		if (enabled) {
 			return and();
 		}
 		return this;
 	}
-	
+
 	public YadaSql and() {
 		if (lastSkipped) {
 			lastSkipped=false;
@@ -412,14 +413,14 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	public YadaSql or(boolean enabled) {
 		if (enabled) {
 			return or();
 		}
 		return this;
 	}
-	
+
 	public YadaSql or() {
 		if (lastSkipped) {
 			lastSkipped=false;
@@ -432,14 +433,14 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	public YadaSql xor(boolean enabled) {
 		if (enabled) {
 			return xor();
 		}
 		return this;
 	}
-	
+
 	public YadaSql xor() {
 		if (lastSkipped) {
 			lastSkipped=false;
@@ -452,7 +453,7 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Starts a subexpression. Be careful that the returned YadaSql object is different from the original one, so don't use the original one for ending the subexpression.
 	 * @return
@@ -460,7 +461,7 @@ public class YadaSql implements CloneableDeep {
 	public YadaSql startSubexpression() {
 		return startSubexpression(true);
 	}
-	
+
 	/**
 	 * Starts a subexpression. Be careful that the returned YadaSql object is different from the original one, so don't use the original one for ending the subexpression.
 	 * @param enabled If the subexpression is disabled, the whole subquery is not included, not just the parenthesis
@@ -482,7 +483,7 @@ public class YadaSql implements CloneableDeep {
 	public YadaSql endSubexpression() {
 		return endSubexpression(null);
 	}
-	
+
 	/**
 	 * Ending a subexpression is always safe even if the startSubexpression had an "enabled" condition
 	 * @param enabled
@@ -491,7 +492,7 @@ public class YadaSql implements CloneableDeep {
 	public YadaSql endSubexpression(boolean enabled) {
 		return endSubexpression();
 	}
-	
+
 	/**
 	 * Ends a where/having subexpression. To be called on the object returned by the {@link #startSubexpression()} method (or any method called on that object)
 	 * @param alias the table alias, like in "select alias.a+alias.c from ( select 2*b as a ...) alias"
@@ -519,16 +520,16 @@ public class YadaSql implements CloneableDeep {
 		}
 		return parent;
 	}
-	
+
 	public YadaSql groupBy(boolean enabled, String groupBy) {
 		if (enabled) {
 			return groupBy(groupBy);
 		}
 		return this;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param groupBy can be empty or null
 	 * @return
 	 */
@@ -546,9 +547,9 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param orderBy can be empty or null
 	 * @return
 	 */
@@ -566,8 +567,8 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
-	
+
+
 	/**
 	 * Add sorting from a Spring Data Pageable
 	 * @param pageable
@@ -581,7 +582,7 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Set a limit
 	 * @param limit the limit, or null for not doing anything
@@ -592,12 +593,12 @@ public class YadaSql implements CloneableDeep {
 		this.limit = limit;
 		return this;
 	}
-	
+
 	public YadaSql clearWhere() {
 		whereConditions = new StringBuilder();
 		return this;
 	}
-	
+
 	/**
 	 * Transforms a "select ... from" to a "select count(*) from"
 	 * @return
@@ -605,7 +606,7 @@ public class YadaSql implements CloneableDeep {
 	public YadaSql toCount() {
 		return toCount(null);
 	}
-	
+
 	/*
 	 * Replaces the current "select ... from"
 	 * @param enabled false to skip this operation
@@ -617,7 +618,7 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	/*
 	 * Replaces the current "select ... from"
 	 * @param newSelectFrom the new select...from sql
@@ -627,7 +628,7 @@ public class YadaSql implements CloneableDeep {
 		appendQuery(newSelectFrom);
 		return this;
 	}
-	
+
 	/*
 	 * Transforms a "select ... from" to a "select count(*) from"
 	 * @param sql null for "select count(*)", or something like "select count(distinct e)"
@@ -645,7 +646,7 @@ public class YadaSql implements CloneableDeep {
 		this.groupBy = "";
 		return this;
 	}
-	
+
 	private void fixQuery(Query query) {
 		queryDone = true;
 		setAllParameters(query);
@@ -653,14 +654,14 @@ public class YadaSql implements CloneableDeep {
 			query.setMaxResults(limit);
 		}
 	}
-	
+
 	public Query nativeQuery(EntityManager em) {
 		nativeQuery = true;
 		Query query = em.createNativeQuery(sql());
 		fixQuery(query);
 		return query;
 	}
-	
+
 	/**
 	 * Create a native query that returns object instances
 	 * @param em
@@ -673,7 +674,7 @@ public class YadaSql implements CloneableDeep {
 		fixQuery(query);
 		return query;
 	}
-	
+
 	/**
 	 * Create an instance of Query for executing a Java Persistence query language statement.
 	 * @param em
@@ -686,7 +687,7 @@ public class YadaSql implements CloneableDeep {
 		fixQuery(query);
 		return query;
 	}
-	
+
 	/**
 	 * Create an instance of TypedQuery for executing a Java Persistence query language statement. The select list of the query must contain only a single item, which must be assignable to the type specified by the resultClass argument.
 	 * @param em
@@ -700,7 +701,7 @@ public class YadaSql implements CloneableDeep {
 		fixQuery(query);
 		return query;
 	}
-	
+
 	private void setAllParameters(Query query) {
 		for (String name : parameters.keySet()) {
 			if (hasParameter(name)) {
@@ -711,7 +712,7 @@ public class YadaSql implements CloneableDeep {
 			unioned.setAllParameters(query);
 		}
 	}
-	
+
 	private boolean hasParameter(String parameter) {
 		String regexp = ".*:"+parameter+"\\b.*";
 		if (whereConditions.toString().matches(regexp)) {
@@ -739,7 +740,7 @@ public class YadaSql implements CloneableDeep {
 		parameters.put(name, value);
 		return this;
 	}
-	
+
 	/**
 	 * Add all the joins, where, having, group, order statements and parameters of another YadaSql object
 	 * @param yadaSql the object to get items from, can be null to no nothing
@@ -758,21 +759,21 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	public YadaSql setParameter(String name, String[] values) {
 		if (values!=null) {
 			return setParameter(name, Arrays.asList(values));
 		}
 		return this;
 	}
-	
+
 	public YadaSql setParameter(String name, Long[] values) {
 		if (values!=null) {
 			return setParameter(name, Arrays.asList(values));
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Set a parameter only when not null. Quite useless because setting a parameter that is not used has no effect.
 	 * @param name
@@ -789,7 +790,7 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Returns the resulting sql
 	 * @return
@@ -797,7 +798,7 @@ public class YadaSql implements CloneableDeep {
 	public String sql() {
 		return sql(null, null);
 	}
-	
+
 	/**
 	 * Sets the whole query. Useful for debugging.
 	 * @param query
@@ -811,9 +812,9 @@ public class YadaSql implements CloneableDeep {
 		orderBy = "";
 		limit = null;
 	}
-	
+
 	/**
-	 * Returns the resulting sql after replacing aliases. It can be used when reusing an existing query with a new alias, to get something like 
+	 * Returns the resulting sql after replacing aliases. It can be used when reusing an existing query with a new alias, to get something like
 	 * "select u from User u where u.type=1 and u.age = (select min(u2.age) from User u2 where u2.type=1)". In this case, create a query "where XX.type=1" and use it
 	 * twice, first replacing "XX" with "u", then replacing "XX" with "u2".
 	 * @param oldAliasName existing alias name (usually a placeholder) like "XX" in "from User XX where XX.name=...". Be sure to use unique character sequences.
@@ -848,7 +849,7 @@ public class YadaSql implements CloneableDeep {
 		}
 		return result;
 	}
-	
+
 //	private void processInsert(StringBuilder builder) {
 //		builder.append("(");
 //		for (String column : insertValues.keySet()) {
@@ -889,7 +890,7 @@ public class YadaSql implements CloneableDeep {
 //	public void addAlias(String aliasPlaceholder, String aliasName) {
 //		aliasMap.put(aliasPlaceholder, aliasName);
 //	}
-	
+
 	/**
 	 * Returns the "where" section of the query, not starting with "where"
 	 * @return
