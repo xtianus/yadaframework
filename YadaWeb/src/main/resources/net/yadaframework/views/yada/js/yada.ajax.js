@@ -877,13 +877,14 @@
 	 * Il metodo chiamato lato java può ritornare un notify chiamando yadaWebUtil.modalOk() o anche yadaWebUtil.modalError() etc.
 	 * In caso di notify di un errore, l'handler non viene chiamato.
 	 * @param url target url
-	 * @param data dati da inviare (stringa od oggetto) - can be null
+	 * @param data data to send, string or object. Can be null. Json objects are converted with JSON.stringify and given a specific content-type
 	 * @param successHandler(responseText, responseHtml);) funzione chiamata in caso di successo e nessun yadaWebUtil.modalError(). Viene chiamata anche in caso di errore se il suo flag executeAnyway è true
 	 * @param method "POST" per il post oppure null o "GET" per il get
 	 * @param timeout milliseconds timeout, null for default (set by the browser)
 	 * @param hideLoader true for not showing the loader
+	 * @param asJson true to send a JSON.stringify(data) with "application/json;charset=UTF-8"
 	 */
-	yada.ajax = function(url, data, successHandler, method, timeout, hideLoader) {
+	yada.ajax = function(url, data, successHandler, method, timeout, hideLoader, asJson) {
 		if (method==null) {
 			method="GET"
 		}
@@ -891,7 +892,14 @@
 			timeout=0; // Default
 		}
 		var processData = !(data instanceof FormData);  // http://stackoverflow.com/a/8244082/587641
-		var contentType = data instanceof FormData ? false : undefined;
+		var contentType = undefined;
+		if (asJson==true) {
+			processData = false;
+			contentType = "application/json;charset=UTF-8";
+			data = JSON.stringify(data);
+		} else {
+			contentType = data instanceof FormData ? false : contentType;
+		}
 		if (hideLoader!=true) {
 			yada.loaderOn();
 		}
