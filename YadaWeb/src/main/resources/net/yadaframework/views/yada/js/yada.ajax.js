@@ -14,6 +14,8 @@
 	var markerAjaxButtonOnly = 'yadaAjaxButtonOnly';
 	var clickedButton;
 	
+	var markerClass = 'yadaAjaxed'; // To prevent double submission
+	
 	// ?????????? A cosa servono questi postXXXX ??????????????????
 	var postLoginUrl = null;
 	var postLoginData = null;
@@ -292,7 +294,6 @@
 			return;
 		}
 		// From here on the $checkbox is a single element, not an array
-		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		$checkbox.not('.'+markerClass).change(function(e) {
 			$checkbox = $(this); // Needed otherwise $checkbox could be stale (from a previous ajax replacement) 
 			// If there is a parent form, submit it, otherwise make an ajax call defined on the checkbox
@@ -335,7 +336,6 @@
 			return;
 		}
 		// From here on the $select is a single element, not an array
-		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		$select.not('.'+markerClass).change(function(e) {
 			$select = $(this); // Needed otherwise $select could be stale (from a previous ajax replacement) 
 			return makeAjaxCall(e, $select, handler);
@@ -361,7 +361,6 @@
 			return;
 		}
 		// From here on the $link is a single anchor, not an array
-		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		$link.not('.'+markerClass).click(function(e) {
 			$link = $(this); // Needed otherwise $link could be stale (from a previous ajax replacement) 
 			return makeAjaxCall(e, $link, handler);
@@ -624,6 +623,15 @@
 			$(this).addClass('yadaClickedButtonHandler');
 		});
 	}
+	
+	/**
+	 * Disable the ajax submission of a form that was previously initialised as an ajax form
+	 * @param $form the jquery form (could be an array), e.g. $('.niceForm')
+	 */
+	yada.disableAjaxForm = function($form) {
+		$form.off("submit");
+		$form.removeClass(markerClass);
+	}
 
 	/**
 	 * Sends a form via ajax, it doesn't have to have class .yadaAjax.
@@ -640,7 +648,6 @@
 		}
 		yada.enableSubmitButtons($form);
 		// From here on the $form is a single anchor, not an array.
-		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		// Can't use document.activeElement to find the clicked button because of the possible "confirm" dialog
 		// http://stackoverflow.com/a/33882987/587641
 //		$form.find("button[type='submit']").not('.yadaClickedButtonHandler').each(function() {
