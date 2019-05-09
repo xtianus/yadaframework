@@ -18,7 +18,7 @@ In any case it has to be statically included in the hmtl with
 <div class="s_modalConfirm"> <!--/* Only seen when loaded via ajax */-->
 <th:block th:fragment="modalBlock">
 	<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-	    <div class="modal-dialog">
+	    <div class="modal-dialog" th:classappend="${extraDialogClasses}">
 	        <div class="modal-content">
 	            <div class="modal-body">
 	                <p th:text="${message}?:#{modal.confirm.default}">Sei sicuro?</p>
