@@ -6,16 +6,12 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.Resource;
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.MessageSource;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 
@@ -31,8 +27,8 @@ import net.yadaframework.web.YadaWebUtil;
 @Service
 // Deve stare in questo package perchè tirato dentro da YadaWebConfig, altrimenti SpringTemplateEngine non viene iniettato
 public class YadaSecurityEmailService {
-	private transient final Logger log = LoggerFactory.getLogger(getClass());	
-	
+	private transient final Logger log = LoggerFactory.getLogger(getClass());
+
 	@Autowired private YadaConfiguration config;
 	@Resource private SpringTemplateEngine emailTemplateEngine;
     @Autowired private YadaTokenHandler yadaTokenHandler;
@@ -40,7 +36,7 @@ public class YadaSecurityEmailService {
     @Autowired private YadaEmailService yadaEmailService;
 	@Autowired private YadaAutoLoginTokenRepository yadaAutoLoginTokenRepository;
 	@Autowired private YadaUtil yadaUtil;
-	
+
     /**
      * Convert a site-relative link to absolute, because in emails we can't use @{}.
      * Example: th:href="${beans.yadaEmailService.buildLink('/read/234')}"
@@ -60,17 +56,17 @@ public class YadaSecurityEmailService {
 		// Creo il link che l'utente deve cliccare
 		String myServerAddress = yadaWebUtil.getWebappAddress(request);
 		String fullLink = myServerAddress + "/changeEmailConfirm/" + yadaTokenHandler.makeLink(yadaRegistrationRequest, null);
-		
-		final Map<String, Object> templateParams = new HashMap<String, Object>();
+
+		final Map<String, Object> templateParams = new HashMap<>();
 		templateParams.put("fullLink", fullLink);
-		
-		Map<String, String> inlineResources = new HashMap<String, String>();
+
+		Map<String, String> inlineResources = new HashMap<>();
 		inlineResources.put("logosmall", config.getEmailLogoImage());
 		return yadaEmailService.sendHtmlEmail(toEmail, emailName, null, templateParams, inlineResources, locale, true);
 	}
 
 	/**
-	 * 
+	 *
 	 * @param yadaRegistrationRequest
 	 * @param linkParameters can be null
 	 * @param request
@@ -84,12 +80,12 @@ public class YadaSecurityEmailService {
 		String link = config.getRegistrationConfirmationLink(locale);
 		String myServerAddress = yadaWebUtil.getWebappAddress(request);
 		String fullLink = myServerAddress + link + yadaTokenHandler.makeLink(yadaRegistrationRequest, linkParameters);
-		
-		final Map<String, Object> templateParams = new HashMap<String, Object>();
+
+		final Map<String, Object> templateParams = new HashMap<>();
 		templateParams.put("fullLink", fullLink);
 		templateParams.put("email", yadaRegistrationRequest.getEmail());
-		
-		Map<String, String> inlineResources = new HashMap<String, String>();
+
+		Map<String, String> inlineResources = new HashMap<>();
 		inlineResources.put("logosmall", config.getEmailLogoImage());
 		return yadaEmailService.sendHtmlEmail(toEmail, emailName, subjectParams, templateParams, inlineResources, locale, false);
 	}
@@ -108,14 +104,21 @@ public class YadaSecurityEmailService {
 		final String[] toEmail = new String[] {yadaRegistrationRequest.getEmail()};
 		final String[] subjectParams = {yadaRegistrationRequest.getEmail()};
 
-		String myServerAddress = yadaWebUtil.getWebappAddress(request);
-		String fullLink = myServerAddress + "/passwordReset/" + yadaTokenHandler.makeLink(yadaRegistrationRequest, null);
+		String destinationUrl = "/passwordReset/";
 
-		final Map<String, Object> templateParams = new HashMap<String, Object>();
+		//Checking the destination url
+		if (!"".equals(yadaRegistrationRequest.getDestinationUrl()) || yadaRegistrationRequest.getDestinationUrl()!= null )  {
+			destinationUrl =  yadaRegistrationRequest.getDestinationUrl();
+		}
+
+		String myServerAddress = yadaWebUtil.getWebappAddress(request);
+		String fullLink = myServerAddress + destinationUrl + yadaTokenHandler.makeLink(yadaRegistrationRequest, null);
+
+		final Map<String, Object> templateParams = new HashMap<>();
 		templateParams.put("fullLink", fullLink);
 		templateParams.put("email", yadaRegistrationRequest.getEmail());
-		
-		Map<String, String> inlineResources = new HashMap<String, String>();
+
+		Map<String, String> inlineResources = new HashMap<>();
 		inlineResources.put("logosmall", config.getEmailLogoImage());
 		return yadaEmailService.sendHtmlEmail(toEmail, emailName, subjectParams, templateParams, inlineResources, locale, true);
 	}
@@ -133,7 +136,7 @@ public class YadaSecurityEmailService {
 		Date expiration = yadaUtil.addHours(new Date(), config.getAutologinExpirationHours());
     	return makeAutologinLink(targetAction, targetUser, expiration, hashCommand, myServerAddress);
     }
-    
+
     /**
      * Create a link that will not require the user to log in. The server address is taken from the request.
      * @param targetAction
@@ -173,7 +176,7 @@ public class YadaSecurityEmailService {
 		}
     	return result.toString();
     }
-    
+
     /**
      * Add a string of parameters to the target action link
      * @param autologinLink a link like "xxx?action=aaa#command"
@@ -193,5 +196,5 @@ public class YadaSecurityEmailService {
 		sb.append("?").append(actionUrl).append(encodedParameters).append(actionHash);
 		return sb.toString();
     }
-    
+
 }
