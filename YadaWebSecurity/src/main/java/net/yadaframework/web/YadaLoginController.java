@@ -4,14 +4,12 @@ import java.net.URLDecoder;
 import java.util.Date;
 import java.util.List;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,6 +42,11 @@ public class YadaLoginController {
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	@Autowired private YadaAuthenticationFailureHandler failureHandler;
 
+	@RequestMapping("/yadaLoginSuccess")
+	public String yadaLoginSuccess(String targetUrl, Model model) {
+		model.addAttribute("targetUrl", targetUrl);
+		return "/yada/ajaxRedirect";
+	}
 
 	@RequestMapping("/ajaxLoginForm")
 	public String ajaxLoginForm(Model model) {
@@ -55,7 +58,7 @@ public class YadaLoginController {
 	public String ajaxLoginOk(Model model) {
 		return "loginSuccess";
 	}
-	
+
 	@RequestMapping("/autologin/{tokenLink}")
 	public String autologin(@PathVariable String tokenLink, String action, RedirectAttributes  redirectAttributes, HttpSession session, HttpServletRequest request) {
 		try {
@@ -67,7 +70,7 @@ public class YadaLoginController {
 		// and I get a login page, while if I use request.logout() the session is not clear but a new session copy of the current one before
 		// the yadaSession.clearCaches() call is created, so that I have a mixed situation where the spring user is the new one and the session
 		// contains the old UserProfile id.
-		// This is probably because the HTTPSession contains the UserPrincipal and other stuff that is not reset.	
+		// This is probably because the HTTPSession contains the UserPrincipal and other stuff that is not reset.
 		// So I just exit.
 		if (yadaSession.getCurrentUserProfileId()!=null) {
 			// TODO localized message
