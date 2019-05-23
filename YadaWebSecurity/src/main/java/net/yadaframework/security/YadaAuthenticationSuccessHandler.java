@@ -24,36 +24,25 @@ import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepo
 @Scope("prototype") // In case you have more than one YadaSecurityConfig bean
 public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	private String defaultTargetUrlAjaxRequest = "/";
 	private String defaultTargetUrlNormalRequest = "/";
 
 	@Autowired private YadaConfiguration yadaConfiguration;
 	@Autowired private YadaUserCredentialsRepository userCredentialsRepository;
 
+	private final static String UNSET_TARGET_URL = "/YADA_UNSET_TARGET_URL"; // Can't just use null because it's rejected
+
 	public YadaAuthenticationSuccessHandler() {
+		// Set so that we know when to return our saved value in determineTargetUrl()
+		super.setDefaultTargetUrl(UNSET_TARGET_URL);
 	}
-	
+
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
 		String username = authentication.getName();
 		userCredentialsRepository.updateLoginTimestamp(username.toLowerCase());
-		// Quando il login ha successo, resetto il contatore dei tentativi falliti che altrimenti cresce sempre finchè non sbaglio due volte (!)
 		userCredentialsRepository.resetFailedAttempts(username.toLowerCase());
-		//		String redirectUrl = "/register"; // !!!!!!!!!!!!!!
-		//		request.setAttribute("redirectUrl", redirectUrl);
-		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
-			super.setDefaultTargetUrl(defaultTargetUrlAjaxRequest);
-		} else {
-			String targetUrl = defaultTargetUrlNormalRequest;
-			if (yadaConfiguration.isLocalePathVariableEnabled()) {
-				Locale locale = LocaleContextHolder.getLocale();
-				if (locale!=null) {
-					targetUrl = "/" + locale.getLanguage() + targetUrl;
-				}
-			}
-			super.setDefaultTargetUrl(targetUrl);
-		}
 		super.onAuthenticationSuccess(request, response, authentication);
 	}
 
@@ -77,6 +66,34 @@ public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 	 */
 	public void setDefaultTargetUrlNormalRequest(String defaultTargetUrlNormalRequest) {
 		this.defaultTargetUrlNormalRequest = defaultTargetUrlNormalRequest;
+	}
+
+	/**
+	 * Thread-safe way of changing the default target url based on the request type (ajax/normal)
+	 */
+	@Override
+	protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response) {
+		// We enter here only when there is no saved request, so a login form has been submitted "on purpose" and not because
+		// the user requested a protected page
+		String targetUrl = super.determineTargetUrl(request, response);
+		if (!UNSET_TARGET_URL.equals(targetUrl)) {
+			// The target url was determined either by a request parameter or a request "Referer" header
+			log.debug("Login target url from either request parameter or Referer header: ", targetUrl);
+			return targetUrl;
+		}
+		// We can return either the ajax default url or the normal default url
+		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+			targetUrl = defaultTargetUrlAjaxRequest;
+		} else {
+			targetUrl = defaultTargetUrlNormalRequest;
+		}
+		if (yadaConfiguration.isLocalePathVariableEnabled()) {
+			Locale locale = LocaleContextHolder.getLocale();
+			if (locale!=null) {
+				targetUrl = "/" + locale.getLanguage() + targetUrl;
+			}
+		}
+		return targetUrl;
 	}
 
 }
