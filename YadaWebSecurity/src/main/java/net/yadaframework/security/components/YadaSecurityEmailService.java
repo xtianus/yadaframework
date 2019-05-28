@@ -104,10 +104,10 @@ public class YadaSecurityEmailService {
 		final String[] toEmail = new String[] {yadaRegistrationRequest.getEmail()};
 		final String[] subjectParams = {yadaRegistrationRequest.getEmail()};
 
-		String destinationUrl = "/passwordReset/";
+		String destinationUrl = "/passwordReset/"; // Default
 
-		//Checking the destination url
-		if (!"".equals(yadaRegistrationRequest.getDestinationUrl()) || yadaRegistrationRequest.getDestinationUrl()!= null )  {
+		// Checking the destination url
+		if (StringUtils.isNotBlank(yadaRegistrationRequest.getDestinationUrl()))  {
 			destinationUrl =  yadaRegistrationRequest.getDestinationUrl();
 		}
 

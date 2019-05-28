@@ -899,10 +899,14 @@
 		}
 		var v1 = $pwd.val();
 		var v2 = $check.val();
-        if(v1 != "" && v2 != "" && v1 != v2){
-	        $submit.attr("disabled", "disabled");
-	        $check.parents('.form-group').addClass('has-error');
-	        $check.parent().append('<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>');
+        if(v1!="" && v2!="" && v1 == v2){
+        	resetPasswordError($oneForm);
+        } else {
+        	$submit.attr("disabled", "disabled");
+        	if (v1!="" || v2!="") {
+        		$oneForm.addClass('has-error');
+        		$check.parent().append('<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>');
+        	}
         }
     }
 
@@ -911,7 +915,7 @@
 		var $check = $('input[name=confirmPassword]', $oneForm);
 		var $submit = $('button[type="submit"]', $oneForm);
         $submit.removeAttr("disabled");
-        $($check).parents('.form-group').removeClass('has-error');
+        $oneForm.removeClass('has-error');
         $('span.form-control-feedback.glyphicon-remove', $check.parent()).remove();
     }
 
@@ -922,21 +926,21 @@
 	 * @param $forms the form on which to enable the check
 	 */
 	yada.enablePasswordMatch = function($forms) {
-		$('input[name=password], input[name=confirmPassword]', $forms).on("keydown", function(e){
-	        /* only check when the tab or enter keys are pressed
-	         * to prevent the method from being called needlessly  */
-	        if(e.keyCode == 13 || e.keyCode == 9) {
-	            checkMatchingPasswords($(this).parents("form"));
-	        }
+		// Start with the submit button disabled, then enable it when the two fields match
+		var $submit = $('button[type="submit"]', $forms);
+		$submit.attr("disabled", "disabled");
+		//
+		$('input[name=password], input[name=confirmPassword]', $forms).on("keyup", function(e){
+			checkMatchingPasswords($(this).parents("form"));
 	     })
 	     .on("blur", function(){                    
 	        // also check when the element looses focus (clicks somewhere else)
 	        checkMatchingPasswords($(this).parents("form"));
 	    })
-	    .on("focus", function(){
-	        // reset the error message when they go to make a change
-	        resetPasswordError($(this).parents("form"));
-	    })
+//	    .on("focus", function(){
+//	        // reset the error message when they go to make a change
+//	        resetPasswordError($(this).parents("form"));
+//	    })
 	}
 	
 	/**
