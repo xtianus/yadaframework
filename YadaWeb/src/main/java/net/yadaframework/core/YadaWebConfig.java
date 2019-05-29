@@ -248,7 +248,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	// Thymeleaf
 	//
 
-	// Non need for a @Bean
+	@Bean // @Bean annotation needed to make message.properties work properly
 	public ClassLoaderTemplateResolver yadaTemplateResolver() {
 		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
 		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
@@ -303,7 +303,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	
 	// x213
 	
-	// Non need for a @Bean
+	@Bean // @Bean annotation needed to make message.properties work properly
 	public ITemplateResolver webTemplateResolver() {
 //		ServletContextTemplateResolver resolver = new ServletContextTemplateResolver();
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
@@ -359,7 +359,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		return resolver;
 	}
 	
-	// Non need for a @Bean
+	@Bean // @Bean annotation needed to make message.properties work properly - DO NOT REMOVE
 	public SpringTemplateEngine templateEngine() {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
 		engine.setEnableSpringELCompiler(true);
