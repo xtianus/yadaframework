@@ -2,9 +2,8 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Ajax &#8212; Yada Framework master documentation</title>
+    <meta charset="utf-8" />
+    <title>5. Ajax &#8212; Yada Framework master documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -17,18 +16,18 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
     <script type="text/javascript" src="_static/copybutton.js"></script>
     <script type="text/javascript" src="_static/yadaDocs.js"></script>
-    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Ajax Modal" href="ajaxModal.html" />
-    <link rel="prev" title="DataTables" href="datatables.html" />
+    <link rel="next" title="6. Ajax Modal" href="ajaxModal.html" />
+    <link rel="prev" title="4. DataTables" href="datatables.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
 
   </head><body>
 
@@ -58,15 +57,15 @@
      href="index.html">Site <b class="caret"></b></a>
   <ul class="dropdown-menu globaltoc"
       role="menu"
-      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">     Forms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">     File Upload</a></li>
-<li class="toctree-l1"><a class="reference internal" href="datatables.html">     Data Tables</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">     Ajax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">     Ajax Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">     Notification Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">     New Eclipse Project</a></li>
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">1. Form Fields and Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">2. Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">3. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datatables.html">4. Data Tables</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. Ajax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">6. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">7. Notification Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">8. New Eclipse Project</a></li>
 </ul>
 </ul>
 </li>
@@ -80,33 +79,33 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">Ajax</a><ul>
-<li><a class="reference internal" href="#description">Description</a></li>
-<li><a class="reference internal" href="#ajax-links">Ajax Links</a><ul>
-<li><a class="reference internal" href="#calling-the-backend">Calling the backend</a><ul>
-<li><a class="reference internal" href="#miscellaneous">Miscellaneous</a></li>
+<li><a class="reference internal" href="#">5. Ajax</a><ul>
+<li><a class="reference internal" href="#description">5.1. Description</a></li>
+<li><a class="reference internal" href="#ajax-links">5.2. Ajax Links</a><ul>
+<li><a class="reference internal" href="#calling-the-backend">5.2.1. Calling the backend</a><ul>
+<li><a class="reference internal" href="#miscellaneous">5.2.1.1. Miscellaneous</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#returning-from-the-backend">Returning from the backend</a></li>
-<li><a class="reference internal" href="#postprocessing">Postprocessing</a><ul>
-<li><a class="reference internal" href="#replacing-and-deleting">Replacing and Deleting</a></li>
-<li><a class="reference internal" href="#calling-some-handler">Calling some Handler</a></li>
-<li><a class="reference internal" href="#modal-dialog">Modal Dialog</a></li>
-<li><a class="reference internal" href="#confirm-dialog">Confirm Dialog</a></li>
+<li><a class="reference internal" href="#returning-from-the-backend">5.2.2. Returning from the backend</a></li>
+<li><a class="reference internal" href="#postprocessing">5.2.3. Postprocessing</a><ul>
+<li><a class="reference internal" href="#replacing-and-deleting">5.2.3.1. Replacing and Deleting</a></li>
+<li><a class="reference internal" href="#calling-some-handler">5.2.3.2. Calling some Handler</a></li>
+<li><a class="reference internal" href="#modal-dialog">5.2.3.3. Modal Dialog</a></li>
+<li><a class="reference internal" href="#confirm-dialog">5.2.3.4. Confirm Dialog</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a class="reference internal" href="#ajax-forms">Ajax Forms</a></li>
-<li><a class="reference internal" href="#ajax-on-other-elements">Ajax on other elements</a><ul>
-<li><a class="reference internal" href="#ajax-on-checkbox">Ajax on checkbox</a></li>
+<li><a class="reference internal" href="#ajax-forms">5.3. Ajax Forms</a></li>
+<li><a class="reference internal" href="#ajax-on-other-elements">5.4. Ajax on other elements</a><ul>
+<li><a class="reference internal" href="#ajax-on-checkbox">5.4.1. Ajax on checkbox</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#ajax-method">Ajax method</a><ul>
-<li><a class="reference internal" href="#success-handler">Success Handler</a></li>
+<li><a class="reference internal" href="#ajax-method">5.5. Ajax method</a><ul>
+<li><a class="reference internal" href="#success-handler">5.5.1. Success Handler</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#class-reference">Class Reference</a></li>
+<li><a class="reference internal" href="#class-reference">5.6. Class Reference</a></li>
 </ul>
 </li>
 </ul>
@@ -118,11 +117,11 @@
               
                 
   <li>
-    <a href="datatables.html" title="Previous Chapter: DataTables"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; DataTables</span>
+    <a href="datatables.html" title="Previous Chapter: 4. DataTables"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 4. DataTables</span>
     </a>
   </li>
   <li>
-    <a href="ajaxModal.html" title="Next Chapter: Ajax Modal"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Ajax Modal &raquo;</span>
+    <a href="ajaxModal.html" title="Next Chapter: 6. Ajax Modal"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">6. Ajax Modal &raquo;</span>
     </a>
   </li>
               
@@ -154,33 +153,13 @@
 
 <div class="container">
   <div class="row">
-      <div class="col-md-3">
-        <div id="sidebar" class="bs-sidenav" role="complementary">
-  <li>
-    <a href="datatables.html" title="Previous Chapter: DataTables"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; DataTables</span>
-    </a>
-  </li>
-  <li>
-    <a href="ajaxModal.html" title="Next Chapter: Ajax Modal"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Ajax Modal &raquo;</span>
-    </a>
-  </li>
-<form action="search.html" method="get">
- <div class="form-group">
-  <input type="text" name="q" class="form-control" placeholder="Search" />
- </div>
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
-        </div>
-      </div>
-    <div class="col-md-9 content">
+    <div class="body col-md-12 content" role="main">
       
-  <p></p>
-<div class="section" id="ajax">
-<h1>Ajax<a class="headerlink" href="#ajax" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="ajax">
+<h1>5. Ajax<a class="headerlink" href="#ajax" title="Permalink to this headline">¶</a></h1>
 <p class="rubric">Easy ajax operations even without javascript</p>
 <div class="section" id="description">
-<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<h2>5.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>The Yada Framework support for ajax calls is implemented in <code class="docutils literal notranslate"><span class="pre">yada.ajax.js</span></code>.
 It is automatically included in production, merged with the other yada javascript files. To use it in development, add:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">script</span> <span class="na">th:if</span><span class="o">=</span><span class="s">&quot;${@config.developmentEnvironment}&quot;</span> <span class="na">yada:src</span><span class="o">=</span><span class="s">&quot;@{/yadares/js/yada.ajax.js}&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
@@ -189,30 +168,30 @@ It is automatically included in production, merged with the other yada javascrip
 <p>Ajax is set up via css classes and data attributes in the HTML source. Some data attributes have yada-dialect equivalents which are more readable and easier to use with thymeleaf expressions.</p>
 </div>
 <div class="section" id="ajax-links">
-<h2>Ajax Links<a class="headerlink" href="#ajax-links" title="Permalink to this headline">¶</a></h2>
+<h2>5.2. Ajax Links<a class="headerlink" href="#ajax-links" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="calling-the-backend">
-<h3>Calling the backend<a class="headerlink" href="#calling-the-backend" title="Permalink to this headline">¶</a></h3>
+<h3>5.2.1. Calling the backend<a class="headerlink" href="#calling-the-backend" title="Permalink to this headline">¶</a></h3>
 <p>To make an ajax request, add the <code class="docutils literal notranslate"><span class="pre">yadaAjax</span></code> class:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/some/endpoint&quot;</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;yadaAjax&quot;</span><span class="p">&gt;</span>Click here<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
 </pre></div>
 </div>
 <p>When clicking on the anchor, the <code class="docutils literal notranslate"><span class="pre">/some/endpoint</span></code> url is called via ajax.</p>
 <div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<p class="last">Check that I can use yada:ajax=”url” and data-yadaHref=”url” instead of href and class. href should be “javascript:;” in that case.</p>
+<p class="admonition-title">Todo</p>
+<p>Check that I can use yada:ajax=”url” and data-yadaHref=”url” instead of href and class. href should be “javascript:;” in that case.</p>
 </div>
 <div class="section" id="miscellaneous">
-<h4>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h4>
-<dl class="docutils">
-<dt>timeout</dt>
-<dd>You can set a timeout on the ajax call with <code class="docutils literal notranslate"><span class="pre">data-yadaTimeout=&quot;&lt;milliseconds&gt;&quot;</span></code></dd>
-<dt>disable the link</dt>
-<dd>The class <code class="docutils literal notranslate"><span class="pre">yadaDisabled</span></code> disables the link</dd>
+<h4>5.2.1.1. Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h4>
+<dl class="simple">
+<dt>timeout</dt><dd><p>You can set a timeout on the ajax call with <code class="docutils literal notranslate"><span class="pre">data-yadaTimeout=&quot;&lt;milliseconds&gt;&quot;</span></code></p>
+</dd>
+<dt>disable the link</dt><dd><p>The class <code class="docutils literal notranslate"><span class="pre">yadaDisabled</span></code> disables the link</p>
+</dd>
 </dl>
 </div>
 </div>
 <div class="section" id="returning-from-the-backend">
-<h3>Returning from the backend<a class="headerlink" href="#returning-from-the-backend" title="Permalink to this headline">¶</a></h3>
+<h3>5.2.2. Returning from the backend<a class="headerlink" href="#returning-from-the-backend" title="Permalink to this headline">¶</a></h3>
 <p>Controllers can return a standard thymeleaf view (html/xml) or some JSON data.</p>
 <p>A String map can easily be converted to JSON using the standard Spring features:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">path</span> <span class="o">=</span> <span class="s">&quot;/people&quot;</span><span class="o">,</span> <span class="n">produces</span> <span class="o">=</span> <span class="n">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON_UTF8_VALUE</span><span class="o">)</span>
@@ -227,145 +206,145 @@ It is automatically included in production, merged with the other yada javascrip
 </div>
 <p>The resulting objects will be passed to any “successHandler” javascript method (see below).</p>
 <p>The following return values, defined on the YadaViews java class, have special meaning in the context of an ajax call:</p>
-<table border="1" class="colwidths-given docutils">
+<table class="colwidths-given docutils align-center">
 <colgroup>
-<col width="50%" />
-<col width="50%" />
+<col style="width: 50%" />
+<col style="width: 50%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">view name</th>
-<th class="head">description</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>view name</p></th>
+<th class="head"><p>description</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td>AJAX_SUCCESS</td>
-<td>Do nothing on the browser</td>
+<tbody>
+<tr class="row-even"><td><p>AJAX_SUCCESS</p></td>
+<td><p>Do nothing on the browser</p></td>
 </tr>
-<tr class="row-odd"><td>AJAX_REDIRECT</td>
-<td>Perform a redirect on the browser. It uses the Model attributes shown below</td>
+<tr class="row-odd"><td><p>AJAX_REDIRECT</p></td>
+<td><p>Perform a redirect on the browser. It uses the Model attributes shown below</p></td>
 </tr>
-<tr class="row-even"><td>AJAX_RELOAD</td>
-<td>Perform a page reload</td>
+<tr class="row-even"><td><p>AJAX_RELOAD</p></td>
+<td><p>Perform a page reload</p></td>
 </tr>
-<tr class="row-odd"><td>AJAX_CLOSE_MODAL</td>
-<td>Close any modal that might be open</td>
+<tr class="row-odd"><td><p>AJAX_CLOSE_MODAL</p></td>
+<td><p>Close any modal that might be open</p></td>
 </tr>
-<tr class="row-even"><td>AJAX_SERVER_ERROR</td>
-<td>Opens a modal with an error message that by default is ‘Server Error’ unless a Model attribute with a custom message has been added. It uses the Model attributes shown below</td>
+<tr class="row-even"><td><p>AJAX_SERVER_ERROR</p></td>
+<td><p>Opens a modal with an error message that by default is ‘Server Error’ unless a Model attribute with a custom message has been added. It uses the Model attributes shown below</p></td>
 </tr>
 </tbody>
 </table>
-<table border="1" class="colwidths-given docutils" id="id1">
+<table class="colwidths-given docutils align-center" id="id1">
 <caption><span class="caption-text">YadaViews Model attributes</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col width="20%" />
-<col width="30%" />
-<col width="50%" />
+<col style="width: 20%" />
+<col style="width: 30%" />
+<col style="width: 50%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">view name</th>
-<th class="head">attribute name</th>
-<th class="head">description</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>view name</p></th>
+<th class="head"><p>attribute name</p></th>
+<th class="head"><p>description</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td>AJAX_REDIRECT</td>
-<td>AJAX_REDIRECT_URL</td>
-<td>The target absolute url</td>
+<tbody>
+<tr class="row-even"><td><p>AJAX_REDIRECT</p></td>
+<td><p>AJAX_REDIRECT_URL</p></td>
+<td><p>The target absolute url</p></td>
 </tr>
-<tr class="row-odd"><td>AJAX_REDIRECT</td>
-<td>AJAX_REDIRECT_URL_RELATIVE</td>
-<td>The target url relative to the webapp, used if AJAX_REDIRECT_URL is not set</td>
+<tr class="row-odd"><td><p>AJAX_REDIRECT</p></td>
+<td><p>AJAX_REDIRECT_URL_RELATIVE</p></td>
+<td><p>The target url relative to the webapp, used if AJAX_REDIRECT_URL is not set</p></td>
 </tr>
-<tr class="row-even"><td>AJAX_REDIRECT</td>
-<td>AJAX_REDIRECT_NEWTAB</td>
-<td>Set this attribute to true to open the redirect page in a new tab. Browser popups must be enabled by the user</td>
+<tr class="row-even"><td><p>AJAX_REDIRECT</p></td>
+<td><p>AJAX_REDIRECT_NEWTAB</p></td>
+<td><p>Set this attribute to true to open the redirect page in a new tab. Browser popups must be enabled by the user</p></td>
 </tr>
-<tr class="row-odd"><td>AJAX_SERVER_ERROR</td>
-<td>AJAX_SERVER_ERROR_DESCRIPTION</td>
-<td>The custom error message to put in the Model</td>
+<tr class="row-odd"><td><p>AJAX_SERVER_ERROR</p></td>
+<td><p>AJAX_SERVER_ERROR_DESCRIPTION</p></td>
+<td><p>The custom error message to put in the Model</p></td>
 </tr>
 </tbody>
 </table>
 <div class="admonition-todo admonition" id="index-1">
-<p class="first admonition-title">Todo</p>
-<p class="last">examples</p>
+<p class="admonition-title">Todo</p>
+<p>examples</p>
 </div>
 </div>
 <div class="section" id="postprocessing">
-<span id="ajax-postprocessing"></span><h3>Postprocessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline">¶</a></h3>
+<span id="ajax-postprocessing"></span><h3>5.2.3. Postprocessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline">¶</a></h3>
 <p>After an ajax call, you usually want to do something on the page: update some div, show a modal, change a javascript variable etc.
 The following <code class="docutils literal notranslate"><span class="pre">data-</span></code> attributes allow you to perform postprocessing when returning successfully (i.e. with no network errors and no <code class="docutils literal notranslate"><span class="pre">YadaNotify</span></code> errors) from the call.</p>
-<table border="1" class="colwidths-given docutils" id="id2">
+<table class="colwidths-given docutils align-center" id="id2">
 <caption><span class="caption-text">data- attributes for ajax postprocessing</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col width="25%" />
-<col width="25%" />
-<col width="50%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 50%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">name</th>
-<th class="head">value</th>
-<th class="head">description</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>name</p></th>
+<th class="head"><p>value</p></th>
+<th class="head"><p>description</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">data-yadaUpdateOnSuccess</span></code></td>
-<td>jQuery selector list</td>
-<td>replace the selector targets with the result of the ajax call, or replace each selector target with a different part of the result (see below)</td>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">data-yadaUpdateOnSuccess</span></code></p></td>
+<td><p>jQuery selector list</p></td>
+<td><p>replace the selector targets with the result of the ajax call, or replace each selector target with a different part of the result (see below)</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">data-yadaDeleteOnSuccess</span></code></td>
-<td>jQuery selector list</td>
-<td>delete the target elements</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">data-yadaDeleteOnSuccess</span></code></p></td>
+<td><p>jQuery selector list</p></td>
+<td><p>delete the target elements</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">data-yadaSuccessHandler</span></code></td>
-<td>comma-separated list of function names</td>
-<td>call the specified functions</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">data-yadaSuccessHandler</span></code></p></td>
+<td><p>comma-separated list of function names</p></td>
+<td><p>call the specified functions</p></td>
 </tr>
 </tbody>
 </table>
 <p>Yada-dialect variants:</p>
-<table border="1" class="colwidths-given docutils">
+<table class="colwidths-given docutils align-center">
 <colgroup>
-<col width="50%" />
-<col width="50%" />
+<col style="width: 50%" />
+<col style="width: 50%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">data-yadaUpdateOnSuccess</span></code></td>
-<td><code class="docutils literal notranslate"><span class="pre">yada:updateOnSuccess</span></code></td>
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">data-yadaUpdateOnSuccess</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">yada:updateOnSuccess</span></code></p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">data-yadaDeleteOnSuccess</span></code></td>
-<td><code class="docutils literal notranslate"><span class="pre">yada:deleteOnSuccess</span></code></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">data-yadaDeleteOnSuccess</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">yada:deleteOnSuccess</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">data-yadaSuccessHandler</span></code></td>
-<td><code class="docutils literal notranslate"><span class="pre">yada:successHandler</span></code></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">data-yadaSuccessHandler</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">yada:successHandler</span></code></p></td>
 </tr>
 </tbody>
 </table>
 <div class="section" id="replacing-and-deleting">
-<h4>Replacing and Deleting<a class="headerlink" href="#replacing-and-deleting" title="Permalink to this headline">¶</a></h4>
+<h4>5.2.3.1. Replacing and Deleting<a class="headerlink" href="#replacing-and-deleting" title="Permalink to this headline">¶</a></h4>
 <p>The “jQuery selector list” is a comma-separated list of jQuery selectors, like <code class="docutils literal notranslate"><span class="pre">&quot;#someId,</span> <span class="pre">.someClass</span> <span class="pre">&gt;</span> <span class="pre">a&quot;</span></code>.
 If the selector list is empty, the target is the element itself.</p>
 <p>Each selector can also the following special prefixes:</p>
-<table border="1" class="colwidths-given docutils">
+<table class="colwidths-given docutils align-center">
 <colgroup>
-<col width="33%" />
-<col width="67%" />
+<col style="width: 33%" />
+<col style="width: 67%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">name</th>
-<th class="head">description</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>name</p></th>
+<th class="head"><p>description</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">yadaParents:</span></code></td>
-<td>the selector is searched in the parents of the current element</td>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">yadaParents:</span></code></p></td>
+<td><p>the selector is searched in the parents of the current element</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">yadaSiblings:</span></code></td>
-<td>the selector is searched in the siblings of the current element</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">yadaSiblings:</span></code></p></td>
+<td><p>the selector is searched in the siblings of the current element</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">yadaClosestFind:</span></code></td>
-<td>splits the selector at the first space then uses <code class="docutils literal notranslate"><span class="pre">$.closest()</span></code> with the first part and <code class="docutils literal notranslate"><span class="pre">$.find()</span></code> with the second</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">yadaClosestFind:</span></code></p></td>
+<td><p>splits the selector at the first space then uses <code class="docutils literal notranslate"><span class="pre">$.closest()</span></code> with the first part and <code class="docutils literal notranslate"><span class="pre">$.find()</span></code> with the second</p></td>
 </tr>
 </tbody>
 </table>
@@ -373,52 +352,52 @@ If the selector list is empty, the target is the element itself.</p>
 <p>If the selector list has many targets and the result contains as many elements tagged with the class <code class="docutils literal notranslate"><span class="pre">_yadaReplacement_</span></code>, then each target is given a different <code class="docutils literal notranslate"><span class="pre">_yadaReplacement_</span></code> element.
 When there are more targets than replacements, the last replacement is repeated.</p>
 <div class="admonition-todo admonition" id="index-2">
-<p class="first admonition-title">Todo</p>
-<p class="last">Examples (see OneNote)</p>
+<p class="admonition-title">Todo</p>
+<p>Examples (see OneNote)</p>
 </div>
 </div>
 <div class="section" id="calling-some-handler">
-<h4>Calling some Handler<a class="headerlink" href="#calling-some-handler" title="Permalink to this headline">¶</a></h4>
+<h4>5.2.3.2. Calling some Handler<a class="headerlink" href="#calling-some-handler" title="Permalink to this headline">¶</a></h4>
 <p>The success handlers are called in sequence and should have the following signature:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span>function someHandler(responseText, responseHtml, link) {
 </pre></div>
 </div>
-<dl class="docutils">
-<dt>responseText</dt>
-<dd>either the unparsed text received from the ajax call, or a json object if the response text is json</dd>
-<dt>responseHtml</dt>
-<dd>the ajax response converted to html objects</dd>
-<dt>link</dt>
-<dd>the original anchor object (DOM, not jQuery)</dd>
+<dl class="simple">
+<dt>responseText</dt><dd><p>either the unparsed text received from the ajax call, or a json object if the response text is json</p>
+</dd>
+<dt>responseHtml</dt><dd><p>the ajax response converted to html objects</p>
+</dd>
+<dt>link</dt><dd><p>the original anchor object (DOM, not jQuery)</p>
+</dd>
 </dl>
 </div>
 <div class="section" id="modal-dialog">
-<h4>Modal Dialog<a class="headerlink" href="#modal-dialog" title="Permalink to this headline">¶</a></h4>
+<h4>5.2.3.3. Modal Dialog<a class="headerlink" href="#modal-dialog" title="Permalink to this headline">¶</a></h4>
 <p>To open a modal returned by an ajax call, see <a class="reference internal" href="ajaxModal.html"><span class="doc">Ajax Modal</span></a>.</p>
 </div>
 <div class="section" id="confirm-dialog">
-<h4>Confirm Dialog<a class="headerlink" href="#confirm-dialog" title="Permalink to this headline">¶</a></h4>
+<h4>5.2.3.4. Confirm Dialog<a class="headerlink" href="#confirm-dialog" title="Permalink to this headline">¶</a></h4>
 <p>You can show a confirm dialog before the ajax call is made. The user will be shown a text message and an option to confirm or abort the call.</p>
-<table border="1" class="colwidths-given docutils" id="id3">
+<table class="colwidths-given docutils align-center" id="id3">
 <caption><span class="caption-text">data- attributes for Confirm Dialog</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col width="33%" />
-<col width="67%" />
+<col style="width: 33%" />
+<col style="width: 67%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">name</th>
-<th class="head">description</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>name</p></th>
+<th class="head"><p>description</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">data-yadaConfirm</span></code></td>
-<td>text to show in the dialog</td>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">data-yadaConfirm</span></code></p></td>
+<td><p>text to show in the dialog</p></td>
 </tr>
-<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">data-okButton</span></code></td>
-<td>(optional) text of the confirm button</td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">data-okButton</span></code></p></td>
+<td><p>(optional) text of the confirm button</p></td>
 </tr>
-<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">data-cancelButton</span></code></td>
-<td>(optional) text of the cancel button</td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">data-cancelButton</span></code></p></td>
+<td><p>(optional) text of the cancel button</p></td>
 </tr>
 </tbody>
 </table>
@@ -426,83 +405,83 @@ When there are more targets than replacements, the last replacement is repeated.
 </div>
 </div>
 <div class="section" id="ajax-forms">
-<h2>Ajax Forms<a class="headerlink" href="#ajax-forms" title="Permalink to this headline">¶</a></h2>
+<h2>5.3. Ajax Forms<a class="headerlink" href="#ajax-forms" title="Permalink to this headline">¶</a></h2>
 <div class="admonition-todo admonition" id="index-3">
-<p class="first admonition-title">Todo</p>
-<p class="last">all. Remember that button handlers receive the button itself: function editTaskFormHandler(responseText, responseHtml, form, button) {</p>
+<p class="admonition-title">Todo</p>
+<p>all. Remember that button handlers receive the button itself: function editTaskFormHandler(responseText, responseHtml, form, button) {</p>
 </div>
 </div>
 <div class="section" id="ajax-on-other-elements">
-<h2>Ajax on other elements<a class="headerlink" href="#ajax-on-other-elements" title="Permalink to this headline">¶</a></h2>
+<h2>5.4. Ajax on other elements<a class="headerlink" href="#ajax-on-other-elements" title="Permalink to this headline">¶</a></h2>
 <p>Ajax calls can also be made on other HTML elements like buttons and selects by means of the <code class="docutils literal notranslate"><span class="pre">data-yadahref</span></code> attribute or the equivalent <code class="docutils literal notranslate"><span class="pre">yada:ajax</span></code> dialect.</p>
 <div class="section" id="ajax-on-checkbox">
-<h3>Ajax on checkbox<a class="headerlink" href="#ajax-on-checkbox" title="Permalink to this headline">¶</a></h3>
+<h3>5.4.1. Ajax on checkbox<a class="headerlink" href="#ajax-on-checkbox" title="Permalink to this headline">¶</a></h3>
 <p>An ajax call can be originated by a state change in a checkbox. The checkbox must NOT be inside a form otherwise the form would be submitted instead.</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">input</span> <span class="na">yada:ajax</span><span class="o">=</span><span class="s">&quot;@{/product/onOff(productId=${product.id})}&quot;</span>
         <span class="na">th:name</span><span class="o">=</span><span class="s">&quot;enabled&quot;</span> <span class="na">th:checked</span><span class="o">=</span><span class="s">&quot;${product.enabled}&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;checkbox&quot;</span> <span class="p">/&gt;</span>
 </pre></div>
 </div>
 <div class="admonition-todo admonition" id="index-4">
-<p class="first admonition-title">Todo</p>
-<p class="last">complete list of ajaxifyable elements. Is the yadaAjax class needed? Examples.
+<p class="admonition-title">Todo</p>
+<p>complete list of ajaxifyable elements. Is the yadaAjax class needed? Examples.
 showFeedbackIfNeeded</p>
 </div>
 </div>
 </div>
 <div class="section" id="ajax-method">
-<h2>Ajax method<a class="headerlink" href="#ajax-method" title="Permalink to this headline">¶</a></h2>
+<h2>5.5. Ajax method<a class="headerlink" href="#ajax-method" title="Permalink to this headline">¶</a></h2>
 <p>You can call the low-level yada.ajax() method directly.</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">yada</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">successHandler</span><span class="p">,</span> <span class="nx">method</span><span class="p">,</span> <span class="nx">timeout</span><span class="p">,</span> <span class="nx">hideLoader</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li><dl class="first docutils">
-<dt>url</dt>
-<dd>the server address to call</dd>
+<li><dl class="simple">
+<dt>url</dt><dd><p>the server address to call</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>data</dt>
-<dd>(optional) string or object to send to the server</dd>
+<li><dl class="simple">
+<dt>data</dt><dd><p>(optional) string or object to send to the server</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>successHandler</dt>
-<dd>(optional) javascript method to call after returning from the server (see below)</dd>
+<li><dl class="simple">
+<dt>successHandler</dt><dd><p>(optional) javascript method to call after returning from the server (see below)</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>method</dt>
-<dd>(optional) either “GET” (default) or “POST”</dd>
+<li><dl class="simple">
+<dt>method</dt><dd><p>(optional) either “GET” (default) or “POST”</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>timeout</dt>
-<dd>(optional) milliseconds timeout, null for default (set by the browser)</dd>
+<li><dl class="simple">
+<dt>timeout</dt><dd><p>(optional) milliseconds timeout, null for default (set by the browser)</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>hideLoader</dt>
-<dd>(optional) true for not showing the spinning loader (shown by default)</dd>
+<li><dl class="simple">
+<dt>hideLoader</dt><dd><p>(optional) true for not showing the spinning loader (shown by default)</p>
+</dd>
 </dl>
 </li>
 </ul>
 <p>Everything that applies to the other forms of invocation (opening modals, showing login pages, …) also applies.</p>
 <div class="section" id="success-handler">
-<h3>Success Handler<a class="headerlink" href="#success-handler" title="Permalink to this headline">¶</a></h3>
+<h3>5.5.1. Success Handler<a class="headerlink" href="#success-handler" title="Permalink to this headline">¶</a></h3>
 <p>The success handler is called when the server returns without errors:</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">successHandler</span><span class="p">(</span><span class="nx">responseText</span><span class="p">,</span> <span class="nx">responseHtml</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li><dl class="first docutils">
-<dt>responseText</dt>
-<dd>the raw original text returned by the server</dd>
+<li><dl class="simple">
+<dt>responseText</dt><dd><p>the raw original text returned by the server, or a json object if json was returned</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>responseHtml</dt>
-<dd>the original response converted with jQuery.html()</dd>
+<li><dl class="simple">
+<dt>responseHtml</dt><dd><p>the original response converted to a div with jQuery.html()</p>
+</dd>
 </dl>
 </li>
 </ul>
@@ -513,13 +492,13 @@ showFeedbackIfNeeded</p>
 </div>
 </div>
 <div class="section" id="class-reference">
-<h2>Class Reference<a class="headerlink" href="#class-reference" title="Permalink to this headline">¶</a></h2>
-<dl class="docutils">
-<dt>yadaAjax</dt>
-<dd>Change the standard behavior of the element so that it calls the server via ajax</dd>
-<dt>yadaAjaxButtonOnly</dt>
-<dd>When set on an ajax form, make the form ajax only if the clicked button also has the yadaAjax class.
-Otherwise the form will be sent with a normal non-ajax request.</dd>
+<h2>5.6. Class Reference<a class="headerlink" href="#class-reference" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt>yadaAjax</dt><dd><p>Change the standard behavior of the element so that it calls the server via ajax</p>
+</dd>
+<dt>yadaAjaxButtonOnly</dt><dd><p>When set on an ajax form, make the form ajax only if the clicked button also has the yadaAjax class.
+Otherwise the form will be sent with a normal non-ajax request.</p>
+</dd>
 </dl>
 <p>TO BE CONTINUED</p>
 </div>
@@ -538,7 +517,7 @@ Otherwise the form will be sent with a normal non-ajax request.</dd>
     </p>
     <p>
         &copy; Copyright 2019, Cristian Ghezzi.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.0.1.<br/>
     </p>
   </div>
 </footer>

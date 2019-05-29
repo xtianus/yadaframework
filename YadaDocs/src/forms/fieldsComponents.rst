@@ -1,0 +1,41 @@
+***************************
+Form Fields and Components
+***************************
+
+.. rubric::
+	Quickly assembling forms
+
+Description
+===========
+Creating a form often implies not only adding the input fields, but also all the elements that make the form more usable: validation messages, help text,
+sort buttons, etc.
+The use of yada form fields and form components speeds up form development.
+ 
+General Syntax
+==============
+Form fields and form elements are inserted using Thymeleaf template directives.
+Example:
+
+.. code-block:: html
+
+	<div th:replace="/yada/form/text::field(fieldName='subject',maxlength=64,required=true,labelKey='form.label.subject')"></div>
+
+Parameters can be specified, as usual, either on the replace directive itself or by creating variables on some parent element using th:with.	
+
+The difference between form fields and form components is that usually the formers are little more than a decorated form input element while the latter
+could implement complex interactions.
+
+Form Fields
+============
+TODO all fields + link to file upload page
+
+Form Components
+====================
+
+Entity Sorter
+--------------------------
+The Entity Sorter is a form component that allows to add, edit and sort a set of database @Entity objects.
+
+TODO
+
+

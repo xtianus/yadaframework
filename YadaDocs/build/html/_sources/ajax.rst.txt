@@ -262,9 +262,9 @@ The success handler is called when the server returns without errors:
 	successHandler(responseText, responseHtml)
 	
 - responseText
-	the raw original text returned by the server
+	the raw original text returned by the server, or a json object if json was returned
 - responseHtml
-	the original response converted with jQuery.html()
+	the original response converted to a div with jQuery.html()
 	
 The successHandler is not invoked if the call returns with a YadaNotify error, unless the ``executeAnyway`` flag is true:
 

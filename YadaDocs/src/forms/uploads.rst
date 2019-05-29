@@ -89,13 +89,19 @@ File upload starts from a ``"multipart/form-data"`` form. This is a standard for
 		<input type="submit" value="Press"> to upload the file!
 	</form>
 
+Form Fragment /yada/form/fileUpload
+-----------------------------------
 If you're using a *form backing bean* you can include a yada fragment for the input tag. The following example also shows any error:
 
 .. code-block:: html
 
 	<form th:action="@{/profile}" th:object="${formProfile}" enctype="multipart/form-data" method="post" 
 	th:classappend="${#fields.hasErrors('*')}? has-error" role="form">
+	
 		<div th:replace="/yada/form/fileUpload::field(fieldName='avatarImage',label='Avatar')"></div>
+
+You can display a link to the uploaded file underneath the input field by passing an instance of ``YadaAttachedFile`` to the ``attachedFile`` fragment attribute.
+For other usage instructions see the source file for ``/yada/form/fileUpload``.
 
 JAVA
 ===========

@@ -2,9 +2,8 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Forms &#8212; Yada Framework master documentation</title>
+    <meta charset="utf-8" />
+    <title>2. Forms &#8212; Yada Framework master documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
@@ -17,18 +16,18 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
     <script type="text/javascript" src="../_static/copybutton.js"></script>
     <script type="text/javascript" src="../_static/yadaDocs.js"></script>
-    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Ajax" href="../ajax.html" />
-    <link rel="prev" title="Yada Framework" href="../index.html" />
+    <link rel="next" title="3. File Uploads" href="uploads.html" />
+    <link rel="prev" title="1. Form Fields and Components" href="fieldsComponents.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js "></script>
 
   </head><body>
 
@@ -58,12 +57,15 @@
      href="../index.html">Site <b class="caret"></b></a>
   <ul class="dropdown-menu globaltoc"
       role="menu"
-      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">     Forms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ajax.html">     Ajax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ajaxModal.html">     Ajax Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../newEclipseProject.html">     New Project</a></li>
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="fieldsComponents.html">1. Form Fields and Components</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uploads.html">3. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../datatables.html">4. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ajax.html">5. Ajax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ajaxModal.html">6. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notificationModal.html">7. Notification Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../newEclipseProject.html">8. New Eclipse Project</a></li>
 </ul>
 </ul>
 </li>
@@ -77,11 +79,11 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">Forms</a><ul>
-<li><a class="reference internal" href="#description">Description</a></li>
-<li><a class="reference internal" href="#plain-forms">Plain Forms</a></li>
-<li><a class="reference internal" href="#form-backing-beans">Form Backing Beans</a></li>
-<li><a class="reference internal" href="#entity-backing-beans">Entity Backing Beans</a></li>
+<li><a class="reference internal" href="#">2. Forms</a><ul>
+<li><a class="reference internal" href="#description">2.1. Description</a></li>
+<li><a class="reference internal" href="#plain-forms">2.2. Plain Forms</a></li>
+<li><a class="reference internal" href="#form-backing-beans">2.3. Form Backing Beans</a></li>
+<li><a class="reference internal" href="#entity-backing-beans">2.4. Entity Backing Beans</a></li>
 </ul>
 </li>
 </ul>
@@ -93,11 +95,11 @@
               
                 
   <li>
-    <a href="../index.html" title="Previous Chapter: Yada Framework"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Yada Framework</span>
+    <a href="fieldsComponents.html" title="Previous Chapter: 1. Form Fields and Components"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 1. Form Field...</span>
     </a>
   </li>
   <li>
-    <a href="../ajax.html" title="Next Chapter: Ajax"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Ajax &raquo;</span>
+    <a href="uploads.html" title="Next Chapter: 3. File Uploads"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">3. File Uploads &raquo;</span>
     </a>
   </li>
               
@@ -129,33 +131,13 @@
 
 <div class="container">
   <div class="row">
-      <div class="col-md-3">
-        <div id="sidebar" class="bs-sidenav" role="complementary">
-  <li>
-    <a href="../index.html" title="Previous Chapter: Yada Framework"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Yada Framework</span>
-    </a>
-  </li>
-  <li>
-    <a href="../ajax.html" title="Next Chapter: Ajax"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Ajax &raquo;</span>
-    </a>
-  </li>
-<form action="../search.html" method="get">
- <div class="form-group">
-  <input type="text" name="q" class="form-control" placeholder="Search" />
- </div>
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
-        </div>
-      </div>
-    <div class="col-md-9 content">
+    <div class="body col-md-12 content" role="main">
       
-  <p></p>
-<div class="section" id="forms">
-<h1>Forms<a class="headerlink" href="#forms" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="forms">
+<h1>2. Forms<a class="headerlink" href="#forms" title="Permalink to this headline">¶</a></h1>
 <p class="rubric">Handling user-submitted data</p>
 <div class="section" id="description">
-<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<h2>2.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>Forms are used to gather information from users. You could also use plain anchors with request attributes, but forms are way more convenient especially
 for more than a couple of fields and for performing validation.</p>
 <p>The more general kind of form has some input fields that are sent to the server in a POST and received from the &#64;Controller as method parameters. This is a
@@ -167,7 +149,7 @@ have a database &#64;Entity with the same exact fields. With a simple technique 
 a lot of work.</p>
 </div>
 <div class="section" id="plain-forms">
-<h2>Plain Forms<a class="headerlink" href="#plain-forms" title="Permalink to this headline">¶</a></h2>
+<h2>2.2. Plain Forms<a class="headerlink" href="#plain-forms" title="Permalink to this headline">¶</a></h2>
 <p>The standard plain forms don’t need much explanation: you have some HTML with input fields and a &#64;Controller that receives those input fields:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">th:action</span><span class="o">=</span><span class="s">&quot;@{/addBook}&quot;</span><span class="p">&gt;</span>
         <span class="p">&lt;</span><span class="nt">input</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;bookTitle&quot;</span> <span class="na">th:value</span><span class="o">=</span><span class="s">&quot;${bookTitle}&quot;</span><span class="p">&gt;</span>
@@ -201,11 +183,11 @@ This is a possible solution for error handling:</p>
 </div>
 </div>
 <div class="section" id="form-backing-beans">
-<h2>Form Backing Beans<a class="headerlink" href="#form-backing-beans" title="Permalink to this headline">¶</a></h2>
+<h2>2.3. Form Backing Beans<a class="headerlink" href="#form-backing-beans" title="Permalink to this headline">¶</a></h2>
 <p>TODO</p>
 </div>
 <div class="section" id="entity-backing-beans">
-<h2>Entity Backing Beans<a class="headerlink" href="#entity-backing-beans" title="Permalink to this headline">¶</a></h2>
+<h2>2.4. Entity Backing Beans<a class="headerlink" href="#entity-backing-beans" title="Permalink to this headline">¶</a></h2>
 <p>When the form contains most of the fields that are defined in an existing &#64;Entity it makes sense to use that &#64;Entity as a backing bean.
 Some may argue that exposing database classes on the front-end layer would compromise layer isolation, but we never experienced anything bad by doing this.</p>
 <p>The general idea is that Spring can create an instance of a new &#64;Entity or read it from the database before setting form values on it. The &#64;Controller
@@ -251,8 +233,8 @@ Even more, you can write a single method to handle both addition and editing of 
 </pre></div>
 </div>
 <div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<p class="last">test that the above code works</p>
+<p class="admonition-title">Todo</p>
+<p>test that the above code works</p>
 </div>
 <p>It’s always better to use a specific name for the &#64;Entity id, like <code class="docutils literal notranslate"><span class="pre">bookId</span></code> and not just <code class="docutils literal notranslate"><span class="pre">id</span></code>, so that you can handle different &#64;Entity instances in the same &#64;Controller.</p>
 <p>TO BE CONTINUED</p>
@@ -272,7 +254,7 @@ Even more, you can write a single method to handle both addition and editing of 
     </p>
     <p>
         &copy; Copyright 2019, Cristian Ghezzi.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.0.1.<br/>
     </p>
   </div>
 </footer>

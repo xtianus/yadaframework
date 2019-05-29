@@ -2,9 +2,8 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Ajax Modal &#8212; Yada Framework master documentation</title>
+    <meta charset="utf-8" />
+    <title>6. Ajax Modal &#8212; Yada Framework master documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -17,18 +16,18 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
     <script type="text/javascript" src="_static/copybutton.js"></script>
     <script type="text/javascript" src="_static/yadaDocs.js"></script>
-    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="New Eclipse Project" href="newEclipseProject.html" />
-    <link rel="prev" title="Ajax" href="ajax.html" />
+    <link rel="next" title="7. Notification Modal" href="notificationModal.html" />
+    <link rel="prev" title="5. Ajax" href="ajax.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
 
   </head><body>
 
@@ -58,12 +57,15 @@
      href="index.html">Site <b class="caret"></b></a>
   <ul class="dropdown-menu globaltoc"
       role="menu"
-      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">     Forms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ajax.html">     Ajax</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">     Ajax Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">     New Project</a></li>
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">1. Form Fields and Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">2. Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">3. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datatables.html">4. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajax.html">5. Ajax</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">6. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">7. Notification Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">8. New Eclipse Project</a></li>
 </ul>
 </ul>
 </li>
@@ -77,12 +79,12 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">Ajax Modal</a><ul>
-<li><a class="reference internal" href="#description">Description</a></li>
-<li><a class="reference internal" href="#html-placeholder">HTML placeholder</a></li>
-<li><a class="reference internal" href="#html-for-the-ajax-call">HTML for the ajax call</a></li>
-<li><a class="reference internal" href="#java-for-the-controller">Java for the &#64;Controller</a></li>
-<li><a class="reference internal" href="#html-of-the-modal">HTML of the modal</a></li>
+<li><a class="reference internal" href="#">6. Ajax Modal</a><ul>
+<li><a class="reference internal" href="#description">6.1. Description</a></li>
+<li><a class="reference internal" href="#html-placeholder">6.2. HTML placeholder</a></li>
+<li><a class="reference internal" href="#html-for-the-ajax-call">6.3. HTML for the ajax call</a></li>
+<li><a class="reference internal" href="#java-for-the-controller">6.4. Java for the &#64;Controller</a></li>
+<li><a class="reference internal" href="#html-of-the-modal">6.5. HTML of the modal</a></li>
 </ul>
 </li>
 </ul>
@@ -94,11 +96,11 @@
               
                 
   <li>
-    <a href="ajax.html" title="Previous Chapter: Ajax"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Ajax</span>
+    <a href="ajax.html" title="Previous Chapter: 5. Ajax"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 5. Ajax</span>
     </a>
   </li>
   <li>
-    <a href="newEclipseProject.html" title="Next Chapter: New Eclipse Project"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">New Eclipse Project &raquo;</span>
+    <a href="notificationModal.html" title="Next Chapter: 7. Notification Modal"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">7. Notification Modal &raquo;</span>
     </a>
   </li>
               
@@ -130,33 +132,13 @@
 
 <div class="container">
   <div class="row">
-      <div class="col-md-3">
-        <div id="sidebar" class="bs-sidenav" role="complementary">
-  <li>
-    <a href="ajax.html" title="Previous Chapter: Ajax"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Ajax</span>
-    </a>
-  </li>
-  <li>
-    <a href="newEclipseProject.html" title="Next Chapter: New Eclipse Project"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">New Eclipse Project &raquo;</span>
-    </a>
-  </li>
-<form action="search.html" method="get">
- <div class="form-group">
-  <input type="text" name="q" class="form-control" placeholder="Search" />
- </div>
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
-        </div>
-      </div>
-    <div class="col-md-9 content">
+    <div class="body col-md-12 content" role="main">
       
-  <p></p>
-<div class="section" id="ajax-modal">
-<h1>Ajax Modal<a class="headerlink" href="#ajax-modal" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="ajax-modal">
+<h1>6. Ajax Modal<a class="headerlink" href="#ajax-modal" title="Permalink to this headline">¶</a></h1>
 <p class="rubric">Opening a modal with an ajax call</p>
 <div class="section" id="description">
-<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<h2>6.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>Make a Bootstrap Modal open as a result of an ajax call.
 For example, by clicking on an “Edit” button
 a modal opens with a form to edit the chosen element.
@@ -164,81 +146,86 @@ The modal content is generated on the server. The browser just opens it.</p>
 <img alt="_images/modal-example.jpg" src="_images/modal-example.jpg" />
 <p>The implementation needs the following parts:</p>
 <ul class="simple">
-<li><dl class="first docutils">
-<dt>HTML placeholder</dt>
-<dd>The page must contain the standard HTML placeholder for opening modals. This is
-usually inserted in a common footer so that you don’t need to remember adding it to the page.</dd>
+<li><dl class="simple">
+<dt>HTML placeholder</dt><dd><p>The page must contain the standard HTML placeholder for opening modals. This is
+usually inserted in a common footer so that you don’t need to remember adding it to the page.</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>HTML for the ajax call</dt>
-<dd>The ajax call can be made in many ways: with a <a class="reference internal" href="datatables.html"><span class="doc">DataTable</span></a> button, with an <a class="reference internal" href="ajax.html"><span class="doc">ajax link</span></a>, via custom javascript …</dd>
+<li><dl class="simple">
+<dt>HTML for the ajax call</dt><dd><p>The ajax call can be made in many ways: with a <a class="reference internal" href="datatables.html"><span class="doc">DataTable</span></a> button, with an <a class="reference internal" href="ajax.html"><span class="doc">ajax link</span></a>, via custom javascript …</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>Java for the &#64;Controller</dt>
-<dd>The modal must be returned by a &#64;RequestMapping method of a &#64;Controller.</dd>
+<li><dl class="simple">
+<dt>Java for the &#64;Controller</dt><dd><p>The modal must be returned by a &#64;RequestMapping method of a &#64;Controller.</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>HTML of the modal</dt>
-<dd>It specifies the title, header, body, footer and script sections (all are optional)</dd>
+<li><dl class="simple">
+<dt>HTML of the modal</dt><dd><p>It specifies the title, header, body, footer and script sections (all are optional)</p>
+</dd>
 </dl>
 </li>
 </ul>
 </div>
 <div class="section" id="html-placeholder">
-<h2>HTML placeholder<a class="headerlink" href="#html-placeholder" title="Permalink to this headline">¶</a></h2>
+<h2>6.2. HTML placeholder<a class="headerlink" href="#html-placeholder" title="Permalink to this headline">¶</a></h2>
 <p>The HTML placeholder must be the <code class="docutils literal notranslate"><span class="pre">class=&quot;modal&quot;</span></code> node of a Bootstrap Modal and have <code class="docutils literal notranslate"><span class="pre">id=&quot;ajaxModal&quot;</span></code>:</p>
-<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;ajaxModal&quot;</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;modal fade &quot;</span> <span class="na">tabindex</span><span class="o">=</span><span class="s">&quot;-1&quot;</span> <span class="na">role</span><span class="o">=</span><span class="s">&quot;dialog&quot;</span> <span class="na">aria-hidden</span><span class="o">=</span><span class="s">&quot;true&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;ajaxModal&quot;</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;modal fade&quot;</span> <span class="na">tabindex</span><span class="o">=</span><span class="s">&quot;-1&quot;</span> <span class="na">role</span><span class="o">=</span><span class="s">&quot;dialog&quot;</span> <span class="na">aria-hidden</span><span class="o">=</span><span class="s">&quot;true&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="html-for-the-ajax-call">
-<h2>HTML for the ajax call<a class="headerlink" href="#html-for-the-ajax-call" title="Permalink to this headline">¶</a></h2>
+<h2>6.3. HTML for the ajax call<a class="headerlink" href="#html-for-the-ajax-call" title="Permalink to this headline">¶</a></h2>
 <p>The modal can be opened with any ajax call performed by Yada. In this example we show an ajax link:</p>
 <div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<p class="last">Ajax link example</p>
+<p class="admonition-title">Todo</p>
+<p>Ajax link example</p>
 </div>
 </div>
 <div class="section" id="java-for-the-controller">
-<h2>Java for the &#64;Controller<a class="headerlink" href="#java-for-the-controller" title="Permalink to this headline">¶</a></h2>
+<h2>6.4. Java for the &#64;Controller<a class="headerlink" href="#java-for-the-controller" title="Permalink to this headline">¶</a></h2>
 <p>The Java &#64;Controller must return a full Bootstrap Modal. The content of the <code class="docutils literal notranslate"><span class="pre">class=&quot;modal&quot;</span></code> node will be inserted in the HTML placeholder and shown.</p>
 <div class="admonition-todo admonition" id="index-1">
-<p class="first admonition-title">Todo</p>
-<p class="last">&#64;Controller example</p>
+<p class="admonition-title">Todo</p>
+<p>&#64;Controller example</p>
 </div>
 </div>
 <div class="section" id="html-of-the-modal">
-<h2>HTML of the modal<a class="headerlink" href="#html-of-the-modal" title="Permalink to this headline">¶</a></h2>
+<h2>6.5. HTML of the modal<a class="headerlink" href="#html-of-the-modal" title="Permalink to this headline">¶</a></h2>
 <p>You can use your own Bootstrap Modal html or take advantage of the Yada Generic Modal.
 With the Yada Generic Modal you only define the section fragments that you need, producing a full Bootstrap Modal.</p>
 <p>The fragments are:</p>
 <ul class="simple">
-<li><dl class="first docutils">
-<dt>modal title</dt>
-<dd>Visible in the modal header as an &lt;h4&gt; when no custom modal header fragment is given</dd>
+<li><dl class="simple">
+<dt>modal title</dt><dd><p>Visible in the modal header as an &lt;h4&gt; when no custom modal header fragment is given</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>custom modal header</dt>
-<dd>A full Boostrap modal-header fragment. The modal title is ignored when using this fragment</dd>
+<li><dl class="simple">
+<dt>custom modal header</dt><dd><p>A full Boostrap modal-header fragment. The modal title is ignored when using this fragment</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>modal body</dt>
-<dd>The body content</dd>
+<li><dl class="simple">
+<dt>modal body</dt><dd><p>The body content</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>modal footer</dt>
-<dd>The html for the bottom part of the modal. Usually Submit and Close buttons are located here. By default, there’s just the close button.</dd>
+<li><dl class="simple">
+<dt>modal footer</dt><dd><p>The html for the bottom part of the modal. Usually Submit and Close buttons are located here. By default, there’s just the close button.</p>
+</dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>modal script</dt>
-<dd>Some custom script to be run when the modal code is inserted on page.</dd>
+<li><dl class="simple">
+<dt>modal script</dt><dd><p>Some custom script to be run when the modal code is inserted on page.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>extra dialog classes</dt><dd><p>You can add a class to the modal-dialog div to set the modal size, the position, or anything that can be set there: <code class="docutils literal notranslate"><span class="pre">modal-dialog-centered</span></code>, <code class="docutils literal notranslate"><span class="pre">'modal-sm'</span></code>, <code class="docutils literal notranslate"><span class="pre">'modal-lg'</span></code>, <code class="docutils literal notranslate"><span class="pre">'modal-xl'</span></code> and so on. You can also send an empty string <code class="docutils literal notranslate"><span class="pre">''</span></code> or the empty fragment <code class="docutils literal notranslate"><span class="pre">~{}</span></code></p>
+</dd>
 </dl>
 </li>
 </ul>
@@ -252,7 +239,7 @@ To remove a fragment from the modal, use the ~{} expression. To keep the default
 <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
 <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
 
-<span class="p">&lt;</span><span class="nt">div</span> <span class="na">th:replace</span><span class="o">=</span><span class="s">&quot;/yada/modalGeneric::fragment(~{::modalTitle},_,~{::modalBody},~{},~{::modalScript})&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">th:replace</span><span class="o">=</span><span class="s">&quot;/yada/modalGeneric::fragment(~{::modalTitle},_,~{::modalBody},~{},~{::modalScript},&#39;modal-lg&#39;)&quot;</span><span class="p">&gt;</span>
 
         <span class="p">&lt;</span><span class="nt">div</span> <span class="na">th:fragment</span><span class="o">=</span><span class="s">&quot;modalTitle&quot;</span><span class="p">&gt;</span>This is the title<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
 
@@ -288,7 +275,7 @@ To remove a fragment from the modal, use the ~{} expression. To keep the default
     </p>
     <p>
         &copy; Copyright 2019, Cristian Ghezzi.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.0.1.<br/>
     </p>
   </div>
 </footer>
