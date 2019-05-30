@@ -392,7 +392,7 @@
 	
 	/**
 	 * Transform links into confirm links: all anchors with a "data-yadaConfirm" attribute that don't have a class of "yadaAjax" 
-	 * will show a confirm box before submission.
+	 * will show a confirm box before submission. If yadaAjax is present, see "yada.ajax.js"
 	 */
 	yada.enableConfirmLinks = function($element) {
 		if ($element==null) {
