@@ -187,10 +187,8 @@ javadoc_url_map = {
 
 # Global header import
 # See https://stackoverflow.com/a/9707879/587641
-# rst_prolog = open('globalHeader.rst', 'r').read()
-rst_prolog = """
-.. include:: /globalHeader.rst
-"""
+rst_prolog = open('globalHeader.rst', 'r').read()
+
 # Additional CSS file
 def setup(app):
     app.add_stylesheet('yadaDocs.css')
