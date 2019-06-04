@@ -1,5 +1,6 @@
+********************
 New Eclipse Project
-===================
+********************
 
 Introduction
 ------------
@@ -20,8 +21,10 @@ You will also have a basic deployment procedure already set up:
 Prerequisites
 -------------
 
-You should have `Java`_ and a working copy of `Eclipse`_.
-To make your installation future-proof, save the java JDK in some folder like ``C:\Local\Javas\jdk1.8.0_152`` and
+You should have `Java`_, `git`_ and a working copy of `Eclipse IDE for Enterprise Java Developers`_.
+
+Currently the Yada source is tested with Java 8. You should be able to compile it on any later version but to be on the safe side you can download Java 8 from the "`Java Archive`_" section of the Oracle site.
+To make your installation future-proof, install the java JDK in some folder like ``C:\Local\Javas\jdk1.8.0_152`` and
 make a symbolic link to it with a generic name, like
 
 .. code-block:: bat
@@ -29,11 +32,18 @@ make a symbolic link to it with a generic name, like
 	mklink /D /J C:\Local\jdk8 C:\Local\Javas\jdk1.8.0_152
 
 Now you can refer to C:\\Local\\jdk8 in your scripts and when you update the java (minor) version you just change the link, not the scripts.
+The Java JRE can be installed to the default folder.
+Download git and install it.
+
+Install `MySQL Community Server`_ v5.7: later versions have not been tested yet.
+
+Inside Eclipse, from the "Window > Preferences > Gradle" dialog set the "Java home" entry to your JDK installation, which would be C:\Local\jdk8 if you followed the instructions above.
 
 .. _Java: https://www.oracle.com/technetwork/java/javase/downloads/index.html
-.. _Eclipse: https://www.eclipse.org
-
-.. todo:: configure eclipse ini, run with shortcut
+.. _Eclipse IDE for Enterprise Java Developers: https://www.eclipse.org/downloads/packages/
+.. _Java Archive: https://www.oracle.com/technetwork/java/javase/archive-139210.html
+.. _git: https://git-scm.com/downloads
+.. _MySQL Community Server: https://dev.mysql.com/downloads/mysql/
 
 
 The Project Skeleton

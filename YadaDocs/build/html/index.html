@@ -2,8 +2,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Yada Framework &#8212; Yada Framework master documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,17 +16,17 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
     <script type="text/javascript" src="_static/copybutton.js"></script>
     <script type="text/javascript" src="_static/yadaDocs.js"></script>
-    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Forms" href="forms/overview.html" />
+    <link rel="next" title="1. Form Fields and Components" href="forms/fieldsComponents.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
 
   </head><body>
 
@@ -57,15 +56,15 @@
      href="#">Site <b class="caret"></b></a>
   <ul class="dropdown-menu globaltoc"
       role="menu"
-      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">     Forms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">     File Upload</a></li>
-<li class="toctree-l1"><a class="reference internal" href="datatables.html">     Data Tables</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ajax.html">     Ajax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">     Ajax Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">     Notification Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">     New Eclipse Project</a></li>
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">1. Form Fields and Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">2. Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">3. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datatables.html">4. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajax.html">5. Ajax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">6. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">7. Notification Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">8. New Eclipse Project</a></li>
 </ul>
 </ul>
 </li>
@@ -90,7 +89,7 @@
               
                 
   <li>
-    <a href="forms/overview.html" title="Next Chapter: Forms"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Forms &raquo;</span>
+    <a href="forms/fieldsComponents.html" title="Next Chapter: 1. Form Fields and Components"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">1. Form Field... &raquo;</span>
     </a>
   </li>
               
@@ -122,74 +121,124 @@
 
 <div class="container">
   <div class="row">
-      <div class="col-md-3">
-        <div id="sidebar" class="bs-sidenav" role="complementary">
-  <li>
-    <a href="forms/overview.html" title="Next Chapter: Forms"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Forms &raquo;</span>
-    </a>
-  </li>
-<form action="search.html" method="get">
- <div class="form-group">
-  <input type="text" name="q" class="form-control" placeholder="Search" />
- </div>
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
-        </div>
-      </div>
-    <div class="col-md-9 content">
+    <div class="body col-md-12 content" role="main">
       
-  <p></p>
-<div class="section" id="yada-framework">
+  <div class="section" id="yada-framework">
 <h1>Yada Framework<a class="headerlink" href="#yada-framework" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">     Forms</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="forms/overview.html#description">Description</a></li>
-<li class="toctree-l2"><a class="reference internal" href="forms/overview.html#plain-forms">Plain Forms</a></li>
-<li class="toctree-l2"><a class="reference internal" href="forms/overview.html#form-backing-beans">Form Backing Beans</a></li>
-<li class="toctree-l2"><a class="reference internal" href="forms/overview.html#entity-backing-beans">Entity Backing Beans</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">1. Form Fields and Components</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="forms/fieldsComponents.html#description">1.1. Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forms/fieldsComponents.html#general-syntax">1.2. General Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forms/fieldsComponents.html#form-fields">1.3. Form Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forms/fieldsComponents.html#form-components">1.4. Form Components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="forms/fieldsComponents.html#entity-sorter">1.4.1. Entity Sorter</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">     File Upload</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="forms/uploads.html#description">Description</a></li>
-<li class="toctree-l2"><a class="reference internal" href="forms/uploads.html#configuration">Configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="forms/uploads.html#html">HTML</a></li>
-<li class="toctree-l2"><a class="reference internal" href="forms/uploads.html#java">JAVA</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="datatables.html">     Data Tables</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ajax.html">     Ajax</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ajax.html#description">Description</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ajax.html#ajax-links">Ajax Links</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ajax.html#ajax-forms">Ajax Forms</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ajax.html#ajax-on-other-elements">Ajax on other elements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ajax.html#class-reference">Class Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">2. Forms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="forms/overview.html#description">2.1. Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forms/overview.html#plain-forms">2.2. Plain Forms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forms/overview.html#form-backing-beans">2.3. Form Backing Beans</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forms/overview.html#entity-backing-beans">2.4. Entity Backing Beans</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">     Ajax Modal</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ajaxModal.html#description">Description</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ajaxModal.html#html-placeholder">HTML placeholder</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ajaxModal.html#html-for-the-ajax-call">HTML for the ajax call</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ajaxModal.html#java-for-the-controller">Java for the &#64;Controller</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ajaxModal.html#html-of-the-modal">HTML of the modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">3. File Uploads</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="forms/uploads.html#description">3.1. Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forms/uploads.html#configuration">3.2. Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="forms/uploads.html#maximum-file-size-setting">3.2.1. Maximum file size setting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="forms/uploads.html#maximum-file-size-check">3.2.2. Maximum file size check</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">     Notification Modal</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="notificationModal.html#description">Description</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notificationModal.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="notificationModal.html#java-api">Java API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forms/uploads.html#html">3.3. HTML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="forms/uploads.html#form-fragment-yada-form-fileupload">3.3.1. Form Fragment /yada/form/fileUpload</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">     New Eclipse Project</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="newEclipseProject.html#introduction">Introduction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="newEclipseProject.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="newEclipseProject.html#the-project-skeleton">The Project Skeleton</a></li>
-<li class="toctree-l2"><a class="reference internal" href="newEclipseProject.html#the-build-file">The Build File</a></li>
-<li class="toctree-l2"><a class="reference internal" href="newEclipseProject.html#code-generation-just-a-bit">Code Generation (just a bit)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="newEclipseProject.html#initial-customization">Initial Customization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="newEclipseProject.html#database-setup">Database Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="forms/uploads.html#java">3.4. JAVA</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="forms/uploads.html#just-save-the-file">3.4.1. Just save the file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="forms/uploads.html#yadaattachedfile">3.4.2. YadaAttachedFile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="forms/uploads.html#yadafilemanager">3.4.3. YadaFileManager</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="forms/uploads.html#introduction">3.4.3.1. Introduction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="forms/uploads.html#saving-the-file">3.4.3.2. Saving the file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="forms/uploads.html#image-variants">3.4.3.3. Image variants</a></li>
+<li class="toctree-l4"><a class="reference internal" href="forms/uploads.html#file-url">3.4.3.4. File URL</a></li>
+<li class="toctree-l4"><a class="reference internal" href="forms/uploads.html#delete-files">3.4.3.5. Delete Files</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="datatables.html">4. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajax.html">5. Ajax</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ajax.html#description">5.1. Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ajax.html#ajax-links">5.2. Ajax Links</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ajax.html#calling-the-backend">5.2.1. Calling the backend</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ajax.html#miscellaneous">5.2.1.1. Miscellaneous</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ajax.html#returning-from-the-backend">5.2.2. Returning from the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ajax.html#postprocessing">5.2.3. Postprocessing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ajax.html#replacing-and-deleting">5.2.3.1. Replacing and Deleting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ajax.html#calling-some-handler">5.2.3.2. Calling some Handler</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ajax.html#modal-dialog">5.2.3.3. Modal Dialog</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ajax.html#confirm-dialog">5.2.3.4. Confirm Dialog</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ajax.html#ajax-forms">5.3. Ajax Forms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ajax.html#ajax-on-other-elements">5.4. Ajax on other elements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ajax.html#ajax-on-checkbox">5.4.1. Ajax on checkbox</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ajax.html#ajax-method">5.5. Ajax method</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ajax.html#success-handler">5.5.1. Success Handler</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ajax.html#class-reference">5.6. Class Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">6. Ajax Modal</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ajaxModal.html#description">6.1. Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ajaxModal.html#html-placeholder">6.2. HTML placeholder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ajaxModal.html#html-for-the-ajax-call">6.3. HTML for the ajax call</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ajaxModal.html#java-for-the-controller">6.4. Java for the &#64;Controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ajaxModal.html#html-of-the-modal">6.5. HTML of the modal</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">7. Notification Modal</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notificationModal.html#description">7.1. Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notificationModal.html#prerequisites">7.2. Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notificationModal.html#java-api">7.3. Java API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="notificationModal.html#normal-request-normal-response">7.3.1. Normal request / normal response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notificationModal.html#normal-request-redirect-response">7.3.2. Normal request / redirect response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notificationModal.html#ajax-request">7.3.3. Ajax request</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="notificationModal.html#returning-from-the-controller">7.3.3.1. Returning from the Controller</a></li>
+<li class="toctree-l4"><a class="reference internal" href="notificationModal.html#returning-additional-html">7.3.3.2. Returning additional HTML</a></li>
+<li class="toctree-l4"><a class="reference internal" href="notificationModal.html#returning-additional-data">7.3.3.3. Returning additional data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="notificationModal.html#redirect">7.3.3.4. Redirect</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="notificationModal.html#other-functionality">7.3.4. Other functionality</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="notificationModal.html#vertically-center-0-3-3">7.3.4.1. Vertically Center <span class="yadaversion">0.3.3</span></a></li>
+<li class="toctree-l4"><a class="reference internal" href="notificationModal.html#generic-modal-classes-0-3-3">7.3.4.2. Generic modal classes <span class="yadaversion">0.3.3</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="notificationModal.html#javascript-api">7.4. Javascript API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">8. New Eclipse Project</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="newEclipseProject.html#introduction">8.1. Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="newEclipseProject.html#prerequisites">8.2. Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="newEclipseProject.html#the-project-skeleton">8.3. The Project Skeleton</a></li>
+<li class="toctree-l2"><a class="reference internal" href="newEclipseProject.html#the-build-file">8.4. The Build File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="newEclipseProject.html#code-generation-just-a-bit">8.5. Code Generation (just a bit)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="newEclipseProject.html#initial-customization">8.6. Initial Customization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="newEclipseProject.html#database-setup">8.7. Database Setup</a></li>
 </ul>
 </li>
 </ul>
@@ -198,9 +247,9 @@
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </div>
 
@@ -217,7 +266,7 @@
     </p>
     <p>
         &copy; Copyright 2019, Cristian Ghezzi.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.0.1.<br/>
     </p>
   </div>
 </footer>

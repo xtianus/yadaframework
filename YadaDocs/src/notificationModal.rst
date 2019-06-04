@@ -198,7 +198,45 @@ on modal close with :ref:`redirectOnClose <redirectOnClose>`.
 
 .. todo:: What happens if the controller returns "redirect:/xxx" on an ajax call?
 
+
 Other functionality
 ----------------------------------
-.. todo:: Clearing all previous messages, javascript api, "Chiamare javascript arbitrario decidendo lato server", Autoclose, modalReloadOnClose, 
+Vertically Center :yada-version:`0.3.3`
+^^^^^^^^^^^^^^^^^
+If you're using Bootstrap 4 you can vertically center the modal with the method ``center()``:
+
+.. code-block:: java
+
+	yadaNotify.title("Login success", model).ok().message("You have been logged in").center().add();
+
+Generic modal classes :yada-version:`0.3.3`
+^^^^^^^^^^^^^^^^^^^^^
+You can add any class to the "modal-dialog" div by setting the ``extraDialogClasses`` Model attribute:
+
+.. code-block:: java
+
+	model.addAttribute("extraDialogClasses", "myclass1 myclass2");
+	return yadaNotify.title("Saved", model).ok().message("Item saved").add();
+
+.. todo:: Clearing all previous messages, "Chiamare javascript arbitrario decidendo lato server", Autoclose, modalReloadOnClose, 
 	
+Javascript API
+==============
+The notification modal can also be opened in javascript:
+
+.. code-block:: javascript
+	
+	yada.showOkModal(title, message, redirectUrl)
+	yada.showInfoModal(title, message, redirectUrl)
+	yada.showErrorModal(title, message, redirectUrl)
+
+title
+	the modal title
+message
+	the modal message
+redirectUrl
+	optional url to redirect when the modal is closed
+	
+	
+	
+

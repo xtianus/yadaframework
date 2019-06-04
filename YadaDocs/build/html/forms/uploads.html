@@ -2,9 +2,8 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>File Uploads &#8212; Yada Framework master documentation</title>
+    <meta charset="utf-8" />
+    <title>3. File Uploads &#8212; Yada Framework master documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
@@ -17,16 +16,18 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
     <script type="text/javascript" src="../_static/copybutton.js"></script>
     <script type="text/javascript" src="../_static/yadaDocs.js"></script>
-    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="4. DataTables" href="../datatables.html" />
+    <link rel="prev" title="2. Forms" href="overview.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js "></script>
 
   </head><body>
 
@@ -56,12 +57,15 @@
      href="../index.html">Site <b class="caret"></b></a>
   <ul class="dropdown-menu globaltoc"
       role="menu"
-      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">     Forms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ajax.html">     Ajax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ajaxModal.html">     Ajax Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../newEclipseProject.html">     New Project</a></li>
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="fieldsComponents.html">1. Form Fields and Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">2. Forms</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">3. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../datatables.html">4. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ajax.html">5. Ajax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ajaxModal.html">6. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notificationModal.html">7. Notification Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../newEclipseProject.html">8. New Eclipse Project</a></li>
 </ul>
 </ul>
 </li>
@@ -75,23 +79,26 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">File Uploads</a><ul>
-<li><a class="reference internal" href="#description">Description</a></li>
-<li><a class="reference internal" href="#configuration">Configuration</a><ul>
-<li><a class="reference internal" href="#maximum-file-size-setting">Maximum file size setting</a></li>
-<li><a class="reference internal" href="#maximum-file-size-check">Maximum file size check</a></li>
+<li><a class="reference internal" href="#">3. File Uploads</a><ul>
+<li><a class="reference internal" href="#description">3.1. Description</a></li>
+<li><a class="reference internal" href="#configuration">3.2. Configuration</a><ul>
+<li><a class="reference internal" href="#maximum-file-size-setting">3.2.1. Maximum file size setting</a></li>
+<li><a class="reference internal" href="#maximum-file-size-check">3.2.2. Maximum file size check</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#html">HTML</a></li>
-<li><a class="reference internal" href="#java">JAVA</a><ul>
-<li><a class="reference internal" href="#just-save-the-file">Just save the file</a></li>
-<li><a class="reference internal" href="#yadaattachedfile">YadaAttachedFile</a></li>
-<li><a class="reference internal" href="#yadafilemanager">YadaFileManager</a><ul>
-<li><a class="reference internal" href="#introduction">Introduction</a></li>
-<li><a class="reference internal" href="#saving-the-file">Saving the file</a></li>
-<li><a class="reference internal" href="#image-variants">Image variants</a></li>
-<li><a class="reference internal" href="#file-url">File URL</a></li>
-<li><a class="reference internal" href="#delete-files">Delete Files</a></li>
+<li><a class="reference internal" href="#html">3.3. HTML</a><ul>
+<li><a class="reference internal" href="#form-fragment-yada-form-fileupload">3.3.1. Form Fragment /yada/form/fileUpload</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#java">3.4. JAVA</a><ul>
+<li><a class="reference internal" href="#just-save-the-file">3.4.1. Just save the file</a></li>
+<li><a class="reference internal" href="#yadaattachedfile">3.4.2. YadaAttachedFile</a></li>
+<li><a class="reference internal" href="#yadafilemanager">3.4.3. YadaFileManager</a><ul>
+<li><a class="reference internal" href="#introduction">3.4.3.1. Introduction</a></li>
+<li><a class="reference internal" href="#saving-the-file">3.4.3.2. Saving the file</a></li>
+<li><a class="reference internal" href="#image-variants">3.4.3.3. Image variants</a></li>
+<li><a class="reference internal" href="#file-url">3.4.3.4. File URL</a></li>
+<li><a class="reference internal" href="#delete-files">3.4.3.5. Delete Files</a></li>
 </ul>
 </li>
 </ul>
@@ -106,6 +113,14 @@
             
               
                 
+  <li>
+    <a href="overview.html" title="Previous Chapter: 2. Forms"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 2. Forms</span>
+    </a>
+  </li>
+  <li>
+    <a href="../datatables.html" title="Next Chapter: 4. DataTables"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">4. DataTables &raquo;</span>
+    </a>
+  </li>
               
             
             
@@ -135,40 +150,28 @@
 
 <div class="container">
   <div class="row">
-      <div class="col-md-3">
-        <div id="sidebar" class="bs-sidenav" role="complementary">
-<form action="../search.html" method="get">
- <div class="form-group">
-  <input type="text" name="q" class="form-control" placeholder="Search" />
- </div>
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
-        </div>
-      </div>
-    <div class="col-md-9 content">
+    <div class="body col-md-12 content" role="main">
       
-  <p></p>
-<div class="section" id="file-uploads">
-<h1>File Uploads<a class="headerlink" href="#file-uploads" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="file-uploads">
+<h1>3. File Uploads<a class="headerlink" href="#file-uploads" title="Permalink to this headline">¶</a></h1>
 <p class="rubric">Uploading files to the server, handling and linking them</p>
 <div class="section" id="description">
-<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<h2>3.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>File Upload is handled via <a class="reference external" href="https://commons.apache.org/proper/commons-fileupload/">Commons FileUpload</a>. We don’t use the Servlet 3 API because, when we had to make a choice,
 we couldn’t figure out how to set the file size limit via our configuration file.</p>
 <p>Yada offers some utility classes to more easily handle files <em>after</em> they have been uploaded:</p>
 <ul class="simple">
-<li>storing files on disk</li>
-<li>resizing images</li>
-<li>assigning files to Entity objects</li>
-<li>generating download links</li>
-<li>managing the pool of uploaded files</li>
+<li><p>storing files on disk</p></li>
+<li><p>resizing images</p></li>
+<li><p>assigning files to Entity objects</p></li>
+<li><p>generating download links</p></li>
+<li><p>managing the pool of uploaded files</p></li>
 </ul>
 </div>
 <div class="section" id="configuration">
-<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<h2>3.2. Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="maximum-file-size-setting">
-<h3>Maximum file size setting<a class="headerlink" href="#maximum-file-size-setting" title="Permalink to this headline">¶</a></h3>
+<h3>3.2.1. Maximum file size setting<a class="headerlink" href="#maximum-file-size-setting" title="Permalink to this headline">¶</a></h3>
 <p>You can set the maximum file size for an upload by means of the maxFileUploadSizeBytes configuration entry:</p>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;config&gt;</span>
         <span class="nt">&lt;maxFileUploadSizeBytes&gt;</span>3000000<span class="nt">&lt;/maxFileUploadSizeBytes&gt;</span>
@@ -177,7 +180,7 @@ we couldn’t figure out how to set the file size limit via our configuration fi
 <p>The default is 50MB.</p>
 </div>
 <div class="section" id="maximum-file-size-check">
-<h3>Maximum file size check<a class="headerlink" href="#maximum-file-size-check" title="Permalink to this headline">¶</a></h3>
+<h3>3.2.2. Maximum file size check<a class="headerlink" href="#maximum-file-size-check" title="Permalink to this headline">¶</a></h3>
 <p>When the upload limit is reached, a message is logged with a debug severity. You can ensure to see the message with the following logback configuration:</p>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;logger</span> <span class="na">name=</span><span class="s">&quot;org.springframework.web.multipart.commons.YadaCommonsMultipartResolver&quot;</span> <span class="na">level=</span><span class="s">&quot;DEBUG&quot;</span><span class="nt">/&gt;</span>
 </pre></div>
@@ -212,13 +215,13 @@ The best solution would be to only check file size on the browser via javascript
 </pre></div>
 </div>
 <div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<p class="last">Automate javascript checking of file size</p>
+<p class="admonition-title">Todo</p>
+<p>Automate javascript checking of file size</p>
 </div>
 </div>
 </div>
 <div class="section" id="html">
-<h2>HTML<a class="headerlink" href="#html" title="Permalink to this headline">¶</a></h2>
+<h2>3.3. HTML<a class="headerlink" href="#html" title="Permalink to this headline">¶</a></h2>
 <p>File upload starts from a <code class="docutils literal notranslate"><span class="pre">&quot;multipart/form-data&quot;</span></code> form. This is a standard form with a input element of type <code class="docutils literal notranslate"><span class="pre">&quot;file&quot;</span></code>:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;POST&quot;</span> <span class="na">enctype</span><span class="o">=</span><span class="s">&quot;multipart/form-data&quot;</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;doUpload&quot;</span><span class="p">&gt;</span>
         File to upload: <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;file&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;upfile&quot;</span><span class="p">&gt;&lt;</span><span class="nt">br</span><span class="p">/&gt;</span>
@@ -226,21 +229,27 @@ The best solution would be to only check file size on the browser via javascript
 <span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
 </pre></div>
 </div>
+<div class="section" id="form-fragment-yada-form-fileupload">
+<h3>3.3.1. Form Fragment /yada/form/fileUpload<a class="headerlink" href="#form-fragment-yada-form-fileupload" title="Permalink to this headline">¶</a></h3>
 <p>If you’re using a <em>form backing bean</em> you can include a yada fragment for the input tag. The following example also shows any error:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">th:action</span><span class="o">=</span><span class="s">&quot;@{/profile}&quot;</span> <span class="na">th:object</span><span class="o">=</span><span class="s">&quot;${formProfile}&quot;</span> <span class="na">enctype</span><span class="o">=</span><span class="s">&quot;multipart/form-data&quot;</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span>
 <span class="na">th:classappend</span><span class="o">=</span><span class="s">&quot;${#fields.hasErrors(&#39;*&#39;)}? has-error&quot;</span> <span class="na">role</span><span class="o">=</span><span class="s">&quot;form&quot;</span><span class="p">&gt;</span>
+
         <span class="p">&lt;</span><span class="nt">div</span> <span class="na">th:replace</span><span class="o">=</span><span class="s">&quot;/yada/form/fileUpload::field(fieldName=&#39;avatarImage&#39;,label=&#39;Avatar&#39;)&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
 </pre></div>
 </div>
+<p>You can display a link to the uploaded file underneath the input field by passing an instance of <code class="docutils literal notranslate"><span class="pre">YadaAttachedFile</span></code> to the <code class="docutils literal notranslate"><span class="pre">attachedFile</span></code> fragment attribute.
+For other usage instructions see the source file for <code class="docutils literal notranslate"><span class="pre">/yada/form/fileUpload</span></code>.</p>
+</div>
 </div>
 <div class="section" id="java">
-<h2>JAVA<a class="headerlink" href="#java" title="Permalink to this headline">¶</a></h2>
+<h2>3.4. JAVA<a class="headerlink" href="#java" title="Permalink to this headline">¶</a></h2>
 <p>After submission, the uploaded file will be processed by <em>Commons File Upload</em> and sent to the &#64;Controller as a <code class="docutils literal notranslate"><span class="pre">MultipartFile</span></code> object.
 You would normally add a field of that type to the <em>form backing bean</em>, but you can also handle it independently from the other form fields if you wish,
 by adding it to the &#64;RequestMapping signature.</p>
 <p>In the &#64;Controller you have many options.</p>
 <div class="section" id="just-save-the-file">
-<h3>Just save the file<a class="headerlink" href="#just-save-the-file" title="Permalink to this headline">¶</a></h3>
+<h3>3.4.1. Just save the file<a class="headerlink" href="#just-save-the-file" title="Permalink to this headline">¶</a></h3>
 <p>You can just save the file somewhere with YadaWebUtil.saveAttachment():</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span> <span class="n">String</span> <span class="nf">storeFile</span><span class="o">(</span><span class="n">MultipartFile</span> <span class="n">submittedFile</span><span class="o">)</span> <span class="o">{</span>
         <span class="n">File</span> <span class="n">destination</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="s">&quot;someFolder&quot;</span><span class="o">);</span>
@@ -250,7 +259,7 @@ by adding it to the &#64;RequestMapping signature.</p>
 <p>Then you will have to keep track of the file yourself somehow. The following sections show an alternative and more convenient way of dealing with file uploads.</p>
 </div>
 <div class="section" id="yadaattachedfile">
-<h3>YadaAttachedFile<a class="headerlink" href="#yadaattachedfile" title="Permalink to this headline">¶</a></h3>
+<h3>3.4.2. YadaAttachedFile<a class="headerlink" href="#yadaattachedfile" title="Permalink to this headline">¶</a></h3>
 <p>Usually the uploaded file has to be associated to some Entity in the database: a user avatar or CV, the image of a product, the pdf for a trip.
 Use YadaAttachedFile to easily handle file attachments:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Entity</span>
@@ -268,27 +277,27 @@ Strictly speaking, the above annotation is not needed because YadaAttachedFile i
 but this wouldn’t enforce database integrity.</p>
 <p>The YadaAttachedFile class stores some file-related information that you might want to keep:</p>
 <ul class="simple">
-<li>the original name of the file uploaded by the user</li>
-<li>the upload time</li>
-<li>localized title and description</li>
-<li>the folder where the file is stored</li>
-<li>the name of three versions of the file: the original one and the ones scaled for desktop and mobile</li>
-<li>the sort order relative to files of the same “group”</li>
-<li>the Entity to which the file is attached</li>
-<li>a “published” flag</li>
-<li>a locale if the file has to be made available only to some specific locale. This could be useful for pdf files in different languages</li>
+<li><p>the original name of the file uploaded by the user</p></li>
+<li><p>the upload time</p></li>
+<li><p>localized title and description</p></li>
+<li><p>the folder where the file is stored</p></li>
+<li><p>the name of three versions of the file: the original one and the ones scaled for desktop and mobile</p></li>
+<li><p>the sort order relative to files of the same “group”</p></li>
+<li><p>the Entity to which the file is attached</p></li>
+<li><p>a “published” flag</p></li>
+<li><p>a locale if the file has to be made available only to some specific locale. This could be useful for pdf files in different languages</p></li>
 </ul>
 </div>
 <div class="section" id="yadafilemanager">
-<h3>YadaFileManager<a class="headerlink" href="#yadafilemanager" title="Permalink to this headline">¶</a></h3>
+<h3>3.4.3. YadaFileManager<a class="headerlink" href="#yadafilemanager" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="introduction">
-<h4>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h4>
+<h4>3.4.3.1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h4>
 <p>The YadaFileManager &#64;Component is the single entry to all operations on uploaded files.</p>
 <p>Every time a file is uploaded, it is stored in a folder named “uploads” in the &lt;basePath&gt; configured directory. This folder is
 created automatically if the tomcat process has enough permissions, otherwise you have to create it manually.</p>
 </div>
 <div class="section" id="saving-the-file">
-<h4>Saving the file<a class="headerlink" href="#saving-the-file" title="Permalink to this headline">¶</a></h4>
+<h4>3.4.3.2. Saving the file<a class="headerlink" href="#saving-the-file" title="Permalink to this headline">¶</a></h4>
 <p>Every file is stored using the original file name. To prevent name duplicates a number is automatically appended at the end.</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span> <span class="n">String</span> <span class="nf">updateProfile</span><span class="o">(</span><span class="n">MultipartFile</span> <span class="n">thumbnailImage</span><span class="o">)</span> <span class="o">{</span>
         <span class="n">File</span> <span class="n">managedFile</span> <span class="o">=</span> <span class="n">yadaFileManager</span><span class="o">.</span><span class="na">uploadFile</span><span class="o">(</span><span class="n">thumbnailImage</span><span class="o">);</span>
@@ -308,8 +317,8 @@ The original file is by default deleted from the “uploads” folder unless a s
 </div>
 <p>Not deleting uploaded files allows the implementation of a filesystem-like feature where single files could be reused many times.</p>
 <div class="admonition-todo admonition" id="index-1">
-<p class="first admonition-title">Todo</p>
-<p class="last">implement filesystem feature</p>
+<p class="admonition-title">Todo</p>
+<p>implement filesystem feature</p>
 </div>
 <p>The association between the owning Entity and the new YadaAttachedFile instance is not created automatically by yadaFileManager.attachNew() and you
 have to do it explicitly:</p>
@@ -325,12 +334,12 @@ the new ones. Non database operation is needed in this case.</p>
 </pre></div>
 </div>
 <div class="admonition-todo admonition" id="index-2">
-<p class="first admonition-title">Todo</p>
-<p class="last">test that the above code works</p>
+<p class="admonition-title">Todo</p>
+<p>test that the above code works</p>
 </div>
 </div>
 <div class="section" id="image-variants">
-<h4>Image variants<a class="headerlink" href="#image-variants" title="Permalink to this headline">¶</a></h4>
+<h4>3.4.3.3. Image variants<a class="headerlink" href="#image-variants" title="Permalink to this headline">¶</a></h4>
 <p>If the uploaded file is an image, it can be resized for desktop and mobile as needed by specifying the alternative dimensions:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">yadaFileManager</span><span class="o">.</span><span class="na">attach</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">(),</span> <span class="n">managedFile</span><span class="o">,</span> <span class="s">&quot;userData&quot;</span><span class="o">,</span> <span class="s">&quot;icon&quot;</span><span class="o">,</span> <span class="s">&quot;jpg&quot;</span><span class="o">,</span> <span class="mi">1280</span><span class="o">,</span> <span class="mi">768</span><span class="o">);</span>
 </pre></div>
@@ -338,12 +347,12 @@ the new ones. Non database operation is needed in this case.</p>
 <p>In the above example the image is converted to jpg and two additional versions are saved on disk.
 The conversion is performed with the command line tool configured in <code class="docutils literal notranslate"><span class="pre">config/shell/resize</span></code> (usually imagemagick).</p>
 <div class="admonition-todo admonition" id="index-3">
-<p class="first admonition-title">Todo</p>
-<p class="last">link to the configuration section</p>
+<p class="admonition-title">Todo</p>
+<p>link to the configuration section</p>
 </div>
 </div>
 <div class="section" id="file-url">
-<h4>File URL<a class="headerlink" href="#file-url" title="Permalink to this headline">¶</a></h4>
+<h4>3.4.3.4. File URL<a class="headerlink" href="#file-url" title="Permalink to this headline">¶</a></h4>
 <p>In order to show images and allow file download, you need to add the relevant URL to the page.
 This is done by the methods <code class="docutils literal notranslate"><span class="pre">YadaFileManager.getFileUrl()</span></code>, <code class="docutils literal notranslate"><span class="pre">YadaFileManager.getDesktopImageUrl()</span></code>, <code class="docutils literal notranslate"><span class="pre">YadaFileManager.getMobileImageUrl()</span></code> that can
 either be used in the &#64;Controller or directly in the HTML:</p>
@@ -351,20 +360,22 @@ either be used in the &#64;Controller or directly in the HTML:</p>
 <span class="p">&lt;</span><span class="nt">a</span> <span class="na">th:href</span><span class="o">=</span><span class="s">&quot;@{${@yadaFileManager.getFileUrl(product.manual)}}&quot;</span><span class="p">&gt;</span>Download manual<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
 </pre></div>
 </div>
+<p>If you call <code class="docutils literal notranslate"><span class="pre">getMobileImageUrl()</span></code> and a mobile image is not present, it will fall back to <code class="docutils literal notranslate"><span class="pre">getDesktopImageUrl()</span></code> which in turn
+falls back to <code class="docutils literal notranslate"><span class="pre">getFileUrl()</span></code>.</p>
 </div>
 <div class="section" id="delete-files">
-<h4>Delete Files<a class="headerlink" href="#delete-files" title="Permalink to this headline">¶</a></h4>
+<h4>3.4.3.5. Delete Files<a class="headerlink" href="#delete-files" title="Permalink to this headline">¶</a></h4>
 <p>Files can be removed from the filesystem with <code class="docutils literal notranslate"><span class="pre">YadaFileManager.deleteFileAttachment()</span></code>. All database objects must then be deleted manually.</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">YadaAttachedFile</span> <span class="n">icon</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="na">getIcon</span><span class="o">();</span>
-<span class="n">YadaFileManager</span><span class="o">.</span><span class="na">deleteFileAttachment</span><span class="o">(</span><span class="n">icon</span><span class="o">);</span>
+<span class="n">yadaFileManager</span><span class="o">.</span><span class="na">deleteFileAttachment</span><span class="o">(</span><span class="n">icon</span><span class="o">);</span>
 <span class="n">yadaAttachedFileRepository</span><span class="o">.</span><span class="na">delete</span><span class="o">(</span><span class="n">icon</span><span class="o">);</span>
 <span class="n">user</span><span class="o">.</span><span class="na">setIcon</span><span class="o">(</span><span class="kc">null</span><span class="o">);</span>
 <span class="n">userRepository</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="n">user</span><span class="o">);</span>
 </pre></div>
 </div>
 <div class="admonition-todo admonition" id="index-4">
-<p class="first admonition-title">Todo</p>
-<p class="last">test that the above code works</p>
+<p class="admonition-title">Todo</p>
+<p>test that the above code works</p>
 </div>
 </div>
 </div>
@@ -384,7 +395,7 @@ either be used in the &#64;Controller or directly in the HTML:</p>
     </p>
     <p>
         &copy; Copyright 2019, Cristian Ghezzi.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.0.1.<br/>
     </p>
   </div>
 </footer>

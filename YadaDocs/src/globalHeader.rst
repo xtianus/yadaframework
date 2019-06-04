@@ -1,3 +1,3 @@
 
-.. role:: putSomeClassHere
-	
+.. role:: yada-version
+  :class: yadaversion

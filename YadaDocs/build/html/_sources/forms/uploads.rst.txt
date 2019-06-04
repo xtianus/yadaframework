@@ -89,13 +89,19 @@ File upload starts from a ``"multipart/form-data"`` form. This is a standard for
 		<input type="submit" value="Press"> to upload the file!
 	</form>
 
+Form Fragment /yada/form/fileUpload
+-----------------------------------
 If you're using a *form backing bean* you can include a yada fragment for the input tag. The following example also shows any error:
 
 .. code-block:: html
 
 	<form th:action="@{/profile}" th:object="${formProfile}" enctype="multipart/form-data" method="post" 
 	th:classappend="${#fields.hasErrors('*')}? has-error" role="form">
+	
 		<div th:replace="/yada/form/fileUpload::field(fieldName='avatarImage',label='Avatar')"></div>
+
+You can display a link to the uploaded file underneath the input field by passing an instance of ``YadaAttachedFile`` to the ``attachedFile`` fragment attribute.
+For other usage instructions see the source file for ``/yada/form/fileUpload``.
 
 JAVA
 ===========
@@ -231,6 +237,9 @@ either be used in the @Controller or directly in the HTML:
 	<img th:src="@{${@yadaFileManager.getDesktopImageUrl(user.icon)}}">
 	<a th:href="@{${@yadaFileManager.getFileUrl(product.manual)}}">Download manual</a>
 
+If you call ``getMobileImageUrl()`` and a mobile image is not present, it will fall back to ``getDesktopImageUrl()`` which in turn
+falls back to ``getFileUrl()``. 
+
 Delete Files
 ^^^^^^^^^^^^^^^
 Files can be removed from the filesystem with ``YadaFileManager.deleteFileAttachment()``. All database objects must then be deleted manually.
@@ -238,7 +247,7 @@ Files can be removed from the filesystem with ``YadaFileManager.deleteFileAttach
 .. code-block:: java
 
 	YadaAttachedFile icon = user.getIcon();
-	YadaFileManager.deleteFileAttachment(icon);
+	yadaFileManager.deleteFileAttachment(icon);
 	yadaAttachedFileRepository.delete(icon);
 	user.setIcon(null);
 	userRepository.save(user);

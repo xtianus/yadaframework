@@ -2,9 +2,8 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>New Eclipse Project &#8212; Yada Framework master documentation</title>
+    <meta charset="utf-8" />
+    <title>8. New Eclipse Project &#8212; Yada Framework master documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -17,17 +16,17 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
     <script type="text/javascript" src="_static/copybutton.js"></script>
     <script type="text/javascript" src="_static/yadaDocs.js"></script>
-    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Ajax Modal" href="ajaxModal.html" />
+    <link rel="prev" title="7. Notification Modal" href="notificationModal.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
 
   </head><body>
 
@@ -57,12 +56,15 @@
      href="index.html">Site <b class="caret"></b></a>
   <ul class="dropdown-menu globaltoc"
       role="menu"
-      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">Contents</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">     Forms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ajax.html">     Ajax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">     Ajax Modal</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">     New Project</a></li>
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">1. Form Fields and Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">2. Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">3. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datatables.html">4. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajax.html">5. Ajax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">6. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">7. Notification Modal</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">8. New Eclipse Project</a></li>
 </ul>
 </ul>
 </li>
@@ -76,14 +78,14 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">New Eclipse Project</a><ul>
-<li><a class="reference internal" href="#introduction">Introduction</a></li>
-<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
-<li><a class="reference internal" href="#the-project-skeleton">The Project Skeleton</a></li>
-<li><a class="reference internal" href="#the-build-file">The Build File</a></li>
-<li><a class="reference internal" href="#code-generation-just-a-bit">Code Generation (just a bit)</a></li>
-<li><a class="reference internal" href="#initial-customization">Initial Customization</a></li>
-<li><a class="reference internal" href="#database-setup">Database Setup</a></li>
+<li><a class="reference internal" href="#">8. New Eclipse Project</a><ul>
+<li><a class="reference internal" href="#introduction">8.1. Introduction</a></li>
+<li><a class="reference internal" href="#prerequisites">8.2. Prerequisites</a></li>
+<li><a class="reference internal" href="#the-project-skeleton">8.3. The Project Skeleton</a></li>
+<li><a class="reference internal" href="#the-build-file">8.4. The Build File</a></li>
+<li><a class="reference internal" href="#code-generation-just-a-bit">8.5. Code Generation (just a bit)</a></li>
+<li><a class="reference internal" href="#initial-customization">8.6. Initial Customization</a></li>
+<li><a class="reference internal" href="#database-setup">8.7. Database Setup</a></li>
 </ul>
 </li>
 </ul>
@@ -95,7 +97,7 @@
               
                 
   <li>
-    <a href="ajaxModal.html" title="Previous Chapter: Ajax Modal"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Ajax Modal</span>
+    <a href="notificationModal.html" title="Previous Chapter: 7. Notification Modal"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 7. Notification Modal</span>
     </a>
   </li>
               
@@ -127,71 +129,57 @@
 
 <div class="container">
   <div class="row">
-      <div class="col-md-3">
-        <div id="sidebar" class="bs-sidenav" role="complementary">
-  <li>
-    <a href="ajaxModal.html" title="Previous Chapter: Ajax Modal"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Ajax Modal</span>
-    </a>
-  </li>
-<form action="search.html" method="get">
- <div class="form-group">
-  <input type="text" name="q" class="form-control" placeholder="Search" />
- </div>
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
-        </div>
-      </div>
-    <div class="col-md-9 content">
+    <div class="body col-md-12 content" role="main">
       
-  <p></p>
-<div class="section" id="new-eclipse-project">
-<h1>New Eclipse Project<a class="headerlink" href="#new-eclipse-project" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="new-eclipse-project">
+<h1>8. New Eclipse Project<a class="headerlink" href="#new-eclipse-project" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<h2>8.1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <p>The following procedure will guide you through the creation of a new Eclipse project for your web app. At the end you will have a Web Project that can be run in a Java EE server (e.g. Tomcat) with all the needed layers set up and ready for customization:</p>
 <ul class="simple">
-<li>Database access layer with transactions (Hibernate / JPA / Spring)</li>
-<li>Web application controller (Spring)</li>
-<li>Page templates (Thymeleaf)</li>
-<li>Security (Spring)</li>
+<li><p>Database access layer with transactions (Hibernate / JPA / Spring)</p></li>
+<li><p>Web application controller (Spring)</p></li>
+<li><p>Page templates (Thymeleaf)</p></li>
+<li><p>Security (Spring)</p></li>
 </ul>
 <p>You will also have a basic deployment procedure already set up:</p>
 <ul class="simple">
-<li>Database schema generator</li>
-<li>Configurations for development, test and production</li>
-<li>Deployment script</li>
+<li><p>Database schema generator</p></li>
+<li><p>Configurations for development, test and production</p></li>
+<li><p>Deployment script</p></li>
 </ul>
 </div>
 <div class="section" id="prerequisites">
-<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
-<p>You should have <a class="reference external" href="https://www.oracle.com/technetwork/java/javase/downloads/index.html">Java</a> and a working copy of <a class="reference external" href="https://www.eclipse.org">Eclipse</a>.
-To make your installation future-proof, save the java JDK in some folder like <code class="docutils literal notranslate"><span class="pre">C:\Local\Javas\jdk1.8.0_152</span></code> and
+<h2>8.2. Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<p>You should have <a class="reference external" href="https://www.oracle.com/technetwork/java/javase/downloads/index.html">Java</a>, <a class="reference external" href="https://git-scm.com/downloads">git</a> and a working copy of <a class="reference external" href="https://www.eclipse.org/downloads/packages/">Eclipse IDE for Enterprise Java Developers</a>.</p>
+<p>Currently the Yada source is tested with Java 8. You should be able to compile it on any later version but to be on the safe side you can download Java 8 from the “<a class="reference external" href="https://www.oracle.com/technetwork/java/javase/archive-139210.html">Java Archive</a>” section of the Oracle site.
+To make your installation future-proof, install the java JDK in some folder like <code class="docutils literal notranslate"><span class="pre">C:\Local\Javas\jdk1.8.0_152</span></code> and
 make a symbolic link to it with a generic name, like</p>
 <div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="k">mklink</span> /D /J C:\Local\jdk8 C:\Local\Javas\jdk1.8.0_152
 </pre></div>
 </div>
-<p>Now you can refer to C:\Local\jdk8 in your scripts and when you update the java (minor) version you just change the link, not the scripts.</p>
-<div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<p class="last">configure eclipse ini, run with shortcut</p>
-</div>
+<p>Now you can refer to C:\Local\jdk8 in your scripts and when you update the java (minor) version you just change the link, not the scripts.
+The Java JRE can be installed to the default folder.
+Download git and install it.</p>
+<p>Install <a class="reference external" href="https://dev.mysql.com/downloads/mysql/">MySQL Community Server</a> v5.7: later versions have not been tested yet.</p>
+<p>Inside Eclipse, from the “Window &gt; Preferences &gt; Gradle” dialog set the “Java home” entry to your JDK installation, which would be C:Localjdk8 if you followed the instructions above.</p>
 </div>
 <div class="section" id="the-project-skeleton">
-<h2>The Project Skeleton<a class="headerlink" href="#the-project-skeleton" title="Permalink to this headline">¶</a></h2>
+<h2>8.3. The Project Skeleton<a class="headerlink" href="#the-project-skeleton" title="Permalink to this headline">¶</a></h2>
 <p>These are the steps needed to create a new Eclipse project that uses the Yada Framework.</p>
 <ul class="simple">
-<li>Add a Tomcat server to Eclipse</li>
-<li>Follow the Eclipse [[Setup|Setup]] procedure:<ul>
-<li>Clone the yadaframework git repository locally</li>
-<li>Import the Yada projects in Eclipse from the local git clone with “File &gt; Import… &gt; Gradle &gt; Existing Gradle project”</li>
+<li><p>Add a Tomcat server to Eclipse</p></li>
+<li><p>Follow the Eclipse [[Setup|Setup]] procedure:</p>
+<ul>
+<li><p>Clone the yadaframework git repository locally</p></li>
+<li><p>Import the Yada projects in Eclipse from the local git clone with “File &gt; Import… &gt; Gradle &gt; Existing Gradle project”</p></li>
 </ul>
 </li>
-<li>Create a local git repository to store your own sources</li>
-<li>Create a new Gradle project in the workspace (let’s call it “ExamplePrj”)</li>
-<li>Delete any example files that might have been created, like “Library.java”</li>
-<li>Share ExamplePrj to git so that Eclipse moves all files to the git location: “Team &gt; Share Project…” (No need to commit yet)</li>
-<li>Edit .gitignore in the root of ExamplePrj to look like the following:</li>
+<li><p>Create a local git repository to store your own sources</p></li>
+<li><p>Create a new Gradle project in the workspace (let’s call it “ExamplePrj”)</p></li>
+<li><p>Delete any example files that might have been created, like “Library.java”</p></li>
+<li><p>Share ExamplePrj to git so that Eclipse moves all files to the git location: “Team &gt; Share Project…” (No need to commit yet)</p></li>
+<li><p>Edit .gitignore in the root of ExamplePrj to look like the following:</p></li>
 </ul>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>/.gradle/
 /build/
@@ -204,9 +192,9 @@ make a symbolic link to it with a generic name, like</p>
 </div>
 </div>
 <div class="section" id="the-build-file">
-<h2>The Build File<a class="headerlink" href="#the-build-file" title="Permalink to this headline">¶</a></h2>
+<h2>8.4. The Build File<a class="headerlink" href="#the-build-file" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Replace build.gradle with the following:</li>
+<li><p>Replace build.gradle with the following:</p></li>
 </ul>
 <div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="n">buildscript</span> <span class="o">{</span>
     <span class="n">repositories</span> <span class="o">{</span>
@@ -323,7 +311,7 @@ make a symbolic link to it with a generic name, like</p>
 <p>[TODO: YadaConfiguration.isProductionEnvironment() and similar methods should use the configured environment names]</p>
 <p>For a list of all other options for the yadaInit task see <code class="docutils literal notranslate"><span class="pre">/YadaTools/src/main/groovy/net/yadaframework/tools/YadaProject.groovy</span></code></p>
 <ul class="simple">
-<li>Replace settings.gradle with the following:</li>
+<li><p>Replace settings.gradle with the following:</p></li>
 </ul>
 <div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span>    <span class="n">rootProject</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="s1">&#39;ExamplePrj&#39;</span>
     <span class="n">include</span> <span class="s1">&#39;YadaWeb&#39;</span>
@@ -348,58 +336,56 @@ make a symbolic link to it with a generic name, like</p>
 </div>
 </div>
 <div class="section" id="code-generation-just-a-bit">
-<h2>Code Generation (just a bit)<a class="headerlink" href="#code-generation-just-a-bit" title="Permalink to this headline">¶</a></h2>
+<h2>8.5. Code Generation (just a bit)<a class="headerlink" href="#code-generation-just-a-bit" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><dl class="first docutils">
-<dt>ensure you have these folders in your project before the next step:</dt>
-<dd><ul class="first last">
-<li><code class="docutils literal notranslate"><span class="pre">src/main/java</span></code></li>
-<li><code class="docutils literal notranslate"><span class="pre">src/main/webapp</span></code></li>
+<li><dl class="simple">
+<dt>ensure you have these folders in your project before the next step:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/main/java</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/main/webapp</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li>run <code class="docutils literal notranslate"><span class="pre">gradlew</span> <span class="pre">-q</span> <span class="pre">eclipse</span></code>, either from a command prompt or from the “Eclipse gradle tasks” view (under Gradle Tasks &gt; ExamplePrj &gt; ide &gt; eclipse)</li>
-<li>run the “YadaTools - uploadArchives” gradle task (under Gradle Tasks &gt; YadaTools &gt; upload &gt; uploadArchives) so that the latest version of the YadaTools library is loaded to the local maven repository. The task should already be available in “Run &gt; Run Configurations…” but can also be run from the command line with <code class="docutils literal notranslate"><span class="pre">gradle</span> <span class="pre">uploadArchives</span></code> from inside the YadaTools project folder</li>
-<li><dl class="first docutils">
-<dt>from the “ExamplePrj” folder run the task <code class="docutils literal notranslate"><span class="pre">gradlew</span> <span class="pre">yadaInit</span></code></dt>
-<dd><ul class="first last">
-<li>This task will add the java core Spring configuration and some default files that will have to be either deleted or customised</li>
-<li>You can run the task multiple times and it will never overwrite existing files: to revert a change, delete the file and run the task again</li>
+<li><p>run <code class="docutils literal notranslate"><span class="pre">gradlew</span> <span class="pre">-q</span> <span class="pre">eclipse</span></code>, either from a command prompt or from the “Eclipse gradle tasks” view (under Gradle Tasks &gt; ExamplePrj &gt; ide &gt; eclipse)</p></li>
+<li><p>run the “YadaTools - uploadArchives” gradle task (under Gradle Tasks &gt; YadaTools &gt; upload &gt; uploadArchives) so that the latest version of the YadaTools library is loaded to the local maven repository. The task should already be available in “Run &gt; Run Configurations…” but can also be run from the command line with <code class="docutils literal notranslate"><span class="pre">gradle</span> <span class="pre">uploadArchives</span></code> from inside the YadaTools project folder</p></li>
+<li><dl class="simple">
+<dt>from the “ExamplePrj” folder run the task <code class="docutils literal notranslate"><span class="pre">gradlew</span> <span class="pre">yadaInit</span></code></dt><dd><ul>
+<li><p>This task will add the java core Spring configuration and some default files that will have to be either deleted or customised</p></li>
+<li><p>You can run the task multiple times and it will never overwrite existing files: to revert a change, delete the file and run the task again</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li>run either the <code class="docutils literal notranslate"><span class="pre">gradle</span> <span class="pre">eclipse</span></code> task, or more simply click the <code class="docutils literal notranslate"><span class="pre">Gradle</span> <span class="pre">&gt;</span> <span class="pre">Refresh</span> <span class="pre">Gradle</span> <span class="pre">Project</span></code> project menu item in order to import all jar dependencies thus clearing compilation errors</li>
+<li><p>run either the <code class="docutils literal notranslate"><span class="pre">gradle</span> <span class="pre">eclipse</span></code> task, or more simply click the <code class="docutils literal notranslate"><span class="pre">Gradle</span> <span class="pre">&gt;</span> <span class="pre">Refresh</span> <span class="pre">Gradle</span> <span class="pre">Project</span></code> project menu item in order to import all jar dependencies thus clearing compilation errors</p></li>
 </ul>
 </div>
 <div class="section" id="initial-customization">
-<h2>Initial Customization<a class="headerlink" href="#initial-customization" title="Permalink to this headline">¶</a></h2>
+<h2>8.6. Initial Customization<a class="headerlink" href="#initial-customization" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><dl class="first docutils">
-<dt>edit the generated .xml/.html files to suit your needs. You can skip the “tst” and “prod” files until you’re ready to deploy to a test/production server</dt>
-<dd><ul class="first last">
-<li>the <code class="docutils literal notranslate"><span class="pre">env/dev</span></code> and <code class="docutils literal notranslate"><span class="pre">env/prod</span></code> folders now have a couple of script files that you can use to create the initial database and db user</li>
-<li>the <code class="docutils literal notranslate"><span class="pre">/src/main/resources/template/email</span></code> folder now contains some typical email templates that you can decide to delete or customize</li>
+<li><dl class="simple">
+<dt>edit the generated .xml/.html files to suit your needs. You can skip the “tst” and “prod” files until you’re ready to deploy to a test/production server</dt><dd><ul>
+<li><p>the <code class="docutils literal notranslate"><span class="pre">env/dev</span></code> and <code class="docutils literal notranslate"><span class="pre">env/prod</span></code> folders now have a couple of script files that you can use to create the initial database and db user</p></li>
+<li><p>the <code class="docutils literal notranslate"><span class="pre">/src/main/resources/template/email</span></code> folder now contains some typical email templates that you can decide to delete or customize</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li>you can add all the dependencies that you need</li>
-<li>run either the <code class="docutils literal notranslate"><span class="pre">gradle</span> <span class="pre">eclipse</span></code> task again, or more simply click the <code class="docutils literal notranslate"><span class="pre">Gradle</span> <span class="pre">&gt;</span> <span class="pre">Refresh</span> <span class="pre">Gradle</span> <span class="pre">Project</span></code> project context menu item</li>
+<li><p>you can add all the dependencies that you need</p></li>
+<li><p>run either the <code class="docutils literal notranslate"><span class="pre">gradle</span> <span class="pre">eclipse</span></code> task again, or more simply click the <code class="docutils literal notranslate"><span class="pre">Gradle</span> <span class="pre">&gt;</span> <span class="pre">Refresh</span> <span class="pre">Gradle</span> <span class="pre">Project</span></code> project context menu item</p></li>
 </ul>
 </div>
 <div class="section" id="database-setup">
-<h2>Database Setup<a class="headerlink" href="#database-setup" title="Permalink to this headline">¶</a></h2>
+<h2>8.7. Database Setup<a class="headerlink" href="#database-setup" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>create the local database by running the scripts inside <code class="docutils literal notranslate"><span class="pre">env/dev</span></code> (if you’re not on windows, just copy the content and adapt it to your platform)</li>
-<li>create the database schema by running the <code class="docutils literal notranslate"><span class="pre">gradlew</span> <span class="pre">dbSchema</span></code> task<ul>
-<li>If you can’t connect to the database check that /src/main/resources/META-INF/persistence.xml (and /src/main/webapp/META-INF/context.xml) has the right credentials</li>
+<li><p>create the local database by running the scripts inside <code class="docutils literal notranslate"><span class="pre">env/dev</span></code> (if you’re not on windows, just copy the content and adapt it to your platform)</p></li>
+<li><p>create the database schema by running the <code class="docutils literal notranslate"><span class="pre">gradlew</span> <span class="pre">dbSchema</span></code> task</p>
+<ul>
+<li><p>If you can’t connect to the database check that /src/main/resources/META-INF/persistence.xml (and /src/main/webapp/META-INF/context.xml) has the right credentials</p></li>
 </ul>
 </li>
-<li>run the /env/dev/dropAndCreateDatabase.bat (or a linux equivalent) each time you want to create a new empty database with the generated schema</li>
-<li>create a new Tomcat Server in Eclipse and add the ExamplePrj project, then start it</li>
-<li>if the server starts with no errors, you can see the homepage placeholder at <a class="reference external" href="http://localhost:8080/">http://localhost:8080/</a></li>
+<li><p>run the /env/dev/dropAndCreateDatabase.bat (or a linux equivalent) each time you want to create a new empty database with the generated schema</p></li>
+<li><p>create a new Tomcat Server in Eclipse and add the ExamplePrj project, then start it</p></li>
+<li><p>if the server starts with no errors, you can see the homepage placeholder at <a class="reference external" href="http://localhost:8080/">http://localhost:8080/</a></p></li>
 </ul>
 </div>
 </div>
@@ -417,7 +403,7 @@ make a symbolic link to it with a generic name, like</p>
     </p>
     <p>
         &copy; Copyright 2019, Cristian Ghezzi.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.0.1.<br/>
     </p>
   </div>
 </footer>

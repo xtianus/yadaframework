@@ -37,7 +37,7 @@ The HTML placeholder must be the ``class="modal"`` node of a Bootstrap Modal and
 
 .. code-block:: html
 
-	<div id="ajaxModal" class="modal fade " tabindex="-1" role="dialog" aria-hidden="true"></div>
+	<div id="ajaxModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
 
 
 HTML for the ajax call
@@ -72,7 +72,9 @@ The fragments are:
 	The html for the bottom part of the modal. Usually Submit and Close buttons are located here. By default, there's just the close button.
 - modal script
 	Some custom script to be run when the modal code is inserted on page.
-	
+- extra dialog classes
+	You can add a class to the modal-dialog div to set the modal size, the position, or anything that can be set there: ``modal-dialog-centered``, ``'modal-sm'``, ``'modal-lg'``, ``'modal-xl'`` and so on. You can also send an empty string ``''`` or the empty fragment ``~{}``
+
 The code uses standard Thymeleaf `fragment <https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#template-layout>`_ syntax.
 To remove a fragment from the modal, use the ~{} expression. To keep the default value use the _ character: 
 
@@ -87,7 +89,7 @@ In the following example, three fragments have been defined in the same html fil
 	</head>
 	<body>
 
-	<div th:replace="/yada/modalGeneric::fragment(~{::modalTitle},_,~{::modalBody},~{},~{::modalScript})">
+	<div th:replace="/yada/modalGeneric::fragment(~{::modalTitle},_,~{::modalBody},~{},~{::modalScript},'modal-lg')">
 
 		<div th:fragment="modalTitle">This is the title</div>
 		
