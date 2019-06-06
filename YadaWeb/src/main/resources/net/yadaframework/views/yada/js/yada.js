@@ -905,6 +905,7 @@
         	$submit.attr("disabled", "disabled");
         	if (v1!="" || v2!="") {
         		$oneForm.addClass('has-error');
+        		$oneForm.addClass('yada-password-mismatch');
         		$check.parent().append('<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>');
         	}
         }
@@ -916,6 +917,7 @@
 		var $submit = $('button[type="submit"]', $oneForm);
         $submit.removeAttr("disabled");
         $oneForm.removeClass('has-error');
+        $oneForm.removeClass('yada-password-mismatch');
         $('span.form-control-feedback.glyphicon-remove', $check.parent()).remove();
     }
 
