@@ -62,15 +62,15 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 @Service
 public class YadaWebUtil {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private MessageSource messageSource;
-	
-	public final Pageable FIND_ONE = new PageRequest(0, 1); 
-	
+
+	public final Pageable FIND_ONE = new PageRequest(0, 1);
+
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
-	
+
 	/**
 	 * Create a redirect string to be returned by a @Controller, taking into account the locale in the path.
 	 * If you can do a redirect with a relative url ("some/url") you don't need to use this method because the language path
@@ -79,20 +79,32 @@ public class YadaWebUtil {
 	 * @param targetUrl the redirect target, like "/some/place"
 	 * @param locale can be null if the locale is not in the path, but then why use this method?
 	 * @param params optional request parameters to be set on the url
-	 * @return
+	 * @return a url like "redirect:/en/some/place?par1=val1&par2=val2"
 	 */
-	public String redirectString(String targetUrl, Locale locale, String...params) {
-		StringBuilder result = new StringBuilder("redirect:");
+	public String redirectString(String url, Locale locale, String...params) {
+		String enhancedUrl = enhanceUrl(url, locale, params);
+		return "redirect:" + enhancedUrl;
+	}
+
+	/**
+	 * Creates a new URL string from a starting one, taking into account the locale in the path and optional url parameters.
+	 * @param url the original url, like "/some/place"
+	 * @param locale added as a path in the url, only if the url is absolute. Can be null if the locale is not needed in the path
+	 * @param params optional request parameters to be set on the url
+	 * @return a url like "/en/some/place?par1=val1&par2=val2"
+	 */
+	public String enhanceUrl(String url, Locale locale, String...params) {
+		StringBuilder result = new StringBuilder();
 		if (config.isLocalePathVariableEnabled()) {
 			// The language is added only to absolute urls
-			if (targetUrl.startsWith("/")) {
+			if (url.startsWith("/")) {
 				if (locale==null) {
 					throw new YadaInvalidUsageException("Locale is needed when using the locale path variable with an absolute redirect");
 				}
 				result.append("/").append(locale.getLanguage());
 			}
 		}
-		result.append(targetUrl);
+		result.append(url);
 		if (params!=null && params.length>0) {
 			result.append("?");
 			boolean name = true;
@@ -137,7 +149,7 @@ public class YadaWebUtil {
 		}
 
 	}
-	
+
 	/**
 	 * Sorts a localized enum according to the locale specified
 	 * @param localEnum the class of the enum, e.g. net.yadaframework.persistence.entity.YadaJobState.class
@@ -163,7 +175,7 @@ public class YadaWebUtil {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns the first language in the request language header as a string.
 	 * @return the language string, like "en_US", or "" if not found
@@ -181,7 +193,7 @@ public class YadaWebUtil {
 		}
 		return "";
 	}
-	
+
 	/**
 	 * Returns the first country in the request language header as a string.
 	 * @return the country string, like "US", or "" if not found
@@ -198,7 +210,7 @@ public class YadaWebUtil {
 		}
 		return "";
 	}
-	
+
 	/**
 	 * Save an uploaded file to a temporary file
 	 * @param attachment
@@ -213,7 +225,7 @@ public class YadaWebUtil {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Save an uploaded file to the given target file
 	 * @param attachment
@@ -227,7 +239,7 @@ public class YadaWebUtil {
 			throw e;
 		}
 	}
-	
+
 	/**
 	 * From a given string, creates a "slug" that can be inserted in a url and still be readable.
 	 * @param source the string to convert
@@ -271,7 +283,7 @@ public class YadaWebUtil {
 		}
 		return source;
 	}
-	
+
 	/**
 	 * Encodes a string with URLEncoder, handling the useless try-catch that is needed
 	 * @param source
@@ -286,7 +298,7 @@ public class YadaWebUtil {
 		}
 		return source;
 	}
-	
+
 	/**
 	 * ATTENZIONE: non sempre va!
 	 * @return
@@ -294,7 +306,7 @@ public class YadaWebUtil {
 	public HttpServletRequest getCurrentRequest() {
 		return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 	}
-	
+
 	/**
 	 * Ritorna true se la request corrente è ajax
 	 * @return
@@ -302,7 +314,7 @@ public class YadaWebUtil {
 	public boolean isAjaxRequest() {
 		return isAjaxRequest(getCurrentRequest());
 	}
-	
+
 	/**
 	 * Ritorna true se la request passata è ajax
 	 * @return
@@ -311,7 +323,7 @@ public class YadaWebUtil {
 		String ajaxHeader = request.getHeader("X-Requested-With");
 		return "XMLHttpRequest".equalsIgnoreCase(ajaxHeader);
 	}
-	
+
 	/**
 	 * Trasforma /res/img/favicon.ico in /res-0002/img/favicon.ico
 	 * @param urlNotVersioned
@@ -329,11 +341,11 @@ public class YadaWebUtil {
 				return prefix + "-" + config.getApplicationBuild() + suffix;
 			} catch (Exception e) {
 				log.error("Impossibile versionificare la url {} (ignored)", urlNotVersioned, e);
-			} 
+			}
 		}
     	return urlNotVersioned;
     }
-	
+
 	/**
 	 * Cleans the html content leaving only the following tags: b, em, i, strong, u, br, cite, em, i, p, strong, img, li, ul, ol, sup, sub, s
 	 * @param content html content
@@ -345,9 +357,9 @@ public class YadaWebUtil {
 		allowedTags.addTags("br", "cite", "em", "i", "p", "strong", "img", "li", "ul", "ol", "sup", "sub", "s");
 		allowedTags.addTags(extraTags);
 		allowedTags.addAttributes("p", "style"); // Serve per l'allineamento a destra e sinistra
-		allowedTags.addAttributes("img", "src", "style", "class"); 
+		allowedTags.addAttributes("img", "src", "style", "class");
 		if (Arrays.asList(extraTags).contains("a")) {
-			allowedTags.addAttributes("a", "href", "target"); 
+			allowedTags.addAttributes("a", "href", "target");
 		}
 		Document dirty = Jsoup.parseBodyFragment(content, "");
 		Cleaner cleaner = new Cleaner(allowedTags);
@@ -366,7 +378,7 @@ public class YadaWebUtil {
 	public String getWebappAddress(HttpServletRequest request) {
 		int port = request.getServerPort();
 		String pattern = port==80||port==443?"%s://%s%s":"%s://%s:%d%s";
-		String myServerAddress = port==80||port==443? 
+		String myServerAddress = port==80||port==443?
 				String.format(pattern, request.getScheme(),  request.getServerName(), request.getContextPath())
 				:
 				String.format(pattern, request.getScheme(),  request.getServerName(), request.getServerPort(), request.getContextPath());
@@ -380,14 +392,14 @@ public class YadaWebUtil {
 	 */
 	public boolean isWebImage(String extension) {
 		extension = extension.toLowerCase();
-		return extension.equals("jpg") 
-			|| extension.equals("png") 
-			|| extension.equals("gif") 
-			|| extension.equals("tif") 
-			|| extension.equals("tiff") 
+		return extension.equals("jpg")
+			|| extension.equals("png")
+			|| extension.equals("gif")
+			|| extension.equals("tif")
+			|| extension.equals("tiff")
 			|| extension.equals("jpeg");
 	}
-	
+
 	/**
 	 * ritorna ad esempio "jpg" lowercase
 	 * @param multipartFile
@@ -401,7 +413,7 @@ public class YadaWebUtil {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Visualizza un errore se non viene fatto redirect
 	 * @param title
@@ -409,40 +421,40 @@ public class YadaWebUtil {
 	 * @param model
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public String modalError(String title, String message, Model model) {
 		notifyModal(title, message, VAL_NOTIFICATION_SEVERITY_ERROR, null, model);
 		return "/yada/modalNotify";
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param title
 	 * @param message
 	 * @param model
 	 * @return
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public String modalInfo(String title, String message, Model model) {
 		notifyModal(title, message, VAL_NOTIFICATION_SEVERITY_INFO, null, model);
 		return "/yada/modalNotify";
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param title
 	 * @param message
 	 * @param model
 	 * @return
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public String modalOk(String title, String message, Model model) {
 		notifyModal(title, message, VAL_NOTIFICATION_SEVERITY_OK, null, model);
 		return "/yada/modalNotify";
 	}
-	
+
 	/**
 	 * Visualizza un errore se viene fatto redirect
 	 * @param title
@@ -450,53 +462,53 @@ public class YadaWebUtil {
 	 * @param redirectAttributes
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public void modalError(String title, String message, RedirectAttributes redirectAttributes) {
 		notifyModal(title, message, VAL_NOTIFICATION_SEVERITY_ERROR, redirectAttributes);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param title
 	 * @param message
 	 * @param redirectAttributes
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public void modalInfo(String title, String message, RedirectAttributes redirectAttributes) {
 		notifyModal(title, message, VAL_NOTIFICATION_SEVERITY_INFO, redirectAttributes);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param title
 	 * @param message
 	 * @param redirectAttributes
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public void modalOk(String title, String message, RedirectAttributes redirectAttributes) {
 		notifyModal(title, message, VAL_NOTIFICATION_SEVERITY_OK, redirectAttributes);
 	}
-	
+
 	/**
 	 * Set the automatic closing time for the notification - no close button is shown
 	 * @param milliseconds
 	 * @param model
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public void modalAutoclose(long milliseconds, Model model) {
 		model.addAttribute(KEY_NOTIFICATION_AUTOCLOSE, milliseconds);
 	}
-	
+
 	/**
 	 * Set the automatic closing time for the notification - no close button is shown
 	 * @param milliseconds
 	 * @param redirectAttributes
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public void modalAutoclose(long milliseconds, RedirectAttributes redirectAttributes) {
 		redirectAttributes.addAttribute(KEY_NOTIFICATION_AUTOCLOSE, milliseconds);
 	}
@@ -506,29 +518,29 @@ public class YadaWebUtil {
 	 * @param model
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public void modalReloadOnClose(Model model) {
 		model.addAttribute(KEY_NOTIFICATION_RELOADONCLOSE, KEY_NOTIFICATION_RELOADONCLOSE);
 	}
-	
+
 	/**
 	 * Set the page to reload when the modal is closed
 	 * @param redirectAttributes
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public void modalReloadOnClose(RedirectAttributes redirectAttributes) {
 		redirectAttributes.addAttribute(KEY_NOTIFICATION_RELOADONCLOSE, KEY_NOTIFICATION_RELOADONCLOSE);
 	}
-	
-	@Deprecated 
+
+	@Deprecated
 	private void notifyModal(String title, String message, String severity, RedirectAttributes redirectAttributes) {
 		Map<String, ?> modelMap = redirectAttributes.getFlashAttributes();
 		// Mette nel flash tre array di stringhe che contengono titolo, messaggio e severity.
 		if (!modelMap.containsKey(KEY_NOTIFICATION_TITLE)) {
-			List<String> titles = new ArrayList<String>();
-			List<String> bodies = new ArrayList<String>();
-			List<String> severities = new ArrayList<String>();
+			List<String> titles = new ArrayList<>();
+			List<String> bodies = new ArrayList<>();
+			List<String> severities = new ArrayList<>();
 			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_TITLE, titles);
 			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_BODY, bodies);
 			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_SEVERITY, severities);
@@ -540,14 +552,14 @@ public class YadaWebUtil {
 		String newTotalSeverity = calcTotalSeverity(modelMap, severity);
 		redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_TOTALSEVERITY, newTotalSeverity);
 	}
-	
+
 	/**
 	 * Test if a modal is going to be opened when back to the view (usually after a redirect)
 	 * @param request
 	 * @return true if a modal is going to be opened
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public boolean isNotifyModalPending(HttpServletRequest request) {
 		Map<String, ?> flashMap = RequestContextUtils.getInputFlashMap(request);
 		return flashMap!=null && (
@@ -556,7 +568,7 @@ public class YadaWebUtil {
 			|| flashMap.containsKey(KEY_NOTIFICATION_SEVERITY)
 			);
 	}
-	
+
 	/**
 	 * Da usare direttamente solo quando si vuole fare un redirect dopo aver mostrato un messaggio.
 	 * Se chiamato tante volte, i messaggi si sommano e vengono mostrati tutti all'utente.
@@ -568,7 +580,7 @@ public class YadaWebUtil {
 	 * @see YadaConstants
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public void notifyModal(String title, String message, String severity, String redirectSemiurl, Model model) {
 		if (severity==VAL_NOTIFICATION_SEVERITY_ERROR) {
 			// Tutte le notifiche di errore vengono loggate a warn (potrebbero non essere degli errori del programma)
@@ -576,9 +588,9 @@ public class YadaWebUtil {
 		}
 		// Mette nel model tre array di stringhe che contengono titolo, messaggio e severity.
 		if (!model.containsAttribute(KEY_NOTIFICATION_TITLE)) {
-			List<String> titles = new ArrayList<String>();
-			List<String> bodies = new ArrayList<String>();
-			List<String> severities = new ArrayList<String>();
+			List<String> titles = new ArrayList<>();
+			List<String> bodies = new ArrayList<>();
+			List<String> severities = new ArrayList<>();
 			model.addAttribute(KEY_NOTIFICATION_TITLE, titles);
 			model.addAttribute(KEY_NOTIFICATION_BODY, bodies);
 			model.addAttribute(KEY_NOTIFICATION_SEVERITY, severities);
@@ -595,25 +607,25 @@ public class YadaWebUtil {
 		String newTotalSeverity = calcTotalSeverity(modelMap, severity);
 		model.addAttribute(KEY_NOTIFICATION_TOTALSEVERITY, newTotalSeverity);
 	}
-	
+
 	/**
 	 * Return true if modalError has been called before
 	 * @param model
 	 * @return
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public boolean isModalError(Model model) {
 		return model.asMap().containsValue(VAL_NOTIFICATION_SEVERITY_ERROR);
 	}
-	
+
 	/**
 	 * Return true if for this thread the notifyModal (or a variant) has been called
 	 * @param model
 	 * @return
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public boolean isNotifyModalRequested(Model model) {
 		return model.containsAttribute(KEY_NOTIFICATION_TITLE);
 	}
@@ -643,7 +655,7 @@ public class YadaWebUtil {
 		}
 		return newTotalSeverity;
 	}
-	
+
 //	private void notifyModalSetValue(String title, String message, String severity, String redirectSemiurl, Model model) {
 //		model.addAttribute(KEY_NOTIFICATION_TITLE, title);
 //		model.addAttribute(KEY_NOTIFICATION_BODY, message);
@@ -667,7 +679,7 @@ public class YadaWebUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param message text to be displayed (can be null for default value)
 	 * @param confirmButton text of the confirm button (can be null for default value)
 	 * @param cancelButton text of the cancel button (can be null for default value)
@@ -676,7 +688,7 @@ public class YadaWebUtil {
 	public String modalConfirm(String message, String confirmButton, String cancelButton, Model model) {
 		return modalConfirm(message, confirmButton, cancelButton, model, false, false);
 	}
-	
+
 	/**
 	 * Show the confirm modal and reloads when the confirm button is pressed, adding the confirmation parameter to the url.
 	 * The modal will be opened on load.
@@ -689,7 +701,7 @@ public class YadaWebUtil {
 	public String modalConfirmAndReload(String message, String confirmButton, String cancelButton, Model model) {
 		return modalConfirm(message, confirmButton, cancelButton, model, true, true);
 	}
-	
+
 	/**
 	 * Show the confirm modal and optionally reloads when the confirm button is pressed
 	 * @param message text to be displayed (can be null for default value)
@@ -718,14 +730,14 @@ public class YadaWebUtil {
 	 * @param model
 	 * @deprecated Use YadaNotify instead
 	 */
-	@Deprecated 
+	@Deprecated
 	public void callScriptOnModal(String scriptId, Model model) {
 		if (!model.containsAttribute(KEY_NOTIFICATION_CALLSCRIPT)) {
-			List<String> scriptIds = new ArrayList<String>();
+			List<String> scriptIds = new ArrayList<>();
 			model.addAttribute(KEY_NOTIFICATION_CALLSCRIPT, scriptIds);
 		}
 		Map<String, Object> modelMap = model.asMap();
 		((List<String>)modelMap.get(KEY_NOTIFICATION_CALLSCRIPT)).add(scriptId);
 	}
-	
+
 }
