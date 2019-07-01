@@ -4,3 +4,4 @@
 /.classpath
 /.project
 !gradle-wrapper.jar
+/build/
