@@ -61,8 +61,8 @@ if [ ! -d ${projectBase} ]; then
 fi
 
 if [[ $cfgHostname && $myHostName ]]; then
-	hostname $myHostName
-	hostname > /etc/hostname
+	hostnamectl set-hostname $myHostName
+	echo "127.0.0.1 $myVirtualHost $myHostName" > /etc/hosts
 fi
 
 apt-get update
