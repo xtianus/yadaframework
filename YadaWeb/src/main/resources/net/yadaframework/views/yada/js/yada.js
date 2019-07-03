@@ -531,6 +531,9 @@
 	 * Returns the portion of string that follows the first match of some substring
 	 */
 	yada.getAfter = function(str, toFind, fromIndex) {
+		if (str==null) {
+			return str;
+		}
 		var pos = str.indexOf(toFind, fromIndex);
 		if (pos>=0) {
 			return str.substring(pos+toFind.length);
@@ -551,7 +554,7 @@
 	
 	// Ritorna true se str contiene toFind
 	yada.stringContains = function(str, toFind) {
-		return str.indexOf(toFind) >= 0;
+		return str!=null && typeof str=="string" && str.indexOf(toFind) >= 0;
 	}
 	
 	// Returns the last element of a delimiter-separated list of elements in a string.
@@ -568,7 +571,7 @@
 	// Ritorna true se str inizia con prefix
 	// http://stackoverflow.com/questions/646628/how-to-check-if-a-string-startswith-another-string
 	yada.startsWith = function(str, prefix) {
-		return str.lastIndexOf(prefix, 0) === 0;
+		return str!=null && typeof str=="string" && str.lastIndexOf(prefix, 0) === 0;
 	}
 
 	/**
@@ -576,7 +579,7 @@
 	 * http://stackoverflow.com/a/2548133/587641
 	 */
 	yada.endsWith = function(str, suffix) {
-		return str.substr(-suffix.length) === suffix;
+		return str!=null && typeof str=="string" && str.substr(-suffix.length) === suffix;
 	}
 	
 	/**

@@ -945,6 +945,9 @@
 				} else if (typeof responseText == "object") {
 					responseObject = responseText;
 				}
+				if (yada.startsWith(responseTrimmed, "/yada/")) {
+					console.warn("Yada path detected in ajax result: you may need to remove @ResponseBody");
+				}
 				if (yada.showAjaxErrorIfPresent(responseTrimmed, statusText, responseObject)==true) {
 					yada.loaderOff();
 					return;
