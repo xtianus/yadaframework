@@ -884,7 +884,8 @@
 	 * Il metodo chiamato lato java può ritornare un notify chiamando yadaWebUtil.modalOk() o anche yadaWebUtil.modalError() etc.
 	 * In caso di notify di un errore, l'handler non viene chiamato.
 	 * @param url target url
-	 * @param data data to send, string or object. Can be null. Json objects are converted with JSON.stringify and given a specific content-type
+	 * @param data data to send, string or object. Can be null. Json objects are converted with JSON.stringify and given a specific content-type.
+	 *        To send a multipart request, data must be a FormData.
 	 * @param successHandler(responseText, responseHtml);) funzione chiamata in caso di successo e nessun yadaWebUtil.modalError(). Viene chiamata anche in caso di errore se il suo flag executeAnyway è true
 	 * @param method "POST" per il post oppure null o "GET" per il get
 	 * @param timeout milliseconds timeout, null for default (set by the browser)

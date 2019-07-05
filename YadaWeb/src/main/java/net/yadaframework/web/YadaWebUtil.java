@@ -21,6 +21,8 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -47,6 +49,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
@@ -70,6 +73,45 @@ public class YadaWebUtil {
 	public final Pageable FIND_ONE = new PageRequest(0, 1);
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
+
+	/**
+	 * Copies the content of a file to the Request then deletes the file.
+	 * To be used when the client needs to download a previously-created temporary file that you don't want to keep on server.
+	 * @param tempFilename the name (without path) of the existing temporary file
+	 * @param contentType the content-type header
+	 * @param clientFilename the filename that will be used on the client browser
+	 * @return true if the file was sent without errors
+	 */
+	public boolean downloadTempFile(String tempFilename, String contentType, String clientFilename, HttpServletResponse response) {
+		Path tempFile = null;
+		try {
+			Path dummy = Files.createTempFile("x", null);
+			Path tempFolder = dummy.getParent();
+			yadaUtil.deleteFileSilently(dummy);
+			tempFile = tempFolder.resolve(tempFilename);
+			if (!Files.exists(tempFile)) {
+				log.info("Trying to download non-existent file {}", tempFile);
+				return false;
+			}
+		} catch (IOException e) {
+			log.error("Error sending temporary file to client", e);
+			return false;
+		}
+		try (InputStream resultStream = Files.newInputStream(tempFile)) {
+			response.setContentType(contentType);
+			response.setHeader("Content-Disposition", "attachment; filename=" + clientFilename);
+			StreamUtils.copy(resultStream, response.getOutputStream()); // StreamUtils doesn't close any stream
+			return true;
+		} catch (IOException e) {
+			log.error("Can't send temporary file to client", e);
+		} finally {
+			boolean deleted = yadaUtil.deleteFileSilently(tempFile);
+			if (!deleted) {
+				log.error("Temporary file could not be deleted: {}", tempFile);
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Create a redirect string to be returned by a @Controller, taking into account the locale in the path.
@@ -229,14 +271,24 @@ public class YadaWebUtil {
 	/**
 	 * Save an uploaded file to the given target file
 	 * @param attachment
+	 * @param targetPath
+	 * @throws IOException
+	 */
+	public void saveAttachment(MultipartFile attachment, Path targetPath) throws IOException {
+		try (InputStream inputStream = attachment.getInputStream(); OutputStream outputStream = new FileOutputStream(targetPath.toFile())) {
+			IOUtils.copy(inputStream, outputStream);
+		}
+	}
+
+	/**
+	 * Save an uploaded file to the given target file
+	 * @param attachment
 	 * @param targetFile
 	 * @throws IOException
 	 */
 	public void saveAttachment(MultipartFile attachment, File targetFile) throws IOException {
 		try (InputStream inputStream = attachment.getInputStream(); OutputStream outputStream = new FileOutputStream(targetFile)) {
 			IOUtils.copy(inputStream, outputStream);
-		} catch (IOException e) {
-			throw e;
 		}
 	}
 
