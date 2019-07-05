@@ -42,7 +42,9 @@ import sphinx_bootstrap_theme
 # sphinx.ext.githubpages - See http://www.sphinx-doc.org/en/master/usage/extensions/githubpages.html
 # javasphinx - See https://javasphinx.readthedocs.io/en/latest/
 # sphinx_copybutton - https://github.com/choldgraf/sphinx-copybutton
-extensions = ['sphinx.ext.todo', 'javasphinx', 'sphinx_copybutton']
+extensions = ['sphinx.ext.autosectionlabel', 'sphinx.ext.todo', 'javasphinx', 'sphinx_copybutton']
+
+autosectionlabel_prefix_document = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
