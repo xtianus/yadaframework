@@ -1036,57 +1036,80 @@
 					return;
 				}
 				// Open any other modal
-				var loadedModalDialog=$(responseHtml).find(".modal > .modal-dialog");
-//				var loadedModalDialog=$(responseHtml).find("> .modal:not(.s_fullPage) > .modal-dialog");
-				if (loadedModalDialog.length==1) {
-					// La risposta è un qualunque modal, che viene mostrato
+				var $loadedModalDialog=$(responseHtml).find(".modal > .modal-dialog").first();
+				if ($loadedModalDialog.length==1) {
+					// A modal was returned. Is it a "sticky" modal?
+					var stickyModal = $loadedModalDialog.hasClass("yadaStickyModal");
 					$("#loginModal").remove();
+
+					var $modalObject = null;
+					if (stickyModal) {
+						// Sticky modals are appended to the body
+						$modalObject = $(responseHtml).find(".modal").first();
+						// This container is needed to keep the scrollbar when a second modal is closed
+						var $container = $("<div class='modal-open'></div>");
+						$container.append($modalObject);
+						$("body").prepend($container);
+						$modalObject.on('hidden.bs.modal', function (e) {
+							$container.remove(); // Remove modal on close
+						});
+					} else {
+						// Normal modals are appended to the common placeholder
+						$modalObject = $("#ajaxModal");
+						$("#ajaxModal").children().remove();
+						$("#ajaxModal").append($loadedModalDialog);
+					}
+					
 					// Adding the modal head elements to the main document
 					if (responseText.indexOf('<head>')>-1) {
 						var parser = new DOMParser();
 						var htmlDoc = parser.parseFromString(responseText, "text/html");
 						var headNodes = $(htmlDoc.head).children();
 						$("head").append(headNodes);
-						$('#ajaxModal').one('hidden.bs.modal', function (e) {
-							headNodes.remove(); // Cleanup on modal close
-						});
+						removeHeadNodes(headNodes, $modalObject) // Needed a closure for headNodes (?)
 					}
 					
-					$("#ajaxModal").children().remove();
-					$("#ajaxModal").append(loadedModalDialog);
 					// We need to show the modal after a delay or it won't show sometimes (!)
-					var modalIsHidden = $('#ajaxModal:visible').length==0;
+					var modalIsHidden = !$modalObject.is(':visible');
 					if (modalIsHidden) {
 						setTimeout(function() {
-							$('#ajaxModal:hidden').modal('show');
+							$modalObject.modal('show');
+							if (stickyModal) {
+								// Need to fix the z-index to allow other modals to show on top and shade it
+								var $background = $(".modal-backdrop.fade.show").last();
+								var z = $background.css("z-index"); // 1040
+								$modalObject.css("z-index", z-1); // 1039, must be less than 1040 to be behind a future background
+								$background.css("z-index", z-2);
+							}
 							// The loader is removed after the modal is opened to prevent background flickering (if the loader background is not transparent)
-							$('#ajaxModal').on('shown.bs.modal', function (e) {
+							$modalObject.on('shown.bs.modal', function (e) {
 								yada.loaderOff();
 							})
 						}, 100);
 					} else {
 						yada.loaderOff();
 					}
-					yada.initAjaxHandlersOn($("#ajaxModal"));
-					// Questo permette di scrollare all'anchor (ho dovuto mettere un ritardo altrimenti non scrollava)
-					// e anche di far scendere il modal se per caso si apre scrollato (a volte capita, forse coi modal molto alti)
+					yada.initAjaxHandlersOn($modalObject);
+					// Scroll the modal to an optional anchor (delay was needed for it to work)
+					// or scroll back to top when it opens already scrolled (sometimes it happens)
 					setTimeout(function() {
 						var hashValue = window.location.hash; // #234
 						if (hashValue.length>1 && !isNaN(hashValue.substring(1))) {
 							try {
-								$('#ajaxModal').animate({
+								$modalObject.animate({
 									scrollTop: $(hashValue).offset().top
 								}, 1000);
 							} catch (e) {}
-						} else if ($('#ajaxModal').scrollTop()>0) {
-							// Si è aperto in mezzo quindi lo scrollo in alto
-							$('#ajaxModal').animate({
+						} else if ($modalObject.scrollTop()>0) {
+							// Scroll back to top when already scrolled
+							$modalObject.animate({
 								scrollTop: 0
 							}, 500);
 						}
 					}, 500);
 					return;
 				}
+				
 				// If the result is "closeModal", close all open modals
 				if (responseTrimmed == 'closeModal') {
 					$(".modal:visible").modal('hide');
@@ -1104,6 +1127,17 @@
 		});
 		
 	}
+	
+	function removeHeadNodes(headNodes, $modalObject) {
+		$modalObject.on('hidden.bs.modal', function (e) {
+			if (headNodes!=null) {
+				try {
+					headNodes.remove(); // Cleanup on modal close
+				} finally {};
+			}
+		});
+	}
+
 	
 	/**
 	 * Se esiste un confirm nel response, lo visualizza e, in caso l'utente confermi, esegue la chiamata originale aggiungendo "confirmed" ai parametri.
