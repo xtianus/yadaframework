@@ -960,10 +960,10 @@
 				if (yada.startsWith(responseTrimmed, "{\"redirect\":")) {
 					var redirectObject = JSON.parse(responseTrimmed);
 					var targetUrl = redirectObject.redirect;
+					yada.loaderOff();
 					if (redirectObject.newTab!="true") {
 						window.location.href=targetUrl;
 					} else {
-						yada.loaderOff();
 						var win = window.open(targetUrl, '_blank');
 						if (win) {
 						    //Browser has allowed it to be opened
@@ -973,7 +973,7 @@
 						    alert('Please allow popups for this website');
 						}
 					}
-					return;
+					// Keep going, there could be a handler
 				}
 				var responseHtml=$("<div>").html(responseTrimmed);
 				// Check if we just did a login.
