@@ -1149,7 +1149,6 @@
 	yada.handleModalConfirm = function(responseHtml, url, data, successHandler, type) {
 		var $modalConfirm=$(responseHtml).find(".s_modalConfirm .modal");
 		if ($modalConfirm.length>0) {
-			debugger;
 			// Close all non-sticky modals
 			var $currentModals = $(".modal:visible").filter(function(){return $(".yadaStickyModal", this).length==0});			$currentModals.modal('hide'); // Hide any modal that might be already open
 			$("#yada-confirm .modal").children().remove();
