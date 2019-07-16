@@ -1046,6 +1046,8 @@
 					if (stickyModal) {
 						// Sticky modals are appended to the body
 						$modalObject = $(responseHtml).find(".modal").first();
+						// Remove the modalGenericDialog id if present, because it could conflict with future dialogs
+						$("#modalGenericDialog", $modalObject).removeAttr('id');
 						// This container is needed to keep the scrollbar when a second modal is closed
 						var $container = $("<div class='modal-open'></div>");
 						$container.append($modalObject);
@@ -1147,8 +1149,9 @@
 	yada.handleModalConfirm = function(responseHtml, url, data, successHandler, type) {
 		var $modalConfirm=$(responseHtml).find(".s_modalConfirm .modal");
 		if ($modalConfirm.length>0) {
-			var $currentModals = $(".modal:visible");
-			$currentModals.modal('hide'); // Hide any modal that might be already open
+			debugger;
+			// Close all non-sticky modals
+			var $currentModals = $(".modal:visible").filter(function(){return $(".yadaStickyModal", this).length==0});			$currentModals.modal('hide'); // Hide any modal that might be already open
 			$("#yada-confirm .modal").children().remove();
 			$("#yada-confirm .modal").append($(".modal-dialog", $modalConfirm));
 			$("#yada-confirm .modal").modal('show');
@@ -1170,8 +1173,9 @@
 				yada.ajax(url, data, successHandler, type);
 			});
 			$("#yada-confirm .cancelButton").click(function() {
-				$('#yada-confirm .modal').on('hidden.bs.modal', function (e) {
+				$('#yada-confirm .modal').one('hidden.bs.modal', function (e) {
 					$currentModals.modal('show');
+					$('#yada-confirm .modal').off('hidden.bs.modal');
 				});
 				// $("#yada-confirm .modal").modal('hide');
 			});
