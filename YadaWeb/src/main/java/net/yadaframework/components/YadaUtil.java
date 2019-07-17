@@ -78,26 +78,26 @@ import sogei.utility.UCheckNum;
 @Component
 public class YadaUtil {
 	private final static Logger log = LoggerFactory.getLogger(YadaUtil.class);
-	
+
 	@Autowired private YadaConfiguration config;
     @Autowired private AutowireCapableBeanFactory autowireCapableBeanFactory; // For autowiring entities
 
     static ApplicationContext applicationContext; 	// To access the ApplicationContext from anywhere
     static public MessageSource messageSource; 		// To access the MessageSource from anywhere
-	
-    public final static long MILLIS_IN_MINUTE = 60*1000; 
-	public final static long MILLIS_IN_HOUR = 60*MILLIS_IN_MINUTE; 
-	public final static long MILLIS_IN_DAY = 24*MILLIS_IN_HOUR; 
-	
+
+    public final static long MILLIS_IN_MINUTE = 60*1000;
+	public final static long MILLIS_IN_HOUR = 60*MILLIS_IN_MINUTE;
+	public final static long MILLIS_IN_DAY = 24*MILLIS_IN_HOUR;
+
 	private SecureRandom secureRandom = new SecureRandom();
-	
+
 	private static Locale defaultLocale = null;
-	
+
 	@PostConstruct
     public void init() {
 		defaultLocale = config.getDefaultLocale();
     }
-	
+
 	/**
 	 * Returns the current stack trace as a string, formatted on separate lines
 	 * @return
@@ -109,7 +109,7 @@ public class YadaUtil {
 		}
 		return stringBuilder.toString();
 	}
-	
+
 	/**
 	 * Returns a random element from the list
 	 * @param list
@@ -122,7 +122,7 @@ public class YadaUtil {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Convert from an amount of time to a string in the format xxd:hh:mm:ss
 	 * @param amount interval that needs to be formatted
@@ -147,18 +147,18 @@ public class YadaUtil {
 		return result;
 	}
 
-	
-	
+
+
 	/**
 	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity.
 	 * Post processing (@PostConstruct etc) is also performed but initialization is not.
 	 * @param instance to autowire
-	 * @see AutowireCapableBeanFactory#autowireBean(Object) 
+	 * @see AutowireCapableBeanFactory#autowireBean(Object)
 	 */
 	public void autowire(Object instance) {
 		autowireCapableBeanFactory.autowireBean(instance);
 	}
-	
+
 	/**
 	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity.
 	 * Post processing (@PostConstruct etc) and initialization are also performed.
@@ -194,7 +194,7 @@ public class YadaUtil {
 		}
 		return prefix;
 	}
-	
+
 	/**
 	 * Creates an empty file that doesn't already exist in the specified folder
 	 * with the specified leading characters (baseName).
@@ -204,7 +204,7 @@ public class YadaUtil {
 	 * @param extension the extension without a dot, like "jpg"
 	 * @param counterSeparator the separator to be used before appending the number, e.g. "_"
 	 * @return a new file in that folder, with a name like "product_2.jpg" or "product.jpg"
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public static File findAvailableName(File targetFolder, String baseName, String extensionNoDot, String counterSeparator) throws IOException {
 		String extension = "." + extensionNoDot;
@@ -224,7 +224,28 @@ public class YadaUtil {
 			}
 		}
 	}
-	
+
+	/**
+	 * Creates a file with a unique filename by appending a number after the specified separator if needed.
+	 * If the sourceFile exists already, a new file is created with a proper counter at the end. The counter may be stripped
+	 * altogether (if the original file had a counter and no file without counter exists) or added or incremented.
+	 * The new counter might not be higher than the original one, nor sequential. It depends on what's already on
+	 * the filesystem.
+	 * @param sourceFile the file that we want to create.
+	 * @param counterSeparator (optional) when null, "_" is used.
+	 * @return
+	 * @throws IOException
+	 */
+	public static File findAvailableName(File sourceFile, String counterSeparator) throws IOException {
+		if (counterSeparator==null) {
+			counterSeparator="_";
+		}
+		String sourceFilename = sourceFile.getName();
+		String extension = splitFileNameAndExtension(sourceFilename)[1];
+		String strippedName = stripCounterFromFilename(sourceFilename, counterSeparator);
+		return findAvailableName(sourceFile.getParentFile(), strippedName, extension, counterSeparator);
+	}
+
 	/**
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
 	 * It must be called in a transaction.
@@ -238,7 +259,29 @@ public class YadaUtil {
 			prefetchLocalizedStringList(list, targetClass);
 		}
 	}
-	
+
+	/**
+	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
+	 * It must be called in a transaction.
+	 * @param fetchedEntity object fetched from database that may contain localized strings
+	 * @param targetClass type of fetchedEntities elements
+	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
+	 */
+	public static <targetClass> void prefetchLocalizedStringsRecursive(targetClass fetchedEntity, Class<?> targetClass, String...attributes) {
+		if (fetchedEntity!=null) {
+			List<targetClass> list = new ArrayList<>();
+			list.add(fetchedEntity);
+			prefetchLocalizedStringListRecursive(list, targetClass, attributes);
+		}
+	}
+
+	/**
+	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
+	 * It must be called in a transaction.
+	 * @param entities objects fetched from database that may contain localized strings
+	 * @param entityClass type of fetchedEntities elements
+	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
+	 */
 	public static <entityClass> void prefetchLocalizedStringListRecursive(List<entityClass> entities, Class<?> entityClass, String...attributes) {
 		if (entities==null || entities.isEmpty()) {
 			return;
@@ -272,7 +315,7 @@ public class YadaUtil {
 				Type type = field.getGenericType();
 				return !(type instanceof ParameterizedType);
 			}
-		});	
+		});
 	}
 
 	/**
@@ -280,7 +323,7 @@ public class YadaUtil {
 	 * It must be called in a transaction.
 	 * @param entities objects fetched from database that may contain localized strings
 	 * @param entityClass type of fetchedEntities elements
-	 * @param attributes the attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
+	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
 	 */
 	public static <entityClass> void prefetchLocalizedStringList(List<entityClass> entities, Class<?> entityClass, String...attributes) {
 		List<String> attributeNames = Arrays.asList(attributes);
@@ -322,11 +365,11 @@ public class YadaUtil {
 			}
 		});
 	}
-	
+
 	/**
 	 * Returns the localized value from a map of Locale -> String.
 	 * Used in entities with localized string attributes.
-	 * If a default locale has been configured with <code>&lt;locale default='true'></code>, then that locale is attempted when 
+	 * If a default locale has been configured with <code>&lt;locale default='true'></code>, then that locale is attempted when
 	 * there is no value for the needed locale (and they differ)
 	 * @param LocalizedValueMap
 	 * @param locale the needed locale for the value, can be null for the current request locale
@@ -342,7 +385,19 @@ public class YadaUtil {
 		}
 		return result==null?"":result;
 	}
-	
+
+	/**
+	 * Deletes a file without reporting any errors.
+	 * @param file the file. It could also be an empty foder. Folders containing files are not deleted.
+	 */
+	public boolean deleteFileSilently(Path file) {
+		try {
+			return Files.deleteIfExists(file);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	/**
 	 * Close a closeable ignoring exceptions and null.
 	 * @param closeable the object to close(), can be null
@@ -359,11 +414,11 @@ public class YadaUtil {
 		}
 		return false;
 	}
-	
+
 	public void sleepRandom(long minMilliseconds, long maxMilliseconds) {
 		sleep(minMilliseconds + (long)(Math.random()*(maxMilliseconds-minMilliseconds)));
 	}
-	
+
 	public void sleep(long milliseconds) {
 		try {
 			Thread.sleep(milliseconds);
@@ -380,15 +435,15 @@ public class YadaUtil {
 	 */
 	public String md5Hash(String clear) throws NoSuchAlgorithmException {
 		MessageDigest m = MessageDigest.getInstance("MD5");
-		byte[] data = clear.getBytes(); 
+		byte[] data = clear.getBytes();
 		m.update(data,0,data.length);
 		BigInteger i = new BigInteger(1,m.digest());
 		return String.format("%1$032X", i);
 	}
 
 	/**
-	 * Copies an inputStream to an outputStream. 
-	 * This method blocks until input data is available, end of file is detected, or an exception is thrown. 
+	 * Copies an inputStream to an outputStream.
+	 * This method blocks until input data is available, end of file is detected, or an exception is thrown.
 	 * Streams are not closed.
 	 * @param inputStream
 	 * @param outputStream
@@ -397,7 +452,7 @@ public class YadaUtil {
 	 * @param sizeLimit the maximum number of bytes to read (inclusive)
 	 * @return the number of bytes read, or -1 if the sizeLimit has been exceeded.
 	 * @see org.apache.commons.io.IOUtils#copy(InputStream, OutputStream)
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public long copyStream(InputStream inputStream, OutputStream outputStream, Integer bufferSize, Long sizeLimit) throws IOException {
 		long totBytes = 0;
@@ -415,7 +470,7 @@ public class YadaUtil {
 		}
 		return totBytes;
 	}
-	
+
 	/**
 	 * Get the Field of a given class, even from a superclass but not "nested" in a path
 	 * @param rootClass
@@ -489,7 +544,7 @@ public class YadaUtil {
 		}
 		return getType(attributeType, StringUtils.substringAfter(attributePath, "."));
 	}
-	
+
 	/**
 	 * Ritorna un messaggio localizzato da un contesto fuori da Spring (ad esempio in un enum o un Entity)
 	 * @param key
@@ -542,7 +597,7 @@ public class YadaUtil {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Get any bean defined in the Spring ApplicationContext
 	 * @param beanClass
@@ -553,7 +608,7 @@ public class YadaUtil {
 		String beanName = StringUtils.uncapitalize(beanClass.getSimpleName());
 		return (T) getBean(beanName, args);
 	}
-	
+
 	/**
 	 * Get any bean defined in the Spring ApplicationContext
 	 * @param nameInApplicationContext the Class.getSimpleName() starting lowercase, e.g. "processController"
@@ -566,7 +621,7 @@ public class YadaUtil {
 		log.debug("No applicationContext injected in getBean() yet - returning null");
 		return null;
 	}
-	
+
 	/**
 	 * Get any bean defined in the Spring ApplicationContext
 	 * @param nameInApplicationContext the Class.getSimpleName() starting lowercase, e.g. "processController"
@@ -579,7 +634,7 @@ public class YadaUtil {
 		log.debug("No applicationContext injected in getBean() yet - returning null");
 		return null;
 	}
-	
+
 	/**
 	 * Ritorna la data nel passato per il numero di minuti indicati
 	 * @param days numero di minuti fa
@@ -588,7 +643,7 @@ public class YadaUtil {
 	public Date minutesAgo(int minuti) {
 		return new Date(System.currentTimeMillis() - minuti*MILLIS_IN_MINUTE);
 	}
-	
+
 	/**
 	 * Ritorna la data nel passato per il numero di giorni indicati
 	 * @param days numero di giorni fa
@@ -597,7 +652,7 @@ public class YadaUtil {
 	public Date daysAgo(int days) {
 		return new Date(System.currentTimeMillis() - days*MILLIS_IN_DAY);
 	}
-	
+
 	/**
 	 * Delete a file ignoring errors.
 	 * @param file the file to delete, can be null
@@ -648,7 +703,7 @@ public class YadaUtil {
 	    }
 	    return result;
 	}
-	
+
 	/**
 	 * Removes files from a folder starting with the prefix (can be an empty string) and older than the given date
 	 * @param folder
@@ -670,7 +725,7 @@ public class YadaUtil {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns the file name given the file path
 	 * @param fileWithPath
@@ -682,10 +737,10 @@ public class YadaUtil {
 		}
 		File file = new File(fileWithPath);
 		return file.getName();
-	}	
-	
+	}
+
 	/**
-	 * Splits a filename in the prefix and the extension parts
+	 * Splits a filename in the prefix and the extension parts. If there is no extension, the second array cell is the empty string
 	 * @param filename
 	 * @return an array with [ filename without extension, extension without dot]
 	 */
@@ -704,7 +759,7 @@ public class YadaUtil {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Da un nome tipo abcd.JPG ritorna "jpg"
 	 * @param filename
@@ -720,7 +775,7 @@ public class YadaUtil {
 		}
 		return result;
 	}
-	
+
 	public String getFileExtension(File file) {
 		return getFileExtension(file.getName());
 	}
@@ -818,12 +873,12 @@ public class YadaUtil {
 		}
 		return exitValue>0?"":null;
 	}
-	
+
 	/**
 	 * Esegue il comando configurato
 	 * @param shellCommandKey chiave completa xpath del comando shell da eseguire e.g. "config/shell/processTunableWhiteImage"
 	 * @param substitutionMap key-value of placeholders to replace in the command. A placeholder in the command is like ${key}, a substitution
-	 * pair is like "key"-->"value" 
+	 * pair is like "key"-->"value"
 	 * @return true if successful
 	 */
 	public boolean exec(String shellCommandKey, Map substitutionMap) {
@@ -844,8 +899,8 @@ public class YadaUtil {
 		} finally {
 			closeSilently(outputStream);
 		}
-	}	
-	
+	}
+
 //	/**
 //	 * Esegue il comando configurato
 //	 * @param shellCommandKey chiave completa xpath del comando shell da eseguire e.g. "config/shell/processTunableWhiteImage"
@@ -884,10 +939,10 @@ public class YadaUtil {
 //			} catch (Exception e) {
 //				// ignored
 //				log.debug("Can't close outputStream (ignored): " + e);
-//			}		
+//			}
 //		}
-//	}	
-	
+//	}
+
 	public boolean isCodiceFiscaleValid(String codiceFiscale) {
 		try {
 			if (StringUtils.isBlank(codiceFiscale)) {
@@ -903,7 +958,7 @@ public class YadaUtil {
 				boolean maybeValid = uCheckCfNum.controllaCfNum();
 				if (maybeValid) {
 					String c = uCheckCfNum.trattCfNum();
-					return !(c.equals("2") || c.equals("5")); 
+					return !(c.equals("2") || c.equals("5"));
 				}
 			}
 		} catch (Exception e) {
@@ -928,7 +983,7 @@ public class YadaUtil {
 		}
 		return root;
 	}
-	
+
 	/*
 	 * Spezza una stringa in due, circa al carattere splitPoint, ma a fine parola.
 	 */
@@ -944,11 +999,11 @@ public class YadaUtil {
 			return new String[] { value, "" };
 		}
 	}
-	
+
 	public String abbreviate(String string, int length, boolean breakAtWord) {
 		return abbreviate(string, length, breakAtWord, null);
 	}
-	
+
 	/**
 	 * Accorcia una stringa mettendo "...", eventualmente senza troncare le parole
 	 * @param string
@@ -983,37 +1038,51 @@ public class YadaUtil {
 			log.error("Can't abbreviate '{}' (ignored)", string, e);
 		}
 	    return string;
-	}	
-	
+	}
+
 	/**
+	 * Copy (clone) an object via getter/setter.
+	 * The object must implement CloneableFiltered and optionally state what fields should be excluded and left null.
+	 * The id is always excluded.
+	 * All collections are recreated with the same instances unless their classes implement CloneableDeep, in which case the instances are copied with this same method.
+	 * All objects are shallow copied unless they implement CloneableDeep, in which case they are copied with this same method.
+	 * Map keys are never cloned.
+	 *
+	 * NOTE: the object doesn't have to be an @Entity
+	 * NOTE: any @Entity in the hierarchy is cloned without id and should be explicitly persisted after cloning unless there's PERSIST propagation.
+	 * NOTE: this method works quite well and should be trusted to copy even complex hierarchies.
+	 * NOTE: a transaction should be active to copy entities with lazy associations
+	 *
 	 * Questo metodo crea la copia di un oggetto TRAMITE I SUOI GETTER (anche privati), facendo in modo che alcune collection/mappe vengano copiate pur restando indipendenti.
 	 * In pratica le collection/mappe sono ricreate come istanze nuove con i medesimi oggetti di quelle originali.
 	 * Questo permette di condividere gli oggetti tra le copie, ma di mantenere le associazioni slegate.
 	 * Così se copio un Prodotto, mi trovo gli stessi componenti dell'originale (gli Articolo sono gli stessi) ma posso in seguito toglierli/aggiungerli
 	 * senza influire sull'altra istanza da cui son partito a copiare.
-	 * 
+	 *
 	 * E' possibile specificare quali attributi non copiare grazie all'interfaccia CloneableFiltered. La id non è mai copiata.
 	 * Gli attributi senza getter/setter non sono copiati a prescindere dal filtro.
 	 * Per esempio se l'oggetto che si vuole copiare ha l'attributo pippo e l'attributo pluto, si può fare in modo che sia copiato solo pippo e non pluto (che rimane quindi null).
-	 * 
+	 *
 	 * Se una collection/mappa deve essere clonata anche nel contenuto, i suoi elementi devono implementare CloneableDeep (vedi LocalString).
 	 * Per esempio se l'attributo pippo è una collection di oggetti Cane che non implementa ClonableDeep, nella copia verrà creata una nuova collection
 	 * di oggetti Cane che saranno gli stessi della collection di partenza. Se invcece Cane implementa ClonableDeep, allora gli oggetti Cane contenuti
 	 * nella copia di pippo sono essi stessi delle copie che seguono le stesse regole qui indicate.
-	 * 
-	 * ATTENZIONE: 
+	 *
+	 * ATTENZIONE:
 	 * - da verificare se gli attributi dei parent sono duplicati pure loro
-	 *  
+	 *
 	 * @param source
 	 * @return
 	 */
-	// TODO why not use SerializationUtils.clone(..) of commons-lang? This is many times slower than writing clone methods by hand on all objects in your object graph. However, for complex object graphs, or for those that don't support deep cloning this can be a simple alternative implementation. Of course all the objects must be Serializable.
+	// why not use SerializationUtils.clone(..) of commons-lang?
+	// This is many times slower than writing clone methods by hand on all objects in your object graph.
+	// However, for complex object graphs, or for those that don't support deep cloning this can be a simple alternative implementation. Of course all the objects must be Serializable.
 	public static Object copyEntity(CloneableFiltered source) {
 		return copyEntity(source, false);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param source
 	 * @param setFieldDirectly true to copy using fields and not getter/setter
 	 * @return
@@ -1021,49 +1090,49 @@ public class YadaUtil {
 	public static Object copyEntity(CloneableFiltered source, boolean setFieldDirectly) {
 		return copyEntity(source, null, setFieldDirectly);
 	}
-	
+
 	/**
 	 * Questo metodo crea la copia di un oggetto TRAMITE I SUOI GETTER (anche privati), facendo in modo che alcune collection/mappe vengano copiate pur restando indipendenti.
 	 * In pratica le collection/mappe sono ricreate come istanze nuove con i medesimi oggetti di quelle originali.
 	 * Questo permette di condividere gli oggetti tra le copie, ma di mantenere le associazioni slegate.
 	 * Così se copio un Prodotto mi trovo gli stessi componenti dell'originale (gli Articolo sono gli stessi) ma posso in seguito toglierli/aggiungerli
 	 * senza influire sull'altra istanza da cui son partito a copiare.
-	 * 
+	 *
 	 * E' possibile specificare quali attributi non copiare grazie all'interfaccia CloneableFiltered. La id non è mai copiata.
 	 * Per esempio se l'oggetto che si vuole copiare ha l'attributo pippo e l'attributo pluto, si può fare in modo che sia copiato solo pippo e non pluto (che rimane quindi null).
-	 * 
+	 *
 	 * Se una collection/mappa deve essere clonata anche nel contenuto, i suoi elementi devono implementare CloneableDeep (vedi LocalString).
 	 * Per esempio se l'attributo pippo è una collection di oggetti Cane che non implementa ClonableDeep, nella copia verrà creata una nuova collection
 	 * di oggetti Cane che saranno gli stessi della collection di partenza. Se invcece Cane implementa ClonableDeep, allora gli oggetti Cane contenuti
 	 * nella copia di pippo sono essi stessi delle copie che seguono le stesse regole qui indicate.
-	 * 
-	 * ATTENZIONE: 
+	 *
+	 * ATTENZIONE:
 	 * - da verificare se gli attributi dei parent sono duplicati pure loro
-	 *  
+	 *
 	 * @param source
 	 * @param classObject classe da usare per creare il clone quando il source è nascosto dentro a un HibernateProxy
 	 * @return
 	 */
-	// TODO why not use SerializationUtils.clone(..) of commons-lang?
 	public static Object copyEntity(CloneableFiltered source, Class classObject) {
 		return copyEntity(source, classObject, false);
 	}
-	
+
 	public static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly) {
 		if (source==null) {
 			return null;
 		}
 		Class<?> sourceClass = source.getClass();
-			
+
 		try {
 			// The constructor may be private, so don't just use newInstance()
 	        // Object target = sourceClass.newInstance();
 			Constructor constructor = sourceClass.getDeclaredConstructor(new Class[0]);
 	        constructor.setAccessible(true);
 			Object target = constructor.newInstance(new Object[0]);
-			if(target instanceof org.hibernate.proxy.HibernateProxy && classObject!=null)
-				target = classObject.newInstance();	
-				
+			if(target instanceof org.hibernate.proxy.HibernateProxy && classObject!=null) {
+				target = classObject.newInstance();
+			}
+
 			copyFields(source, sourceClass, target, setFieldDirectly);
 			Class<?> superclass = sourceClass.getSuperclass();
 			while (superclass!=null && superclass!=Object.class) {
@@ -1078,7 +1147,7 @@ public class YadaUtil {
 			throw new YadaInternalException(msg, e);
 		}
 	}
-	
+
 	/**
 	 * Copy a value either by getter or by field
 	 * @param setFieldDirectly
@@ -1112,13 +1181,13 @@ public class YadaUtil {
 //	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target) {
 //		copyFields(source, sourceClass, target, false);
 //	}
-	
+
 	// TODO StringBuilder is not cloned (as it doesn't implement CloneableFiltered)
 	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target, boolean setFieldDirectly) {
 		log.debug("Copio oggetto {} di tipo {}", source, sourceClass);
 		Field[] fields = sourceClass.getDeclaredFields();
 		Field[] excludedFields = source.getExcludedFields();
-		List<Field>filteredFields = excludedFields!=null? (List<Field>) Arrays.asList(excludedFields):new ArrayList<Field>();
+		List<Field>filteredFields = excludedFields!=null? (List<Field>) Arrays.asList(excludedFields):new ArrayList<>();
 		for (int i = 0; i < fields.length; i++) {
 			Field field = fields[i];
 			field.setAccessible(true);
@@ -1135,9 +1204,9 @@ public class YadaUtil {
 				try {
 					Method getter = null;
 					Method setter = null;
-					
+
 					if (!setFieldDirectly) {
-					
+
 						try{
 							getter = sourceClass.getDeclaredMethod(getterName);
 						} catch(NoSuchMethodException exc){
@@ -1151,12 +1220,12 @@ public class YadaUtil {
 						}
 						getter.setAccessible(true);
 						setter = sourceClass.getDeclaredMethod(setterName, fieldType);
-						setter.setAccessible(true);	
-					
+						setter.setAccessible(true);
+
 					}
-					
-					if (fieldType.isPrimitive() 
-							 || fieldType==Boolean.class 
+
+					if (fieldType.isPrimitive()
+							 || fieldType==Boolean.class
 							 || fieldType==Integer.class
 							 || fieldType==Long.class
 							 || fieldType==Byte.class
@@ -1234,7 +1303,7 @@ public class YadaUtil {
 			}
 		}
 	}
-	
+
 	/**
 	 * Check if a class is of a given type, considering superclasses and interfaces (of superclasses)
 	 * @param fieldType
@@ -1248,9 +1317,9 @@ public class YadaUtil {
 			found = isTypeNoSuperclass(fieldType, requiredType);
 			fieldType = fieldType.getSuperclass();
 		}
-		return found; 
+		return found;
 	}
-		
+
 	private static boolean isTypeNoSuperclass(Class<?> fieldType, Class requiredType) {
 		return fieldType!=null && (fieldType.equals(requiredType) || (Arrays.asList(fieldType.getInterfaces()).contains(requiredType)));
 	}
@@ -1262,9 +1331,9 @@ public class YadaUtil {
 //	 * @param toCal
 //	 */
 //	public void copyFields(Calendar fromCal, Calendar toCal) {
-//		
+//
 //	}
-	
+
 	/** Ritorna l'ora più vicina nel passato alla data specificata
 	 * @return
 	 */
@@ -1272,7 +1341,7 @@ public class YadaUtil {
 	public Date roundBackToHour(Date date) {
 		return roundBackToHour(date, TimeZone.getDefault());
 	}
-	
+
 	/**
 	 * Returns the same calendar object aligned to the next hour
 	 * @param calendar
@@ -1285,7 +1354,7 @@ public class YadaUtil {
 		calendar.add(Calendar.HOUR, 1);
 		return calendar;
 	}
-	
+
 	/**
 	 * Returns the same calendar object aligned to the previous hour
 	 * @param calendar
@@ -1297,7 +1366,7 @@ public class YadaUtil {
 		calendar.set(Calendar.MILLISECOND, 0);
 		return calendar;
 	}
-	
+
 	/**
 	 * Resets minutes to zero
 	 * @param date
@@ -1337,7 +1406,7 @@ public class YadaUtil {
 		}
 		return 0;
 	}
-	
+
 	/**
 	 * Returns the minutes between two dates
 	 * @param recentDate
@@ -1362,7 +1431,7 @@ public class YadaUtil {
 		calendar.setTime(date);
 		return roundBackToMidnight(calendar).getTime();
 	}
-	
+
 	/**
 	 * Create a new calendar rounded back to the start of the day.
 	 * @param calendar the calendar to copy
@@ -1371,7 +1440,7 @@ public class YadaUtil {
 	public static Calendar roundBackToMidnightClone(Calendar source) {
 		return roundBackToMidnight((Calendar) source.clone());
 	}
-	
+
 	/**
 	 * Rounds back the calendar to the start of the day.
 	 * @param calendar the calendar to change: the parameter will be modified by this method
@@ -1384,7 +1453,7 @@ public class YadaUtil {
 		calendar.set(Calendar.MILLISECOND, 0);
 		return calendar;
 	}
-	
+
 	/**
 	 * Returns the last midnight
 	 * @return
@@ -1392,48 +1461,48 @@ public class YadaUtil {
 	public static Calendar getLastMidnight() {
 		return YadaUtil.roundBackToMidnight(new GregorianCalendar());
 	}
-	
+
 	public static Calendar addDaysClone(Calendar source, int days) {
 		return addDays((Calendar) source.clone(), days);
 	}
-	
+
 	public static Calendar addDays(Calendar calendar, int days) {
 		calendar.add(Calendar.DAY_OF_YEAR, days);
 		return calendar;
 	}
-	
+
 	public static Calendar addMinutes(Calendar calendar, int minutes) {
 		calendar.add(Calendar.MINUTE, minutes);
 		return calendar;
 	}
-	
+
 	/**
 	 * Aggiunge (o rimuove) i minuti indicati dalla data
 	 * @param date
 	 * @param hours numero di minuti, può essere negativo
 	 * @return
 	 */
-	public static Date addMinutes(Date date, int minutes) { 
+	public static Date addMinutes(Date date, int minutes) {
 		return new Date(date.getTime()+minutes*MILLIS_IN_MINUTE);
 	}
-	
+
 	/**
 	 * Aggiunge (o rimuove) le ore indicate dalla data
 	 * @param date
 	 * @param hours numero di ore, può essere negativo
 	 * @return
 	 */
-	public static Date addHours(Date date, int hours) { 
+	public static Date addHours(Date date, int hours) {
 		return new Date(date.getTime()+hours*MILLIS_IN_HOUR);
 	}
-	
+
 	/**
 	 * Aggiunge (o rimuove) i giorni indicati dalla data
 	 * @param date
 	 * @param days numero di giorni, può essere negativo
 	 * @return
 	 */
-	public static Date addDays(Date date, int days) { 
+	public static Date addDays(Date date, int days) {
 		return new Date(date.getTime()+days*MILLIS_IN_DAY);
 	}
 
@@ -1443,11 +1512,11 @@ public class YadaUtil {
 	 * @param years numero di 365 giorni, può essere negativo
 	 * @return
 	 */
-	public static Date addYears(Date date, int years) { 
+	public static Date addYears(Date date, int years) {
 		final long millisInYear = MILLIS_IN_DAY * 365;
 		return new Date(date.getTime()+millisInYear);
 	}
-	
+
 	/**
 	 * Returns true if the two dates are on the same day
 	 * @param a
@@ -1465,7 +1534,7 @@ public class YadaUtil {
 		int bYear = bCalendar.get(Calendar.YEAR);
 		return aDay==bDay && aYear == bYear;
 	}
-	
+
 	/**
 	 * Create a zip file of a folder
 	 * @param zipFile the target zip file
@@ -1493,7 +1562,7 @@ public class YadaUtil {
 			}
 		}
 	}
-	
+
 	/**
 	 * Crea un file zip contenente una serie di file.
 	 * Lancia un'eccezione in caso di errore.
@@ -1504,10 +1573,10 @@ public class YadaUtil {
 	 */
 	public void createZipFile(File zipFile, File[] sourceFiles, String[] filenamesNoExtension) {
 		createZipFile(zipFile, sourceFiles, filenamesNoExtension, false);
-	}	
-	
+	}
+
 	/**
-	 * Crea un file zip contenente una serie di file. 
+	 * Crea un file zip contenente una serie di file.
 	 * Può continuare con i file successivi se uno dei file va in errore.
 	 * Preso da http://www.exampledepot.com/egs/java.util.zip/CreateZip.html
 	 * @param zipFile File da creare
@@ -1554,8 +1623,8 @@ public class YadaUtil {
 			throw new YadaSystemException("Can't create zip file", e);
 		}
 	}
-	
-	
+
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1565,7 +1634,7 @@ public class YadaUtil {
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	public static Calendar roundForwardToAlmostMidnight(Calendar calendar) {
 		calendar.set(Calendar.HOUR_OF_DAY, 23);
 		calendar.set(Calendar.MINUTE, 59);
@@ -1573,12 +1642,12 @@ public class YadaUtil {
 		calendar.set(Calendar.MILLISECOND, 999);
 		return calendar;
 	}
-	
+
 	public static Calendar roundBackToLastMonthStart(Calendar calendar) {
 		calendar.add(Calendar.MONTH, -1);
 		return roundBackToMonth(calendar);
 	}
-	
+
 	public static Calendar roundBackToMonth(Calendar calendar) {
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
@@ -1593,7 +1662,7 @@ public class YadaUtil {
 		calendar.setTime(date);
 		return roundBackToMonth(calendar).getTime();
 	}
-	
+
 	public static Date roundFowardToMonth(Date date, TimeZone timezone) {//timezone = TimeZone.getTimeZone("GMT");
 		GregorianCalendar calendar = new GregorianCalendar(timezone);
 		calendar.setTime(date);
@@ -1603,7 +1672,7 @@ public class YadaUtil {
 		calendar.set(Calendar.MILLISECOND, 0);
 		calendar.set(Calendar.DAY_OF_MONTH, 1);
 		calendar.add(Calendar.MONTH, 1);
-		
+
 		return calendar.getTime();
 	}
 
@@ -1619,7 +1688,7 @@ public class YadaUtil {
 		}
 		return "+39"+cellulare; // Metto prefisso
 	}
-	
+
 	public static boolean validaCellulare(String cellulare) {
 		try {
 			if (cellulare.startsWith("+")) {
@@ -1632,17 +1701,17 @@ public class YadaUtil {
 		}
 		return false;
 	}
-	
+
 	// Trasforma una mappa qualunque in un set ordinato in base ai valori
 	public static SortedSet<Entry<String,String>> sortByValue(Map data) {
 		// Uso il giro del TreeSet per sortare in base al value
-		SortedSet<Entry<String,String>> result = new TreeSet<Entry<String,String>>(new Comparator<Entry<String, String>>() {
+		SortedSet<Entry<String,String>> result = new TreeSet<>(new Comparator<Entry<String, String>>() {
 			public int compare(Entry<String, String> element1, Entry<String, String> element2) {
 				return element1.getValue().compareTo(element2.getValue());
 			}
 		});
 		try {
-			result.addAll((Collection<Entry<String, String>>) data.entrySet());
+			result.addAll(data.entrySet());
 		} catch (RuntimeException e) {
 			String msg = "Can't sort map by value";
 			log.error(msg, e);
@@ -1650,17 +1719,17 @@ public class YadaUtil {
 		}
 		return result;
 	}
-	
+
 	// Trasforma una mappa qualunque in un set ordinato in base alle chiavi
 	public static SortedSet<Entry<String,String>> sortByKey(Map data) {
 		// Uso il giro del TreeSet per sortare in base al value
-		SortedSet<Entry<String,String>> result = new TreeSet<Entry<String,String>>(new Comparator<Entry<String, String>>() {
+		SortedSet<Entry<String,String>> result = new TreeSet<>(new Comparator<Entry<String, String>>() {
 			public int compare(Entry<String, String> element1, Entry<String, String> element2) {
 				return element1.getKey().compareTo(element2.getKey());
 			}
 		});
 		try {
-			result.addAll((Collection<Entry<String, String>>) data.entrySet());
+			result.addAll(data.entrySet());
 		} catch (RuntimeException e) {
 			String msg = "Can't sort map by key";
 			log.error(msg, e);
@@ -1677,7 +1746,7 @@ public class YadaUtil {
 		return YadaUtil.applicationContext;
 	}
 
-	@Autowired 
+	@Autowired
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		YadaUtil.applicationContext = applicationContext;
 	}
@@ -1692,7 +1761,7 @@ public class YadaUtil {
 	public static String reduceToSafeFilename(String originalFilename) {
 		return reduceToSafeFilename(originalFilename, true);
 	}
-	
+
 	/**
 	 * Converte un filename in modo che sia valido sia per il filesystem (unix/dos) sia per il browser.
 	 * E' molto distruttiva in quanto i caratteri non previsti vengono eliminati. Per questo si chiama "reduce" :-)
@@ -1716,7 +1785,7 @@ public class YadaUtil {
 				return "";
 			}
 		}
-		
+
 		char[] resultChars = originalFilename.toCharArray();
 		char[] lowerChars = originalFilename.toLowerCase().toCharArray();
 		for (int i = 0; i < resultChars.length; i++) {
@@ -1743,7 +1812,7 @@ public class YadaUtil {
 				}
 			}
 			// TODO raffinare con altri casi
-			
+
 			resultChars[i]=c;
 		}
 		return new String(resultChars).replaceAll("__+", "_").replaceAll("--+", "-");

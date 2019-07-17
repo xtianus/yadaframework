@@ -48,7 +48,7 @@
     margin: 0;
     padding: 0;
     opacity: .2;
-}​
+}
 
 .yadaResponseData {
 	display: none;
@@ -121,6 +121,19 @@ input.yadaReadonly {
 .yadaWidth80 input {
 	width: 80%;
 }
+
+.yadaHideEdit .yadaEditButton {
+	display: none;
+}
+
+.yadaHideClone .yadaClonetButton {
+	display: none;
+}
+
+.yadaHideDelete .yadaDeletetButton {
+	display: none;
+}
+
 /*************/
 /* DataTable */
 /*************/
@@ -170,10 +183,11 @@ table.dataTable th.sorting_asc, table.dataTable th.sorting_desc {
 	border-color: #e5e5e5 !important;
 	border-bottom-style: none !important;
 }
+
 /****************/
 /* Notification */
 /****************/
-.yadaNotify .modal-header .glyphicon {
+.yadaNotify .modal-header .yadaIcon:not(.yadaIcon-close) {
 	font-size: 40px;
 	vertical-align: middle;
 	padding-right: 10px;
@@ -182,13 +196,13 @@ table.dataTable th.sorting_asc, table.dataTable th.sorting_desc {
 	max-height: 400px;
 	overflow: auto;
 } 
-.yadaNotify .glyphicon.ok {
+.yadaNotify .yadaIcon.ok {
 	color: #25B72E;
 }
-.yadaNotify .glyphicon.error {
+.yadaNotify .yadaIcon.error {
 	color: #E81111;
 }
-.yadaNotify .glyphicon.info {
+.yadaNotify .yadaIcon.info {
 	color: #209EF9;
 }
 
@@ -287,3 +301,79 @@ input.yadaSwitch-round:checked ~ label:before {
 input.yadaSwitch-round:checked ~ label:after {
   margin-left: 20px;
 }
+
+/****************/
+/* Bootstrap 5  */
+/****************/
+/* These are needed to use Bootstrap 5 on Bootstrap 4 code */
+
+.btn-default {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+}
+.btn-default:hover {
+    color: #333;
+    background-color: #e6e6e6;
+    border-color: #adadad;
+}
+
+/***************/
+/* Yada Icons  */
+/***************/
+/* This is for fontawesome 5 but can be overridden for any other icon library */
+
+.yadaIcon {
+	font-family: "Font Awesome 5 Free";
+	-moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+    font-weight: 400;
+}
+
+.yadaIcon-ok:before {
+    content: "\f058";
+}
+
+.yadaIcon-warning:before {
+    content: "\f06a";
+}
+
+.yadaIcon-error:before {
+    content: "\f057";
+}
+
+.yadaIcon-close:before {
+    content: "\f00d";
+    font-weight: 600;	
+}
+
+.yadaIcon-down:before {
+    content: "\f107";
+    font-weight: 600;	
+}
+
+.yadaIcon-up:before {
+    content: "\f106";
+    font-weight: 600;	
+}
+
+.yadaIcon-edit:before {
+    content: "\f303";
+    font-weight: 900;
+}
+
+.yadaIcon-delete:before {
+    content: "\f2ed";
+}
+
+.yadaIcon-clone:before {
+    content: "\f24d";
+}
+
+
+

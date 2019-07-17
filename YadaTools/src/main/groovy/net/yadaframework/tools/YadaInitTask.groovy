@@ -119,7 +119,7 @@ class YadaInitTask extends YadaProject {
 			// envFolderFiles.add(envFolderFile);
 			copyEnvFiles(env, envFolderFile, resourcesSourceFolder, webAppRootFolder);
 		}
-		processTemplate(CONFIGURATIONDIRNAME, "configuration.xml", null, resourcesSourceFolder);
+		processTemplate(CONFIGURATIONDIRNAME, "configuration.xml.txt", "configuration.xml", resourcesSourceFolder);
 		//
 		// Java Templates
 		//

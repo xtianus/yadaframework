@@ -3,15 +3,15 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.YadaAuthenticationFailureHandler;
 import net.yadaframework.security.YadaUserDetailsService;
 import net.yadaframework.security.components.YadaTokenHandler;
@@ -38,12 +39,37 @@ public class YadaLoginController {
 
 	@Autowired private YadaNotify yadaNotify;
 	@Autowired private YadaSession yadaSession;
-//	@Autowired private YadaConfiguration config;
+	@Autowired private YadaConfiguration yadaConfiguration;
 	@Autowired private YadaTokenHandler yadaTokenHandler;
 	@Autowired private YadaAutoLoginTokenRepository yadaAutoLoginTokenRepository;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	@Autowired private YadaAuthenticationFailureHandler failureHandler;
 
+	/**
+	 * This method can be set as the default ajax login target in a Security Config, and will redirect to the targetUrl when specified.
+	 * Example: successHandler.setDefaultTargetUrlAjaxRequest("/yadaLoginSuccess?targetUrl=/configurator/");
+	 * @param targetUrl the final url after login, without any language in the path (will be added)
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping("/yadaLoginSuccess")
+	public String yadaLoginSuccess(String targetUrl, Model model) {
+		if (targetUrl==null) {
+			return YadaViews.AJAX_SUCCESS;
+		}
+		// Automatically add the language in the target url path when needed
+		if (yadaConfiguration.isLocalePathVariableEnabled()) {
+			Locale locale = LocaleContextHolder.getLocale();
+			if (locale!=null) {
+				String langPath = "/" + locale.getLanguage(); // e.g. "/en"
+				if(!targetUrl.startsWith(langPath)) {
+					targetUrl = langPath + targetUrl;
+				}
+			}
+		}
+		model.addAttribute("targetUrl", targetUrl);
+		return YadaViews.AJAX_REDIRECT;
+	}
 
 	@RequestMapping("/ajaxLoginForm")
 	public String ajaxLoginForm(Model model) {
@@ -55,7 +81,7 @@ public class YadaLoginController {
 	public String ajaxLoginOk(Model model) {
 		return "loginSuccess";
 	}
-	
+
 	@RequestMapping("/autologin/{tokenLink}")
 	public String autologin(@PathVariable String tokenLink, String action, RedirectAttributes  redirectAttributes, HttpSession session, HttpServletRequest request) {
 		try {
@@ -67,7 +93,7 @@ public class YadaLoginController {
 		// and I get a login page, while if I use request.logout() the session is not clear but a new session copy of the current one before
 		// the yadaSession.clearCaches() call is created, so that I have a mixed situation where the spring user is the new one and the session
 		// contains the old UserProfile id.
-		// This is probably because the HTTPSession contains the UserPrincipal and other stuff that is not reset.	
+		// This is probably because the HTTPSession contains the UserPrincipal and other stuff that is not reset.
 		// So I just exit.
 		if (yadaSession.getCurrentUserProfileId()!=null) {
 			// TODO localized message

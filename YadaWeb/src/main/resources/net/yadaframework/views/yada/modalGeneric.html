@@ -3,21 +3,22 @@
 	xmlns:th="http://www.thymeleaf.org"
 	xmlns:yada="http://yada.yodadog.net"
   	>
+<head>
+	<meta charset="utf-8" />
+</head>
 <body>
 <!--/* 
-	Questo layout è per un modal generico composto da titolo e contenuto che viene usato come ajaxModal.
-	Il primo div qui sotto con classe "modal" viene in realtà ignorato in quanto il chiamante utilizza l'ajaxModal di mainLayout.html
+	Questo layout Ã¨ per un modal generico composto da titolo e contenuto che viene usato come ajaxModal.
+	Il primo div qui sotto con classe "modal" viene in realtÃ  ignorato in quanto il chiamante utilizza l'ajaxModal di mainLayout.html
  */-->
-<div th:fragment="fragment(title,header,body,footer,script)" 
-	class="modal fade" tabindex="-1" role="dialog" aria-labelledby="ajaxModalTitle" aria-hidden="true"> <!--/* Il primo div è ignorato */-->
-	<div id="modalGenericDialog" class="modal-dialog modal-lg">
+<div th:fragment="fragment(title,header,body,footer,script,extraDialogClasses)" 
+	class="modal fade" tabindex="-1" role="dialog" aria-labelledby="ajaxModalTitle" aria-hidden="true"> <!--/* Il primo div Ã¨ ignorato */-->
+	<div id="modalGenericDialog" class="modal-dialog" th:classappend="${extraDialogClasses}" role="document">
     	<div class="modal-content">
     		<div th:replace="${header}">
 	    		<div class="modal-header">
-	    			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" >&times;</button>
-	    			<div class="clearfix">
-	    				<h4 class="modal-title" id="ajaxModalTitle"><span th:replace="${title}"></span></h4>
-	    			</div>
+	    			<h4 class="modal-title" id="ajaxModalTitle"><span th:replace="${title}"></span></h4>
+	    			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ><i class="yadaIcon yadaIcon-close"></i></button>
 	   			</div>
     		</div>
      		<div th:replace="${body}">

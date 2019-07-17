@@ -14,6 +14,8 @@
 	var markerAjaxButtonOnly = 'yadaAjaxButtonOnly';
 	var clickedButton;
 	
+	var markerClass = 'yadaAjaxed'; // To prevent double submission
+	
 	// ?????????? A cosa servono questi postXXXX ??????????????????
 	var postLoginUrl = null;
 	var postLoginData = null;
@@ -292,7 +294,6 @@
 			return;
 		}
 		// From here on the $checkbox is a single element, not an array
-		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		$checkbox.not('.'+markerClass).change(function(e) {
 			$checkbox = $(this); // Needed otherwise $checkbox could be stale (from a previous ajax replacement) 
 			// If there is a parent form, submit it, otherwise make an ajax call defined on the checkbox
@@ -335,7 +336,6 @@
 			return;
 		}
 		// From here on the $select is a single element, not an array
-		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		$select.not('.'+markerClass).change(function(e) {
 			$select = $(this); // Needed otherwise $select could be stale (from a previous ajax replacement) 
 			return makeAjaxCall(e, $select, handler);
@@ -361,7 +361,6 @@
 			return;
 		}
 		// From here on the $link is a single anchor, not an array
-		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		$link.not('.'+markerClass).click(function(e) {
 			$link = $(this); // Needed otherwise $link could be stale (from a previous ajax replacement) 
 			return makeAjaxCall(e, $link, handler);
@@ -421,9 +420,9 @@
 				handler(responseText, responseHtml, $element[0]);
 			}
 		}
-		var url = $element.attr('href');
-		if (url==null) {
-			url = $element.attr('data-yadaHref');
+		var url = $element.attr('data-yadaHref');
+		if (url==null || url=='') {
+			url = $element.attr('href');
 		}
 		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
 		// Create data for submission
@@ -624,6 +623,15 @@
 			$(this).addClass('yadaClickedButtonHandler');
 		});
 	}
+	
+	/**
+	 * Disable the ajax submission of a form that was previously initialised as an ajax form
+	 * @param $form the jquery form (could be an array), e.g. $('.niceForm')
+	 */
+	yada.disableAjaxForm = function($form) {
+		$form.off("submit");
+		$form.removeClass(markerClass);
+	}
 
 	/**
 	 * Sends a form via ajax, it doesn't have to have class .yadaAjax.
@@ -640,7 +648,6 @@
 		}
 		yada.enableSubmitButtons($form);
 		// From here on the $form is a single anchor, not an array.
-		var markerClass = 'yadaAjaxed'; // To prevent double submission
 		// Can't use document.activeElement to find the clicked button because of the possible "confirm" dialog
 		// http://stackoverflow.com/a/33882987/587641
 //		$form.find("button[type='submit']").not('.yadaClickedButtonHandler').each(function() {
@@ -877,13 +884,15 @@
 	 * Il metodo chiamato lato java può ritornare un notify chiamando yadaWebUtil.modalOk() o anche yadaWebUtil.modalError() etc.
 	 * In caso di notify di un errore, l'handler non viene chiamato.
 	 * @param url target url
-	 * @param data dati da inviare (stringa od oggetto) - can be null
+	 * @param data data to send, string or object. Can be null. Json objects are converted with JSON.stringify and given a specific content-type.
+	 *        To send a multipart request, data must be a FormData.
 	 * @param successHandler(responseText, responseHtml);) funzione chiamata in caso di successo e nessun yadaWebUtil.modalError(). Viene chiamata anche in caso di errore se il suo flag executeAnyway è true
 	 * @param method "POST" per il post oppure null o "GET" per il get
 	 * @param timeout milliseconds timeout, null for default (set by the browser)
 	 * @param hideLoader true for not showing the loader
+	 * @param asJson true to send a JSON.stringify(data) with "application/json;charset=UTF-8"
 	 */
-	yada.ajax = function(url, data, successHandler, method, timeout, hideLoader) {
+	yada.ajax = function(url, data, successHandler, method, timeout, hideLoader, asJson) {
 		if (method==null) {
 			method="GET"
 		}
@@ -891,7 +900,14 @@
 			timeout=0; // Default
 		}
 		var processData = !(data instanceof FormData);  // http://stackoverflow.com/a/8244082/587641
-		var contentType = data instanceof FormData ? false : undefined;
+		var contentType = undefined;
+		if (asJson==true) {
+			processData = false;
+			contentType = "application/json;charset=UTF-8";
+			data = JSON.stringify(data);
+		} else {
+			contentType = data instanceof FormData ? false : contentType;
+		}
 		if (hideLoader!=true) {
 			yada.loaderOn();
 		}
@@ -930,6 +946,9 @@
 				} else if (typeof responseText == "object") {
 					responseObject = responseText;
 				}
+				if (yada.startsWith(responseTrimmed, "/yada/")) {
+					console.warn("Yada path detected in ajax result: you may need to remove @ResponseBody");
+				}
 				if (yada.showAjaxErrorIfPresent(responseTrimmed, statusText, responseObject)==true) {
 					yada.loaderOff();
 					return;
@@ -941,10 +960,10 @@
 				if (yada.startsWith(responseTrimmed, "{\"redirect\":")) {
 					var redirectObject = JSON.parse(responseTrimmed);
 					var targetUrl = redirectObject.redirect;
+					yada.loaderOff();
 					if (redirectObject.newTab!="true") {
 						window.location.href=targetUrl;
 					} else {
-						yada.loaderOff();
 						var win = window.open(targetUrl, '_blank');
 						if (win) {
 						    //Browser has allowed it to be opened
@@ -954,7 +973,7 @@
 						    alert('Please allow popups for this website');
 						}
 					}
-					return;
+					// Keep going, there could be a handler
 				}
 				var responseHtml=$("<div>").html(responseTrimmed);
 				// Check if we just did a login.
@@ -1014,61 +1033,85 @@
 					return;
 				}
 				if (notify) {
-					yada.loaderOff();
 					return;
 				}
 				// Open any other modal
-				var loadedModalDialog=$(responseHtml).find(".modal > .modal-dialog");
-//				var loadedModalDialog=$(responseHtml).find("> .modal:not(.s_fullPage) > .modal-dialog");
-				if (loadedModalDialog.length==1) {
-					// La risposta è un qualunque modal, che viene mostrato
+				var $loadedModalDialog=$(responseHtml).find(".modal > .modal-dialog").first();
+				if ($loadedModalDialog.length==1) {
+					// A modal was returned. Is it a "sticky" modal?
+					var stickyModal = $loadedModalDialog.hasClass("yadaStickyModal");
 					$("#loginModal").remove();
+
+					var $modalObject = null;
+					if (stickyModal) {
+						// Sticky modals are appended to the body
+						$modalObject = $(responseHtml).find(".modal").first();
+						// Remove the modalGenericDialog id if present, because it could conflict with future dialogs
+						$("#modalGenericDialog", $modalObject).removeAttr('id');
+						// This container is needed to keep the scrollbar when a second modal is closed
+						var $container = $("<div class='modal-open'></div>");
+						$container.append($modalObject);
+						$("body").prepend($container);
+						$modalObject.on('hidden.bs.modal', function (e) {
+							$container.remove(); // Remove modal on close
+						});
+					} else {
+						// Normal modals are appended to the common placeholder
+						$modalObject = $("#ajaxModal");
+						$("#ajaxModal").children().remove();
+						$("#ajaxModal").append($loadedModalDialog);
+					}
+					
 					// Adding the modal head elements to the main document
 					if (responseText.indexOf('<head>')>-1) {
 						var parser = new DOMParser();
 						var htmlDoc = parser.parseFromString(responseText, "text/html");
 						var headNodes = $(htmlDoc.head).children();
 						$("head").append(headNodes);
-						$('#ajaxModal').one('hidden.bs.modal', function (e) {
-							headNodes.remove(); // Cleanup on modal close
-						});
+						removeHeadNodes(headNodes, $modalObject) // Needed a closure for headNodes (?)
 					}
 					
-					$("#ajaxModal").children().remove();
-					$("#ajaxModal").append(loadedModalDialog);
 					// We need to show the modal after a delay or it won't show sometimes (!)
-					var modalIsHidden = $('#ajaxModal:visible').length==0;
+					var modalIsHidden = !$modalObject.is(':visible');
 					if (modalIsHidden) {
 						setTimeout(function() {
-							$('#ajaxModal:hidden').modal('show');
+							$modalObject.modal('show');
+							if (stickyModal) {
+								// Need to fix the z-index to allow other modals to show on top and shade it
+								var $background = $(".modal-backdrop.fade.show").last();
+								var z = $background.css("z-index"); // 1040
+								$modalObject.css("z-index", z-1); // 1039, must be less than 1040 to be behind a future background
+								$background.css("z-index", z-2);
+							}
 							// The loader is removed after the modal is opened to prevent background flickering (if the loader background is not transparent)
-							$('#ajaxModal').on('shown.bs.modal', function (e) {
+							$modalObject.on('shown.bs.modal', function (e) {
 								yada.loaderOff();
 							})
 						}, 100);
 					} else {
 						yada.loaderOff();
 					}
-					yada.initAjaxHandlersOn($("#ajaxModal"));
-					// Questo permette di scrollare all'anchor (ho dovuto mettere un ritardo altrimenti non scrollava)
-					// e anche di far scendere il modal se per caso si apre scrollato (a volte capita, forse coi modal molto alti)
+					yada.initAjaxHandlersOn($modalObject);
+					// Scroll the modal to an optional anchor (delay was needed for it to work)
+					// or scroll back to top when it opens already scrolled (sometimes it happens)
 					setTimeout(function() {
 						var hashValue = window.location.hash; // #234
 						if (hashValue.length>1 && !isNaN(hashValue.substring(1))) {
 							try {
-								$('#ajaxModal').animate({
+								$modalObject.animate({
 									scrollTop: $(hashValue).offset().top
 								}, 1000);
 							} catch (e) {}
-						} else if ($('#ajaxModal').scrollTop()>0) {
-							// Si è aperto in mezzo quindi lo scrollo in alto
-							$('#ajaxModal').animate({
+						} else if ($modalObject.scrollTop()>0) {
+							// Scroll back to top when already scrolled
+							$modalObject.animate({
 								scrollTop: 0
 							}, 500);
 						}
 					}, 500);
 					return;
 				}
+				
 				// If the result is "closeModal", close all open modals
 				if (responseTrimmed == 'closeModal') {
 					$(".modal:visible").modal('hide');
@@ -1087,6 +1130,17 @@
 		
 	}
 	
+	function removeHeadNodes(headNodes, $modalObject) {
+		$modalObject.on('hidden.bs.modal', function (e) {
+			if (headNodes!=null) {
+				try {
+					headNodes.remove(); // Cleanup on modal close
+				} finally {};
+			}
+		});
+	}
+
+	
 	/**
 	 * Se esiste un confirm nel response, lo visualizza e, in caso l'utente confermi, esegue la chiamata originale aggiungendo "confirmed" ai parametri.
 	 * WARNING: any modal will be closed and its close-handlers invoked before showing the confirm dialog
@@ -1095,8 +1149,8 @@
 	yada.handleModalConfirm = function(responseHtml, url, data, successHandler, type) {
 		var $modalConfirm=$(responseHtml).find(".s_modalConfirm .modal");
 		if ($modalConfirm.length>0) {
-			var $currentModals = $(".modal:visible");
-			$currentModals.modal('hide'); // Hide any modal that might be already open
+			// Close all non-sticky modals
+			var $currentModals = $(".modal:visible").filter(function(){return $(".yadaStickyModal", this).length==0});			$currentModals.modal('hide'); // Hide any modal that might be already open
 			$("#yada-confirm .modal").children().remove();
 			$("#yada-confirm .modal").append($(".modal-dialog", $modalConfirm));
 			$("#yada-confirm .modal").modal('show');
@@ -1118,8 +1172,9 @@
 				yada.ajax(url, data, successHandler, type);
 			});
 			$("#yada-confirm .cancelButton").click(function() {
-				$('#yada-confirm .modal').on('hidden.bs.modal', function (e) {
+				$('#yada-confirm .modal').one('hidden.bs.modal', function (e) {
 					$currentModals.modal('show');
+					$('#yada-confirm .modal').off('hidden.bs.modal');
 				});
 				// $("#yada-confirm .modal").modal('hide');
 			});
@@ -1176,13 +1231,18 @@
 		var notification=$(responseHtml).find(".s_modalNotify .yadaNotify");
 		if (notification.length==1) {
 			// Mostro la notification
-			$('#ajaxModal').modal('hide'); // non si sa mai
+			$('#ajaxModal:visible').modal('hide'); // Close any current modals
 			$('#yada-notification').children().remove();
 			$('#yada-notification').append(notification);
 			// We need to show the modal after a delay or it won't show sometimes (!)
 			setTimeout(function() {
+				$('#yada-notification').on('shown.bs.modal', function (e) {
+					// Keep the loader open until the modal is fully shown, to prevent "flashing".
+					// This should become a configurable option maybe
+					yada.loaderOff();
+				});
 				$('#yada-notification').modal('show');
-			}, 100);
+			}, 200);
 			return true;
 		}
 		return false;

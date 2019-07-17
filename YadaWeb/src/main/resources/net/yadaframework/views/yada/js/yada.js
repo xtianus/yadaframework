@@ -44,7 +44,7 @@
 	
 	function initHandlers() {
 		// Mostra il loader sugli elementi con le classi s_showLoaderClick oppure s_showLoaderForm
-		$('body').on('click', '.yadaShowLoader', yada.loaderOn);
+		$('body').on('click', ':not(form).yadaShowLoader', yada.loaderOn);
 		$('body').on('submit', '.yadaShowLoader', yada.loaderOn);
 		// Legacy
 		$('body').on('click', '.s_showLoaderClick', yada.loaderOn);
@@ -392,7 +392,7 @@
 	
 	/**
 	 * Transform links into confirm links: all anchors with a "data-yadaConfirm" attribute that don't have a class of "yadaAjax" 
-	 * will show a confirm box before submission.
+	 * will show a confirm box before submission. If yadaAjax is present, see "yada.ajax.js"
 	 */
 	yada.enableConfirmLinks = function($element) {
 		if ($element==null) {
@@ -531,6 +531,9 @@
 	 * Returns the portion of string that follows the first match of some substring
 	 */
 	yada.getAfter = function(str, toFind, fromIndex) {
+		if (str==null) {
+			return str;
+		}
 		var pos = str.indexOf(toFind, fromIndex);
 		if (pos>=0) {
 			return str.substring(pos+toFind.length);
@@ -551,7 +554,7 @@
 	
 	// Ritorna true se str contiene toFind
 	yada.stringContains = function(str, toFind) {
-		return str.indexOf(toFind) >= 0;
+		return str!=null && typeof str=="string" && str.indexOf(toFind) >= 0;
 	}
 	
 	// Returns the last element of a delimiter-separated list of elements in a string.
@@ -568,7 +571,7 @@
 	// Ritorna true se str inizia con prefix
 	// http://stackoverflow.com/questions/646628/how-to-check-if-a-string-startswith-another-string
 	yada.startsWith = function(str, prefix) {
-		return str.lastIndexOf(prefix, 0) === 0;
+		return str!=null && typeof str=="string" && str.lastIndexOf(prefix, 0) === 0;
 	}
 
 	/**
@@ -576,7 +579,7 @@
 	 * http://stackoverflow.com/a/2548133/587641
 	 */
 	yada.endsWith = function(str, suffix) {
-		return str.substr(-suffix.length) === suffix;
+		return str!=null && typeof str=="string" && str.substr(-suffix.length) === suffix;
 	}
 	
 	/**
@@ -783,10 +786,10 @@
 	}
 	
 	function hideAllModals() {
-		$("#loginModal").modal('hide');
-		$("#ajaxModal").modal('hide');
-		$('#yada-notification').modal('hide');
-		$('#yada-confirm').modal('hide');
+		$("#loginModal.show").modal('hide');
+		$("#ajaxModal.show").modal('hide');
+		$('#yada-notification.show').modal('hide');
+		$('#yada-confirm.show').modal('hide');
 	}
 	
 
@@ -899,10 +902,15 @@
 		}
 		var v1 = $pwd.val();
 		var v2 = $check.val();
-        if(v1 != "" && v2 != "" && v1 != v2){
-	        $submit.attr("disabled", "disabled");
-	        $check.parents('.form-group').addClass('has-error');
-	        $check.parent().append('<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>');
+        if(v1!="" && v2!="" && v1 == v2){
+        	resetPasswordError($oneForm);
+        } else {
+        	$submit.attr("disabled", "disabled");
+        	if (v1!="" || v2!="") {
+        		$oneForm.addClass('has-error');
+        		$oneForm.addClass('yada-password-mismatch');
+        		$check.parent().append('<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>');
+        	}
         }
     }
 
@@ -911,7 +919,8 @@
 		var $check = $('input[name=confirmPassword]', $oneForm);
 		var $submit = $('button[type="submit"]', $oneForm);
         $submit.removeAttr("disabled");
-        $($check).parents('.form-group').removeClass('has-error');
+        $oneForm.removeClass('has-error');
+        $oneForm.removeClass('yada-password-mismatch');
         $('span.form-control-feedback.glyphicon-remove', $check.parent()).remove();
     }
 
@@ -922,21 +931,21 @@
 	 * @param $forms the form on which to enable the check
 	 */
 	yada.enablePasswordMatch = function($forms) {
-		$('input[name=password], input[name=confirmPassword]', $forms).on("keydown", function(e){
-	        /* only check when the tab or enter keys are pressed
-	         * to prevent the method from being called needlessly  */
-	        if(e.keyCode == 13 || e.keyCode == 9) {
-	            checkMatchingPasswords($(this).parents("form"));
-	        }
+		// Start with the submit button disabled, then enable it when the two fields match
+		var $submit = $('button[type="submit"]', $forms);
+		$submit.attr("disabled", "disabled");
+		//
+		$('input[name=password], input[name=confirmPassword]', $forms).on("keyup", function(e){
+			checkMatchingPasswords($(this).parents("form"));
 	     })
 	     .on("blur", function(){                    
 	        // also check when the element looses focus (clicks somewhere else)
 	        checkMatchingPasswords($(this).parents("form"));
 	    })
-	    .on("focus", function(){
-	        // reset the error message when they go to make a change
-	        resetPasswordError($(this).parents("form"));
-	    })
+//	    .on("focus", function(){
+//	        // reset the error message when they go to make a change
+//	        resetPasswordError($(this).parents("form"));
+//	    })
 	}
 	
 	/**
@@ -985,7 +994,7 @@
 				// When the form is submitted, set this form as the child of the parent and submit the parent instead
 				e.preventDefault();
 				var $thisForm = $(this);
-				var parentFormSelector =  $thisForm.attr('data-yadaParentForm');
+				var parentFormSelector = $thisForm.attr('data-yadaParentForm');
 				// Find and submit all parent forms (only one parent makes sense generally)
 				var $parentFormArray = yada.extendedSelect($thisForm, parentFormSelector); 
 				if ($parentFormArray!=null) {
@@ -1010,12 +1019,12 @@
 			});
 		});
 		// Handle the submission of non-ajax forms
-		$('form').not('yadaAjax').not('yadaAjaxed').submit(function(e) {
+		$('form').not('.yadaAjax').not('.yadaAjaxed').submit(function(e) {
 			// Recursively add all child forms
 			var $form = $(this);
-			var $childForm = $form['yadaChildForm'];
+			var $childForm = this['yadaChildForm'];
 			while ($childForm != null) {
-				$childForm.children().appendTo($form);
+				$childForm.children().filter("input, textarea, select").appendTo($form);
 				$childForm = $childForm['yadaChildForm'];
 			}
 			// continue normal submission...

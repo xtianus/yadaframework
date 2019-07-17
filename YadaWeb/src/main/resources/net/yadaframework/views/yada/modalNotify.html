@@ -1,24 +1,25 @@
 <!DOCTYPE html>
 <html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<meta charset="utf-8" />
+</head>
 <body>
-<!--/* Modal per le notifiche incluso fisso nel layout ma anche restituito dopo una request ajax eventualmente */-->
-<!--/* Il primo div del modal non viene usato perchè già presente nel layout, anche se in modalità ajax è comunque presente nell'html ritornato */-->
-<!--/* Infatti layout:fragment scarta il tag su cui si trova, e via js si usa .yadaNotify che sta dopo */-->
+<!--/* Notification modal */-->
 <!--/* Do not add anything before "modal" and "yadaNotify" because yada.js relies on this sequence: body > .modal > .yadaNotify */-->
 <div class="s_modalNotify"> <!--/* Only seen when loaded via ajax */-->
 	<div th:replace="/yada/ajaxResponseData :: .yadaResponseData" th:if="${resultMap!=null}"></div>
 	<div th:fragment="modal" class="modal fade" role="dialog">
-	  <div class="modal-dialog yadaNotify"
-	  	th:with="glyphName=${YADA_TOTSEVERITY=='ok'?'ok-circle':YADA_TOTSEVERITY=='error'?'remove-circle':'exclamation-sign'}">
+	  <div class="modal-dialog yadaNotify" th:classappend="${extraDialogClasses}"
+	  	th:with="iconName=${YADA_TOTSEVERITY=='ok'?'ok':YADA_TOTSEVERITY=='error'?'error':'warning'}">
 
 		<!--/* Versione con tanti messaggi */-->
 	    <div class="modal-content" th:if="${YADA_NTITLE!=null and YADA_NTITLE.size()>1}">
 	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 	        <h4>
-		        <span th:class="|glyphicon glyphicon-${glyphName} ${YADA_TOTSEVERITY}|"></span>
+	        	<i th:class="|yadaIcon yadaIcon-${iconName} ${YADA_TOTSEVERITY}|"></i>
 		        <span class="modal-title"></span>
 	        </h4>
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="yadaIcon yadaIcon-close"></i></button>
 	      </div>
 	      <div class="modal-body">
 	      	<div class="panel-group" id="messageAccordion" role="tablist" aria-multiselectable="true">
@@ -27,7 +28,7 @@
 						<h4 class="panel-title">
 							<a data-toggle="collapse" data-parent="#messageAccordion" th:href="|#collapse${iterStat.index}|" 
 							aria-expanded="true" th:attr="aria-controls=${'collapse' + iterStat.index}">
-								<span th:class="|glyphicon glyphicon-${glyphName} ${YADA_SEVERITY.get(iterStat.index)}|"></span>
+								<i th:class="|yadaIcon yadaIcon-${iconName} ${YADA_SEVERITY.get(iterStat.index)}|"></i>
 								<span th:text="${title}">Collapsible Group Item #1</span>
 							</a>
 						</h4>
@@ -39,10 +40,6 @@
 					</div>
 				</div>	  
 			</div>    	
-	      	<!-- 
-	      	<span th:class="|glyphicon glyphicon-${glyphName} ${YADA_TOTSEVERITY}|"></span>
-	        <p th:text="${YADA_NBODY.get(0)}">Message body here</p>
-	      	 -->
 	      </div>
 	      <div class="modal-footer" th:if="${YADA_AUTOCLOSE==null}">
 	        <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{yada.view.modal.button.close}">Close</button>
@@ -52,11 +49,11 @@
 		<!--/* Versione con un solo messaggio */-->
 	    <div class="modal-content" th:if="${YADA_NTITLE==null or YADA_NTITLE.size()==1}">
 	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 	        <h4>
-		        <span th:class="|glyphicon glyphicon-${glyphName} ${YADA_TOTSEVERITY}|"></span>
+	        	<i th:class="|yadaIcon yadaIcon-${iconName} ${YADA_TOTSEVERITY}|"></i>
 		        <span th:text="${YADA_NTITLE!=null?YADA_NTITLE.get(0):''}" class="modal-title">Modal title</span>
 	        </h4>
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="yadaIcon yadaIcon-close"></i></button>
 	      </div>
 	      <div class="modal-body">
 	        <p th:utext="${YADA_NBODY!=null?YADA_NBODY.get(0):''}">Message body here</p>

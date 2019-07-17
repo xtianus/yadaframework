@@ -12,8 +12,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
@@ -37,7 +35,7 @@ import net.yadaframework.persistence.entity.YadaClause;
 public class YadaRegistrationRequest implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	// For optimistic locking
 	@Version
 	private long version;
@@ -45,7 +43,7 @@ public class YadaRegistrationRequest implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@NotNull(message="{validation.registration.email.missing}")
 	@Email(message="{validation.registration.email.invalid}")
 	@Size(min=6, max=64, message="La lunghezza dell''email deve essere compresa tra {min} e {max} caratteri")
@@ -53,18 +51,21 @@ public class YadaRegistrationRequest implements Serializable {
 	// @NaturalId
 	@Column(nullable=false, length=64)
 	private String email;
-	
+
 	@NotNull(message="Specificare una password")
 	// TODO parametrizzare questa validazione con i valori della configurazione (se si può)
 	// @Size(min=3, max=32, message="La lunghezza della password deve essere compresa tra {min} e {max} caratteri")
 	//
 	@Column(nullable=false, length=128)
 	private String password;
-	
+
 	private Date timestamp; // Creazione
-	
+
 	private long token;
-	
+
+	@Column(length=255)
+	private String destinationUrl;
+
 	private YadaRegistrationType registrationType;
 
 //	@Column(length=512)
@@ -76,29 +77,29 @@ public class YadaRegistrationRequest implements Serializable {
 
 	@OneToOne
 	private YadaUserCredentials yadaUserCredentials; // Usato per il cambio di email
-	
+
 	@OneToOne
 	private YadaClause trattamentoDati; // Usato per visualizzare la clausola nel form, e poi per sapere quale clausola è stata accettata in fase di creazione utente
-	
+
 	@Transient
 	private boolean trattamentoDatiAccepted=true; // usato nel form
-	
+
 	/**
 	 * Password confirm, only used on the frontend but needed by thymeleaf to make things simpler
 	 */
 	@Transient
-	private String confirmPassword; 
+	private String confirmPassword;
 
 	@PrePersist
 	void setDefaults() {
 		timestamp=new Date();
 		token=(long) (Math.random()*Long.MAX_VALUE);
 	}
-	
+
 	public String getEmail() {
 		return email;
 	}
-	
+
 	public void setEmail(String email) {
 		this.email = email;
 	}
@@ -189,6 +190,14 @@ public class YadaRegistrationRequest implements Serializable {
 
 	public void setConfirmPassword(String confirm) {
 		this.confirmPassword = confirm;
+	}
+
+	public String getDestinationUrl() {
+		return destinationUrl;
+	}
+
+	public void setDestinationUrl(String destinationUrl) {
+		this.destinationUrl = destinationUrl;
 	}
 
 //	public String getGeneric1() {

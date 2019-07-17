@@ -35,12 +35,12 @@ public class AuditFilter extends OncePerRequestFilter {
 	private static final String MDC_USERNAME = "username";
 	private static final String MDC_SESSION = "session";
 	private static final String MDC_REMOTEIP = "remoteIp";
-	
+
 	private String yadaResourceUrlStart = null; // Prefix for resource urls from /src/main/webapp/yadares
 	private String resourceUrlStart = null; // Prefix for resource urls from /src/main/webapp/res
 	private String staticUrlStart = null; // Prefix for resource urls from /src/main/webapp/static
 	private String contentUrlStart = null; // Prefix for contents urls (usually they are served by apache anyway)
-	
+
 	/**
 	 * Forwards the request to the next filter in the chain and delegates down to the subclasses to perform the actual
 	 * request logging both before and after the request is processed.
@@ -106,8 +106,8 @@ public class AuditFilter extends OncePerRequestFilter {
 			}
 		}
 		MDC.put(MDC_SESSION, sessionId); // Session viene messo sull'MDC. Usarlo con %X{session} nel pattern
-		MDC.put(MDC_USERNAME, username); // username viene messo sull'MDC. Usarlo con %X{username} nel pattern		
-		MDC.put(MDC_REMOTEIP, remoteIp); // remoteIp viene messo sull'MDC. Usarlo con %X{remoteIp} nel pattern		
+		MDC.put(MDC_USERNAME, username); // username viene messo sull'MDC. Usarlo con %X{username} nel pattern
+		MDC.put(MDC_REMOTEIP, remoteIp); // remoteIp viene messo sull'MDC. Usarlo con %X{remoteIp} nel pattern
 
 		if (isFirstRequest) {
 			beforeRequest(request);
@@ -131,7 +131,7 @@ public class AuditFilter extends OncePerRequestFilter {
 			MDC.remove(MDC_REMOTEIP);
 		}
 	}
-	
+
 	/**
 	 * Returns true if the request is for a file, not for a controller
 	 * @param requestUri
@@ -139,12 +139,12 @@ public class AuditFilter extends OncePerRequestFilter {
 	 */
 	private boolean isFile(HttpServletRequest request) {
 		String requestUri = request.getRequestURI();
-		return (resourceUrlStart!=null && requestUri.startsWith(resourceUrlStart)) 
+		return (resourceUrlStart!=null && requestUri.startsWith(resourceUrlStart))
 			|| (yadaResourceUrlStart!=null && requestUri.startsWith(yadaResourceUrlStart))
 			|| (staticUrlStart!=null && requestUri.startsWith(staticUrlStart))
 			|| (contentUrlStart!=null && requestUri.startsWith(contentUrlStart));
 		}
-	
+
 	// Stampo i parametri di request (get e post)
 	protected void beforeRequest(HttpServletRequest request) {
 		String requestUri = request.getRequestURI();
@@ -183,6 +183,8 @@ public class AuditFilter extends OncePerRequestFilter {
 					if (postDataMap.isEmpty()) {
 						if (org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent(request)) {
 							log.debug("** multipart request");
+						} else if (request.getContentType().equals("application/json;charset=UTF-8")) {
+							log.debug("** json object");
 						}
 					}
 				}

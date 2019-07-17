@@ -34,12 +34,15 @@ Example:
 <div th:replace="/yada/form/list::body(options=${@config.typeMap},selected=${chosenTypes},multiple=true,idPrefix=${username},onclick=clicked)"></div>
 
 */-->
+<head>
+	<meta charset="utf-8" />
+</head>
 <body>
 <div th:with="idPrefix=${idPrefix?:'fieldId'}">
 	<label th:if="${label!=null or labelKey!=null}" 
 		class="control-label" th:for="${#ids.next(idPrefix)}" 
 		th:text="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
-	<div class="input-group" style="width:100%"> <!--/* il width serve perché se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
+	<div class="input-group" style="width:100%"> <!--/* il width serve perchè se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
 		<select th:multiple="${multiple}" th:name="${name?:''}"
 			th:with="isMap=${options instanceof T(java.util.Map)}"
 			th:required="${required}" 

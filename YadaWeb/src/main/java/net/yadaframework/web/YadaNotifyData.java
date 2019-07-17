@@ -44,14 +44,14 @@ public class YadaNotifyData {
 		this.messageSource = messageSource;
 		this.locale = locale==null?LocaleContextHolder.getLocale():locale;
 	}
-	
+
 	// Package visibility
 	YadaNotifyData(RedirectAttributes redirectAttributes, MessageSource messageSource, Locale locale) {
 		this.redirectAttributes = redirectAttributes;
 		this.messageSource = messageSource;
 		this.locale = locale==null?LocaleContextHolder.getLocale():locale;
 	}
-	
+
 	/**
 	 * Makes the notification active. Can be called many times to add different notifications, even on the same instance, after setting a new title/message/severity.
 	 * @return If used with a Model, returns the view of the notification modal.
@@ -87,7 +87,7 @@ public class YadaNotifyData {
 		this.title = messageSource.getMessage(titleKeyAndArgs[0], argsArray, locale);
 		return this;
 	}
-		
+
 	/**
 	 * Set the notification message. Can be HTML.
 	 * @param message
@@ -97,7 +97,7 @@ public class YadaNotifyData {
 		this.message = message;
 		return this;
 	}
-	
+
 	/**
 	 * Set the notification message with slf4j-style parameters. Can be HTML.
 	 * @param messageFormat the message format with slf4j syntax: use {} as placeholders
@@ -108,7 +108,7 @@ public class YadaNotifyData {
 		this.message = MessageFormatter.arrayFormat(messageFormat, params).getMessage();
 		return this;
 	}
-	
+
 	/**
 	 * Set the autoclose time in milliseconds - no close button is rendered
 	 * @param milliseconds
@@ -119,6 +119,18 @@ public class YadaNotifyData {
 			model.addAttribute(KEY_NOTIFICATION_AUTOCLOSE, milliseconds);
 		} else {
 			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_AUTOCLOSE, milliseconds);
+		}
+		return this;
+	}
+
+	/**
+	 * Vertically center the modal (with Bootstrap 4)
+	 */
+	public YadaNotifyData center() {
+		if (model!=null) {
+			model.addAttribute("extraDialogClasses", "modal-dialog-centered");
+		} else {
+			redirectAttributes.addFlashAttribute("extraDialogClasses", "modal-dialog-centered");
 		}
 		return this;
 	}
@@ -147,7 +159,7 @@ public class YadaNotifyData {
 		this.message = messageSource.getMessage(messageKeyAndArgs[0], argsArray, locale);
 		return this;
 	}
-	
+
 	/**
 	 * The page will redirect on modal close
 	 * @param path the last part of the url after the servlet context, like "/user/profile"
@@ -170,7 +182,7 @@ public class YadaNotifyData {
 	public YadaNotifyData callScript(String scriptId) {
 		if (model!=null) {
 			if (!model.containsAttribute(KEY_NOTIFICATION_CALLSCRIPT)) {
-				List<String> scriptIds = new ArrayList<String>();
+				List<String> scriptIds = new ArrayList<>();
 				model.addAttribute(KEY_NOTIFICATION_CALLSCRIPT, scriptIds);
 			}
 			Map<String, Object> modelMap = model.asMap();
@@ -179,13 +191,13 @@ public class YadaNotifyData {
 		if (redirectAttributes!=null) {
 			Map<String, ?> modelMap = redirectAttributes.getFlashAttributes();
 			if (!modelMap.containsKey(KEY_NOTIFICATION_CALLSCRIPT)) {
-				List<String> scriptIds = new ArrayList<String>();
+				List<String> scriptIds = new ArrayList<>();
 				redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_CALLSCRIPT, scriptIds);
 			}
 			((List<String>)modelMap.get(KEY_NOTIFICATION_CALLSCRIPT)).add(scriptId);		}
 		return this;
 	}
-	
+
 	/**
 	 * Set the notification severity if active is true
 	 * @param active true to set the severity, false for not setting it
@@ -197,7 +209,7 @@ public class YadaNotifyData {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Set the notification severity if active is true
 	 * @param active true to set the severity, false for not setting it
@@ -209,7 +221,7 @@ public class YadaNotifyData {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Set the notification severity if active is true
 	 * @param active true to set the severity, false for not setting it
@@ -221,7 +233,7 @@ public class YadaNotifyData {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Set the notification severity. This is the default.
 	 * @return
@@ -230,7 +242,7 @@ public class YadaNotifyData {
 		this.severity = VAL_NOTIFICATION_SEVERITY_OK;
 		return this;
 	}
-	
+
 	/**
 	 * Set the notification severity
 	 * @return
@@ -239,7 +251,7 @@ public class YadaNotifyData {
 		this.severity = VAL_NOTIFICATION_SEVERITY_INFO;
 		return this;
 	}
-	
+
 	/**
 	 * Set the notification severity
 	 * @return
@@ -248,24 +260,24 @@ public class YadaNotifyData {
 		this.severity = VAL_NOTIFICATION_SEVERITY_ERROR;
 		return this;
 	}
-	
+
 	private boolean isLocalized() {
 		return messageSource!=null && locale !=null;
 	}
-	
+
 	private void ensureLocalized() {
 		if (!isLocalized()) {
 			throw new YadaInvalidUsageException("The Locale must be passed to YadaNotify before using keys");
 		}
 	}
-	
+
 	private void activateRedirect() {
 		Map<String, ?> modelMap = redirectAttributes.getFlashAttributes();
 		// Mette nel flash tre array di stringhe che contengono titolo, messaggio e severity.
 		if (!modelMap.containsKey(KEY_NOTIFICATION_TITLE)) {
-			List<String> titles = new ArrayList<String>();
-			List<String> bodies = new ArrayList<String>();
-			List<String> severities = new ArrayList<String>();
+			List<String> titles = new ArrayList<>();
+			List<String> bodies = new ArrayList<>();
+			List<String> severities = new ArrayList<>();
 			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_TITLE, titles);
 			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_BODY, bodies);
 			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_SEVERITY, severities);
@@ -285,9 +297,9 @@ public class YadaNotifyData {
 		}
 		// Mette nel model tre array di stringhe che contengono titolo, messaggio e severity.
 		if (!model.containsAttribute(KEY_NOTIFICATION_TITLE)) {
-			List<String> titles = new ArrayList<String>();
-			List<String> bodies = new ArrayList<String>();
-			List<String> severities = new ArrayList<String>();
+			List<String> titles = new ArrayList<>();
+			List<String> bodies = new ArrayList<>();
+			List<String> severities = new ArrayList<>();
 			model.addAttribute(KEY_NOTIFICATION_TITLE, titles);
 			model.addAttribute(KEY_NOTIFICATION_BODY, bodies);
 			model.addAttribute(KEY_NOTIFICATION_SEVERITY, severities);

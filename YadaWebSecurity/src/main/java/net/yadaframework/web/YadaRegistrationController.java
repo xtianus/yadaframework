@@ -51,7 +51,7 @@ public class YadaRegistrationController {
 	@Autowired private MessageSource messageSource;
 	@Autowired private YadaNotify yadaNotify;
 
-	
+
 	public enum YadaRegistrationStatus {
 		OK,					// Good registration
 		ERROR,				// Some exception
@@ -59,7 +59,7 @@ public class YadaRegistrationController {
 		LINK_EXPIRED,		// Link expired
 		USER_EXISTS;		// User exists
 	}
-	
+
 	/**
 	 * The outcome of a registration. When successful, the userProfile field should be saved by the caller
 	 * @param <T> the subclass of YadaUserProfile
@@ -77,22 +77,24 @@ public class YadaRegistrationController {
 		 * The user email, is null when the registration link is expired
 		 */
 		public String email;
+
+		public String destinationUrl;
 	}
-	
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////// Registration helpers                                                                         /////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	/**
-	 * To be called when the link in the registration confirmation email has been clicked. 
-	 * It creates a YadaUserCredential instance with basic YadaUserProfile values which should be refined and saved by the caller 
+	 * To be called when the link in the registration confirmation email has been clicked.
+	 * It creates a YadaUserCredential instance with basic YadaUserProfile values which should be refined and saved by the caller
 	 * @param token
 	 * @param userRoles an array of configured roles, like <pre>new String[]{"USER"}</pre>
 	 * @param locale
 	 * @return a {@link YadaRegistrationOutcome}
 	 */
 	public <T extends YadaUserProfile> YadaRegistrationOutcome<T> handleRegistrationConfirmation(String token, String[] userRoles, Locale locale, Class<T> userProfileClass) {
-		YadaRegistrationOutcome<T> result = new YadaRegistrationOutcome<T>();
+		YadaRegistrationOutcome<T> result = new YadaRegistrationOutcome<>();
 		long[] parts = yadaTokenHandler.parseLink(token);
 		try {
 			if (parts!=null) {
@@ -104,7 +106,9 @@ public class YadaRegistrationController {
 				}
 				YadaRegistrationRequest registrationRequest = registrationRequests.get(0);
 				String email = registrationRequest.getEmail().toLowerCase();
+				String destinationUrl = registrationRequest.getDestinationUrl();
 				result.email = email;
+				result.destinationUrl = destinationUrl;
 				YadaUserCredentials existing = yadaUserCredentialsRepository.findFirstByUsername(email);
 				if (existing!=null) {
 					log.warn("Email '{}' already exists", email);
@@ -131,7 +135,7 @@ public class YadaRegistrationController {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Create a new user. Throws a runtime exception if the email already exists
 	 * @param email
@@ -156,7 +160,7 @@ public class YadaRegistrationController {
 			throw new YadaInternalException("Can't create instance of {}", userProfileClass);
 		}
 	}
-	
+
 	/**
 	 * This method should be called by a registration controller to perform the actual registration
 	 * @param yadaRegistrationRequest
@@ -166,7 +170,7 @@ public class YadaRegistrationController {
 	 * @return true if the user has been registered, false otherwise
 	 */
 	public boolean handleRegistrationRequest(YadaRegistrationRequest yadaRegistrationRequest, BindingResult bindingResult, Model model, HttpServletRequest request, Locale locale) {
-		// 
+		//
 		// Validation
 		//
 		String email = yadaRegistrationRequest.getEmail();
@@ -190,7 +194,7 @@ public class YadaRegistrationController {
 		if (bindingResult.hasErrors()) {
 			return false;
 		}
-		
+
 		//
 		// Add registration request to database
 		//
@@ -207,13 +211,13 @@ public class YadaRegistrationController {
 		}
 		return true;
 	}
-	
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////// Password Recovery                                                                            /////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/** Default method to change a user password.
-	 * 
+	 *
 	 * @return
 	 */
 	@RequestMapping("/passwordChangeAfterRequest")
@@ -234,7 +238,7 @@ public class YadaRegistrationController {
 		}
 		return "/yada/modalPasswordChange";
 	}
-	
+
 	/**
 	 * Called via ajax to open the final password change modal
 	 * @param token
@@ -302,6 +306,6 @@ public class YadaRegistrationController {
 			.add();
 		String address = yadaConfiguration.getPasswordResetSent(locale);
 
-        return "redirect:" + address; 
+        return "redirect:" + address;
 	}
 }

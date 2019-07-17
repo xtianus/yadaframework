@@ -285,7 +285,7 @@
 				var id = yada.getHashValue($(this).attr('href'));
 				var idName = editDef.idName || "id";
 				var requestData = {};
-				var noLoader = deleteDef.noLoader || false;
+				var noLoader = editDef.noLoader || false;
 				requestData[idName] = id;
 				// Devo abilitare ajax ricorsivamente per quando il form ritorna con un errore di validazione
 				var handler = function(responseText, responseHtml) {

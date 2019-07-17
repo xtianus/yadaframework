@@ -12,7 +12,7 @@ import net.yadaframework.persistence.entity.YadaAttachedFile;
 public interface YadaAttachedFileRepository extends JpaRepository<YadaAttachedFile, Long> {
 
 	/**
-	 * Swaps the sortOrder of two entities
+	 * Swaps the sortOrder of two YadaAttachedFile entities
 	 * @param oneId
 	 * @param anotherId
 	 */
