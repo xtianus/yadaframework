@@ -960,10 +960,10 @@
 				if (yada.startsWith(responseTrimmed, "{\"redirect\":")) {
 					var redirectObject = JSON.parse(responseTrimmed);
 					var targetUrl = redirectObject.redirect;
+					yada.loaderOff();
 					if (redirectObject.newTab!="true") {
 						window.location.href=targetUrl;
 					} else {
-						yada.loaderOff();
 						var win = window.open(targetUrl, '_blank');
 						if (win) {
 						    //Browser has allowed it to be opened
@@ -973,7 +973,7 @@
 						    alert('Please allow popups for this website');
 						}
 					}
-					return;
+					// Keep going, there could be a handler
 				}
 				var responseHtml=$("<div>").html(responseTrimmed);
 				// Check if we just did a login.
@@ -1036,57 +1036,82 @@
 					return;
 				}
 				// Open any other modal
-				var loadedModalDialog=$(responseHtml).find(".modal > .modal-dialog");
-//				var loadedModalDialog=$(responseHtml).find("> .modal:not(.s_fullPage) > .modal-dialog");
-				if (loadedModalDialog.length==1) {
-					// La risposta è un qualunque modal, che viene mostrato
+				var $loadedModalDialog=$(responseHtml).find(".modal > .modal-dialog").first();
+				if ($loadedModalDialog.length==1) {
+					// A modal was returned. Is it a "sticky" modal?
+					var stickyModal = $loadedModalDialog.hasClass("yadaStickyModal");
 					$("#loginModal").remove();
+
+					var $modalObject = null;
+					if (stickyModal) {
+						// Sticky modals are appended to the body
+						$modalObject = $(responseHtml).find(".modal").first();
+						// Remove the modalGenericDialog id if present, because it could conflict with future dialogs
+						$("#modalGenericDialog", $modalObject).removeAttr('id');
+						// This container is needed to keep the scrollbar when a second modal is closed
+						var $container = $("<div class='modal-open'></div>");
+						$container.append($modalObject);
+						$("body").prepend($container);
+						$modalObject.on('hidden.bs.modal', function (e) {
+							$container.remove(); // Remove modal on close
+						});
+					} else {
+						// Normal modals are appended to the common placeholder
+						$modalObject = $("#ajaxModal");
+						$("#ajaxModal").children().remove();
+						$("#ajaxModal").append($loadedModalDialog);
+					}
+					
 					// Adding the modal head elements to the main document
 					if (responseText.indexOf('<head>')>-1) {
 						var parser = new DOMParser();
 						var htmlDoc = parser.parseFromString(responseText, "text/html");
 						var headNodes = $(htmlDoc.head).children();
 						$("head").append(headNodes);
-						$('#ajaxModal').one('hidden.bs.modal', function (e) {
-							headNodes.remove(); // Cleanup on modal close
-						});
+						removeHeadNodes(headNodes, $modalObject) // Needed a closure for headNodes (?)
 					}
 					
-					$("#ajaxModal").children().remove();
-					$("#ajaxModal").append(loadedModalDialog);
 					// We need to show the modal after a delay or it won't show sometimes (!)
-					var modalIsHidden = $('#ajaxModal:visible').length==0;
+					var modalIsHidden = !$modalObject.is(':visible');
 					if (modalIsHidden) {
 						setTimeout(function() {
-							$('#ajaxModal:hidden').modal('show');
+							$modalObject.modal('show');
+							if (stickyModal) {
+								// Need to fix the z-index to allow other modals to show on top and shade it
+								var $background = $(".modal-backdrop.fade.show").last();
+								var z = $background.css("z-index"); // 1040
+								$modalObject.css("z-index", z-1); // 1039, must be less than 1040 to be behind a future background
+								$background.css("z-index", z-2);
+							}
 							// The loader is removed after the modal is opened to prevent background flickering (if the loader background is not transparent)
-							$('#ajaxModal').on('shown.bs.modal', function (e) {
+							$modalObject.on('shown.bs.modal', function (e) {
 								yada.loaderOff();
 							})
 						}, 100);
 					} else {
 						yada.loaderOff();
 					}
-					yada.initAjaxHandlersOn($("#ajaxModal"));
-					// Questo permette di scrollare all'anchor (ho dovuto mettere un ritardo altrimenti non scrollava)
-					// e anche di far scendere il modal se per caso si apre scrollato (a volte capita, forse coi modal molto alti)
+					yada.initAjaxHandlersOn($modalObject);
+					// Scroll the modal to an optional anchor (delay was needed for it to work)
+					// or scroll back to top when it opens already scrolled (sometimes it happens)
 					setTimeout(function() {
 						var hashValue = window.location.hash; // #234
 						if (hashValue.length>1 && !isNaN(hashValue.substring(1))) {
 							try {
-								$('#ajaxModal').animate({
+								$modalObject.animate({
 									scrollTop: $(hashValue).offset().top
 								}, 1000);
 							} catch (e) {}
-						} else if ($('#ajaxModal').scrollTop()>0) {
-							// Si è aperto in mezzo quindi lo scrollo in alto
-							$('#ajaxModal').animate({
+						} else if ($modalObject.scrollTop()>0) {
+							// Scroll back to top when already scrolled
+							$modalObject.animate({
 								scrollTop: 0
 							}, 500);
 						}
 					}, 500);
 					return;
 				}
+				
 				// If the result is "closeModal", close all open modals
 				if (responseTrimmed == 'closeModal') {
 					$(".modal:visible").modal('hide');
@@ -1105,6 +1130,17 @@
 		
 	}
 	
+	function removeHeadNodes(headNodes, $modalObject) {
+		$modalObject.on('hidden.bs.modal', function (e) {
+			if (headNodes!=null) {
+				try {
+					headNodes.remove(); // Cleanup on modal close
+				} finally {};
+			}
+		});
+	}
+
+	
 	/**
 	 * Se esiste un confirm nel response, lo visualizza e, in caso l'utente confermi, esegue la chiamata originale aggiungendo "confirmed" ai parametri.
 	 * WARNING: any modal will be closed and its close-handlers invoked before showing the confirm dialog
@@ -1113,8 +1149,8 @@
 	yada.handleModalConfirm = function(responseHtml, url, data, successHandler, type) {
 		var $modalConfirm=$(responseHtml).find(".s_modalConfirm .modal");
 		if ($modalConfirm.length>0) {
-			var $currentModals = $(".modal:visible");
-			$currentModals.modal('hide'); // Hide any modal that might be already open
+			// Close all non-sticky modals
+			var $currentModals = $(".modal:visible").filter(function(){return $(".yadaStickyModal", this).length==0});			$currentModals.modal('hide'); // Hide any modal that might be already open
 			$("#yada-confirm .modal").children().remove();
 			$("#yada-confirm .modal").append($(".modal-dialog", $modalConfirm));
 			$("#yada-confirm .modal").modal('show');
@@ -1136,8 +1172,9 @@
 				yada.ajax(url, data, successHandler, type);
 			});
 			$("#yada-confirm .cancelButton").click(function() {
-				$('#yada-confirm .modal').on('hidden.bs.modal', function (e) {
+				$('#yada-confirm .modal').one('hidden.bs.modal', function (e) {
 					$currentModals.modal('show');
+					$('#yada-confirm .modal').off('hidden.bs.modal');
 				});
 				// $("#yada-confirm .modal").modal('hide');
 			});
