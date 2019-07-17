@@ -1,7 +1,4 @@
-/.gradle/
-/bin/
+/.externalToolBuilders/
 /.settings/
-/.classpath
 /.project
-!gradle-wrapper.jar
 /build/
