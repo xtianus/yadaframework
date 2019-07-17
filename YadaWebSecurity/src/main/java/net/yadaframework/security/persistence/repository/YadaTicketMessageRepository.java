@@ -28,7 +28,8 @@ public interface YadaTicketMessageRepository extends JpaRepository<YadaTicketMes
 	 * @param yadaTicket
 	 * @return
 	 */
-	@Query("select m from YadaTicket t join t.messages m join fetch m.attachment a where t= :yadaTicket order by m.modified asc ")
-	List<YadaTicketMessage> findMessagesAndAttachmentByYadaTicketOrderByModifiedAsc(@Param("yadaTicket") YadaTicket yadaTicket);
+	@Query("select m from YadaTicket t join t.messages m left join fetch m.attachment a where t= :yadaTicket order by m.modified desc ")
+	List<YadaTicketMessage> findMessagesAndAttachmentByYadaTicketOrderByModifiedDesc(@Param("yadaTicket") YadaTicket yadaTicket);
+
 
 }
