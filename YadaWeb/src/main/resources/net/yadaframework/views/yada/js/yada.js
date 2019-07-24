@@ -858,7 +858,15 @@
 	yada.changeLanguagePathVariable = function(language) {
 		var currentPath = window.location.pathname; // /xx/somePage
 		var regex = new RegExp("/[^/]+");
-		window.location.pathname = currentPath.replace(regex, "/"+language);
+		var verifyLanguage = currentPath.match(regex);
+		if (verifyLanguage[0].length != 3) {
+			// The language path was missing - insert it.
+			currentPath = "/"+language + currentPath;
+		} else {
+			// Replace the current language path with the new one
+			currentPath = currentPath.replace(regex, "/"+language);
+		}
+		window.location.pathname = currentPath;
 	}
 
 	/////////////

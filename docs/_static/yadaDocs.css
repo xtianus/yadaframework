@@ -1,0 +1,70 @@
+/* Bootstrap theme overrides */
+
+h1 {
+	text-decoration: underline;
+}
+
+h3 {
+	font-size: 22px;
+}
+
+h4 {
+	margin-top: 16px;
+}
+
+a.headerlink {
+	opacity: 0;
+	transition: opacity 0.8s;
+}
+h1:hover > a.headerlink, h2:hover > a.headerlink, h3:hover > a.headerlink, h4:hover > a.headerlink, h5:hover > a.headerlink, h6:hover > a.headerlink, dt:hover > a.headerlink, caption:hover > a.headerlink, p.caption:hover > a.headerlink, div.code-block-caption:hover > a.headerlink {
+	opacity: 1;
+}
+
+dd {
+    margin-left: 20px;
+}
+
+/* Copy-button overrides */
+/* https://github.com/choldgraf/sphinx-copybutton */
+
+a.copybtn {
+    top: 2px;
+    right: 1px;
+    width: 2em;
+}
+.highlight .copybtn {
+	opacity: 0;
+	transition: opacity 0.5s;
+}
+.highlight:hover .copybtn {
+  opacity: 1;
+}
+
+/* Custom code-block icons */
+
+.highlight-bat {
+	padding-left: 25px;
+}
+
+.highlight-bat::before { 
+	content: '';
+	background:url('img/winlogo.svg');
+    width: 20px;
+    height: 20px;
+    display: block;
+    position: relative;
+    top: 28px;
+    left: -25px;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.yadaversion {
+	font-size: small;
+    color: #aba6b1;
+    float: right;
+}
+
+.yadaversion::before {
+	content: 'since ';
+}

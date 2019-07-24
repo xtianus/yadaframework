@@ -1,1 +1,0 @@
-Files for the GitHub Pages should go here.
