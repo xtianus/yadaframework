@@ -42,5 +42,9 @@ popd
 REM Copy _static files too when changed
 xcopy %SOURCEDIR%\_static %BUILDDIR%\html\_static /f/d/y/s
 
+REM Copy to github docs folder
+xcopy %BUILDDIR%\html ..\docs /f/d/y/s
+
+
 
 REM pause
