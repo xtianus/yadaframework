@@ -6,7 +6,7 @@ Ajax Modal
 	Opening a modal with an ajax call
 
 Description
-------------
+===================
 
 Make a Bootstrap Modal open as a result of an ajax call. 
 For example, by clicking on an "Edit" button
@@ -28,10 +28,11 @@ The implementation needs the following parts:
 	The modal must be returned by a @RequestMapping method of a @Controller.
  
 - HTML of the modal
-	It specifies the title, header, body, footer and script sections (all are optional)
+	It specifies the title, header, body, footer and script sections (all are optional). It can also have <head> elements that are
+	added to the page while the modal is open and removed on close.
 
 HTML placeholder
-----------------
+===================
 
 The HTML placeholder must be the ``class="modal"`` node of a Bootstrap Modal and have ``id="ajaxModal"``:
 
@@ -41,21 +42,21 @@ The HTML placeholder must be the ``class="modal"`` node of a Bootstrap Modal and
 
 
 HTML for the ajax call
-----------------------
+===========================
 
 The modal can be opened with any ajax call performed by Yada. In this example we show an ajax link:
 
 .. todo:: Ajax link example
 
 Java for the @Controller
-------------------------
+===========================
 
 The Java @Controller must return a full Bootstrap Modal. The content of the ``class="modal"`` node will be inserted in the HTML placeholder and shown.
 
 .. todo:: @Controller example
 
 HTML of the modal
------------------
+===========================
 
 You can use your own Bootstrap Modal html or take advantage of the Yada Generic Modal.
 With the Yada Generic Modal you only define the section fragments that you need, producing a full Bootstrap Modal.
@@ -109,6 +110,32 @@ In the following example, three fragments have been defined in the same html fil
 
 
 .. image:: _static/img/modal-example.nofooter.jpg
+
+
+Sticky Modals
+===========================
+Normally, when you open an ajax modal, all existing modals are closed. This is both convenient and compliant with Bootstrap 3 where multiple modals were discouraged.
+
+A "sticky modal" is an ajax-loaded modal that can stay open behind anyother ajax modal that is opened afterwords.
+You create a sticky modal by adding the ``yadaStickyModal`` class to the ``modal-dialog``, for example:
+
+.. code-block:: html
+
+	<div th:replace="/yada/modalGeneric::fragment(~{::modalTitle},_,~{::modalBody},~{},~{::modalScript},'modal-lg yadaStickyModal')">
+
+The modal will not close when another modal is opened but will stay behind: it can only be closed with a ``data-dismiss`` button or with a call to ``.modal("hide")``.
+There can only be one sticky modal at a time: opening a new sticky modal on top of another will hide the new one behind the existing one.
+
+It might be convenient to increase the size of a sticky modal so that it remains partially visible behind a normal one. You can achieve this via
+the standard ``modal-lg`` or ``modal-xl`` classes, or you could implement your own full-screen modal with the following css:
+
+.. code-block:: css
+
+	.modal-dialog {
+		margin: 0;
+		max-width: 100vw;
+	}
+
 
 
 

@@ -102,7 +102,9 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#ajax-method">5.5. Ajax method</a><ul>
-<li><a class="reference internal" href="#success-handler">5.5.1. Success Handler</a></li>
+<li><a class="reference internal" href="#url">5.5.1. URL</a></li>
+<li><a class="reference internal" href="#data">5.5.2. data</a></li>
+<li><a class="reference internal" href="#success-handler">5.5.3. Success Handler</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#class-reference">5.6. Class Reference</a></li>
@@ -192,7 +194,10 @@ It is automatically included in production, merged with the other yada javascrip
 </div>
 <div class="section" id="returning-from-the-backend">
 <h3>5.2.2. Returning from the backend<a class="headerlink" href="#returning-from-the-backend" title="Permalink to this headline">¶</a></h3>
-<p>Controllers can return a standard thymeleaf view (html/xml) or some JSON data.</p>
+<p>Controllers can return a standard thymeleaf view (html/xml) or some JSON data.
+The resulting objects will be passed to any “successHandler” javascript method (see below)
+when they don’t have other special meaning.</p>
+<p><strong>Returning JSON</strong></p>
 <p>A String map can easily be converted to JSON using the standard Spring features:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">path</span> <span class="o">=</span> <span class="s">&quot;/people&quot;</span><span class="o">,</span> <span class="n">produces</span> <span class="o">=</span> <span class="n">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON_UTF8_VALUE</span><span class="o">)</span>
 <span class="nd">@ResponseBody</span>
@@ -204,8 +209,10 @@ It is automatically included in production, merged with the other yada javascrip
 <span class="o">}</span>
 </pre></div>
 </div>
-<p>The resulting objects will be passed to any “successHandler” javascript method (see below).</p>
-<p>The following return values, defined on the YadaViews java class, have special meaning in the context of an ajax call:</p>
+<p>Please note the needed <code class="docutils literal notranslate"><span class="pre">&#64;ResponseBody</span></code> tag.</p>
+<p><strong>Yada Commands</strong></p>
+<p>The following return values, defined on the YadaViews java class, have special meaning in the context of an ajax call.
+Please note that you should NOT use the <code class="docutils literal notranslate"><span class="pre">&#64;ResponseBody</span></code> tag in this case.</p>
 <table class="colwidths-given docutils align-center">
 <colgroup>
 <col style="width: 50%" />
@@ -234,8 +241,8 @@ It is automatically included in production, merged with the other yada javascrip
 </tr>
 </tbody>
 </table>
-<table class="colwidths-given docutils align-center" id="id1">
-<caption><span class="caption-text">YadaViews Model attributes</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<p>The AJAX_REDIRECT and AJAX_SERVER_ERROR commands use these optional Model attributes:</p>
+<table class="colwidths-given docutils align-center">
 <colgroup>
 <col style="width: 20%" />
 <col style="width: 30%" />
@@ -275,8 +282,8 @@ It is automatically included in production, merged with the other yada javascrip
 <span id="ajax-postprocessing"></span><h3>5.2.3. Postprocessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline">¶</a></h3>
 <p>After an ajax call, you usually want to do something on the page: update some div, show a modal, change a javascript variable etc.
 The following <code class="docutils literal notranslate"><span class="pre">data-</span></code> attributes allow you to perform postprocessing when returning successfully (i.e. with no network errors and no <code class="docutils literal notranslate"><span class="pre">YadaNotify</span></code> errors) from the call.</p>
-<table class="colwidths-given docutils align-center" id="id2">
-<caption><span class="caption-text">data- attributes for ajax postprocessing</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<table class="colwidths-given docutils align-center" id="id1">
+<caption><span class="caption-text">data- attributes for ajax postprocessing</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 25%" />
 <col style="width: 25%" />
@@ -324,8 +331,9 @@ The following <code class="docutils literal notranslate"><span class="pre">data-
 <div class="section" id="replacing-and-deleting">
 <h4>5.2.3.1. Replacing and Deleting<a class="headerlink" href="#replacing-and-deleting" title="Permalink to this headline">¶</a></h4>
 <p>The “jQuery selector list” is a comma-separated list of jQuery selectors, like <code class="docutils literal notranslate"><span class="pre">&quot;#someId,</span> <span class="pre">.someClass</span> <span class="pre">&gt;</span> <span class="pre">a&quot;</span></code>.
-If the selector list is empty, the target is the element itself.</p>
-<p>Each selector can also the following special prefixes:</p>
+If the selector list is empty, the target is the element itself.
+If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.</p>
+<p>Each selector can also have the following special prefixes:</p>
 <table class="colwidths-given docutils align-center">
 <colgroup>
 <col style="width: 33%" />
@@ -338,7 +346,7 @@ If the selector list is empty, the target is the element itself.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">yadaParents:</span></code></p></td>
-<td><p>the selector is searched in the parents of the current element</p></td>
+<td><p>the selector is searched in the parents of the current element using <code class="docutils literal notranslate"><span class="pre">$.closest()</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">yadaSiblings:</span></code></p></td>
 <td><p>the selector is searched in the siblings of the current element</p></td>
@@ -378,8 +386,8 @@ When there are more targets than replacements, the last replacement is repeated.
 <div class="section" id="confirm-dialog">
 <h4>5.2.3.4. Confirm Dialog<a class="headerlink" href="#confirm-dialog" title="Permalink to this headline">¶</a></h4>
 <p>You can show a confirm dialog before the ajax call is made. The user will be shown a text message and an option to confirm or abort the call.</p>
-<table class="colwidths-given docutils align-center" id="id3">
-<caption><span class="caption-text">data- attributes for Confirm Dialog</span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
+<table class="colwidths-given docutils align-center" id="id2">
+<caption><span class="caption-text">data- attributes for Confirm Dialog</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 33%" />
 <col style="width: 67%" />
@@ -431,7 +439,7 @@ showFeedbackIfNeeded</p>
 <div class="section" id="ajax-method">
 <h2>5.5. Ajax method<a class="headerlink" href="#ajax-method" title="Permalink to this headline">¶</a></h2>
 <p>You can call the low-level yada.ajax() method directly.</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">yada</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">successHandler</span><span class="p">,</span> <span class="nx">method</span><span class="p">,</span> <span class="nx">timeout</span><span class="p">,</span> <span class="nx">hideLoader</span><span class="p">)</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">yada</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">successHandler</span><span class="p">,</span> <span class="nx">method</span><span class="p">,</span> <span class="nx">timeout</span><span class="p">,</span> <span class="nx">hideLoader</span><span class="p">,</span> <span class="nx">asJson</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -465,10 +473,63 @@ showFeedbackIfNeeded</p>
 </dd>
 </dl>
 </li>
+<li><dl class="simple">
+<dt>asJson</dt><dd><p>(optional) true to send the data object as json without splitting the attributes into request parameters</p>
+</dd>
+</dl>
+</li>
 </ul>
 <p>Everything that applies to the other forms of invocation (opening modals, showing login pages, …) also applies.</p>
+<div class="section" id="url">
+<h3>5.5.1. URL<a class="headerlink" href="#url" title="Permalink to this headline">¶</a></h3>
+<p>The url must point to the controller handling the request. If the javascript code is in an HTML file, the standard thymeleaf <code class="docutils literal notranslate"><span class="pre">[[&#64;{/path}]]</span></code> syntax can be used.
+If the code is in a js file, the url will have to be passed to the script using some global variable set inside the html file:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span>window.myUrl = [[@{/path}]]
+</pre></div>
+</div>
+</div>
+<div class="section" id="data">
+<h3>5.5.2. data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h3>
+<p>The data object is a standard jQuery.ajax() data object. This means it will be converted using the jQuery conversion rules.</p>
+<p>To send some name/value pairs you could therefore use the following code:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="p">{};</span>
+<span class="nx">data</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="s2">&quot;John&quot;</span><span class="p">;</span>
+<span class="nx">data</span><span class="p">.</span><span class="nx">surname</span> <span class="o">=</span> <span class="s2">&quot;Doe&quot;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The above would result in two request parameters named “name” and “surname” that can be read on the controller in the usual way:</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">&quot;/addUser&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="n">String</span> <span class="nf">addUser</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">,</span> <span class="n">String</span> <span class="n">surname</span><span class="o">,</span> <span class="n">Model</span> <span class="n">model</span><span class="o">)</span> <span class="o">{</span>
+</pre></div>
+</div>
+<p>To send a json object, the <code class="docutils literal notranslate"><span class="pre">asJson</span></code> flag must be true:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="p">{</span><span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;john&#39;</span><span class="p">,</span> <span class="nx">surname</span><span class="o">:</span> <span class="s1">&#39;Doe&#39;</span><span class="p">};</span>
+<span class="nx">yada</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="kc">true</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The controller will then be able to receive a converted Java object:</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">&quot;/addUser&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="n">String</span> <span class="nf">addUser</span><span class="o">(</span><span class="nd">@RequestBody</span> <span class="n">NameSurname</span> <span class="n">data</span><span class="o">,</span> <span class="n">Model</span> <span class="n">model</span><span class="o">)</span> <span class="o">{</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">NameSurname</span></code> is a Java class with the <code class="docutils literal notranslate"><span class="pre">name</span></code> and <code class="docutils literal notranslate"><span class="pre">surname</span></code> String attributes.</p>
+<p>To send a “multipart/form-data” request the data object must be a FormData:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">FormData</span><span class="p">();</span>
+<span class="nx">data</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;someBinaryArray&quot;</span><span class="p">,</span> <span class="nx">blob</span><span class="p">);</span>
+<span class="nx">data</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">&quot;someText&quot;</span><span class="p">,</span> <span class="nx">text</span><span class="p">);</span>
+<span class="nx">yada</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="s2">&quot;POST&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>This would be equivalent to sending a form via ajax after setting its fields.
+The controller should have a <code class="docutils literal notranslate"><span class="pre">MultipartFile</span></code> argument for each binary part:</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">&quot;/addUser&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="n">String</span> <span class="nf">addUser</span><span class="o">(</span><span class="n">MultipartFile</span> <span class="n">someBinaryArray</span><span class="o">,</span> <span class="n">String</span> <span class="n">someText</span><span class="o">,</span> <span class="n">Model</span> <span class="n">model</span><span class="o">)</span> <span class="o">{</span>
+</pre></div>
+</div>
+<p>More info on binary uploads can be found in <a class="reference internal" href="forms/uploads.html#java"><span class="std std-ref">File Uploads</span></a>.</p>
+</div>
 <div class="section" id="success-handler">
-<h3>5.5.1. Success Handler<a class="headerlink" href="#success-handler" title="Permalink to this headline">¶</a></h3>
+<h3>5.5.3. Success Handler<a class="headerlink" href="#success-handler" title="Permalink to this headline">¶</a></h3>
 <p>The success handler is called when the server returns without errors:</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">successHandler</span><span class="p">(</span><span class="nx">responseText</span><span class="p">,</span> <span class="nx">responseHtml</span><span class="p">)</span>
 </pre></div>
