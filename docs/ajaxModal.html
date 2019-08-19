@@ -85,6 +85,7 @@
 <li><a class="reference internal" href="#html-for-the-ajax-call">6.3. HTML for the ajax call</a></li>
 <li><a class="reference internal" href="#java-for-the-controller">6.4. Java for the &#64;Controller</a></li>
 <li><a class="reference internal" href="#html-of-the-modal">6.5. HTML of the modal</a></li>
+<li><a class="reference internal" href="#sticky-modals">6.6. Sticky Modals</a></li>
 </ul>
 </li>
 </ul>
@@ -163,7 +164,8 @@ usually inserted in a common footer so that you don’t need to remember adding 
 </dl>
 </li>
 <li><dl class="simple">
-<dt>HTML of the modal</dt><dd><p>It specifies the title, header, body, footer and script sections (all are optional)</p>
+<dt>HTML of the modal</dt><dd><p>It specifies the title, header, body, footer and script sections (all are optional). It can also have &lt;head&gt; elements that are
+added to the page while the modal is open and removed on close.</p>
 </dd>
 </dl>
 </li>
@@ -259,6 +261,25 @@ To remove a fragment from the modal, use the ~{} expression. To keep the default
 </pre></div>
 </div>
 <img alt="_images/modal-example.nofooter.jpg" src="_images/modal-example.nofooter.jpg" />
+</div>
+<div class="section" id="sticky-modals">
+<h2>6.6. Sticky Modals<a class="headerlink" href="#sticky-modals" title="Permalink to this headline">¶</a></h2>
+<p>Normally, when you open an ajax modal, all existing modals are closed. This is both convenient and compliant with Bootstrap 3 where multiple modals were discouraged.</p>
+<p>A “sticky modal” is an ajax-loaded modal that can stay open behind anyother ajax modal that is opened afterwords.
+You create a sticky modal by adding the <code class="docutils literal notranslate"><span class="pre">yadaStickyModal</span></code> class to the <code class="docutils literal notranslate"><span class="pre">modal-dialog</span></code>, for example:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">div</span> <span class="na">th:replace</span><span class="o">=</span><span class="s">&quot;/yada/modalGeneric::fragment(~{::modalTitle},_,~{::modalBody},~{},~{::modalScript},&#39;modal-lg yadaStickyModal&#39;)&quot;</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>The modal will not close when another modal is opened but will stay behind: it can only be closed with a <code class="docutils literal notranslate"><span class="pre">data-dismiss</span></code> button or with a call to <code class="docutils literal notranslate"><span class="pre">.modal(&quot;hide&quot;)</span></code>.
+There can only be one sticky modal at a time: opening a new sticky modal on top of another will hide the new one behind the existing one.</p>
+<p>It might be convenient to increase the size of a sticky modal so that it remains partially visible behind a normal one. You can achieve this via
+the standard <code class="docutils literal notranslate"><span class="pre">modal-lg</span></code> or <code class="docutils literal notranslate"><span class="pre">modal-xl</span></code> classes, or you could implement your own full-screen modal with the following css:</p>
+<div class="highlight-css notranslate"><div class="highlight"><pre><span></span><span class="p">.</span><span class="nc">modal-dialog</span> <span class="p">{</span>
+        <span class="k">margin</span><span class="p">:</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="k">max-width</span><span class="p">:</span> <span class="mi">100</span><span class="kt">vw</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 </div>
 </div>
 
