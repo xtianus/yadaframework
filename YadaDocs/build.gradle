@@ -1,0 +1,70 @@
+group = 'net.yadaframework'
+version = '0.3.0'
+
+buildscript {
+	repositories {
+		mavenLocal()
+		mavenCentral()
+	}
+}
+
+apply plugin: 'java-library'
+apply plugin: 'eclipse-wtp'
+// apply plugin: 'kr.motd.sphinx'
+
+eclipse {
+	jdt {
+		sourceCompatibility = 1.8
+		targetCompatibility = 1.8
+		// https://stackoverflow.com/a/35302104/587641
+		file {
+      		File dir = file('.settings')
+      		dir.mkdirs()
+      		File f = file('.settings/org.eclipse.core.resources.prefs')
+      		if (!f.exists()) {
+      			f.write('eclipse.preferences.version=1\n')
+      			f.append('encoding/<project>=utf-8')
+      		}
+    	}
+	}
+	classpath {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+repositories {
+    jcenter()
+	mavenLocal()
+}
+
+dependencies {
+}
+
+task listJars {
+	doLast {
+		configurations.compile.each { File file -> println file.name }
+	}
+}
+
+jar {
+    manifest {
+        attributes("Implementation-Title": "YadaDocs",
+                   "Implementation-Version": version)
+    }
+}
+
+// Set the yada version in the properties file
+processResources {
+	doLast {
+		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadaweb.properties", token: '@YADA_VERSION@', value: version)
+	}
+}
+
+
+
+
+
