@@ -323,9 +323,10 @@ public class YadaSeleniumUtil {
 	 */
 	public void clickByJavascript(WebElement webElement, WebDriver webDriver, int minPercentX, int maxPercentX, int minPercentY, int maxPercentY) {
 		// Move the mouse over the element, just in case
+		// // When using the W3C Action commands, offsets are from the center of element
 		Dimension dimension = webElement.getSize();
-		int offx = (int) ThreadLocalRandom.current().nextDouble(dimension.width*minPercentX/100d, dimension.width*maxPercentX/100d+1); // Faccio +1 per evitare "bound must be greater than origin" nel caso di zero
-		int offy = (int) ThreadLocalRandom.current().nextDouble(dimension.height*minPercentY/100d, dimension.height*maxPercentY/100d+1);
+		int offx = (int) ThreadLocalRandom.current().nextDouble(dimension.width*minPercentX/100d, dimension.width*maxPercentX/100d)/2;
+		int offy = (int) ThreadLocalRandom.current().nextDouble(dimension.height*minPercentY/100d, dimension.height*maxPercentY/100d)/2;
 		Actions actions = new Actions(webDriver); 
 		actions.moveToElement(webElement, offx, offy);
 		//
@@ -342,7 +343,7 @@ public class YadaSeleniumUtil {
 		randomClick(webElement, webDriver, 20, 80, 20, 80);
 	}
 	/**
-	 * Click on the given element in a range between min and max % of the dimensions
+	 * Click on the given element in a range between min and max % of the dimensions.
 	 * @param webElement
 	 * @param webDriver
 	 * @param minPercentX e.g. 10
@@ -353,8 +354,9 @@ public class YadaSeleniumUtil {
 	public void randomClick(WebElement webElement, WebDriver webDriver, int minPercentX, int maxPercentX, int minPercentY, int maxPercentY) {
 		Dimension dimension = webElement.getSize();
 		// Clicco in un range compreso tra min% e max% della larghezza e altezza
-		int offx = (int) ThreadLocalRandom.current().nextDouble(dimension.width*minPercentX/100d, dimension.width*maxPercentX/100d+1); // Faccio +1 per evitare "bound must be greater than origin" nel caso di zero
-		int offy = (int) ThreadLocalRandom.current().nextDouble(dimension.height*minPercentY/100d, dimension.height*maxPercentY/100d+1);
+		// When using the W3C Action commands, offsets are from the center of element
+		int offx = (int) ThreadLocalRandom.current().nextDouble(dimension.width*minPercentX/100d, dimension.width*maxPercentX/100d)/2;
+		int offy = (int) ThreadLocalRandom.current().nextDouble(dimension.height*minPercentY/100d, dimension.height*maxPercentY/100d)/2;
 		if (log.isDebugEnabled()) {
 			log.debug("Clicco elemento che misura {} in {},{}", dimension, offx, offy);
 		}
@@ -364,6 +366,7 @@ public class YadaSeleniumUtil {
 				webElement.click();
 			} else {
 				// Clicco sull'elemento
+				// When using the W3C Action commands, offsets are from the center of element
 				Actions actions = new Actions(webDriver); 
 				actions.moveToElement(webElement, offx, offy).click().build().perform();
 			}

@@ -31,7 +31,6 @@ public class YadaUserMessageDao {
      * Delete all messages that do not involve users other than the one specified (no other users as sender o recipient)
      * @param userProfile the receiver/sender of the message
      */
-    @Modifying
     @Transactional(readOnly = false) 
     public void deleteBelongingTo(YadaUserProfile userProfile) {
     	// Messages that have the user as sender or recipient, and nobody else involved, or
@@ -53,7 +52,6 @@ public class YadaUserMessageDao {
      * content and same recipient and same sender and same data, if not older than one day
      * @param m
      */
-    @Modifying
     @Transactional(readOnly = false) 
     public void createOrIncrement(YadaUserMessage<?> m) {
     	log.debug("YadaUserMessage to {} from {}: [{}] '{}' - {} (data={})", 

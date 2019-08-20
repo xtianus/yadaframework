@@ -41,7 +41,8 @@ import net.yadaframework.web.YadaJsonDateTimeShortSerializer;
 import net.yadaframework.web.YadaJsonView;
 
 /**
- * A message sent to some user by another user or by the system
+ * A message sent to some user by another user or by the system.
+ * Identical consecutive messages can be "stacked" on a single row by incrementing the "stackSize" and adding a new "created" date
  * 
  * @param <E> a localized enum for the message type
  */
