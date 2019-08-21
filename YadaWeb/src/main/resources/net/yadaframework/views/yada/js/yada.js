@@ -406,8 +406,8 @@
 				var href = $link.attr("href");
 				var confirmText = $link.attr("data-yadaConfirm") || $link.attr("data-confirm");
 				if (confirmText!=null) {
-					var okButton = $link.attr("data-okButton") || yada.messages.confirmButtons.ok;
-					var cancelButton = $link.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
+					var okButton = $link.attr("data-yadaOkButton") || $link.attr("data-okButton") || yada.messages.confirmButtons.ok;
+					var cancelButton = $link.attr("data-yadaCancelButton") || $link.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 					yada.confirm(confirmText, function(result) {
 						if (result==true) {
 							yada.loaderOn();
