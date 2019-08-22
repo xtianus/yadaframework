@@ -21,7 +21,7 @@
 	 * 	- title to show in the tooltip
 	 *  - idName the name of the id request parameter (optional - defaults to "id")
 	 * @param deleteDef object containing url and text (can be null):
-	 * 	- url that returns the edit form e.g. [[@{/gestione/ajaxDeleteTag}]]
+	 * 	- url to delete the row e.g. [[@{/gestione/ajaxDeleteTag}]]
 	 * 	- title to show in the tooltip
 	 * 	- confirmOneMessage (optional)
 	 * 	- confirmManyMessage (optional)

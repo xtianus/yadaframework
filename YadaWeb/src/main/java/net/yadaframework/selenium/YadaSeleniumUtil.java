@@ -342,6 +342,26 @@ public class YadaSeleniumUtil {
 	public void randomClick(WebElement webElement, WebDriver webDriver) {
 		randomClick(webElement, webDriver, 20, 80, 20, 80);
 	}
+	
+	/**
+	 * Convert a range expressed as percentage from origin to a position from the center
+	 * @param size
+	 * @param minPercent
+	 * @param maxPercent
+	 * @return
+	 */
+	private int percentageToRandomOffsetFromCenter(int size, int minPercent, int maxPercent) {
+		double min = size*minPercent/100d;
+		double max = size*maxPercent/100d;
+		double half = size/2d;
+		double displacement = min-half;
+		double from = 0d;
+		double to = max - min;
+		double random = ThreadLocalRandom.current().nextDouble(from, to);
+		double positionFromCenter = random + displacement;
+		return (int) positionFromCenter;
+	}
+	
 	/**
 	 * Click on the given element in a range between min and max % of the dimensions.
 	 * @param webElement
@@ -354,17 +374,20 @@ public class YadaSeleniumUtil {
 	public void randomClick(WebElement webElement, WebDriver webDriver, int minPercentX, int maxPercentX, int minPercentY, int maxPercentY) {
 		Dimension dimension = webElement.getSize();
 		// Clicco in un range compreso tra min% e max% della larghezza e altezza
-		// When using the W3C Action commands, offsets are from the center of element
-		int offx = (int) ThreadLocalRandom.current().nextDouble(dimension.width*minPercentX/100d, dimension.width*maxPercentX/100d)/2;
-		int offy = (int) ThreadLocalRandom.current().nextDouble(dimension.height*minPercentY/100d, dimension.height*maxPercentY/100d)/2;
-		if (log.isDebugEnabled()) {
-			log.debug("Clicco elemento che misura {} in {},{}", dimension, offx, offy);
-		}
+		// When using the W3C Action commands, offsets are from the center of element.
+		// Una volta l'offset era dall'angolo in basso a sinistra, ma adesso è dal centro quindi devo calcolare il nuovo offset partendo dalle percentuali
+		// relative alla dimensione totale dell'elemento.
+		
 		try {
-			if (dimension.width==0 && dimension.height==0) {
-				log.debug("Uso webElement.click()");
+			if (dimension.width==0 || dimension.height==0) {
+				log.debug("Using webElement.click() because element has no dimension");
 				webElement.click();
 			} else {
+				int offx = percentageToRandomOffsetFromCenter(dimension.width, minPercentX, maxPercentX);
+				int offy = percentageToRandomOffsetFromCenter(dimension.height, minPercentY, maxPercentY);
+				if (log.isDebugEnabled()) {
+					log.debug("Clicking on element with size {} at position ({},{}) from center", dimension, offx, offy);
+				}
 				// Clicco sull'elemento
 				// When using the W3C Action commands, offsets are from the center of element
 				Actions actions = new Actions(webDriver); 
@@ -434,6 +457,16 @@ public class YadaSeleniumUtil {
 	public void waitWhileVisible(String cssSelector, WebDriver webDriver, long timeOutInSeconds) {
 		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
 		webDriverWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(cssSelector)));
+	}
+	
+	public void waitWhileVisible(WebElement webElement, WebDriver webDriver, long timeOutInSeconds) {
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		webDriverWait.until(ExpectedConditions.invisibilityOf(webElement));
+	}
+	
+	public void waitWhileVisible(List<WebElement> webElements, WebDriver webDriver, long timeOutInSeconds) {
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		webDriverWait.until(ExpectedConditions.invisibilityOfAllElements(webElements));
 	}
 	
 	private long calcSleepTimeMillis(long timeOutInSeconds) {
