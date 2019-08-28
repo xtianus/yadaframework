@@ -82,13 +82,13 @@ public class YadaRegexUtil {
 	}
 	
 	/**
-	 * Performs a find-and-replace in a delimited area of the source
+	 * Performs a find-and-replace in a delimited area of the source, returning the source with replacements applied.
 	 * @param source the text to be searched
 	 * @param startPattern pattern that identifies the region start
 	 * @param endPattern pattern that identifies the region end
 	 * @param repeatRegion true if the region has to be searched many times in the source
 	 * @param replacer the object performing the replacement within the region
-	 * @return the replaced text
+	 * @return the source where the replacer has been applied within the delimited region
 	 */
 	public String replaceInRegion(String source, String startPattern, String endPattern, boolean repeatRegion, YadaRegexReplacer replacer) {
 		StringBuffer result = new StringBuffer();
@@ -106,10 +106,42 @@ public class YadaRegexUtil {
 					 break;
 				 }
 			} catch (Exception e) {
-				log.error("Failed to replace in region", e);
+				log.error("Failed to replace in region (ignored)", e);
 			}
 		 }
 		 regionMatcher.appendTail(result);
 		 return result.toString();
 	}
+	
+	/**
+	 * Searches a region of text for a pattern that contains a capturing group, and returns the captured group.
+	 * @param source the text to search
+	 * @param startPattern a regular expression that identifies the start of the region, null to search from start.
+	 *                     The matched text is excluded from search.
+	 * @param endPattern a regular expression that identifies the end of the region, null to search to the end.
+	 *                     The matched text is excluded from search.
+	 * @param extractPattern a regular expression with a capturing group, null to return the whole region
+	 * @return the text matched by the first capturing group of extractorPattern, or the empty string
+	 */
+	public String extractInRegion(String source, String startPattern, String endPattern, String extractPattern) {
+		startPattern=(startPattern==null)?"\\A":startPattern; // null is beginning of document
+		endPattern=(endPattern==null)?"\\z":endPattern; // null is end of document
+		Matcher regionMatcher = this.createMatcher(source, startPattern + "(.*?)" + endPattern);
+		 try {
+			if (regionMatcher.find()) {
+				 String region = regionMatcher.group(1); // "(.*?)"
+				 if (extractPattern==null) {
+					 return region;
+				 }
+				 Matcher extractor = this.createMatcher(region, extractPattern);
+				 if (extractor.find()) {
+					 return extractor.group(1);
+				 }
+			 }
+		} catch (Exception e) {
+			log.error("Failed to search in region (ignored)", e);
+		}
+		 return "";
+	}
+
 }

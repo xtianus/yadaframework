@@ -50,10 +50,11 @@ public class YadaUserMessageDao {
     /**
      * Save a message. If the message is stackable, only increment the counter of an existing message with identical
      * content and same recipient and same sender and same data, if not older than one day
-     * @param m
+     * @param m the message
+     * @return true if the message has been created, false if the counter incremented
      */
     @Transactional(readOnly = false) 
-    public void createOrIncrement(YadaUserMessage<?> m) {
+    public boolean createOrIncrement(YadaUserMessage<?> m) {
     	log.debug("YadaUserMessage to {} from {}: [{}] '{}' - {} (data={})", 
     		m.getReceiverName()!=null?m.getReceiverName():"-", 
     		m.getSender()!=null?m.getSenderName():"-", 
@@ -67,7 +68,7 @@ public class YadaUserMessageDao {
     	}*/
     	if (!m.isStackable()) {
     		em.persist(m);
-    		return;
+    		return true; // Created new
     	}
     	// Need to update an existing row counter if it exists, or insert a new one.
     	// Not using "insert ... on duplicate key update" because of the time window
@@ -90,11 +91,13 @@ public class YadaUserMessageDao {
     	
     	if (existingList.isEmpty()) {
     		em.persist(m);
+    		return true; // Created new
     	} else {
     		m = existingList.get(0);
     		m.incrementStack();
     		m.setReadByRecipient(false);
     		m.setModified(new Date());
+    		return false;
     	}
     }
 }

@@ -32,7 +32,6 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -46,6 +45,8 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaConfigurationException;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.raw.YadaHttpUtil;
+import net.yadaframework.raw.YadaRegexReplacer;
+import net.yadaframework.raw.YadaRegexUtil;
 
 @Component
 public class YadaSeleniumUtil {
@@ -56,8 +57,24 @@ public class YadaSeleniumUtil {
     
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
+	private YadaRegexUtil yadaRegexUtil = new YadaRegexUtil();
 	
 	YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
+	
+	/**
+	 * Returns a part of the page source.
+	 * @param startPattern regular expression that matches the start of the search area, null for the beginning of the page.
+	 * The matched text is not part of the search area.
+	 * @param endPattern regular expression that matches the end of the search area, null for the end of the page
+	 * The matched text is not part of the search area.
+	 * @param extractPattern regular expression with one capturing group to search in the search area. Use null to just return the search area.
+	 * @param webDriver
+	 * @return
+	 */
+	public String getSourceSnippet(String startPattern, String endPattern, String extractPattern, WebDriver webDriver) {
+		String pageSource = webDriver.getPageSource();
+		return yadaRegexUtil.extractInRegion(pageSource, startPattern, endPattern, extractPattern);
+	}
 	
 	/**
 	 * Return a value calculated via javascript.
