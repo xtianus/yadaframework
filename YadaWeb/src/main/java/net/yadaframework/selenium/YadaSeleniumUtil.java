@@ -441,7 +441,6 @@ public class YadaSeleniumUtil {
 	 * @param cssSelector
 	 * @param webDriver
 	 * @param timeOutInSeconds
-	 * @param sleepInMillis
 	 */
 	public void waitUntilPresent(String cssSelector, WebDriver webDriver, long timeOutInSeconds) {
 		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
@@ -453,7 +452,6 @@ public class YadaSeleniumUtil {
 	 * @param cssSelector
 	 * @param webDriver
 	 * @param timeOutInSeconds
-	 * @param sleepInMillis
 	 */
 	public void waitUntilVisible(String cssSelector, WebDriver webDriver, long timeOutInSeconds) {
 		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
