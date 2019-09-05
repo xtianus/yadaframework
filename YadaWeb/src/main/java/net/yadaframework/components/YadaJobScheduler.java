@@ -238,15 +238,19 @@ class YadaJobScheduler implements Runnable {
 		if (yadaJob==null) {
 			return false;
 		}
-		log.debug("Interrupting job {}", yadaJob);
-		ListenableFuture<?> jobHandle = yadaJob.yadaInternalJobHandle;
-		if (jobHandle!=null) {
-			jobHandle.cancel(true);
-			return true;
-		} else {
-			log.debug("No job handle found for job {} when interrupting", yadaJob);
+		try {
+			log.debug("Interrupting job {}", yadaJob);
+			ListenableFuture<?> jobHandle = yadaJob.yadaInternalJobHandle;
+			if (jobHandle!=null) {
+				jobHandle.cancel(true);
+				return true;
+			} else {
+				log.debug("No job handle found for job {} when interrupting", yadaJob);
+			}
+			return false;
+		} finally {
+			invalidateCompletedJob(yadaJob); // Remove from the cache
 		}
-		return false;
 	}
 
 	private void cleanupStaleJobs() {
