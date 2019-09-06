@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
@@ -45,7 +46,6 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaConfigurationException;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.raw.YadaHttpUtil;
-import net.yadaframework.raw.YadaRegexReplacer;
 import net.yadaframework.raw.YadaRegexUtil;
 
 @Component
@@ -57,9 +57,11 @@ public class YadaSeleniumUtil {
     
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
-	private YadaRegexUtil yadaRegexUtil = new YadaRegexUtil();
 	
-	YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
+	private YadaRegexUtil yadaRegexUtil = new YadaRegexUtil();
+	private YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
+	private Pattern matchNonEmptyText = Pattern.compile(".*\\w+.*"); // Match any string that contains at least a word character
+
 	
 	/**
 	 * Returns a part of the page source.
@@ -434,6 +436,41 @@ public class YadaSeleniumUtil {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Waits until the attribute contains some non-empty text
+	 * @param element the element to check
+	 * @param attribute the attribute of the element that must not be empty
+	 * @param webDriver
+	 * @param timeOutInSeconds
+	 */
+	public void waitUntilAttributeNotEmpty(WebElement element, String attribute, WebDriver webDriver, long timeOutInSeconds) {
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		webDriverWait.until(ExpectedConditions.attributeToBeNotEmpty(element, attribute));
+	}
+	
+	/**
+	 * Waits until the selected element contains some non-empty text (warning: this method may not work as expected)
+	 * @param element
+	 * @param webDriver
+	 * @param timeOutInSeconds
+	 * @see #waitUntilAttributeNotEmpty
+	 */
+	public void waitWhileEmptyText(WebElement element, WebDriver webDriver, long timeOutInSeconds) {
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		webDriverWait.until(ExpectedConditions.not(ExpectedConditions.textToBePresentInElement(element, "")));
+	}
+	
+	/**
+	 * Waits until the selected element contains some non-empty text
+	 * @param cssSelector
+	 * @param webDriver
+	 * @param timeOutInSeconds
+	 */
+	public void waitWhileEmptyText(String cssSelector, WebDriver webDriver, long timeOutInSeconds) {
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		webDriverWait.until(ExpectedConditions.textMatches(By.cssSelector(cssSelector), matchNonEmptyText));
 	}
 	
 	/**
