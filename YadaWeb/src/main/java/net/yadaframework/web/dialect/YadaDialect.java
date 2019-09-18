@@ -42,7 +42,8 @@ public class YadaDialect extends AbstractProcessorDialect {
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "confirm", "data-yadaConfirm"));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "okButton", "data-yadaOkButton"));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "cancelButton", "data-yadaCancelButton"));
-        processors.add(new YadaNewlineTextAttrProcessor(dialectPrefix));
+        processors.add(new YadaNewlineTextAttrProcessor(dialectPrefix, false)); // unewlinetext
+        processors.add(new YadaNewlineTextAttrProcessor(dialectPrefix, true));	// newlinetext
         // TODO move YadaActionUploadAttrProcessor to a yada security dialect
         // processors.add(new YadaActionUploadAttrProcessor(dialectPrefix));
         // Rimuove lo yada:xxx namespace dal tag <html>

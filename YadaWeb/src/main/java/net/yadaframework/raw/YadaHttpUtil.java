@@ -344,7 +344,7 @@ public class YadaHttpUtil {
 	}
 
 	/**
-	 * Extract the path from a url (the servlet context will be included)
+	 * Extract the path from a url (the servlet context and request parameters will be included)
 	 * @param url an url like http://www.myserver.net:8080/xxx/yyy/zzz or //www.myserver.net:8080/xxx/yyy/zzz or www.myserver.net:8080/xxx/yyy/zzz
 	 * @return the path like "/xxx/yyy/zzz" or "/" at the least
 	 */

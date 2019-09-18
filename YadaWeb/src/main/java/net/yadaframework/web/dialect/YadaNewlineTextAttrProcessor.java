@@ -13,24 +13,26 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.unbescape.html.HtmlEscape;
 
 /**
- * Adds the yada:newlinetext="" attribute that converts ASCII newlines to HTML newlines
+ * Adds the yada:newlinetext="" attribute that converts ASCII newlines to HTML newlines, and the yada:unewlinetext that does not escape the original text
  */
 public class YadaNewlineTextAttrProcessor extends AbstractAttributeTagProcessor {
 	public static final int ATTR_PRECEDENCE = 9000;
-    public static final String ATTR_NAME = "newlinetext";
+    public static final String ATTR_NAME = "newlinetext"; // becomes unewlinetext to not escape text
+    private boolean escapeText = true;
    
 	/**
 	 */
-	public YadaNewlineTextAttrProcessor(final String dialectPrefix) {
+	public YadaNewlineTextAttrProcessor(final String dialectPrefix, boolean escapeText) {
         super(
                 TemplateMode.HTML, // This processor will apply only to HTML mode
                 dialectPrefix,     // Prefix to be applied to name for matching
                 null,              // No tag name: match any tag name
                 false,             // No prefix to be applied to tag name
-                ATTR_NAME,         // Name of the attribute that will be matched
+                (escapeText?"":"u")+ATTR_NAME,         // Name of the attribute that will be matched
                 true,              // Apply dialect prefix to attribute name
                 ATTR_PRECEDENCE,   // Precedence (inside dialect's own precedence)
                 true);             // Remove the matched attribute afterwards
+        this.escapeText = escapeText;
 	}
 
 
@@ -72,7 +74,7 @@ public class YadaNewlineTextAttrProcessor extends AbstractAttributeTagProcessor 
          */
         final String unescapedText = (String) expression.execute(context);
 
-        String escapedText = HtmlEscape.escapeHtml5(unescapedText);
+        String escapedText = escapeText?HtmlEscape.escapeHtml5(unescapedText):unescapedText;
 
         /*
          * Set the new value into the attribute
