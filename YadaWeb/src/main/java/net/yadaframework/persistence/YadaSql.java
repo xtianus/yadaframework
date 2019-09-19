@@ -322,7 +322,7 @@ public class YadaSql implements CloneableDeep {
 
 	/**
 	 * Adds a where condition
-	 * @param enabled
+	 * @param enabled false to skip this statement. Any following and/or operator is also skipped.
 	 * @param whereConditions a condition like "where a>0" or just "a>0"
 	 * @return
 	 */
@@ -394,6 +394,11 @@ public class YadaSql implements CloneableDeep {
 		return this;
 	}
 
+	/**
+	 * Adds an AND condition if the parameter is true, but only if the previous expression was not skipped
+	 * @param enabled false to ignore this call
+	 * @return
+	 */
 	public YadaSql and(boolean enabled) {
 		if (enabled) {
 			return and();
@@ -401,6 +406,10 @@ public class YadaSql implements CloneableDeep {
 		return this;
 	}
 
+	/**
+	 * Adds an AND condition, but only if the previous expression was not skipped
+	 * @return
+	 */
 	public YadaSql and() {
 		if (lastSkipped) {
 			lastSkipped=false;
