@@ -94,8 +94,8 @@ public class YadaUserDetailsService implements UserDetailsService {
 	 * Authenticate the user without setting the lastSuccessfulLogin timestamp
 	 * @param userCredentials
 	 */
-	public void authenticateAs(YadaUserCredentials userCredentials) {
-		authenticateAs(userCredentials, true);	
+	public Authentication authenticateAs(YadaUserCredentials userCredentials) {
+		return authenticateAs(userCredentials, true);	
 	}
 	
 	/**
@@ -103,7 +103,7 @@ public class YadaUserDetailsService implements UserDetailsService {
 	 * @param userCredentials
 	 * @param setTimestamp true to set the lastSuccessfulLogin timestamp
 	 */
-	public void authenticateAs(YadaUserCredentials userCredentials, boolean setTimestamp) {
+	public Authentication authenticateAs(YadaUserCredentials userCredentials, boolean setTimestamp) {
 		UserDetails userDetails = createUserDetails(userCredentials);
 		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 		SecurityContextHolder.getContext().setAuthentication(auth);
@@ -111,6 +111,7 @@ public class YadaUserDetailsService implements UserDetailsService {
 			userCredentialsRepository.updateLoginTimestamp(userCredentials.getUsername().toLowerCase());
 			userCredentialsRepository.resetFailedAttempts(userCredentials.getUsername().toLowerCase());
 		}
+		return auth;
 	}
 	
 	public void changePasswordIfAuthenticated(String username, String passwordTyped, String newPassword) throws UsernameNotFoundException, InternalAuthenticationException, BadCredentialsException {

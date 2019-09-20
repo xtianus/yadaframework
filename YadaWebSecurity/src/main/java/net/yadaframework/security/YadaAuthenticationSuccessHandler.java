@@ -37,12 +37,21 @@ public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 		// Set so that we know when to return our saved value in determineTargetUrl()
 		super.setDefaultTargetUrl(UNSET_TARGET_URL);
 	}
-
-	@Override
-	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
+	
+	/**
+	 * Custom code to be executed after login or autologin. Can be overridden.
+	 * @param request
+	 * @param authentication
+	 */
+	public void onAuthenticationSuccessCustom(HttpServletRequest request, Authentication authentication) {
 		String username = authentication.getName();
 		userCredentialsRepository.updateLoginTimestamp(username.toLowerCase());
 		userCredentialsRepository.resetFailedAttempts(username.toLowerCase());
+	}
+
+	@Override
+	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
+		onAuthenticationSuccessCustom(request, authentication);
 		super.onAuthenticationSuccess(request, response, authentication);
 	}
 

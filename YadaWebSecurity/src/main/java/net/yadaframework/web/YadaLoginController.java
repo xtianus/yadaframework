@@ -1,17 +1,21 @@
 package net.yadaframework.web;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +25,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.YadaAuthenticationFailureHandler;
+import net.yadaframework.security.YadaAuthenticationSuccessHandler;
 import net.yadaframework.security.YadaUserDetailsService;
 import net.yadaframework.security.components.YadaTokenHandler;
 import net.yadaframework.security.persistence.entity.YadaAutoLoginToken;
@@ -44,7 +49,8 @@ public class YadaLoginController {
 	@Autowired private YadaAutoLoginTokenRepository yadaAutoLoginTokenRepository;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	@Autowired private YadaAuthenticationFailureHandler failureHandler;
-
+	@Autowired protected YadaAuthenticationSuccessHandler successHandler;
+	
 	/**
 	 * This method can be set as the default ajax login target in a Security Config, and will redirect to the targetUrl when specified.
 	 * Example: successHandler.setDefaultTargetUrlAjaxRequest("/yadaLoginSuccess?targetUrl=/configurator/");
@@ -126,7 +132,13 @@ public class YadaLoginController {
 						// No user is currently logged in
 						log.info("Performing autologin with token {} to username {} ", tokenLink, yadaUserCredentials.getUsername());
 						yadaSession.clearCaches();
-						yadaUserDetailsService.authenticateAs(yadaUserCredentials);
+						try {
+							// Need to call the login success handler to perform eventual login tasks
+							Authentication authentication = yadaUserDetailsService.authenticateAs(yadaUserCredentials);
+							successHandler.onAuthenticationSuccessCustom(request, authentication);
+						} catch (Exception e) {
+							log.error("Auhtentication success handler failed on autologin (ignored)", e);
+						}
 					}
 					// TODO delete autologin link after use
 					// TODO Questo l'ho disabilitato fintanto che non aggiusto che l'autenticazione (social) non ti porta sulla pagina inizialmente richiesta
