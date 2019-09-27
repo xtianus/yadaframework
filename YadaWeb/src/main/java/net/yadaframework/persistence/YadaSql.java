@@ -526,6 +526,7 @@ public class YadaSql implements CloneableDeep {
 					parent.having(sql);
 				}
 			}
+			parent.parameters.putAll(this.parameters); // Needed for any setParameter() done on the subexpression
 		}
 		return parent;
 	}
