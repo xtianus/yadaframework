@@ -484,7 +484,7 @@ showFeedbackIfNeeded</p>
 <h3>5.5.1. URL<a class="headerlink" href="#url" title="Permalink to this headline">¶</a></h3>
 <p>The url must point to the controller handling the request. If the javascript code is in an HTML file, the standard thymeleaf <code class="docutils literal notranslate"><span class="pre">[[&#64;{/path}]]</span></code> syntax can be used.
 If the code is in a js file, the url will have to be passed to the script using some global variable set inside the html file:</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span>window.myUrl = [[@{/path}]]
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span>window.myUrl = [[@{/path}]]
 </pre></div>
 </div>
 </div>
