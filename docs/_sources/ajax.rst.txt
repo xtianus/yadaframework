@@ -42,6 +42,10 @@ disable the link
 Returning from the backend
 --------------------------
 Controllers can return a standard thymeleaf view (html/xml) or some JSON data.
+The resulting objects will be passed to any "successHandler" javascript method (see below)
+when they don't have other special meaning.
+
+**Returning JSON**
 
 A String map can easily be converted to JSON using the standard Spring features:
 
@@ -56,9 +60,12 @@ A String map can easily be converted to JSON using the standard Spring features:
         return map;
     }
 
-The resulting objects will be passed to any "successHandler" javascript method (see below).
+Please note the needed ``@ResponseBody`` tag.
 
-The following return values, defined on the YadaViews java class, have special meaning in the context of an ajax call:
+**Yada Commands**
+
+The following return values, defined on the YadaViews java class, have special meaning in the context of an ajax call.
+Please note that you should NOT use the ``@ResponseBody`` tag in this case.
 
 .. list-table::
   :widths: 50 50
@@ -77,7 +84,9 @@ The following return values, defined on the YadaViews java class, have special m
   *	- AJAX_SERVER_ERROR
 	- Opens a modal with an error message that by default is 'Server Error' unless a Model attribute with a custom message has been added. It uses the Model attributes shown below
 
-.. list-table:: YadaViews Model attributes
+The AJAX_REDIRECT and AJAX_SERVER_ERROR commands use these optional Model attributes:
+
+.. list-table::
   :widths: 20 30 50
   :header-rows: 1
 
@@ -141,8 +150,9 @@ Replacing and Deleting
 ^^^^^^^^^^^^^^^^^^^^^^
 The "jQuery selector list" is a comma-separated list of jQuery selectors, like ``"#someId, .someClass > a"``.  
 If the selector list is empty, the target is the element itself.
+If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.
 
-Each selector can also the following special prefixes:
+Each selector can also have the following special prefixes:
 
 .. list-table::
   :widths: 25 50
@@ -151,7 +161,7 @@ Each selector can also the following special prefixes:
   *	- name
 	- description
   *	- ``yadaParents:``
-	- the selector is searched in the parents of the current element
+	- the selector is searched in the parents of the current element using ``$.closest()``
   *	- ``yadaSiblings:``
 	- the selector is searched in the siblings of the current element
   *	- ``yadaClosestFind:``
@@ -236,7 +246,7 @@ You can call the low-level yada.ajax() method directly.
 
 .. code-block:: javascript
 
-	yada.ajax(url, data, successHandler, method, timeout, hideLoader)
+	yada.ajax(url, data, successHandler, method, timeout, hideLoader, asJson)
 
 - url
 	the server address to call
@@ -250,8 +260,73 @@ You can call the low-level yada.ajax() method directly.
 	(optional) milliseconds timeout, null for default (set by the browser)
 - hideLoader
 	(optional) true for not showing the spinning loader (shown by default)
+- asJson
+	(optional) true to send the data object as json without splitting the attributes into request parameters
 
 Everything that applies to the other forms of invocation (opening modals, showing login pages, ...) also applies.
+
+URL
+---
+The url must point to the controller handling the request. If the javascript code is in an HTML file, the standard thymeleaf ``[[@{/path}]]`` syntax can be used.
+If the code is in a js file, the url will have to be passed to the script using some global variable set inside the html file:
+
+.. code-block:: html
+
+    window.myUrl = [[@{/path}]]
+
+data
+----
+The data object is a standard jQuery.ajax() data object. This means it will be converted using the jQuery conversion rules.
+
+To send some name/value pairs you could therefore use the following code:
+
+.. code-block:: javascript
+
+    var data = {};
+    data.name = "John";
+    data.surname = "Doe";
+
+The above would result in two request parameters named "name" and "surname" that can be read on the controller in the usual way:
+
+.. code-block:: java
+
+    @RequestMapping("/addUser")
+    public String addUser(String name, String surname, Model model) {
+
+To send a json object, the ``asJson`` flag must be true:
+
+.. code-block:: javascript
+
+    var data = {name: 'john', surname: 'Doe'};
+    yada.ajax(url, data, null, "POST", null, false, true);
+
+The controller will then be able to receive a converted Java object:
+
+.. code-block:: java
+
+    @RequestMapping("/addUser")
+    public String addUser(@RequestBody NameSurname data, Model model) {
+
+where ``NameSurname`` is a Java class with the ``name`` and ``surname`` String attributes.
+
+To send a "multipart/form-data" request the data object must be a FormData:
+
+.. code-block:: javascript
+
+    var data = new FormData();
+    data.append("someBinaryArray", blob);
+    data.append("someText", text);
+    yada.ajax(url, data, null, "POST");
+
+This would be equivalent to sending a form via ajax after setting its fields.
+The controller should have a ``MultipartFile`` argument for each binary part:
+
+.. code-block:: java
+
+    @RequestMapping("/addUser")
+    public String addUser(MultipartFile someBinaryArray, String someText, Model model) {
+
+More info on binary uploads can be found in :ref:`File Uploads <forms/uploads:JAVA>`.
 
 Success Handler
 ----------------

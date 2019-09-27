@@ -21,7 +21,7 @@
 	 * 	- title to show in the tooltip
 	 *  - idName the name of the id request parameter (optional - defaults to "id")
 	 * @param deleteDef object containing url and text (can be null):
-	 * 	- url that returns the edit form e.g. [[@{/gestione/ajaxDeleteTag}]]
+	 * 	- url to delete the row e.g. [[@{/gestione/ajaxDeleteTag}]]
 	 * 	- title to show in the tooltip
 	 * 	- confirmOneMessage (optional)
 	 * 	- confirmManyMessage (optional)
@@ -182,17 +182,27 @@
 		        if ( type === 'display' ) {
 		        	var buttons = '';
 		        	for (var i=0; extraButtons!=null && i<extraButtons.length; i++) {
-		        		var noRowIcon = extraButtons[i].noRowIcon;
-		        		var showRowIcon = noRowIcon!=true; // True when noRowIcon == false, false when noRowIcon == true
-		        		if (noRowIcon != null && typeof noRowIcon == "function") {
-		        			showRowIcon = noRowIcon(data, row);
+		        		var displayIconOnRow = extraButtons[i].showRowIcon;
+		        		if (displayIconOnRow==null) {
+		        			displayIconOnRow = extraButtons[i].noRowIcon; // Fallback to deprecated attribute
 		        		}
-		        		if (showRowIcon) {
+		        		if (typeof displayIconOnRow == "function") {
+		        			displayIconOnRow = displayIconOnRow(data, row);
+		        		}
+		        		if (displayIconOnRow==null) {
+		        			displayIconOnRow = true;
+		        		}
+		        		if (displayIconOnRow!=null && extraButtons[i].noRowIcon != null && extraButtons[i].showRowIcon == null) {
+		        			displayIconOnRow = !displayIconOnRow; // Invert the logic
+		        		}
+		        		if (displayIconOnRow) {
 			        		buttons +=
 			        			'<a class="yadaTableExtraButton' + i + ' yadaRowCommandButton" href="#' +
 			        			rowId + '" title="' + extraButtons[i].title + '">' + extraButtons[i].icon + '</a>';
-		        		} else {
+		        		} else if (displayIconOnRow=="disabled") {
 		        			buttons += '<span class="yadaTableExtraButton' + i + ' yadaRowCommandButton disabled" ' + 'title="' + extraButtons[i].title + '"' + '>' + extraButtons[i].icon + '</span>';
+		        		} else {
+		        			// No button
 		        		}
 		        	}
 		        	if (editDef!=null) {

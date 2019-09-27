@@ -82,7 +82,7 @@ public class YadaRegistrationRequest implements Serializable {
 	private YadaClause trattamentoDati; // Usato per visualizzare la clausola nel form, e poi per sapere quale clausola è stata accettata in fase di creazione utente
 
 	@Transient
-	private boolean trattamentoDatiAccepted=true; // usato nel form
+	private boolean trattamentoDatiAccepted=false; // usato nel form
 
 	/**
 	 * Password confirm, only used on the frontend but needed by thymeleaf to make things simpler

@@ -202,7 +202,7 @@ on modal close with :ref:`redirectOnClose <redirectOnClose>`.
 Other functionality
 ----------------------------------
 Vertically Center :yada-version:`0.3.3`
-^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 If you're using Bootstrap 4 you can vertically center the modal with the method ``center()``:
 
 .. code-block:: java
@@ -210,7 +210,7 @@ If you're using Bootstrap 4 you can vertically center the modal with the method 
 	yadaNotify.title("Login success", model).ok().message("You have been logged in").center().add();
 
 Generic modal classes :yada-version:`0.3.3`
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 You can add any class to the "modal-dialog" div by setting the ``extraDialogClasses`` Model attribute:
 
 .. code-block:: java

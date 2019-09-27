@@ -27,8 +27,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.yadaframework.components.YadaUtil;
-import net.yadaframework.exceptions.YadaInternalException;
-import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
 import net.yadaframework.web.YadaDatatablesColumn;
 import net.yadaframework.web.YadaDatatablesOrder;
@@ -37,7 +35,6 @@ import net.yadaframework.web.YadaDatatablesRequest;
 @Repository
 @Transactional(readOnly = true) 
 //TODO non considera il search su singola colonna "columns[i][search][value]", nel senso che usa solo il global search su tutte le colonne searchable
-//TODO gestire i parametri nestati più di 2 livelli (e.g. company.location.name)
 public class YadaDataTableDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
@@ -105,7 +102,7 @@ public class YadaDataTableDao {
 	 * @param yadaDatatablesRequest
 	 * @param entityClass
 	 * @param locale
-	 * @return
+	 * @return never null
 	 */
 	private <entityClass> List<Map<String, Object>> convertToJson(List<entityClass> entityPage, YadaDatatablesRequest yadaDatatablesRequest, Class<?> entityClass, Locale locale) {
 		Field idField = yadaUtil.getFieldNoTraversing(entityClass, "id");

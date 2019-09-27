@@ -100,6 +100,27 @@ public class YadaTokenHandler {
 		}
     	return result.toString();
 	}
+	
+	//Idem but without HttpServletRequest because we have the myServerAddress not null
+	/**
+	 * Return the autologin link generated from the given parameters
+	 * @param yadaAutoLoginToken
+	 * @param targetAction
+	 * @param hashCommand
+	 * @param myServerAddress
+	 * @param request
+	 * @return
+	 */
+	public String makeAutologinLink(YadaAutoLoginToken yadaAutoLoginToken, String targetAction, String hashCommand, String myServerAddress) {
+		StringBuilder result = new StringBuilder(myServerAddress);
+		result.append("/autologin/");
+		result.append(makeLink(yadaAutoLoginToken.getId(), yadaAutoLoginToken.getToken(), null));
+		result.append("?action=").append(yadaWebUtil.urlEncode(targetAction));
+		if (hashCommand!=null) {
+			result.append(hashCommand);
+		}
+		return result.toString();
+	}
 			
 	/**
 	 * Create a token-link

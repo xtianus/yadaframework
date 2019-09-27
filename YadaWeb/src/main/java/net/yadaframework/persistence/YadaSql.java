@@ -322,7 +322,7 @@ public class YadaSql implements CloneableDeep {
 
 	/**
 	 * Adds a where condition
-	 * @param enabled
+	 * @param enabled false to skip this statement. Any following and/or operator is also skipped.
 	 * @param whereConditions a condition like "where a>0" or just "a>0"
 	 * @return
 	 */
@@ -394,6 +394,11 @@ public class YadaSql implements CloneableDeep {
 		return this;
 	}
 
+	/**
+	 * Adds an AND condition if the parameter is true, but only if the previous expression was not skipped
+	 * @param enabled false to ignore this call
+	 * @return
+	 */
 	public YadaSql and(boolean enabled) {
 		if (enabled) {
 			return and();
@@ -401,6 +406,10 @@ public class YadaSql implements CloneableDeep {
 		return this;
 	}
 
+	/**
+	 * Adds an AND condition, but only if the previous expression was not skipped
+	 * @return
+	 */
 	public YadaSql and() {
 		if (lastSkipped) {
 			lastSkipped=false;
@@ -578,7 +587,19 @@ public class YadaSql implements CloneableDeep {
 		Iterator<Sort.Order> orders = pageable.getSort().iterator();
 		while (orders.hasNext()) {
 			Sort.Order order = orders.next();
-			orderBy(order.getProperty() + " " + order.getDirection());
+			// Handling of messed-up urls like "sort=publicName%252Cdesc" instead of "sort=publicName,desc" or "sort=publicName%2Cdesc"
+			// Explanation: whenever the , is converted by the client to %252C (which is a double encoded comma), the Pageable fails to parse the sort
+			// parameter and puts the decoded element ("%2C") in the property name. No problem if the comma is originally encoded to %2C because the Pageable
+			// returns a property name without %2C.
+			String property = order.getProperty(); // "publicName%2Cdesc" results from "sort=publicName%252Cdesc"
+			String direction = order.getDirection().toString();
+			String[] parts = property.split("%2C");
+			if (parts.length>1) {
+				property = parts[0];
+				direction = parts[1];
+			}
+			//
+			orderBy(property + " " + direction);
 		}
 		return this;
 	}

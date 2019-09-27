@@ -347,8 +347,9 @@
 	// e precedingSegment = "racconti", il risultato è "410".
 	// Se precedingSegment non è seguito da un valore, ritorna stringa vuota.
 	// Se precedingSegment non c'è, ritorna null
+	// The anchor is stripped
 	yada.getPathVariable = function(url, precedingSegment) {
-		var segments = yada.removeQuery(url).split('/');
+		var segments = yada.removeQuery(yada.removeHash(url)).split('/');
 		var found=false;
 		for (var i=1; i<segments.length; i++) {
 			if (segments[i]===precedingSegment) {
@@ -406,8 +407,8 @@
 				var href = $link.attr("href");
 				var confirmText = $link.attr("data-yadaConfirm") || $link.attr("data-confirm");
 				if (confirmText!=null) {
-					var okButton = $link.attr("data-okButton") || yada.messages.confirmButtons.ok;
-					var cancelButton = $link.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
+					var okButton = $link.attr("data-yadaOkButton") || $link.attr("data-okButton") || yada.messages.confirmButtons.ok;
+					var cancelButton = $link.attr("data-yadaCancelButton") || $link.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 					yada.confirm(confirmText, function(result) {
 						if (result==true) {
 							yada.loaderOn();
@@ -475,7 +476,7 @@
 		return str;
 	}
 	
-	// Elimina l'hash da un url, se presente.
+	// Elimina l'hash (anchor) da un url, se presente.
 	yada.removeHash = function(someUrl) {
 		var parts = someUrl.split('#');
 		return parts[0];

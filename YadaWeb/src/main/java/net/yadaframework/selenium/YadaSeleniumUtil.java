@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
@@ -32,7 +33,6 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -46,6 +46,7 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaConfigurationException;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.raw.YadaHttpUtil;
+import net.yadaframework.raw.YadaRegexUtil;
 
 @Component
 public class YadaSeleniumUtil {
@@ -57,7 +58,25 @@ public class YadaSeleniumUtil {
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
 	
-	YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
+	private YadaRegexUtil yadaRegexUtil = new YadaRegexUtil();
+	private YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
+	private Pattern matchNonEmptyText = Pattern.compile(".*\\w+.*"); // Match any string that contains at least a word character
+
+	
+	/**
+	 * Returns a part of the page source.
+	 * @param startPattern regular expression that matches the start of the search area, null for the beginning of the page.
+	 * The matched text is not part of the search area.
+	 * @param endPattern regular expression that matches the end of the search area, null for the end of the page
+	 * The matched text is not part of the search area.
+	 * @param extractPattern regular expression with one capturing group to search in the search area. Use null to just return the search area.
+	 * @param webDriver
+	 * @return
+	 */
+	public String getSourceSnippet(String startPattern, String endPattern, String extractPattern, WebDriver webDriver) {
+		String pageSource = webDriver.getPageSource();
+		return yadaRegexUtil.extractInRegion(pageSource, startPattern, endPattern, extractPattern);
+	}
 	
 	/**
 	 * Return a value calculated via javascript.
@@ -323,9 +342,10 @@ public class YadaSeleniumUtil {
 	 */
 	public void clickByJavascript(WebElement webElement, WebDriver webDriver, int minPercentX, int maxPercentX, int minPercentY, int maxPercentY) {
 		// Move the mouse over the element, just in case
+		// // When using the W3C Action commands, offsets are from the center of element
 		Dimension dimension = webElement.getSize();
-		int offx = (int) ThreadLocalRandom.current().nextDouble(dimension.width*minPercentX/100d, dimension.width*maxPercentX/100d+1); // Faccio +1 per evitare "bound must be greater than origin" nel caso di zero
-		int offy = (int) ThreadLocalRandom.current().nextDouble(dimension.height*minPercentY/100d, dimension.height*maxPercentY/100d+1);
+		int offx = (int) ThreadLocalRandom.current().nextDouble(dimension.width*minPercentX/100d, dimension.width*maxPercentX/100d)/2;
+		int offy = (int) ThreadLocalRandom.current().nextDouble(dimension.height*minPercentY/100d, dimension.height*maxPercentY/100d)/2;
 		Actions actions = new Actions(webDriver); 
 		actions.moveToElement(webElement, offx, offy);
 		//
@@ -341,8 +361,28 @@ public class YadaSeleniumUtil {
 	public void randomClick(WebElement webElement, WebDriver webDriver) {
 		randomClick(webElement, webDriver, 20, 80, 20, 80);
 	}
+	
 	/**
-	 * Click on the given element in a range between min and max % of the dimensions
+	 * Convert a range expressed as percentage from origin to a position from the center
+	 * @param size
+	 * @param minPercent
+	 * @param maxPercent
+	 * @return
+	 */
+	private int percentageToRandomOffsetFromCenter(int size, int minPercent, int maxPercent) {
+		double min = size*minPercent/100d;
+		double max = size*maxPercent/100d;
+		double half = size/2d;
+		double displacement = min-half;
+		double from = 0d;
+		double to = max - min;
+		double random = ThreadLocalRandom.current().nextDouble(from, to);
+		double positionFromCenter = random + displacement;
+		return (int) positionFromCenter;
+	}
+	
+	/**
+	 * Click on the given element in a range between min and max % of the dimensions.
 	 * @param webElement
 	 * @param webDriver
 	 * @param minPercentX e.g. 10
@@ -353,17 +393,22 @@ public class YadaSeleniumUtil {
 	public void randomClick(WebElement webElement, WebDriver webDriver, int minPercentX, int maxPercentX, int minPercentY, int maxPercentY) {
 		Dimension dimension = webElement.getSize();
 		// Clicco in un range compreso tra min% e max% della larghezza e altezza
-		int offx = (int) ThreadLocalRandom.current().nextDouble(dimension.width*minPercentX/100d, dimension.width*maxPercentX/100d+1); // Faccio +1 per evitare "bound must be greater than origin" nel caso di zero
-		int offy = (int) ThreadLocalRandom.current().nextDouble(dimension.height*minPercentY/100d, dimension.height*maxPercentY/100d+1);
-		if (log.isDebugEnabled()) {
-			log.debug("Clicco elemento che misura {} in {},{}", dimension, offx, offy);
-		}
+		// When using the W3C Action commands, offsets are from the center of element.
+		// Una volta l'offset era dall'angolo in basso a sinistra, ma adesso è dal centro quindi devo calcolare il nuovo offset partendo dalle percentuali
+		// relative alla dimensione totale dell'elemento.
+		
 		try {
-			if (dimension.width==0 && dimension.height==0) {
-				log.debug("Uso webElement.click()");
+			if (dimension.width==0 || dimension.height==0) {
+				log.debug("Using webElement.click() because element has no dimension");
 				webElement.click();
 			} else {
+				int offx = percentageToRandomOffsetFromCenter(dimension.width, minPercentX, maxPercentX);
+				int offy = percentageToRandomOffsetFromCenter(dimension.height, minPercentY, maxPercentY);
+				if (log.isDebugEnabled()) {
+					log.debug("Clicking on element with size {} at position ({},{}) from center", dimension, offx, offy);
+				}
 				// Clicco sull'elemento
+				// When using the W3C Action commands, offsets are from the center of element
 				Actions actions = new Actions(webDriver); 
 				actions.moveToElement(webElement, offx, offy).click().build().perform();
 			}
@@ -394,11 +439,45 @@ public class YadaSeleniumUtil {
 	}
 	
 	/**
+	 * Waits until the attribute contains some non-empty text
+	 * @param element the element to check
+	 * @param attribute the attribute of the element that must not be empty
+	 * @param webDriver
+	 * @param timeOutInSeconds
+	 */
+	public void waitUntilAttributeNotEmpty(WebElement element, String attribute, WebDriver webDriver, long timeOutInSeconds) {
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		webDriverWait.until(ExpectedConditions.attributeToBeNotEmpty(element, attribute));
+	}
+	
+	/**
+	 * Waits until the selected element contains some non-empty text (warning: this method may not work as expected)
+	 * @param element
+	 * @param webDriver
+	 * @param timeOutInSeconds
+	 * @see #waitUntilAttributeNotEmpty
+	 */
+	public void waitWhileEmptyText(WebElement element, WebDriver webDriver, long timeOutInSeconds) {
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		webDriverWait.until(ExpectedConditions.not(ExpectedConditions.textToBePresentInElement(element, "")));
+	}
+	
+	/**
+	 * Waits until the selected element contains some non-empty text
+	 * @param cssSelector
+	 * @param webDriver
+	 * @param timeOutInSeconds
+	 */
+	public void waitWhileEmptyText(String cssSelector, WebDriver webDriver, long timeOutInSeconds) {
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		webDriverWait.until(ExpectedConditions.textMatches(By.cssSelector(cssSelector), matchNonEmptyText));
+	}
+	
+	/**
 	 * Wait until the selector matches an element
 	 * @param cssSelector
 	 * @param webDriver
 	 * @param timeOutInSeconds
-	 * @param sleepInMillis
 	 */
 	public void waitUntilPresent(String cssSelector, WebDriver webDriver, long timeOutInSeconds) {
 		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
@@ -410,7 +489,6 @@ public class YadaSeleniumUtil {
 	 * @param cssSelector
 	 * @param webDriver
 	 * @param timeOutInSeconds
-	 * @param sleepInMillis
 	 */
 	public void waitUntilVisible(String cssSelector, WebDriver webDriver, long timeOutInSeconds) {
 		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
@@ -431,6 +509,16 @@ public class YadaSeleniumUtil {
 	public void waitWhileVisible(String cssSelector, WebDriver webDriver, long timeOutInSeconds) {
 		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
 		webDriverWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(cssSelector)));
+	}
+	
+	public void waitWhileVisible(WebElement webElement, WebDriver webDriver, long timeOutInSeconds) {
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		webDriverWait.until(ExpectedConditions.invisibilityOf(webElement));
+	}
+	
+	public void waitWhileVisible(List<WebElement> webElements, WebDriver webDriver, long timeOutInSeconds) {
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		webDriverWait.until(ExpectedConditions.invisibilityOfAllElements(webElements));
 	}
 	
 	private long calcSleepTimeMillis(long timeOutInSeconds) {

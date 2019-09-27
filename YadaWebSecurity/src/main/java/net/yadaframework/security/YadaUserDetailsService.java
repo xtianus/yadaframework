@@ -35,6 +35,20 @@ public class YadaUserDetailsService implements UserDetailsService {
 	@Autowired YadaUserCredentialsRepository userCredentialsRepository;
 	@Autowired YadaConfiguration yadaConfiguration;
 	
+	/**
+	 * Change the roles of the currently authenticated user, but not on the database
+	 * @param authentication the current Authentication object
+	 * @param roleIds the database ids of the needed roles
+	 */
+	public void changeCurrentRoles(Authentication authentication, int[] roleIds) {
+	    Set<GrantedAuthority> authorities = new HashSet<>();
+	    for (int roleId : roleIds) {
+	    	authorities.add(new SimpleGrantedAuthority(yadaConfiguration.getRoleSpringName(roleId)));
+		}
+	    Authentication newAuth = new UsernamePasswordAuthenticationToken(authentication.getPrincipal(), authentication.getCredentials(), authorities);
+	    SecurityContextHolder.getContext().setAuthentication(newAuth);
+	}
+	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, InternalAuthenticationException, TooManyFailedAttemptsException {
 		UserDetails result = null;
@@ -94,8 +108,8 @@ public class YadaUserDetailsService implements UserDetailsService {
 	 * Authenticate the user without setting the lastSuccessfulLogin timestamp
 	 * @param userCredentials
 	 */
-	public void authenticateAs(YadaUserCredentials userCredentials) {
-		authenticateAs(userCredentials, true);	
+	public Authentication authenticateAs(YadaUserCredentials userCredentials) {
+		return authenticateAs(userCredentials, true);	
 	}
 	
 	/**
@@ -103,7 +117,7 @@ public class YadaUserDetailsService implements UserDetailsService {
 	 * @param userCredentials
 	 * @param setTimestamp true to set the lastSuccessfulLogin timestamp
 	 */
-	public void authenticateAs(YadaUserCredentials userCredentials, boolean setTimestamp) {
+	public Authentication authenticateAs(YadaUserCredentials userCredentials, boolean setTimestamp) {
 		UserDetails userDetails = createUserDetails(userCredentials);
 		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 		SecurityContextHolder.getContext().setAuthentication(auth);
@@ -111,6 +125,7 @@ public class YadaUserDetailsService implements UserDetailsService {
 			userCredentialsRepository.updateLoginTimestamp(userCredentials.getUsername().toLowerCase());
 			userCredentialsRepository.resetFailedAttempts(userCredentials.getUsername().toLowerCase());
 		}
+		return auth;
 	}
 	
 	public void changePasswordIfAuthenticated(String username, String passwordTyped, String newPassword) throws UsernameNotFoundException, InternalAuthenticationException, BadCredentialsException {

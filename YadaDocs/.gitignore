@@ -1,5 +1,5 @@
 /.externalToolBuilders/
 /.settings/
 /.project
-/.gradle
 /build/
+/.gradle/

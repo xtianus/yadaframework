@@ -1000,15 +1000,23 @@ public class YadaUtil {
 		}
 	}
 
+	/**
+	 * Cuts the input string at the given length, optionally keeping the whole last word and adding some dots at the end
+	 * @param string text to shorten
+	 * @param length characters to keep starting from the beginning
+	 * @param breakAtWord true to keep the whole last word, false to eventually cut it
+	 * @return
+	 */
 	public String abbreviate(String string, int length, boolean breakAtWord) {
 		return abbreviate(string, length, breakAtWord, null);
 	}
 
 	/**
-	 * Accorcia una stringa mettendo "...", eventualmente senza troncare le parole
-	 * @param string
-	 * @param length
-	 * @param breakAtWord true per non troncare le parole
+	 * Cuts the input string at the given length, optionally keeping the whole last word and adding some characters at the end
+	 * @param string text to shorten
+	 * @param length characters to keep starting from the beginning
+	 * @param breakAtWord true to keep the whole last word, false to eventually cut it
+	 * @param ellipsis the characters to add at the end, use null for " [...]"
 	 * @return
 	 */
 	// Adattato da http://stackoverflow.com/questions/7738157/trim-string-in-java-while-preserve-full-word
