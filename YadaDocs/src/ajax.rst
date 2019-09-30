@@ -270,7 +270,7 @@ URL
 The url must point to the controller handling the request. If the javascript code is in an HTML file, the standard thymeleaf ``[[@{/path}]]`` syntax can be used.
 If the code is in a js file, the url will have to be passed to the script using some global variable set inside the html file:
 
-.. code-block:: javascript
+.. code-block:: html
 
     window.myUrl = [[@{/path}]]
 
