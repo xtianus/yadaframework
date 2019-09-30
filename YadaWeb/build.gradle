@@ -81,7 +81,7 @@ dependencies {
 	testImplementation 'junit:junit:4.12',
 		'org.springframework:spring-test:4.3.13.RELEASE'
 	
-	testRuntime 'commons-beanutils:commons-beanutils:1.9.3',
+	testRuntime 'commons-beanutils:commons-beanutils:1.9.4',
 		'commons-jxpath:commons-jxpath:1.3'
 		
 }
