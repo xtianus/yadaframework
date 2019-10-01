@@ -47,7 +47,20 @@ public class YadaSession<T extends YadaUserProfile> {
 		return impersonificatorUserId!=null && impersonifiedUserId!=null;
 	}
 	
+	/**
+	 * Assume the identity of the given user. Deprecated: use impersonate()
+	 * @param targetUserProfileId
+	 */
+	@Deprecated // Wrong spelling
 	public void impersonify(Long targetUserProfileId) {
+		impersonate(targetUserProfileId);
+	}
+	
+	/**
+	 * Assume the identity of the given user
+	 * @param targetUserProfileId
+	 */
+	public void impersonate(Long targetUserProfileId) {
 		impersonificatorUserId = getCurrentUserProfileId();
 		impersonifiedUserId = targetUserProfileId;
 		YadaUserCredentials targetUserCredentials = yadaUserCredentialsRepository.findByUserProfileId(targetUserProfileId);
@@ -57,10 +70,19 @@ public class YadaSession<T extends YadaUserProfile> {
 	}
 	
 	/**
-	 * Terminates impersonification.
-	 * @return true if the impersonification was active, false if it was not active.
+	 * Use depersonate() instead.
+	 * @return
 	 */
+	@Deprecated // Use depersonate()
 	public boolean depersonify() {
+		return depersonate();
+	}
+	
+	/**
+	 * Terminates impersonation.
+	 * @return true if the impersonation was active, false if it was not active.
+	 */
+	public boolean depersonate() {
 		if (isImpersonificationActive()) {
 			YadaUserCredentials originalCredentials = yadaUserCredentialsRepository.findByUserProfileId(impersonificatorUserId);
 			yadaUserDetailsService.authenticateAs(originalCredentials);

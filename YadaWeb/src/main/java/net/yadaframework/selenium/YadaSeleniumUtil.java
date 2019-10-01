@@ -208,6 +208,20 @@ public class YadaSeleniumUtil {
 	 * @return
 	 */
 	public WebDriver makeWebDriver(File customProfileDir, InetSocketAddress proxyToUse, Set<Cookie> cookiesToSet, int driverType) {
+		return this.makeWebDriver(customProfileDir, proxyToUse, cookiesToSet, driverType, null);
+	}	
+	
+	/**
+	 * Create a new browser instance positioning the window 
+	 * @param customProfileDir the folder where to store the user profile, can be null to use the default temporary profile. The folder is created when missing.
+	 * @param proxy
+	 * @param cookiesToSet cookies to set after the first get of a document. Can be null or empty. Cookies are set only when a 
+	 * cookie with the same name has not been received. It's not possible to set cookies BEFORE the first get (by design of WebDriver).
+	 * @param driverType DRIVER_FIREFOX, DRIVER_CHROME
+	 * @param userAgent the user agent string, null for keeping the current browser's default. Not implemented for Firefox.
+	 * @return
+	 */
+	public WebDriver makeWebDriver(File customProfileDir, InetSocketAddress proxyToUse, Set<Cookie> cookiesToSet, int driverType, String userAgent) {
 		final Set<Cookie> initialCookies = new HashSet<Cookie>();
 		if (cookiesToSet!=null) {
 			// Make a copy because we need to clear the set later
@@ -236,6 +250,9 @@ public class YadaSeleniumUtil {
 				((FirefoxOptions)capability).addArguments("-profile", path);
 				// capability.setCapability(FirefoxOptions.FIREFOX_OPTIONS, options);
 			}
+			if (userAgent!=null) {
+				log.error("Custom User Agent for Firefox not implemented yet"); // Don't know how to implement it
+			}
 			break;
 		case DRIVER_CHROME:
 			capability = new ChromeOptions();
@@ -246,6 +263,10 @@ public class YadaSeleniumUtil {
 				log.debug("Setting Chrome user profile folder to {}", path);
 				((ChromeOptions)capability).addArguments("user-data-dir=" + path);
 				// capability.setCapability(ChromeOptions.CAPABILITY, options);
+			}
+			if (userAgent!=null) {
+				log.debug("Setting Chrome user agent to {}", userAgent);
+				((ChromeOptions)capability).addArguments("user-agent=" + userAgent);
 			}
 			break;
 		default:
