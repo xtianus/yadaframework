@@ -880,6 +880,30 @@
 	}
 	
 	/**
+	 * Download ajax-received data
+	 */
+	yada.downloadData = function(data, filename, mimeType) {
+		/*if (filename==null || filename.trim()=="") {
+			filename = ""
+		}*/
+		var blob = new Blob([data], {type : mimeType});
+		var link = document.createElement("a");
+		link.href = URL.createObjectURL(blob);
+		link.download = filename;
+		link.style="display: none;";
+		document.body.appendChild(link);
+		link.click();
+	}
+	
+	/*
+	$.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
+		if (options.url.match(/.*\.pdf/)) {
+			return 'binary';
+		}
+	});
+	*/
+	
+	/**
 	 * Esegue una get/post ajax passando data (stringa od oggetto). Gestisce il caso che sia necessario il login.
 	 * Il metodo chiamato lato java può ritornare un notify chiamando yadaWebUtil.modalOk() o anche yadaWebUtil.modalError() etc.
 	 * In caso di notify di un errore, l'handler non viene chiamato.
@@ -941,6 +965,14 @@
 			success: function(responseText, statusText, jqXHR) {
 				var responseTrimmed = "";
 				var responseObject = null;
+				/* Didn't find a way to prevent binary to text conversion that corrupts the pdf
+				var contentType = jqXHR.getResponseHeader("Content-Type");
+				if (yada.startsWith(contentType, "application/pdf")) {
+					var contentDisposition = jqXHR.getResponseHeader("Content-Disposition");
+					var filename = yada.getAfter(contentDisposition, "filename=");
+					yada.downloadData(responseText, filename, "application/pdf");
+				}
+				*/
 				if (typeof responseText == "string") {
 					responseTrimmed = responseText.trim();
 				} else if (typeof responseText == "object") {
