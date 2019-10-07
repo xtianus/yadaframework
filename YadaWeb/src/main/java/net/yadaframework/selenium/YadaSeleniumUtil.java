@@ -201,7 +201,7 @@ public class YadaSeleniumUtil {
 	/**
 	 * Create a new browser instance positioning the window 
 	 * @param customProfileDir the folder where to store the user profile, can be null to use the default temporary profile. The folder is created when missing.
-	 * @param proxy
+	 * @param proxyToUse the address of the proxy, or null for direct connection
 	 * @param cookiesToSet cookies to set after the first get of a document. Can be null or empty. Cookies are set only when a 
 	 * cookie with the same name has not been received. It's not possible to set cookies BEFORE the first get (by design of WebDriver).
 	 * @param driverType DRIVER_FIREFOX, DRIVER_CHROME
@@ -214,7 +214,7 @@ public class YadaSeleniumUtil {
 	/**
 	 * Create a new browser instance positioning the window 
 	 * @param customProfileDir the folder where to store the user profile, can be null to use the default temporary profile. The folder is created when missing.
-	 * @param proxy
+	 * @param proxyToUse the address of the proxy, or null for direct connection
 	 * @param cookiesToSet cookies to set after the first get of a document. Can be null or empty. Cookies are set only when a 
 	 * cookie with the same name has not been received. It's not possible to set cookies BEFORE the first get (by design of WebDriver).
 	 * @param driverType DRIVER_FIREFOX, DRIVER_CHROME
@@ -227,16 +227,19 @@ public class YadaSeleniumUtil {
 			// Make a copy because we need to clear the set later
 			initialCookies.addAll(cookiesToSet);
 		}
-		Proxy browserProxy = new Proxy();
-		String proxyHost = proxyToUse.getHostName();
-		if (proxyHost.equals("0:0:0:0:0:0:0:0")) {
-			proxyHost = "localhost";
+		Proxy browserProxy = null;
+		if (proxyToUse!=null) {
+			browserProxy = new Proxy();
+			String proxyHost = proxyToUse.getHostName();
+			if (proxyHost.equals("0:0:0:0:0:0:0:0")) {
+				proxyHost = "localhost";
+			}
+			int proxyPort = proxyToUse.getPort();
+			log.debug("Setting browser proxy to {}:{}", proxyHost, proxyPort);
+			browserProxy.setHttpProxy(proxyHost + ":" + proxyPort);
+			browserProxy.setSslProxy(proxyHost + ":" + proxyPort);
+			browserProxy.setProxyType(ProxyType.MANUAL);
 		}
-		int proxyPort = proxyToUse.getPort();
-		log.debug("Setting browser proxy to {}:{}", proxyHost, proxyPort);
-		browserProxy.setHttpProxy(proxyHost + ":" + proxyPort);
-		browserProxy.setSslProxy(proxyHost + ":" + proxyPort);
-		browserProxy.setProxyType(ProxyType.MANUAL);
 		
 		MutableCapabilities capability;
 		switch (driverType) {
@@ -276,7 +279,9 @@ public class YadaSeleniumUtil {
 		// Attenzione: da Firefox 48 sembra che il proxy si debba settare diversamente:
 		// http://www.seleniumhq.org/docs/04_webdriver_advanced.jsp
 		
-		capability.setCapability(CapabilityType.PROXY, browserProxy);
+		if (browserProxy!=null) {
+			capability.setCapability(CapabilityType.PROXY, browserProxy);
+		}
 		URL remoteAddress;
 		try {
 			remoteAddress = new URL(config.getSeleniumHubAddress());
