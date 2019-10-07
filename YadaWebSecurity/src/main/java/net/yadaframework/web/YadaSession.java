@@ -31,31 +31,36 @@ public class YadaSession<T extends YadaUserProfile> {
 
 	protected Long impersonificatorUserId = null;
 	protected Long impersonifiedUserId = null;
-	protected Long loggedInUserProfileId = null; // id of the current logged in user, be it "real" or "impersonificated"
-	
+	protected Long loggedInUserProfileId = null; // id of the current logged in user, be it "real" or "impersonated"
+
 	public void clearUserProfileCache() {
 		loggedInUserProfileId = null;
 	}
-	
+
 	public void clearCaches() {
 		impersonificatorUserId = null;
 		loggedInUserProfileId = null;
 		impersonifiedUserId = null;
 	}
-	
+
+	@Deprecated // use isImpersonationActive()
 	public boolean isImpersonificationActive() {
+		return isImpersonationActive();
+	}
+
+	public boolean isImpersonationActive() {
 		return impersonificatorUserId!=null && impersonifiedUserId!=null;
 	}
-	
+
 	/**
 	 * Assume the identity of the given user. Deprecated: use impersonate()
 	 * @param targetUserProfileId
 	 */
-	@Deprecated // Wrong spelling
+	@Deprecated // use impersonate()
 	public void impersonify(Long targetUserProfileId) {
 		impersonate(targetUserProfileId);
 	}
-	
+
 	/**
 	 * Assume the identity of the given user
 	 * @param targetUserProfileId
@@ -68,7 +73,7 @@ public class YadaSession<T extends YadaUserProfile> {
 		loggedInUserProfileId = targetUserProfileId;
 		log.info("Impersonification by #{} as {} started", impersonificatorUserId, targetUserCredentials);
 	}
-	
+
 	/**
 	 * Use depersonate() instead.
 	 * @return
@@ -77,13 +82,13 @@ public class YadaSession<T extends YadaUserProfile> {
 	public boolean depersonify() {
 		return depersonate();
 	}
-	
+
 	/**
 	 * Terminates impersonation.
 	 * @return true if the impersonation was active, false if it was not active.
 	 */
 	public boolean depersonate() {
-		if (isImpersonificationActive()) {
+		if (isImpersonationActive()) {
 			YadaUserCredentials originalCredentials = yadaUserCredentialsRepository.findByUserProfileId(impersonificatorUserId);
 			yadaUserDetailsService.authenticateAs(originalCredentials);
 			log.info("Impersonification by {} ended", originalCredentials);
@@ -94,7 +99,7 @@ public class YadaSession<T extends YadaUserProfile> {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Check if the current user has the role "ADMIN"
 	 * @return
@@ -106,18 +111,18 @@ public class YadaSession<T extends YadaUserProfile> {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Check if the argument userProfile is the same as the currently logged-in one
 	 * @param someUserProfile
 	 * @return
 	 */
 	public boolean isLoggedUser(T someUserProfile) {
-		return someUserProfile!=null && 
+		return someUserProfile!=null &&
 			someUserProfile.getId()!=null &&
 			someUserProfile.getId().equals(loggedInUserProfileId);
 	}
-	
+
 	/**
 	 * Returns the id of the YadaUserProfile for the currently logged-in user
 	 * @return the id or null
@@ -131,7 +136,7 @@ public class YadaSession<T extends YadaUserProfile> {
 		}
 		return loggedInUserProfileId;
 	}
-	
+
 	/**
 	 * Returns the currently logged-in user profile
 	 * @return
@@ -142,6 +147,6 @@ public class YadaSession<T extends YadaUserProfile> {
 		}
 		return loggedInUserProfileId==null?null:yadaUserProfileRepository.findOne(loggedInUserProfileId);
 	}
-	
-	
+
+
 }
