@@ -251,11 +251,11 @@ public class YadaDataTableDao {
 			}
 		}
 		YadaSql yadaSql = yadaDatatablesRequest.getYadaSql();
-		YadaSql countSql = (YadaSql) YadaUtil.copyEntity(yadaSql); // Copy any conditions set before calling
+		YadaSql countSql = (YadaSql) YadaUtil.copyEntity(yadaSql, true); // Copy any conditions set before calling
 		YadaSql searchSql = YadaSql.instance();
 		
 		yadaSql.selectFrom("select distinct e from "+targetClass.getSimpleName()+" e");
-		countSql.selectFrom("select count(*) from "+targetClass.getSimpleName()+" e");
+		countSql.selectFrom("select count(distinct e.id) from "+targetClass.getSimpleName()+" e");
 		
 		// Searching
 		List<YadaDatatablesColumn> yadaDatatablesColumns = yadaDatatablesRequest.getColumns();

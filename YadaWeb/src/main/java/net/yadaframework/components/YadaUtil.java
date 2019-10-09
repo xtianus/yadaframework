@@ -1185,12 +1185,23 @@ public class YadaUtil {
 			log.debug("Failed to set field {}", field.getName());
 		}
 	}
+	
+	private static void copyProvidedValue(boolean setFieldDirectly, Field field, Method getter, Method setter, Object newValue, Object target) {
+		try {
+			if (setFieldDirectly) {
+				field.set(target, newValue);
+			} else {
+				setter.invoke(target, newValue);
+			}
+		} catch (Exception e) {
+			log.debug("Failed to set field {}", field.getName());
+		}
+	}
 
 //	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target) {
 //		copyFields(source, sourceClass, target, false);
 //	}
 
-	// TODO StringBuilder is not cloned (as it doesn't implement CloneableFiltered)
 	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target, boolean setFieldDirectly) {
 		log.debug("Copio oggetto {} di tipo {}", source, sourceClass);
 		Field[] fields = sourceClass.getDeclaredFields();
@@ -1295,6 +1306,16 @@ public class YadaUtil {
 								CloneableFiltered fieldValue = setFieldDirectly ? (CloneableFiltered) field.get(source) : (CloneableFiltered) getter.invoke(source);
 								copyValue(setFieldDirectly, field, getter, setter, source, target, YadaUtil.copyEntity(fieldValue, setFieldDirectly)); // deep but detached
 //								setter.invoke(target, YadaUtil.copyEntity(fieldValue)); // deep but detached
+							} else if (isType(fieldType, StringBuilder.class)) {
+								// String builder/buffer is cloned otherwise changes to the original object would be reflected in the new one
+								StringBuilder fieldValue = setFieldDirectly ? (StringBuilder) field.get(source) : (StringBuilder) getter.invoke(source);
+								StringBuilder fieldClone = new StringBuilder(fieldValue.toString());
+								copyProvidedValue(setFieldDirectly, field, getter, setter, fieldClone, target);
+							} else if (isType(fieldType, StringBuffer.class)) {
+								// String builder/buffer is cloned otherwise changes to the original object would be reflected in the new one
+								StringBuffer fieldValue = setFieldDirectly ? (StringBuffer) field.get(source) : (StringBuffer) getter.invoke(source);
+								StringBuffer fieldClone = new StringBuffer(fieldValue.toString());
+								copyProvidedValue(setFieldDirectly, field, getter, setter, fieldClone, target);
 							} else {
 								// E' un oggetto normale, per cui copio il riferimento
 								copyValue(setFieldDirectly, field, getter, setter, source, target);
