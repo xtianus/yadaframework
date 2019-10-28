@@ -1126,10 +1126,22 @@ public class YadaUtil {
 	}
 
 	public static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly) {
+		Map<CloneableFiltered, Object> alreadyCopiedMap = new HashMap<>();
+		return copyEntity(source, classObject, setFieldDirectly, alreadyCopiedMap);
+	}
+
+	private static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap) {
 		if (source==null) {
 			return null;
 		}
 		Class<?> sourceClass = source.getClass();
+
+		// Needed to avoid infinite recursion if a value holds a reference to the parent
+		Object alreadyCopied = alreadyCopiedMap.get(source);
+		if (alreadyCopied!=null) {
+			log.debug("Reusing already copied object {}", alreadyCopied);
+			return alreadyCopied;
+		}
 
 		try {
 			// The constructor may be private, so don't just use newInstance()
@@ -1141,11 +1153,12 @@ public class YadaUtil {
 				target = classObject.newInstance();
 			}
 
-			copyFields(source, sourceClass, target, setFieldDirectly);
+			alreadyCopiedMap.put(source, target); // Needed to avoid infinite recursion if a value holds a reference to the parent
+			copyFields(source, sourceClass, target, setFieldDirectly, alreadyCopiedMap);
 			Class<?> superclass = sourceClass.getSuperclass();
 			while (superclass!=null && superclass!=Object.class) {
 				sourceClass = superclass;
-				copyFields(source, sourceClass, target, setFieldDirectly);
+				copyFields(source, sourceClass, target, setFieldDirectly, alreadyCopiedMap);
 				superclass = sourceClass.getSuperclass();
 			}
 			return target;
@@ -1185,7 +1198,7 @@ public class YadaUtil {
 			log.debug("Failed to set field {}", field.getName());
 		}
 	}
-	
+
 	private static void copyProvidedValue(boolean setFieldDirectly, Field field, Method getter, Method setter, Object newValue, Object target) {
 		try {
 			if (setFieldDirectly) {
@@ -1202,13 +1215,14 @@ public class YadaUtil {
 //		copyFields(source, sourceClass, target, false);
 //	}
 
-	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target, boolean setFieldDirectly) {
+	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap) {
 		log.debug("Copio oggetto {} di tipo {}", source, sourceClass);
 		Field[] fields = sourceClass.getDeclaredFields();
 		Field[] excludedFields = source.getExcludedFields();
 		List<Field>filteredFields = excludedFields!=null? (List<Field>) Arrays.asList(excludedFields):new ArrayList<>();
 		for (int i = 0; i < fields.length; i++) {
 			Field field = fields[i];
+			log.debug("Copying field {}", field.getName());
 			field.setAccessible(true);
 			// "id" viene filtrato d'ufficio, per detacchare l'oggetto
 			if ("id".equals(field.getName()) || filteredFields.contains(field)) {
@@ -1261,8 +1275,11 @@ public class YadaUtil {
 						if (isType(fieldType, Collection.class)) {
 							// E' una collection, quindi copio solo i contenuti.
 							// E' importante che il costruttore del target abbia istanziato il field con una collection vuota.
-							Collection sourceCollection = (Collection) getter.invoke(source); // La collection di partenza, serve per i contenuti
-							Collection targetCollection = (Collection) getter.invoke(target); // La collection di destinazione da riempire
+							// Collection sourceCollection = (Collection) getter.invoke(source); // La collection di partenza, serve per i contenuti
+							// Collection targetCollection = (Collection) getter.invoke(target); // La collection di destinazione da riempire
+							Collection sourceCollection = setFieldDirectly ? (Collection) field.get(source) : (Collection) getter.invoke(source);
+							Collection targetCollection = setFieldDirectly ? (Collection) field.get(target) : (Collection) getter.invoke(target);
+
 							if (targetCollection==null) {
 								// Se il costruttore non istanzia la mappa, ne creo una arbitrariamente di tipo ArrayList
 								targetCollection = new ArrayList();
@@ -1273,7 +1290,7 @@ public class YadaUtil {
 							// per questi faccio la copia deep.
 							for (Object value : sourceCollection) {
 								if (isType(value.getClass(), CloneableDeep.class)) {
-									targetCollection.add(YadaUtil.copyEntity((CloneableFiltered) value)); // deep
+									targetCollection.add(YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap)); // deep
 								} else {
 									targetCollection.add(value); // shallow
 								}
@@ -1293,7 +1310,7 @@ public class YadaUtil {
 							for (Object key : sourceMap.keySet()) {
 								Object value = sourceMap.get(key);
 								if (isType(value.getClass(), CloneableDeep.class)) {
-									targetMap.put(key, YadaUtil.copyEntity((CloneableFiltered) value)); // deep
+									targetMap.put(key, YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap)); // deep
 								} else {
 									targetMap.put(key, value); // shallow
 								}
@@ -1304,7 +1321,7 @@ public class YadaUtil {
 							if (isType(fieldType, CloneableDeep.class)) {
 								// Siccome implementa CloneableDeep, lo duplico deep
 								CloneableFiltered fieldValue = setFieldDirectly ? (CloneableFiltered) field.get(source) : (CloneableFiltered) getter.invoke(source);
-								copyValue(setFieldDirectly, field, getter, setter, source, target, YadaUtil.copyEntity(fieldValue, setFieldDirectly)); // deep but detached
+								copyValue(setFieldDirectly, field, getter, setter, source, target, YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap)); // deep but detached
 //								setter.invoke(target, YadaUtil.copyEntity(fieldValue)); // deep but detached
 							} else if (isType(fieldType, StringBuilder.class)) {
 								// String builder/buffer is cloned otherwise changes to the original object would be reflected in the new one
@@ -1349,8 +1366,20 @@ public class YadaUtil {
 		return found;
 	}
 
-	private static boolean isTypeNoSuperclass(Class<?> fieldType, Class requiredType) {
-		return fieldType!=null && (fieldType.equals(requiredType) || (Arrays.asList(fieldType.getInterfaces()).contains(requiredType)));
+	private static boolean isTypeNoSuperclass(Class<?> fieldType, Class<?> requiredType) {
+		if (fieldType==null) {
+			return false;
+		}
+		if (fieldType.equals(requiredType)) {
+			return true;
+		}
+		Class<?>[] interfaces = fieldType.getInterfaces();
+		for (Class<?> iface : interfaces) {
+			if (isTypeNoSuperclass(iface, requiredType)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 //	/**
