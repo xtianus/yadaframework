@@ -880,6 +880,29 @@
 	}
 	
 	/**
+	 * Download ajax-received data
+	 */
+	yada.downloadData = function(data, filename, mimeType) {
+		/*if (filename==null || filename.trim()=="") {
+			filename = ""
+		}*/
+		var blob = new Blob([data], {type : mimeType});
+		yada.downloadBlob(blob, filename);
+	}
+	
+	/**
+	 * Download ajax-received data
+	 */
+	yada.downloadBlob = function(blob, filename) {
+		var link = document.createElement("a");
+		link.href = URL.createObjectURL(blob);
+		link.download = filename;
+		link.style="display: none;";
+		document.body.appendChild(link);
+		link.click();
+	}
+	
+	/**
 	 * Esegue una get/post ajax passando data (stringa od oggetto). Gestisce il caso che sia necessario il login.
 	 * Il metodo chiamato lato java può ritornare un notify chiamando yadaWebUtil.modalOk() o anche yadaWebUtil.modalError() etc.
 	 * In caso di notify di un errore, l'handler non viene chiamato.
@@ -891,8 +914,9 @@
 	 * @param timeout milliseconds timeout, null for default (set by the browser)
 	 * @param hideLoader true for not showing the loader
 	 * @param asJson true to send a JSON.stringify(data) with "application/json;charset=UTF-8"
+	 * @param responseType set the response type, for example "blob" for downloading binary data (e.g. a pdf file)
 	 */
-	yada.ajax = function(url, data, successHandler, method, timeout, hideLoader, asJson) {
+	yada.ajax = function(url, data, successHandler, method, timeout, hideLoader, asJson, responseType) {
 		if (method==null) {
 			method="GET"
 		}
@@ -911,12 +935,17 @@
 		if (hideLoader!=true) {
 			yada.loaderOn();
 		}
+		var xhrFields = {};
+		if (responseType!=null) {
+			xhrFields.responseType = responseType;
+		}
 		$.ajax({
 			type: method,
 			url: url,
 			data: data,
 			processData: processData,
 			contentType: contentType,
+			xhrFields: xhrFields,
 			error: function(jqXHR, textStatus, errorThrown ) { 
 				yada.loaderOff();
 				// textStatus is "error", "timeout", "abort", or"parsererror"
@@ -941,6 +970,13 @@
 			success: function(responseText, statusText, jqXHR) {
 				var responseTrimmed = "";
 				var responseObject = null;
+				if (responseText instanceof Blob) {
+					var contentDisposition = jqXHR.getResponseHeader("Content-Disposition");
+					var filename = yada.getAfter(contentDisposition, "filename=");
+					yada.downloadBlob(responseText, filename);
+					yada.loaderOff();
+					return;
+				}
 				if (typeof responseText == "string") {
 					responseTrimmed = responseText.trim();
 				} else if (typeof responseText == "object") {

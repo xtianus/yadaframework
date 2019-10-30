@@ -74,12 +74,15 @@ public class YadaWebUtil {
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
 
+
 	/**
-	 * Copies the content of a file to the Request then deletes the file.
+	 * Copies the content of a file to the Response then deletes the file.
 	 * To be used when the client needs to download a previously-created temporary file that you don't want to keep on server.
-	 * @param tempFilename the name (without path) of the existing temporary file
+	 * Remember to set the "produces" attribute on the @RequestMapping with the appropriate content-type.
+	 * @param tempFilename the name (without path) of the existing temporary file, created with Files.createTempFile()
 	 * @param contentType the content-type header
 	 * @param clientFilename the filename that will be used on the client browser
+	 * @param response the HTTP response
 	 * @return true if the file was sent without errors
 	 */
 	public boolean downloadTempFile(String tempFilename, String contentType, String clientFilename, HttpServletResponse response) {
@@ -97,7 +100,22 @@ public class YadaWebUtil {
 			log.error("Error sending temporary file to client", e);
 			return false;
 		}
-		try (InputStream resultStream = Files.newInputStream(tempFile)) {
+		return downloadFile(tempFile, true, contentType, clientFilename, response);
+	}
+
+	/**
+	 * Copies the content of a file to the Response then deletes the file.
+	 * To be used when the client needs to download a previously-created file that you don't want to keep on server.
+	 * Remember to set the "produces" attribute on the @RequestMapping with the appropriate content-type.
+	 * @param fileToDownload the existing file to download and delete
+	 * @param thenDeleteFile true to delete the file when download ends (or fails)
+	 * @param contentType the content-type header
+	 * @param clientFilename the filename that will be used on the client browser
+	 * @param response the HTTP response
+	 * @return true if the file was sent without errors
+	 */
+	public boolean downloadFile(Path fileToDownload, boolean thenDeleteFile, String contentType, String clientFilename, HttpServletResponse response) {
+		try (InputStream resultStream = Files.newInputStream(fileToDownload)) {
 			response.setContentType(contentType);
 			response.setHeader("Content-Disposition", "attachment; filename=" + clientFilename);
 			StreamUtils.copy(resultStream, response.getOutputStream()); // StreamUtils doesn't close any stream
@@ -105,9 +123,11 @@ public class YadaWebUtil {
 		} catch (IOException e) {
 			log.error("Can't send temporary file to client", e);
 		} finally {
-			boolean deleted = yadaUtil.deleteFileSilently(tempFile);
-			if (!deleted) {
-				log.error("Temporary file could not be deleted: {}", tempFile);
+			if (thenDeleteFile) {
+				boolean deleted = yadaUtil.deleteFileSilently(fileToDownload);
+				if (!deleted) {
+					log.error("Temporary file could not be deleted: {}", fileToDownload);
+				}
 			}
 		}
 		return false;

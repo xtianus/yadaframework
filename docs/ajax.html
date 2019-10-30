@@ -439,7 +439,7 @@ showFeedbackIfNeeded</p>
 <div class="section" id="ajax-method">
 <h2>5.5. Ajax method<a class="headerlink" href="#ajax-method" title="Permalink to this headline">¶</a></h2>
 <p>You can call the low-level yada.ajax() method directly.</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">yada</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">successHandler</span><span class="p">,</span> <span class="nx">method</span><span class="p">,</span> <span class="nx">timeout</span><span class="p">,</span> <span class="nx">hideLoader</span><span class="p">,</span> <span class="nx">asJson</span><span class="p">)</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">yada</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">successHandler</span><span class="p">,</span> <span class="nx">method</span><span class="p">,</span> <span class="nx">timeout</span><span class="p">,</span> <span class="nx">hideLoader</span><span class="p">,</span> <span class="nx">asJson</span><span class="p">,</span> <span class="nx">responseType</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -475,6 +475,11 @@ showFeedbackIfNeeded</p>
 </li>
 <li><dl class="simple">
 <dt>asJson</dt><dd><p>(optional) true to send the data object as json without splitting the attributes into request parameters</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>responseType</dt><dd><p>(optional) the XMLHttpRequest.responseType; use “blob” to download binary data like a pdf file</p>
 </dd>
 </dl>
 </li>

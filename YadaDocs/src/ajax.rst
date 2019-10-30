@@ -246,7 +246,7 @@ You can call the low-level yada.ajax() method directly.
 
 .. code-block:: javascript
 
-	yada.ajax(url, data, successHandler, method, timeout, hideLoader, asJson)
+	yada.ajax(url, data, successHandler, method, timeout, hideLoader, asJson, responseType)
 
 - url
 	the server address to call
@@ -262,6 +262,8 @@ You can call the low-level yada.ajax() method directly.
 	(optional) true for not showing the spinning loader (shown by default)
 - asJson
 	(optional) true to send the data object as json without splitting the attributes into request parameters
+- responseType
+	(optional) the XMLHttpRequest.responseType; use "blob" to download binary data like a pdf file
 
 Everything that applies to the other forms of invocation (opening modals, showing login pages, ...) also applies.
 

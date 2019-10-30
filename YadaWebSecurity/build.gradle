@@ -31,14 +31,14 @@ repositories {
 
 dependencies {
 	api 'org.thymeleaf.extras:thymeleaf-extras-springsecurity4:3.0.4.RELEASE',
-		'org.springframework.security:spring-security-config:4.2.4.RELEASE',
+		'org.springframework.security:spring-security-config:4.2.13.RELEASE',
 		'org.apache.tomcat:tomcat-servlet-api:8.0.48'
 
     implementation	project(':YadaWeb'),
     	'org.springframework:spring-webmvc:4.3.13.RELEASE',
     	'org.springframework:spring-context-support:4.3.13.RELEASE',
  		'org.thymeleaf:thymeleaf-spring4:3.0.11.RELEASE',
-    	'org.springframework.security:spring-security-web:4.2.4.RELEASE',
+    	'org.springframework.security:spring-security-web:4.2.13.RELEASE',
 		'org.springframework.data:spring-data-jpa:1.11.9.RELEASE',
 		'org.hibernate:hibernate-entitymanager:5.3.7.Final',
 		'org.hibernate:hibernate-validator:5.4.2.Final',

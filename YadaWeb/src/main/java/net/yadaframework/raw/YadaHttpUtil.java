@@ -375,13 +375,16 @@ public class YadaHttpUtil {
 	 * @return
 	 */
 	public String relativeToAbsolute(String currentFullAddress, String newRelativeAddress) {
+		// TODO check for cases where currentFullAddress does not end with / and newRelativeAddress does not start with /
 		String prefix = currentFullAddress;
 		char start = newRelativeAddress.charAt(0);
 		if (start!='?' && start!='#') {
 			if (start=='/') {
 				int from = currentFullAddress.indexOf("//");
 				int cutPos = currentFullAddress.indexOf("/", from+2);
-				prefix = currentFullAddress.substring(0, cutPos);
+				if (cutPos>-1) {
+					prefix = currentFullAddress.substring(0, cutPos);
+				}
 			} else {
 				prefix = currentFullAddress.substring(0, currentFullAddress.lastIndexOf('/')+1);
 			}
