@@ -1491,15 +1491,33 @@ public class YadaUtil {
 		return YadaUtil.roundBackToMidnight(new GregorianCalendar());
 	}
 
+	/**
+	 * Adds or removes the days. The original object is cloned.
+	 * @param calendar
+	 * @param minutes
+	 * @return
+	 */
 	public static Calendar addDaysClone(Calendar source, int days) {
 		return addDays((Calendar) source.clone(), days);
 	}
 
+	/**
+	 * Adds or removes the days. The original object is modified.
+	 * @param calendar
+	 * @param minutes
+	 * @return
+	 */
 	public static Calendar addDays(Calendar calendar, int days) {
 		calendar.add(Calendar.DAY_OF_YEAR, days);
 		return calendar;
 	}
 
+	/**
+	 * Adds or removes the minutes. The original object is modified.
+	 * @param calendar
+	 * @param minutes
+	 * @return
+	 */
 	public static Calendar addMinutes(Calendar calendar, int minutes) {
 		calendar.add(Calendar.MINUTE, minutes);
 		return calendar;
