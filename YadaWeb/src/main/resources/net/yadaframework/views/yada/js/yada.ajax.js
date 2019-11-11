@@ -1062,7 +1062,7 @@
 						// Keep going...
 					}
 				}
-				// If it is a full page, overwrite the current one
+				// If it is a full page, overwrite the current one. The class .yadafullPage must not be on the body
 				if ($('.yadafullPage', responseHtml).length>0 || $('.s_fullPage', responseHtml).length>0) {
 					showFullPage(responseText);
 					yada.loaderOff();

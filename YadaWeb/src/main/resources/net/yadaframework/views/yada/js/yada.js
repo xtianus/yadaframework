@@ -255,8 +255,12 @@
 		return url+anchor;
 	};
 	
-	// Modifica o aggiunge un parametro di request alla url. La url può anche essere solo la location.search e può essere vuota
+	// Modifica o aggiunge un parametro di request alla url. La url può anche essere solo la location.search e può essere vuota.
+	// if papram is null or empty, the url is unchanged.
 	yada.addOrUpdateUrlParameter = function(url, param, value, addQuestionMark) {
+		if (param==null || param=="") {
+			return url;
+		}
 		if (yada.hasUrlParameter(url, param)) {
 			return yada.updateUrlParameter(url, param, value);
 		}

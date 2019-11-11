@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://www.yadaframework.net" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
+<!--/*
+A component to crop a set of uploaded images to "desktop" and/or "mobile" size.
+Parameters:
+- cropQueue = A YadaCropQueue object, usually found with @yadaSession.cropQueue (use your own YadaSession subclass as needed)
+
+Message keys:
+- yada.crop.legendDesktopKey
+- yada.crop.legendMobileKey
+- yada.crop.cropSubmit
+
+Example:
+<div th:replace="~{/yadacms/imageCropper::component(cropQueue=${@yadaSession.cropQueue})}"></div>
+<div th:replace="~{/yadacms/imageCropper::component(cropQueue=${@mySession.cropQueue})}"></div>
+
+*/-->
+<body>
+<th:block th:fragment="component">
+
+	<div th:with="cropImage=${cropQueue.currentImage}" class="yadaImageCropper">
+	
+		<form id="yadaCropForm" th:action="@{${cropQueue.cropPerformAction}}">
+			<div class="yadaDesktop">
+				<input class="yadax" type="hidden" name="desktopCrop['x']" value="">
+				<input class="yaday" type="hidden" name="desktopCrop['y']" value="">
+				<input class="yadaw" type="hidden" name="desktopCrop['w']" value="">
+				<input class="yadah" type="hidden" name="desktopCrop['h']" value="">
+			</div>
+			<div class="yadaMobile">
+				<input class="yadax" type="hidden" name="mobileCrop['x']" value="">
+				<input class="yaday" type="hidden" name="mobileCrop['y']" value="">
+				<input class="yadaw" type="hidden" name="mobileCrop['w']" value="">
+				<input class="yadah" type="hidden" name="mobileCrop['h']" value="">
+			</div>
+			
+			<div class="form-group">
+				<img th:src="@{${cropImage.sourceUrl}}" id="yadaCropImage">
+				<div>[[${cropImage.imageToCrop.dimension}]]</div>
+			</div>
+			
+			<div class="form-group legend">
+				<p th:if="${cropImage.cropDesktop}" class="yadaDesktop active">
+					<span></span> <span th:text="#{yada.crop.legendDesktopKey}">Legend for desktop goes here</span>
+					<span id="yadaDesktopCropSize"><span>???</span>x<span>???</span></span> ([[${cropImage.targetDesktopDimension}]])
+				</p>
+				<p th:if="${cropImage.cropMobile}" class="yadaMobile">
+					<span></span> <span th:text="#{yada.crop.legendMobileKey}">Legend for mobile goes here</span>
+					<span id="yadaMobileCropSize"><span>???</span>x<span>???</span></span> ([[${cropImage.targetMobileDimension}]])
+				</p>
+			</div>
+			
+			<input class="btn btn-default" type="submit" th:value="#{yada.crop.cropSubmit}">
+		</form>
+		
+		<script th:inline="javascript">
+			"use strict";
+			
+			function makeFittingRectangle(imageWidth, imageHeight, aspectRatio) {
+				// Finds the biggest rectangle that fits the given dimensions with the aspectRatio specified
+				var w = imageWidth;
+				var h = Math.round(imageWidth/aspectRatio);
+				if (h>imageHeight) {
+					h = imageHeight;
+					w = Math.round(imageHeight*aspectRatio);
+				}
+				return Jcrop.Rect.create(0, 0, w, h);
+			}
+			
+			function forceSize(widget, scale, targetWidth, targetHeight) {
+				widget.pos.w = targetWidth / scale;
+				widget.el.style.width=widget.pos.w+"px";
+				widget.pos.h = targetHeight / scale;
+				widget.el.style.height=widget.pos.h+"px";
+			}
+			
+			function setData(widget, type, scale, targetWidth, targetHeight) {
+				// Do not allow images smaller than target
+				if (widget.pos.w*scale < targetWidth || widget.pos.h*scale < targetHeight) {
+					forceSize(widget, scale, targetWidth, targetHeight);
+				}
+				//
+				var capitalType = type.charAt(0).toUpperCase() + type.slice(1)
+				$(".yada"+capitalType+" input.yadax").val(Math.round(widget.pos.x*scale));
+				$(".yada"+capitalType+" input.yaday").val(Math.round(widget.pos.y*scale));
+				$(".yada"+capitalType+" input.yadaw").val(Math.round(widget.pos.w*scale));
+				$(".yada"+capitalType+" input.yadah").val(Math.round(widget.pos.h*scale));
+				$("#yada"+capitalType+"CropSize span:first-child").text(Math.round(widget.pos.w*scale));
+				$("#yada"+capitalType+"CropSize span:last-child").text(Math.round(widget.pos.h*scale));
+			}
+			
+			function makeDesktopWidget(jcrop, sourceWidth, sourceHeight, scale) {
+				var targetWidth = [[${cropImage.targetDesktopDimension.width}]];
+				var targetHeight = [[${cropImage.targetDesktopDimension.height}]];
+				var aspect = [[${cropImage.targetDesktopProportions}]];
+				//
+				var initialCrop = makeFittingRectangle(sourceWidth, sourceHeight, aspect);
+				var desktop = jcrop.newWidget(initialCrop, { aspectRatio: aspect });
+				$(desktop.el).addClass("yadaDesktop");
+				desktop.listen('crop.update',(widget,e) => {
+					setData(widget, 'desktop', scale, targetWidth, targetHeight);
+				});
+				$(".legend .yadaDesktop").click(function(){
+					jcrop.activate(desktop);
+				});
+				desktop.listen('crop.activate',(widget,e) => {
+					$("#yadaCropForm .legend p.active").removeClass("active");
+					$("#yadaCropForm .legend p.yadaDesktop").addClass("active");
+				});
+				setData(desktop, 'desktop', scale);
+			}
+			
+			function makeMobileWidget(jcrop, sourceWidth, sourceHeight, scale) {
+				var targetWidth = [[${cropImage.targetMobileDimension.width}]];
+				var targetHeight = [[${cropImage.targetMobileDimension.height}]];
+				var aspect = [[${cropImage.targetMobileProportions}]];
+				//
+				var initialCrop = makeFittingRectangle(sourceWidth, sourceHeight, aspect);
+				var mobile = jcrop.newWidget(initialCrop, { aspectRatio: aspect });
+				$(mobile.el).addClass("yadaMobile");
+				mobile.listen('crop.update',(widget,e) => {
+					setData(widget, 'mobile', scale, targetWidth, targetHeight);
+				});
+				$(".legend .yadaMobile").click(function(){
+					jcrop.activate(mobile);
+				});
+				mobile.listen('crop.activate',(widget,e) => {
+					$("#yadaCropForm .legend p.active").removeClass("active");
+					$("#yadaCropForm .legend p.yadaMobile").addClass("active");
+				});
+				setData(mobile, 'mobile', scale);
+			}
+			
+			function handleCrop(jcrop, imageRect) {
+				var sourceWidth = [[${cropImage.imageToCrop.dimension.width}]];
+				var sourceHeight = [[${cropImage.imageToCrop.dimension.height}]];
+				var scale = sourceWidth / imageRect.w;
+				
+				[# th:if="${cropImage.cropMobile}"]
+					makeMobileWidget(jcrop, sourceWidth, sourceHeight, scale);
+				[/]
+	
+				[# th:if="${cropImage.cropDesktop}"] {
+					makeDesktopWidget(jcrop, sourceWidth, sourceHeight, scale);
+				[/] }
+			}
+			
+			Jcrop.load('yadaCropImage').then(function(img) {
+				// Initialise after image has finished loading
+				var jcp = Jcrop.attach(img);
+				var rect = Jcrop.Rect.from(jcp.el);
+				handleCrop(jcp, rect);
+			});
+			
+		</script>
+		
+	</div>
+		
+</th:block>    	
+</body>
+</html>
+

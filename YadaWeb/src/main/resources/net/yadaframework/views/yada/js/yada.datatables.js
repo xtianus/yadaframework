@@ -471,7 +471,7 @@
 			} else {
 				ids = [id];
 			}
-			var idName = extraButtonDef.idName || "id";
+			var idName = extraButtonDef.idName==null ? "id" : extraButtonDef.idName;
 			var noLoader = extraButtonDef.noLoader || false;
 			var param = (ids.length>1?ids:ids[0]); // Either send one id or all of them
 			if (extraButtonDef.ajax === false) {
@@ -479,7 +479,9 @@
 				return;
 			}
 			var requestData = {};
-			requestData[idName] = param;
+			if (idName!="") {
+				requestData[idName] = param;
+			}
 			var handler = function(responseText, responseHtml) {
 				dataTable.draw(false); // Always reload table content on return from ajax call (there could be no modal)
 				yada.datatableDrawOnModalClose(dataTable);

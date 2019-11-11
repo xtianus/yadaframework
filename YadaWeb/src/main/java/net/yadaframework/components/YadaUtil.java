@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -47,6 +48,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.FileImageInputStream;
+import javax.imageio.stream.ImageInputStream;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -72,6 +77,7 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.exceptions.YadaSystemException;
+import net.yadaframework.raw.YadaIntDimension;
 import sogei.utility.UCheckDigit;
 import sogei.utility.UCheckNum;
 
@@ -97,6 +103,31 @@ public class YadaUtil {
     public void init() {
 		defaultLocale = config.getDefaultLocale();
     }
+
+	/**
+	 * Gets image dimensions for given file, or null
+	 * @param imageFile image file
+	 * @return dimensions of image, or null when not found
+	 */
+	// Adapted from https://stackoverflow.com/a/12164026/587641
+	public YadaIntDimension getImageDimension(File imageFile) {
+		String suffix = getFileExtension(imageFile);
+		Iterator<ImageReader> iter = ImageIO.getImageReadersBySuffix(suffix);
+		while (iter.hasNext()) {
+			ImageReader reader = iter.next();
+			try(ImageInputStream stream = new FileImageInputStream(imageFile))  {
+				reader.setInput(stream);
+				int width = reader.getWidth(reader.getMinIndex());
+				int height = reader.getHeight(reader.getMinIndex());
+				return new YadaIntDimension(width, height);
+			} catch (IOException e) {
+				log.debug("Error reading dimensions for {} using reader {}", imageFile, reader, e);
+			} finally {
+				reader.dispose();
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Returns the current stack trace as a string, formatted on separate lines
@@ -160,7 +191,7 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity.
+	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity or normal java instance made with new.
 	 * Post processing (@PostConstruct etc) and initialization are also performed.
 	 * @param instance to autowire
 	 * @return the autowired/initialized bean instance, either the original or a wrapped one
@@ -781,6 +812,117 @@ public class YadaUtil {
 	}
 
 	/**
+	 * Run an external shell command.
+	 * @param command the shell command to run, without parameters
+	 * @param args optional command line parameters. Can be null for no parameters. Each parameter can have spaces without delimiting quotes.
+	 * @param optional substitutionMap key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
+	 * pair is like "key"-->"value". If the value is a collection, arguments are unrolled so key-->collection will result in key0=val0 key1=val1...
+	 * @param optional outputStream ByteArrayOutputStream that will contain the command output (out + err)
+	 * @return the command exit value
+	 * @throws IOException
+	 */
+	public int shellExec(String command, List<String> args, Map substitutionMap, ByteArrayOutputStream outputStream) throws IOException {
+		if (outputStream==null) {
+			// The outputstream is needed so that execution does not block. Will be discarded.
+			outputStream = new ByteArrayOutputStream();
+		}
+		try {
+			CommandLine commandLine = new CommandLine(command);
+			if (args!=null) {
+				Pattern keyPattern = Pattern.compile("\\$\\{([^}]+)}"); // ${PARAMNAME}
+				for (String arg : args) {
+					boolean added=false;
+					// Convert collections to multiple arguments when needed
+					if (substitutionMap!=null) {
+						Matcher m = keyPattern.matcher(arg);
+						if (m.find()) {
+							String key = m.group(1); // PARAMNAME
+							Object values = substitutionMap.get(key);
+							if (values instanceof Collection) {
+								// The parameter had a collection in the substitution map
+								int countArg=0;
+								added=true;
+								for (Object extractedValue : (Collection)values) {
+									String newKey = key + countArg; // PARAMNAME0
+									String newArg = "${" + newKey  + "}"; // ${PARAMNAME0}
+									// The original parameter is replaced with a new indexed parameter and its value is added to the substitution map
+									commandLine.addArgument(newArg, false); // Don't handle quoting
+									substitutionMap.put(newKey, extractedValue);
+									countArg++;
+								}
+							}
+						}
+					}
+					if (!added) {
+						// Add a parameter that didn't have a collection parameter in it
+						commandLine.addArgument(arg, false); // Don't handle quoting
+					}
+				}
+			}
+			if (log.isDebugEnabled() && substitutionMap!=null) {
+				for (Object keyObj : substitutionMap.keySet()) {
+					String key = (String) keyObj;
+					log.debug("{}={}", key, substitutionMap.get(key));
+					if (key.startsWith("{") || key.startsWith("${")) { // Checking { just for extra precaution
+						log.error("Invalid substitution {}: should NOT start with ${", key);
+					}
+				}
+			}
+			if (substitutionMap!=null) {
+				commandLine.setSubstitutionMap(substitutionMap);
+			}
+			DefaultExecutor executor = new DefaultExecutor();
+			ExecuteWatchdog watchdog = new ExecuteWatchdog(60000); // Kill after 60 seconds
+			executor.setWatchdog(watchdog);
+			// Output and Error go together
+			PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream);
+			executor.setStreamHandler(streamHandler);
+			log.debug("Executing shell command: {}", StringUtils.join(commandLine, " "));
+			int exitValue = executor.execute(commandLine);
+			if (exitValue!=0) {
+				log.error("Shell command exited with {}", exitValue);
+			}
+			log.debug("Shell command output: {}", outputStream.toString());
+			return exitValue;
+		} catch (IOException e) {
+			log.error("Shell command output: {}", outputStream.toString());
+			log.error("Failed to execute shell command: {} {} {}", command, args!=null?args.toArray():"", substitutionMap!=null?substitutionMap:"", e);
+			throw e;
+		} finally {
+			closeSilently(outputStream);
+		}
+	}
+
+	/**
+	 * Run an external shell command without keyword substitution in the parameters.
+	 * @param command the shell command to run, without parameters
+	 * @param args command line literal parameters. Can be null for no parameters. Each parameter can have spaces without delimiting quotes.
+	 * @param optional outputStream ByteArrayOutputStream that will contain the command output (out + err)
+	 * @return the command exit value
+	 * @throws IOException
+	 */
+	public int shellExec(String command, List<String> args, ByteArrayOutputStream outputStream) throws IOException {
+		return shellExec(command, args, null, outputStream);
+	}
+
+	/**
+	 * Run an external shell command that has been defined in the configuration file.
+	 * @param shellCommandKey xpath key of the shell command, e.g. "config/shell/cropImage"
+	 * @param optional substitutionMap key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
+	 * pair is like "key"-->"value". If the value is a collection, arguments are unrolled so key-->collection will result in key0=val0 key1=val1...
+	 * @param optional outputStream ByteArrayOutputStream that will contain the command output (out + err)
+	 * @return the command exit value
+	 * @throws IOException
+	 */
+	public int shellExec(String shellCommandKey, Map substitutionMap, ByteArrayOutputStream outputStream) throws IOException {
+		String executable = config.getString(shellCommandKey + "/executable");
+		// Need to use getProperty() to avoid interpolation on ${} arguments
+		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
+		List<String> args = (List<String>) config.getConfiguration().getProperty(shellCommandKey + "/arg");
+		return shellExec(executable, args, substitutionMap, outputStream);
+	}
+
+	/**
 	 * Esegue un comando di shell
 	 * @param command comando
 	 * @param args lista di argomenti (ogni elemento puo' contenere spazi), puo' essere null
@@ -789,6 +931,7 @@ public class YadaUtil {
 	 * @param outputStream ByteArrayOutputStream che conterrà l'output del comando (out + err)
 	 * @return the error message (will be empty for a return code >0), or null if there was no error
 	 */
+	@Deprecated // use shellExec() instead
 	public String exec(String command, List<String> args, Map substitutionMap, ByteArrayOutputStream outputStream) {
 		int exitValue=1;
 		try {
@@ -853,6 +996,7 @@ public class YadaUtil {
 	 * @param outputStream ByteArrayOutputStream che conterrà l'output del comando
 	 * @return the error message (will be empty for a return code >0), or null if there was no error
 	 */
+	@Deprecated // use shellExec() instead
 	public String exec(String command, List<String> args, ByteArrayOutputStream outputStream) {
 		int exitValue=1;
 		try {
@@ -866,6 +1010,9 @@ public class YadaUtil {
 			PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
 			executor.setStreamHandler(streamHandler);
 			log.debug("Executing shell command: {}", commandLine);
+			if (args!=null) {
+				log.debug("Command args: {}", args.toArray());
+			}
 			exitValue = executor.execute(commandLine);
 		} catch (Exception e) {
 			log.error("Failed to execute shell command: " + command + " " + args, e);
@@ -881,6 +1028,7 @@ public class YadaUtil {
 	 * pair is like "key"-->"value"
 	 * @return true if successful
 	 */
+	@Deprecated // use shellExec() instead
 	public boolean exec(String shellCommandKey, Map substitutionMap) {
 		String executable = config.getString(shellCommandKey + "/executable");
 		// Need to use getProperty() to avoid interpolation on ${} arguments

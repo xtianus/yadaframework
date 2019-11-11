@@ -14,7 +14,6 @@ import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -140,7 +139,7 @@ public class YadaWebUtil {
 	 * in the url (and any parameters at the end too).
 	 * @param targetUrl the redirect target, like "/some/place"
 	 * @param locale can be null if the locale is not in the path, but then why use this method?
-	 * @param params optional request parameters to be set on the url
+	 * @param params optional request parameters to be set on the url, in the form of comma-separated name,value pairs. E.g. id,123,name,"joe"
 	 * @return a url like "redirect:/en/some/place?par1=val1&par2=val2"
 	 */
 	public String redirectString(String url, Locale locale, String...params) {
@@ -152,7 +151,7 @@ public class YadaWebUtil {
 	 * Creates a new URL string from a starting one, taking into account the locale in the path and optional url parameters.
 	 * @param url the original url, like "/some/place"
 	 * @param locale added as a path in the url, only if the url is absolute. Can be null if the locale is not needed in the path
-	 * @param params optional request parameters to be set on the url
+	 * @param params optional request parameters to be set on the url, in the form of comma-separated name,value pairs. E.g. id,123,name,"joe"
 	 * @return a url like "/en/some/place?par1=val1&par2=val2"
 	 */
 	public String enhanceUrl(String url, Locale locale, String...params) {
@@ -277,7 +276,7 @@ public class YadaWebUtil {
 	 * Save an uploaded file to a temporary file
 	 * @param attachment
 	 * @return the temporary file holding the uploaded file, or null if no file has bee attached
-	 * @throws IOException
+	 * @throws IOException, IllegalStateException
 	 */
 	public File saveAttachment(MultipartFile attachment) throws IOException {
 		if (!attachment.isEmpty()) {
@@ -292,24 +291,27 @@ public class YadaWebUtil {
 	 * Save an uploaded file to the given target file
 	 * @param attachment
 	 * @param targetPath
-	 * @throws IOException
+	 * @throws IOException, IllegalStateException
 	 */
 	public void saveAttachment(MultipartFile attachment, Path targetPath) throws IOException {
-		try (InputStream inputStream = attachment.getInputStream(); OutputStream outputStream = new FileOutputStream(targetPath.toFile())) {
-			IOUtils.copy(inputStream, outputStream);
-		}
+		saveAttachment(attachment, targetPath.toFile());
+		//		try (InputStream inputStream = attachment.getInputStream(); OutputStream outputStream = new FileOutputStream(targetPath.toFile())) {
+		//			IOUtils.copy(inputStream, outputStream);
+		//		}
 	}
 
 	/**
 	 * Save an uploaded file to the given target file
 	 * @param attachment
 	 * @param targetFile
-	 * @throws IOException
+	 * @throws IOException, IllegalStateException
 	 */
 	public void saveAttachment(MultipartFile attachment, File targetFile) throws IOException {
-		try (InputStream inputStream = attachment.getInputStream(); OutputStream outputStream = new FileOutputStream(targetFile)) {
-			IOUtils.copy(inputStream, outputStream);
-		}
+		attachment.transferTo(targetFile);
+		//
+		//		try (InputStream inputStream = attachment.getInputStream(); OutputStream outputStream = new FileOutputStream(targetFile)) {
+		//			IOUtils.copy(inputStream, outputStream);
+		//		}
 	}
 
 	/**
