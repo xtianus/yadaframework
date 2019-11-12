@@ -89,7 +89,7 @@ public class YadaIntDimension implements java.io.Serializable {
     }
 
     /**
-     * Returns true if at least one dimension is bigger than the corresponding argument and the other one is not smaller.
+     * Returns true if both dimensions are not smaller than the argument, nor both equal.
      * @param yadaIntDimension can be null
      * @return
      */
@@ -102,7 +102,7 @@ public class YadaIntDimension implements java.io.Serializable {
     }
 
     /**
-     * Returns true if at least one dimension is smaller than the corresponding argument and the other one is not bigger.
+     * Returns true if both dimensions are not bigger than the argument, nor both equal.
      * @param yadaIntDimension can be null
      * @return
      */
@@ -112,6 +112,30 @@ public class YadaIntDimension implements java.io.Serializable {
     	}
     	return !this.isEqualTo(yadaIntDimension) &&
 			this.width <= yadaIntDimension.width && this.height <= yadaIntDimension.height;
+    }
+
+    /**
+     * Returns true if at least one dimension is bigger.
+     * @param yadaIntDimension can be null
+     * @return
+     */
+    public boolean isAnyBiggerThan(YadaIntDimension yadaIntDimension) {
+    	if (yadaIntDimension==null) {
+    		return true;
+    	}
+    	return this.width > yadaIntDimension.width || this.height > yadaIntDimension.height;
+    }
+
+    /**
+     * Returns true if at least one dimension is smaller.
+     * @param yadaIntDimension can be null
+     * @return
+     */
+    public boolean isAnySmallerThan(YadaIntDimension yadaIntDimension) {
+    	if (yadaIntDimension==null) {
+    		return true;
+    	}
+    	return this.width < yadaIntDimension.width || this.height < yadaIntDimension.height;
     }
 
     /**

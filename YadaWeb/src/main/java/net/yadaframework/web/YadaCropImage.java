@@ -25,8 +25,6 @@ public class YadaCropImage {
 	private YadaAttachedFile yadaAttachedFile = null;	// File to replace or to create
 
 	private String titleKey; // key in messages.properties for the title of the crop page
-	private String legendDesktopKey; // key in messages.properties for the desktop legend of the crop page
-	private String legendMobileKey; // key in messages.properties for the mobile legend of the crop page
 
 	private boolean cropDesktop = false; 	// True to crop for desktop image
 	private boolean cropMobile = false;		// True to crop for mobile image
@@ -127,9 +125,8 @@ public class YadaCropImage {
 	 * Enables image cropping for desktop size
 	 * @return
 	 */
-	public YadaCropImage cropDesktop(String legendDesktopKey) {
+	public YadaCropImage cropDesktop() {
 		this.cropDesktop = true;
-		this.legendDesktopKey = legendDesktopKey;
 		return this;
 	}
 
@@ -137,9 +134,8 @@ public class YadaCropImage {
 	 * Enables image cropping for mobile size
 	 * @return
 	 */
-	public YadaCropImage cropMobile(String legendMobileKey) {
+	public YadaCropImage cropMobile() {
 		this.cropMobile = true;
-		this.legendMobileKey = legendMobileKey;
 		return this;
 	}
 
@@ -232,24 +228,6 @@ public class YadaCropImage {
 	@SuppressWarnings("unused") // Use titleKey() instead
 	private void setTitleKey(String titleKey) {
 		this.titleKey = titleKey;
-	}
-
-	public String getLegendDesktopKey() {
-		return legendDesktopKey;
-	}
-
-	@SuppressWarnings("unused") // Use cropDesktop() instead
-	private void setLegendDesktopKey(String legendDesktopKey) {
-		this.legendDesktopKey = legendDesktopKey;
-	}
-
-	public String getLegendMobileKey() {
-		return legendMobileKey;
-	}
-
-	@SuppressWarnings("unused") // Use cropMobile() instead
-	private void setLegendMobileKey(String legendMobileKey) {
-		this.legendMobileKey = legendMobileKey;
 	}
 
 }

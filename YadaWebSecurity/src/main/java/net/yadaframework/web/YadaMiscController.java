@@ -95,11 +95,13 @@ public class YadaMiscController {
 		YadaManagedFile sourceManagedFile = yadaCropImage.getImageToCrop();
 		File imageToCropFile = sourceManagedFile.getAbsoluteFile();
 		YadaAttachedFile yadaAttachedFile = yadaCropImage.getYadaAttachedFile();
-		File destinationFile = yadaAttachedFile.getAbsoluteFile(type, config);
 		String targetExtension = config.getTargetImageExtension(); // "jpg"
-		if (destinationFile==null) {
-			destinationFile = yadaAttachedFile.calcAndSetTargetFile(yadaCropImage.getTargetNamePrefix(), targetExtension, type, targetDimension, config);
+		// Always set a new target file to prevent cache issues
+		File destinationFile = yadaAttachedFile.getAbsoluteFile(type, config);
+		if (destinationFile!=null) {
+			destinationFile.delete();
 		}
+		destinationFile = yadaAttachedFile.calcAndSetTargetFile(yadaCropImage.getTargetNamePrefix(), targetExtension, type, targetDimension, config);
 		Map<String, String> params = new HashMap<>();
 		params.put("FILENAMEIN", imageToCropFile.getAbsolutePath());
 		params.put("FILENAMEOUT", destinationFile.getAbsolutePath());

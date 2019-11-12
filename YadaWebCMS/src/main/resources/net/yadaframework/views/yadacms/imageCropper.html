@@ -23,7 +23,7 @@ Example:
 
 	<div th:with="cropImage=${cropQueue.currentImage}" class="yadaImageCropper">
 	
-		<form id="yadaCropForm" th:action="@{${cropQueue.cropPerformAction}}">
+		<form id="yadaCropForm" th:action="@{${cropQueue.cropPerformAction}}" class="yadaShowLoader">
 			<div class="yadaDesktop">
 				<input class="yadax" type="hidden" name="desktopCrop['x']" value="">
 				<input class="yaday" type="hidden" name="desktopCrop['y']" value="">

@@ -162,7 +162,8 @@ public class YadaAttachedFile implements CloneableDeep {
 		String[] filenameParts = YadaUtil.splitFileNameAndExtension(this.clientFilename);
 		String origFilename = filenameParts[0];
 		String origExtension = filenameParts[1]; // e.g. jpg or pdf
-		String targetFilenamePrefix = StringUtils.trimToEmpty(namePrefix) + origFilename + COUNTER_SEPARATOR + this.id; // product_2631
+		String anticache = String.format("%x", System.currentTimeMillis()); // To prevent cache issues when changing image file
+		String targetFilenamePrefix = StringUtils.trimToEmpty(namePrefix) + origFilename + COUNTER_SEPARATOR + this.id + COUNTER_SEPARATOR + anticache; // product_2631_38f74g
 		targetFilenamePrefix = YadaUtil.reduceToSafeFilename(targetFilenamePrefix, true);
 		if (targetExtension==null) {
 			targetExtension = origExtension;
