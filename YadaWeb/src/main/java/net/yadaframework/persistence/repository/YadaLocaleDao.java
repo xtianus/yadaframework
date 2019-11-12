@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -25,17 +24,17 @@ import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.persistence.YadaSql;
 
 /**
- * Locale-related operations on entities 
+ * Locale-related operations on entities
  */
 @Repository
-@Transactional(readOnly = true) 
+@Transactional(readOnly = true)
 public class YadaLocaleDao {
-	
+
     @Autowired private YadaConfiguration config;
     @Autowired private JdbcTemplate jdbcTemplate;
 
     @PersistenceContext private EntityManager em;
-    
+
     /**
      * Finds all entities of the given type, then initializes all localized string attributes defined as Map&lt;Locale, String>
      * @param entityClass
@@ -45,11 +44,11 @@ public class YadaLocaleDao {
     	@SuppressWarnings("unchecked")
 		List<entityClass> result = (List<entityClass>) YadaSql.instance().selectFrom("from " + entityClass.getSimpleName())
     		.query(em, entityClass).getResultList();
-    	
+
     	YadaUtil.prefetchLocalizedStringList(result, entityClass);
     	return result;
     }
-    
+
     /**
      * Finds an object of the given id, then initializes all localized string attributes defined as Map&lt;Locale, String>
      * @param entityId
@@ -64,25 +63,41 @@ public class YadaLocaleDao {
     	}
     	return entity;
     }
-    
+
+    /**
+     * Finds an object of the given id, then initializes all localized string attributes defined as Map&lt;Locale, String>
+     * with recursion on the fields.
+     * @param entityId
+     * @param entityClass
+     * @return
+     */
+   public <entityClass> entityClass findOneWithLocalValuesRecursive(Long entityId, Class<?> entityClass) {
+    	@SuppressWarnings("unchecked")
+    	entityClass entity = (entityClass) em.find(entityClass, entityId);
+    	if (entity!=null) {
+    		YadaUtil.prefetchLocalizedStringsRecursive(entity, entityClass);
+    	}
+    	return entity;
+    }
+
     /**
      * Get the localized value of an entity's attribute
      * @param entity the entity instance
      * @param attributeName the name of the attribute that must be defined as Map<Locale, String>
-     * @return the localized value in the current locale, or in the default configured locale if the value is not set for that locale, 
+     * @return the localized value in the current locale, or in the default configured locale if the value is not set for that locale,
      * or an empty string if no value is found.
      */
    public String getLocalValue(Object entity, String attributeName) {
     	return getLocalValue(entity, attributeName, null);
     }
-    
+
     /**
      * Get the localized value of an entity's attribute
      * @param entity the entity instance
      * @param attributeName the name of the attribute that must be defined as Map<Locale, String>
      * @param locale the locale for the value, use null for the current request locale
      * @param returnNull (optional) true if null must be returned when no value is present instead of the empty string
-     * @return the localized value in the specified locale, or in the default configured locale if the value is not set for that locale, 
+     * @return the localized value in the specified locale, or in the default configured locale if the value is not set for that locale,
      * or an empty string if no value is found or null if no value is found and returnNull is true.
      */
     public String getLocalValue(Object entity, String attributeName, Locale locale, Boolean... returnNull) {
@@ -95,7 +110,7 @@ public class YadaLocaleDao {
 			throw new YadaInternalException("Can't get local value for object " + entity + " attribute " + attributeName, e);
 		}
     }
-    
+
     /**
      * Get the localized value of an entity's attribute
      * @param entityId the id of the entity
@@ -103,7 +118,7 @@ public class YadaLocaleDao {
      * @param attributeName the name of the attribute that must be defined as Map<Locale, String>
      * @param locale the locale for the value, use null for the current request locale
      * @param returnNull (optional) true if null must be returned when no value is present instead of the empty string
-     * @return the localized value in the specified locale, or in the default configured locale if the value is not set for that locale, 
+     * @return the localized value in the specified locale, or in the default configured locale if the value is not set for that locale,
      * or an empty string if no value is found or null if no value is found and returnNull is true.
      */
     public String getLocalValue(long entityId, Class<?> entityClass, String attributeName, Locale locale, Boolean... returnNull) {
@@ -152,7 +167,7 @@ public class YadaLocaleDao {
     		return false;
     	}
     }
-    
+
     private String findClass(Class<?> entityClass, String attributeName) {
     	String className = entityClass.getSimpleName();
     	String tableName = className + "_" + attributeName;

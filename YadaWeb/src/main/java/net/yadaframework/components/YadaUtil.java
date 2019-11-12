@@ -332,6 +332,7 @@ public class YadaUtil {
 								Class fieldClass = field.getType();
 								List secondLevel = new ArrayList<>();
 								secondLevel.add(fieldValue);
+								// TODO shouldn't this call prefetchLocalizedStringListRecursive()?
 								prefetchLocalizedStringList(secondLevel, fieldClass, attributes);
 							}
 						} catch (Exception e) {
