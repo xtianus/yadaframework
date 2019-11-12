@@ -81,7 +81,7 @@ public class YadaFileManager {
 	 * Makes a copy of just the filesystem files. New names are generated from the old ones by appending an incremental number.
 	 * The source YadaAttachedFile is updated with the new names. The old files are not deleted.
 	 * Use case: you clone an instance of YadaAttachedFile with YadaUtil.copyEntity() then you need to copy its files too.
-	 * @param yadaAttachedFile
+	 * @param yadaAttachedFile a copy of another YadaAttachedFile
 	 * @return the saved YadaAttachedFile
 	 * @throws IOException
 	 */

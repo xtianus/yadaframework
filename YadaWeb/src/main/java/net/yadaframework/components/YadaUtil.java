@@ -77,6 +77,7 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.exceptions.YadaSystemException;
+import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.raw.YadaIntDimension;
 import sogei.utility.UCheckDigit;
 import sogei.utility.UCheckNum;
@@ -87,6 +88,8 @@ public class YadaUtil {
 
 	@Autowired private YadaConfiguration config;
     @Autowired private AutowireCapableBeanFactory autowireCapableBeanFactory; // For autowiring entities
+
+    static private YadaFileManager yadaFileManager;
 
     static ApplicationContext applicationContext; 	// To access the ApplicationContext from anywhere
     static public MessageSource messageSource; 		// To access the MessageSource from anywhere
@@ -102,6 +105,7 @@ public class YadaUtil {
 	@PostConstruct
     public void init() {
 		defaultLocale = config.getDefaultLocale();
+		yadaFileManager = getBean(YadaFileManager.class);
     }
 
 	/**
@@ -1324,8 +1328,8 @@ public class YadaUtil {
 	 * @param field
 	 * @param getter
 	 * @param setter
-	 * @param source
-	 * @param target
+	 * @param source object containing the value to copy
+	 * @param target object where to copy the value
 	 * @param args
 	 */
 	private static void copyValue(boolean setFieldDirectly, Field field, Method getter, Method setter, Object source, Object target, Object... args) {
@@ -1470,8 +1474,13 @@ public class YadaUtil {
 							if (isType(fieldType, CloneableDeep.class)) {
 								// Siccome implementa CloneableDeep, lo duplico deep
 								CloneableFiltered fieldValue = setFieldDirectly ? (CloneableFiltered) field.get(source) : (CloneableFiltered) getter.invoke(source);
-								copyValue(setFieldDirectly, field, getter, setter, source, target, YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap)); // deep but detached
+								Object clonedValue = YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap); // deep but detached
+								copyValue(setFieldDirectly, field, getter, setter, source, target, clonedValue);
 //								setter.invoke(target, YadaUtil.copyEntity(fieldValue)); // deep but detached
+								// For YadaAttachedFile objects, duplicate the file on disk too
+								if (isType(fieldType, YadaAttachedFile.class)) {
+									yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+								}
 							} else if (isType(fieldType, StringBuilder.class)) {
 								// String builder/buffer is cloned otherwise changes to the original object would be reflected in the new one
 								StringBuilder fieldValue = setFieldDirectly ? (StringBuilder) field.get(source) : (StringBuilder) getter.invoke(source);

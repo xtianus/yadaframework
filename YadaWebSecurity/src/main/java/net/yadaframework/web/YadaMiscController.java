@@ -102,6 +102,7 @@ public class YadaMiscController {
 			destinationFile.delete();
 		}
 		destinationFile = yadaAttachedFile.calcAndSetTargetFile(yadaCropImage.getTargetNamePrefix(), targetExtension, type, targetDimension, config);
+		destinationFile.getParentFile().mkdirs(); // Ensure the target folder exists
 		Map<String, String> params = new HashMap<>();
 		params.put("FILENAMEIN", imageToCropFile.getAbsolutePath());
 		params.put("FILENAMEOUT", destinationFile.getAbsolutePath());
