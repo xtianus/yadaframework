@@ -1,9 +1,26 @@
 /* Bootstrap theme overrides */
 
-h1 {
-	text-decoration: underline;
+.toctree-wrapper ul {
+    list-style-type: none;
 }
 
+.toctree-wrapper > ul {
+	padding-left: 0;
+}
+
+.toctree-l1 > a {
+	color: black;
+    font-size: 2rem;
+}
+
+.toctree-l2 > a {
+    font-size: 1.7rem;
+}
+
+/* h1 {
+	text-decoration: underline;
+}
+ */
 h3 {
 	font-size: 22px;
 }
@@ -67,4 +84,18 @@ a.copybtn {
 
 .yadaversion::before {
 	content: 'since ';
+}
+
+.admonition.tip:before {
+	content: 'Design Decision';
+	font-weight: bold;
+}
+.admonition.tip {
+	background-color: white;
+	background-image: none;
+	color: #156900;
+	border-color: #156900;
+}
+.admonition.tip .admonition-title {
+	display: none;
 }
