@@ -418,3 +418,12 @@ input.yadaSwitch-round:checked ~ label:after {
 .yadaImageCropper {
 	margin: 50px 0;
 }
+
+.yadaUploadedImages {
+	width: 80%;
+    margin: 50px auto;
+}
+
+.yadaUploadedImages a {
+	cursor: zoom-in;
+}

@@ -32,6 +32,7 @@ import net.yadaframework.exceptions.YadaConfigurationException;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.persistence.entity.YadaClause;
+import net.yadaframework.raw.YadaIntDimension;
 
 /**
  * Classe che estende CombinedConfiguration aggiungendo metodi di gestione della configurazione specifici.
@@ -84,6 +85,35 @@ public abstract class YadaConfiguration {
 	private boolean defaultLocaleChecked = false;
 	private Map<String, SortedSet<Entry<Integer,String>>> localSetCache = new HashMap<>(); // Deprecated
 	private String targetImageExtension=null;
+
+
+	/**
+	 * Get the width/height of an image, for desktop and mobile
+	 * @param relativeKey the key like "/product/gallery", relative to "config/dimension"
+	 * @return { desktopWidth, mobileWidth }, the cell is null when not configured
+	 */
+	protected YadaIntDimension[] getImageDimensions(String relativeKey) {
+		YadaIntDimension[] result = new YadaIntDimension[2];
+		String widthHeight = configuration.getString("config/dimension" + relativeKey + "/desktop", null);
+		YadaIntDimension desktop = null;
+		if (widthHeight!=null) {
+			String[] parts = widthHeight.split(",");
+			int width = Integer.parseInt(parts[0]);
+			int height = Integer.parseInt(parts[1]);
+			desktop = new YadaIntDimension(width, height);
+		}
+		result[0] = desktop;
+		widthHeight = configuration.getString("config/dimension" + relativeKey + "/mobile", null);
+		YadaIntDimension mobile = null;
+		if (widthHeight!=null) {
+			String[] parts = widthHeight.split(",");
+			int width = Integer.parseInt(parts[0]);
+			int height = Integer.parseInt(parts[1]);
+			mobile = new YadaIntDimension(width, height);
+		}
+		result[1] = mobile;
+		return result;
+	}
 
 	/**
 	 * Returns the image extension (without dot) to use when uploading user images. Defaults to "jpg".

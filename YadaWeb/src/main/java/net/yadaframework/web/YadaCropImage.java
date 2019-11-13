@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaManagedFile;
@@ -19,6 +20,7 @@ public class YadaCropImage {
 
 	// Autowiring must be performed by yadaUtil.autowireAndInitialize()
 	private @Autowired YadaAttachedFileRepository yadaAttachedFileRepository;
+	private @Autowired YadaUtil yadaUtil;
 	// private @Autowired YadaConfiguration config;
 
 	private YadaManagedFile imageToCrop = null;			// Uploaded file to crop
@@ -112,9 +114,14 @@ public class YadaCropImage {
 		// this.yadaAttachedFile is null
 
 		if (someYadaAttachedFile==null) {
-			someYadaAttachedFile = new YadaAttachedFile(attachedToId);
-			someYadaAttachedFile.setRelativeFolderPath(targetRelativeFolder);
-			someYadaAttachedFile.setClientFilename(clientFilename);
+			someYadaAttachedFile = new YadaAttachedFile();
+		}
+		someYadaAttachedFile.setAttachedToId(attachedToId);
+		someYadaAttachedFile.setRelativeFolderPath(targetRelativeFolder);
+		someYadaAttachedFile.setClientFilename(clientFilename);
+		YadaIntDimension dimension = yadaUtil.getImageDimension(imageToCrop.getAbsoluteFile());
+		someYadaAttachedFile.setImageDimension(dimension);
+		if (someYadaAttachedFile.getId()==null) {
 			someYadaAttachedFile = yadaAttachedFileRepository.save(someYadaAttachedFile);
 		}
 		this.yadaAttachedFile = someYadaAttachedFile;
@@ -152,8 +159,7 @@ public class YadaCropImage {
 		return yadaAttachedFile;
 	}
 
-	@SuppressWarnings("unused")
-	private void setYadaAttachedFile(YadaAttachedFile yadaAttachedFile) {
+	public void setYadaAttachedFile(YadaAttachedFile yadaAttachedFile) {
 		this.yadaAttachedFile = yadaAttachedFile;
 	}
 

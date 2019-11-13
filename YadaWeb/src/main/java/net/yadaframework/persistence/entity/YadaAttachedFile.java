@@ -6,8 +6,11 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -86,6 +89,24 @@ public class YadaAttachedFile implements CloneableDeep {
 	 * The desktop version of an image is here
 	 */
 	protected String filenameDesktop; // only for images on desktop, null for non-images
+
+	/**
+	 * Image width and height (for images)
+	 */
+	@Embedded
+	@AttributeOverrides({
+		@AttributeOverride(name="width", column=@Column(name="widthDesktop")),
+		@AttributeOverride(name="height", column=@Column(name="heightDesktop"))
+	})
+	protected YadaIntDimension desktopImageDimension = YadaIntDimension.UNSET;
+	@Embedded
+	@AttributeOverrides({
+		@AttributeOverride(name="width", column=@Column(name="widthMobile")),
+		@AttributeOverride(name="height", column=@Column(name="heightMobile"))
+	})
+	protected YadaIntDimension mobileImageDimension = YadaIntDimension.UNSET;
+	@Embedded
+	protected YadaIntDimension imageDimension = YadaIntDimension.UNSET;
 
 	/**
 	 * Only for non-images, or when no alternative size is specified (will be the same as filenameDesktop)
@@ -223,20 +244,9 @@ public class YadaAttachedFile implements CloneableDeep {
 		throw new YadaInvalidUsageException("Invalid type: " + type);
 	}
 
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * Use YadaAttachedFile(Long attachedToId) instead
 	 */
-	@Deprecated // Use YadaAttachedFile(Long attachedToId) instead
 	public YadaAttachedFile() {
 	}
 
@@ -374,6 +384,45 @@ public class YadaAttachedFile implements CloneableDeep {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+
+	public YadaIntDimension getImageDimension() {
+		return imageDimension;
+	}
+
+	public void setImageDimension(YadaIntDimension dimension) {
+		this.imageDimension = dimension;
+	}
+
+	/**
+	 * Returns true if the file is an image
+	 */
+	public boolean isImage() {
+		return !imageDimension.isUnset() || !desktopImageDimension.isUnset() || !mobileImageDimension.isUnset();
+	}
+
+	public boolean isDesktopImage() {
+		return this.filenameDesktop!=null && !desktopImageDimension.isUnset();
+	}
+
+	public boolean isMobileImage() {
+		return this.filenameMobile!=null && !mobileImageDimension.isUnset();
+	}
+
+	public YadaIntDimension getDesktopImageDimension() {
+		return desktopImageDimension;
+	}
+
+	public void setDesktopImageDimension(YadaIntDimension desktopImageDimension) {
+		this.desktopImageDimension = desktopImageDimension;
+	}
+
+	public YadaIntDimension getMobileImageDimension() {
+		return mobileImageDimension;
+	}
+
+	public void setMobileImageDimension(YadaIntDimension mobileImageDimension) {
+		this.mobileImageDimension = mobileImageDimension;
 	}
 
 }

@@ -113,6 +113,15 @@ public class YadaMiscController {
 		params.put("resizew", Integer.toString(targetDimension.getWidth()));
 		params.put("resizeh", Integer.toString(targetDimension.getHeight()));
 		int exitValue = yadaUtil.shellExec("config/shell/yadaCropAndResize", params, null);
+		int newWidth = targetDimension.getWidth();
+		int newHeight = targetDimension.getHeight();
+		if (type == YadaAttachedFileType.DESKTOP) {
+			yadaAttachedFile.setDesktopImageDimension(new YadaIntDimension(newWidth, newHeight));
+		} else if (type == YadaAttachedFileType.MOBILE) {
+			yadaAttachedFile.setMobileImageDimension(new YadaIntDimension(newWidth, newHeight));
+		} else {
+			yadaAttachedFile.setImageDimension(new YadaIntDimension(newWidth, newHeight));
+		}
 		return destinationFile;
 	}
 

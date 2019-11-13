@@ -25,6 +25,7 @@ import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaManagedFile;
 import net.yadaframework.persistence.repository.YadaAttachedFileRepository;
 import net.yadaframework.persistence.repository.YadaFileManagerDao;
+import net.yadaframework.raw.YadaIntDimension;
 
 /**
  * The File Manager handles uploaded files. They are kept in a specific folder where they can be
@@ -430,6 +431,8 @@ public class YadaFileManager {
 		if (targetExtension==null) {
 			targetExtension = origExtension;
 		}
+		YadaIntDimension dimension = yadaUtil.getImageDimension(managedFile);
+		yadaAttachedFile.setImageDimension(dimension);
 		boolean imageExtensionChanged = targetExtension.compareToIgnoreCase(origExtension)!=0;
 		boolean requiresTransofmation = imageExtensionChanged || desktopWidth!=null || mobileWidth!=null;
 		boolean needToDeleteOriginal =  config.isFileManagerDeletingUploads();

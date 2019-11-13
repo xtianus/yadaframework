@@ -109,9 +109,9 @@ public class YadaUtil {
     }
 
 	/**
-	 * Gets image dimensions for given file, or null
+	 * Gets image dimensions for given file
 	 * @param imageFile image file
-	 * @return dimensions of image, or null when not found
+	 * @return dimensions of image, or YadaIntDimension.UNSET when not found
 	 */
 	// Adapted from https://stackoverflow.com/a/12164026/587641
 	public YadaIntDimension getImageDimension(File imageFile) {
@@ -130,7 +130,7 @@ public class YadaUtil {
 				reader.dispose();
 			}
 		}
-		return null;
+		return YadaIntDimension.UNSET;
 	}
 
 	/**

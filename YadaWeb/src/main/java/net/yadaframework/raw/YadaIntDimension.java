@@ -11,14 +11,21 @@ public class YadaIntDimension implements java.io.Serializable {
 	private static final long serialVersionUID = 526069244927838614L;
 
 	/**
+	 * UNSET is a special value to be used in @Entity instances instead of null that would generate a constraint violation
+	 */
+	public final static YadaIntDimension UNSET = new YadaIntDimension(-1, -1);
+
+	/**
      * The width dimension; negative values can be used.
      */
-    public int width;
+	// Using Integer would make comparison more difficult
+    public int width = 0;
 
     /**
      * The height dimension; negative values can be used.
      */
-    public int height;
+    // Using Integer would make comparison more difficult
+    public int height = 0;
 
     /**
      * Creates an instance of <code>YadaIntDimension</code> with a width
@@ -53,7 +60,15 @@ public class YadaIntDimension implements java.io.Serializable {
     }
 
     /**
-     * Returns the biggest dimension, or the first one if there are many of the same size
+     * Returns the biggest of width and height
+     * @return
+     */
+    public int getMax() {
+    	return Integer.max(width, height);
+    }
+
+    /**
+     * Returns the dimension with the width or height that has the biggest value, or the first one if there are many that qualify.
      * @param dimensions can be null
      * @return
      */
@@ -62,9 +77,13 @@ public class YadaIntDimension implements java.io.Serializable {
     		return null;
     	}
     	YadaIntDimension biggest = null;
+    	int bigWidthHeight = 0;
     	for (YadaIntDimension dimension : dimensions) {
-			if (dimension.isBiggerThan(biggest)) {
-				biggest = dimension;
+			if (dimension!=null && !dimension.isUnset() && dimension.isAnyBiggerThan(biggest)) {
+				if (dimension.getWidth()>bigWidthHeight || dimension.getHeight()>bigWidthHeight) {
+					biggest = dimension;
+					bigWidthHeight = dimension.getMax();
+				}
 			}
 		}
     	return biggest;
@@ -81,20 +100,24 @@ public class YadaIntDimension implements java.io.Serializable {
     	}
     	YadaIntDimension smallest = null;
     	for (YadaIntDimension dimension : dimensions) {
-    		if (dimension.isSmallerThan(smallest)) {
+    		if (!dimension.isUnset() && dimension.isSmallerThan(smallest)) {
     			smallest = dimension;
     		}
     	}
     	return smallest;
     }
 
-    /**
+    public boolean isUnset() {
+		return this.equals(UNSET);
+	}
+
+	/**
      * Returns true if both dimensions are not smaller than the argument, nor both equal.
-     * @param yadaIntDimension can be null
+     * @param yadaIntDimension can be null or unset and the result would be true
      * @return
      */
     public boolean isBiggerThan(YadaIntDimension yadaIntDimension) {
-    	if (yadaIntDimension==null) {
+    	if (yadaIntDimension==null || yadaIntDimension.isUnset()) {
     		return true;
     	}
     	return !this.isEqualTo(yadaIntDimension) &&
@@ -103,11 +126,11 @@ public class YadaIntDimension implements java.io.Serializable {
 
     /**
      * Returns true if both dimensions are not bigger than the argument, nor both equal.
-     * @param yadaIntDimension can be null
+     * @param yadaIntDimension can be null or unset and the result would be true
      * @return
      */
     public boolean isSmallerThan(YadaIntDimension yadaIntDimension) {
-       	if (yadaIntDimension==null) {
+       	if (yadaIntDimension==null || yadaIntDimension.isUnset()) {
     		return true;
     	}
     	return !this.isEqualTo(yadaIntDimension) &&
@@ -116,11 +139,11 @@ public class YadaIntDimension implements java.io.Serializable {
 
     /**
      * Returns true if at least one dimension is bigger.
-     * @param yadaIntDimension can be null
+     * @param yadaIntDimension can be null and the result would be true
      * @return
      */
     public boolean isAnyBiggerThan(YadaIntDimension yadaIntDimension) {
-    	if (yadaIntDimension==null) {
+    	if (yadaIntDimension==null || yadaIntDimension.isUnset()) {
     		return true;
     	}
     	return this.width > yadaIntDimension.width || this.height > yadaIntDimension.height;
@@ -128,11 +151,11 @@ public class YadaIntDimension implements java.io.Serializable {
 
     /**
      * Returns true if at least one dimension is smaller.
-     * @param yadaIntDimension can be null
+     * @param yadaIntDimension can be null and the result would be true
      * @return
      */
     public boolean isAnySmallerThan(YadaIntDimension yadaIntDimension) {
-    	if (yadaIntDimension==null) {
+    	if (yadaIntDimension==null || yadaIntDimension.isUnset()) {
     		return true;
     	}
     	return this.width < yadaIntDimension.width || this.height < yadaIntDimension.height;
@@ -202,6 +225,9 @@ public class YadaIntDimension implements java.io.Serializable {
      * Returns a string representation in the form WxH
      */
     public String toString() {
+    	if (this.equals(UNSET)) {
+    		return "UNSET";
+    	}
         return width + "x" + height;
     }
 }
