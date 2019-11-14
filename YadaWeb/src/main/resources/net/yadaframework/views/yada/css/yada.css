@@ -427,3 +427,11 @@ input.yadaSwitch-round:checked ~ label:after {
 .yadaUploadedImages a {
 	cursor: zoom-in;
 }
+
+/**************/
+/* CKEditor 5 */
+
+/* Needed when in a modal to show ckeditor link dialog */
+.ck.ck-balloon-panel {
+	z-index: 999991 !important;
+}

@@ -87,8 +87,16 @@ Example:
 		//<![CDATA[
         $(function(){
         	var targetId = [[${id}?:${#ids.prev(seqName)}]];
-        	ClassicEditor.create( document.querySelector( '#'+targetId ) );
-        	/*
+        	ClassicEditor
+            	.create(document.getElementById(targetId), {
+            		// ["undo", "redo", "bold", "italic", "blockQuote", "ckfinder", "imageTextAlternative", "imageUpload", "heading", "imageStyle:full", "imageStyle:side", "indent", "outdent", "link", "numberedList", "bulletedList", "mediaEmbed", "insertTable", "tableColumn", "tableRow", "mergeTableCells"]
+            		// "link" removed because it doesn't work in modals
+            		toolbar: ["undo", "redo", "bold", "italic", "blockQuote", "heading", "indent", "outdent", "numberedList", "bulletedList", "insertTable", "tableColumn", "tableRow", "mergeTableCells"]
+            	})
+            	.catch( error => {
+                console.error( error );
+            } );
+        	/* CKEditor 4
 			$([['#'+${id}?:${#ids.prev(seqName)}]]).ckeditor(function( textarea ) {
 			}, {
 				removeButtons : 'Save,About',
