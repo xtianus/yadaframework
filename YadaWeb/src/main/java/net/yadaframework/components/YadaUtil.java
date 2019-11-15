@@ -109,6 +109,22 @@ public class YadaUtil {
     }
 
 	/**
+	 * Check if a date is not more than maxYears years from now, not in an accurate way.
+	 * Useful to check validity of a date coming from the browser.
+	 * @param someDate
+	 * @param maxYears max number of years (positive or negative) for this date to be valid. When null, defaults to 4000 years.
+	 * @return false if the date is too distant from now
+	 */
+	public boolean dateValid(Date someDate, Integer maxYears) {
+		long now = System.currentTimeMillis();
+		long toCheck = someDate.getTime();
+		long difference = Math.abs(now-toCheck);
+		final long millisInYearInaccurate = 365*MILLIS_IN_DAY;
+		maxYears = maxYears==null?4000:maxYears;
+		return difference < maxYears*millisInYearInaccurate;
+	}
+
+	/**
 	 * Gets image dimensions for given file
 	 * @param imageFile image file
 	 * @return dimensions of image, or YadaIntDimension.UNSET when not found
