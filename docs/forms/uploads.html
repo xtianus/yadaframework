@@ -106,12 +106,14 @@
 </li>
 <li><a class="reference internal" href="#image-upload-and-crop">3.5. Image upload and crop</a><ul>
 <li><a class="reference internal" href="#workflow">3.5.1. Workflow</a></li>
-<li><a class="reference internal" href="#id1">3.5.2. Configuration</a></li>
-<li><a class="reference internal" href="#java-form-bean">3.5.3. Java form bean</a></li>
-<li><a class="reference internal" href="#html-form">3.5.4. HTML form</a></li>
-<li><a class="reference internal" href="#java-controller-to-show-the-form">3.5.5. Java Controller to show the form</a></li>
-<li><a class="reference internal" href="#java-form-submission">3.5.6. Java Form submission</a></li>
-<li><a class="reference internal" href="#html-crop-page">3.5.7. HTML Crop page</a></li>
+<li><a class="reference internal" href="#prerequisites">3.5.2. Prerequisites</a></li>
+<li><a class="reference internal" href="#id1">3.5.3. Configuration</a></li>
+<li><a class="reference internal" href="#java-form-bean">3.5.4. Java form bean</a></li>
+<li><a class="reference internal" href="#html-form">3.5.5. HTML form</a></li>
+<li><a class="reference internal" href="#java-controller-to-show-the-form">3.5.6. Java Controller to show the form</a></li>
+<li><a class="reference internal" href="#java-form-submission">3.5.7. Java Form submission</a></li>
+<li><a class="reference internal" href="#html-crop-page">3.5.8. HTML Crop page</a></li>
+<li><a class="reference internal" href="#troubleshooting">3.5.9. Troubleshooting</a></li>
 </ul>
 </li>
 </ul>
@@ -291,17 +293,21 @@ Use YadaAttachedFile to easily handle file attachments:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Entity</span>
 <span class="kd">public</span> <span class="kd">class</span> <span class="nc">Product</span> <span class="o">{</span>
 
-        <span class="nd">@OneToOne</span>
+        <span class="nd">@OneToOne</span><span class="o">(</span><span class="n">cascade</span><span class="o">=</span><span class="n">CascadeType</span><span class="o">.</span><span class="na">PERSIST</span><span class="o">)</span>
         <span class="kd">protected</span> <span class="n">YadaAttachedFile</span> <span class="n">icon</span><span class="o">;</span>
 
-        <span class="nd">@OneToOne</span>
+        <span class="nd">@OneToOne</span><span class="o">(</span><span class="n">cascade</span><span class="o">=</span><span class="n">CascadeType</span><span class="o">.</span><span class="na">PERSIST</span><span class="o">)</span>
         <span class="kd">protected</span> <span class="n">YadaAttachedFile</span> <span class="n">specSheet</span><span class="o">;</span>
 </pre></div>
 </div>
 <p>After doing this you can make use of the functionality of YadaFileManager explained below.
 Strictly speaking, the above annotation is not needed because YadaAttachedFile instances can exist on their own, having the entity id as a field,
-but this wouldn’t enforce database integrity. You shouldn’t use any <code class="docutils literal notranslate"><span class="pre">cascade</span></code> or <code class="docutils literal notranslate"><span class="pre">orphanRemoval</span></code> annotations though because deleting the
-YadaAttachedFile object won’t delete the file on the disk.</p>
+but this wouldn’t enforce database integrity. You shouldn’t use any <code class="docutils literal notranslate"><span class="pre">cascade</span></code> different from PERSIST or <code class="docutils literal notranslate"><span class="pre">orphanRemoval</span></code> annotations though:</p>
+<ul class="simple">
+<li><p>cascade <code class="docutils literal notranslate"><span class="pre">SAVE</span></code> would generate a <code class="docutils literal notranslate"><span class="pre">ConcurrentModificationException</span></code> when using the upload and crop workflow (see below)</p></li>
+<li><p>cascade <code class="docutils literal notranslate"><span class="pre">REMOVE</span></code> or <code class="docutils literal notranslate"><span class="pre">orphanRemoval=true</span></code> wouldn’t delete the file on the disk.</p></li>
+<li><p>cascade <code class="docutils literal notranslate"><span class="pre">PERSIST</span></code> is needed when cloning the parent object (<code class="docutils literal notranslate"><span class="pre">Product</span></code> in the example above)</p></li>
+</ul>
 <p>The YadaAttachedFile class stores some file-related information that you might want to keep:</p>
 <ul class="simple">
 <li><p>the original name of the file uploaded by the user</p></li>
@@ -445,8 +451,12 @@ be resized (reduced) to the target dimensions.</p>
 <p>This is implemented by storing an instance of YadaCropQueue in the session, and starting a loop that asks the user to
 crop all images added to the queue until there are no more left.</p>
 </div>
+<div class="section" id="prerequisites">
+<h3>3.5.2. Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://imagemagick.org/index.php">Imagemagick</a> must be installed on the system.</p>
+</div>
 <div class="section" id="id1">
-<h3>3.5.2. Configuration<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.3. Configuration<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>The required image size has to be configured in the <code class="docutils literal notranslate"><span class="pre">conf.webapp.prod.xml</span></code> file, as in the following example:</p>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;config&gt;</span>
         <span class="nt">&lt;dimension</span> <span class="na">targetImageExtension=</span><span class="s">&quot;jpg&quot;</span><span class="nt">&gt;</span>
@@ -471,14 +481,37 @@ The above configuration can be read in your subclass of <code class="docutils li
 </pre></div>
 </div>
 <p>This will return an array of YadaIntDimension holding the desktop and mobile dimensions at position 0 and 1.</p>
+<p>The command to crop and resize images must be specified in the configuration too:</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;config&gt;</span>
+        <span class="nt">&lt;shell&gt;</span>
+                <span class="nt">&lt;yadaCropAndResize&gt;</span>
+                        <span class="nt">&lt;executable&gt;</span>convert<span class="nt">&lt;/executable&gt;</span>
+                        <span class="nt">&lt;arg&gt;</span>${FILENAMEIN}<span class="nt">&lt;/arg&gt;</span>
+                        <span class="nt">&lt;arg&gt;</span>-background<span class="nt">&lt;/arg&gt;</span> <span class="c">&lt;!-- &quot;-background white -flatten&quot; converts any transparent png backround to white instead of the default black --&gt;</span>
+                        <span class="nt">&lt;arg&gt;</span>white<span class="nt">&lt;/arg&gt;</span>
+                        <span class="nt">&lt;arg&gt;</span>-flatten<span class="nt">&lt;/arg&gt;</span>
+                        <span class="nt">&lt;arg&gt;</span>-crop<span class="nt">&lt;/arg&gt;</span>
+                        <span class="nt">&lt;arg&gt;</span>${w}x${h}+${x}+${y}<span class="nt">&lt;/arg&gt;</span>
+                        <span class="nt">&lt;arg&gt;</span>-resize<span class="nt">&lt;/arg&gt;</span>
+                        <span class="nt">&lt;arg&gt;</span>${resizew}x${resizeh}<span class="ni">&amp;gt;</span><span class="nt">&lt;/arg&gt;</span>
+                        <span class="nt">&lt;arg&gt;</span>${FILENAMEOUT}<span class="nt">&lt;/arg&gt;</span>
+                <span class="nt">&lt;/yadaCropAndResize&gt;</span>
+</pre></div>
+</div>
+<p>Be aware that the most recent version of imagemagick uses the “magick” command instead of “convert”, which must become the first argument:</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;executable&gt;</span>magick<span class="nt">&lt;/executable&gt;</span>
+<span class="nt">&lt;executable&gt;</span>convert<span class="nt">&lt;/executable&gt;</span>
+<span class="nt">&lt;arg&gt;</span>${FILENAMEIN}<span class="nt">&lt;/arg&gt;</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="java-form-bean">
-<h3>3.5.3. Java form bean<a class="headerlink" href="#java-form-bean" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.4. Java form bean<a class="headerlink" href="#java-form-bean" title="Permalink to this headline">¶</a></h3>
 <p>The easiest way to handle file uploads is to use the <a class="reference internal" href="overview.html#entity-backing-beans"><span class="std std-ref">Entity Backing Beans</span></a> technique. You need to add a <code class="docutils literal notranslate"><span class="pre">&#64;Transient</span></code> field (with getter and setter)
 for each multipart file you need to receive:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Entity</span>
 <span class="kd">public</span> <span class="kd">class</span> <span class="nc">News</span> <span class="kd">implements</span> <span class="n">CloneableDeep</span> <span class="o">{</span>
-        <span class="nd">@OneToOne</span>
+        <span class="nd">@OneToOne</span><span class="o">(</span><span class="n">cascade</span><span class="o">=</span><span class="n">CascadeType</span><span class="o">.</span><span class="na">PERSIST</span><span class="o">)</span>
         <span class="kd">protected</span> <span class="n">YadaAttachedFile</span> <span class="n">thumbnail</span><span class="o">;</span>
 
         <span class="nd">@Transient</span>
@@ -488,22 +521,23 @@ for each multipart file you need to receive:</p>
 <p>This allows for easy validation and handling of the uploaded file.</p>
 </div>
 <div class="section" id="html-form">
-<h3>3.5.4. HTML form<a class="headerlink" href="#html-form" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.5. HTML form<a class="headerlink" href="#html-form" title="Permalink to this headline">¶</a></h3>
 <p>The upload form is the same as already seen elsewhere, with the added <code class="docutils literal notranslate"><span class="pre">size</span></code> option:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">th:action</span><span class="o">=</span><span class="s">&quot;@{/addOrUpdateNews}&quot;</span> <span class="na">th:object</span><span class="o">=</span><span class="s">&quot;${news}&quot;</span> <span class="na">enctype</span><span class="o">=</span><span class="s">&quot;multipart/form-data&quot;</span> <span class="na">th:classappend</span><span class="o">=</span><span class="s">&quot;${#fields.hasErrors(&#39;*&#39;)}? has-error&quot;</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span> <span class="na">role</span><span class="o">=</span><span class="s">&quot;form&quot;</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">th:replace</span><span class="o">=</span><span class="s">&quot;/yada/form/fileUpload::field(fieldName=&#39;thumbnailImage&#39;,size=${thumbnailSize},label=&#39;Upload thumbnail image&#39;,required=${news.thumbnail==null},help=&#39;Thumbnail image&#39;,attachedFile=*{thumbnail})&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">th:replace</span><span class="o">=</span><span class="s">&quot;/yada/form/fileUpload::field(fieldName=&#39;thumbnailImage&#39;,size=${thumbnailSize},accept=&#39;image/*&#39;,label=&#39;Upload thumbnail image&#39;,required=${news.thumbnail==null},help=&#39;Thumbnail image&#39;,attachedFile=*{thumbnail})&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
 </pre></div>
 </div>
 <p>These are the needed parameters:</p>
 <ul class="simple">
 <li><p>fieldName: the name of the field in the backing bean that holds the multipart file</p></li>
 <li><p>size: the YadaIntDimension taken from the configuration, using the biggest between desktop and mobile</p></li>
+<li><p>‘accept’: should be used to allow the upload of image files only. If a non-image is uploaded, it wouldn’t pass validation anyway</p></li>
 <li><p>required: should be false when the YadaAttachedFile is not null so that the user is not forced to upload the file when changing something else in the Entity</p></li>
 <li><p>attachedFile: the YadaAttachedFile if you want to show a link to the image below the input field (optional)</p></li>
 </ul>
 </div>
 <div class="section" id="java-controller-to-show-the-form">
-<h3>3.5.5. Java Controller to show the form<a class="headerlink" href="#java-controller-to-show-the-form" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.6. Java Controller to show the form<a class="headerlink" href="#java-controller-to-show-the-form" title="Permalink to this headline">¶</a></h3>
 <p>When showing the form, the size model attribute must be set:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">YadaIntDimension</span><span class="o">[]</span> <span class="n">dimensionsDesktopAndMobile</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">getDimensionsNewsThumbnail</span><span class="o">();</span>
 <span class="n">YadaIntDimension</span> <span class="n">biggestNeeded</span> <span class="o">=</span> <span class="n">YadaIntDimension</span><span class="o">.</span><span class="na">biggest</span><span class="o">(</span><span class="n">dimensionsDesktopAndMobile</span><span class="o">);</span>
@@ -512,7 +546,7 @@ for each multipart file you need to receive:</p>
 </div>
 </div>
 <div class="section" id="java-form-submission">
-<h3>3.5.6. Java Form submission<a class="headerlink" href="#java-form-submission" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.7. Java Form submission<a class="headerlink" href="#java-form-submission" title="Permalink to this headline">¶</a></h3>
 <p>When the Controller receives the submitted data inside an instance of the Entity, the first thing is to check for the upload file size and issue an error when the file is too big:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">&quot;/addOrUpdateNews&quot;</span><span class="o">)</span>
 <span class="kd">public</span> <span class="n">String</span> <span class="nf">addOrUpdateNews</span><span class="o">(</span><span class="n">News</span> <span class="n">news</span><span class="o">,</span> <span class="n">BindingResult</span> <span class="n">newsBinding</span><span class="o">,</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="n">Model</span> <span class="n">model</span><span class="o">,</span> <span class="n">Locale</span> <span class="n">locale</span><span class="o">)</span> <span class="o">{</span>
@@ -536,7 +570,10 @@ for each multipart file you need to receive:</p>
                 <span class="n">YadaIntDimension</span> <span class="n">biggestNeeded</span> <span class="o">=</span> <span class="n">YadaIntDimension</span><span class="o">.</span><span class="na">biggest</span><span class="o">(</span><span class="n">thumbnailDimensionsDesktopMobile</span><span class="o">);</span>
                 <span class="n">thumbnailManagedFile</span> <span class="o">=</span> <span class="n">yadaFileManager</span><span class="o">.</span><span class="na">manageFile</span><span class="o">(</span><span class="n">thumbnailImage</span><span class="o">);</span>
                 <span class="n">YadaIntDimension</span> <span class="n">fileDimension</span> <span class="o">=</span> <span class="n">thumbnailManagedFile</span><span class="o">.</span><span class="na">getDimension</span><span class="o">();</span>
-                <span class="k">if</span> <span class="o">(</span><span class="n">biggestNeeded</span><span class="o">.</span><span class="na">isAnyBiggerThan</span><span class="o">(</span><span class="n">fileDimension</span><span class="o">))</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">fileDimension</span><span class="o">.</span><span class="na">isUnset</span><span class="o">())</span> <span class="o">{</span>
+                        <span class="n">newsBinding</span><span class="o">.</span><span class="na">rejectValue</span><span class="o">(</span><span class="s">&quot;thumbnailImage&quot;</span><span class="o">,</span> <span class="s">&quot;validation.value.invalidImage&quot;</span><span class="o">,</span> <span class="s">&quot;Invalid image file&quot;</span><span class="o">);</span>
+                        <span class="n">valid</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+                <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">biggestNeeded</span><span class="o">.</span><span class="na">isAnyBiggerThan</span><span class="o">(</span><span class="n">fileDimension</span><span class="o">))</span> <span class="o">{</span>
                         <span class="n">newsBinding</span><span class="o">.</span><span class="na">rejectValue</span><span class="o">(</span><span class="s">&quot;thumbnailImage&quot;</span><span class="o">,</span> <span class="s">&quot;validation.value.smallImage&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]</span> <span class="o">{</span><span class="n">fileDimension</span><span class="o">,</span> <span class="n">biggestNeeded</span><span class="o">},</span> <span class="s">&quot;Image too small&quot;</span><span class="o">);</span>
                         <span class="n">valid</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
                 <span class="o">}</span>
@@ -595,7 +632,7 @@ If the <code class="docutils literal notranslate"><span class="pre">YadaAttached
 </div>
 </div>
 <div class="section" id="html-crop-page">
-<h3>3.5.7. HTML Crop page<a class="headerlink" href="#html-crop-page" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.8. HTML Crop page<a class="headerlink" href="#html-crop-page" title="Permalink to this headline">¶</a></h3>
 <p>The crop page can be easily implemented by including the <a class="reference external" href="https://jcrop.com/">jcrop library</a> and the yada imageCropper fragment:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
         <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">th:href</span><span class="o">=</span><span class="s">&quot;@{/static/jcrop-3/jcrop.css}&quot;</span><span class="p">&gt;</span>
@@ -611,6 +648,20 @@ If the <code class="docutils literal notranslate"><span class="pre">YadaAttached
 
         <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
 <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="troubleshooting">
+<h3>3.5.9. Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h3>
+<p>The following exception: <code class="docutils literal notranslate"><span class="pre">YadaInvalidUsageException:</span> <span class="pre">Concurrent</span> <span class="pre">modification</span> <span class="pre">on</span> <span class="pre">yadaAttachedFile.</span> <span class="pre">This</span> <span class="pre">happens</span> <span class="pre">if</span> <span class="pre">you</span> <span class="pre">set</span> <span class="pre">'cascade=CascadeType.ALL'</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">owning</span> <span class="pre">entity</span> <span class="pre">or</span> <span class="pre">if</span> <span class="pre">the</span> <span class="pre">yadaAttachedFile</span> <span class="pre">is</span> <span class="pre">merged</span> <span class="pre">after</span> <span class="pre">setting</span> <span class="pre">it</span> <span class="pre">on</span> <span class="pre">YadaCropImage</span></code></p>
+<p>is thrown whenever the YadaAttachedFile inside YadaCropImage is different from the one found on db at the time of the final crop.
+This always happens in the following cases:</p>
+<ul class="simple">
+<li><p>the Entity owning the YadaAttachedFile image has a <code class="docutils literal notranslate"><span class="pre">cascade=SAVE</span></code> on the attribute and it has been saved after calling <code class="docutils literal notranslate"><span class="pre">yadaCropImage.link()</span></code></p></li>
+<li><p>the YadaAttachedFile has been saved after calling <code class="docutils literal notranslate"><span class="pre">yadaCropImage.link()</span></code></p></li>
+</ul>
+<p>Solution: do not use the offending cascade or re-add the new version of YadaAttachedFile to the YadaCropImage:</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">yadaCropImage</span><span class="o">.</span><span class="na">setYadaAttachedFile</span><span class="o">(</span><span class="n">yadaAttachedFile</span><span class="o">);</span>
 </pre></div>
 </div>
 </div>

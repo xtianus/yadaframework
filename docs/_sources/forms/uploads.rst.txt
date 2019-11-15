@@ -152,16 +152,19 @@ Use YadaAttachedFile to easily handle file attachments:
 	@Entity
 	public class Product {
 
-		@OneToOne
+		@OneToOne(cascade=CascadeType.PERSIST)
 		protected YadaAttachedFile icon;
 
-		@OneToOne
+		@OneToOne(cascade=CascadeType.PERSIST)
 		protected YadaAttachedFile specSheet;
 		
 After doing this you can make use of the functionality of YadaFileManager explained below.
 Strictly speaking, the above annotation is not needed because YadaAttachedFile instances can exist on their own, having the entity id as a field,
-but this wouldn't enforce database integrity. You shouldn't use any ``cascade`` or ``orphanRemoval`` annotations though because deleting the
-YadaAttachedFile object won't delete the file on the disk.
+but this wouldn't enforce database integrity. You shouldn't use any ``cascade`` different from PERSIST or ``orphanRemoval`` annotations though:
+
+- cascade ``SAVE`` would generate a ``ConcurrentModificationException`` when using the upload and crop workflow (see below)
+- cascade ``REMOVE`` or ``orphanRemoval=true`` wouldn't delete the file on the disk.
+- cascade ``PERSIST`` is needed when cloning the parent object (``Product`` in the example above)
 
 The YadaAttachedFile class stores some file-related information that you might want to keep:
 
@@ -313,6 +316,10 @@ be resized (reduced) to the target dimensions.
 This is implemented by storing an instance of YadaCropQueue in the session, and starting a loop that asks the user to
 crop all images added to the queue until there are no more left.
 
+Prerequisites
+-------------------------
+`Imagemagick <https://imagemagick.org/index.php>`_ must be installed on the system.
+
 Configuration
 -------------------------
 The required image size has to be configured in the ``conf.webapp.prod.xml`` file, as in the following example:
@@ -344,6 +351,34 @@ The above configuration can be read in your subclass of ``YadaConfiguration``:
 
 This will return an array of YadaIntDimension holding the desktop and mobile dimensions at position 0 and 1.
 
+The command to crop and resize images must be specified in the configuration too:
+
+.. code-block:: xml
+
+	<config>
+		<shell>
+			<yadaCropAndResize>
+				<executable>convert</executable>
+				<arg>${FILENAMEIN}</arg>
+				<arg>-background</arg> <!-- "-background white -flatten" converts any transparent png backround to white instead of the default black -->
+				<arg>white</arg>
+				<arg>-flatten</arg>
+				<arg>-crop</arg>
+				<arg>${w}x${h}+${x}+${y}</arg>
+				<arg>-resize</arg>
+				<arg>${resizew}x${resizeh}&gt;</arg>
+				<arg>${FILENAMEOUT}</arg>
+			</yadaCropAndResize>
+
+Be aware that the most recent version of imagemagick uses the "magick" command instead of "convert", which must become the first argument:
+
+.. code-block:: xml
+
+		<executable>magick</executable>
+		<executable>convert</executable>
+		<arg>${FILENAMEIN}</arg>
+
+
 Java form bean
 -------------------------
 The easiest way to handle file uploads is to use the :ref:`forms/overview:Entity Backing Beans` technique. You need to add a ``@Transient`` field (with getter and setter)
@@ -353,7 +388,7 @@ for each multipart file you need to receive:
 
 	@Entity
 	public class News implements CloneableDeep {
-		@OneToOne
+		@OneToOne(cascade=CascadeType.PERSIST)
 		protected YadaAttachedFile thumbnail;
 		
 		@Transient
@@ -368,12 +403,13 @@ The upload form is the same as already seen elsewhere, with the added ``size`` o
 .. code-block:: html
 
 	<form th:action="@{/addOrUpdateNews}" th:object="${news}" enctype="multipart/form-data" th:classappend="${#fields.hasErrors('*')}? has-error" method="post" role="form">
-		<div th:replace="/yada/form/fileUpload::field(fieldName='thumbnailImage',size=${thumbnailSize},label='Upload thumbnail image',required=${news.thumbnail==null},help='Thumbnail image',attachedFile=*{thumbnail})"></div>
+		<div th:replace="/yada/form/fileUpload::field(fieldName='thumbnailImage',size=${thumbnailSize},accept='image/*',label='Upload thumbnail image',required=${news.thumbnail==null},help='Thumbnail image',attachedFile=*{thumbnail})"></div>
 
 These are the needed parameters:
 
 - fieldName: the name of the field in the backing bean that holds the multipart file
 - size: the YadaIntDimension taken from the configuration, using the biggest between desktop and mobile
+- 'accept': should be used to allow the upload of image files only. If a non-image is uploaded, it wouldn't pass validation anyway
 - required: should be false when the YadaAttachedFile is not null so that the user is not forced to upload the file when changing something else in the Entity
 - attachedFile: the YadaAttachedFile if you want to show a link to the image below the input field (optional)
 
@@ -419,7 +455,10 @@ Next, the image size should be validated and when not big enough, the form shoul
 			YadaIntDimension biggestNeeded = YadaIntDimension.biggest(thumbnailDimensionsDesktopMobile);
 			thumbnailManagedFile = yadaFileManager.manageFile(thumbnailImage);
 			YadaIntDimension fileDimension = thumbnailManagedFile.getDimension();
-			if (biggestNeeded.isAnyBiggerThan(fileDimension)) {
+			if (fileDimension.isUnset()) {
+				newsBinding.rejectValue("thumbnailImage", "validation.value.invalidImage", "Invalid image file");
+				valid = false;
+			} else if (biggestNeeded.isAnyBiggerThan(fileDimension)) {
 				newsBinding.rejectValue("thumbnailImage", "validation.value.smallImage", new Object[] {fileDimension, biggestNeeded}, "Image too small");
 				valid = false;
 			}
@@ -504,6 +543,28 @@ The crop page can be easily implemented by including the `jcrop library <https:/
 
 		</div>
 	</body>
+
+Troubleshooting
+--------------------------------
+The following exception: ``YadaInvalidUsageException: Concurrent modification on yadaAttachedFile. This happens if you set 'cascade=CascadeType.ALL' on the owning entity or if the yadaAttachedFile is merged after setting it on YadaCropImage``
+
+is thrown whenever the YadaAttachedFile inside YadaCropImage is different from the one found on db at the time of the final crop.
+This always happens in the following cases:
+
+- the Entity owning the YadaAttachedFile image has a ``cascade=SAVE`` on the attribute and it has been saved after calling ``yadaCropImage.link()``
+- the YadaAttachedFile has been saved after calling ``yadaCropImage.link()``
+
+Solution: do not use the offending cascade or re-add the new version of YadaAttachedFile to the YadaCropImage:
+
+.. code-block:: java
+
+	yadaCropImage.setYadaAttachedFile(yadaAttachedFile);
+
+
+
+
+
+
 
 
 
