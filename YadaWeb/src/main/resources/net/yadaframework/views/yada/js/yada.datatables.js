@@ -455,11 +455,12 @@
 	function makeExtraButtonHandler(extraButtonDef, $button, dataTable, $table) {
 		$button.click(function(e) {
 			e.preventDefault();
+			var isRowIcon = $(this).hasClass("yadaRowCommandButton");
 			var buttonUrl = extraButtonDef.url;
 			var ids = [];
 			var id = yada.getHashValue($(this).attr('href'));
-			if (id=="") {
-				// Must be a toolbar button
+			if (!isRowIcon) {
+				// Toolbar button
 				var $checks = $table.find("tbody [type='checkbox']:checked");
 				var totElements = $checks.length;
 				ids = $checks.map(function() {
@@ -471,16 +472,30 @@
 				}).get();
 			} else {
 				ids = [id];
-				if (typeof buttonUrl == "function") {
+			}
+			var noLoader = extraButtonDef.noLoader || false;
+			if (typeof extraButtonDef.url == "function") {
+				if (isRowIcon) {
+					// Row button
 					var rowData = dataTable.row(this.parentElement).data();
 					buttonUrl = buttonUrl(rowData);
+				} else {
+					// Toolbar button
+					// TODO to be tested
+					var rowData = dataTable.rows();
+					buttonUrl = buttonUrl(rowData, ids);
 				}
+			} else {
+				var idName = extraButtonDef.idName==null ? "id" : extraButtonDef.idName;
+				var param = (ids.length>1?ids:ids[0]); // Either send one id or all of them
+				buttonUrl = yada.addOrUpdateUrlParameter(buttonUrl, idName, param);
 			}
-			var idName = extraButtonDef.idName==null ? "id" : extraButtonDef.idName;
-			var noLoader = extraButtonDef.noLoader || false;
-			var param = (ids.length>1?ids:ids[0]); // Either send one id or all of them
 			if (extraButtonDef.ajax === false) {
-				window.location.replace(yada.addOrUpdateUrlParameter(buttonUrl, idName, param));
+				if (extraButtonDef.windowName!=null) {
+					window.open(buttonUrl, extraButtonDef.windowName, extraButtonDef.windowFeatures);
+				} else {
+					window.location.replace(buttonUrl);
+				}
 				return;
 			}
 			var requestData = {};

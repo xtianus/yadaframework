@@ -8,7 +8,7 @@ import net.yadaframework.components.YadaUtil;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaManagedFile;
-import net.yadaframework.persistence.repository.YadaAttachedFileRepository;
+import net.yadaframework.persistence.repository.YadaAttachedFileDao;
 import net.yadaframework.raw.YadaIntDimension;
 
 /**
@@ -19,7 +19,7 @@ public class YadaCropImage {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
 	// Autowiring must be performed by yadaUtil.autowireAndInitialize()
-	private @Autowired YadaAttachedFileRepository yadaAttachedFileRepository;
+	private @Autowired YadaAttachedFileDao yadaAttachedFileDao;
 	private @Autowired YadaUtil yadaUtil;
 	// private @Autowired YadaConfiguration config;
 
@@ -85,6 +85,17 @@ public class YadaCropImage {
 	}
 
 	/**
+	 * Link to an Entity by means of a new YadaAttachedFile. Useful when adding a new image to a list.
+	 * @param attachedToId the id of the entity owning the new YadaAttachedFile
+	 * @param clientFilename
+	 * @return new YadaAttachedFile to add to the list
+	 */
+	public YadaAttachedFile linkAdd(Long attachedToId, String clientFilename) {
+		YadaAttachedFile newYadaAttachedFile = link(null, attachedToId, clientFilename);
+		return newYadaAttachedFile;
+	}
+
+	/**
 	 * Link to an Entity by means of a YadaAttachedFile.
 	 * @param someYadaAttachedFile an existing YadaAttachedFile or null to create a new one.
 	 * @param attachedToId the id of the entity owning the YadaAttachedFile (either exsiting or new)
@@ -122,7 +133,7 @@ public class YadaCropImage {
 		YadaIntDimension dimension = yadaUtil.getImageDimension(imageToCrop.getAbsoluteFile());
 		someYadaAttachedFile.setImageDimension(dimension);
 		if (someYadaAttachedFile.getId()==null) {
-			someYadaAttachedFile = yadaAttachedFileRepository.save(someYadaAttachedFile);
+			someYadaAttachedFile = yadaAttachedFileDao.save(someYadaAttachedFile);
 		}
 		this.yadaAttachedFile = someYadaAttachedFile;
 		return someYadaAttachedFile;

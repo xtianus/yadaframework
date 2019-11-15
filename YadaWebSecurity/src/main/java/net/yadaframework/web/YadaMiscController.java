@@ -63,7 +63,7 @@ public class YadaMiscController {
 			try {
 				yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile);
 			} catch (javax.persistence.OptimisticLockException e) {
-				throw new YadaInvalidUsageException("Concurrent modification on yadaAttachedFile. This happens if you set 'cascade=CascadeType.ALL' on the owning entity", e);
+				throw new YadaInvalidUsageException("Concurrent modification on yadaAttachedFile. This happens if you set 'cascade=CascadeType.ALL' on the owning entity or if the yadaAttachedFile is merged after setting it on YadaCropImage", e);
 			}
 		} catch (IOException e) {
 			// Failed to crop
