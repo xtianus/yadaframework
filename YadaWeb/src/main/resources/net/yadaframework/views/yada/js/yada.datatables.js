@@ -455,6 +455,7 @@
 	function makeExtraButtonHandler(extraButtonDef, $button, dataTable, $table) {
 		$button.click(function(e) {
 			e.preventDefault();
+			var buttonUrl = extraButtonDef.url;
 			var ids = [];
 			var id = yada.getHashValue($(this).attr('href'));
 			if (id=="") {
@@ -470,12 +471,16 @@
 				}).get();
 			} else {
 				ids = [id];
+				if (typeof buttonUrl == "function") {
+					var rowData = dataTable.row(this.parentElement).data();
+					buttonUrl = buttonUrl(rowData);
+				}
 			}
 			var idName = extraButtonDef.idName==null ? "id" : extraButtonDef.idName;
 			var noLoader = extraButtonDef.noLoader || false;
 			var param = (ids.length>1?ids:ids[0]); // Either send one id or all of them
 			if (extraButtonDef.ajax === false) {
-				window.location.replace(yada.addOrUpdateUrlParameter(extraButtonDef.url, idName, param));
+				window.location.replace(yada.addOrUpdateUrlParameter(buttonUrl, idName, param));
 				return;
 			}
 			var requestData = {};
@@ -487,7 +492,7 @@
 				yada.datatableDrawOnModalClose(dataTable);
 				recursiveEnableAjaxForm(responseText, responseHtml);
 			};
-			yada.ajax(extraButtonDef.url, requestData, handler, null, null, noLoader);
+			yada.ajax(buttonUrl, requestData, handler, null, null, noLoader);
 		});
 	}
 	
