@@ -75,6 +75,7 @@ import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInternalException;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.exceptions.YadaSystemException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
@@ -1450,10 +1451,28 @@ public class YadaUtil {
 							Collection targetCollection = setFieldDirectly ? (Collection) field.get(target) : (Collection) getter.invoke(target);
 
 							if (targetCollection==null) {
-								// Se il costruttore non istanzia la mappa, ne creo una arbitrariamente di tipo ArrayList
-								targetCollection = new ArrayList();
+								boolean invalid = false;
+								try {
+									Class sourceCollectionClass = sourceCollection.getClass();
+									if (sourceCollectionClass.getTypeName().startsWith("org.hibernate.collection")) {
+										invalid = true;
+									} else {
+										targetCollection = (Collection) sourceCollectionClass.newInstance();
+									}
+								} catch (Exception e) {
+									log.error("Can't clone collection", e);
+									invalid = true;
+								}
+								if (invalid) {
+									if (setFieldDirectly) {
+										throw new YadaInvalidUsageException("The field '{}' on a new instance of {} should not be null but should be an empty collection for cloning", field.getName(), sourceClass);
+									}
+									throw new YadaInvalidUsageException("The getter of '{}' on a new instance of {} should not return null but an empty collection for cloning", field.getName(), sourceClass);
+								}
 								copyValue(setFieldDirectly, field, getter, setter, source, target, targetCollection);
-//								setter.invoke(target, targetCollection);
+								// The getter should have returned a new empty instance.
+								// We could
+//								targetCollection = new ArrayList();
 							}
 							// Faccio la copia shallow di tutti gli elementi che non implementano CloneableDeep;
 							// per questi faccio la copia deep.
@@ -1474,7 +1493,7 @@ public class YadaUtil {
 								copyValue(setFieldDirectly, field, getter, setter, source, target, targetMap);
 //								setter.invoke(target, targetMap);
 							}
-							// Faccio la copia shallow di tutti gli elementi che non implementano CloneableFiltered;
+							// Faccio la copia shallow di tutti gli elementi che non implementano CloneableDeep;
 							// per questi faccio la copia deep.
 							for (Object key : sourceMap.keySet()) {
 								Object value = sourceMap.get(key);
@@ -1519,7 +1538,7 @@ public class YadaUtil {
 					// Non loggo perché uscirebbe il log anche in casi giusti
 				}
 			} catch (Exception e) {
-				log.error("Can't copy field {} (ignored): {}", field, e);
+				log.error("Can't copy field {} (ignored)", field, e);
 			}
 		}
 	}
