@@ -218,7 +218,7 @@ public abstract class YadaConfiguration {
 	 * @return
 	 */
 	public File getUploadsFolder() {
-		return new File(getContentPath(), "uploads");
+		return new File(getContentPath(), getUploadsDirname());
 	}
 
 	/**

@@ -274,7 +274,7 @@ public class YadaFileManager {
 		String targetName = YadaUtil.reduceToSafeFilename(originalFilename);
 		String[] filenameParts = YadaUtil.splitFileNameAndExtension(targetName);
 		File targetFolder = config.getUploadsFolder();
-		targetFolder.mkdirs();
+		// Useless: doesn't throw an exception when it fails: targetFolder.mkdirs();
 		File targetFile = YadaUtil.findAvailableName(targetFolder, filenameParts[0], filenameParts[1], COUNTER_SEPARATOR);
 		multipartFile.transferTo(targetFile);
 		//		try (InputStream inputStream = multipartFile.getInputStream(); OutputStream outputStream = new FileOutputStream(targetFile)) {
