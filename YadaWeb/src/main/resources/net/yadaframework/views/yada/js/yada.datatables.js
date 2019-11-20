@@ -485,12 +485,13 @@
 					var rowData = dataTable.rows();
 					buttonUrl = buttonUrl(rowData, ids);
 				}
-			} else {
-				var idName = extraButtonDef.idName==null ? "id" : extraButtonDef.idName;
-				var param = (ids.length>1?ids:ids[0]); // Either send one id or all of them
-				buttonUrl = yada.addOrUpdateUrlParameter(buttonUrl, idName, param);
 			}
+			var idName = extraButtonDef.idName==null ? "id" : extraButtonDef.idName;
+			var param = (ids.length>1?ids:ids[0]); // Either send one id or all of them
 			if (extraButtonDef.ajax === false) {
+				if (typeof extraButtonDef.url != "function") {
+					buttonUrl = yada.addOrUpdateUrlParameter(buttonUrl, idName, param);
+				}
 				if (extraButtonDef.windowName!=null) {
 					window.open(buttonUrl, extraButtonDef.windowName, extraButtonDef.windowFeatures);
 				} else {
