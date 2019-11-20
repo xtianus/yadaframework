@@ -119,12 +119,12 @@ public class YadaAttachedFile implements CloneableDeep {
 	protected String clientFilename;
 
 	@ElementCollection
-	@Column(length=64)
+	@Column(length=1024)
 	@MapKeyColumn(name="locale", length=32)
 	protected Map<Locale, String> title;
 
 	@ElementCollection
-	@Column(length=512)
+	@Column(length=8192)
 	@MapKeyColumn(name="locale", length=32)
 	protected Map<Locale, String> description;
 
