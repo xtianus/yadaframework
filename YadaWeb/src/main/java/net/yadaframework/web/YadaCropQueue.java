@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaManagedFile;
+import net.yadaframework.persistence.repository.YadaAttachedFileDao;
 import net.yadaframework.persistence.repository.YadaFileManagerDao;
 import net.yadaframework.raw.YadaIntDimension;
 
@@ -23,7 +25,7 @@ public class YadaCropQueue {
 	// Autowiring must be performed by yadaUtil.autowireAndInitialize()
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private YadaFileManagerDao yadaFileManagerDao;
-	// @Autowired private YadaAttachedFileRepository yadaAttachedFileRepository;
+	@Autowired private YadaAttachedFileDao yadaAttachedFileDao;
 	// private @Autowired YadaConfiguration config;
 
 
@@ -82,12 +84,20 @@ public class YadaCropQueue {
 	}
 
 	/**
-	 * Delete any images in the queue
+	 * Delete any images in the queue, aborting the upload of any remaining pictures.
 	 */
 	public void delete() {
-		for (YadaCropImage yadaCropImage : this.cropImages) {
+		for (YadaCropImage yadaCropImage : cropImages) {
 			yadaFileManagerDao.delete(yadaCropImage.getImageToCrop());
+			// Se lo YadaAttachedFile non è stato ancora usato, lo cancello, altrimenti
+			// lo lascio perché contiene le immagini precedenti
+			YadaAttachedFile yadaAttachedFile = yadaCropImage.getYadaAttachedFile();
+			if (yadaAttachedFile.getId()!=null && yadaAttachedFile.getFilename()==null && yadaAttachedFile.getFilenameDesktop()==null && yadaAttachedFile.getFilenameMobile()==null) {
+				yadaAttachedFileDao.delete(yadaAttachedFile.getId());
+				//	Non serve sganciarli dall'entity purché tale entity non venga usata prima di un reload, cosa improbabile a meno che non ci sia una cache.
+			}
 		}
+		cropImages.clear();
 	}
 
 	/**

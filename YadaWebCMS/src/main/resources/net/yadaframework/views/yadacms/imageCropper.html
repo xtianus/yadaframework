@@ -53,7 +53,10 @@ Example:
 				</p>
 			</div>
 			
-			<input class="btn btn-default" type="submit" th:value="#{yada.crop.cropSubmit}">
+			<div class="form-group">
+				<input class="btn btn-warn" name="cancel" type="submit" th:value="#{yada.crop.cropCancel}">
+				<input class="btn btn-primary" name="submit" type="submit" th:value="#{yada.crop.cropSubmit}">
+			</div>
 		</form>
 		
 		<script th:inline="javascript">

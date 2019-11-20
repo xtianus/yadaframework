@@ -37,42 +37,57 @@ public class YadaMiscController {
 	@Autowired private YadaAttachedFileRepository yadaAttachedFileRepository;
 	@Autowired private YadaFileManager yadaFileManager;
 
-	@RequestMapping("/yada/cropPerform")
+	@RequestMapping(value="/yada/cropPerform", params={"!submit", "cancel"})
 	// @RequestParam Map<String,String> allParams
+	public String cropCancel(YadaCropDefinition yadaCropDefinition, Model model, RedirectAttributes redirectAttributes) {
+		YadaCropQueue cropQueue = yadaSession.getCropQueue();
+		if (cropQueue==null) {
+			throw new YadaInternalException("No data in session when cancelling image crop");
+		}
+		// Skip the crop of all remaining images
+		String destination = cropQueue.getDestinationRedirect(); // Done
+		yadaSession.deleteCropQueue();
+		return destination;
+	}
+
+	@RequestMapping("/yada/cropPerform")
 	public String cropPerform(YadaCropDefinition yadaCropDefinition, Model model, RedirectAttributes redirectAttributes) {
 		YadaCropQueue cropQueue = yadaSession.getCropQueue();
 		if (cropQueue==null) {
 			throw new YadaInternalException("No data in session when performing image crop");
 		}
 		YadaCropImage yadaCropImage = cropQueue.getAndRemoveCurrentImage();
-		boolean failed = false;
-		try {
-			YadaAttachedFile yadaAttachedFile = yadaCropImage.getYadaAttachedFile();
-			if (yadaCropImage.isCropDesktop()) {
-				// Desktop
-				File createdFile = cropAndResizeImage(yadaCropImage, yadaCropDefinition.getDesktopCrop(), yadaCropImage.getTargetDesktopDimension(), YadaAttachedFileType.DESKTOP);
-				if (!yadaCropImage.isCropMobile()) {
-					// Default is like desktop when there is no mobile
-					yadaAttachedFile.setFilename(createdFile.getName());
-				}
-			}
-			if (yadaCropImage.isCropMobile()) {
-				// Mobile
-				File createdFile = cropAndResizeImage(yadaCropImage, yadaCropDefinition.getMobileCrop(), yadaCropImage.getTargetMobileDimension(), YadaAttachedFileType.MOBILE);
-			}
+		boolean failed = true;
+		if (yadaCropImage!=null) {
+			failed = false;
 			try {
-				yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile);
-			} catch (javax.persistence.OptimisticLockException e) {
-				throw new YadaInvalidUsageException("Concurrent modification on yadaAttachedFile. This happens if you set 'cascade=CascadeType.ALL' on the owning entity or if the yadaAttachedFile is merged after setting it on YadaCropImage", e);
+				YadaAttachedFile yadaAttachedFile = yadaCropImage.getYadaAttachedFile();
+				if (yadaCropImage.isCropDesktop()) {
+					// Desktop
+					File createdFile = cropAndResizeImage(yadaCropImage, yadaCropDefinition.getDesktopCrop(), yadaCropImage.getTargetDesktopDimension(), YadaAttachedFileType.DESKTOP);
+					if (!yadaCropImage.isCropMobile()) {
+						// Default is like desktop when there is no mobile
+						yadaAttachedFile.setFilename(createdFile.getName());
+					}
+				}
+				if (yadaCropImage.isCropMobile()) {
+					// Mobile
+					File createdFile = cropAndResizeImage(yadaCropImage, yadaCropDefinition.getMobileCrop(), yadaCropImage.getTargetMobileDimension(), YadaAttachedFileType.MOBILE);
+				}
+				try {
+					yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile);
+				} catch (javax.persistence.OptimisticLockException e) {
+					throw new YadaInvalidUsageException("Concurrent modification on yadaAttachedFile. This happens if you set 'cascade=CascadeType.ALL' on the owning entity or if the yadaAttachedFile is merged after setting it on YadaCropImage", e);
+				}
+			} catch (IOException e) {
+				// Failed to crop
+				failed = true;
 			}
-		} catch (IOException e) {
-			// Failed to crop
-			failed = true;
-		}
-		// Delete original file when temporary
-		YadaManagedFile yadaManagedFile = yadaCropImage.getImageToCrop();
-		if (yadaManagedFile.isTemporary()) {
-			yadaFileManager.delete(yadaManagedFile);
+			// Delete original file when temporary
+			YadaManagedFile yadaManagedFile = yadaCropImage.getImageToCrop();
+			if (yadaManagedFile.isTemporary()) {
+				yadaFileManager.delete(yadaManagedFile);
+			}
 		}
 		//
 		if (cropQueue.hasCropImages()) {
@@ -84,7 +99,9 @@ public class YadaMiscController {
 			if (failed) {
 				yadaNotify.titleKey(redirectAttributes, "yada.crop.error.title").error().messageKey("yada.crop.error.message").add();
 			}
-			return cropQueue.getDestinationRedirect(); // Done
+			String destination = cropQueue.getDestinationRedirect(); // Done
+			yadaSession.deleteCropQueue();
+			return destination;
 		}
 	}
 

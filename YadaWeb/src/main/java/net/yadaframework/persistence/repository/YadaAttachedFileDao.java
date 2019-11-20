@@ -8,6 +8,7 @@ import javax.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import net.yadaframework.persistence.YadaSql;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 
 /**
@@ -18,6 +19,36 @@ import net.yadaframework.persistence.entity.YadaAttachedFile;
 public class YadaAttachedFileDao {
 
     @PersistenceContext private EntityManager em;
+
+    /**
+     * Delete a YadaAttachedFile using fast native queries
+     * @param yadaAttachedFileId
+     */
+    @Transactional(readOnly = false)
+    public void delete(long yadaAttachedFileId) {
+    	YadaSql.instance().deleteFrom("delete from YadaAttachedFile_title y")
+    		.where("y.YadaAttachedFile_id = :id")
+    		.setParameter("id", yadaAttachedFileId)
+    		.nativeQuery(em).executeUpdate();
+    	YadaSql.instance().deleteFrom("delete from YadaAttachedFile_description y")
+	    	.where("y.YadaAttachedFile_id = :id")
+	    	.setParameter("id", yadaAttachedFileId)
+	    	.nativeQuery(em).executeUpdate();
+    	YadaSql.instance().deleteFrom("delete from YadaAttachedFile y")
+	    	.where("y.id = :id")
+	    	.setParameter("id", yadaAttachedFileId)
+	    	.nativeQuery(em).executeUpdate();
+    }
+
+    /**
+     * Deletes a YadaAttachedFile after merging it (slower)
+     * @param yadaAttachedFile
+     */
+    @Transactional(readOnly = false)
+    public void delete(YadaAttachedFile yadaAttachedFile) {
+    	em.merge(yadaAttachedFile);
+    	em.remove(yadaAttachedFile);
+    }
 
 	/**
 	 * Swaps the sortOrder of two YadaAttachedFile entities

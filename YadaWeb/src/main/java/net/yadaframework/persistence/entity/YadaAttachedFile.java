@@ -138,6 +138,14 @@ public class YadaAttachedFile implements CloneableDeep {
 	 */
 	protected Locale forLocale;
 
+	@Transient
+	private YadaConfiguration config; // Spring can not autowire an Entity
+
+	public YadaAttachedFile() {
+		// Substitute for autowiring
+		this.config = (YadaConfiguration) YadaUtil.getBean("config");
+	}
+
 	@PostPersist
 	// Sets the sortOrder equal to the id, so that ordering can occur by just swapping sortOrder values
 	public void ensureSortOrder() {
@@ -156,9 +164,24 @@ public class YadaAttachedFile implements CloneableDeep {
 	 * @return
 	 */
 	@Transient
+	@Deprecated
 	public File calcAndSetTargetFile(String namePrefix, String targetExtension, YadaAttachedFileType type, YadaIntDimension targetDimension, YadaConfiguration config) {
+		return calcAndSetTargetFile(namePrefix, targetExtension, type, targetDimension);
+	}
+
+	/**
+	 * Computes the file to create, given the parameters, and sets it.
+	 * @param namePrefix string to attach at the start of the filename, can be null
+	 * @param targetExtension the needed file extension without dot, can be null if no conversion has to be performed
+	 * @param targetDimension the needed image size (only width is considered), null if no resize has to be performed
+	 * @param type the type of file
+	 * @param targetFolder where the file has to be stored
+	 * @return
+	 */
+	@Transient
+	public File calcAndSetTargetFile(String namePrefix, String targetExtension, YadaAttachedFileType type, YadaIntDimension targetDimension) {
 		Integer targetWidth = targetDimension == null ? null : targetDimension.getWidth();
-		return calcAndSetTargetFile(namePrefix, targetExtension, targetWidth, type, config);
+		return calcAndSetTargetFile(namePrefix, targetExtension, targetWidth, type);
 	}
 
 	/**
@@ -171,7 +194,22 @@ public class YadaAttachedFile implements CloneableDeep {
 	 * @return
 	 */
 	@Transient
+	@Deprecated
 	public File calcAndSetTargetFile(String namePrefix, String targetExtension, Integer targetWidth, YadaAttachedFileType type, YadaConfiguration config) {
+		return calcAndSetTargetFile(namePrefix, targetExtension, targetWidth, type);
+	}
+
+	/**
+	 * Computes the file to create, given the parameters, and sets it.
+	 * @param namePrefix string to attach at the start of the filename, can be null
+	 * @param targetExtension the needed file extension without dot, can be null if no conversion has to be performed
+	 * @param targetWidth the needed image width, null if no resize has to be performed
+	 * @param type the type of file
+	 * @param targetFolder where the file has to be stored
+	 * @return
+	 */
+	@Transient
+	public File calcAndSetTargetFile(String namePrefix, String targetExtension, Integer targetWidth, YadaAttachedFileType type) {
 		File result = null;
 		if (this.id==null) {
 			throw new YadaInvalidUsageException("YadaAttachedFile instance must be saved before");
@@ -218,7 +256,19 @@ public class YadaAttachedFile implements CloneableDeep {
 	 * @return
 	 */
 	@Transient
+	@Deprecated
 	public File getAbsoluteFile(YadaAttachedFileType type, YadaConfiguration config) {
+		return getAbsoluteFile(type);
+	}
+
+	/**
+	 * Returns the absolute file on the filesystem
+	 * @param type the version of the file: desktop, mobile or default
+	 * @param config
+	 * @return
+	 */
+	@Transient
+	public File getAbsoluteFile(YadaAttachedFileType type) {
 		File result = config.getContentsFolder();
 		// Add the relative path if any
 		if (StringUtils.isNotBlank(relativeFolderPath)) {
@@ -242,12 +292,6 @@ public class YadaAttachedFile implements CloneableDeep {
 			return new File(result, filename);
 		}
 		throw new YadaInvalidUsageException("Invalid type: " + type);
-	}
-
-	/**
-	 * Use YadaAttachedFile(Long attachedToId) instead
-	 */
-	public YadaAttachedFile() {
 	}
 
 	/**
