@@ -363,7 +363,6 @@ public class YadaFileManager {
 	 * Copies a managed file to the destination folder, creating a database association to assign to an Entity.
 	 * The name of the file is in the format [basename]managedFileName_id.ext.
 	 * Images are not resized.
-	 * @param attachToId the id of the entity to which the file should be attached
 	 * @param managedFile an uploaded file, can be an image or not
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not set.
 	 * @param relativeFolderPath path of the target folder relative to the contents folder
@@ -372,14 +371,13 @@ public class YadaFileManager {
 	 * @throws IOException
 	 * @see {@link #attach(File, String, String, String, Integer, Integer)}
 	 */
-	public YadaAttachedFile attachNew(Long attachToId, File managedFile, MultipartFile multipartFile, String relativeFolderPath, String namePrefix) throws IOException {
-		return attachNew(attachToId, managedFile, multipartFile, relativeFolderPath, namePrefix, null, null, null);
+	public YadaAttachedFile attachNew(File managedFile, MultipartFile multipartFile, String relativeFolderPath, String namePrefix) throws IOException {
+		return attachNew(managedFile, multipartFile, relativeFolderPath, namePrefix, null, null, null);
 	}
 
 	/**
 	 * Copies (and resizes) a managed file to the destination folder, creating a database association to assign to an Entity.
 	 * The name of the file is in the format [basename]managedFileName_id.ext
-	 * @param attachToId the id of the entity to which the file should be attached
 	 * @param managedFile an uploaded file, can be an image or not. When null, nothing is done.
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
 	 * @param relativeFolderPath path of the target folder relative to the contents folder, starting with a slash /
@@ -391,7 +389,7 @@ public class YadaFileManager {
 	 * @throws IOException
 	 * @see {@link #attach(File, String, String, String)}
 	 */
-	public YadaAttachedFile attachNew(Long attachToId, File managedFile, MultipartFile multipartFile, String relativeFolderPath, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+	public YadaAttachedFile attachNew(File managedFile, MultipartFile multipartFile, String relativeFolderPath, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
 		if (managedFile==null) {
 			return null;
 		}
@@ -399,7 +397,7 @@ public class YadaFileManager {
 			relativeFolderPath = "/" + relativeFolderPath;
 			log.warn("The relativeFolderPath '{}' should have a leading slash (fixed)", relativeFolderPath);
 		}
-		YadaAttachedFile yadaAttachedFile = new YadaAttachedFile(attachToId);
+		YadaAttachedFile yadaAttachedFile = new YadaAttachedFile();
 		// yadaAttachedFile.setAttachedToId(attachToId);
 		yadaAttachedFile.setRelativeFolderPath(relativeFolderPath);
 		// This save should not bee needed anymore because of @PostPersist in YadaAttachedFile

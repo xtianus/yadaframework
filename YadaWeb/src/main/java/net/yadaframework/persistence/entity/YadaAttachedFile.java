@@ -65,7 +65,8 @@ public class YadaAttachedFile implements CloneableDeep {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
 
-	protected Long attachedToId; // Id of the Entity to which this file is attached
+// Removed because the id is not unique in the database: we would need the class name too. But anyway, this id is not needed.	
+//	protected Long attachedToId; // Id of the Entity to which this file is attached
 
 	/**
 	 * Value for ordering files of the same type (e.g. gallery images)
@@ -294,13 +295,13 @@ public class YadaAttachedFile implements CloneableDeep {
 		throw new YadaInvalidUsageException("Invalid type: " + type);
 	}
 
-	/**
-	 * Create an instance and attach to an Entity
-	 * @param attachedToId the id of the owning entity
-	 */
-	public YadaAttachedFile(Long attachedToId) {
-		this.attachedToId = attachedToId;
-	}
+//	/**
+//	 * Create an instance and attach to an Entity
+//	 * @param attachedToId the id of the owning entity
+//	 */
+//	public YadaAttachedFile(Long attachedToId) {
+//		this.attachedToId = attachedToId;
+//	}
 
 	public Long getId() {
 		return id;
@@ -402,13 +403,13 @@ public class YadaAttachedFile implements CloneableDeep {
 		this.filename = filename;
 	}
 
-	public Long getAttachedToId() {
-		return attachedToId;
-	}
-
-	public void setAttachedToId(Long attachedToId) {
-		this.attachedToId = attachedToId;
-	}
+//	public Long getAttachedToId() {
+//		return attachedToId;
+//	}
+//
+//	public void setAttachedToId(Long attachedToId) {
+//		this.attachedToId = attachedToId;
+//	}
 
 	public String getClientFilename() {
 		return clientFilename;

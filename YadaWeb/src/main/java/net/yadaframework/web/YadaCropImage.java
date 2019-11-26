@@ -43,6 +43,8 @@ public class YadaCropImage {
 	 */
 	private String targetNamePrefix;		// e,g. "urban-"
 
+	String clientFilename = null; // The name the file had on the client
+
 	/**
 	 * Package-accessible constructor used by YadaCropQueue
 	 * @param imageToCrop
@@ -55,6 +57,7 @@ public class YadaCropImage {
 		this.targetNamePrefix = targetNamePrefix;
 		this.targetDesktopDimension = targetDimensions[0];
 		this.targetMobileDimension = targetDimensions[1];
+		this.clientFilename = this.imageToCrop.getClientFilename();
 		cropDesktop |= targetDesktopDimension!=null;
 		cropMobile |= targetMobileDimension!=null;
 	}
@@ -90,19 +93,18 @@ public class YadaCropImage {
 	 * @param clientFilename
 	 * @return new YadaAttachedFile to add to the list
 	 */
-	public YadaAttachedFile linkAdd(Long attachedToId, String clientFilename) {
-		YadaAttachedFile newYadaAttachedFile = link(null, attachedToId, clientFilename);
+	public YadaAttachedFile linkAdd() {
+		YadaAttachedFile newYadaAttachedFile = link(null);
 		return newYadaAttachedFile;
 	}
 
 	/**
 	 * Link to an Entity by means of a YadaAttachedFile.
 	 * @param someYadaAttachedFile an existing YadaAttachedFile or null to create a new one.
-	 * @param attachedToId the id of the entity owning the YadaAttachedFile (either exsiting or new)
 	 * @param clientFilename
 	 * @return the existing or a new YadaAttachedFile to set on the entity
 	 */
-	public YadaAttachedFile link(YadaAttachedFile someYadaAttachedFile, Long attachedToId, String clientFilename) {
+	public YadaAttachedFile link(YadaAttachedFile someYadaAttachedFile) {
 		// this is null and new is null --> create instance
 		// this is null and new is not null --> set
 		// this is not null and new is null --> check consistency and do nothing
@@ -110,12 +112,9 @@ public class YadaCropImage {
 
 		if (this.yadaAttachedFile!=null) {
 			// Check for consistency and do nothing if all is good
-			if (!this.yadaAttachedFile.getId().equals(attachedToId)) {
-				throw new YadaInvalidUsageException("yadaAttachedFile already attached to entity {}", this.yadaAttachedFile.getId());
-			}
 			if (someYadaAttachedFile!=null) {
 				if (!this.yadaAttachedFile.getId().equals(someYadaAttachedFile.getId())) {
-					throw new YadaInvalidUsageException("yadaAttachedFile already attached to entity {}", this.yadaAttachedFile.getId());
+					throw new YadaInvalidUsageException("yadaAttachedFile {} already attached to entity", this.yadaAttachedFile.getId());
 				}
 			}
 			log.warn("Attaching an already attached file (ignored)");
@@ -127,7 +126,7 @@ public class YadaCropImage {
 		if (someYadaAttachedFile==null) {
 			someYadaAttachedFile = new YadaAttachedFile();
 		}
-		someYadaAttachedFile.setAttachedToId(attachedToId);
+		// someYadaAttachedFile.setAttachedToId(attachedToId);
 		someYadaAttachedFile.setRelativeFolderPath(targetRelativeFolder);
 		someYadaAttachedFile.setClientFilename(clientFilename);
 		YadaIntDimension dimension = yadaUtil.getImageDimension(imageToCrop.getAbsoluteFile());
