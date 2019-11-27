@@ -3,6 +3,10 @@ package net.yadaframework.cms.persistence.entity;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
+/**
+ * Entity for a product dimension
+ *
+ */
 @Embeddable
 public class YadaDimension {
 
@@ -10,15 +14,15 @@ public class YadaDimension {
 	protected String size; // M, L, 42, ...
 
 	protected Float width;
-	
-	protected Float height; 
-	
-	protected Float depth; 
-	
-	protected Float diameter; 
 
-	protected Float weight; 
-	
+	protected Float height;
+
+	protected Float depth;
+
+	protected Float diameter;
+
+	protected Float weight;
+
 	protected Integer elements;
 
 	public String getSize() {
@@ -76,5 +80,5 @@ public class YadaDimension {
 	public void setElements(Integer elements) {
 		this.elements = elements;
 	}
-	
+
 }

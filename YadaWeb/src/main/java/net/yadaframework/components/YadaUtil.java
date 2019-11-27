@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -47,6 +48,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.FileImageInputStream;
+import javax.imageio.stream.ImageInputStream;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -70,8 +75,11 @@ import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInternalException;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.exceptions.YadaSystemException;
+import net.yadaframework.persistence.entity.YadaAttachedFile;
+import net.yadaframework.raw.YadaIntDimension;
 import sogei.utility.UCheckDigit;
 import sogei.utility.UCheckNum;
 
@@ -81,6 +89,8 @@ public class YadaUtil {
 
 	@Autowired private YadaConfiguration config;
     @Autowired private AutowireCapableBeanFactory autowireCapableBeanFactory; // For autowiring entities
+
+    static private YadaFileManager yadaFileManager;
 
     static ApplicationContext applicationContext; 	// To access the ApplicationContext from anywhere
     static public MessageSource messageSource; 		// To access the MessageSource from anywhere
@@ -96,7 +106,49 @@ public class YadaUtil {
 	@PostConstruct
     public void init() {
 		defaultLocale = config.getDefaultLocale();
+		yadaFileManager = getBean(YadaFileManager.class);
     }
+
+	/**
+	 * Check if a date is not more than maxYears years from now, not in an accurate way.
+	 * Useful to check validity of a date coming from the browser.
+	 * @param someDate
+	 * @param maxYears max number of years (positive or negative) for this date to be valid. When null, defaults to 4000 years.
+	 * @return false if the date is too distant from now
+	 */
+	public boolean dateValid(Date someDate, Integer maxYears) {
+		long now = System.currentTimeMillis();
+		long toCheck = someDate.getTime();
+		long difference = Math.abs(now-toCheck);
+		final long millisInYearInaccurate = 365*MILLIS_IN_DAY;
+		maxYears = maxYears==null?4000:maxYears;
+		return difference < maxYears*millisInYearInaccurate;
+	}
+
+	/**
+	 * Gets image dimensions for given file
+	 * @param imageFile image file
+	 * @return dimensions of image, or YadaIntDimension.UNSET when not found
+	 */
+	// Adapted from https://stackoverflow.com/a/12164026/587641
+	public YadaIntDimension getImageDimension(File imageFile) {
+		String suffix = getFileExtension(imageFile);
+		Iterator<ImageReader> iter = ImageIO.getImageReadersBySuffix(suffix);
+		while (iter.hasNext()) {
+			ImageReader reader = iter.next();
+			try(ImageInputStream stream = new FileImageInputStream(imageFile))  {
+				reader.setInput(stream);
+				int width = reader.getWidth(reader.getMinIndex());
+				int height = reader.getHeight(reader.getMinIndex());
+				return new YadaIntDimension(width, height);
+			} catch (IOException e) {
+				log.debug("Error reading dimensions for {} using reader {}", imageFile, reader, e);
+			} finally {
+				reader.dispose();
+			}
+		}
+		return YadaIntDimension.UNSET;
+	}
 
 	/**
 	 * Returns the current stack trace as a string, formatted on separate lines
@@ -160,7 +212,7 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity.
+	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity or normal java instance made with new.
 	 * Post processing (@PostConstruct etc) and initialization are also performed.
 	 * @param instance to autowire
 	 * @return the autowired/initialized bean instance, either the original or a wrapped one
@@ -301,6 +353,7 @@ public class YadaUtil {
 								Class fieldClass = field.getType();
 								List secondLevel = new ArrayList<>();
 								secondLevel.add(fieldValue);
+								// TODO shouldn't this call prefetchLocalizedStringListRecursive()?
 								prefetchLocalizedStringList(secondLevel, fieldClass, attributes);
 							}
 						} catch (Exception e) {
@@ -781,6 +834,117 @@ public class YadaUtil {
 	}
 
 	/**
+	 * Run an external shell command.
+	 * @param command the shell command to run, without parameters
+	 * @param args optional command line parameters. Can be null for no parameters. Each parameter can have spaces without delimiting quotes.
+	 * @param optional substitutionMap key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
+	 * pair is like "key"-->"value". If the value is a collection, arguments are unrolled so key-->collection will result in key0=val0 key1=val1...
+	 * @param optional outputStream ByteArrayOutputStream that will contain the command output (out + err)
+	 * @return the command exit value
+	 * @throws IOException
+	 */
+	public int shellExec(String command, List<String> args, Map substitutionMap, ByteArrayOutputStream outputStream) throws IOException {
+		if (outputStream==null) {
+			// The outputstream is needed so that execution does not block. Will be discarded.
+			outputStream = new ByteArrayOutputStream();
+		}
+		try {
+			CommandLine commandLine = new CommandLine(command);
+			if (args!=null) {
+				Pattern keyPattern = Pattern.compile("\\$\\{([^}]+)}"); // ${PARAMNAME}
+				for (String arg : args) {
+					boolean added=false;
+					// Convert collections to multiple arguments when needed
+					if (substitutionMap!=null) {
+						Matcher m = keyPattern.matcher(arg);
+						if (m.find()) {
+							String key = m.group(1); // PARAMNAME
+							Object values = substitutionMap.get(key);
+							if (values instanceof Collection) {
+								// The parameter had a collection in the substitution map
+								int countArg=0;
+								added=true;
+								for (Object extractedValue : (Collection)values) {
+									String newKey = key + countArg; // PARAMNAME0
+									String newArg = "${" + newKey  + "}"; // ${PARAMNAME0}
+									// The original parameter is replaced with a new indexed parameter and its value is added to the substitution map
+									commandLine.addArgument(newArg, false); // Don't handle quoting
+									substitutionMap.put(newKey, extractedValue);
+									countArg++;
+								}
+							}
+						}
+					}
+					if (!added) {
+						// Add a parameter that didn't have a collection parameter in it
+						commandLine.addArgument(arg, false); // Don't handle quoting
+					}
+				}
+			}
+			if (log.isDebugEnabled() && substitutionMap!=null) {
+				for (Object keyObj : substitutionMap.keySet()) {
+					String key = (String) keyObj;
+					log.debug("{}={}", key, substitutionMap.get(key));
+					if (key.startsWith("{") || key.startsWith("${")) { // Checking { just for extra precaution
+						log.error("Invalid substitution {}: should NOT start with ${", key);
+					}
+				}
+			}
+			if (substitutionMap!=null) {
+				commandLine.setSubstitutionMap(substitutionMap);
+			}
+			DefaultExecutor executor = new DefaultExecutor();
+			ExecuteWatchdog watchdog = new ExecuteWatchdog(60000); // Kill after 60 seconds
+			executor.setWatchdog(watchdog);
+			// Output and Error go together
+			PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream);
+			executor.setStreamHandler(streamHandler);
+			log.debug("Executing shell command: {}", StringUtils.join(commandLine, " "));
+			int exitValue = executor.execute(commandLine);
+			if (exitValue!=0) {
+				log.error("Shell command exited with {}", exitValue);
+			}
+			log.debug("Shell command output: {}", outputStream.toString());
+			return exitValue;
+		} catch (IOException e) {
+			log.error("Shell command output: {}", outputStream.toString());
+			log.error("Failed to execute shell command: {} {} {}", command, args!=null?args.toArray():"", substitutionMap!=null?substitutionMap:"", e);
+			throw e;
+		} finally {
+			closeSilently(outputStream);
+		}
+	}
+
+	/**
+	 * Run an external shell command without keyword substitution in the parameters.
+	 * @param command the shell command to run, without parameters
+	 * @param args command line literal parameters. Can be null for no parameters. Each parameter can have spaces without delimiting quotes.
+	 * @param optional outputStream ByteArrayOutputStream that will contain the command output (out + err)
+	 * @return the command exit value
+	 * @throws IOException
+	 */
+	public int shellExec(String command, List<String> args, ByteArrayOutputStream outputStream) throws IOException {
+		return shellExec(command, args, null, outputStream);
+	}
+
+	/**
+	 * Run an external shell command that has been defined in the configuration file.
+	 * @param shellCommandKey xpath key of the shell command, e.g. "config/shell/cropImage"
+	 * @param optional substitutionMap key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
+	 * pair is like "key"-->"value". If the value is a collection, arguments are unrolled so key-->collection will result in key0=val0 key1=val1...
+	 * @param optional outputStream ByteArrayOutputStream that will contain the command output (out + err)
+	 * @return the command exit value
+	 * @throws IOException
+	 */
+	public int shellExec(String shellCommandKey, Map substitutionMap, ByteArrayOutputStream outputStream) throws IOException {
+		String executable = config.getString(shellCommandKey + "/executable");
+		// Need to use getProperty() to avoid interpolation on ${} arguments
+		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
+		List<String> args = (List<String>) config.getConfiguration().getProperty(shellCommandKey + "/arg");
+		return shellExec(executable, args, substitutionMap, outputStream);
+	}
+
+	/**
 	 * Esegue un comando di shell
 	 * @param command comando
 	 * @param args lista di argomenti (ogni elemento puo' contenere spazi), puo' essere null
@@ -789,6 +953,7 @@ public class YadaUtil {
 	 * @param outputStream ByteArrayOutputStream che conterrà l'output del comando (out + err)
 	 * @return the error message (will be empty for a return code >0), or null if there was no error
 	 */
+	@Deprecated // use shellExec() instead
 	public String exec(String command, List<String> args, Map substitutionMap, ByteArrayOutputStream outputStream) {
 		int exitValue=1;
 		try {
@@ -853,6 +1018,7 @@ public class YadaUtil {
 	 * @param outputStream ByteArrayOutputStream che conterrà l'output del comando
 	 * @return the error message (will be empty for a return code >0), or null if there was no error
 	 */
+	@Deprecated // use shellExec() instead
 	public String exec(String command, List<String> args, ByteArrayOutputStream outputStream) {
 		int exitValue=1;
 		try {
@@ -866,6 +1032,9 @@ public class YadaUtil {
 			PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
 			executor.setStreamHandler(streamHandler);
 			log.debug("Executing shell command: {}", commandLine);
+			if (args!=null) {
+				log.debug("Command args: {}", args.toArray());
+			}
 			exitValue = executor.execute(commandLine);
 		} catch (Exception e) {
 			log.error("Failed to execute shell command: " + command + " " + args, e);
@@ -881,6 +1050,7 @@ public class YadaUtil {
 	 * pair is like "key"-->"value"
 	 * @return true if successful
 	 */
+	@Deprecated // use shellExec() instead
 	public boolean exec(String shellCommandKey, Map substitutionMap) {
 		String executable = config.getString(shellCommandKey + "/executable");
 		// Need to use getProperty() to avoid interpolation on ${} arguments
@@ -1175,8 +1345,8 @@ public class YadaUtil {
 	 * @param field
 	 * @param getter
 	 * @param setter
-	 * @param source
-	 * @param target
+	 * @param source object containing the value to copy
+	 * @param target object where to copy the value
 	 * @param args
 	 */
 	private static void copyValue(boolean setFieldDirectly, Field field, Method getter, Method setter, Object source, Object target, Object... args) {
@@ -1281,10 +1451,28 @@ public class YadaUtil {
 							Collection targetCollection = setFieldDirectly ? (Collection) field.get(target) : (Collection) getter.invoke(target);
 
 							if (targetCollection==null) {
-								// Se il costruttore non istanzia la mappa, ne creo una arbitrariamente di tipo ArrayList
-								targetCollection = new ArrayList();
+								boolean invalid = false;
+								try {
+									Class sourceCollectionClass = sourceCollection.getClass();
+									if (sourceCollectionClass.getTypeName().startsWith("org.hibernate.collection")) {
+										invalid = true;
+									} else {
+										targetCollection = (Collection) sourceCollectionClass.newInstance();
+									}
+								} catch (Exception e) {
+									log.error("Can't clone collection", e);
+									invalid = true;
+								}
+								if (invalid) {
+									if (setFieldDirectly) {
+										throw new YadaInvalidUsageException("The field '{}' on a new instance of {} should not be null but should be an empty collection for cloning", field.getName(), sourceClass);
+									}
+									throw new YadaInvalidUsageException("The getter of '{}' on a new instance of {} should not return null but an empty collection for cloning", field.getName(), sourceClass);
+								}
 								copyValue(setFieldDirectly, field, getter, setter, source, target, targetCollection);
-//								setter.invoke(target, targetCollection);
+								// The getter should have returned a new empty instance.
+								// We could
+//								targetCollection = new ArrayList();
 							}
 							// Faccio la copia shallow di tutti gli elementi che non implementano CloneableDeep;
 							// per questi faccio la copia deep.
@@ -1305,7 +1493,7 @@ public class YadaUtil {
 								copyValue(setFieldDirectly, field, getter, setter, source, target, targetMap);
 //								setter.invoke(target, targetMap);
 							}
-							// Faccio la copia shallow di tutti gli elementi che non implementano CloneableFiltered;
+							// Faccio la copia shallow di tutti gli elementi che non implementano CloneableDeep;
 							// per questi faccio la copia deep.
 							for (Object key : sourceMap.keySet()) {
 								Object value = sourceMap.get(key);
@@ -1321,8 +1509,13 @@ public class YadaUtil {
 							if (isType(fieldType, CloneableDeep.class)) {
 								// Siccome implementa CloneableDeep, lo duplico deep
 								CloneableFiltered fieldValue = setFieldDirectly ? (CloneableFiltered) field.get(source) : (CloneableFiltered) getter.invoke(source);
-								copyValue(setFieldDirectly, field, getter, setter, source, target, YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap)); // deep but detached
+								Object clonedValue = YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap); // deep but detached
+								copyValue(setFieldDirectly, field, getter, setter, source, target, clonedValue);
 //								setter.invoke(target, YadaUtil.copyEntity(fieldValue)); // deep but detached
+								// For YadaAttachedFile objects, duplicate the file on disk too
+								if (isType(fieldType, YadaAttachedFile.class)) {
+									yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+								}
 							} else if (isType(fieldType, StringBuilder.class)) {
 								// String builder/buffer is cloned otherwise changes to the original object would be reflected in the new one
 								StringBuilder fieldValue = setFieldDirectly ? (StringBuilder) field.get(source) : (StringBuilder) getter.invoke(source);
@@ -1345,7 +1538,7 @@ public class YadaUtil {
 					// Non loggo perché uscirebbe il log anche in casi giusti
 				}
 			} catch (Exception e) {
-				log.error("Can't copy field {} (ignored): {}", field, e);
+				log.error("Can't copy field {} (ignored)", field, e);
 			}
 		}
 	}
@@ -1520,15 +1713,33 @@ public class YadaUtil {
 		return YadaUtil.roundBackToMidnight(new GregorianCalendar());
 	}
 
+	/**
+	 * Adds or removes the days. The original object is cloned.
+	 * @param calendar
+	 * @param minutes
+	 * @return
+	 */
 	public static Calendar addDaysClone(Calendar source, int days) {
 		return addDays((Calendar) source.clone(), days);
 	}
 
+	/**
+	 * Adds or removes the days. The original object is modified.
+	 * @param calendar
+	 * @param minutes
+	 * @return
+	 */
 	public static Calendar addDays(Calendar calendar, int days) {
 		calendar.add(Calendar.DAY_OF_YEAR, days);
 		return calendar;
 	}
 
+	/**
+	 * Adds or removes the minutes. The original object is modified.
+	 * @param calendar
+	 * @param minutes
+	 * @return
+	 */
 	public static Calendar addMinutes(Calendar calendar, int minutes) {
 		calendar.add(Calendar.MINUTE, minutes);
 		return calendar;

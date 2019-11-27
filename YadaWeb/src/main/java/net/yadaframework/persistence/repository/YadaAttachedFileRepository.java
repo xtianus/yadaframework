@@ -8,7 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 
-@Transactional(readOnly = true) 
+@Transactional(readOnly = true)
+@Deprecated // Use YadaAttachedFileDao
 public interface YadaAttachedFileRepository extends JpaRepository<YadaAttachedFile, Long> {
 
 	/**
@@ -19,8 +20,9 @@ public interface YadaAttachedFileRepository extends JpaRepository<YadaAttachedFi
 	@Query(value="update YadaAttachedFile yaf inner join YadaAttachedFile yaf2 on yaf.id != yaf2.id "
 		+ "set yaf.sortOrder = yaf2.sortOrder, yaf2.sortOrder = yaf.sortOrder "
 		+ "where yaf.id in (:oneId,:anotherId) and yaf2.id in (:oneId,:anotherId);", nativeQuery=true)
-	@Transactional(readOnly = false) 
+	@Transactional(readOnly = false)
 	@Modifying
+	@Deprecated // Use @Deprecated.swapSortOrder()
 	void swapSortOrder(@Param("oneId") long oneId, @Param("anotherId") long anotherId);
-	
+
 }

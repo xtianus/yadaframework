@@ -4,10 +4,11 @@ import java.lang.reflect.Field;
 
 
 /**
- * Questa interfaccia indica che l'oggetto deve essere clonato in modo che la nuova istanza condivida i riferimenti agli stessi oggetti dell'originale, ma in collection/mappe differenti.
- * Se il membro di una collection/mappa la implementa a sua volta, esso non viene condiviso tra le copie ma clonato ricorsivamente.
- * Permette inoltre di specificare i campi da non copiare.
- * Vedere come è usato in Prodotto e Sellability.
+ * Marker interface to allow an object to be cloned with YadaUtil.copyEntity().
+ * It also has two more functions:
+ * - During a clone operation, a source object implementing this interface can specify which fields should not be cloned
+ * - When the source object is inside a collection, it will not be cloned when inserted into the cloned collection. Use ClonableDeep
+ *   if the cloned collection must contain a cloned instance of the source object
  */
 public interface CloneableFiltered {
 	/**

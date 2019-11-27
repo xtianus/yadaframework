@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.persistence.repository.YadaFileManagerDao;
 import net.yadaframework.security.YadaUserDetailsService;
 import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
@@ -15,10 +17,11 @@ import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepo
 import net.yadaframework.security.persistence.repository.YadaUserProfileRepository;
 
 /**
- *
+ * Base class for application session. The subclass must be annotated with "@Primary" otherwise two different instances are created for the two classes
  */
 @Component
 @SessionScope
+// NOTE: Use @Primary in subclasses
 public class YadaSession<T extends YadaUserProfile> {
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	@Autowired private YadaConfiguration config;
@@ -28,19 +31,23 @@ public class YadaSession<T extends YadaUserProfile> {
 	@Autowired protected YadaUserProfileRepository<T> yadaUserProfileRepository;
 	@Autowired protected YadaUserDetailsService yadaUserDetailsService;
 	@Autowired protected YadaUserCredentialsRepository yadaUserCredentialsRepository;
+	@Autowired protected YadaFileManagerDao yadaFileManagerDao;
+	@Autowired protected YadaUtil yadaUtil;
 
-	protected Long impersonificatorUserId = null;
-	protected Long impersonifiedUserId = null;
+	protected Long impersonatorUserId = null;
+	protected Long impersonatedUserId = null;
 	protected Long loggedInUserProfileId = null; // id of the current logged in user, be it "real" or "impersonated"
+
+	protected YadaCropQueue cropQueue; // Crop images
 
 	public void clearUserProfileCache() {
 		loggedInUserProfileId = null;
 	}
 
 	public void clearCaches() {
-		impersonificatorUserId = null;
+		impersonatorUserId = null;
 		loggedInUserProfileId = null;
-		impersonifiedUserId = null;
+		impersonatedUserId = null;
 	}
 
 	@Deprecated // use isImpersonationActive()
@@ -49,7 +56,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	}
 
 	public boolean isImpersonationActive() {
-		return impersonificatorUserId!=null && impersonifiedUserId!=null;
+		return impersonatorUserId!=null && impersonatedUserId!=null;
 	}
 
 	/**
@@ -66,12 +73,12 @@ public class YadaSession<T extends YadaUserProfile> {
 	 * @param targetUserProfileId
 	 */
 	public void impersonate(Long targetUserProfileId) {
-		impersonificatorUserId = getCurrentUserProfileId();
-		impersonifiedUserId = targetUserProfileId;
+		impersonatorUserId = getCurrentUserProfileId();
+		impersonatedUserId = targetUserProfileId;
 		YadaUserCredentials targetUserCredentials = yadaUserCredentialsRepository.findByUserProfileId(targetUserProfileId);
 		yadaUserDetailsService.authenticateAs(targetUserCredentials, false);
 		loggedInUserProfileId = targetUserProfileId;
-		log.info("Impersonification by #{} as {} started", impersonificatorUserId, targetUserCredentials);
+		log.info("Impersonification by #{} as {} started", impersonatorUserId, targetUserCredentials);
 	}
 
 	/**
@@ -89,7 +96,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	 */
 	public boolean depersonate() {
 		if (isImpersonationActive()) {
-			YadaUserCredentials originalCredentials = yadaUserCredentialsRepository.findByUserProfileId(impersonificatorUserId);
+			YadaUserCredentials originalCredentials = yadaUserCredentialsRepository.findByUserProfileId(impersonatorUserId);
 			yadaUserDetailsService.authenticateAs(originalCredentials);
 			log.info("Impersonification by {} ended", originalCredentials);
 			clearCaches();
@@ -148,5 +155,46 @@ public class YadaSession<T extends YadaUserProfile> {
 		return loggedInUserProfileId==null?null:yadaUserProfileRepository.findOne(loggedInUserProfileId);
 	}
 
+	/**
+	 * Returns true if there are images to be cropped
+	 */
+	public boolean hasCropQueue() {
+		return this.cropQueue != null && this.cropQueue.hasCropImages();
+	}
+
+	/**
+	 * Returns the current YadaCropQueue
+	 * @return the YadaCropQueue or null
+	 */
+	public YadaCropQueue getCropQueue() {
+		return this.cropQueue;
+	}
+
+	public void deleteCropQueue() {
+		if (this.cropQueue != null) {
+			this.cropQueue.delete();
+		}
+		this.cropQueue = null;
+	}
+
+	/**
+	 * Starts a new crop operation deleting any stale images.
+	 * @param cropRedirect where to go to perform the crop, e.g. "/some/controller/cropPage"
+	 * @param destinationRedirect where to go after all the crop has been done, e.g. "/some/controller/afterCrop"
+	 * @return
+	 */
+	public YadaCropQueue addCropQueue(String cropRedirect, String destinationRedirect) {
+		if (this.cropQueue != null) {
+			this.cropQueue.delete();
+		}
+		this.cropQueue = new YadaCropQueue(cropRedirect, destinationRedirect);
+		this.cropQueue = (YadaCropQueue) yadaUtil.autowireAndInitialize(this.cropQueue);
+		return this.cropQueue;
+	}
+
+	@SuppressWarnings("unused")
+	private void setCropQueue(YadaCropQueue cropQueue) {
+		this.cropQueue = cropQueue;
+	}
 
 }

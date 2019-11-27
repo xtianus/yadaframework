@@ -32,19 +32,21 @@ import net.yadaframework.exceptions.YadaConfigurationException;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.persistence.entity.YadaClause;
+import net.yadaframework.raw.YadaIntDimension;
 
 /**
  * Classe che estende CombinedConfiguration aggiungendo metodi di gestione della configurazione specifici.
  */
 public abstract class YadaConfiguration {
 	private static Logger log = LoggerFactory.getLogger(YadaConfiguration.class);
-	
+
 	protected ImmutableHierarchicalConfiguration configuration;
 	protected ReloadingCombinedConfigurationBuilder builder;
-	
+
 	// Cached values
-	// Questi valori li memorizzo perchè probabilmente verranno controllati 
+	// Questi valori li memorizzo perchè probabilmente verranno controllati
 	// ad ogni pageview e comunque non mi aspetto che cambino a runtime
+	private String uploadsDir = null;
 	private String contentUrl = null;
 	private String contentName = null;
 	private String environment = null;
@@ -82,7 +84,49 @@ public abstract class YadaConfiguration {
 	private Locale defaultLocale = null;
 	private boolean defaultLocaleChecked = false;
 	private Map<String, SortedSet<Entry<Integer,String>>> localSetCache = new HashMap<>(); // Deprecated
-	
+	private String targetImageExtension=null;
+
+
+	/**
+	 * Get the width/height of an image, for desktop and mobile
+	 * @param relativeKey the key like "/product/gallery", relative to "config/dimension"
+	 * @return { desktopWidth, mobileWidth }, the cell is null when not configured
+	 */
+	protected YadaIntDimension[] getImageDimensions(String relativeKey) {
+		YadaIntDimension[] result = new YadaIntDimension[2];
+		String widthHeight = configuration.getString("config/dimension" + relativeKey + "/desktop", null);
+		YadaIntDimension desktop = null;
+		if (widthHeight!=null) {
+			String[] parts = widthHeight.split(",");
+			int width = Integer.parseInt(parts[0]);
+			int height = Integer.parseInt(parts[1]);
+			desktop = new YadaIntDimension(width, height);
+		}
+		result[0] = desktop;
+		widthHeight = configuration.getString("config/dimension" + relativeKey + "/mobile", null);
+		YadaIntDimension mobile = null;
+		if (widthHeight!=null) {
+			String[] parts = widthHeight.split(",");
+			int width = Integer.parseInt(parts[0]);
+			int height = Integer.parseInt(parts[1]);
+			mobile = new YadaIntDimension(width, height);
+		}
+		result[1] = mobile;
+		return result;
+	}
+
+	/**
+	 * Returns the image extension (without dot) to use when uploading user images. Defaults to "jpg".
+	 * @return
+	 */
+	public String getTargetImageExtension() {
+		if (targetImageExtension==null) {
+			targetImageExtension = configuration.getString("config/dimension/@targetImageExtension", "jpg");
+			targetImageExtension = StringUtils.removeStart(targetImageExtension, "."); // Remove dot if any
+		}
+		return targetImageExtension;
+	}
+
 	/**
 	 * Tells if the YadaFileManager has to delete uploaded files when attaching them, or to keep them in the uploads folder
 	 * for later use. true by default.
@@ -120,7 +164,7 @@ public abstract class YadaConfiguration {
 	 * </pre>
 	 * The resulting set will have the countries in the following order: Albania, England, France, USA.
 	 * Results are cached forever.
-	 * 
+	 *
 	 * @param configPath item in the configuration file that holds the id. There should be more than one such item in the configuration.
 	 * Example: config/countries/countryId
 	 * @param messageBaseKey the prefix of the message.properties key to which the id should be appended in order to retrieve the localized text.
@@ -146,21 +190,37 @@ public abstract class YadaConfiguration {
 		for (Integer id : ids) {
 			String key = messageBaseKey + "." + id;
 			String localizedText = messageSource.getMessage(key, null, key, locale);
-			Entry<Integer,String> entry = new AbstractMap.SimpleImmutableEntry<Integer,String>(id, localizedText);
+			Entry<Integer,String> entry = new AbstractMap.SimpleImmutableEntry<>(id, localizedText);
 			result.add(entry);
 		}
 		localSetCache.put(cacheKey, result);
 		return result;
 	}
-	
+
+	public String getUploadsDirname() {
+		if (uploadsDir==null) {
+			uploadsDir = configuration.getString("config/paths/uploadsDir", "uploads");
+		}
+		return uploadsDir;
+	}
+
 	/**
-	 * Folder where all files are uploaded.
+	 * Returns the url for the uploads folder
 	 * @return
 	 */
-	public File getUploadFolder() {
-		return new File(getBasePath(), "uploads");
+	public String getUploadsUrl() {
+		return this.getContentUrl() + "/" + getUploadsDirname();
 	}
-	
+
+	/**
+	 * Folder where files are uploaded before processing.
+	 * Also the folder where the Media Manager keeps the files.
+	 * @return
+	 */
+	public File getUploadsFolder() {
+		return new File(getContentPath(), getUploadsDirname());
+	}
+
 	/**
 	 * Returns true if YadaEmaiService should throw an exception instead of returning false when it receives an exception on send
 	 * @return
@@ -176,7 +236,7 @@ public abstract class YadaConfiguration {
 		String link = configuration.getString("config/security/passwordReset/passwordResetSent", "/");
 		return fixLink(link, locale);
 	}
-	
+
 	/**
 	 * @return the link to use for the registration confirmation, e.g. "/my/registrationConfirmation" or "/en/my/registrationConfirmation"
 	 */
@@ -184,7 +244,7 @@ public abstract class YadaConfiguration {
 		String link = configuration.getString("config/security/registration/confirmationLink", "/registrationConfirmation");
 		return fixLink(link, locale);
 	}
-	
+
 	private String fixLink(String link, Locale locale) {
 		if (!link.endsWith("/")) {
 			link = link + "/";
@@ -215,7 +275,7 @@ public abstract class YadaConfiguration {
 		return false;
 	}
 
-	
+
 	/**
 	 * True if during startup YadaAppConfig should run the FlyWay migrate operation
 	 * @return
@@ -223,7 +283,7 @@ public abstract class YadaConfiguration {
 	public boolean useDatabaseMigrationAtStartup() {
 		return configuration.getBoolean("config/database/databaseMigrationAtStartup", false);
 	}
-	
+
 	/**
 	 * Returns the configured default locale.
 	 * @return the default locale, or null if no default is set
@@ -244,7 +304,7 @@ public abstract class YadaConfiguration {
 		}
 		return defaultLocale;
 	}
-	
+
 	/**
 	 * True if the filter enables the use of locales in the url, like /en/mypage
 	 * @return
@@ -255,7 +315,7 @@ public abstract class YadaConfiguration {
 		}
 		return localePathVariableEnabled.booleanValue();
 	}
-	
+
 //	/**
 //	 * Returns the locale to be injected in the request.
 //	 * Used when the locale string only has the language and you want to store the full language_COUNTRY locale in your request.
@@ -266,7 +326,7 @@ public abstract class YadaConfiguration {
 //	public String getLocaleForRequest(String locale) {
 //		return configuration.getString("config/i18n/locale[text()='" + locale + "']/request", locale);
 //	}
-	
+
 	public String getCountryForLanguage(String language) {
 		if (languageToCountry==null) {
 			languageToCountry = new HashMap<>();
@@ -279,9 +339,9 @@ public abstract class YadaConfiguration {
 		}
 		return languageToCountry.get(language);
 	}
-	
+
 	/**
-	 * True if locale paths only have the language component ("en") but you also need the country component ("US") in the request Locale 
+	 * True if locale paths only have the language component ("en") but you also need the country component ("US") in the request Locale
 	 */
 	public boolean isLocaleAddCountry() {
 		if (localeAddCountry==null) {
@@ -289,7 +349,7 @@ public abstract class YadaConfiguration {
 		}
 		return localeAddCountry.booleanValue();
 	}
-	
+
 	/**
 	 * Get a list of iso2 locales that the webapp can handle
 	 * @return
@@ -302,12 +362,12 @@ public abstract class YadaConfiguration {
 			        LocaleUtils.toLocale(locale); // Validity check
 			    } catch (IllegalArgumentException e) {
 			    	throw new YadaConfigurationException("Locale {} is invalid", locale);
-			    }			
+			    }
 			}
 		}
 		return locales;
 	}
-	
+
 	/**
 	 * Returns the page to forward to after an unhandled exception or HTTP error
 	 * @return
@@ -318,35 +378,35 @@ public abstract class YadaConfiguration {
 		}
 		return errorPageForward;
 	}
-	
+
 	public boolean isBeta() {
 		if (beta==null) {
 			beta=configuration.getBoolean("/config/info/beta", false);
 		}
 		return beta;
 	}
-	
+
 	public boolean isAlpha() {
 		if (alpha==null) {
 			alpha=configuration.getBoolean("/config/info/alpha", false);
 		}
 		return alpha;
 	}
-	
+
 	public int getMaxPasswordLength() {
 		if (maxPwdLen<0) {
 			maxPwdLen = configuration.getInt("config/security/passwordLength/@max", 16);
 		}
 		return maxPwdLen;
 	}
-	
+
 	public int getMinPasswordLength() {
 		if (minPwdLen<0) {
 			minPwdLen = configuration.getInt("config/security/passwordLength/@min", 0);
 		}
 		return minPwdLen;
 	}
-	
+
 	/**
 	 * Ritorna il path del folder in cui sono memorizzate le immagini temporanee accessibili via web, ad esempio per il preview della newsletter
 	 * @return
@@ -354,7 +414,7 @@ public abstract class YadaConfiguration {
 	public File getTempImageDir() {
 		return new File(getContentPath(), getTempImageRelativePath());
 	}
-	
+
 	/**
 	 * Ritorna il path del folder in cui sono memorizzate le immagini temporanee accessibili via web, relativamente al folder "contents"
 	 * @return
@@ -362,8 +422,8 @@ public abstract class YadaConfiguration {
 	public String getTempImageRelativePath() {
 		return "/tmp";
 	}
-	
-	
+
+
 	/**
 	 * Return the webapp address without a trailing slash. E.g. http://www.mysite.com/app or http://www.mysite.com
 	 * @return
@@ -376,7 +436,7 @@ public abstract class YadaConfiguration {
 		}
 		return webappAddress;
 	}
-	
+
 	/**
 	 * Return the server address without a trailing slash. E.g. http://col.letturedametropolitana.it
 	 * @return
@@ -394,7 +454,7 @@ public abstract class YadaConfiguration {
 		}
 		return logoImage;
 	}
-	
+
 	/**
 	 * Returns ".min" if this is not a development environment. Use like <script yada:src="@{|/res/dataTables/jquery.dataTables${@config.min}.js|}"
 	 * @return ".min" or ""
@@ -405,15 +465,15 @@ public abstract class YadaConfiguration {
 		}
 		return ".min";
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return
 	 */
 	public int getAutologinExpirationHours() {
 		return configuration.getInt("config/security/autologinExpirationHours", 10);
 	}
-	
+
 	/**
 	 * Ritorna il numero massimo di suggerimenti di tag per una storia
 	 * @return
@@ -435,7 +495,7 @@ public abstract class YadaConfiguration {
 		}
 		return tagMaxSuggested;
 	}
-	
+
 	/**
 	 * Ritorna il numero massimo di tag normali che è possibile assegnare a una storia
 	 * @return
@@ -446,7 +506,7 @@ public abstract class YadaConfiguration {
 		}
 		return tagMaxNum;
 	}
-	
+
 	/**
 	 * Ritorna il prefisso di un tag redazionale (special)
 	 * @return
@@ -468,7 +528,7 @@ public abstract class YadaConfiguration {
 		}
  		return facebookType;
 	}
-	
+
 	public int getGoogleType() {
 		if (googleType==-1) {
 			googleType = configuration.getInt("config/social/google/type", -1);
@@ -483,14 +543,14 @@ public abstract class YadaConfiguration {
 	public String getFacebookBaseStoryUrl() {
  		return configuration.getString("config/social/facebook/baseStoryUrl", "unset");
 	}
-	
+
 	/**
 	 * @return
 	 */
 	public String getFacebookPageAccessToken() {
 		return configuration.getString("config/social/facebook/pageAccessToken", "unset");
 	}
-	
+
 	/**
 	 * @return
 	 */
@@ -500,7 +560,7 @@ public abstract class YadaConfiguration {
 		}
 		return facebookSecret;
 	}
-	
+
 	/**
 	 * @return
 	 */
@@ -520,7 +580,7 @@ public abstract class YadaConfiguration {
 		}
 		return googleSecret;
 	}
-	
+
 	/**
 	 * @return
 	 */
@@ -540,18 +600,18 @@ public abstract class YadaConfiguration {
 		String roleKey = getRoleKey(roleId);
 		return "ROLE_" + roleKey;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return the configured role ids, sorted ascending
 	 */
 	public List<Integer> getRoleIds() {
 		ensureRoleMaps();
-		List<Integer> result = new ArrayList<Integer>(roleIdToKeyMap.keySet());
+		List<Integer> result = new ArrayList<>(roleIdToKeyMap.keySet());
 		Collections.sort(result);
 		return result;
 	}
-	
+
 	/**
 	 * Convert from role names to role ids
 	 * @param roleNames an array of role names, like ["USER", "ADMIN"]
@@ -569,7 +629,7 @@ public abstract class YadaConfiguration {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * @param roleKey e.g. "ADMIN"
 	 * @return e.g. 9
@@ -582,7 +642,7 @@ public abstract class YadaConfiguration {
 		}
 		return id;
 	}
-	
+
 	/**
 	 * @param roleId e.g. 9
 	 * @return e.g. "ADMIN"
@@ -595,14 +655,14 @@ public abstract class YadaConfiguration {
 		}
 		return key;
 	}
-	
+
 	private void ensureRoleMaps() {
 		synchronized (roleMapMonitor) {
 			if (roleIdToKeyMap!=null) {
 				return;
 			}
-			roleIdToKeyMap = new HashMap<Integer, String>();
-			roleKeyToIdMap = new HashMap<String, Integer>();
+			roleIdToKeyMap = new HashMap<>();
+			roleKeyToIdMap = new HashMap<>();
 			for (ImmutableHierarchicalConfiguration sub : configuration.immutableConfigurationsAt("config/security/roles/role")) {
 				Integer id = sub.getInteger("id", null);
 				String key = sub.getString("key", null);
@@ -624,7 +684,7 @@ public abstract class YadaConfiguration {
 	 * Ritorna la lista di YadaClause trovate nella configurazione
 	 */
 	public List<YadaClause> getSetupClauses() {
-		List<YadaClause> result = new ArrayList<YadaClause>();
+		List<YadaClause> result = new ArrayList<>();
 		for (ImmutableHierarchicalConfiguration sub : configuration.immutableConfigurationsAt("config/setup/clauses")) {
 			for (Iterator<String> names = sub.getKeys(); names.hasNext();) {
 				String name = names.next();
@@ -638,7 +698,7 @@ public abstract class YadaConfiguration {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Check if content urls must be local to the server or remote with a http address
 	 * @return
@@ -647,11 +707,11 @@ public abstract class YadaConfiguration {
 		String contentUrl = getContentUrl();
 		return contentUrl!=null && contentUrl.charAt(0)=='/' && contentUrl.charAt(1)!='/';
 	}
-	
+
 
 	/**
-	 * Url da cui prelevare i "contenuti" caricati dall'utente, senza slash finale.
-	 * Può essere relativa alla root della webapp oppure completa, per esempio "/contents" oppure "http://cdn.my.com/contents" o "//cdn.my.com/contents"
+	 * Url where to download user-uploaded content, without final slash.
+	 * Can be webapp-relative or absolute, for example "/contents" or "http://cdn.my.com/contents" or "//cdn.my.com/contents"
 	 * @return the configured value, or "/contents" by default
 	 */
 	public String getContentUrl() {
@@ -671,6 +731,14 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
+	 * Base folder for uploaded content
+	 * @return
+	 */
+	public File getContentsFolder() {
+		return new File(getContentPath());
+	}
+
+	/**
 	 * Path del filesystem in cui vengono memorizzati i "contenuti" caricati dall'utente, per esempio /srv/ldm/contents
 	 * @return
 	 */
@@ -679,7 +747,7 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
-	 * Name of the folder where uploaded contents are stored
+	 * Name of the folder inside basePath where contents are stored
 	 * @return
 	 */
 	public String getContentName() {
@@ -691,7 +759,7 @@ public abstract class YadaConfiguration {
 		}
 		return contentName;
 	}
-	
+
 	/**
 	 * Absolute path on the filesystem where application files not belonging to the webapp war are stored.
 	 * Example: /srv/myproject
@@ -702,54 +770,54 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return e.g. "res"
 	 */
 	public String getResourceDir() {
 		return configuration.getString("config/paths/resourceDir", "res");
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return e.g. "yadares"
 	 */
 	public String getYadaResourceDir() {
 		return configuration.getString("config/paths/yadaResourceDir", "yadares");
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return e.g. "res-0012"
 	 */
 	public String getVersionedResourceDir() {
 		return getResourceDir() + "-" + getApplicationBuild();
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return e.g. "yadares-0012"
 	 */
 	public String getVersionedYadaResourceDir() {
 		return getYadaResourceDir() + "-" + getYadaVersion();
 	}
-	
+
 //	/**
-//	 * Add project-specific user attributes from the configuration 
+//	 * Add project-specific user attributes from the configuration
 //	 * @param user
 //	 * @param sub
 //	 */
 //	@Deprecated // should not be needed anymore, now that any tag can be used to define a user
 //	abstract protected void addSetupUserAttributes(Map<String, Object> user, ImmutableHierarchicalConfiguration sub);
-	
+
 	/**
-	 * Every tag in the config/setup/users/user configuration is added to the map as a key-value pair 
+	 * Every tag in the config/setup/users/user configuration is added to the map as a key-value pair
 	 * except roles, added as a list to the "roles" key.
 	 */
 	public List<Map<String, Object>> getSetupUsers() {
-		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> result = new ArrayList<>();
 		for (ImmutableHierarchicalConfiguration sub : configuration.immutableConfigurationsAt("config/setup/users/user")) {
-			Map<String, Object> user = new HashMap<String, Object>();
-			Set<Integer> roles = new HashSet<Integer>();
+			Map<String, Object> user = new HashMap<>();
+			Set<Integer> roles = new HashSet<>();
 			result.add(user);
 			// Every tag except <role> is added to the map
 			for (Iterator<String> keys = sub.getKeys(); keys.hasNext();) {
@@ -780,7 +848,7 @@ public abstract class YadaConfiguration {
 	public int getMaxFileUploadSizeBytes() {
 		return configuration.getInt("config/maxFileUploadSizeBytes", 50000000); // 50 mega default
 	}
-	
+
 	/**
 	 * Used internally to configure JPA EntityManagerFactory
 	 * @return
@@ -793,11 +861,11 @@ public abstract class YadaConfiguration {
 		}
 		return result;
 	}
-	
+
 	public String getDbJndiName() {
 		return configuration.getString("config/database/jndiname");
 	}
-	
+
 	/**
 	 * Get the email address and the personal name of the sender.
 	 * @return an array with email and personal name
@@ -812,11 +880,11 @@ public abstract class YadaConfiguration {
 			return new String[] { configuration.getString("config/email/from"), null };
 		}
 	}
-	
+
 	public boolean isEmailEnabled() {
 		return configuration.getBoolean("config/email/enabled", false);
 	}
-	
+
 	public String getEmailHost() {
 		try {
 			String result = configuration.getString("/config/email/smtpserver/host");
@@ -827,7 +895,7 @@ public abstract class YadaConfiguration {
 			return null;
 		}
 	}
-	
+
 	public int getEmailPort() {
 		try {
 			int result = configuration.getInt("/config/email/smtpserver/port");
@@ -838,7 +906,7 @@ public abstract class YadaConfiguration {
 			return 0;
 		}
 	}
-	
+
 	public String getEmailProtocol() {
 		try {
 			String result = configuration.getString("/config/email/smtpserver/protocol");
@@ -849,7 +917,7 @@ public abstract class YadaConfiguration {
 			return null;
 		}
 	}
-	
+
 	public String getEmailUsername() {
 		try {
 			String result = configuration.getString("/config/email/smtpserver/username");
@@ -860,7 +928,7 @@ public abstract class YadaConfiguration {
 			return null;
 		}
 	}
-	
+
 	public String getEmailPassword() {
 		try {
 			String result = configuration.getString("/config/email/smtpserver/password");
@@ -871,7 +939,7 @@ public abstract class YadaConfiguration {
 			return null;
 		}
 	}
-	
+
 	public Properties getEmailProperties() {
 		try {
 			Properties result = configuration.getProperties("/config/email/smtpserver/properties");
@@ -882,29 +950,29 @@ public abstract class YadaConfiguration {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Ritorna le email per le quali è abilitato l'invio
 	 * @return
 	 */
 	public List<String> getValidDestinationEmails() {
-		return new ArrayList<String>(Arrays.asList(configuration.getStringArray("config/email/validEmail")));
+		return new ArrayList<>(Arrays.asList(configuration.getStringArray("config/email/validEmail")));
 	}
-	
+
 	public boolean isProductionEnvironment() {
 		if (production==null) {
 			production="prod".equalsIgnoreCase(getApplicationEnvironment());
 		}
 		return production;
 	}
-	
+
 	public boolean isDevelopmentEnvironment() {
 		if (development==null) {
 			development="dev".equalsIgnoreCase(getApplicationEnvironment());
 		}
 		return development;
 	}
-	
+
 	/**
 	 * Ritorna la stringa che rappresenta la versione di yada
 	 * @return
@@ -920,7 +988,7 @@ public abstract class YadaConfiguration {
 		}
 		return yadaVersion;
 	}
-	
+
 	/**
 	 * Ritorna la stringa che rappresenta la versione, completa di build
 	 * @return
@@ -931,7 +999,7 @@ public abstract class YadaConfiguration {
 		}
 		return version;
 	}
-	
+
 	/**
 	 * Get the configured environment name: config/info/env
 	 * @return the environment name, or ""
@@ -942,7 +1010,7 @@ public abstract class YadaConfiguration {
 		}
  		return environment;
 	}
-	
+
 	/**
 	 * @return il numero di build. Viene usato soprattutto per eliminare il problema della cache sui file dentro a res
 	 */
@@ -964,7 +1032,7 @@ public abstract class YadaConfiguration {
 		}
 		return build;
 	}
-	
+
 	/**
 	 * @return la data di rilascio oppure null oppure "" se non è stata settata dal build.xml
 	 */
@@ -977,8 +1045,8 @@ public abstract class YadaConfiguration {
 			}
 		}
 		return releaseDate;
-	}	
-	
+	}
+
 //	/**
 //	 * Ritorna il valore di "config.resources.basepath" come File
 //	 * @param config
@@ -987,7 +1055,7 @@ public abstract class YadaConfiguration {
 //	public File getResourcesBasepath() {
 //		return new File(this.getString("config.resources.basepath", ""));
 //	}
-//	
+//
 //	/**
 //	 * Ritorna il valore di "config.resources.basepath" come URL, terminata con "/"
 //	 * @param config
@@ -996,8 +1064,8 @@ public abstract class YadaConfiguration {
 //	public String getResourcesBaseurl() {
 //		return BabkaFileUtil.getNormalisedPath(this, "config.resources.baseurl", "/");
 //	}
-//	
-	
+//
+
 	/**
 	 * Cerca all'interno delle options il testo toSearch
 	 * @param options
@@ -1007,7 +1075,7 @@ public abstract class YadaConfiguration {
 	public static Properties containsInProperties(Properties options, String toSearch){
 		Properties returnList = new Properties();
 		for(Object k: options.keySet()){
-			String ks =  (String)k ; 
+			String ks =  (String)k ;
 			String value = options.getProperty(ks);
 			if(value.toLowerCase().contains(toSearch.toLowerCase())){
 				returnList.put(ks, value);
@@ -1015,18 +1083,18 @@ public abstract class YadaConfiguration {
 		}
 		return returnList;
 	}
-	
+
 	public YadaConfiguration() {
 	}
-	
+
 //	public YadaConfiguration(NodeCombiner comb) {
 //		super(comb);
 //	}
-//	
+//
 //	public YadaConfiguration(Lock lock) {
 //		super(lock);
 //	}
-//	
+//
 //	public YadaConfiguration(NodeCombiner comb, Lock lock) {
 //		super(comb, lock);
 //	}
@@ -1038,17 +1106,17 @@ public abstract class YadaConfiguration {
 	public boolean encodePassword() {
 		return configuration.getBoolean("config/security/encodePassword", false);
 	}
-	
+
 	public int getMaxPasswordFailedAttempts() {
 		return configuration.getInteger("config/security/maxFailedAttempts", 50);
 	}
-	
+
 	public int getPasswordFailedAttemptsLockoutMinutes() {
 		return configuration.getInteger("config/security/failedAttemptsLockoutMinutes", 50);
 	}
-	
+
 	// Selenium Web Driver
-	
+
 	public int seleniumWaitQuick() {
 		return configuration.getInt("config/selenium/timeout/waitQuickSeconds", 4);
 	}
@@ -1058,7 +1126,7 @@ public abstract class YadaConfiguration {
 	public int seleniumWaitSlow() {
 		return configuration.getInt("config/selenium/timeout/waitSlowSeconds", 16);
 	}
-	
+
 	/**
 	 * The url of the Selenium HUB or the ChromeDriver server. Example: http://localhost:4444/wd/hub, http://127.0.0.1:9515
 	 * @return
@@ -1070,11 +1138,11 @@ public abstract class YadaConfiguration {
 	public long getSeleniumTimeoutSlowPageLoadSeconds() {
 		return configuration.getInt("config/selenium/timeout/slowPageLoadSeconds", 60);
 	}
-	
+
 	public long getSeleniumTimeoutProxyTestPageLoadSeconds() {
 		return configuration.getInt("config/selenium/timeout/proxyTestPageLoadSeconds", 10);
 	}
-	
+
 	public long getSeleniumTimeoutPageLoadSeconds() {
 		return configuration.getInt("config/selenium/timeout/pageLoadSeconds", 10);
 	}
@@ -1082,13 +1150,13 @@ public abstract class YadaConfiguration {
 	public long getSeleniumTimeoutScriptSeconds() {
 		return configuration.getInt("config/selenium/timeout/scriptSeconds", 5);
 	}
-	
+
 	public long getSeleniumTimeoutImplicitlyWaitSeconds() {
 		return configuration.getInt("config/selenium/timeout/implicitlyWaitSeconds", 5);
 	}
 
 	//
-	
+
 	public ImmutableHierarchicalConfiguration getConfiguration() {
 		return configuration;
 	}
@@ -1100,7 +1168,7 @@ public abstract class YadaConfiguration {
 	public String getString(String key, String defaultValue) {
 		return configuration.getString(key, defaultValue);
 	}
-	
+
 	public String getString(String key) {
 		return configuration.getString(key);
 	}
@@ -1117,10 +1185,10 @@ public abstract class YadaConfiguration {
 		this.builder = builder;
 		this.configuration = ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration());
 	}
-	
+
 	/**
 	 * Call this method to trigger a configuration reload, but only if the file has changed and the timeout since last reload has passed
-	 * @throws ConfigurationException 
+	 * @throws ConfigurationException
 	 */
 	public void reloadIfNeeded() throws ConfigurationException {
 		// TODO Doesn't seem to work
@@ -1135,7 +1203,7 @@ public abstract class YadaConfiguration {
 	public long getYadaJobSchedulerPeriod() {
 		return this.configuration.getLong("config/yada/jobScheduler/periodMillis", 0); // by default it doesn't start
 	}
-	
+
 	/**
 	 * The YadaJobScheduler thread pool size. When the number of concurrent jobs is higher, they are queued.
 	 * @return
@@ -1143,7 +1211,7 @@ public abstract class YadaConfiguration {
 	public int getYadaJobSchedulerThreadPoolSize() {
 		return this.configuration.getInt("config/yada/jobScheduler/threadPoolSize", 10);
 	}
-	
+
 	/**
 	 * Milliseconds after a running job is considered to be stale and killed.
 	 * @return
@@ -1155,8 +1223,8 @@ public abstract class YadaConfiguration {
 	/**
 	 * Number of YadaJob entities to keep in cache. It should be equal to the estimated maximum number
 	 * of concurrent running jobs.
-	 * If the number is too small, concurrent writes to the same job data could result in "concurrent modification" 
-	 * exceptions. Also the running job could be evicted from cache and terminated prematurely with a log saying "Evicting job {} while still running". 
+	 * If the number is too small, concurrent writes to the same job data could result in "concurrent modification"
+	 * exceptions. Also the running job could be evicted from cache and terminated prematurely with a log saying "Evicting job {} while still running".
 	 * This is a possible scenario:
 	 * <pre>
 	 * - thread A loads instance J1 for a job, puts it in the cache and starts a long running job
@@ -1171,5 +1239,5 @@ public abstract class YadaConfiguration {
 	public int getYadaJobSchedulerCacheSize() {
 		return this.configuration.getInt("config/yada/jobScheduler/jobCacheSize", 500);
 	}
-	
+
 }

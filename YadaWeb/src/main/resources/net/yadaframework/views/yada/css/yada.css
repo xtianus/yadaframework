@@ -303,9 +303,9 @@ input.yadaSwitch-round:checked ~ label:after {
 }
 
 /****************/
-/* Bootstrap 5  */
+/* Bootstrap 4  */
 /****************/
-/* These are needed to use Bootstrap 5 on Bootstrap 4 code */
+/* These are needed to use Bootstrap 4 on Bootstrap 3 code */
 
 .btn-default {
     color: #333;
@@ -375,5 +375,63 @@ input.yadaSwitch-round:checked ~ label:after {
     content: "\f24d";
 }
 
+/********************/
+/* Image crop page  */
+/********************/
 
+#yadaCropForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#yadaCropForm .jcrop-widget.yadaDesktop {
+	border-color: green;
+}
+#yadaCropForm .legend p {
+	cursor: pointer;
+}
+#yadaCropForm .legend p.active {
+	font-weight: bold;
+}
+#yadaCropForm .legend p > span:first-child {
+	width: 10px;
+	height: 10px;
+	display: inline-block;
+}
+#yadaCropForm .jcrop-widget.yadaDesktop .jcrop-handle,
+#yadaCropForm .legend p.yadaDesktop > span:first-child {
+    background-color: green;
+}
+#yadaCropForm .jcrop-widget.yadaMobile {
+	border-color: yellow;
+}
+#yadaCropForm .jcrop-widget.yadaMobile .jcrop-handle,
+#yadaCropForm .legend p.yadaMobile > span:first-child {
+    background-color: yellow;
+}
 
+#yadaCropForm #yadaCropImage {
+    max-width: 100%;
+    max-height: 60vh;
+}
+
+.yadaImageCropper {
+	margin: 50px 0;
+}
+
+.yadaUploadedImages {
+	width: 80%;
+    margin: 50px auto;
+}
+
+.yadaUploadedImages a {
+	cursor: zoom-in;
+}
+
+/**************/
+/* CKEditor 5 */
+
+/* Needed when in a modal to show ckeditor link dialog */
+.ck.ck-balloon-panel {
+	z-index: 999991 !important;
+}

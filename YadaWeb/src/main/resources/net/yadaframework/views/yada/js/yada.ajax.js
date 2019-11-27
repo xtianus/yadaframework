@@ -735,6 +735,10 @@
 			var action = $(this).attr('action');
 			// Check if it must be a multipart formdata
 			var multipart = $form.attr("enctype")=="multipart/form-data";
+			// If CKEditor is being used, ensure all fields are valid (copies from ck-managed-fields to normal form fields)
+			$(".ck-editor__editable").each(function(){
+				this.ckeditorInstance.updateSourceElement();
+			});
 			// Using FormData to send files too: https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData
 			var data = multipart ? new FormData(this) : $(this).serializeArray();
 			// Add data from the form group if any
@@ -1062,7 +1066,7 @@
 						// Keep going...
 					}
 				}
-				// If it is a full page, overwrite the current one
+				// If it is a full page, overwrite the current one. The class .yadafullPage must not be on the body
 				if ($('.yadafullPage', responseHtml).length>0 || $('.s_fullPage', responseHtml).length>0) {
 					showFullPage(responseText);
 					yada.loaderOff();

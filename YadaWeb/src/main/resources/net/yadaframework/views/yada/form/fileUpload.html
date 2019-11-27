@@ -5,37 +5,73 @@
 </head>
 <!--/*
 A file-upload input element.
+Do not use if you don't have a form object holding a MultipartFile.
 
 Parameters:
 - fieldName = name of the field holding the value
 - labelKey = key in messages.properties for the label text
 - label = label to use, if not using a labelKey
+- size = YadaIntDimension for the minimum size of the image (optional)
+- accept = the accept attribute (optional): file_extension, audio/*, image/* etc.
 - required = true for a required value (optional)
 - disabled = true for a disabled field - NOT SENT TO SERVER (optional)
 - help = testo per il pulsante di help (optional)
 - attachedFile = (optional) YadaAttachedFile instance for which to add a download link if not null
+
+Message keys:
+- yada.form.fileUpload.minimumSize
+
+Example:
+<div th:replace="/yada/form/fileUpload::field(fieldName='thumbnailImage',label='Upload thumbnail image',size=${thumbnailSize},required=true,help='Image that will be shown in the list',attachedFile=*{thumbnail})"></div>
+
 
 */-->
 <body>
 <div class="form-group has-feedback yadaFileUpload" 
 	th:fragment="field"
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
-	<label class="control-label" th:for="${#ids.next('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
-	<a th:if="${help!=null}" class="yadaHelpButton" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="top" tabindex="-1"
-		th:attr="data-content=${help}">
+<th:block th:with="tmp=${fieldName+'seqName'},seqName=${#strings.replace(#strings.replace(tmp,']',''),'[','')}">
+	<label class="control-label" th:for="${#ids.next(seqName)}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
+	<a th:if="${help!=null}" class="yadaHelpButton" data-trigger="focus" th:id="|help${#ids.next(seqName)}|" data-toggle="popover" data-placement="top" tabindex="-1"
+		th:attr="data-content=${help},data-container=${'#help'+#ids.next(seqName)}">
 		<i class="fa fa-question-circle fa-lg"></i>
 	</a>
+	<div th:if="${size!=null}" class="yadaMinimumSize"><span th:text="${size}">100x100</span> [[#{yada.form.fileUpload.minimumSize}]]</div>
 	<input th:field="*{__${fieldName}__}" type="file" th:disabled="${disabled}" th:required="${required}" class="form-control has-feedback" 
-		th:id="${#ids.seq('fieldId')}" th:attr="aria-describedby=${#ids.next('fieldId')}"/>
+		th:accept="${accept}?:''" th:id="${#ids.seq(seqName)}" th:attr="aria-describedby=${#ids.next(seqName)}"/>
 	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
 	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
-		<span th:text="${err}" th:id="${#ids.seq('fieldId')}">Error Text</span>
+		<span th:text="${err}" th:id="${#ids.seq(seqName)}">Error Text</span>
 		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	</div>
-	<p th:if="${attachedFile!=null}">
-		<a th:href="@{${@yadaFileManager.getFileUrl(attachedFile)}}" target="_blank" class="yadaNoLoader">[[${attachedFile.clientFilename}]]</a>
-	</p>
+	<div th:if="${attachedFile!=null && !attachedFile.image}">
+		<div th:if="${attachedFile.filename!=null}">
+			File: <a th:href="@{${@yadaFileManager.getFileUrl(attachedFile)}}" target="_blank" class="yadaNoLoader">[[${attachedFile.clientFilename}]]</a>
+		</div>
+		<div th:if="${attachedFile.filenameDesktop!=null}">
+			Desktop: <a th:href="@{${@yadaFileManager.getDesktopImageUrl(attachedFile)}}" target="_blank" class="yadaNoLoader">[[${attachedFile.clientFilename}]]</a>
+		</div>
+		<div th:if="${attachedFile.filenameMobile!=null}">
+			Mobile: <a th:href="@{${@yadaFileManager.getMobileImageUrl(attachedFile)}}" target="_blank" class="yadaNoLoader">[[${attachedFile.clientFilename}]]</a>
+		</div>
+	</div>
 	
+	<div th:if="${attachedFile!=null && attachedFile.image}" class="row yadaUploadedImages">
+		<div th:if="${attachedFile.desktopImage}" th:class="${attachedFile.mobileImage}?'col-xs-8':'col-xs-12'">
+			<a th:href="${@yadaFileManager.getDesktopImageUrl(attachedFile)}" target="_blank">
+				<img class="img-responsive" th:src="@{${@yadaFileManager.getDesktopImageUrl(attachedFile)}}">
+			</a>
+			<div>[[${attachedFile.desktopImageDimension}]]</div>
+		</div>
+		<div th:if="${attachedFile.mobileImage}" th:class="${attachedFile.desktopImage}?'col-xs-4':'col-xs-12'">
+			<a th:href="${@yadaFileManager.getMobileImageUrl(attachedFile)}" target="_blank">
+				<img class="img-responsive" th:src="@{${@yadaFileManager.getMobileImageUrl(attachedFile)}}">
+			</a>
+			<div>[[${attachedFile.mobileImageDimension}]]</div>
+		</div>
+	</div>
+	<div class="clearfix"></div>
+</th:block>
 </div>    	
 </body>
 </html>

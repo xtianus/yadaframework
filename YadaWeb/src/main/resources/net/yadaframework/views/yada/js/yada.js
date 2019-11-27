@@ -183,7 +183,7 @@
 	
 	// Ritorna true se la url contiene il parametro indicato
 	yada.hasUrlParameter = function(url, param) {
-		return typeof yada.getUrlParameter(url, param) == "string";
+		return yada.getUrlParameter(url, param) !=null;
 	};
 	
 	
@@ -255,8 +255,12 @@
 		return url+anchor;
 	};
 	
-	// Modifica o aggiunge un parametro di request alla url. La url può anche essere solo la location.search e può essere vuota
+	// Modifica o aggiunge un parametro di request alla url. La url può anche essere solo la location.search e può essere vuota.
+	// if papram is null or empty, the url is unchanged.
 	yada.addOrUpdateUrlParameter = function(url, param, value, addQuestionMark) {
+		if (param==null || param=="") {
+			return url;
+		}
 		if (yada.hasUrlParameter(url, param)) {
 			return yada.updateUrlParameter(url, param, value);
 		}
@@ -279,7 +283,7 @@
 	};
 	
 	/**
-	 * Restituisce il valore di un parametro di request, oppure false se non c'è
+	 * Returns an url parameter when found, null when not found
 	 * Adapted from http://stackoverflow.com/questions/2090551/parse-query-string-in-javascript
 	 * @param url can be a url, a query string or even part of it, but everything before "?" or "&" will be skipped
 	 */
@@ -287,7 +291,7 @@
 		 var queryStr = url + '&';
 		 var regex = new RegExp('.*?[&\\?]' + varName + '=(.*?)[&#].*');
 		 var val = queryStr.replace(regex, "$1");
-		 return val == queryStr ? false : unescape(val);
+		 return val == queryStr ? null : unescape(val);
 	};
 
 	//Rimpiazza un singolo carattere
@@ -787,10 +791,10 @@
 	}
 	
 	function hideAllModals() {
-		$("#loginModal.show").modal('hide');
-		$("#ajaxModal.show").modal('hide');
-		$('#yada-notification.show').modal('hide');
-		$('#yada-confirm.show').modal('hide');
+		$("#loginModal:visible").modal('hide');
+		$("#ajaxModal:visible").modal('hide');
+		$('#yada-notification:visible').modal('hide');
+		$('#yada-confirm:visible').modal('hide');
 	}
 	
 
