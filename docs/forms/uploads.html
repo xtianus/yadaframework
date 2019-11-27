@@ -301,11 +301,10 @@ Use YadaAttachedFile to easily handle file attachments:</p>
 </pre></div>
 </div>
 <p>After doing this you can make use of the functionality of YadaFileManager explained below.
-Strictly speaking, the above annotation is not needed because YadaAttachedFile instances can exist on their own, having the entity id as a field,
-but this wouldn’t enforce database integrity. You shouldn’t use any <code class="docutils literal notranslate"><span class="pre">cascade</span></code> different from PERSIST or <code class="docutils literal notranslate"><span class="pre">orphanRemoval</span></code> annotations though:</p>
+You shouldn’t use any <code class="docutils literal notranslate"><span class="pre">cascade</span></code> different from PERSIST or <code class="docutils literal notranslate"><span class="pre">orphanRemoval</span></code> annotations:</p>
 <ul class="simple">
-<li><p>cascade <code class="docutils literal notranslate"><span class="pre">SAVE</span></code> would generate a <code class="docutils literal notranslate"><span class="pre">ConcurrentModificationException</span></code> when using the upload and crop workflow (see below)</p></li>
-<li><p>cascade <code class="docutils literal notranslate"><span class="pre">REMOVE</span></code> or <code class="docutils literal notranslate"><span class="pre">orphanRemoval=true</span></code> wouldn’t delete the file on the disk.</p></li>
+<li><p>cascade <code class="docutils literal notranslate"><span class="pre">SAVE</span></code> would generate a <code class="docutils literal notranslate"><span class="pre">ConcurrentModificationException</span></code> when using the upload and crop workflow (images only - see below)</p></li>
+<li><p>cascade <code class="docutils literal notranslate"><span class="pre">REMOVE</span></code> or <code class="docutils literal notranslate"><span class="pre">orphanRemoval=true</span></code> wouldn’t delete the file on disk</p></li>
 <li><p>cascade <code class="docutils literal notranslate"><span class="pre">PERSIST</span></code> is needed when cloning the parent object (<code class="docutils literal notranslate"><span class="pre">Product</span></code> in the example above)</p></li>
 </ul>
 <p>The YadaAttachedFile class stores some file-related information that you might want to keep:</p>
@@ -316,7 +315,6 @@ but this wouldn’t enforce database integrity. You shouldn’t use any <code cl
 <li><p>the folder where the file is stored</p></li>
 <li><p>the name of three versions of the file: the original one and the ones scaled for desktop and mobile</p></li>
 <li><p>the sort order relative to files of the same “group”</p></li>
-<li><p>the Entity to which the file is attached</p></li>
 <li><p>a “published” flag</p></li>
 <li><p>a locale if the file has to be made available only to some specific locale. This could be useful for pdf files in different languages</p></li>
 </ul>
@@ -332,22 +330,23 @@ created automatically if the tomcat process has enough permissions, otherwise yo
 <div class="section" id="saving-the-file">
 <h4>3.4.3.2. Saving the file<a class="headerlink" href="#saving-the-file" title="Permalink to this headline">¶</a></h4>
 <p>Every file is stored using the original file name. To prevent name duplicates a number is automatically appended at the end.</p>
-<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span> <span class="n">String</span> <span class="nf">updateProfile</span><span class="o">(</span><span class="n">MultipartFile</span> <span class="n">thumbnailImage</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">File</span> <span class="n">managedFile</span> <span class="o">=</span> <span class="n">yadaFileManager</span><span class="o">.</span><span class="na">uploadFile</span><span class="o">(</span><span class="n">thumbnailImage</span><span class="o">);</span>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span> <span class="n">String</span> <span class="nf">updateProfile</span><span class="o">(</span><span class="n">MultipartFile</span> <span class="n">uploadedMultipart</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">File</span> <span class="n">uploadedFile</span> <span class="o">=</span> <span class="n">yadaFileManager</span><span class="o">.</span><span class="na">uploadFile</span><span class="o">(</span><span class="n">uploadedMultipart</span><span class="o">);</span>
 </pre></div>
 </div>
 <p>The File can then be attached to an Entity:</p>
-<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">yadaFileManager</span><span class="o">.</span><span class="na">attachNew</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">(),</span> <span class="n">managedFile</span><span class="o">,</span> <span class="s">&quot;userData&quot;</span><span class="o">,</span> <span class="s">&quot;icon&quot;</span><span class="o">);</span>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">YadaAttachedFile</span> <span class="n">newIcon</span> <span class="o">=</span> <span class="n">yadaFileManager</span><span class="o">.</span><span class="na">attachNew</span><span class="o">(</span><span class="n">uploadedFile</span><span class="o">,</span> <span class="n">uploadedMultipart</span><span class="o">,</span> <span class="s">&quot;userData&quot;</span><span class="o">,</span> <span class="s">&quot;icon&quot;</span><span class="o">);</span>
+<span class="k">if</span> <span class="o">(</span><span class="n">newIcon</span><span class="o">!=</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">user</span><span class="o">.</span><span class="na">setIcon</span><span class="o">(</span><span class="n">newIcon</span><span class="o">);</span>
+        <span class="n">userRepository</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="n">user</span><span class="o">);</span>
+<span class="o">}</span>
 </pre></div>
 </div>
-<p>When the attach method is called, the original uploaded file is copied from the “uploads” folder into the target folder.
-The new file will have the new prefix specified and the YadaAttachedFile id at the end of the name.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>You don’t pass the owning entity to the attach method, but its id. The advantage is that the implementation is simplified because you don’t need
-a specific interface; the disadvantage is that you might end up with orphan YadaAttachedFile instances if you delete the owner and don’t propagate the deletion.</p>
-</div>
-<p>The original file is by default deleted from the “uploads” folder unless a specific configuration is set to false:</p>
+<p>The association between the owning Entity and the new YadaAttachedFile instance is not created automatically by yadaFileManager.attachNew() and you
+have to do it explicitly as shown above.
+When the attach method is called, the original uploaded file is copied from the “uploads” folder into the target folder.
+The new file will have the new prefix specified and the YadaAttachedFile id at the end of the name.
+The original file is by default deleted from the “uploads” folder unless a specific configuration is set to false:</p>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;yadaFileManager&gt;</span>
         <span class="nt">&lt;deleteUploads&gt;</span>false<span class="nt">&lt;/deleteUploads&gt;</span>
 <span class="nt">&lt;/yadaFileManager&gt;</span>
@@ -358,17 +357,10 @@ a specific interface; the disadvantage is that you might end up with orphan Yada
 <p class="admonition-title">Todo</p>
 <p>implement filesystem feature</p>
 </div>
-<p>The association between the owning Entity and the new YadaAttachedFile instance is not created automatically by yadaFileManager.attachNew() and you
-have to do it explicitly:</p>
-<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">YadaAttachedFile</span> <span class="n">newIcon</span> <span class="o">=</span> <span class="n">yadaFileManager</span><span class="o">.</span><span class="na">attachNew</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">(),</span> <span class="n">managedFile</span><span class="o">,</span> <span class="s">&quot;userData&quot;</span><span class="o">,</span> <span class="s">&quot;icon&quot;</span><span class="o">);</span>
-<span class="n">user</span><span class="o">.</span><span class="na">setIcon</span><span class="o">(</span><span class="n">newIcon</span><span class="o">);</span>
-<span class="n">userRepository</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="n">user</span><span class="o">);</span>
-</pre></div>
-</div>
 <p>In case you’re replacing a previous attachment, you only need to pass the previous YadaAttachedFile: the old files will be deleted and replaced with
 the new ones. No database operation is needed in this case.</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">YadaAttachedFile</span> <span class="n">previousIcon</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="na">getIcon</span><span class="o">();</span>
-<span class="n">YadaAttachedFile</span> <span class="n">iconAttachedFile</span> <span class="o">=</span> <span class="n">yadaFileManager</span><span class="o">.</span><span class="na">attachReplace</span><span class="o">(</span><span class="n">previousIcon</span><span class="o">,</span> <span class="n">managedFile</span><span class="o">,</span> <span class="s">&quot;icon&quot;</span><span class="o">,</span> <span class="s">&quot;jpg&quot;</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+<span class="n">YadaAttachedFile</span> <span class="n">iconAttachedFile</span> <span class="o">=</span> <span class="n">yadaFileManager</span><span class="o">.</span><span class="na">attachReplace</span><span class="o">(</span><span class="n">previousIcon</span><span class="o">,</span> <span class="n">uploadedFile</span><span class="o">,</span> <span class="s">&quot;icon&quot;</span><span class="o">,</span> <span class="s">&quot;jpg&quot;</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
 </pre></div>
 </div>
 <div class="admonition-todo admonition" id="index-2">
@@ -386,7 +378,7 @@ There is no way to detect if you are using the wrong method, so be careful.</p>
 <div class="section" id="image-variants">
 <h4>3.4.3.3. Image variants<a class="headerlink" href="#image-variants" title="Permalink to this headline">¶</a></h4>
 <p>If the uploaded file is an image, it can be resized for desktop and mobile as needed by specifying the alternative dimensions:</p>
-<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">yadaFileManager</span><span class="o">.</span><span class="na">attach</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="na">getId</span><span class="o">(),</span> <span class="n">managedFile</span><span class="o">,</span> <span class="s">&quot;userData&quot;</span><span class="o">,</span> <span class="s">&quot;icon&quot;</span><span class="o">,</span> <span class="s">&quot;jpg&quot;</span><span class="o">,</span> <span class="mi">1280</span><span class="o">,</span> <span class="mi">768</span><span class="o">);</span>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">yadaFileManager</span><span class="o">.</span><span class="na">attach</span><span class="o">(</span><span class="n">uploadedFile</span><span class="o">,</span> <span class="s">&quot;userData&quot;</span><span class="o">,</span> <span class="s">&quot;icon&quot;</span><span class="o">,</span> <span class="s">&quot;jpg&quot;</span><span class="o">,</span> <span class="mi">1280</span><span class="o">,</span> <span class="mi">768</span><span class="o">);</span>
 </pre></div>
 </div>
 <p>In the above example the image is converted to jpg and two additional versions are saved on disk.
@@ -605,8 +597,7 @@ It is important that, if the YadaSession object has been subclassed, it has the 
 <span class="n">YadaCropQueue</span> <span class="n">yadaCropQueue</span> <span class="o">=</span> <span class="n">applicationSession</span><span class="o">.</span><span class="na">addCropQueue</span><span class="o">(</span><span class="n">cropRedirect</span><span class="o">,</span> <span class="n">finalRedirect</span><span class="o">);</span> <span class="c1">// Clear any previous abandoned crops and set the destination</span>
 <span class="k">if</span> <span class="o">(</span><span class="n">thumbnailManagedFile</span><span class="o">!=</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
         <span class="n">YadaCropImage</span> <span class="n">yadaCropImage</span> <span class="o">=</span> <span class="n">yadaCropQueue</span><span class="o">.</span><span class="na">addCropImage</span><span class="o">(</span><span class="n">thumbnailManagedFile</span><span class="o">,</span> <span class="n">thumbnailDimensionsDesktopMobile</span><span class="o">,</span> <span class="n">FOLDER_NEWS</span><span class="o">,</span> <span class="s">&quot;thumb-&quot;</span><span class="o">);</span>
-        <span class="n">yadaCropImage</span><span class="o">.</span><span class="na">titleKey</span><span class="o">(</span><span class="s">&quot;crop.news.thumbnail&quot;</span><span class="o">).</span><span class="na">cropDesktop</span><span class="o">().</span><span class="na">cropMobile</span><span class="o">();</span>
-        <span class="n">YadaAttachedFile</span> <span class="n">newOrExisting</span> <span class="o">=</span> <span class="n">yadaCropImage</span><span class="o">.</span><span class="na">link</span><span class="o">(</span><span class="n">news</span><span class="o">.</span><span class="na">getThumbnail</span><span class="o">(),</span> <span class="n">news</span><span class="o">.</span><span class="na">getId</span><span class="o">(),</span> <span class="n">thumbnailImage</span><span class="o">.</span><span class="na">getOriginalFilename</span><span class="o">());</span>
+        <span class="n">YadaAttachedFile</span> <span class="n">newOrExisting</span> <span class="o">=</span> <span class="n">yadaCropImage</span><span class="o">.</span><span class="na">titleKey</span><span class="o">(</span><span class="s">&quot;crop.news.thumbnail&quot;</span><span class="o">).</span><span class="na">cropDesktop</span><span class="o">().</span><span class="na">cropMobile</span><span class="o">().</span><span class="na">link</span><span class="o">(</span><span class="n">news</span><span class="o">.</span><span class="na">getThumbnail</span><span class="o">());</span>
         <span class="n">news</span><span class="o">.</span><span class="na">setThumbnail</span><span class="o">(</span><span class="n">newOrExisting</span><span class="o">);</span>
         <span class="n">imageLoaded</span><span class="o">=</span><span class="kc">true</span><span class="o">;</span>
 <span class="o">}</span>

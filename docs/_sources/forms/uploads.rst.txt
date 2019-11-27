@@ -159,11 +159,10 @@ Use YadaAttachedFile to easily handle file attachments:
 		protected YadaAttachedFile specSheet;
 		
 After doing this you can make use of the functionality of YadaFileManager explained below.
-Strictly speaking, the above annotation is not needed because YadaAttachedFile instances can exist on their own, having the entity id as a field,
-but this wouldn't enforce database integrity. You shouldn't use any ``cascade`` different from PERSIST or ``orphanRemoval`` annotations though:
+You shouldn't use any ``cascade`` different from PERSIST or ``orphanRemoval`` annotations:
 
-- cascade ``SAVE`` would generate a ``ConcurrentModificationException`` when using the upload and crop workflow (see below)
-- cascade ``REMOVE`` or ``orphanRemoval=true`` wouldn't delete the file on the disk.
+- cascade ``SAVE`` would generate a ``ConcurrentModificationException`` when using the upload and crop workflow (images only - see below)
+- cascade ``REMOVE`` or ``orphanRemoval=true`` wouldn't delete the file on disk
 - cascade ``PERSIST`` is needed when cloning the parent object (``Product`` in the example above)
 
 The YadaAttachedFile class stores some file-related information that you might want to keep:
@@ -174,7 +173,6 @@ The YadaAttachedFile class stores some file-related information that you might w
 - the folder where the file is stored
 - the name of three versions of the file: the original one and the ones scaled for desktop and mobile
 - the sort order relative to files of the same "group"
-- the Entity to which the file is attached
 - a "published" flag
 - a locale if the file has to be made available only to some specific locale. This could be useful for pdf files in different languages
 
@@ -193,21 +191,24 @@ Every file is stored using the original file name. To prevent name duplicates a 
 
 .. code-block:: java
 
-	public String updateProfile(MultipartFile thumbnailImage) {
-		File managedFile = yadaFileManager.uploadFile(thumbnailImage);
+	public String updateProfile(MultipartFile uploadedMultipart) {
+		File uploadedFile = yadaFileManager.uploadFile(uploadedMultipart);
 
 The File can then be attached to an Entity:
 
 .. code-block:: java
 
-	yadaFileManager.attachNew(user.getId(), managedFile, "userData", "icon");
+	YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "userData", "icon");
+	if (newIcon!=null) {
+		user.setIcon(newIcon);
+		userRepository.save(user);
+	}
 
+
+The association between the owning Entity and the new YadaAttachedFile instance is not created automatically by yadaFileManager.attachNew() and you
+have to do it explicitly as shown above.
 When the attach method is called, the original uploaded file is copied from the "uploads" folder into the target folder. 
 The new file will have the new prefix specified and the YadaAttachedFile id at the end of the name.
-
-.. tip:: You don't pass the owning entity to the attach method, but its id. The advantage is that the implementation is simplified because you don't need
-   a specific interface; the disadvantage is that you might end up with orphan YadaAttachedFile instances if you delete the owner and don't propagate the deletion.
-
 The original file is by default deleted from the "uploads" folder unless a specific configuration is set to false:
 
 .. code-block:: xml
@@ -220,22 +221,13 @@ Not deleting uploaded files allows the implementation of a filesystem-like featu
 
 .. todo:: implement filesystem feature
 
-The association between the owning Entity and the new YadaAttachedFile instance is not created automatically by yadaFileManager.attachNew() and you
-have to do it explicitly:
-
-.. code-block:: java
-
-	YadaAttachedFile newIcon = yadaFileManager.attachNew(user.getId(), managedFile, "userData", "icon");
-	user.setIcon(newIcon);
-	userRepository.save(user);
-
 In case you're replacing a previous attachment, you only need to pass the previous YadaAttachedFile: the old files will be deleted and replaced with
 the new ones. No database operation is needed in this case.
 
 .. code-block:: java
 
 	YadaAttachedFile previousIcon = user.getIcon();
-	YadaAttachedFile iconAttachedFile = yadaFileManager.attachReplace(previousIcon, managedFile, "icon", "jpg", null, null);
+	YadaAttachedFile iconAttachedFile = yadaFileManager.attachReplace(previousIcon, uploadedFile, "icon", "jpg", null, null);
 
 .. todo:: test that the above code works
 
@@ -251,7 +243,7 @@ If the uploaded file is an image, it can be resized for desktop and mobile as ne
 
 .. code-block:: java
 
-	yadaFileManager.attach(user.getId(), managedFile, "userData", "icon", "jpg", 1280, 768);
+	yadaFileManager.attach(uploadedFile, "userData", "icon", "jpg", 1280, 768);
 
 In the above example the image is converted to jpg and two additional versions are saved on disk.
 The conversion is performed with the command line tool configured in ``config/shell/resize`` (usually imagemagick).
@@ -494,8 +486,7 @@ Back to the Controller, the validated image can be added to the crop queue:
 	YadaCropQueue yadaCropQueue = applicationSession.addCropQueue(cropRedirect, finalRedirect); // Clear any previous abandoned crops and set the destination
 	if (thumbnailManagedFile!=null) {
 		YadaCropImage yadaCropImage = yadaCropQueue.addCropImage(thumbnailManagedFile, thumbnailDimensionsDesktopMobile, FOLDER_NEWS, "thumb-");
-		yadaCropImage.titleKey("crop.news.thumbnail").cropDesktop().cropMobile();
-		YadaAttachedFile newOrExisting = yadaCropImage.link(news.getThumbnail(), news.getId(), thumbnailImage.getOriginalFilename());
+		YadaAttachedFile newOrExisting = yadaCropImage.titleKey("crop.news.thumbnail").cropDesktop().cropMobile().link(news.getThumbnail());
 		news.setThumbnail(newOrExisting);
 		imageLoaded=true;
 	}
