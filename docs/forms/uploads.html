@@ -363,16 +363,35 @@ the new ones. No database operation is needed in this case.</p>
 <span class="n">YadaAttachedFile</span> <span class="n">iconAttachedFile</span> <span class="o">=</span> <span class="n">yadaFileManager</span><span class="o">.</span><span class="na">attachReplace</span><span class="o">(</span><span class="n">previousIcon</span><span class="o">,</span> <span class="n">uploadedFile</span><span class="o">,</span> <span class="s">&quot;icon&quot;</span><span class="o">,</span> <span class="s">&quot;jpg&quot;</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition" id="index-2">
-<p class="admonition-title">Todo</p>
-<p>test that the above code works</p>
-</div>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>The difference between <code class="docutils literal notranslate"><span class="pre">attachNew()</span></code> and <code class="docutils literal notranslate"><span class="pre">attachReplace()</span></code> is that the former creates a new YadaAttachedFile instance each time and adds it to the database.
 If you use the attachNew variant to replace an existing file, you will have to delete the old YadaAttachedFile yourself so it’s better to use attachReplace in this scenario.
 AttachNew should be used on the first upload of a file or when an Entity can hold a list of files.
 There is no way to detect if you are using the wrong method, so be careful.</p>
+</div>
+<p><strong>Complete Example</strong></p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="cm">/**</span>
+<span class="cm"> * Uploads an &quot;icon&quot; image for the user</span>
+<span class="cm"> */</span>
+<span class="kd">public</span> <span class="n">String</span> <span class="nf">updateProfile</span><span class="o">(</span><span class="n">MultipartFile</span> <span class="n">uploadedMultipart</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">uploadedMultipart</span><span class="o">!=</span><span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">uploadedMultipart</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>
+                <span class="c1">// Saving the uploaded file to the uploads folder</span>
+                <span class="n">File</span> <span class="n">uploadedFile</span> <span class="o">=</span> <span class="n">yadaFileManager</span><span class="o">.</span><span class="na">uploadFile</span><span class="o">(</span><span class="n">uploadedMultipart</span><span class="o">);</span>
+                <span class="n">YadaAttachedFile</span> <span class="n">previousIcon</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="na">getIcon</span><span class="o">();</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">previousIcon</span><span class="o">==</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// Move the file to the &quot;someFolder&quot; directory and create a new YadaAttachedFile</span>
+                        <span class="n">YadaAttachedFile</span> <span class="n">newIcon</span> <span class="o">=</span> <span class="n">yadaFileManager</span><span class="o">.</span><span class="na">attachNew</span><span class="o">(</span><span class="n">uploadedFile</span><span class="o">,</span> <span class="n">uploadedMultipart</span><span class="o">,</span> <span class="s">&quot;someFolder&quot;</span><span class="o">,</span> <span class="s">&quot;myprefix&quot;</span><span class="o">);</span>
+                        <span class="k">if</span> <span class="o">(</span><span class="n">newIcon</span><span class="o">!=</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                                <span class="n">user</span><span class="o">.</span><span class="na">setIcon</span><span class="o">(</span><span class="n">newIcon</span><span class="o">);</span>
+                                <span class="n">userRepository</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="n">user</span><span class="o">);</span>
+                        <span class="o">}</span>
+                <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+                        <span class="c1">// Replace the existing file with the uploaded one</span>
+                        <span class="n">yadaFileManager</span><span class="o">.</span><span class="na">attachReplace</span><span class="o">(</span><span class="n">previousIcon</span><span class="o">,</span> <span class="n">uploadedFile</span><span class="o">,</span> <span class="n">uploadedMultipart</span><span class="o">,</span> <span class="s">&quot;myprefix&quot;</span><span class="o">,</span> <span class="s">&quot;jpg&quot;</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+                <span class="o">}</span>
+        <span class="o">}</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="image-variants">
@@ -387,7 +406,7 @@ The conversion is performed with the command line tool configured in <code class
 <p class="admonition-title">Tip</p>
 <p>To keep things simple, there are no high density versions for mobile: you should just use the desktop version.</p>
 </div>
-<div class="admonition-todo admonition" id="index-3">
+<div class="admonition-todo admonition" id="index-2">
 <p class="admonition-title">Todo</p>
 <p>link to the configuration section</p>
 </div>
@@ -424,7 +443,7 @@ new entity will reference the old files.</p>
 <span class="n">userRepository</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="n">user</span><span class="o">);</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition" id="index-4">
+<div class="admonition-todo admonition" id="index-3">
 <p class="admonition-title">Todo</p>
 <p>test that the above code works</p>
 </div>

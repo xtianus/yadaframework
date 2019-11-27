@@ -229,13 +229,35 @@ the new ones. No database operation is needed in this case.
 	YadaAttachedFile previousIcon = user.getIcon();
 	YadaAttachedFile iconAttachedFile = yadaFileManager.attachReplace(previousIcon, uploadedFile, "icon", "jpg", null, null);
 
-.. todo:: test that the above code works
-
-
 .. caution:: The difference between ``attachNew()`` and ``attachReplace()`` is that the former creates a new YadaAttachedFile instance each time and adds it to the database.
    If you use the attachNew variant to replace an existing file, you will have to delete the old YadaAttachedFile yourself so it's better to use attachReplace in this scenario.
    AttachNew should be used on the first upload of a file or when an Entity can hold a list of files.
    There is no way to detect if you are using the wrong method, so be careful.
+
+**Complete Example**
+
+.. code-block:: java
+
+	/**
+	 * Uploads an "icon" image for the user
+	 */
+	public String updateProfile(MultipartFile uploadedMultipart) {
+		if (uploadedMultipart!=null && !uploadedMultipart.isEmpty()) {
+			// Saving the uploaded file to the uploads folder
+			File uploadedFile = yadaFileManager.uploadFile(uploadedMultipart);
+			YadaAttachedFile previousIcon = user.getIcon();
+			if (previousIcon==null) {
+				// Move the file to the "someFolder" directory and create a new YadaAttachedFile
+				YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "someFolder", "myprefix");
+				if (newIcon!=null) {
+					user.setIcon(newIcon);
+					userRepository.save(user);
+				}
+			} else {
+				// Replace the existing file with the uploaded one
+				yadaFileManager.attachReplace(previousIcon, uploadedFile, uploadedMultipart, "myprefix", "jpg", null, null);
+			}
+		}
 
 Image variants
 ^^^^^^^^^^^^^^^
