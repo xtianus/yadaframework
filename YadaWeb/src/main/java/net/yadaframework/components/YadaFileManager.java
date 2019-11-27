@@ -330,7 +330,7 @@ public class YadaFileManager {
 
 	/**
 	 * Replace the file associated with the current attachment
-	 * @param currentAttachedFile an existing attachment
+	 * @param currentAttachedFile an existing attachment, never null
 	 * @param managedFile the new file to set
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
 	 * @return
@@ -342,7 +342,7 @@ public class YadaFileManager {
 
 	/**
 	 * Replace the file associated with the current attachment, only if a file was actually attached
-	 * @param currentAttachedFile an existing attachment
+	 * @param currentAttachedFile an existing attachment, never null
 	 * @param managedFile the new file to set
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
 	 * @param targetExtension optional, to convert image file formats
