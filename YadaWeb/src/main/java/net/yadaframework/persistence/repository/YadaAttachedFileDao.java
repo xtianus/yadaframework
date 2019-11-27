@@ -26,16 +26,16 @@ public class YadaAttachedFileDao {
      */
     @Transactional(readOnly = false)
     public void delete(long yadaAttachedFileId) {
-    	YadaSql.instance().deleteFrom("delete from YadaAttachedFile_title y")
-    		.where("y.YadaAttachedFile_id = :id")
+    	YadaSql.instance().deleteFrom("delete from YadaAttachedFile_title")
+    		.where("YadaAttachedFile_id = :id")
     		.setParameter("id", yadaAttachedFileId)
     		.nativeQuery(em).executeUpdate();
-    	YadaSql.instance().deleteFrom("delete from YadaAttachedFile_description y")
-	    	.where("y.YadaAttachedFile_id = :id")
+    	YadaSql.instance().deleteFrom("delete from YadaAttachedFile_description")
+	    	.where("YadaAttachedFile_id = :id")
 	    	.setParameter("id", yadaAttachedFileId)
 	    	.nativeQuery(em).executeUpdate();
-    	YadaSql.instance().deleteFrom("delete from YadaAttachedFile y")
-	    	.where("y.id = :id")
+    	YadaSql.instance().deleteFrom("delete from YadaAttachedFile")
+	    	.where("id = :id")
 	    	.setParameter("id", yadaAttachedFileId)
 	    	.nativeQuery(em).executeUpdate();
     }
@@ -46,7 +46,7 @@ public class YadaAttachedFileDao {
      */
     @Transactional(readOnly = false)
     public void delete(YadaAttachedFile yadaAttachedFile) {
-    	em.merge(yadaAttachedFile);
+    	yadaAttachedFile = em.merge(yadaAttachedFile);
     	em.remove(yadaAttachedFile);
     }
 
