@@ -447,11 +447,12 @@
 		if (confirmText!=null && confirmText!="") {
 			var okButton = $element.attr("data-okButton") || yada.messages.confirmButtons.ok;
 			var cancelButton = $element.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
+			var okShowsPreviousModal = $element.attr("data-yadaOkShowsPrevious")==null || $element.attr("data-yadaOkShowsPrevious")=="true";
 			yada.confirm(confirmText, function(result) {
 				if (result==true) {
 					yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, getTimeoutValue($element), noLoader);
 				}
-			}, okButton, cancelButton);
+			}, okButton, cancelButton, okShowsPreviousModal);
 		} else {
 			yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, null, noLoader);
 		}

@@ -413,12 +413,13 @@
 				if (confirmText!=null) {
 					var okButton = $link.attr("data-yadaOkButton") || $link.attr("data-okButton") || yada.messages.confirmButtons.ok;
 					var cancelButton = $link.attr("data-yadaCancelButton") || $link.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
+					var okShowsPreviousModal = $link.attr("data-yadaOkShowsPrevious")==null || $link.attr("data-yadaOkShowsPrevious")=="true";
 					yada.confirm(confirmText, function(result) {
 						if (result==true) {
 							yada.loaderOn();
 							window.location.replace(href);
 						}
-					}, okButton, cancelButton);
+					}, okButton, cancelButton, okShowsPreviousModal);
 				} else {
 					yada.loaderOn();
 					window.location.replace(href);
@@ -722,6 +723,8 @@
 	yada.confirm = function(message, callback, okButtonText, cancelButtonText, okShowsPreviousModal) {
 		// okButtonText e cancelButtonText sono opzionali
 		var $currentModals = $(".modal:visible");
+		var okClicked = false;
+		var cancelClicked = false;
 		hideAllModals();
 		// Turn off the loader else the confirm dialog won't show
 		yada.loaderOff();
@@ -736,12 +739,13 @@
 			$('#yada-confirm .cancelButton').text(cancelButtonText);
 		}
 		$('#yada-confirm .okButton').off().click(function(){
-			if (okShowsPreviousModal) {
-				$currentModals.modal('show');
-			}
+			okClicked=true;
+			cancelClicked=false;
 			if (callback) callback(true);
 		});
 		$('#yada-confirm .cancelButton').off().click(function(){
+			cancelClicked=true;
+			okClicked=false;
 			if (callback) callback(false);
 		});
 		var $modal = $('#yada-confirm .modal');
@@ -749,10 +753,12 @@
 			console.error("No confirm modal found: did you include it?");
 		}
 		$modal.modal('show');
-		$modal.on('hidden.bs.modal', function (e) {
+		$modal.off('hidden.bs.modal').on('hidden.bs.modal', function (e) {
 			$('#yada-confirm .okButton').text(previousOkButtonText);
 			$('#yada-confirm .cancelButton').text(previousCancelButtonText);
-			$currentModals.modal('show');
+			if (cancelClicked || (okClicked && okShowsPreviousModal==true)) {
+				$currentModals.modal('show');
+			}
 		});		
 	}
 	
