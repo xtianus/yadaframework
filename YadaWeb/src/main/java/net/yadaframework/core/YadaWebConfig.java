@@ -97,7 +97,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		result.append(STATIC_YADARESOURCES_FOLDER+"/");
 		result.append("|");
 		result.append(STATIC_FILE_FOLDER+"/");
-		result.append("|/loginPost");
+		// result.append("|/loginPost");
 		if (config.isContentUrlLocal()) {
 			result.append("|");
 			result.append(contentUrl+"/");
