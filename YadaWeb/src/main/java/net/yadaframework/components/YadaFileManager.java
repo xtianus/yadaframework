@@ -356,7 +356,11 @@ public class YadaFileManager {
 			return null;
 		}
 		deleteFileAttachment(currentAttachedFile); // Delete any previous attached files
-		return attach(currentAttachedFile, managedFile, multipartFile, namePrefix, targetExtension, desktopWidth, mobileWidth);
+		String clientFilename = null;
+		if (multipartFile!=null) {
+			clientFilename = multipartFile.getOriginalFilename();
+		}
+		return attach(currentAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
 	}
 
 	/**
@@ -390,6 +394,28 @@ public class YadaFileManager {
 	 * @see {@link #attach(File, String, String, String)}
 	 */
 	public YadaAttachedFile attachNew(File managedFile, MultipartFile multipartFile, String relativeFolderPath, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+		String clientFilename = null;
+		if (multipartFile!=null) {
+			clientFilename = multipartFile.getOriginalFilename();
+		}
+		return attachNew(managedFile, clientFilename, relativeFolderPath, namePrefix, targetExtension, desktopWidth, mobileWidth);
+	}
+
+	/**
+	 * Copies (and resizes) a managed file to the destination folder, creating a database association to assign to an Entity.
+	 * The name of the file is in the format [basename]managedFileName_id.ext
+	 * @param managedFile an uploaded file, can be an image or not. When null, nothing is done.
+	 * @param clientFilename the original client filename. If null, the client filename is not changed.
+	 * @param relativeFolderPath path of the target folder relative to the contents folder, starting with a slash /
+	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
+	 * @param targetExtension optional, to convert image file formats
+	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
+	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
+	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
+	 * @throws IOException
+	 * @see {@link #attach(File, String, String, String)}
+	 */
+	public YadaAttachedFile attachNew(File managedFile, String clientFilename, String relativeFolderPath, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
 		if (managedFile==null) {
 			return null;
 		}
@@ -404,14 +430,14 @@ public class YadaFileManager {
 		yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile); // Get the id
 		File targetFolder = new File(config.getContentPath(), relativeFolderPath);
 		targetFolder.mkdirs();
-		return attach(yadaAttachedFile, managedFile, multipartFile, namePrefix, targetExtension, desktopWidth, mobileWidth);
+		return attach(yadaAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
 	}
 
 	/**
 	 * Performs file copy and (for images) resize to different versions
 	 * @param yadaAttachedFile object to fill with values
 	 * @param managedFile an uploaded file, can be an image or not. When null, nothing is done.
-	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
+	 * @param clientFilename the client filename. If null, the client filename is not changed.
 	 * @param namePrefix prefix to attach before the original file name to make the target name. Add a separator (like a dash) if you need one. Can be null.
 	 * @param targetExtension optional, to convert image file formats
 	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
@@ -419,11 +445,11 @@ public class YadaFileManager {
 	 * @return
 	 * @throws IOException
 	 */
-	private YadaAttachedFile attach(YadaAttachedFile yadaAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+	private YadaAttachedFile attach(YadaAttachedFile yadaAttachedFile, File managedFile, String clientFilename, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
 		//
 		yadaAttachedFile.setUploadTimestamp(new Date());
-		if (multipartFile!=null) {
-			yadaAttachedFile.setClientFilename(multipartFile.getOriginalFilename());
+		if (clientFilename!=null) {
+			yadaAttachedFile.setClientFilename(clientFilename);
 		}
 		String origExtension = yadaUtil.getFileExtension(yadaAttachedFile.getClientFilename());
 		if (targetExtension==null) {
@@ -431,13 +457,13 @@ public class YadaFileManager {
 		}
 		YadaIntDimension dimension = yadaUtil.getImageDimension(managedFile);
 		yadaAttachedFile.setImageDimension(dimension);
-		boolean imageExtensionChanged = targetExtension.compareToIgnoreCase(origExtension)!=0;
+		boolean imageExtensionChanged = origExtension==null || targetExtension.compareToIgnoreCase(origExtension)!=0;
 		boolean requiresTransofmation = imageExtensionChanged || desktopWidth!=null || mobileWidth!=null;
 		boolean needToDeleteOriginal =  config.isFileManagerDeletingUploads();
 		//
 		// If the file does not need resizing, there is just one default filename like "product-mydoc_2631.pdf"
 		if (!requiresTransofmation) {
-			File targetFile = yadaAttachedFile.calcAndSetTargetFile(namePrefix, targetExtension, null, YadaAttachedFile.YadaAttachedFileType.DEFAULT, config);
+			File targetFile = yadaAttachedFile.calcAndSetTargetFile(namePrefix, targetExtension, null, YadaAttachedFile.YadaAttachedFileType.DEFAULT);
 			// File targetFile = new File(targetFolder, targetFilenamePrefix + "." + targetExtension);
 			if (needToDeleteOriginal) {
 				// Just move the old file to the new destination
@@ -454,13 +480,13 @@ public class YadaFileManager {
 			// Transformation: copy with imagemagick
 			// If desktopWidth is null, the image original size does not change.
 			// The file name is like "product-mydoc_2631_640.jpg"
-			File targetFile = yadaAttachedFile.calcAndSetTargetFile(namePrefix, targetExtension, desktopWidth, YadaAttachedFile.YadaAttachedFileType.DESKTOP, config);
+			File targetFile = yadaAttachedFile.calcAndSetTargetFile(namePrefix, targetExtension, desktopWidth, YadaAttachedFile.YadaAttachedFileType.DESKTOP);
 			resizeAndConvertImageAsNeeded(managedFile, targetFile, desktopWidth);
 			yadaAttachedFile.setFilename(targetFile.getName());
 			if (mobileWidth==null) {
 				yadaAttachedFile.setFilenameMobile(null); // No mobile image
 			} else {
-				targetFile = yadaAttachedFile.calcAndSetTargetFile(namePrefix, targetExtension, mobileWidth, YadaAttachedFile.YadaAttachedFileType.MOBILE, config);
+				targetFile = yadaAttachedFile.calcAndSetTargetFile(namePrefix, targetExtension, mobileWidth, YadaAttachedFile.YadaAttachedFileType.MOBILE);
 				resizeAndConvertImageAsNeeded(managedFile, targetFile, mobileWidth);
 			}
 			if (needToDeleteOriginal) {
