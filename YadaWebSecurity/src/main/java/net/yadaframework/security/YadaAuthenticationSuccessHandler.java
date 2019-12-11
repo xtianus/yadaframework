@@ -99,14 +99,19 @@ public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 		} else {
 			targetUrl = defaultTargetUrlNormalRequest;
 		}
-    	// During login for some reason YadaLocalePathChangeInterceptor is not called and we don't get the proper locale in the context
-    	String requestLocaleString = (String) request.getAttribute(YadaLocalePathChangeInterceptor.LOCALE_ATTRIBUTE_NAME);
-    	if (requestLocaleString!=null) {
-    		Locale requestLocale = StringUtils.parseLocaleString(requestLocaleString);
-	    	if (requestLocale!=null) {
-	    		targetUrl = yadaWebUtil.enhanceUrl(targetUrl, requestLocale);
+		if (yadaConfiguration.isLocalePathVariableEnabled()) {
+			// The target url must be prefixed by the language because it is used as a redirect
+			//
+			// During login for some reason YadaLocalePathChangeInterceptor is not called and we don't get the proper locale in the context
+			String requestLocaleString = (String) request.getAttribute(YadaLocalePathChangeInterceptor.LOCALE_ATTRIBUTE_NAME);
+			if (requestLocaleString!=null) {
+				Locale requestLocale = StringUtils.parseLocaleString(requestLocaleString);
+				if (requestLocale!=null) {
+					targetUrl = yadaWebUtil.enhanceUrl(targetUrl, requestLocale);
+				}
 			}
-    	}
+			
+		}
 		return targetUrl;
 	}
 

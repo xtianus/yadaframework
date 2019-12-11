@@ -92,15 +92,16 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed: " + exception.getMessage());
         } else {
         	log.debug("Forwarding to " + failureUrl);
+
+        	// This is a forward, so there's no need to prefix with the language as done in the success handler
         	
-        	// During login for some reason YadaLocalePathChangeInterceptor is not called and we don't get the proper locale in the context
-        	String requestLocaleString = (String) request.getAttribute(YadaLocalePathChangeInterceptor.LOCALE_ATTRIBUTE_NAME);
-        	if (requestLocaleString!=null) {
-        		Locale requestLocale = StringUtils.parseLocaleString(requestLocaleString);
-    	    	if (requestLocale!=null) {
-    	    		failureUrl = yadaWebUtil.enhanceUrl(failureUrl, requestLocale);
-    			}
-        	}
+//        	String requestLocaleString = (String) request.getAttribute(YadaLocalePathChangeInterceptor.LOCALE_ATTRIBUTE_NAME);
+//        	if (requestLocaleString!=null) {
+//        		Locale requestLocale = StringUtils.parseLocaleString(requestLocaleString);
+//    	    	if (requestLocale!=null) {
+//    	    		failureUrl = yadaWebUtil.enhanceUrl(failureUrl, requestLocale);
+//    			}
+//        	}
         	
             request.getRequestDispatcher(failureUrl).forward(request, response);
         }
