@@ -2,7 +2,7 @@ package net.yadaframework.security;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -21,10 +21,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.core.YadaLocalePathChangeInterceptor;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
+import net.yadaframework.web.YadaWebUtil;
 
 /**
  * Questa classe aggiunge un pò di informazioni in request quando il login fallisce.
@@ -41,6 +44,7 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
 	
 	@Autowired private YadaUserCredentialsRepository userCredentialsRepository;
 	@Autowired private YadaConfiguration yadaConfiguration;
+	@Autowired private YadaWebUtil yadaWebUtil;
 
 	public YadaAuthenticationFailureHandler() {
 	}
@@ -88,6 +92,17 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed: " + exception.getMessage());
         } else {
         	log.debug("Forwarding to " + failureUrl);
+
+        	// This is a forward, so there's no need to prefix with the language as done in the success handler
+        	
+//        	String requestLocaleString = (String) request.getAttribute(YadaLocalePathChangeInterceptor.LOCALE_ATTRIBUTE_NAME);
+//        	if (requestLocaleString!=null) {
+//        		Locale requestLocale = StringUtils.parseLocaleString(requestLocaleString);
+//    	    	if (requestLocale!=null) {
+//    	    		failureUrl = yadaWebUtil.enhanceUrl(failureUrl, requestLocale);
+//    			}
+//        	}
+        	
             request.getRequestDispatcher(failureUrl).forward(request, response);
         }
     }
