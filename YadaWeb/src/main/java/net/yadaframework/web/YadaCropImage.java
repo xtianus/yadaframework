@@ -48,15 +48,17 @@ public class YadaCropImage {
 	/**
 	 * Package-accessible constructor used by YadaCropQueue
 	 * @param imageToCrop
-	 * @param targetDimensions image target desktop and mobile dimensions. Use null when a shrink is not needed.
+	 * @param targetDimensions image target desktop and mobile dimensions. Use null when a shrink is not needed, use a null dimension when that crop is not needed.
 	 */
 	// Package visibility
 	YadaCropImage(YadaManagedFile imageToCrop, YadaIntDimension[] targetDimensions, String targetRelativeFolder, String targetNamePrefix) {
 		this.imageToCrop = imageToCrop;
 		this.targetRelativeFolder = targetRelativeFolder;
 		this.targetNamePrefix = targetNamePrefix;
-		this.targetDesktopDimension = targetDimensions[0];
-		this.targetMobileDimension = targetDimensions[1];
+		if (targetDimensions!=null) {
+			this.targetDesktopDimension = targetDimensions[0];
+			this.targetMobileDimension = targetDimensions[1];
+		}
 		this.clientFilename = this.imageToCrop.getClientFilename();
 		cropDesktop |= targetDesktopDimension!=null;
 		cropMobile |= targetMobileDimension!=null;

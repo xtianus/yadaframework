@@ -95,6 +95,7 @@ Example:
 				$("#yada"+capitalType+"CropSize span:last-child").text(Math.round(widget.pos.h*scale));
 			}
 			
+			[# th:if="${cropImage.cropDesktop}"]
 			function makeDesktopWidget(jcrop, sourceWidth, sourceHeight, scale) {
 				var targetWidth = [[${cropImage.targetDesktopDimension.width}]];
 				var targetHeight = [[${cropImage.targetDesktopDimension.height}]];
@@ -115,7 +116,9 @@ Example:
 				});
 				setData(desktop, 'desktop', scale);
 			}
+			[/]
 			
+			[# th:if="${cropImage.cropMobile}"]
 			function makeMobileWidget(jcrop, sourceWidth, sourceHeight, scale) {
 				var targetWidth = [[${cropImage.targetMobileDimension.width}]];
 				var targetHeight = [[${cropImage.targetMobileDimension.height}]];
@@ -136,6 +139,7 @@ Example:
 				});
 				setData(mobile, 'mobile', scale);
 			}
+			[/]
 			
 			function handleCrop(jcrop, imageRect) {
 				var sourceWidth = [[${cropImage.imageToCrop.dimension.width}]];
@@ -146,9 +150,9 @@ Example:
 					makeMobileWidget(jcrop, sourceWidth, sourceHeight, scale);
 				[/]
 	
-				[# th:if="${cropImage.cropDesktop}"] {
+				[# th:if="${cropImage.cropDesktop}"]
 					makeDesktopWidget(jcrop, sourceWidth, sourceHeight, scale);
-				[/] }
+				[/]
 			}
 			
 			Jcrop.load('yadaCropImage').then(function(img) {
