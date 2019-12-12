@@ -34,7 +34,9 @@ public class YadaAttachedFileDao {
 	    	.where("YadaAttachedFile_id = :id")
 	    	.setParameter("id", yadaAttachedFileId)
 	    	.nativeQuery(em).executeUpdate();
-    	YadaSql.instance().deleteFrom("delete from YadaAttachedFile")
+    	// If the YadaAttachedFile has been attached to an entity that has been saved, there's no way of removing that relationship
+    	// because we don't know which entity so we just ignore the deletion and keep the row
+    	YadaSql.instance().deleteFrom("delete ignore from YadaAttachedFile")
 	    	.where("id = :id")
 	    	.setParameter("id", yadaAttachedFileId)
 	    	.nativeQuery(em).executeUpdate();
