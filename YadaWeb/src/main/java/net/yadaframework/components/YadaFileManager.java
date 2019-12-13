@@ -249,11 +249,11 @@ public class YadaFileManager {
 	 */
 	public String getFileUrl(YadaAttachedFile yadaAttachedFile) {
 		if (yadaAttachedFile==null) {
-			return NOIMAGE_DATA;
+			return null;
 		}
 		String imageName = yadaAttachedFile.getFilename();
 		if (imageName==null) {
-			return NOIMAGE_DATA;
+			return null;
 		}
 		return computeUrl(yadaAttachedFile, imageName);
 	}
