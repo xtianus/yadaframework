@@ -1,7 +1,5 @@
 package net.yadaframework.web.dialect;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.engine.AttributeName;
@@ -12,47 +10,42 @@ import org.thymeleaf.standard.expression.IStandardExpression;
 import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templatemode.TemplateMode;
+import org.unbescape.html.HtmlEscape;
 
 /**
- * Converts from a "yada:xxx" thymeleaf attribute to a plain html attribute.
- * For example from "yada:successHandler" to "data-yadaSuccessHandler".
- * It must be configured in YadaDialect.
+ * Adds the yada:brspace="" attribute that insert a &lt;br> tag after the first space.
+ * Also yada:ubrspace to not escape text.
  */
-public class YadaSimpleAttrProcessor extends AbstractAttributeTagProcessor {
-	private final Logger log = LoggerFactory.getLogger(getClass());
-	// Tutorial: http://www.thymeleaf.org/doc/html/Extending-Thymeleaf.html
-   // A value of 10000 is higher than any attribute in the
-    // SpringStandard dialect. So this attribute will execute
-    // after all other attributes from that dialect, if in the
-    // same tag.
+public class YadaBrOnFirstSpaceAttrProcessor extends AbstractAttributeTagProcessor {
 	public static final int ATTR_PRECEDENCE = 9000;
-
-	private String replacementAttribute;
+    public static final String ATTR_NAME = "brspace"; // becomes ubrspace to not escape text
+    private boolean escapeText = true;
 
 	/**
-	 * Creates a new attribute processor that converts from the thymeleaf attribute to a html attribute.
-	 * @param dialectPrefix dialect prefix ("yada")
-	 * @param attributeFrom attribute to convert from (e.g. "confirm")
-	 * @param attributeTo attribute to convert to (e.g. "data-yadaConfirm")
 	 */
-	public YadaSimpleAttrProcessor(final String dialectPrefix, String attributeFrom, String attributeTo) {
+	public YadaBrOnFirstSpaceAttrProcessor(final String dialectPrefix, boolean escapeText) {
         super(
                 TemplateMode.HTML, // This processor will apply only to HTML mode
                 dialectPrefix,     // Prefix to be applied to name for matching
                 null,              // No tag name: match any tag name
                 false,             // No prefix to be applied to tag name
-                attributeFrom,         // Name of the attribute that will be matched
+                (escapeText?"":"u")+ATTR_NAME,         // Name of the attribute that will be matched
                 true,              // Apply dialect prefix to attribute name
                 ATTR_PRECEDENCE,   // Precedence (inside dialect's own precedence)
                 true);             // Remove the matched attribute afterwards
-        replacementAttribute = attributeTo;
+        this.escapeText = escapeText;
 	}
+
 
 //	@Override
 //	public int getPrecedence() {
+//	    // A value of 10000 is higher than any attribute in the
+//        // SpringStandard dialect. So this attribute will execute
+//        // after all other attributes from that dialect, if in the
+//        // same tag.
 //        return ATTR_PRECEDENCE;
 //	}
-
+//
 //    @Override
 //    protected String getTargetAttributeName(
 //            final Arguments arguments, final Element element, final String attributeName) {
@@ -80,19 +73,23 @@ public class YadaSimpleAttrProcessor extends AbstractAttributeTagProcessor {
         /*
          * Execute the expression just parsed
          */
-        final String value = (String) expression.execute(context);
+        final String unescapedText = (String) expression.execute(context);
+
+        String escapedText = escapeText?HtmlEscape.escapeHtml5(unescapedText):unescapedText;
 
         /*
-         * Set the value into the 'data-updateOnSuccess' attribute
+         * Set the new value into the attribute
          */
-        if (value != null) {
-        	structureHandler.setAttribute(replacementAttribute, value);
+        if (escapedText != null) {
+        	escapedText = escapedText.replaceFirst(" ", "<br>");
+        	boolean processable = true; // no idea
+        	structureHandler.setBody(escapedText, processable);
         }
     }
 
-    /**
-     *
-     */
+//    /**
+//     *
+//     */
 //    @Override
 //    protected String getTargetAttributeValue(final Arguments arguments, final Element element, final String attributeName) {
 //    	String url = super.getTargetAttributeValue(arguments, element, attributeName);
@@ -104,24 +101,7 @@ public class YadaSimpleAttrProcessor extends AbstractAttributeTagProcessor {
 //	protected ModificationType getModificationType(Arguments arguments, Element element, String attributeName, String newAttributeName) {
 //		return ModificationType.SUBSTITUTION;
 //	}
-
-//	@Override
-//	protected Map<String, String> getModifiedAttributeValues(Arguments arguments, Element element, String attributeName) {
-//		final Configuration configuration = arguments.getConfiguration();
-//		final String attributeValue = element.getAttributeValue(attributeName);
-//		final IStandardExpressionParser parser = StandardExpressions.getExpressionParser(configuration);
-//		String trailingUrl = attributeValue; // Nel caso sia stato usato un character literal che manda in exception il parser
-//		try {
-//			final IStandardExpression expression = parser.parseExpression(configuration, arguments, attributeValue);
-//			trailingUrl = (String) expression.execute(configuration, arguments);
-//		} catch (Exception e) {
-//			// Ignored
-//		}
-//		final Map<String,String> values = new HashMap<String, String>();
-//		values.put("href", getResourcesUrl(trailingUrl));
-//		return values;
-//	}
-
+//
 //	@Override
 //	protected boolean recomputeProcessorsAfterExecution(Arguments arguments, Element element, String attributeName) {
 //		return false;
