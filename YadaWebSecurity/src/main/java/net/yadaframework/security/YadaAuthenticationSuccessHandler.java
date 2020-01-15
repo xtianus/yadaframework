@@ -11,13 +11,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.core.YadaLocalePathChangeInterceptor;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
+import net.yadaframework.web.YadaWebUtil;
 
 // Si può inserire il codice da eseguire dopo un login che ha avuto successo
 @Component
@@ -30,6 +32,7 @@ public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 
 	@Autowired private YadaConfiguration yadaConfiguration;
 	@Autowired private YadaUserCredentialsRepository userCredentialsRepository;
+	@Autowired private YadaWebUtil yadaWebUtil;
 
 	private final static String UNSET_TARGET_URL = "/YADA_UNSET_TARGET_URL"; // Can't just use null because it's rejected
 
@@ -97,10 +100,17 @@ public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 			targetUrl = defaultTargetUrlNormalRequest;
 		}
 		if (yadaConfiguration.isLocalePathVariableEnabled()) {
-			Locale locale = LocaleContextHolder.getLocale();
-			if (locale!=null) {
-				targetUrl = "/" + locale.getLanguage() + targetUrl;
+			// The target url must be prefixed by the language because it is used as a redirect
+			//
+			// During login for some reason YadaLocalePathChangeInterceptor is not called and we don't get the proper locale in the context
+			String requestLocaleString = (String) request.getAttribute(YadaLocalePathChangeInterceptor.LOCALE_ATTRIBUTE_NAME);
+			if (requestLocaleString!=null) {
+				Locale requestLocale = StringUtils.parseLocaleString(requestLocaleString);
+				if (requestLocale!=null) {
+					targetUrl = yadaWebUtil.enhanceUrl(targetUrl, requestLocale);
+				}
 			}
+			
 		}
 		return targetUrl;
 	}

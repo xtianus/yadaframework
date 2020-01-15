@@ -13,9 +13,9 @@ import net.yadaframework.core.YadaConfiguration;
 
 public class YadaDialect extends AbstractProcessorDialect {
 	private YadaConfiguration config;
-	
+
 	/**
-	 * 
+	 *
 	 * @param config
 	 */
 	public YadaDialect(YadaConfiguration config) {
@@ -32,7 +32,7 @@ public class YadaDialect extends AbstractProcessorDialect {
 
 	 @Override
     public Set<IProcessor> getProcessors(final String dialectPrefix) {
-        final Set<IProcessor> processors = new HashSet<IProcessor>();
+        final Set<IProcessor> processors = new HashSet<>();
         processors.add(new YadaHrefAttrProcessor(dialectPrefix, config));
         processors.add(new YadaSrcAttrProcessor(dialectPrefix, config));
         processors.add(new YadaAjaxAttrProcessor(dialectPrefix));
@@ -44,6 +44,8 @@ public class YadaDialect extends AbstractProcessorDialect {
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "cancelButton", "data-yadaCancelButton"));
         processors.add(new YadaNewlineTextAttrProcessor(dialectPrefix, false)); // unewlinetext
         processors.add(new YadaNewlineTextAttrProcessor(dialectPrefix, true));	// newlinetext
+        processors.add(new YadaBrOnFirstSpaceAttrProcessor(dialectPrefix, false));	// ubrspace
+        processors.add(new YadaBrOnFirstSpaceAttrProcessor(dialectPrefix, true));	// brspace
         // TODO move YadaActionUploadAttrProcessor to a yada security dialect
         // processors.add(new YadaActionUploadAttrProcessor(dialectPrefix));
         // Rimuove lo yada:xxx namespace dal tag <html>

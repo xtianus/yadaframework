@@ -103,7 +103,7 @@ public class YadaCropQueue {
 	/**
 	 * Add an image to be cropped
 	 * @param imageToCrop image to crop
-	 * @param targetDimensions desktop and mobile target dimensions
+	 * @param targetDimensions desktop and mobile target dimensions, use null when a crop is not needed for some dimension
 	 * @param targetRelativeFolder Folder where to place cropped images, relative to the contents folder
 	 * @param targetNamePrefix Prefix to use for the target file, can be empty or null
 	 */
