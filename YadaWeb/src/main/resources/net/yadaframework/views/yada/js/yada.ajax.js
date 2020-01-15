@@ -517,11 +517,14 @@
 	function updateOnSuccess($element, responseHtml) {
 		// If "yadaUpdateOnSuccess" is set, replace its target; if it's empty, replace the original link.
 		// The target can be a parent when the css selector starts with parentSelector (currently "yadaParents:").
-		// The selector can be multiple, separated by comma. The replacement can be multiple, identified by _yadaReplacement_
+		// The selector can be multiple, separated by comma. The replacement can be multiple, identified by yadaFragment
 		var updateSelector = $element.attr("data-yadaUpdateOnSuccess");
 		if (updateSelector != null) {
 			var selectors = updateSelector.split(',');
-			var $replacementArray = $("._yadaReplacement_", responseHtml);
+			var $replacementArray = $(".yadaFragment", responseHtml);
+			if ($replacementArray.length==0) {
+				$replacementArray = $("._yadaReplacement_", responseHtml); // Legacy
+			}
 			if ($replacementArray.length==0) {
 				$replacementArray = [responseHtml.children()]; // Uso .children() per skippare il primo div inserito da yada.ajax()
 			}
