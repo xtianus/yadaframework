@@ -58,6 +58,7 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -927,6 +928,17 @@ public class YadaUtil {
 		return shellExec(command, args, null, outputStream);
 	}
 
+	private String getExecutable(String shellCommandKey) {
+		boolean mac = SystemUtils.IS_OS_MAC;
+		boolean linux = SystemUtils.IS_OS_LINUX;
+		boolean windows = SystemUtils.IS_OS_WINDOWS;
+		String executable = mac ? config.getString(shellCommandKey + "/executable[@mac='true']") :
+			linux ? config.getString(shellCommandKey + "/executable[@linux='true']") :
+			windows ? config.getString(shellCommandKey + "/executable[@windows='true']") :
+			config.getString(shellCommandKey + "/executable"); // Fallback
+		return executable;
+	}
+
 	/**
 	 * Run an external shell command that has been defined in the configuration file.
 	 * @param shellCommandKey xpath key of the shell command, e.g. "config/shell/cropImage"
@@ -937,7 +949,7 @@ public class YadaUtil {
 	 * @throws IOException
 	 */
 	public int shellExec(String shellCommandKey, Map substitutionMap, ByteArrayOutputStream outputStream) throws IOException {
-		String executable = config.getString(shellCommandKey + "/executable");
+		String executable = getExecutable(shellCommandKey);
 		// Need to use getProperty() to avoid interpolation on ${} arguments
 		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
 		List<String> args = (List<String>) config.getConfiguration().getProperty(shellCommandKey + "/arg");
@@ -1052,7 +1064,7 @@ public class YadaUtil {
 	 */
 	@Deprecated // use shellExec() instead
 	public boolean exec(String shellCommandKey, Map substitutionMap) {
-		String executable = config.getString(shellCommandKey + "/executable");
+		String executable = getExecutable(shellCommandKey);
 		// Need to use getProperty() to avoid interpolation on ${} arguments
 		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
 		List<String> args = (List<String>) config.getConfiguration().getProperty(shellCommandKey + "/arg");
