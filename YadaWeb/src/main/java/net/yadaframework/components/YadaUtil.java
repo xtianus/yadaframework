@@ -934,8 +934,10 @@ public class YadaUtil {
 		boolean windows = SystemUtils.IS_OS_WINDOWS;
 		String executable = mac ? config.getString(shellCommandKey + "/executable[@mac='true']") :
 			linux ? config.getString(shellCommandKey + "/executable[@linux='true']") :
-			windows ? config.getString(shellCommandKey + "/executable[@windows='true']") :
-			config.getString(shellCommandKey + "/executable"); // Fallback
+			windows ? config.getString(shellCommandKey + "/executable[@windows='true']") : null;
+		if (executable==null) {
+			executable = config.getString(shellCommandKey + "/executable"); // Fallback to generic OS
+		}
 		return executable;
 	}
 
