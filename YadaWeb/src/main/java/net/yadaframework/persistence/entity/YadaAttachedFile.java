@@ -47,6 +47,7 @@ public class YadaAttachedFile implements CloneableDeep {
 	public enum YadaAttachedFileType {
 		DESKTOP,
 		MOBILE,
+		PDF,
 		DEFAULT;
 	}
 
@@ -65,7 +66,7 @@ public class YadaAttachedFile implements CloneableDeep {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
 
-// Removed because the id is not unique in the database: we would need the class name too. But anyway, this id is not needed.	
+// Removed because the id is not unique in the database: we would need the class name too. But anyway, this id is not needed.
 //	protected Long attachedToId; // Id of the Entity to which this file is attached
 
 	/**
@@ -92,6 +93,11 @@ public class YadaAttachedFile implements CloneableDeep {
 	protected String filenameDesktop; // only for images on desktop, null for non-images
 
 	/**
+	 * The pdf version of an image is here
+	 */
+	protected String filenamePdf; // only for images in pdf, null for non-images
+
+	/**
 	 * Image width and height (for images)
 	 */
 	@Embedded
@@ -100,12 +106,21 @@ public class YadaAttachedFile implements CloneableDeep {
 		@AttributeOverride(name="height", column=@Column(name="heightDesktop"))
 	})
 	protected YadaIntDimension desktopImageDimension = YadaIntDimension.UNSET;
+
 	@Embedded
 	@AttributeOverrides({
 		@AttributeOverride(name="width", column=@Column(name="widthMobile")),
 		@AttributeOverride(name="height", column=@Column(name="heightMobile"))
 	})
 	protected YadaIntDimension mobileImageDimension = YadaIntDimension.UNSET;
+
+	@Embedded
+	@AttributeOverrides({
+		@AttributeOverride(name="width", column=@Column(name="widthPdf")),
+		@AttributeOverride(name="height", column=@Column(name="heightPdf"))
+	})
+	protected YadaIntDimension pdfImageDimension = YadaIntDimension.UNSET;
+
 	@Embedded
 	protected YadaIntDimension imageDimension = YadaIntDimension.UNSET;
 
@@ -241,6 +256,9 @@ public class YadaAttachedFile implements CloneableDeep {
 		case MOBILE:
 			this.filenameMobile = result.getName();
 			break;
+		case PDF:
+			this.filenamePdf = result.getName();
+			break;
 		case DEFAULT:
 			this.filename = result.getName();
 			break;
@@ -286,6 +304,11 @@ public class YadaAttachedFile implements CloneableDeep {
 				return null;
 			}
 			return new File(result, filenameMobile);
+		case PDF:
+			if (StringUtils.isBlank(filenamePdf)) {
+				return null;
+			}
+			return new File(result, filenamePdf);
 		case DEFAULT:
 			if (StringUtils.isBlank(filename)) {
 				return null;
@@ -454,6 +477,10 @@ public class YadaAttachedFile implements CloneableDeep {
 		return this.filenameMobile!=null && !mobileImageDimension.isUnset();
 	}
 
+	public boolean isPdfImage() {
+		return this.filenamePdf!=null && !pdfImageDimension.isUnset();
+	}
+
 	public YadaIntDimension getDesktopImageDimension() {
 		return desktopImageDimension;
 	}
@@ -468,6 +495,22 @@ public class YadaAttachedFile implements CloneableDeep {
 
 	public void setMobileImageDimension(YadaIntDimension mobileImageDimension) {
 		this.mobileImageDimension = mobileImageDimension;
+	}
+
+	public String getFilenamePdf() {
+		return filenamePdf;
+	}
+
+	public void setFilenamePdf(String filenamePdf) {
+		this.filenamePdf = filenamePdf;
+	}
+
+	public YadaIntDimension getPdfImageDimension() {
+		return pdfImageDimension;
+	}
+
+	public void setPdfImageDimension(YadaIntDimension pdfImageDimension) {
+		this.pdfImageDimension = pdfImageDimension;
 	}
 
 }
