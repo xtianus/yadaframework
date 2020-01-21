@@ -146,6 +146,18 @@ public class YadaFileManager {
 	}
 
 	/**
+	 * Returns the absolute path of the pdf file
+	 * @param yadaAttachedFile the attachment
+	 * @return the File or null
+	 */
+	public File getAbsolutePdfFile(YadaAttachedFile yadaAttachedFile) {
+		if (yadaAttachedFile!=null) {
+			return getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenamePdf());
+		}
+		return null;
+	}
+
+	/**
 	 * Returns the absolute path of the default file (no mobile/desktop variant)
 	 * @param yadaAttachedFile the attachment
 	 * @return the File or null
@@ -238,6 +250,22 @@ public class YadaFileManager {
 		String imageName = yadaAttachedFile.getFilenameDesktop();
 		if (imageName==null) {
 			return getFileUrl(yadaAttachedFile);
+		}
+		return computeUrl(yadaAttachedFile, imageName);
+	}
+
+	/**
+	 * Returns the (relative) url of the pdf image if any, or null.
+	 * @param yadaAttachedFile
+	 * @return
+	 */
+	public String getPdfImageUrl(YadaAttachedFile yadaAttachedFile) {
+		if (yadaAttachedFile==null) {
+			return NOIMAGE_DATA;
+		}
+		String imageName = yadaAttachedFile.getFilenamePdf();
+		if (imageName==null) {
+			return NOIMAGE_DATA;
 		}
 		return computeUrl(yadaAttachedFile, imageName);
 	}

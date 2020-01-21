@@ -936,7 +936,7 @@ public class YadaUtil {
 			linux ? config.getString(shellCommandKey + "/executable[@linux='true']") :
 			windows ? config.getString(shellCommandKey + "/executable[@windows='true']") : null;
 		if (executable==null) {
-			executable = config.getString(shellCommandKey + "/executable"); // Fallback to generic OS
+			executable = config.getString(shellCommandKey + "/executable[not(@mac) and not(@linux) and not(@windows)]"); // Fallback to generic OS
 		}
 		return executable;
 	}
