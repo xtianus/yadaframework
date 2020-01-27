@@ -128,7 +128,7 @@ public class YadaLocaleDao {
 		}
 		String className = findClass(entityClass, attributeName);
 		if (className==null) {
-			throw new YadaInvalidValueException("The requested attirbute {} does not exist on {}", attributeName, entityClass);
+			throw new YadaInvalidValueException("The requested attirbute '{}' does not exist on '{}'", attributeName, entityClass);
 		}
     	String tableName = className + "_" + attributeName;
     	String idColumn = className + "_id";
