@@ -74,10 +74,6 @@ public class YadaMiscController {
 					// Mobile
 					File createdFile = cropAndResizeImage(yadaCropImage, yadaCropDefinition.getMobileCrop(), yadaCropImage.getTargetMobileDimension(), YadaAttachedFileType.MOBILE);
 				}
-				if (yadaCropImage.isCropPdf()) {
-					// pdf
-					File createdFile = cropAndResizeImage(yadaCropImage, yadaCropDefinition.getPdfCrop(), yadaCropImage.getTargetPdfDimension(), YadaAttachedFileType.PDF);
-				}
 				try {
 					yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile);
 				} catch (javax.persistence.OptimisticLockException e) {
@@ -140,8 +136,6 @@ public class YadaMiscController {
 			yadaAttachedFile.setDesktopImageDimension(new YadaIntDimension(newWidth, newHeight));
 		} else if (type == YadaAttachedFileType.MOBILE) {
 			yadaAttachedFile.setMobileImageDimension(new YadaIntDimension(newWidth, newHeight));
-		} else if (type == YadaAttachedFileType.PDF) {
-			yadaAttachedFile.setPdfImageDimension(new YadaIntDimension(newWidth, newHeight));
 		} else {
 			yadaAttachedFile.setImageDimension(new YadaIntDimension(newWidth, newHeight));
 		}
