@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -109,6 +110,37 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+
+	/**
+	 * Ensure that the given filename has not been already used, by adding a counter.
+	 * For example, a list containing {"dog.jpg", "dog.jpg", "dog.jpg"} becomes {"dog.jpg", "dog_1.jpg", "dog_2.jpg"}
+	 * This version does not check if a file exists on disk. For that, see {@link #findAvailableName(File, String, String, String)}
+	 * @param usedNames filenames used so far, must start empty and will be modified
+	 * @param baseName filename to add, without extension
+	 * @param extensionNoDot filename extension without dot
+	 * @param counterSeparator string to separate the filename and the counter
+	 * @return the original filename with extension, or a new version with a counter added
+	 * @throws IOException
+	 * @see {@link #findAvailableName(File, String, String, String)}
+	 */
+	public String findAvailableFilename(String baseName, String extensionNoDot, String counterSeparator, Set<String> usedNames) throws IOException {
+		String extension = "." + extensionNoDot;
+		String fullName = baseName + extension;
+		int counter = 0;
+		long startTime = System.currentTimeMillis();
+		int timeoutMillis = 1000; // 1 second to find a result seems to be reasonable
+		while (true) {
+			if (!usedNames.contains(fullName)) {
+				usedNames.add(fullName);
+				return fullName;
+			}
+			counter++;
+			fullName = baseName + counterSeparator + counter + extension;
+			if (System.currentTimeMillis()-startTime > timeoutMillis) {
+				throw new IOException("Timeout trying to create a unique name starting with " + baseName);
+			}
+		}
+	}
 
 	/**
 	 * Check if a date is not more than maxYears years from now, not in an accurate way.
@@ -1870,6 +1902,7 @@ public class YadaUtil {
 	public void createZipFile(File zipFile, File[] sourceFiles, String[] filenamesNoExtension, boolean ignoreErrors) {
 		byte[] buf = new byte[1024]; // Create a buffer for reading the files
 		// Create the ZIP file
+		Set<String> addedFilenames = new HashSet<>();
 		try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile))) {
 		    // Compress the files
 		    for (int i=0; i<sourceFiles.length; i++) {
@@ -1877,10 +1910,15 @@ public class YadaUtil {
 			        // Add ZIP entry to output stream.
 			        String entryName;
 			        if (filenamesNoExtension!=null) {
-			        	String extension = "." + getFileExtension(sourceFiles[i]);
+			        	String extensionNoDot = getFileExtension(sourceFiles[i]);
+			        	String extension = "." + extensionNoDot;
 			        	entryName = filenamesNoExtension[i].toLowerCase().endsWith(extension)? filenamesNoExtension[i] : filenamesNoExtension[i] + extension;
+			        	// Add a counter for duplicated names
+			        	entryName = findAvailableFilename(filenamesNoExtension[i], extensionNoDot, "_", addedFilenames);
 			        } else {
-			        	entryName = sourceFiles[i].getName();
+			        	String[] filenameAndExtension = splitFileNameAndExtension(sourceFiles[i].getName());
+			        	// Add a counter for duplicated names
+			        	entryName = findAvailableFilename(filenameAndExtension[0], filenameAndExtension[1], "_", addedFilenames);
 			        }
 			        try (FileInputStream in = new FileInputStream(sourceFiles[i])) {
 						out.putNextEntry(new ZipEntry(entryName));
