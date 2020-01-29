@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.Stack;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
@@ -110,6 +111,96 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+
+	/**
+	 * Split an HTML string in two parts, not breaking words, handling closing and reopening of html tags.
+	 * Useful when showing some part of a text and the whole of it after a user clicks.
+	 * For example, the string "&lt;p>Some text here&lt;/p> becomes ["&lt;p>Some text&lt;/p>","&lt;p>here&lt;/p>"].
+	 * The HTML is not splitted exactly at splitPos if there's a word there, a tag, or if the paragraph ends in the next 20 characters:
+	 * in such cases the split position is increased accordingly.
+	 * Note: does not work in any possible scenario. For example &lt;ul>&lt;li> is not split properly because it creates two list entries
+	 * if the split point is inside the li. Tag attributes are not currently handled properly.
+	 * @param htmlToSplit The html text to split, must be well-formed (all opened tags must be closed properly)
+	 * @param splitPos the minimum position, in number of characters including tags, where to split
+	 * @return an array of two self-contained html parts, where each opened tag is correctly closed. The second part could be null.
+	 * @see #splitAtWord(String, int)
+	 */
+	public String[] splitHtml(String htmlToSplit, int splitPos) {
+		String[] result = new String[2];
+		char[] charArray = htmlToSplit.toCharArray();
+		int maxPos = charArray.length-1;
+		boolean tag = false; // True when the current character is inside an HTML tag
+		boolean tagOpen = false; // True when an HTML tag has been opened
+		int pos = 0;
+		Stack<String> tagsToCopy = new Stack<>();
+		StringBuffer tagName = null;
+		try {
+			while (pos<maxPos) {
+				char current = charArray[pos];
+				boolean isSpace = current==' ';
+				if (!isSpace && !tag && current=='<') {
+					// We are at the start of an HTML tag: get the name and check if it's opening or closing
+					tag = true;
+					tagOpen = charArray[pos+1]!='/';
+					if (tagOpen) {
+						tagName = new StringBuffer();
+					}
+					// We get the name of opening tags only and presume that the HTML is well formed
+				} else if (!isSpace && tag && current=='>') {
+					// Last character of a tag. If it was an opening tag, add it to the stack of opened tags
+					tag = false;
+					if (tagOpen) {
+						String tagNameString = tagName.toString();
+						// br is not added because it does not need a closing tag
+						// TODO what other html tags don't have a closing one?
+						if (!"br".equals(tagNameString)) {
+							tagsToCopy.add(tagNameString);
+						}
+						tagOpen=false;
+					} else {
+						// It was a close tag. We presume that it was the same as the last one on the stack and we forget it.
+						tagsToCopy.pop();
+					}
+					continue;
+				} else if (pos>=splitPos && !tag && isSpace) {
+					// We reached or surpassed the split point outside of a tag and at a space character.
+					// The HTML can be split here, unless there's a closing p in the next 20 character
+					// TODO 20 should be a parameter?
+					// TODO should be done for <li> too
+					int closep = htmlToSplit.indexOf("</p>", pos);
+					if (closep-pos<20) {
+						// Close the paragraph in the first part
+						pos = closep + "</p>".length();
+						// Forget all tags up to the opening paragraph because we assume that we skipped the closing ones
+						while (!tagsToCopy.isEmpty()) {
+							String tagToCopy = tagsToCopy.pop();
+							if ("p".equals(tagToCopy)) {
+								break;
+							}
+						}
+					}
+					// Split at a safe position
+					result[0] = htmlToSplit.substring(0, pos);
+					result[1] = htmlToSplit.substring(pos);
+					// Add any needed closing tags to the first part and opening tags to the second part
+					while (!tagsToCopy.isEmpty()) {
+						String tagToCopy = tagsToCopy.pop();
+						result[0] += "</" + tagToCopy + '>'; // Tag closed in the first part
+						result[1] = "<" + tagToCopy + '>' + result[1]; // Tag reopened in the second part
+					}
+					return result;
+				} else if (tagOpen) {
+					tagName.append(current);
+				}
+				pos++;
+			}
+		} catch (Exception e) {
+			// In case of error, the whole HTML is returned in the first part, and null in the second
+			log.error("Can't split HTML (returned whole)", e);
+		}
+		result[0] = htmlToSplit;
+		return result;
+	}
 
 	/**
 	 * Ensure that the given filename has not been already used, by adding a counter.
@@ -1200,7 +1291,7 @@ public class YadaUtil {
 		return root;
 	}
 
-	/*
+	/**
 	 * Spezza una stringa in due, circa al carattere splitPoint, ma a fine parola.
 	 */
 	public String[] splitAtWord(String value, int splitPoint) {
