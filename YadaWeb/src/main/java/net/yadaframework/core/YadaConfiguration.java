@@ -296,6 +296,10 @@ public abstract class YadaConfiguration {
 			String localeString = configuration.getString("config/i18n/locale[@default='true']", null);
 			if (localeString!=null) {
 				try {
+					String country = getCountryForLanguage(localeString);
+					if (country!=null) {
+						localeString += "_" + country;
+					}
 					defaultLocale = LocaleUtils.toLocale(localeString);
 				} catch (IllegalArgumentException e) {
 			    	throw new YadaConfigurationException("Locale {} is invalid", localeString);

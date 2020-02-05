@@ -29,6 +29,7 @@ import javax.persistence.Version;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
@@ -36,27 +37,27 @@ import net.yadaframework.persistence.entity.YadaPersistentEnum;
 /**
  * A Product is an "abstract" item because it groups similar objects that differ in color, size or other attributes.
  * So a "Paris T-Shirt" is a very specific product but it comes in different sizes, so it doesn't exist unless
- * you specify the size. 
+ * you specify the size.
  * The Medium Paris T-Shirt is an article that actually exists and can be sold.
  *
  */
 @Entity
 public class YadaProduct implements CloneableFiltered, Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	// For synchronization with external databases
 	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified;
-	
+
 	// For optimistic locking
 	@Version
 	protected long version;
-	
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
-	
+
 	protected int year; // Production year
 
 	@ElementCollection
@@ -68,55 +69,55 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	@Column(length=128)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> subtitle = new HashMap<>(); // a kind of short description
-	
+
 	@ElementCollection
 	@Column(length=8192)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> description = new HashMap<>(); // a kind of small description
-	
+
 	@ElementCollection
 	@Column(length=128)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> materials = new HashMap<>();
-	
+
 	// For Thymeleaf to convert between the enum string and the list of YadaPersistentEnum, you need to configure an "editor"
 	// in your @Controller:
-	// 
+	//
 	//	@InitBinder
 	//	public void initBinder(WebDataBinder binder) {
 	//		binder.registerCustomEditor(YadaPersistentEnum.class, new YadaPersistentEnumEditor(new Class[] {EnumCategory.class}));
-	//	}	
+	//	}
 	@ManyToMany
 	@JoinTable(
 		name="YadaProduct_categories",
 		uniqueConstraints = @UniqueConstraint(columnNames={"YadaProduct_id", "categories_id"})
 	)
 	protected List<YadaPersistentEnum<?>> categories;
-	
+
 	@ManyToMany
 	@JoinTable(
 		name="YadaProduct_subcategories",
 		uniqueConstraints = @UniqueConstraint(columnNames={"YadaProduct_id", "subcategories_id"})
 	)
 	protected List<YadaPersistentEnum<?>> subcategories;
-	
+
 	/**
 	 * true if the YadaProduct is an accessory
 	 */
 	protected boolean accessoryFlag; // Useful to know if this is an accessory without a join on the YadaProduct_accessories table
-	
+
 	@ManyToMany
 	@JoinTable(name="YadaProduct_accessories")
 	protected List<YadaProduct> accessories;
-	
+
 	@ManyToMany(mappedBy="accessories")
 	protected List<YadaProduct> accessoryOf;
-	
+
 	@OneToMany(mappedBy="product")
 	protected List<YadaArticle> articles; // The version of a product with a specific color, size, etc.
 
 	protected boolean published;
-	
+
 	// A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance
 	@OneToMany // (cascade=CascadeType.REMOVE, orphanRemoval=true)
 	@JoinTable(name="YadaProduct_galleryImages")
@@ -128,20 +129,20 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	@JoinTable(name="YadaProduct_attachments")
 	@OrderBy("sortOrder")
 	protected List<YadaAttachedFile> attachments;
-	
+
 	/**
 	 * The main image to show in lists etc. (for example a thumbnail)
 	 */
 	@OneToOne(cascade=CascadeType.REMOVE, orphanRemoval=true)
 	protected YadaAttachedFile image;
-	
+
 	/***********************************************************************/
 //	/* Lazy localized value fetching                                       */
 //
-//	/* These getters can be called outside of a transaction (e.g. in the view) 
+//	/* These getters can be called outside of a transaction (e.g. in the view)
 //	 * to fetch the localized value for the current request locale
 //	 */
-//	
+//
 //	protected @Transient YadaLocaleDao yadaLocaleDao;
 //	protected @Transient String cacheName = null;
 //	protected @Transient String cacheSubtitle = null;
@@ -151,7 +152,7 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 //	public YadaProduct() {
 //		yadaLocaleDao = (YadaLocaleDao) YadaUtil.getBean(YadaLocaleDao.class);
 //	}
-//	
+//
 //	/**
 //	 * Fetches the localized name for the current request locale or the default configured locale
 //	 * @return the name or the empty string if no value has been defined
@@ -187,7 +188,7 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 //		}
 //		return cacheDescription;
 //	}
-//	
+//
 //	/**
 //	 * Fetches the localized materials for the current request locale or the default configured locale
 //	 * @return the name or the empty string if no value has been defined
@@ -199,17 +200,17 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 //		}
 //		return cacheMaterials;
 //	}
-	
-	
+
+
 	/**
 	 * Returns the localized name in the current request locale
 	 * @return
 	 */
 	@Transient
 	public String getLocalName() {
-		return name.get(LocaleContextHolder.getLocale());
+		return YadaUtil.getLocalValue(name);
 	}
-	
+
 	@Transient
 	public void seLocalName(String name) {
 		this.name.put(LocaleContextHolder.getLocale(), name);
@@ -220,45 +221,45 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	 */
 	@Transient
 	public String getLocalSubtitle() {
-		return subtitle.get(LocaleContextHolder.getLocale());
+		return YadaUtil.getLocalValue(subtitle);
 	}
-	
+
 	@Transient
 	public void seLocalSubtitle(String subtitle) {
 		this.subtitle.put(LocaleContextHolder.getLocale(), subtitle);
 	}
-	
+
 	/**
 	 * Returns the localized description in the current request locale
 	 * @return
 	 */
 	@Transient
 	public String getLocalDescription() {
-		return description.get(LocaleContextHolder.getLocale());
+		return YadaUtil.getLocalValue(description);
 	}
-	
+
 	@Transient
 	public void seLocalDescription(String description) {
 		this.description.put(LocaleContextHolder.getLocale(), description);
 	}
-	
+
 	/**
 	 * Returns the localized materials in the current request locale
 	 * @return
 	 */
 	@Transient
 	public String getLocalMaterials() {
-		return materials.get(LocaleContextHolder.getLocale());
+		return YadaUtil.getLocalValue(materials);
 	}
-	
+
 	@Transient
 	public void seLocalMaterials (String materials) {
 		this.materials.put(LocaleContextHolder.getLocale(), materials);
 	}
-	
+
 	/***********************************************************************/
 	/* Plain getter / setter                                               */
-	
+
 	public Long getId() {
 		return id;
 	}

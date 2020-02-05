@@ -547,6 +547,18 @@ public class YadaUtil {
 	 * Returns the localized value from a map of Locale -> String.
 	 * Used in entities with localized string attributes.
 	 * If a default locale has been configured with <code>&lt;locale default='true'></code>, then that locale is attempted when
+	 * there is no value (null or "") for the needed locale (and they differ)
+	 * @param LocalizedValueMap
+	 * @return the localized value, or the empty string if no value has been defined and no default locale has been configured
+	 */
+	public static String getLocalValue(Map<Locale, String> LocalizedValueMap) {
+		return YadaUtil.getLocalValue(LocalizedValueMap, LocaleContextHolder.getLocale());
+	}
+
+	/**
+	 * Returns the localized value from a map of Locale -> String.
+	 * Used in entities with localized string attributes.
+	 * If a default locale has been configured with <code>&lt;locale default='true'></code>, then that locale is attempted when
 	 * there is no value for the needed locale (and they differ)
 	 * @param LocalizedValueMap
 	 * @param locale the needed locale for the value, can be null for the current request locale
@@ -557,7 +569,7 @@ public class YadaUtil {
 			locale = LocaleContextHolder.getLocale();
 		}
 		String result = LocalizedValueMap.get(locale);
-		if (result==null && defaultLocale!=null && !defaultLocale.equals(locale)) {
+		if (StringUtils.isEmpty(result) && defaultLocale!=null && !defaultLocale.equals(locale)) {
 			result = LocalizedValueMap.get(defaultLocale);
 		}
 		return result==null?"":result;
