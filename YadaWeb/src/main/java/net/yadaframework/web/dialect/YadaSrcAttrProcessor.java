@@ -14,17 +14,19 @@ import org.thymeleaf.templatemode.TemplateMode;
 import net.yadaframework.core.YadaConfiguration;
 
 /**
- * Questa classe aggiunge il tag yada:src identico a yada:href
+ * Questa classe aggiunge il tag yada:src identico a yada:href.
+ * It is needed only when linking static images from the resources folder.
+ * When images are in the contents folder, the file name should be versioned instead, using YadaAttachedFile
  * @see YadaHrefAttrProcessor
  */
 public class YadaSrcAttrProcessor extends AbstractAttributeTagProcessor {
 	public static final int ATTR_PRECEDENCE = 9000;
     public static final String ATTR_NAME = "src";
-   
+
     private final YadaDialectUtil yadaDialectUtil;
 
 	/**
-	 * 
+	 *
 	 * @param resFolder Folder contenente le risorse da "versionare", per esempio "/res/"
 	 * @param config
 	 */
@@ -89,9 +91,9 @@ public class YadaSrcAttrProcessor extends AbstractAttributeTagProcessor {
         	structureHandler.setAttribute(ATTR_NAME, resultUrl);
         }
     }
-    
+
 //    /**
-//     * 
+//     *
 //     */
 //    @Override
 //    protected String getTargetAttributeValue(final Arguments arguments, final Element element, final String attributeName) {
@@ -100,7 +102,7 @@ public class YadaSrcAttrProcessor extends AbstractAttributeTagProcessor {
 //        return RequestDataValueProcessorUtils.processUrl(arguments.getConfiguration(), arguments, resultUrl);
 //    }
 
-//	@Override	
+//	@Override
 //	protected ModificationType getModificationType(Arguments arguments, Element element, String attributeName, String newAttributeName) {
 //		return ModificationType.SUBSTITUTION;
 //	}

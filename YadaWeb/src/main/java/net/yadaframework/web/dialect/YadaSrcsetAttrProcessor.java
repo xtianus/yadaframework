@@ -14,8 +14,10 @@ import org.thymeleaf.templatemode.TemplateMode;
 import net.yadaframework.core.YadaConfiguration;
 
 /**
- * Tag yada:srcset same as yada:href
- * @see YadaHrefAttrProcessor
+ * Tag yada:srcset same as yada:src.
+ * It is needed only when linking static images from the resources folder.
+ * When images are in the contents folder, the file name should be versioned instead, using YadaAttachedFile
+ * @see YadaSrcAttrProcessor
  */
 public class YadaSrcsetAttrProcessor extends AbstractAttributeTagProcessor {
 	public static final int ATTR_PRECEDENCE = 9000;

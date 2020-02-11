@@ -14,12 +14,10 @@ public class YadaDialectUtil {
 	public YadaDialectUtil(YadaConfiguration config) {
 		this.config=config;
 	}
-	
+
     /**
-     * Converts "/res/xxx" into "/res-123/xxx", 
-     * "/yadares/xxx" into "/yadares-7/xxx",
-     * "/content/xxx" into either "/content-123/xxx" or "http://somecdn.com/somecontext/xxx" depending on conf/paths/contentDir/@url
-     * and leaves "/static" alone
+     * Browser cache bypass trick for resources.
+     * Converts "/res/xxx" into "/res-123/xxx", "/yadares/xxx" into "/yadares-7/xxx", where the number is the application build number.
      */
     protected String getVersionedAttributeValue(final ITemplateContext context, String value) {
     	try {
@@ -40,6 +38,11 @@ public class YadaDialectUtil {
 			if (isYada) {
 				return applyVersion(config.getVersionedYadaResourceDir(), valueSuffix); // /site/yadares-7/xxx
 			}
+
+			// The "contents" folder is not versioned anymore.
+			// Cache bypass is better implemented by versioning the file name of anything stored there.
+			// YadaAttachedFile should do this automatically.
+
 			// The problem with contents is that the version should be taken from the file timestamp so here it should accept any value but I don't know how to make it work with any version value
 //    	boolean isContent = config.getContentName().equals(valueType);
 //    	if (isContent) {
@@ -56,7 +59,7 @@ public class YadaDialectUtil {
     }
 
     /**
-     * 
+     *
      * @param versionedDir without leading /
      * @param valueSuffix
      * @return
