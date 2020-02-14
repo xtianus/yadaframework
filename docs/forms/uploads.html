@@ -470,7 +470,7 @@ crop all images added to the queue until there are no more left.</p>
 <h3>3.5.3. Configuration<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>The required image size has to be configured in the <code class="docutils literal notranslate"><span class="pre">conf.webapp.prod.xml</span></code> file, as in the following example:</p>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;config&gt;</span>
-        <span class="nt">&lt;dimension</span> <span class="na">targetImageExtension=</span><span class="s">&quot;jpg&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;dimension</span> <span class="na">targetImageExtension=</span><span class="s">&quot;jpg&quot;</span> <span class="na">preserveImageExtensions=</span><span class="s">&quot;gif&quot;</span><span class="nt">&gt;</span>
                 <span class="nt">&lt;news&gt;</span>
                         <span class="nt">&lt;top&gt;</span>
                                 <span class="nt">&lt;desktop&gt;</span>1920,1200<span class="nt">&lt;/desktop&gt;</span>
@@ -483,8 +483,9 @@ crop all images added to the queue until there are no more left.</p>
                 <span class="nt">&lt;/news&gt;</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">targetImageExtension</span></code> is the image format that all uploaded images will be converted to.
-The other xml specifies the desktop and mobile dimensions required for each image.
+<p><code class="docutils literal notranslate"><span class="pre">targetImageExtension</span></code> is the image format that all uploaded images will be converted to, unless specified in <code class="docutils literal notranslate"><span class="pre">preserveImageExtensions</span></code>
+which is a comma-separated list of extensions that should not be converted. This can be useful to preserve animated gifs.
+The following xml specifies the desktop and mobile dimensions required for each image.
 The above configuration can be read in your subclass of <code class="docutils literal notranslate"><span class="pre">YadaConfiguration</span></code>:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span> <span class="n">YadaIntDimension</span><span class="o">[]</span> <span class="nf">getDimensionsNewsThumbnail</span><span class="o">()</span> <span class="o">{</span>
         <span class="k">return</span> <span class="kd">super</span><span class="o">.</span><span class="na">getImageDimensions</span><span class="o">(</span><span class="s">&quot;/news/thumbnail&quot;</span><span class="o">);</span>
@@ -492,26 +493,43 @@ The above configuration can be read in your subclass of <code class="docutils li
 </pre></div>
 </div>
 <p>This will return an array of YadaIntDimension holding the desktop and mobile dimensions at position 0 and 1.</p>
-<p>The command to crop and resize images must be specified in the configuration too:</p>
+<p>The command to crop and resize images must be specified in the configuration too.
+This example can crop and resize any image, preserving animated gifs if the gif extension has been included in the preserveImageExtensions attribute.</p>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;config&gt;</span>
         <span class="nt">&lt;shell&gt;</span>
                 <span class="nt">&lt;yadaCropAndResize&gt;</span>
                         <span class="nt">&lt;executable&gt;</span>convert<span class="nt">&lt;/executable&gt;</span>
                         <span class="nt">&lt;arg&gt;</span>${FILENAMEIN}<span class="nt">&lt;/arg&gt;</span>
-                        <span class="nt">&lt;arg&gt;</span>-background<span class="nt">&lt;/arg&gt;</span> <span class="c">&lt;!-- &quot;-background white -flatten&quot; converts any transparent png backround to white instead of the default black --&gt;</span>
-                        <span class="nt">&lt;arg&gt;</span>white<span class="nt">&lt;/arg&gt;</span>
-                        <span class="nt">&lt;arg&gt;</span>-flatten<span class="nt">&lt;/arg&gt;</span>
+                        <span class="nt">&lt;arg&gt;</span>-coalesce<span class="nt">&lt;/arg&gt;</span>
+                        <span class="nt">&lt;arg&gt;</span>-repage<span class="nt">&lt;/arg&gt;</span>
+                        <span class="nt">&lt;arg&gt;</span>0x0<span class="nt">&lt;/arg&gt;</span>
                         <span class="nt">&lt;arg&gt;</span>-crop<span class="nt">&lt;/arg&gt;</span>
                         <span class="nt">&lt;arg&gt;</span>${w}x${h}+${x}+${y}<span class="nt">&lt;/arg&gt;</span>
                         <span class="nt">&lt;arg&gt;</span>-resize<span class="nt">&lt;/arg&gt;</span>
                         <span class="nt">&lt;arg&gt;</span>${resizew}x${resizeh}<span class="ni">&amp;gt;</span><span class="nt">&lt;/arg&gt;</span>
+                        <span class="nt">&lt;arg&gt;</span>+repage<span class="nt">&lt;/arg&gt;</span>
                         <span class="nt">&lt;arg&gt;</span>${FILENAMEOUT}<span class="nt">&lt;/arg&gt;</span>
                 <span class="nt">&lt;/yadaCropAndResize&gt;</span>
 </pre></div>
 </div>
+<p>This example works with any image but corrupts gif animations.</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;yadaCropAndResize&gt;</span>
+        <span class="nt">&lt;executable&gt;</span>convert<span class="nt">&lt;/executable&gt;</span>
+        <span class="nt">&lt;arg&gt;</span>${FILENAMEIN}<span class="nt">&lt;/arg&gt;</span>
+        <span class="nt">&lt;arg&gt;</span>-background<span class="nt">&lt;/arg&gt;</span> <span class="c">&lt;!-- &quot;-background white -flatten&quot; converts any transparent png backround to white instead of the default black --&gt;</span>
+        <span class="nt">&lt;arg&gt;</span>white<span class="nt">&lt;/arg&gt;</span>
+        <span class="nt">&lt;arg&gt;</span>-flatten<span class="nt">&lt;/arg&gt;</span>
+        <span class="nt">&lt;arg&gt;</span>-crop<span class="nt">&lt;/arg&gt;</span>
+        <span class="nt">&lt;arg&gt;</span>${w}x${h}+${x}+${y}<span class="nt">&lt;/arg&gt;</span>
+        <span class="nt">&lt;arg&gt;</span>-resize<span class="nt">&lt;/arg&gt;</span>
+        <span class="nt">&lt;arg&gt;</span>${resizew}x${resizeh}<span class="ni">&amp;gt;</span><span class="nt">&lt;/arg&gt;</span>
+        <span class="nt">&lt;arg&gt;</span>${FILENAMEOUT}<span class="nt">&lt;/arg&gt;</span>
+<span class="nt">&lt;/yadaCropAndResize&gt;</span>
+</pre></div>
+</div>
 <p>Be aware that the most recent version of imagemagick uses the “magick” command instead of “convert”, which must become the first argument:</p>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;executable&gt;</span>magick<span class="nt">&lt;/executable&gt;</span>
-<span class="nt">&lt;executable&gt;</span>convert<span class="nt">&lt;/executable&gt;</span>
+<span class="nt">&lt;arg&gt;</span>convert<span class="nt">&lt;/arg&gt;</span>
 <span class="nt">&lt;arg&gt;</span>${FILENAMEIN}<span class="nt">&lt;/arg&gt;</span>
 </pre></div>
 </div>

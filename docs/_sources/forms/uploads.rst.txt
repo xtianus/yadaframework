@@ -341,7 +341,7 @@ The required image size has to be configured in the ``conf.webapp.prod.xml`` fil
 .. code-block:: xml
 
 	<config>
-		<dimension targetImageExtension="jpg">
+		<dimension targetImageExtension="jpg" preserveImageExtensions="gif">
 			<news>
 				<top>
 					<desktop>1920,1200</desktop>
@@ -353,8 +353,9 @@ The required image size has to be configured in the ``conf.webapp.prod.xml`` fil
 				</thumbnail>
 			</news>
 
-``targetImageExtension`` is the image format that all uploaded images will be converted to.
-The other xml specifies the desktop and mobile dimensions required for each image.
+``targetImageExtension`` is the image format that all uploaded images will be converted to, unless specified in ``preserveImageExtensions``
+which is a comma-separated list of extensions that should not be converted. This can be useful to preserve animated gifs.
+The following xml specifies the desktop and mobile dimensions required for each image.
 The above configuration can be read in your subclass of ``YadaConfiguration``:
 
 .. code-block:: java
@@ -365,12 +366,31 @@ The above configuration can be read in your subclass of ``YadaConfiguration``:
 
 This will return an array of YadaIntDimension holding the desktop and mobile dimensions at position 0 and 1.
 
-The command to crop and resize images must be specified in the configuration too:
+The command to crop and resize images must be specified in the configuration too.
+This example can crop and resize any image, preserving animated gifs if the gif extension has been included in the preserveImageExtensions attribute.
 
 .. code-block:: xml
 
 	<config>
 		<shell>
+			<yadaCropAndResize>
+				<executable>convert</executable>
+				<arg>${FILENAMEIN}</arg>
+				<arg>-coalesce</arg>
+				<arg>-repage</arg>
+				<arg>0x0</arg>
+				<arg>-crop</arg>
+				<arg>${w}x${h}+${x}+${y}</arg>
+				<arg>-resize</arg>
+				<arg>${resizew}x${resizeh}&gt;</arg>
+				<arg>+repage</arg>
+				<arg>${FILENAMEOUT}</arg>
+			</yadaCropAndResize>
+
+This example works with any image but corrupts gif animations.
+
+.. code-block:: xml
+
 			<yadaCropAndResize>
 				<executable>convert</executable>
 				<arg>${FILENAMEIN}</arg>
@@ -389,7 +409,7 @@ Be aware that the most recent version of imagemagick uses the "magick" command i
 .. code-block:: xml
 
 		<executable>magick</executable>
-		<executable>convert</executable>
+		<arg>convert</arg>
 		<arg>${FILENAMEIN}</arg>
 
 
