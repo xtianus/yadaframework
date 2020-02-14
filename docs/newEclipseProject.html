@@ -151,7 +151,7 @@
 </div>
 <div class="section" id="prerequisites">
 <h2>8.2. Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
-<p>You should have <a class="reference external" href="https://www.oracle.com/technetwork/java/javase/downloads/index.html">Java</a>, <a class="reference external" href="https://git-scm.com/downloads">git</a> and a working copy of <a class="reference external" href="https://www.eclipse.org/downloads/packages/">Eclipse IDE for Enterprise Java Developers</a>.</p>
+<p>You should have <a class="reference external" href="https://www.oracle.com/technetwork/java/javase/downloads/index.html">Java</a>, <a class="reference external" href="https://git-scm.com/downloads">git</a>, <a class="reference external" href="https://dev.mysql.com/downloads/mysql/">MySQL Community Server</a> and a working copy of <a class="reference external" href="https://www.eclipse.org/downloads/packages/">Eclipse IDE for Enterprise Java Developers</a>. Check the notes that follow before installing anything.</p>
 <p>Currently the Yada source is tested with Java 8. You should be able to compile it on any later version but to be on the safe side you can download Java 8 from the “<a class="reference external" href="https://www.oracle.com/technetwork/java/javase/archive-139210.html">Java Archive</a>” section of the Oracle site.
 To make your installation future-proof, install the java JDK in some folder like <code class="docutils literal notranslate"><span class="pre">C:\Local\Javas\jdk1.8.0_152</span></code> and
 make a symbolic link to it with a generic name, like</p>
@@ -159,10 +159,33 @@ make a symbolic link to it with a generic name, like</p>
 </pre></div>
 </div>
 <p>Now you can refer to C:\Local\jdk8 in your scripts and when you update the java (minor) version you just change the link, not the scripts.
-The Java JRE can be installed to the default folder.
-Download git and install it.</p>
-<p>Install <a class="reference external" href="https://dev.mysql.com/downloads/mysql/">MySQL Community Server</a> v5.7: later versions have not been tested yet.</p>
+The Java JRE can be installed to the default folder.</p>
 <p>Inside Eclipse, from the “Window &gt; Preferences &gt; Gradle” dialog set the “Java home” entry to your JDK installation, which would be C:Localjdk8 if you followed the instructions above.</p>
+<p>Download git and install it.</p>
+<p>Install <a class="reference external" href="https://dev.mysql.com/downloads/mysql/">MySQL Community Server</a> v5.7: later versions have not been tested yet.</p>
+<p>For a future-proof installation you should not install MySQL as a Service, but run it manually when needed because one day
+you might have more than one version to use. The steps to install MySQL 8 on windows are as follows:</p>
+<ul class="simple">
+<li><p>download and run the web installer</p></li>
+<li><p>choose the “Custom” installation</p></li>
+<li><p>select the latest MySQL Server 8 from the list on the left, click on the right arrow to move it to the right, then click on it: a new “Advanced Options” link should appear. Click on it and choose the installation folder, for example <code class="docutils literal notranslate"><span class="pre">C:\Local\Mysqls\mysql-8.0.19-winx64</span></code></p></li>
+</ul>
+<img alt="_images/MySQL-advanced.jpg" src="_images/MySQL-advanced.jpg" />
+<ul class="simple">
+<li><p>when asked, choose “Show Advanced and Logging options”</p></li>
+<li><p>on the “Authentication Method” page choose “Use Legacy Authentication” (second option) to have an easier life (it’s a dev PC after all)</p></li>
+<li><p>on the “Advanced Options” choose “Preserve Given Case” - this is important to prevent problems when running the DB on linux</p></li>
+</ul>
+<img alt="_images/MySQL-preservecase.jpg" src="_images/MySQL-preservecase.jpg" />
+<p>After installation, make a symbolic link to it with a generic name, like</p>
+<div class="highlight-bat notranslate"><div class="highlight"><pre><span></span><span class="k">mklink</span> /D /J C:\Local\mysql80 C:\local\Mysqls\mysql-8.0.19-winx64
+</pre></div>
+</div>
+<p>Now you can refer to <code class="docutils literal notranslate"><span class="pre">C:\Local\mysql80</span></code> in your scripts and when you update the MySQL (minor) version you just change the link, not the scripts.</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="admonition-title">Todo</p>
+<p>startup/shutdown scripts</p>
+</div>
 </div>
 <div class="section" id="the-project-skeleton">
 <h2>8.3. The Project Skeleton<a class="headerlink" href="#the-project-skeleton" title="Permalink to this headline">¶</a></h2>

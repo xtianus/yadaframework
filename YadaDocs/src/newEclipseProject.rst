@@ -21,7 +21,7 @@ You will also have a basic deployment procedure already set up:
 Prerequisites
 -------------
 
-You should have `Java`_, `git`_ and a working copy of `Eclipse IDE for Enterprise Java Developers`_.
+You should have `Java`_, `git`_, `MySQL Community Server`_ and a working copy of `Eclipse IDE for Enterprise Java Developers`_. Check the notes that follow before installing anything.
 
 Currently the Yada source is tested with Java 8. You should be able to compile it on any later version but to be on the safe side you can download Java 8 from the "`Java Archive`_" section of the Oracle site.
 To make your installation future-proof, install the java JDK in some folder like ``C:\Local\Javas\jdk1.8.0_152`` and
@@ -33,11 +33,37 @@ make a symbolic link to it with a generic name, like
 
 Now you can refer to C:\\Local\\jdk8 in your scripts and when you update the java (minor) version you just change the link, not the scripts.
 The Java JRE can be installed to the default folder.
+
+Inside Eclipse, from the "Window > Preferences > Gradle" dialog set the "Java home" entry to your JDK installation, which would be C:\Local\jdk8 if you followed the instructions above.
+
 Download git and install it.
 
 Install `MySQL Community Server`_ v5.7: later versions have not been tested yet.
 
-Inside Eclipse, from the "Window > Preferences > Gradle" dialog set the "Java home" entry to your JDK installation, which would be C:\Local\jdk8 if you followed the instructions above.
+For a future-proof installation you should not install MySQL as a Service, but run it manually when needed because one day
+you might have more than one version to use. The steps to install MySQL 8 on windows are as follows:
+
+- download and run the web installer
+- choose the "Custom" installation
+- select the latest MySQL Server 8 from the list on the left, click on the right arrow to move it to the right, then click on it: a new "Advanced Options" link should appear. Click on it and choose the installation folder, for example ``C:\Local\Mysqls\mysql-8.0.19-winx64``
+
+.. image:: _static/img/MySQL-advanced.jpg
+
+- when asked, choose "Show Advanced and Logging options"
+- on the "Authentication Method" page choose "Use Legacy Authentication" (second option) to have an easier life (it's a dev PC after all)
+- on the "Advanced Options" choose "Preserve Given Case" - this is important to prevent problems when running the DB on linux
+
+.. image:: _static/img/MySQL-preservecase.jpg
+
+After installation, make a symbolic link to it with a generic name, like
+
+.. code-block:: bat
+
+	mklink /D /J C:\Local\mysql80 C:\local\Mysqls\mysql-8.0.19-winx64
+
+Now you can refer to ``C:\Local\mysql80`` in your scripts and when you update the MySQL (minor) version you just change the link, not the scripts.
+
+.. todo:: startup/shutdown scripts
 
 .. _Java: https://www.oracle.com/technetwork/java/javase/downloads/index.html
 .. _Eclipse IDE for Enterprise Java Developers: https://www.eclipse.org/downloads/packages/
