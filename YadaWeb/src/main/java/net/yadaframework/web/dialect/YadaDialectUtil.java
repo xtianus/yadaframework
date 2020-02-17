@@ -1,5 +1,6 @@
 package net.yadaframework.web.dialect;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.context.ITemplateContext;
@@ -21,6 +22,9 @@ public class YadaDialectUtil {
      */
     protected String getVersionedAttributeValue(final ITemplateContext context, String value) {
     	try {
+    		if (StringUtils.isBlank(value)) {
+    			return value;
+    		}
 			// The contextPath is applied by @{} so it's not needed here
 			// String contextPath = ((org.thymeleaf.context.IWebContext)context).getRequest().getContextPath();
 			int dividerPos = value.indexOf('/', 1); // Second slash
