@@ -180,7 +180,7 @@ public class YadaAttachedFile implements CloneableDeep {
 	 * @return
 	 */
 	@Transient
-	@Deprecated
+	@Deprecated // Do not use config
 	public File calcAndSetTargetFile(String namePrefix, String targetExtension, YadaAttachedFileType type, YadaIntDimension targetDimension, YadaConfiguration config) {
 		return calcAndSetTargetFile(namePrefix, targetExtension, type, targetDimension);
 	}
@@ -210,7 +210,7 @@ public class YadaAttachedFile implements CloneableDeep {
 	 * @return
 	 */
 	@Transient
-	@Deprecated
+	@Deprecated // Do not use config
 	public File calcAndSetTargetFile(String namePrefix, String targetExtension, Integer targetWidth, YadaAttachedFileType type, YadaConfiguration config) {
 		return calcAndSetTargetFile(namePrefix, targetExtension, targetWidth, type);
 	}
@@ -275,7 +275,7 @@ public class YadaAttachedFile implements CloneableDeep {
 	 * @return
 	 */
 	@Transient
-	@Deprecated
+	@Deprecated // Do not use config
 	public File getAbsoluteFile(YadaAttachedFileType type, YadaConfiguration config) {
 		return getAbsoluteFile(type);
 	}

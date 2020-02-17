@@ -85,6 +85,7 @@ public abstract class YadaConfiguration {
 	private boolean defaultLocaleChecked = false;
 	private Map<String, SortedSet<Entry<Integer,String>>> localSetCache = new HashMap<>(); // Deprecated
 	private String targetImageExtension=null;
+	private String preserveImageExtensions=null;
 
 
 	/**
@@ -127,6 +128,23 @@ public abstract class YadaConfiguration {
 			targetImageExtension = StringUtils.removeStart(targetImageExtension, "."); // Remove dot if any
 		}
 		return targetImageExtension;
+	}
+
+	/**
+	 * Check if the image extension has to be preserved when converting.
+	 * The value is taken from &lt;dimension targetImageExtension="jpg" preserveImageExtension="gif,webp">
+	 * @param extensionNoDot
+	 * @return
+	 */
+	public boolean isPreserveImageExtension(String extensionNoDot) {
+		if (preserveImageExtensions==null) {
+			preserveImageExtensions = configuration.getString("config/dimension/@preserveImageExtensions", "");
+			preserveImageExtensions = StringUtils.remove(preserveImageExtensions, '.'); // Remove dot if any
+			// Add commas for easy search
+			preserveImageExtensions = ','+preserveImageExtensions.toLowerCase()+',';
+		}
+		return preserveImageExtensions.contains(','+extensionNoDot.toLowerCase()+',');
+
 	}
 
 	/**

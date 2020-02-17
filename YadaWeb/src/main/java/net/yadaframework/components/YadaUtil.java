@@ -106,6 +106,11 @@ public class YadaUtil {
 
 	private static Locale defaultLocale = null;
 
+	/**
+	 * Instance to be used when autowiring is not available
+	 */
+	public final static YadaUtil INSTANCE = new YadaUtil();
+
 	@PostConstruct
     public void init() {
 		defaultLocale = config.getDefaultLocale();
