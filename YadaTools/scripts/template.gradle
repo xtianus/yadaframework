@@ -1,0 +1,118 @@
+buildscript {
+    repositories {
+        mavenLocal()
+    }
+    dependencies {
+        classpath 'net.yadaframework:YadaTools:+'
+    }
+}
+
+plugins {
+	id 'org.hidetake.ssh' version '2.10.1'
+	id 'com.meiuwa.gradle.sass' version "1.0.0"	// Only when using SASS
+}
+
+ext.acronym = 'sg20'
+apply plugin: 'war'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'net.yadaframework.tools'
+apply plugin: 'org.hidetake.ssh'        // https://gradle-ssh-plugin.github.io
+
+eclipse {
+    jdt {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+        // https://stackoverflow.com/a/35302104/587641
+        file {
+                File dir = file('.settings')
+                dir.mkdirs()
+                File f = file('.settings/org.eclipse.core.resources.prefs')
+            if (!f.exists()) {
+                    f.write('eclipse.preferences.version=1\n')
+                    f.append('encoding/<project>=utf-8')
+                }
+            }
+    }
+    wtp {
+        component {
+        	contextPath = '/'
+        }
+        facet {
+        	facet name: 'jst.web', version: '3.1'
+        	// This is a workaround to remove the old facet from
+        	// .settings/org.eclipse.wst.common.project.facet.core.xml
+        	def oldJstWebFacet = facets.findAll {
+            	it.name -- 'jst.web' && it.version -- '2.4'
+            }
+            facets.removeAll(oldJstWebFacet)
+        }
+    }
+    autoBuildTasks sassCompile // Only when using SASS
+}
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF8'
+}
+
+def YadaWebLib = "$projectDir/../../yadaframework/YadaWeb";
+def YadaWebCmsLib = "$projectDir/../../yadaframework/YadaWebCMS";
+
+repositories {
+    jcenter()
+    mavenLocal()
+}
+
+dependencies {
+
+    // Add here any library that you might need (then run "Refresh Gradle Project")
+    // compile  'joda-time:joda-time:2.+'
+    
+	compile	 project(':YadaWeb')
+	compile	 project(':YadaWebSecurity')
+	compile	 project(':YadaWebCMS')
+	compile	 project(':ArtemideCommon')
+
+    compile 'org.springframework:spring-webmvc:4.3.7.RELEASE',
+        'org.springframework:spring-context-support:4.3.7.RELEASE',
+        'org.springframework.data:spring-data-jpa:1.11.1.RELEASE',
+        'org.springframework.security:spring-security-web:4.2.2.RELEASE',
+        'org.hibernate:hibernate-entitymanager:5.2.9.Final',
+        'mysql:mysql-connector-java:5.1.41',
+        'com.fasterxml.jackson.core:jackson-annotations:2.9.+',
+        'com.fasterxml.jackson.core:jackson-core:2.9.+',
+        'com.fasterxml.jackson.core:jackson-databind:2.9.+',
+        'org.thymeleaf:thymeleaf-spring4:3.0.3.RELEASE'
+
+    // Needed in Tomcat 8 at runtime
+    runtime 'commons-beanutils:commons-beanutils:1.9.2'
+    runtime 'commons-jxpath:commons-jxpath:1.3'
+
+    testCompile 'junit:junit:4.12'
+}
+
+yadaInit {
+    projectName = rootProject.name
+    acronym = project.acronym
+    basePackage = '**com.example**'
+    dbPasswords = [**'dev': 'mydevpwd', 'tst': 'mytstpwd', 'prod': 'myprodpwd'**]
+    envs=[**'dev', 'tst', 'prod'**]
+        // See YadaTools/src/main/groovy/net/yadaframework/tools/YadaProject.groovy
+        // for more configuration options
+}
+
+configurations {
+    hibtools {
+        extendsFrom configurations.compile
+    }
+}
+dependencies {
+    hibtools files("$buildDir/classes/java/main") // Needed for yadaPersistenceUnit
+    hibtools 'org.hibernate:hibernate-tools:5.+'
+}
+task dbSchema(dependsOn: [classes], type: net.yadaframework.tools.YadaCreateDbSchemaTask) {
+    inputs.files configurations.hibtools;
+    outputfilename = "${acronym}.sql"
+}
