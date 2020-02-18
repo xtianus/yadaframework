@@ -12,7 +12,7 @@ plugins {
 	id 'com.meiuwa.gradle.sass' version "1.0.0"	// Only when using SASS
 }
 
-ext.acronym = 'sg20'
+ext.acronym = '**acronym**' // CHANGE THIS !!!
 apply plugin: 'war'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'net.yadaframework.tools'
@@ -96,7 +96,7 @@ dependencies {
 yadaInit {
     projectName = rootProject.name
     acronym = project.acronym
-    basePackage = '**com.example**'
+    basePackage = '**com.example**'  // CHANGE THIS !!!
     dbPasswords = [**'dev': 'mydevpwd', 'tst': 'mytstpwd', 'prod': 'myprodpwd'**]
     envs=[**'dev', 'tst', 'prod'**]
         // See YadaTools/src/main/groovy/net/yadaframework/tools/YadaProject.groovy
