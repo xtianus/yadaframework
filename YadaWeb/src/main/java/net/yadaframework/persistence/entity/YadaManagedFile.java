@@ -91,6 +91,14 @@ public class YadaManagedFile implements CloneableDeep {
 	}
 
 	/**
+	 * Returns the file extension without dot, or null
+	 * @return
+	 */
+	public String getFileExtension() {
+		return YadaUtil.INSTANCE.getFileExtension(filename);
+	}
+
+	/**
 	 * Returns width and height of a loaded image
 	 * @return
 	 */

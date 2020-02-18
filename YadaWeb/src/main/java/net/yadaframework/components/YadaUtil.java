@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -39,6 +40,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.Stack;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
@@ -58,6 +60,7 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,11 +106,137 @@ public class YadaUtil {
 
 	private static Locale defaultLocale = null;
 
+	/**
+	 * Instance to be used when autowiring is not available
+	 */
+	public final static YadaUtil INSTANCE = new YadaUtil();
+
 	@PostConstruct
     public void init() {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+
+	/**
+	 * Split an HTML string in two parts, not breaking words, handling closing and reopening of html tags.
+	 * Useful when showing some part of a text and the whole of it after a user clicks.
+	 * For example, the string "&lt;p>Some text here&lt;/p> becomes ["&lt;p>Some text&lt;/p>","&lt;p>here&lt;/p>"].
+	 * The HTML is not splitted exactly at splitPos if there's a word there, a tag, or if the paragraph ends in the next 20 characters:
+	 * in such cases the split position is increased accordingly.
+	 * Note: does not work in any possible scenario. For example &lt;ul>&lt;li> is not split properly because it creates two list entries
+	 * if the split point is inside the li. Tag attributes are not currently handled properly.
+	 * @param htmlToSplit The html text to split, must be well-formed (all opened tags must be closed properly)
+	 * @param splitPos the minimum position, in number of characters including tags, where to split
+	 * @return an array of two self-contained html parts, where each opened tag is correctly closed. The second part could be null.
+	 * @see #splitAtWord(String, int)
+	 */
+	public String[] splitHtml(String htmlToSplit, int splitPos) {
+		String[] result = new String[2];
+		char[] charArray = htmlToSplit.toCharArray();
+		int maxPos = charArray.length-1;
+		boolean tag = false; // True when the current character is inside an HTML tag
+		boolean tagOpen = false; // True when an HTML tag has been opened
+		int pos = 0;
+		Stack<String> tagsToCopy = new Stack<>();
+		StringBuffer tagName = null;
+		try {
+			while (pos<maxPos) {
+				char current = charArray[pos];
+				boolean isSpace = current==' ';
+				if (!isSpace && !tag && current=='<') {
+					// We are at the start of an HTML tag: get the name and check if it's opening or closing
+					tag = true;
+					tagOpen = charArray[pos+1]!='/';
+					if (tagOpen) {
+						tagName = new StringBuffer();
+					}
+					// We get the name of opening tags only and presume that the HTML is well formed
+				} else if (!isSpace && tag && current=='>') {
+					// Last character of a tag. If it was an opening tag, add it to the stack of opened tags
+					tag = false;
+					if (tagOpen) {
+						String tagNameString = tagName.toString();
+						// br is not added because it does not need a closing tag
+						// TODO what other html tags don't have a closing one?
+						if (!"br".equals(tagNameString)) {
+							tagsToCopy.add(tagNameString);
+						}
+						tagOpen=false;
+					} else {
+						// It was a close tag. We presume that it was the same as the last one on the stack and we forget it.
+						tagsToCopy.pop();
+					}
+					continue;
+				} else if (pos>=splitPos && !tag && isSpace) {
+					// We reached or surpassed the split point outside of a tag and at a space character.
+					// The HTML can be split here, unless there's a closing p in the next 20 character
+					// TODO 20 should be a parameter?
+					// TODO should be done for <li> too
+					int closep = htmlToSplit.indexOf("</p>", pos);
+					if (closep-pos<20) {
+						// Close the paragraph in the first part
+						pos = closep + "</p>".length();
+						// Forget all tags up to the opening paragraph because we assume that we skipped the closing ones
+						while (!tagsToCopy.isEmpty()) {
+							String tagToCopy = tagsToCopy.pop();
+							if ("p".equals(tagToCopy)) {
+								break;
+							}
+						}
+					}
+					// Split at a safe position
+					result[0] = htmlToSplit.substring(0, pos);
+					result[1] = htmlToSplit.substring(pos);
+					// Add any needed closing tags to the first part and opening tags to the second part
+					while (!tagsToCopy.isEmpty()) {
+						String tagToCopy = tagsToCopy.pop();
+						result[0] += "</" + tagToCopy + '>'; // Tag closed in the first part
+						result[1] = "<" + tagToCopy + '>' + result[1]; // Tag reopened in the second part
+					}
+					return result;
+				} else if (tagOpen) {
+					tagName.append(current);
+				}
+				pos++;
+			}
+		} catch (Exception e) {
+			// In case of error, the whole HTML is returned in the first part, and null in the second
+			log.error("Can't split HTML (returned whole)", e);
+		}
+		result[0] = htmlToSplit;
+		return result;
+	}
+
+	/**
+	 * Ensure that the given filename has not been already used, by adding a counter.
+	 * For example, a list containing {"dog.jpg", "dog.jpg", "dog.jpg"} becomes {"dog.jpg", "dog_1.jpg", "dog_2.jpg"}
+	 * This version does not check if a file exists on disk. For that, see {@link #findAvailableName(File, String, String, String)}
+	 * @param usedNames filenames used so far, must start empty and will be modified
+	 * @param baseName filename to add, without extension
+	 * @param extensionNoDot filename extension without dot
+	 * @param counterSeparator string to separate the filename and the counter
+	 * @return the original filename with extension, or a new version with a counter added
+	 * @throws IOException
+	 * @see {@link #findAvailableName(File, String, String, String)}
+	 */
+	public String findAvailableFilename(String baseName, String extensionNoDot, String counterSeparator, Set<String> usedNames) throws IOException {
+		String extension = "." + extensionNoDot;
+		String fullName = baseName + extension;
+		int counter = 0;
+		long startTime = System.currentTimeMillis();
+		int timeoutMillis = 1000; // 1 second to find a result seems to be reasonable
+		while (true) {
+			if (!usedNames.contains(fullName)) {
+				usedNames.add(fullName);
+				return fullName;
+			}
+			counter++;
+			fullName = baseName + counterSeparator + counter + extension;
+			if (System.currentTimeMillis()-startTime > timeoutMillis) {
+				throw new IOException("Timeout trying to create a unique name starting with " + baseName);
+			}
+		}
+	}
 
 	/**
 	 * Check if a date is not more than maxYears years from now, not in an accurate way.
@@ -423,6 +552,18 @@ public class YadaUtil {
 	 * Returns the localized value from a map of Locale -> String.
 	 * Used in entities with localized string attributes.
 	 * If a default locale has been configured with <code>&lt;locale default='true'></code>, then that locale is attempted when
+	 * there is no value (null or "") for the needed locale (and they differ)
+	 * @param LocalizedValueMap
+	 * @return the localized value, or the empty string if no value has been defined and no default locale has been configured
+	 */
+	public static String getLocalValue(Map<Locale, String> LocalizedValueMap) {
+		return YadaUtil.getLocalValue(LocalizedValueMap, LocaleContextHolder.getLocale());
+	}
+
+	/**
+	 * Returns the localized value from a map of Locale -> String.
+	 * Used in entities with localized string attributes.
+	 * If a default locale has been configured with <code>&lt;locale default='true'></code>, then that locale is attempted when
 	 * there is no value for the needed locale (and they differ)
 	 * @param LocalizedValueMap
 	 * @param locale the needed locale for the value, can be null for the current request locale
@@ -433,7 +574,7 @@ public class YadaUtil {
 			locale = LocaleContextHolder.getLocale();
 		}
 		String result = LocalizedValueMap.get(locale);
-		if (result==null && defaultLocale!=null && !defaultLocale.equals(locale)) {
+		if (StringUtils.isEmpty(result) && defaultLocale!=null && !defaultLocale.equals(locale)) {
 			result = LocalizedValueMap.get(defaultLocale);
 		}
 		return result==null?"":result;
@@ -927,6 +1068,19 @@ public class YadaUtil {
 		return shellExec(command, args, null, outputStream);
 	}
 
+	private String getExecutable(String shellCommandKey) {
+		boolean mac = SystemUtils.IS_OS_MAC;
+		boolean linux = SystemUtils.IS_OS_LINUX;
+		boolean windows = SystemUtils.IS_OS_WINDOWS;
+		String executable = mac ? config.getString(shellCommandKey + "/executable[@mac='true']") :
+			linux ? config.getString(shellCommandKey + "/executable[@linux='true']") :
+			windows ? config.getString(shellCommandKey + "/executable[@windows='true']") : null;
+		if (executable==null) {
+			executable = config.getString(shellCommandKey + "/executable[not(@mac) and not(@linux) and not(@windows)]"); // Fallback to generic OS
+		}
+		return executable;
+	}
+
 	/**
 	 * Run an external shell command that has been defined in the configuration file.
 	 * @param shellCommandKey xpath key of the shell command, e.g. "config/shell/cropImage"
@@ -937,7 +1091,7 @@ public class YadaUtil {
 	 * @throws IOException
 	 */
 	public int shellExec(String shellCommandKey, Map substitutionMap, ByteArrayOutputStream outputStream) throws IOException {
-		String executable = config.getString(shellCommandKey + "/executable");
+		String executable = getExecutable(shellCommandKey);
 		// Need to use getProperty() to avoid interpolation on ${} arguments
 		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
 		List<String> args = (List<String>) config.getConfiguration().getProperty(shellCommandKey + "/arg");
@@ -1052,7 +1206,7 @@ public class YadaUtil {
 	 */
 	@Deprecated // use shellExec() instead
 	public boolean exec(String shellCommandKey, Map substitutionMap) {
-		String executable = config.getString(shellCommandKey + "/executable");
+		String executable = getExecutable(shellCommandKey);
 		// Need to use getProperty() to avoid interpolation on ${} arguments
 		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
 		List<String> args = (List<String>) config.getConfiguration().getProperty(shellCommandKey + "/arg");
@@ -1154,7 +1308,7 @@ public class YadaUtil {
 		return root;
 	}
 
-	/*
+	/**
 	 * Spezza una stringa in due, circa al carattere splitPoint, ma a fine parola.
 	 */
 	public String[] splitAtWord(String value, int splitPoint) {
@@ -1856,6 +2010,7 @@ public class YadaUtil {
 	public void createZipFile(File zipFile, File[] sourceFiles, String[] filenamesNoExtension, boolean ignoreErrors) {
 		byte[] buf = new byte[1024]; // Create a buffer for reading the files
 		// Create the ZIP file
+		Set<String> addedFilenames = new HashSet<>();
 		try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile))) {
 		    // Compress the files
 		    for (int i=0; i<sourceFiles.length; i++) {
@@ -1863,10 +2018,15 @@ public class YadaUtil {
 			        // Add ZIP entry to output stream.
 			        String entryName;
 			        if (filenamesNoExtension!=null) {
-			        	String extension = "." + getFileExtension(sourceFiles[i]);
+			        	String extensionNoDot = getFileExtension(sourceFiles[i]);
+			        	String extension = "." + extensionNoDot;
 			        	entryName = filenamesNoExtension[i].toLowerCase().endsWith(extension)? filenamesNoExtension[i] : filenamesNoExtension[i] + extension;
+			        	// Add a counter for duplicated names
+			        	entryName = findAvailableFilename(filenamesNoExtension[i], extensionNoDot, "_", addedFilenames);
 			        } else {
-			        	entryName = sourceFiles[i].getName();
+			        	String[] filenameAndExtension = splitFileNameAndExtension(sourceFiles[i].getName());
+			        	// Add a counter for duplicated names
+			        	entryName = findAvailableFilename(filenameAndExtension[0], filenameAndExtension[1], "_", addedFilenames);
 			        }
 			        try (FileInputStream in = new FileInputStream(sourceFiles[i])) {
 						out.putNextEntry(new ZipEntry(entryName));

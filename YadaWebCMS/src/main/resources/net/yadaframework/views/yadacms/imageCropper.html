@@ -4,13 +4,14 @@
 <meta charset="UTF-8">
 </head>
 <!--/*
-A component to crop a set of uploaded images to "desktop" and/or "mobile" size.
+A component to crop a set of uploaded images to "desktop" and/or "mobile" and/or "pdf" size.
 Parameters:
 - cropQueue = A YadaCropQueue object, usually found with @yadaSession.cropQueue (use your own YadaSession subclass as needed)
 
 Message keys:
 - yada.crop.legendDesktopKey
 - yada.crop.legendMobileKey
+- yada.crop.legendPdfKey
 - yada.crop.cropSubmit
 
 Example:
@@ -36,6 +37,12 @@ Example:
 				<input class="yadaw" type="hidden" name="mobileCrop['w']" value="">
 				<input class="yadah" type="hidden" name="mobileCrop['h']" value="">
 			</div>
+			<div class="yadaPdf">
+				<input class="yadax" type="hidden" name="pdfCrop['x']" value="">
+				<input class="yaday" type="hidden" name="pdfCrop['y']" value="">
+				<input class="yadaw" type="hidden" name="pdfCrop['w']" value="">
+				<input class="yadah" type="hidden" name="pdfCrop['h']" value="">
+			</div>
 			
 			<div class="form-group">
 				<img th:src="@{${cropImage.sourceUrl}}" id="yadaCropImage">
@@ -45,11 +52,15 @@ Example:
 			<div class="form-group legend">
 				<p th:if="${cropImage.cropDesktop}" class="yadaDesktop active">
 					<span></span> <span th:text="#{yada.crop.legendDesktopKey}">Legend for desktop goes here</span>
-					<span id="yadaDesktopCropSize"><span>???</span>x<span>???</span></span> ([[${cropImage.targetDesktopDimension}]])
+					([[${cropImage.targetDesktopDimension}]]) <span id="yadaDesktopCropSize"><span>???</span>x<span>???</span></span>
 				</p>
 				<p th:if="${cropImage.cropMobile}" class="yadaMobile">
 					<span></span> <span th:text="#{yada.crop.legendMobileKey}">Legend for mobile goes here</span>
-					<span id="yadaMobileCropSize"><span>???</span>x<span>???</span></span> ([[${cropImage.targetMobileDimension}]])
+					([[${cropImage.targetMobileDimension}]]) <span id="yadaMobileCropSize"><span>???</span>x<span>???</span></span>
+				</p>
+				<p th:if="${cropImage.cropPdf}" class="yadaPdf">
+					<span></span> <span th:text="#{yada.crop.legendPdfKey}">Legend for pdf goes here</span>
+					([[${cropImage.targetPdfDimension}]]) <span id="yadaPdfCropSize"><span>???</span>x<span>???</span></span>
 				</p>
 			</div>
 			
@@ -141,10 +152,37 @@ Example:
 			}
 			[/]
 			
+			[# th:if="${cropImage.cropPdf}"]
+			function makePdfWidget(jcrop, sourceWidth, sourceHeight, scale) {
+				var targetWidth = [[${cropImage.targetPdfDimension.width}]];
+				var targetHeight = [[${cropImage.targetPdfDimension.height}]];
+				var aspect = [[${cropImage.targetPdfProportions}]];
+				//
+				var initialCrop = makeFittingRectangle(sourceWidth, sourceHeight, aspect);
+				var pdf = jcrop.newWidget(initialCrop, { aspectRatio: aspect });
+				$(pdf.el).addClass("yadaPdf");
+				pdf.listen('crop.update',(widget,e) => {
+					setData(widget, 'pdf', scale, targetWidth, targetHeight);
+				});
+				$(".legend .yadaPdf").click(function(){
+					jcrop.activate(pdf);
+				});
+				pdf.listen('crop.activate',(widget,e) => {
+					$("#yadaCropForm .legend p.active").removeClass("active");
+					$("#yadaCropForm .legend p.yadaPdf").addClass("active");
+				});
+				setData(pdf, 'pdf', scale);
+			}
+			[/]
+			
 			function handleCrop(jcrop, imageRect) {
 				var sourceWidth = [[${cropImage.imageToCrop.dimension.width}]];
 				var sourceHeight = [[${cropImage.imageToCrop.dimension.height}]];
 				var scale = sourceWidth / imageRect.w;
+				
+				[# th:if="${cropImage.cropPdf}"]
+					makePdfWidget(jcrop, sourceWidth, sourceHeight, scale);
+				[/]
 				
 				[# th:if="${cropImage.cropMobile}"]
 					makeMobileWidget(jcrop, sourceWidth, sourceHeight, scale);

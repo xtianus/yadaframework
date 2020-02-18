@@ -111,6 +111,9 @@ public class YadaCropQueue {
 		if (this.cropImages==null) {
 			throw new YadaInvalidUsageException("Please call YadaSession.addCropQueue() before adding images to the YadaCropQueue instance");
 		}
+		if (targetDimensions == null || targetDimensions.length<3) {
+			throw new YadaInvalidUsageException("Please call YadaCropQueue.addCropImage() with a targetDimensions array of three elements that can be null");
+		}
 		YadaCropImage yadaCropImage = new YadaCropImage(imageToCrop, targetDimensions, targetRelativeFolder, targetNamePrefix);
 		yadaCropImage = (YadaCropImage) yadaUtil.autowireAndInitialize(yadaCropImage);
 		this.cropImages.add(yadaCropImage);
