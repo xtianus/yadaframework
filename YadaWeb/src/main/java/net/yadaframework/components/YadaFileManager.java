@@ -204,6 +204,9 @@ public class YadaFileManager {
 		if (yadaAttachedFile.getFilename() != null) {
 			getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilename()).delete();
 		}
+		if (yadaAttachedFile.getFilenamePdf() != null) {
+			getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenamePdf()).delete();
+		}
 		if (yadaAttachedFile.getFilenameDesktop() != null) {
 			getAbsoluteFile(yadaAttachedFile, yadaAttachedFile.getFilenameDesktop()).delete();
 		}
