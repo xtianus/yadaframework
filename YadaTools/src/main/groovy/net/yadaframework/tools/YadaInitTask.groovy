@@ -137,7 +137,7 @@ class YadaInitTask extends YadaProject {
 			if (target == "XXXSession.java") {
 				target = acronym.capitalize() + (target-"XXX");
 			}
-			processTemplate("java/web", filename, filename-".txt", javaWebFolder);
+			processTemplate("java/web", filename, target, javaWebFolder);
 		}
 		List componentsFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/components");
 		for (filename in componentsFiles) {

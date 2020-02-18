@@ -4,6 +4,7 @@
 <booleanAttribute key="build_scans_enabled" value="false"/>
 <stringAttribute key="gradle_distribution" value="GRADLE_DISTRIBUTION(WRAPPER)"/>
 <stringAttribute key="gradle_user_home" value=""/>
+<stringAttribute key="java_home" value="E:\local\jdk8"/>
 <listAttribute key="jvm_arguments"/>
 <booleanAttribute key="offline_mode" value="false"/>
 <booleanAttribute key="override_workspace_settings" value="false"/>
