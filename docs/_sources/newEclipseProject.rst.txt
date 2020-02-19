@@ -3,8 +3,7 @@ New Eclipse Project
 ********************
 
 Introduction
-------------
-
+===================
 The following procedure will guide you through the creation of a new Eclipse project for your web app. At the end you will have a Web Project that can be run in a Java EE server (e.g. Tomcat) with all the needed layers set up and ready for customization: 
 
 * Database access layer with transactions (Hibernate / JPA / Spring)
@@ -19,11 +18,27 @@ You will also have a basic deployment procedure already set up:
 * Deployment script
 
 Prerequisites
--------------
+===================
+You should have `Java`_, `git`_, `MySQL Community Server`_ and a working copy of `Eclipse IDE for Enterprise Java Developers`_. Check the notes in this section before installing anything.
 
-You should have `Java`_, `git`_, `MySQL Community Server`_ and a working copy of `Eclipse IDE for Enterprise Java Developers`_. Check the notes that follow before installing anything.
+Java SDK
+--------
+Remove any Java installation you may have on your PC.
 
-Currently the Yada source is tested with Java 8. You should be able to compile it on any later version but to be on the safe side you can download Java 8 from the "`Java Archive`_" section of the Oracle site.
+
+.. DANGER:: The biggest problem you may face with Java installation is to mix 32 and 64 bit versions: it gives unexpected results.
+	So always download 64 bit versions of Java and Eclipse.
+	Currently the Yada Framework source is tested with Java 8. Running on an untested version might give weird errors.
+	At the time of writing we failed to run on Java 11.0.6 for problems during Gradle project import.
+
+You should look on the Oracle site for "Java SE" installer, which is the "Standard Edition". 
+You can download Java 8 from the "`Java Archive`_" section of the Oracle site. You will be required to create an
+Oracle account and login before being able to download. 
+
+.. note:: Before Java 11 there were two components in Java SE: the JDK (Development Kit) and the JRE (Runtime Environment). Since Java 11 the JDK is also a JRE.
+	
+The installation package will install both the JDK and the JRE. 
+The JRE - 64 bit - can be any version and generally it will auto-upgrade to the latest.
 To make your installation future-proof, install the java JDK in some folder like ``C:\Local\Javas\jdk1.8.0_152`` and
 make a symbolic link to it with a generic name, like
 
@@ -31,14 +46,19 @@ make a symbolic link to it with a generic name, like
 
 	mklink /D /J C:\Local\jdk8 C:\Local\Javas\jdk1.8.0_152
 
-Now you can refer to C:\\Local\\jdk8 in your scripts and when you update the java (minor) version you just change the link, not the scripts.
-The Java JRE can be installed to the default folder.
+Now you can refer to ``C:\Local\jdk8`` in your scripts and when you update the java (minor) version you just change the link, not the scripts.
+The Java JRE can be installed to the default folder (``C:\Program Files``).
 
-Inside Eclipse, from the "Window > Preferences > Gradle" dialog set the "Java home" entry to your JDK installation, which would be C:\Local\jdk8 if you followed the instructions above.
 
-Download git and install it.
+GIT
+---
+Install `git`_ for your OS.
 
-Install `MySQL Community Server`_ v5.7: later versions have not been tested yet.
+.. _git: https://git-scm.com/downloads
+
+MySQL
+-----
+Install `MySQL Community Server`_ v5.7: later versions have not been tested yet but this documentation uses MySQL 8 just to be ready.
 
 For a future-proof installation you should not install MySQL as a Service, but run it manually when needed because one day
 you might have more than one version to use. The steps to install MySQL 8 on windows are as follows:
@@ -47,13 +67,13 @@ you might have more than one version to use. The steps to install MySQL 8 on win
 - choose the "Custom" installation
 - select the latest MySQL Server 8 from the list on the left, click on the right arrow to move it to the right, then click on it: a new "Advanced Options" link should appear. Click on it and choose the installation folder, for example ``C:\Local\Mysqls\mysql-8.0.19-winx64``
 
-.. image:: _static/img/MySQL-advanced.jpg
+.. image:: _static/img/newEclipseProject/MySQL-advanced.jpg
 
 - when asked, choose "Show Advanced and Logging options"
 - on the "Authentication Method" page choose "Use Legacy Authentication" (second option) to have an easier life (it's a dev PC after all)
 - on the "Advanced Options" choose "Preserve Given Case" - this is important to prevent problems when running the DB on linux
 
-.. image:: _static/img/MySQL-preservecase.jpg
+.. image:: _static/img/newEclipseProject/MySQL-preservecase.jpg
 
 After installation, make a symbolic link to it with a generic name, like
 
@@ -63,223 +83,329 @@ After installation, make a symbolic link to it with a generic name, like
 
 Now you can refer to ``C:\Local\mysql80`` in your scripts and when you update the MySQL (minor) version you just change the link, not the scripts.
 
-.. todo:: startup/shutdown scripts
+In order to start/stop the MySQL server you should create two scripts and put their shortcut somewhere easy like the desktop or the taskbar.
+
+``startMySql80.bat``
+
+.. code-block:: bat
+
+	set MYSQL_HOME=C:\Local\mysql80
+	set PATH=%MYSQL_HOME%\bin;%PATH%
+	C:\Local\mysql80\bin\mysqld.exe --defaults-file="%MYSQL_HOME%\my.ini" --console
+
+``stopMySql80.bat``
+
+.. code-block:: bat
+
+	set MYSQL_HOME=C:\Local\mysql80
+	C:\Local\mysql80\bin\mysqladmin.exe -u root shutdown
 
 .. _Java: https://www.oracle.com/technetwork/java/javase/downloads/index.html
 .. _Eclipse IDE for Enterprise Java Developers: https://www.eclipse.org/downloads/packages/
-.. _Java Archive: https://www.oracle.com/technetwork/java/javase/archive-139210.html
+.. _Java Archive: https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html
 .. _git: https://git-scm.com/downloads
 .. _MySQL Community Server: https://dev.mysql.com/downloads/mysql/
 
+Eclipse
+--------
+Install the latest version of `Eclipse IDE for Enterprise Java Developers`_. Be sure to install the 64 bit "Enterprise" version:
 
-The Project Skeleton
+.. caution:: A 32 bit Eclipse will not run on a 64 bit Java installation and the non-enterprise version will not be able to 
+	run a web application in a standalone Tomcat. 
+	If you do not want to manage a standalone Tomcat installation and choose to use embedded Tomcat instead, you may actually download 
+	the non-Enterprise version (not tested).
+
+With a single installation of Eclipse you can have as many workspaces as you like. For big projects involving multiple branches and many people,
+you might want to create at least two workspaces, one for your own development and another one for checking other people's work or for deployment.
+It is very convenient to create a different shortcut for each workspace. Using the "-data" command line option you can specify which workspace you
+want to use. For example:
+
+``C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\myCoding"``
+``C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\myRelease"``
+
+Run Eclipse with the chosen workspace and click on the "Workbench" icon to the right of the "Welcome to Eclipse" page.
+
+Update your installation with "Help > Check for Updates" and follow the instructions. Failing to do so might prevent
+you from adding a Tomcat server later.
+
+From the "Window > Preferences > Gradle" dialog set the "Java home" entry to your JDK installation, 
+which would be ``C:\Local\jdk8`` if you followed the instructions above.
+
+Set the editors file encoding to UTF-8, at least "General > Workspace > Text file encoding" and "Web > CSS Files > Encoding":
+
+.. image:: _static/img/newEclipseProject/encoding.jpg
+
+.. _Eclipse IDE for Enterprise Java Developers: https://www.eclipse.org/downloads/packages/
+
+The "New text file line delimiter" shown in the above image is also better set to "Unix".
+
+Add the donwloaded JRE as a new Runtime in "Window > Preferences > Java > Installed JREs" and set it as the default. 
+Also set the "Window > Preferences > Java > Compiler > JDK Compliance" accordingly.
+
+Node.js (optional)
+-------------------
+Node.js is not strictly needed but it can be useful.
+Install the `latest LTS version`_.
+
+.. _latest LTS version: https://nodejs.org/en/download/
+
+Connect to GIT
+==============
+Add the repositories
 --------------------
+The "Yada Framework" sources are hosted on the public GitHub site.
+To access the GitHub repository just use your GitHub credentials (create some) on the `yadaframework`_ repo.
+The git url should be like ``https://github.com/xtianus/yadaframework.git``. 
 
-These are the steps needed to create a new Eclipse project that uses the Yada Framework.
+.. _yadaframework: https://github.com/xtianus/yadaframework
 
--  Add a Tomcat server to Eclipse
--  Follow the Eclipse [[Setup\|Setup]] procedure:
+Once you have the repository credentials, you can connect Eclipse: 
 
-   -  Clone the yadaframework git repository locally
-   -  Import the Yada projects in Eclipse from the local git clone with "File > Import… > Gradle > Existing Gradle project"
+- Open the "git perspective" from "Window > Perspective > Open Perspective"
+- On the left of the workspace you should see the "Git Repositories" panel
+- Click on "Clone a Git repository" and add the needed information
+ 
+.. image:: _static/img/newEclipseProject/clonegit.jpg
+ 
+.. image:: _static/img/newEclipseProject/clonedialog1.jpg
 
--  Create a local git repository to store your own sources
--  Create a new Gradle project in the workspace (let's call it "ExamplePrj")
--  Delete any example files that might have been created, like "Library.java"
--  Share ExamplePrj to git so that Eclipse moves all files to the git location: "Team > Share Project..." (No need to commit yet)
--  Edit .gitignore in the root of ExamplePrj to look like the following:
+On the "Branch Selection" dialog you should select just "master". You will later
+add any branch that you need.
+
+On the "Local Destination" dialog you just need to select a local folder where to clone the repository.
+The following information assumes that you have already created a new Eclipse project called `MySiteProject` (will be explained later) and added it to a git repository
+called `mysite` that you host somewhere.
+It is very important that you **store all the repositories in a common parent folder** that is specific to the current project, for example
+``C:\work\git-mysite``, otherwise relative paths in the build file won't work and you'll have to customise them.
+
+.. image:: _static/img/newEclipseProject/cloneDialog2.jpg
+
+At the end you should have a filesystem structure like the following, where "mysite" is any new project that uses the Yada Framework:
+
+::
+
+  C:\\work\\git-mysite
+    mysite
+      .git
+      MySiteProject
+    yadaframework 
+      .git
+      docs
+      YadaDocs
+      YadaTools
+      YadaWeb
+      ... and other folders	
+
+When you have connected to all repositories, you can switch to the "Java Perspective" in Eclipse. 
+
+Generate the YadaTools library
+------------------------------
+When you first setup the development environment, you currently need to generate the YadaTools library locally
+because it has not been uploaded on a distribution site yet.
+If you fail to do so, you'll get a weird compilation error like *"Could not fetch model of type 'GradleBuild' using Gradle distribution"*.
+To generate the library, you first need to import the YadaTools project.
+
+Use the "File > Import... > Gradle > Existing Gradle Project" menu to import YadaTools:
+
+.. image:: _static/img/newEclipseProject/yadaTools.jpg
+
+If the imported project has some errors, first of right-click and choose "Gradle > Refresh Gradle Project".
+If it complains about some unbound system library, open "Properties > Java build path > Libraries" and remove the library.
+
+To build the library, run the "YadaTools - uploadArchives" task from "Run > Run Configurations... > Gradle Task". If you have some
+weird errors, try from the command line in the YadaTools folder and run ``gradlew uploadArchives --no-daemon`` because the Gradle
+daemon sometimes gets in the way...
+
+The First Project
+=====================
+Create a new Eclipse Project using "File > New > Project... > Gradle > Gradle Project" menu.
+Use any name you like ("MySiteProject" in the above example) and accept all defaults. A new Java project will be created in your workspace.
+
+Delete any example file and folders inside the "src/main/java" and "src/test/java" folders.
+
+Edit the ``/MySiteProject/gradle/wrapper/gradle-wrapper.properties`` file changing the ``distributionUrl`` to match the version of
+Gradle that you want to use. For example ``distributionUrl=https\://services.gradle.org/distributions/gradle-5.6.4-bin.zip``.
+
+.. DANGER:: The currently recommended Gradle version is 5.6.4; Gradle 6.2 failed to load the YadaTools library during initial setup
+
+Right-click the project and choose "Gradle > Refresh Gradle Project" to update the version of Gradle used.
+
+You can choose to add an external Tomcat server or use the embedded version. In the first case, you should be using the "Enterprise" version of Eclipse.
+If not, you should at least install the "Eclipse Web Tools Platform" (WTP) plugin and... hope for the best.
+
+Import the Yada projects that you need to use. After connecting to the GitHub repository as explained above, you need to import the
+needed projects using the "File > Import... > Gradle > Existing Gradle Project" menu as explained in :ref:`newEclipseProject:Generate the YadaTools library`.
+To import all Yada projects at once you could just import the "YadaWebCommerce" project and rely on dependency resolution to automatically
+import everything else:
+
+.. image:: _static/img/newEclipseProject/importYada.jpg
+
+You should now have, in your workspace, the following Yada projects:
+
+- YadaTools
+- YadaWeb
+- YadaWebCMS
+- YadaWebCommerce
+- YadaWebSecurity
+
+The next step is to create a git repository to store your projects. You can use any public provider like GitHub or a private installation
+based for example on GitLab. You should definitely use git to store your files, also because they will be moved to the same folder of the
+Yada projects and relative paths in the build file will work effortlessly.
+When using "GitLab", let it create a default readme.md file so that you'll be able to check out the repository easily (there should be a
+similar option on GitHub). Then add the repository location to the Git Perspective as done for the Yada Framework.
+The local folder should be next to the Yada Framework local git, for example ``C:\work\git-mysite\mysite``.
+To add your project to the local git repository right-click on it and choose "Team > Share Project...". 
+In the dialog you should just select the correct repository and accept the defaults.
+Finally edit .gitignore in the root of your project look like the following:
 
 ::
 
     /.gradle/
     /build/
     /bin/
+    /.gitattributes
     /.settings/
     /.classpath
     /.project
     !gradle-wrapper.jar
 
 The Build File
---------------
+===================
 
--  Replace build.gradle with the following:
+Replace your ``build.gradle`` with the contents of ``/YadaTools/scripts/template.gradle``.
 
-.. code-block:: groovy
+The ``// CHANGE THIS !!!`` items should be edited to suit your needs.
 
-    buildscript {
-        repositories {
-            mavenLocal()
-        }
-        dependencies {
-            classpath 'net.yadaframework:YadaTools:+'
-        }                    
-    }
+The default environments are "dev" for "Development", "tst" for "Test" and "prod" for "Production". 
+You can rename them (or also add/remove some) using the "envs" property in the ``yadaInit`` task of the build, 
+but the envs array must always have the "development" environtment first and the "production" environment last 
+in order to create a correct configuration.xml file. For a list of all other options for the ``yadaInit`` task 
+see ``/YadaTools/src/main/groovy/net/yadaframework/tools/YadaProject.groovy``
 
-    plugins {
-        id 'org.hidetake.ssh' version '2.9.0'
-    }
-
-    ext.acronym = '**myprj**'
-    apply plugin: 'war'
-    apply plugin: 'eclipse-wtp'
-    apply plugin: 'net.yadaframework.tools'
-    apply plugin: 'org.hidetake.ssh'        // https://gradle-ssh-plugin.github.io
-
-    eclipse {
-        jdt {
-            sourceCompatibility = 1.8
-            targetCompatibility = 1.8
-            // https://stackoverflow.com/a/35302104/587641
-            file {
-                    File dir = file('.settings')
-                    dir.mkdirs()
-                    File f = file('.settings/org.eclipse.core.resources.prefs')
-                if (!f.exists()) {
-                        f.write('eclipse.preferences.version=1\n')
-                        f.append('encoding/<project>=utf-8')
-                    }
-                }
-        }
-        wtp {
-                component {
-            contextPath = '/'
-            }
-            facet {
-            facet name: 'jst.web', version: '3.1'
-            // This is a workaround to remove the old facet from 
-            // .settings/org.eclipse.wst.common.project.facet.core.xml
-            def oldJstWebFacet = facets.findAll {
-                        it.name -- 'jst.web' && it.version -- '2.4'
-                    }
-                    facets.removeAll(oldJstWebFacet)
-            }
-        }
-    }
-
-    compileJava.options.encoding = 'UTF-8'
-    compileTestJava.options.encoding = 'UTF-8'
-
-    def YadaWebLib = "$projectDir/../../yadaframework/YadaWeb";
-
-    repositories {
-        jcenter()
-        mavenLocal()
-    }
-
-    dependencies {
-
-        // Add here any library that you might need (then run "Refresh Gradle Project")
-        // compile  'joda-time:joda-time:2.+'
-
-        compile project(':YadaWeb'), project(':YadaWebSecurity'),
-            'org.springframework:spring-webmvc:4.3.7.RELEASE',
-            'org.springframework:spring-context-support:4.3.7.RELEASE',
-            'org.springframework.data:spring-data-jpa:1.11.1.RELEASE',
-            'org.springframework.security:spring-security-web:4.2.2.RELEASE',
-            'org.hibernate:hibernate-entitymanager:5.2.9.Final',
-            'mysql:mysql-connector-java:5.1.41',
-            'com.fasterxml.jackson.core:jackson-annotations:2.9.+',
-            'com.fasterxml.jackson.core:jackson-core:2.9.+',
-            'com.fasterxml.jackson.core:jackson-databind:2.9.+',
-                'org.thymeleaf:thymeleaf-spring4:3.0.3.RELEASE'
-        
-        // Needed in Tomcat 8 at runtime
-        runtime 'commons-beanutils:commons-beanutils:1.9.2'
-        runtime 'commons-jxpath:commons-jxpath:1.3'
-            
-        testCompile 'junit:junit:4.12'
-    }
-
-    yadaInit {
-        projectName = rootProject.name
-        acronym = project.acronym
-        basePackage = '**com.example**'
-        dbPasswords = [**'dev': 'mydevpwd', 'tst': 'mytstpwd', 'prod': 'myprodpwd'**]
-        envs=[**'dev', 'tst', 'prod'**]
-            // See YadaTools/src/main/groovy/net/yadaframework/tools/YadaProject.groovy 
-            // for more configuration options
-    }
-
-    configurations {
-        hibtools {
-            extendsFrom configurations.compile
-        }
-    }
-    dependencies {
-        hibtools files("$buildDir/classes/java/main") // Needed for yadaPersistenceUnit
-        hibtools 'org.hibernate:hibernate-tools:5.+'
-    }
-    task dbSchema(dependsOn: [classes], type: net.yadaframework.tools.YadaCreateDbSchemaTask) {
-        inputs.files configurations.hibtools;
-        outputfilename = "${acronym}.sql"
-    }
-
-(wtp syntax `here <https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpComponent.html>`__ and `here <https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpFacet.html>`__)
-
-The ``**marked**``\ items should be edited to suit your needs.
-
-The default environments are "dev" for "Development", "tst" for "Test" and "prod" for "Production". You can rename them (or also add/remove some) using the "envs" property as shown above, but the envs array must always have the "development" environtment first and the "production" environment last in order to produce a correct configuration.xml file.
-
-[TODO: YadaConfiguration.isProductionEnvironment() and similar methods should use the configured environment names]
-
-For a list of all other options for the yadaInit task see ``/YadaTools/src/main/groovy/net/yadaframework/tools/YadaProject.groovy``
-
--  Replace settings.gradle with the following:
+Replace your ``settings.gradle`` with the following:
 
 .. code-block:: groovy
 
-       rootProject.name = 'ExamplePrj'
+       rootProject.name = 'MySiteProject'
        include 'YadaWeb'
        project(':YadaWeb').projectDir = "../../yadaframework/YadaWeb" as File
        include 'YadaWebSecurity'
        project(':YadaWebSecurity').projectDir = "../../yadaframework/YadaWebSecurity" as File
+       include 'YadaWebCMS'
+       project(':YadaWebCMS').projectDir = "../../yadaframework/YadaWebCMS" as File
+       include 'YadaWebCommerce'
+       project(':YadaWebCommerce').projectDir = "../../yadaframework/YadaWebCommerce" as File
 
-   This assumes that you cloned the yadaframework repository in the same root folder of your project repository, like:
+You should change the project name to whatever you used. The above assumes that you cloned the yadaframework repository 
+in the same root folder of your project repository as explained in :ref:`newEclipseProject:Add the repositories`.
+This setup is needed to use YadaWeb class files directly instead of going through the jar, 
+and is handy when you plan to work on the YadaWeb sources to fix and improve them. 
 
-.. code-block:: default
+More information on the wtp syntax `here <https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpComponent.html>`__ and `here <https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpFacet.html>`__.
 
-       rootfolder
-        |--------- exampleProject
-                         |--------- .git
-                         |--------- ExamplePrj
-        |--------- yadaframework
-                         |--------- .git
-                         |--------- YadaWeb
-                         |--------- YadaWebSecurity
-
-   This setup is needed to use YadaWeb class files directly instead of going through the jar, and is handy when you plan to work on the YadaWeb sources to fix and improve them. The YadaWebSecurity project is needed only if you plan to implement a password-protected restricted section, otherwise it can be omitted.
 
 Code Generation (just a bit)
-----------------------------
+======================================
 
--  ensure you have these folders in your project before the next step:
-	-  ``src/main/java``
-	-  ``src/main/webapp``
--  run ``gradlew -q eclipse``, either from a command prompt or from the "Eclipse gradle tasks" view (under Gradle Tasks > ExamplePrj > ide > eclipse)
--  run the "YadaTools - uploadArchives" gradle task (under Gradle Tasks > YadaTools > upload > uploadArchives) so that the latest version of the YadaTools library is loaded to the local maven repository. The task should already be available in "Run > Run Configurations..." but can also be run from the command line with ``gradle uploadArchives`` from inside the YadaTools project folder
--  from the "ExamplePrj" folder run the task ``gradlew yadaInit``
-	-  This task will add the java core Spring configuration and some default files that will have to be either deleted or customised
-	-  You can run the task multiple times and it will never overwrite existing files: to revert a change, delete the file and run the task again
--  run either the ``gradle eclipse`` task, or more simply click the ``Gradle > Refresh Gradle Project`` project menu item in order to import all jar dependencies thus clearing compilation errors
+Ensure you have these folders in your project before the next step:
+
+-  ``src/main/java``
+-  ``src/main/webapp``
+
+Use the ``Gradle > Refresh Gradle Project`` project menu item to initialise the project.
+
+Open a command prompt in the root folder of your project (e.g. ``C:\work\git-mysite\MySiteProject``) and run ``gradlew yadaInit --no-daemon``. 
+This task will add the java core Spring configuration and some default files that will have to be either deleted or customised.
+The "--no-daemon" option is to stay on the safe side.
+
+.. note:: You can run the task multiple times and it will never overwrite existing files: to revert a change, delete the file and run the task again
+
+If you see compilation errors ensure that you're just missing some classpath libraries and do a "Refresh Gradle Project" again. If you
+still have errors, try to fix them ;-) For example you might need to remove the dependency on YadaWebSeurity classes if you didn't want to use it.
 
 Initial Customization
----------------------
+======================================
+Before starting the server for the first time, you should customise some generated files.
+The bare minimum would be to edit these files:
 
--  edit the generated .xml/.html files to suit your needs. You can skip the "tst" and "prod" files until you're ready to deploy to a test/production server
-	-  the ``env/dev`` and ``env/prod`` folders now have a couple of script files that you can use to create the initial database and db user
-	-  the ``/src/main/resources/template/email`` folder now contains some typical email templates that you can decide to delete or customize
+- /src/main/resources/conf.webapp.dev.xml
+	- **paths/basePath** is where your project files will be found
+	- **setup/users/user/admin** is the initial user of your site (if YadaWebSecurity is being used). You should change the password at least
+- /src/main/resources/logback.xml
+	- you may want to change the log path
 
--  you can add all the dependencies that you need
--  run either the ``gradle eclipse`` task again, or more simply click the ``Gradle > Refresh Gradle Project`` project context menu item
+You can skip the "tst" and "prod" files until you're ready to deploy to a test/production server.
 
 Database Setup
---------------
+===================
+Create the local database by running the scripts inside ``/env/dev`` (if you're not on windows, just copy the content and adapt it to your platform).
 
--  create the local database by running the scripts inside ``env/dev`` (if you're not on windows, just copy the content and adapt it to your platform)
--  create the database schema by running the ``gradlew dbSchema`` task
+Create the database schema by running the ``gradlew dbSchema`` task.
+You may get some compilation errors that need to be fixed.
+If the schema generator can't connect to the database check that /src/main/resources/META-INF/persistence.xml (and /src/main/webapp/META-INF/context.xml) has the right DB credentials.
 
-   -  If you can't connect to the database check that /src/main/resources/META-INF/persistence.xml (and /src/main/webapp/META-INF/context.xml) has the right credentials
+Run the ``/env/dev/dropAndCreateDatabase.bat`` (or a linux equivalent) to create a new empty database with the generated schema.
 
--  run the /env/dev/dropAndCreateDatabase.bat (or a linux equivalent) each time you want to create a new empty database with the generated schema
--  create a new Tomcat Server in Eclipse and add the ExamplePrj project, then start it
--  if the server starts with no errors, you can see the homepage placeholder at http://localhost:8080/
+Tomcat server
+===================
+This section is about setting up a standalone Tomcat server that can be controlled from Eclipse. You don't need it if you're going to use the
+embedded version of Tomcat.
+
+Download `Apache Tomcat 8.5`_ "64-bit Windows zip" and unzip the folder to some place like ``C:\local\Tomcats\apache-tomcat-8.5.51``.
+
+Create a new folder where you will keep all your web application deploys, like ``C:\local\Deploy``.
+
+In Eclipse, while in the "Java Perspective", show the "Servers" view from "Window > Show View > Other... > Server > Servers".
+You will see the link "No servers available. Click to create a new server...". Click that link. You will see a dialog
+where you should choose "Apache > Tomcat v8.5 Server". In the Next dialog choose your "Tomcat installation directory", 
+for example ``C:\local\Tomcats\apache-tomcat-8.5.51``, and finish.
+Just to be safe, check that Tomcat works by running it and browsing to ``http://localhost:8080/``. If all is fine, you should see
+an error from Tomcat:
+
+.. image:: _static/img/newEclipseProject/tomcatError.jpg
+
+Stop Tomcat then right-click on it and choose "Open". You will see the Overview:
+
+.. image:: _static/img/newEclipseProject/tomcatOverview.JPG
+
+On this page do the following:
+
+- Under "Server locations" set "Use custom location > Server path" to ``C:\local\Deploy\myProject`` where "myProject" is anything you like
+- Under "Server Options" uncheck "Modules auto reload by default"
+- Under "Timeouts" add a trailing 0 to both timeouts so that 45 becomes 450 and 15 becomes 150
+- Save with CTRL+S.
+
+If your sources in the "Package Explorer" window don't have any red marks (no compilation errors), you can add the web application to Tomcat:
+
+- Right-click on the Tomcat server in the "Servers" view
+- Select "Add and Remove... > Add All >>"
+
+If the server starts with no errors, you can see the homepage placeholder at http://localhost:8080/
+
+.. _Apache Tomcat 8.5: https://tomcat.apache.org/download-80.cgi
+
+Troubleshooting
+===================
+
+Compilation Errors
+------------------
+In case of compilation errors, the first thing to do is to run a "Refresh Gradle Project" on the affected project or the including project.
+If errors persist, check that you have imported all the needed Yada projects.
+Also be sure to have "Projects > Build Automatically" checked and try with a "Project > Clean...".
+
+Validation Errors
+-----------------
+If you get an error like
+
+``CHKJ3000E: WAR Validation Failed: org.eclipse.jst.j2ee.commonarchivecore.internal.exception.DeploymentDescriptorLoadException: WEB-INF/web.xml``
+
+you may fix it just by forcing a validation on the project via the menu.
+
+Tomcat Startup Errors
+---------------------
+If Tomcat doesn't start, it might have stale data. Try with a "Clean..." on the server. If everything fails, stop the server and delete the content of the Deploy folder,
+for example ``C:\local\Deploy\myProject``. Then do a "Publish" on the server. If you can't delete some file because Windows says it's open, you'll need to quit Eclipse
+and be sure that there are no ghost Tomcat processes running. In extreme cases, you might need to restart your PC.
+
+
+
