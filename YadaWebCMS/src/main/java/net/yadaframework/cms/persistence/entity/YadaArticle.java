@@ -43,22 +43,22 @@ import net.yadaframework.persistence.entity.YadaAttachedFile;
 @Entity
 public class YadaArticle implements CloneableFiltered, Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	public static class SimpleJson{}
-	
+
 	// For synchronization with external databases
 	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified;
-	
+
 	// For optimistic locking
 	@Version
 	protected long version;
-	
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
-	
+
 	@ElementCollection
 	@Column(length=64)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
@@ -66,23 +66,23 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 
 	@Column(length=32)
 	protected String code;
-	
+
 	@ElementCollection
 	@Column(length=32)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> color = new HashMap<>();
-	
+
 	@Embedded
 	protected YadaDimension dimension;
-	
+
 	@Convert(converter = YadaMoneyConverter.class)
 	protected YadaMoney unitPrice;
-	
+
 	@ManyToOne
 	protected YadaProduct product;
-	
+
 	protected boolean published;
-	
+
 	@OneToMany(cascade=CascadeType.REMOVE, orphanRemoval=true)
 	@JoinTable(name="YadaArticle_galleryImages")
 	@OrderBy("sortOrder")
@@ -106,17 +106,17 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 
 	@Transient
 	protected Long chosenProductId;
-	
+
 	////////////////////////////////////////////////////////////////////77
-	
+
 	/**
 	 * Returns the localized name in the current request locale
 	 * @return
 	 */
 	public String getLocalName() {
-		return name.get(LocaleContextHolder.getLocale());
+		return YadaUtil.getLocalValue(name);
 	}
-	
+
 	public void seLocalName(String name) {
 		this.name.put(LocaleContextHolder.getLocale(), name);
 	}
@@ -126,22 +126,22 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 	 * @return
 	 */
 	public String getLocalColor() {
-		return color.get(LocaleContextHolder.getLocale());
+		return YadaUtil.getLocalValue(color);
 	}
-	
+
 	public void seLocalcolor (String color) {
 		this.color.put(LocaleContextHolder.getLocale(), color);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param locale
 	 * @return
 	 */
 	public String getColor(Locale locale) {
 		return YadaUtil.getLocalValue(color, locale);
 	}
-	
+
 	public Long getId() {
 		return id;
 	}

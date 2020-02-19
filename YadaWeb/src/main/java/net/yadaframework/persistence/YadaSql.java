@@ -300,6 +300,25 @@ public class YadaSql implements CloneableDeep {
 	}
 
 	/**
+	 * Adds a TYPE condition - JPQL QUERIES ONLY
+	 * @param attributeAlias the attribute name used in the query
+	 * @param targetType the type to query
+	 * @return
+	 */
+	public YadaSql type(String attributeAlias, Class<?> targetType) {
+		return where("TYPE("+attributeAlias+") = " + targetType.getSimpleName()).and();
+	}
+
+	/**
+	 * Adds a DTYPE condition - NATIVE QUERIES ONLY
+	 * @param dtype
+	 * @return
+	 */
+	public YadaSql dtype(Class<?> targetType) {
+		return where("DTYPE = '" + targetType.getSimpleName() + "'").and();
+	}
+
+	/**
 	 * Add an empty where. Needed for example when the where is followed by a subexpression: where (a=1 or b=2) and (c=3 or d=4)
 	 * becomes where().startSubexpression().where("a=1").or("b=2").endSubexpression().and().startSubexpression().where("c=3").or("d=4").endSubexpression()
 	 * Usually it's clearer if you just put the subexpression in the string: .where("(a=1 or b=2)").and().where("(c=3 or d=4)")

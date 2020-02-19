@@ -17,16 +17,6 @@ public class ${acronym.capitalize()}Configuration extends YadaConfiguration {
 	// Questi valori li memorizzo perchè non mi aspetto che cambino a runtime
 	private Integer sessionTimeoutMinutes=null;
 	
-	/**
-	 * Add project-specific user attributes from the configuration
-	 * @param user
-	 * @param sub
-	 */
-	@Override
-	protected void addSetupUserAttributes(Map<String, Object> user, ImmutableHierarchicalConfiguration sub) {
-		// Add statements as needed
-	}
-	
 	public Integer getSessionTimeoutMinutes() {
 		if (sessionTimeoutMinutes==null) {
 			sessionTimeoutMinutes = configuration.getInt("config/security/sessionTimeoutMinutes", -1);

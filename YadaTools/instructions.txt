@@ -17,7 +17,7 @@ and in the build.gradle:
 yadaInit {
 	projectName = 'NiceProject'
 	acronym = 'npj'
-	basePackage = 'com.nice'
+	basePackage = 'com.example'
 	dbPasswords = ['dev': 'devpwd', 'col': 'colpwd', 'prod': 'prodpwd']
 }
 

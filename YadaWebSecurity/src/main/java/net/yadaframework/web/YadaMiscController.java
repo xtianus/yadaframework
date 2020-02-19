@@ -74,6 +74,10 @@ public class YadaMiscController {
 					// Mobile
 					File createdFile = cropAndResizeImage(yadaCropImage, yadaCropDefinition.getMobileCrop(), yadaCropImage.getTargetMobileDimension(), YadaAttachedFileType.MOBILE);
 				}
+				if (yadaCropImage.isCropPdf()) {
+					// pdf
+					File createdFile = cropAndResizeImage(yadaCropImage, yadaCropDefinition.getPdfCrop(), yadaCropImage.getTargetPdfDimension(), YadaAttachedFileType.PDF);
+				}
 				try {
 					yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile);
 				} catch (javax.persistence.OptimisticLockException e) {
@@ -112,13 +116,18 @@ public class YadaMiscController {
 		YadaManagedFile sourceManagedFile = yadaCropImage.getImageToCrop();
 		File imageToCropFile = sourceManagedFile.getAbsoluteFile();
 		YadaAttachedFile yadaAttachedFile = yadaCropImage.getYadaAttachedFile();
+		String sourceExtension = sourceManagedFile.getFileExtension();
 		String targetExtension = config.getTargetImageExtension(); // "jpg"
+		// Check if the source extension has to be preserved (e.g. for gif)
+		if (config.isPreserveImageExtension(sourceExtension)) {
+			targetExtension = sourceExtension;
+		}
 		// Always set a new target file to prevent cache issues
-		File destinationFile = yadaAttachedFile.getAbsoluteFile(type, config);
+		File destinationFile = yadaAttachedFile.getAbsoluteFile(type);
 		if (destinationFile!=null) {
 			destinationFile.delete();
 		}
-		destinationFile = yadaAttachedFile.calcAndSetTargetFile(yadaCropImage.getTargetNamePrefix(), targetExtension, type, targetDimension, config);
+		destinationFile = yadaAttachedFile.calcAndSetTargetFile(yadaCropImage.getTargetNamePrefix(), targetExtension, type, targetDimension);
 		destinationFile.getParentFile().mkdirs(); // Ensure the target folder exists
 		Map<String, String> params = new HashMap<>();
 		params.put("FILENAMEIN", imageToCropFile.getAbsolutePath());
@@ -136,6 +145,8 @@ public class YadaMiscController {
 			yadaAttachedFile.setDesktopImageDimension(new YadaIntDimension(newWidth, newHeight));
 		} else if (type == YadaAttachedFileType.MOBILE) {
 			yadaAttachedFile.setMobileImageDimension(new YadaIntDimension(newWidth, newHeight));
+		} else if (type == YadaAttachedFileType.PDF) {
+			yadaAttachedFile.setPdfImageDimension(new YadaIntDimension(newWidth, newHeight));
 		} else {
 			yadaAttachedFile.setImageDimension(new YadaIntDimension(newWidth, newHeight));
 		}

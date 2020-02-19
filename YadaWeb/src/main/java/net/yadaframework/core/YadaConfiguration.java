@@ -85,34 +85,37 @@ public abstract class YadaConfiguration {
 	private boolean defaultLocaleChecked = false;
 	private Map<String, SortedSet<Entry<Integer,String>>> localSetCache = new HashMap<>(); // Deprecated
 	private String targetImageExtension=null;
+	private String preserveImageExtensions=null;
 
 
 	/**
-	 * Get the width/height of an image, for desktop and mobile
+	 * Get the width/height of an image, for desktop, mobile and pdf
 	 * @param relativeKey the key like "/product/gallery", relative to "config/dimension"
-	 * @return { desktopWidth, mobileWidth }, the cell is null when not configured
+	 * @return { desktopDimension, mobileDimension, pdfDimension }, the cell is null when not configured
 	 */
 	protected YadaIntDimension[] getImageDimensions(String relativeKey) {
-		YadaIntDimension[] result = new YadaIntDimension[2];
-		String widthHeight = configuration.getString("config/dimension" + relativeKey + "/desktop", null);
-		YadaIntDimension desktop = null;
-		if (widthHeight!=null) {
-			String[] parts = widthHeight.split(",");
-			int width = Integer.parseInt(parts[0]);
-			int height = Integer.parseInt(parts[1]);
-			desktop = new YadaIntDimension(width, height);
-		}
-		result[0] = desktop;
-		widthHeight = configuration.getString("config/dimension" + relativeKey + "/mobile", null);
-		YadaIntDimension mobile = null;
-		if (widthHeight!=null) {
-			String[] parts = widthHeight.split(",");
-			int width = Integer.parseInt(parts[0]);
-			int height = Integer.parseInt(parts[1]);
-			mobile = new YadaIntDimension(width, height);
-		}
-		result[1] = mobile;
+		YadaIntDimension[] result = new YadaIntDimension[3];
+		result[0] = splitDimension(relativeKey, "/desktop");
+		result[1] = splitDimension(relativeKey, "/mobile");
+		result[2] = splitDimension(relativeKey, "/pdf");
 		return result;
+	}
+
+	/**
+	 * Converts a value like &lt;desktop>1920,973&lt;/desktop> to a YadaIntDimension
+	 * @param relativeKey relativeKey the key like "/product/gallery", relative to "config/dimension"
+	 * @param type "/desktop" or "/mobile" etc as found in the configuration xml
+	 * @return YadaIntDimension or null
+	 */
+	private YadaIntDimension splitDimension(String relativeKey, String type) {
+		String widthHeight = configuration.getString("config/dimension" + relativeKey + type, null);
+		if (widthHeight!=null) {
+			String[] parts = widthHeight.split(",");
+			int width = Integer.parseInt(parts[0]);
+			int height = Integer.parseInt(parts[1]);
+			return new YadaIntDimension(width, height);
+		}
+		return null;
 	}
 
 	/**
@@ -125,6 +128,23 @@ public abstract class YadaConfiguration {
 			targetImageExtension = StringUtils.removeStart(targetImageExtension, "."); // Remove dot if any
 		}
 		return targetImageExtension;
+	}
+
+	/**
+	 * Check if the image extension has to be preserved when converting.
+	 * The value is taken from &lt;dimension targetImageExtension="jpg" preserveImageExtension="gif,webp">
+	 * @param extensionNoDot
+	 * @return
+	 */
+	public boolean isPreserveImageExtension(String extensionNoDot) {
+		if (preserveImageExtensions==null) {
+			preserveImageExtensions = configuration.getString("config/dimension/@preserveImageExtensions", "");
+			preserveImageExtensions = StringUtils.remove(preserveImageExtensions, '.'); // Remove dot if any
+			// Add commas for easy search
+			preserveImageExtensions = ','+preserveImageExtensions.toLowerCase()+',';
+		}
+		return preserveImageExtensions.contains(','+extensionNoDot.toLowerCase()+',');
+
 	}
 
 	/**
@@ -294,6 +314,10 @@ public abstract class YadaConfiguration {
 			String localeString = configuration.getString("config/i18n/locale[@default='true']", null);
 			if (localeString!=null) {
 				try {
+					String country = getCountryForLanguage(localeString);
+					if (country!=null) {
+						localeString += "_" + country;
+					}
 					defaultLocale = LocaleUtils.toLocale(localeString);
 				} catch (IllegalArgumentException e) {
 			    	throw new YadaConfigurationException("Locale {} is invalid", localeString);

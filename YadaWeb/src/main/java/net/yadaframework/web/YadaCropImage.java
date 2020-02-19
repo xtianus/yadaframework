@@ -30,9 +30,11 @@ public class YadaCropImage {
 
 	private boolean cropDesktop = false; 	// True to crop for desktop image
 	private boolean cropMobile = false;		// True to crop for mobile image
+	private boolean cropPdf = false;		// True to crop for pdf image
 
 	private YadaIntDimension targetDesktopDimension;	// After crop, the image will be shrunk to this value
-	private YadaIntDimension targetMobileDimension;	// After crop, the image will be shrunk to this value
+	private YadaIntDimension targetMobileDimension;		// After crop, the image will be shrunk to this value
+	private YadaIntDimension targetPdfDimension;		// After crop, the image will be shrunk to this value
 
 	/**
 	 * Folder where to place cropped images, relative to the contents folder
@@ -58,22 +60,43 @@ public class YadaCropImage {
 		if (targetDimensions!=null) {
 			this.targetDesktopDimension = targetDimensions[0];
 			this.targetMobileDimension = targetDimensions[1];
+			this.targetPdfDimension = targetDimensions[2];
 		}
 		this.clientFilename = this.imageToCrop.getClientFilename();
 		cropDesktop |= targetDesktopDimension!=null;
 		cropMobile |= targetMobileDimension!=null;
+		cropPdf |= targetPdfDimension!=null;
 	}
 
+	/**
+	 * Used on the browser
+	 * @return
+	 */
 	public double getTargetMobileProportions() {
-		if (targetDesktopDimension!=null) {
+		if (targetMobileDimension!=null) {
 			return (double)targetMobileDimension.getWidth()/(double)targetMobileDimension.getHeight();
 		}
 		return 1;
 	}
 
+	/**
+	 * Used on the browser
+	 * @return
+	 */
 	public double getTargetDesktopProportions() {
 		if (targetDesktopDimension!=null) {
 			return (double)targetDesktopDimension.getWidth()/(double)targetDesktopDimension.getHeight();
+		}
+		return 1;
+	}
+
+	/**
+	 * Used on the browser
+	 * @return
+	 */
+	public double getTargetPdfProportions() {
+		if (targetPdfDimension!=null) {
+			return (double)targetPdfDimension.getWidth()/(double)targetPdfDimension.getHeight();
 		}
 		return 1;
 	}
@@ -155,6 +178,15 @@ public class YadaCropImage {
 	 */
 	public YadaCropImage cropMobile() {
 		this.cropMobile = true;
+		return this;
+	}
+
+	/**
+	 * Enables image cropping for pdf size
+	 * @return
+	 */
+	public YadaCropImage cropPdf() {
+		this.cropPdf= true;
 		return this;
 	}
 
@@ -246,6 +278,24 @@ public class YadaCropImage {
 	@SuppressWarnings("unused") // Use titleKey() instead
 	private void setTitleKey(String titleKey) {
 		this.titleKey = titleKey;
+	}
+
+	public boolean isCropPdf() {
+		return cropPdf;
+	}
+
+	@SuppressWarnings("unused") // Use cropMobile() instead
+	private void setCropPdf(boolean cropPdf) {
+		this.cropPdf = cropPdf;
+	}
+
+	public YadaIntDimension getTargetPdfDimension() {
+		return targetPdfDimension;
+	}
+
+	@SuppressWarnings("unused")
+	private void setTargetPdfDimension(YadaIntDimension targetPdfDimension) {
+		this.targetPdfDimension = targetPdfDimension;
 	}
 
 }

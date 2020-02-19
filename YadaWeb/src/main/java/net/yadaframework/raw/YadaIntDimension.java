@@ -68,6 +68,30 @@ public class YadaIntDimension implements java.io.Serializable {
     }
 
     /**
+     * Returns the dimension with the width and height that cover all given dimensions.
+     * @param dimensions can be null or UNSET
+     * @return a dimension with the maximum width and height from the input arguments, or null when the input is all null or UNSET
+     */
+    public static YadaIntDimension biggestCover(YadaIntDimension...dimensions) {
+    	if (dimensions==null) {
+    		return null;
+    	}
+    	int maxWidth = 0;
+    	int maxHeight = 0;
+    	for (YadaIntDimension dimension : dimensions) {
+			if (dimension!=null && !dimension.isUnset()) {
+				if (dimension.getWidth()>maxWidth) {
+					maxWidth = dimension.getWidth();
+				}
+				if (dimension.getHeight()>maxHeight) {
+					maxHeight = dimension.getHeight();
+				}
+			}
+		}
+    	return new YadaIntDimension(maxWidth, maxHeight);
+    }
+
+    /**
      * Returns the dimension with the width or height that has the biggest value, or the first one if there are many that qualify.
      * @param dimensions can be null
      * @return
@@ -79,13 +103,13 @@ public class YadaIntDimension implements java.io.Serializable {
     	YadaIntDimension biggest = null;
     	int bigWidthHeight = 0;
     	for (YadaIntDimension dimension : dimensions) {
-			if (dimension!=null && !dimension.isUnset() && dimension.isAnyBiggerThan(biggest)) {
-				if (dimension.getWidth()>bigWidthHeight || dimension.getHeight()>bigWidthHeight) {
-					biggest = dimension;
-					bigWidthHeight = dimension.getMax();
-				}
-			}
-		}
+    		if (dimension!=null && !dimension.isUnset() && dimension.isAnyBiggerThan(biggest)) {
+    			if (dimension.getWidth()>bigWidthHeight || dimension.getHeight()>bigWidthHeight) {
+    				biggest = dimension;
+    				bigWidthHeight = dimension.getMax();
+    			}
+    		}
+    	}
     	return biggest;
     }
 

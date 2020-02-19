@@ -410,6 +410,14 @@ input.yadaSwitch-round:checked ~ label:after {
     background-color: yellow;
 }
 
+#yadaCropForm .jcrop-widget.yadaPdf {
+	border-color: red;
+}
+#yadaCropForm .jcrop-widget.yadaPdf .jcrop-handle,
+#yadaCropForm .legend p.yadaPdf > span:first-child {
+    background-color: red;
+}
+
 #yadaCropForm #yadaCropImage {
     max-width: 100%;
     max-height: 60vh;

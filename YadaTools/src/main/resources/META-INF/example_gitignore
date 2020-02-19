@@ -3,5 +3,6 @@
 /bin/
 /.settings/
 /.classpath
+/.gitattributes
 /.project
 !gradle-wrapper.jar
