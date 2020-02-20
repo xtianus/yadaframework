@@ -99,6 +99,13 @@ In order to start/stop the MySQL server you should create two scripts and put th
 
 	set MYSQL_HOME=C:\Local\mysql80
 	C:\Local\mysql80\bin\mysqladmin.exe -u root shutdown
+	
+It is very convenient to set an empty password for root on the development computer (the above script won't work otherwise):
+
+.. code-block:: bat
+
+	mysql -u root -p
+	SET PASSWORD FOR 'root'@'localhost' = '';
 
 .. _Java: https://www.oracle.com/technetwork/java/javase/downloads/index.html
 .. _Eclipse IDE for Enterprise Java Developers: https://www.eclipse.org/downloads/packages/
@@ -108,6 +115,9 @@ In order to start/stop the MySQL server you should create two scripts and put th
 
 Eclipse
 --------
+
+.. DANGER:: Eclipse jee 2019-12-R throws a weird "VerifyError: Inconsistent stackmap frames" on some occasions. Don't use that version yet. 
+
 Install the latest version of `Eclipse IDE for Enterprise Java Developers`_. Be sure to install the 64 bit "Enterprise" version:
 
 .. caution:: A 32 bit Eclipse will not run on a 64 bit Java installation and the non-enterprise version will not be able to 

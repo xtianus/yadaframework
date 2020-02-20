@@ -236,9 +236,18 @@ C<span class="p">:</span><span class="nl">\Local\mysql80\bin\mysqld.exe</span><s
 C<span class="p">:</span><span class="nl">\Local\mysql80\bin\mysqladmin.exe</span><span class="c1"> -u root shutdown</span>
 </pre></div>
 </div>
+<p>It is very convenient to set an empty password for root on the development computer (the above script won’t work otherwise):</p>
+<div class="highlight-bat notranslate"><div class="highlight"><pre><span></span>mysql -u root -p
+<span class="k">SET</span> <span class="nv">PASSWORD FOR &#39;root&#39;@&#39;localhost&#39; </span><span class="p">=</span> &#39;&#39;;
+</pre></div>
+</div>
 </div>
 <div class="section" id="eclipse">
 <h3>8.2.4. Eclipse<a class="headerlink" href="#eclipse" title="Permalink to this headline">¶</a></h3>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>Eclipse jee 2019-12-R throws a weird “VerifyError: Inconsistent stackmap frames” on some occasions. Don’t use that version yet.</p>
+</div>
 <p>Install the latest version of <a class="reference external" href="https://www.eclipse.org/downloads/packages/">Eclipse IDE for Enterprise Java Developers</a>. Be sure to install the 64 bit “Enterprise” version:</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>

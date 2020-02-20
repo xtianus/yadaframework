@@ -115,6 +115,9 @@ It is very convenient to set an empty password for root on the development compu
 
 Eclipse
 --------
+
+.. DANGER:: Eclipse jee 2019-12-R throws a weird "VerifyError: Inconsistent stackmap frames" on some occasions. Don't use that version yet. 
+
 Install the latest version of `Eclipse IDE for Enterprise Java Developers`_. Be sure to install the 64 bit "Enterprise" version:
 
 .. caution:: A 32 bit Eclipse will not run on a 64 bit Java installation and the non-enterprise version will not be able to 
