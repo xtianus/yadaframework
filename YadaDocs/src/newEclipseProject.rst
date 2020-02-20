@@ -99,6 +99,13 @@ In order to start/stop the MySQL server you should create two scripts and put th
 
 	set MYSQL_HOME=C:\Local\mysql80
 	C:\Local\mysql80\bin\mysqladmin.exe -u root shutdown
+	
+It is very convenient to set an empty password for root on the development computer (the above script won't work otherwise):
+
+.. code-block:: bat
+
+	mysql -u root -p
+	SET PASSWORD FOR 'root'@'localhost' = '';
 
 .. _Java: https://www.oracle.com/technetwork/java/javase/downloads/index.html
 .. _Eclipse IDE for Enterprise Java Developers: https://www.eclipse.org/downloads/packages/
