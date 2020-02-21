@@ -32,6 +32,8 @@
 			"cancel": "Cancel"
 	}; 
 	
+	var siteMatcher=RegExp("(?:http.?://)?([^/:]*).*"); // Extract the server name from a url like "http://www.aaa.com/xxx" or "www.aaa.com"
+	
 	var parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
 	var siblingSelector = "yadaSiblings:"; // Used to indicate that a CSS selector should be searched in the siblings()
 	var closestFindSelector = "yadaClosestFind:"; // Used to indicate that a two-part CSS selector should be searched with closest() then with find()
@@ -453,6 +455,13 @@
 	/// URL functions
 	
 	/**
+	 * Extract the server address from a url, for example "www.example.com" from "http://www.example.com/path"
+	 */
+	yada.getServerAddress = function(url) {
+		return url.replace(siteMatcher, "$1");
+	}
+	
+	/**
 	 * Joins two url segments taking care of the separator / character
 	 */
 	yada.joinUrls = function(left, right) {
@@ -532,7 +541,34 @@
 	
 	////////////////////
 	/// String functions
-	
+
+	/**
+	 * Replaces a template like "My name is ${name}" with its value. The value can be a string or an array of strings.
+	 * @param template the template string
+	 * @param replacements an object whose attributes have to be searched and replaced in the string, e.g. replacements.name="Joe"
+	 * @returns
+	 */
+	 yada.templateReplace = function(template, replacements) {
+		for (const name in replacements) {
+			if (name!=null) {
+				var placeholder = '\\$\\{'+name+'\\}';
+				var value = replacements[name];
+				if (typeof value == 'string') {
+					template = template.replace(new RegExp(placeholder, 'g'), value);
+				} else {
+					for (var i=0; i<value.length; i++) {
+						if (i<value.length-1) {
+							template = template.replace(new RegExp(placeholder, 'g'), value[i]+"${"+name+"}");
+						} else {
+							template = template.replace(new RegExp(placeholder, 'g'), value[i]);
+						}
+					}
+				}
+			}
+		}
+		return template;
+	}
+
 	/**
 	 * Returns the portion of string that follows the first match of some substring
 	 */
