@@ -549,7 +549,7 @@
 	 * @returns
 	 */
 	 yada.templateReplace = function(template, replacements) {
-		for (const name in replacements) {
+		for (name in replacements) {
 			if (name!=null) {
 				var placeholder = '\\$\\{'+name+'\\}';
 				var value = replacements[name];
