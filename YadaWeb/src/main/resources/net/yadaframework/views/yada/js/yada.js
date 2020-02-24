@@ -543,7 +543,7 @@
 	/// String functions
 
 	/**
-	 * Replaces a template like "My name is ${name}" with its value. The value can be a string or an array of strings.
+	 * Replaces a template like "My name is ${name}" with its value. The value can be a string or a number or an array of strings/numbers.
 	 * @param template the template string
 	 * @param replacements an object whose attributes have to be searched and replaced in the string, e.g. replacements.name="Joe"
 	 * @returns
@@ -553,7 +553,7 @@
 			if (name!=null) {
 				var placeholder = '\\$\\{'+name+'\\}';
 				var value = replacements[name];
-				if (typeof value == 'string') {
+				if (typeof value != 'object') {
 					template = template.replace(new RegExp(placeholder, 'g'), value);
 				} else {
 					for (var i=0; i<value.length; i++) {
