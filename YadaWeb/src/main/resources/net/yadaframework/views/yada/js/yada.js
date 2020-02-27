@@ -541,6 +541,20 @@
 	
 	////////////////////
 	/// String functions
+	
+	/**
+	 * Converts a sentence to title case: each first letter of a word is uppercase, the rest lowercase.
+	 * It will also convert "u.s.a" to "U.S.A" and "jim-joe" to "Jim-Joe"
+	 * Adapted from https://stackoverflow.com/a/196991/587641
+	 */
+	yada.titleCase = function(sentence) {
+		 return sentence.replace(
+			 /\w[^\s-.]*/g, // The regex means "word char up to a space or - or dot": https://www.w3schools.com/jsref/jsref_obj_regexp.asp
+			 	function(txt) {
+	                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+	            }
+	     );
+	}
 
 	/**
 	 * Replaces a template like "My name is ${name}" with its value. The value can be a string or a number or an array of strings/numbers.
