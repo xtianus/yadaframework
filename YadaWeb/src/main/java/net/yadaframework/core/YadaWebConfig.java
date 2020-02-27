@@ -30,13 +30,13 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
-import org.thymeleaf.spring4.SpringTemplateEngine;
-import org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver;
-import org.thymeleaf.spring4.view.ThymeleafViewResolver;
+import org.thymeleaf.spring5.SpringTemplateEngine;
+import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
+import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
@@ -44,13 +44,14 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
 import net.yadaframework.web.YadaDateFormatter;
 import net.yadaframework.web.dialect.YadaDialect;
 
+
 @Configuration
 @EnableWebMvc
 @EnableSpringDataWebSupport
 @EnableScheduling
 @EnableAsync
 @ComponentScan(basePackages = { "net.yadaframework.web" })
-public class YadaWebConfig extends WebMvcConfigurerAdapter {
+public class YadaWebConfig implements WebMvcConfigurer {
 	//	private final static long MB = 1024*1024;
 //	private final static long MAXFILESIZE = 10*MB;
 	private final transient Logger log = LoggerFactory.getLogger(getClass());

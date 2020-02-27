@@ -1,4 +1,4 @@
-package net.yadaframework.web;
+package net.yadaframework.security.web;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -22,6 +22,9 @@ import net.yadaframework.persistence.entity.YadaAttachedFile.YadaAttachedFileTyp
 import net.yadaframework.persistence.entity.YadaManagedFile;
 import net.yadaframework.persistence.repository.YadaAttachedFileRepository;
 import net.yadaframework.raw.YadaIntDimension;
+import net.yadaframework.web.YadaCropImage;
+import net.yadaframework.web.YadaCropQueue;
+import net.yadaframework.web.YadaNotify;
 
 /**
  * Miscellaneous @RequestMapping methods

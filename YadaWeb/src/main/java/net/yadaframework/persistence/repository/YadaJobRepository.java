@@ -116,7 +116,7 @@ public interface YadaJobRepository extends JpaRepository<YadaJob, Long> {
 	 * @return the running job or null
 	 */
 	default YadaJob findRunning(@Param("jobGroup") String jobGroup) {
-		List<YadaJob> result = findByJobGroupAndState(jobGroup, YadaJobState.RUNNING.toYadaPersistentEnum(), new PageRequest(0,1));
+		List<YadaJob> result = findByJobGroupAndState(jobGroup, YadaJobState.RUNNING.toYadaPersistentEnum(), PageRequest.of(0, 1));
 		if (result.size()==1) {
 			return result.get(0);
 		}

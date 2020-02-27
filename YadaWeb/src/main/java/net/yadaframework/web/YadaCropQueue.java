@@ -42,7 +42,7 @@ public class YadaCropQueue {
 	 * @param cropRedirect where to go to perform the crop, e.g. "/some/controller/cropPage"
 	 * @param destinationRedirect where to go after all the crop has been done, e.g. "/some/controller/afterCrop"
 	 */
-	YadaCropQueue(String cropRedirect, String destinationRedirect) {
+	public YadaCropQueue(String cropRedirect, String destinationRedirect) {
 		this.destinationRedirect = destinationRedirect;
 		this.cropRedirect = cropRedirect;
 		this.cropImages = new LinkedList<>();
@@ -60,7 +60,7 @@ public class YadaCropQueue {
 	 * Returns the current image to be cropped, removing it from the list
 	 * @return
 	 */
-	// package visible
+	public // Internal use only
 	YadaCropImage getAndRemoveCurrentImage() {
 		return cropImages.poll();
 	}

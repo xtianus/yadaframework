@@ -1,4 +1,4 @@
-package net.yadaframework.web;
+package net.yadaframework.security.web;
 
 import java.util.Locale;
 

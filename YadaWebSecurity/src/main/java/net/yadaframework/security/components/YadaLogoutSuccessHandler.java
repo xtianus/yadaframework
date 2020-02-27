@@ -1,4 +1,4 @@
-package net.yadaframework.security;
+package net.yadaframework.security.components;
 
 import java.util.Locale;
 

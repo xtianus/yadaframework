@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
@@ -22,7 +23,6 @@ import net.yadaframework.security.persistence.entity.YadaTicket;
 import net.yadaframework.security.persistence.entity.YadaTicketMessage;
 import net.yadaframework.security.persistence.entity.YadaTicketStatus;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
-import net.yadaframework.web.YadaWebUtil;
 
 @Repository
 @Transactional(readOnly = true) 

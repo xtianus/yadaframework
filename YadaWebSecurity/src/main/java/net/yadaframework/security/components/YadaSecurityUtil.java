@@ -28,7 +28,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 
 import net.yadaframework.components.YadaUtil;
-import net.yadaframework.security.YadaUserDetailsService;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaRegistrationRequestRepository;

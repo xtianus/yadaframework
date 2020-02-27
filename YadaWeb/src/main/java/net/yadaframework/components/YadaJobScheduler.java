@@ -98,7 +98,7 @@ class YadaJobScheduler implements Runnable {
 			.build(
 				new CacheLoader<Long, YadaJob>() {
 					public YadaJob load(Long id) {
-						return yadaJobRepository.findOne(id);
+						return yadaJobRepository.findById(id).orElse(null);
 					}
 				}
 			);

@@ -1,16 +1,13 @@
 package net.yadaframework.core;
-import java.util.Map;
-
 import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
 
-import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import com.mysql.cj.jdbc.MysqlDataSource;
 
 @Configuration
 public class YadaTestConfig extends YadaAppConfig {

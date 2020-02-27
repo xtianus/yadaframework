@@ -1,4 +1,4 @@
-package net.yadaframework.web;
+package net.yadaframework.components;
 
 import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_AUTOCLOSE;
 import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_BODY;
@@ -55,7 +55,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
-import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
 import net.yadaframework.core.YadaLocalEnum;
@@ -69,7 +68,7 @@ public class YadaWebUtil {
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private MessageSource messageSource;
 
-	public final Pageable FIND_ONE = new PageRequest(0, 1);
+	public final Pageable FIND_ONE = PageRequest.of(0, 1);
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
 

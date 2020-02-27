@@ -1,4 +1,6 @@
-package net.yadaframework.web;
+package net.yadaframework.security.web;
+
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,12 +11,13 @@ import org.springframework.web.context.annotation.SessionScope;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.persistence.repository.YadaFileManagerDao;
-import net.yadaframework.security.YadaUserDetailsService;
 import net.yadaframework.security.components.YadaSecurityUtil;
+import net.yadaframework.security.components.YadaUserDetailsService;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
 import net.yadaframework.security.persistence.repository.YadaUserProfileRepository;
+import net.yadaframework.web.YadaCropQueue;
 
 /**
  * Base class for application session. The subclass must be annotated with "@Primary" otherwise two different instances are created for the two classes
@@ -152,7 +155,8 @@ public class YadaSession<T extends YadaUserProfile> {
 		if (loggedInUserProfileId==null) {
 			getCurrentUserProfileId();
 		}
-		return loggedInUserProfileId==null?null:yadaUserProfileRepository.findOne(loggedInUserProfileId);
+		Optional<T> result = loggedInUserProfileId==null?null:yadaUserProfileRepository.findById(loggedInUserProfileId);
+		return (result == null || !result.isPresent())?null:result.get();
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package net.yadaframework.web;
+package net.yadaframework.security.web;
 
 import org.springframework.security.web.csrf.CsrfToken;
 import org.thymeleaf.IEngineConfiguration;

@@ -26,6 +26,10 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.commons.YadaCommonsMultipartResolver;
 
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.security.components.YadaAuthenticationFailureHandler;
+import net.yadaframework.security.components.YadaAuthenticationSuccessHandler;
+import net.yadaframework.security.components.YadaLogoutSuccessHandler;
+import net.yadaframework.security.components.YadaUserDetailsService;
 
 /**
  * Basic security configuration. 
@@ -34,7 +38,7 @@ import net.yadaframework.core.YadaConfiguration;
 @EnableWebSecurity
 @Configuration
 @EnableJpaRepositories(basePackages = "net.yadaframework.security.persistence.repository")
-@ComponentScan(basePackages = { "net.yadaframework.security" })
+@ComponentScan(basePackages = { "net.yadaframework.security.components" })
 @Order(10) // Just in case there will be others
 public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 //	private Logger log = LoggerFactory.getLogger(YadaSecurityConfig.class);

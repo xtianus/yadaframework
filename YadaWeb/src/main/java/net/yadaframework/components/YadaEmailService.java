@@ -31,8 +31,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.spring4.SpringTemplateEngine;
-import org.thymeleaf.spring4.expression.ThymeleafEvaluationContext;
+import org.thymeleaf.spring5.SpringTemplateEngine;
+import org.thymeleaf.spring5.expression.ThymeleafEvaluationContext;
 
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
@@ -40,7 +40,6 @@ import net.yadaframework.exceptions.YadaEmailException;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.web.YadaEmailContent;
 import net.yadaframework.web.YadaEmailParam;
-import net.yadaframework.web.YadaWebUtil;
 
 @Service
 // Deve stare in questo package perchè tirato dentro da YadaWebConfig, altrimenti SpringTemplateEngine non viene iniettato

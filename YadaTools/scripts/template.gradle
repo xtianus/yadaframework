@@ -37,16 +37,18 @@ eclipse {
         component {
         	contextPath = '/'
         }
-//        facet {
-//        	facet name: 'jst.web', version: '3.1'
-//        	// This is a workaround to remove the old facet from
-//        	// .settings/org.eclipse.wst.common.project.facet.core.xml
-//        	def oldJstWebFacet = facets.findAll {
-//            	it.name -- 'jst.web' && it.version -- '2.4'
-//            }
-//            facets.removeAll(oldJstWebFacet)
-//        }
+        // This section edits the file "/.settings/org.eclipse.wst.common.project.facet.core.xml"
+        // removing the facet of jst.web version 2.4 and adding version 3.1.
+        // One day this will not be needed anymore, but until then...
+        facet {
+        	facet name: 'jst.web', version: '3.1'
+        	def oldJstWebFacet = facets.findAll {
+            	it.name == 'jst.web' && it.version == '2.4'
+            }
+            facets.removeAll(oldJstWebFacet)
+        }
     }
+	// https://blog.gradle.org/buildship-sync-task-exec
     autoBuildTasks sassCompile // Only when using SASS !!!
 }
 
@@ -77,6 +79,7 @@ dependencies {
 
     compile 'org.springframework:spring-webmvc:5.2.3.RELEASE',
         'org.springframework:spring-context-support:5.2.3.RELEASE',
+		'org.springframework.data:spring-data-jpa:1.11.22.RELEASE',
         'org.springframework.security:spring-security-web:5.2.2.RELEASE',
         'org.hibernate:hibernate-entitymanager:5.4.12.Final',
         'mysql:mysql-connector-java:8.0.19',

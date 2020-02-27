@@ -1,4 +1,4 @@
-package net.yadaframework.security;
+package net.yadaframework.security.components;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -16,10 +16,10 @@ import org.springframework.security.web.authentication.SavedRequestAwareAuthenti
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaLocalePathChangeInterceptor;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
-import net.yadaframework.web.YadaWebUtil;
 
 // Si può inserire il codice da eseguire dopo un login che ha avuto successo
 @Component
