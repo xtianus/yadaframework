@@ -58,10 +58,6 @@ Example:
 					<span></span> <span th:text="#{yada.crop.legendMobileKey}">Legend for mobile goes here</span>
 					([[${cropImage.targetMobileDimension}]]) <span id="yadaMobileCropSize"><span>???</span>x<span>???</span></span>
 				</p>
-				<p th:if="${cropImage.cropPdf}" class="yadaPdf">
-					<span></span> <span th:text="#{yada.crop.legendPdfKey}">Legend for pdf goes here</span>
-					([[${cropImage.targetPdfDimension}]]) <span id="yadaPdfCropSize"><span>???</span>x<span>???</span></span>
-				</p>
 			</div>
 			
 			<div class="form-group">
@@ -152,37 +148,10 @@ Example:
 			}
 			[/]
 			
-			[# th:if="${cropImage.cropPdf}"]
-			function makePdfWidget(jcrop, sourceWidth, sourceHeight, scale) {
-				var targetWidth = [[${cropImage.targetPdfDimension.width}]];
-				var targetHeight = [[${cropImage.targetPdfDimension.height}]];
-				var aspect = [[${cropImage.targetPdfProportions}]];
-				//
-				var initialCrop = makeFittingRectangle(sourceWidth, sourceHeight, aspect);
-				var pdf = jcrop.newWidget(initialCrop, { aspectRatio: aspect });
-				$(pdf.el).addClass("yadaPdf");
-				pdf.listen('crop.update',(widget,e) => {
-					setData(widget, 'pdf', scale, targetWidth, targetHeight);
-				});
-				$(".legend .yadaPdf").click(function(){
-					jcrop.activate(pdf);
-				});
-				pdf.listen('crop.activate',(widget,e) => {
-					$("#yadaCropForm .legend p.active").removeClass("active");
-					$("#yadaCropForm .legend p.yadaPdf").addClass("active");
-				});
-				setData(pdf, 'pdf', scale);
-			}
-			[/]
-			
 			function handleCrop(jcrop, imageRect) {
 				var sourceWidth = [[${cropImage.imageToCrop.dimension.width}]];
 				var sourceHeight = [[${cropImage.imageToCrop.dimension.height}]];
 				var scale = sourceWidth / imageRect.w;
-				
-				[# th:if="${cropImage.cropPdf}"]
-					makePdfWidget(jcrop, sourceWidth, sourceHeight, scale);
-				[/]
 				
 				[# th:if="${cropImage.cropMobile}"]
 					makeMobileWidget(jcrop, sourceWidth, sourceHeight, scale);
