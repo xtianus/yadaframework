@@ -41,6 +41,7 @@ public class YadaDialect extends AbstractProcessorDialect {
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "updateOnSuccess", "data-yadaUpdateOnSuccess"));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "deleteOnSuccess", "data-yadaDeleteOnSuccess"));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "confirm", "data-yadaConfirm"));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "title", "data-yadaTitle"));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "okButton", "data-yadaOkButton"));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "cancelButton", "data-yadaCancelButton"));
         processors.add(new YadaNewlineTextAttrProcessor(dialectPrefix, false)); // unewlinetext

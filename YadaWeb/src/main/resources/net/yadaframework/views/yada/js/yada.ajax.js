@@ -445,10 +445,11 @@
 			}
 		}
 		if (confirmText!=null && confirmText!="") {
-			var okButton = $element.attr("data-okButton") || yada.messages.confirmButtons.ok;
-			var cancelButton = $element.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
+			var title = $element.attr("data-yadaTitle");
+			var okButton = $element.attr("data-yadaOkButton") || $element.attr("data-okButton") || yada.messages.confirmButtons.ok;
+			var cancelButton = $element.attr("data-yadaCancelButton") || $element.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 			var okShowsPreviousModal = $element.attr("data-yadaOkShowsPrevious")==null || $element.attr("data-yadaOkShowsPrevious")=="true";
-			yada.confirm(confirmText, function(result) {
+			yada.confirm(title, confirmText, function(result) {
 				if (result==true) {
 					yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, getTimeoutValue($element), noLoader);
 				}
@@ -676,9 +677,10 @@
 					var confirmText = $thisForm.attr("data-yadaConfirm");
 					if (confirmText!=null && confirmText!="") {
 						e.preventDefault(); // Stop form submission
+						var title = $button.attr("data-yadaTitle");
 						var okButton = $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
 						var cancelButton = $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
-		    			yada.confirm(confirmText, function(result) {
+		    			yada.confirm(title, confirmText, function(result) {
 		    				if (result==true) {
 		    					$thisForm[0]['yadaConfirmed']=true;
 		    					$thisForm.submit();
@@ -863,11 +865,12 @@
 	    	var $button = $(this);
 	    	var confirmText = $button.attr("data-yadaConfirm") || $button.attr("data-confirm");
 	    	if (confirmText!=null && confirmText!="") {
+	    		var title = $button.attr("data-yadaTitle");
 	    		var okButton = $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
 	    		var cancelButton = $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 	    		$button.click(function() {
 	    			$button = $(this); // Needed otherwise $button could be stale (from a previous ajax replacement) 
-	    			yada.confirm(confirmText, function(result) {
+	    			yada.confirm(title, confirmText, function(result) {
 	    				if (result==true) {
 	    					$button.off("click");
 	    					$button.click();

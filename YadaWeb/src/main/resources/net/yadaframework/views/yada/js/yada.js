@@ -413,10 +413,11 @@
 				var href = $link.attr("href");
 				var confirmText = $link.attr("data-yadaConfirm") || $link.attr("data-confirm");
 				if (confirmText!=null) {
+					var title = $link.attr("data-yadaTitle");
 					var okButton = $link.attr("data-yadaOkButton") || $link.attr("data-okButton") || yada.messages.confirmButtons.ok;
 					var cancelButton = $link.attr("data-yadaCancelButton") || $link.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 					var okShowsPreviousModal = $link.attr("data-yadaOkShowsPrevious")==null || $link.attr("data-yadaOkShowsPrevious")=="true";
-					yada.confirm(confirmText, function(result) {
+					yada.confirm(title, confirmText, function(result) {
 						if (result==true) {
 							yada.loaderOn();
 							window.location.replace(href);
@@ -764,13 +765,14 @@
 	//<div layout:include="/fragments/modalConfirm :: modal" th:remove="tag"></div>
 	
 	/**
+	 * @param title optional title
 	 * @param message Text to show
 	 * @param callback handler to call after choice. It receives true/false for ok/cancel
 	 * @param okButtonText text for the ok button (optional)
 	 * @param cancelButtonText text for the cancel button (optional)
 	 * @param okShowsPreviousModal if true, shows previous modal (if any) after ok (optional)
 	 */
-	yada.confirm = function(message, callback, okButtonText, cancelButtonText, okShowsPreviousModal) {
+	yada.confirm = function(title, message, callback, okButtonText, cancelButtonText, okShowsPreviousModal) {
 		// okButtonText e cancelButtonText sono opzionali
 		var $currentModals = $(".modal:visible");
 		var okClicked = false;
@@ -779,6 +781,9 @@
 		// Turn off the loader else the confirm dialog won't show
 		yada.loaderOff();
 		// $('#yada-confirm').modal('hide'); // Eventualmente fosse già aperto
+		if (title) {
+			$('#yada-confirm .modal-header .confirm-title').html(title);
+		}
 		$('#yada-confirm .modal-body p').html(message);
 		var previousOkButtonText = $('#yada-confirm .okButton').text();
 		if (okButtonText) {
@@ -791,12 +796,12 @@
 		$('#yada-confirm .okButton').off().click(function(){
 			okClicked=true;
 			cancelClicked=false;
-			if (callback) callback(true);
+			if (typeof callback == "function") callback(true);
 		});
 		$('#yada-confirm .cancelButton').off().click(function(){
 			cancelClicked=true;
 			okClicked=false;
-			if (callback) callback(false);
+			if (typeof callback == "function") callback(false);
 		});
 		var $modal = $('#yada-confirm .modal');
 		if ($modal.length==0) {
