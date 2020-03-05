@@ -201,17 +201,24 @@ Confirm Dialog
 ^^^^^^^^^^^^^^^^^^^^^^
 You can show a confirm dialog before the ajax call is made. The user will be shown a text message and an option to confirm or abort the call.
 
-.. list-table:: data- attributes for Confirm Dialog
-  :widths: 25 50
+.. list-table:: data- attributes and tags for Confirm Dialog
+  :widths: 25 25 50
   :header-rows: 1
 
-  *	- name
+  *	- data
+	- tag
 	- description
   *	- ``data-yadaConfirm``
+	- ``yada:confirm``
 	- text to show in the dialog
-  *	- ``data-okButton``
+  *	- ``data-yadaTitle``
+	- ``yada:title``
+	- (optional) title of the dialog
+  *	- ``data-yadaOkButton``
+	- ``yada:okButton``
 	- (optional) text of the confirm button
-  *	- ``data-cancelButton``
+  *	- ``data-yadaCancelButton``
+	- ``yada:cancelButton``
 	- (optional) text of the cancel button
 
 
