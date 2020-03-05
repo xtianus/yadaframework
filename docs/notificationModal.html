@@ -100,6 +100,7 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#javascript-api">7.4. Javascript API</a></li>
+<li><a class="reference internal" href="#customization">7.5. Customization</a></li>
 </ul>
 </li>
 </ul>
@@ -360,6 +361,26 @@ on modal close with <a class="reference internal" href="#redirectonclose"><span 
 <dt>redirectUrl</dt><dd><p>optional url to redirect when the modal is closed</p>
 </dd>
 </dl>
+</div>
+<div class="section" id="customization">
+<h2>7.5. Customization<a class="headerlink" href="#customization" title="Permalink to this headline">¶</a></h2>
+<p>The notification modal can either be customized via CSS or by implementing a new html file.
+In the second case you should copy the original file from <code class="docutils literal notranslate"><span class="pre">/YadaWeb/src/main/resources/net/yadaframework/views/yada/modalNotify.html</span></code> and
+change it while preserving some key elements that are used as reference to add content.</p>
+<div class="admonition-todo admonition" id="index-4">
+<p class="admonition-title">Todo</p>
+<p>explain what to preserve</p>
+</div>
+<p>The file should be placed somewhere in your views folder and its path added to the configuration with something like</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;config&gt;</span>
+        <span class="nt">&lt;paths&gt;</span>
+                <span class="nt">&lt;notificationModalView&gt;</span>/myModalNotify<span class="nt">&lt;/notificationModalView&gt;</span>
+</pre></div>
+</div>
+<p>It should also be included in the footer in place of the original one</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">div</span> <span class="na">th:include</span><span class="o">=</span><span class="s">&quot;/myModalNotify :: modal&quot;</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;modal fade&quot;</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;yada-notification&quot;</span> <span class="na">role</span><span class="o">=</span><span class="s">&quot;dialog&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</pre></div>
+</div>
 </div>
 </div>
 

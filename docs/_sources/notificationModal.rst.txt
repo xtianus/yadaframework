@@ -237,6 +237,28 @@ message
 redirectUrl
 	optional url to redirect when the modal is closed
 	
+Customization
+==============
+The notification modal can either be customized via CSS or by implementing a new html file.
+In the second case you should copy the original file from ``/YadaWeb/src/main/resources/net/yadaframework/views/yada/modalNotify.html`` and 
+change it while preserving some key elements that are used as reference to add content.
+
+.. todo:: explain what to preserve
+
+The file should be placed somewhere in your views folder and its path added to the configuration with something like
+
+.. code-block:: xml
+	
+	<config>
+		<paths>
+			<notificationModalView>/myModalNotify</notificationModalView>
+
+It should also be included in the footer in place of the original one
+
+.. code-block:: html
+
+	<div th:include="/myModalNotify :: modal" class="modal fade" id="yada-notification" role="dialog"></div>
+
 	
 	
 
