@@ -85,11 +85,12 @@
 	};
 	
 	yada.loaderOff = function() {
+		// The loader must be shown at least for 200 milliseconds or it gets annoying
 		var elapsedMillis = Date.now() - loaderStart;
-		if (elapsedMillis>100) {
+		if (elapsedMillis>200) {
 			$(".loader").hide();
 		} else {
-			setTimeout(function(){ $(".loader").hide(); }, 100-elapsedMillis);
+			setTimeout(function(){ $(".loader").hide(); }, 200-elapsedMillis);
 		}
 	};
 	
@@ -406,6 +407,7 @@
 			$element = $('body');
 		}
 		var markerClass = 's_dataConfirmed';
+		// For the ajax version see yada.ajax.js
 		$('a[data-yadaConfirm], a[data-confirm]', $element.parent()).not('.'+markerClass).not('.yadaAjax').each(function() {
 			$(this).click(function(e) {
 				var $link = $(this);
