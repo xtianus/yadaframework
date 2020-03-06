@@ -527,7 +527,7 @@
 				$replacementArray = $("._yadaReplacement_", responseHtml); // Legacy
 			}
 			if ($replacementArray.length==0) {
-				$replacementArray = [responseHtml.children()]; // Uso .children() per skippare il primo div inserito da yada.ajax()
+				$replacementArray = responseHtml.children(); // Uso .children() per skippare il primo div inserito da yada.ajax()
 			}
 			var $replacement;
 			for (var count=0; count<selectors.length; count++) {
