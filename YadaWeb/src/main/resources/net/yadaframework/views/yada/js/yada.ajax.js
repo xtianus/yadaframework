@@ -521,21 +521,27 @@
 		// The selector can be multiple, separated by comma. The replacement can be multiple, identified by yadaFragment
 		var updateSelector = $element.attr("data-yadaUpdateOnSuccess");
 		if (updateSelector != null) {
+			// Clone so that the original responseHtml is not removed by replaceWith.
+			// All handlers are also cloned.
+			var $replacement = responseHtml.children().clone(true, true); // Uso .children() per skippare il primo div inserito da yada.ajax()
 			var selectors = updateSelector.split(',');
-			var $replacementArray = $(".yadaFragment", responseHtml);
-			if ($replacementArray.length==0) {
-				$replacementArray = $("._yadaReplacement_", responseHtml); // Legacy
+			var $replacementArray = null;
+			if (selectors.length>1) {
+				// yadaFragment is used only when there is more than one selector, otherwise the whole result is used for replacement
+				$replacementArray = $(".yadaFragment", responseHtml);
+				if ($replacementArray.length==0) {
+					$replacementArray = $("._yadaReplacement_", responseHtml); // Legacy
+				}
 			}
-			if ($replacementArray.length==0) {
-				$replacementArray = responseHtml.children(); // Uso .children() per skippare il primo div inserito da yada.ajax()
-			}
-			var $replacement;
+			var fragmentCount = 0;
 			for (var count=0; count<selectors.length; count++) {
 				var selector = selectors[count];
-				if (count<$replacementArray.length) {
+				if ($replacementArray!=null && $replacementArray.length>0) {
 					// Clone so that the original responseHtml is not removed by replaceWith.
 					// All handlers are also cloned.
-					$replacement = $replacementArray.eq(count).clone(true, true); 
+					$replacement = $replacementArray.eq(fragmentCount).clone(true, true);
+					// When there are more selectors than fragments, fragments are cycled from the first one
+					fragmentCount = (fragmentCount+1) % $replacementArray.length;
 				}
 				yada.extendedSelect($element, selector).replaceWith($replacement);
 
