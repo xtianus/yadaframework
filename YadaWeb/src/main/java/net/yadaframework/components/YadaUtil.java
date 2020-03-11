@@ -164,7 +164,9 @@ public class YadaUtil {
 						tagOpen=false;
 					} else {
 						// It was a close tag. We presume that it was the same as the last one on the stack and we forget it.
-						tagsToCopy.pop();
+						if (!tagsToCopy.isEmpty()) {
+							tagsToCopy.pop();
+						}
 					}
 					continue;
 				} else if (pos>=splitPos && !tag && isSpace) {
@@ -173,7 +175,7 @@ public class YadaUtil {
 					// TODO 20 should be a parameter?
 					// TODO should be done for <li> too
 					int closep = htmlToSplit.indexOf("</p>", pos);
-					if (closep-pos<20) {
+					if (closep>-1 && closep-pos<20) {
 						// Close the paragraph in the first part
 						pos = closep + "</p>".length();
 						// Forget all tags up to the opening paragraph because we assume that we skipped the closing ones
