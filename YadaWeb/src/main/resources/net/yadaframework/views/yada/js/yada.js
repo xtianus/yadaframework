@@ -400,7 +400,7 @@
 			$element = $('body');
 		}
 		var markerClass = 's_dataConfirmed';
-		$('a[data-yadaConfirm], a[data-confirm]', $element.parent()).not('.'+markerClass).not('.yadaAjax').each(function() {
+		$('a[data-yadaConfirm], a[data-confirm]', $element.parent()).not('.'+markerClass).not('.yadaAjax').not('.yadaAjaxed').each(function() {
 			$(this).click(function(e) {
 				var $link = $(this);
 				e.preventDefault();

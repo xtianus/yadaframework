@@ -14,6 +14,7 @@
 	var markerAjaxButtonOnly = 'yadaAjaxButtonOnly';
 	var clickedButton;
 	
+	// WARNING: if you change this, also change it in yada.js
 	var markerClass = 'yadaAjaxed'; // To prevent double submission
 	
 	// ?????????? A cosa servono questi postXXXX ??????????????????
