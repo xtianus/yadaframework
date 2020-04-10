@@ -79,7 +79,7 @@ echo set ignorecase >> $viconfig
 echo set smartcase >> $viconfig
 echo set incsearch >> $viconfig
 
-apt-get -o Dpkg::Options::="--force-confnew" install sudo cron
+apt-get -o Dpkg::Options::="--force-confnew" -y install sudo cron
 echo "${cfgUser}	ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers;
 
 groupadd ${cfgUser}
@@ -112,6 +112,7 @@ fi;
 
 service ssh restart
 
+echo "Installing java..."
 apt-get -o Dpkg::Options::="--force-confnew" -y install $cfgPkgJava
 if [[ $cfgPkgTomcat && ! $cfgTomcatTarGz ]]; then
 	apt-get -o Dpkg::Options::="--force-confnew" -y install $cfgPkgTomcat $cfgPkgTomcatUtil
