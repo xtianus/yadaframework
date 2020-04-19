@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,15 +24,15 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
-import org.springframework.validation.BindingResult;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.security.YadaAuthenticationFailureHandler;
 import net.yadaframework.security.YadaUserDetailsService;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaRegistrationRequestRepository;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
-import net.yadaframework.security.persistence.repository.YadaUserProfileRepository;
+import net.yadaframework.web.YadaWebUtil;
 import net.yadaframework.web.form.YadaFormPasswordChange;
 
 @Component
@@ -41,23 +40,59 @@ public class YadaSecurityUtil {
 	private final transient Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired private YadaRegistrationRequestRepository registrationRequestRepository;
-	
+
 	private Date lastOldCleanup = null; // Data dell'ultimo cleanup, ne viene fatto uno al giorno
 	private Object lastOldCleanupMonitor = new Object();
 
 	private final static int MAX_AGE_DAY=20; // Tempo dopo il quale una richiesta viene cancellata
 	private final static long MILLIS_IN_DAY = 24*60*60*1000; // Millesimi di secondo in un giorno
 	private final static String SAVED_REQUEST = "SPRING_SECURITY_SAVED_REQUEST"; // copiato da org.springframework.security.web.savedrequest.HttpSessionRequestCache
-	
+
 	private SecureRandom secureRandom = new SecureRandom();
-	
+
 	@Autowired private HttpSession httpSession; // Funziona perchè è un proxy
 	@Autowired private YadaTokenHandler yadaTokenHandler;
 	@Autowired private YadaRegistrationRequestRepository yadaRegistrationRequestRepository;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	@Autowired private YadaUserCredentialsRepository yadaUserCredentialsRepository;
 	@Autowired private PasswordEncoder passwordEncoder;
-	
+	@Autowired private YadaWebUtil yadaWebUtil;
+
+
+	/**
+	 * Copy all not-null login error parameters to the Model
+	 * @param request
+	 * @param model
+	 */
+	public void copyLoginErrorParams(HttpServletRequest request, Model model) {
+		List<String> params = YadaAuthenticationFailureHandler.getLoginErrorParams(request);
+		for (int i = 0; i < params.size(); i++) {
+			String name = params.get(i);
+			i++;
+			String value = params.get(i);
+			model.addAttribute(name, value);
+		}
+	}
+
+	/**
+	 * Add to some url the login error request parameters defined in YadaAuthenticationFailureHandler so that the login modal
+	 * can show them.
+	 * This method should be used when opening the login modal using an ajax call form a normal page as the result of a previous login error.
+	 * Usage example:
+	 * 	<pre>
+    const loginModalUrl = [[${@yadaSecurityUtil.addLoginErrorParams("__@{/some/loginModal(ajaxForm=false)}__")}]];
+	yada.ajax(loginModalUrl);
+		</pre>
+	 * @param url
+	 * @return
+	 * @see YadaAuthenticationFailureHandler
+	 */
+	public String addLoginErrorParams(String url) {
+		HttpServletRequest request = yadaWebUtil.getCurrentRequest();
+		List<String> params = YadaAuthenticationFailureHandler.getLoginErrorParams(request);
+		return yadaWebUtil.enhanceUrl(url, null, params.toArray(new String[params.size()]));
+	}
+
 	/**
 	 * Generate a 32 characters random password
 	 * @return a string like "XFofvGEtBlZIa5sH"
@@ -106,7 +141,7 @@ public class YadaSecurityUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the username of the logged-in user, or null
 	 */
 	public String getUsername() {
@@ -143,7 +178,7 @@ public class YadaSecurityUtil {
 	public boolean loggedIn() {
 		return isLoggedIn();
 	}
-	
+
 	/**
 	 * Check if the current user is authenticated (logged in) not anonymously.
 	 * Use in thymeleaf with th:if="${@YadaSecurityUtil.loggedIn}"
@@ -161,7 +196,7 @@ public class YadaSecurityUtil {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Check if the current user is logged in.
 	 * Use in thymeleaf with th:if="${@yadaWebUtil.loggedIn(#httpServletRequest)}"
@@ -171,7 +206,7 @@ public class YadaSecurityUtil {
 	public boolean loggedIn(HttpServletRequest request) {
 		return request.getRemoteUser()!=null;
 	}
-	
+
 	/**
 	 * Ritorna la richiesta che era stata salvata da Spring Security prima del login, bloccata perchè l'utente non era autenticato
 	 * @return la url originale completa di http://, oppure null se non c'è in sessione
@@ -184,7 +219,7 @@ public class YadaSecurityUtil {
 		log.debug("No saved request found in session");
 		return null;
 	}
-	
+
 	/**
 	 * Ritorna uno o l'altro parametro a seconda che l'utente corrente sia autenticato o meno
 	 * @param anonymousValue
@@ -200,7 +235,7 @@ public class YadaSecurityUtil {
 		}
 		return authenticated ? authenticatedValue : anonymousValue;
 	}
-	
+
 	/**
 	 * Cancello le registration request vecchie o con lo stesso email e tipo. Se la registrationRequest passata � sul database, non viene cancellata.
 	 * @param registrationRequest prototipo di richiesta da cancellare (ne viene usato email e tipo)
@@ -233,9 +268,9 @@ public class YadaSecurityUtil {
 			}
 		}
 	}
-	
+
 	public Set<String> getCurrentRoles() {
-		Set<String> roles = new HashSet<String>();
+		Set<String> roles = new HashSet<>();
 		try {
 			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 			if (auth!=null && auth.isAuthenticated()) {
@@ -251,7 +286,7 @@ public class YadaSecurityUtil {
 		}
 		return roles;
 	}
-	
+
 	/**
 	 * Controlla se l'utente attuale possiede il ruolo specificato. Case Sensitive!
 	 * @param roleToCheck nel formato senza ROLE_ iniziale
@@ -269,7 +304,7 @@ public class YadaSecurityUtil {
 	 */
 	public boolean hasCurrentRole(String[] rolesToCheck) {
 		Set<String> currentRoles = getCurrentRoles();
-		Set<String> requiredRoles = new HashSet<String>(Arrays.asList(rolesToCheck));
+		Set<String> requiredRoles = new HashSet<>(Arrays.asList(rolesToCheck));
 		return CollectionUtils.containsAny(currentRoles, requiredRoles);
-	}	
+	}
 }
