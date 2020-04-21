@@ -247,8 +247,9 @@ public class YadaAttachedFile implements CloneableDeep {
 		boolean requiresTransofmation = imageExtensionChanged || targetWidth!=null;
 		if (!requiresTransofmation) {
 			result = new File(targetFolder, targetFilenamePrefix + "." + targetExtension);
+		} else {
+			result = new File(targetFolder, targetFilenamePrefix + COUNTER_SEPARATOR + targetWidth + "." + targetExtension);
 		}
-		result = new File(targetFolder, targetFilenamePrefix + COUNTER_SEPARATOR + targetWidth + "." + targetExtension);
 		switch (type) {
 		case DESKTOP:
 			this.filenameDesktop = result.getName();

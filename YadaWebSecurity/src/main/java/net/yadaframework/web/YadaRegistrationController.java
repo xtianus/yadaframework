@@ -79,6 +79,8 @@ public class YadaRegistrationController {
 		public String email;
 
 		public String destinationUrl;
+
+		public YadaRegistrationRequest yadaRegistrationRequest;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,6 +111,7 @@ public class YadaRegistrationController {
 				String destinationUrl = registrationRequest.getDestinationUrl();
 				result.email = email;
 				result.destinationUrl = destinationUrl;
+				result.yadaRegistrationRequest = registrationRequest;
 				YadaUserCredentials existing = yadaUserCredentialsRepository.findFirstByUsername(email);
 				if (existing!=null) {
 					log.warn("Email '{}' already exists", email);
