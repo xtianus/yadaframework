@@ -487,7 +487,7 @@
 	
 	// Ritorna ciò che segue lo hash in una stringa. Se non c'è nulla, ritorna ''
 	yada.getHashValue = function(str) {
-		if (str!=null) {
+		if (str!=null && str!='') {
 			return str.split('#')[1];
 		}
 		return str;
@@ -527,16 +527,17 @@
 	 */
 	yada.hashPathToMap = function(propertyList, windowLocationHash, separator) {
 		var result = {};
+		var segments = [];
 		var hashString = yada.getHashValue(windowLocationHash); // 834753/myslug
 		if (hashString!=null && hashString.length>0) {
-			var segments = hashString.split(separator);
-			for (var i = 0; i < propertyList.length; i++) {
-				var name = propertyList[i];
-				if (i<segments.length) {
-					result[name] = segments[i];
-				} else {
-					result[name] = '';
-				}
+			segments = hashString.split(separator);
+		}
+		for (var i = 0; i < propertyList.length; i++) {
+			var name = propertyList[i];
+			if (i<segments.length) {
+				result[name] = segments[i];
+			} else {
+				result[name] = '';
 			}
 		}
 		return result;
