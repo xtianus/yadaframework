@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.openqa.selenium.By;
@@ -62,6 +63,26 @@ public class YadaSeleniumUtil {
 	private YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
 	private Pattern matchNonEmptyText = Pattern.compile(".*\\w+.*"); // Match any string that contains at least a word character
 
+	/**
+	 * Returns true if the current url matches the specified pattern
+	 * @param urlPattern
+	 * @param webDriver
+	 * @return
+	 */
+	public boolean urlMatches(Pattern urlPattern, WebDriver webDriver) {
+		Matcher m = urlPattern.matcher(webDriver.getCurrentUrl());
+		return m.matches();
+	}
+	
+	/**
+	 * Returns true if the current url contains the specified string at any position
+	 * @param urlSegment
+	 * @param webDriver
+	 * @return
+	 */
+	public boolean urlContains(String urlSegment, WebDriver webDriver) {
+		return webDriver.getCurrentUrl().contains(urlSegment);
+	}
 	
 	/**
 	 * Returns a part of the page source.
