@@ -161,7 +161,7 @@ The solution is to add a conditional include of the modalNotify in your returned
 
 	<!-- Some other html that you need goes before or after -->
 	<div class="yadaResponseData">
-		<div th:if="${YADA_NBODY}" th:include="/yada/modalNotify :: modal" th:remove="tag"></div>
+		<div th:if="${YADA_NBODY}" th:include="/yada/modalNotify :: body" th:remove="tag"></div>
 	</div>
 
 The yadaResponseData element is hidden by `yada.css`.

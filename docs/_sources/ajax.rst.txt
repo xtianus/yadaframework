@@ -171,7 +171,8 @@ Each selector can also have the following special prefixes:
 **Multiple replacement values**
 
 If the selector list has many targets and the result contains as many elements tagged with the class ``yadaFragment``, then each target is given a different ``yadaFragment`` element. 
-When there are more targets than replacements, the last replacement is repeated.
+When there are more targets than replacements, replacements are cycled from the start.
+When there is a single target, fragments are ignored and the whole result is used as usual.
 
 .. todo:: Examples (see OneNote)
 
