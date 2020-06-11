@@ -25,6 +25,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 public class YadaNotifyData {
@@ -37,16 +38,19 @@ public class YadaNotifyData {
 	private String message;
 	private MessageSource messageSource;
 	private Locale locale;
+	private YadaConfiguration configuration;
 
 	// Package visibility
-	YadaNotifyData(Model model, MessageSource messageSource, Locale locale) {
+	YadaNotifyData(Model model, MessageSource messageSource, Locale locale, YadaConfiguration configuration) {
+		this.configuration = configuration;
 		this.model = model;
 		this.messageSource = messageSource;
 		this.locale = locale==null?LocaleContextHolder.getLocale():locale;
 	}
 
 	// Package visibility
-	YadaNotifyData(RedirectAttributes redirectAttributes, MessageSource messageSource, Locale locale) {
+	YadaNotifyData(RedirectAttributes redirectAttributes, MessageSource messageSource, Locale locale, YadaConfiguration configuration) {
+		this.configuration = configuration;
 		this.redirectAttributes = redirectAttributes;
 		this.messageSource = messageSource;
 		this.locale = locale==null?LocaleContextHolder.getLocale():locale;
@@ -55,6 +59,7 @@ public class YadaNotifyData {
 	/**
 	 * Makes the notification active. Can be called many times to add different notifications, even on the same instance, after setting a new title/message/severity.
 	 * @return If used with a Model, returns the view of the notification modal.
+	 * @see YadaConfiguration#getNotifyModalView
 	 */
 	public String add() {
 		if (redirectAttributes!=null) {
@@ -62,7 +67,7 @@ public class YadaNotifyData {
 			return null;
 		}
 		activateNormal();
-		return YadaViews.AJAX_NOTIFY;
+		return configuration.getNotifyModalView();
 	}
 
 	/**

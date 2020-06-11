@@ -164,7 +164,9 @@ public class YadaUtil {
 						tagOpen=false;
 					} else {
 						// It was a close tag. We presume that it was the same as the last one on the stack and we forget it.
-						tagsToCopy.pop();
+						if (!tagsToCopy.isEmpty()) {
+							tagsToCopy.pop();
+						}
 					}
 					continue;
 				} else if (pos>=splitPos && !tag && isSpace) {
@@ -173,7 +175,7 @@ public class YadaUtil {
 					// TODO 20 should be a parameter?
 					// TODO should be done for <li> too
 					int closep = htmlToSplit.indexOf("</p>", pos);
-					if (closep-pos<20) {
+					if (closep>-1 && closep-pos<20) {
 						// Close the paragraph in the first part
 						pos = closep + "</p>".length();
 						// Forget all tags up to the opening paragraph because we assume that we skipped the closing ones
@@ -981,7 +983,8 @@ public class YadaUtil {
 	 * @param optional substitutionMap key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
 	 * pair is like "key"-->"value". If the value is a collection, arguments are unrolled so key-->collection will result in key0=val0 key1=val1...
 	 * @param optional outputStream ByteArrayOutputStream that will contain the command output (out + err)
-	 * @return the command exit value
+	 * @return the command exit value (maybe not)
+	 * @throws org.apache.commons.exec.ExecuteException when the exit value is 1
 	 * @throws IOException
 	 */
 	public int shellExec(String command, List<String> args, Map substitutionMap, ByteArrayOutputStream outputStream) throws IOException {
@@ -1045,10 +1048,10 @@ public class YadaUtil {
 			if (exitValue!=0) {
 				log.error("Shell command exited with {}", exitValue);
 			}
-			log.debug("Shell command output: {}", outputStream.toString());
+			log.debug("Shell command output: \"{}\"", outputStream.toString());
 			return exitValue;
 		} catch (IOException e) {
-			log.error("Shell command output: {}", outputStream.toString());
+			log.error("Shell command output: \"{}\"", outputStream.toString());
 			log.error("Failed to execute shell command: {} {} {}", command, args!=null?args.toArray():"", substitutionMap!=null?substitutionMap:"", e);
 			throw e;
 		} finally {

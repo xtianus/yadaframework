@@ -23,6 +23,7 @@
 	 * @param deleteDef object containing url and text (can be null):
 	 * 	- url to delete the row e.g. [[@{/gestione/ajaxDeleteTag}]]
 	 * 	- title to show in the tooltip
+	 *  - confirmTitle (optional)
 	 * 	- confirmOneMessage (optional)
 	 * 	- confirmManyMessage (optional)
 	 *  - confirmButtonText (optional)
@@ -275,12 +276,13 @@
 				requestData[idName] = id;
 				var $row = $(this).parents('tr');
 				// var dtrow = dataTable.row($row);
+				var confirmTitle = deleteDef.confirmTitle || null;
 				var confirmButtonText = deleteDef.confirmButtonText || "Delete";
 				var abortButtonText = deleteDef.abortButtonText || "Cancel";
 				var confirmMessage = deleteDef.confirmOneMessage || "Do you want to delete {0}?";
 				var rowName = thisDataTable.cell($row, nameColumn).data(); // We assume that column 1 is the select, column 2 is the id and column 3 is the name or similar 
 				confirmMessage = confirmMessage.replace("{0}", rowName);
-				yada.confirm(confirmMessage, function(result) {
+				yada.confirm(confirmTitle, confirmMessage, function(result) {
 					if (result==true) {
 						yada.ajax(deleteDef.url, requestData, function() {
 							thisDataTable.draw(false);
@@ -394,12 +396,13 @@
 					return yada.getHashValue(id);
 				}).get();
 		
+				var confirmTitle = deleteDef.confirmTitle || null;
 				var confirmMessage = deleteDef.confirmManyMessage || "Do you want to delete {0} elements?";
 				confirmMessage = confirmMessage.replace("{0}", totElements);
 				var confirmButtonText = deleteDef.confirmButtonText || "Delete";
 				var abortButtonText = deleteDef.abortButtonText || "Cancel";
 				var noLoader = deleteDef.noLoader || false;
-				yada.confirm(confirmMessage, function(result) {
+				yada.confirm(confirmTitle, confirmMessage, function(result) {
 					if (result==true) {
 						var idName = deleteDef.idName || "id";
 						var requestData = {};

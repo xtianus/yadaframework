@@ -33,6 +33,7 @@ import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.persistence.entity.YadaClause;
 import net.yadaframework.raw.YadaIntDimension;
+import net.yadaframework.web.YadaViews;
 
 /**
  * Classe che estende CombinedConfiguration aggiungendo metodi di gestione della configurazione specifici.
@@ -86,7 +87,19 @@ public abstract class YadaConfiguration {
 	private Map<String, SortedSet<Entry<Integer,String>>> localSetCache = new HashMap<>(); // Deprecated
 	private String targetImageExtension=null;
 	private String preserveImageExtensions=null;
+	private String defaultNotifyModalView = null;
 
+	/**
+	 * Returns the configured path for the notification modal.
+	 * The configuration path is config/paths/notificationModalView
+	 * @return
+	 */
+	public String getNotifyModalView() {
+		if (defaultNotifyModalView==null) {
+			defaultNotifyModalView = configuration.getString("config/paths/notificationModalView", YadaViews.AJAX_NOTIFY);
+		}
+		return defaultNotifyModalView;
+	}
 
 	/**
 	 * Get the width/height of an image, for desktop, mobile and pdf

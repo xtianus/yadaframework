@@ -542,6 +542,18 @@ public class YadaSeleniumUtil {
 		webDriverWait.until(ExpectedConditions.invisibilityOf(webElement));
 	}
 	
+	/**
+	 * Waits until the element is no more attached to the DOM (stale).
+	 * It happens when a new page is loaded, for example.
+	 * @param webElement
+	 * @param webDriver
+	 * @param timeOutInSeconds
+	 */
+	public void waitUntilLost(WebElement webElement, WebDriver webDriver, long timeOutInSeconds) {
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		webDriverWait.until(ExpectedConditions.stalenessOf(webElement));
+	}
+	
 	public void waitWhileVisible(List<WebElement> webElements, WebDriver webDriver, long timeOutInSeconds) {
 		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
 		webDriverWait.until(ExpectedConditions.invisibilityOfAllElements(webElements));

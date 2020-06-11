@@ -13,6 +13,7 @@ Parameters:
 - id = id of the field holding the value (optional)
 - labelKey = key in messages.properties for the label text
 - label = label to use, if not using a labelKey
+- classes = base classes to set on the input/textarea element. When not specified, "form-control" is used
 - placeholderKey = key in messages.properties for the placeholder text (optional)
 - placeholder = placeholder to use, if not using a placeholderKey (optional)
 - type = the input type ('text', 'hidden', 'password', 'number', 'email', 'date', ...) (optional)
@@ -57,7 +58,7 @@ Example:
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:type="${type}?:'text'" th:readonly="${readonly}" 
 			th:min="${min}" th:max="${max}" th:step="${step}" 
-			class="form-control"
+			th:class="${classes}?:'form-control'"
 			th:classappend="${readonly==true?'yadaReadonly':(noFeedback==true?'':' has-feedback')}" th:maxlength="${maxlength}" 
 			th:tabindex="${tabindex}"
 			th:autocomplete="${autocomplete}"
@@ -69,7 +70,7 @@ Example:
 		<textarea th:if="${maxlength gt 80}" th:rows="${rows}?:3" th:field="*{{__${fieldName}__}}" 
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:maxlength="${maxlength}" 
-			class="form-control"
+			th:class="${classes}?:'form-control'"
 			th:classappend="${readonly==true?'yadaReadonly':(noFeedback==true?'':' has-feedback')}"
 			th:tabindex="${tabindex}"
 			th:autocomplete="${autocomplete}"

@@ -31,6 +31,7 @@ import net.yadaframework.persistence.entity.YadaClause;
  * Subclasses must not define a id field.
  */
 @Entity
+// Subclasses must not have an id but should still be tagged as @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaRegistrationRequest implements Serializable {
 	private static final long serialVersionUID = 1L;
