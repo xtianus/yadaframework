@@ -1,14 +1,25 @@
 plugins {
+	id 'java-library'
 	id 'org.hidetake.ssh' version '2.7.0'
+	id 'maven-publish'
 }
 
 group = 'net.yadaframework'
-version = '0.6.8'
+version = '0.6.9'
+
+// PublishToMavenLocal task
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'yadatools'
+            from components.java
+        }
+    }
+}
 
 apply plugin: 'groovy'
 // apply plugin: 'java-gradle-plugin'
 apply plugin: 'eclipse'
-apply plugin: 'maven'
 
 eclipse {
 	jdt {
@@ -27,24 +38,12 @@ eclipse {
 	}
 }
 
-//// Dependencies needed to check the syntax of /YadaTools/src/main/resources/META-INF/template/java/*
-//dependencies {
-//	compile 'net.yadaframework:YadaCore:0.4'
-//	compile 'org.springframework:spring-webmvc:4.2.5.RELEASE',
-//    	'org.springframework:spring-context-support:4.2.5.RELEASE',
-//    	'org.springframework.data:spring-data-jpa:1.9.4.RELEASE',
-//		'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
-//    	'org.springframework.security:spring-security-web:4.0.4.RELEASE',
-//    	'org.springframework.security:spring-security-config:4.0.4.RELEASE'
-//
-//}
-
 repositories {
 	jcenter()
 }
 
 dependencies {
-	compile gradleApi(), localGroovy(),
+	implementation gradleApi(), localGroovy(),
 		'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final' 
 }
 
@@ -87,23 +86,3 @@ task terraforming {
 	}
 }
 
-//artifacts {
-//	archives file('build/libs/YadaTools.jar')
-//}
-
-//uploadArchives {
-//	repositories {
-//		flatDir {
-//			dirs "C:/work/xtianRepository"
-//		}
-//	}
-//}
-
-// Per usare meglio maven vedi qui: http://stackoverflow.com/questions/24751996/gradle-configuration-to-download-custom-plugin-dependencies
-
-uploadArchives {
-	dependsOn build
-	repositories {
-		mavenLocal()
-	}
-}

@@ -1,7 +1,11 @@
+plugins {
+	id 'java-library'
+	id 'maven-publish'
+}
+
 group = 'net.yadaframework'
 version = '0.1.0'
 
-apply plugin: 'java-library'
 apply plugin: 'eclipse-wtp'
 
 eclipse {
@@ -59,21 +63,23 @@ dependencies {
 jar {
     manifest {
         attributes("Implementation-Title": "YadaWebSecurity",
-                   "Implementation-Version": version)
+                   "Implementation-Version": archiveVersion)
     }
 }
 
 // Set the yada version in the properties file
 processResources {
 	doLast {
-		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadawebsecurity.properties", token: '@YADA_VERSION@', value: version)
+		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadawebsecurity.properties", token: '@YADA_VERSION@', value: archiveVersion)
 	}
 }
 
-apply plugin: 'maven'
-uploadArchives {
-	dependsOn build
-	repositories {
-		mavenLocal()
-	}
+// PublishToMavenLocal task
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'yadawebsecurity'
+            from components.java
+        }
+    }
 }
