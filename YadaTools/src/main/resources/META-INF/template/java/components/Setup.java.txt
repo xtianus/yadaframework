@@ -40,7 +40,7 @@ public class Setup extends YadaSetup {
 			String preferredLanguage = (String) userDefinition.get("language");
 			String preferredCountry = (String) userDefinition.get("country");
 			String timezone = (String) userDefinition.get("timezone");
-			List<YadaUserCredentials> existingUserCredentials = userCredentialsRepository.findByUsername(email, new PageRequest(0, 1));
+			List<YadaUserCredentials> existingUserCredentials = userCredentialsRepository.findByUsername(email, PageRequest.of(0, 1));
 			if (existingUserCredentials.isEmpty()) {
 				log.info("Setup: creating user {}", email);
 				YadaUserCredentials userCredentials = new YadaUserCredentials();

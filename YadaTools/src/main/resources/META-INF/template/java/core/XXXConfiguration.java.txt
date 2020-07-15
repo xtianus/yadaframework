@@ -1,20 +1,17 @@
 package $basePackage.core;
 
-import java.util.Map;
-
-import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import net.yadaframework.core.YadaConfiguration;
 
-// Usare XPath
+// Use XPath
 public class ${acronym.capitalize()}Configuration extends YadaConfiguration {
 	private static final long serialVersionUID = 1L;
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
 	// Cached values
-	// Questi valori li memorizzo perchè non mi aspetto che cambino a runtime
+	// Stored for speed as they don't change at runtime
 	private Integer sessionTimeoutMinutes=null;
 	
 	public Integer getSessionTimeoutMinutes() {
