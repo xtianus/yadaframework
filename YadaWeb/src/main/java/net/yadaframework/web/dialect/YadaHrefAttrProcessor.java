@@ -24,6 +24,7 @@ import net.yadaframework.core.YadaConfiguration;
  * Tutorial: http://www.thymeleaf.org/doc/html/Extending-Thymeleaf.html
  *
  */
+@Deprecated // Just use th:href because YadaLinkBuilder takes care of everything
 public class YadaHrefAttrProcessor extends AbstractAttributeTagProcessor {
 	private YadaConfiguration config;
    // A value of 10000 is higher than any attribute in the
@@ -89,7 +90,7 @@ public class YadaHrefAttrProcessor extends AbstractAttributeTagProcessor {
          */
         final String semiurl = (String) expression.execute(context);
 
-        String resultUrl = yadaDialectUtil.getVersionedAttributeValue(context, semiurl);
+        String resultUrl = yadaDialectUtil.getVersionedAttributeValue(semiurl);
 
         /*
          * Set the new value into the 'href' attribute

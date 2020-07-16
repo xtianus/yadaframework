@@ -17,5 +17,17 @@ public class WebConfig extends YadaWebSecurityConfig {
 		// engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
 	}
 
+
+	/**
+	 * Fixes urls with @{} adding the language path when configured and versioning resource folders
+	 */
+	@Override
+	@Bean
+	public SpringTemplateEngine templateEngine() {
+		SpringTemplateEngine engine = super.templateEngine();
+		engine.setLinkBuilder(new YadaLinkBuilder(config, super.getNotLocalizedResourcePattern()));
+		return engine;
+	}
+
 }
 
