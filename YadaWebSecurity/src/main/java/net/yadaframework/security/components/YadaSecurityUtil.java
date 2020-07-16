@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,14 +24,14 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
-import org.springframework.validation.BindingResult;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.security.YadaAuthenticationFailureHandler;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaRegistrationRequestRepository;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
-import net.yadaframework.security.persistence.repository.YadaUserProfileRepository;
+import net.yadaframework.web.YadaWebUtil;
 import net.yadaframework.web.form.YadaFormPasswordChange;
 
 @Component
@@ -56,7 +55,43 @@ public class YadaSecurityUtil {
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	@Autowired private YadaUserCredentialsRepository yadaUserCredentialsRepository;
 	@Autowired private PasswordEncoder passwordEncoder;
+	@Autowired private YadaWebUtil yadaWebUtil;
+
 	
+	/**
+	 * Copy all not-null login error parameters to the Model
+	 * @param request
+	 * @param model
+	 */
+	public void copyLoginErrorParams(HttpServletRequest request, Model model) {
+		List<String> params = YadaAuthenticationFailureHandler.getLoginErrorParams(request);
+		for (int i = 0; i < params.size(); i++) {
+			String name = params.get(i);
+			i++;
+			String value = params.get(i);
+			model.addAttribute(name, value);
+		}
+	}
+
+	/**
+	 * Add to some url the login error request parameters defined in YadaAuthenticationFailureHandler so that the login modal
+	 * can show them.
+	 * This method should be used when opening the login modal using an ajax call form a normal page as the result of a previous login error.
+	 * Usage example:
+	 * 	<pre>
+    const loginModalUrl = [[${@yadaSecurityUtil.addLoginErrorParams("__@{/some/loginModal(ajaxForm=false)}__")}]];
+	yada.ajax(loginModalUrl);
+		</pre>
+	 * @param url
+	 * @return
+	 * @see YadaAuthenticationFailureHandler
+	 */
+	public String addLoginErrorParams(String url) {
+		HttpServletRequest request = yadaWebUtil.getCurrentRequest();
+		List<String> params = YadaAuthenticationFailureHandler.getLoginErrorParams(request);
+		return yadaWebUtil.enhanceUrl(url, null, params.toArray(new String[params.size()]));
+	}
+
 	/**
 	 * Generate a 32 characters random password
 	 * @return a string like "XFofvGEtBlZIa5sH"
@@ -234,7 +269,7 @@ public class YadaSecurityUtil {
 	}
 	
 	public Set<String> getCurrentRoles() {
-		Set<String> roles = new HashSet<String>();
+		Set<String> roles = new HashSet<>();
 		try {
 			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 			if (auth!=null && auth.isAuthenticated()) {
@@ -268,7 +303,7 @@ public class YadaSecurityUtil {
 	 */
 	public boolean hasCurrentRole(String[] rolesToCheck) {
 		Set<String> currentRoles = getCurrentRoles();
-		Set<String> requiredRoles = new HashSet<String>(Arrays.asList(rolesToCheck));
+		Set<String> requiredRoles = new HashSet<>(Arrays.asList(rolesToCheck));
 		return CollectionUtils.containsAny(currentRoles, requiredRoles);
 	}	
 }

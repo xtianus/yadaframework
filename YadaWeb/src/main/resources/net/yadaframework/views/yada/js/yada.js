@@ -32,6 +32,8 @@
 			"cancel": "Cancel"
 	}; 
 	
+	var siteMatcher=RegExp("(?:http.?://)?([^/:]*).*"); // Extract the server name from a url like "http://www.aaa.com/xxx" or "www.aaa.com"
+	
 	var parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
 	var siblingSelector = "yadaSiblings:"; // Used to indicate that a CSS selector should be searched in the siblings()
 	var closestFindSelector = "yadaClosestFind:"; // Used to indicate that a two-part CSS selector should be searched with closest() then with find()
@@ -83,11 +85,12 @@
 	};
 	
 	yada.loaderOff = function() {
+		// The loader must be shown at least for 200 milliseconds or it gets annoying
 		var elapsedMillis = Date.now() - loaderStart;
-		if (elapsedMillis>100) {
+		if (elapsedMillis>200) {
 			$(".loader").hide();
 		} else {
-			setTimeout(function(){ $(".loader").hide(); }, 100-elapsedMillis);
+			setTimeout(function(){ $(".loader").hide(); }, 200-elapsedMillis);
 		}
 	};
 	
@@ -404,17 +407,19 @@
 			$element = $('body');
 		}
 		var markerClass = 's_dataConfirmed';
-		$('a[data-yadaConfirm], a[data-confirm]', $element.parent()).not('.'+markerClass).not('.yadaAjax').each(function() {
+		// For the ajax version see yada.ajax.js
+		$('a[data-yadaConfirm], a[data-confirm]', $element.parent()).not('.'+markerClass).not('.yadaAjax').not('.yadaAjaxed').each(function() {
 			$(this).click(function(e) {
 				var $link = $(this);
 				e.preventDefault();
 				var href = $link.attr("href");
 				var confirmText = $link.attr("data-yadaConfirm") || $link.attr("data-confirm");
 				if (confirmText!=null) {
+					var title = $link.attr("data-yadaTitle");
 					var okButton = $link.attr("data-yadaOkButton") || $link.attr("data-okButton") || yada.messages.confirmButtons.ok;
 					var cancelButton = $link.attr("data-yadaCancelButton") || $link.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 					var okShowsPreviousModal = $link.attr("data-yadaOkShowsPrevious")==null || $link.attr("data-yadaOkShowsPrevious")=="true";
-					yada.confirm(confirmText, function(result) {
+					yada.confirm(title, confirmText, function(result) {
 						if (result==true) {
 							yada.loaderOn();
 							window.location.replace(href);
@@ -453,6 +458,13 @@
 	/// URL functions
 	
 	/**
+	 * Extract the server address from a url, for example "www.example.com" from "http://www.example.com/path"
+	 */
+	yada.getServerAddress = function(url) {
+		return url.replace(siteMatcher, "$1");
+	}
+	
+	/**
 	 * Joins two url segments taking care of the separator / character
 	 */
 	yada.joinUrls = function(left, right) {
@@ -475,7 +487,7 @@
 	
 	// Ritorna ciò che segue lo hash in una stringa. Se non c'è nulla, ritorna ''
 	yada.getHashValue = function(str) {
-		if (str!=null) {
+		if (str!=null && str!='') {
 			return str.split('#')[1];
 		}
 		return str;
@@ -515,16 +527,17 @@
 	 */
 	yada.hashPathToMap = function(propertyList, windowLocationHash, separator) {
 		var result = {};
+		var segments = [];
 		var hashString = yada.getHashValue(windowLocationHash); // 834753/myslug
 		if (hashString!=null && hashString.length>0) {
-			var segments = hashString.split(separator);
-			for (var i = 0; i < propertyList.length; i++) {
-				var name = propertyList[i];
-				if (i<segments.length) {
-					result[name] = segments[i];
-				} else {
-					result[name] = '';
-				}
+			segments = hashString.split(separator);
+		}
+		for (var i = 0; i < propertyList.length; i++) {
+			var name = propertyList[i];
+			if (i<segments.length) {
+				result[name] = segments[i];
+			} else {
+				result[name] = '';
 			}
 		}
 		return result;
@@ -533,6 +546,47 @@
 	////////////////////
 	/// String functions
 	
+	/**
+	 * Converts a sentence to title case: each first letter of a word is uppercase, the rest lowercase.
+	 * It will also convert "u.s.a" to "U.S.A" and "jim-joe" to "Jim-Joe"
+	 * Adapted from https://stackoverflow.com/a/196991/587641
+	 */
+	yada.titleCase = function(sentence) {
+		 return sentence.replace(
+			 /\w[^\s-.]*/g, // The regex means "word char up to a space or - or dot": https://www.w3schools.com/jsref/jsref_obj_regexp.asp
+			 	function(txt) {
+	                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+	            }
+	     );
+	}
+
+	/**
+	 * Replaces a template like "My name is ${name}" with its value. The value can be a string or a number or an array of strings/numbers.
+	 * @param template the template string
+	 * @param replacements an object whose attributes have to be searched and replaced in the string, e.g. replacements.name="Joe"
+	 * @returns
+	 */
+	 yada.templateReplace = function(template, replacements) {
+		for (name in replacements) {
+			if (name!=null) {
+				var placeholder = '\\$\\{'+name+'\\}';
+				var value = replacements[name];
+				if (typeof value != 'object') {
+					template = template.replace(new RegExp(placeholder, 'g'), value);
+				} else {
+					for (var i=0; i<value.length; i++) {
+						if (i<value.length-1) {
+							template = template.replace(new RegExp(placeholder, 'g'), value[i]+"${"+name+"}");
+						} else {
+							template = template.replace(new RegExp(placeholder, 'g'), value[i]);
+						}
+					}
+				}
+			}
+		}
+		return template;
+	}
+
 	/**
 	 * Returns the portion of string that follows the first match of some substring
 	 */
@@ -714,13 +768,14 @@
 	//<div layout:include="/fragments/modalConfirm :: modal" th:remove="tag"></div>
 	
 	/**
+	 * @param title optional title
 	 * @param message Text to show
 	 * @param callback handler to call after choice. It receives true/false for ok/cancel
 	 * @param okButtonText text for the ok button (optional)
 	 * @param cancelButtonText text for the cancel button (optional)
 	 * @param okShowsPreviousModal if true, shows previous modal (if any) after ok (optional)
 	 */
-	yada.confirm = function(message, callback, okButtonText, cancelButtonText, okShowsPreviousModal) {
+	yada.confirm = function(title, message, callback, okButtonText, cancelButtonText, okShowsPreviousModal) {
 		// okButtonText e cancelButtonText sono opzionali
 		var $currentModals = $(".modal:visible");
 		var okClicked = false;
@@ -729,6 +784,9 @@
 		// Turn off the loader else the confirm dialog won't show
 		yada.loaderOff();
 		// $('#yada-confirm').modal('hide'); // Eventualmente fosse già aperto
+		if (title) {
+			$('#yada-confirm .modal-header .confirm-title').html(title);
+		}
 		$('#yada-confirm .modal-body p').html(message);
 		var previousOkButtonText = $('#yada-confirm .okButton').text();
 		if (okButtonText) {
@@ -741,12 +799,12 @@
 		$('#yada-confirm .okButton').off().click(function(){
 			okClicked=true;
 			cancelClicked=false;
-			if (callback) callback(true);
+			if (typeof callback == "function") callback(true);
 		});
 		$('#yada-confirm .cancelButton').off().click(function(){
 			cancelClicked=true;
 			okClicked=false;
-			if (callback) callback(false);
+			if (typeof callback == "function") callback(false);
 		});
 		var $modal = $('#yada-confirm .modal');
 		if ($modal.length==0) {

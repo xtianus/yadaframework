@@ -1,5 +1,16 @@
 package net.yadaframework.web;
-import static net.yadaframework.core.YadaConstants.*;
+import static net.yadaframework.core.YadaConstants.KEY_ALL;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_AUTOCLOSE;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_BODY;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_CALLSCRIPT;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_REDIRECT;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_RELOADONCLOSE;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_SEVERITY;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_TITLE;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_TOTALSEVERITY;
+import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_ERROR;
+import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_INFO;
+import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,13 +29,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
+import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 /**
  * Build a notification dialog to be shown on the response page or after a redirect.
  * More than one notification can be saved for the same request: all messages will be shown in one dialog.
  * A single instance can be reused after changing its parameters (but not the title). Multiple instances can be used too.
- * By setting the title you create a new instance so previous parameters are reset. 
+ * By setting the title you create a new instance so previous parameters are reset.
  * The last method called on the instance must be add() to store the configuration values.
  * Example: <br/>
  * <pre>
@@ -37,10 +49,11 @@ return yadaNotify.title("All good").ok()
 // This is a factory of YadaNotifyData
 public class YadaNotify {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	@Autowired private MessageSource messageSource;
-	
-	@Deprecated private Model model; 
+	@Autowired private YadaConfiguration yadaConfiguration;
+
+	@Deprecated private Model model;
 	@Deprecated private RedirectAttributes redirectAttributes;
 	@Deprecated private String severity;
 	@Deprecated private String title;
@@ -53,16 +66,16 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData empty(Model model) {
-		return new YadaNotifyData(model, messageSource, null);
+		return new YadaNotifyData(model, messageSource, null, yadaConfiguration);
 	}
-	
+
 	/**
 	 * Initialise an empty instance
 	 * @param model
 	 * @return
 	 */
 	public YadaNotifyData empty(RedirectAttributes redirectAttributes) {
-		return new YadaNotifyData(redirectAttributes, messageSource, null);
+		return new YadaNotifyData(redirectAttributes, messageSource, null, yadaConfiguration);
 	}
 
 	/**
@@ -72,9 +85,9 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData title(String title, Model model) {
-		return new YadaNotifyData(model, messageSource, null).setTitle(title);
+		return new YadaNotifyData(model, messageSource, null, yadaConfiguration).setTitle(title);
 	}
-	
+
 	/**
 	 * Initialise the instance with a title and a specific locale
 	 * @param title the notification title
@@ -82,10 +95,10 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData title(String title, Model model, Locale locale) {
-		return new YadaNotifyData(model, messageSource, locale).setTitle(title);
+		return new YadaNotifyData(model, messageSource, locale, yadaConfiguration).setTitle(title);
 	}
 
-	
+
 	/**
 	 * Initialise the instance with a title, to be displayed after a redirect
 	 * @param title the notification title
@@ -93,7 +106,7 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData title(String title, RedirectAttributes redirectAttributes) {
-		return new YadaNotifyData(redirectAttributes, messageSource, null).setTitle(title);
+		return new YadaNotifyData(redirectAttributes, messageSource, null, yadaConfiguration).setTitle(title);
 	}
 
 	/**
@@ -103,7 +116,7 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData title(String title, RedirectAttributes redirectAttributes, Locale locale) {
-		return new YadaNotifyData(redirectAttributes, messageSource, locale).setTitle(title);
+		return new YadaNotifyData(redirectAttributes, messageSource, locale, yadaConfiguration).setTitle(title);
 	}
 
 	/**
@@ -113,7 +126,7 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData titleKey(Model model, String ... titleKeyAndArgs) {
-		return new YadaNotifyData(model, messageSource, null).setTitleKey(titleKeyAndArgs);
+		return new YadaNotifyData(model, messageSource, null, yadaConfiguration).setTitleKey(titleKeyAndArgs);
 	}
 
 	/**
@@ -124,9 +137,9 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData titleKey(Model model, Locale locale, String ... titleKeyAndArgs) {
-		return new YadaNotifyData(model, messageSource, locale).setTitleKey(titleKeyAndArgs);
+		return new YadaNotifyData(model, messageSource, locale, yadaConfiguration).setTitleKey(titleKeyAndArgs);
 	}
-	
+
 	/**
 	 * Initialise the instance
 	 * @param model
@@ -134,9 +147,9 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData titleKey(RedirectAttributes redirectAttributes, String ... titleKeyAndArgs) {
-		return new YadaNotifyData(redirectAttributes, messageSource, null).setTitleKey(titleKeyAndArgs);
+		return new YadaNotifyData(redirectAttributes, messageSource, null, yadaConfiguration).setTitleKey(titleKeyAndArgs);
 	}
-	
+
 	/**
 	 * Initialise the instance
 	 * @param model
@@ -144,9 +157,9 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData titleKey(RedirectAttributes redirectAttributes, Locale locale, String ... titleKeyAndArgs) {
-		return new YadaNotifyData(redirectAttributes, messageSource, locale).setTitleKey(titleKeyAndArgs);
+		return new YadaNotifyData(redirectAttributes, messageSource, locale, yadaConfiguration).setTitleKey(titleKeyAndArgs);
 	}
-	
+
 	private void clearAll(Map keyMap) {
 		for (String key : KEY_ALL) {
 			keyMap.remove(key);
@@ -178,7 +191,7 @@ public class YadaNotify {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Test if a modal is going to be opened when back to the view (usually after a redirect)
 	 * @param request
@@ -192,7 +205,7 @@ public class YadaNotify {
 			|| flashMap.containsKey(KEY_NOTIFICATION_SEVERITY)
 			);
 	}
-	
+
 	/**
 	 * Test if a modal is going to be opened when back to the view
 	 * @param model can be null
@@ -226,12 +239,12 @@ public class YadaNotify {
 		}
 		return result;
 	}
-	
+
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	/**
 	 * Create a new YadaNotify instance.
 	 * @param model
@@ -257,7 +270,7 @@ public class YadaNotify {
 		instance.redirectAttributes = redirectAttributes;
 		return instance;
 	}
-	
+
 	/**
 	 * Makes the notification active. Can be called many times to add different notifications, even on the same instance.
 	 * @return If used with a Model, returns the view of the notification modal.
@@ -282,7 +295,7 @@ public class YadaNotify {
 		this.title = title;
 		return this;
 	}
-		
+
 	/**
 	 * Set the notification message. Can be HTML.
 	 * @param title
@@ -293,7 +306,7 @@ public class YadaNotify {
 		this.message = message;
 		return this;
 	}
-	
+
 	/**
 	 * Set the autoclose time in milliseconds - no close button is rendered
 	 * @param milliseconds
@@ -362,7 +375,7 @@ public class YadaNotify {
 		this.message = messageSource.getMessage(messageKeyAndArgs[0], argsArray, locale);
 		return this;
 	}
-	
+
 	/**
 	 * The page will redirect on modal close
 	 * @param path the last part of the url after the servlet context, like "/user/profile"
@@ -387,7 +400,7 @@ public class YadaNotify {
 	public YadaNotify script(String scriptId) {
 		if (model!=null) {
 			if (!model.containsAttribute(KEY_NOTIFICATION_CALLSCRIPT)) {
-				List<String> scriptIds = new ArrayList<String>();
+				List<String> scriptIds = new ArrayList<>();
 				model.addAttribute(KEY_NOTIFICATION_CALLSCRIPT, scriptIds);
 			}
 			Map<String, Object> modelMap = model.asMap();
@@ -396,7 +409,7 @@ public class YadaNotify {
 		if (redirectAttributes!=null) {
 			Map<String, ?> modelMap = redirectAttributes.getFlashAttributes();
 			if (!modelMap.containsKey(KEY_NOTIFICATION_CALLSCRIPT)) {
-				List<String> scriptIds = new ArrayList<String>();
+				List<String> scriptIds = new ArrayList<>();
 				redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_CALLSCRIPT, scriptIds);
 			}
 			((List<String>)modelMap.get(KEY_NOTIFICATION_CALLSCRIPT)).add(scriptId);		}
@@ -412,7 +425,7 @@ public class YadaNotify {
 		this.severity = VAL_NOTIFICATION_SEVERITY_OK;
 		return this;
 	}
-	
+
 	/**
 	 * Set the notification severity
 	 * @return
@@ -422,7 +435,7 @@ public class YadaNotify {
 		this.severity = VAL_NOTIFICATION_SEVERITY_INFO;
 		return this;
 	}
-	
+
 	/**
 	 * Set the notification severity
 	 * @return
@@ -432,27 +445,27 @@ public class YadaNotify {
 		this.severity = VAL_NOTIFICATION_SEVERITY_ERROR;
 		return this;
 	}
-	
+
 	@Deprecated
 	private boolean isLocalized() {
 		return messageSource!=null && locale !=null;
 	}
-	
+
 	@Deprecated
 	private void ensureLocalized() {
 		if (!isLocalized()) {
 			throw new YadaInvalidUsageException("The method yadaMessageSource() must be called before using keys");
 		}
 	}
-	
+
 	@Deprecated
 	private void activateRedirect() {
 		Map<String, ?> modelMap = redirectAttributes.getFlashAttributes();
 		// Mette nel flash tre array di stringhe che contengono titolo, messaggio e severity.
 		if (!modelMap.containsKey(KEY_NOTIFICATION_TITLE)) {
-			List<String> titles = new ArrayList<String>();
-			List<String> bodies = new ArrayList<String>();
-			List<String> severities = new ArrayList<String>();
+			List<String> titles = new ArrayList<>();
+			List<String> bodies = new ArrayList<>();
+			List<String> severities = new ArrayList<>();
 			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_TITLE, titles);
 			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_BODY, bodies);
 			redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_SEVERITY, severities);
@@ -473,9 +486,9 @@ public class YadaNotify {
 		}
 		// Mette nel model tre array di stringhe che contengono titolo, messaggio e severity.
 		if (!model.containsAttribute(KEY_NOTIFICATION_TITLE)) {
-			List<String> titles = new ArrayList<String>();
-			List<String> bodies = new ArrayList<String>();
-			List<String> severities = new ArrayList<String>();
+			List<String> titles = new ArrayList<>();
+			List<String> bodies = new ArrayList<>();
+			List<String> severities = new ArrayList<>();
 			model.addAttribute(KEY_NOTIFICATION_TITLE, titles);
 			model.addAttribute(KEY_NOTIFICATION_BODY, bodies);
 			model.addAttribute(KEY_NOTIFICATION_SEVERITY, severities);
@@ -514,7 +527,7 @@ public class YadaNotify {
 		}
 		return newTotalSeverity;
 	}
-	
+
 	/**
 	 * Test if a modal is going to be opened when back to the view (usually after a redirect)
 	 * @param request
@@ -547,8 +560,8 @@ public class YadaNotify {
 		}
 		return result;
 	}
-	
-	
+
+
 	/**
 	 * Check if the YadaNotify.yadaSave() has been called in this request
 	 * @param model can be null
@@ -566,9 +579,9 @@ public class YadaNotify {
 		}
 		return result;
 	}
-	
+
 	/**
-	 * Return the view name for the notification modal. To be used only when adding many messages and the last 
+	 * Return the view name for the notification modal. To be used only when adding many messages and the last
 	 * message is not at the method end.
 	 * @return
 	 */

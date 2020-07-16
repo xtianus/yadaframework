@@ -164,7 +164,9 @@ public class YadaUtil {
 						tagOpen=false;
 					} else {
 						// It was a close tag. We presume that it was the same as the last one on the stack and we forget it.
-						tagsToCopy.pop();
+						if (!tagsToCopy.isEmpty()) {
+							tagsToCopy.pop();
+						}
 					}
 					continue;
 				} else if (pos>=splitPos && !tag && isSpace) {
@@ -173,7 +175,7 @@ public class YadaUtil {
 					// TODO 20 should be a parameter?
 					// TODO should be done for <li> too
 					int closep = htmlToSplit.indexOf("</p>", pos);
-					if (closep-pos<20) {
+					if (closep>-1 && closep-pos<20) {
 						// Close the paragraph in the first part
 						pos = closep + "</p>".length();
 						// Forget all tags up to the opening paragraph because we assume that we skipped the closing ones
@@ -974,17 +976,23 @@ public class YadaUtil {
 		return getFileExtension(file.getName());
 	}
 
+	public int shellExec(String command, List<String> args, Map substitutionMap, ByteArrayOutputStream outputStream) throws IOException {
+		return shellExec(command, args, substitutionMap, outputStream, 60); // Default timeout is 60 seconds
+	}
+
 	/**
 	 * Run an external shell command.
 	 * @param command the shell command to run, without parameters
 	 * @param args optional command line parameters. Can be null for no parameters. Each parameter can have spaces without delimiting quotes.
 	 * @param optional substitutionMap key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
 	 * pair is like "key"-->"value". If the value is a collection, arguments are unrolled so key-->collection will result in key0=val0 key1=val1...
+	 * @param timeoutSeconds timeout in seconds after which ExecuteException is thrown. Use -1 for default timeout of 60 seconds and 0 for infinite timeout
 	 * @param optional outputStream ByteArrayOutputStream that will contain the command output (out + err)
-	 * @return the command exit value
+	 * @return the command exit value (maybe not)
+	 * @throws org.apache.commons.exec.ExecuteException when the exit value is 1 or the timeout is triggered
 	 * @throws IOException
 	 */
-	public int shellExec(String command, List<String> args, Map substitutionMap, ByteArrayOutputStream outputStream) throws IOException {
+	public int shellExec(String command, List<String> args, Map substitutionMap, ByteArrayOutputStream outputStream, int timeoutSeconds) throws IOException {
 		if (outputStream==null) {
 			// The outputstream is needed so that execution does not block. Will be discarded.
 			outputStream = new ByteArrayOutputStream();
@@ -1035,7 +1043,8 @@ public class YadaUtil {
 				commandLine.setSubstitutionMap(substitutionMap);
 			}
 			DefaultExecutor executor = new DefaultExecutor();
-			ExecuteWatchdog watchdog = new ExecuteWatchdog(60000); // Kill after 60 seconds
+			// Kill after timeoutSeconds, defaults to 60. 0 means no timeout
+			ExecuteWatchdog watchdog = new ExecuteWatchdog(timeoutSeconds<0?60000:timeoutSeconds==0?ExecuteWatchdog.INFINITE_TIMEOUT:timeoutSeconds*1000);
 			executor.setWatchdog(watchdog);
 			// Output and Error go together
 			PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream);
@@ -1045,10 +1054,10 @@ public class YadaUtil {
 			if (exitValue!=0) {
 				log.error("Shell command exited with {}", exitValue);
 			}
-			log.debug("Shell command output: {}", outputStream.toString());
+			log.debug("Shell command output: \"{}\"", outputStream.toString());
 			return exitValue;
 		} catch (IOException e) {
-			log.error("Shell command output: {}", outputStream.toString());
+			log.error("Shell command output: \"{}\"", outputStream.toString());
 			log.error("Failed to execute shell command: {} {} {}", command, args!=null?args.toArray():"", substitutionMap!=null?substitutionMap:"", e);
 			throw e;
 		} finally {
@@ -1083,6 +1092,17 @@ public class YadaUtil {
 
 	/**
 	 * Run an external shell command that has been defined in the configuration file.
+	 * The command must be as in the following example:
+	 * <pre>
+ 	&lt;imageConvert timeoutseconds="20">
+		&lt;executable windows="true">magick&lt;/executable>
+		&lt;executable mac="true" linux="true">/usr/local/bin/magick&lt;/executable>
+		&lt;arg>convert&lt;/arg>
+		&lt;arg>${FILENAMEIN}&lt;/arg>
+		&lt;arg>${FILENAMEOUT}&lt;/arg>
+	&lt;/imageConvert>
+	 * </pre>
+	 * See the yadaframework documentation for full syntax.
 	 * @param shellCommandKey xpath key of the shell command, e.g. "config/shell/cropImage"
 	 * @param optional substitutionMap key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
 	 * pair is like "key"-->"value". If the value is a collection, arguments are unrolled so key-->collection will result in key0=val0 key1=val1...
@@ -1095,7 +1115,8 @@ public class YadaUtil {
 		// Need to use getProperty() to avoid interpolation on ${} arguments
 		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
 		List<String> args = (List<String>) config.getConfiguration().getProperty(shellCommandKey + "/arg");
-		return shellExec(executable, args, substitutionMap, outputStream);
+		Integer timeout = config.getInt(shellCommandKey + "/@timeoutseconds", -1);
+		return shellExec(executable, args, substitutionMap, outputStream, timeout);
 	}
 
 	/**

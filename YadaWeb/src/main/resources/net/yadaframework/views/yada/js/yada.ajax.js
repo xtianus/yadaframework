@@ -14,6 +14,7 @@
 	var markerAjaxButtonOnly = 'yadaAjaxButtonOnly';
 	var clickedButton;
 	
+	// WARNING: if you change this, also change it in yada.js
 	var markerClass = 'yadaAjaxed'; // To prevent double submission
 	
 	// ?????????? A cosa servono questi postXXXX ??????????????????
@@ -172,7 +173,7 @@
 	}	
 	
 	function hasNoLoader($element) {
-		return $element.hasClass("noLoader") || $element.hasClass("noloader") || $element.hasClass("yadaNoLoader");
+		return $element.hasClass("noLoader") || $element.hasClass("noloader") || $element.hasClass("yadaNoLoader") || $element.hasClass("yadaNoloader") || $element.hasClass("yadanoloader");
 	}
 	
 	// Loads a data-yadaAjaxFragment
@@ -445,10 +446,11 @@
 			}
 		}
 		if (confirmText!=null && confirmText!="") {
-			var okButton = $element.attr("data-okButton") || yada.messages.confirmButtons.ok;
-			var cancelButton = $element.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
+			var title = $element.attr("data-yadaTitle");
+			var okButton = $element.attr("data-yadaOkButton") || $element.attr("data-okButton") || yada.messages.confirmButtons.ok;
+			var cancelButton = $element.attr("data-yadaCancelButton") || $element.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 			var okShowsPreviousModal = $element.attr("data-yadaOkShowsPrevious")==null || $element.attr("data-yadaOkShowsPrevious")=="true";
-			yada.confirm(confirmText, function(result) {
+			yada.confirm(title, confirmText, function(result) {
 				if (result==true) {
 					yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, getTimeoutValue($element), noLoader);
 				}
@@ -520,21 +522,27 @@
 		// The selector can be multiple, separated by comma. The replacement can be multiple, identified by yadaFragment
 		var updateSelector = $element.attr("data-yadaUpdateOnSuccess");
 		if (updateSelector != null) {
+			// Clone so that the original responseHtml is not removed by replaceWith.
+			// All handlers are also cloned.
+			var $replacement = responseHtml.children().clone(true, true); // Uso .children() per skippare il primo div inserito da yada.ajax()
 			var selectors = updateSelector.split(',');
-			var $replacementArray = $(".yadaFragment", responseHtml);
-			if ($replacementArray.length==0) {
-				$replacementArray = $("._yadaReplacement_", responseHtml); // Legacy
+			var $replacementArray = null;
+			if (selectors.length>1) {
+				// yadaFragment is used only when there is more than one selector, otherwise the whole result is used for replacement
+				$replacementArray = $(".yadaFragment", responseHtml);
+				if ($replacementArray.length==0) {
+					$replacementArray = $("._yadaReplacement_", responseHtml); // Legacy
+				}
 			}
-			if ($replacementArray.length==0) {
-				$replacementArray = [responseHtml.children()]; // Uso .children() per skippare il primo div inserito da yada.ajax()
-			}
-			var $replacement;
+			var fragmentCount = 0;
 			for (var count=0; count<selectors.length; count++) {
 				var selector = selectors[count];
-				if (count<$replacementArray.length) {
+				if ($replacementArray!=null && $replacementArray.length>0) {
 					// Clone so that the original responseHtml is not removed by replaceWith.
 					// All handlers are also cloned.
-					$replacement = $replacementArray[count].clone(true, true); 
+					$replacement = $replacementArray.eq(fragmentCount).clone(true, true);
+					// When there are more selectors than fragments, fragments are cycled from the first one
+					fragmentCount = (fragmentCount+1) % $replacementArray.length;
 				}
 				yada.extendedSelect($element, selector).replaceWith($replacement);
 
@@ -676,9 +684,10 @@
 					var confirmText = $thisForm.attr("data-yadaConfirm");
 					if (confirmText!=null && confirmText!="") {
 						e.preventDefault(); // Stop form submission
-						var okButton = $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
-						var cancelButton = $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
-		    			yada.confirm(confirmText, function(result) {
+						var title = $button.attr("data-yadaTitle");
+						var okButton = $button.attr("data-yadaOkButton") || $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
+						var cancelButton = $button.attr("data-yadaCancelButton") || $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
+		    			yada.confirm(title, confirmText, function(result) {
 		    				if (result==true) {
 		    					$thisForm[0]['yadaConfirmed']=true;
 		    					$thisForm.submit();
@@ -805,7 +814,8 @@
 				if (buttonAction!=null) {
 					action = buttonAction;
 				}
-				noLoader = hasNoLoader($(clickedButton));
+				// Either the form or the button can have a noLoader flag
+				noLoader |= hasNoLoader($(clickedButton));
 			}
 			if (!multipart) {
 				data = $.param(data);
@@ -863,15 +873,19 @@
 	    	var $button = $(this);
 	    	var confirmText = $button.attr("data-yadaConfirm") || $button.attr("data-confirm");
 	    	if (confirmText!=null && confirmText!="") {
-	    		var okButton = $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
-	    		var cancelButton = $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
+	    		var title = $button.attr("data-yadaTitle");
+	    		var okButton = $button.attr("data-yadaOkButton") || $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
+	    		var cancelButton = $button.attr("data-yadaCancelButton") || $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
 	    		$button.click(function() {
 	    			$button = $(this); // Needed otherwise $button could be stale (from a previous ajax replacement) 
-	    			yada.confirm(confirmText, function(result) {
+	    			yada.confirm(title, confirmText, function(result) {
 	    				if (result==true) {
 	    					$button.off("click");
 	    					$button.click();
-	    					// No $form.submit(); because of the button name (see clickedButton above)
+	    					// No $form.submit(); because of the button name that has to be preserved (see clickedButton above)
+	    					// TODO/BUG if the submit button contains an <input>, that value will not be included in $(form).serializeArray() and will not be sent
+	    					// This only happens when the form is sent with $button.click(): its value is sent correctly when no confirm dialog is used.
+	    					// The workaround is to set the value of <input> on the submit button itself using name= and value= attributes
 	    				}
 	    			}, okButton, cancelButton);
 	    			return false; // Stop form submission
@@ -925,6 +939,10 @@
 	 * @param responseType set the response type, for example "blob" for downloading binary data (e.g. a pdf file)
 	 */
 	yada.ajax = function(url, data, successHandler, method, timeout, hideLoader, asJson, responseType) {
+		if (successHandler=="GET" || successHandler=="POST") {
+			console.error("YadaError: you are forgetting the successHandler in the yada.ajax call; use null for no handler.")
+			return;
+		}
 		if (method==null) {
 			method="GET"
 		}
@@ -1004,10 +1022,10 @@
 				if (yada.startsWith(responseTrimmed, "{\"redirect\":")) {
 					var redirectObject = JSON.parse(responseTrimmed);
 					var targetUrl = redirectObject.redirect;
-					yada.loaderOff();
 					if (redirectObject.newTab!="true") {
 						window.location.href=targetUrl;
 					} else {
+						yada.loaderOff();
 						var win = window.open(targetUrl, '_blank');
 						if (win) {
 						    //Browser has allowed it to be opened
