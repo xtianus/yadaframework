@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>9. Troubleshooting &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/yadaDocs.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
+    <script type="text/javascript" src="_static/copybutton.js"></script>
+    <script type="text/javascript" src="_static/yadaDocs.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="8. New Eclipse Project" href="newEclipseProject.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">1. Form Fields and Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">2. Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">3. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datatables.html">4. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajax.html">5. Ajax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">6. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">7. Notification Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">8. New Eclipse Project</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">9. Troubleshooting</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">9. Troubleshooting</a><ul>
+<li><a class="reference internal" href="#runtime-problems">9.1. Runtime problems</a><ul>
+<li><a class="reference internal" href="#application-doesn-t-start">9.1.1. Application doesn’t start</a></li>
+<li><a class="reference internal" href="#can-t-see-the-changes">9.1.2. Can’t see the changes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#compilation-problems">9.2. Compilation problems</a><ul>
+<li><a class="reference internal" href="#errors-for-no-reason">9.2.1. Errors for no reason</a></li>
+<li><a class="reference internal" href="#errors-after-a-git-pull">9.2.2. Errors after a git pull</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="newEclipseProject.html" title="Previous Chapter: 8. New Eclipse Project"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 8. New Eclips...</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/troubleshooting.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <div class="section" id="troubleshooting">
+<h1>9. Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">When something doesn’t work as expected</p>
+<div class="section" id="runtime-problems">
+<h2>9.1. Runtime problems<a class="headerlink" href="#runtime-problems" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="application-doesn-t-start">
+<h3>9.1.1. Application doesn’t start<a class="headerlink" href="#application-doesn-t-start" title="Permalink to this headline">¶</a></h3>
+<dl class="simple">
+<dt>Clear compilation errors</dt><dd><p>The application won’t work properly if you have compilation errors in your sources. Fix them first.</p>
+</dd>
+<dt>Check the stack trace</dt><dd><p>Be sure to set a high limit on the console output (“Windows &gt; Preferences &gt; Run/Debug &gt; Console &gt; Limit console output”)
+so that the log is not clipped. Look for the first stack trace and see the root reason for the problem. This should help you a lot.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="can-t-see-the-changes">
+<h3>9.1.2. Can’t see the changes<a class="headerlink" href="#can-t-see-the-changes" title="Permalink to this headline">¶</a></h3>
+<p>If you made some change in the code but the site seems to ignore them, these are the steps you could take, in order of annoyance.</p>
+<dl class="simple">
+<dt>Be sure you saved the file</dt><dd><p>This is trivial but sometimes you might forget.</p>
+</dd>
+<dt>Refresh the sources</dt><dd><p>Eclipse should detect changes in the source files automatically, but sometimes a “Refresh” helps (F5 on a folder in Package Explorer).</p>
+</dd>
+<dt>Force a “publish” on Tomcat</dt><dd><p>Ususally Tomcat copies modified items to the deploy directory automatically. Sometimes you have to force it using the “Publish” context menu on the server.</p>
+</dd>
+<dt>Restart Tomcat</dt><dd><p>When “Publish” doesn’t do the trick, try with a restart of the server.</p>
+</dd>
+<dt>Force a “clean” on Tomcat</dt><dd><p>The “Clean…” context menu on the server deletes the application files from the deploy directory and publishes them again.</p>
+</dd>
+<dt>Remove and add back the web application</dt><dd><p>Using the “Add and remove…” context menu on the server, remove the web application, restart Tomcat, add the application back, restart again.
+This should be similar to “Clean…” but sometimes it works better.</p>
+</dd>
+<dt>Physically delete the deploy files on disk</dt><dd><p>Sometimes Eclipse can’t copy a file for some reason. In such cases you should do it manually: stop Tomcat, open the deploy folder
+and delete everything inside wtpwebapps (you might keep ROOT). Then do a “Publish…” on the server.
+If you can’t delete a file because it’s locked, you might need to close Eclipse or restart the PC.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="compilation-problems">
+<h2>9.2. Compilation problems<a class="headerlink" href="#compilation-problems" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="errors-for-no-reason">
+<h3>9.2.1. Errors for no reason<a class="headerlink" href="#errors-for-no-reason" title="Permalink to this headline">¶</a></h3>
+<p>When you start Eclipse again after some time, it might give you compilation errors that weren’t there the last time.</p>
+<dl class="simple">
+<dt>Perform a Gradle Refresh</dt><dd><p>From the context menu on a project, use “Gradle &gt; Refresh Gradle Project”.
+This usually fixes everything and also downloads the latest versions of the libraries you are using, so it’s worth doing it every now and then.</p>
+</dd>
+<dt>Clean and Build</dt><dd><p>The Gradle Refresh should rebuild your project, but maybe you need to clean them first. Use the “Project &gt; Clean…” menu
+from the top bar.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="errors-after-a-git-pull">
+<h3>9.2.2. Errors after a git pull<a class="headerlink" href="#errors-after-a-git-pull" title="Permalink to this headline">¶</a></h3>
+<p>Always be sure to have the correct YadaFramework version. Choose a specific branch and stick to it until you are ready
+to switch to a more recent one. Never use the master because the API might change without notice.</p>
+<p>TO BE CONTINUED</p>
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2019, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.0.1.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

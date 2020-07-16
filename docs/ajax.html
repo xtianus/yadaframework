@@ -104,7 +104,8 @@
 <li><a class="reference internal" href="#ajax-method">5.5. Ajax method</a><ul>
 <li><a class="reference internal" href="#url">5.5.1. URL</a></li>
 <li><a class="reference internal" href="#data">5.5.2. data</a></li>
-<li><a class="reference internal" href="#success-handler">5.5.3. Success Handler</a></li>
+<li><a class="reference internal" href="#successhandler">5.5.3. successHandler</a></li>
+<li><a class="reference internal" href="#responsetype">5.5.4. responseType</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#class-reference">5.6. Class Reference</a></li>
@@ -194,7 +195,7 @@ It is automatically included in production, merged with the other yada javascrip
 </div>
 <div class="section" id="returning-from-the-backend">
 <h3>5.2.2. Returning from the backend<a class="headerlink" href="#returning-from-the-backend" title="Permalink to this headline">¶</a></h3>
-<p>Controllers can return a standard thymeleaf view (html/xml) or some JSON data.
+<p>Controllers can return a standard thymeleaf view (html/xml), some JSON data or any other MIME type like a PDF or an excel file content.
 The resulting objects will be passed to any “successHandler” javascript method (see below)
 when they don’t have other special meaning.</p>
 <p><strong>Returning JSON</strong></p>
@@ -210,6 +211,16 @@ when they don’t have other special meaning.</p>
 </pre></div>
 </div>
 <p>Please note the needed <code class="docutils literal notranslate"><span class="pre">&#64;ResponseBody</span></code> tag.</p>
+<p><strong>Returning any MIME type</strong></p>
+<p>By setting the appropriate MediaType, the controller method can return any object, for example a PDF file:</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">path</span> <span class="o">=</span> <span class="s">&quot;/catalog&quot;</span><span class="o">,</span> <span class="n">produces</span> <span class="o">=</span> <span class="n">org</span><span class="o">.</span><span class="na">springframework</span><span class="o">.</span><span class="na">http</span><span class="o">.</span><span class="na">MediaType</span><span class="o">.</span><span class="na">APPLICATION_PDF_VALUE</span><span class="o">)</span>
+<span class="nd">@ResponseBody</span>
+<span class="kd">public</span> <span class="n">String</span> <span class="nf">downloadCatalog</span><span class="o">(</span><span class="n">HttpServletResponse</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">yadaWebUtil</span><span class="o">.</span><span class="na">downloadFile</span><span class="o">(</span><span class="n">fileToDownload</span><span class="o">,</span> <span class="kc">false</span><span class="o">,</span> <span class="n">MediaType</span><span class="o">.</span><span class="na">APPLICATION_PDF_VALUE</span><span class="o">,</span> <span class="n">clientFilename</span><span class="o">,</span> <span class="n">response</span><span class="o">);</span>
+    <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+<span class="o">}</span>
+</pre></div>
+</div>
 <p><strong>Yada Commands</strong></p>
 <p>The following return values, defined on the YadaViews java class, have special meaning in the context of an ajax call.
 Please note that you should NOT use the <code class="docutils literal notranslate"><span class="pre">&#64;ResponseBody</span></code> tag in this case.</p>
@@ -543,8 +554,8 @@ The controller should have a <code class="docutils literal notranslate"><span cl
 </div>
 <p>More info on binary uploads can be found in <a class="reference internal" href="forms/uploads.html#java"><span class="std std-ref">File Uploads</span></a>.</p>
 </div>
-<div class="section" id="success-handler">
-<h3>5.5.3. Success Handler<a class="headerlink" href="#success-handler" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="successhandler">
+<h3>5.5.3. successHandler<a class="headerlink" href="#successhandler" title="Permalink to this headline">¶</a></h3>
 <p>The success handler is called when the server returns without errors:</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">successHandler</span><span class="p">(</span><span class="nx">responseText</span><span class="p">,</span> <span class="nx">responseHtml</span><span class="p">)</span>
 </pre></div>
@@ -563,6 +574,15 @@ The controller should have a <code class="docutils literal notranslate"><span cl
 </ul>
 <p>The successHandler is not invoked if the call returns with a YadaNotify error, unless the <code class="docutils literal notranslate"><span class="pre">executeAnyway</span></code> flag is true:</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">successHandler</span><span class="p">.</span><span class="nx">executeAnyway</span><span class="o">=</span><span class="kc">true</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="responsetype">
+<h3>5.5.4. responseType<a class="headerlink" href="#responsetype" title="Permalink to this headline">¶</a></h3>
+<p>The response type of an ajax call is set automatically unless specified in this field. A useful value is “blob”
+for downloading a file on the client computer.
+See <a class="reference internal" href="#returning-from-the-backend"><span class="std std-ref">Returning from the backend</span></a> for an example on how to send a PDF file from the server.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">yada</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="s2">&quot;/catalog&quot;</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="s2">&quot;blob&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>

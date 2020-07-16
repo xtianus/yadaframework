@@ -14,6 +14,7 @@ Yada Framework
    Ajax Modal <ajaxModal>
    Notification Modal <notificationModal>
    New Eclipse Project <newEclipseProject>
+   Troubleshooting <troubleshooting>
 ..	TODO: packages <javadoc/packages>
 	
 Indices and tables

@@ -41,7 +41,7 @@ disable the link
 
 Returning from the backend
 --------------------------
-Controllers can return a standard thymeleaf view (html/xml) or some JSON data.
+Controllers can return a standard thymeleaf view (html/xml), some JSON data or any other MIME type like a PDF or an excel file content.
 The resulting objects will be passed to any "successHandler" javascript method (see below)
 when they don't have other special meaning.
 
@@ -61,6 +61,19 @@ A String map can easily be converted to JSON using the standard Spring features:
     }
 
 Please note the needed ``@ResponseBody`` tag.
+
+**Returning any MIME type**
+
+By setting the appropriate MediaType, the controller method can return any object, for example a PDF file:
+
+.. code-block:: java
+
+    @RequestMapping(path = "/catalog", produces = org.springframework.http.MediaType.APPLICATION_PDF_VALUE)
+    @ResponseBody
+    public String downloadCatalog(HttpServletResponse response) {
+        yadaWebUtil.downloadFile(fileToDownload, false, MediaType.APPLICATION_PDF_VALUE, clientFilename, response);
+        return null;
+    }
 
 **Yada Commands**
 
@@ -338,7 +351,7 @@ The controller should have a ``MultipartFile`` argument for each binary part:
 
 More info on binary uploads can be found in :ref:`File Uploads <forms/uploads:JAVA>`.
 
-Success Handler
+successHandler
 ----------------
 The success handler is called when the server returns without errors:
 
@@ -356,6 +369,16 @@ The successHandler is not invoked if the call returns with a YadaNotify error, u
 .. code-block:: javascript
 
 	successHandler.executeAnyway=true
+
+responseType
+------------
+The response type of an ajax call is set automatically unless specified in this field. A useful value is "blob"
+for downloading a file on the client computer.
+See :ref:`ajax:Returning from the backend` for an example on how to send a PDF file from the server.
+
+.. code-block:: javascript
+
+    yada.ajax("/catalog", null, null, null, null, null, null, "blob");
 
 
 Class Reference
