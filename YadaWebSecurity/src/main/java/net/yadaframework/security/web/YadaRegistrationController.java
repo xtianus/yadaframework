@@ -85,6 +85,8 @@ public class YadaRegistrationController {
 		public String email;
 
 		public String destinationUrl;
+		
+		public YadaRegistrationRequest yadaRegistrationRequest;
 	}
 	
 	@PostConstruct
@@ -123,6 +125,7 @@ public class YadaRegistrationController {
 				String destinationUrl = registrationRequest.getDestinationUrl();
 				result.email = email;
 				result.destinationUrl = destinationUrl;
+				result.yadaRegistrationRequest = registrationRequest;
 				YadaUserCredentials existing = yadaUserCredentialsRepository.findFirstByUsername(email);
 				if (existing!=null) {
 					log.warn("Email '{}' already exists", email);
@@ -274,6 +277,7 @@ public class YadaRegistrationController {
 			if (parts!=null) {
 				List<YadaRegistrationRequest> registrationRequests = yadaRegistrationRequestRepository.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]);
 				if (registrationRequests.isEmpty()) {
+					// TODO remove this message, the caller should add its own
 					yadaWebUtil.modalError("Password change failed", "The link for password change is expired. Please repeat the change request from the start.", redirectAttributes);
 					return false;
 				}
@@ -286,6 +290,7 @@ public class YadaRegistrationController {
 		} catch (Exception e) {
 			log.debug("Recupero Password Fallito", e);
 		}
+		// TODO remove this message, the caller should add its own
 		yadaWebUtil.modalError("Password change failed", "An error occurred while changing the password. Please try again and contact us if the problem persists.", redirectAttributes);
 		return false;
 	}

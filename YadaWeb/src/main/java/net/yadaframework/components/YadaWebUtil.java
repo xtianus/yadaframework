@@ -139,9 +139,14 @@ public class YadaWebUtil {
 	 * @param targetUrl the redirect target, like "/some/place"
 	 * @param locale can be null if the locale is not in the path, but then why use this method?
 	 * @param params optional request parameters to be set on the url, in the form of comma-separated name,value pairs. E.g. id,123,name,"joe"
+	 * 			Existing parameters are not replaced. Null values become empty strings. Null names are skipped with their values.
 	 * @return a url like "redirect:/en/some/place?par1=val1&par2=val2"
+	 * @throws YadaInvalidUsageException if path locale is configured and the url is absolute and the locale is null
 	 */
 	public String redirectString(String url, Locale locale, String...params) {
+		if (config.isLocalePathVariableEnabled() && url.startsWith("/") && locale==null) {
+			throw new YadaInvalidUsageException("Locale is needed when using the locale path variable with an absolute redirect");
+		}
 		String enhancedUrl = enhanceUrl(url, locale, params);
 		return "redirect:" + enhancedUrl;
 	}
@@ -150,40 +155,63 @@ public class YadaWebUtil {
 	 * Creates a new URL string from a starting one, taking into account the locale in the path and optional url parameters.
 	 * @param url the original url, like "/some/place"
 	 * @param locale added as a path in the url, only if the url is absolute. Can be null if the locale is not needed in the path
-	 * @param params optional request parameters to be set on the url, in the form of comma-separated name,value pairs. E.g. id,123,name,"joe"
-	 * @return a url like "/en/some/place?par1=val1&par2=val2"
+	 * @param params optional request parameters to be set on the url, in the form of comma-separated name,value pairs. E.g. "id","123","name","joe".
+	 * 			Existing parameters are not replaced. Null values become empty strings. Null names are skipped with their values.
+	 * @return a url like "/en/some/place?id=123&name=joe"
 	 */
 	public String enhanceUrl(String url, Locale locale, String...params) {
 		StringBuilder result = new StringBuilder();
 		if (config.isLocalePathVariableEnabled()) {
-			// The language is added only to absolute urls
-			if (url.startsWith("/")) {
-				if (locale==null) {
-					throw new YadaInvalidUsageException("Locale is needed when using the locale path variable with an absolute redirect");
+			// The language is added only to absolute urls, if it doesn't exist yet
+			if (url.startsWith("/") && locale!=null) {
+				String language = locale.getLanguage();
+				if (!url.startsWith("/"+language+"/")) {
+					result.append("/").append(language);
 				}
-				result.append("/").append(locale.getLanguage());
 			}
 		}
 		result.append(url);
 		if (params!=null && params.length>0) {
-			result.append("?");
-			boolean name = true;
-			boolean start=true;
+			boolean isStart = true;
+			int questionPos = result.indexOf("?");
+			if (questionPos<0) {
+				result.append("?");
+			} else {
+				if (url.length()>questionPos+1) {
+					// There is some parameter already
+					isStart = false;
+				}
+			}
+			boolean isName = true;
+			String lastName = null;
 			for (String param : params) {
-				if (name && !start) {
+				if (isName && !isStart) {
 					result.append("&");
 				}
-				result.append(param);
-				if (name) {
-					result.append("=");
+				if (isName) { // name
+					// null names are skipped together with their value
+					if (param!=null) {
+						result.append(param);
+						result.append("=");
+					}
+					lastName = param;
+				} else { // value
+					if (lastName!=null) {
+						// Null values remain empty
+						if (param!=null) {
+							result.append(param);
+						}
+					} else {
+						log.debug("Skipping null name and its value '{}'", param);
+					}
 				}
-				start=false;
-				name=!name;
+				isStart=false;
+				isName=!isName;
 			}
 		}
 		return result.toString();
 	}
-
+	
 	/**
 	 * Make a zip file and send it to the client. The temp file is automatically deleted.
 	 * @param returnedFilename the name of the file to create and send, with extension. E.g.: data.zip

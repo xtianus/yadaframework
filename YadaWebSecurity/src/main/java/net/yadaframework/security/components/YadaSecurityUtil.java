@@ -26,12 +26,11 @@ import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
 
 import net.yadaframework.components.YadaUtil;
-import net.yadaframework.security.YadaAuthenticationFailureHandler;
+import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaRegistrationRequestRepository;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
-import net.yadaframework.web.YadaWebUtil;
 import net.yadaframework.web.form.YadaFormPasswordChange;
 
 @Component
