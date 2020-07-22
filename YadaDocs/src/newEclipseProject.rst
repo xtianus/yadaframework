@@ -149,6 +149,10 @@ Set the editors file encoding to UTF-8, at least "General > Workspace > Text fil
 
 The "New text file line delimiter" shown in the above image is also better set to "Unix".
 
+Also set UTF-8 in the "Content Types > Text > Java Properties File > Default encoding" field:
+
+.. image:: _static/img/newEclipseProject/java-properties-utf8.png
+
 Add the donwloaded JRE as a new Runtime in "Window > Preferences > Java > Installed JREs" and set it as the default. 
 Also set the "Window > Preferences > Java > Compiler > JDK Compliance" accordingly.
 
