@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
 @ComponentScan(basePackages = { "$basePackage.web" })
-@Configuration
+//@Configuration not needed when using WebApplicationInitializer.java
 // Extend YadaWebConfig if you're not using the YadaWebSecurity project
 public class WebConfig extends YadaWebSecurityConfig {
 

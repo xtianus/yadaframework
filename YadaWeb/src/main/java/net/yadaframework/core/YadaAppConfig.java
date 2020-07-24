@@ -35,7 +35,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.web.dialect.YadaDialect;
 
-@Configuration
+//@Configuration not needed when using WebApplicationInitializer.java
 @ComponentScan(basePackages = { "net.yadaframework.components" })
 @EnableScheduling
 @EnableAsync

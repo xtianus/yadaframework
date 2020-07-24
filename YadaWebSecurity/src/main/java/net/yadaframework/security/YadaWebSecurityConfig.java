@@ -11,7 +11,7 @@ import org.thymeleaf.spring5.SpringTemplateEngine;
 import net.yadaframework.core.YadaWebConfig;
 import net.yadaframework.security.web.YadaDialectWithSecurity;
 
-@Configuration
+//@Configuration not needed when using WebApplicationInitializer.java
 @EnableWebMvc
 @EnableSpringDataWebSupport
 @EnableScheduling

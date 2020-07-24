@@ -77,10 +77,10 @@ dependencies {
 	compile	 project(':YadaWebCMS')			// Remove if not used !!!
 	compile	 project(':YadaWebCommerce')	// Remove if not used !!!
 
-    compile 'org.springframework:spring-webmvc:5.2.3.RELEASE',
-        'org.springframework:spring-context-support:5.2.3.RELEASE',
+    compile 'org.springframework:spring-webmvc:5.2.8.RELEASE',
+        'org.springframework:spring-context-support:5.2.8.RELEASE',
 		'org.springframework.data:spring-data-jpa:1.11.22.RELEASE',
-        'org.springframework.security:spring-security-web:5.2.2.RELEASE',
+        'org.springframework.security:spring-security-web:5.3.3.RELEASE',
         'org.hibernate:hibernate-entitymanager:5.4.12.Final',
         'mysql:mysql-connector-java:8.0.19',
         'com.fasterxml.jackson.core:jackson-annotations:2.10.+',

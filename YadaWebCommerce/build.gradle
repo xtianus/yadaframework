@@ -36,8 +36,8 @@ repositories {
 dependencies {
 		
 	implementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'),
-		'org.hibernate:hibernate-entitymanager:5.2.9.Final',
-		'org.springframework.data:spring-data-jpa:1.11.1.RELEASE'
+		'org.hibernate:hibernate-entitymanager:5.4.12.Final',
+		'org.springframework.data:spring-data-jpa:2.3.2.RELEASE'
 		
 	testImplementation 'junit:junit:4.12'
 }

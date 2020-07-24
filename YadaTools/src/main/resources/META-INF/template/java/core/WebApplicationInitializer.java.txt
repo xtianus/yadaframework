@@ -13,6 +13,9 @@ import net.yadaframework.exceptions.YadaConfigurationException;
 public class WebApplicationInitializer extends YadaWebApplicationInitializer {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
+	/**
+	 * Configuration for the ROOT context
+	 */
 	@Override
 	protected Class<?>[] getRootConfigClasses() {
 		List<Class<?>> configurationClasses = new ArrayList<>();
@@ -31,6 +34,9 @@ public class WebApplicationInitializer extends YadaWebApplicationInitializer {
 		return configurationClasses.toArray(new Class<?>[configurationClasses.size()]);
 	}
 
+	/**
+	 * Configuration for the SERVLET context
+	 */
 	@Override
 	protected Class<?>[] getServletConfigClasses() {
 		return new Class<?>[] { WebConfig.class };

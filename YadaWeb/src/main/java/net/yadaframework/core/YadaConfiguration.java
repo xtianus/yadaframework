@@ -18,6 +18,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
@@ -27,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+import org.vibur.dbcp.ViburDBCPDataSource;
 
 import net.yadaframework.exceptions.YadaConfigurationException;
 import net.yadaframework.exceptions.YadaInternalException;
@@ -88,7 +91,50 @@ public abstract class YadaConfiguration {
 	private String targetImageExtension=null;
 	private String preserveImageExtensions=null;
 	private String defaultNotifyModalView = null;
+	private DataSource dataSource = null;
 
+	/**
+	 * Returns a DataSource that has NOT been configured on JNDI. Given that there is a configuration file for each environment, you
+	 * could have a programmatic datasource in development and a JNDI datasource in production, if needed.
+	 * This method should be overridden to set more parameters than currently implemented.
+	 * @return null if the DataSource is on JNDI (via context.xml), or a new Vibur DataSource otherwise 
+	 */
+	public synchronized DataSource getProgrammaticDatasource() {
+		if (dataSource!=null) {
+			return dataSource; // Keep the instance because the YadaJpaConfigdataSource() method is called twice
+		}
+		try {
+			ImmutableHierarchicalConfiguration datasourceConfig = configuration.immutableConfigurationAt("config/database/datasource");
+			
+			ViburDBCPDataSource ds = new ViburDBCPDataSource();
+			ds.setJdbcUrl(datasourceConfig.getString("jdbcUrl"));
+			ds.setUsername(datasourceConfig.getString("username"));
+			ds.setPassword(datasourceConfig.getString("password"));
+			ds.setName(datasourceConfig.getString("name")); // Pool name
+
+			ds.setPoolInitialSize(datasourceConfig.getInt("poolInitialSize"));
+			ds.setPoolMaxSize(datasourceConfig.getInt("poolMaxSize"));
+			ds.setPoolEnableConnectionTracking(datasourceConfig.getBoolean("poolEnableConnectionTracking"));
+
+			ds.setLogQueryExecutionLongerThanMs(datasourceConfig.getInt("logQueryExecutionLongerThanMs"));
+			ds.setLogStackTraceForLongQueryExecution(datasourceConfig.getBoolean("logStackTraceForLongQueryExecution"));
+			ds.setLogLargeResultSet(datasourceConfig.getLong("logLargeResultSet"));
+			ds.setLogStackTraceForLargeResultSet(datasourceConfig.getBoolean("logStackTraceForLargeResultSet"));
+			ds.setIncludeQueryParameters(datasourceConfig.getBoolean("includeQueryParameters"));
+			
+			ds.setStatementCacheMaxSize(datasourceConfig.getInt("statementCacheMaxSize"));
+			// ds.setDriverClassName("com.mysql.cj.jdbc.Driver"); // Not needed
+
+			ds.start();
+			this.dataSource = ds;
+			return ds;
+		} catch (org.apache.commons.configuration2.ex.ConfigurationRuntimeException e) {
+			log.info("No datasource in application configuration - using JNDI");
+		}
+	    return null;
+	}
+	
+	
 	/**
 	 * Returns the configured path for the notification modal.
 	 * The configuration path is config/paths/notificationModalView

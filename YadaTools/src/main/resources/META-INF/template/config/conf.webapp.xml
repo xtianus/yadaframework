@@ -9,6 +9,7 @@
 	<paths>
 		<serverAddress>http://$env.EXAMPLE.com/</serverAddress>
 		<basePath>$basePath/$acronym$env</basePath>
+		<contentDir name="contents" url="/contents"></contentDir>
 	</paths>
 	<email>
 		<enabled>true</enabled>
@@ -39,10 +40,29 @@
 	</email>
 
 	<database>
-		<jndiname>java:comp/env/jdbc/${acronym}db$env</jndiname>
+		<jndiname>java:comp/env/jdbc/${acronym}db$env</jndiname> <!-- Not used when <datasource> is defined -->
 		<showSql>false</showSql>
 		<entityPackage>${basePackage}.persistence.entity</entityPackage>
 		<databaseMigrationAtStartup>false</databaseMigrationAtStartup>
+		<!-- Datasource for embedded Tomcat -->
+		<datasource>
+			<jdbcUrl>jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false</jdbcUrl>
+			<username>${acronym}user$env</username>
+			<password>$dbpwd</password>
+			
+			<name>${acronym}${env}pool</name>
+			<poolInitialSize>10</poolInitialSize>	
+			<poolMaxSize>100</poolMaxSize>
+			<poolEnableConnectionTracking>true</poolEnableConnectionTracking>
+			
+			<logQueryExecutionLongerThanMs>2000</logQueryExecutionLongerThanMs>
+			<logStackTraceForLongQueryExecution>true</logStackTraceForLongQueryExecution>
+			<logLargeResultSet>500</logLargeResultSet> <!-- ResultSets with length greater than or equal to this limit are logged -->
+			<logStackTraceForLargeResultSet>true</logStackTraceForLargeResultSet>
+			<includeQueryParameters>true</includeQueryParameters>
+			
+			<statementCacheMaxSize>200</statementCacheMaxSize>
+		</datasource>
 	</database>
 
 	<social>

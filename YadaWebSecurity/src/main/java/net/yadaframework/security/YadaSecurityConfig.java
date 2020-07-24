@@ -36,7 +36,7 @@ import net.yadaframework.security.components.YadaUserDetailsService;
  * The application paths must be protected in an application-specific subclass of WebSecurityConfigurerAdapter
  */
 @EnableWebSecurity
-@Configuration
+//@Configuration not needed when using WebApplicationInitializer.java
 @EnableJpaRepositories(basePackages = "net.yadaframework.security.persistence.repository")
 @ComponentScan(basePackages = { "net.yadaframework.security.components" })
 @Order(10) // Just in case there will be others

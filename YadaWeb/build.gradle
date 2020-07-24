@@ -66,10 +66,10 @@ dependencies {
 	// Needed by Commons Configuration
     runtimeOnly 'commons-jxpath:commons-jxpath:1.+'
 	
-    implementation 'org.springframework:spring-webmvc:5.2.3.RELEASE',
-		'org.springframework:spring-context-support:5.2.3.RELEASE',
+    implementation 'org.springframework:spring-webmvc:5.2.8.RELEASE',
+		'org.springframework:spring-context-support:5.2.8.RELEASE',
 		// 'org.springframework.data:spring-data-jpa:1.11.9.RELEASE',
-		'org.springframework.data:spring-data-jpa:2.2.4.RELEASE',
+		'org.springframework.data:spring-data-jpa:2.3.2.RELEASE',
 		'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
        'org.hibernate:hibernate-entitymanager:5.4.12.Final',
 		'org.hibernate:hibernate-validator:5.4.2.Final',
@@ -92,6 +92,10 @@ dependencies {
 		// 'org.quartz-scheduler:quartz:2.2.3',
 		'org.flywaydb:flyway-core:5.0.5',
 		'commons-beanutils:commons-beanutils:1.9.+'
+		
+	 // Connection pool for embedded Tomcat and programmatic datasource
+	implementation 'org.vibur:vibur-dbcp:25.+'
+	runtimeOnly 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.+'
 	
 	// Needed to run in Tomcat
 	// runtime 'commons-jxpath:commons-jxpath:1.3'

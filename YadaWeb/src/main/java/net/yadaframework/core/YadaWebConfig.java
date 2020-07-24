@@ -45,7 +45,7 @@ import net.yadaframework.web.YadaDateFormatter;
 import net.yadaframework.web.dialect.YadaDialect;
 
 
-@Configuration
+//@Configuration not needed when using WebApplicationInitializer.java
 @EnableWebMvc
 @EnableSpringDataWebSupport
 @EnableScheduling
