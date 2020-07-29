@@ -8,12 +8,14 @@ Yada Framework
    :numbered:
    :glob:
 
+   Overview <overview>
+   New Eclipse Project <newEclipseProject>
+   Internationalization <internationalization>
    forms/*
    Data Tables <datatables>
    Ajax <ajax>
    Ajax Modal <ajaxModal>
    Notification Modal <notificationModal>
-   New Eclipse Project <newEclipseProject>
    Troubleshooting <troubleshooting>
 ..	TODO: packages <javadoc/packages>
 	
