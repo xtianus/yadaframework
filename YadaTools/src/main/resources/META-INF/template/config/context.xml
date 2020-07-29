@@ -5,8 +5,9 @@
 
 <JarScanner>
 	<!-- skip tag/annotation jar scanning: https://tomcat.apache.org/tomcat-8.0-doc/config/jar-scan-filter.html -->
+   	<!-- "main" is needed when running standalone (tomcat embedded) in Eclipse in order to use the Yada projects -->
     <JarScanFilter
-    	defaultPluggabilityScan="true" pluggabilityScan="Yada*,yada*" pluggabilitySkip="*"
+    	defaultPluggabilityScan="true" pluggabilityScan="main,Yada*,yada*,spring*" pluggabilitySkip="*"
     	defaultTldScan="false" tldScan="" tldSkip="*" />
 </JarScanner>
 
