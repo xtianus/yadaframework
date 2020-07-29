@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>6. Ajax Modal &#8212; Yada Framework master documentation</title>
+    <title>9. Ajax Modal &#8212; Yada Framework master documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -18,8 +18,8 @@
     <script type="text/javascript" src="_static/yadaDocs.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="7. Notification Modal" href="notificationModal.html" />
-    <link rel="prev" title="5. Ajax" href="ajax.html" />
+    <link rel="next" title="10. Notification Modal" href="notificationModal.html" />
+    <link rel="prev" title="8. Ajax" href="ajax.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -58,14 +58,17 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">1. Form Fields and Components</a></li>
-<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">2. Forms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">3. File Uploads</a></li>
-<li class="toctree-l1"><a class="reference internal" href="datatables.html">4. Data Tables</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ajax.html">5. Ajax</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">6. Ajax Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">7. Notification Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">8. New Eclipse Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">1. Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">2. New Eclipse Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internationalization.html">3. Internationalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">4. Form Fields and Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">5. Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">6. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datatables.html">7. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajax.html">8. Ajax</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">9. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">10. Notification Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">11. Troubleshooting</a></li>
 </ul>
 </ul>
 </li>
@@ -79,13 +82,13 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">6. Ajax Modal</a><ul>
-<li><a class="reference internal" href="#description">6.1. Description</a></li>
-<li><a class="reference internal" href="#html-placeholder">6.2. HTML placeholder</a></li>
-<li><a class="reference internal" href="#html-for-the-ajax-call">6.3. HTML for the ajax call</a></li>
-<li><a class="reference internal" href="#java-for-the-controller">6.4. Java for the &#64;Controller</a></li>
-<li><a class="reference internal" href="#html-of-the-modal">6.5. HTML of the modal</a></li>
-<li><a class="reference internal" href="#sticky-modals">6.6. Sticky Modals</a></li>
+<li><a class="reference internal" href="#">9. Ajax Modal</a><ul>
+<li><a class="reference internal" href="#description">9.1. Description</a></li>
+<li><a class="reference internal" href="#html-placeholder">9.2. HTML placeholder</a></li>
+<li><a class="reference internal" href="#html-for-the-ajax-call">9.3. HTML for the ajax call</a></li>
+<li><a class="reference internal" href="#java-for-the-controller">9.4. Java for the &#64;Controller</a></li>
+<li><a class="reference internal" href="#html-of-the-modal">9.5. HTML of the modal</a></li>
+<li><a class="reference internal" href="#sticky-modals">9.6. Sticky Modals</a></li>
 </ul>
 </li>
 </ul>
@@ -97,11 +100,11 @@
               
                 
   <li>
-    <a href="ajax.html" title="Previous Chapter: 5. Ajax"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 5. Ajax</span>
+    <a href="ajax.html" title="Previous Chapter: 8. Ajax"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 8. Ajax</span>
     </a>
   </li>
   <li>
-    <a href="notificationModal.html" title="Next Chapter: 7. Notification Modal"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">7. Notification Modal &raquo;</span>
+    <a href="notificationModal.html" title="Next Chapter: 10. Notification Modal"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">10. Notificat... &raquo;</span>
     </a>
   </li>
               
@@ -136,10 +139,10 @@
     <div class="body col-md-12 content" role="main">
       
   <div class="section" id="ajax-modal">
-<h1>6. Ajax Modal<a class="headerlink" href="#ajax-modal" title="Permalink to this headline">¶</a></h1>
+<h1>9. Ajax Modal<a class="headerlink" href="#ajax-modal" title="Permalink to this headline">¶</a></h1>
 <p class="rubric">Opening a modal with an ajax call</p>
 <div class="section" id="description">
-<h2>6.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<h2>9.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>Make a Bootstrap Modal open as a result of an ajax call.
 For example, by clicking on an “Edit” button
 a modal opens with a form to edit the chosen element.
@@ -172,14 +175,14 @@ added to the page while the modal is open and removed on close.</p>
 </ul>
 </div>
 <div class="section" id="html-placeholder">
-<h2>6.2. HTML placeholder<a class="headerlink" href="#html-placeholder" title="Permalink to this headline">¶</a></h2>
+<h2>9.2. HTML placeholder<a class="headerlink" href="#html-placeholder" title="Permalink to this headline">¶</a></h2>
 <p>The HTML placeholder must be the <code class="docutils literal notranslate"><span class="pre">class=&quot;modal&quot;</span></code> node of a Bootstrap Modal and have <code class="docutils literal notranslate"><span class="pre">id=&quot;ajaxModal&quot;</span></code>:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;ajaxModal&quot;</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;modal fade&quot;</span> <span class="na">tabindex</span><span class="o">=</span><span class="s">&quot;-1&quot;</span> <span class="na">role</span><span class="o">=</span><span class="s">&quot;dialog&quot;</span> <span class="na">aria-hidden</span><span class="o">=</span><span class="s">&quot;true&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="html-for-the-ajax-call">
-<h2>6.3. HTML for the ajax call<a class="headerlink" href="#html-for-the-ajax-call" title="Permalink to this headline">¶</a></h2>
+<h2>9.3. HTML for the ajax call<a class="headerlink" href="#html-for-the-ajax-call" title="Permalink to this headline">¶</a></h2>
 <p>The modal can be opened with any ajax call performed by Yada. In this example we show an ajax link:</p>
 <div class="admonition-todo admonition" id="index-0">
 <p class="admonition-title">Todo</p>
@@ -187,7 +190,7 @@ added to the page while the modal is open and removed on close.</p>
 </div>
 </div>
 <div class="section" id="java-for-the-controller">
-<h2>6.4. Java for the &#64;Controller<a class="headerlink" href="#java-for-the-controller" title="Permalink to this headline">¶</a></h2>
+<h2>9.4. Java for the &#64;Controller<a class="headerlink" href="#java-for-the-controller" title="Permalink to this headline">¶</a></h2>
 <p>The Java &#64;Controller must return a full Bootstrap Modal. The content of the <code class="docutils literal notranslate"><span class="pre">class=&quot;modal&quot;</span></code> node will be inserted in the HTML placeholder and shown.</p>
 <div class="admonition-todo admonition" id="index-1">
 <p class="admonition-title">Todo</p>
@@ -195,7 +198,7 @@ added to the page while the modal is open and removed on close.</p>
 </div>
 </div>
 <div class="section" id="html-of-the-modal">
-<h2>6.5. HTML of the modal<a class="headerlink" href="#html-of-the-modal" title="Permalink to this headline">¶</a></h2>
+<h2>9.5. HTML of the modal<a class="headerlink" href="#html-of-the-modal" title="Permalink to this headline">¶</a></h2>
 <p>You can use your own Bootstrap Modal html or take advantage of the Yada Generic Modal.
 With the Yada Generic Modal you only define the section fragments that you need, producing a full Bootstrap Modal.</p>
 <p>The fragments are:</p>
@@ -263,7 +266,7 @@ To remove a fragment from the modal, use the ~{} expression. To keep the default
 <img alt="_images/modal-example.nofooter.jpg" src="_images/modal-example.nofooter.jpg" />
 </div>
 <div class="section" id="sticky-modals">
-<h2>6.6. Sticky Modals<a class="headerlink" href="#sticky-modals" title="Permalink to this headline">¶</a></h2>
+<h2>9.6. Sticky Modals<a class="headerlink" href="#sticky-modals" title="Permalink to this headline">¶</a></h2>
 <p>Normally, when you open an ajax modal, all existing modals are closed. This is both convenient and compliant with Bootstrap 3 where multiple modals were discouraged.</p>
 <p>A “sticky modal” is an ajax-loaded modal that can stay open behind anyother ajax modal that is opened afterwords.
 You create a sticky modal by adding the <code class="docutils literal notranslate"><span class="pre">yadaStickyModal</span></code> class to the <code class="docutils literal notranslate"><span class="pre">modal-dialog</span></code>, for example:</p>

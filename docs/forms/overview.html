@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>2. Forms &#8212; Yada Framework master documentation</title>
+    <title>5. Forms &#8212; Yada Framework master documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
@@ -18,8 +18,8 @@
     <script type="text/javascript" src="../_static/yadaDocs.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="3. File Uploads" href="uploads.html" />
-    <link rel="prev" title="1. Form Fields and Components" href="fieldsComponents.html" />
+    <link rel="next" title="6. File Uploads" href="uploads.html" />
+    <link rel="prev" title="4. Form Fields and Components" href="fieldsComponents.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -58,14 +58,17 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="fieldsComponents.html">1. Form Fields and Components</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Forms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="uploads.html">3. File Uploads</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../datatables.html">4. Data Tables</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ajax.html">5. Ajax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ajaxModal.html">6. Ajax Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notificationModal.html">7. Notification Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../newEclipseProject.html">8. New Eclipse Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">1. Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../newEclipseProject.html">2. New Eclipse Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../internationalization.html">3. Internationalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fieldsComponents.html">4. Form Fields and Components</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uploads.html">6. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../datatables.html">7. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ajax.html">8. Ajax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ajaxModal.html">9. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notificationModal.html">10. Notification Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">11. Troubleshooting</a></li>
 </ul>
 </ul>
 </li>
@@ -79,11 +82,11 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">2. Forms</a><ul>
-<li><a class="reference internal" href="#description">2.1. Description</a></li>
-<li><a class="reference internal" href="#plain-forms">2.2. Plain Forms</a></li>
-<li><a class="reference internal" href="#form-backing-beans">2.3. Form Backing Beans</a></li>
-<li><a class="reference internal" href="#entity-backing-beans">2.4. Entity Backing Beans</a></li>
+<li><a class="reference internal" href="#">5. Forms</a><ul>
+<li><a class="reference internal" href="#description">5.1. Description</a></li>
+<li><a class="reference internal" href="#plain-forms">5.2. Plain Forms</a></li>
+<li><a class="reference internal" href="#form-backing-beans">5.3. Form Backing Beans</a></li>
+<li><a class="reference internal" href="#entity-backing-beans">5.4. Entity Backing Beans</a></li>
 </ul>
 </li>
 </ul>
@@ -95,11 +98,11 @@
               
                 
   <li>
-    <a href="fieldsComponents.html" title="Previous Chapter: 1. Form Fields and Components"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 1. Form Field...</span>
+    <a href="fieldsComponents.html" title="Previous Chapter: 4. Form Fields and Components"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 4. Form Field...</span>
     </a>
   </li>
   <li>
-    <a href="uploads.html" title="Next Chapter: 3. File Uploads"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">3. File Uploads &raquo;</span>
+    <a href="uploads.html" title="Next Chapter: 6. File Uploads"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">6. File Uploads &raquo;</span>
     </a>
   </li>
               
@@ -134,10 +137,10 @@
     <div class="body col-md-12 content" role="main">
       
   <div class="section" id="forms">
-<h1>2. Forms<a class="headerlink" href="#forms" title="Permalink to this headline">¶</a></h1>
+<h1>5. Forms<a class="headerlink" href="#forms" title="Permalink to this headline">¶</a></h1>
 <p class="rubric">Handling user-submitted data</p>
 <div class="section" id="description">
-<h2>2.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<h2>5.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>Forms are used to gather information from users. You could also use plain anchors with request attributes, but forms are way more convenient especially
 for more than a couple of fields and for performing validation.</p>
 <p>The more general kind of form has some input fields that are sent to the server in a POST and received from the &#64;Controller as method parameters. This is a
@@ -149,7 +152,7 @@ have a database &#64;Entity with the same exact fields. With a simple technique 
 a lot of work.</p>
 </div>
 <div class="section" id="plain-forms">
-<h2>2.2. Plain Forms<a class="headerlink" href="#plain-forms" title="Permalink to this headline">¶</a></h2>
+<h2>5.2. Plain Forms<a class="headerlink" href="#plain-forms" title="Permalink to this headline">¶</a></h2>
 <p>The standard plain forms don’t need much explanation: you have some HTML with input fields and a &#64;Controller that receives those input fields:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">th:action</span><span class="o">=</span><span class="s">&quot;@{/addBook}&quot;</span><span class="p">&gt;</span>
         <span class="p">&lt;</span><span class="nt">input</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;bookTitle&quot;</span> <span class="na">th:value</span><span class="o">=</span><span class="s">&quot;${bookTitle}&quot;</span><span class="p">&gt;</span>
@@ -183,11 +186,11 @@ This is a possible solution for error handling:</p>
 </div>
 </div>
 <div class="section" id="form-backing-beans">
-<h2>2.3. Form Backing Beans<a class="headerlink" href="#form-backing-beans" title="Permalink to this headline">¶</a></h2>
+<h2>5.3. Form Backing Beans<a class="headerlink" href="#form-backing-beans" title="Permalink to this headline">¶</a></h2>
 <p>TODO</p>
 </div>
 <div class="section" id="entity-backing-beans">
-<h2>2.4. Entity Backing Beans<a class="headerlink" href="#entity-backing-beans" title="Permalink to this headline">¶</a></h2>
+<h2>5.4. Entity Backing Beans<a class="headerlink" href="#entity-backing-beans" title="Permalink to this headline">¶</a></h2>
 <p>When the form contains most of the fields that are defined in an existing &#64;Entity it makes sense to use that &#64;Entity as a backing bean.
 Some may argue that exposing database classes on the front-end layer would compromise layer isolation, but we never experienced anything bad by doing this.</p>
 <p>The general idea is that Spring can create an instance of a new &#64;Entity or read it from the database before setting form values on it. The &#64;Controller

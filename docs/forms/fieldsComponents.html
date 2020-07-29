@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>1. Form Fields and Components &#8212; Yada Framework master documentation</title>
+    <title>4. Form Fields and Components &#8212; Yada Framework master documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
@@ -18,8 +18,8 @@
     <script type="text/javascript" src="../_static/yadaDocs.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="2. Forms" href="overview.html" />
-    <link rel="prev" title="Yada Framework" href="../index.html" />
+    <link rel="next" title="5. Forms" href="overview.html" />
+    <link rel="prev" title="3. Internationalization" href="../internationalization.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -58,14 +58,17 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">1. Form Fields and Components</a></li>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">2. Forms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="uploads.html">3. File Uploads</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../datatables.html">4. Data Tables</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ajax.html">5. Ajax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ajaxModal.html">6. Ajax Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notificationModal.html">7. Notification Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../newEclipseProject.html">8. New Eclipse Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">1. Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../newEclipseProject.html">2. New Eclipse Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../internationalization.html">3. Internationalization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">4. Form Fields and Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">5. Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uploads.html">6. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../datatables.html">7. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ajax.html">8. Ajax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ajaxModal.html">9. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notificationModal.html">10. Notification Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">11. Troubleshooting</a></li>
 </ul>
 </ul>
 </li>
@@ -79,12 +82,12 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">1. Form Fields and Components</a><ul>
-<li><a class="reference internal" href="#description">1.1. Description</a></li>
-<li><a class="reference internal" href="#general-syntax">1.2. General Syntax</a></li>
-<li><a class="reference internal" href="#form-fields">1.3. Form Fields</a></li>
-<li><a class="reference internal" href="#form-components">1.4. Form Components</a><ul>
-<li><a class="reference internal" href="#entity-sorter">1.4.1. Entity Sorter</a></li>
+<li><a class="reference internal" href="#">4. Form Fields and Components</a><ul>
+<li><a class="reference internal" href="#description">4.1. Description</a></li>
+<li><a class="reference internal" href="#general-syntax">4.2. General Syntax</a></li>
+<li><a class="reference internal" href="#form-fields">4.3. Form Fields</a></li>
+<li><a class="reference internal" href="#form-components">4.4. Form Components</a><ul>
+<li><a class="reference internal" href="#entity-sorter">4.4.1. Entity Sorter</a></li>
 </ul>
 </li>
 </ul>
@@ -98,11 +101,11 @@
               
                 
   <li>
-    <a href="../index.html" title="Previous Chapter: Yada Framework"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Yada Framework</span>
+    <a href="../internationalization.html" title="Previous Chapter: 3. Internationalization"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 3. Internatio...</span>
     </a>
   </li>
   <li>
-    <a href="overview.html" title="Next Chapter: 2. Forms"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">2. Forms &raquo;</span>
+    <a href="overview.html" title="Next Chapter: 5. Forms"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">5. Forms &raquo;</span>
     </a>
   </li>
               
@@ -137,16 +140,16 @@
     <div class="body col-md-12 content" role="main">
       
   <div class="section" id="form-fields-and-components">
-<h1>1. Form Fields and Components<a class="headerlink" href="#form-fields-and-components" title="Permalink to this headline">¶</a></h1>
+<h1>4. Form Fields and Components<a class="headerlink" href="#form-fields-and-components" title="Permalink to this headline">¶</a></h1>
 <p class="rubric">Quickly assembling forms</p>
 <div class="section" id="description">
-<h2>1.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<h2>4.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>Creating a form often implies not only adding the input fields, but also all the elements that make the form more usable: validation messages, help text,
 sort buttons, etc.
 The use of yada form fields and form components speeds up form development.</p>
 </div>
 <div class="section" id="general-syntax">
-<h2>1.2. General Syntax<a class="headerlink" href="#general-syntax" title="Permalink to this headline">¶</a></h2>
+<h2>4.2. General Syntax<a class="headerlink" href="#general-syntax" title="Permalink to this headline">¶</a></h2>
 <p>Form fields and form elements are inserted using Thymeleaf template directives.
 Example:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">div</span> <span class="na">th:replace</span><span class="o">=</span><span class="s">&quot;/yada/form/text::field(fieldName=&#39;subject&#39;,maxlength=64,required=true,labelKey=&#39;form.label.subject&#39;)&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
@@ -157,13 +160,13 @@ Example:</p>
 could implement complex interactions.</p>
 </div>
 <div class="section" id="form-fields">
-<h2>1.3. Form Fields<a class="headerlink" href="#form-fields" title="Permalink to this headline">¶</a></h2>
+<h2>4.3. Form Fields<a class="headerlink" href="#form-fields" title="Permalink to this headline">¶</a></h2>
 <p>TODO all fields + link to file upload page</p>
 </div>
 <div class="section" id="form-components">
-<h2>1.4. Form Components<a class="headerlink" href="#form-components" title="Permalink to this headline">¶</a></h2>
+<h2>4.4. Form Components<a class="headerlink" href="#form-components" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="entity-sorter">
-<h3>1.4.1. Entity Sorter<a class="headerlink" href="#entity-sorter" title="Permalink to this headline">¶</a></h3>
+<h3>4.4.1. Entity Sorter<a class="headerlink" href="#entity-sorter" title="Permalink to this headline">¶</a></h3>
 <p>The Entity Sorter is a form component that allows to add, edit and sort a set of database &#64;Entity objects.</p>
 <p>TODO</p>
 </div>

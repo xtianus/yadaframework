@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>5. Ajax &#8212; Yada Framework master documentation</title>
+    <title>8. Ajax &#8212; Yada Framework master documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -18,8 +18,8 @@
     <script type="text/javascript" src="_static/yadaDocs.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="6. Ajax Modal" href="ajaxModal.html" />
-    <link rel="prev" title="4. DataTables" href="datatables.html" />
+    <link rel="next" title="9. Ajax Modal" href="ajaxModal.html" />
+    <link rel="prev" title="7. DataTables" href="datatables.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -58,14 +58,17 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">1. Form Fields and Components</a></li>
-<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">2. Forms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">3. File Uploads</a></li>
-<li class="toctree-l1"><a class="reference internal" href="datatables.html">4. Data Tables</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">5. Ajax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">6. Ajax Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">7. Notification Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">8. New Eclipse Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">1. Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">2. New Eclipse Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internationalization.html">3. Internationalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">4. Form Fields and Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">5. Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">6. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datatables.html">7. Data Tables</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">8. Ajax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">9. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">10. Notification Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">11. Troubleshooting</a></li>
 </ul>
 </ul>
 </li>
@@ -79,36 +82,36 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">5. Ajax</a><ul>
-<li><a class="reference internal" href="#description">5.1. Description</a></li>
-<li><a class="reference internal" href="#ajax-links">5.2. Ajax Links</a><ul>
-<li><a class="reference internal" href="#calling-the-backend">5.2.1. Calling the backend</a><ul>
-<li><a class="reference internal" href="#miscellaneous">5.2.1.1. Miscellaneous</a></li>
+<li><a class="reference internal" href="#">8. Ajax</a><ul>
+<li><a class="reference internal" href="#description">8.1. Description</a></li>
+<li><a class="reference internal" href="#ajax-links">8.2. Ajax Links</a><ul>
+<li><a class="reference internal" href="#calling-the-backend">8.2.1. Calling the backend</a><ul>
+<li><a class="reference internal" href="#miscellaneous">8.2.1.1. Miscellaneous</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#returning-from-the-backend">5.2.2. Returning from the backend</a></li>
-<li><a class="reference internal" href="#postprocessing">5.2.3. Postprocessing</a><ul>
-<li><a class="reference internal" href="#replacing-and-deleting">5.2.3.1. Replacing and Deleting</a></li>
-<li><a class="reference internal" href="#calling-some-handler">5.2.3.2. Calling some Handler</a></li>
-<li><a class="reference internal" href="#modal-dialog">5.2.3.3. Modal Dialog</a></li>
-<li><a class="reference internal" href="#confirm-dialog">5.2.3.4. Confirm Dialog</a></li>
+<li><a class="reference internal" href="#returning-from-the-backend">8.2.2. Returning from the backend</a></li>
+<li><a class="reference internal" href="#postprocessing">8.2.3. Postprocessing</a><ul>
+<li><a class="reference internal" href="#replacing-and-deleting">8.2.3.1. Replacing and Deleting</a></li>
+<li><a class="reference internal" href="#calling-some-handler">8.2.3.2. Calling some Handler</a></li>
+<li><a class="reference internal" href="#modal-dialog">8.2.3.3. Modal Dialog</a></li>
+<li><a class="reference internal" href="#confirm-dialog">8.2.3.4. Confirm Dialog</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a class="reference internal" href="#ajax-forms">5.3. Ajax Forms</a></li>
-<li><a class="reference internal" href="#ajax-on-other-elements">5.4. Ajax on other elements</a><ul>
-<li><a class="reference internal" href="#ajax-on-checkbox">5.4.1. Ajax on checkbox</a></li>
+<li><a class="reference internal" href="#ajax-forms">8.3. Ajax Forms</a></li>
+<li><a class="reference internal" href="#ajax-on-other-elements">8.4. Ajax on other elements</a><ul>
+<li><a class="reference internal" href="#ajax-on-checkbox">8.4.1. Ajax on checkbox</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#ajax-method">5.5. Ajax method</a><ul>
-<li><a class="reference internal" href="#url">5.5.1. URL</a></li>
-<li><a class="reference internal" href="#data">5.5.2. data</a></li>
-<li><a class="reference internal" href="#successhandler">5.5.3. successHandler</a></li>
-<li><a class="reference internal" href="#responsetype">5.5.4. responseType</a></li>
+<li><a class="reference internal" href="#ajax-method">8.5. Ajax method</a><ul>
+<li><a class="reference internal" href="#url">8.5.1. URL</a></li>
+<li><a class="reference internal" href="#data">8.5.2. data</a></li>
+<li><a class="reference internal" href="#successhandler">8.5.3. successHandler</a></li>
+<li><a class="reference internal" href="#responsetype">8.5.4. responseType</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#class-reference">5.6. Class Reference</a></li>
+<li><a class="reference internal" href="#class-reference">8.6. Class Reference</a></li>
 </ul>
 </li>
 </ul>
@@ -120,11 +123,11 @@
               
                 
   <li>
-    <a href="datatables.html" title="Previous Chapter: 4. DataTables"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 4. DataTables</span>
+    <a href="datatables.html" title="Previous Chapter: 7. DataTables"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 7. DataTables</span>
     </a>
   </li>
   <li>
-    <a href="ajaxModal.html" title="Next Chapter: 6. Ajax Modal"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">6. Ajax Modal &raquo;</span>
+    <a href="ajaxModal.html" title="Next Chapter: 9. Ajax Modal"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">9. Ajax Modal &raquo;</span>
     </a>
   </li>
               
@@ -159,10 +162,10 @@
     <div class="body col-md-12 content" role="main">
       
   <div class="section" id="ajax">
-<h1>5. Ajax<a class="headerlink" href="#ajax" title="Permalink to this headline">¶</a></h1>
+<h1>8. Ajax<a class="headerlink" href="#ajax" title="Permalink to this headline">¶</a></h1>
 <p class="rubric">Easy ajax operations even without javascript</p>
 <div class="section" id="description">
-<h2>5.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<h2>8.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>The Yada Framework support for ajax calls is implemented in <code class="docutils literal notranslate"><span class="pre">yada.ajax.js</span></code>.
 It is automatically included in production, merged with the other yada javascript files. To use it in development, add:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">script</span> <span class="na">th:if</span><span class="o">=</span><span class="s">&quot;${@config.developmentEnvironment}&quot;</span> <span class="na">yada:src</span><span class="o">=</span><span class="s">&quot;@{/yadares/js/yada.ajax.js}&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
@@ -171,9 +174,9 @@ It is automatically included in production, merged with the other yada javascrip
 <p>Ajax is set up via css classes and data attributes in the HTML source. Some data attributes have yada-dialect equivalents which are more readable and easier to use with thymeleaf expressions.</p>
 </div>
 <div class="section" id="ajax-links">
-<h2>5.2. Ajax Links<a class="headerlink" href="#ajax-links" title="Permalink to this headline">¶</a></h2>
+<h2>8.2. Ajax Links<a class="headerlink" href="#ajax-links" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="calling-the-backend">
-<h3>5.2.1. Calling the backend<a class="headerlink" href="#calling-the-backend" title="Permalink to this headline">¶</a></h3>
+<h3>8.2.1. Calling the backend<a class="headerlink" href="#calling-the-backend" title="Permalink to this headline">¶</a></h3>
 <p>To make an ajax request, add the <code class="docutils literal notranslate"><span class="pre">yadaAjax</span></code> class:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/some/endpoint&quot;</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;yadaAjax&quot;</span><span class="p">&gt;</span>Click here<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
 </pre></div>
@@ -184,7 +187,7 @@ It is automatically included in production, merged with the other yada javascrip
 <p>Check that I can use yada:ajax=”url” and data-yadaHref=”url” instead of href and class. href should be “javascript:;” in that case.</p>
 </div>
 <div class="section" id="miscellaneous">
-<h4>5.2.1.1. Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h4>
+<h4>8.2.1.1. Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h4>
 <dl class="simple">
 <dt>timeout</dt><dd><p>You can set a timeout on the ajax call with <code class="docutils literal notranslate"><span class="pre">data-yadaTimeout=&quot;&lt;milliseconds&gt;&quot;</span></code></p>
 </dd>
@@ -194,7 +197,7 @@ It is automatically included in production, merged with the other yada javascrip
 </div>
 </div>
 <div class="section" id="returning-from-the-backend">
-<h3>5.2.2. Returning from the backend<a class="headerlink" href="#returning-from-the-backend" title="Permalink to this headline">¶</a></h3>
+<h3>8.2.2. Returning from the backend<a class="headerlink" href="#returning-from-the-backend" title="Permalink to this headline">¶</a></h3>
 <p>Controllers can return a standard thymeleaf view (html/xml), some JSON data or any other MIME type like a PDF or an excel file content.
 The resulting objects will be passed to any “successHandler” javascript method (see below)
 when they don’t have other special meaning.</p>
@@ -290,7 +293,7 @@ Please note that you should NOT use the <code class="docutils literal notranslat
 </div>
 </div>
 <div class="section" id="postprocessing">
-<span id="ajax-postprocessing"></span><h3>5.2.3. Postprocessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline">¶</a></h3>
+<span id="ajax-postprocessing"></span><h3>8.2.3. Postprocessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline">¶</a></h3>
 <p>After an ajax call, you usually want to do something on the page: update some div, show a modal, change a javascript variable etc.
 The following <code class="docutils literal notranslate"><span class="pre">data-</span></code> attributes allow you to perform postprocessing when returning successfully (i.e. with no network errors and no <code class="docutils literal notranslate"><span class="pre">YadaNotify</span></code> errors) from the call.</p>
 <table class="colwidths-given docutils align-center" id="id1">
@@ -340,7 +343,7 @@ The following <code class="docutils literal notranslate"><span class="pre">data-
 </tbody>
 </table>
 <div class="section" id="replacing-and-deleting">
-<h4>5.2.3.1. Replacing and Deleting<a class="headerlink" href="#replacing-and-deleting" title="Permalink to this headline">¶</a></h4>
+<h4>8.2.3.1. Replacing and Deleting<a class="headerlink" href="#replacing-and-deleting" title="Permalink to this headline">¶</a></h4>
 <p>The “jQuery selector list” is a comma-separated list of jQuery selectors, like <code class="docutils literal notranslate"><span class="pre">&quot;#someId,</span> <span class="pre">.someClass</span> <span class="pre">&gt;</span> <span class="pre">a&quot;</span></code>.
 If the selector list is empty, the target is the element itself.
 If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.</p>
@@ -377,7 +380,7 @@ When there is a single target, fragments are ignored and the whole result is use
 </div>
 </div>
 <div class="section" id="calling-some-handler">
-<h4>5.2.3.2. Calling some Handler<a class="headerlink" href="#calling-some-handler" title="Permalink to this headline">¶</a></h4>
+<h4>8.2.3.2. Calling some Handler<a class="headerlink" href="#calling-some-handler" title="Permalink to this headline">¶</a></h4>
 <p>The success handlers are called in sequence and should have the following signature:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span>function someHandler(responseText, responseHtml, link) {
 </pre></div>
@@ -392,11 +395,11 @@ When there is a single target, fragments are ignored and the whole result is use
 </dl>
 </div>
 <div class="section" id="modal-dialog">
-<h4>5.2.3.3. Modal Dialog<a class="headerlink" href="#modal-dialog" title="Permalink to this headline">¶</a></h4>
+<h4>8.2.3.3. Modal Dialog<a class="headerlink" href="#modal-dialog" title="Permalink to this headline">¶</a></h4>
 <p>To open a modal returned by an ajax call, see <a class="reference internal" href="ajaxModal.html"><span class="doc">Ajax Modal</span></a>.</p>
 </div>
 <div class="section" id="confirm-dialog">
-<h4>5.2.3.4. Confirm Dialog<a class="headerlink" href="#confirm-dialog" title="Permalink to this headline">¶</a></h4>
+<h4>8.2.3.4. Confirm Dialog<a class="headerlink" href="#confirm-dialog" title="Permalink to this headline">¶</a></h4>
 <p>You can show a confirm dialog before the ajax call is made. The user will be shown a text message and an option to confirm or abort the call.</p>
 <table class="colwidths-given docutils align-center" id="id2">
 <caption><span class="caption-text">data- attributes and tags for Confirm Dialog</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
@@ -434,17 +437,17 @@ When there is a single target, fragments are ignored and the whole result is use
 </div>
 </div>
 <div class="section" id="ajax-forms">
-<h2>5.3. Ajax Forms<a class="headerlink" href="#ajax-forms" title="Permalink to this headline">¶</a></h2>
+<h2>8.3. Ajax Forms<a class="headerlink" href="#ajax-forms" title="Permalink to this headline">¶</a></h2>
 <div class="admonition-todo admonition" id="index-3">
 <p class="admonition-title">Todo</p>
 <p>all. Remember that button handlers receive the button itself: function editTaskFormHandler(responseText, responseHtml, form, button) {</p>
 </div>
 </div>
 <div class="section" id="ajax-on-other-elements">
-<h2>5.4. Ajax on other elements<a class="headerlink" href="#ajax-on-other-elements" title="Permalink to this headline">¶</a></h2>
+<h2>8.4. Ajax on other elements<a class="headerlink" href="#ajax-on-other-elements" title="Permalink to this headline">¶</a></h2>
 <p>Ajax calls can also be made on other HTML elements like buttons and selects by means of the <code class="docutils literal notranslate"><span class="pre">data-yadahref</span></code> attribute or the equivalent <code class="docutils literal notranslate"><span class="pre">yada:ajax</span></code> dialect.</p>
 <div class="section" id="ajax-on-checkbox">
-<h3>5.4.1. Ajax on checkbox<a class="headerlink" href="#ajax-on-checkbox" title="Permalink to this headline">¶</a></h3>
+<h3>8.4.1. Ajax on checkbox<a class="headerlink" href="#ajax-on-checkbox" title="Permalink to this headline">¶</a></h3>
 <p>An ajax call can be originated by a state change in a checkbox. The checkbox must NOT be inside a form otherwise the form would be submitted instead.</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">input</span> <span class="na">yada:ajax</span><span class="o">=</span><span class="s">&quot;@{/product/onOff(productId=${product.id})}&quot;</span>
         <span class="na">th:name</span><span class="o">=</span><span class="s">&quot;enabled&quot;</span> <span class="na">th:checked</span><span class="o">=</span><span class="s">&quot;${product.enabled}&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;checkbox&quot;</span> <span class="p">/&gt;</span>
@@ -458,7 +461,7 @@ showFeedbackIfNeeded</p>
 </div>
 </div>
 <div class="section" id="ajax-method">
-<h2>5.5. Ajax method<a class="headerlink" href="#ajax-method" title="Permalink to this headline">¶</a></h2>
+<h2>8.5. Ajax method<a class="headerlink" href="#ajax-method" title="Permalink to this headline">¶</a></h2>
 <p>You can call the low-level yada.ajax() method directly.</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">yada</span><span class="p">.</span><span class="nx">ajax</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">successHandler</span><span class="p">,</span> <span class="nx">method</span><span class="p">,</span> <span class="nx">timeout</span><span class="p">,</span> <span class="nx">hideLoader</span><span class="p">,</span> <span class="nx">asJson</span><span class="p">,</span> <span class="nx">responseType</span><span class="p">)</span>
 </pre></div>
@@ -507,7 +510,7 @@ showFeedbackIfNeeded</p>
 </ul>
 <p>Everything that applies to the other forms of invocation (opening modals, showing login pages, …) also applies.</p>
 <div class="section" id="url">
-<h3>5.5.1. URL<a class="headerlink" href="#url" title="Permalink to this headline">¶</a></h3>
+<h3>8.5.1. URL<a class="headerlink" href="#url" title="Permalink to this headline">¶</a></h3>
 <p>The url must point to the controller handling the request. If the javascript code is in an HTML file, the standard thymeleaf <code class="docutils literal notranslate"><span class="pre">[[&#64;{/path}]]</span></code> syntax can be used.
 If the code is in a js file, the url will have to be passed to the script using some global variable set inside the html file:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span>window.myUrl = [[@{/path}]]
@@ -515,7 +518,7 @@ If the code is in a js file, the url will have to be passed to the script using 
 </div>
 </div>
 <div class="section" id="data">
-<h3>5.5.2. data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h3>
+<h3>8.5.2. data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h3>
 <p>The data object is a standard jQuery.ajax() data object. This means it will be converted using the jQuery conversion rules.</p>
 <p>To send some name/value pairs you could therefore use the following code:</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="p">{};</span>
@@ -555,7 +558,7 @@ The controller should have a <code class="docutils literal notranslate"><span cl
 <p>More info on binary uploads can be found in <a class="reference internal" href="forms/uploads.html#java"><span class="std std-ref">File Uploads</span></a>.</p>
 </div>
 <div class="section" id="successhandler">
-<h3>5.5.3. successHandler<a class="headerlink" href="#successhandler" title="Permalink to this headline">¶</a></h3>
+<h3>8.5.3. successHandler<a class="headerlink" href="#successhandler" title="Permalink to this headline">¶</a></h3>
 <p>The success handler is called when the server returns without errors:</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">successHandler</span><span class="p">(</span><span class="nx">responseText</span><span class="p">,</span> <span class="nx">responseHtml</span><span class="p">)</span>
 </pre></div>
@@ -578,7 +581,7 @@ The controller should have a <code class="docutils literal notranslate"><span cl
 </div>
 </div>
 <div class="section" id="responsetype">
-<h3>5.5.4. responseType<a class="headerlink" href="#responsetype" title="Permalink to this headline">¶</a></h3>
+<h3>8.5.4. responseType<a class="headerlink" href="#responsetype" title="Permalink to this headline">¶</a></h3>
 <p>The response type of an ajax call is set automatically unless specified in this field. A useful value is “blob”
 for downloading a file on the client computer.
 See <a class="reference internal" href="#returning-from-the-backend"><span class="std std-ref">Returning from the backend</span></a> for an example on how to send a PDF file from the server.</p>
@@ -588,7 +591,7 @@ See <a class="reference internal" href="#returning-from-the-backend"><span class
 </div>
 </div>
 <div class="section" id="class-reference">
-<h2>5.6. Class Reference<a class="headerlink" href="#class-reference" title="Permalink to this headline">¶</a></h2>
+<h2>8.6. Class Reference<a class="headerlink" href="#class-reference" title="Permalink to this headline">¶</a></h2>
 <dl class="simple">
 <dt>yadaAjax</dt><dd><p>Change the standard behavior of the element so that it calls the server via ajax</p>
 </dd>

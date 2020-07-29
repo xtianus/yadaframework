@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>8. New Eclipse Project &#8212; Yada Framework master documentation</title>
+    <title>2. New Eclipse Project &#8212; Yada Framework master documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -18,8 +18,8 @@
     <script type="text/javascript" src="_static/yadaDocs.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="9. Troubleshooting" href="troubleshooting.html" />
-    <link rel="prev" title="7. Notification Modal" href="notificationModal.html" />
+    <link rel="next" title="3. Form Fields and Components" href="forms/fieldsComponents.html" />
+    <link rel="prev" title="1. Overview" href="overview.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -58,15 +58,16 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">1. Form Fields and Components</a></li>
-<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">2. Forms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">3. File Uploads</a></li>
-<li class="toctree-l1"><a class="reference internal" href="datatables.html">4. Data Tables</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ajax.html">5. Ajax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">6. Ajax Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">7. Notification Modal</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">8. New Eclipse Project</a></li>
-<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">9. Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">1. Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. New Eclipse Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">3. Form Fields and Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">4. Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">5. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datatables.html">6. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajax.html">7. Ajax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">8. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">9. Notification Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">10. Troubleshooting</a></li>
 </ul>
 </ul>
 </li>
@@ -80,31 +81,31 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">8. New Eclipse Project</a><ul>
-<li><a class="reference internal" href="#introduction">8.1. Introduction</a></li>
-<li><a class="reference internal" href="#prerequisites">8.2. Prerequisites</a><ul>
-<li><a class="reference internal" href="#java-sdk">8.2.1. Java SDK</a></li>
-<li><a class="reference internal" href="#git">8.2.2. GIT</a></li>
-<li><a class="reference internal" href="#mysql">8.2.3. MySQL</a></li>
-<li><a class="reference internal" href="#eclipse">8.2.4. Eclipse</a></li>
-<li><a class="reference internal" href="#node-js-optional">8.2.5. Node.js (optional)</a></li>
+<li><a class="reference internal" href="#">2. New Eclipse Project</a><ul>
+<li><a class="reference internal" href="#introduction">2.1. Introduction</a></li>
+<li><a class="reference internal" href="#prerequisites">2.2. Prerequisites</a><ul>
+<li><a class="reference internal" href="#java-sdk">2.2.1. Java SDK</a></li>
+<li><a class="reference internal" href="#git">2.2.2. GIT</a></li>
+<li><a class="reference internal" href="#mysql">2.2.3. MySQL</a></li>
+<li><a class="reference internal" href="#eclipse">2.2.4. Eclipse</a></li>
+<li><a class="reference internal" href="#node-js-optional">2.2.5. Node.js (optional)</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#connect-to-git">8.3. Connect to GIT</a><ul>
-<li><a class="reference internal" href="#add-the-repositories">8.3.1. Add the repositories</a></li>
-<li><a class="reference internal" href="#generate-the-yadatools-library">8.3.2. Generate the YadaTools library</a></li>
+<li><a class="reference internal" href="#connect-to-git">2.3. Connect to GIT</a><ul>
+<li><a class="reference internal" href="#add-the-repositories">2.3.1. Add the repositories</a></li>
+<li><a class="reference internal" href="#generate-the-yadatools-library">2.3.2. Generate the YadaTools library</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#the-first-project">8.4. The First Project</a></li>
-<li><a class="reference internal" href="#the-build-file">8.5. The Build File</a></li>
-<li><a class="reference internal" href="#code-generation-just-a-bit">8.6. Code Generation (just a bit)</a></li>
-<li><a class="reference internal" href="#initial-customization">8.7. Initial Customization</a></li>
-<li><a class="reference internal" href="#database-setup">8.8. Database Setup</a></li>
-<li><a class="reference internal" href="#tomcat-server">8.9. Tomcat server</a></li>
-<li><a class="reference internal" href="#troubleshooting">8.10. Troubleshooting</a><ul>
-<li><a class="reference internal" href="#compilation-errors">8.10.1. Compilation Errors</a></li>
-<li><a class="reference internal" href="#validation-errors">8.10.2. Validation Errors</a></li>
-<li><a class="reference internal" href="#tomcat-startup-errors">8.10.3. Tomcat Startup Errors</a></li>
+<li><a class="reference internal" href="#the-first-project">2.4. The First Project</a></li>
+<li><a class="reference internal" href="#the-build-file">2.5. The Build File</a></li>
+<li><a class="reference internal" href="#code-generation-just-a-bit">2.6. Code Generation (just a bit)</a></li>
+<li><a class="reference internal" href="#initial-customization">2.7. Initial Customization</a></li>
+<li><a class="reference internal" href="#database-setup">2.8. Database Setup</a></li>
+<li><a class="reference internal" href="#tomcat-server">2.9. Tomcat server</a></li>
+<li><a class="reference internal" href="#troubleshooting">2.10. Troubleshooting</a><ul>
+<li><a class="reference internal" href="#compilation-errors">2.10.1. Compilation Errors</a></li>
+<li><a class="reference internal" href="#validation-errors">2.10.2. Validation Errors</a></li>
+<li><a class="reference internal" href="#tomcat-startup-errors">2.10.3. Tomcat Startup Errors</a></li>
 </ul>
 </li>
 </ul>
@@ -118,11 +119,11 @@
               
                 
   <li>
-    <a href="notificationModal.html" title="Previous Chapter: 7. Notification Modal"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 7. Notification Modal</span>
+    <a href="overview.html" title="Previous Chapter: 1. Overview"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 1. Overview</span>
     </a>
   </li>
   <li>
-    <a href="troubleshooting.html" title="Next Chapter: 9. Troubleshooting"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">9. Troubleshooting &raquo;</span>
+    <a href="forms/fieldsComponents.html" title="Next Chapter: 3. Form Fields and Components"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">3. Form Field... &raquo;</span>
     </a>
   </li>
               
@@ -157,9 +158,9 @@
     <div class="body col-md-12 content" role="main">
       
   <div class="section" id="new-eclipse-project">
-<h1>8. New Eclipse Project<a class="headerlink" href="#new-eclipse-project" title="Permalink to this headline">¶</a></h1>
+<h1>2. New Eclipse Project<a class="headerlink" href="#new-eclipse-project" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="introduction">
-<h2>8.1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<h2>2.1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <p>The following procedure will guide you through the creation of a new Eclipse project for your web app. At the end you will have a Web Project that can be run in a Java EE server (e.g. Tomcat) with all the needed layers set up and ready for customization:</p>
 <ul class="simple">
 <li><p>Database access layer with transactions (Hibernate / JPA / Spring)</p></li>
@@ -175,10 +176,10 @@
 </ul>
 </div>
 <div class="section" id="prerequisites">
-<h2>8.2. Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<h2>2.2. Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
 <p>You should have <a class="reference external" href="https://www.oracle.com/technetwork/java/javase/downloads/index.html">Java</a>, <a class="reference external" href="https://git-scm.com/downloads">git</a>, <a class="reference external" href="https://dev.mysql.com/downloads/mysql/">MySQL Community Server</a> and a working copy of <a class="reference external" href="https://www.eclipse.org/downloads/packages/">Eclipse IDE for Enterprise Java Developers</a>. Check the notes in this section before installing anything.</p>
 <div class="section" id="java-sdk">
-<h3>8.2.1. Java SDK<a class="headerlink" href="#java-sdk" title="Permalink to this headline">¶</a></h3>
+<h3>2.2.1. Java SDK<a class="headerlink" href="#java-sdk" title="Permalink to this headline">¶</a></h3>
 <p>Remove any Java installation you may have on your PC.</p>
 <div class="admonition danger">
 <p class="admonition-title">Danger</p>
@@ -205,11 +206,11 @@ make a symbolic link to it with a generic name, like</p>
 The Java JRE can be installed to the default folder (<code class="docutils literal notranslate"><span class="pre">C:\Program</span> <span class="pre">Files</span></code>).</p>
 </div>
 <div class="section" id="git">
-<h3>8.2.2. GIT<a class="headerlink" href="#git" title="Permalink to this headline">¶</a></h3>
+<h3>2.2.2. GIT<a class="headerlink" href="#git" title="Permalink to this headline">¶</a></h3>
 <p>Install <a class="reference external" href="https://git-scm.com/downloads">git</a> for your OS.</p>
 </div>
 <div class="section" id="mysql">
-<h3>8.2.3. MySQL<a class="headerlink" href="#mysql" title="Permalink to this headline">¶</a></h3>
+<h3>2.2.3. MySQL<a class="headerlink" href="#mysql" title="Permalink to this headline">¶</a></h3>
 <p>Install <a class="reference external" href="https://dev.mysql.com/downloads/mysql/">MySQL Community Server</a> v5.7: later versions have not been tested yet but this documentation uses MySQL 8 just to be ready.</p>
 <p>For a future-proof installation you should not install MySQL as a Service, but run it manually when needed because one day
 you might have more than one version to use. The steps to install MySQL 8 on windows are as follows:</p>
@@ -249,7 +250,7 @@ C<span class="p">:</span><span class="nl">\Local\mysql80\bin\mysqladmin.exe</spa
 </div>
 </div>
 <div class="section" id="eclipse">
-<h3>8.2.4. Eclipse<a class="headerlink" href="#eclipse" title="Permalink to this headline">¶</a></h3>
+<h3>2.2.4. Eclipse<a class="headerlink" href="#eclipse" title="Permalink to this headline">¶</a></h3>
 <div class="admonition danger">
 <p class="admonition-title">Danger</p>
 <p>Eclipse jee 2019-12-R throws a weird “VerifyError: Inconsistent stackmap frames” on some occasions. Don’t use that version yet.</p>
@@ -282,15 +283,15 @@ which would be <code class="docutils literal notranslate"><span class="pre">C:\L
 Also set the “Window &gt; Preferences &gt; Java &gt; Compiler &gt; JDK Compliance” accordingly.</p>
 </div>
 <div class="section" id="node-js-optional">
-<h3>8.2.5. Node.js (optional)<a class="headerlink" href="#node-js-optional" title="Permalink to this headline">¶</a></h3>
+<h3>2.2.5. Node.js (optional)<a class="headerlink" href="#node-js-optional" title="Permalink to this headline">¶</a></h3>
 <p>Node.js is not strictly needed but it can be useful.
 Install the <a class="reference external" href="https://nodejs.org/en/download/">latest LTS version</a>.</p>
 </div>
 </div>
 <div class="section" id="connect-to-git">
-<h2>8.3. Connect to GIT<a class="headerlink" href="#connect-to-git" title="Permalink to this headline">¶</a></h2>
+<h2>2.3. Connect to GIT<a class="headerlink" href="#connect-to-git" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="add-the-repositories">
-<h3>8.3.1. Add the repositories<a class="headerlink" href="#add-the-repositories" title="Permalink to this headline">¶</a></h3>
+<h3>2.3.1. Add the repositories<a class="headerlink" href="#add-the-repositories" title="Permalink to this headline">¶</a></h3>
 <p>The “Yada Framework” sources are hosted on the public GitHub site.
 To access the GitHub repository just use your GitHub credentials (create some) on the <a class="reference external" href="https://github.com/xtianus/yadaframework">yadaframework</a> repo.
 The git url should be like <code class="docutils literal notranslate"><span class="pre">https://github.com/xtianus/yadaframework.git</span></code>.</p>
@@ -327,7 +328,7 @@ It is very important that you <strong>store all the repositories in a common par
 <p>When you have connected to all repositories, you can switch to the “Java Perspective” in Eclipse.</p>
 </div>
 <div class="section" id="generate-the-yadatools-library">
-<h3>8.3.2. Generate the YadaTools library<a class="headerlink" href="#generate-the-yadatools-library" title="Permalink to this headline">¶</a></h3>
+<h3>2.3.2. Generate the YadaTools library<a class="headerlink" href="#generate-the-yadatools-library" title="Permalink to this headline">¶</a></h3>
 <p>When you first setup the development environment, you currently need to generate the YadaTools library locally
 because it has not been uploaded on a distribution site yet.
 If you fail to do so, you’ll get a weird compilation error like <em>“Could not fetch model of type ‘GradleBuild’ using Gradle distribution”</em>.
@@ -342,7 +343,7 @@ daemon sometimes gets in the way…</p>
 </div>
 </div>
 <div class="section" id="the-first-project">
-<h2>8.4. The First Project<a class="headerlink" href="#the-first-project" title="Permalink to this headline">¶</a></h2>
+<h2>2.4. The First Project<a class="headerlink" href="#the-first-project" title="Permalink to this headline">¶</a></h2>
 <p>Create a new Eclipse Project using “File &gt; New &gt; Project… &gt; Gradle &gt; Gradle Project” menu.
 Use any name you like (“MySiteProject” in the above example) and accept all defaults. A new Java project will be created in your workspace.</p>
 <p>Delete any example file and folders inside the “src/main/java” and “src/test/java” folders.</p>
@@ -389,7 +390,7 @@ Finally edit .gitignore in the root of your project look like the following:</p>
 </div>
 </div>
 <div class="section" id="the-build-file">
-<h2>8.5. The Build File<a class="headerlink" href="#the-build-file" title="Permalink to this headline">¶</a></h2>
+<h2>2.5. The Build File<a class="headerlink" href="#the-build-file" title="Permalink to this headline">¶</a></h2>
 <p>Replace your <code class="docutils literal notranslate"><span class="pre">build.gradle</span></code> with the contents of <code class="docutils literal notranslate"><span class="pre">/YadaTools/scripts/template.gradle</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">//</span> <span class="pre">CHANGE</span> <span class="pre">THIS</span> <span class="pre">!!!</span></code> items should be edited to suit your needs.</p>
 <p>The default environments are “dev” for “Development”, “tst” for “Test” and “prod” for “Production”.
@@ -416,7 +417,7 @@ and is handy when you plan to work on the YadaWeb sources to fix and improve the
 <p>More information on the wtp syntax <a class="reference external" href="https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpComponent.html">here</a> and <a class="reference external" href="https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpFacet.html">here</a>.</p>
 </div>
 <div class="section" id="code-generation-just-a-bit">
-<h2>8.6. Code Generation (just a bit)<a class="headerlink" href="#code-generation-just-a-bit" title="Permalink to this headline">¶</a></h2>
+<h2>2.6. Code Generation (just a bit)<a class="headerlink" href="#code-generation-just-a-bit" title="Permalink to this headline">¶</a></h2>
 <p>Ensure you have these folders in your project before the next step:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">src/main/java</span></code></p></li>
@@ -434,7 +435,7 @@ The “–no-daemon” option is to stay on the safe side.</p>
 still have errors, try to fix them ;-) For example you might need to remove the dependency on YadaWebSeurity classes if you didn’t want to use it.</p>
 </div>
 <div class="section" id="initial-customization">
-<h2>8.7. Initial Customization<a class="headerlink" href="#initial-customization" title="Permalink to this headline">¶</a></h2>
+<h2>2.7. Initial Customization<a class="headerlink" href="#initial-customization" title="Permalink to this headline">¶</a></h2>
 <p>Before starting the server for the first time, you should customise some generated files.
 The bare minimum would be to edit these files:</p>
 <ul class="simple">
@@ -457,7 +458,7 @@ The bare minimum would be to edit these files:</p>
 <p>You can skip the “tst” and “prod” files until you’re ready to deploy to a test/production server.</p>
 </div>
 <div class="section" id="database-setup">
-<h2>8.8. Database Setup<a class="headerlink" href="#database-setup" title="Permalink to this headline">¶</a></h2>
+<h2>2.8. Database Setup<a class="headerlink" href="#database-setup" title="Permalink to this headline">¶</a></h2>
 <p>Create the local database by running the scripts inside <code class="docutils literal notranslate"><span class="pre">/env/dev</span></code> (if you’re not on windows, just copy the content and adapt it to your platform).</p>
 <p>Create the database schema by running the <code class="docutils literal notranslate"><span class="pre">gradlew</span> <span class="pre">dbSchema</span></code> task.
 You may get some compilation errors that need to be fixed.
@@ -465,7 +466,7 @@ If the schema generator can’t connect to the database check that /src/main/res
 <p>Run the <code class="docutils literal notranslate"><span class="pre">/env/dev/dropAndCreateDatabase.bat</span></code> (or a linux equivalent) to create a new empty database with the generated schema.</p>
 </div>
 <div class="section" id="tomcat-server">
-<h2>8.9. Tomcat server<a class="headerlink" href="#tomcat-server" title="Permalink to this headline">¶</a></h2>
+<h2>2.9. Tomcat server<a class="headerlink" href="#tomcat-server" title="Permalink to this headline">¶</a></h2>
 <p>This section is about setting up a standalone Tomcat server that can be controlled from Eclipse. You don’t need it if you’re going to use the
 embedded version of Tomcat.</p>
 <p>Download <a class="reference external" href="https://tomcat.apache.org/download-80.cgi">Apache Tomcat 8.5</a> “64-bit Windows zip” and unzip the folder to some place like <code class="docutils literal notranslate"><span class="pre">C:\local\Tomcats\apache-tomcat-8.5.51</span></code>.</p>
@@ -494,21 +495,21 @@ an error from Tomcat:</p>
 <p>If the server starts with no errors, you can see the homepage placeholder at <a class="reference external" href="http://localhost:8080/">http://localhost:8080/</a></p>
 </div>
 <div class="section" id="troubleshooting">
-<h2>8.10. Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
+<h2>2.10. Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="compilation-errors">
-<h3>8.10.1. Compilation Errors<a class="headerlink" href="#compilation-errors" title="Permalink to this headline">¶</a></h3>
+<h3>2.10.1. Compilation Errors<a class="headerlink" href="#compilation-errors" title="Permalink to this headline">¶</a></h3>
 <p>In case of compilation errors, the first thing to do is to run a “Refresh Gradle Project” on the affected project or the including project.
 If errors persist, check that you have imported all the needed Yada projects.
 Also be sure to have “Projects &gt; Build Automatically” checked and try with a “Project &gt; Clean…”.</p>
 </div>
 <div class="section" id="validation-errors">
-<h3>8.10.2. Validation Errors<a class="headerlink" href="#validation-errors" title="Permalink to this headline">¶</a></h3>
+<h3>2.10.2. Validation Errors<a class="headerlink" href="#validation-errors" title="Permalink to this headline">¶</a></h3>
 <p>If you get an error like</p>
 <p><code class="docutils literal notranslate"><span class="pre">CHKJ3000E:</span> <span class="pre">WAR</span> <span class="pre">Validation</span> <span class="pre">Failed:</span> <span class="pre">org.eclipse.jst.j2ee.commonarchivecore.internal.exception.DeploymentDescriptorLoadException:</span> <span class="pre">WEB-INF/web.xml</span></code></p>
 <p>you may fix it just by forcing a validation on the project via the menu.</p>
 </div>
 <div class="section" id="tomcat-startup-errors">
-<h3>8.10.3. Tomcat Startup Errors<a class="headerlink" href="#tomcat-startup-errors" title="Permalink to this headline">¶</a></h3>
+<h3>2.10.3. Tomcat Startup Errors<a class="headerlink" href="#tomcat-startup-errors" title="Permalink to this headline">¶</a></h3>
 <p>If Tomcat doesn’t start, it might have stale data. Try with a “Clean…” on the server. If everything fails, stop the server and delete the content of the Deploy folder,
 for example <code class="docutils literal notranslate"><span class="pre">C:\local\Deploy\myProject</span></code>. Then do a “Publish” on the server. If you can’t delete some file because Windows says it’s open, you’ll need to quit Eclipse
 and be sure that there are no ghost Tomcat processes running. In extreme cases, you might need to restart your PC.</p>

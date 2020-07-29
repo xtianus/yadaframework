@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>7. DataTables &#8212; Yada Framework master documentation</title>
+    <title>1. Overview &#8212; Yada Framework master documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
@@ -18,8 +18,8 @@
     <script type="text/javascript" src="_static/yadaDocs.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="8. Ajax" href="ajax.html" />
-    <link rel="prev" title="6. File Uploads" href="forms/uploads.html" />
+    <link rel="next" title="2. New Eclipse Project" href="newEclipseProject.html" />
+    <link rel="prev" title="Yada Framework" href="index.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -58,13 +58,13 @@
   <ul class="dropdown-menu globaltoc"
       role="menu"
       aria-labelledby="dLabelGlobalToc"><ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="overview.html">1. Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">1. Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">2. New Eclipse Project</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internationalization.html">3. Internationalization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">4. Form Fields and Components</a></li>
 <li class="toctree-l1"><a class="reference internal" href="forms/overview.html">5. Forms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">6. File Uploads</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">7. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datatables.html">7. Data Tables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ajax.html">8. Ajax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">9. Ajax Modal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notificationModal.html">10. Notification Modal</a></li>
@@ -82,7 +82,11 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">7. DataTables</a></li>
+<li><a class="reference internal" href="#">1. Overview</a><ul>
+<li><a class="reference internal" href="#general-principles">1.1. General Principles</a></li>
+<li><a class="reference internal" href="#documentation-contents">1.2. Documentation Contents</a></li>
+</ul>
+</li>
 </ul>
 </ul>
 </li>
@@ -92,11 +96,11 @@
               
                 
   <li>
-    <a href="forms/uploads.html" title="Previous Chapter: 6. File Uploads"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 6. File Uploads</span>
+    <a href="index.html" title="Previous Chapter: Yada Framework"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Yada Framework</span>
     </a>
   </li>
   <li>
-    <a href="ajax.html" title="Next Chapter: 8. Ajax"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">8. Ajax &raquo;</span>
+    <a href="newEclipseProject.html" title="Next Chapter: 2. New Eclipse Project"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">2. New Eclips... &raquo;</span>
     </a>
   </li>
               
@@ -106,7 +110,7 @@
             
               <li class="hidden-sm">
 <div id="sourcelink">
-  <a href="_sources/datatables.rst.txt"
+  <a href="_sources/overview.rst.txt"
      rel="nofollow">Source</a>
 </div></li>
             
@@ -130,11 +134,60 @@
   <div class="row">
     <div class="body col-md-12 content" role="main">
       
-  <div class="section" id="datatables">
-<h1>7. DataTables<a class="headerlink" href="#datatables" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="overview">
+<h1>1. Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="general-principles">
+<h2>1.1. General Principles<a class="headerlink" href="#general-principles" title="Permalink to this headline">¶</a></h2>
+<p>The <strong>Yada Framework</strong> is a collection of libraries, patterns, tools, code snippets and best practices to speed up web site
+development.</p>
+<p>The main focus is on <strong>productivity</strong> and the approach is to use proven and known technologies
+in a repeatable way, so that each new project is easier to develop and maintain.</p>
+<p>Another goal is <strong>simplicity</strong> as defined by the KISS principle. If something is very powerful and exciting and
+complicated to use, it won’t find a place here.</p>
+<p>The technology stack is as follows:</p>
+<ul class="simple">
+<li><p>java</p></li>
+<li><p>Tomcat</p></li>
+<li><p>Spring WebMVC</p></li>
+<li><p>MySQL</p></li>
+<li><p>Hibernate</p></li>
+<li><p>Thymeleaf</p></li>
+<li><p>HTML/CSS</p></li>
+<li><p>Javascript</p></li>
+<li><p>jQuery</p></li>
+</ul>
+<p>Tools used:</p>
+<ul class="simple">
+<li><p>Eclipse</p></li>
+<li><p>Gradle</p></li>
+<li><p>Sphinx</p></li>
+</ul>
+<p>You may think that some are old or obsolete technologies only because they’re not very much hyped anymore,
+but for the purpose of increasing productivity, there’s nothing better than something that has been around for years or decades and
+is still being used and maintained: developers will spend less time around bugs, architects will know when to use what,
+testers will have plenty of tools at their disposal.</p>
 <div class="admonition-todo admonition" id="index-0">
 <p class="admonition-title">Todo</p>
-<p>TODO</p>
+<p>TO BE CONTINUED…</p>
+</div>
+</div>
+<div class="section" id="documentation-contents">
+<h2>1.2. Documentation Contents<a class="headerlink" href="#documentation-contents" title="Permalink to this headline">¶</a></h2>
+<dl>
+<dt><a class="reference internal" href="newEclipseProject.html"><span class="doc">New Eclipse Project</span></a></dt><dd><blockquote>
+<div><p>This section will guide you through the setup of the development environment: installing Java, git,
+MySQL, Eclipse. It will then show you how to create an Eclipse project with a database and a web server.</p>
+</div></blockquote>
+<dl class="simple">
+<dt><a class="reference internal" href="internationalization.html"><span class="doc">Internationalization</span></a></dt><dd><p>This section shows how easy it is to cope for different languages</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition-todo admonition" id="index-1">
+<p class="admonition-title">Todo</p>
+<p>TO BE CONTINUED…</p>
+</div>
 </div>
 </div>
 

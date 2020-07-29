@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>3. Internationalization &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/yadaDocs.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
+    <script type="text/javascript" src="_static/copybutton.js"></script>
+    <script type="text/javascript" src="_static/yadaDocs.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="4. Form Fields and Components" href="forms/fieldsComponents.html" />
+    <link rel="prev" title="2. New Eclipse Project" href="newEclipseProject.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">1. Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">2. New Eclipse Project</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">3. Internationalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">4. Form Fields and Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">5. Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">6. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datatables.html">7. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajax.html">8. Ajax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">9. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">10. Notification Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">11. Troubleshooting</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">3. Internationalization</a><ul>
+<li><a class="reference internal" href="#introduction">3.1. Introduction</a><ul>
+<li><a class="reference internal" href="#language-user-choice">3.1.1. Language user choice</a></li>
+<li><a class="reference internal" href="#search-engine-indexing">3.1.2. Search engine indexing</a></li>
+<li><a class="reference internal" href="#immutable-text">3.1.3. Immutable text</a></li>
+<li><a class="reference internal" href="#database-text-fields">3.1.4. Database text fields</a></li>
+<li><a class="reference internal" href="#enum-values">3.1.5. Enum values</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuring-language-in-the-path">3.2. Configuring “language in the path”</a><ul>
+<li><a class="reference internal" href="#java-code">3.2.1. Java code</a></li>
+<li><a class="reference internal" href="#application-configuration">3.2.2. Application configuration</a></li>
+<li><a class="reference internal" href="#javascript">3.2.3. Javascript</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuring-language-request-parameter">3.3. Configuring “language request parameter”</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="newEclipseProject.html" title="Previous Chapter: 2. New Eclipse Project"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 2. New Eclips...</span>
+    </a>
+  </li>
+  <li>
+    <a href="forms/fieldsComponents.html" title="Next Chapter: 4. Form Fields and Components"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">4. Form Field... &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/internationalization.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <div class="section" id="internationalization">
+<h1>3. Internationalization<a class="headerlink" href="#internationalization" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>3.1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>Unless there is a very good reason to do otherwise, every web application should be internationalized, or at least be
+ready for it.
+Internationalization (i18n) means that the content of the site will change according to the <em>locale</em> of the user visiting it,
+where <em>locale</em> stands for “language and regional settings”.</p>
+<p>These are the aspects of i18n that should be considered:</p>
+<ul class="simple">
+<li><p>language user choice</p></li>
+<li><p>search engine indexing</p></li>
+<li><p>immutable text</p></li>
+<li><p>database text fields</p></li>
+<li><p>enum values</p></li>
+</ul>
+<div class="section" id="language-user-choice">
+<h3>3.1.1. Language user choice<a class="headerlink" href="#language-user-choice" title="Permalink to this headline">¶</a></h3>
+<p>Browsers send the user system language to the server at each request. Actually, some browsers allow users to
+override the system language. Still, that’s a very inconvenient way to choose language.
+You should also give the user a way to choose a different language for your site using something like a dropdown menu.</p>
+</div>
+<div class="section" id="search-engine-indexing">
+<h3>3.1.2. Search engine indexing<a class="headerlink" href="#search-engine-indexing" title="Permalink to this headline">¶</a></h3>
+<p>The chosen language should be reflected in the url for a number of reasons:</p>
+<ul class="simple">
+<li><p>better search engine indexing</p></li>
+<li><p>bookmarking</p></li>
+</ul>
+<p>One way to put the language in the url would be to
+add a request parameter like <code class="docutils literal notranslate"><span class="pre">?lang=fr</span></code>; another option is to add the language code in the servlet path,
+like <code class="docutils literal notranslate"><span class="pre">example.com/fr/home</span></code>. The Yada Framework supports both.</p>
+<p>You can also use a full Locale code instead of the language code, like fr_CA for french in Canada.</p>
+</div>
+<div class="section" id="immutable-text">
+<h3>3.1.3. Immutable text<a class="headerlink" href="#immutable-text" title="Permalink to this headline">¶</a></h3>
+<div class="admonition-todo admonition" id="index-0">
+<p class="admonition-title">Todo</p>
+<p>TO BE CONTINUED…</p>
+</div>
+</div>
+<div class="section" id="database-text-fields">
+<h3>3.1.4. Database text fields<a class="headerlink" href="#database-text-fields" title="Permalink to this headline">¶</a></h3>
+<div class="admonition-todo admonition" id="index-1">
+<p class="admonition-title">Todo</p>
+<p>TO BE CONTINUED…</p>
+</div>
+</div>
+<div class="section" id="enum-values">
+<h3>3.1.5. Enum values<a class="headerlink" href="#enum-values" title="Permalink to this headline">¶</a></h3>
+<div class="admonition-todo admonition" id="index-2">
+<p class="admonition-title">Todo</p>
+<p>TO BE CONTINUED…</p>
+</div>
+</div>
+</div>
+<div class="section" id="configuring-language-in-the-path">
+<h2>3.2. Configuring “language in the path”<a class="headerlink" href="#configuring-language-in-the-path" title="Permalink to this headline">¶</a></h2>
+<p>URL Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">it</span><span class="o">/</span><span class="n">myHome</span>
+</pre></div>
+</div>
+<div class="section" id="java-code">
+<h3>3.2.1. Java code<a class="headerlink" href="#java-code" title="Permalink to this headline">¶</a></h3>
+<p>If your project does not use YadaSecurity, change <code class="docutils literal notranslate"><span class="pre">WebApplicationInitializer</span></code> in order to add a servlet filter:</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Override</span>
+<span class="kd">protected</span> <span class="n">Filter</span><span class="o">[]</span> <span class="nf">getServletFilters</span><span class="o">()</span> <span class="o">{</span>
+      <span class="c1">// Locale in the path</span>
+      <span class="c1">// See https://stackoverflow.com/a/23847484/587641</span>
+      <span class="k">return</span> <span class="k">new</span> <span class="n">Filter</span><span class="o">[]</span> <span class="o">{</span> <span class="k">new</span> <span class="n">DelegatingFilterProxy</span><span class="o">(</span><span class="s">&quot;yadaLocalePathVariableFilter&quot;</span><span class="o">)</span> <span class="o">};</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>The above adds a filter to the Spring servlet engine. It is not needed when using YadaSecurity because the same is
+already done in <code class="docutils literal notranslate"><span class="pre">net.yadaframework.security.SecurityWebApplicationInitializer</span></code>.</p>
+</div>
+<div class="section" id="application-configuration">
+<h3>3.2.2. Application configuration<a class="headerlink" href="#application-configuration" title="Permalink to this headline">¶</a></h3>
+<p>Edit the conf.webapp.prod.xml configuration file (were ‘prod’ is the environment code for “production”) adding a section
+like the following:</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;i18n</span> <span class="na">localePathVariable=</span><span class="s">&quot;true&quot;</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;locale&gt;</span>it<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale</span> <span class="na">default=</span><span class="s">&quot;true&quot;</span><span class="nt">&gt;</span>en<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale&gt;</span>de<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale&gt;</span>es<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale&gt;</span>fr<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale&gt;</span>ru<span class="nt">&lt;/locale&gt;</span>
+<span class="nt">&lt;/i18n&gt;</span>
+</pre></div>
+</div>
+<p>Note the use of the “default” attribute. This is <strong>not</strong> the locale that will be set when there is no appropriate
+value in the request (you’d get a 404 HTTP error). This is actually the language to use for
+strings retrieved from the database (see later).</p>
+<div class="admonition-todo admonition" id="index-3">
+<p class="admonition-title">Todo</p>
+<p>link to the database section</p>
+</div>
+<p>Other than just the language, you can use a full locale code though this is rarely needed:</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;i18n</span> <span class="na">localePathVariable=</span><span class="s">&quot;true&quot;</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;locale&gt;</span>it_IT<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale</span> <span class="na">default=</span><span class="s">&quot;true&quot;</span><span class="nt">&gt;</span>en_GB<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale&gt;</span>en_US<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale&gt;</span>es_ES<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale&gt;</span>fr_FR<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale&gt;</span>fr_CA<span class="nt">&lt;/locale&gt;</span>
+<span class="nt">&lt;/i18n&gt;</span>
+</pre></div>
+</div>
+<p>You can also configure a country to be added to the locale after the request has been received. This way you can still
+use just the language code in the url but receive a full Locale in the java &#64;Controller:</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;i18n</span> <span class="na">localePathVariable=</span><span class="s">&quot;true&quot;</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;locale</span> <span class="na">country=</span><span class="s">&quot;IT&quot;</span><span class="nt">&gt;</span>it<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale</span> <span class="na">country=</span><span class="s">&quot;GB&quot;</span> <span class="na">default=</span><span class="s">&quot;true&quot;</span><span class="nt">&gt;</span>en<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale</span> <span class="na">country=</span><span class="s">&quot;DE&quot;</span><span class="nt">&gt;</span>de<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale</span> <span class="na">country=</span><span class="s">&quot;ES&quot;</span><span class="nt">&gt;</span>es<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale</span> <span class="na">country=</span><span class="s">&quot;FR&quot;</span><span class="nt">&gt;</span>fr<span class="nt">&lt;/locale&gt;</span>
+      <span class="nt">&lt;locale</span> <span class="na">country=</span><span class="s">&quot;RU&quot;</span><span class="nt">&gt;</span>ru<span class="nt">&lt;/locale&gt;</span>
+<span class="nt">&lt;/i18n&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="javascript">
+<h3>3.2.3. Javascript<a class="headerlink" href="#javascript" title="Permalink to this headline">¶</a></h3>
+<p>The language in the path variable can be changed via javascript using</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">yada</span><span class="p">.</span><span class="nx">changeLanguagePathVariable</span><span class="p">(</span><span class="nx">locale</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>where “locale” is the ISO2 locale code. This code could be called when choosing from a list of languages.</p>
+</div>
+</div>
+<div class="section" id="configuring-language-request-parameter">
+<h2>3.3. Configuring “language request parameter”<a class="headerlink" href="#configuring-language-request-parameter" title="Permalink to this headline">¶</a></h2>
+<p>URL Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>http://www.example.com/myHome?lang=it
+</pre></div>
+</div>
+<p>This is easier to configure because you don’t need to change the Java code.
+The application configuration is the same but you need to set localePathVariable=”false”.</p>
+<div class="admonition-todo admonition" id="index-4">
+<p class="admonition-title">Todo</p>
+<p>check that this stil works and what it does. I think YadaWebUtil.enhanceUrl() doesn’t work properly</p>
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2019, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.0.1.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
