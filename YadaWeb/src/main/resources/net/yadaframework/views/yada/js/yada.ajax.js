@@ -374,8 +374,9 @@
 	/**
 	 * Execute function by name
 	 * See https://stackoverflow.com/a/359910/587641
-	 * @param functionName the name of the function, the window scope, that can have namespaces like "mylib.myfunc"
+	 * @param functionName the name of the function, in the window scope, that can have namespaces like "mylib.myfunc"
 	 * @param thisObject the object that will become the this object in the called function
+	 * Any number of arguments can be passed to the function
 	 */
 	function executeFunctionByName(functionName, thisObject /*, args */) {
 			var context = window; // The functionName is always searched in the current window
@@ -700,11 +701,18 @@
 		});
 
 		$form.not('.'+markerClass).submit(function(e) {
+			// Only ajax forms enter here
+			var $form=$(this); // Needed to overwrite the outside variable with the current form, otherwise we may handle the wrong form (because of cloning)
+			// Invoke any submit handlers
+			var submitHandlerNames = $form.attr("data-yadaSubmitHandler");
+			var submitHandlerNameArray = yada.listToArray(submitHandlerNames);
+			for (var z = 0; z < submitHandlerNameArray.length; z++) {
+				executeFunctionByName(submitHandlerNameArray[z], $form, e);
+			}
+			//
 			if (e.isDefaultPrevented()) {
 				return; // Do not send the form - probably a cancel has been made
 			}
-			// Only ajax forms enter here
-			var $form=$(this); // Needed to overwrite the outside variable with the current form, otherwise we may handle the wrong form (because of cloning)
 //			// Form alias: submit another form after merging the current form children
 //			var formAliasSelector = $form.attr('data-yadaFormAlias');
 //			if (formAliasSelector!=null) {
