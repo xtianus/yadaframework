@@ -156,6 +156,11 @@ Also set UTF-8 in the "Content Types > Text > Java Properties File > Default enc
 Add the donwloaded JRE as a new Runtime in "Window > Preferences > Java > Installed JREs" and set it as the default. 
 Also set the "Window > Preferences > Java > Compiler > JDK Compliance" accordingly.
 
+In order to better spot errors and stack traces, you should considerably increase the console output buffer or remove the limit altogether
+using the "Window > Preferences > Run/Debug > Console" options:
+
+.. image:: _static/img/newEclipseProject/console.png
+
 Node.js (optional)
 -------------------
 Node.js is not strictly needed but it can be useful.

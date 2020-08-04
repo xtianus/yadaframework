@@ -201,6 +201,21 @@ It is automatically included in production, merged with the other yada javascrip
 <p>Controllers can return a standard thymeleaf view (html/xml), some JSON data or any other MIME type like a PDF or an excel file content.
 The resulting objects will be passed to any “successHandler” javascript method (see below)
 when they don’t have other special meaning.</p>
+<p><strong>Returning HTML</strong></p>
+<p>A very common use case is to return a fragment of the page that originated the request, for example to change
+a message or to update a table (see <a class="reference internal" href="#postprocessing"><span class="std std-ref">Postprocessing</span></a> for more details):</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">&quot;/addRow&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="n">String</span> <span class="nf">addRowAjax</span><span class="o">()</span> <span class="o">{</span>
+    <span class="c1">// Change something in the model...</span>
+    <span class="c1">// ...then return a fragment of the original page</span>
+    <span class="k">return</span> <span class="s">&quot;/dashboard :: #table&quot;</span><span class="o">;</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">a</span> <span class="na">th:href</span><span class="o">=</span><span class="s">&quot;@{/addRow}&quot;</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;yadaAjax&quot;</span> <span class="na">yada:updateOnSuccess</span><span class="o">=</span><span class="s">&quot;&#39;#table&#39;&quot;</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">#table</span></code> must be in single quotes inside double quotes because it’s a EL literal string.</p>
 <p><strong>Returning JSON</strong></p>
 <p>A String map can easily be converted to JSON using the standard Spring features:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">path</span> <span class="o">=</span> <span class="s">&quot;/people&quot;</span><span class="o">,</span> <span class="n">produces</span> <span class="o">=</span> <span class="n">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON_UTF8_VALUE</span><span class="o">)</span>
@@ -342,6 +357,13 @@ The following <code class="docutils literal notranslate"><span class="pre">data-
 </tr>
 </tbody>
 </table>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>the difference between using the data- attribute version and the yada: dialect version is that
+the latter receives an expression that will be evaluated by Thymeleaf. Therefore you can use ${variables}
+in the value, but you have to be careful to enclose complex strings in single quotes, like <code class="docutils literal notranslate"><span class="pre">&quot;'#one,</span> <span class="pre">.two'&quot;</span></code>,
+otherwise you get a parse error from Thymeleaf: <code class="docutils literal notranslate"><span class="pre">org.thymeleaf.exceptions.TemplateProcessingException:</span> <span class="pre">Could</span> <span class="pre">not</span> <span class="pre">parse</span> <span class="pre">as</span> <span class="pre">expression</span></code>.</p>
+</div>
 <div class="section" id="replacing-and-deleting">
 <h4>8.2.3.1. Replacing and Deleting<a class="headerlink" href="#replacing-and-deleting" title="Permalink to this headline">¶</a></h4>
 <p>The “jQuery selector list” is a comma-separated list of jQuery selectors, like <code class="docutils literal notranslate"><span class="pre">&quot;#someId,</span> <span class="pre">.someClass</span> <span class="pre">&gt;</span> <span class="pre">a&quot;</span></code>.
@@ -438,10 +460,7 @@ When there is a single target, fragments are ignored and the whole result is use
 </div>
 <div class="section" id="ajax-forms">
 <h2>8.3. Ajax Forms<a class="headerlink" href="#ajax-forms" title="Permalink to this headline">¶</a></h2>
-<div class="admonition-todo admonition" id="index-3">
-<p class="admonition-title">Todo</p>
-<p>all. Remember that button handlers receive the button itself: function editTaskFormHandler(responseText, responseHtml, form, button) {</p>
-</div>
+<p>See the <a class="reference internal" href="forms/overview.html#ajax-forms"><span class="std std-ref">Ajax Forms section</span></a> in the Forms chapter.</p>
 </div>
 <div class="section" id="ajax-on-other-elements">
 <h2>8.4. Ajax on other elements<a class="headerlink" href="#ajax-on-other-elements" title="Permalink to this headline">¶</a></h2>
@@ -453,7 +472,7 @@ When there is a single target, fragments are ignored and the whole result is use
         <span class="na">th:name</span><span class="o">=</span><span class="s">&quot;enabled&quot;</span> <span class="na">th:checked</span><span class="o">=</span><span class="s">&quot;${product.enabled}&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;checkbox&quot;</span> <span class="p">/&gt;</span>
 </pre></div>
 </div>
-<div class="admonition-todo admonition" id="index-4">
+<div class="admonition-todo admonition" id="index-3">
 <p class="admonition-title">Todo</p>
 <p>complete list of ajaxifyable elements. Is the yadaAjax class needed? Examples.
 showFeedbackIfNeeded</p>

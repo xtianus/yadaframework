@@ -87,6 +87,10 @@
 <li><a class="reference internal" href="#plain-forms">5.2. Plain Forms</a></li>
 <li><a class="reference internal" href="#form-backing-beans">5.3. Form Backing Beans</a></li>
 <li><a class="reference internal" href="#entity-backing-beans">5.4. Entity Backing Beans</a></li>
+<li><a class="reference internal" href="#ajax-forms">5.5. Ajax Forms</a><ul>
+<li><a class="reference internal" href="#postprocessing">5.5.1. Postprocessing</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -240,7 +244,51 @@ Even more, you can write a single method to handle both addition and editing of 
 <p>test that the above code works</p>
 </div>
 <p>It’s always better to use a specific name for the &#64;Entity id, like <code class="docutils literal notranslate"><span class="pre">bookId</span></code> and not just <code class="docutils literal notranslate"><span class="pre">id</span></code>, so that you can handle different &#64;Entity instances in the same &#64;Controller.</p>
+</div>
+<div class="section" id="ajax-forms">
+<h2>5.5. Ajax Forms<a class="headerlink" href="#ajax-forms" title="Permalink to this headline">¶</a></h2>
+<p>To send a form via ajax you just need to add the <code class="docutils literal notranslate"><span class="pre">yadaAjax</span></code> class:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;jadaAjax&quot;</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;/subscribe&quot;</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>When a form is added dynamically via custom javascript, you also need to call</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">yada</span><span class="p">.</span><span class="nx">enableAjaxForms</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>after the change.</p>
+<p><span class="yadaversion">0.4.1</span>
+Any submit handler that needs to be invoked before form submission has to be listed as a SubmitHandler value:</p>
+<table class="colwidths-given docutils align-center">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">data-yadaSubmitHandler</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">yada:submitHandler</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Both the data- attribute version and the yada: dialect version take a comma-separated list of function names
+to be called in order. Submission is aborted if any returns true and any following functions are skipped.</p>
+<p>Example:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;jadaAjax&quot;</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;/subscribe&quot;</span> <span class="na">yada:submitHandler</span><span class="o">=</span><span class="s">&quot;validateInput&quot;</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<div class="section" id="postprocessing">
+<h3>5.5.1. Postprocessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline">¶</a></h3>
+<p>There are many options to handle the server response, like replacing page content or invoking some
+handler. See <a class="reference internal" href="../ajax.html#ajax-links"><span class="std std-ref">Ajax Links</span></a> for more details. For example, this form replaces a page element with the
+returned html:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;jadaAjax&quot;</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;/subscribe&quot;</span> <span class="na">yada:updateOnSuccess</span><span class="o">=</span><span class="s">&quot;#someSection&quot;</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition" id="index-1">
+<p class="admonition-title">Todo</p>
+<p>all. Remember that button handlers receive the button itself: function editTaskFormHandler(responseText, responseHtml, form, button) {</p>
+</div>
 <p>TO BE CONTINUED</p>
+</div>
 </div>
 </div>
 

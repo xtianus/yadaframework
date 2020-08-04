@@ -122,8 +122,55 @@ The trick is to add a @ModelAttribute to the @Controller, which is always called
 It's always better to use a specific name for the @Entity id, like ``bookId`` and not just ``id``, so that you can handle different @Entity instances in the same @Controller.
 
 
+Ajax Forms
+===========
+To send a form via ajax you just need to add the ``yadaAjax`` class:
+
+.. code-block:: html
+
+  <form class="jadaAjax" action="/subscribe">
+
+When a form is added dynamically via custom javascript, you also need to call
+
+.. code-block:: javascript
+
+  yada.enableAjaxForms();
+
+after the change.
+
+:yada-version:`0.4.1`
+Any submit handler that needs to be invoked before form submission has to be listed as a SubmitHandler value:
+
+.. list-table::
+  :widths: 25 25
+  :header-rows: 0
+
+  *	- ``data-yadaSubmitHandler``
+	- ``yada:submitHandler``
+
+Both the data- attribute version and the yada: dialect version take a comma-separated list of function names
+to be called in order. Submission is aborted if any returns true and any following functions are skipped.
+
+Example:
+
+.. code-block:: html
+
+  <form class="jadaAjax" action="/subscribe" yada:submitHandler="validateInput">
 
 
+Postprocessing
+---------------
+There are many options to handle the server response, like replacing page content or invoking some
+handler. See :ref:`ajax:Ajax Links` for more details. For example, this form replaces a page element with the
+returned html:
+
+.. code-block:: html
+
+  <form class="jadaAjax" action="/subscribe" yada:updateOnSuccess="#someSection">
+
+
+
+.. todo:: all. Remember that button handlers receive the button itself: function editTaskFormHandler(responseText, responseHtml, form, button) {
 
 
 

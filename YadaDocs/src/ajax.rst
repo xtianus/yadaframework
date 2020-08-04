@@ -45,6 +45,26 @@ Controllers can return a standard thymeleaf view (html/xml), some JSON data or a
 The resulting objects will be passed to any "successHandler" javascript method (see below)
 when they don't have other special meaning.
 
+**Returning HTML**
+
+A very common use case is to return a fragment of the page that originated the request, for example to change
+a message or to update a table (see :ref:`ajax:Postprocessing` for more details):
+
+.. code-block:: java
+
+    @RequestMapping("/addRow")
+    public String addRowAjax() {
+        // Change something in the model...
+        // ...then return a fragment of the original page
+        return "/dashboard :: #table";
+    }
+
+.. code-block:: html
+
+  <a th:href="@{/addRow}" class="yadaAjax" yada:updateOnSuccess="'#table'">
+
+Note that ``#table`` must be in single quotes inside double quotes because it's a EL literal string.
+
 **Returning JSON**
 
 A String map can easily be converted to JSON using the standard Spring features:
@@ -158,6 +178,10 @@ Yada-dialect variants:
   *	- ``data-yadaSuccessHandler``
 	- ``yada:successHandler``
 
+.. caution:: the difference between using the data- attribute version and the yada: dialect version is that
+  the latter receives an expression that will be evaluated by Thymeleaf. Therefore you can use ${variables}
+  in the value, but you have to be careful to enclose complex strings in single quotes, like ``"'#one, .two'"``,
+  otherwise you get a parse error from Thymeleaf: ``org.thymeleaf.exceptions.TemplateProcessingException: Could not parse as expression``.
 
 Replacing and Deleting
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -239,8 +263,7 @@ You can show a confirm dialog before the ajax call is made. The user will be sho
 
 Ajax Forms
 ==========
-
-.. todo:: all. Remember that button handlers receive the button itself: function editTaskFormHandler(responseText, responseHtml, form, button) {
+See the :ref:`Ajax Forms section <forms/overview:Ajax Forms>` in the Forms chapter.
 
 Ajax on other elements
 ========================
