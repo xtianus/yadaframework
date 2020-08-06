@@ -580,16 +580,19 @@ public class YadaSeleniumUtil {
 		webDriverWait.until(ExpectedConditions.invisibilityOfAllElements(webElements));
 	}
 	
+	/**
+	 * Sleep time between checks. Must be much less than timeOutInSeconds
+	 * @param timeOutInSeconds
+	 * @return
+	 */
 	private long calcSleepTimeMillis(long timeOutInSeconds) {
-		return timeOutInSeconds*1000;
-		// Non ho capito perché avevo fatto questa cosa assurda:
-//		long result = timeOutInSeconds*1000/10;
-//		if (result>2000) {
-//			result = 2000;
-//		} else if (result<500) {
-//			result = 500;
-//		}
-//		return result;
+		long result = timeOutInSeconds*1000/10; // Ten times per timeout
+		if (result>2000) {
+			result = 2000; // Max 2 seconds
+		} else if (result<500) {
+			result = 500; // Min half second
+		}
+		return result;
 	}
 	
 //	/**

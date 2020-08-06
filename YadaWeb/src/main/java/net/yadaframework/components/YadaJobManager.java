@@ -74,6 +74,7 @@ public class YadaJobManager {
 	 * Activate the job so that it becomes available for the scheduler to start it. 
 	 * The scheduled time is left unchanged unless null, when it is set to NOW (start ASAP).
 	 * This method does nothing to a job that is already scheduled and in the ACTIVE state.
+	 * Any errors are reset.
 	 * @param yadaJob the job to start
 	 * @return true if the job has been activated, false if it doesn't exist in the database
 	 */
@@ -87,6 +88,7 @@ public class YadaJobManager {
 			yadaJob.setJobScheduledTime(new Date());
 		}
 		yadaJob.setJobStateObject(YadaJobState.ACTIVE.toYadaPersistentEnum());
+		yadaJob.setErrorStreakCount(0);
 		yadaJobRepository.save(yadaJob);
 		return true;
 	}
