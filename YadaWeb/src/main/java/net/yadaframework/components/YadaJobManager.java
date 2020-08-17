@@ -245,7 +245,12 @@ public class YadaJobManager {
 		YadaJob yadaJob = yadaJobScheduler.getJobInstance(yadaJobId);
 		yadaJob.pause();
 		if (!yadaJobScheduler.interruptJob(yadaJob)) {
-			yadaJobRepository.save(yadaJob); // Save it because nobody else will
+			try {
+				yadaJobRepository.save(yadaJob); // Save it because nobody else will
+			} catch (Exception e) {
+				log.debug("Failed to save interrupted job (ignored)");
+				// Keep going
+			}
 		}	
 	}
 
