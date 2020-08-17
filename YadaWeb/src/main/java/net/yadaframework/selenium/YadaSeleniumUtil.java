@@ -286,6 +286,10 @@ public class YadaSeleniumUtil {
 				String path = customProfileDir.getAbsolutePath();
 				log.debug("Setting Chrome user profile folder to {}", path);
 				((ChromeOptions)capability).addArguments("user-data-dir=" + path);
+				if (config.isDevelopmentEnvironment()) {
+					// Fixes "plugin crashed" error when using symbolic links
+					((ChromeOptions)capability).addArguments("--no-sandbox");
+				}
 				// capability.setCapability(ChromeOptions.CAPABILITY, options);
 			}
 			if (userAgent!=null) {

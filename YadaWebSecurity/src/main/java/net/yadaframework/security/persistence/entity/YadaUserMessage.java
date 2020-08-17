@@ -28,6 +28,7 @@ import javax.persistence.Version;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -136,6 +137,18 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	public void init() {
 		computeHash();
 		setInitialDate();
+	}
+	
+	/**
+	 * Escape all markup-significant characters
+	 * @param message
+	 * @return 
+	 * @return the current instance
+	 */
+	@Transient
+	public YadaUserMessage<E> setMessageEscaped(String message) {
+		this.message = HtmlEscape.escapeHtml5Xml(message);
+		return this;
 	}
 	
 	public void computeHash() {
