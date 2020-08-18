@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.openqa.selenium.By;
@@ -62,6 +63,26 @@ public class YadaSeleniumUtil {
 	private YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
 	private Pattern matchNonEmptyText = Pattern.compile(".*\\w+.*"); // Match any string that contains at least a word character
 
+	/**
+	 * Returns true if the current url matches the specified pattern
+	 * @param urlPattern
+	 * @param webDriver
+	 * @return
+	 */
+	public boolean urlMatches(Pattern urlPattern, WebDriver webDriver) {
+		Matcher m = urlPattern.matcher(webDriver.getCurrentUrl());
+		return m.matches();
+	}
+	
+	/**
+	 * Returns true if the current url contains the specified string at any position
+	 * @param urlSegment
+	 * @param webDriver
+	 * @return
+	 */
+	public boolean urlContains(String urlSegment, WebDriver webDriver) {
+		return webDriver.getCurrentUrl().contains(urlSegment);
+	}
 	
 	/**
 	 * Returns a part of the page source.
@@ -265,6 +286,10 @@ public class YadaSeleniumUtil {
 				String path = customProfileDir.getAbsolutePath();
 				log.debug("Setting Chrome user profile folder to {}", path);
 				((ChromeOptions)capability).addArguments("user-data-dir=" + path);
+				if (config.isDevelopmentEnvironment()) {
+					// Fixes "plugin crashed" error when using symbolic links
+					((ChromeOptions)capability).addArguments("--no-sandbox");
+				}
 				// capability.setCapability(ChromeOptions.CAPABILITY, options);
 			}
 			if (userAgent!=null) {
@@ -559,16 +584,19 @@ public class YadaSeleniumUtil {
 		webDriverWait.until(ExpectedConditions.invisibilityOfAllElements(webElements));
 	}
 	
+	/**
+	 * Sleep time between checks. Must be much less than timeOutInSeconds
+	 * @param timeOutInSeconds
+	 * @return
+	 */
 	private long calcSleepTimeMillis(long timeOutInSeconds) {
-		return timeOutInSeconds*1000;
-		// Non ho capito perché avevo fatto questa cosa assurda:
-//		long result = timeOutInSeconds*1000/10;
-//		if (result>2000) {
-//			result = 2000;
-//		} else if (result<500) {
-//			result = 500;
-//		}
-//		return result;
+		long result = timeOutInSeconds*1000/10; // Ten times per timeout
+		if (result>2000) {
+			result = 2000; // Max 2 seconds
+		} else if (result<500) {
+			result = 500; // Min half second
+		}
+		return result;
 	}
 	
 //	/**
