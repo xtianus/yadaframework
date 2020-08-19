@@ -9,9 +9,9 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 public class YadaPageRows<T> implements Iterable<T> {
 	private final List<T> rows = new ArrayList<T>();
-	private final YadaPageRequest yadaPageRequest;
+	private final YadaPageRequest currentPageRequest;
 	private Long outOfRows = null; // Total number of elements that would be returned without pagination
-	private Boolean hasMoreRows = null;
+	private boolean hasMoreRows = false;
 	
 	/**
 	 * @param rows the result
@@ -36,7 +36,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	 */
 	public YadaPageRows(List<T> rows, YadaPageRequest currentPageRequest) {
 		this.rows.addAll(rows);
-		this.yadaPageRequest = currentPageRequest;
+		this.currentPageRequest = currentPageRequest;
 		// We have fetched one more row to check if there is more data after the current page, so we have to fix that
 		this.hasMoreRows = rows.size()==currentPageRequest.getMaxResults();
 		if (this.hasMoreRows) {
@@ -55,10 +55,42 @@ public class YadaPageRows<T> implements Iterable<T> {
 
 	/**
 	 * 
+	 * @return the number of rows fetched from database, can be less, equal or higher than the page size
+	 */
+	public int getRowNumber() {
+		return rows.size();
+	}
+	
+	/**
+	 * 
+	 * @return the page size
+	 */
+	public int getPageSize() {
+		return currentPageRequest.getSize();
+	}
+	
+	/**
+	 * 
+	 * @return the page number
+	 */
+	public int getPage() {
+		return currentPageRequest.getPage();
+	}
+	
+	/**
+	 * 
+	 * @return the next page number
+	 */
+	public int getNextPage() {
+		return currentPageRequest.getNextPageRequest().getPage();
+	}
+	
+	/**
+	 * 
 	 * @return the YadaPageRequest that generated this YadaPageContent
 	 */
 	public YadaPageRequest getYadaPageRequest() {
-		return yadaPageRequest;
+		return currentPageRequest;
 	}
 
 	/**
@@ -77,18 +109,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	 * @return true if there is more data to fetch from the database, false if this is the last available page
 	 */
 	public boolean hasMoreRows() {
-		if (hasMoreRows==null) {
-			throw new YadaInvalidUsageException("hasNext has not been initialized");
-		}
 		return hasMoreRows;
-	}
-	
-	/**
-	 * 
-	 * @return the number of rows fetched from database, can be equal or less than the page size
-	 */
-	public int getSize() {
-		return rows.size();
 	}
 	
 	/**
@@ -102,7 +123,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	 * @return true if this is the first page
 	 */
 	public boolean isFirst() {
-		return yadaPageRequest.isFirst();
+		return currentPageRequest.isFirst();
 	}
 
 	/**
@@ -119,7 +140,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(rows, hasMoreRows, outOfRows, yadaPageRequest);
+		return Objects.hash(rows, hasMoreRows, outOfRows, currentPageRequest);
 	}
 
 	@Override
@@ -136,7 +157,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 		@SuppressWarnings("unchecked")
 		YadaPageRows<T> other = (YadaPageRows<T>) obj;
 		return Objects.equals(rows, other.rows) && hasMoreRows == other.hasMoreRows && outOfRows == other.outOfRows
-				&& Objects.equals(yadaPageRequest, other.yadaPageRequest);
+				&& Objects.equals(currentPageRequest, other.currentPageRequest);
 	}
 
 
