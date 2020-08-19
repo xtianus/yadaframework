@@ -1,0 +1,183 @@
+******************
+Forms
+******************
+
+.. rubric::
+	Handling user-submitted data
+
+Description
+===========
+Forms are used to gather information from users. You could also use plain anchors with request attributes, but forms are way more convenient especially
+for more than a couple of fields and for performing validation.
+
+The more general kind of form has some input fields that are sent to the server in a POST and received from the @Controller as method parameters. This is a
+`standard Spring Web MVC feature`_ and quite straightforward to implement. 
+
+For more complicated forms you'd rather have a "form backing bean" holding all the input fields.
+This allows the use of the Yada Form Fragments for quickly assembling the HTML of the form. 
+
+Creating a java object just to hold the form data might seem overkill when you already
+have a database @Entity with the same exact fields. With a simple technique you can very easily use the same @Entity classes as form backing beans and save yourself
+a lot of work.
+
+.. _standard Spring Web MVC feature: https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#mvc-controller
+ 
+Plain Forms
+===========
+The standard plain forms don't need much explanation: you have some HTML with input fields and a @Controller that receives those input fields:
+
+.. code-block:: html
+
+	<form th:action="@{/addBook}">
+		<input name="bookTitle" th:value="${bookTitle}">
+	
+.. code-block:: java
+
+	@Controller
+	public class BookController {
+		@RequestMapping("/addBook")
+		public String addBook(String bookTitle) {
+			Book book = new Book(bookTitle);
+
+The above code doesn't perform any validation but in a real-world example it should check at least that the title is not empty and go back to the user with an error message.
+The error handling code would have to be added for any field. Writing it could be quite time-consuming if there are more than a couple of fields.
+This is a possible solution for error handling:
+
+
+.. code-block:: html
+
+	<form th:action="@{/addBook}">
+		<input name="bookTitle" th:value="${bookTitle}" th:classappend="${titleError}?'formError':''">
+		<div th:if="${titleError!=null}" th:text="${titleError}" class="formError">Title Error</div>
+	
+.. code-block:: java
+
+	@Controller
+	public class BookController {
+		@RequestMapping("/addBook")
+		public String addBook(String bookTitle, Model model) {
+			if (bookTitle.trim().length()==0) {
+				model.addAttribute("titleError", "The book title can not be empty");
+				return "bookForm";
+			}
+			Book book = new Book(bookTitle);
+
+Form Backing Beans
+==================
+TODO
+
+Entity Backing Beans
+====================
+When the form contains most of the fields that are defined in an existing @Entity it makes sense to use that @Entity as a backing bean.
+Some may argue that exposing database classes on the front-end layer would compromise layer isolation, but we never experienced anything bad by doing this.
+
+The general idea is that Spring can create an instance of a new @Entity or read it from the database before setting form values on it. The @Controller
+method handling the form will receive a ready-populated @Entity where any database value has been overwritten by the form value.
+This is very convenient because you just have to save the object and the form values will be persisted to the database.
+Even more, you can write a single method to handle both addition and editing of @Entity instances, sharing the common code. 
+
+The trick is to add a @ModelAttribute to the @Controller, which is always called before Spring calls the final @RequestMapping method:
+
+.. code-block:: html
+
+	<form th:action="@{/addBook}" th:object="${book}">
+		<input type="hidden" name="bookId" value="*{id}">
+		<input th:field="*{bookTitle}">
+
+.. code-block:: java
+
+	@Controller
+	public class BookController {
+
+		@ModelAttribute("book")
+		public Book addBook(@RequestParam(value="bookId", required=false) Long id) {
+			Book toEdit = null;
+			Exception exception = null;
+			if (id!=null) {
+				try {
+					toEdit = bookRepository.findOne(id);
+				} catch (Exception e) {
+					exception = e;
+				}
+				if (toEdit==null) {
+					log.error("Can't find Book with id={} - (creating new)", id, exception);
+				} else {
+					log.debug("Book {}-{} fetched from DB as ModelAttribute", id, toEdit.getTitle());
+				}
+			}
+			if (toEdit==null) {
+				toEdit = new Book();
+			}
+			return toEdit;
+		}
+
+		@RequestMapping("/addBook")
+		public String addBook(Book book, Model model) {
+			// Validation here
+			...
+			bookRepository.save(book);
+
+.. todo:: test that the above code works
+
+It's always better to use a specific name for the @Entity id, like ``bookId`` and not just ``id``, so that you can handle different @Entity instances in the same @Controller.
+
+
+Ajax Forms
+===========
+To send a form via ajax you just need to add the ``yadaAjax`` class:
+
+.. code-block:: html
+
+  <form class="jadaAjax" action="/subscribe">
+
+When a form is added dynamically via custom javascript, you also need to call
+
+.. code-block:: javascript
+
+  yada.enableAjaxForms();
+
+after the change.
+
+:yada-version:`0.4.1`
+Any submit handler that needs to be invoked before form submission has to be listed as a SubmitHandler value:
+
+.. list-table::
+  :widths: 25 25
+  :header-rows: 0
+
+  *	- ``data-yadaSubmitHandler``
+	- ``yada:submitHandler``
+
+Both the data- attribute version and the yada: dialect version take a comma-separated list of function names
+to be called in order. Submission is aborted if any returns true and any following functions are skipped.
+
+Example:
+
+.. code-block:: html
+
+  <form class="jadaAjax" action="/subscribe" yada:submitHandler="validateInput">
+
+
+Postprocessing
+---------------
+There are many options to handle the server response, like replacing page content or invoking some
+handler. See :ref:`ajax:Ajax Links` for more details. For example, this form replaces a page element with the
+returned html:
+
+.. code-block:: html
+
+  <form class="jadaAjax" action="/subscribe" yada:updateOnSuccess="#someSection">
+
+
+
+.. todo:: all. Remember that button handlers receive the button itself: function editTaskFormHandler(responseText, responseHtml, form, button) {
+
+
+
+
+
+
+
+
+
+TO BE CONTINUED

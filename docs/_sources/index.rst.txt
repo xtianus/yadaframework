@@ -16,6 +16,7 @@ Yada Framework
    Ajax <ajax>
    Ajax Modal <ajaxModal>
    Notification Modal <notificationModal>
+   database/*
    Troubleshooting <troubleshooting>
 ..	TODO: packages <javadoc/packages>
 	

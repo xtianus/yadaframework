@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Forms &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/yadaDocs.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
+    <script type="text/javascript" src="../_static/copybutton.js"></script>
+    <script type="text/javascript" src="../_static/yadaDocs.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">1. Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../newEclipseProject.html">2. New Eclipse Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../internationalization.html">3. Internationalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../forms/fieldsComponents.html">4. Form Fields and Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../forms/overview.html">5. Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../forms/uploads.html">6. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../datatables.html">7. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ajax.html">8. Ajax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ajaxModal.html">9. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notificationModal.html">10. Notification Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">11. Troubleshooting</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">Forms</a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#plain-forms">Plain Forms</a></li>
+<li><a class="reference internal" href="#form-backing-beans">Form Backing Beans</a></li>
+<li><a class="reference internal" href="#entity-backing-beans">Entity Backing Beans</a></li>
+<li><a class="reference internal" href="#ajax-forms">Ajax Forms</a><ul>
+<li><a class="reference internal" href="#postprocessing">Postprocessing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../_sources/database/overview.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <div class="section" id="forms">
+<h1>Forms<a class="headerlink" href="#forms" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">Handling user-submitted data</p>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>Forms are used to gather information from users. You could also use plain anchors with request attributes, but forms are way more convenient especially
+for more than a couple of fields and for performing validation.</p>
+<p>The more general kind of form has some input fields that are sent to the server in a POST and received from the &#64;Controller as method parameters. This is a
+<a class="reference external" href="https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#mvc-controller">standard Spring Web MVC feature</a> and quite straightforward to implement.</p>
+<p>For more complicated forms you’d rather have a “form backing bean” holding all the input fields.
+This allows the use of the Yada Form Fragments for quickly assembling the HTML of the form.</p>
+<p>Creating a java object just to hold the form data might seem overkill when you already
+have a database &#64;Entity with the same exact fields. With a simple technique you can very easily use the same &#64;Entity classes as form backing beans and save yourself
+a lot of work.</p>
+</div>
+<div class="section" id="plain-forms">
+<h2>Plain Forms<a class="headerlink" href="#plain-forms" title="Permalink to this headline">¶</a></h2>
+<p>The standard plain forms don’t need much explanation: you have some HTML with input fields and a &#64;Controller that receives those input fields:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">th:action</span><span class="o">=</span><span class="s">&quot;@{/addBook}&quot;</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">input</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;bookTitle&quot;</span> <span class="na">th:value</span><span class="o">=</span><span class="s">&quot;${bookTitle}&quot;</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Controller</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BookController</span> <span class="o">{</span>
+        <span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">&quot;/addBook&quot;</span><span class="o">)</span>
+        <span class="kd">public</span> <span class="n">String</span> <span class="nf">addBook</span><span class="o">(</span><span class="n">String</span> <span class="n">bookTitle</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">Book</span> <span class="n">book</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Book</span><span class="o">(</span><span class="n">bookTitle</span><span class="o">);</span>
+</pre></div>
+</div>
+<p>The above code doesn’t perform any validation but in a real-world example it should check at least that the title is not empty and go back to the user with an error message.
+The error handling code would have to be added for any field. Writing it could be quite time-consuming if there are more than a couple of fields.
+This is a possible solution for error handling:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">th:action</span><span class="o">=</span><span class="s">&quot;@{/addBook}&quot;</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">input</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;bookTitle&quot;</span> <span class="na">th:value</span><span class="o">=</span><span class="s">&quot;${bookTitle}&quot;</span> <span class="na">th:classappend</span><span class="o">=</span><span class="s">&quot;${titleError}?&#39;formError&#39;:&#39;&#39;&quot;</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">th:if</span><span class="o">=</span><span class="s">&quot;${titleError!=null}&quot;</span> <span class="na">th:text</span><span class="o">=</span><span class="s">&quot;${titleError}&quot;</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;formError&quot;</span><span class="p">&gt;</span>Title Error<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Controller</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BookController</span> <span class="o">{</span>
+        <span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">&quot;/addBook&quot;</span><span class="o">)</span>
+        <span class="kd">public</span> <span class="n">String</span> <span class="nf">addBook</span><span class="o">(</span><span class="n">String</span> <span class="n">bookTitle</span><span class="o">,</span> <span class="n">Model</span> <span class="n">model</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">bookTitle</span><span class="o">.</span><span class="na">trim</span><span class="o">().</span><span class="na">length</span><span class="o">()==</span><span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="n">model</span><span class="o">.</span><span class="na">addAttribute</span><span class="o">(</span><span class="s">&quot;titleError&quot;</span><span class="o">,</span> <span class="s">&quot;The book title can not be empty&quot;</span><span class="o">);</span>
+                        <span class="k">return</span> <span class="s">&quot;bookForm&quot;</span><span class="o">;</span>
+                <span class="o">}</span>
+                <span class="n">Book</span> <span class="n">book</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Book</span><span class="o">(</span><span class="n">bookTitle</span><span class="o">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="form-backing-beans">
+<h2>Form Backing Beans<a class="headerlink" href="#form-backing-beans" title="Permalink to this headline">¶</a></h2>
+<p>TODO</p>
+</div>
+<div class="section" id="entity-backing-beans">
+<h2>Entity Backing Beans<a class="headerlink" href="#entity-backing-beans" title="Permalink to this headline">¶</a></h2>
+<p>When the form contains most of the fields that are defined in an existing &#64;Entity it makes sense to use that &#64;Entity as a backing bean.
+Some may argue that exposing database classes on the front-end layer would compromise layer isolation, but we never experienced anything bad by doing this.</p>
+<p>The general idea is that Spring can create an instance of a new &#64;Entity or read it from the database before setting form values on it. The &#64;Controller
+method handling the form will receive a ready-populated &#64;Entity where any database value has been overwritten by the form value.
+This is very convenient because you just have to save the object and the form values will be persisted to the database.
+Even more, you can write a single method to handle both addition and editing of &#64;Entity instances, sharing the common code.</p>
+<p>The trick is to add a &#64;ModelAttribute to the &#64;Controller, which is always called before Spring calls the final &#64;RequestMapping method:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">th:action</span><span class="o">=</span><span class="s">&quot;@{/addBook}&quot;</span> <span class="na">th:object</span><span class="o">=</span><span class="s">&quot;${book}&quot;</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;hidden&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;bookId&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;*{id}&quot;</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">input</span> <span class="na">th:field</span><span class="o">=</span><span class="s">&quot;*{bookTitle}&quot;</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Controller</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BookController</span> <span class="o">{</span>
+
+        <span class="nd">@ModelAttribute</span><span class="o">(</span><span class="s">&quot;book&quot;</span><span class="o">)</span>
+        <span class="kd">public</span> <span class="n">Book</span> <span class="nf">addBook</span><span class="o">(</span><span class="nd">@RequestParam</span><span class="o">(</span><span class="n">value</span><span class="o">=</span><span class="s">&quot;bookId&quot;</span><span class="o">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">false</span><span class="o">)</span> <span class="n">Long</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">Book</span> <span class="n">toEdit</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+                <span class="n">Exception</span> <span class="n">exception</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">id</span><span class="o">!=</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="k">try</span> <span class="o">{</span>
+                                <span class="n">toEdit</span> <span class="o">=</span> <span class="n">bookRepository</span><span class="o">.</span><span class="na">findOne</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+                        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                                <span class="n">exception</span> <span class="o">=</span> <span class="n">e</span><span class="o">;</span>
+                        <span class="o">}</span>
+                        <span class="k">if</span> <span class="o">(</span><span class="n">toEdit</span><span class="o">==</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                                <span class="n">log</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">&quot;Can&#39;t find Book with id={} - (creating new)&quot;</span><span class="o">,</span> <span class="n">id</span><span class="o">,</span> <span class="n">exception</span><span class="o">);</span>
+                        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+                                <span class="n">log</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">&quot;Book {}-{} fetched from DB as ModelAttribute&quot;</span><span class="o">,</span> <span class="n">id</span><span class="o">,</span> <span class="n">toEdit</span><span class="o">.</span><span class="na">getTitle</span><span class="o">());</span>
+                        <span class="o">}</span>
+                <span class="o">}</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">toEdit</span><span class="o">==</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="n">toEdit</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Book</span><span class="o">();</span>
+                <span class="o">}</span>
+                <span class="k">return</span> <span class="n">toEdit</span><span class="o">;</span>
+        <span class="o">}</span>
+
+        <span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">&quot;/addBook&quot;</span><span class="o">)</span>
+        <span class="kd">public</span> <span class="n">String</span> <span class="nf">addBook</span><span class="o">(</span><span class="n">Book</span> <span class="n">book</span><span class="o">,</span> <span class="n">Model</span> <span class="n">model</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// Validation here</span>
+                <span class="o">...</span>
+                <span class="n">bookRepository</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="n">book</span><span class="o">);</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition" id="index-0">
+<p class="admonition-title">Todo</p>
+<p>test that the above code works</p>
+</div>
+<p>It’s always better to use a specific name for the &#64;Entity id, like <code class="docutils literal notranslate"><span class="pre">bookId</span></code> and not just <code class="docutils literal notranslate"><span class="pre">id</span></code>, so that you can handle different &#64;Entity instances in the same &#64;Controller.</p>
+</div>
+<div class="section" id="ajax-forms">
+<h2>Ajax Forms<a class="headerlink" href="#ajax-forms" title="Permalink to this headline">¶</a></h2>
+<p>To send a form via ajax you just need to add the <code class="docutils literal notranslate"><span class="pre">yadaAjax</span></code> class:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;jadaAjax&quot;</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;/subscribe&quot;</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>When a form is added dynamically via custom javascript, you also need to call</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">yada</span><span class="p">.</span><span class="nx">enableAjaxForms</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>after the change.</p>
+<p><span class="yadaversion">0.4.1</span>
+Any submit handler that needs to be invoked before form submission has to be listed as a SubmitHandler value:</p>
+<table class="colwidths-given docutils align-center">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">data-yadaSubmitHandler</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">yada:submitHandler</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Both the data- attribute version and the yada: dialect version take a comma-separated list of function names
+to be called in order. Submission is aborted if any returns true and any following functions are skipped.</p>
+<p>Example:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;jadaAjax&quot;</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;/subscribe&quot;</span> <span class="na">yada:submitHandler</span><span class="o">=</span><span class="s">&quot;validateInput&quot;</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<div class="section" id="postprocessing">
+<h3>Postprocessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline">¶</a></h3>
+<p>There are many options to handle the server response, like replacing page content or invoking some
+handler. See <a class="reference internal" href="../ajax.html#ajax-links"><span class="std std-ref">Ajax Links</span></a> for more details. For example, this form replaces a page element with the
+returned html:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;jadaAjax&quot;</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;/subscribe&quot;</span> <span class="na">yada:updateOnSuccess</span><span class="o">=</span><span class="s">&quot;#someSection&quot;</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition" id="index-1">
+<p class="admonition-title">Todo</p>
+<p>all. Remember that button handlers receive the button itself: function editTaskFormHandler(responseText, responseHtml, form, button) {</p>
+</div>
+<p>TO BE CONTINUED</p>
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2019, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.0.1.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
