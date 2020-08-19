@@ -1,5 +1,5 @@
 group = 'net.yadaframework'
-version = '0.0.1'
+version = 'master'
 
 apply plugin: 'java-library'
 apply plugin: 'eclipse-wtp'
