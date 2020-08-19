@@ -33,6 +33,27 @@
 		yada.enableAjaxCheckboxes(null, $element);
 		yada.enableAjaxFragments(null, $element);
 	}
+	//////////////////////
+	/// Pagination support
+	/**
+	 * Changes the current URL history adding pagination parameters.
+	 * This is needed when loading a new page via ajax so that the browser back button will run the correct query again.
+	 * @param $a the jQuery object of the clicked anchor
+	 * @param pageParam the name of the parameter that will contain the page number to load, for example "product.page"
+	 * @param sizeParam the name of the parameter that will contain the page size to load, for example "product.size"
+	 * @param loadPreviousParam the name of the parameter that will contain the loadPrevious flag, for example "product.loadPrevious"
+	 */
+	yada.fixPaginationLinkHistory = function($a, pageParam, sizeParam, loadPreviousParam){
+		const nextPageUrl = $a.attr("href"); // ".../en/search/loadMoreProducts?searchString=tolo&page=2&size=4"
+		const nextPage = yada.getUrlParameter(nextPageUrl, "page");
+		const nextSize = yada.getUrlParameter(nextPageUrl, "size");
+		const currentUrl = window.location.href;
+		var newUrl = yada.addOrUpdateUrlParameter(currentUrl, pageParam, nextPage);
+		newUrl = yada.addOrUpdateUrlParameter(newUrl, sizeParam, nextSize);
+		newUrl = yada.addOrUpdateUrlParameter(newUrl, loadPreviousParam, true);
+		history.pushState({}, "", newUrl);
+	};
+	
 
 	////////////////////
 	/// Modal
@@ -364,6 +385,13 @@
 		// From here on the $link is a single anchor, not an array
 		$link.not('.'+markerClass).click(function(e) {
 			$link = $(this); // Needed otherwise $link could be stale (from a previous ajax replacement) 
+			// Fix pagination parameters if any
+			const yadaPagination = $link.attr("data-yadaPaginationHistory"); // pageParam, sizeParam, loadPreviousParam
+			const paginationParams = yada.listToArray(yadaPagination);
+			if (paginationParams.length==3) {
+				yada.fixPaginationLinkHistory($link, paginationParams[0], paginationParams[1], paginationParams[2]);
+			}
+			//
 			return makeAjaxCall(e, $link, handler);
 		})
 		$link.removeClass('yadaAjax');
@@ -374,8 +402,9 @@
 	/**
 	 * Execute function by name
 	 * See https://stackoverflow.com/a/359910/587641
-	 * @param functionName the name of the function, the window scope, that can have namespaces like "mylib.myfunc"
+	 * @param functionName the name of the function, in the window scope, that can have namespaces like "mylib.myfunc"
 	 * @param thisObject the object that will become the this object in the called function
+	 * Any number of arguments can be passed to the function
 	 */
 	function executeFunctionByName(functionName, thisObject /*, args */) {
 			var context = window; // The functionName is always searched in the current window
@@ -700,11 +729,21 @@
 		});
 
 		$form.not('.'+markerClass).submit(function(e) {
+			// Only ajax forms enter here
+			var $form=$(this); // Needed to overwrite the outside variable with the current form, otherwise we may handle the wrong form (because of cloning)
+			// Invoke any submit handlers
+			var submitHandlerNames = $form.attr("data-yadaSubmitHandler");
+			var submitHandlerNameArray = yada.listToArray(submitHandlerNames);
+			for (var z = 0; z < submitHandlerNameArray.length; z++) {
+				const result = executeFunctionByName(submitHandlerNameArray[z], $form, e);
+				if (result==false) {
+					return; // Do not send the form
+				}
+			}
+			//
 			if (e.isDefaultPrevented()) {
 				return; // Do not send the form - probably a cancel has been made
 			}
-			// Only ajax forms enter here
-			var $form=$(this); // Needed to overwrite the outside variable with the current form, otherwise we may handle the wrong form (because of cloning)
 //			// Form alias: submit another form after merging the current form children
 //			var formAliasSelector = $form.attr('data-yadaFormAlias');
 //			if (formAliasSelector!=null) {
@@ -965,6 +1004,7 @@
 		if (responseType!=null) {
 			xhrFields.responseType = responseType;
 		}
+		// Call the server
 		$.ajax({
 			type: method,
 			url: url,
