@@ -2008,25 +2008,24 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Crea un file zip contenente una serie di file.
-	 * Lancia un'eccezione in caso di errore.
-	 * Preso da http://www.exampledepot.com/egs/java.util.zip/CreateZip.html
-	 * @param zipFile File da creare
-	 * @param sourceFiles lista di File da zippare
-	 * @param filenamesNoExtension lista di nomi da assegnare ai file nello zip senza estensione, oppure null se si usano gli originali
+	 * Create a zip of a list of files.
+	 * An exception is thrown when a source file is not readable.
+	 * Adapted from http://www.exampledepot.com/egs/java.util.zip/CreateZip.html
+	 * @param zipFile zip file to create
+	 * @param sourceFiles files to zip
+	 * @param filenamesNoExtension optional list of names to give to zip entries. The name extension is also optional: it will be taken from the source file
 	 */
 	public void createZipFile(File zipFile, File[] sourceFiles, String[] filenamesNoExtension) {
 		createZipFile(zipFile, sourceFiles, filenamesNoExtension, false);
 	}
 
 	/**
-	 * Crea un file zip contenente una serie di file.
-	 * Può continuare con i file successivi se uno dei file va in errore.
-	 * Preso da http://www.exampledepot.com/egs/java.util.zip/CreateZip.html
-	 * @param zipFile File da creare
-	 * @param sourceFiles lista di File da zippare
-	 * @param filenamesNoExtension lista di nomi da assegnare ai file nello zip senza estensione, oppure null se si usano gli originali
-	 * @param ignoreErrors true per ignorare gli errori e continuare
+	 * Create a zip of a list of files.
+	 * Adapted from http://www.exampledepot.com/egs/java.util.zip/CreateZip.html
+	 * @param zipFile zip file to create
+	 * @param sourceFiles files to zip
+	 * @param filenamesNoExtension optional list of names to give to zip entries. The name extension is also optional: it will be taken from the source file
+	 * @param ignoreErrors true to ignore a file error and keep going with the next file
 	 */
 	public void createZipFile(File zipFile, File[] sourceFiles, String[] filenamesNoExtension, boolean ignoreErrors) {
 		byte[] buf = new byte[1024]; // Create a buffer for reading the files
@@ -2039,11 +2038,14 @@ public class YadaUtil {
 			        // Add ZIP entry to output stream.
 			        String entryName;
 			        if (filenamesNoExtension!=null) {
-			        	String extensionNoDot = getFileExtension(sourceFiles[i]);
-			        	String extension = "." + extensionNoDot;
-			        	entryName = filenamesNoExtension[i].toLowerCase().endsWith(extension)? filenamesNoExtension[i] : filenamesNoExtension[i] + extension;
+			        	// The filenamesNoExtension array should not contain the extensions, but we check just in case
+			        	String targetNameNoExtensionMaybe = filenamesNoExtension[i];
+			        	String extensionNoDot = getFileExtension(sourceFiles[i]); // jpg
+			        	String sourceExtension = "." + extensionNoDot; // Extension of the file to zip, e.g. ".jpg"
+			        	boolean targeHasExtension = targetNameNoExtensionMaybe.toLowerCase().endsWith(sourceExtension);
+			        	String targetNameNoExtension = targeHasExtension ? splitFileNameAndExtension(targetNameNoExtensionMaybe)[0] : targetNameNoExtensionMaybe;
 			        	// Add a counter for duplicated names
-			        	entryName = findAvailableFilename(filenamesNoExtension[i], extensionNoDot, "_", addedFilenames);
+			        	entryName = findAvailableFilename(targetNameNoExtension, extensionNoDot, "_", addedFilenames);
 			        } else {
 			        	String[] filenameAndExtension = splitFileNameAndExtension(sourceFiles[i].getName());
 			        	// Add a counter for duplicated names
