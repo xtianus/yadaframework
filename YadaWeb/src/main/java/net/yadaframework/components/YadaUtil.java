@@ -1061,7 +1061,7 @@ public class YadaUtil {
 			log.error("Failed to execute shell command: {} {} {}", command, args!=null?args.toArray():"", substitutionMap!=null?substitutionMap:"", e);
 			throw e;
 		} finally {
-			closeSilently(outputStream);
+			closeSilently(outputStream); // This may not be needed
 		}
 	}
 
@@ -1104,9 +1104,9 @@ public class YadaUtil {
 	 * </pre>
 	 * See the yadaframework documentation for full syntax.
 	 * @param shellCommandKey xpath key of the shell command, e.g. "config/shell/cropImage"
-	 * @param optional substitutionMap key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
+	 * @param substitutionMap optional key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
 	 * pair is like "key"-->"value". If the value is a collection, arguments are unrolled so key-->collection will result in key0=val0 key1=val1...
-	 * @param optional outputStream ByteArrayOutputStream that will contain the command output (out + err)
+	 * @param outputStream optional ByteArrayOutputStream that will contain the command output (out + err)
 	 * @return the command exit value
 	 * @throws IOException
 	 */
@@ -1114,7 +1114,15 @@ public class YadaUtil {
 		String executable = getExecutable(shellCommandKey);
 		// Need to use getProperty() to avoid interpolation on ${} arguments
 		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
-		List<String> args = (List<String>) config.getConfiguration().getProperty(shellCommandKey + "/arg");
+		Object argsObject = config.getConfiguration().getProperty(shellCommandKey + "/arg");
+		List<String> args = new ArrayList<String>();
+		if (argsObject!=null) {
+			if (argsObject instanceof List) {
+				args.addAll((Collection<? extends String>) argsObject);
+			} else {
+				args.add((String) argsObject);
+			}
+		}
 		Integer timeout = config.getInt(shellCommandKey + "/@timeoutseconds", -1);
 		return shellExec(executable, args, substitutionMap, outputStream, timeout);
 	}
