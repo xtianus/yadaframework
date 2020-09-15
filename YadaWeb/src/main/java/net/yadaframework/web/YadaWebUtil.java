@@ -379,7 +379,7 @@ public class YadaWebUtil {
 	 * @return
 	 */
 	public boolean checkInvalidSlugCharacters(String text) {
-		Pattern pattern = Pattern.compile("[^\\w:,;=&!+~\\(\\)@\\*\\$\\'\\s\\s]");
+		Pattern pattern = Pattern.compile("[:,;=&!+~\\(\\)@\\*\\$\\'\\s\\s]");
 		Matcher matcher = pattern.matcher(text);
 
 		while(matcher.find()){
