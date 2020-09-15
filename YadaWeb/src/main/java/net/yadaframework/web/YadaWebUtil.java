@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -368,6 +370,22 @@ public class YadaWebUtil {
 		slug = StringUtils.removeEnd(slug, "\\");
 		slug = slug.replaceAll("-+", "-"); // Multiple dashes become one dash
 		return slug;
+	}
+
+	/**
+	 * Find invalid characters from a slug: white space, :,;=&!+~\()@*$'
+	 * The char "-" is excluded.
+	 * @param text
+	 * @return
+	 */
+	public boolean checkInvalidSlugCharacters(String text) {
+		Pattern pattern = Pattern.compile("[^\\w:,;=&!+~\\(\\)@\\*\\$\\'\\s\\s]");
+		Matcher matcher = pattern.matcher(text);
+
+		while(matcher.find()){
+			return true;
+		}
+		return false;
 	}
 
 	/**
