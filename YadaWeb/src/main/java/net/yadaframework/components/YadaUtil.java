@@ -1102,6 +1102,7 @@ public class YadaUtil {
 		&lt;arg>${FILENAMEOUT}&lt;/arg>
 	&lt;/imageConvert>
 	 * </pre>
+	 * Be aware that args can not contain "Commons Configuration variables" because they clash with placeholders as defined below.
 	 * See the yadaframework documentation for full syntax.
 	 * @param shellCommandKey xpath key of the shell command, e.g. "config/shell/cropImage"
 	 * @param substitutionMap optional key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
