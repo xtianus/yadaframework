@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import net.yadaframework.components.YadaNotify;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaRegistrationType;
@@ -36,7 +37,6 @@ import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.security.persistence.repository.YadaRegistrationRequestRepository;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
 import net.yadaframework.security.persistence.repository.YadaUserProfileRepository;
-import net.yadaframework.web.YadaNotify;
 import net.yadaframework.web.form.YadaFormPasswordChange;
 
 @Controller

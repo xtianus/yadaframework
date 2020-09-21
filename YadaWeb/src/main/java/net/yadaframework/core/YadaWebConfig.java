@@ -41,7 +41,7 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
-import net.yadaframework.web.YadaDateFormatter;
+import net.yadaframework.components.YadaDateFormatter;
 import net.yadaframework.web.dialect.YadaDialect;
 
 

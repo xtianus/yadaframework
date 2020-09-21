@@ -1,4 +1,4 @@
-package net.yadaframework.web;
+package net.yadaframework.components;
 import static net.yadaframework.core.YadaConstants.KEY_ALL;
 import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_AUTOCLOSE;
 import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_BODY;
@@ -31,6 +31,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.web.YadaViews;
 
 /**
  * Build a notification dialog to be shown on the response page or after a redirect.
