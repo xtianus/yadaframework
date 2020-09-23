@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>11. Sending Emails &#8212; Yada Framework master documentation</title>
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/yadaDocs.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
+    <script type="text/javascript" src="_static/copybutton.js"></script>
+    <script type="text/javascript" src="_static/yadaDocs.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="12. Database Pagination" href="database/pagination.html" />
+    <link rel="prev" title="10. Notification Modal" href="notificationModal.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          Yada Framework</a>
+        <span class="navbar-text navbar-version pull-left"><b>master</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">1. Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="newEclipseProject.html">2. New Eclipse Project</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internationalization.html">3. Internationalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/fieldsComponents.html">4. Form Fields and Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/overview.html">5. Forms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forms/uploads.html">6. File Uploads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datatables.html">7. Data Tables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajax.html">8. Ajax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">9. Ajax Modal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notificationModal.html">10. Notification Modal</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">11. Sending Emails</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database/pagination.html">12. Database Pagination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">13. Troubleshooting</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">11. Sending Emails</a><ul>
+<li><a class="reference internal" href="#introduction">11.1. Introduction</a></li>
+<li><a class="reference internal" href="#configuration">11.2. Configuration</a></li>
+<li><a class="reference internal" href="#email-templates">11.3. Email Templates</a></li>
+<li><a class="reference internal" href="#email-subject">11.4. Email Subject</a></li>
+<li><a class="reference internal" href="#java-code">11.5. Java Code</a></li>
+<li><a class="reference internal" href="#internationalization">11.6. Internationalization</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="notificationModal.html" title="Previous Chapter: 10. Notification Modal"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 10. Notificat...</span>
+    </a>
+  </li>
+  <li>
+    <a href="database/pagination.html" title="Next Chapter: 12. Database Pagination"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">12. Database ... &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/emails.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <div class="section" id="sending-emails">
+<h1>11. Sending Emails<a class="headerlink" href="#sending-emails" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>11.1. Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>Emails can be sent to users in many occasions:</p>
+<ul class="simple">
+<li><p>when a user registers you need to send a confirmation link</p></li>
+<li><p>when a user can’t remember the password you need to send a password reset link</p></li>
+<li><p>some use cases require sending confirmation emails to users</p></li>
+<li><p>you may need to send user data to a company email, like when suggesting a feature or asking for help</p></li>
+</ul>
+<p>The Yada Framework approach to emails is similar to writing a web page: an html template is populated with
+values before being sent via a SMTP server you have configured.</p>
+</div>
+<div class="section" id="configuration">
+<h2>11.2. Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>The configuration file holds the SMTP server configuration and other parameters:</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;email&gt;</span>
+        <span class="nt">&lt;enabled&gt;</span>true<span class="nt">&lt;/enabled&gt;</span>
+        <span class="nt">&lt;from&gt;</span>mysender@gmail.com<span class="nt">&lt;/from&gt;</span>
+        <span class="nt">&lt;logoImage&gt;</span>/template/email/mycompany-logo.png<span class="nt">&lt;/logoImage&gt;</span>
+        <span class="nt">&lt;smtpserver&gt;</span>
+                <span class="nt">&lt;host&gt;</span>smtp.example.com<span class="nt">&lt;/host&gt;</span>
+                <span class="nt">&lt;port&gt;</span>587<span class="nt">&lt;/port&gt;</span>
+                <span class="nt">&lt;protocol&gt;</span>smtp<span class="nt">&lt;/protocol&gt;</span>
+                <span class="nt">&lt;username&gt;</span>mysmtpuser<span class="nt">&lt;/username&gt;</span>
+                <span class="nt">&lt;password&gt;</span>mysmtppassword<span class="nt">&lt;/password&gt;</span>
+                 <span class="c">&lt;!--  If sendpartial is set to true, and a message has some valid and some invalid addresses, send the message anyway,</span>
+<span class="c">                       reporting the partial failure with a SendFailedException. If set to false (the default), the message</span>
+<span class="c">                       is not sent to any of the recipients if there is an invalid recipient address.  --&gt;</span>
+                <span class="nt">&lt;properties&gt;</span>mail.smtp.sendpartial=true<span class="nt">&lt;/properties&gt;</span>
+                <span class="nt">&lt;properties&gt;</span>mail.smtp.auth=true<span class="nt">&lt;/properties&gt;</span>
+                <span class="nt">&lt;properties&gt;</span>mail.smtp.starttls.enable=true<span class="nt">&lt;/properties&gt;</span>
+                <span class="nt">&lt;properties&gt;</span>mail.smtp.quitwait=false<span class="nt">&lt;/properties&gt;</span>
+        <span class="nt">&lt;/smtpserver&gt;</span>
+        <span class="c">&lt;!-- Remove this list to enable email to everyone --&gt;</span>
+        <span class="nt">&lt;validEmail&gt;</span>mydeveloper1@gmail.com<span class="nt">&lt;/validEmail&gt;</span>
+        <span class="nt">&lt;validEmail&gt;</span>mydeveloper2@gmail.com<span class="nt">&lt;/validEmail&gt;</span>
+        <span class="c">&lt;!-- Email patterns of invalid emails (rejected on registration) --&gt;</span>
+        <span class="nt">&lt;blacklistPattern&gt;</span>.*invalid.*<span class="nt">&lt;/blacklistPattern&gt;</span>
+        <span class="nt">&lt;blacklistPattern&gt;</span>.*@mailinator.com<span class="nt">&lt;/blacklistPattern&gt;</span>
+<span class="nt">&lt;/email&gt;</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>enabled</dt><dd><p>when false or not set, emails are not sent</p>
+</dd>
+<dt>from</dt><dd><p>email address of the sender, usually a system account. Can be repeated to have more sender emails.</p>
+</dd>
+<dt>logoImage (optional)</dt><dd><p>path of the logo to place in the email, relative to the <code class="docutils literal notranslate"><span class="pre">resources</span></code> folder</p>
+</dd>
+<dt>host</dt><dd><p>SMTP server address</p>
+</dd>
+<dt>port</dt><dd><p>SMTP server port</p>
+</dd>
+<dt>protocol</dt><dd><p>SMTP server protocol</p>
+</dd>
+<dt>username</dt><dd><p>SMTP server login username</p>
+</dd>
+<dt>password</dt><dd><p>SMTP server login password</p>
+</dd>
+<dt>properties (optional)</dt><dd><p>list of java mail properties</p>
+</dd>
+<dt>validEmail (optional)</dt><dd><p>list of authorized destination emails.
+When present, all emails to addresses not listed here are not sent.
+Useful in development and test environments to prevent sending fake emails to real users</p>
+</dd>
+<dt>blacklistPattern (optional)</dt><dd><p>Regex patterns of email addresses that are not accepted at registration</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="email-templates">
+<h2>11.3. Email Templates<a class="headerlink" href="#email-templates" title="Permalink to this headline">¶</a></h2>
+<p>Email content is defined using HTML templates as for web pages.
+Templates must be saved in the <code class="docutils literal notranslate"><span class="pre">src\main\resources\template\email</span></code> folder as html files.
+You can use the standard Thymeleaf notation. Model attributes can be accesed the ususal way with <code class="docutils literal notranslate"><span class="pre">${myobj}</span></code>, as are
+singleton beans <code class="docutils literal notranslate"><span class="pre">${&#64;mybean}</span></code>, urls <code class="docutils literal notranslate"><span class="pre">&#64;{/myurl}</span></code> and localized strings <code class="docutils literal notranslate"><span class="pre">#{my.local.string}</span></code>.
+Includes can also be used, with a path relative to the <code class="docutils literal notranslate"><span class="pre">templates</span></code> folder.</p>
+<p>Example <code class="docutils literal notranslate"><span class="pre">src\main\resources\template\email\bookVisit.html</span></code>:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">xmlns:th</span><span class="o">=</span><span class="s">&quot;http://www.thymeleaf.org&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+                <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">/&gt;</span>
+                <span class="p">&lt;</span><span class="nt">th:block</span> <span class="na">th:replace</span><span class="o">=</span><span class="s">&quot;/email/mailhead :: head&quot;</span> <span class="p">&gt;&lt;/</span><span class="nt">th:block</span><span class="p">&gt;</span>
+   <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">th:block</span> <span class="na">th:replace</span><span class="o">=</span><span class="s">&quot;/email/mailhead :: body&quot;</span> <span class="p">&gt;&lt;/</span><span class="nt">th:block</span><span class="p">&gt;</span>
+
+        <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Booking confirmed<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
+                <span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>Day: <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span> <span class="na">th:with</span><span class="o">=</span><span class="s">&quot;dateFormat=#{date.format.long}&quot;</span> <span class="na">th:text</span><span class="o">=</span><span class="s">&quot;${#dates.format(slot.start, dateFormat)}&quot;</span><span class="p">&gt;</span>10 january<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+                <span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>Time: <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span> <span class="na">th:text</span><span class="o">=</span><span class="s">&quot;${slot.timeRange}&quot;</span><span class="p">&gt;</span>10:00 - 10:30<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+                <span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>People: <span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>[[${totPeople}]]<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+
+        <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Thank you for joining us.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>If you need to cancel your booking, please <span class="p">&lt;</span><span class="nt">a</span> <span class="na">th:href</span><span class="o">=</span><span class="s">&quot;@{${cancelLink}}&quot;</span><span class="p">&gt;</span>click here<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">th:replace</span><span class="o">=</span><span class="s">&quot;/email/mailfooter :: body&quot;</span> <span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="email-subject">
+<h2>11.4. Email Subject<a class="headerlink" href="#email-subject" title="Permalink to this headline">¶</a></h2>
+<p>The subject of the email is localized and is defined in message.properties.
+The property name must have the format</p>
+<p><code class="docutils literal notranslate"><span class="pre">email.subject.&lt;templateName&gt;</span></code></p>
+<p>where <code class="docutils literal notranslate"><span class="pre">&lt;templateName&gt;</span></code> is the name of the template html file without extension.
+Example:</p>
+<p><code class="docutils literal notranslate"><span class="pre">email.subject.bookVisit</span> <span class="pre">=</span> <span class="pre">Thank</span> <span class="pre">you</span> <span class="pre">for</span> <span class="pre">visiting</span> <span class="pre">{0}</span></code></p>
+</div>
+<div class="section" id="java-code">
+<h2>11.5. Java Code<a class="headerlink" href="#java-code" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">YadaEmailService</span></code> class can be used to send emails using the <code class="docutils literal notranslate"><span class="pre">sendHtmlEmail</span></code> methods.
+It can also handle file attachments.</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">confirmVisit</span><span class="o">(</span><span class="n">Booking</span> <span class="n">booking</span><span class="o">,</span> <span class="n">String</span> <span class="n">customerEmail</span><span class="o">,</span> <span class="n">File</span> <span class="n">catalog</span><span class="o">,</span> <span class="n">Locale</span> <span class="n">locale</span><span class="o">)</span> <span class="o">{</span>
+<span class="kd">final</span> <span class="n">String</span> <span class="n">emailName</span> <span class="o">=</span> <span class="s">&quot;bookVisit&quot;</span><span class="o">;</span>
+        <span class="kd">final</span> <span class="n">String</span><span class="o">[]</span> <span class="n">toEmail</span> <span class="o">=</span> <span class="k">new</span> <span class="n">String</span><span class="o">[]</span> <span class="o">{</span> <span class="n">customerEmail</span> <span class="o">};</span>
+        <span class="kd">final</span> <span class="n">String</span><span class="o">[]</span> <span class="n">replyEmail</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">getEmailFrom</span><span class="o">();</span>
+        <span class="n">String</span> <span class="n">cancelLink</span> <span class="o">=</span> <span class="s">&quot;/booking/cancel/&quot;</span> <span class="o">+</span> <span class="n">booking</span><span class="o">.</span><span class="na">getId</span><span class="o">();</span>
+
+        <span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">templateParams</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;();</span>
+<span class="n">templateParams</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;slot&quot;</span><span class="o">,</span> <span class="n">booking</span><span class="o">.</span><span class="na">getSlot</span><span class="o">());</span>
+<span class="n">templateParams</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;totPeople&quot;</span><span class="o">,</span> <span class="n">booking</span><span class="o">.</span><span class="na">getTotPeople</span><span class="o">());</span>
+<span class="n">templateParams</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;cancelLink&quot;</span><span class="o">,</span> <span class="n">cancelLink</span><span class="o">);</span>
+
+<span class="n">String</span><span class="o">[]</span> <span class="n">subjectParams</span> <span class="o">=</span> <span class="k">new</span> <span class="n">String</span><span class="o">[]</span> <span class="o">{</span><span class="n">booking</span><span class="o">.</span><span class="na">storeName</span><span class="o">()};</span>
+
+<span class="kd">final</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">File</span><span class="o">&gt;</span> <span class="n">attachments</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;();</span>
+<span class="n">attachments</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">pdf</span><span class="o">.</span><span class="na">getName</span><span class="o">(),</span> <span class="n">catalog</span><span class="o">);</span>
+
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">inlineResources</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;();</span>
+        <span class="n">inlineResources</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;logosmall&quot;</span><span class="o">,</span> <span class="n">config</span><span class="o">.</span><span class="na">getEmailLogoImage</span><span class="o">());</span>
+
+        <span class="n">yadaEmailService</span><span class="o">.</span><span class="na">sendHtmlEmail</span><span class="o">(</span><span class="n">replyEmail</span><span class="o">,</span> <span class="n">toEmail</span><span class="o">,</span> <span class="n">replyEmail</span><span class="o">[</span><span class="mi">0</span><span class="o">],</span> <span class="n">emailName</span><span class="o">,</span> <span class="n">subjectParams</span><span class="o">,</span> <span class="n">templateParams</span><span class="o">,</span> <span class="n">inlineResources</span><span class="o">,</span> <span class="n">attachments</span><span class="o">,</span> <span class="n">locale</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="internationalization">
+<h2>11.6. Internationalization<a class="headerlink" href="#internationalization" title="Permalink to this headline">¶</a></h2>
+<p>The HTML of the email template can contain localized text expressed via the usual thymeleaf <code class="docutils literal notranslate"><span class="pre">#{}</span></code> operator.</p>
+<p>When you have emails with a lot of text, it may be more convenient to write the whole email in a specific language.
+Files for different languages other than the default one must have a _&lt;lang&gt; suffix.
+For example:</p>
+<ul class="simple">
+<li><p>bookVisit.html</p></li>
+<li><p>bookVisit_de.html</p></li>
+<li><p>bookVisit_it.html</p></li>
+</ul>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2019, Cristian Ghezzi.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.0.1.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

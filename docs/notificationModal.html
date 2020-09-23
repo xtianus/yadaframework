@@ -18,7 +18,7 @@
     <script type="text/javascript" src="_static/yadaDocs.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="11. Troubleshooting" href="troubleshooting.html" />
+    <link rel="next" title="11. Database Pagination" href="database/pagination.html" />
     <link rel="prev" title="9. Ajax Modal" href="ajaxModal.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
@@ -68,7 +68,8 @@
 <li class="toctree-l1"><a class="reference internal" href="ajax.html">8. Ajax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">9. Ajax Modal</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">10. Notification Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">11. Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database/pagination.html">11. Database Pagination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">12. Troubleshooting</a></li>
 </ul>
 </ul>
 </li>
@@ -87,7 +88,10 @@
 <li><a class="reference internal" href="#prerequisites">10.2. Prerequisites</a></li>
 <li><a class="reference internal" href="#java-api">10.3. Java API</a><ul>
 <li><a class="reference internal" href="#normal-request-normal-response">10.3.1. Normal request / normal response</a></li>
-<li><a class="reference internal" href="#normal-request-redirect-response">10.3.2. Normal request / redirect response</a></li>
+<li><a class="reference internal" href="#normal-request-redirect-response">10.3.2. Normal request / redirect response</a><ul>
+<li><a class="reference internal" href="#redirect-on-modal-close">10.3.2.1. Redirect on modal close</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#ajax-request">10.3.3. Ajax request</a><ul>
 <li><a class="reference internal" href="#returning-from-the-controller">10.3.3.1. Returning from the Controller</a></li>
 <li><a class="reference internal" href="#returning-additional-html">10.3.3.2. Returning additional HTML</a></li>
@@ -119,7 +123,7 @@
     </a>
   </li>
   <li>
-    <a href="troubleshooting.html" title="Next Chapter: 11. Troubleshooting"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">11. Troubleshooting &raquo;</span>
+    <a href="database/pagination.html" title="Next Chapter: 11. Database Pagination"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">11. Database ... &raquo;</span>
     </a>
   </li>
               
@@ -256,12 +260,25 @@ The server can test if a modal is pending with the following methods:</p>
 <span class="n">isErrorSet</span><span class="o">(...)</span>
 </pre></div>
 </div>
-<p>You can also activate a redirect only when the modal is closed by the user with <code class="docutils literal notranslate"><span class="pre">redirectOnClose()</span></code>:</p>
+<div class="section" id="redirect-on-modal-close">
+<h4>10.3.2.1. Redirect on modal close<a class="headerlink" href="#redirect-on-modal-close" title="Permalink to this headline">¶</a></h4>
+<p>You can also activate a redirect when the modal is closed by the user with <code class="docutils literal notranslate"><span class="pre">redirectOnClose()</span></code>.
+This can happen both after a normal response and a redirect response. Be careful to use the appropriate
+parameter to the <code class="docutils literal notranslate"><span class="pre">title()</span></code> method: Model for a normal response and RedirectAttributes for a redirect response.
+The first example will show the modal on the “/dashboardPage” and redirect to “/console” on close; the
+second example will show the modal after a redirect to “/dashboard” and redirect again to “/console” on close:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">&quot;/dashboard&quot;</span><span class="o">)</span>
 <span class="kd">public</span> <span class="n">String</span> <span class="nf">dashboard</span><span class="o">(</span><span class="n">Model</span> <span class="n">model</span><span class="o">)</span> <span class="o">{</span>
         <span class="n">yadaNotify</span><span class="o">.</span><span class="na">title</span><span class="o">(</span><span class="s">&quot;Login success&quot;</span><span class="o">,</span> <span class="n">model</span><span class="o">).</span><span class="na">ok</span><span class="o">().</span><span class="na">message</span><span class="o">(</span><span class="s">&quot;You have been logged in&quot;</span><span class="o">).</span><span class="na">redirectOnClose</span><span class="o">(</span><span class="s">&quot;/console&quot;</span><span class="o">).</span><span class="na">add</span><span class="o">();</span>
-        <span class="k">return</span> <span class="s">&quot;/dashboard&quot;</span><span class="o">;</span>
+        <span class="k">return</span> <span class="s">&quot;/dashboardPage&quot;</span><span class="o">;</span>
+
+<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">&quot;/dashboard&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="n">String</span> <span class="nf">dashboard</span><span class="o">(</span><span class="n">RedirectAttributes</span> <span class="n">redirectAttributes</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">yadaNotify</span><span class="o">.</span><span class="na">title</span><span class="o">(</span><span class="s">&quot;Login success&quot;</span><span class="o">,</span> <span class="n">redirectAttributes</span><span class="o">).</span><span class="na">ok</span><span class="o">().</span><span class="na">message</span><span class="o">(</span><span class="s">&quot;You have been logged in&quot;</span><span class="o">).</span><span class="na">redirectOnClose</span><span class="o">(</span><span class="s">&quot;/console&quot;</span><span class="o">).</span><span class="na">add</span><span class="o">();</span>
+        <span class="k">return</span> <span class="s">&quot;redirect:/dashboard&quot;</span><span class="o">;</span>
 </pre></div>
+</div>
+<p>Please note that the <code class="docutils literal notranslate"><span class="pre">redirectOnClose()</span></code> url does not need to have the language prefix (when applicable), so “/console” is correct while “/en/console” is not.</p>
 </div>
 </div>
 <div class="section" id="ajax-request">
@@ -299,7 +316,7 @@ The solution is to add a conditional include of the modalNotify in your returned
 <div class="section" id="returning-additional-data">
 <h4>10.3.3.3. Returning additional data<a class="headerlink" href="#returning-additional-data" title="Permalink to this headline">¶</a></h4>
 <p>You might want to return, together with a notification, some key-value pairs for use in a javascript handler
-defined with <code class="docutils literal notranslate"><span class="pre">yada:successHandler</span></code> (see <span class="xref std std-ref">ajax-postprocessing</span>).</p>
+defined with <code class="docutils literal notranslate"><span class="pre">yada:successHandler</span></code> (see <a class="reference internal" href="ajax.html#ajax-postprocessing"><span class="std std-ref">Postprocessing</span></a>).</p>
 <p>You can achieve this by placing a Map called “resultMap” in the Model:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">resultMap</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;();</span>
 <span class="n">resultMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;deletedTaskId&quot;</span><span class="o">,</span> <span class="n">taskId</span><span class="o">);</span>

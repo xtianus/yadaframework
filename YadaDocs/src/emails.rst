@@ -1,0 +1,169 @@
+********************
+Sending Emails
+********************
+
+Introduction
+===================
+
+Emails can be sent to users in many occasions:
+
+- when a user registers you need to send a confirmation link
+- when a user can't remember the password you need to send a password reset link
+- some use cases require sending confirmation emails to users
+- you may need to send user data to a company email, like when suggesting a feature or asking for help
+
+The Yada Framework approach to emails is similar to writing a web page: an html template is populated with
+values before being sent via a SMTP server you have configured.
+
+Configuration
+===================
+
+The configuration file holds the SMTP server configuration and other parameters:
+
+.. code-block:: xml
+
+	<email>
+		<enabled>true</enabled>
+		<from>mysender@gmail.com</from>
+		<logoImage>/template/email/mycompany-logo.png</logoImage>
+		<smtpserver>
+			<host>smtp.example.com</host>
+			<port>587</port>
+			<protocol>smtp</protocol>
+			<username>mysmtpuser</username>
+			<password>mysmtppassword</password>
+			 <!--  If sendpartial is set to true, and a message has some valid and some invalid addresses, send the message anyway, 
+			       reporting the partial failure with a SendFailedException. If set to false (the default), the message 
+			       is not sent to any of the recipients if there is an invalid recipient address.  -->
+			<properties>mail.smtp.sendpartial=true</properties>
+			<properties>mail.smtp.auth=true</properties>
+			<properties>mail.smtp.starttls.enable=true</properties>
+			<properties>mail.smtp.quitwait=false</properties>
+		</smtpserver>	
+		<!-- Remove this list to enable email to everyone -->
+		<validEmail>mydeveloper1@gmail.com</validEmail>
+		<validEmail>mydeveloper2@gmail.com</validEmail>
+		<!-- Email patterns of invalid emails (rejected on registration) -->
+		<blacklistPattern>.*invalid.*</blacklistPattern>
+		<blacklistPattern>.*@mailinator.com</blacklistPattern>
+	</email>
+
+
+enabled
+  when false or not set, emails are not sent
+from
+  email address of the sender, usually a system account. Can be repeated to have more sender emails.
+logoImage (optional)
+  path of the logo to place in the email, relative to the ``resources`` folder
+host
+  SMTP server address
+port
+  SMTP server port
+protocol
+  SMTP server protocol
+username
+  SMTP server login username
+password
+  SMTP server login password
+properties (optional)
+  list of java mail properties
+validEmail (optional)
+  list of authorized destination emails.
+  When present, all emails to addresses not listed here are not sent.
+  Useful in development and test environments to prevent sending fake emails to real users
+blacklistPattern (optional)
+  Regex patterns of email addresses that are not accepted at registration
+
+Email Templates
+===================
+
+Email content is defined using HTML templates as for web pages.
+Templates must be saved in the ``src\main\resources\template\email`` folder as html files.
+You can use the standard Thymeleaf notation. Model attributes can be accesed the ususal way with ``${myobj}``, as are
+singleton beans ``${@mybean}``, urls ``@{/myurl}`` and localized strings ``#{my.local.string}``.
+Includes can also be used, with a path relative to the ``templates`` folder.
+
+Example ``src\main\resources\template\email\bookVisit.html``:
+
+.. code-block:: html
+
+	<!DOCTYPE html>
+	<html xmlns:th="http://www.thymeleaf.org">
+	    <head>
+	 		<meta charset="UTF-8"/>
+	 		<th:block th:replace="/email/mailhead :: head" ></th:block>
+	   </head>
+	    <body>
+		    <th:block th:replace="/email/mailhead :: body" ></th:block>
+	
+	    	<h1>Booking confirmed</h1>
+	    	<table>
+	    		<tr><td>Day: </td><td th:with="dateFormat=#{date.format.long}" th:text="${#dates.format(slot.start, dateFormat)}">10 january</td></tr>
+	    		<tr><td>Time: </td><td th:text="${slot.timeRange}">10:00 - 10:30</td></tr>
+	    		<tr><td>People: </td><td>[[${totPeople}]]</td></tr>
+	    	</table>
+	    	
+	    	<p>Thank you for joining us.</p>
+	    	<p>If you need to cancel your booking, please <a th:href="@{${cancelLink}}">click here</a></p>
+	 
+	    	<div th:replace="/email/mailfooter :: body" ></div>
+	    </body>
+	</html>
+
+Email Subject
+===================
+
+The subject of the email is localized and is defined in message.properties.
+The property name must have the format 
+
+``email.subject.<templateName>``
+
+where ``<templateName>`` is the name of the template html file without extension.
+Example:
+
+``email.subject.bookVisit = Thank you for visiting {0}``
+
+Java Code
+===================
+
+The ``YadaEmailService`` class can be used to send emails using the ``sendHtmlEmail`` methods.
+It can also handle file attachments.
+
+.. code-block:: java
+
+	public void confirmVisit(Booking booking, String customerEmail, File catalog, Locale locale) {
+    	final String emailName = "bookVisit";
+		final String[] toEmail = new String[] { customerEmail };
+		final String[] replyEmail = config.getEmailFrom();
+		String cancelLink = "/booking/cancel/" + booking.getId();
+		
+		final Map<String, Object> templateParams = new HashMap<>();
+    	templateParams.put("slot", booking.getSlot());
+    	templateParams.put("totPeople", booking.getTotPeople());
+    	templateParams.put("cancelLink", cancelLink);
+    	
+    	String[] subjectParams = new String[] {booking.storeName()};
+    	
+    	final Map<String, File> attachments = new HashMap<>();
+    	attachments.put(pdf.getName(), catalog);
+
+    	Map<String, String> inlineResources = new HashMap<>();
+		inlineResources.put("logosmall", config.getEmailLogoImage());
+
+		yadaEmailService.sendHtmlEmail(replyEmail, toEmail, replyEmail[0], emailName, subjectParams, templateParams, inlineResources, attachments, locale, false);
+	}
+
+Internationalization
+=====================
+
+The HTML of the email template can contain localized text expressed via the usual thymeleaf ``#{}`` operator.
+
+When you have emails with a lot of text, it may be more convenient to write the whole email in a specific language.
+Files for different languages other than the default one must have a _<lang> suffix.
+For example:
+
+- bookVisit.html
+- bookVisit_de.html
+- bookVisit_it.html
+
+

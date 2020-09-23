@@ -67,8 +67,9 @@
 <li class="toctree-l1"><a class="reference internal" href="ajax.html">8. Ajax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">9. Ajax Modal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notificationModal.html">10. Notification Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="database/pagination.html">11. Database Pagination</a></li>
-<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">12. Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emails.html">11. Sending Emails</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database/pagination.html">12. Database Pagination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">13. Troubleshooting</a></li>
 </ul>
 </ul>
 </li>
@@ -290,7 +291,10 @@
 <li class="toctree-l2"><a class="reference internal" href="notificationModal.html#prerequisites">10.2. Prerequisites</a></li>
 <li class="toctree-l2"><a class="reference internal" href="notificationModal.html#java-api">10.3. Java API</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="notificationModal.html#normal-request-normal-response">10.3.1. Normal request / normal response</a></li>
-<li class="toctree-l3"><a class="reference internal" href="notificationModal.html#normal-request-redirect-response">10.3.2. Normal request / redirect response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="notificationModal.html#normal-request-redirect-response">10.3.2. Normal request / redirect response</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="notificationModal.html#redirect-on-modal-close">10.3.2.1. Redirect on modal close</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="notificationModal.html#ajax-request">10.3.3. Ajax request</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="notificationModal.html#returning-from-the-controller">10.3.3.1. Returning from the Controller</a></li>
 <li class="toctree-l4"><a class="reference internal" href="notificationModal.html#returning-additional-html">10.3.3.2. Returning additional HTML</a></li>
@@ -309,21 +313,30 @@
 <li class="toctree-l2"><a class="reference internal" href="notificationModal.html#customization">10.5. Customization</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="database/pagination.html">11. Database Pagination</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="database/pagination.html#description">11.1. Description</a></li>
-<li class="toctree-l2"><a class="reference internal" href="database/pagination.html#first-query">11.2. First query</a></li>
-<li class="toctree-l2"><a class="reference internal" href="database/pagination.html#load-more-query">11.3. Load More query</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emails.html">11. Sending Emails</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="emails.html#introduction">11.1. Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="emails.html#configuration">11.2. Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="emails.html#email-templates">11.3. Email Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="emails.html#email-subject">11.4. Email Subject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="emails.html#java-code">11.5. Java Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="emails.html#internationalization">11.6. Internationalization</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">12. Troubleshooting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#runtime-problems">12.1. Runtime problems</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#application-doesn-t-start">12.1.1. Application doesn’t start</a></li>
-<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#can-t-see-the-changes">12.1.2. Can’t see the changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database/pagination.html">12. Database Pagination</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="database/pagination.html#description">12.1. Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="database/pagination.html#first-query">12.2. First query</a></li>
+<li class="toctree-l2"><a class="reference internal" href="database/pagination.html#load-more-query">12.3. Load More query</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#compilation-problems">12.2. Compilation problems</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#errors-for-no-reason">12.2.1. Errors for no reason</a></li>
-<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#errors-after-a-git-pull">12.2.2. Errors after a git pull</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">13. Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#runtime-problems">13.1. Runtime problems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#application-doesn-t-start">13.1.1. Application doesn’t start</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#can-t-see-the-changes">13.1.2. Can’t see the changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#compilation-problems">13.2. Compilation problems</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#errors-for-no-reason">13.2.1. Errors for no reason</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#errors-after-a-git-pull">13.2.2. Errors after a git pull</a></li>
 </ul>
 </li>
 </ul>

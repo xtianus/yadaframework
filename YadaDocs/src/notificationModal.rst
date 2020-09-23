@@ -125,14 +125,28 @@ The server can test if a modal is pending with the following methods:
 	isNotificationPending(...)
 	isErrorSet(...)
 
-You can also activate a redirect only when the modal is closed by the user with ``redirectOnClose()``:
+Redirect on modal close
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can also activate a redirect when the modal is closed by the user with ``redirectOnClose()``.
+This can happen both after a normal response and a redirect response. Be careful to use the appropriate
+parameter to the ``title()`` method: Model for a normal response and RedirectAttributes for a redirect response.
+The first example will show the modal on the "/dashboardPage" and redirect to "/console" on close; the
+second example will show the modal after a redirect to "/dashboard" and redirect again to "/console" on close:
 
 .. code-block:: java
 	
 	@RequestMapping("/dashboard")
 	public String dashboard(Model model) {
 		yadaNotify.title("Login success", model).ok().message("You have been logged in").redirectOnClose("/console").add();
-		return "/dashboard";
+		return "/dashboardPage";
+
+	@RequestMapping("/dashboard")
+	public String dashboard(RedirectAttributes redirectAttributes) {
+		yadaNotify.title("Login success", redirectAttributes).ok().message("You have been logged in").redirectOnClose("/console").add();
+		return "redirect:/dashboard";
+
+Please note that the ``redirectOnClose()`` url does not need to have the language prefix (when applicable), so "/console" is correct while "/en/console" is not.
 
 Ajax request
 ----------------------------------

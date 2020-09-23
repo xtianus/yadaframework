@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>11. Database Pagination &#8212; Yada Framework master documentation</title>
+    <title>12. Database Pagination &#8212; Yada Framework master documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
@@ -18,8 +18,8 @@
     <script type="text/javascript" src="../_static/yadaDocs.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="12. Troubleshooting" href="../troubleshooting.html" />
-    <link rel="prev" title="10. Notification Modal" href="../notificationModal.html" />
+    <link rel="next" title="13. Troubleshooting" href="../troubleshooting.html" />
+    <link rel="prev" title="11. Internationalization" href="../emails.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -68,8 +68,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../ajax.html">8. Ajax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ajaxModal.html">9. Ajax Modal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notificationModal.html">10. Notification Modal</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">11. Database Pagination</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">12. Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../emails.html">11. Sending Emails</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">12. Database Pagination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">13. Troubleshooting</a></li>
 </ul>
 </ul>
 </li>
@@ -83,10 +84,10 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">11. Database Pagination</a><ul>
-<li><a class="reference internal" href="#description">11.1. Description</a></li>
-<li><a class="reference internal" href="#first-query">11.2. First query</a></li>
-<li><a class="reference internal" href="#load-more-query">11.3. Load More query</a></li>
+<li><a class="reference internal" href="#">12. Database Pagination</a><ul>
+<li><a class="reference internal" href="#description">12.1. Description</a></li>
+<li><a class="reference internal" href="#first-query">12.2. First query</a></li>
+<li><a class="reference internal" href="#load-more-query">12.3. Load More query</a></li>
 </ul>
 </li>
 </ul>
@@ -98,11 +99,11 @@
               
                 
   <li>
-    <a href="../notificationModal.html" title="Previous Chapter: 10. Notification Modal"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 10. Notificat...</span>
+    <a href="../emails.html" title="Previous Chapter: 11. Internationalization"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 11. Internati...</span>
     </a>
   </li>
   <li>
-    <a href="../troubleshooting.html" title="Next Chapter: 12. Troubleshooting"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">12. Troubleshooting &raquo;</span>
+    <a href="../troubleshooting.html" title="Next Chapter: 13. Troubleshooting"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">13. Troubleshooting &raquo;</span>
     </a>
   </li>
               
@@ -137,10 +138,10 @@
     <div class="body col-md-12 content" role="main">
       
   <div class="section" id="database-pagination">
-<h1>11. Database Pagination<a class="headerlink" href="#database-pagination" title="Permalink to this headline">¶</a></h1>
+<h1>12. Database Pagination<a class="headerlink" href="#database-pagination" title="Permalink to this headline">¶</a></h1>
 <p class="rubric">Fetch big data one piece at a time</p>
 <div class="section" id="description">
-<h2>11.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<h2>12.1. Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>Loading the whole content of a table onto a web page is never a good idea if the row count is high, both
 from a performance and usability perspective.
 In such case it’s better to implement database pagination: loading a few rows at a time via ajax when the user wants
@@ -150,7 +151,7 @@ for bookmarking and for the
 browser back button: when going back to a web page where more data was loaded, that data is still there.</p>
 </div>
 <div class="section" id="first-query">
-<h2>11.2. First query<a class="headerlink" href="#first-query" title="Permalink to this headline">¶</a></h2>
+<h2>12.2. First query<a class="headerlink" href="#first-query" title="Permalink to this headline">¶</a></h2>
 <p>The “first query” happens when a user loads the web page for the first time, either from normal link navigation
 (e.g. a “Show all transactions” link) or by typing a search string into a form and sending it.
 The first query will receive any search keywords, will query the database for results, and will return the
@@ -221,7 +222,7 @@ implement pagination.</p>
 </div>
 </div>
 <div class="section" id="load-more-query">
-<h2>11.3. Load More query<a class="headerlink" href="#load-more-query" title="Permalink to this headline">¶</a></h2>
+<h2>12.3. Load More query<a class="headerlink" href="#load-more-query" title="Permalink to this headline">¶</a></h2>
 <p>The above code prints the found rows, then adds a “Load More” link in case there are more results.
 When the user clicks on that link, an ajax call is made to the server in order to fetch the next page:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">&quot;/searchBookMore&quot;</span><span class="o">)</span>
