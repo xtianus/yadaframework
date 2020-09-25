@@ -65,6 +65,7 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 @Service
 public class YadaWebUtil {
+
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
 	@Autowired private YadaConfiguration config;
@@ -72,6 +73,9 @@ public class YadaWebUtil {
 	@Autowired private MessageSource messageSource;
 
 	public final Pageable FIND_ONE = new PageRequest(0, 1);
+
+	// Characters that should never be found or placed in a slug
+	private static final String PATTERN_INVALID_SLUG = "[:,;=&!+~()@*$'\"\\s]";
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
 
@@ -364,7 +368,7 @@ public class YadaWebUtil {
 		}
 		String slug = source.trim().toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
 		slug = slug.replaceAll(" +", "-"); // Spaces become dashes
-		slug = slug.replaceAll("[:,;=&!+~\\(\\)@\\*\\$\\']", "");
+		slug = slug.replaceAll(PATTERN_INVALID_SLUG, "");
 		slug = StringUtils.removeEnd(slug, ".");
 		slug = StringUtils.removeEnd(slug, ";");
 		slug = StringUtils.removeEnd(slug, "\\");
@@ -381,7 +385,7 @@ public class YadaWebUtil {
 	 * @return
 	 */
 	public boolean checkInvalidSlugCharacters(String text) {
-		Pattern pattern = Pattern.compile("[:,;=&!+~\\(\\)@\\*\\$\\'\\s\\s]");
+		Pattern pattern = Pattern.compile(PATTERN_INVALID_SLUG);
 		Matcher matcher = pattern.matcher(text);
 
 		while(matcher.find()){
