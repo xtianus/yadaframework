@@ -372,6 +372,7 @@ public class YadaWebUtil {
 		slug = StringUtils.removeEnd(slug, ".");
 		slug = StringUtils.removeEnd(slug, ";");
 		slug = StringUtils.removeEnd(slug, "\\");
+		slug = slug.replaceAll("/", "_");
 		slug = slug.replaceAll("__", "_");
 		slug = slug.replaceAll("--", "-");
 		slug = slug.replaceAll("-+", "-"); // Multiple dashes become one dash
