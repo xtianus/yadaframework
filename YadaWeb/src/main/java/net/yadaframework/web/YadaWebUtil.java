@@ -364,10 +364,12 @@ public class YadaWebUtil {
 		}
 		String slug = source.trim().toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
 		slug = slug.replaceAll(" +", "-"); // Spaces become dashes
-		slug = slug.replaceAll("[^\\w:,;=&!+~\\(\\)@\\*\\$\\'\\-]", "");
+		slug = slug.replaceAll("[:,;=&!+~\\(\\)@\\*\\$\\']", "");
 		slug = StringUtils.removeEnd(slug, ".");
 		slug = StringUtils.removeEnd(slug, ";");
 		slug = StringUtils.removeEnd(slug, "\\");
+		slug = slug.replaceAll("__", "_");
+		slug = slug.replaceAll("--", "-");
 		slug = slug.replaceAll("-+", "-"); // Multiple dashes become one dash
 		return slug;
 	}
