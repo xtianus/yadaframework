@@ -473,6 +473,22 @@ public class YadaWebUtil {
     }
 
 	/**
+	 * Removes all HTML tags. Static to be used from Entity beans without forcing autowiring on each instance.
+	 * @param source html content
+	 * @return text content
+	 * @see #cleanContent(String, String...)
+	 */
+	public static String removeHtmlStatic(String source) {
+		Whitelist allowedTags = Whitelist.none();
+		Document dirty = Jsoup.parseBodyFragment(source, "");
+		Cleaner cleaner = new Cleaner(allowedTags);
+		Document clean = cleaner.clean(dirty);
+		clean.outputSettings().escapeMode(EscapeMode.xhtml); // Non fa l'escape dei caratteri utf-8
+		String safe = clean.body().html();
+		return safe;
+	}
+
+	/**
 	 * Cleans the html content leaving only the following tags: b, em, i, strong, u, br, cite, em, i, p, strong, img, li, ul, ol, sup, sub, s
 	 * @param content html content
 	 * @param extraTags any other tags that you may want to keep, e. g. "a"
