@@ -6,7 +6,9 @@
 
 <!--/*
 A text input element.
-It becomes a textarea if maxlength>80
+It becomes a textarea if maxlength>80.
+It uses CKEditor5 when editor=true. 
+The CKEditor script must be loaded for this to work. The possible toolbar options depend on the chosen plugins.
 
 Parameters:
 - fieldName = name of the field holding the value
@@ -31,6 +33,7 @@ Parameters:
 - help = testo per il pulsante di help, se non c'è helpKey (optional)
 - helpKey = chiave del testo per il pulsante di help (optional)
 - editor = true/false to use ckeditor
+- toolbar = the ckeditor toolbar options as an array of strings: ["undo", "redo", "bold"]
 - noFeedback = true to remove space reserved for field feedback icon (optional)
 - noShowPassword = true to remove the icon that shows the password in cleartext
 - tabindex = the tabindex for the field (optional)
@@ -90,10 +93,16 @@ Example:
         	var targetId = [[${id}?:${#ids.prev(seqName)}]];
         	ClassicEditor
             	.create(document.getElementById(targetId), {
+            		// Possible values for Classic build:
             		// ["undo", "redo", "bold", "italic", "blockQuote", "ckfinder", "imageTextAlternative", "imageUpload", "heading", "imageStyle:full", "imageStyle:side", "indent", "outdent", "link", "numberedList", "bulletedList", "mediaEmbed", "insertTable", "tableColumn", "tableRow", "mergeTableCells"]
             		// "link" removed because it doesn't work in modals
-            		toolbar: ["undo", "redo", "bold", "italic", "blockQuote", "heading", "indent", "outdent", "numberedList", "bulletedList", "insertTable", "tableColumn", "tableRow", "mergeTableCells"]
+            		toolbar: [[${toolbar}?:${ {"undo", "redo", "bold", "italic", "blockQuote", "heading", "indent", "outdent", "numberedList", "bulletedList", "insertTable", "tableColumn", "tableRow", "mergeTableCells"} }]]
             	})
+            	// Show all toolbar values with the following code:
+            	// .then( editor => {
+        		// 	console.log( 'Editor was initialized', editor );
+        		// 	console.log(Array.from( editor.ui.componentFactory.names() ));
+            	// })
             	.catch( error => {
                 console.error( error );
             } );
