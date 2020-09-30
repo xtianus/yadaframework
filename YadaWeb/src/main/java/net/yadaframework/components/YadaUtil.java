@@ -158,7 +158,7 @@ public class YadaUtil {
 						String tagNameString = tagName.toString();
 						// br is not added because it does not need a closing tag
 						// TODO what other html tags don't have a closing one?
-						if (!"br".equals(tagNameString)) {
+						if (!"br".equals(tagNameString) && !tagNameString.contains("br/")) {
 							tagsToCopy.add(tagNameString);
 						}
 						tagOpen=false;
@@ -1116,7 +1116,7 @@ public class YadaUtil {
 		// Need to use getProperty() to avoid interpolation on ${} arguments
 		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
 		Object argsObject = config.getConfiguration().getProperty(shellCommandKey + "/arg");
-		List<String> args = new ArrayList<String>();
+		List<String> args = new ArrayList<>();
 		if (argsObject!=null) {
 			if (argsObject instanceof List) {
 				args.addAll((Collection<? extends String>) argsObject);
