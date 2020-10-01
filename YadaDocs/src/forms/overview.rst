@@ -149,7 +149,7 @@ Any submit handler that needs to be invoked before form submission has to be lis
 	- ``yada:submitHandler``
 
 Both the data- attribute version and the yada: dialect version take a comma-separated list of function names
-to be called in order. Submission is aborted if any returns true and any following functions are skipped.
+to be called in order. Submission is aborted if any returns false and any following functions are skipped.
 
 Example:
 

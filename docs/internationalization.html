@@ -68,7 +68,9 @@
 <li class="toctree-l1"><a class="reference internal" href="ajax.html">8. Ajax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ajaxModal.html">9. Ajax Modal</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notificationModal.html">10. Notification Modal</a></li>
-<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">11. Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="emails.html">11. Sending Emails</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database/pagination.html">12. Database Pagination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">13. Troubleshooting</a></li>
 </ul>
 </ul>
 </li>
@@ -86,7 +88,7 @@
 <li><a class="reference internal" href="#introduction">3.1. Introduction</a><ul>
 <li><a class="reference internal" href="#language-user-choice">3.1.1. Language user choice</a></li>
 <li><a class="reference internal" href="#search-engine-indexing">3.1.2. Search engine indexing</a></li>
-<li><a class="reference internal" href="#immutable-text">3.1.3. Immutable text</a></li>
+<li><a class="reference internal" href="#immutable-static-text">3.1.3. Immutable (static) text</a></li>
 <li><a class="reference internal" href="#database-text-fields">3.1.4. Database text fields</a></li>
 <li><a class="reference internal" href="#enum-values">3.1.5. Enum values</a></li>
 </ul>
@@ -98,6 +100,14 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#configuring-language-request-parameter">3.3. Configuring “language request parameter”</a></li>
+<li><a class="reference internal" href="#coding-with-i18n-text">3.4. Coding with i18n text</a><ul>
+<li><a class="reference internal" href="#static-text">3.4.1. Static text</a><ul>
+<li><a class="reference internal" href="#usage-with-thymeleaf">3.4.1.1. Usage with Thymeleaf</a></li>
+<li><a class="reference internal" href="#usage-in-java">3.4.1.2. Usage in Java</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -181,23 +191,23 @@ add a request parameter like <code class="docutils literal notranslate"><span cl
 like <code class="docutils literal notranslate"><span class="pre">example.com/fr/home</span></code>. The Yada Framework supports both.</p>
 <p>You can also use a full Locale code instead of the language code, like fr_CA for french in Canada.</p>
 </div>
-<div class="section" id="immutable-text">
-<h3>3.1.3. Immutable text<a class="headerlink" href="#immutable-text" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="index-0">
-<p class="admonition-title">Todo</p>
-<p>TO BE CONTINUED…</p>
-</div>
+<div class="section" id="immutable-static-text">
+<h3>3.1.3. Immutable (static) text<a class="headerlink" href="#immutable-static-text" title="Permalink to this headline">¶</a></h3>
+<p>A typical web page usually shows some text that is statically typed, i.e. not added via a CMS backend but
+typed directly into the HTML code. This may be a title, a menu entry, an image caption, or a description.
+All this statically typed text can’t be used in a i18n application: the text must change according to the
+user language.</p>
 </div>
 <div class="section" id="database-text-fields">
 <h3>3.1.4. Database text fields<a class="headerlink" href="#database-text-fields" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="index-1">
+<div class="admonition-todo admonition" id="index-0">
 <p class="admonition-title">Todo</p>
 <p>TO BE CONTINUED…</p>
 </div>
 </div>
 <div class="section" id="enum-values">
 <h3>3.1.5. Enum values<a class="headerlink" href="#enum-values" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="index-2">
+<div class="admonition-todo admonition" id="index-1">
 <p class="admonition-title">Todo</p>
 <p>TO BE CONTINUED…</p>
 </div>
@@ -240,7 +250,7 @@ like the following:</p>
 <p>Note the use of the “default” attribute. This is <strong>not</strong> the locale that will be set when there is no appropriate
 value in the request (you’d get a 404 HTTP error). This is actually the language to use for
 strings retrieved from the database (see later).</p>
-<div class="admonition-todo admonition" id="index-3">
+<div class="admonition-todo admonition" id="index-2">
 <p class="admonition-title">Todo</p>
 <p>link to the database section</p>
 </div>
@@ -285,9 +295,68 @@ use just the language code in the url but receive a full Locale in the java &#64
 </div>
 <p>This is easier to configure because you don’t need to change the Java code.
 The application configuration is the same but you need to set localePathVariable=”false”.</p>
-<div class="admonition-todo admonition" id="index-4">
+<div class="admonition-todo admonition" id="index-3">
 <p class="admonition-title">Todo</p>
 <p>check that this stil works and what it does. I think YadaWebUtil.enhanceUrl() doesn’t work properly</p>
+</div>
+</div>
+<div class="section" id="coding-with-i18n-text">
+<h2>3.4. Coding with i18n text<a class="headerlink" href="#coding-with-i18n-text" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="static-text">
+<h3>3.4.1. Static text<a class="headerlink" href="#static-text" title="Permalink to this headline">¶</a></h3>
+<p>To implement localized static text just use the standard <a class="reference external" href="https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/core.html#context-functionality-messagesource">Spring “MessageSource”</a> concept: store all text in different
+<code class="docutils literal notranslate"><span class="pre">message.properties</span></code> files, indexed by a key.</p>
+<p>The Yada Framework expects message source files to be in the <code class="docutils literal notranslate"><span class="pre">WEB-INF/messages</span></code> folder, with a file name in the
+<code class="docutils literal notranslate"><span class="pre">messages[_&lt;lang&gt;].properties</span></code> format. Example:</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">messages_de</span><span class="o">.</span><span class="na">properties</span>
+<span class="n">messages_fr</span><span class="o">.</span><span class="na">properties</span>
+<span class="n">messages_ru</span><span class="o">.</span><span class="na">properties</span>
+<span class="n">messages</span><span class="o">.</span><span class="na">properties</span>
+</pre></div>
+</div>
+<p>Each file stores the text of a different language. You don’t need to add them all immediately: start
+from the default language in <code class="docutils literal notranslate"><span class="pre">messages.properties</span></code> then add the translations when they become needed.
+The default language can be any language that you consider to be the “base” language: all keys that are
+not found in a specific language are searched in the default one; when not found, the key
+is shown as text.</p>
+<p>The content of the file is in the standard <a class="reference external" href="https://docs.oracle.com/javase/8/docs/api/java/text/MessageFormat.html">Java “MessageFormat”</a> format:</p>
+<p>&lt;key&gt; = &lt;value&gt;</p>
+<p>Example:</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span>validation.empty = This value can&#39;t be empty
+validation.password.length = Password can&#39;&#39;t be shorter than {0} characters and longer than {1}
+files.total = There {0,choice,0#are no files|1#is one file|1&lt;are {0,number,integer} files}.
+</pre></div>
+</div>
+<p>In particular:</p>
+<ul class="simple">
+<li><p>{0} and {1} are ways of passing parameters</p></li>
+<li><p>when a parameter is specified, a single quote must be escaped by another single quote</p></li>
+<li><p>there’s a powerful way of specifying variations like singular/plural (choice format)</p></li>
+</ul>
+<p>In production, files are reloaded every 600 seconds (10 minutes) to pick up changes.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>The Message Source configuration is implemented in YadaAppConfig.messageSource()</p>
+</div>
+<div class="section" id="usage-with-thymeleaf">
+<h4>3.4.1.1. Usage with Thymeleaf<a class="headerlink" href="#usage-with-thymeleaf" title="Permalink to this headline">¶</a></h4>
+<p>The syntax to show a localized string in Thymeleaf is <code class="docutils literal notranslate"><span class="pre">#{&lt;key&gt;}</span></code>. Example:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">p</span> <span class="na">th:text</span><span class="o">=</span><span class="s">&quot;#{validation.empty}&quot;</span><span class="p">&gt;</span>Any placeholder text here will be overwritten<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>See the <a class="reference external" href="https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#messages">Thymeleaf docs</a> for more details.</p>
+</div>
+<div class="section" id="usage-in-java">
+<h4>3.4.1.2. Usage in Java<a class="headerlink" href="#usage-in-java" title="Permalink to this headline">¶</a></h4>
+<p>To get the localized text in java you first autowire a MessageSource bean, then use the getMessage() method:</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Autowired</span> <span class="kd">private</span> <span class="n">MessageSource</span> <span class="n">messageSource</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="n">String</span> <span class="nf">someMethod</span><span class="o">(</span><span class="n">Locale</span> <span class="n">locale</span><span class="o">)</span> <span class="o">{</span>
+  <span class="n">String</span> <span class="n">msg1</span> <span class="o">=</span> <span class="n">messageSource</span><span class="o">.</span><span class="na">getMessage</span><span class="o">(</span><span class="s">&quot;validation.empty&quot;</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="n">locale</span><span class="o">);</span>
+  <span class="n">String</span> <span class="n">msg2</span> <span class="o">=</span> <span class="n">messageSource</span><span class="o">.</span><span class="na">getMessage</span><span class="o">(</span><span class="s">&quot;validation.password.length&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]{</span><span class="mi">5</span><span class="o">,</span> <span class="mi">10</span><span class="o">},</span> <span class="n">locale</span><span class="o">);</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 </div>

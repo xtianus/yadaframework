@@ -111,3 +111,16 @@ a.copybtn {
 .admonition.tip .admonition-title {
 	display: none;
 }
+
+.admonition.hint:before {
+	content: 'Yada Internals';
+	font-weight: bold;
+}
+.admonition.hint {
+	background-image: linear-gradient(to bottom,#d0d0d0 0,#ffffff 100%);
+	color: #156900;
+	border-color: black;
+}
+.admonition.hint .admonition-title {
+	display: none;
+}
