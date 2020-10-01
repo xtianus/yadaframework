@@ -48,8 +48,42 @@ user language.
 
 Database text fields
 ----------------------
+Traditional applications with just one language store a Java String attribute into a single table column in the database. 
+With i18n applications, where a Java attribute can have as many values as the languages that are allowed,
+the single-column approach can't work anymore. There are many solutions to this problem. The Yada
+Framework stores a localized String attribute into a dedicated table, where a row holds the value
+for a single instance in a single language.
 
-.. todo:: TO BE CONTINUED...
+For example, consider a Product with a non-localized "name" and a localized "description". The Database model could be like the following:
+
+**Table: Product**
+
+.. rst-class:: simple-header
+
++-------+--------+
+|id     | name   |
++-------+--------+
+| 1     | AirOne |
++-------+--------+
+| 2     | AirMax |
++-------+--------+
+
+**Table: Product_description**
+
+.. rst-class:: simple-header
+
++-----------+--------------------------+--------+
+|Product_id | description              | locale |
++-----------+--------------------------+--------+
+| 1         | Small inflatable ball    | en_GB  |
++-----------+--------------------------+--------+
+| 1         | Piccola palla gonfiabile | it_IT  |
++-----------+--------------------------+--------+
+| 2         | Big inflatable ball      | en_GB  |
++-----------+--------------------------+--------+
+| 2         | Grande palla gonfiabile  | it_IT  |
++-----------+--------------------------+--------+
+
 
 Enum values
 ----------------------
@@ -81,6 +115,8 @@ If your project does not use YadaSecurity, change ``WebApplicationInitializer`` 
 The above adds a filter to the Spring servlet engine. It is not needed when using YadaSecurity because the same is
 already done in ``net.yadaframework.security.SecurityWebApplicationInitializer``.
 
+.. hint:: The "language in the path" functionality is implemented in YadaLocalePathVariableFilter, YadaLocalePathChangeInterceptor, YadaLocalePathLinkBuilder
+
 Application configuration
 -------------------------
 
@@ -98,11 +134,9 @@ like the following:
   	<locale>ru</locale>
   </i18n>
 
-Note the use of the "default" attribute. This is **not** the locale that will be set when there is no appropriate 
+Note the use of the "default" attribute. This is **not** the locale that will be set when there is not a valid 
 value in the request (you'd get a 404 HTTP error). This is actually the language to use for 
-strings retrieved from the database (see later).
-
-.. todo:: link to the database section
+strings retrieved from the database (see :ref:`internationalization:Database fields` below).
 
 Other than just the language, you can use a full locale code though this is rarely needed:
 
@@ -132,6 +166,57 @@ use just the language code in the url but receive a full Locale in the java @Con
   	<locale country="RU">ru</locale>
   </i18n>
   
+Using "language in the path"
+==================================
+
+Java
+----
+
+Language on redirect
+^^^^^^^^^^^^^^^^^^^^
+When returning a redirect string, the language path should be present: ``/fr/products``. The method ``YadaWebUtil.redirectString()`` can add the
+needed language to the url, and also any parameters (see javadoc):
+
+.. code-block:: java
+
+	return YadaWebUtil.redirectString("/products", locale, "id", "172");
+
+The ``YadaWebUtil.redirectString()`` returns the "redirect:" prefix too. In order to create a string without that prefix, use ``YadaWebUtil.enhanceUrl()``.
+
+URL with no language
+^^^^^^^^^^^^^^^^^^^^
+The default language is also needed when someone types just the server address without path from a browser in a language
+that is not in the configuration. In such case, the default language should be used:
+
+.. code-block:: java
+
+	@RequestMapping("/")
+	public String home(Model model, HttpServletRequest request, Locale locale) {
+		if (YadaLocalePathChangeInterceptor.localePathRequested(request)) {
+			// Language was in the url
+			return home(model, request);
+		}
+		// Language was not in the url
+		String currentLanguage = locale.getLanguage();
+		if (!config.getLocaleStrings().contains(currentLanguage)) {
+			// Not a configured locale - use the default one
+			Locale defaultLocale = config.getDefaultLocale();
+			if (defaultLocale==null) {
+				// Default locale was not configured - use english
+				defaultLocale = Locale.ENGLISH;
+			}
+			currentLanguage = defaultLocale.getLanguage();
+		}
+		return "redirect:/" + currentLanguage + "/home"; // Moved temporarily
+
+.. TODO:: the default language redirect should be implemented in YadaLocalePathVariableFilter
+
+HTML
+----
+
+The standard Thymeleaf ``@{url}`` syntax has been retrofitted to automatically handle language in the path:
+the current locale will be added at the start of every url, so ``@{/home}`` becomes ``/de/home`` for example.  
+
 Javascript
 ----------
 The language in the path variable can be changed via javascript using
@@ -141,6 +226,7 @@ The language in the path variable can be changed via javascript using
   yada.changeLanguagePathVariable(locale);
 
 where "locale" is the ISO2 locale code. This code could be called when choosing from a list of languages.
+
 
 Configuring "language request parameter"
 ========================================
@@ -230,6 +316,55 @@ To get the localized text in java you first autowire a MessageSource bean, then 
 	public String someMethod(Locale locale) {
 	  String msg1 = messageSource.getMessage("validation.empty", null, locale);
 	  String msg2 = messageSource.getMessage("validation.password.length", new Object[]{5, 10}, locale);
+
+Database fields
+----------------------
+The Yada Framework uses the table-per-attribute approach to multivalue string attributes.
+An @Entity with a localized string attribute can be defined with a ``Map<Locale, String>`` so
+that values are related to their locale:
+
+.. code-block:: java
+
+	@ElementCollection
+	@Column(length=8192)
+	@MapKeyColumn(name="locale", length=32)
+	private Map<Locale, String> description = new HashMap<>();
+
+To retrieve the value in a specific locale, use YadaUtil.getLocalValue(). This will return the value in the specified locale or null.
+If a default locale has been configured (see :ref:`internationalization:Application configuration` above) then the default locale will be tried before returning null.
+This is useful when all locales have the same value and you only want to set it once: the value for the default language
+will be "inherited" by all current and future configured languages.
+
+.. code-block:: java
+
+	String productDesc = YadaUtil.getLocalValue(product.getDescription(), locale);
+	String productDesc = YadaUtil.getLocalValue(product.getDescription()); // Use current locale
+	
+It can be very convenient to add to the entity a method that retrieves the value in the current locale 
+(the locale of the current request):
+
+.. code-block:: java
+
+	@Entity
+	public class Product {
+	  ...
+	  @ElementCollection
+	  @Column(length=8192)
+	  @MapKeyColumn(name="locale", length=32)
+	  private Map<Locale, String> description = new HashMap<>();
+
+	  ...
+	  public String getDescriptionLocal() {
+	    return YadaUtil.getLocalValue(description);
+	  }
+
+This allows for a simple use in Thymeleaf:
+
+.. code-block:: html
+
+	<p th:text="${product.descriptionLocal}">Some description</p>
+	
+
 
 
 

@@ -124,3 +124,10 @@ a.copybtn {
 .admonition.hint .admonition-title {
 	display: none;
 }
+
+table.simple-header tr:first-child p {
+	font-weight: bold;
+}
+
+	
+}

@@ -96,16 +96,26 @@
 <li><a class="reference internal" href="#configuring-language-in-the-path">3.2. Configuring “language in the path”</a><ul>
 <li><a class="reference internal" href="#java-code">3.2.1. Java code</a></li>
 <li><a class="reference internal" href="#application-configuration">3.2.2. Application configuration</a></li>
-<li><a class="reference internal" href="#javascript">3.2.3. Javascript</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#configuring-language-request-parameter">3.3. Configuring “language request parameter”</a></li>
-<li><a class="reference internal" href="#coding-with-i18n-text">3.4. Coding with i18n text</a><ul>
-<li><a class="reference internal" href="#static-text">3.4.1. Static text</a><ul>
-<li><a class="reference internal" href="#usage-with-thymeleaf">3.4.1.1. Usage with Thymeleaf</a></li>
-<li><a class="reference internal" href="#usage-in-java">3.4.1.2. Usage in Java</a></li>
+<li><a class="reference internal" href="#using-language-in-the-path">3.3. Using “language in the path”</a><ul>
+<li><a class="reference internal" href="#java">3.3.1. Java</a><ul>
+<li><a class="reference internal" href="#language-on-redirect">3.3.1.1. Language on redirect</a></li>
+<li><a class="reference internal" href="#url-with-no-language">3.3.1.2. URL with no language</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#html">3.3.2. HTML</a></li>
+<li><a class="reference internal" href="#javascript">3.3.3. Javascript</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuring-language-request-parameter">3.4. Configuring “language request parameter”</a></li>
+<li><a class="reference internal" href="#coding-with-i18n-text">3.5. Coding with i18n text</a><ul>
+<li><a class="reference internal" href="#static-text">3.5.1. Static text</a><ul>
+<li><a class="reference internal" href="#usage-with-thymeleaf">3.5.1.1. Usage with Thymeleaf</a></li>
+<li><a class="reference internal" href="#usage-in-java">3.5.1.2. Usage in Java</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#database-fields">3.5.2. Database fields</a></li>
 </ul>
 </li>
 </ul>
@@ -200,14 +210,64 @@ user language.</p>
 </div>
 <div class="section" id="database-text-fields">
 <h3>3.1.4. Database text fields<a class="headerlink" href="#database-text-fields" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="index-0">
-<p class="admonition-title">Todo</p>
-<p>TO BE CONTINUED…</p>
-</div>
+<p>Traditional applications with just one language store a Java String attribute into a single table column in the database.
+With i18n applications, where a Java attribute can have as many values as the languages that are allowed,
+the single-column approach can’t work anymore. There are many solutions to this problem. The Yada
+Framework stores a localized String attribute into a dedicated table, where a row holds the value
+for a single instance in a single language.</p>
+<p>For example, consider a Product with a non-localized “name” and a localized “description”. The Database model could be like the following:</p>
+<p><strong>Table: Product</strong></p>
+<table class="simple-header docutils align-center">
+<colgroup>
+<col style="width: 47%" />
+<col style="width: 53%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>id</p></td>
+<td><p>name</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>AirOne</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>AirMax</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Table: Product_description</strong></p>
+<table class="simple-header docutils align-center">
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 58%" />
+<col style="width: 18%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Product_id</p></td>
+<td><p>description</p></td>
+<td><p>locale</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>Small inflatable ball</p></td>
+<td><p>en_GB</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>Piccola palla gonfiabile</p></td>
+<td><p>it_IT</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>Big inflatable ball</p></td>
+<td><p>en_GB</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>Grande palla gonfiabile</p></td>
+<td><p>it_IT</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="enum-values">
 <h3>3.1.5. Enum values<a class="headerlink" href="#enum-values" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="index-1">
+<div class="admonition-todo admonition" id="index-0">
 <p class="admonition-title">Todo</p>
 <p>TO BE CONTINUED…</p>
 </div>
@@ -232,6 +292,10 @@ user language.</p>
 </div>
 <p>The above adds a filter to the Spring servlet engine. It is not needed when using YadaSecurity because the same is
 already done in <code class="docutils literal notranslate"><span class="pre">net.yadaframework.security.SecurityWebApplicationInitializer</span></code>.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>The “language in the path” functionality is implemented in YadaLocalePathVariableFilter, YadaLocalePathChangeInterceptor, YadaLocalePathLinkBuilder</p>
+</div>
 </div>
 <div class="section" id="application-configuration">
 <h3>3.2.2. Application configuration<a class="headerlink" href="#application-configuration" title="Permalink to this headline">¶</a></h3>
@@ -247,13 +311,9 @@ like the following:</p>
 <span class="nt">&lt;/i18n&gt;</span>
 </pre></div>
 </div>
-<p>Note the use of the “default” attribute. This is <strong>not</strong> the locale that will be set when there is no appropriate
+<p>Note the use of the “default” attribute. This is <strong>not</strong> the locale that will be set when there is not a valid
 value in the request (you’d get a 404 HTTP error). This is actually the language to use for
-strings retrieved from the database (see later).</p>
-<div class="admonition-todo admonition" id="index-2">
-<p class="admonition-title">Todo</p>
-<p>link to the database section</p>
-</div>
+strings retrieved from the database (see <a class="reference internal" href="#database-fields"><span class="std std-ref">Database fields</span></a> below).</p>
 <p>Other than just the language, you can use a full locale code though this is rarely needed:</p>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;i18n</span> <span class="na">localePathVariable=</span><span class="s">&quot;true&quot;</span><span class="nt">&gt;</span>
       <span class="nt">&lt;locale&gt;</span>it_IT<span class="nt">&lt;/locale&gt;</span>
@@ -278,8 +338,57 @@ use just the language code in the url but receive a full Locale in the java &#64
 </pre></div>
 </div>
 </div>
+</div>
+<div class="section" id="using-language-in-the-path">
+<h2>3.3. Using “language in the path”<a class="headerlink" href="#using-language-in-the-path" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="java">
+<h3>3.3.1. Java<a class="headerlink" href="#java" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="language-on-redirect">
+<h4>3.3.1.1. Language on redirect<a class="headerlink" href="#language-on-redirect" title="Permalink to this headline">¶</a></h4>
+<p>When returning a redirect string, the language path should be present: <code class="docutils literal notranslate"><span class="pre">/fr/products</span></code>. The method <code class="docutils literal notranslate"><span class="pre">YadaWebUtil.redirectString()</span></code> can add the
+needed language to the url, and also any parameters (see javadoc):</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">YadaWebUtil</span><span class="o">.</span><span class="na">redirectString</span><span class="o">(</span><span class="s">&quot;/products&quot;</span><span class="o">,</span> <span class="n">locale</span><span class="o">,</span> <span class="s">&quot;id&quot;</span><span class="o">,</span> <span class="s">&quot;172&quot;</span><span class="o">);</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">YadaWebUtil.redirectString()</span></code> returns the “redirect:” prefix too. In order to create a string without that prefix, use <code class="docutils literal notranslate"><span class="pre">YadaWebUtil.enhanceUrl()</span></code>.</p>
+</div>
+<div class="section" id="url-with-no-language">
+<h4>3.3.1.2. URL with no language<a class="headerlink" href="#url-with-no-language" title="Permalink to this headline">¶</a></h4>
+<p>The default language is also needed when someone types just the server address without path from a browser in a language
+that is not in the configuration. In such case, the default language should be used:</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">&quot;/&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="n">String</span> <span class="nf">home</span><span class="o">(</span><span class="n">Model</span> <span class="n">model</span><span class="o">,</span> <span class="n">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="n">Locale</span> <span class="n">locale</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">YadaLocalePathChangeInterceptor</span><span class="o">.</span><span class="na">localePathRequested</span><span class="o">(</span><span class="n">request</span><span class="o">))</span> <span class="o">{</span>
+                <span class="c1">// Language was in the url</span>
+                <span class="k">return</span> <span class="n">home</span><span class="o">(</span><span class="n">model</span><span class="o">,</span> <span class="n">request</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="c1">// Language was not in the url</span>
+        <span class="n">String</span> <span class="n">currentLanguage</span> <span class="o">=</span> <span class="n">locale</span><span class="o">.</span><span class="na">getLanguage</span><span class="o">();</span>
+        <span class="k">if</span> <span class="o">(!</span><span class="n">config</span><span class="o">.</span><span class="na">getLocaleStrings</span><span class="o">().</span><span class="na">contains</span><span class="o">(</span><span class="n">currentLanguage</span><span class="o">))</span> <span class="o">{</span>
+                <span class="c1">// Not a configured locale - use the default one</span>
+                <span class="n">Locale</span> <span class="n">defaultLocale</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="na">getDefaultLocale</span><span class="o">();</span>
+                <span class="k">if</span> <span class="o">(</span><span class="n">defaultLocale</span><span class="o">==</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                        <span class="c1">// Default locale was not configured - use english</span>
+                        <span class="n">defaultLocale</span> <span class="o">=</span> <span class="n">Locale</span><span class="o">.</span><span class="na">ENGLISH</span><span class="o">;</span>
+                <span class="o">}</span>
+                <span class="n">currentLanguage</span> <span class="o">=</span> <span class="n">defaultLocale</span><span class="o">.</span><span class="na">getLanguage</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="s">&quot;redirect:/&quot;</span> <span class="o">+</span> <span class="n">currentLanguage</span> <span class="o">+</span> <span class="s">&quot;/home&quot;</span><span class="o">;</span> <span class="c1">// Moved temporarily</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition" id="index-1">
+<p class="admonition-title">Todo</p>
+<p>the default language redirect should be implemented in YadaLocalePathVariableFilter</p>
+</div>
+</div>
+</div>
+<div class="section" id="html">
+<h3>3.3.2. HTML<a class="headerlink" href="#html" title="Permalink to this headline">¶</a></h3>
+<p>The standard Thymeleaf <code class="docutils literal notranslate"><span class="pre">&#64;{url}</span></code> syntax has been retrofitted to automatically handle language in the path:
+the current locale will be added at the start of every url, so <code class="docutils literal notranslate"><span class="pre">&#64;{/home}</span></code> becomes <code class="docutils literal notranslate"><span class="pre">/de/home</span></code> for example.</p>
+</div>
 <div class="section" id="javascript">
-<h3>3.2.3. Javascript<a class="headerlink" href="#javascript" title="Permalink to this headline">¶</a></h3>
+<h3>3.3.3. Javascript<a class="headerlink" href="#javascript" title="Permalink to this headline">¶</a></h3>
 <p>The language in the path variable can be changed via javascript using</p>
 <div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">yada</span><span class="p">.</span><span class="nx">changeLanguagePathVariable</span><span class="p">(</span><span class="nx">locale</span><span class="p">);</span>
 </pre></div>
@@ -288,22 +397,22 @@ use just the language code in the url but receive a full Locale in the java &#64
 </div>
 </div>
 <div class="section" id="configuring-language-request-parameter">
-<h2>3.3. Configuring “language request parameter”<a class="headerlink" href="#configuring-language-request-parameter" title="Permalink to this headline">¶</a></h2>
+<h2>3.4. Configuring “language request parameter”<a class="headerlink" href="#configuring-language-request-parameter" title="Permalink to this headline">¶</a></h2>
 <p>URL Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>http://www.example.com/myHome?lang=it
 </pre></div>
 </div>
 <p>This is easier to configure because you don’t need to change the Java code.
 The application configuration is the same but you need to set localePathVariable=”false”.</p>
-<div class="admonition-todo admonition" id="index-3">
+<div class="admonition-todo admonition" id="index-2">
 <p class="admonition-title">Todo</p>
 <p>check that this stil works and what it does. I think YadaWebUtil.enhanceUrl() doesn’t work properly</p>
 </div>
 </div>
 <div class="section" id="coding-with-i18n-text">
-<h2>3.4. Coding with i18n text<a class="headerlink" href="#coding-with-i18n-text" title="Permalink to this headline">¶</a></h2>
+<h2>3.5. Coding with i18n text<a class="headerlink" href="#coding-with-i18n-text" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="static-text">
-<h3>3.4.1. Static text<a class="headerlink" href="#static-text" title="Permalink to this headline">¶</a></h3>
+<h3>3.5.1. Static text<a class="headerlink" href="#static-text" title="Permalink to this headline">¶</a></h3>
 <p>To implement localized static text just use the standard <a class="reference external" href="https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/core.html#context-functionality-messagesource">Spring “MessageSource”</a> concept: store all text in different
 <code class="docutils literal notranslate"><span class="pre">message.properties</span></code> files, indexed by a key.</p>
 <p>The Yada Framework expects message source files to be in the <code class="docutils literal notranslate"><span class="pre">WEB-INF/messages</span></code> folder, with a file name in the
@@ -339,7 +448,7 @@ files.total = There {0,choice,0#are no files|1#is one file|1&lt;are {0,number,in
 <p>The Message Source configuration is implemented in YadaAppConfig.messageSource()</p>
 </div>
 <div class="section" id="usage-with-thymeleaf">
-<h4>3.4.1.1. Usage with Thymeleaf<a class="headerlink" href="#usage-with-thymeleaf" title="Permalink to this headline">¶</a></h4>
+<h4>3.5.1.1. Usage with Thymeleaf<a class="headerlink" href="#usage-with-thymeleaf" title="Permalink to this headline">¶</a></h4>
 <p>The syntax to show a localized string in Thymeleaf is <code class="docutils literal notranslate"><span class="pre">#{&lt;key&gt;}</span></code>. Example:</p>
 <div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">p</span> <span class="na">th:text</span><span class="o">=</span><span class="s">&quot;#{validation.empty}&quot;</span><span class="p">&gt;</span>Any placeholder text here will be overwritten<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
 </pre></div>
@@ -347,7 +456,7 @@ files.total = There {0,choice,0#are no files|1#is one file|1&lt;are {0,number,in
 <p>See the <a class="reference external" href="https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#messages">Thymeleaf docs</a> for more details.</p>
 </div>
 <div class="section" id="usage-in-java">
-<h4>3.4.1.2. Usage in Java<a class="headerlink" href="#usage-in-java" title="Permalink to this headline">¶</a></h4>
+<h4>3.5.1.2. Usage in Java<a class="headerlink" href="#usage-in-java" title="Permalink to this headline">¶</a></h4>
 <p>To get the localized text in java you first autowire a MessageSource bean, then use the getMessage() method:</p>
 <div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Autowired</span> <span class="kd">private</span> <span class="n">MessageSource</span> <span class="n">messageSource</span><span class="o">;</span>
 
@@ -356,6 +465,46 @@ files.total = There {0,choice,0#are no files|1#is one file|1&lt;are {0,number,in
   <span class="n">String</span> <span class="n">msg2</span> <span class="o">=</span> <span class="n">messageSource</span><span class="o">.</span><span class="na">getMessage</span><span class="o">(</span><span class="s">&quot;validation.password.length&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Object</span><span class="o">[]{</span><span class="mi">5</span><span class="o">,</span> <span class="mi">10</span><span class="o">},</span> <span class="n">locale</span><span class="o">);</span>
 </pre></div>
 </div>
+</div>
+</div>
+<div class="section" id="database-fields">
+<h3>3.5.2. Database fields<a class="headerlink" href="#database-fields" title="Permalink to this headline">¶</a></h3>
+<p>The Yada Framework uses the table-per-attribute approach to multivalue string attributes.
+An &#64;Entity with a localized string attribute can be defined with a <code class="docutils literal notranslate"><span class="pre">Map&lt;Locale,</span> <span class="pre">String&gt;</span></code> so
+that values are related to their locale:</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@ElementCollection</span>
+<span class="nd">@Column</span><span class="o">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8192</span><span class="o">)</span>
+<span class="nd">@MapKeyColumn</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;locale&quot;</span><span class="o">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">32</span><span class="o">)</span>
+<span class="kd">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">Locale</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">description</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;();</span>
+</pre></div>
+</div>
+<p>To retrieve the value in a specific locale, use YadaUtil.getLocalValue(). This will return the value in the specified locale or null.
+If a default locale has been configured (see <a class="reference internal" href="#application-configuration"><span class="std std-ref">Application configuration</span></a> above) then the default locale will be tried before returning null.
+This is useful when all locales have the same value and you only want to set it once: the value for the default language
+will be “inherited” by all current and future configured languages.</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="n">String</span> <span class="n">productDesc</span> <span class="o">=</span> <span class="n">YadaUtil</span><span class="o">.</span><span class="na">getLocalValue</span><span class="o">(</span><span class="n">product</span><span class="o">.</span><span class="na">getDescription</span><span class="o">(),</span> <span class="n">locale</span><span class="o">);</span>
+<span class="n">String</span> <span class="n">productDesc</span> <span class="o">=</span> <span class="n">YadaUtil</span><span class="o">.</span><span class="na">getLocalValue</span><span class="o">(</span><span class="n">product</span><span class="o">.</span><span class="na">getDescription</span><span class="o">());</span> <span class="c1">// Use current locale</span>
+</pre></div>
+</div>
+<p>It can be very convenient to add to the entity a method that retrieves the value in the current locale
+(the locale of the current request):</p>
+<div class="highlight-java notranslate"><div class="highlight"><pre><span></span><span class="nd">@Entity</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Product</span> <span class="o">{</span>
+  <span class="o">...</span>
+  <span class="nd">@ElementCollection</span>
+  <span class="nd">@Column</span><span class="o">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8192</span><span class="o">)</span>
+  <span class="nd">@MapKeyColumn</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;locale&quot;</span><span class="o">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">32</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">Locale</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">description</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;();</span>
+
+  <span class="o">...</span>
+  <span class="kd">public</span> <span class="n">String</span> <span class="nf">getDescriptionLocal</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">YadaUtil</span><span class="o">.</span><span class="na">getLocalValue</span><span class="o">(</span><span class="n">description</span><span class="o">);</span>
+  <span class="o">}</span>
+</pre></div>
+</div>
+<p>This allows for a simple use in Thymeleaf:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">p</span> <span class="na">th:text</span><span class="o">=</span><span class="s">&quot;${product.descriptionLocal}&quot;</span><span class="p">&gt;</span>Some description<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</pre></div>
 </div>
 </div>
 </div>
