@@ -63,14 +63,14 @@ dependencies {
 jar {
     manifest {
         attributes("Implementation-Title": "YadaWebSecurity",
-                   "Implementation-Version": archiveVersion)
+                   "Implementation-Version": version)
     }
 }
 
 // Set the yada version in the properties file
 processResources {
 	doLast {
-		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadawebsecurity.properties", token: '@YADA_VERSION@', value: archiveVersion)
+		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadawebsecurity.properties", token: '@YADA_VERSION@', value: version)
 	}
 }
 

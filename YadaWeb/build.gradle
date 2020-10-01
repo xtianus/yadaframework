@@ -117,7 +117,7 @@ task listJars {
 jar {
     manifest {
         attributes("Implementation-Title": "YadaWeb",
-                   "Implementation-Version": archiveVersion)
+                   "Implementation-Version": version)
     }
 }
 
