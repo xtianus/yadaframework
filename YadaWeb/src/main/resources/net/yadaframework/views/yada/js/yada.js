@@ -35,8 +35,9 @@
 	var siteMatcher=RegExp("(?:http.?://)?([^/:]*).*"); // Extract the server name from a url like "http://www.aaa.com/xxx" or "www.aaa.com"
 	
 	var parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
-	var siblingSelector = "yadaSiblings:"; // Used to indicate that a CSS selector should be searched in the siblings()
+	var siblingsSelector = "yadaSiblings:"; // Used to indicate that a CSS selector should be searched in the siblings()
 	var closestFindSelector = "yadaClosestFind:"; // Used to indicate that a two-part CSS selector should be searched with closest() then with find()
+	var siblingsFindSelector = "yadaSiblingsFind:"; // Used to indicate that a two-part CSS selector should be searched with siblings() then with find()
 	
 	$(document).ready(function() {
 		// Be aware that all ajax links and forms will NOT be ajax if the user clicks while the document is still loading.
@@ -1035,20 +1036,25 @@
 			return $fromElement;
 		}
 		var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
-		var fromSiblings = yada.startsWith(selector, siblingSelector); // yadaSiblings:
+		var fromSiblings = yada.startsWith(selector, siblingsSelector); // yadaSiblings:
 		var fromClosestFind = yada.startsWith(selector, closestFindSelector); // yadaClosestFind:
-		if (fromParents==false && fromSiblings==false && fromClosestFind==false) {
+		var fromSiblingsFind = yada.startsWith(selector, siblingsFindSelector); // yadaSiblingsFind:
+		if (fromParents==false && fromSiblings==false && fromClosestFind==false && fromSiblingsFind==false) {
 			return $(selector);
 		} else if (fromParents) {
 			selector = selector.replace(parentSelector, "").trim();
 			return $fromElement.parent().closest(selector);
 		} else if (fromSiblings) {
-			selector = selector.replace(siblingSelector, "").trim();
+			selector = selector.replace(siblingsSelector, "").trim();
 			return $fromElement.siblings(selector);
 		} else if (fromClosestFind) {
 			selector = selector.replace(closestFindSelector, "").trim();
 			var splitSelector = selector.split(" ", 2);
 			return $fromElement.parent().closest(splitSelector[0]).find(splitSelector[1]);
+		} else if (fromSiblingsFind) {
+			selector = selector.replace(siblingsFindSelector, "").trim();
+			var splitSelector = selector.split(" ", 2);
+			return $fromElement.siblings(splitSelector[0]).find(splitSelector[1]);
 		}
 		// Should never get here
 		return $fromElement;

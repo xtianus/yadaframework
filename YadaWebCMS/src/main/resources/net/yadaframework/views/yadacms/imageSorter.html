@@ -19,6 +19,10 @@ Parameters:
 - urlDelete - url to delete an image. It receives the "imageId" parameter.
 - urlSort - url to sort an image. It receives the "currentId", "otherId" and "${entityIdName}" parameters. The controller should just 
             call yadaAttachedFileRepository.swapSortOrder(currentId, otherId);
+- captions - element referring to the captions of the images - true/false.
+- labelCaption - label text - can be null
+- urlCaption - url to modify a caption (multilanguage) - it is used if caption is present.
+- jsOnReload - js to reload the caption (multilanguage) - it could use if caption is present.
 - sorterId - (optional) The id of this sorter, useful when there is more than one on page. Defaults to "yadaImageSorter"
 - labelKeyAdd = key in messages.properties for the label of the upload form
 - labelAdd = label to use, if not using a labelKey. When none is defined, no label is shown.
@@ -45,19 +49,34 @@ Example:
 					<div th:if="${size!=null}" class="yadaMinimumSize"><span th:text="${size}">100x100</span> [[#{yada.form.fileUpload.minimumSize}]]</div>
 					<input type="file" th:id="|${sorterId}-newImage|" th:name="${multipartName}?:newImage" th:accept="${accept}?:''" th:required="${required}">
 				</div>
+				<th:block th:if="${captions==true}">
+					<div th:fragment="captions">
+						<div th:each="simpleLocale,iter : ${locales}" 
+							th:with="language=${#strings.substring(simpleLocale,0,2)}">
+							<div class="localized" th:classappend="${language}">
+								<div class="form-group has-feedback">
+									<label class="control-label" th:text="${labelCaption!=null?labelCaption:''}">Caption</label>
+									<div class="input-group col">
+									  <div class="input-group-addon" th:text="${#strings.toUpperCase(language)}">IT</div>
+									  <input type="text" th:name="title[__${simpleLocale}__]" th:value="${galleryImage!=null?galleryImage.title[__${simpleLocale}__]:''}" class="form-control  has-feedback"
+								  		aria-describedby="caption image">
+								    </div>
+							    </div>
+							</div>
+						</div>
+					</div>
+				</th:block>
 				<button class="btn btn-success" type="submit" name="Upload" th:utext="${uploadButtonKey!=null?#messages.msg(uploadButtonKey):uploadButton?:'Upload'}">Upload</button>
 			</fieldset>
 		</form>
 
-		<form th:action="${urlSort}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaImageSorterImages" class="yadaAjax sortForm yadaNoLoader">
+		<form th:action="${urlSort}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaImageSorterImages" yada:successHandler="${jsOnReload}" class="yadaAjax sortForm yadaNoLoader">
 			<input type="hidden" th:name="${entityIdName}" th:value="${entityIdValue}">
 		</form>
 		<form th:action="${urlDelete}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaImageSorterImages" class="yadaAjax deleteForm yadaNoLoader"
 			yada:confirm="${deleteConfirmKey!=null?#messages.msg(deleteConfirmKey):deleteConfirm?:''}">
 			<input type="hidden" th:name="${entityIdName}" th:value="${entityIdValue}">
 		</form>
-		
-		
 		<div class="yadaImageSorterImages">
 			<div th:each="galleryImage,iter : ${images}" class="yadaImageControl">
 				<div class="row yadaUploadedImages">
@@ -66,6 +85,22 @@ Example:
 							<img class="img-responsive" th:src="@{${@yadaFileManager.getDesktopImageUrl(galleryImage)}}">
 						</a>
 						<div>[[${galleryImage.desktopImageDimension}]]</div>
+						
+						<th:block th:if="${captions==true}">
+							<form class="yadaAjax captionForm yadaNoLoader" th:object="${galleryImage}"
+								th:action="${urlCaption}" data-yadaUpdateOnSuccess="yadaSiblingsFind:.message span">
+								<!-- data-yadaParentForm="yadaClosestFind:.yadaImageSorter .captionForm"> -->
+								<input type="hidden" th:name="${entityIdName}" th:value="${entityIdValue}">
+								<input type="hidden" name="yadaAttachedFileId" th:value="${galleryImage.id}">
+								<div th:replace="~{::captions}"></div>
+								<br/>
+								<button class="btn btn-success" type="submit" name="captionUpdate">Update</button>
+							</form>
+							<div class="message">
+								<span></span>
+							</div>
+						</th:block>
+						
 					</div>
 					<div th:if="${galleryImage.mobileImage}" th:class="${galleryImage.desktopImage}?'col-xs-4':'col-xs-12'">
 						<a th:href="${@yadaFileManager.getMobileImageUrl(galleryImage)}" target="_blank">
