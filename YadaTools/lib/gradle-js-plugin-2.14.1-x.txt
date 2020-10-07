@@ -1,0 +1,1 @@
+This is a fork of "eriwen/gradle-js-plugin" on GitHub, to make it work with Gradle 6+
