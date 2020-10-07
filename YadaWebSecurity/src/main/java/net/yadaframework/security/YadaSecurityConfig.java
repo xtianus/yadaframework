@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -38,7 +37,7 @@ import net.yadaframework.security.components.YadaUserDetailsService;
 @EnableWebSecurity
 //@Configuration not needed when using WebApplicationInitializer.java
 @EnableJpaRepositories(basePackages = "net.yadaframework.security.persistence.repository")
-@ComponentScan(basePackages = { "net.yadaframework.security.components" })
+@ComponentScan(basePackages = { "net.yadaframework.security.components", "net.yadaframework.security.persistence.repository" })
 @Order(10) // Just in case there will be others
 public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 //	private Logger log = LoggerFactory.getLogger(YadaSecurityConfig.class);
