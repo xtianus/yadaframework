@@ -366,7 +366,8 @@ public class YadaWebUtil {
 		if (StringUtils.isBlank(source)) {
 			return "";
 		}
-		String slug = source.trim().toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
+		String slug = removeHtmlStatic(source); //rimuove tutti gli eventuali tag.
+		slug = source.trim().toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
 		slug = slug.replaceAll(" +", "-"); // Spaces become dashes
 		slug = slug.replaceAll(PATTERN_INVALID_SLUG, "");
 		slug = StringUtils.removeEnd(slug, ".");
