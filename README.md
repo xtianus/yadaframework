@@ -1,4 +1,4 @@
-# YADAframework
-Yet Another Development Architecture Framework.
+# YadaFramework
+Yet Another Development Architecture Framework with Java, Spring, Hibernate, Thymeleaf.
 
-This version is currently pre-alpha and very incomplete.
+See documentation here: http://yadaframework.net/
