@@ -604,11 +604,14 @@
 	
 	/**
 	 * Split a comma-separated string into an array. Commas can be followed by spaces.
-	 * If the input is null, return an empty array.
+	 * If the input is null, return an empty array. If the value is numeric, return an array with the value converted to string
 	 */
 	yada.listToArray = function(str) {
 		if (str==null) {
 			return [];
+		}
+		if (typeof str != "string") {
+			return [str.toString()];
 		}
 		return str.split(/, */);
 	}
