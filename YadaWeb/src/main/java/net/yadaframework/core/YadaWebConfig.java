@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -33,7 +34,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
-import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
@@ -394,7 +394,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		engine.addDialect(new YadaDialect(config));
 	}
 
-	// No need for a @Bean?
+	@Bean
 	public SpringTemplateEngine javascriptTemplateEngine() {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
 		engine.addTemplateResolver(javascriptTemplateResolver());
@@ -407,7 +407,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 	
 	// Ho aggiunto un viewResolver per gestire i file xml. Per usarlo basta che il controller restituisca il nome di un file xml senza estensione che sta in WEB-INF/views/xml
 	// prefissandolo con "/xml", per esempio "/xml/sitemap".
-	// No need for a @Bean?
+	@Bean
 	public SpringTemplateEngine xmlTemplateEngine() {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
 		engine.addTemplateResolver(xmlTemplateResolver());
@@ -424,10 +424,9 @@ public class YadaWebConfig implements WebMvcConfigurer {
 	 * @return
 	 */
 	@Bean
-	public ViewResolver javascriptViewResolver() {
-		SpringTemplateEngine engine = javascriptTemplateEngine();
+	public ViewResolver javascriptViewResolver(@Qualifier("javascriptTemplateEngine") SpringTemplateEngine javascriptTemplateEngine) {
 		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
-		viewResolver.setTemplateEngine(engine);
+		viewResolver.setTemplateEngine(javascriptTemplateEngine);
 		viewResolver.setCharacterEncoding("UTF-8"); // Questo è importante anche se nei tutorial non lo mettono
 		viewResolver.setOrder(5);
 		// This is needed to skip this resolver for all html files but it forces the use of .js in the view name
@@ -443,10 +442,9 @@ public class YadaWebConfig implements WebMvcConfigurer {
 	 * @return
 	 */
 	@Bean
-	public ViewResolver xmlViewResolver() {
-		SpringTemplateEngine engine = xmlTemplateEngine();
+	public ViewResolver xmlViewResolver(@Qualifier("xmlTemplateEngine") SpringTemplateEngine xmlTemplateEngine) {
 		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
-		viewResolver.setTemplateEngine(engine);
+		viewResolver.setTemplateEngine(xmlTemplateEngine);
 		viewResolver.setCharacterEncoding("UTF-8"); // Questo è importante anche se nei tutorial non lo mettono
 		viewResolver.setOrder(10);
 		// Tutti i template devono stare nel folder /xml. Se non si usa un folder specifico, questo viewResolver non viene usato
@@ -462,7 +460,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 	 * @return
 	 */
 	@Bean
-	public ViewResolver viewResolver(SpringTemplateEngine templateEngine) {
+	public ViewResolver viewResolver(@Qualifier("templateEngine") SpringTemplateEngine templateEngine) {
 		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
 		// ATTENTION: do not use templateEngine() here otherwise i18n won't work because the MessageSource is not going to be injected
 		viewResolver.setTemplateEngine(templateEngine);

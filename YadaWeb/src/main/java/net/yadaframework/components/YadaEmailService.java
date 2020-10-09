@@ -49,6 +49,7 @@ public class YadaEmailService {
 	@Autowired private YadaConfiguration config;
 	@Autowired private JavaMailSender mailSender;
 	
+	// Using @Resource we don't need a Qualifier annotation
 	@Resource private SpringTemplateEngine emailTemplateEngine;
     
     @Autowired private MessageSource messageSource;
