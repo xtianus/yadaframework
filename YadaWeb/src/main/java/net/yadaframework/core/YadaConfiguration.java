@@ -18,6 +18,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
@@ -460,6 +462,22 @@ public abstract class YadaConfiguration {
 		return "/tmp";
 	}
 
+	/**
+	 * Return the webapp address without a trailing slash. E.g. http://www.mysite.com/app or http://www.mysite.com
+	 * The language path is added if enabled 
+	 * @return
+	 */
+	public String getWebappAddress(HttpServletRequest request, Locale locale) {
+		if (webappAddress==null) {
+			StringBuilder address = new StringBuilder(getServerAddress(request)); // http://www.example.com
+			address.append(request.getContextPath()); // http://www.example.com/appname
+			if (isLocalePathVariableEnabled() && locale!=null) {
+				address.append("/").append(locale.getLanguage()); // http://www.example.com/en
+			}
+			webappAddress = address.toString();
+		}
+		return webappAddress;
+	}
 
 	/**
 	 * Return the webapp address without a trailing slash. E.g. http://www.mysite.com/app or http://www.mysite.com
@@ -474,6 +492,22 @@ public abstract class YadaConfiguration {
 		return webappAddress;
 	}
 
+	/**
+	 * Return the server address without a trailing slash. E.g. http://col.letturedametropolitana.it
+	 * @return
+	 */
+	public String getServerAddress(HttpServletRequest request) {
+		if (serverAddress==null) {
+			StringBuilder address = new StringBuilder();
+			address.append(request.getScheme()).append("://").append(request.getServerName()); // http://www.example.com
+			if (request.getServerPort()!=80 && request.getServerPort()!=443) {
+				address.append(":").append(request.getServerPort()); // http://www.example.com:8080
+			}
+			serverAddress = address.toString();
+		}
+		return serverAddress;
+	}
+	
 	/**
 	 * Return the server address without a trailing slash. E.g. http://col.letturedametropolitana.it
 	 * @return

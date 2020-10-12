@@ -10,6 +10,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.SqlResultSetMapping;
 import javax.persistence.TypedQuery;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -702,6 +703,19 @@ public class YadaSql implements CloneableDeep {
 		fixQuery(query);
 		return query;
 	}
+	
+	/**
+	 * 
+	 * @param em
+	 * @param resultSetMapping the name of the result set mapping, defined with a @SqlResultSetMapping annotation on the @Entity
+	 * @return
+	 */
+	public Query nativeQuery(EntityManager em, String resultSetMapping) {
+		nativeQuery = true;
+		Query query = em.createNativeQuery(sql(), resultSetMapping);
+		fixQuery(query);
+		return query;
+	}
 
 	/**
 	 * Create a native query that returns object instances
@@ -870,8 +884,8 @@ public class YadaSql implements CloneableDeep {
 //		} else {
 			builder.append(joins);
 			builder.append(whereConditions);
-			builder.append(havingConditions);
 			builder.append(groupBy);
+			builder.append(havingConditions);
 			builder.append(orderBy);
 			if (parent == null && log.isDebugEnabled()) {
 				log.debug(builder.toString());

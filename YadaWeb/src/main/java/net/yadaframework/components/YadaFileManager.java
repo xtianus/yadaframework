@@ -184,6 +184,13 @@ public class YadaFileManager {
 	}
 
 	/**
+	 * Find one from repository
+	 * @param yadaAttachedFileId the attachment id
+	 */
+	public YadaAttachedFile findOne(Long yadaAttachedFileId) {
+		return yadaAttachedFileRepository.findOne(yadaAttachedFileId);
+	}
+	/**
 	 * Deletes from the filesystem all files related to the attachment
 	 * @param yadaAttachedFileId the attachment id
 	 * @see #deleteFileAttachment(YadaAttachedFile)

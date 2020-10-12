@@ -339,6 +339,14 @@ public class YadaAttachedFile implements CloneableDeep {
 		return title;
 	}
 
+	/**
+	 * Returns the localized title in the current request locale
+	 * @return
+	 */
+	public String getLocalTitle() {
+		return YadaUtil.getLocalValue(title);
+	}
+
 	public void setTitle(Map<Locale, String> title) {
 		this.title = title;
 	}

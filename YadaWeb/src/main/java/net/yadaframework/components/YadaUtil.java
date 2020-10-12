@@ -158,7 +158,7 @@ public class YadaUtil {
 						String tagNameString = tagName.toString();
 						// br is not added because it does not need a closing tag
 						// TODO what other html tags don't have a closing one?
-						if (!"br".equals(tagNameString)) {
+						if (!"br".equals(tagNameString) && !tagNameString.contains("br/")) {
 							tagsToCopy.add(tagNameString);
 						}
 						tagOpen=false;
@@ -1061,7 +1061,7 @@ public class YadaUtil {
 			log.error("Failed to execute shell command: {} {} {}", command, args!=null?args.toArray():"", substitutionMap!=null?substitutionMap:"", e);
 			throw e;
 		} finally {
-			closeSilently(outputStream);
+			closeSilently(outputStream); // This may not be needed
 		}
 	}
 
@@ -1102,11 +1102,12 @@ public class YadaUtil {
 		&lt;arg>${FILENAMEOUT}&lt;/arg>
 	&lt;/imageConvert>
 	 * </pre>
+	 * Be aware that args can not contain "Commons Configuration variables" because they clash with placeholders as defined below.
 	 * See the yadaframework documentation for full syntax.
 	 * @param shellCommandKey xpath key of the shell command, e.g. "config/shell/cropImage"
-	 * @param optional substitutionMap key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
+	 * @param substitutionMap optional key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
 	 * pair is like "key"-->"value". If the value is a collection, arguments are unrolled so key-->collection will result in key0=val0 key1=val1...
-	 * @param optional outputStream ByteArrayOutputStream that will contain the command output (out + err)
+	 * @param outputStream optional ByteArrayOutputStream that will contain the command output (out + err)
 	 * @return the command exit value
 	 * @throws IOException
 	 */
@@ -1114,7 +1115,15 @@ public class YadaUtil {
 		String executable = getExecutable(shellCommandKey);
 		// Need to use getProperty() to avoid interpolation on ${} arguments
 		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
-		List<String> args = (List<String>) config.getConfiguration().getProperty(shellCommandKey + "/arg");
+		Object argsObject = config.getConfiguration().getProperty(shellCommandKey + "/arg");
+		List<String> args = new ArrayList<>();
+		if (argsObject!=null) {
+			if (argsObject instanceof List) {
+				args.addAll((Collection<? extends String>) argsObject);
+			} else {
+				args.add((String) argsObject);
+			}
+		}
 		Integer timeout = config.getInt(shellCommandKey + "/@timeoutseconds", -1);
 		return shellExec(executable, args, substitutionMap, outputStream, timeout);
 	}
@@ -2008,25 +2017,24 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Crea un file zip contenente una serie di file.
-	 * Lancia un'eccezione in caso di errore.
-	 * Preso da http://www.exampledepot.com/egs/java.util.zip/CreateZip.html
-	 * @param zipFile File da creare
-	 * @param sourceFiles lista di File da zippare
-	 * @param filenamesNoExtension lista di nomi da assegnare ai file nello zip senza estensione, oppure null se si usano gli originali
+	 * Create a zip of a list of files.
+	 * An exception is thrown when a source file is not readable.
+	 * Adapted from http://www.exampledepot.com/egs/java.util.zip/CreateZip.html
+	 * @param zipFile zip file to create
+	 * @param sourceFiles files to zip
+	 * @param filenamesNoExtension optional list of names to give to zip entries. The name extension is also optional: it will be taken from the source file
 	 */
 	public void createZipFile(File zipFile, File[] sourceFiles, String[] filenamesNoExtension) {
 		createZipFile(zipFile, sourceFiles, filenamesNoExtension, false);
 	}
 
 	/**
-	 * Crea un file zip contenente una serie di file.
-	 * Può continuare con i file successivi se uno dei file va in errore.
-	 * Preso da http://www.exampledepot.com/egs/java.util.zip/CreateZip.html
-	 * @param zipFile File da creare
-	 * @param sourceFiles lista di File da zippare
-	 * @param filenamesNoExtension lista di nomi da assegnare ai file nello zip senza estensione, oppure null se si usano gli originali
-	 * @param ignoreErrors true per ignorare gli errori e continuare
+	 * Create a zip of a list of files.
+	 * Adapted from http://www.exampledepot.com/egs/java.util.zip/CreateZip.html
+	 * @param zipFile zip file to create
+	 * @param sourceFiles files to zip
+	 * @param filenamesNoExtension optional list of names to give to zip entries. The name extension is also optional: it will be taken from the source file
+	 * @param ignoreErrors true to ignore a file error and keep going with the next file
 	 */
 	public void createZipFile(File zipFile, File[] sourceFiles, String[] filenamesNoExtension, boolean ignoreErrors) {
 		byte[] buf = new byte[1024]; // Create a buffer for reading the files
@@ -2039,11 +2047,14 @@ public class YadaUtil {
 			        // Add ZIP entry to output stream.
 			        String entryName;
 			        if (filenamesNoExtension!=null) {
-			        	String extensionNoDot = getFileExtension(sourceFiles[i]);
-			        	String extension = "." + extensionNoDot;
-			        	entryName = filenamesNoExtension[i].toLowerCase().endsWith(extension)? filenamesNoExtension[i] : filenamesNoExtension[i] + extension;
+			        	// The filenamesNoExtension array should not contain the extensions, but we check just in case
+			        	String targetNameNoExtensionMaybe = filenamesNoExtension[i];
+			        	String extensionNoDot = getFileExtension(sourceFiles[i]); // jpg
+			        	String sourceExtension = "." + extensionNoDot; // Extension of the file to zip, e.g. ".jpg"
+			        	boolean targeHasExtension = targetNameNoExtensionMaybe.toLowerCase().endsWith(sourceExtension);
+			        	String targetNameNoExtension = targeHasExtension ? splitFileNameAndExtension(targetNameNoExtensionMaybe)[0] : targetNameNoExtensionMaybe;
 			        	// Add a counter for duplicated names
-			        	entryName = findAvailableFilename(filenamesNoExtension[i], extensionNoDot, "_", addedFilenames);
+			        	entryName = findAvailableFilename(targetNameNoExtension, extensionNoDot, "_", addedFilenames);
 			        } else {
 			        	String[] filenameAndExtension = splitFileNameAndExtension(sourceFiles[i].getName());
 			        	// Add a counter for duplicated names
