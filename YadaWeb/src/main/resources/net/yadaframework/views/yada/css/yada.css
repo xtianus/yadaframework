@@ -443,3 +443,35 @@ input.yadaSwitch-round:checked ~ label:after {
 .ck.ck-balloon-panel {
 	z-index: 999991 !important;
 }
+
+/*****************/
+/* Cookie Banner */
+
+#yadaCookieBanner {
+	background-color: black;
+	color: white;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    padding: 0 0 10px 5px;
+    z-index: 9876543;
+}
+#yadaCookieBanner .closeIcon {
+	position: absolute;
+    right: 10px;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    background-image: url("images/cookieClose.png");
+    background-repeat: no-repeat;
+    margin-top: 5px;
+}
+#yadaCookieBanner p {
+	display: inline-block;
+    margin-right: 10px;
+    margin-top: 20px;
+}
+#yadaCookieBanner a {
+	color: white;
+}

@@ -10,8 +10,10 @@ import org.thymeleaf.linkbuilder.StandardLinkBuilder;
 
 /**
  * Needed to create localized urls when using thymeleaf @{} syntax with context-relative paths like @{/somePath}.
- * 
+ * Also need to version the res folder because the yada:href dialect is not called when inlining with [[@{/somePath}]]
+ * @see YadaLinkBuilder
  */
+@Deprecated // Use YadaLinkBuilder instead
 public class YadaLocalePathLinkBuilder extends StandardLinkBuilder  {
 	
 	private Pattern nonLocalizedUrls;

@@ -80,7 +80,7 @@ public class YadaJobManager {
 	 */
 	public boolean startJob(YadaJob yadaJob) {
 		// If the job has been deleted, return false
-		if (yadaJobRepository.findOne(yadaJob.getId())==null) {
+		if (!yadaJobRepository.findById(yadaJob.getId()).isPresent()) {
 			log.debug("Job {} not found in DB when activating", yadaJob);
 			return false;
 		}

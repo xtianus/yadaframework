@@ -19,14 +19,14 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jndi.JndiObjectFactoryBean;
-import org.springframework.orm.hibernate4.HibernateExceptionTranslator;
+import org.springframework.orm.hibernate5.HibernateExceptionTranslator;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-@Configuration
+//@Configuration not needed when using WebApplicationInitializer.java
 @EnableTransactionManagement
 @EnableJpaRepositories(basePackages = {"net.yadaframework.persistence.repository"})
 @ComponentScan(basePackages = {"net.yadaframework.persistence"})
@@ -45,10 +45,23 @@ public class YadaJpaConfig {
 		return new JdbcTemplate(dataSource);
 	}
 	
+	/**
+	 * Returns the datasource. It can either be configured in the application configuration (uses vibur-dbcp pool) or on JNDI
+	 * via META-INF/context.xml (uses Tomcat-jndi pool)
+	 * @return
+	 * @throws SQLException
+	 */
 	@Bean
 	public DataSource dataSource() throws SQLException {
+		// Configuration DataSource
+		DataSource result = config.getProgrammaticDatasource();
+		if (result!=null) {
+			log.info("DataSource from configuration file (not JNDI)");
+			return result;
+		}
+		// JNDI DataSource
 		JndiObjectFactoryBean jndiObjectFactoryBean = new JndiObjectFactoryBean();
-		log.debug("DataSource JNDI Name: {}", config.getDbJndiName());
+		log.info("DataSource JNDI Name: {}", config.getDbJndiName());
 		jndiObjectFactoryBean.setJndiName(config.getDbJndiName());
 		try {
 			jndiObjectFactoryBean.afterPropertiesSet();
@@ -63,7 +76,7 @@ public class YadaJpaConfig {
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		// vendorAdapter.setGenerateDdl(true); // Crea la tabella e le colonne quando non esistono
 		vendorAdapter.setShowSql(config.getShowSql());
-		vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQL5InnoDBDialect");
+		vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQL8Dialect");
 		LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
 		factory.setJpaVendorAdapter(vendorAdapter);
 		List<String> packages = config.getDbEntityPackages();

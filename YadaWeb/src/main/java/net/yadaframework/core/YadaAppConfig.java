@@ -28,14 +28,14 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.thymeleaf.spring4.SpringTemplateEngine;
+import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.web.dialect.YadaDialect;
 
-@Configuration
+//@Configuration not needed when using WebApplicationInitializer.java
 @ComponentScan(basePackages = { "net.yadaframework.components" })
 @EnableScheduling
 @EnableAsync

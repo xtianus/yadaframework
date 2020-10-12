@@ -1,4 +1,4 @@
-package net.yadaframework.web;
+package net.yadaframework.security.web;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -23,14 +23,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import net.yadaframework.components.YadaNotify;
 import net.yadaframework.core.YadaConfiguration;
-import net.yadaframework.security.YadaAuthenticationFailureHandler;
-import net.yadaframework.security.YadaAuthenticationSuccessHandler;
-import net.yadaframework.security.YadaUserDetailsService;
+import net.yadaframework.security.components.YadaAuthenticationFailureHandler;
+import net.yadaframework.security.components.YadaAuthenticationSuccessHandler;
 import net.yadaframework.security.components.YadaTokenHandler;
+import net.yadaframework.security.components.YadaUserDetailsService;
 import net.yadaframework.security.persistence.entity.YadaAutoLoginToken;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaAutoLoginTokenRepository;
+import net.yadaframework.web.YadaViews;
 
 /**
  * This controller handles the opening of the login form/modal, autologin links, and the result of an ajax login.

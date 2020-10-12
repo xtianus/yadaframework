@@ -8,12 +8,29 @@ buildscript {
 	}
 	dependencies {
 		// Needed for test schema creation
-		classpath 'net.yadaframework:YadaTools:0.6.8'
+		classpath 'net.yadaframework:YadaTools:0.6.9'
 		// classpath 'kr.motd.gradle:sphinx-gradle-plugin:2.2.0'
 	}                    
 }
 
-apply plugin: 'java-library'
+plugins {
+	id 'java-library'
+	id 'maven-publish'
+}
+
+group = 'net.yadaframework'
+version = '0.5.0'
+
+// PublishToMavenLocal task
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'yadaweb'
+            from components.java
+        }
+    }
+}
+
 apply plugin: 'eclipse-wtp'
 // apply plugin: 'kr.motd.sphinx'
 
@@ -49,14 +66,18 @@ repositories {
 dependencies {
 	api 'org.apache.commons:commons-configuration2:2.+'
 	
-    implementation 'org.springframework:spring-webmvc:4.3.20.RELEASE',
-		'org.springframework:spring-context-support:4.3.20.RELEASE',
-		'org.springframework.data:spring-data-jpa:1.11.22.RELEASE',
+	// Needed by Commons Configuration
+    runtimeOnly 'commons-jxpath:commons-jxpath:1.+'
+	
+    implementation 'org.springframework:spring-webmvc:5.2.8.RELEASE',
+		'org.springframework:spring-context-support:5.2.8.RELEASE',
+		// 'org.springframework.data:spring-data-jpa:1.11.9.RELEASE',
+		'org.springframework.data:spring-data-jpa:2.3.2.RELEASE',
 		'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
-		'org.hibernate:hibernate-entitymanager:5.3.7.Final',
+       'org.hibernate:hibernate-entitymanager:5.4.12.Final',
 		'org.hibernate:hibernate-validator:5.4.2.Final',
-		'org.thymeleaf:thymeleaf-spring4:3.0.11.RELEASE',
-		'mysql:mysql-connector-java:5.1.+',
+		'org.thymeleaf:thymeleaf-spring5:3.0.11.RELEASE',
+		'mysql:mysql-connector-java:8.+',
 		'commons-collections:commons-collections:3.2.2',
 		'org.apache.tomcat:tomcat-servlet-api:8.0.48',
 		'commons-fileupload:commons-fileupload:1.3.3',
@@ -74,6 +95,10 @@ dependencies {
 		// 'org.quartz-scheduler:quartz:2.2.3',
 		'org.flywaydb:flyway-core:5.0.5',
 		'commons-beanutils:commons-beanutils:1.9.+'
+		
+	 // Connection pool for embedded Tomcat and programmatic datasource
+	implementation 'org.vibur:vibur-dbcp:25.+'
+	runtimeOnly 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.+'
 	
 	// Needed to run in Tomcat
 	// runtime 'commons-jxpath:commons-jxpath:1.3'
@@ -81,7 +106,7 @@ dependencies {
 	testImplementation 'junit:junit:4.12',
 		'org.springframework:spring-test:4.3.13.RELEASE'
 	
-	testRuntime 'commons-beanutils:commons-beanutils:1.9.+',
+	testRuntimeOnly 'commons-beanutils:commons-beanutils:1.9.+',
 		'commons-jxpath:commons-jxpath:1.3'
 		
 }
@@ -107,8 +132,6 @@ processResources {
 }
 
 
-apply plugin: 'maven'
-
 javadoc {
     options.encoding = 'UTF-8'
     options.docEncoding = 'UTF-8'
@@ -123,15 +146,6 @@ task javadocJar(type: Jar) {
 
 artifacts {
     archives javadocJar
-}
-
-// Per usare meglio maven vedi qui: http://stackoverflow.com/questions/24751996/gradle-configuration-to-download-custom-plugin-dependencies
-
-uploadArchives {
-	dependsOn build
-	repositories {
-		mavenLocal()
-	}
 }
 
 configurations {

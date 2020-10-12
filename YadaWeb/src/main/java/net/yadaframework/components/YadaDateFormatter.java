@@ -1,4 +1,4 @@
-package net.yadaframework.web;
+package net.yadaframework.components;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

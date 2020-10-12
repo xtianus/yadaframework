@@ -11,7 +11,8 @@ import net.yadaframework.security.YadaSecurityConfig;
  * Other configuration is set on YadaSecurityConfig
  * @see YadaSecurityConfig
  */
-@Configuration
+//@Configuration not needed when using WebApplicationInitializer.java
+@DependsOn("webConfig") // Fix circular reference on 'mvcContentNegotiationManager' creation
 public class SecurityConfig extends YadaSecurityConfig {
 	
     @Override

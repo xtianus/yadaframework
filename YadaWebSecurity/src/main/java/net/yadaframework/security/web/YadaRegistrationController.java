@@ -1,7 +1,8 @@
-package net.yadaframework.web;
+package net.yadaframework.security.web;
 import java.util.List;
 import java.util.Locale;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -10,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,13 +22,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import net.yadaframework.components.YadaNotify;
+import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaRegistrationType;
 import net.yadaframework.exceptions.YadaInternalException;
-import net.yadaframework.security.YadaUserDetailsService;
 import net.yadaframework.security.components.YadaSecurityEmailService;
 import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.security.components.YadaTokenHandler;
+import net.yadaframework.security.components.YadaUserDetailsService;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
@@ -46,11 +51,12 @@ public class YadaRegistrationController {
 	@Autowired private YadaSecurityEmailService yadaSecurityEmailService;
 	@Autowired private YadaTokenHandler yadaTokenHandler;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
-	@Autowired private PasswordEncoder passwordEncoder;
 	@Autowired private YadaConfiguration yadaConfiguration;
 	@Autowired private MessageSource messageSource;
 	@Autowired private YadaNotify yadaNotify;
 
+	// For some reason, autowiring of the "passwordEncoder" created by YadaSecurityConfig doesn't work: bean is not found
+	/*@Autowired */ private PasswordEncoder passwordEncoder = null;
 
 	public enum YadaRegistrationStatus {
 		OK,					// Good registration
@@ -79,8 +85,16 @@ public class YadaRegistrationController {
 		public String email;
 
 		public String destinationUrl;
-
+		
 		public YadaRegistrationRequest yadaRegistrationRequest;
+	}
+	
+	@PostConstruct
+	public void init() {
+		if (yadaConfiguration.encodePassword()) {
+			passwordEncoder = new BCryptPasswordEncoder();
+		}
+
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -12,7 +12,7 @@
 <booleanAttribute key="show_execution_view" value="false"/>
 <listAttribute key="tasks">
 <listEntry value="build"/>
-<listEntry value="uploadArchives"/>
+<listEntry value="PublishToMavenLocal"/>
 </listAttribute>
 <stringAttribute key="working_dir" value="${workspace_loc:/YadaTools}"/>
 </launchConfiguration>

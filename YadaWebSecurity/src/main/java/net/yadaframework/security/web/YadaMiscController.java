@@ -1,4 +1,4 @@
-package net.yadaframework.web;
+package net.yadaframework.security.web;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import net.yadaframework.components.YadaFileManager;
+import net.yadaframework.components.YadaNotify;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInternalException;
@@ -22,6 +23,8 @@ import net.yadaframework.persistence.entity.YadaAttachedFile.YadaAttachedFileTyp
 import net.yadaframework.persistence.entity.YadaManagedFile;
 import net.yadaframework.persistence.repository.YadaAttachedFileRepository;
 import net.yadaframework.raw.YadaIntDimension;
+import net.yadaframework.web.YadaCropImage;
+import net.yadaframework.web.YadaCropQueue;
 
 /**
  * Miscellaneous @RequestMapping methods

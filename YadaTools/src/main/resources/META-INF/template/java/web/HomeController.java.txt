@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaLocalePathChangeInterceptor;
 import net.yadaframework.web.YadaNotify;
-import net.yadaframework.web.YadaWebUtil;
+import net.yadaframework.components.YadaWebUtil;
 
 @Controller
 public class HomeController {
@@ -31,12 +31,15 @@ public class HomeController {
 
 	@RequestMapping("/")
 	public String home(HttpServletRequest request, Locale locale) {
+		// You get here either when the url is just "/" or when it is "en/" with localepath configured.
+		// We need to insert the locale path when missing
+		// NOTE: any 404 NOT FOUND error opens the home page and gets here too.
 		if (!config.isLocalePathVariableEnabled() || YadaLocalePathChangeInterceptor.localePathRequested(request)) {
 			// Either the locale is not in the path or it has been set already
 			return "/home";
 		}
 		// Set the locale explicitly
-		return "redirect:/" + locale.getLanguage() + "/"; // Moved temporarily
+		return yadaWebUtil.redirectString("/", locale); // Moved temporarily
 	}
 	
 	// The login page is the home page with an attribute set

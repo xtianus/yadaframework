@@ -1,4 +1,4 @@
-package net.yadaframework.security;
+package net.yadaframework.security.components;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,11 +24,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.security.TooManyFailedAttemptsException;
 import net.yadaframework.security.exceptions.InternalAuthenticationException;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
 
 @Component
+@DependsOn("passwordEncoder")
 public class YadaUserDetailsService implements UserDetailsService {
 	private transient final Logger log = LoggerFactory.getLogger(getClass());
 	private transient final Logger logSec = LoggerFactory.getLogger("security");
@@ -132,7 +135,7 @@ public class YadaUserDetailsService implements UserDetailsService {
 		// Prima controllo che username e password siano validi, poi setto la nuova password
 		try {
 			username = username.toLowerCase();
-			List<YadaUserCredentials> userCredentialsList = userCredentialsRepository.findByUsername(username, new PageRequest(0, 1));
+			List<YadaUserCredentials> userCredentialsList = userCredentialsRepository.findByUsername(username, PageRequest.of(0, 1));
 			if (userCredentialsList.isEmpty()) {
 				throw new UsernameNotFoundException("Username " + username + " not found");
 			}

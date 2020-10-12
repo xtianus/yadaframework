@@ -5,3 +5,4 @@
 /.classpath
 /.project
 !gradle-wrapper.jar
+!gradle-js-plugin-2.14.1-x.jar

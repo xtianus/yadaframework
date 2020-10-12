@@ -27,12 +27,11 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 
 import net.yadaframework.core.YadaConfiguration;
-import net.yadaframework.security.YadaUserDetailsService;
 import net.yadaframework.security.persistence.entity.YadaSocialCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaSocialCredentialsRepository;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
-import net.yadaframework.web.YadaSocialRegistrationData;
+import net.yadaframework.security.web.YadaSocialRegistrationData;
 import net.yadaframework.web.YadaViews;
 
 /**

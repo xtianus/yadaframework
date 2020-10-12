@@ -1,4 +1,4 @@
-package net.yadaframework.web;
+package net.yadaframework.components;
 import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_AUTOCLOSE;
 import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_BODY;
 import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_CALLSCRIPT;

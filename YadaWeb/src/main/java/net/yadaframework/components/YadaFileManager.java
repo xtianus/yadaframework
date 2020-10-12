@@ -196,7 +196,7 @@ public class YadaFileManager {
 	 * @see #deleteFileAttachment(YadaAttachedFile)
 	 */
 	public void deleteFileAttachment(Long yadaAttachedFileId) {
-		deleteFileAttachment(yadaAttachedFileRepository.findOne(yadaAttachedFileId));
+		deleteFileAttachment(yadaAttachedFileRepository.findById(yadaAttachedFileId).orElse(null));
 	}
 
 	/**

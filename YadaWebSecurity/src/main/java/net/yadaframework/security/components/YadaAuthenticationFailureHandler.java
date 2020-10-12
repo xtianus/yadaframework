@@ -1,4 +1,4 @@
-package net.yadaframework.security;
+package net.yadaframework.security.components;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,7 +22,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
+
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.security.TooManyFailedAttemptsException;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
 
@@ -107,7 +109,7 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
 				request.getRequestDispatcher("/pwdChange").forward(request, response);
 				return;
 			} else if (exception instanceof TooManyFailedAttemptsException) {
-				YadaUserCredentials yadaUserCredentials = userCredentialsRepository.findByUsername(username.toLowerCase(), new PageRequest(0, 1)).get(0);
+				YadaUserCredentials yadaUserCredentials = userCredentialsRepository.findByUsername(username.toLowerCase(), PageRequest.of(0, 1)).get(0);
 				int lockMinutes = yadaConfiguration.getPasswordFailedAttemptsLockoutMinutes();
 				Date lastFailedTimestamp = yadaUserCredentials.getLastFailedAttempt();
 				if (lastFailedTimestamp!=null) {

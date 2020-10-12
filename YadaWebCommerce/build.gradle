@@ -1,7 +1,11 @@
+plugins {
+	id 'java-library'
+	id 'maven-publish'
+}
+
 group = 'net.yadaframework'
 version = 'master'
 
-apply plugin: 'java-library'
 apply plugin: 'eclipse-wtp'
 
 eclipse {
@@ -32,8 +36,8 @@ repositories {
 dependencies {
 		
 	implementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'),
-		'org.hibernate:hibernate-entitymanager:5.2.9.Final',
-		'org.springframework.data:spring-data-jpa:1.11.1.RELEASE'
+		'org.hibernate:hibernate-entitymanager:5.4.12.Final',
+		'org.springframework.data:spring-data-jpa:2.3.2.RELEASE'
 		
 	testImplementation 'junit:junit:4.12'
 }
@@ -52,11 +56,13 @@ processResources {
 	}
 }
 
-apply plugin: 'maven'
-uploadArchives {
-	dependsOn build
-	repositories {
-		mavenLocal()
-	}
+// PublishToMavenLocal task
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = 'yadawebcommerce'
+            from components.java
+        }
+    }
 }
 

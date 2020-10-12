@@ -3,6 +3,14 @@
 <Context override="true">
 <Manager pathname="" /> <!-- Disabilito session persistence -->
 
+<JarScanner>
+	<!-- skip tag/annotation jar scanning: https://tomcat.apache.org/tomcat-8.0-doc/config/jar-scan-filter.html -->
+   	<!-- "main" is needed when running standalone (tomcat embedded) in Eclipse in order to use the Yada projects -->
+    <JarScanFilter
+    	defaultPluggabilityScan="true" pluggabilityScan="main,Yada*,yada*,spring*" pluggabilitySkip="*"
+    	defaultTldScan="false" tldScan="" tldSkip="*" />
+</JarScanner>
+
 <!-- 
 http://commons.apache.org/proper/commons-dbcp/configuration.html
 initialSize: The initial number of connections that are created when the pool is started.
@@ -15,6 +23,8 @@ validationQueryTimeout: The timeout in seconds before connection validation quer
 testOnBorrow: The indication of whether objects will be validated before being borrowed from the pool.
 maxConnLifetimeMillis: The maximum lifetime in milliseconds of a connection. After this time is exceeded the connection will fail the next activation, passivation or validation test. A value of zero or less means the connection has an infinite lifetime.
 -->
+
+<!-- Datasource for Tomcat server - JNDI version
 <Resource name="jdbc/${acronym}db$env" 
 	type="javax.sql.DataSource"
 	factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
@@ -35,5 +45,5 @@ maxConnLifetimeMillis: The maximum lifetime in milliseconds of a connection. Aft
 	password="$dbpwd"
 	url="jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false"
 />
-
+-->
 </Context>

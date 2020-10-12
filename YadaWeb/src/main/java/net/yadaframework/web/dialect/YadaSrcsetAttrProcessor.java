@@ -19,6 +19,7 @@ import net.yadaframework.core.YadaConfiguration;
  * When images are in the contents folder, the file name should be versioned instead, using YadaAttachedFile
  * @see YadaSrcAttrProcessor
  */
+@Deprecated // Just use th:href because YadaLinkBuilder takes care of everything
 public class YadaSrcsetAttrProcessor extends AbstractAttributeTagProcessor {
 	public static final int ATTR_PRECEDENCE = 9000;
     public static final String ATTR_NAME = "srcset";
@@ -82,7 +83,7 @@ public class YadaSrcsetAttrProcessor extends AbstractAttributeTagProcessor {
          */
         final String semiurl = (String) expression.execute(context);
 
-        String resultUrl = yadaDialectUtil.getVersionedAttributeValue(context, semiurl);
+        String resultUrl = yadaDialectUtil.getVersionedAttributeValue(semiurl);
 
         /*
          * Set the new value into the 'href' attribute

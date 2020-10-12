@@ -11,10 +11,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.format.Formatter;
@@ -30,27 +30,28 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
-import org.thymeleaf.spring4.SpringTemplateEngine;
-import org.thymeleaf.spring4.templateresolver.SpringResourceTemplateResolver;
-import org.thymeleaf.spring4.view.ThymeleafViewResolver;
+import org.thymeleaf.spring5.SpringTemplateEngine;
+import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
+import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
-import net.yadaframework.web.YadaDateFormatter;
+import net.yadaframework.components.YadaDateFormatter;
 import net.yadaframework.web.dialect.YadaDialect;
 
-@Configuration
+
+//@Configuration not needed when using WebApplicationInitializer.java
 @EnableWebMvc
 @EnableSpringDataWebSupport
 @EnableScheduling
 @EnableAsync
 @ComponentScan(basePackages = { "net.yadaframework.web" })
-public class YadaWebConfig extends WebMvcConfigurerAdapter {
+public class YadaWebConfig implements WebMvcConfigurer {
 	//	private final static long MB = 1024*1024;
 //	private final static long MAXFILESIZE = 10*MB;
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
@@ -248,7 +249,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	// Thymeleaf
 	//
 
-	// Non need for a @Bean
+	// @Bean // No need for a @Bean?
 	public ClassLoaderTemplateResolver yadaTemplateResolver() {
 		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
 		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
@@ -277,6 +278,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	 * Template resolver for mail preview pages that include email templates (maybe I could just use emailTemplateResolver())
 	 * @return
 	 */
+	// @Bean // No need for a @Bean?
 	public ITemplateResolver mailPreviewTemplateResolver() {
 //		ServletContextTemplateResolver resolver = new ServletContextTemplateResolver();
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
@@ -303,7 +305,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	
 	// x213
 	
-	// Non need for a @Bean
+	// @Bean // No need for a @Bean?
 	public ITemplateResolver webTemplateResolver() {
 //		ServletContextTemplateResolver resolver = new ServletContextTemplateResolver();
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
@@ -323,7 +325,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		return resolver;
 	}
 	
-	// Non need for a @Bean
+	// @Bean // No need for a @Bean?
 	public ITemplateResolver javascriptTemplateResolver() {
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
 	    resolver.setApplicationContext(applicationContext);
@@ -340,7 +342,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		return resolver;
 	}
 	
-	// Non need for a @Bean
+	// @Bean // No need for a @Bean?
 	public ITemplateResolver xmlTemplateResolver() {
 //		ServletContextTemplateResolver resolver = new ServletContextTemplateResolver();
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
@@ -359,7 +361,8 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		return resolver;
 	}
 	
-	@Bean // @Bean annotation needed to make message.properties work properly - DO NOT REMOVE
+	@Bean 	// WARNING: @Bean annotation needed to make message.properties work properly - DO NOT REMOVE
+			//          because the SpringTemplateEngine has to be injected with the MessageSource bean.
 	public SpringTemplateEngine templateEngine() {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
 		engine.setEnableSpringELCompiler(true);
@@ -368,6 +371,9 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		engine.addTemplateResolver(webTemplateResolver());
 		engine.addTemplateResolver(mailPreviewTemplateResolver());
 		engine.addTemplateResolver(yadaTemplateResolver());
+		// Fixes urls with @{} adding the language path when configured and versioning resource folders
+		engine.setLinkBuilder(new YadaLinkBuilder(config, getNotLocalizedResourcePattern()));
+		
 		// Do this in the subclass
 		//		// http://www.thymeleaf.org/layouts.html
 		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
@@ -388,7 +394,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 		engine.addDialect(new YadaDialect(config));
 	}
 
-	// Non need for a @Bean
+	@Bean
 	public SpringTemplateEngine javascriptTemplateEngine() {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
 		engine.addTemplateResolver(javascriptTemplateResolver());
@@ -401,7 +407,7 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	
 	// Ho aggiunto un viewResolver per gestire i file xml. Per usarlo basta che il controller restituisca il nome di un file xml senza estensione che sta in WEB-INF/views/xml
 	// prefissandolo con "/xml", per esempio "/xml/sitemap".
-	// Non need for a @Bean
+	@Bean
 	public SpringTemplateEngine xmlTemplateEngine() {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
 		engine.addTemplateResolver(xmlTemplateResolver());
@@ -418,10 +424,9 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	 * @return
 	 */
 	@Bean
-	public ViewResolver javascriptViewResolver() {
-		SpringTemplateEngine engine = javascriptTemplateEngine();
+	public ViewResolver javascriptViewResolver(@Qualifier("javascriptTemplateEngine") SpringTemplateEngine javascriptTemplateEngine) {
 		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
-		viewResolver.setTemplateEngine(engine);
+		viewResolver.setTemplateEngine(javascriptTemplateEngine);
 		viewResolver.setCharacterEncoding("UTF-8"); // Questo è importante anche se nei tutorial non lo mettono
 		viewResolver.setOrder(5);
 		// This is needed to skip this resolver for all html files but it forces the use of .js in the view name
@@ -437,10 +442,9 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	 * @return
 	 */
 	@Bean
-	public ViewResolver xmlViewResolver() {
-		SpringTemplateEngine engine = xmlTemplateEngine();
+	public ViewResolver xmlViewResolver(@Qualifier("xmlTemplateEngine") SpringTemplateEngine xmlTemplateEngine) {
 		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
-		viewResolver.setTemplateEngine(engine);
+		viewResolver.setTemplateEngine(xmlTemplateEngine);
 		viewResolver.setCharacterEncoding("UTF-8"); // Questo è importante anche se nei tutorial non lo mettono
 		viewResolver.setOrder(10);
 		// Tutti i template devono stare nel folder /xml. Se non si usa un folder specifico, questo viewResolver non viene usato
@@ -456,9 +460,11 @@ public class YadaWebConfig extends WebMvcConfigurerAdapter {
 	 * @return
 	 */
 	@Bean
-	public ViewResolver viewResolver() {
+	public ViewResolver viewResolver(@Qualifier("templateEngine") SpringTemplateEngine templateEngine) {
 		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
-		viewResolver.setTemplateEngine(templateEngine());
+		// ATTENTION: do not use templateEngine() here otherwise i18n won't work because the MessageSource is not going to be injected
+		viewResolver.setTemplateEngine(templateEngine);
+		// viewResolver.setTemplateEngine(templateEngine());
 		viewResolver.setCharacterEncoding("UTF-8");
 		viewResolver.setContentType("text/html; charset=UTF-8");
 		viewResolver.setOrder(20);
