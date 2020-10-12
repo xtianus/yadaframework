@@ -1,16 +1,6 @@
 package net.yadaframework.components;
 
-import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_AUTOCLOSE;
-import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_BODY;
-import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_CALLSCRIPT;
-import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_REDIRECT;
-import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_RELOADONCLOSE;
-import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_SEVERITY;
-import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_TITLE;
-import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_TOTALSEVERITY;
-import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_ERROR;
-import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_INFO;
-import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
+import static net.yadaframework.core.YadaConstants.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,6 +61,9 @@ public class YadaWebUtil {
 	@Autowired private MessageSource messageSource;
 
 	public final Pageable FIND_ONE = PageRequest.of(0, 1);
+
+	// Characters that should never be found or placed in a slug
+	private static final String PATTERN_INVALID_SLUG = "[:,;=&!+~()@*$'\"\\s]";
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
 
@@ -360,14 +355,34 @@ public class YadaWebUtil {
 		if (StringUtils.isBlank(source)) {
 			return "";
 		}
-		String slug = source.trim().toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
+		String slug = removeHtmlStatic(source); //rimuove tutti gli eventuali tag.
+		slug = source.trim().toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
 		slug = slug.replaceAll(" +", "-"); // Spaces become dashes
-		slug = slug.replaceAll("[^\\w:,;=&!+~\\(\\)@\\*\\$\\'\\-]", "");
+		slug = slug.replaceAll(PATTERN_INVALID_SLUG, "");
 		slug = StringUtils.removeEnd(slug, ".");
 		slug = StringUtils.removeEnd(slug, ";");
 		slug = StringUtils.removeEnd(slug, "\\");
+		slug = slug.replaceAll("/", "_");
+		slug = slug.replaceAll("__", "_");
+		slug = slug.replaceAll("--", "-");
 		slug = slug.replaceAll("-+", "-"); // Multiple dashes become one dash
 		return slug;
+	}
+
+	/**
+	 * Find invalid characters from a slug: white space, :,;=&!+~\()@*$'
+	 * The char "-" is excluded.
+	 * @param text
+	 * @return
+	 */
+	public boolean checkInvalidSlugCharacters(String text) {
+		Pattern pattern = Pattern.compile(PATTERN_INVALID_SLUG);
+		Matcher matcher = pattern.matcher(text);
+
+		while(matcher.find()){
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -446,6 +461,22 @@ public class YadaWebUtil {
 		}
     	return urlNotVersioned;
     }
+
+	/**
+	 * Removes all HTML tags. Static to be used from Entity beans without forcing autowiring on each instance.
+	 * @param source html content
+	 * @return text content
+	 * @see #cleanContent(String, String...)
+	 */
+	public static String removeHtmlStatic(String source) {
+		Whitelist allowedTags = Whitelist.none();
+		Document dirty = Jsoup.parseBodyFragment(source, "");
+		Cleaner cleaner = new Cleaner(allowedTags);
+		Document clean = cleaner.clean(dirty);
+		clean.outputSettings().escapeMode(EscapeMode.xhtml); // Non fa l'escape dei caratteri utf-8
+		String safe = clean.body().html();
+		return safe;
+	}
 
 	/**
 	 * Cleans the html content leaving only the following tags: b, em, i, strong, u, br, cite, em, i, p, strong, img, li, ul, ol, sup, sub, s
