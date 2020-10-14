@@ -115,7 +115,7 @@ If your project does not use YadaSecurity, change ``WebApplicationInitializer`` 
 The above adds a filter to the Spring servlet engine. It is not needed when using YadaSecurity because the same is
 already done in ``net.yadaframework.security.SecurityWebApplicationInitializer``.
 
-.. hint:: The "language in the path" functionality is implemented in YadaLocalePathVariableFilter, YadaLocalePathChangeInterceptor, YadaLocalePathLinkBuilder
+.. hint:: The "language in the path" functionality is implemented in YadaLocalePathVariableFilter, YadaLocalePathChangeInterceptor, YadaLinkBuilder
 
 Application configuration
 -------------------------
