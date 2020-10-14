@@ -83,6 +83,7 @@ import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.exceptions.YadaSystemException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.raw.YadaIntDimension;
+import net.yadaframework.web.YadaWebUtil;
 import sogei.utility.UCheckDigit;
 import sogei.utility.UCheckNum;
 
@@ -2246,7 +2247,7 @@ public class YadaUtil {
 				return "";
 			}
 		}
-
+		originalFilename = YadaWebUtil.removeHtmlStatic(originalFilename);
 		char[] resultChars = originalFilename.toCharArray();
 		char[] lowerChars = originalFilename.toLowerCase().toCharArray();
 		for (int i = 0; i < resultChars.length; i++) {
