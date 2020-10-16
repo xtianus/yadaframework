@@ -21,14 +21,14 @@ import org.slf4j.LoggerFactory;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 /**
- * Tomcat Embedded.
+ * Tomcat Embedded. Use the args constructor to accept the provided configurator. To create a different configuration, extend this class.
  *
  */
 public class YadaTomcatServer {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
     private Tomcat tomcat;
-    private long startTime;
+    private String acroenv;
     
     /**
      * Starts the standalone server on port 8080
@@ -39,10 +39,30 @@ public class YadaTomcatServer {
      * @throws Exception
      */
 	public static void main(String[] args) throws Exception {
+		YadaTomcatServer yadaTomcatServer = new YadaTomcatServer(args);
+		yadaTomcatServer.start();
+	}
+	
+	/**
+	 * Create an instance of the server for custom configuration
+	 */
+	public YadaTomcatServer() {
+		this.tomcat = new Tomcat();
+	}
+
+	/**
+	 * Create an instance of the server using the configuration specified in the args parameter
+	 * @param args
+	 * @throws ServletException
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 */
+	public YadaTomcatServer(String[] args) throws ServletException, MalformedURLException, IOException {
+		this();
 		if (args.length == 0 || args.length>3) {
 			throw new YadaInvalidUsageException("Command line parameter missing. Usage: {} <acroenv> <webappFolder> [<baseDir>]", YadaTomcatServer.class.getName());
 		}
-		String acroenv = args[0];
+		this.acroenv = args[0];
 		String webappFolder = args[1];
 		String baseDir=null;
 		boolean dev = true;
@@ -53,36 +73,73 @@ public class YadaTomcatServer {
 				throw new YadaInvalidUsageException("The baseDir {} must exist and be writable", new File(baseDir));
 			}
 		}
-		YadaTomcatServer yadaTomcatServer = new YadaTomcatServer();
-		yadaTomcatServer.configure(webappFolder, baseDir, dev);
-		yadaTomcatServer.start(acroenv);
+		this.configure(webappFolder, baseDir, dev);
 	}
 	
-	private void start(String acroenv) throws LifecycleException {
+	public void start() throws LifecycleException {
 		try {
-			tomcat.start();
-			log.info("Tomcat embedded server started in {} ms: ready for connections", System.currentTimeMillis() - startTime);
+			log.info("Starting Tomcat embedded server...");
+			long startTime = System.currentTimeMillis();
 			tomcat.getServer().setPort(8005);
 			String shutdownCommand = acroenv+"down";
 			tomcat.getServer().setShutdown(shutdownCommand);
+			tomcat.start();
+			log.info("Tomcat embedded server started in {} ms: ready for connections", System.currentTimeMillis() - startTime);
 			tomcat.getServer().await();
 		} catch (LifecycleException e) {
 			tomcat.destroy();
 			log.error("Server exited in error", e);
 		}
 	}
+	
+	/**
+	 * Compression only works on the standard HTTP connector, not for AJP.
+	 * Override this method to add compressable mime types or to disable compression.
+	 * @param connector the connector on which to enable compression
+	 * @param the compressable mime types as a comma-separated list.
+	 * 		  The empty string disables compression, the null value uses the default mime types for compression.
+	 */
+	protected void setCompressableMimeType(Connector connector, String mimeTypeList) {
+		if (!"".equals(mimeTypeList)) {
+			connector.setProperty("compression", "on");
+			if (mimeTypeList==null) {
+				connector.setProperty("compressableMimeType", 
+						"text/html,"
+						+ "text/xml,"
+						+ "text/plain,"
+						+ "text/css,"
+						+ "application/xml,"
+						+ "text/javascript,"
+						+ "application/javascript,"
+						+ "application/x-javascript,"
+						+ "application/pdf,"
+						+ "application/json,"
+						+ "text/json,"
+						+ "application/octet-stream");
+			} else {
+				connector.setProperty("compressableMimeType", mimeTypeList);
+			}
+		}
+	}
 
-	private void configure(String webappFolder, String baseDir, boolean dev) throws ServletException, MalformedURLException, IOException {
-		startTime = System.currentTimeMillis();
-		log.info("Starting Tomcat embedded server...");
+	/**
+	 * Default configurator. Write your own when using the no-args constructor.
+	 * @param webappFolder
+	 * @param baseDir
+	 * @param dev
+	 * @throws ServletException
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 */
+	protected void configure(String webappFolder, String baseDir, boolean dev) throws ServletException, MalformedURLException, IOException {
 		System.setProperty("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE", "true");
-		tomcat = new Tomcat();
 		if (baseDir!=null) {
 			tomcat.setBaseDir(baseDir);
 		}
 		tomcat.setPort(8080);
 		tomcat.getConnector().setThrowOnFailure(true);
-		tomcat.setAddDefaultWebXmlToWebapp(false); // Usa web.xml
+		setCompressableMimeType(tomcat.getConnector(), null);
+		tomcat.setAddDefaultWebXmlToWebapp(false); // Use web.xml
 		StandardContext ctx = (StandardContext) tomcat.addWebapp("", new File(webappFolder).getAbsolutePath());
 		if (dev) {
 			// Only needed in Eclipse because classes are found in the "bin" folder
