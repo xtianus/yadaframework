@@ -231,8 +231,8 @@ Use the "File > Import... > Gradle > Existing Gradle Project" menu to import Yad
 If the imported project has some errors, first of right-click and choose "Gradle > Refresh Gradle Project".
 If it complains about some unbound system library, open "Properties > Java build path > Libraries" and remove the library.
 
-To build the library, run the "YadaTools - uploadArchives" task from "Run > Run Configurations... > Gradle Task". If you have some
-weird errors, try from the command line in the YadaTools folder and run ``gradlew uploadArchives --no-daemon`` because the Gradle
+To build the library, run the "YadaTools - PublishToMavenLocal" task from "Run > Run Configurations... > Gradle Task". If you have some
+weird errors, try from the command line in the YadaTools folder and run ``gradlew PublishToMavenLocal --no-daemon`` because the Gradle
 daemon sometimes gets in the way...
 
 The First Project

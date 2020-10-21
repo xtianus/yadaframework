@@ -343,8 +343,8 @@ To generate the library, you first need to import the YadaTools project.</p>
 <img alt="_images/yadaTools.jpg" src="_images/yadaTools.jpg" />
 <p>If the imported project has some errors, first of right-click and choose “Gradle &gt; Refresh Gradle Project”.
 If it complains about some unbound system library, open “Properties &gt; Java build path &gt; Libraries” and remove the library.</p>
-<p>To build the library, run the “YadaTools - uploadArchives” task from “Run &gt; Run Configurations… &gt; Gradle Task”. If you have some
-weird errors, try from the command line in the YadaTools folder and run <code class="docutils literal notranslate"><span class="pre">gradlew</span> <span class="pre">uploadArchives</span> <span class="pre">--no-daemon</span></code> because the Gradle
+<p>To build the library, run the “YadaTools - PublishToMavenLocal” task from “Run &gt; Run Configurations… &gt; Gradle Task”. If you have some
+weird errors, try from the command line in the YadaTools folder and run <code class="docutils literal notranslate"><span class="pre">gradlew</span> <span class="pre">PublishToMavenLocal</span> <span class="pre">--no-daemon</span></code> because the Gradle
 daemon sometimes gets in the way…</p>
 </div>
 </div>
