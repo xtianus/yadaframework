@@ -28,8 +28,8 @@ Parameters:
 - readonly = true for readonly (optional)
 - maxlength = max number of characters accepted (optional). When greater than 80, a textarea is generated instead of an input tag.
 - rows = number of rows for the textarea (optional)
-- addonLeft = character to set as a bootstrap "input-group-addon" to the left of the input field (optional)
-- addonRight = character to set as a bootstrap "input-group-addon" to the right of the input field (optional)
+- addonLeft = character to set as a bootstrap "input-group-prepend" to the left of the input field (optional)
+- addonRight = character to set as a bootstrap "input-group-append" to the right of the input field (optional)
 - help = testo per il pulsante di help, se non c'è helpKey (optional)
 - helpKey = chiave del testo per il pulsante di help (optional)
 - editor = true/false to use ckeditor
@@ -50,13 +50,15 @@ Example:
 <div th:fragment="field"> <!--/* Top-level div container is needed for fragment replacement */-->
 <th:block th:with="tmp=${fieldName+'seqName'},seqName=${#strings.replace(#strings.replace(tmp,']',''),'[','')}">
 <input th:if="${#strings.equals(type,'hidden')}" th:field="*{{__${fieldName}__}}" th:disabled="${disabled}" th:type="hidden" th:id="${id}?:${#ids.seq(seqName)}" />
-<div th:if="${!#strings.equals(type,'hidden')}" class="form-group" 
+<div th:if="${!#strings.equals(type,'hidden')}" class="form-group "
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" 
 	th:classappend="|${hasError==true?'has-error':''} ${inline==true?'form-inline':''} ${noFeedback==true?'':'has-feedback'}|">
 	<label th:if="${label!=null || labelKey!=null}" class="control-label" th:for="${id}?:${#ids.next(seqName)}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
 	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perchÃ© se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
 		<!--/* Can't use th:field="*{__${fieldName}__}" because somehow passwords remain blank when they already have a value */-->
-		<div th:if="${addonLeft!=null}" th:text="${addonLeft}" class="input-group-addon">$</div>
+		<div th:if="${addonLeft!=null}" class="input-group-prepend">
+			<span class="input-group-text" th:text="${addonLeft}">$</span>
+		</div>
 		<input th:if="${maxlength==null or maxlength le 80}" th:name="${fieldName}" th:value="*{{__${fieldName}__}}"
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:type="${type}?:'text'" th:readonly="${readonly}" 
@@ -66,10 +68,12 @@ Example:
 			th:tabindex="${tabindex}"
 			th:autocomplete="${autocomplete}"
 			th:id="${id}?:${#ids.seq(seqName)}" th:attr="aria-describedby=${id}?:${#ids.next(seqName)}"/>
-		<div th:if="${addonRight!=null}" th:text="${addonRight}" class="input-group-addon">.00</div>
-		<span th:if="${type=='password' && noShowPassword!=true}" class="input-group-btn">
-			<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
-		</span>
+		<div th:if="${addonRight!=null}" class="input-group-append">
+			<span class="input-group-text" th:text="${addonRight}">.00</span>
+			<span th:if="${type=='password' && noShowPassword!=true}" class="input-group-text">
+				<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
+			</span>
+		</div>
 		<textarea th:if="${maxlength gt 80}" th:rows="${rows}?:3" th:field="*{{__${fieldName}__}}" 
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:maxlength="${maxlength}" 
@@ -79,7 +83,7 @@ Example:
 			th:autocomplete="${autocomplete}"
 			th:id="${id}?:${#ids.seq(seqName)}" th:attr="aria-describedby=${id}?:${#ids.next(seqName)}"></textarea>
 		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
-			<a th:if="${help!=null}" class="yadaHelpButton input-group-addon" data-trigger="focus" data-container="body" 
+			<a th:if="${help!=null}" class="yadaHelpButton input-group-append" data-trigger="focus" data-container="body" 
 				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
 				data-html="true"
 				th:attr="data-content=${help}">

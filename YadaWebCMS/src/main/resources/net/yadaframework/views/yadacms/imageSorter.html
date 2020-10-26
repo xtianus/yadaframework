@@ -57,7 +57,7 @@ Example:
 								<div class="form-group has-feedback">
 									<label class="control-label" th:text="${labelCaption!=null?labelCaption:''}">Caption</label>
 									<div class="input-group col">
-									  <div class="input-group-addon" th:text="${#strings.toUpperCase(language)}">IT</div>
+									  <div class="input-group-prepend" th:text="${#strings.toUpperCase(language)}">IT</div>
 									  <input type="text" th:name="title[__${simpleLocale}__]" th:value="${galleryImage!=null?galleryImage.title[__${simpleLocale}__]:''}" class="form-control  has-feedback"
 								  		aria-describedby="caption image">
 								    </div>
