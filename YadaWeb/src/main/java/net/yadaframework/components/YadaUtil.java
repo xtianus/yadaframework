@@ -827,7 +827,7 @@ public class YadaUtil {
 		if (applicationContext!=null) {
 			return applicationContext.getBean(nameInApplicationContext);
 		}
-		log.debug("No applicationContext injected in getBean() yet - returning null");
+		log.debug("No applicationContext injected in getBean() yet - returning null for '{}'", nameInApplicationContext);
 		return null;
 	}
 

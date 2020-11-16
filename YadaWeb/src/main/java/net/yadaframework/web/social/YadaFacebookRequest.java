@@ -1,100 +1,67 @@
 package net.yadaframework.web.social;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 
-import net.yadaframework.exceptions.InternalException;
+import net.yadaframework.components.YadaUtil;
+import net.yadaframework.components.YadaWebUtil;
+import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaSocialException;
 
-public class YadaFacebookRequest {
-	@SuppressWarnings("unused")
+/**
+ * Abstract superclass for Facebook operations. 
+ * @see YadaFacebookRequestV9
+ *
+ */
+public abstract class YadaFacebookRequest {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
+	
+	private YadaWebUtil yadaWebUtil = (YadaWebUtil) YadaUtil.getBean("yadaWebUtil");
+	
+	protected String userAccessToken;
 
-	/**
-	 * Fetch profile
-	 */
-	public final static String API_PROFILE="/v2.12/me";
-	// Docs: https://developers.facebook.com/docs/graph-api/reference/v2.12/page/feed#publish
-	// You can use "me" instead of the page access token
-	public final static String API_PAGE_POST_AS_ADMIN="/v2.12/me/feed";
+	protected String baseUrl;
+	protected String apiVersion;
+	protected HttpMethod httpMethod; // GET / POST
+	protected String resource; // This is the URL path that follows the api version, i.e. "/feed"
+	protected String resultValidPattern; // null for don't check
+	protected String resultErrorPattern; // null for don't check
 	
-	private String BASE_URL = "https://graph.facebook.com";
+	protected Map<String, String> requestParameters = new HashMap<>();
+	protected Map<String, Object> requestJson = new HashMap<>();
 
-	private String api;
-	private HttpMethod httpMethod; // GET o POST
-	private Map<String, String> parameters = new HashMap<String, String>();
-	
-	public YadaFacebookRequest(String accessToken) {
-		parameters.put("access_token", accessToken);
-	}
-	
-	/**
-	 * Generic request
-	 * @param api
-	 * @param accessToken
-	 * @param httpMethod
-	 */
-	public YadaFacebookRequest(String api, String accessToken, HttpMethod httpMethod) {
-		this.api = api;
+	protected YadaFacebookRequest(HttpMethod httpMethod, String baseUrl, String apiVersion) {
 		this.httpMethod = httpMethod;
-		parameters.put("access_token", accessToken);
-	}
-	
-	void checkForErrors(String body) throws YadaSocialException {
-		if (API_PAGE_POST_AS_ADMIN == api) {
-			if (body.indexOf("\"id\":")<0) {
-				throw new YadaSocialException("Invalid response from Facebook when calling {}: {}", api, body);
-			}
-		}
+		this.baseUrl = baseUrl;
+		this.apiVersion = apiVersion;
 	}
 	
 	/**
-	 * Create a request for a Post as the page admin (not as the user)
-	 * @param linkToPost the link to post
+	 * @return the url like "https://graph.facebook.com/v2.3/me?access_token=uefbise&id=23423"
 	 */
-	public void facebookPagePostAsAdmin(String linkToPost) {
-		this.api = API_PAGE_POST_AS_ADMIN;
-		this.setParameter("link", linkToPost);
-		this.httpMethod = HttpMethod.POST;
-	}
-	
-	public void facebookCurrentProfile() {
-		this.api = API_PROFILE;
-		this.httpMethod = HttpMethod.GET;
-	}
-	
-	/**
-	 * 
-	 * @return he url like "https://graph.facebook.com/v2.3/me?access_token=uefbise&id=23423"
-	 */
-	String getUrl() {
-		if (api==null || httpMethod==null) {
-			throw new InternalException("Missing api/httpMethod");
+	String makeUrl() {
+		if (baseUrl==null || apiVersion==null || httpMethod==null || resource==null) {
+			log.error("Some parameter is missing: baseUrl={}, apiVersion={}, httpMethod={}, resource={}", baseUrl, apiVersion, httpMethod, resource);
+			throw new YadaInternalException("Missing endpoint parameter");
 		}
-		StringBuffer result = new StringBuffer();
-		result.append(BASE_URL).append(api).append("?");
-//		result.append("?access_token=").append(accessToken);
-		for (String key : parameters.keySet()) {
-			String value = parameters.get(key);
-			result.append("&").append(key).append("=").append(value);
-		}
-		return result.toString();
+		return yadaWebUtil.makeUrl(new String[] {baseUrl, apiVersion, resource}, requestParameters, Boolean.FALSE);
 	}
 
-	public void setParameter(String name, String value) {
-		parameters.put(name, value);
+	void checkForErrors(String body) throws YadaSocialException {
+		if (resultValidPattern!=null && !Pattern.matches(resultValidPattern, body)) {
+			throw new YadaSocialException("Unexpected response from Facebook when calling {}: {}", resource, body);
+		}
+		if (resultErrorPattern!=null && Pattern.matches(resultErrorPattern, body)) {
+			throw new YadaSocialException("Error response from Facebook when calling {}: {}", resource, body);
+		}
 	}
 
 	HttpMethod getHttpMethod() {
 		return httpMethod;
 	}
 
-	Map<String, String> getParameters() {
-		return parameters;
-	}
-
-	
 }
