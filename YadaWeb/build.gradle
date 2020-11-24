@@ -63,11 +63,11 @@ repositories {
 dependencies {
 	api 'org.apache.commons:commons-configuration2:2.+'
 	
-	    // For embedded Tomcat
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:8.5.+'
-    runtimeOnly 'org.apache.tomcat:tomcat-el-api:8.5.+'
-    runtimeOnly 'org.apache.tomcat:tomcat-jasper-el:8.5.+'
-    runtimeOnly 'org.apache.tomcat:tomcat-jasper:8.5.+'
+	// For embedded Tomcat ONLY - add these to your project
+    // runtimeOnly 'org.apache.tomcat:tomcat-el-api:8.5.+'
+    // runtimeOnly 'org.apache.tomcat:tomcat-jasper-el:8.5.+'
+    // runtimeOnly 'org.apache.tomcat:tomcat-jasper:8.5.+'
 	
 	// Needed by Commons Configuration
     runtimeOnly 'commons-jxpath:commons-jxpath:1.+'
