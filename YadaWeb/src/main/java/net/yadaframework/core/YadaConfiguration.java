@@ -70,6 +70,7 @@ public abstract class YadaConfiguration {
 	private String googleClientId = null;
 	private String googleSecret = null;
 	private String facebookAppId = null;
+	private String facebookPageId = null;
 	private String facebookSecret = null;
 	private String serverAddress = null;
 	private String webappAddress = null;
@@ -660,35 +661,48 @@ public abstract class YadaConfiguration {
  		return configuration.getString("config/social/facebook/baseStoryUrl", "unset");
 	}
 
-	/**
-	 * @return
-	 */
+	public String getFacebookTestPageAccessToken() {
+		return configuration.getString("config/social/facebook/test/pageAccessToken", "unset");
+	}
+	
 	public String getFacebookPageAccessToken() {
 		return configuration.getString("config/social/facebook/pageAccessToken", "unset");
 	}
 
-	/**
-	 * @return
-	 */
+	public String getFacebookTestSecret() {
+		return configuration.getString("config/social/facebook/test/secret", "unset");
+	}
+
 	public String getFacebookSecret() {
 		if (facebookSecret==null) {
 			facebookSecret = configuration.getString("config/social/facebook/secret", "unset");
 		}
 		return facebookSecret;
 	}
+	
+	public String getFacebookTestPageId() {
+		return configuration.getString("config/social/facebook/test/pageId", "unset");
+	}
+	
+	public String getFacebookPageId() {
+		if (facebookPageId==null) {
+			facebookPageId = configuration.getString("config/social/facebook/pageId", "unset");
+		}
+		return facebookPageId;
+	}
 
-	/**
-	 * @return
-	 */
+	public String getFacebookTestAppId() {
+		return configuration.getString("config/social/facebook/test/appId", "unset");
+	}
+	
 	public String getFacebookAppId() {
 		if (facebookAppId==null) {
 			facebookAppId = configuration.getString("config/social/facebook/appId", "unset");
 		}
 		return facebookAppId;
 	}
-
+	
 	/**
-	 * @return
 	 */
 	public String getGoogleSecret() {
 		if (googleSecret==null) {

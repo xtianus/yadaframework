@@ -16,9 +16,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -334,6 +337,42 @@ public class YadaWebUtil {
 		//		try (InputStream inputStream = attachment.getInputStream(); OutputStream outputStream = new FileOutputStream(targetFile)) {
 		//			IOUtils.copy(inputStream, outputStream);
 		//		}
+	}
+	
+	/**
+	 * Assembles a url given its parts as string.
+	 * @param segments the initial parts of the url up to the query string. Leading and trailing slashes are added when missing.
+	 * @param requestParams optional name/value pairs of request parameters that will compose the query string. 
+	 * Use null for no parameters, use a null value for no value (just the name will be added)
+	 * @param urlEncode use Boolean.TRUE to encode the parameters, null or anything else not to encode
+	 * @return
+	 */
+	public String makeUrl(String[] segments, Map<String, String> requestParams, Boolean urlEncode) {
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i < segments.length; i++) {
+			result.append(segments[i]);
+			// Add a separator when needed
+			if (i<segments.length-1 && !segments[i].endsWith("/") && !segments[i+1].startsWith("/")) {
+				result.append("/");
+			}
+		}
+		if (requestParams!=null) {
+			boolean encode = Boolean.TRUE == urlEncode;
+			result.append("?");
+			String[] keys = requestParams.keySet().toArray(new String[0]);
+			for (int i=0; i<keys.length; i++) {
+				String key = keys[i]; 
+				String value = requestParams.get(key);
+				result.append(encode?urlEncode(key):key);
+				if (value!=null) {
+					result.append("=").append(encode?urlEncode(value):value);
+				}
+				if (i<keys.length-1) {
+					result.append("&");
+				}
+			}
+		}
+		return result.toString();
 	}
 
 	/**
