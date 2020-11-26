@@ -83,6 +83,7 @@ import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.exceptions.YadaSystemException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.raw.YadaIntDimension;
+import net.yadaframework.web.YadaWebUtil;
 import sogei.utility.UCheckDigit;
 import sogei.utility.UCheckNum;
 
@@ -997,6 +998,8 @@ public class YadaUtil {
 			// The outputstream is needed so that execution does not block. Will be discarded.
 			outputStream = new ByteArrayOutputStream();
 		}
+		timeoutSeconds = timeoutSeconds<0?60:timeoutSeconds;
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(timeoutSeconds==0?ExecuteWatchdog.INFINITE_TIMEOUT:timeoutSeconds*1000);
 		try {
 			CommandLine commandLine = new CommandLine(command);
 			if (args!=null) {
@@ -1044,7 +1047,6 @@ public class YadaUtil {
 			}
 			DefaultExecutor executor = new DefaultExecutor();
 			// Kill after timeoutSeconds, defaults to 60. 0 means no timeout
-			ExecuteWatchdog watchdog = new ExecuteWatchdog(timeoutSeconds<0?60000:timeoutSeconds==0?ExecuteWatchdog.INFINITE_TIMEOUT:timeoutSeconds*1000);
 			executor.setWatchdog(watchdog);
 			// Output and Error go together
 			PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream);
@@ -1059,6 +1061,9 @@ public class YadaUtil {
 		} catch (IOException e) {
 			log.error("Shell command output: \"{}\"", outputStream.toString());
 			log.error("Failed to execute shell command: {} {} {}", command, args!=null?args.toArray():"", substitutionMap!=null?substitutionMap:"", e);
+			if (watchdog.killedProcess()) {
+				log.error("Process was killed by watchdog after {} seconds timeout", timeoutSeconds);
+			}
 			throw e;
 		} finally {
 			closeSilently(outputStream); // This may not be needed
@@ -1140,6 +1145,7 @@ public class YadaUtil {
 	@Deprecated // use shellExec() instead
 	public String exec(String command, List<String> args, Map substitutionMap, ByteArrayOutputStream outputStream) {
 		int exitValue=1;
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(60000); // Kill after 60 seconds
 		try {
 			CommandLine commandLine = new CommandLine(command);
 			if (args!=null) {
@@ -1181,7 +1187,6 @@ public class YadaUtil {
 			}
 			commandLine.setSubstitutionMap(substitutionMap);
 			DefaultExecutor executor = new DefaultExecutor();
-			ExecuteWatchdog watchdog = new ExecuteWatchdog(60000); // Kill after 60 seconds
 			executor.setWatchdog(watchdog);
 			// Output and Error go together
 			PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream);
@@ -1190,7 +1195,12 @@ public class YadaUtil {
 			exitValue = executor.execute(commandLine);
 		} catch (Exception e) {
 			log.error("Failed to execute shell command: " + command + " " + args, e);
-			return e.getMessage();
+			String message = e.getMessage();
+			if (watchdog.killedProcess()) {
+				log.error("Processed killed by watchdog for timeout after 60 seconds");
+				message += " - timeout after 60 seconds";
+			}
+			return message;
 		}
 		return (exitValue>0)?"":null;
 	}
@@ -2246,7 +2256,7 @@ public class YadaUtil {
 				return "";
 			}
 		}
-
+		originalFilename = YadaWebUtil.removeHtmlStatic(originalFilename);
 		char[] resultChars = originalFilename.toCharArray();
 		char[] lowerChars = originalFilename.toLowerCase().toCharArray();
 		for (int i = 0; i < resultChars.length; i++) {
