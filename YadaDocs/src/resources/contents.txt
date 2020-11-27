@@ -1,0 +1,14 @@
+highlight
+---------
+Downloaded from https://highlightjs.org/download/
+The highlight\styles\github.min.css file has been created after download from highlight\styles\github.css
+
+To see the supported languages, type
+
+hljs.listLanguages()
+
+in the browser console:
+
+["java", "http", "tcl", "less", "typescript", "powershell", "json", "dos", "makefile", "xml", "bash", 
+"python", "kotlin", "scss", "ruby", "yaml", "accesslog", "markdown", "groovy", "properties", "plaintext", 
+"javascript", "dockerfile", "vim", "gradle", "sql", "php", "php-template", "asciidoc", "shell", "apache", "css"]

@@ -1,12 +1,16 @@
-group = 'net.yadaframework'
-version = '0.3.0'
-
 buildscript {
 	repositories {
 		mavenLocal()
 		mavenCentral()
 	}
 }
+
+plugins {
+    id 'org.asciidoctor.jvm.convert' version '3.1.0'
+}
+
+group = 'net.yadaframework'
+version = '0.3.0'
 
 apply plugin: 'java-library'
 apply plugin: 'eclipse-wtp'
@@ -61,6 +65,27 @@ jar {
 processResources {
 	doLast {
 		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadaweb.properties", token: '@YADA_VERSION@', value: version)
+	}
+}
+
+asciidoctor {
+	baseDirFollowsSourceDir()
+	asciidoctorj {
+		attribute 'docinfo1', ''
+		// attribute 'docinfo', 'shared'
+		attribute 'source-highlighter', 'highlightjs'
+		attribute 'highlightjsdir', '../highlight'
+	}
+	languages 'en'
+	sources {
+		include '*.adoc'
+	}
+	outputDir  file('build/docs') // TODO cambiare !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	resources {
+		from('src/resources') {
+		}
+		into '../'
 	}
 }
 
