@@ -2256,7 +2256,7 @@ public class YadaUtil {
 				return "";
 			}
 		}
-		originalFilename = YadaWebUtil.removeHtmlStatic(originalFilename);
+		//originalFilename = YadaWebUtil.removeHtmlStatic(originalFilename);
 		char[] resultChars = originalFilename.toCharArray();
 		char[] lowerChars = originalFilename.toLowerCase().toCharArray();
 		for (int i = 0; i < resultChars.length; i++) {
