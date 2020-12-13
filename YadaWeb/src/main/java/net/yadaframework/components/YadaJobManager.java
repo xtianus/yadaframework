@@ -254,14 +254,14 @@ public class YadaJobManager {
 		}	
 	}
 
-	public void changeJobPriority(YadaJob yadaJob, int priority) {
+	public YadaJob changeJobPriority(YadaJob yadaJob, int priority) {
 		yadaJob.setJobPriority(priority);
-		yadaJobRepository.save(yadaJob);
+		return yadaJobRepository.save(yadaJob);
 	}
 	
-	public void reschedule(YadaJob yadaJob, Date newScheduling) {
+	public YadaJob reschedule(YadaJob yadaJob, Date newScheduling) {
 		yadaJob.setJobScheduledTime(newScheduling);
-		yadaJobRepository.save(yadaJob);
+		return yadaJobRepository.save(yadaJob);
 	}
 	
 	/**
