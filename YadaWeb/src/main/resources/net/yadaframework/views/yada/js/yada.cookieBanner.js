@@ -73,7 +73,7 @@
 			}
 			var bannerHtml = '<div id="'+bannerId+'">'
 				+ '<p>' + infoText + '</p>'
-				+ '<div class="closeIcon"></div>'
+				// + '<div class="closeIcon"></div>'
 				;
 			if (acceptButtonText!="") {
 				bannerHtml+= '<a class="'+yada.cookieBannerAcceptClass+'" href="#">' + acceptButtonText + '</a>';
@@ -83,7 +83,9 @@
 			document.body.insertAdjacentHTML('afterbegin', bannerHtml);
 
 			// Add the handlers
-			if (noHideOnClick!=true) {
+			if (noHideOnClick==true) {
+				$("."+yada.cookieBannerAcceptClass).click(bodyClickHandler);
+			} else {
 				document.body.addEventListener("click", bodyClickHandler);
 			}
 			if (noHideOnScroll!=true) {
