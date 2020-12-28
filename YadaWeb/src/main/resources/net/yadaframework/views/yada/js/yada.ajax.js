@@ -1064,6 +1064,7 @@
 					var targetUrl = redirectObject.redirect;
 					if (redirectObject.newTab!="true") {
 						window.location.href=targetUrl;
+						return; // Needed to prevent flashing of the loader
 					} else {
 						yada.loaderOff();
 						var win = window.open(targetUrl, '_blank');
