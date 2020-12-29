@@ -78,7 +78,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	
 	/**
 	 * 
-	 * @return the next page number
+	 * @return the next page number. If there are no more rows, this number is invalid.
 	 */
 	public int getNextPage() {
 		return currentPageRequest.getNextPageRequest().getPage();
@@ -160,10 +160,13 @@ public class YadaPageRows<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Returns the next page request, for use in the "load more" buttons
+	 * Returns the next page request, for use in the "load more" buttons, or null if this is the last page.
 	 * @return
 	 */
 	public YadaPageRequest getNextPageRequest() {
+		if (!hasMoreRows) {
+			return null;
+		}
 		return currentPageRequest.getNextPageRequest();
 	}
 
