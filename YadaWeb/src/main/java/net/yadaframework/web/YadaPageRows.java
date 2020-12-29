@@ -32,7 +32,6 @@ public class YadaPageRows<T> implements Iterable<T> {
 	 * 
 	 * @param rows the result
 	 * @param currentPageRequest the page request that generated this result
-	 * @param hasMoreRows true if there are more rows to fetch from the database
 	 */
 	public YadaPageRows(List<T> rows, YadaPageRequest currentPageRequest) {
 		this.rows.addAll(rows);
@@ -158,6 +157,14 @@ public class YadaPageRows<T> implements Iterable<T> {
 		YadaPageRows<T> other = (YadaPageRows<T>) obj;
 		return Objects.equals(rows, other.rows) && hasMoreRows == other.hasMoreRows && outOfRows == other.outOfRows
 				&& Objects.equals(currentPageRequest, other.currentPageRequest);
+	}
+
+	/**
+	 * Returns the next page request, for use in the "load more" buttons
+	 * @return
+	 */
+	public YadaPageRequest getNextPageRequest() {
+		return currentPageRequest.getNextPageRequest();
 	}
 
 
