@@ -63,6 +63,42 @@ public class YadaSeleniumUtil {
 	private YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
 	private Pattern matchNonEmptyText = Pattern.compile(".*\\w+.*"); // Match any string that contains at least a word character
 
+	  /**
+	   * Run some javascript.
+	   *
+	   * <p>
+	   * If the script has a return value (i.e. if the script contains a <code>return</code> statement),
+	   * then the following steps will be taken:
+	   *
+	   * <ul>
+	   * <li>For an HTML element, this method returns a WebElement</li>
+	   * <li>For a decimal, a Double is returned</li>
+	   * <li>For a non-decimal number, a Long is returned</li>
+	   * <li>For a boolean, a Boolean is returned</li>
+	   * <li>For all other cases, a String is returned.</li>
+	   * <li>For an array, return a List&lt;Object&gt; with each object following the rules above. We
+	   * support nested lists.</li>
+	   * <li>For a map, return a Map&lt;String, Object&gt; with values following the rules above.</li>
+	   * <li>Unless the value is null or there is no return value, in which null is returned</li>
+	   * </ul>
+	   *
+	   * <p>
+	   * Arguments must be a number, a boolean, a String, WebElement, or a List of any combination of
+	   * the above. An exception will be thrown if the arguments do not meet these criteria. The
+	   * arguments will be made available to the JavaScript via the "arguments" magic variable, as if
+	   * the function were called via "Function.apply"
+	   *
+	   * @param script The JavaScript to execute
+	   * @param webDriver
+	   * @param args The arguments to the script. May be empty. They will be available to the script as the arguments[] array.
+	   * @return One of Boolean, Long, Double, String, List, Map or WebElement. Or null.
+	 */
+	public Object runJavascript(String script,  WebDriver webDriver, Object...args) {
+		JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
+		return javascriptExecutor.executeScript(script, args);
+	}
+
+	
 	/**
 	 * Returns true if the current url matches the specified pattern
 	 * @param urlPattern
