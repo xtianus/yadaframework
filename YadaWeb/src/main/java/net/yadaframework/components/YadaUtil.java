@@ -1768,6 +1768,44 @@ public class YadaUtil {
 //	public void copyFields(Calendar fromCal, Calendar toCal) {
 //
 //	}
+	
+	/**
+	 * Check if a date is within two dates expressed as month/day, regardless of the year and of the validity of such dates.
+	 * @param dateToCheck for example new GregorianCalendar()
+	 * @param fromMonth 0-based, better use Calendar.JANUARY etc.
+	 * @param fromDayInclusive 1-based
+	 * @param toMonth 0-based, better use Calendar.JANUARY etc.
+	 * @param toDayExcluded 1-based
+	 * @return
+	 */
+	public static boolean dateWithin(Calendar dateToCheck, int fromMonth, int fromDayInclusive, int toMonth, int toDayExcluded) {
+		if (fromMonth<0 || fromMonth>11) {
+			throw new YadaInvalidUsageException("Month must be in the range 0-11");
+		}
+		if (toMonth<0 || toMonth>11) {
+			throw new YadaInvalidUsageException("Month must be in the range 0-11");
+		}
+		if (fromDayInclusive<1 || fromDayInclusive>31) {
+			throw new YadaInvalidUsageException("Day must be in the range 1-31");
+		}
+		if (toDayExcluded<1 || toDayExcluded>31) {
+			throw new YadaInvalidUsageException("Day must be in the range 1-31");
+		}
+		boolean sameYear = fromMonth<=toMonth;
+		int monthToCheck = dateToCheck.get(Calendar.MONTH);
+		if (sameYear && (monthToCheck<fromMonth || monthToCheck>toMonth)) {
+			return false;
+		}
+		if (!sameYear && (monthToCheck<fromMonth && monthToCheck>toMonth)) {
+			return false;
+		}
+		// The month is within range, keep checking...
+		int dayToCheck = dateToCheck.get(Calendar.DAY_OF_MONTH);
+		if ((monthToCheck==fromMonth && dayToCheck<fromDayInclusive) || (monthToCheck==toMonth && dayToCheck>=toDayExcluded)) {
+			return false;
+		}
+		return true;
+	}
 
 	/** Ritorna l'ora più vicina nel passato alla data specificata
 	 * @return
