@@ -1042,7 +1042,9 @@
 		} else {
 			contentType = data instanceof FormData ? false : contentType;
 		}
-		if (hideLoader!=true) {
+		if (hideLoader==true) {
+			yada.loaderOff();
+		} else {
 			yada.loaderOn();
 		}
 		var xhrFields = {};
