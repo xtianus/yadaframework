@@ -90,7 +90,7 @@
 	/**
 	 * Open a modal when the location.hash contains the needed value.
 	 * Example: openModalOnHash('/mymodal', ['id', 'name'], '/', function(data){return !isNaN(data.id);}
-	 * @param targetUrl the modal url to open via ajax
+	 * @param targetUrl the modal url to open via ajax; can have url parameters
 	 * @param paramNames an array of request parameter names that are assigned to from the hash
 	 * @param separator the values contained in the hash are separated by this character
 	 * @param validator a function that returns true if the hash values are valid
@@ -1108,7 +1108,8 @@
 				}
 				if (yada.startsWith(responseTrimmed, "{\"redirect\":")) {
 					var redirectObject = JSON.parse(responseTrimmed);
-					var targetUrl = redirectObject.redirect;
+					// Get the redirect url and remove any "redirect:" prefix from the url
+					var targetUrl = yada.getAfter(redirectObject.redirect, "redirect:");
 					if (redirectObject.newTab!="true") {
 						window.location.href=targetUrl;
 						return; // Needed to prevent flashing of the loader
