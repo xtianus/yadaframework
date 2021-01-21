@@ -398,8 +398,13 @@ public class YadaUtil {
 		int timeoutMillis = 20000; // 20 seconds to find a result seems to be reasonable
 		while (true) {
 			File candidateFile = new File(targetFolder, filename);
-			if (candidateFile.createNewFile()) {
-				return candidateFile;
+			try {
+				if (candidateFile.createNewFile()) {
+					return candidateFile;
+				}
+			} catch (IOException e) {
+				log.error("Can't create file {}", candidateFile);
+				throw e;
 			}
 			counter++;
 			filename = baseName + counterSeparator + counter + extension;
