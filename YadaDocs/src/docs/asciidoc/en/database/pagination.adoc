@@ -1,0 +1,137 @@
+
+=  Database Pagination
+
+[abstract]
+Fetch big data one piece at a time
+
+==  Description
+
+
+Loading the whole content of a table onto a web page is never a good idea if the row count is high, both
+from a performance and usability perspective.
+In such case it's better to implement database pagination: loading a few rows at a time via ajax when the user wants
+to see more.
+This section shows how to implement pagination on a web page using a "load more" button, with support
+for bookmarking and for the
+browser back button: when going back to a web page where more data was loaded, that data is still there.
+
+
+==  First query
+
+
+The "first query" happens when a user loads the web page for the first time, either from normal link navigation
+(e.g. a "Show all transactions" link) or by typing a search string into a form and sending it.
+The first query will receive any search keywords, will query the database for results, and will return the
+results building a page with a "load more" button when there is more data to show.
+
+The "first query" is also called when the user later reloads the web page using the browser "refresh" button,
+using the browser "back" button or by clicking on a previously saved bookmark.
+
+It is therefore important that the method handling the first query receives the information needed to load
+as many rows as were loaded by the user using the "load more" button. This information is stored in a `YadaPageRequest`:
+
+[source,html]
+----
+<form th:action="@{/searchBook}">
+        <input name="searchString" th:value="${searchString}">
+        <button type="submit">
+----
+
+[source,java]
+----
+@Controller
+public class BookController {
+        final static int PAGE_SIZE =  10;
+        @RequestMapping("/searchBook")
+        public String searchBook(String searchString, YadaPageRequest yadaPageRequest, Model model) {
+----
+
+When the web page is loaded for the first time, Spring calls the "first query" method and creates an instance of
+YadaPageRequest but doesn't set any values in it because there are no request parameters to set.
+You should check if the yadaPageRequest is valid and set it to a default initial value when it's not,
+then call the proper DAO to fetch data from the database, that will be stored in a `YadaPageRows` instance:
+
+[source,java]
+----
+if (!yadaPageRequest.isValid()) {
+        yadaPageRequest = new YadaPageRequest(0, PAGE_SIZE);
+}
+YadaPageRows<Book> result = searchDao.find(searchString, yadaPageRequest);
+model.addAttribute("books", result);
+return "/searchResult";
+----
+
+The DAO will have to fetch as many rows as needed:
+
+[source,java]
+----
+@Repository
+@Transactional(readOnly = true)
+public class SearchDao {
+        @PersistenceContext EntityManager em;
+
+        public YadaPageRows<Book> find(String searchString, YadaPageRequest yadaPageRequest) {
+                List<Book> found = YadaSql.instance().selectFrom("from Book b")
+                        .where("b.title LIKE CONCAT('%',:search,'%')")
+                        .setParameter("search", searchString)
+                        .query(em, Book.class)
+                        .setFirstResult(yadaPageRequest.getFirstResult())
+                        .setMaxResults(yadaPageRequest.getMaxResults())
+                        .getResultList();
+                return new YadaPageRows<Book>(found, yadaPageRequest);
+        }
+----
+
+It is very important to use the `setFirstResult` and `setMaxResults` methods as shown above in order to
+implement pagination.
+
+The result can be shown with the following `searchResult.html`:
+
+[source,html]
+----
+<div th:unless="${books.empty}">
+        <th:block fragment="bookList">
+                <div th:each="book : ${books}" th:text="${book.title}">Book title here</div>
+
+                <div id="loadMoreBooks" th:unless="${books.last}">
+                        <a class="yadaAjax"
+                                th:href="@{/searchBookMore(searchString=${searchString},page=${books.nextPage},size=${books.pageSize})}"
+                                yada:paginationHistory
+                                yada:updateOnSuccess="'#loadMoreBooks'">Load More
+                        </a>
+                </div>
+        </th:block>
+</div>
+----
+
+
+==  Load More query
+
+
+The above code prints the found rows, then adds a "Load More" link in case there are more results.
+When the user clicks on that link, an ajax call is made to the server in order to fetch the next page:
+
+[source,java]
+----
+@RequestMapping("/searchBookMore")
+public String addBook(String searchString, YadaPageRequest yadaPageRequest, Model model) {
+        YadaPageRows<Book> result = searchDao.find(searchString, yadaPageRequest);
+        model.addAttribute("books", result);
+        return "/searchResult :: bookList";
+}
+----
+
+That's all there is to it.
+
+The `yada:paginationHistory` attribute, with no value, will add the `page`, `size` and `loadPrevious` request
+parameters to the current page URL in the history, so that when using a bookmark, reloading the page or using
+the back button those values will be sent to the "first query" method seen at the start, and all
+pages up to the current one will be fetched from database and shown. The `yada:paginationHistory` attribute
+must be set on the link or button that loads the next page.
+
+This example can of course be optimized by using a single method both for the first query and for the following ones,
+and many paginations can be used on a single web page by keeping distinct `yada:paginationHistory` parameters, 
+like `yada:paginationHistory="'product.page, product.size, product.loadPrevious'"` and `yada:paginationHistory="'project.page, project.size, project.loadPrevious'"`.
+
+
+
