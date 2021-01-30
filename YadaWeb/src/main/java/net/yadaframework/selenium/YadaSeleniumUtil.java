@@ -264,21 +264,23 @@ public class YadaSeleniumUtil {
 	 * @param driverType DRIVER_FIREFOX, DRIVER_CHROME
 	 * @return
 	 */
-	public WebDriver makeWebDriver(File customProfileDir, InetSocketAddress proxyToUse, Set<Cookie> cookiesToSet, int driverType) {
-		return this.makeWebDriver(customProfileDir, proxyToUse, cookiesToSet, driverType, null);
+	public WebDriver makeWebDriver(File customProfileDir, InetSocketAddress proxyToUse, String proxyUser, String proxyPassword, Set<Cookie> cookiesToSet, int driverType) {
+		return this.makeWebDriver(customProfileDir, proxyToUse, proxyUser, proxyPassword, cookiesToSet, driverType, null);
 	}	
 	
 	/**
 	 * Create a new browser instance positioning the window 
 	 * @param customProfileDir the folder where to store the user profile, can be null to use the default temporary profile. The folder is created when missing.
 	 * @param proxyToUse the address of the proxy, or null for direct connection
+	 * @param proxyUser can be set for SOCKS5 proxies only
+	 * @param proxyPassword can be set for SOCKS5 proxies only
 	 * @param cookiesToSet cookies to set after the first get of a document. Can be null or empty. Cookies are set only when a 
 	 * cookie with the same name has not been received. It's not possible to set cookies BEFORE the first get (by design of WebDriver).
 	 * @param driverType DRIVER_FIREFOX, DRIVER_CHROME
 	 * @param userAgent the user agent string, null for keeping the current browser's default. Not implemented for Firefox.
 	 * @return
 	 */
-	public WebDriver makeWebDriver(File customProfileDir, InetSocketAddress proxyToUse, Set<Cookie> cookiesToSet, int driverType, String userAgent) {
+	public WebDriver makeWebDriver(File customProfileDir, InetSocketAddress proxyToUse, String proxyUser, String proxyPassword, Set<Cookie> cookiesToSet, int driverType, String userAgent) {
 		final Set<Cookie> initialCookies = new HashSet<Cookie>();
 		if (cookiesToSet!=null) {
 			// Make a copy because we need to clear the set later
@@ -293,9 +295,18 @@ public class YadaSeleniumUtil {
 			}
 			int proxyPort = proxyToUse.getPort();
 			log.debug("Setting browser proxy to {}:{}", proxyHost, proxyPort);
-			browserProxy.setHttpProxy(proxyHost + ":" + proxyPort);
-			browserProxy.setSslProxy(proxyHost + ":" + proxyPort);
-			browserProxy.setProxyType(ProxyType.MANUAL);
+			// Only socks proxies can have authentication (limitation of Selenium API?)
+			// and if a proxy has authentication it must be socks5
+			if (proxyUser!=null && proxyPassword!=null) {
+				browserProxy.setSocksVersion(5);
+				browserProxy.setSocksProxy(proxyHost + ":" + proxyPort);
+				browserProxy.setSocksUsername(proxyUser);
+				browserProxy.setSocksPassword(proxyPassword);
+			} else {
+				browserProxy.setHttpProxy(proxyHost + ":" + proxyPort);
+				browserProxy.setSslProxy(proxyHost + ":" + proxyPort);
+			}
+			// browserProxy.setProxyType(ProxyType.MANUAL);
 		}
 		
 		MutableCapabilities capability;
