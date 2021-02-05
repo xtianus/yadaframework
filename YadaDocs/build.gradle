@@ -69,18 +69,21 @@ processResources {
 }
 
 asciidoctor {
-	baseDirFollowsSourceDir()
+	// baseDirFollowsSourceDir()
+	// baseDirIsRootProjectDir()
+	// This is needed for docinfo to be found in the same subfolder of a source file
+	// and we need a different docinfo in each subfolder in order to reference the relative yadadocs.css file
+	baseDirFollowsSourceFile();
 	asciidoctorj {
-		attribute 'docinfo1', ''
+		// attribute 'docinfo', 'shared-head'
+		//attribute 'stylesheet', '../../../resources/yadadocs.css'
+		attribute 'toc', 'left'
 		// attribute 'docinfo', 'shared'
 		attribute 'source-highlighter', 'highlightjs'
 		attribute 'highlightjsdir', '../highlight'
 	}
 	languages 'en'
-	sources {
-		include '*.adoc'
-	}
-	outputDir  file('build/docs') // TODO cambiare !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	outputDir file('../docs')
 
 	resources {
 		from('src/resources') {

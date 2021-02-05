@@ -1,7 +1,6 @@
-
 =  Database Pagination
+:docinfo: shared
 
-[abstract]
 Fetch big data one piece at a time
 
 ==  Description

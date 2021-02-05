@@ -1,8 +1,6 @@
-
-
 =  Forms
+:docinfo: shared
 
-[abstract]
 Handling user-submitted data
 
 

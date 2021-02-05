@@ -1,0 +1,122 @@
+=  Troubleshooting
+:docinfo: shared
+
+
+When something doesn't work as expected
+
+
+==  Runtime problems
+
+
+
+===  Application doesn't start
+
+
+
+Clear compilation errors:: 
+
+The application won't work properly if you have compilation errors in your sources. Fix them first.
+
+
+
+Check the stack trace:: 
+
+Be sure to set a high limit on the console output ("Windows > Preferences > Run/Debug > Console > Limit console output")
+so that the log is not clipped. Look for the first stack trace and see the root reason for the problem. This should help you a lot.
+
+
+
+
+
+
+
+===  Can't see the changes
+
+
+If you made some change in the code but the site seems to ignore them, these are the steps you could take, in order of annoyance.
+
+
+Be sure you saved the file:: 
+
+This is trivial but sometimes you might forget.
+
+
+
+Refresh the sources:: 
+
+Eclipse should detect changes in the source files automatically, but sometimes a "Refresh" helps (F5 on a folder in Package Explorer).
+
+
+
+Force a "publish" on Tomcat:: 
+
+Ususally Tomcat copies modified items to the deploy directory automatically. Sometimes you have to force it using the "Publish" context menu on the server.
+
+
+
+Restart Tomcat:: 
+
+When "Publish" doesn't do the trick, try with a restart of the server.
+
+
+
+Force a "clean" on Tomcat:: 
+
+The "Clean..." context menu on the server deletes the application files from the deploy directory and publishes them again.
+
+
+
+Remove and add back the web application:: 
+
+Using the "Add and remove..." context menu on the server, remove the web application, restart Tomcat, add the application back, restart again.
+This should be similar to "Clean..." but sometimes it works better.
+
+
+
+Physically delete the deploy files on disk:: 
+
+Sometimes Eclipse can't copy a file for some reason. In such cases you should do it manually: stop Tomcat, open the deploy folder
+and delete everything inside wtpwebapps (you might keep ROOT). Then do a "Publish..." on the server.
+If you can't delete a file because it's locked, you might need to close Eclipse or restart the PC.
+
+
+
+
+
+
+
+==  Compilation problems
+
+
+
+===  Errors for no reason
+
+
+When you start Eclipse again after some time, it might give you compilation errors that weren't there the last time.
+
+
+Perform a Gradle Refresh:: 
+
+From the context menu on a project, use "Gradle > Refresh Gradle Project".
+This usually fixes everything and also downloads the latest versions of the libraries you are using, so it's worth doing it every now and then.
+
+
+
+Clean and Build:: 
+
+The Gradle Refresh should rebuild your project, but maybe you need to clean them first. Use the "Project > Clean..." menu
+from the top bar.
+
+
+
+
+
+
+
+===  Errors after a git pull
+
+
+Always be sure to have the correct YadaFramework version. Choose a specific branch and stick to it until you are ready
+to switch to a more recent one. Never use the master because the API might change without notice.
+
+TO BE CONTINUED

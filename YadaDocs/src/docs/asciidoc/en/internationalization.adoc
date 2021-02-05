@@ -1,6 +1,5 @@
-
-
 =  Internationalization
+:docinfo: shared
 
 
 
