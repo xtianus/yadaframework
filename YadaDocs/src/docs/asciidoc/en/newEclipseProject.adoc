@@ -1,6 +1,5 @@
-=  New Eclipse Project
+=  Getting Started
 :docinfo: shared
-:icons: font
 :imagesdir: ../img/
 
 ==  Introduction
@@ -20,7 +19,8 @@ You will also have a basic deployment procedure already set up:
 * Deployment script
 
 ==  Prerequisites
-You should have link:++https://www.oracle.com/technetwork/java/javase/downloads/index.html++[Java], link:++https://git-scm.com/downloads++[git], link:++https://dev.mysql.com/downloads/mysql/++[MySQL Community Server] and a working copy of link:++https://www.eclipse.org/downloads/packages/++[Eclipse IDE for Enterprise Java Developers]. Check the notes in this section before installing anything.
+You should have https://www.oracle.com/java/technologies/javase-downloads.html[Java^], https://git-scm.com/downloads[git^], https://dev.mysql.com/downloads/mysql/[MySQL Community Server^] 
+and a working copy of https://www.eclipse.org/downloads/packages/[Eclipse IDE^]. Check the notes in this section before installing anything.
 
 ===  Java SDK
 Remove any Java installation you may have on your PC.
@@ -35,9 +35,9 @@ Currently the Yada Framework source is **tested with Java 8**. Running on an unt
 At the time of writing we failed to run on Java 11.0.6 for problems during Gradle project import.
 ====
 
-You should look on the Oracle site for "Java SE" installer, which is the "Standard Edition".
-You can download Java 8 from the "link:++https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html++[Java Archive]" section of the Oracle site. You will be required to create an
-Oracle account and login before being able to download.
+You should look on the Oracle site for the "Java SE" installer, which is the "Standard Edition" of Java.
+You will probably be required to create an Oracle account and login before being able to download.
+The OpenJDK version of Java should also work fine if you prefer open source software.
 
 [NOTE]
 .JDK vs JRE

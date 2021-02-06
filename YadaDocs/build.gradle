@@ -10,7 +10,7 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.3.0'
+version = '0.5.1'
 
 apply plugin: 'java-library'
 apply plugin: 'eclipse-wtp'

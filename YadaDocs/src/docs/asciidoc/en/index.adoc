@@ -6,42 +6,39 @@ The *Yada Framework* is a collection of libraries, patterns, tools, code snippet
 development.
 The main focus is on *productivity* and the approach is to use proven and known technologies
 in a repeatable way, so that each new project is easier to develop and maintain.
-Another goal is *simplicity* as defined by the KISS principle. If something is very powerful and exciting and
-complicated to use, it won't find a place here.
+Another goal is *simplicity* as defined by the KISS principle: some technology that is very powerful and exciting and
+complicated to use, won't find a place here.
 
 The technology stack is as follows:
 
-* java
-* Tomcat
-* Spring WebMVC
-* MySQL
-* Hibernate
-* Thymeleaf
-* HTML/CSS
+* https://www.oracle.com/java/technologies/javase-downloads.html[Java^]
+* https://tomcat.apache.org/download-80.cgi[Tomcat^]
+* https://docs.spring.io/spring-framework/docs/current/reference/html/web.html[Spring Web MVC^]
+* https://dev.mysql.com/downloads/mysql/[MySQL Community Server^]
+* https://hibernate.org/orm/[Hibernate ORM^]
+* https://www.thymeleaf.org/[Thymeleaf^]
+* https://jquery.com/[jQuery^]
 * Javascript
-* jQuery
+* HTML, CSS, https://sass-lang.com/[SASS^]
 
 Tools used:
 
-* Eclipse
-* Gradle
-* Asciidoctor
+* https://www.eclipse.org/downloads/[Eclipse IDE^]
+* https://gradle.org/[Gradle^]
+* https://git-scm.com/[git^]
+* https://asciidoctor.org/[Asciidoctor^]
 
-You may think that some are old or obsolete technologies,
-but for the purpose of increasing productivity, there's nothing better than something that has been around for years or decades and
-is still being used and maintained: developers will spend less time around bugs, architects will know when to use what,
-testers will have plenty of tools at their disposal.
+It is our strong belief that productivity is increased when using old and proven technologies (less bugs,
+less chance of deprecation, more documentation, more tools, more developer experience), and that
+simple architectures can efficiently solve most practical problems a developer will ever have to face.
 
-[.todo]
-----
-TO BE CONTINUED...
-----
+==  Documentation Chapters
 
+The documentation is a mix of tutorial and reference. It loosely follows the official
+Java https://docs.oracle.com/javaee/6/tutorial/doc/glnvi.html["Duke’s Bookstore Case Study Example"^] with many improvements in functionality.
 
-==  Documentation Contents
-
-<<newEclipseProject.adoc#,New Eclipse Project>>:: This section will guide you through the setup of the development environment: installing Java, git,
-MySQL, Eclipse. It will then show you how to create an Eclipse project with a database and a web server.
+<<newEclipseProject.adoc#,Getting Started>>:: This section will guide you through the setup of the development environment: installing Java, git,
+MySQL, Eclipse. It will then show you how to create an Eclipse project with a database and a web server
 
 <<internationalization.adoc#>>:: This section shows how easy it is to cope for different languages
 
@@ -63,10 +60,24 @@ MySQL, Eclipse. It will then show you how to create an Eclipse project with a da
 
 <<troubleshooting.adoc#>>:: TODO
 
+<<upgrade.adoc#,Upgrade Yada Framework Version>>:: new versions are announced on this page, together
+with instructions on how to migrate from the previous one
 
-[.todo]
-----
-TO BE CONTINUED...
-----
+==  Current Status
+The Yada Framework will always be a work in progress: open source libraries will evolve,
+our ways of using them will improve, the Yada code will get smarter, best practices will change,
+bugs will be fixed... and documentation will always lag behind.
+
+The master branch in the git repository contains the latest "unstable" development.
+Each new stable version will have its own branch on which non-disruptive changes will be committed.
+Users, when starting the development of a new project, should pick the latest version on a branch and stick to it.
+Every new version might have breaking changes so you should upgrade only when you know you can afford the time of
+fixing your code.
+
+A step-by-step guide on how to migrate from a version to the next will be provided <<upgrade.adoc#,here>>.
+
+
+
+
 
 

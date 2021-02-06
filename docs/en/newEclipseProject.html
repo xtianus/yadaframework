@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>New Eclipse Project</title>
+<title>Getting Started</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -435,14 +435,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" type="text/css" href="../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1>New Eclipse Project</h1>
+<h1>Getting Started</h1>
 <div class="details">
-<span id="revnumber">version 0.3.0</span>
+<span id="revnumber">version 0.5.1</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -524,7 +523,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_prerequisites">Prerequisites</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You should have <a href="https://www.oracle.com/technetwork/java/javase/downloads/index.html">Java</a>, <a href="https://git-scm.com/downloads">git</a>, <a href="https://dev.mysql.com/downloads/mysql/">MySQL Community Server</a> and a working copy of <a href="https://www.eclipse.org/downloads/packages/">Eclipse IDE for Enterprise Java Developers</a>. Check the notes in this section before installing anything.</p>
+<p>You should have <a href="https://www.oracle.com/java/technologies/javase-downloads.html" target="_blank" rel="noopener">Java</a>, <a href="https://git-scm.com/downloads" target="_blank" rel="noopener">git</a>, <a href="https://dev.mysql.com/downloads/mysql/" target="_blank" rel="noopener">MySQL Community Server</a>
+and a working copy of <a href="https://www.eclipse.org/downloads/packages/" target="_blank" rel="noopener">Eclipse IDE</a>. Check the notes in this section before installing anything.</p>
 </div>
 <div class="sect2">
 <h3 id="_java_sdk">Java SDK</h3>
@@ -535,7 +535,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
+<div class="title">Warning</div>
 </td>
 <td class="content">
 <div class="title">Java version mismatch</div>
@@ -560,7 +560,7 @@ Oracle account and login before being able to download.</p>
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<div class="title">Note</div>
 </td>
 <td class="content">
 <div class="title">JDK vs JRE</div>
@@ -683,7 +683,7 @@ SET PASSWORD FOR 'root'@'localhost' = '';</code></pre>
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
+<div class="title">Warning</div>
 </td>
 <td class="content">
 Eclipse jee 2019-12-R throws a weird "VerifyError: Inconsistent stackmap frames" on some occasions. Don&#8217;t use that version yet.
@@ -698,7 +698,7 @@ Eclipse jee 2019-12-R throws a weird "VerifyError: Inconsistent stackmap frames"
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-caution" title="Caution"></i>
+<div class="title">Caution</div>
 </td>
 <td class="content">
 <div class="title">Need Enterprise version?</div>
@@ -1040,7 +1040,7 @@ The "--no-daemon" option is to stay on the safe side.</p>
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<div class="title">Note</div>
 </td>
 <td class="content">
 <div class="paragraph">
@@ -1121,7 +1121,7 @@ If the schema generator can&#8217;t connect to the database check that /src/main
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<div class="title">Note</div>
 </td>
 <td class="content">
 <div class="paragraph">
@@ -1234,8 +1234,8 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.3.0<br>
-Last updated 2021-02-05 18:05:40 +0100
+Version 0.5.1<br>
+Last updated 2021-02-06 17:32:16 +0100
 </div>
 </div>
 <link rel="stylesheet" href="../highlight/styles/github.min.css">

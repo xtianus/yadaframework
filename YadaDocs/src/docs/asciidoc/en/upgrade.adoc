@@ -1,0 +1,12 @@
+=  Upgrade Yada Framework Version
+:docinfo: shared
+
+Sometimes you have to forget the past
+
+==  Latest Stable Version
+
+The current stable version of the Yada Framework is https://github.com/xtianus/yadaframework/tree/0.5.1[0.5.1^]
+
+It uses spring 5, hibernate 5, bootstrap 4
+
+

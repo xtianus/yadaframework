@@ -441,13 +441,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 <h1>Yada Framework</h1>
 <div class="details">
-<span id="revnumber">version 0.3.0</span>
+<span id="revnumber">version 0.5.1</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_general_principles">General Principles</a></li>
-<li><a href="#_documentation_contents">Documentation Contents</a></li>
+<li><a href="#_documentation_chapters">Documentation Chapters</a></li>
+<li><a href="#_current_status">Current Status</a></li>
 </ul>
 </div>
 </div>
@@ -460,8 +461,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 development.
 The main focus is on <strong>productivity</strong> and the approach is to use proven and known technologies
 in a repeatable way, so that each new project is easier to develop and maintain.
-Another goal is <strong>simplicity</strong> as defined by the KISS principle. If something is very powerful and exciting and
-complicated to use, it won&#8217;t find a place here.</p>
+Another goal is <strong>simplicity</strong> as defined by the KISS principle: some technology that is very powerful and exciting and
+complicated to use, won&#8217;t find a place here.</p>
 </div>
 <div class="paragraph">
 <p>The technology stack is as follows:</p>
@@ -469,31 +470,31 @@ complicated to use, it won&#8217;t find a place here.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>java</p>
+<p><a href="https://www.oracle.com/java/technologies/javase-downloads.html" target="_blank" rel="noopener">Java</a></p>
 </li>
 <li>
-<p>Tomcat</p>
+<p><a href="https://tomcat.apache.org/download-80.cgi" target="_blank" rel="noopener">Tomcat</a></p>
 </li>
 <li>
-<p>Spring WebMVC</p>
+<p><a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web.html" target="_blank" rel="noopener">Spring Web MVC</a></p>
 </li>
 <li>
-<p>MySQL</p>
+<p><a href="https://dev.mysql.com/downloads/mysql/" target="_blank" rel="noopener">MySQL Community Server</a></p>
 </li>
 <li>
-<p>Hibernate</p>
+<p><a href="https://hibernate.org/orm/" target="_blank" rel="noopener">Hibernate ORM</a></p>
 </li>
 <li>
-<p>Thymeleaf</p>
+<p><a href="https://www.thymeleaf.org/" target="_blank" rel="noopener">Thymeleaf</a></p>
 </li>
 <li>
-<p>HTML/CSS</p>
+<p><a href="https://jquery.com/" target="_blank" rel="noopener">jQuery</a></p>
 </li>
 <li>
 <p>Javascript</p>
 </li>
 <li>
-<p>jQuery</p>
+<p>HTML, CSS, <a href="https://sass-lang.com/" target="_blank" rel="noopener">SASS</a></p>
 </li>
 </ul>
 </div>
@@ -503,38 +504,39 @@ complicated to use, it won&#8217;t find a place here.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Eclipse</p>
+<p><a href="https://www.eclipse.org/downloads/" target="_blank" rel="noopener">Eclipse IDE</a></p>
 </li>
 <li>
-<p>Gradle</p>
+<p><a href="https://gradle.org/" target="_blank" rel="noopener">Gradle</a></p>
 </li>
 <li>
-<p>Asciidoctor</p>
+<p><a href="https://git-scm.com/" target="_blank" rel="noopener">git</a></p>
+</li>
+<li>
+<p><a href="https://asciidoctor.org/" target="_blank" rel="noopener">Asciidoctor</a></p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>You may think that some are old or obsolete technologies,
-but for the purpose of increasing productivity, there&#8217;s nothing better than something that has been around for years or decades and
-is still being used and maintained: developers will spend less time around bugs, architects will know when to use what,
-testers will have plenty of tools at their disposal.</p>
-</div>
-<div class="listingblock todo">
-<div class="content">
-<pre>TO BE CONTINUED...</pre>
-</div>
+<p>It is our strong belief that productivity is increased when using old and proven technologies (less bugs,
+less chance of deprecation, more documentation, more tools, more developer experience), and that
+simple architectures can efficiently solve most practical problems a developer will ever have to face.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_documentation_contents">Documentation Contents</h2>
+<h2 id="_documentation_chapters">Documentation Chapters</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>The documentation is a mix of tutorial and reference. It loosely follows the official
+Java <a href="https://docs.oracle.com/javaee/6/tutorial/doc/glnvi.html" target="_blank" rel="noopener">"Duke’s Bookstore Case Study Example"</a> with many improvements in functionality.</p>
+</div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1"><a href="newEclipseProject.html">New Eclipse Project</a></dt>
+<dt class="hdlist1"><a href="newEclipseProject.html">Getting Started</a></dt>
 <dd>
 <p>This section will guide you through the setup of the development environment: installing Java, git,
-MySQL, Eclipse. It will then show you how to create an Eclipse project with a database and a web server.</p>
+MySQL, Eclipse. It will then show you how to create an Eclipse project with a database and a web server</p>
 </dd>
 <dt class="hdlist1"><a href="internationalization.html">internationalization.html</a></dt>
 <dd>
@@ -576,20 +578,40 @@ MySQL, Eclipse. It will then show you how to create an Eclipse project with a da
 <dd>
 <p>TODO</p>
 </dd>
+<dt class="hdlist1"><a href="upgrade.html">Upgrade Yada Framework Version</a></dt>
+<dd>
+<p>new versions are announced on this page, together
+with instructions on how to migrate from the previous one</p>
+</dd>
 </dl>
 </div>
-<div class="listingblock todo">
-<div class="content">
-<pre>TO BE CONTINUED...</pre>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_current_status">Current Status</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Yada Framework will always be a work in progress: open source libraries will evolve,
+our ways of using them will improve, the Yada code will get smarter, best practices will change,
+bugs will be fixed&#8230;&#8203; and documentation will always lag behind.</p>
+</div>
+<div class="paragraph">
+<p>The master branch in the git repository contains the latest "unstable" development.
+Each new stable version will have its own branch on which non-disruptive changes will be committed.
+Users, when starting the development of a new project, should pick the latest version on a branch and stick to it.
+Every new version might have breaking changes so you should upgrade only when you know you can afford the time of
+fixing your code.</p>
+</div>
+<div class="paragraph">
+<p>A step-by-step guide on how to migrate from a version to the next will be provided <a href="upgrade.html">here</a>.</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.3.0<br>
-Last updated 2021-02-05 19:47:40 +0100
+Version 0.5.1<br>
+Last updated 2021-02-06 17:25:03 +0100
 </div>
 </div>
 <link rel="stylesheet" href="../highlight/styles/github.min.css">
