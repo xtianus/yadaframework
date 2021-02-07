@@ -59,10 +59,10 @@ Now you can refer to `C:\Local\jdk8` in your scripts and when you update the jav
 The Java JRE can be installed to the default folder (`C:\Program Files`).
 
 ===  GIT
-Install link:++https://git-scm.com/downloads++[git] for your OS.
+Install https://git-scm.com/downloads[git^] for your OS.
 
 ===  MySQL
-Install link:++https://dev.mysql.com/downloads/mysql/++[MySQL Community Server] v5.7: later versions have not been tested yet but this documentation uses MySQL 8 just to be ready.
+Install https://dev.mysql.com/downloads/mysql/[MySQL Community Server^] v8: any later versions have not been tested yet.
 
 For a future-proof installation you should not install MySQL as a Service, but run it manually when needed because one day
 you might have more than one version to use. The steps to install MySQL 8 on windows are as follows:
@@ -76,8 +76,9 @@ you might have more than one version to use. The steps to install MySQL 8 on win
 image::newEclipseProject/MySQL-advanced.jpg[MySQL advanced installation]
 
 * when asked, choose "Show Advanced and Logging options"
-* on the "Authentication Method" page choose "Use Legacy Authentication" (second option) to have an easier life (it's a dev PC after all)
-* on the "Advanced Options" choose "Preserve Given Case" - this is important to prevent problems when running the DB on linux
+* on the "Authentication Method" page choose "Use Legacy Authentication" (second option) to have an easier life: it's a development PC after all
+and you shouldn't have any sensitive information in the database; if you do, you should garble it
+* on the "Advanced Options" choose "Preserve Given Case" - this is important on Windows to prevent problems when running the DB on linux
 
 [.center]
 .Installing MySQL
@@ -120,18 +121,24 @@ SET PASSWORD FOR 'root'@'localhost' = '';
 
 ===  Eclipse
 
+You can edit the source files and compile the binaries in any IDE. This documentation only shows how to set up Eclipse though.
+You don't actually need an IDE to develop a web application, but it can make life a lot easier
+compared to editing files in a generic text editor and compiling from the command line.
 
-WARNING: Eclipse jee 2019-12-R throws a weird "VerifyError: Inconsistent stackmap frames" on some occasions. Don't use that version yet.
+WARNING: Eclipse jee 2019-12-R throws a weird "VerifyError: Inconsistent stackmap frames" on some occasions. Don't use that version.
 
-Install the latest version of link:++https://www.eclipse.org/downloads/packages/++[Eclipse IDE for Enterprise Java Developers]. Be sure to install the 64 bit "Enterprise" version:
+Install the latest version of https://www.eclipse.org/downloads/packages/[Eclipse IDE for Enterprise Java Developers^]. 
+Be sure to install the 64 bit "Enterprise" version.
 
 [CAUTION]
 .Need Enterprise version?
 ====
-A 32 bit Eclipse will not run on a 64 bit Java installation and the non-enterprise version will not be able to
-run a web application in a standalone Tomcat.
-If you do not want to manage a standalone Tomcat installation and choose to use embedded Tomcat instead, you may actually download
-the non-Enterprise version (not tested).
+A 32 bit Eclipse will not run on a 64 bit Java installation so be careful. 
+The non-enterprise version will not be able to
+run a web application in a standalone Tomcat, and it already comes with some plugins that you
+would otherwise need to install separately.
+If you need a minimalistic development environment, you should be able to code with the non-enterprise
+version though.
 ====
 
 With a single installation of Eclipse you can have as many workspaces as you like. For big projects involving multiple branches and many people,
@@ -169,7 +176,7 @@ Also set UTF-8 in the "Content Types > Text > Java Properties File > Default enc
 image::newEclipseProject/java-properties-utf8.png[Eclipse file encoding]
 
 
-Add the donwloaded JRE as a new Runtime in "Window > Preferences > Java > Installed JREs" and set it as the default.
+Add the <<Java SDK,previously donwloaded>> JRE as a new Runtime in "Window > Preferences > Java > Installed JREs" and set it as the default.
 Also set the "Window > Preferences > Java > Compiler > JDK Compliance" accordingly.
 
 In order to better spot errors and stack traces, you should considerably increase the console output buffer or remove the limit altogether
@@ -185,11 +192,20 @@ Install the link:++https://nodejs.org/en/download/++[latest LTS version].
 
 ==  Connect to GIT
 ===  Add the repositories
-The "Yada Framework" sources are hosted on the public GitHub site.
-To access the GitHub repository just use your GitHub credentials (create some) on the link:++https://github.com/xtianus/yadaframework++[yadaframework] repo.
-The git url should be like `https://github.com/xtianus/yadaframework.git`.
+The Yada Framework sources are hosted on the public GitHub site.
+To access the GitHub repository use your GitHub credentials on the https://github.com/xtianus/yadaframework[yadaframework repo^].
+The git url should be like `git@github.com:yourname/yadaframework.git`.
 
-Once you have the repository credentials, you can connect Eclipse:
+NOTE: Since 2021 the preferred method for connecting to GitHub is ssh
+
+Once you have the repository credentials, connect Eclipse:
+
+* Open the SSH2 preferences dialog from "Window > Preferences"
+* browse to the location of your private GitHub ssh key
+
+[.center]
+.GitHub ssh key
+image::newEclipseProject/github-key.jpg[GitHub ssh key]
 
 * Open the "git perspective" from "Window > Perspective > Open Perspective"
 * On the left of the workspace you should see the "Git Repositories" panel
@@ -207,11 +223,14 @@ image::newEclipseProject/clonedialog1.jpg[Clone the Git repository]
 On the "Branch Selection" dialog you should select just "master". You will later
 add any branch that you need.
 
-On the "Local Destination" dialog you just need to select a local folder where to clone the repository.
-The following information assumes that you have already created a new Eclipse project called `*MySiteProject*` (will be explained later) and added it to a git repository
-called `*mysite*` that you host somewhere.
-It is very important that you *store all the repositories in a common parent folder* that is specific to the current project, for example
+On the "Local Destination" dialog you need to select a local folder where to clone the repository.
+We assume that you are going to create a new Eclipse project called `MySiteProject` (will be explained later) and 
+add it to a git repository called `mysite`.
+It is very important that you *store both the Yada Framework repository and your application repository in a common parent folder* that is specific to the current project, for example
 `C:\work\git-mysite`, otherwise relative paths in the build file won't work and you'll have to customise them.
+
+So you should create your base git folder before going on. The Yada Framework will have to be cloned inside this folder, with
+a name of "yadaframework":
 
 [.center]
 .Repository destination folder

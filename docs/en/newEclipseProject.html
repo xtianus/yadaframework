@@ -552,9 +552,9 @@ At the time of writing we failed to run on Java 11.0.6 for problems during Gradl
 </table>
 </div>
 <div class="paragraph">
-<p>You should look on the Oracle site for "Java SE" installer, which is the "Standard Edition".
-You can download Java 8 from the "<a href="https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html">Java Archive</a>" section of the Oracle site. You will be required to create an
-Oracle account and login before being able to download.</p>
+<p>You should look on the Oracle site for the "Java SE" installer, which is the "Standard Edition" of Java.
+You will probably be required to create an Oracle account and login before being able to download.
+The OpenJDK version of Java should also work fine if you prefer open source software.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -590,13 +590,13 @@ The Java JRE can be installed to the default folder (<code>C:\Program Files</cod
 <div class="sect2">
 <h3 id="_git">GIT</h3>
 <div class="paragraph">
-<p>Install <a href="https://git-scm.com/downloads">git</a> for your OS.</p>
+<p>Install <a href="https://git-scm.com/downloads" target="_blank" rel="noopener">git</a> for your OS.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_mysql">MySQL</h3>
 <div class="paragraph">
-<p>Install <a href="https://dev.mysql.com/downloads/mysql/">MySQL Community Server</a> v5.7: later versions have not been tested yet but this documentation uses MySQL 8 just to be ready.</p>
+<p>Install <a href="https://dev.mysql.com/downloads/mysql/" target="_blank" rel="noopener">MySQL Community Server</a> v8: any later versions have not been tested yet.</p>
 </div>
 <div class="paragraph">
 <p>For a future-proof installation you should not install MySQL as a Service, but run it manually when needed because one day
@@ -627,10 +627,11 @@ you might have more than one version to use. The steps to install MySQL 8 on win
 <p>when asked, choose "Show Advanced and Logging options"</p>
 </li>
 <li>
-<p>on the "Authentication Method" page choose "Use Legacy Authentication" (second option) to have an easier life (it&#8217;s a dev PC after all)</p>
+<p>on the "Authentication Method" page choose "Use Legacy Authentication" (second option) to have an easier life: it&#8217;s a development PC after all
+and you shouldn&#8217;t have any sensitive information in the database; if you do, you should garble it</p>
 </li>
 <li>
-<p>on the "Advanced Options" choose "Preserve Given Case" - this is important to prevent problems when running the DB on linux</p>
+<p>on the "Advanced Options" choose "Preserve Given Case" - this is important on Windows to prevent problems when running the DB on linux</p>
 </li>
 </ul>
 </div>
@@ -679,6 +680,11 @@ SET PASSWORD FOR 'root'@'localhost' = '';</code></pre>
 </div>
 <div class="sect2">
 <h3 id="_eclipse">Eclipse</h3>
+<div class="paragraph">
+<p>You can edit the source files and compile the binaries in any IDE. This documentation only shows how to set up Eclipse though.
+You don&#8217;t actually need an IDE to develop a web application, but it can make life a lot easier
+compared to editing files in a generic text editor and compiling from the command line.</p>
+</div>
 <div class="admonitionblock warning">
 <table>
 <tr>
@@ -686,13 +692,14 @@ SET PASSWORD FOR 'root'@'localhost' = '';</code></pre>
 <div class="title">Warning</div>
 </td>
 <td class="content">
-Eclipse jee 2019-12-R throws a weird "VerifyError: Inconsistent stackmap frames" on some occasions. Don&#8217;t use that version yet.
+Eclipse jee 2019-12-R throws a weird "VerifyError: Inconsistent stackmap frames" on some occasions. Don&#8217;t use that version.
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>Install the latest version of <a href="https://www.eclipse.org/downloads/packages/">Eclipse IDE for Enterprise Java Developers</a>. Be sure to install the 64 bit "Enterprise" version:</p>
+<p>Install the latest version of <a href="https://www.eclipse.org/downloads/packages/" target="_blank" rel="noopener">Eclipse IDE for Enterprise Java Developers</a>.
+Be sure to install the 64 bit "Enterprise" version.</p>
 </div>
 <div class="admonitionblock caution">
 <table>
@@ -703,10 +710,12 @@ Eclipse jee 2019-12-R throws a weird "VerifyError: Inconsistent stackmap frames"
 <td class="content">
 <div class="title">Need Enterprise version?</div>
 <div class="paragraph">
-<p>A 32 bit Eclipse will not run on a 64 bit Java installation and the non-enterprise version will not be able to
-run a web application in a standalone Tomcat.
-If you do not want to manage a standalone Tomcat installation and choose to use embedded Tomcat instead, you may actually download
-the non-Enterprise version (not tested).</p>
+<p>A 32 bit Eclipse will not run on a 64 bit Java installation so be careful.
+The non-enterprise version will not be able to
+run a web application in a standalone Tomcat, and it already comes with some plugins that you
+would otherwise need to install separately.
+If you need a minimalistic development environment, you should be able to code with the non-enterprise
+version though.</p>
 </div>
 </td>
 </tr>
@@ -757,7 +766,7 @@ which would be <code>C:\Local\jdk8</code> if you followed the instructions above
 <div class="title">Figure 4. Eclipse file encoding</div>
 </div>
 <div class="paragraph">
-<p>Add the donwloaded JRE as a new Runtime in "Window &gt; Preferences &gt; Java &gt; Installed JREs" and set it as the default.
+<p>Add the <a href="#_java_sdk">previously donwloaded</a> JRE as a new Runtime in "Window &gt; Preferences &gt; Java &gt; Installed JREs" and set it as the default.
 Also set the "Window &gt; Preferences &gt; Java &gt; Compiler &gt; JDK Compliance" accordingly.</p>
 </div>
 <div class="paragraph">
@@ -786,12 +795,40 @@ Install the <a href="https://nodejs.org/en/download/">latest LTS version</a>.</p
 <div class="sect2">
 <h3 id="_add_the_repositories">Add the repositories</h3>
 <div class="paragraph">
-<p>The "Yada Framework" sources are hosted on the public GitHub site.
-To access the GitHub repository just use your GitHub credentials (create some) on the <a href="https://github.com/xtianus/yadaframework">yadaframework</a> repo.
-The git url should be like <code><a href="https://github.com/xtianus/yadaframework.git" class="bare">https://github.com/xtianus/yadaframework.git</a></code>.</p>
+<p>The Yada Framework sources are hosted on the public GitHub site.
+To access the GitHub repository use your GitHub credentials on the <a href="https://github.com/xtianus/yadaframework" target="_blank" rel="noopener">yadaframework repo</a>.
+The git url should be like <code>git@github.com:yourname/yadaframework.git</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Since 2021 the preferred method for connecting to GitHub is ssh
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
-<p>Once you have the repository credentials, you can connect Eclipse:</p>
+<p>Once you have the repository credentials, connect Eclipse:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Open the SSH2 preferences dialog from "Window &gt; Preferences"</p>
+</li>
+<li>
+<p>browse to the location of your private GitHub ssh key</p>
+</li>
+</ul>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../img/newEclipseProject/github-key.jpg" alt="GitHub ssh key">
+</div>
+<div class="title">Figure 6. GitHub ssh key</div>
 </div>
 <div class="ulist">
 <ul>
@@ -810,13 +847,13 @@ The git url should be like <code><a href="https://github.com/xtianus/yadaframewo
 <div class="content">
 <img src="../img/newEclipseProject/clonegit.jpg" alt="Clone the Git repository">
 </div>
-<div class="title">Figure 6. Clone the Git repository</div>
+<div class="title">Figure 7. Clone the Git repository</div>
 </div>
 <div class="imageblock center">
 <div class="content">
 <img src="../img/newEclipseProject/clonedialog1.jpg" alt="Clone the Git repository">
 </div>
-<div class="title">Figure 7. Clone the Git repository</div>
+<div class="title">Figure 8. Clone the Git repository</div>
 </div>
 <div class="paragraph">
 <p>On the "Branch Selection" dialog you should select just "master". You will later
@@ -824,16 +861,20 @@ add any branch that you need.</p>
 </div>
 <div class="paragraph">
 <p>On the "Local Destination" dialog you just need to select a local folder where to clone the repository.
-The following information assumes that you have already created a new Eclipse project called <code><strong>MySiteProject</strong></code> (will be explained later) and added it to a git repository
-called <code><strong>mysite</strong></code> that you host somewhere.
+We assume that you are going to create a new Eclipse project called <code>MySiteProject</code> (will be explained later) and
+add it to a git repository called <code>mysite</code>.
 It is very important that you <strong>store all the repositories in a common parent folder</strong> that is specific to the current project, for example
 <code>C:\work\git-mysite</code>, otherwise relative paths in the build file won&#8217;t work and you&#8217;ll have to customise them.</p>
+</div>
+<div class="paragraph">
+<p>So you should create your base project folder before going on. The Yada Framework will be cloned inside this folder, with
+a name of "yadaframework".</p>
 </div>
 <div class="imageblock center">
 <div class="content">
 <img src="../img/newEclipseProject/cloneDialog2.jpg" alt="Repository destination folder">
 </div>
-<div class="title">Figure 8. Repository destination folder</div>
+<div class="title">Figure 9. Repository destination folder</div>
 </div>
 <div class="paragraph">
 <p>At the end you should have a filesystem structure like the following, where "mysite" is any new project that uses the Yada Framework:</p>
@@ -872,7 +913,7 @@ To generate the library, you first need to import the YadaTools project.</p>
 <div class="content">
 <img src="../img/newEclipseProject/yadaTools.jpg" alt="Import the YadaTools project">
 </div>
-<div class="title">Figure 9. Import the YadaTools project</div>
+<div class="title">Figure 10. Import the YadaTools project</div>
 </div>
 <div class="paragraph">
 <p>If the imported project has some errors, first of right-click and choose "Gradle &gt; Refresh Gradle Project".
@@ -917,7 +958,7 @@ import everything else:</p>
 <div class="content">
 <img src="../img/newEclipseProject/importYada.jpg" alt="Import the YadaWebCommerce project">
 </div>
-<div class="title">Figure 10. Import the YadaWebCommerce project</div>
+<div class="title">Figure 11. Import the YadaWebCommerce project</div>
 </div>
 <div class="paragraph">
 <p>You should now have, in your workspace, the following Yada projects:</p>
@@ -1150,7 +1191,7 @@ an error from Tomcat:</p>
 <div class="content">
 <img src="../img/newEclipseProject/tomcatError.jpg" alt="Tomcat error">
 </div>
-<div class="title">Figure 11. Tomcat error</div>
+<div class="title">Figure 12. Tomcat error</div>
 </div>
 <div class="paragraph">
 <p>Stop Tomcat then right-click on it and choose "Open". You will see the Overview:</p>
@@ -1159,7 +1200,7 @@ an error from Tomcat:</p>
 <div class="content">
 <img src="../img/newEclipseProject/tomcatOverview.JPG" alt="Tomcat configuration">
 </div>
-<div class="title">Figure 12. Tomcat configuration</div>
+<div class="title">Figure 13. Tomcat configuration</div>
 </div>
 <div class="paragraph">
 <p>On this page do the following:</p>
@@ -1235,7 +1276,7 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 <div id="footer">
 <div id="footer-text">
 Version 0.5.1<br>
-Last updated 2021-02-06 17:32:16 +0100
+Last updated 2021-02-07 21:47:29 +0100
 </div>
 </div>
 <link rel="stylesheet" href="../highlight/styles/github.min.css">
