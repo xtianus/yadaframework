@@ -4,14 +4,14 @@
 <booleanAttribute key="build_scans_enabled" value="false"/>
 <stringAttribute key="gradle_distribution" value="GRADLE_DISTRIBUTION(WRAPPER)"/>
 <stringAttribute key="gradle_user_home" value=""/>
+<stringAttribute key="java_home" value=""/>
 <listAttribute key="jvm_arguments"/>
 <booleanAttribute key="offline_mode" value="false"/>
 <booleanAttribute key="override_workspace_settings" value="false"/>
 <booleanAttribute key="show_console_view" value="true"/>
 <booleanAttribute key="show_execution_view" value="false"/>
 <listAttribute key="tasks">
-<listEntry value="build"/>
-<listEntry value="uploadArchives"/>
+<listEntry value="publishToMavenLocal"/>
 </listAttribute>
 <stringAttribute key="working_dir" value="${workspace_loc:/YadaTools}"/>
 </launchConfiguration>
