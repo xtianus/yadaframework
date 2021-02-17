@@ -704,7 +704,7 @@
 		var submitHandlerNames = $element.attr("data-yadaSubmitHandler");
 		var submitHandlerNameArray = yada.listToArray(submitHandlerNames);
 		for (var z = 0; z < submitHandlerNameArray.length; z++) {
-			const result = executeFunctionByName(submitHandlerNameArray[z], $element, e);
+			const result = executeFunctionByName(submitHandlerNameArray[z], $element);
 			if (result==false) {
 				return false; // Do not send the form
 			}
