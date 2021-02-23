@@ -74,7 +74,7 @@ public class YadaNewlineTextAttrProcessor extends AbstractAttributeTagProcessor 
          */
         final String unescapedText = (String) expression.execute(context);
 
-        String escapedText = escapeText?HtmlEscape.escapeHtml5(unescapedText):unescapedText;
+        String escapedText = escapeText?HtmlEscape.escapeHtml5Xml(unescapedText):unescapedText;
 
         /*
          * Set the new value into the attribute
