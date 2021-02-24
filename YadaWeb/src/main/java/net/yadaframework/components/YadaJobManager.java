@@ -132,7 +132,7 @@ public class YadaJobManager {
 	 */
 	public void deleteJob(YadaJob yadaJob) {
 		pauseAndInterruptJob(yadaJob.getId());
-		yadaJobDao.delete(yadaJob);
+		yadaJobDao.delete(yadaJob.getId());
 	}
 	
 	/**
@@ -242,15 +242,12 @@ public class YadaJobManager {
 	 * @param yadaJob
 	 */
 	public void pauseAndInterruptJob(Long yadaJobId) {
+		// Careful in the caller because YadaJob is modified here
 		YadaJob yadaJob = yadaJobScheduler.getJobInstance(yadaJobId);
 		yadaJob.pause();
 		if (!yadaJobScheduler.interruptJob(yadaJob)) {
-			try {
-				yadaJobRepository.save(yadaJob); // Save it because nobody else will
-			} catch (Exception e) {
-				log.debug("Failed to save interrupted job (ignored)");
-				// Keep going
-			}
+			// As there is no YadaJob instance in the cache, we set the state directly in the database if there is still a valid row
+			yadaJobDao.setState(yadaJobId, YadaJobState.PAUSED);
 		}	
 	}
 
