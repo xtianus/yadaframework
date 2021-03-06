@@ -66,7 +66,7 @@ public class YadaWebUtil {
 	public final Pageable FIND_ONE = PageRequest.of(0, 1);
 
 	// Characters that should never be found or placed in a slug
-	private static final String PATTERN_INVALID_SLUG = "[:,;=&!+~()@*$'\"\\s]";
+	private static final String PATTERN_INVALID_SLUG = "[?%:,;=&!+~()@*$'\"\\s]";
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
 

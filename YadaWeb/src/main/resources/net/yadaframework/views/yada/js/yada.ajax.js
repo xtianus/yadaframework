@@ -36,24 +36,53 @@
 	//////////////////////
 	/// Pagination support
 	/**
-	 * Changes the current URL history adding pagination parameters.
+	 * Changes the current URL history adding pagination parameters: the back button will enforce the previous page parameters on the url.
 	 * This is needed when loading a new page via ajax so that the browser back button will run the correct query again.
-	 * @param $a the jQuery object of the clicked anchor
-	 * @param pageParam the name of the parameter that will contain the page number to load, for example "product.page"
-	 * @param sizeParam the name of the parameter that will contain the page size to load, for example "product.size"
-	 * @param loadPreviousParam the name of the parameter that will contain the loadPrevious flag, for example "product.loadPrevious"
+	 * Pagination parameters on the nextpage url/form must always be named "page" and "size", but they can be different on the history url in order to have
+	 * more than one pageable section on the same page, for example "product.page" and "project.page". 
+	 * @param $linkOrForm the jQuery object of the clicked anchor, or submitted form, with pagination parameters named "page" and "size"
+	 * @param pageParam the optional name of the parameter that will contain the page number to load on back, for example "product.page"
+	 * @param sizeParam the optional name of the parameter that will contain the page size to load on back, for example "product.size"
+	 * @param loadPreviousParam the optional name of the parameter that will contain the loadPrevious flag, for example "product.loadPrevious". 
+	 *        It just tells when the user pressed the back button, so that eventually all previous pages can be loaded, not just the last one.
+	 * @see net.yadaframework.web.YadaPageRequest
 	 */
-	yada.fixPaginationLinkHistory = function($a, pageParam, sizeParam, loadPreviousParam){
-		const nextPageUrl = $a.attr("href"); // ".../en/search/loadMoreProducts?searchString=tolo&page=2&size=4"
-		const nextPage = yada.getUrlParameter(nextPageUrl, "page");
-		const nextSize = yada.getUrlParameter(nextPageUrl, "size");
+	yada.fixPaginationLinkHistory = function($linkOrForm, pageParam, sizeParam, loadPreviousParam) {
+		const NEXTPAGE_NAME="page";
+		const NEXTSIZE_NAME="size";
+		// Default param names
+		pageParam = pageParam || "page";
+		sizeParam = sizeParam || "size";
+		loadPreviousParam = loadPreviousParam || "loadPrevious";
+		// 
+		const nextPageUrl = $linkOrForm.attr("href"); // ".../en/search/loadMoreProducts?searchString=tolo&page=2&size=4"
+		var nextPage = yada.getUrlParameter(nextPageUrl, NEXTPAGE_NAME);
+		var nextSize = yada.getUrlParameter(nextPageUrl, NEXTSIZE_NAME);
+		if (nextPageUrl==null) {
+			// Could be a form
+			nextPage = $("input[name="+NEXTPAGE_NAME+"]", $linkOrForm).val() || 1;
+			nextSize = $("input[name="+NEXTSIZE_NAME+"]", $linkOrForm).val() || 32;
+		}
 		const currentUrl = window.location.href;
 		var newUrl = yada.addOrUpdateUrlParameter(currentUrl, pageParam, nextPage);
 		newUrl = yada.addOrUpdateUrlParameter(newUrl, sizeParam, nextSize);
-		newUrl = yada.addOrUpdateUrlParameter(newUrl, loadPreviousParam, true);
+		newUrl = yada.addOrUpdateUrlParameter(newUrl, loadPreviousParam, true); // This is always true
 		history.pushState({}, "", newUrl);
 	};
 	
+	/**
+	 * If the "data-yadaPaginationHistory" attribute is present, set a new history entry.
+	 * @return true if the attribute is present.
+	 */
+	function handlePaginationHistoryAttribute($elem, $linkOrForm) {
+		const yadaPagination = $elem.attr("data-yadaPaginationHistory"); // ="pageParam, sizeParam, loadPreviousParam"
+		if (yadaPagination==null) {
+			return false;
+		}
+		const paginationParams = yada.listToArray(yadaPagination);
+		yada.fixPaginationLinkHistory($linkOrForm, paginationParams[0], paginationParams[1], paginationParams[2]);
+		return true;
+	}
 
 	////////////////////
 	/// Modal
@@ -61,7 +90,7 @@
 	/**
 	 * Open a modal when the location.hash contains the needed value.
 	 * Example: openModalOnHash('/mymodal', ['id', 'name'], '/', function(data){return !isNaN(data.id);}
-	 * @param targetUrl the modal url to open via ajax
+	 * @param targetUrl the modal url to open via ajax; can have url parameters
 	 * @param paramNames an array of request parameter names that are assigned to from the hash
 	 * @param separator the values contained in the hash are separated by this character
 	 * @param validator a function that returns true if the hash values are valid
@@ -386,11 +415,7 @@
 		$link.not('.'+markerClass).click(function(e) {
 			$link = $(this); // Needed otherwise $link could be stale (from a previous ajax replacement) 
 			// Fix pagination parameters if any
-			const yadaPagination = $link.attr("data-yadaPaginationHistory"); // pageParam, sizeParam, loadPreviousParam
-			const paginationParams = yada.listToArray(yadaPagination);
-			if (paginationParams.length==3) {
-				yada.fixPaginationLinkHistory($link, paginationParams[0], paginationParams[1], paginationParams[2]);
-			}
+			handlePaginationHistoryAttribute($link, $link);
 			//
 			return makeAjaxCall(e, $link, handler);
 		})
@@ -673,6 +698,19 @@
 		$form.off("submit");
 		$form.removeClass(markerClass);
 	}
+	
+	function execSubmitHandlers($element) {
+		// Invoke any submit handlers either on form or on submit button
+		var submitHandlerNames = $element.attr("data-yadaSubmitHandler");
+		var submitHandlerNameArray = yada.listToArray(submitHandlerNames);
+		for (var z = 0; z < submitHandlerNameArray.length; z++) {
+			const result = executeFunctionByName(submitHandlerNameArray[z], $element);
+			if (result==false) {
+				return false; // Do not send the form
+			}
+		}
+		return true;
+	}
 
 	/**
 	 * Sends a form via ajax, it doesn't have to have class .yadaAjax.
@@ -732,13 +770,8 @@
 			// Only ajax forms enter here
 			var $form=$(this); // Needed to overwrite the outside variable with the current form, otherwise we may handle the wrong form (because of cloning)
 			// Invoke any submit handlers
-			var submitHandlerNames = $form.attr("data-yadaSubmitHandler");
-			var submitHandlerNameArray = yada.listToArray(submitHandlerNames);
-			for (var z = 0; z < submitHandlerNameArray.length; z++) {
-				const result = executeFunctionByName(submitHandlerNameArray[z], $form, e);
-				if (result==false) {
-					return; // Do not send the form
-				}
+			if (execSubmitHandlers($form)==false) {
+				return false; // Do not send the form
 			}
 			//
 			if (e.isDefaultPrevented()) {
@@ -841,7 +874,13 @@
 			
 			var buttonName = null;
 			var buttonValue = null;
+			var buttonHistoryAttribute = false;
 			if (clickedButton!=null) {
+				// Invoke any submit handlers
+				if (execSubmitHandlers($(clickedButton))==false) {
+					return false; // Do not send the form
+				}
+				//
 				buttonName = $(clickedButton).attr("name");
 				buttonValue = $(clickedButton).attr("value") || "";
 				if (multipart && buttonName!=null && !data.has('buttonName')) {
@@ -855,6 +894,8 @@
 				}
 				// Either the form or the button can have a noLoader flag
 				noLoader |= hasNoLoader($(clickedButton));
+				// Pagination history
+				buttonHistoryAttribute = handlePaginationHistoryAttribute($(clickedButton), $(clickedButton).closest("form"));
 			}
 			if (!multipart) {
 				data = $.param(data);
@@ -901,6 +942,10 @@
 				}
 			};
 			var method = $(this).attr('method') || "POST";
+			
+			if (!buttonHistoryAttribute) {
+				handlePaginationHistoryAttribute($form, $form);
+			}
 			
 			yada.ajax(action, data, joinedHandler.bind(this), method, getTimeoutValue($(this)), noLoader);
 			clickedButton = null;
@@ -997,7 +1042,9 @@
 		} else {
 			contentType = data instanceof FormData ? false : contentType;
 		}
-		if (hideLoader!=true) {
+		if (hideLoader==true) {
+			yada.loaderOff();
+		} else {
 			yada.loaderOn();
 		}
 		var xhrFields = {};
@@ -1061,9 +1108,11 @@
 				}
 				if (yada.startsWith(responseTrimmed, "{\"redirect\":")) {
 					var redirectObject = JSON.parse(responseTrimmed);
-					var targetUrl = redirectObject.redirect;
+					// Get the redirect url and remove any "redirect:" prefix from the url
+					var targetUrl = yada.getAfter(redirectObject.redirect, "redirect:");
 					if (redirectObject.newTab!="true") {
 						window.location.href=targetUrl;
+						return; // Needed to prevent flashing of the loader
 					} else {
 						yada.loaderOff();
 						var win = window.open(targetUrl, '_blank');

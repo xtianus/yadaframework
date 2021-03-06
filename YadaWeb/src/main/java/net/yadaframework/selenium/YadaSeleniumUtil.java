@@ -234,6 +234,17 @@ public class YadaSeleniumUtil {
 	}
 
 	/**
+	 * Get an element by id
+	 * @param id
+	 * @param webDriver
+	 * @return
+	 */
+	public WebElement findById(String id, WebDriver webDriver) {
+		List<WebElement> contents = webDriver.findElements(By.id(id));
+		return contents.isEmpty()?null:contents.get(0);
+	}
+	
+	/**
 	 * Check if an element with a given id exists
 	 * @param id
 	 * @param webDriver
