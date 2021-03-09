@@ -38,6 +38,8 @@ Parameters:
 - noShowPassword = true to remove the icon that shows the password in cleartext
 - tabindex = the tabindex for the field (optional)
 - autocomplete = the autocomplete value (optional)
+- oninput = function to call on the input event. It receives the 'input' event (optional)
+
 
 Example:
 
@@ -116,7 +118,13 @@ Example:
         });
 		//]]>
 	</script>
-
+	<script th:if="${oninput!=null}" type="text/javascript">
+		//<![CDATA[
+		$("[['#'+${#ids.prev(seqName)}]]").on('input', function (e) {
+			[[${oninput}]](e);
+		});
+		//]]>
+	</script>
 	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
 	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
 		<span th:text="${err}" th:id="${id}?:${#ids.seq(seqName)}">Error Text</span>
