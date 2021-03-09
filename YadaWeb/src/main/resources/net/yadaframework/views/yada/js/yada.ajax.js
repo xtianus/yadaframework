@@ -941,13 +941,13 @@
 					handler(responseText, responseHtml, this, localClickedButton);
 				}
 			};
-			var method = $(this).attr('method') || "POST";
+			var method = $form.attr('method') || "POST";
 			
 			if (!buttonHistoryAttribute) {
 				handlePaginationHistoryAttribute($form, $form);
 			}
 			
-			yada.ajax(action, data, joinedHandler.bind(this), method, getTimeoutValue($(this)), noLoader);
+			yada.ajax(action, data, joinedHandler.bind(this), method, getTimeoutValue($form), noLoader);
 			clickedButton = null;
 			return false; // Important so that the form is not submitted by the browser too
 		}) // submit()
