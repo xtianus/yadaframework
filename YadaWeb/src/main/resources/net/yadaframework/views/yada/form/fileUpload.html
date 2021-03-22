@@ -56,7 +56,7 @@ Example:
 		</div>
 	</div>
 	
-	<div th:if="${attachedFile!=null && attachedFile.image}" class="row yadaUploadedImages">
+	<div th:if="${attachedFile!=null && attachedFile.image && (attachedFile.desktopImage || attachedFile.mobileImage)}" class="row yadaUploadedImages">
 		<div th:if="${attachedFile.desktopImage}" th:class="${attachedFile.mobileImage}?'col-xs-8':'col-xs-12'">
 			<a th:href="${@yadaFileManager.getDesktopImageUrl(attachedFile)}" target="_blank">
 				<img class="img-responsive" th:src="@{${@yadaFileManager.getDesktopImageUrl(attachedFile)}}">
