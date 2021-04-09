@@ -83,7 +83,6 @@ import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.exceptions.YadaSystemException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.raw.YadaIntDimension;
-import net.yadaframework.web.YadaWebUtil;
 import sogei.utility.UCheckDigit;
 import sogei.utility.UCheckNum;
 
@@ -117,6 +116,41 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+	
+	/**
+	 * Merges all files matched by a pattern, in no particular order.
+	 * @param sourceFolder root folder where files are to be found
+	 * @param sourceFilePattern regex pattern to match files, e.g. ".*.js"
+	 * @param outputFile file that will contain the joined files
+	 * @param depth (optional) max depth of folders: null or 1 for no recursion
+	 * @param deleteSource (optional) Boolean.TRUE to attempt deletion of source files
+	 * @throws IOException 
+	 */
+	public void joinFiles(Path sourceFolder, String sourceFilePattern, File outputFile, Integer depth, Boolean deleteSource) throws IOException {
+		depth = depth==null ? 1 : depth; // By default we don't look into subfolders
+		FileOutputStream joinedStream = new FileOutputStream(outputFile);
+		Iterator<Path> allFilesIter = java.nio.file.Files.find(sourceFolder, depth, (path, basicFileAttributes) -> path.toFile().getName().matches(sourceFilePattern)).iterator();
+		while (allFilesIter.hasNext()) {
+			Path filePath = allFilesIter.next();
+			com.google.common.io.Files.copy(filePath.toFile(), joinedStream);
+			if (Boolean.TRUE.equals(deleteSource)) {
+				filePath.toFile().delete();
+			}
+		}
+		joinedStream.close();
+	}
+	
+	/**
+	 * Creates a folder in the system temp folder. The name is prefixed with "yada".
+	 * @return
+	 * @throws IOException
+	 */
+	public File makeTempFolder() throws IOException {
+		File file = File.createTempFile("yada", "");
+		file.delete();
+        file.mkdir();
+        return file;
+	}
 
 	/**
 	 * Split an HTML string in two parts, not breaking words, handling closing and reopening of html tags.
