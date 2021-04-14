@@ -83,7 +83,8 @@ public class YadaNewlineTextAttrProcessor extends AbstractAttributeTagProcessor 
         	escapedText = escapedText.replace("\r\n", "\n"); 	// Windows newline
         	escapedText = escapedText.replace("\r", "\n"); 		// Old Mac newline
         	escapedText = escapedText.replace("\n", "<br />" );
-        	boolean processable = true; // no idea
+        	// can be set as processable or not, depending on whether we want to execute any processors that might be associated with them
+        	boolean processable = false; // No need to process the text
         	structureHandler.setBody(escapedText, processable);
         }
     }
