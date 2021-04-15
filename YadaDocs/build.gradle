@@ -81,6 +81,7 @@ asciidoctor {
 		// attribute 'docinfo', 'shared'
 		attribute 'source-highlighter', 'highlightjs'
 		attribute 'highlightjsdir', '../highlight'
+		attribute 'icons', 'font'
 	}
 	languages 'en'
 	outputDir file('../docs')
