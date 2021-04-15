@@ -83,7 +83,6 @@ import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.exceptions.YadaSystemException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.raw.YadaIntDimension;
-import net.yadaframework.web.YadaWebUtil;
 import sogei.utility.UCheckDigit;
 import sogei.utility.UCheckNum;
 
