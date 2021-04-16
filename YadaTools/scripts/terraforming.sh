@@ -298,16 +298,11 @@ if [[ $cfgPkgMysql ]]; then
 	fi
 fi
 
-# certbot for SSL
+# certbot for SSL - ubuntu 20
 if [[ $cfgCertbot != "false" ]]; then
-	apt-get -o Dpkg::Options::="--force-confnew" -y install software-properties-common
-	add-apt-repository -y ppa:certbot/certbot
-	apt-get -o Dpkg::Options::="--force-confnew" -y update
-	if [[ $cfgPkgApache ]]; then
-		apt-get -o Dpkg::Options::="--force-confnew" -y install python-certbot-apache
-	else
-		apt-get -o Dpkg::Options::="--force-confnew" -y install certbot
-	fi 
+	apt install snapd
+	snap install --classic certbot
+	# certbot --apache
 fi
 
 # Altro

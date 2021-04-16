@@ -1248,13 +1248,13 @@ public abstract class YadaConfiguration {
 	// Selenium Web Driver
 
 	public int seleniumWaitQuick() {
-		return configuration.getInt("config/selenium/timeout/waitQuickSeconds", 4);
+		return configuration.getInt("config/selenium/timeout/waitQuickSeconds", 8);
 	}
 	public int seleniumWait() {
-		return configuration.getInt("config/selenium/timeout/waitSeconds", 8);
+		return configuration.getInt("config/selenium/timeout/waitSeconds", 10);
 	}
 	public int seleniumWaitSlow() {
-		return configuration.getInt("config/selenium/timeout/waitSlowSeconds", 16);
+		return configuration.getInt("config/selenium/timeout/waitSlowSeconds", 18);
 	}
 
 	/**

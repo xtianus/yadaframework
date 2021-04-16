@@ -66,28 +66,36 @@ public class YadaSimpleAttrProcessor extends AbstractAttributeTagProcessor {
             final IElementTagStructureHandler structureHandler) {
 
         final IEngineConfiguration configuration = context.getConfiguration();
-
-        /*
-         * Obtain the Thymeleaf Standard Expression parser
-         */
-        final IStandardExpressionParser parser = StandardExpressions.getExpressionParser(configuration);
-
-        /*
-         * Parse the attribute value as a Thymeleaf Standard Expression
-         */
-        final IStandardExpression expression = parser.parseExpression(context, attributeValue);
-
-        /*
-         * Execute the expression just parsed
-         */
-        final String value = (String) expression.execute(context);
-
-        /*
-         * Set the value into the 'data-updateOnSuccess' attribute
-         */
-        if (value != null) {
-        	structureHandler.setAttribute(replacementAttribute, value);
+        
+        String value = "";
+        if (attributeValue!=null) {
+        	/*
+        	 * Obtain the Thymeleaf Standard Expression parser
+        	 */
+        	final IStandardExpressionParser parser = StandardExpressions.getExpressionParser(configuration);
+        	
+        	try {
+				/*
+				 * Parse the attribute value as a Thymeleaf Standard Expression
+				 */
+				final IStandardExpression expression = parser.parseExpression(context, attributeValue);
+				
+				/*
+				 * Execute the expression just parsed
+				 */
+				value = (String) expression.execute(context);
+			} catch (org.thymeleaf.exceptions.TemplateProcessingException e) {
+				// Check if the expression is actually just a single word: in that case use it literally
+				if (attributeValue.indexOf(' ')==-1) {
+					// No spaces == single word
+					value = attributeValue;
+				} else {
+					throw e;
+				}
+			}
         }
+
+        structureHandler.setAttribute(replacementAttribute, value);
     }
 
     /**

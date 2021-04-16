@@ -34,35 +34,59 @@ public class YadaJobDao {
     @PersistenceContext private EntityManager em;
     
     /**
-     * Deletes a job
-     * @param yadaJob
+     * Set the state of a job in the database. If the job does not exist, nothing happens.
+     * @param yadaJobId
+     * @param yadaJobState
      */
     @Transactional(readOnly = false)
-    public void delete(YadaJob yadaJob) {
-    	// Natively delete job associations (quicker than JPA)
-       	YadaSql.instance()
-       		.selectFrom("delete from YadaJob_BeActive")
-    		.where("where YadaJob_id = :id or jobsMustBeActive_id = :id")
-    		.setParameter("id", yadaJob.getId())
-    		.nativeQuery(em)
+    public void setState(Long yadaJobId, YadaJobState yadaJobState) {
+    	String sql = "update YadaJob yj set yj.jobStateObject_id = :yadaJobStateId where yj.id = :jobId";
+    	em.createNativeQuery(sql)
+    		.setParameter("yadaJobStateId", yadaJobState.toYadaPersistentEnum().getId())
+    		.setParameter("jobId", yadaJobId)
     		.executeUpdate();
-       	YadaSql.instance()
+    	
+		//    	String sql = "update YadaJob yj set yj.jobStateObject_id = ("
+		//			+ "SELECT id FROM YadaPersistentEnum ype where ype.enumClassName=:enumClass and "
+		//			+ "ype.enumOrdinal=:enumOrdinal limit 1) "
+		//			+ "where yj.id = :jobId";
+		//    	em.createNamedQuery(sql)
+		//    		.setParameter("enumClass", yadaJobState.getClass().getName())
+		//    		.setParameter("enumOrdinal", yadaJobState.ordinal())
+		//    		.setParameter("jobId", yadaJobId)
+		//    		.executeUpdate();
+    }
+    
+    /**
+    * Deletes a job
+    * @param long1
+    */
+   @Transactional(readOnly = false)
+   public void delete(Long yadaJobId) {
+   	// Natively delete job associations (quicker than JPA)
+      	YadaSql.instance()
+      		.selectFrom("delete from YadaJob_BeActive")
+   		.where("where YadaJob_id = :id or jobsMustBeActive_id = :id")
+   		.setParameter("id", yadaJobId)
+   		.nativeQuery(em)
+   		.executeUpdate();
+      	YadaSql.instance()
 	       	.selectFrom("delete from YadaJob_BeCompleted")
 	       	.where("where YadaJob_id = :id or jobsMustComplete_id = :id")
-	       	.setParameter("id", yadaJob.getId())
+	       	.setParameter("id", yadaJobId)
 	       	.nativeQuery(em)
 	       	.executeUpdate();
-       	YadaSql.instance()
+      	YadaSql.instance()
 	       	.selectFrom("delete from YadaJob_BeInactive")
 	       	.where("where YadaJob_id = :id or jobsMustBeInactive_id = :id")
-	       	.setParameter("id", yadaJob.getId())
+	       	.setParameter("id", yadaJobId)
 	       	.nativeQuery(em)
 	       	.executeUpdate();
-       	// JPA-delete so that any joined application subclasses (which are obviously unknown when writing this) are deleted too
-       	// Better to reload the entity because the argument might come from another entitymanager (?!)
-       	YadaJob deletable = em.find(yadaJob.getClass(), yadaJob.getId());
-       	em.remove(deletable);
-    }
+      	// JPA-delete so that any joined application subclasses (which are obviously unknown when writing this) are deleted too
+      	// Better to reload the entity because the argument might come from another entitymanager (?!)
+      	YadaJob deletable = em.find(YadaJob.class, yadaJobId);
+      	em.remove(deletable);
+   }
     
 //    /**
 //     * If the job is RUNNING, set the state to ACTIVE
@@ -104,15 +128,17 @@ public class YadaJobDao {
 		.query(em).executeUpdate();
 	}
 
-    /**
-     * TODO Change the state of all jobs in the group
-     * @param jobGroup
-     * @param fromState
-     * @param toState
-     */
-	public void changeAllStates(String jobGroup, YadaJobState fromState, YadaJobState toState) {
-		YadaSql.instance().set("set "); //////////////// TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	}
+//  /**
+//  * TODO Change the state of all jobs in the group
+//  * @param jobGroup
+//  * @param fromState
+//  * @param toState
+//  */
+//	public void changeAllStates(String jobGroup, YadaJobState fromState, YadaJobState toState) {
+//		YadaSql.instance().set("set "); //////////////// TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//		
+//		
+//	}
 	
 	/**
 	 * Get the current job state from the database
