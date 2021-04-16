@@ -22,7 +22,7 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.persistence.entity.YadaAutoLoginToken;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
-import net.yadaframework.security.persistence.repository.YadaAutoLoginTokenRepository;
+import net.yadaframework.security.persistence.repository.YadaAutoLoginTokenDao;
 
 @Service
 // Deve stare in questo package perchè tirato dentro da YadaWebConfig, altrimenti SpringTemplateEngine non viene iniettato
@@ -34,7 +34,7 @@ public class YadaSecurityEmailService {
     @Autowired private YadaTokenHandler yadaTokenHandler;
     @Autowired private YadaWebUtil yadaWebUtil;
     @Autowired private YadaEmailService yadaEmailService;
-	@Autowired private YadaAutoLoginTokenRepository yadaAutoLoginTokenRepository;
+	@Autowired private YadaAutoLoginTokenDao yadaAutoLoginTokenDao;
 	@Autowired private YadaUtil yadaUtil;
 
     /**
@@ -165,8 +165,8 @@ public class YadaSecurityEmailService {
     	YadaAutoLoginToken yadaAutoLoginToken = new YadaAutoLoginToken();
     	yadaAutoLoginToken.setExpiration(expiration);
     	yadaAutoLoginToken.setYadaUserCredentials(targetUser);
-    	yadaAutoLoginToken = yadaAutoLoginTokenRepository.save(yadaAutoLoginToken);
-    	yadaAutoLoginTokenRepository.deleteExpired(); // Rimuovo quelle vecchie, per pulizia
+    	yadaAutoLoginToken = yadaAutoLoginTokenDao.save(yadaAutoLoginToken);
+    	yadaAutoLoginTokenDao.deleteExpired(); // Rimuovo quelle vecchie, per pulizia
     	StringBuilder result = new StringBuilder(myServerAddress);
     	result.append("/autologin/");
     	result.append(yadaTokenHandler.makeLink(yadaAutoLoginToken.getId(), yadaAutoLoginToken.getToken(), null));

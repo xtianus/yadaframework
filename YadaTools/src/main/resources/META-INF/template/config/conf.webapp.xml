@@ -81,7 +81,7 @@
 			<user>
 				<name>admin</name>
 				<email>admin@EXAMPLE.com</email>
-				<password>sfkueslifg</password>
+				<password>myAppPassword</password>
 				<language>en</language>
 				<country>it</country>
 				<timezone>Europe/Rome</timezone>

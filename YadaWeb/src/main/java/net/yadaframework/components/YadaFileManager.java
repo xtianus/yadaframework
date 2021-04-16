@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaManagedFile;
-import net.yadaframework.persistence.repository.YadaAttachedFileRepository;
+import net.yadaframework.persistence.repository.YadaAttachedFileDao;
 import net.yadaframework.persistence.repository.YadaFileManagerDao;
 import net.yadaframework.raw.YadaIntDimension;
 
@@ -37,7 +37,7 @@ import net.yadaframework.raw.YadaIntDimension;
 public class YadaFileManager {
 	private final transient Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Autowired private YadaAttachedFileRepository yadaAttachedFileRepository;
+	@Autowired private YadaAttachedFileDao yadaAttachedFileDao;
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private YadaFileManagerDao yadaFileManagerDao;
@@ -118,7 +118,7 @@ public class YadaFileManager {
 			}
 			yadaAttachedFile.setFilename(newFile.getName());
 		}
-		return yadaAttachedFileRepository.save(yadaAttachedFile);
+		return yadaAttachedFileDao.save(yadaAttachedFile);
 	}
 
 	/**
@@ -196,7 +196,7 @@ public class YadaFileManager {
 	 * @see #deleteFileAttachment(YadaAttachedFile)
 	 */
 	public void deleteFileAttachment(Long yadaAttachedFileId) {
-		deleteFileAttachment(yadaAttachedFileRepository.findById(yadaAttachedFileId).orElse(null));
+		deleteFileAttachment(yadaAttachedFileDao.findById(yadaAttachedFileId).orElse(null));
 	}
 
 	/**
@@ -468,7 +468,7 @@ public class YadaFileManager {
 		// yadaAttachedFile.setAttachedToId(attachToId);
 		yadaAttachedFile.setRelativeFolderPath(relativeFolderPath);
 		// This save should not bee needed anymore because of @PostPersist in YadaAttachedFile
-		yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile); // Get the id
+		yadaAttachedFile = yadaAttachedFileDao.save(yadaAttachedFile); // Get the id
 		File targetFolder = new File(config.getContentPath(), relativeFolderPath);
 		targetFolder.mkdirs();
 		return attach(yadaAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
@@ -535,7 +535,7 @@ public class YadaFileManager {
 				managedFile.delete();
 			}
 		}
-		return yadaAttachedFileRepository.save(yadaAttachedFile);
+		return yadaAttachedFileDao.save(yadaAttachedFile);
 	}
 
 	/**

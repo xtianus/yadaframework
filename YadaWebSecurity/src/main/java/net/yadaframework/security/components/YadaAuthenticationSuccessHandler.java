@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaLocalePathChangeInterceptor;
-import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 
 // Si può inserire il codice da eseguire dopo un login che ha avuto successo
 @Component
@@ -31,7 +31,7 @@ public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 	private String defaultTargetUrlNormalRequest = "/";
 
 	@Autowired private YadaConfiguration yadaConfiguration;
-	@Autowired private YadaUserCredentialsRepository userCredentialsRepository;
+	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired private YadaWebUtil yadaWebUtil;
 
 	private final static String UNSET_TARGET_URL = "/YADA_UNSET_TARGET_URL"; // Can't just use null because it's rejected
@@ -48,8 +48,8 @@ public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 	 */
 	public void onAuthenticationSuccessCustom(HttpServletRequest request, Authentication authentication) {
 		String username = authentication.getName();
-		userCredentialsRepository.updateLoginTimestamp(username.toLowerCase());
-		userCredentialsRepository.resetFailedAttempts(username.toLowerCase());
+		yadaUserCredentialsDao.updateLoginTimestamp(username.toLowerCase());
+		yadaUserCredentialsDao.resetFailedAttempts(username.toLowerCase());
 	}
 
 	@Override

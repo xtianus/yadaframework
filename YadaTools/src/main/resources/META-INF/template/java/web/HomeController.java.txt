@@ -9,10 +9,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import net.yadaframework.components.YadaNotify;
+import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaLocalePathChangeInterceptor;
-import net.yadaframework.web.YadaNotify;
-import net.yadaframework.components.YadaWebUtil;
 
 @Controller
 public class HomeController {

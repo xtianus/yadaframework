@@ -1,6 +1,16 @@
 package net.yadaframework.components;
 
-import static net.yadaframework.core.YadaConstants.*;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_AUTOCLOSE;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_BODY;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_CALLSCRIPT;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_REDIRECT;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_RELOADONCLOSE;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_SEVERITY;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_TITLE;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_TOTALSEVERITY;
+import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_ERROR;
+import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_INFO;
+import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,12 +26,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,8 +46,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
@@ -54,6 +59,7 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.web.YadaPageRequest;
 
 @Service
 public class YadaWebUtil {
@@ -63,7 +69,7 @@ public class YadaWebUtil {
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private MessageSource messageSource;
 
-	public final Pageable FIND_ONE = PageRequest.of(0, 1);
+	public final YadaPageRequest FIND_ONE = YadaPageRequest.of(0, 1);
 
 	// Characters that should never be found or placed in a slug
 	private static final String PATTERN_INVALID_SLUG = "[:,;=&!+~()@*$'\"\\s]";

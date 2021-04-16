@@ -18,7 +18,6 @@ import net.yadaframework.persistence.entity.YadaJob;
 import net.yadaframework.persistence.entity.YadaJobState;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
 import net.yadaframework.persistence.repository.YadaJobDao;
-import net.yadaframework.persistence.repository.YadaJobRepository;
 
 /**
  * Job handling.
@@ -31,7 +30,6 @@ public class YadaJobManager {
 	
 	@Autowired private YadaJobScheduler yadaJobScheduler;
 
-	@Autowired private YadaJobRepository yadaJobRepository;
     @Autowired private YadaJobDao yadaJobDao;
     @Autowired private YadaConfiguration config;
 	@Autowired private TaskScheduler yadaJobSchedulerTaskScheduler; // Used only to schedule the YadaJobScheduler
@@ -60,7 +58,7 @@ public class YadaJobManager {
 			for (YadaJob yadaJob : recoverableJobs) {
 				yadaJob.setRecovered(true);
 				yadaJob.setJobStartTime(new Date()); // Needed to prevent stale cleaning
-				yadaJobRepository.save(yadaJob);
+				yadaJobDao.save(yadaJob);
 				yadaJobScheduler.runJob(yadaJob);
 			}
 			// Scheduling the YadaJobScheduler according to the configured period
@@ -80,7 +78,7 @@ public class YadaJobManager {
 	 */
 	public boolean startJob(YadaJob yadaJob) {
 		// If the job has been deleted, return false
-		if (!yadaJobRepository.findById(yadaJob.getId()).isPresent()) {
+		if (!yadaJobDao.findById(yadaJob.getId()).isPresent()) {
 			log.debug("Job {} not found in DB when activating", yadaJob);
 			return false;
 		}
@@ -89,7 +87,7 @@ public class YadaJobManager {
 		}
 		yadaJob.setJobStateObject(YadaJobState.ACTIVE.toYadaPersistentEnum());
 		yadaJob.setErrorStreakCount(0);
-		yadaJobRepository.save(yadaJob);
+		yadaJobDao.save(yadaJob);
 		return true;
 	}
 	
@@ -99,7 +97,7 @@ public class YadaJobManager {
 	 * @return
 	 */
 	public boolean isJobGroupPaused(String jobGroup) {
-		return yadaJobRepository.isJobGroupPaused(jobGroup)!=null;
+		return yadaJobDao.isJobGroupPaused(jobGroup)!=null;
 	}
 	
 	/**
@@ -110,12 +108,12 @@ public class YadaJobManager {
 	public void pauseJobGroup(String jobGroup, boolean interrupt) {
 		if (interrupt) {
 			// There should be just one job in execution, but we look for many anyway
-			List<YadaJob> running = yadaJobRepository.findByJobGroupAndState(jobGroup, YadaJobState.RUNNING.toYadaPersistentEnum(), null);
+			List<YadaJob> running = yadaJobDao.findByJobGroupAndState(jobGroup, YadaJobState.RUNNING.toYadaPersistentEnum(), null);
 			for (YadaJob yadaJob : running) {
 				yadaJobScheduler.interruptJob(yadaJob.getId());
 			}
 		}
-		yadaJobRepository.setJobGroupPaused(jobGroup, true);
+		yadaJobDao.setJobGroupPaused(jobGroup, true);
 	}
 	
 	/**
@@ -123,7 +121,7 @@ public class YadaJobManager {
 	 * @param jobGroup
 	 */
 	public void resumeJobGroup(String jobGroup) {
-		yadaJobRepository.setJobGroupPaused(jobGroup, false);
+		yadaJobDao.setJobGroupPaused(jobGroup, false);
 	}
 
 	/**
@@ -140,11 +138,11 @@ public class YadaJobManager {
 	 * @param jobGroup
 	 * @return
 	 */
-	public int countActiveOrRunningJobs(String jobGroup) {
+	public long countActiveOrRunningJobs(String jobGroup) {
 		List<YadaPersistentEnum<YadaJobState>> states = new ArrayList<>();
 		states.add(YadaJobState.ACTIVE.toYadaPersistentEnum());
 		states.add(YadaJobState.RUNNING.toYadaPersistentEnum());
-		return yadaJobRepository.countByJobGroupAndStates(jobGroup, states);
+		return yadaJobDao.countByJobGroupAndStates(jobGroup, states);
 	}
 	
 	/**
@@ -157,7 +155,7 @@ public class YadaJobManager {
 		List<YadaPersistentEnum<YadaJobState>> states = new ArrayList<>();
 		states.add(YadaJobState.ACTIVE.toYadaPersistentEnum());
 		states.add(YadaJobState.RUNNING.toYadaPersistentEnum());
-		List<YadaJob> result = yadaJobRepository.findByJobGroupAndStates(jobGroup, states);
+		List<YadaJob> result = yadaJobDao.findByJobGroupAndStates(jobGroup, states);
 		// If a job is running, replace its instance with the cached one
 		ListIterator<YadaJob> iter = result.listIterator();
 		while (iter.hasNext()) {
@@ -192,7 +190,7 @@ public class YadaJobManager {
 					yadaJob = cached;
 				}
 				if (!yadaJobScheduler.interruptJob(yadaJob)) {
-					yadaJobRepository.save(yadaJob); // Save it because nobody else will
+					yadaJobDao.save(yadaJob); // Save it because nobody else will
 				}
 			}
 		} catch (Exception e) {
@@ -207,7 +205,7 @@ public class YadaJobManager {
 	public void completeJob(Long yadaJobId) {
 		YadaJob yadaJob = yadaJobScheduler.getJobInstance(yadaJobId);
 		yadaJob.complete();
-		yadaJobRepository.save(yadaJob);
+		yadaJobDao.save(yadaJob);
 	}
 	
 	/**
@@ -221,7 +219,7 @@ public class YadaJobManager {
 		} else if (yadaJob.isDisabled()) {
 			yadaJob.pause();
 		}
-		yadaJobRepository.save(yadaJob);
+		yadaJobDao.save(yadaJob);
 //		yadaJobRepository.stateToggleBetween(yadaJobId, YadaJobState.PAUSED.toYadaPersistentEnum(), YadaJobState.DISABLED.toYadaPersistentEnum());
 	}
 	
@@ -233,7 +231,7 @@ public class YadaJobManager {
 		YadaJob yadaJob = yadaJobScheduler.getJobInstance(yadaJobId);
 		yadaJob.disable();
 		if (!yadaJobScheduler.interruptJob(yadaJob)) {
-			yadaJobRepository.save(yadaJob); // Save it because nobody else will
+			yadaJobDao.save(yadaJob); // Save it because nobody else will
 		}	
 	}
 	
@@ -246,7 +244,7 @@ public class YadaJobManager {
 		yadaJob.pause();
 		if (!yadaJobScheduler.interruptJob(yadaJob)) {
 			try {
-				yadaJobRepository.save(yadaJob); // Save it because nobody else will
+				yadaJobDao.save(yadaJob); // Save it because nobody else will
 			} catch (Exception e) {
 				log.debug("Failed to save interrupted job (ignored)");
 				// Keep going
@@ -256,12 +254,12 @@ public class YadaJobManager {
 
 	public void changeJobPriority(YadaJob yadaJob, int priority) {
 		yadaJob.setJobPriority(priority);
-		yadaJobRepository.save(yadaJob);
+		yadaJobDao.save(yadaJob);
 	}
 	
 	public void reschedule(YadaJob yadaJob, Date newScheduling) {
 		yadaJob.setJobScheduledTime(newScheduling);
-		yadaJobRepository.save(yadaJob);
+		yadaJobDao.save(yadaJob);
 	}
 	
 	/**

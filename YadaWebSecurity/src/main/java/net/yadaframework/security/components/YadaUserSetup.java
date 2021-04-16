@@ -18,7 +18,7 @@ import net.yadaframework.exceptions.YadaConfigurationException;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
-import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 import net.yadaframework.security.persistence.repository.YadaUserProfileRepository;
 
 /**
@@ -49,7 +49,7 @@ import net.yadaframework.security.persistence.repository.YadaUserProfileReposito
 abstract public class YadaUserSetup<T extends YadaUserProfile> extends YadaSetup {
 	private transient Logger log = LoggerFactory.getLogger(YadaUserSetup.class);
 
-	@Autowired private YadaUserCredentialsRepository userCredentialsRepository;
+	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired private YadaUserProfileRepository<T> yadaUserProfileRepository;
 	@Autowired private PasswordEncoder encoder;
 	
@@ -70,7 +70,7 @@ abstract public class YadaUserSetup<T extends YadaUserProfile> extends YadaSetup
 			if (email==null || password==null) {
 				throw new YadaConfigurationException("setup users must have <email> and <password> elements");
 			}
-			YadaUserCredentials existingUserCredentials = userCredentialsRepository.findFirstByUsername(email);
+			YadaUserCredentials existingUserCredentials = yadaUserCredentialsDao.findFirstByUsername(email);
 			if (existingUserCredentials == null) {
 				log.info("Setup: creating user {}", email);
 				T userProfile;
@@ -114,7 +114,7 @@ abstract public class YadaUserSetup<T extends YadaUserProfile> extends YadaSetup
 					
 				}
 				userProfile = yadaUserProfileRepository.save(userProfile);
-				userCredentialsRepository.save(userCredentials);
+				yadaUserCredentialsDao.save(userCredentials);
 			}
 		}
 	}

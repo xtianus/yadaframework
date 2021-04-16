@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,7 +26,7 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.TooManyFailedAttemptsException;
 import net.yadaframework.security.exceptions.InternalAuthenticationException;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
-import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 
 @Component
 @DependsOn("passwordEncoder")
@@ -35,7 +34,7 @@ public class YadaUserDetailsService implements UserDetailsService {
 	private transient final Logger log = LoggerFactory.getLogger(getClass());
 	private transient final Logger logSec = LoggerFactory.getLogger("security");
 	@Autowired PasswordEncoder encoder;
-	@Autowired YadaUserCredentialsRepository userCredentialsRepository;
+	@Autowired YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired YadaConfiguration yadaConfiguration;
 	
 	/**
@@ -59,7 +58,7 @@ public class YadaUserDetailsService implements UserDetailsService {
 		int totFound=-1;
 		boolean lockout=false;
 		try {
-			List<YadaUserCredentials> userCredentialsList = userCredentialsRepository.findByUsername(username.toLowerCase());
+			List<YadaUserCredentials> userCredentialsList = yadaUserCredentialsDao.findByUsername(username.toLowerCase());
 			totFound = userCredentialsList.size();
 			if (totFound==1) {
 				yadaUserCredentials = userCredentialsList.get(0);
@@ -72,7 +71,7 @@ public class YadaUserDetailsService implements UserDetailsService {
 					if (System.currentTimeMillis()-lastFailedTimestamp.getTime()<lockMillis) {
 						lockout = true;
 					} else {
-						userCredentialsRepository.resetFailedAttempts(username.toLowerCase());
+						yadaUserCredentialsDao.resetFailedAttempts(username.toLowerCase());
 					}
 				}
 				if (!lockout) {
@@ -125,8 +124,8 @@ public class YadaUserDetailsService implements UserDetailsService {
 		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 		SecurityContextHolder.getContext().setAuthentication(auth);
 		if (setTimestamp) {
-			userCredentialsRepository.updateLoginTimestamp(userCredentials.getUsername().toLowerCase());
-			userCredentialsRepository.resetFailedAttempts(userCredentials.getUsername().toLowerCase());
+			yadaUserCredentialsDao.updateLoginTimestamp(userCredentials.getUsername().toLowerCase());
+			yadaUserCredentialsDao.resetFailedAttempts(userCredentials.getUsername().toLowerCase());
 		}
 		return auth;
 	}
@@ -135,15 +134,13 @@ public class YadaUserDetailsService implements UserDetailsService {
 		// Prima controllo che username e password siano validi, poi setto la nuova password
 		try {
 			username = username.toLowerCase();
-			List<YadaUserCredentials> userCredentialsList = userCredentialsRepository.findByUsername(username, PageRequest.of(0, 1));
-			if (userCredentialsList.isEmpty()) {
+			YadaUserCredentials userCredentials = yadaUserCredentialsDao.findFirstByUsername(username);
+			if (userCredentials==null) {
 				throw new UsernameNotFoundException("Username " + username + " not found");
 			}
-			YadaUserCredentials userCredentials = userCredentialsList.get(0);
 			boolean pwdMatch=passwordMatch(passwordTyped, userCredentials);
 			if (pwdMatch) {
-				userCredentials.changePassword(newPassword, encoder);
-				userCredentialsRepository.save(userCredentials);
+				userCredentials = yadaUserCredentialsDao.changePassword(userCredentials, newPassword);
 			} else {
 				log.debug("Invalid password: {}", passwordTyped);
 				throw new BadCredentialsException("Password invalid");

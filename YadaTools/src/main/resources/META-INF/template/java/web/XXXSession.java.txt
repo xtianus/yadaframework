@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import $basePackage.persistence.entity.UserProfile;
 
-import net.yadaframework.web.YadaSession;
+import net.yadaframework.security.web.YadaSession;
 
 /**
  * User session

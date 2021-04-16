@@ -10,7 +10,6 @@ import javax.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,7 +43,6 @@ public class YadaTicketDao {
      * @param closeTicket true if the replyer has closed the ticket on this reply
      * @return the new message added to the ticket
      */
-    @Modifying
     @Transactional(readOnly = false) 
     public YadaTicketMessage replyTicket(Long yadaTicketId, String messageText, YadaUserProfile replySender, boolean supportStaffReply, boolean closeTicket) {
     	YadaTicket yadaTicket = em.find(YadaTicket.class, yadaTicketId); 
@@ -82,7 +80,6 @@ public class YadaTicketDao {
 	 * @param attachment 
 	 * @return the newly created ticket
 	 */
-    @Modifying
     @Transactional(readOnly = false) 
     public YadaTicket addTicket(YadaLocalEnum<?> type, String title, String messageText, YadaUserProfile sender, int severity, MultipartFile attachmentFile) throws IOException {
     	List<YadaTicketMessage> yadaTicketMessages = new ArrayList<>();
@@ -124,6 +121,18 @@ public class YadaTicketDao {
 		em.persist(yadaTicket); // Cascade save
 		return yadaTicket;
 	}
-	    
+
+	public List<YadaTicket> findOldAnsweredYadaTicketNative() {
+		String sql = "select * from YadaTicket  where creationDate <= (NOW() - INTERVAL 7 DAY) AND status_id = '10'";
+		return em.createNativeQuery(sql, YadaTicket.class).getResultList();
+	}
+
+	
+	public long countAllYadaTicketOpenNative() {
+		String sql = "SELECT count(*) from YadaTicket where status_id = '13'";
+		return (Long)em.createNativeQuery(sql, Long.class).getSingleResult();
+	}
+
+
 
 }

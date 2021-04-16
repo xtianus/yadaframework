@@ -12,6 +12,17 @@ public class YadaPageRequest {
 	private boolean loadPrevious = false;
 	
 	/**
+	 * Creates a YadaPageRequest with the given page and size.
+	 * Drop-in replacement for the equivalent Spring Data PageRequest.of() method
+	 * @param page
+	 * @param size
+	 * @return
+	 */
+	public static YadaPageRequest of(int page, int size) {
+		return new YadaPageRequest(page, size);
+	}
+
+	/**
 	 * Creates a new "invalid" YadaPageRequest, with {@code page=-1, size=0}.
 	 * Has the same meaning of a "null" value. 
 	 * Used by Spring when injecting method parameters in a @Controller
@@ -68,51 +79,27 @@ public class YadaPageRequest {
 		this.loadPrevious = loadPrevious;
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see org.springframework.data.domain.YadaPageRequest#next()
-	 */
 	public YadaPageRequest getNextPageRequest() {
 		return new YadaPageRequest(page + 1, size);
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see org.springframework.data.domain.AbstractYadaPageRequest#previous()
-	 */
 	public YadaPageRequest getPreviousPageRequest() {
 		return page == 0 ? this : new YadaPageRequest(page - 1, size);
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see org.springframework.data.domain.YadaPageRequest#first()
-	 */
 	public YadaPageRequest getFirstPageRequest() {
 		return new YadaPageRequest(0, size);
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		return String.format("Page request [page: %d, size %d]", page, size);
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see org.springframework.data.domain.YadaPageRequest#getPageSize()
-	 */
 	public int getSize() {
 		return size;
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see org.springframework.data.domain.YadaPageRequest#getPageNumber()
-	 */
 	public int getPage() {
 		return page;
 	}

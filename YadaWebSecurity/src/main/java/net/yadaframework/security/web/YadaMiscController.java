@@ -21,7 +21,7 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaAttachedFile.YadaAttachedFileType;
 import net.yadaframework.persistence.entity.YadaManagedFile;
-import net.yadaframework.persistence.repository.YadaAttachedFileRepository;
+import net.yadaframework.persistence.repository.YadaAttachedFileDao;
 import net.yadaframework.raw.YadaIntDimension;
 import net.yadaframework.web.YadaCropImage;
 import net.yadaframework.web.YadaCropQueue;
@@ -37,7 +37,7 @@ public class YadaMiscController {
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private YadaNotify yadaNotify;
 	@Autowired private YadaConfiguration config;
-	@Autowired private YadaAttachedFileRepository yadaAttachedFileRepository;
+	@Autowired private YadaAttachedFileDao yadaAttachedFileDao;
 	@Autowired private YadaFileManager yadaFileManager;
 
 	@RequestMapping(value="/yada/cropPerform", params={"!submit", "cancel"})
@@ -82,7 +82,7 @@ public class YadaMiscController {
 					File createdFile = cropAndResizeImage(yadaCropImage, yadaCropDefinition.getPdfCrop(), yadaCropImage.getTargetPdfDimension(), YadaAttachedFileType.PDF);
 				}
 				try {
-					yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile);
+					yadaAttachedFile = yadaAttachedFileDao.save(yadaAttachedFile);
 				} catch (javax.persistence.OptimisticLockException e) {
 					throw new YadaInvalidUsageException("Concurrent modification on yadaAttachedFile. This happens if you set 'cascade=CascadeType.ALL' on the owning entity or if the yadaAttachedFile is merged after setting it on YadaCropImage", e);
 				}

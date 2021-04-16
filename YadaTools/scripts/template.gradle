@@ -79,7 +79,6 @@ dependencies {
 
     compile 'org.springframework:spring-webmvc:5.2.8.RELEASE',
         'org.springframework:spring-context-support:5.2.8.RELEASE',
-		'org.springframework.data:spring-data-jpa:1.11.22.RELEASE',
         'org.springframework.security:spring-security-web:5.3.3.RELEASE',
         'org.hibernate:hibernate-entitymanager:5.4.12.Final',
         'mysql:mysql-connector-java:8.0.19',
@@ -107,7 +106,7 @@ yadaInit {
 
 configurations {
     hibtools {
-        extendsFrom configurations.compile
+        extendsFrom configurations.implementation
     }
 }
 dependencies {
@@ -115,6 +114,6 @@ dependencies {
     hibtools 'org.hibernate:hibernate-tools:5.+'
 }
 task dbSchema(dependsOn: [classes], type: net.yadaframework.tools.YadaCreateDbSchemaTask) {
-    inputs.files configurations.hibtools;
+    inputs.files configurations.hibtools
     outputfilename = "${acronym}.sql"
 }

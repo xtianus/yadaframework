@@ -15,7 +15,7 @@ import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.security.components.YadaUserDetailsService;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
-import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 import net.yadaframework.security.persistence.repository.YadaUserProfileRepository;
 import net.yadaframework.web.YadaCropQueue;
 
@@ -33,7 +33,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	// quando la session viene ricaricata questo non viene valorizzato. Come si fa a inizializzare questo oggetto quando tomcat lo ricarica dallo storage?
 	@Autowired protected YadaUserProfileRepository<T> yadaUserProfileRepository;
 	@Autowired protected YadaUserDetailsService yadaUserDetailsService;
-	@Autowired protected YadaUserCredentialsRepository yadaUserCredentialsRepository;
+	@Autowired protected YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired protected YadaFileManagerDao yadaFileManagerDao;
 	@Autowired protected YadaUtil yadaUtil;
 
@@ -78,7 +78,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	public void impersonate(Long targetUserProfileId) {
 		impersonatorUserId = getCurrentUserProfileId();
 		impersonatedUserId = targetUserProfileId;
-		YadaUserCredentials targetUserCredentials = yadaUserCredentialsRepository.findByUserProfileId(targetUserProfileId);
+		YadaUserCredentials targetUserCredentials = yadaUserCredentialsDao.findByUserProfileId(targetUserProfileId);
 		yadaUserDetailsService.authenticateAs(targetUserCredentials, false);
 		loggedInUserProfileId = targetUserProfileId;
 		log.info("Impersonification by #{} as {} started", impersonatorUserId, targetUserCredentials);
@@ -99,7 +99,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	 */
 	public boolean depersonate() {
 		if (isImpersonationActive()) {
-			YadaUserCredentials originalCredentials = yadaUserCredentialsRepository.findByUserProfileId(impersonatorUserId);
+			YadaUserCredentials originalCredentials = yadaUserCredentialsDao.findByUserProfileId(impersonatorUserId);
 			yadaUserDetailsService.authenticateAs(originalCredentials);
 			log.info("Impersonification by {} ended", originalCredentials);
 			clearCaches();

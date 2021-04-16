@@ -1,10 +1,11 @@
 package $basePackage.core;
 
-import net.yadaframework.security.YadaWebSecurityConfig;
-
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.thymeleaf.spring5.SpringTemplateEngine;
+
+import net.yadaframework.core.YadaLinkBuilder;
+import net.yadaframework.security.YadaWebSecurityConfig;
 
 @ComponentScan(basePackages = { "$basePackage.web" })
 //@Configuration not needed when using WebApplicationInitializer.java
@@ -17,7 +18,6 @@ public class WebConfig extends YadaWebSecurityConfig {
 		// engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
 	}
 
-
 	/**
 	 * Fixes urls with @{} adding the language path when configured and versioning resource folders
 	 */
@@ -28,6 +28,5 @@ public class WebConfig extends YadaWebSecurityConfig {
 		engine.setLinkBuilder(new YadaLinkBuilder(config, super.getNotLocalizedResourcePattern()));
 		return engine;
 	}
-
 }
 

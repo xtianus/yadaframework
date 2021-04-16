@@ -11,7 +11,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.zip.DeflaterInputStream;
 import java.util.zip.GZIPInputStream;
 
@@ -24,9 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
-
-import net.yadaframework.persistence.entity.YadaBrowserId;
-import net.yadaframework.persistence.repository.YadaBrowserIdRepository;
 
 /**
  * Miscellaneous HTTP functions

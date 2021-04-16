@@ -836,6 +836,7 @@ public class YadaSql implements CloneableDeep {
 	 * @return
 	 * @deprecated
 	 */
+	@Deprecated
 	public YadaSql setParameterNotNull(String name, Object value) {
 		if (queryDone) {
 			throw new YadaInternalException("Parameters should be set before calling query()");

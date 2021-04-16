@@ -29,8 +29,8 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.persistence.entity.YadaSocialCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
-import net.yadaframework.security.persistence.repository.YadaSocialCredentialsRepository;
-import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
+import net.yadaframework.security.persistence.repository.YadaSocialCredentialsDao;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 import net.yadaframework.security.web.YadaSocialRegistrationData;
 import net.yadaframework.web.YadaViews;
 
@@ -83,8 +83,8 @@ public class YadaSecuritySocial {
 //	@Autowired private YadaWebUtil yadaWebUtil;
 //	@Autowired private YadaNotify yadaNotify;
 	@Autowired private YadaSecurityUtil yadaSecurityUtil;
-	@Autowired private YadaSocialCredentialsRepository yadaSocialCredentialsRepository;
-	@Autowired private YadaUserCredentialsRepository yadaUserCredentialsRepository;
+	@Autowired private YadaSocialCredentialsDao yadaSocialCredentialsDao;
+	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	
@@ -118,7 +118,7 @@ public class YadaSecuritySocial {
 		credentials.yadaSocialCredential.setEmail(email);
 		credentials.yadaSocialCredential.setSocialId(socialId);
 		credentials.yadaSocialCredential.setType(config.getFacebookType());
-		yadaSocialCredentialsRepository.save(credentials.yadaSocialCredential);
+		yadaSocialCredentialsDao.save(credentials.yadaSocialCredential);
 	}
 	
 	/**
@@ -218,7 +218,7 @@ public class YadaSecuritySocial {
 		String savedRequestUrl = yadaSecurityUtil.getSavedRequestUrl();
 		
 		// Check if we already got the social credentials, and log in
-		List<YadaSocialCredentials> yadaSocialCredentialsList = yadaSocialCredentialsRepository.findBySocialIdAndType(yadaSocialRegistrationData.socialId, config.getFacebookType());
+		List<YadaSocialCredentials> yadaSocialCredentialsList = yadaSocialCredentialsDao.findBySocialIdAndType(yadaSocialRegistrationData.socialId, config.getFacebookType());
 		if (!yadaSocialCredentialsList.isEmpty()) {
 			YadaSocialCredentials yadaSocialCredentials = yadaSocialCredentialsList.get(0);
 			YadaUserCredentials userCredentials = yadaSocialCredentials.getYadaUserCredentials();
@@ -232,7 +232,7 @@ public class YadaSecuritySocial {
 		}
 		
 		// Check if we already got the email, and log in after creating the social credentials
-		YadaUserCredentials yadaUserCredentials = yadaUserCredentialsRepository.findFirstByUsername(yadaSocialRegistrationData.email);
+		YadaUserCredentials yadaUserCredentials = yadaUserCredentialsDao.findFirstByUsername(yadaSocialRegistrationData.email);
 		if (yadaUserCredentials!=null) {
 			Credentials credentials = new Credentials();
 			credentials.yadaUserCredential = yadaUserCredentials;

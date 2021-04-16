@@ -8,7 +8,6 @@ import javax.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -100,4 +99,11 @@ public class YadaUserMessageDao {
     		return false;
     	}
     }
+    
+	List<YadaUserMessage> findOldYadaUserMessages() {
+		String sql = "select * from YadaUserMessage  where modified <= (NOW() - INTERVAL 30 DAY)";
+		return em.createNativeQuery(sql, YadaUserMessage.class)
+				.getResultList();
+	}
+
 }

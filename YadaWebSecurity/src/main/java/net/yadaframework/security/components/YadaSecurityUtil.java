@@ -19,7 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
@@ -29,16 +28,14 @@ import net.yadaframework.components.YadaUtil;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
-import net.yadaframework.security.persistence.repository.YadaRegistrationRequestRepository;
-import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
+import net.yadaframework.security.persistence.repository.YadaRegistrationRequestDao;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 import net.yadaframework.web.form.YadaFormPasswordChange;
 
 @Component
 public class YadaSecurityUtil {
 	private final transient Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Autowired private YadaRegistrationRequestRepository registrationRequestRepository;
-	
 	private Date lastOldCleanup = null; // Data dell'ultimo cleanup, ne viene fatto uno al giorno
 	private Object lastOldCleanupMonitor = new Object();
 
@@ -50,10 +47,9 @@ public class YadaSecurityUtil {
 	
 	@Autowired private HttpSession httpSession; // Funziona perchè è un proxy
 	@Autowired private YadaTokenHandler yadaTokenHandler;
-	@Autowired private YadaRegistrationRequestRepository yadaRegistrationRequestRepository;
+	@Autowired private YadaRegistrationRequestDao yadaRegistrationRequestDao;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
-	@Autowired private YadaUserCredentialsRepository yadaUserCredentialsRepository;
-	@Autowired private PasswordEncoder passwordEncoder;
+	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired private YadaWebUtil yadaWebUtil;
 
 	
@@ -118,13 +114,12 @@ public class YadaSecurityUtil {
 		long[] parts = yadaTokenHandler.parseLink(yadaFormPasswordChange.getToken());
 		try {
 			if (parts!=null) {
-				YadaRegistrationRequest registrationRequest = yadaRegistrationRequestRepository.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]).get(0);
+				YadaRegistrationRequest registrationRequest = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]).get(0);
 				String username = registrationRequest.getEmail();
-				YadaUserCredentials yadaUserCredentials = yadaUserCredentialsRepository.findFirstByUsername(StringUtils.trimToEmpty(username).toLowerCase());
+				YadaUserCredentials yadaUserCredentials = yadaUserCredentialsDao.findFirstByUsername(StringUtils.trimToEmpty(username).toLowerCase());
 				if (yadaUserCredentials!=null) {
-					yadaUserCredentials.changePassword(yadaFormPasswordChange.getPassword(), passwordEncoder);
-					yadaUserCredentialsRepository.save(yadaUserCredentials);
-					yadaRegistrationRequestRepository.delete(registrationRequest);
+					yadaUserCredentials = yadaUserCredentialsDao.changePassword(yadaUserCredentials, yadaFormPasswordChange.getPassword());
+					yadaRegistrationRequestDao.delete(registrationRequest);
 					if (yadaUserCredentials.isEnabled()) {
 						yadaUserDetailsService.authenticateAs(yadaUserCredentials);
 					}
@@ -246,21 +241,21 @@ public class YadaSecurityUtil {
 			if (lastOldCleanup==null || now.getTime()-lastOldCleanup.getTime() > YadaUtil.MILLIS_IN_DAY) { // Faccio pulizia ogni 24 ore
 				lastOldCleanup = now;
 				Date limit = new Date(now.getTime() - MAX_AGE_DAY * YadaUtil.MILLIS_IN_DAY); // Pulisco le righe pi� vecchie di MAX_AGE_DAY giorni
-				List<YadaRegistrationRequest> oldRequests = registrationRequestRepository.findByTimestampBefore(limit);
+				List<YadaRegistrationRequest> oldRequests = yadaRegistrationRequestDao.findByTimestampBefore(limit);
 				if (oldRequests.isEmpty()) {
 					log.info("No old RegistrationRequest to delete");
 				} else {
 					for (YadaRegistrationRequest deletable : oldRequests) {
-						registrationRequestRepository.delete(deletable);
+						yadaRegistrationRequestDao.delete(deletable);
 						log.info("Expired RegistrationRequest ({}) deleted", deletable);
 					}
 				}
 			}
 			// Cancello la precedente richiesta di registrazione per lo stesso email e stesso tipo
-			List<YadaRegistrationRequest> ownRequests = registrationRequestRepository.findByEmailAndRegistrationType(registrationRequest.getEmail(), registrationRequest.getRegistrationType());
+			List<YadaRegistrationRequest> ownRequests = yadaRegistrationRequestDao.findByEmailAndRegistrationType(registrationRequest.getEmail(), registrationRequest.getRegistrationType());
 			for (YadaRegistrationRequest deletable : ownRequests) {
 				if (deletable.getId()!=registrationRequest.getId()) {
-					registrationRequestRepository.delete(deletable);
+					yadaRegistrationRequestDao.delete(deletable);
 					log.info("Previous RegistrationRequest ({}) deleted", deletable);
 				}
 			}

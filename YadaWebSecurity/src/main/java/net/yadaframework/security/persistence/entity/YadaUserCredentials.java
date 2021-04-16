@@ -176,7 +176,7 @@ public class YadaUserCredentials implements Serializable {
 	}
 	
 	/**
-	 * Setta la password e anche il suo timestamp e cancella il flag di change password
+	 * Sets the password and its timestamp then clears the "password change needed" flag
 	 * @param password
 	 */
 	public void changePassword(String password, PasswordEncoder encoder) {
