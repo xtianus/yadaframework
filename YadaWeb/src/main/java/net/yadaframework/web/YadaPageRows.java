@@ -7,6 +7,12 @@ import java.util.Objects;
 
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
+/**
+ * A page of rows fetched using YadaPageRequest 
+ *
+ * @param <T> the type of each row
+ * @see YadaPageRequest
+ */
 public class YadaPageRows<T> implements Iterable<T> {
 	private final List<T> rows = new ArrayList<T>();
 	private final YadaPageRequest currentPageRequest;

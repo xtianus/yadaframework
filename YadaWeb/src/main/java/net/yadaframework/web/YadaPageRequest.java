@@ -4,7 +4,8 @@ import java.util.Objects;
 
 /**
  * A page for pageable content.
- * 
+ * A common use case is to implement web pagination in both directions.
+ * It also solves the problem of the browser back button not loading previously loaded values, via the loadPrevious flag.
  */
 public class YadaPageRequest {
 	private int page = -1;
@@ -96,10 +97,16 @@ public class YadaPageRequest {
 		return String.format("Page request [page: %d, size %d]", page, size);
 	}
 
+	/**
+	 * @return the number of rows for this page
+	 */
 	public int getSize() {
 		return size;
 	}
 
+	/**
+	 * @return The current page number starting at 0
+	 */
 	public int getPage() {
 		return page;
 	}
@@ -122,11 +129,15 @@ public class YadaPageRequest {
 	}
 	
 	/**
-	 * Returns the amount of rows to fetch from the database. 
+	 * Returns the amount of rows to fetch from the database + 1. 
 	 * It is equal to {@link #getSize()+1} when loadPrevious is false, otherwise it
-	 * adds the count of all the previous pages to the value then adds 1.
-	 * 1 is added to find out if there are more rows to fetch after this page.
+	 * adds the count of all the previous pages to the value then adds 1
+	 * to find out if there are more rows to fetch after this page.
+	 * Note: this method must only be used when the results are stored into a YadaPageRows object
+	 * otherwise the page size will be one element bigger than expected.
+	 * <p>If you are not going to store the result in YadaPageRows, use {@link #getSize()} instead</p>
 	 * @return
+	 * @see YadaPageRows
 	 */
 	public int getMaxResults() {
 		return loadPrevious ? getOffset() + size + 1: size + 1;

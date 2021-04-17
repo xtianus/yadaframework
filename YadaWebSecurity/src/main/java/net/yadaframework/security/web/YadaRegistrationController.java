@@ -35,7 +35,7 @@ import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.security.persistence.repository.YadaRegistrationRequestDao;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
-import net.yadaframework.security.persistence.repository.YadaUserProfileRepository;
+import net.yadaframework.security.persistence.repository.YadaUserProfileDao;
 import net.yadaframework.web.form.YadaFormPasswordChange;
 
 @Controller
@@ -43,7 +43,7 @@ public class YadaRegistrationController {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
 	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
-	@Autowired private YadaUserProfileRepository yadaUserProfileRepository;
+	@Autowired private YadaUserProfileDao yadaUserProfileDao;
 	@Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaSecurityUtil yadaSecurityUtil;
 	@Autowired private YadaRegistrationRequestDao yadaRegistrationRequestDao;
@@ -171,7 +171,7 @@ public class YadaRegistrationController {
 			T userProfile = userProfileClass.newInstance();
 			userProfile.setLocale(locale);
 			userProfile.setUserCredentials(userCredentials);
-			return (T) yadaUserProfileRepository.save(userProfile);
+			return (T) yadaUserProfileDao.save(userProfile);
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new YadaInternalException("Can't create instance of {}", userProfileClass);
 		}

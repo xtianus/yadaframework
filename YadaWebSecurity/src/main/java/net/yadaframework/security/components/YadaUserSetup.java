@@ -19,7 +19,7 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
-import net.yadaframework.security.persistence.repository.YadaUserProfileRepository;
+import net.yadaframework.security.persistence.repository.YadaUserProfileDao;
 
 /**
  * Convenience method to create configured application users.
@@ -50,7 +50,7 @@ abstract public class YadaUserSetup<T extends YadaUserProfile> extends YadaSetup
 	private transient Logger log = LoggerFactory.getLogger(YadaUserSetup.class);
 
 	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
-	@Autowired private YadaUserProfileRepository<T> yadaUserProfileRepository;
+	@Autowired private YadaUserProfileDao<T> yadaUserProfileDao;
 	@Autowired private PasswordEncoder encoder;
 	
 	@Override
@@ -113,7 +113,7 @@ abstract public class YadaUserSetup<T extends YadaUserProfile> extends YadaSetup
 					}
 					
 				}
-				userProfile = yadaUserProfileRepository.save(userProfile);
+				userProfile = yadaUserProfileDao.save(userProfile);
 				yadaUserCredentialsDao.save(userCredentials);
 			}
 		}

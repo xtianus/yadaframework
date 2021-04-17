@@ -116,6 +116,21 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+	
+	/**
+	 * Given the instance of a "specific" class created specifying a single type T while extending a generic class, 
+	 * retrieve the class of the type T.
+	 * Example:
+	 * the generic class is public abstract class Shape<T extends Color> {...}
+	 * the specific class is public class Circle extends Shape<Red>
+	 * the instance is new Circle()
+	 * the returned value is Red.class
+	 * @param specificClassInstance instance of the specific class, usually "this" when called from inside either the specific or the generic abstract class.
+	 * @return the class T used to make the generic specific
+	 */
+	public Class<?> findGenericClass(Object specificClassInstance) {
+		return (Class<?>)((ParameterizedType)specificClassInstance.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+	}
 
 	/**
 	 * Split an HTML string in two parts, not breaking words, handling closing and reopening of html tags.
