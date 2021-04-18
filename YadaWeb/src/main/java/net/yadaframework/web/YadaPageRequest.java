@@ -1,5 +1,7 @@
 package net.yadaframework.web;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -11,7 +13,9 @@ public class YadaPageRequest {
 	private int page = -1;
 	private int size = 0;
 	private boolean loadPrevious = false;
-	
+	private List<String> sort = new ArrayList<>(); // Request parameters
+	private YadaPageSort parsedSort = null; // Parsed request sort parameters
+
 	/**
 	 * Creates a YadaPageRequest with the given page and size.
 	 * Drop-in replacement for the equivalent Spring Data PageRequest.of() method
@@ -70,6 +74,27 @@ public class YadaPageRequest {
 		this.page = page;
 		this.size = size;
 		this.loadPrevious = loadPrevious;
+	}
+	
+	/**
+	 * @return the page sort options
+	 */
+	public YadaPageSort getPageSort() {
+		if (parsedSort==null && !sort.isEmpty()) {
+			parsedSort = new YadaPageSort();
+			for (String requestParam : sort) {
+				parsedSort.add(requestParam);
+			}
+		}
+		return parsedSort;
+	}
+	
+	/**
+	 * Set the page sort options
+	 * @param pageSort
+	 */
+	public void setPageSort(YadaPageSort pageSort) {
+		this.parsedSort = pageSort;
 	}
 
 	/**
@@ -178,5 +203,32 @@ public class YadaPageRequest {
 
 	public void setSize(int size) {
 		this.size = size;
-	}	
+	}
+	
+	/**
+	 * Spring Data - compatible method to get the page size (number of rows)
+	 * @return
+	 * @see #getSize()
+	 */
+	public int getPageSize() {
+		return page;
+	}
+
+	/**
+	 * sort strings passed as request parameters - not to be used by the application
+	 * @return
+	 * @see #getPageSort()
+	 */
+	public List<String> getSort() {
+		return sort;
+	}
+
+	/**
+	 * sort strings passed as request parameters - not to be used by the application
+	 * @param sort
+	 */
+	public void setSort(List<String> sort) {
+		this.sort = sort;
+	}
+	
 }

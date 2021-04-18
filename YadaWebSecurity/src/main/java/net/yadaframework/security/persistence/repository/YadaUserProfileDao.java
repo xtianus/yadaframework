@@ -10,11 +10,11 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.persistence.YadaSql;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.web.YadaPageRequest;
@@ -54,26 +54,32 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 	
 	public List<T> findByUserCredentials(YadaUserCredentials userCredentials, YadaPageRequest pageable) {
 		String sql = "from YadaUserProfile where userCredentials = :userCredentials";
+		boolean isPage = pageable!=null && pageable.isValid();
+		if (isPage) {
+			sql += " " + YadaSql.getOrderBy(pageable);
+		}
 		Class<T> returnTypeClass = (Class<T>) yadaUtil.findGenericClass(this); // Returns the class that extends YadaUserProfile e.g. UserProfile.class
 		TypedQuery<T> query = em.createQuery(sql, returnTypeClass)
 			.setParameter("userCredentials", userCredentials);
-		if (pageable!=null && pageable.isValid()) {
+		if (isPage) {
 			query.setFirstResult(pageable.getFirstResult()).setMaxResults(pageable.getSize());
 		}
-		// TODO sistemare anche il sort usando il pageable!!!
 		return query.getResultList();
 	}
 
 	
 	public List<T> findByUserCredentialsUsername(String username, YadaPageRequest pageable) {
 		String sql = "from YadaUserProfile where userCredentials.username = :username";
+		boolean isPage = pageable!=null && pageable.isValid();
+		if (isPage) {
+			sql += " " + YadaSql.getOrderBy(pageable);
+		}
 		Class<T> returnTypeClass = (Class<T>) yadaUtil.findGenericClass(this); // Returns the class that extends YadaUserProfile e.g. UserProfile.class
 		TypedQuery<T> query = em.createQuery(sql, returnTypeClass)
 			.setParameter("username", username);
-		if (pageable!=null && pageable.isValid()) {
+		if (isPage) {
 			query.setFirstResult(pageable.getFirstResult()).setMaxResults(pageable.getSize());
 		}
-		// TODO sistemare anche il sort usando il pageable!!!
 		return query.getResultList();
 	}
 
@@ -82,7 +88,6 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 	 * @param role
 	 * @return
 	 */
-	@Query()
 	public List<T> findEnabledUsersWithRole(Integer role) {
 		String sql = "select up from YadaUserProfile up join up.userCredentials uc where uc.enabled = true and :role member of uc.roles";
 		Class<T> returnTypeClass = (Class<T>) yadaUtil.findGenericClass(this); // Returns the class that extends YadaUserProfile e.g. UserProfile.class
@@ -96,7 +101,6 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 	 * Find by enabled flag
 	 * @return
 	 */
-	@Query()
 	public List<T> findEnabledUsers() {
 		String sql = "select up from YadaUserProfile up join up.userCredentials uc where uc.enabled = true";
 		Class<T> returnTypeClass = (Class<T>) yadaUtil.findGenericClass(this); // Returns the class that extends YadaUserProfile e.g. UserProfile.class

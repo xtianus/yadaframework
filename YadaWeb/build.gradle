@@ -74,7 +74,6 @@ dependencies {
 	
     implementation 'org.springframework:spring-webmvc:5.2.+',
 		'org.springframework:spring-context-support:5.2.+',
-		'org.springframework.data:spring-data-jpa:2.3.2.RELEASE', // TODO remove
 		'org.springframework:spring-tx:5.2.+',
 		'org.springframework:spring-jdbc:5.2.+',
 		'org.springframework:spring-orm:5.2.+',

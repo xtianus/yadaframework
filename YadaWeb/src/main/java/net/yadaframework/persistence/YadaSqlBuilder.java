@@ -1,4 +1,5 @@
 package net.yadaframework.persistence;
+import java.awt.print.Pageable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,11 +14,11 @@ import javax.persistence.Query;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.exceptions.InternalException;
+import net.yadaframework.web.YadaPageRequest;
+import net.yadaframework.web.YadaPageSort;
 
 /**
  * Classe di utilità che costruisce una stringa sql o jpql partendo dagli elementi che la compongono, opzionalmente presenti.
@@ -121,19 +122,19 @@ public class YadaSqlBuilder implements CloneableFiltered {
 	 * Do not use for JPA queries because "limit" is not supported. Use query.setMaxResults() instead.
 	 * @param pageable
 	 */
-	public void setOrderAndLimit(Pageable pageable) {
+	public void setOrderAndLimit(YadaPageRequest pageable) {
 		setOrder(pageable);
 		StringBuffer sqlLimit = new StringBuffer(" limit ");
 		sqlLimit.append(pageable.getOffset()).append(",").append(pageable.getPageSize());
 		this.orderAndLimit = this.orderAndLimit + sqlLimit.toString();
 	}
 	
-	public void setOrder(Pageable pageable) {
+	public void setOrder(YadaPageRequest pageable) {
 		StringBuffer sqlOrder = new StringBuffer("order by ");
-		Iterator<Sort.Order> orders = pageable.getSort().iterator();
+		Iterator<YadaPageSort.Order> orders = pageable.getPageSort().iterator();
 		boolean orderPresent=orders.hasNext();
 		while (orders.hasNext()) {
-			Sort.Order order = orders.next();
+			YadaPageSort.Order order = orders.next();
 			sqlOrder.append(order.getProperty()).append(" ").append(order.getDirection());
 			if (orders.hasNext()) {
 				sqlOrder.append(",");

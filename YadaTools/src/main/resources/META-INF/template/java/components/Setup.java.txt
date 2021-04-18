@@ -1,60 +1,20 @@
 package $basePackage.components;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import $basePackage.core.${acronym.capitalize()}Configuration;
 import $basePackage.persistence.entity.UserProfile;
-import $basePackage.persistence.repository.UserProfileRepository;
 
-import net.yadaframework.components.YadaSetup;
-import net.yadaframework.components.YadaUtil;
-import net.yadaframework.security.persistence.entity.YadaUserCredentials;
-import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
+import net.yadaframework.security.components.YadaUserSetup;
 
 @Component
-public class Setup extends YadaSetup {
-	private transient Logger log = LoggerFactory.getLogger(Setup.class);
-
-	@Autowired YadaUserCredentialsDao userCredentialsDao;
-	@Autowired UserProfileRepository userProfileRepository;
-	@Autowired ${acronym.capitalize()}Configuration config;
-	@Autowired YadaUtil yadaUtil;
-	@Autowired private PasswordEncoder encoder;
+public class Setup extends YadaUserSetup<UserProfile> {
+	// By default this class is only here to call the superclass methods.
+	// You can customize it with any action required at startup
+	// by implementing the setupAppliction() method:
 	
-	@Override
-	protected void setupApplication() {
-	}
-	
-	@Override
-	protected void setupUsers(List<Map<String, Object>> userList) {
-		for (Map<String, Object> userDefinition : userList) {
-			String email = (String) userDefinition.get("email");
-			String password = (String) userDefinition.get("password");
-			Set<Integer> roles = (Set<Integer>) userDefinition.get("roles");
-			String preferredLanguage = (String) userDefinition.get("language");
-			String preferredCountry = (String) userDefinition.get("country");
-			String timezone = (String) userDefinition.get("timezone");
-			YadaUserCredentials existingUserCredentials = userCredentialsDao.findFirstByUsername(email);
-			if (existingUserCredentials!=null) {
-				log.info("Setup: creating user {}", email);
-				YadaUserCredentials userCredentials = userCredentialsDao.create(email, password, roles);
-				//
-				UserProfile userProfile = new UserProfile();
-				userProfile.setUserCredentials(userCredentials);
-				userProfile.setTimezone(timezone);
-				userProfile = userProfileRepository.save(userProfile);
-			}
-		}
-	}
-
-
+	// @Override
+	// void setupApplication() {
+	// }
 
 }
+

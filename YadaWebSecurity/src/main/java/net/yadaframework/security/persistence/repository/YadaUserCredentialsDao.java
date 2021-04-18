@@ -1,7 +1,10 @@
 package net.yadaframework.security.persistence.repository;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -11,10 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.social.connect.UserProfile;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.util.StringUtils;
 
+import net.yadaframework.exceptions.YadaConfigurationException;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.persistence.YadaSql;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.web.YadaPageRequest;
@@ -44,6 +50,86 @@ public class YadaUserCredentialsDao {
 		yadaUserCredentials.changePassword(password, encoder);
 		return yadaUserCredentials;
 	}
+	
+	/**
+	 * Creates a user when it doesn't exists, using the configured attributes.
+	 * The user class must extend YadaUserProfile and implement the getter/setter of all attributes specified in the configuration and not already implemented
+	 * by its superclass.
+	 * Example configuration:
+	 * <pre>
+	 * 	&lt;setup>
+			&lt;users>
+				&lt;user>
+					&lt;name>admin&lt;/name>
+					&lt;email>admin@somemail.com&lt;/email>
+					&lt;password>25345352543154&lt;/password>
+					&lt;language>en&lt;/language>
+					&lt;country>US&lt;/country>
+					&lt;timezone>PST&lt;/timezone>
+					&lt;role>USER&lt;/role>
+					&lt;role>ADMIN&lt;/role>
+				&lt;/user>
+			&lt;/users>
+		&lt;/setup>
+		</pre>
+	 * @param userDefinition
+	 * @return
+	 */
+    @Transactional(readOnly = false) 
+    public <T extends YadaUserProfile> void create(Map<String, Object> userDefinition, Class<T> userProfileClass) {
+		// The map is a key-value pair of user attributes except "roles" which is a list of role ids
+		String email = (String) userDefinition.get("email");
+		String password = (String) userDefinition.get("password");
+		if (email==null || password==null) {
+			throw new YadaConfigurationException("setup users must have <email> and <password> elements");
+		}
+		YadaUserCredentials existingUserCredentials = this.findFirstByUsername(email);
+		if (existingUserCredentials == null) {
+			log.info("Setup: creating user {}", email);
+			T userProfile;
+			try {
+				userProfile = userProfileClass.newInstance();
+				em.persist(userProfile);
+			} catch (InstantiationException | IllegalAccessException e1) {
+				log.error("Failed to setup user of type {}", userProfileClass, e1);
+				throw new YadaInvalidUsageException("Invalid user type {}", userProfileClass);
+			}
+			YadaUserCredentials userCredentials = new YadaUserCredentials();
+			em.persist(userCredentials);
+			userCredentials.setUsername(email);
+			userCredentials.changePassword(password, encoder);
+			userCredentials.setEnabled(true);
+			userProfile.setUserCredentials(userCredentials);
+			for (String key : userDefinition.keySet()) {
+				Object valueObject = userDefinition.get(key);
+				if (key.equals("roles")) {
+					for (Integer role : (Set<Integer>)valueObject) {
+						userCredentials.addRole(role);
+					}
+				} else if (!key.equals("email") && !key.equals("password")) {
+					String setterName = "set" + StringUtils.capitalize(key); // e.g. setTimeZone
+					Method setter = null;
+					try {
+						try {
+							setter = userProfileClass.getMethod(setterName, String.class);
+						} catch (NoSuchMethodException e) {
+							// Try a different version?
+							if (!key.toLowerCase().equals(key)) {
+								setterName = "set" + StringUtils.capitalize(key.toLowerCase()); // e.g. setTimezone
+								setter = userProfileClass.getMethod(setterName, String.class);
+							} else {
+								throw e;
+							}
+						}
+						setter.invoke(userProfile, (String)valueObject);
+					} catch (SecurityException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+						log.error("Can't set attribute '{}' on {} (skipped)", key, userProfileClass, e);
+					}
+				}
+				
+			}
+		}
+    }	
 	
 	/**
 	 * Create a new YadaUserCredentials object that holds login information for the user
@@ -106,10 +192,11 @@ public class YadaUserCredentialsDao {
 	@Deprecated
 	public List<YadaUserCredentials> findByUsername(String username, YadaPageRequest pageable) {
 		String sql = "select yuc from YadaUserCredentials yuc where yuc.username = :username";
-		if (!pageable.isValid()) {
+		if (pageable==null || !pageable.isValid()) {
 			log.debug("Invalid page request");
 			return new ArrayList<YadaUserCredentials>();
 		}
+		sql += " " + YadaSql.getOrderBy(pageable);
 		List<YadaUserCredentials> resultList = em.createQuery(sql, YadaUserCredentials.class)
 			.setParameter("username", username)
 			.setFirstResult(pageable.getOffset())

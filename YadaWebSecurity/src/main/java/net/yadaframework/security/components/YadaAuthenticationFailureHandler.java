@@ -26,7 +26,6 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.TooManyFailedAttemptsException;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
-import net.yadaframework.web.YadaPageRequest;
 
 /**
  * Questa classe aggiunge un pò di informazioni in request quando il login fallisce.

@@ -246,10 +246,14 @@ public class YadaJobDao {
 	 */
 	public List<YadaJob> findByJobGroupAndState(String jobGroup, YadaPersistentEnum<YadaJobState> stateObject, YadaPageRequest pageable) {
 		String sql = "select e from YadaJob e join e.jobStateObject where e.jobGroup=:jobGroup and e.jobStateObject = :stateObject";
+		boolean isPage = pageable!=null && pageable.isValid();
+		if (isPage) {
+			sql += " " + YadaSql.getOrderBy(pageable);
+		}
 		TypedQuery<YadaJob> query = em.createQuery(sql, YadaJob.class)
 			.setParameter("jobGroup", jobGroup)
 			.setParameter("stateObject", stateObject);
-		if (pageable!=null && pageable.isValid()) {
+		if (isPage) {
 			query.setFirstResult(pageable.getFirstResult()).setMaxResults(pageable.getSize());
 		}
 		return query.getResultList();

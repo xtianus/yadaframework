@@ -43,7 +43,6 @@ dependencies {
     	'org.springframework:spring-context-support:5.2.8.RELEASE',
  		'org.thymeleaf:thymeleaf-spring5:3.0.11.RELEASE',
     	'org.springframework.security:spring-security-web:5.3.3.RELEASE',
-		'org.springframework.data:spring-data-jpa:2.3.2.RELEASE', // TODO remove
 		'org.hibernate:hibernate-entitymanager:5.3.7.Final',
 		'org.hibernate:hibernate-validator:5.4.2.Final',
 		'commons-fileupload:commons-fileupload:1.3.2',

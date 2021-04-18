@@ -10,27 +10,29 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import javax.persistence.SqlResultSetMapping;
 import javax.persistence.TypedQuery;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.web.YadaPageRequest;
+import net.yadaframework.web.YadaPageSort;
+import net.yadaframework.web.YadaPageSort.Order;
 
 /**
- * Incrementally and conditionally builds a sql select/update query.
+ * Incrementally and conditionally builds a sql select/update query with MySQL syntax.
  * Example: YadaSql.instance().selectFrom("select * from MyTable").query(em).getResultList();
  */
 // http://dev.mysql.com/doc/refman/5.7/en/select.html
 public class YadaSql implements CloneableDeep {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
+
+	private final static String MYSQL_IGNORECASE="COLLATE utf8_general_ci";
 
 	YadaSql parent = null; // Used for subexpressions
 	boolean enabled = true; // Used for subexpressions
@@ -58,6 +60,30 @@ public class YadaSql implements CloneableDeep {
 	private YadaSql(YadaSql parent, boolean enabled) {
 		this.parent = parent;
 		this.enabled = enabled;
+	}
+	
+	/**
+	 * Returns the "order by" statement in MySql syntax
+	 * @param yadaPageRequest
+	 * @return "order by xxx" or "" if there is no sort to do
+	 */
+	public static String getOrderBy(YadaPageRequest yadaPageRequest) {
+		StringBuilder result = new StringBuilder();
+		List<Order> orders = yadaPageRequest.getPageSort().getOrders();
+		for (Order order : orders) {
+			if (result.length()>0) {
+				result.append(", ");
+			}
+			result.append(order.getProperty()).append(" ");
+			if (order.isIgnorecase()) {
+				result.append(MYSQL_IGNORECASE).append(" ");
+			}
+			result.append(order.getDirection());
+		}
+		if (result.length()>0) {
+			return "order by " + result.toString();
+		}
+		return "";
 	}
 
 	/**
@@ -604,23 +630,24 @@ public class YadaSql implements CloneableDeep {
 	 * @param pageable
 	 * @return
 	 */
-	public YadaSql orderBy(Pageable pageable) {
-		Iterator<Sort.Order> orders = pageable.getSort().iterator();
+	public YadaSql orderBy(YadaPageRequest yadaPageRequest) {
+		Iterator<YadaPageSort.Order> orders = yadaPageRequest.getPageSort().iterator();
 		while (orders.hasNext()) {
-			Sort.Order order = orders.next();
+			YadaPageSort.Order order = orders.next();
 			// Handling of messed-up urls like "sort=publicName%252Cdesc" instead of "sort=publicName,desc" or "sort=publicName%2Cdesc"
 			// Explanation: whenever the , is converted by the client to %252C (which is a double encoded comma), the Pageable fails to parse the sort
 			// parameter and puts the decoded element ("%2C") in the property name. No problem if the comma is originally encoded to %2C because the Pageable
 			// returns a property name without %2C.
 			String property = order.getProperty(); // "publicName%2Cdesc" results from "sort=publicName%252Cdesc"
 			String direction = order.getDirection().toString();
+			boolean ignorecase = order.isIgnorecase();
 			String[] parts = property.split("%2C");
 			if (parts.length>1) {
 				property = parts[0];
 				direction = parts[1];
 			}
 			//
-			orderBy(property + " " + direction);
+			orderBy(property + " " + (ignorecase?MYSQL_IGNORECASE+" ":"") + direction);
 		}
 		return this;
 	}
