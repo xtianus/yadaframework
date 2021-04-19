@@ -443,7 +443,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 <h1>Getting Started</h1>
 <div class="details">
-<span id="revnumber">version 0.5.1</span>
+<span id="revnumber">version 0.7.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -1263,23 +1263,37 @@ folder,
 where <code>&lt;acronym&gt;</code> is the value of <code>ext.acronym</code> in the <code>build.gradle</code> file and <code>&lt;env&gt;</code> is the "environment",
 as explained in <a href="#_the_build_file">The Build File</a> above.</p>
 </div>
-<div class="openblock bookstore">
-<div class="content">
 <div class="paragraph">
-<p>For the YadaBookstore application, the default root folder is <code>/srv/ybsdev</code></p>
-</div>
-</div>
+<p>The predefined user is <code>admin@EXAMPLE.com</code> with password <code>myAppPassword</code>.</p>
 </div>
 <div class="paragraph">
-<p>The predefined user is <code>admin</code> with password <code>sfkueslifg</code>.</p>
-</div>
-<div class="paragraph">
-<p>Before starting the server for the first time, you may want to change the admin password by editing
-the <code>/src/main/resources/conf.webapp.dev.xml</code> file. The password is stored in the database on first startup
+<p>Before starting the server for the first time, you may want to change the admin email and password by editing
+the <code>/src/main/resources/conf.webapp.dev.xml</code> file. The data is stored in the database on first startup
 and never read from file again.</p>
 </div>
 <div class="paragraph">
-<p>There are some other items that can be customized but they can wait for later.</p>
+<p>There are some other items that can be customized but they can wait for later:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>configuration files</p>
+</li>
+<li>
+<p>log configuration</p>
+</li>
+<li>
+<p>startup actions in <code>Setup.java</code></p>
+</li>
+</ul>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>For the YadaBookstore application, the default root folder is <code>/srv/ybsdev</code>. You should change the
+admin user email to your own email address in order to receive emails from the application.</p>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -1370,6 +1384,13 @@ embedded version of Tomcat (recommended option for a generic use case).</p>
 </td>
 </tr>
 </table>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>Skip this section for the bookstore tutorial.</p>
+</div>
+</div>
 </div>
 <div class="paragraph">
 <p>Download <a href="https://tomcat.apache.org/download-80.cgi">Apache Tomcat 8.5</a> "64-bit Windows zip" and unzip the folder to some place like <code>C:\local\Tomcats\apache-tomcat-8.5.51</code>.</p>
@@ -1473,12 +1494,12 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.5.1<br>
-Last updated 2021-04-15 18:29:17 +0200
+Version 0.7.0<br>
+Last updated 2021-04-18 15:00:57 +0200
 </div>
 </div>
-<link rel="stylesheet" href="../highlight/styles/github.min.css">
-<script src="../highlight/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
 <script>hljs.initHighlighting()</script>
 </body>
 </html>

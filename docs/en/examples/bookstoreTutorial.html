@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>Internationalization</title>
+<title>Bookstore Tutorial</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -436,45 +436,24 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" type="text/css" href="../yadadocs.css" />
-
+<link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1>Internationalization</h1>
+<h1>Bookstore Tutorial</h1>
 <div class="details">
 <span id="revnumber">version 0.7.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_introduction">Introduction</a>
+<li><a href="#_introduction">Introduction</a></li>
+<li><a href="#_prerequisites">Prerequisites</a></li>
+<li><a href="#_database_layer">Database Layer</a>
 <ul class="sectlevel2">
-<li><a href="#_language_user_choice">Language user choice</a></li>
-<li><a href="#_search_engine_indexing">Search engine indexing</a></li>
-<li><a href="#_immutable_static_text">Immutable (static) text</a></li>
-<li><a href="#_database_text_fields">Database text fields</a></li>
-<li><a href="#_enum_values">Enum values</a></li>
-</ul>
-</li>
-<li><a href="#_configuring_language_in_the_path">Configuring "language in the path"</a>
-<ul class="sectlevel2">
-<li><a href="#_java_code">Java code</a></li>
-<li><a href="#_application_configuration">Application configuration</a></li>
-</ul>
-</li>
-<li><a href="#_using_language_in_the_path">Using "language in the path"</a>
-<ul class="sectlevel2">
-<li><a href="#_java">Java</a></li>
-<li><a href="#_html">HTML</a></li>
-<li><a href="#_javascript">Javascript</a></li>
-</ul>
-</li>
-<li><a href="#_configuring_language_request_parameter">Configuring "language request parameter"</a></li>
-<li><a href="#_coding_with_i18n_text">Coding with i18n text</a>
-<ul class="sectlevel2">
-<li><a href="#_static_text">Static text</a></li>
-<li><a href="#_database_fields">Database fields</a></li>
+<li><a href="#_entity_classes">Entity classes</a></li>
+<li><a href="#_data_access_objects_aka_repositories">Data Access Objects (aka Repositories)</a></li>
+<li><a href="#_initial_data">Initial data</a></li>
 </ul>
 </li>
 </ul>
@@ -485,506 +464,472 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Unless there is a very good reason to do otherwise, every web application should be internationalized, or at least be
-ready for it.
-Internationalization (i18n) means that the content of the site will change according to the  <em>locale</em> of the user visiting it,
-where  <em>locale</em> stands for "language and regional settings".</p>
+<p>This is the Yada Bookstore Tutorial.
+It serves two purposes: show you how quickly you can develop a web application,
+and how it compares to the recommended Oracle way of doing that.
+This chapter will therefore follow the official
+Java <a href="https://eclipse-ee4j.github.io/jakartaee-tutorial/dukes-bookstore.html" target="_blank" rel="noopener">"Duke’s Bookstore Case Study Example"</a>
+highlighting the many improvements in maintainability and functionality.</p>
 </div>
+<div class="openblock bookstore">
+<div class="content">
 <div class="paragraph">
-<p>These are the aspects of i18n that should be considered:</p>
+<p>Java Bookstore tutorial links:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>language user choice</p>
+<p>Jakarta EE Tutorial Project <a href="https://eclipse-ee4j.github.io/jakartaee-tutorial/" target="_blank" rel="noopener">home page</a></p>
 </li>
 <li>
-<p>search engine indexing</p>
+<p>Tutorial <a href="https://github.com/eclipse-ee4j/jakartaee-tutorial-examples" target="_blank" rel="noopener">installation docs</a></p>
 </li>
 <li>
-<p>immutable text</p>
-</li>
-<li>
-<p>database text fields</p>
-</li>
-<li>
-<p>enum values</p>
+<p>Bookstore Tutorial <a href="https://eclipse-ee4j.github.io/jakartaee-tutorial/dukes-bookstore.html#GLNVI" target="_blank" rel="noopener">docs</a></p>
 </li>
 </ul>
 </div>
-<div class="sect2">
-<h3 id="_language_user_choice">Language user choice</h3>
-<div class="paragraph">
-<p>Browsers send the user system language to the server at each request. Actually, some browsers allow users to
-override the system language. Still, that&#8217;s a very inconvenient way to choose language.
-You should also give the user a way to choose a different language for your site using something like a dropdown menu.</p>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_search_engine_indexing">Search engine indexing</h3>
+<div class="listingblock todo">
+<div class="content">
+<pre>Rewrite the intro when finished.</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_prerequisites">Prerequisites</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>The chosen language should be reflected in the url for a number of reasons:</p>
+<p>This tutorial assumes that you have a development environment available and configured by following
+the instructions in the <a href="../newEclipseProject.html">Getting Started</a> chapter.</p>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>git repo with the source code</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_database_layer">Database Layer</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Yada Framework uses the <a href="https://hibernate.org/orm/" target="_blank" rel="noopener">Hibernate</a> implementation of the <a href="https://docs.oracle.com/javaee/6/tutorial/doc/bnbpz.html" target="_blank" rel="noopener">Java Persistence API</a> (JPA).</p>
+</div>
+<div class="paragraph">
+<p>In short, the purpose of JPA is to represent the relational database (<a href="https://en.wikipedia.org/wiki/Relational_database" target="_blank" rel="noopener">RDBMS</a>) tables as Java objects,
+called "Entities". From an inverse perspective, the purpose of JPA is to store ("persist") Java objects into
+a relational database while hiding as much as possible the database-related concepts.</p>
+</div>
+<div class="sect2">
+<h3 id="_entity_classes">Entity classes</h3>
+<div class="paragraph">
+<p>A "Book" is represented in Java as a class and in the database as a table. The java class must have a specific
+structure in order to provide the information needed to store its values in the table:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>better search engine indexing</p>
+<p>be annotated with <code>@Entity</code></p>
 </li>
 <li>
-<p>bookmarking</p>
+<p>have a "unique identifier" field</p>
+</li>
+<li>
+<p>optionally have a "version" field</p>
+</li>
+<li>
+<p>use all the required field annotations that describe how the value is persisted</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>One way to put the language in the url would be to
-add a request parameter like <code>?lang=fr</code>; another option is to add the language code in the servlet path,
-like <code>example.com/fr/home</code>. The Yada Framework supports both.</p>
+<p>The developer can choose either to start from the class and derive the table, or start defining the table then
+derive the class. In the Yada Framework, the schema creation gradle task can create a schema from the java classes,
+as explained in the <a href="../newEclipseProject.html#Database Layer">Database Layer</a> section below.</p>
 </div>
 <div class="paragraph">
-<p>You can also use a full Locale code instead of the language code, like fr_CA for french in Canada.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_immutable_static_text">Immutable (static) text</h3>
-<div class="paragraph">
-<p>A typical web page usually shows some text that is statically typed, i.e. not added via a CMS backend but
-typed directly into the HTML code. This may be a title, a menu entry, an image caption, or a description.
-All this statically typed text can&#8217;t be used in a i18n application: the text must change according to the
-user language.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_database_text_fields">Database text fields</h3>
-<div class="paragraph">
-<p>Traditional applications with just one language store a Java String attribute into a single table column in the database.
-With i18n applications, where a Java attribute can have as many values as the languages that are allowed,
-the single-column approach can&#8217;t work anymore. There are many solutions to this problem. The Yada
-Framework stores a localized String attribute into a dedicated table, where a row holds the value
-for a single instance in a single language.</p>
-</div>
-<div class="paragraph">
-<p>For example, consider a Product with a non-localized "name" and a localized "description". The Database model could be like the following:</p>
-</div>
-<table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 1. Product</caption>
-<colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 66.6667%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">ID</th>
-<th class="tableblock halign-left valign-top">NAME</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">AirOne</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">2</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">AirOne</p></td>
-</tr>
-</tbody>
-</table>
-<table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 2. Product_description</caption>
-<colgroup>
-<col style="width: 20%;">
-<col style="width: 60%;">
-<col style="width: 20%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">PRODUCT_ID</th>
-<th class="tableblock halign-left valign-top">DESCRIPTION</th>
-<th class="tableblock halign-left valign-top">LOCALE</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Small inflatable ball</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">en_GB</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Piccola palla gonfiabile</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">it_IT</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">2</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Big inflatable ball</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">en_GB</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">2</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Grande palla gonfiabile</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">it_IT</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect2">
-<h3 id="_enum_values">Enum values</h3>
-<div class="listingblock todo">
-<div class="content">
-<pre>TO BE CONTINUED...</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_configuring_language_in_the_path">Configuring "language in the path"</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>URL Example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>http://www.example.com/it/myHome</pre>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_java_code">Java code</h3>
-<div class="paragraph">
-<p>If your project does not use YadaSecurity, change <code>WebApplicationInitializer</code> in order to add a servlet filter:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Override
-protected Filter[] getServletFilters() {
-      // Locale in the path
-      // See https://stackoverflow.com/a/23847484/587641
-      return new Filter[] { new DelegatingFilterProxy("yadaLocalePathVariableFilter") };
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The above adds a filter to the Spring servlet engine. It is not needed when using YadaSecurity because the same is
-already done in <code>net.yadaframework.security.SecurityWebApplicationInitializer</code>.</p>
-</div>
-<div class="paragraph">
-<p>:TIP The "language in the path" functionality is implemented in YadaLocalePathVariableFilter, YadaLocalePathChangeInterceptor, YadaLinkBuilder</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_application_configuration">Application configuration</h3>
-<div class="paragraph">
-<p>Edit the conf.webapp.prod.xml configuration file (were 'prod' is the environment code for "production") adding a section
-like the following:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;i18n localePathVariable="true"&gt;
-      &lt;locale&gt;it&lt;/locale&gt;
-      &lt;locale default="true"&gt;en&lt;/locale&gt;
-      &lt;locale&gt;de&lt;/locale&gt;
-      &lt;locale&gt;es&lt;/locale&gt;
-      &lt;locale&gt;fr&lt;/locale&gt;
-      &lt;locale&gt;ru&lt;/locale&gt;
-&lt;/i18n&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Note the use of the "default" attribute. This is <strong>not</strong> the locale that will be set when there is not a valid
-value in the request (you&#8217;d get a 404 HTTP error). This is actually the language to use for
-strings retrieved from the database (see <a href="#_database_fields">Database fields</a> below).</p>
-</div>
-<div class="paragraph">
-<p>Other than just the language, you can use a full locale code though this is rarely needed:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;i18n localePathVariable="true"&gt;
-      &lt;locale&gt;it_IT&lt;/locale&gt;
-      &lt;locale default="true"&gt;en_GB&lt;/locale&gt;
-      &lt;locale&gt;en_US&lt;/locale&gt;
-      &lt;locale&gt;es_ES&lt;/locale&gt;
-      &lt;locale&gt;fr_FR&lt;/locale&gt;
-      &lt;locale&gt;fr_CA&lt;/locale&gt;
-&lt;/i18n&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>You can also configure a country to be added to the locale after the request has been received. This way you can still
-use just the language code in the url but receive a full Locale in the java @Controller:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;i18n localePathVariable="true"&gt;
-      &lt;locale country="IT"&gt;it&lt;/locale&gt;
-      &lt;locale country="GB" default="true"&gt;en&lt;/locale&gt;
-      &lt;locale country="DE"&gt;de&lt;/locale&gt;
-      &lt;locale country="ES"&gt;es&lt;/locale&gt;
-      &lt;locale country="FR"&gt;fr&lt;/locale&gt;
-      &lt;locale country="RU"&gt;ru&lt;/locale&gt;
-&lt;/i18n&gt;</code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_using_language_in_the_path">Using "language in the path"</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_java">Java</h3>
-<div class="sect3">
-<h4 id="_language_on_redirect">Language on redirect</h4>
-<div class="paragraph">
-<p>When returning a redirect string, the language path should be present: <code>/fr/products</code>. The method <code>YadaWebUtil.redirectString()</code> can add the
-needed language to the url, and also any parameters (see javadoc):</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">return YadaWebUtil.redirectString("/products", locale, "id", "172");</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The <code>YadaWebUtil.redirectString()</code> returns the "redirect:" prefix too. In order to create a string without that prefix, use <code>YadaWebUtil.enhanceUrl()</code>.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_url_with_no_language">URL with no language</h4>
-<div class="paragraph">
-<p>The default language is also needed when someone types just the server address without path from a browser in a language
-that is not in the configuration. In such case, the default language should be used:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/")
-public String home(Model model, HttpServletRequest request, Locale locale) {
-        if (YadaLocalePathChangeInterceptor.localePathRequested(request)) {
-                // Language was in the url
-                return home(model, request);
-        }
-        // Language was not in the url
-        String currentLanguage = locale.getLanguage();
-        if (!config.getLocaleStrings().contains(currentLanguage)) {
-                // Not a configured locale - use the default one
-                Locale defaultLocale = config.getDefaultLocale();
-                if (defaultLocale==null) {
-                        // Default locale was not configured - use english
-                        defaultLocale = Locale.ENGLISH;
-                }
-                currentLanguage = defaultLocale.getLanguage();
-        }
-        return "redirect:/" + currentLanguage + "/home"; // Moved temporarily</code></pre>
-</div>
-</div>
-<div class="listingblock todo">
-<div class="content">
-<pre>The default language redirect should be implemented in YadaLocalePathVariableFilter</pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_html">HTML</h3>
-<div class="paragraph">
-<p>The standard Thymeleaf <code>@{url}</code> syntax has been retrofitted to automatically handle language in the path:
-the current locale will be added at the start of every url, so <code>@{/home}</code> becomes <code>/de/home</code> for example.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_javascript">Javascript</h3>
-<div class="paragraph">
-<p>The language in the path variable can be changed via javascript using</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.changeLanguagePathVariable(locale);</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>where "locale" is the ISO2 locale code. This code could be called when choosing from a list of languages.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_configuring_language_request_parameter">Configuring "language request parameter"</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>URL Example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>http://www.example.com/myHome?lang=it</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This is easier to configure because you don&#8217;t need to change the Java code.
-The application configuration is the same but you need to set localePathVariable="false".</p>
-</div>
-<div class="listingblock todo">
-<div class="content">
-<pre>Check that this stil works and what it does. I think YadaWebUtil.enhanceUrl() doesn't work properly</pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_coding_with_i18n_text">Coding with i18n text</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_static_text">Static text</h3>
-<div class="paragraph">
-<p>To implement localized static text just use the standard <a href="https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/core.html#context-functionality-messagesource">Spring "MessageSource"</a> concept: store all text in different
-<code>message.properties</code> files, indexed by a key.</p>
-</div>
-<div class="paragraph">
-<p>The Yada Framework expects message source files to be in the <code>WEB-INF/messages</code> folder, with a file name in the
-<code>messages[_&lt;lang&gt;].properties</code> format. Example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">messages_de.properties
-messages_fr.properties
-messages_ru.properties
-messages.properties</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Each file stores the text of a different language. You don&#8217;t need to add them all immediately: start
-from the default language in <code>messages.properties</code> then add the translations when they become needed.
-The default language can be any language that you consider to be the "base" language: all keys that are
-not found in a specific language are searched in the default one; when not found, the key
-is shown as text.</p>
-</div>
-<div class="paragraph">
-<p>The content of the file is in the standard <a href="https://docs.oracle.com/javase/8/docs/api/java/text/MessageFormat.html">Java "MessageFormat"</a> format:</p>
-</div>
-<div class="paragraph">
-<p>&lt;key&gt; = &lt;value&gt;</p>
-</div>
-<div class="paragraph">
-<p>Example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">validation.empty = This value can't be empty
-validation.password.length = Password can''t be shorter than {0} characters and longer than {1}
-files.total = There {0,choice,0#are no files|1#is one file|1&lt;are {0,number,integer} files}.</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>In particular:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>{0} and {1} are ways of passing parameters</p>
-</li>
-<li>
-<p>when a parameter is specified, a single quote must be escaped by another single quote</p>
-</li>
-<li>
-<p>there&#8217;s a powerful way of specifying variations like singular/plural (choice format)</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>In production, files are reloaded every 600 seconds (10 minutes) to pick up changes.</p>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-The Message Source configuration is implemented in YadaAppConfig.messageSource()
-</td>
-</tr>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_usage_with_thymeleaf">Usage with Thymeleaf</h4>
-<div class="paragraph">
-<p>The syntax to show a localized string in Thymeleaf is <code>#{&lt;key&gt;}</code>. Example:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;p th:text="#{validation.empty}"&gt;Any placeholder text here will be overwritten&lt;/p&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>See the <a href="https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#messages">Thymeleaf docs</a> for more details.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_usage_in_java">Usage in Java</h4>
-<div class="paragraph">
-<p>To get the localized text in java you first autowire a MessageSource bean, then use the getMessage() method:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Autowired private MessageSource messageSource;
-
-public String someMethod(Locale locale) {
-  String msg1 = messageSource.getMessage("validation.empty", null, locale);
-  String msg2 = messageSource.getMessage("validation.password.length", new Object[]{5, 10}, locale);</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_database_fields">Database fields</h3>
-<div class="paragraph">
-<p>The Yada Framework uses the table-per-attribute approach to multivalue string attributes.
-An @Entity with a localized string attribute can be defined with a <code>Map&lt;Locale, String&gt;</code> so
-that values are related to their locale:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@ElementCollection
-@Column(length=8192)
-@MapKeyColumn(name="locale", length=32)
-private Map&lt;Locale, String&gt; description = new HashMap&lt;&gt;();</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>To retrieve the value in a specific locale, use YadaUtil.getLocalValue(). This will return the value in the specified locale or null.
-If a default locale has been configured (see <a href="#_application_configuration">Application configuration</a> above) then the default locale will be tried before returning null.
-This is useful when all locales have the same value and you only want to set it once: the value for the default language
-will be "inherited" by all current and future configured languages.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String productDesc = YadaUtil.getLocalValue(product.getDescription(), locale);
-String productDesc = YadaUtil.getLocalValue(product.getDescription()); // Use current locale</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>It can be very convenient to add to the entity a method that retrieves the value in the current locale
-(the locale of the current request):</p>
+<p>Following the official Java Bookstore tutorial, the Book entity class is as follows:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Entity
-public class Product {
-  ...
-  @ElementCollection
-  @Column(length=8192)
-  @MapKeyColumn(name="locale", length=32)
-  private Map&lt;Locale, String&gt; description = new HashMap&lt;&gt;();
-
-  ...
-  public String getDescriptionLocal() {
-    return YadaUtil.getLocalValue(description);
-  }</code></pre>
+@Table(uniqueConstraints = @UniqueConstraint(  <i class="conum" data-value="1"></i><b>(1)</b>
+		columnNames={"surname", "firstname", "title", "calendarYear"})
+)
+public class Book implements Serializable {
+	private static final long serialVersionUID = 1L;
+	@Version <i class="conum" data-value="2"></i><b>(2)</b>
+	private long version;
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY) <i class="conum" data-value="3"></i><b>(3)</b>
+	private Long id; <i class="conum" data-value="3"></i><b>(3)</b>
+	private String surname;
+	private String firstname;
+	private String title;
+	private Double price;
+	private Boolean onsale;
+	private Integer calendarYear;
+	private String description;
+	private Integer inventory;
+	...</code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>creates a unique constraint on four columns, to prevent storing two rows for the same book</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>addw a <code>@Version</code> attribute for optimistic locking: you won&#8217;t be able to store an object
+if its database value has been modified in the meanwhile</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>as an <code>@Id</code> usew a <code>Long id</code> that is autogenerated by the database</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
-<p>This allows for a simple use in Thymeleaf:</p>
+<p>The database schema generator creates the following table definition:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;p th:text="${product.descriptionLocal}"&gt;Some description&lt;/p&gt;</code></pre>
+<pre class="highlightjs highlight"><code data-lang="sql" class="language-sql hljs">create table Book (id bigint not null auto_increment, calendarYear integer, description varchar(255), firstname varchar(255), inventory integer, onsale bit, price double precision, surname varchar(255), title varchar(255), version bigint not null, primary key (id)) engine=InnoDB;
+alter table Book add constraint UK9u3gktk5oqaaxduqbu8hql9yy unique (surname, firstname, title, calendarYear);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The database schema can be uploaded to the database with the <code>/YadaBookstore/env/dev/dropAndCreateDatabase.bat</code> script
+or equivalent.</p>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>The code in the official tutorial follows, with comments on the changes we made:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Entity
+@Table(name = "WEB_BOOKSTORE_BOOKS") <i class="conum" data-value="1"></i><b>(1)</b>
+@NamedQuery( <i class="conum" data-value="2"></i><b>(2)</b>
+        name = "findBooks",
+        query = "SELECT b FROM Book b ORDER BY b.bookId")
+public class Book implements Serializable {
+    private static final long serialVersionUID = -4146681491856848089L; <i class="conum" data-value="3"></i><b>(3)</b>
+    @Id <i class="conum" data-value="4"></i><b>(4)</b>
+    @NotNull <i class="conum" data-value="5"></i><b>(5)</b>
+    private String bookId; <i class="conum" data-value="6"></i><b>(6)</b>
+    private String surname;
+	...</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the table name has been removed because the default table name "Book" seems good enough</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>the <code>@NamedQuery</code> annotation has been removed so that all queries are stored in the DAO (see later)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>the <code>serialVersionUID</code> isn&#8217;t usually really used so the default value of <code>1L</code> is enough and less confusing</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>the <code>@Id</code> has become a <code>Long</code> in order to use <code>@GeneratedValue</code> and have it created by the database:
+having to set the book id manually can work on a small example like this but is cumbersom in a real application,
+unless you&#8217;re using a real-life unique identifier like the ISBN code of the book</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>the <code>@NotNull</code> annotation is not required as the database will enforce a value</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>the name <code>bookId</code> has been replaced with <code>id</code> so that it&#8217;s easier to copy&amp;paste the id definition to other entities</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_data_access_objects_aka_repositories">Data Access Objects (aka Repositories)</h3>
+<div class="paragraph">
+<p>Data Access Objects (DAO) are classes that perform all database operations within a transaction.
+They must be annotated with @Repository and some other transaction-definition elements.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Repository
+@Transactional(readOnly = true) <i class="conum" data-value="1"></i><b>(1)</b>
+public class BookDao {
+	private final transient Logger log = LoggerFactory.getLogger(getClass()); <i class="conum" data-value="2"></i><b>(2)</b>
+
+    @PersistenceContext private EntityManager em;
+
+    @Transactional(readOnly = false) <i class="conum" data-value="1"></i><b>(1)</b>
+    public void createBook(String surname, String firstname,
+        String title, Double price, Boolean onsale, Integer calendarYear,
+        String description, Integer inventory) {
+        Book book = new Book(surname, firstname, title, price,
+                onsale, calendarYear, description, inventory);
+        em.persist(book);
+        log.info("Persisted book {}", title); <i class="conum" data-value="2"></i><b>(2)</b>
+    }
+
+    public List&lt;Book&gt; getBooks() {
+        return em.createQuery("FROM Book ORDER BY id", Book.class).getResultList(); <i class="conum" data-value="3"></i><b>(3)</b>
+    }
+    ...</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>It is good practice to declare all methods as "read only" by default and only give write
+permission to the ones that actually write to the database</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This is the <a href="http://logback.qos.ch/" target="_blank" rel="noopener">logback</a> syntax for declaring and using a log instance</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The Book lookup query has been removed from the Entity and added here.
+You can still use a named query defined on the Entity, but in real life project you would
+still have to write the most complex queries in the DAO, resulting in confusion on the location
+of the sql code: better put everything in the DAO from the start</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The full code can be found in git.</p>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>The original version of <code>BookDao</code> is implemented in <code>BookRequestBean</code>. This is an Enterprise
+Java Bean (EJB) but it&#8217;s not much different from our version:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Stateful <i class="conum" data-value="1"></i><b>(1)</b>
+public class BookRequestBean {
+
+    @PersistenceContext
+    private EntityManager em;
+    private static final Logger logger =
+            Logger.getLogger("dukesbookstore.ejb.BookRequestBean");
+
+    public BookRequestBean() throws Exception {
+    }
+
+    public void createBook(String bookId, String surname, String firstname,
+            String title, Double price, Boolean onsale, Integer calendarYear,
+            String description, Integer inventory) {  <i class="conum" data-value="2"></i><b>(2)</b>
+        try {
+            Book book = new Book(bookId, surname, firstname, title, price,
+                    onsale, calendarYear, description, inventory);
+            logger.log(Level.INFO, "Created book {0}", bookId);
+            em.persist(book);
+            logger.log(Level.INFO, "Persisted book {0}", bookId);
+        } catch (Exception ex) {
+            throw new EJBException(ex.getMessage());
+        }
+    }
+
+    public List&lt;Book&gt; getBooks() throws BooksNotFoundException { <i class="conum" data-value="3"></i><b>(3)</b>
+        try {
+            return (List&lt;Book&gt;) em.createNamedQuery("findBooks").getResultList();
+        } catch (Exception ex) {
+            throw new BooksNotFoundException(
+                    "Could not get books: " + ex.getMessage());
+        }
+    }
+	...</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>We don&#8217;t need the EJB declaration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The DAO version doesn&#8217;t receive the book id on creation, because the id is computed
+by the database on save</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>We think that the original version makes excessive use of checked
+exceptions like <code>BooksNotFoundException</code></td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_initial_data">Initial data</h3>
+<div class="paragraph">
+<p>In the original Bookstore tutorial, some books are added to the database on application startup using
+the <code>ConfigBean</code> EJB where book definitions are hardcoded. We prefer a different approach: using the
+application configuration file. The <code>/src/main/resources/conf.webapp.prod.xml</code> should be edited to store
+the initial book definitions. This file holds values for the production environment but these values
+are also used in any other lesser environment when the equivalent data is missing. So if the data should be
+the same in every environment, just add it to the production configuration and it will be seen everywhere.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;setup&gt;
+	&lt;books&gt;
+		&lt;book&gt;
+			&lt;surname&gt;Duke&lt;/surname&gt;
+			&lt;firstname&gt;&lt;/firstname&gt;
+			&lt;title&gt;My Early Years: Growing Up on *7&lt;/title&gt;
+			&lt;price&gt;30.75&lt;/price&gt;
+			&lt;onsale&gt;false&lt;/onsale&gt;
+			&lt;calendarYear&gt;2005&lt;/calendarYear&gt;
+			&lt;description&gt;What a cool book.&lt;/description&gt;
+			&lt;inventory&gt;20&lt;/inventory&gt;
+		&lt;/book&gt;
+		&lt;book&gt;
+			&lt;surname&gt;Jeeves&lt;/surname&gt;
+			&lt;firstname&gt;&lt;/firstname&gt;
+			&lt;title&gt;Web Servers for Fun and Profit&lt;/title&gt;
+			&lt;price&gt;40.75&lt;/price&gt;
+			&lt;onsale&gt;true&lt;/onsale&gt;
+			&lt;calendarYear&gt;2010&lt;/calendarYear&gt;
+			&lt;description&gt;What a cool book.&lt;/description&gt;
+			&lt;inventory&gt;20&lt;/inventory&gt;
+		&lt;/book&gt;
+		...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>All configuration elements are read by the <code>YbsConfiguration</code> class that should act as an
+interface between the xml world and the object world: a new <code>getInitialBooks()</code> will make
+the conversion and return a Book list with the values from the configuration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public List&lt;Book&gt; getInitialBooks() {
+	List&lt;Book&gt; result = new ArrayList&lt;&gt;();
+	List&lt;ImmutableHierarchicalConfiguration&gt; booksSetup = configuration.immutableConfigurationsAt("config/setup/books/book");
+	for (ImmutableHierarchicalConfiguration bookSetup : booksSetup) {
+		String surname = bookSetup.getString("surname");
+		String firstname = bookSetup.getString("firstname");
+		String title = bookSetup.getString("title");
+		Double price = bookSetup.getDouble("price");
+		Boolean onsale = bookSetup.getBoolean("onsale", false); // Defaults to false
+		Integer calendarYear = bookSetup.getInt("calendarYear");
+		String description = bookSetup.getString("description");
+		Integer inventory = bookSetup.getInt("inventory");
+		Book book = new Book(surname, firstname, title, price, onsale, calendarYear, description, inventory);
+		result.add(book);
+	}
+	return result;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Instead of using an EJB, we can add the startup code to the <code>setupApplication()</code> method of the <code>&#8230;&#8203;/components/Setup.java</code> class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs"> @Override
+ protected void setupApplication() {
+	 List&lt;Book&gt; configuredBooks = config.getInitialBooks();
+	 bookDao.createWhenMissing(configuredBooks);
+ }</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The new method <code>createWhenMissing()</code> of the BookDao class uses a MySQL native query to
+add a book row only when it doesn&#8217;t exist already. This is the fastest way of dealing with
+database initialization when giving the option of adding new <code>&lt;setup&gt;</code> entries in the future.
+If this is not a requirement, you can quickly skip book creation when at least one row is found
+in the database.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Transactional(readOnly = false)
+public void createWhenMissing(List&lt;Book&gt; configuredBooks) {
+	String sql = "insert ignore into Book (surname, firstname, title, price, onsale, calendarYear, description, inventory) "
+		+ "values (:surname, :firstname, :title, :price, :onsale, :calendarYear, :description, :inventory)"; <i class="conum" data-value="1"></i><b>(1)</b>
+	for (Book book : configuredBooks) {
+		em.createNativeQuery(sql)
+			.setParameter("surname", book.getSurname())
+			.setParameter("firstname", book.getFirstname())
+			.setParameter("title", book.getTitle())
+			.setParameter("price", book.getPrice())
+			.setParameter("onsale", book.getOnsale())
+			.setParameter("calendarYear", book.getCalendarYear())
+			.setParameter("description", book.getDescription())
+			.setParameter("inventory", book.getInventory())
+			.executeUpdate();
+	}
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>"insert ignore" does the trick of skipping existing elements. It works because of the
+unique constraint that was added in the Book entity</td>
+</tr>
+</table>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>The original hardcoded version is less maintainable and flexible because it failes with an
+exception when the first book is already stored.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Singleton
+@Startup
+public class ConfigBean {
+    @EJB
+    private BookRequestBean request;
+    @PostConstruct
+    public void createData() {
+        request.createBook("201", "Duke", "",
+                "My Early Years: Growing Up on *7",
+                30.75, false, 2005, "What a cool book.", 20);
+        request.createBook("202", "Jeeves", "",
+                "Web Servers for Fun and Profit", 40.75, true,
+                2010, "What a cool book.", 20);
+        request.createBook("203", "Masterson", "Webster",
+                "Web Components for Web Developers",
+                27.75, false, 2010, "What a cool book.", 20);
+        request.createBook("205", "Novation", "Kevin",
+                "From Oak to Java: The Revolution of a Language",
+                10.75, true, 2008, "What a cool book.", 20);
+        request.createBook("206", "Thrilled", "Ben",
+                "The Green Project: Programming for Consumer Devices",
+                30.00, true, 2008, "What a cool book.", 20);
+        request.createBook("207", "Coding", "Happy",
+                "Java Intermediate Bytecodes", 30.95, true,
+                2010, "What a cool book.", 20);
+
+    }
+}</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -994,11 +939,11 @@ public class Product {
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-02-05 19:47:44 +0100
+Last updated 2021-04-19 21:27:30 +0200
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<link rel="stylesheet" href="../../highlight/styles/github.min.css">
+<script src="../../highlight/highlight.min.js"></script>
 <script>hljs.initHighlighting()</script>
 </body>
 </html>
