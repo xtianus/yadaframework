@@ -505,18 +505,24 @@ folder,
 where `<acronym>` is the value of `ext.acronym` in the `build.gradle` file and `<env>` is the "environment", 
 as explained in <<The Build File>> above.
 
-[.bookstore]
---
-For the YadaBookstore application, the default root folder is `/srv/ybsdev` 
---
+The predefined user is `admin@EXAMPLE.com` with password `myAppPassword`. 
 
-The predefined user is `admin` with password `sfkueslifg`. 
-
-Before starting the server for the first time, you may want to change the admin password by editing
-the `/src/main/resources/conf.webapp.dev.xml` file. The password is stored in the database on first startup
+Before starting the server for the first time, you may want to change the admin email and password by editing
+the `/src/main/resources/conf.webapp.dev.xml` file. The data is stored in the database on first startup
 and never read from file again.
 
-There are some other items that can be customized but they can wait for later. 
+There are some other items that can be customized but they can wait for later:
+
+- configuration files
+- log configuration
+- startup actions in `Setup.java`
+
+[.bookstore]
+--
+For the YadaBookstore application, the default root folder is `/srv/ybsdev`. You should change the
+admin user email to your own email address in order to receive emails from the application. 
+--
+
 
 ////
  should customize some generated files.
@@ -585,6 +591,11 @@ This section is about setting up a standalone Tomcat server that can be controll
 You can skip this section if you're going to use the
 embedded version of Tomcat (recommended option for a generic use case).
 ====
+
+[.bookstore]
+--
+Skip this section for the bookstore tutorial.
+--
 
 Download link:++https://tomcat.apache.org/download-80.cgi++[Apache Tomcat 8.5] "64-bit Windows zip" and unzip the folder to some place like `C:\local\Tomcats\apache-tomcat-8.5.51`.
 

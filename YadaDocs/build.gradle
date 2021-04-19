@@ -10,7 +10,7 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.5.1'
+version = '0.7.0'
 
 apply plugin: 'java-library'
 apply plugin: 'eclipse-wtp'
@@ -78,9 +78,11 @@ asciidoctor {
 		// attribute 'docinfo', 'shared-head'
 		//attribute 'stylesheet', '../../../resources/yadadocs.css'
 		attribute 'toc', 'left'
-		// attribute 'docinfo', 'shared'
 		attribute 'source-highlighter', 'highlightjs'
-		attribute 'highlightjsdir', '../highlight'
+		// Can't use a common path because it won't work with files in subfolders.
+		// Must be set in the doc header:
+		// attribute 'highlightjsdir', '../highlight'
+		// attribute 'docinfo', 'shared'
 		attribute 'icons', 'font'
 	}
 	languages 'en'

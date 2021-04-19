@@ -35,7 +35,7 @@ simple architectures can efficiently solve most practical problems a developer w
 ==  Documentation Chapters
 
 The documentation is a mix of tutorial and reference. It loosely follows the official
-Java https://docs.oracle.com/javaee/6/tutorial/doc/glnvi.html["Duke’s Bookstore Case Study Example"^] with many improvements in functionality.
+Java https://eclipse-ee4j.github.io/jakartaee-tutorial/dukes-bookstore.html["Duke’s Bookstore Case Study Example"^] with many improvements in functionality.
 
 [.bookstore]
 --
@@ -44,6 +44,10 @@ The tutorial sections are shown using this visual style.
 
 <<newEclipseProject.adoc#,Getting Started>>:: This section will guide you through the setup of the development environment: installing Java, git,
 MySQL, Eclipse. It will then show you how to create an Eclipse project with a database and a web server
+
+<<examples/bookstoreTutorial.adoc#,Bookstore Tutorial>>:: When your development environment has
+been set by following the instructions in the previous chapter, you can start this tutorial
+that will show you how to quickly create a web application
 
 <<internationalization.adoc#>>:: This section shows how easy it is to handle different languages
 
