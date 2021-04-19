@@ -18,7 +18,9 @@ public class ${acronym.capitalize()}Configuration extends YadaConfiguration {
 		if (sessionTimeoutMinutes==null) {
 			sessionTimeoutMinutes = configuration.getInt("config/security/sessionTimeoutMinutes", -1);
 			if (sessionTimeoutMinutes==-1) {
-				// Se non si configura uguale a web.xml, il js di controllo entra ogni 20 minuti e se è inferiore al timeout vero, la sessione non scade mai
+				// The session timeout must be configured with the same value set in web.xml 
+				// otherwise the session might never expire because the javascript code would
+				// keep it awake.
 				log.error("Session timeout not configured correctly (defaulting to 20). Please configure session timeout in conf.webapp.xml equal to web.xml");
 				sessionTimeoutMinutes = 20;
 			}

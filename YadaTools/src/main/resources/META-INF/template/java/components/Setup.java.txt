@@ -13,7 +13,7 @@ public class Setup extends YadaUserSetup<UserProfile> {
 	// by implementing the setupAppliction() method:
 	
 	// @Override
-	// void setupApplication() {
+	// protected void setupApplication() {
 	// }
 
 }
