@@ -75,6 +75,7 @@ public class YadaWebUtil {
 	public final Pageable FIND_ONE = new PageRequest(0, 1);
 
 	// Characters that should never be found or placed in a slug
+	// ATTENZIONE: ogni modifica va copiata in ArtemideUtil per il CMS, altrimenti i file pdf non vengono cancellati dalla cache
 	private static final String PATTERN_INVALID_SLUG = "[?%:,;=&!+~()@*$'\"\\s]";
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
@@ -363,11 +364,13 @@ public class YadaWebUtil {
 	 * @return the slug, which is empty for a null string
 	 */
 	public static String makeSlugStatic(String source) {
+		// ATTENZIONE: ogni modifica va copiata in ArtemideUtil per il CMS, altrimenti i file pdf non vengono cancellati dalla cache
 		if (StringUtils.isBlank(source)) {
 			return "";
 		}
 		String slug = removeHtmlStatic(source); //rimuove tutti gli eventuali tag.
-		slug = source.trim().toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
+		slug = source.trim().toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e')
+			.replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-').replace(',', '-');
 		slug = slug.replaceAll(" +", "-"); // Spaces become dashes
 		slug = slug.replaceAll(PATTERN_INVALID_SLUG, "");
 		slug = StringUtils.removeEnd(slug, ".");
