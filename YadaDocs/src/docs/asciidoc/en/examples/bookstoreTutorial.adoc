@@ -30,7 +30,7 @@ highlighting the many improvements in maintainability and functionality.
 
 [.bookstore]
 --
-Java Bookstore tutorial links:
+Original Oracle Java Bookstore tutorial links:
 
 - Jakarta EE Tutorial Project https://eclipse-ee4j.github.io/jakartaee-tutorial/[home page^]
 - Tutorial https://github.com/eclipse-ee4j/jakartaee-tutorial-examples[installation docs^]
@@ -353,9 +353,47 @@ public class ConfigBean {
     }
 }
 
-----
- 
+---- 
 --
 
-// List all oracle code that was not needed (if any!)
+== Presentation Layer
+=== General description
+The presentation layer receives page requests from the browser and returns HTML ready
+for display. The returned HTML already contains any dynamic information that is specific
+for the parameters sent by the browser. So if the user is trying to open the description of
+a book, the id of the book is be sent in the request and the presentation layer returns the
+HTML containing the description of that specific book.
+
+This is in contrast to how some other technologies work, where a generic HTML template is sent to the
+browser, then any request for specific data will return not a new HTML page but just the
+data that will be inserted in the existing template on the browser.
+
+In the Yada Framework, web pages are coded in plain HTML that is made dynamic by
+using https://www.thymeleaf.org/[Thymeleaf^] attributes and tags.
+Dynamic values are taken from java beans that are added to the page "model" after being 
+fetched from database. The class that receives and handles browser requests is called a "Controller".
+
+=== Book Display
+
+
+
+The Oracle Bookstore Tutorial starts with a page that shows an image of all available books on a 3x2 grid
+and a similar grid with only the book titles in text form.
+
+[.center]
+.Tomcat configuration
+image::examples/bookstoreHome.jpg[Oracle Bookstore homepage]
+
+
+== Running the Yada Bookstore tutorial
+To run the tutorial on an embedded Tomcat
+
+The tutorial can either be deployed to a standalone Tomcat server or run with an embedded Tomcat.
+In the latter case, the command from the command line is the following:
+
+java net.yadaframework.core.YadaTomcatServer ybsdev src/main/webapp
+
+////
+ List all oracle code that was not needed (if any!)
+////
 
