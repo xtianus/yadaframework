@@ -56,7 +56,7 @@ compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
-    jcenter()
+    mavenCentral()
 	mavenLocal()
 }
 
@@ -124,7 +124,7 @@ task listJars {
 jar {
     manifest {
         attributes("Implementation-Title": "YadaWeb",
-                   "Implementation-Version": version)
+                   "Implementation-Version": archiveVersion)
     }
 }
 

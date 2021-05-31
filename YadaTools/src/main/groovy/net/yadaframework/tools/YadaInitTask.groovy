@@ -3,12 +3,13 @@ package net.yadaframework.tools
 import groovy.text.StreamingTemplateEngine
 
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.Internal
 
 class YadaInitTask extends YadaProject {
 	// TaskOutputs outputs = getOutputs()
-	boolean yadaWebSecurityFound=false;
-	boolean yadaWebCmsFound=false;
-	boolean yadaWebCommerceFound=false;
+	private boolean yadaWebSecurityFound=false;
+	private boolean yadaWebCmsFound=false;
+	private boolean yadaWebCommerceFound=false;
 
 	@TaskAction
 	def initWebApp() {
@@ -147,10 +148,10 @@ class YadaInitTask extends YadaProject {
 		for (filename in entityFiles) {
 			processTemplate("java/persistence/entity", filename, filename-".txt", new File(javaPersistenceFolder, "entity"));
 		}
-		List repositoryFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/persistence/repository");
-		for (filename in repositoryFiles) {
-			processTemplate("java/persistence/repository", filename, filename-".txt", new File(javaPersistenceFolder, "repository"));
-		}
+		// List repositoryFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/persistence/repository");
+		// for (filename in repositoryFiles) {
+		// 	processTemplate("java/persistence/repository", filename, filename-".txt", new File(javaPersistenceFolder, "repository"));
+		// }
 	}
 
 	private copyEnvFiles(env, File envFolderFile, File resourcesSourceFolder, File webAppRootFolder) {

@@ -1,12 +1,12 @@
 plugins {
 	id 'java-library'
-	id 'org.hidetake.ssh' version '2.7.0'
+	id 'org.hidetake.ssh' version '2.10.1'
 	id 'maven-publish'
 	id 'signing'
 }
 
 group = 'net.yadaframework'
-version = '0.7.0'
+version = '0.7.1'
 
 apply plugin: 'groovy'
 // apply plugin: 'java-gradle-plugin'
@@ -30,7 +30,7 @@ eclipse {
 }
 
 repositories {
-	jcenter()
+	mavenCentral()
 }
 
 dependencies {

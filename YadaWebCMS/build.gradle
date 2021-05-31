@@ -29,7 +29,7 @@ compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
-    jcenter()
+    mavenCentral()
 	mavenLocal()
 }
 
@@ -51,7 +51,7 @@ dependencies {
 jar {
     manifest {
         attributes("Implementation-Title": "YadaWebCMS",
-                   "Implementation-Version": version)
+                   "Implementation-Version": archiveVersion)
     }
 }
 
