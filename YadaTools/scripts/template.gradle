@@ -3,7 +3,7 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath 'net.yadaframework:yadaTools:+'
+        classpath 'net.yadaframework:yadatools:+'
     }
 }
 
@@ -72,12 +72,12 @@ dependencies {
     // Add here any library that you might need (then run "Refresh Gradle Project")
     // compile  'joda-time:joda-time:2.+'
     
-	compile	 project(':YadaWeb')
-	compile	 project(':YadaWebSecurity')	// Remove if not used !!!
-	compile	 project(':YadaWebCMS')			// Remove if not used !!!
-	compile	 project(':YadaWebCommerce')	// Remove if not used !!!
+	implementation	 project(':YadaWeb')
+	implementation	 project(':YadaWebSecurity')	// Remove if not used !!!
+	implementation	 project(':YadaWebCMS')			// Remove if not used !!!
+	implementation	 project(':YadaWebCommerce')	// Remove if not used !!!
 
-    compile 'org.springframework:spring-webmvc:5.2.8.RELEASE',
+    implementation 'org.springframework:spring-webmvc:5.2.8.RELEASE',
         'org.springframework:spring-context-support:5.2.8.RELEASE',
 		'org.springframework:spring-tx:5.2.8.RELEASE',
         'org.springframework.security:spring-security-web:5.3.3.RELEASE',

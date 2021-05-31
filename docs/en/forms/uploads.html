@@ -435,13 +435,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
 <h1>File Uploads</h1>
 <div class="details">
-<span id="revnumber">version 0.5.1</span>
+<span id="revnumber">version 0.7.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -493,11 +494,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_description">Description</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>File Upload is handled via <a href="https://commons.apache.org/proper/commons-fileupload/">Commons FileUpload</a>. We don&#8217;t use the Servlet 3 API because, when we had to make a choice,
+<p>File Upload is handled via <a href="https://commons.apache.org/proper/commons-fileupload/" target="_blank" rel="noopener">Commons FileUpload</a>.
+We don&#8217;t use the Servlet 3 API because, when we had to make a choice,
 we couldn&#8217;t figure out how to set the file size limit via our configuration file.</p>
 </div>
 <div class="paragraph">
-<p>Yada offers some utility classes to more easily handle files  <em>after</em> they have been uploaded:</p>
+<p>Yada offers some utility classes to more easily handle files <em>after</em> they have been uploaded:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -526,12 +528,12 @@ we couldn&#8217;t figure out how to set the file size limit via our configuratio
 <div class="sect2">
 <h3 id="_maximum_file_size_setting">Maximum file size setting</h3>
 <div class="paragraph">
-<p>You can set the maximum file size for an upload by means of the maxFileUploadSizeBytes configuration entry:</p>
+<p>You can set the maximum file size for an upload by means of the <code>maxFileUploadSizeBytes</code> configuration entry:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;config&gt;
-        &lt;maxFileUploadSizeBytes&gt;3000000&lt;/maxFileUploadSizeBytes&gt;</code></pre>
+	&lt;maxFileUploadSizeBytes&gt;3000000&lt;/maxFileUploadSizeBytes&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -541,7 +543,8 @@ we couldn&#8217;t figure out how to set the file size limit via our configuratio
 <div class="sect2">
 <h3 id="_maximum_file_size_check">Maximum file size check</h3>
 <div class="paragraph">
-<p>When the upload limit is reached, a message is logged with a debug severity. You can ensure to see the message with the following logback configuration:</p>
+<p>When the upload limit is reached, a message is logged with a debug severity.
+You can ensure to see the message with the following logback configuration:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -549,8 +552,9 @@ we couldn&#8217;t figure out how to set the file size limit via our configuratio
 </div>
 </div>
 <div class="paragraph">
-<p>A Request Attribute is also added to the Request with the name MaxUploadSizeExceededException and the MaxUploadSizeExceededException as a value.
-All Request Parameters sent with the form are lost.</p>
+<p>A Request Attribute is also added to the Request with the name <code>MaxUploadSizeExceededException</code> and
+the MaxUploadSizeExceededException as a value.
+<strong>All Request Parameters sent with the form are lost.</strong></p>
 </div>
 <div class="paragraph">
 <p>The Java method</p>
@@ -566,8 +570,8 @@ All Request Parameters sent with the form are lost.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">if (YadaCommonsMultipartResolver.limitExceeded(request)) {
-        yadaNotify.title("News not saved", model).error().message("File too big. Size limit is " + config.getMaxFileUploadSizeBytes()/(1024*1024) + " MB").add();
-        return "/cms/news";
+	yadaNotify.title("News not saved", model).error().message("File too big. Size limit is " + config.getMaxFileUploadSizeBytes()/(1024*1024) + " MB").add();
+    return "/cms/news";
 }</code></pre>
 </div>
 </div>
@@ -575,7 +579,21 @@ All Request Parameters sent with the form are lost.</p>
 <table>
 <tr>
 <td class="icon">
-<div class="title">Warning</div>
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>On an ajax POST, anything returned by the @Controller is discarded and the user only sees a generic error message.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
 <div class="paragraph">
@@ -596,25 +614,25 @@ The drawback would be that network bandwidth would be wasted and the user will h
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">function fileTooBig() {
-        var file = $('input[name=attachment]')[0].files[0];
-        if (file==null) {
-                return false;
-        }
-        var sizeMega = file.size/1024/1024;
-        if (sizeMega&gt;3) {
-                $('#fileTooBig').show();
-                return true;
-        }
-        $('#fileTooBig').hide();
-        return false;
+    var file = $('input[name=attachment]')[0].files[0];
+    if (file==null) {
+            return false;
+    }
+    var sizeMega = file.size/1024/1024;
+    if (sizeMega&gt;3) {
+            $('#fileTooBig').show();
+            return true;
+    }
+    $('#fileTooBig').hide();
+    return false;
 }
 $('input[name=attachment]').on('change', function() {
-        fileTooBig();
+    fileTooBig();
 });
 $('#theForm').submit(function() {
-        if (fileTooBig()) {
-                event.preventDefault();
-        }
+    if (fileTooBig()) {
+            event.preventDefault();
+    }
 });</code></pre>
 </div>
 </div>
@@ -635,22 +653,23 @@ $('#theForm').submit(function() {
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form method="POST" enctype="multipart/form-data" action="doUpload"&gt;
-        File to upload: &lt;input type="file" name="upfile"&gt;&lt;br/&gt;
-        &lt;input type="submit" value="Press"&gt; to upload the file!
+    File to upload: &lt;input type="file" name="upfile"&gt;&lt;br/&gt;
+    &lt;input type="submit" value="Press"&gt; to upload the file!
 &lt;/form&gt;</code></pre>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_form_fragment_yadaformfileupload">Form Fragment /yada/form/fileUpload</h3>
 <div class="paragraph">
-<p>If you&#8217;re using a  <em>form backing bean</em> you can include a yada fragment for the input tag. The following example also shows any error:</p>
+<p>If you&#8217;re using a  <em>form backing bean</em> you can include a yada fragment for the input tag.
+The following example also shows any error:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/profile}" th:object="${formProfile}" enctype="multipart/form-data" method="post"
 th:classappend="${#fields.hasErrors('*')}? has-error" role="form"&gt;
 
-        &lt;div th:replace="/yada/form/fileUpload::field(fieldName='avatarImage',label='Avatar')"&gt;&lt;/div&gt;</code></pre>
+    &lt;div th:replace="/yada/form/fileUpload::field(fieldName='avatarImage',label='Avatar')"&gt;&lt;/div&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -679,8 +698,8 @@ by adding it to the @RequestMapping signature.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public String storeFile(MultipartFile submittedFile) {
-        File destination = new File("someFolder");
-        YadaWebUtil.saveAttachment(submittedFile, destination):</code></pre>
+    File destination = new File("someFolder");
+    YadaWebUtil.saveAttachment(submittedFile, destination):</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -697,12 +716,11 @@ Use YadaAttachedFile to easily handle file attachments:</p>
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Entity
 public class Product {
+    @OneToOne(cascade=CascadeType.PERSIST)
+    protected YadaAttachedFile icon;
 
-        @OneToOne(cascade=CascadeType.PERSIST)
-        protected YadaAttachedFile icon;
-
-        @OneToOne(cascade=CascadeType.PERSIST)
-        protected YadaAttachedFile specSheet;</code></pre>
+    @OneToOne(cascade=CascadeType.PERSIST)
+    protected YadaAttachedFile specSheet;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -774,7 +792,7 @@ created automatically if the tomcat process has enough permissions, otherwise yo
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public String updateProfile(MultipartFile uploadedMultipart) {
-        File uploadedFile = yadaFileManager.uploadFile(uploadedMultipart);</code></pre>
+    File uploadedFile = yadaFileManager.uploadFile(uploadedMultipart);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -784,8 +802,8 @@ created automatically if the tomcat process has enough permissions, otherwise yo
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "userData", "icon");
 if (newIcon!=null) {
-        user.setIcon(newIcon);
-        userRepository.save(user);
+    user.setIcon(newIcon);
+    userRepository.save(user);
 }</code></pre>
 </div>
 </div>
@@ -799,7 +817,7 @@ The original file is by default deleted from the "uploads" folder unless a speci
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;yadaFileManager&gt;
-        &lt;deleteUploads&gt;false&lt;/deleteUploads&gt;
+    &lt;deleteUploads&gt;false&lt;/deleteUploads&gt;
 &lt;/yadaFileManager&gt;</code></pre>
 </div>
 </div>
@@ -825,7 +843,7 @@ YadaAttachedFile iconAttachedFile = yadaFileManager.attachReplace(previousIcon, 
 <table>
 <tr>
 <td class="icon">
-<div class="title">Caution</div>
+<i class="fa icon-caution" title="Caution"></i>
 </td>
 <td class="content">
 <div class="paragraph">
@@ -847,22 +865,22 @@ There is no way to detect if you are using the wrong method, so be careful.</p>
  * Uploads an "icon" image for the user
  */
 public String updateProfile(MultipartFile uploadedMultipart) {
-        if (uploadedMultipart!=null &amp;&amp; !uploadedMultipart.isEmpty()) {
-                // Saving the uploaded file to the uploads folder
-                File uploadedFile = yadaFileManager.uploadFile(uploadedMultipart);
-                YadaAttachedFile previousIcon = user.getIcon();
-                if (previousIcon==null) {
-                        // Move the file to the "someFolder" directory and create a new YadaAttachedFile
-                        YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "someFolder", "myprefix");
-                        if (newIcon!=null) {
-                                user.setIcon(newIcon);
-                                userRepository.save(user);
-                        }
-                } else {
-                        // Replace the existing file with the uploaded one
-                        yadaFileManager.attachReplace(previousIcon, uploadedFile, uploadedMultipart, "myprefix", "jpg", null, null);
-                }
-        }</code></pre>
+    if (uploadedMultipart!=null &amp;&amp; !uploadedMultipart.isEmpty()) {
+        // Saving the uploaded file to the uploads folder
+        File uploadedFile = yadaFileManager.uploadFile(uploadedMultipart);
+        YadaAttachedFile previousIcon = user.getIcon();
+        if (previousIcon==null) {
+            // Move the file to the "someFolder" directory and create a new YadaAttachedFile
+            YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "someFolder", "myprefix");
+            if (newIcon!=null) {
+                user.setIcon(newIcon);
+                userRepository.save(user);
+            }
+        } else {
+            // Replace the existing file with the uploaded one
+            yadaFileManager.attachReplace(previousIcon, uploadedFile, uploadedMultipart, "myprefix", "jpg", null, null);
+        }
+    }</code></pre>
 </div>
 </div>
 </div>
@@ -884,7 +902,7 @@ The conversion is performed with the command line tool configured in <code>confi
 <table>
 <tr>
 <td class="icon">
-<div class="title">Tip</div>
+<i class="fa icon-tip" title="Tip"></i>
 </td>
 <td class="content">
 <div class="paragraph">
@@ -990,17 +1008,17 @@ crop all images added to the queue until there are no more left.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;config&gt;
-        &lt;dimension targetImageExtension="jpg" preserveImageExtensions="gif"&gt;
-                &lt;news&gt;
-                        &lt;top&gt;
-                                &lt;desktop&gt;1920,1200&lt;/desktop&gt;
-                                &lt;mobile&gt;768,610&lt;/mobile&gt;
-                        &lt;/top&gt;
-                        &lt;thumbnail&gt;
-                                &lt;desktop&gt;1920,1374&lt;/desktop&gt;
-                                &lt;mobile&gt;768,533&lt;/mobile&gt;
-                        &lt;/thumbnail&gt;
-                &lt;/news&gt;</code></pre>
+    &lt;dimension targetImageExtension="jpg" preserveImageExtensions="gif"&gt;
+        &lt;news&gt;
+            &lt;top&gt;
+                &lt;desktop&gt;1920,1200&lt;/desktop&gt;
+                &lt;mobile&gt;768,610&lt;/mobile&gt;
+            &lt;/top&gt;
+            &lt;thumbnail&gt;
+                &lt;desktop&gt;1920,1374&lt;/desktop&gt;
+                &lt;mobile&gt;768,533&lt;/mobile&gt;
+            &lt;/thumbnail&gt;
+        &lt;/news&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1012,7 +1030,7 @@ The above configuration can be read in your subclass of <code>YadaConfiguration<
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public YadaIntDimension[] getDimensionsNewsThumbnail() {
-        return super.getImageDimensions("/news/thumbnail");
+    return super.getImageDimensions("/news/thumbnail");
 }</code></pre>
 </div>
 </div>
@@ -1026,20 +1044,20 @@ This example can crop and resize any image, preserving animated gifs if the gif 
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;config&gt;
-        &lt;shell&gt;
-                &lt;yadaCropAndResize&gt;
-                        &lt;executable&gt;convert&lt;/executable&gt;
-                        &lt;arg&gt;${FILENAMEIN}&lt;/arg&gt;
-                        &lt;arg&gt;-coalesce&lt;/arg&gt;
-                        &lt;arg&gt;-repage&lt;/arg&gt;
-                        &lt;arg&gt;0x0&lt;/arg&gt;
-                        &lt;arg&gt;-crop&lt;/arg&gt;
-                        &lt;arg&gt;${w}x${h}+${x}+${y}&lt;/arg&gt;
-                        &lt;arg&gt;-resize&lt;/arg&gt;
-                        &lt;arg&gt;${resizew}x${resizeh}&amp;gt;&lt;/arg&gt;
-                        &lt;arg&gt;+repage&lt;/arg&gt;
-                        &lt;arg&gt;${FILENAMEOUT}&lt;/arg&gt;
-                &lt;/yadaCropAndResize&gt;</code></pre>
+    &lt;shell&gt;
+        &lt;yadaCropAndResize&gt;
+            &lt;executable&gt;convert&lt;/executable&gt;
+            &lt;arg&gt;${FILENAMEIN}&lt;/arg&gt;
+            &lt;arg&gt;-coalesce&lt;/arg&gt;
+            &lt;arg&gt;-repage&lt;/arg&gt;
+            &lt;arg&gt;0x0&lt;/arg&gt;
+            &lt;arg&gt;-crop&lt;/arg&gt;
+            &lt;arg&gt;${w}x${h}+${x}+${y}&lt;/arg&gt;
+            &lt;arg&gt;-resize&lt;/arg&gt;
+            &lt;arg&gt;${resizew}x${resizeh}&amp;gt;&lt;/arg&gt;
+            &lt;arg&gt;+repage&lt;/arg&gt;
+            &lt;arg&gt;${FILENAMEOUT}&lt;/arg&gt;
+        &lt;/yadaCropAndResize&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1048,16 +1066,16 @@ This example can crop and resize any image, preserving animated gifs if the gif 
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;yadaCropAndResize&gt;
-        &lt;executable&gt;convert&lt;/executable&gt;
-        &lt;arg&gt;${FILENAMEIN}&lt;/arg&gt;
-        &lt;arg&gt;-background&lt;/arg&gt; &lt;!-- "-background white -flatten" converts any transparent png backround to white instead of the default black --&gt;
-        &lt;arg&gt;white&lt;/arg&gt;
-        &lt;arg&gt;-flatten&lt;/arg&gt;
-        &lt;arg&gt;-crop&lt;/arg&gt;
-        &lt;arg&gt;${w}x${h}+${x}+${y}&lt;/arg&gt;
-        &lt;arg&gt;-resize&lt;/arg&gt;
-        &lt;arg&gt;${resizew}x${resizeh}&amp;gt;&lt;/arg&gt;
-        &lt;arg&gt;${FILENAMEOUT}&lt;/arg&gt;
+    &lt;executable&gt;convert&lt;/executable&gt;
+    &lt;arg&gt;${FILENAMEIN}&lt;/arg&gt;
+    &lt;arg&gt;-background&lt;/arg&gt; &lt;!-- "-background white -flatten" converts any transparent png backround to white instead of the default black --&gt;
+    &lt;arg&gt;white&lt;/arg&gt;
+    &lt;arg&gt;-flatten&lt;/arg&gt;
+    &lt;arg&gt;-crop&lt;/arg&gt;
+    &lt;arg&gt;${w}x${h}+${x}+${y}&lt;/arg&gt;
+    &lt;arg&gt;-resize&lt;/arg&gt;
+    &lt;arg&gt;${resizew}x${resizeh}&amp;gt;&lt;/arg&gt;
+    &lt;arg&gt;${FILENAMEOUT}&lt;/arg&gt;
 &lt;/yadaCropAndResize&gt;</code></pre>
 </div>
 </div>
@@ -1082,11 +1100,11 @@ for each multipart file you need to receive:</p>
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Entity
 public class News implements CloneableDeep {
-        @OneToOne(cascade=CascadeType.PERSIST)
-        protected YadaAttachedFile thumbnail;
+    @OneToOne(cascade=CascadeType.PERSIST)
+    protected YadaAttachedFile thumbnail;
 
-        @Transient
-        private  MultipartFile thumbnailImage;</code></pre>
+    @Transient
+    private  MultipartFile thumbnailImage;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1101,7 +1119,7 @@ public class News implements CloneableDeep {
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/addOrUpdateNews}" th:object="${news}" enctype="multipart/form-data" th:classappend="${#fields.hasErrors('*')}? has-error" method="post" role="form"&gt;
-        &lt;div th:replace="/yada/form/fileUpload::field(fieldName='thumbnailImage',size=${thumbnailSize},accept='image/*',label='Upload thumbnail image',required=${news.thumbnail==null},help='Thumbnail image',attachedFile=*{thumbnail})"&gt;&lt;/div&gt;</code></pre>
+    &lt;div th:replace="/yada/form/fileUpload::field(fieldName='thumbnailImage',size=${thumbnailSize},accept='image/*',label='Upload thumbnail image',required=${news.thumbnail==null},help='Thumbnail image',attachedFile=*{thumbnail})"&gt;&lt;/div&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1149,10 +1167,10 @@ model.addAttribute("thumbnailSize", biggestNeeded);</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/addOrUpdateNews")
 public String addOrUpdateNews(News news, BindingResult newsBinding, HttpServletRequest request, Model model, Locale locale) {
-        if (YadaCommonsMultipartResolver.limitExceeded(request)) {
-                yadaNotify.title("News not saved", model).error().message("File too big. Size limit is " + config.getMaxFileUploadSizeBytes()/(1024*1024) + " MB").add();
-                return "/manager/news";
-        }</code></pre>
+    if (YadaCommonsMultipartResolver.limitExceeded(request)) {
+        yadaNotify.title("News not saved", model).error().message("File too big. Size limit is " + config.getMaxFileUploadSizeBytes()/(1024*1024) + " MB").add();
+        return "/manager/news";
+    }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1172,27 +1190,27 @@ public String addOrUpdateNews(News news, BindingResult newsBinding, HttpServletR
 YadaManagedFile thumbnailManagedFile = null;
 YadaIntDimension[] thumbnailDimensionsDesktopMobile = null;
 if (thumbnailImage!=null &amp;&amp; !thumbnailImage.isEmpty()) {
-        try {
-                thumbnailDimensionsDesktopMobile = config.getDimensionsNewsThumbnail();
-                YadaIntDimension biggestNeeded = YadaIntDimension.biggest(thumbnailDimensionsDesktopMobile);
-                thumbnailManagedFile = yadaFileManager.manageFile(thumbnailImage);
-                YadaIntDimension fileDimension = thumbnailManagedFile.getDimension();
-                if (fileDimension.isUnset()) {
-                        newsBinding.rejectValue("thumbnailImage", "validation.value.invalidImage", "Invalid image file");
-                        valid = false;
-                } else if (biggestNeeded.isAnyBiggerThan(fileDimension)) {
-                        newsBinding.rejectValue("thumbnailImage", "validation.value.smallImage", new Object[] {fileDimension, biggestNeeded}, "Image too small");
-                        valid = false;
-                }
-        } catch (IOException e) {
-                log.error("Error uploading image", e);
-                newsBinding.rejectValue("thumbnailImage", "dashboard.imageupload.error");
-                valid = false;
+    try {
+        thumbnailDimensionsDesktopMobile = config.getDimensionsNewsThumbnail();
+        YadaIntDimension biggestNeeded = YadaIntDimension.biggest(thumbnailDimensionsDesktopMobile);
+        thumbnailManagedFile = yadaFileManager.manageFile(thumbnailImage);
+        YadaIntDimension fileDimension = thumbnailManagedFile.getDimension();
+        if (fileDimension.isUnset()) {
+            newsBinding.rejectValue("thumbnailImage", "validation.value.invalidImage", "Invalid image file");
+            valid = false;
+        } else if (biggestNeeded.isAnyBiggerThan(fileDimension)) {
+            newsBinding.rejectValue("thumbnailImage", "validation.value.smallImage", new Object[] {fileDimension, biggestNeeded}, "Image too small");
+            valid = false;
         }
+    } catch (IOException e) {
+        log.error("Error uploading image", e);
+        newsBinding.rejectValue("thumbnailImage", "dashboard.imageupload.error");
+        valid = false;
+    }
 }
 
 if (!valid) {
-        return EDIT_VIEW;
+    return EDIT_VIEW;
 }</code></pre>
 </div>
 </div>
@@ -1219,10 +1237,10 @@ String cropRedirect = yadaWebUtil.redirectString("/manager/cropPage", locale);
 String finalRedirect = yadaWebUtil.redirectString("/manager/journal", locale);
 YadaCropQueue yadaCropQueue = applicationSession.addCropQueue(cropRedirect, finalRedirect); // Clear any previous abandoned crops and set the destination
 if (thumbnailManagedFile!=null) {
-        YadaCropImage yadaCropImage = yadaCropQueue.addCropImage(thumbnailManagedFile, thumbnailDimensionsDesktopMobile, FOLDER_NEWS, "thumb-");
-        YadaAttachedFile newOrExisting = yadaCropImage.titleKey("crop.news.thumbnail").cropDesktop().cropMobile().link(news.getThumbnail());
-        news.setThumbnail(newOrExisting);
-        imageLoaded=true;
+    YadaCropImage yadaCropImage = yadaCropQueue.addCropImage(thumbnailManagedFile, thumbnailDimensionsDesktopMobile, FOLDER_NEWS, "thumb-");
+    YadaAttachedFile newOrExisting = yadaCropImage.titleKey("crop.news.thumbnail").cropDesktop().cropMobile().link(news.getThumbnail());
+    news.setThumbnail(newOrExisting);
+    imageLoaded=true;
 }</code></pre>
 </div>
 </div>
@@ -1244,11 +1262,11 @@ yadaCropImage.setYadaAttachedFile(newOrExisting);</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">if (!imageLoaded) {
-        applicationSession.deleteCropQueue();
+    applicationSession.deleteCropQueue();
 } else {
-        news = newsRepository.save(news);
-        log.debug("Entering crop workflow for news");
-        return yadaCropQueue.getCropRedirect();
+    news = newsRepository.save(news);
+    log.debug("Entering crop workflow for news");
+    return yadaCropQueue.getCropRedirect();
 }</code></pre>
 </div>
 </div>
@@ -1261,18 +1279,18 @@ yadaCropImage.setYadaAttachedFile(newOrExisting);</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;head&gt;
-        &lt;link rel="stylesheet" th:href="@{/static/jcrop-3/jcrop.css}"&gt;
-        &lt;script th:src="@{/static/jcrop-3/jcrop.js}"&gt;&lt;/script&gt;
+    &lt;link rel="stylesheet" th:href="@{/static/jcrop-3/jcrop.css}"&gt;
+    &lt;script th:src="@{/static/jcrop-3/jcrop.js}"&gt;&lt;/script&gt;
 &lt;/head&gt;
 &lt;body class="yadaCropPage"&gt;
-        &lt;div class=" container-fluid sec" th:with="cropQueue=${@applicationSession.cropQueue}, cropImage=${cropQueue.currentImage}"&gt;
+    &lt;div class=" container-fluid sec" th:with="cropQueue=${@applicationSession.cropQueue}, cropImage=${cropQueue.currentImage}"&gt;
 
-                &lt;h1&gt;&lt;span th:text="#{${cropImage.titleKey}}"&gt;This is the title&lt;/span&gt; ([[${cropQueue.count}]] left)&lt;/h1&gt;
-                &lt;p&gt;Drag the handles to the desired crop, then press the [[#{yada.crop.cropSubmit}]] button&lt;/p&gt;
+        &lt;h1&gt;&lt;span th:text="#{${cropImage.titleKey}}"&gt;This is the title&lt;/span&gt; ([[${cropQueue.count}]] left)&lt;/h1&gt;
+        &lt;p&gt;Drag the handles to the desired crop, then press the [[#{yada.crop.cropSubmit}]] button&lt;/p&gt;
 
-                &lt;div th:replace="~{/yadacms/imageCropper::component(cropQueue=${cropQueue})}"&gt;&lt;/div&gt;
+        &lt;div th:replace="~{/yadacms/imageCropper::component(cropQueue=${cropQueue})}"&gt;&lt;/div&gt;
 
-        &lt;/div&gt;
+    &lt;/div&gt;
 &lt;/body&gt;</code></pre>
 </div>
 </div>
@@ -1310,12 +1328,12 @@ This always happens in the following cases:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.5.1<br>
-Last updated 2021-02-05 19:47:01 +0100
+Version 0.7.0<br>
+Last updated 2021-04-12 13:12:02 +0200
 </div>
 </div>
-<link rel="stylesheet" href="../highlight/styles/github.min.css">
-<script src="../highlight/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
 <script>hljs.initHighlighting()</script>
 </body>
 </html>

@@ -435,13 +435,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" type="text/css" href="../yadadocs.css" />
+
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
 <h1>Getting Started</h1>
 <div class="details">
-<span id="revnumber">version 0.5.1</span>
+<span id="revnumber">version 0.7.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -459,7 +461,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_connect_to_git">Connect to GIT</a>
 <ul class="sectlevel2">
 <li><a href="#_add_the_repositories">Add the repositories</a></li>
-<li><a href="#_generate_the_yadatools_library">Generate the YadaTools library</a></li>
 </ul>
 </li>
 <li><a href="#_the_first_project">The First Project</a></li>
@@ -535,7 +536,7 @@ and a working copy of <a href="https://www.eclipse.org/downloads/packages/" targ
 <table>
 <tr>
 <td class="icon">
-<div class="title">Warning</div>
+<i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
 <div class="title">Java version mismatch</div>
@@ -560,7 +561,7 @@ The OpenJDK version of Java should also work fine if you prefer open source soft
 <table>
 <tr>
 <td class="icon">
-<div class="title">Note</div>
+<i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
 <div class="title">JDK vs JRE</div>
@@ -689,7 +690,7 @@ compared to editing files in a generic text editor and compiling from the comman
 <table>
 <tr>
 <td class="icon">
-<div class="title">Warning</div>
+<i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
 Eclipse jee 2019-12-R throws a weird "VerifyError: Inconsistent stackmap frames" on some occasions. Don&#8217;t use that version.
@@ -705,7 +706,7 @@ Be sure to install the 64 bit "Enterprise" version.</p>
 <table>
 <tr>
 <td class="icon">
-<div class="title">Caution</div>
+<i class="fa icon-caution" title="Caution"></i>
 </td>
 <td class="content">
 <div class="title">Need Enterprise version?</div>
@@ -733,8 +734,20 @@ want to use. For example:</p>
 C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\myRelease"</code></pre>
 </div>
 </div>
+<div class="openblock bookstore">
+<div class="content">
 <div class="paragraph">
-<p>Run Eclipse with the chosen workspace and click on the "Workbench" icon to the right of the "Welcome to Eclipse" page.</p>
+<p>Create a workspace for the bookstore tutorial:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="dos" class="language-dos hljs">C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\yadaTutorial"</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Run Eclipse with the chosen workspace and click on the "Workbench" or "Hide" icon to the right of the "Welcome to Eclipse" page.</p>
 </div>
 <div class="paragraph">
 <p>Update your installation with "Help &gt; Check for Updates" and follow the instructions. Failing to do so might prevent
@@ -767,7 +780,7 @@ which would be <code>C:\Local\jdk8</code> if you followed the instructions above
 </div>
 <div class="paragraph">
 <p>Add the <a href="#_java_sdk">previously donwloaded</a> JRE as a new Runtime in "Window &gt; Preferences &gt; Java &gt; Installed JREs" and set it as the default.
-Also set the "Window &gt; Preferences &gt; Java &gt; Compiler &gt; JDK Compliance" accordingly.</p>
+Also set the "Window &gt; Preferences &gt; Java &gt; Compiler &gt; JDK Compliance" accordingly (that would be "1.8" for Java 8).</p>
 </div>
 <div class="paragraph">
 <p>In order to better spot errors and stack traces, you should considerably increase the console output buffer or remove the limit altogether
@@ -803,7 +816,7 @@ The git url should be like <code>git@github.com:yourname/yadaframework.git</code
 <table>
 <tr>
 <td class="icon">
-<div class="title">Note</div>
+<i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
 Since 2021 the preferred method for connecting to GitHub is ssh
@@ -860,15 +873,22 @@ Since 2021 the preferred method for connecting to GitHub is ssh
 add any branch that you need.</p>
 </div>
 <div class="paragraph">
-<p>On the "Local Destination" dialog you just need to select a local folder where to clone the repository.
-We assume that you are going to create a new Eclipse project called <code>MySiteProject</code> (will be explained later) and
+<p>On the "Local Destination" dialog you need to select a local folder where to clone the repository.
+Here we assume that you are going to create a new Eclipse project called <code>MySiteProject</code> (will be explained later) and
 add it to a git repository called <code>mysite</code>.
-It is very important that you <strong>store all the repositories in a common parent folder</strong> that is specific to the current project, for example
+It is very important that you <strong>store both the Yada Framework repository and your application repository in a common parent folder</strong> that is specific to the current project, for example
 <code>C:\work\git-mysite</code>, otherwise relative paths in the build file won&#8217;t work and you&#8217;ll have to customise them.</p>
 </div>
+<div class="openblock bookstore">
+<div class="content">
 <div class="paragraph">
-<p>So you should create your base project folder before going on. The Yada Framework will be cloned inside this folder, with
-a name of "yadaframework".</p>
+<p>For the bookstore example we create a common git folder called <code>C:\work\git-yadabookstore</code> that will contain the "yadaframework" git repo.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>You should create your base git folder before proceeding. The Yada Framework will have to be cloned inside this folder, with
+a name of "yadaframework":</p>
 </div>
 <div class="imageblock center">
 <div class="content">
@@ -877,7 +897,7 @@ a name of "yadaframework".</p>
 <div class="title">Figure 9. Repository destination folder</div>
 </div>
 <div class="paragraph">
-<p>At the end you should have a filesystem structure like the following, where "mysite" is any new project that uses the Yada Framework:</p>
+<p>At the end, when you later also add the "mysite" git and web project, the filesystem structure will be like the following, where "mysite" is any new project that uses the Yada Framework:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -895,34 +915,7 @@ a name of "yadaframework".</p>
 </div>
 </div>
 <div class="paragraph">
-<p>When you have connected to all repositories, you can switch to the "Java Perspective" in Eclipse.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_generate_the_yadatools_library">Generate the YadaTools library</h3>
-<div class="paragraph">
-<p>When you first setup the development environment, you currently need to generate the YadaTools library locally
-because it has not been uploaded on a distribution site yet.
-If you fail to do so, you&#8217;ll get a weird compilation error like  <em>"Could not fetch model of type 'GradleBuild' using Gradle distribution"</em>.
-To generate the library, you first need to import the YadaTools project.</p>
-</div>
-<div class="paragraph">
-<p>Use the "File &gt; Import&#8230;&#8203; &gt; Gradle &gt; Existing Gradle Project" menu to import YadaTools:</p>
-</div>
-<div class="imageblock center">
-<div class="content">
-<img src="../img/newEclipseProject/yadaTools.jpg" alt="Import the YadaTools project">
-</div>
-<div class="title">Figure 10. Import the YadaTools project</div>
-</div>
-<div class="paragraph">
-<p>If the imported project has some errors, first of right-click and choose "Gradle &gt; Refresh Gradle Project".
-If it complains about some unbound system library, open "Properties &gt; Java build path &gt; Libraries" and remove the library.</p>
-</div>
-<div class="paragraph">
-<p>To build the library, run the "YadaTools - PublishToMavenLocal" task from "Run &gt; Run Configurations&#8230;&#8203; &gt; Gradle Task". If you have some
-weird errors, try from the command line in the YadaTools folder and run <code>gradlew PublishToMavenLocal --no-daemon</code> because the Gradle
-daemon sometimes gets in the way&#8230;&#8203;</p>
+<p>When you have connected the yada repository, you can switch to the "Java Perspective" in Eclipse.</p>
 </div>
 </div>
 </div>
@@ -934,40 +927,84 @@ daemon sometimes gets in the way&#8230;&#8203;</p>
 <p>Create a new Eclipse Project using "File &gt; New &gt; Project&#8230;&#8203; &gt; Gradle &gt; Gradle Project" menu.
 Use any name you like ("MySiteProject" in the above example) and accept all defaults. A new Java project will be created in your workspace.</p>
 </div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
 <div class="paragraph">
-<p>Delete any example file and folders inside the "src/main/java" and "src/test/java" folders.</p>
+<p>If the wizard also created a <code>lib</code> project, that&#8217;s an <a href="https://github.com/eclipse/buildship/issues/1077" target="_blank" rel="noopener">Eclipse bug</a>. The workaround
+is to specify Gradle version 6.6.1 in the Workspace Gradle Preferences.</p>
 </div>
 <div class="paragraph">
-<p>Edit the <code>/MySiteProject/gradle/wrapper/gradle-wrapper.properties</code> file changing the <code>distributionUrl</code> to match the version of
-Gradle that you want to use. For example <code>distributionUrl=https\://services.gradle.org/distributions/gradle-5.6.4-bin.zip</code>.</p>
+<p>Be careful: if you specify the Gradle version by overriding the Project options during Project creation instead,
+you will get an inconsistent project because (for a bug?) Eclipse will create a <code>.settings/org.eclipse.jdt.core.prefs</code> file
+that will target the latest java version (15) regardless of your Workspace preferences.</p>
 </div>
 <div class="paragraph">
-<p>Right-click the project and choose "Gradle &gt; Refresh Gradle Project" to update the version of Gradle used.</p>
+<p>You can later change the project properties
+and set a later Gradle version if you wish.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>For the bookstore example the project name will be <code>YadaBookstore</code></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Delete any example file and folders inside the "src/main/java" and "src/test/java" folders of the new project.</p>
+</div>
+<div class="paragraph">
+<p>Optional: edit the <code>/MySiteProject/gradle/wrapper/gradle-wrapper.properties</code> file changing the <code>distributionUrl</code> to match the version of
+Gradle that you want to use. For example <code>distributionUrl=https\://services.gradle.org/distributions/gradle-7.0-bin.zip</code>.
+This is only needed if the gradle you want to use is not yet available in Eclipse or if you were forced to use an old version
+at project creation in order to bypass some bug. Right-click the project and choose "Gradle &gt; Refresh Gradle Project" to update the version of Gradle used.</p>
 </div>
 <div class="paragraph">
 <p>You can choose to add an external Tomcat server or use the embedded version. In the first case, you should be using the "Enterprise" version of Eclipse.
-If not, you should at least install the "Eclipse Web Tools Platform" (WTP) plugin and&#8230;&#8203; hope for the best.</p>
+If not, you should at least install the "Eclipse Web Tools Platform" (WTP) plugin.</p>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>The bookstore application will use Tomcat embedded, so no need to install any standalone server.</p>
+</div>
+</div>
 </div>
 <div class="paragraph">
-<p>Import the Yada projects that you need to use. After connecting to the GitHub repository as explained above, you need to import the
-needed projects using the "File &gt; Import&#8230;&#8203; &gt; Gradle &gt; Existing Gradle Project" menu as explained in "<a href="#_generate_the_yadatools_library">Generate the YadaTools library</a>" above.
-To import all Yada projects at once you could just import the "YadaWebCommerce" project and rely on dependency resolution to automatically
-import everything else:</p>
+<p>After connecting to the GitHub repository as explained above, you can import the
+needed projects using the "File &gt; Import&#8230;&#8203; &gt; Gradle &gt; Existing Gradle Project" menu.</p>
+</div>
+<div class="paragraph">
+<p>To import most Yada Framework projects at once you could just import the "YadaWebCommerce" project and rely on dependency resolution to automatically
+import everything else.
+Don&#8217;t worry about Gradle versions here: the version used will be the one configured inside the imported projects.</p>
 </div>
 <div class="imageblock center">
 <div class="content">
 <img src="../img/newEclipseProject/importYada.jpg" alt="Import the YadaWebCommerce project">
 </div>
-<div class="title">Figure 11. Import the YadaWebCommerce project</div>
+<div class="title">Figure 10. Import the YadaWebCommerce project</div>
+</div>
+<div class="paragraph">
+<p>The <code>YadaTools</code> project should also be imported because you will later need to copy some files from it.</p>
+</div>
+<div class="paragraph">
+<p>If the imported project has some errors, first of all right-click and choose "Gradle &gt; Refresh Gradle Project".
+If it complains about some unbound system library, open "Properties &gt; Java build path &gt; Libraries" and remove the library.</p>
 </div>
 <div class="paragraph">
 <p>You should now have, in your workspace, the following Yada projects:</p>
 </div>
 <div class="ulist">
 <ul>
-<li>
-<p>YadaTools</p>
-</li>
 <li>
 <p>YadaWeb</p>
 </li>
@@ -983,15 +1020,60 @@ import everything else:</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>The next step is to create a git repository to store your projects. You can use any public provider like GitHub or a private installation
-based for example on GitLab. You should definitely use git to store your files, also because they will be moved to the same folder of the
-Yada projects and relative paths in the build file will work effortlessly.
-When using "GitLab", let it create a default readme.md file so that you&#8217;ll be able to check out the repository easily (there should be a
-similar option on GitHub). Then add the repository location to the Git Perspective as done for the Yada Framework.
-The local folder should be next to the Yada Framework local git, for example <code>C:\work\git-mysite\mysite</code>.
-To add your project to the local git repository right-click on it and choose "Team &gt; Share Project&#8230;&#8203;".
+<p>The next step is to create a git repository to store your projects.
+You must definitely use git to store your files, because
+after sharing the project to the repo it will be moved to the same root folder of the
+Yada projects so that relative paths in the build file will work effortlessly.</p>
+</div>
+<div class="paragraph">
+<p>For a quick test, you can just create a
+local repository. It must reside in the same root folder that was used when cloning Yada, that was <code>C:\work\git-mysite</code>
+in the previous example. The name can be anything you like. Here we use 'mysite':</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../img/newEclipseProject/newGit.jpg" alt="Create a local git repository">
+</div>
+<div class="title">Figure 11. Create a local git repository</div>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>In the bookstore tutorial the git folder would be <code>C:\work\git-yadabookstore\yadabookstore</code></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also use any public provider like GitHub or a private server installation
+based for example on GitLab and clone the repository locally, being careful to create the correct directory tree.</p>
+</div>
+<div class="paragraph">
+<p>When using GitLab, let it create a default readme.md file so that you&#8217;ll be able to check out the repository easily (there should be a
+similar option on GitHub). Then add the repository location to the Git Perspective as done for the Yada Framework.</p>
+</div>
+<div class="paragraph">
+<p>After the repository has been added to Eclipse, to add your project to the local git repository right-click on it and
+choose "Team &gt; Share Project&#8230;&#8203;".
 In the dialog you should just select the correct repository and accept the defaults.
-Finally edit <code>.gitignore</code> in the root of your project look like the following:</p>
+The resulting filesystem structure will be as follows:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="dos" class="language-dos hljs">C:\work\git-mysite
+  mysite
+    .git
+    MySiteProject
+  yadaframework
+    .git
+    docs
+    YadaDocs
+    YadaTools
+    YadaWeb
+    ... and other stuff</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Finally edit <code>.gitignore</code> in the root of your project to make it look like the following:</p>
 </div>
 <div class="listingblock">
 <div class="title">.gitignore</div>
@@ -1006,6 +1088,10 @@ Finally edit <code>.gitignore</code> in the root of your project look like the f
 !gradle-wrapper.jar</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>If you don&#8217;t see the file, you should change the workspace filter. Next to the "Package Explorer" title there&#8217;s a
+menu icon containing the "Filters&#8230;&#8203;" item. Ensure that ".* resources" is NOT selected.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1015,7 +1101,36 @@ Finally edit <code>.gitignore</code> in the root of your project look like the f
 <p>Replace your <code>build.gradle</code> with the contents of <code>/YadaTools/scripts/template.gradle</code>.</p>
 </div>
 <div class="paragraph">
-<p>The <code>// CHANGE THIS !!!</code> items should be edited to suit your needs.</p>
+<p>The lines marked with <code>// CHANGE THIS !!!</code> should be edited to suit your needs.</p>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>In the bookstore tutorial we use the <code>ybs</code> acronym and keep all the defaults.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>ext.acronym = 'ybs'</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The Yada Framework has the concept of "environment" built in: an environment is an installation of the application.
+There can be a development environemnt that runs on your computer, a test environment that is deployed on a remote
+server and is used for testing, a production environment that is deployed on a remote serer and is used by the
+end users.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>The default environments are "dev" for "Development", "tst" for "Test" and "prod" for "Production".
@@ -1048,8 +1163,15 @@ in the same root folder of your project repository as explained in
 This setup is needed to use YadaWeb class files directly instead of going through the jar,
 and is handy when you plan to work on the YadaWeb sources to fix and improve them.</p>
 </div>
+<div class="openblock bookstore">
+<div class="content">
 <div class="paragraph">
-<p>More information on the wtp syntax <a href="https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpComponent.html">here</a> and <a href="https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpFacet.html">here</a>.</p>
+<p>Keep <code>rootProject.name = 'YadaBookstore'</code> for the bookstore tutorial.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>More information on the wtp syntax <a href="https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpComponent.html" target="_blank" rel="noopener">here</a> and <a href="https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpFacet.html" target="_blank" rel="noopener">here</a>.</p>
 </div>
 </div>
 </div>
@@ -1057,7 +1179,7 @@ and is handy when you plan to work on the YadaWeb sources to fix and improve the
 <h2 id="_code_generation_just_a_bit">Code Generation (just a bit)</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Ensure you have these folders in your project before the next step:</p>
+<p>Ensure you have these folders in your project before the next step, and create them when missing:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -1072,16 +1194,51 @@ and is handy when you plan to work on the YadaWeb sources to fix and improve the
 <div class="paragraph">
 <p>Use the <code>Gradle &gt; Refresh Gradle Project</code> project menu item to initialise the project.</p>
 </div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
 <div class="paragraph">
-<p>Open a command prompt in the root folder of your project (e.g. <code>C:\work\git-mysite\MySiteProject</code>) and run <code>gradlew yadaInit --no-daemon</code>.
-This task will add the java core Spring configuration and some default files that will have to be either deleted or customised.
+<p>If you get the error "<strong>Java compiler level does not match the version of the installed Java project facet</strong>"
+you may have an inconsistent workspace, probably because you changed the default Gradle options during project creation.
+Check that the file <code>.settings/org.eclipse.jdt.core.prefs</code> matches the project&#8217;s compiler compliance level as
+shown in the project properties dialog. Also check that the same value is present in <code>.settings/org.eclipse.wst.common.project.facet.core.xml</code>
+under <code>facet="jst.java"</code>.
+You may need to edit these files manually to make them consistent.
+After that, repeat the Gradle refresh on your main project.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Open a command prompt in the root folder of your project (e.g. <code>C:\work\git-mysite\MySiteProject</code>) and run <code>gradlew yadaInit --no-daemon</code>.</p>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>For the bookstore tutorial:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="dos" class="language-dos hljs">cd C:\work\git-yadabookstore\yadabookstore\YadaBookstore
+gradlew yadaInit --no-daemon</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This task will add the java core Spring configuration and some default files that later will have to be either deleted or customised.
 The "--no-daemon" option is to stay on the safe side.</p>
 </div>
 <div class="admonitionblock note">
 <table>
 <tr>
 <td class="icon">
-<div class="title">Note</div>
+<i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
 <div class="paragraph">
@@ -1092,7 +1249,7 @@ The "--no-daemon" option is to stay on the safe side.</p>
 </table>
 </div>
 <div class="paragraph">
-<p>If you see compilation errors ensure that you&#8217;re just missing some classpath libraries and do a "Refresh Gradle Project" again. If you
+<p>Refresh your project in Eclipse (F5). If you see compilation errors ensure that you&#8217;re just missing some classpath libraries and do a "Refresh Gradle Project" again. If you
 still have errors, try to fix them ;-) For example you might need to remove the dependency on YadaWebSeurity classes if you didn&#8217;t want to use it.</p>
 </div>
 </div>
@@ -1101,38 +1258,42 @@ still have errors, try to fix them ;-) For example you might need to remove the 
 <h2 id="_initial_customization">Initial Customization</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Before starting the server for the first time, you should customise some generated files.
-The bare minimum would be to edit these files:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>/src/main/resources/conf.webapp.dev.xml</p>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>paths/basePath</strong> is where your project files will be found</p>
-</li>
-<li>
-<p><strong>setup/users/user/admin</strong> is the initial user of your site (if YadaWebSecurity is being used). You should change the password at least</p>
-</li>
-</ul>
-</div>
-</li>
-<li>
-<p>/src/main/resources/logback.xml::</p>
-<div class="ulist">
-<ul>
-<li>
-<p>you may want to change the log path</p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
+<p>By default, all files used and created by a running application are to be found inside the <code>/srv/&lt;acronym&gt;&lt;env&gt;</code> root
+folder,
+where <code>&lt;acronym&gt;</code> is the value of <code>ext.acronym</code> in the <code>build.gradle</code> file and <code>&lt;env&gt;</code> is the "environment",
+as explained in <a href="#_the_build_file">The Build File</a> above.</p>
 </div>
 <div class="paragraph">
-<p>You can skip the "tst" and "prod" files until you&#8217;re ready to deploy to a test/production server.</p>
+<p>The predefined user is <code>admin@EXAMPLE.com</code> with password <code>myAppPassword</code>.</p>
+</div>
+<div class="paragraph">
+<p>Before starting the server for the first time, you may want to change the admin email and password by editing
+the <code>/src/main/resources/conf.webapp.dev.xml</code> file. The data is stored in the database on first startup
+and never read from file again.</p>
+</div>
+<div class="paragraph">
+<p>There are some other items that can be customized but they can wait for later:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>configuration files</p>
+</li>
+<li>
+<p>log configuration</p>
+</li>
+<li>
+<p>startup actions in <code>Setup.java</code></p>
+</li>
+</ul>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>For the YadaBookstore application, the default root folder is <code>/srv/ybsdev</code>. You should change the
+admin user email to your own email address in order to receive emails from the application.</p>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -1140,15 +1301,66 @@ The bare minimum would be to edit these files:</p>
 <h2 id="_database_setup">Database Setup</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Create the local database by running the scripts inside <code>/env/dev</code> (if you&#8217;re not on windows, just copy the content and adapt it to your platform).</p>
+<p>The default database schema, user and password are found both in <code>/src/main/resources/conf.webapp.dev.xml</code> and
+<code>/env/dev/createDatabaseAndUser.bat</code>. If you want to change them, do so in both files.</p>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>For the YadaBookstore application, the default values are:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">schema</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ybsdbdev</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">user</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ybsuserdev</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">password</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">mydevpwd</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div class="paragraph">
-<p>Create the database schema by running the <code>gradlew dbSchema</code> task.
-You may get some compilation errors that need to be fixed.
+<p>To create the database and user, run the <code>/env/dev/createDatabaseAndUser.bat</code>
+(if you&#8217;re not on windows, just copy the content and adapt it to your platform).
+On Windows you can open a cmd window and drag the file there from Eclipse, then just press Enter.</p>
+</div>
+<div class="paragraph">
+<p>If all goes well, you can now generate a schema by running the <code>dbSchema</code> gradle task.</p>
+</div>
+<div class="paragraph">
+<p>As you will be doing this often, you should create a "Run Configuration" in Eclipse to generate the schema.
+Click on "Run &gt; Run Configurations&#8230;&#8203; &gt; Gradle Task" then press the "New launch configuration" icon.
+A new configuration called "New_configuration" will be created. Change the name to anything you like,
+for example "MySiteProject - DB Schema", add a Gradle Task named "dbSchema", set your application project as the Working Directory,
+then in the "Common" tab choose "Save as &gt; Shared file" and type "MySiteProject\Launches"</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../img/newEclipseProject/dbSchemaTask.jpg" alt="Run Configuration for schema creation">
+</div>
+<div class="title">Figure 12. Run Configuration for schema creation</div>
+</div>
+<div class="paragraph">
+<p>You can now run the schema creation task with a press of a button.
+If all goes well, the output will be written to the <code>/schema</code> folder (you might need to refresh it in Eclipse with F5).
+To load the schema into the database, use the <code>/env/dev/dropAndCreateDatabase.bat</code>
+script (or an equivalent linux/mac version).</p>
+</div>
+<div class="paragraph">
+<p>You may get some compilation errors that need to be fixed.
 If the schema generator can&#8217;t connect to the database check that /src/main/resources/META-INF/persistence.xml (and /src/main/webapp/META-INF/context.xml) has the right DB credentials.</p>
-</div>
-<div class="paragraph">
-<p>Run the <code>/env/dev/dropAndCreateDatabase.bat</code> (or a linux equivalent) to create a new empty database with the generated schema.</p>
 </div>
 </div>
 </div>
@@ -1162,7 +1374,7 @@ If the schema generator can&#8217;t connect to the database check that /src/main
 <table>
 <tr>
 <td class="icon">
-<div class="title">Note</div>
+<i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
 <div class="paragraph">
@@ -1172,6 +1384,13 @@ embedded version of Tomcat (recommended option for a generic use case).</p>
 </td>
 </tr>
 </table>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>Skip this section for the bookstore tutorial.</p>
+</div>
+</div>
 </div>
 <div class="paragraph">
 <p>Download <a href="https://tomcat.apache.org/download-80.cgi">Apache Tomcat 8.5</a> "64-bit Windows zip" and unzip the folder to some place like <code>C:\local\Tomcats\apache-tomcat-8.5.51</code>.</p>
@@ -1191,7 +1410,7 @@ an error from Tomcat:</p>
 <div class="content">
 <img src="../img/newEclipseProject/tomcatError.jpg" alt="Tomcat error">
 </div>
-<div class="title">Figure 12. Tomcat error</div>
+<div class="title">Figure 13. Tomcat error</div>
 </div>
 <div class="paragraph">
 <p>Stop Tomcat then right-click on it and choose "Open". You will see the Overview:</p>
@@ -1200,7 +1419,7 @@ an error from Tomcat:</p>
 <div class="content">
 <img src="../img/newEclipseProject/tomcatOverview.JPG" alt="Tomcat configuration">
 </div>
-<div class="title">Figure 13. Tomcat configuration</div>
+<div class="title">Figure 14. Tomcat configuration</div>
 </div>
 <div class="paragraph">
 <p>On this page do the following:</p>
@@ -1275,12 +1494,12 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.5.1<br>
-Last updated 2021-02-07 21:47:29 +0100
+Version 0.7.0<br>
+Last updated 2021-04-18 15:00:57 +0200
 </div>
 </div>
-<link rel="stylesheet" href="../highlight/styles/github.min.css">
-<script src="../highlight/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
 <script>hljs.initHighlighting()</script>
 </body>
 </html>
