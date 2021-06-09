@@ -86,47 +86,50 @@ public class YadaUserCredentialsDao {
 		YadaUserCredentials existingUserCredentials = this.findFirstByUsername(email);
 		if (existingUserCredentials == null) {
 			log.info("Setup: creating user {}", email);
-			T userProfile;
 			try {
-				userProfile = userProfileClass.newInstance();
-				em.persist(userProfile);
+				T userProfile = userProfileClass.newInstance();
+				YadaUserCredentials userCredentials = new YadaUserCredentials();
+				userCredentials.setUsername(email);
+				userCredentials.changePassword(password, encoder);
+				userCredentials.setEnabled(true);
+				userProfile.setUserCredentials(userCredentials);
+//				String language = (String) userDefinition.get("language");
+//				String country = (String) userDefinition.get("country");
+//				if (language!=null && country!=null) {
+//					userProfile.setLocale(language.toLowerCase() + "_" + country.toUpperCase());
+//				}
+				em.persist(userProfile); // Cascade to userCredentials
+				for (String key : userDefinition.keySet()) {
+					Object valueObject = userDefinition.get(key);
+					if (key.equals("roles")) {
+						for (Integer role : (Set<Integer>)valueObject) {
+							userCredentials.addRole(role);
+						}
+					} else if (!key.equals("email") && !key.equals("password")) {
+						String setterName = "set" + StringUtils.capitalize(key); // e.g. setTimeZone
+						Method setter = null;
+						try {
+							try {
+								setter = userProfileClass.getMethod(setterName, String.class);
+							} catch (NoSuchMethodException e) {
+								// Try a different version?
+								if (!key.toLowerCase().equals(key)) {
+									setterName = "set" + StringUtils.capitalize(key.toLowerCase()); // e.g. setTimezone
+									setter = userProfileClass.getMethod(setterName, String.class);
+								} else {
+									throw e;
+								}
+							}
+							setter.invoke(userProfile, (String)valueObject);
+						} catch (SecurityException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+							log.error("Can't set attribute '{}' on {} (skipped)", key, userProfileClass, e);
+						}
+					}
+					
+				}
 			} catch (InstantiationException | IllegalAccessException e1) {
 				log.error("Failed to setup user of type {}", userProfileClass, e1);
 				throw new YadaInvalidUsageException("Invalid user type {}", userProfileClass);
-			}
-			YadaUserCredentials userCredentials = new YadaUserCredentials();
-			em.persist(userCredentials);
-			userCredentials.setUsername(email);
-			userCredentials.changePassword(password, encoder);
-			userCredentials.setEnabled(true);
-			userProfile.setUserCredentials(userCredentials);
-			for (String key : userDefinition.keySet()) {
-				Object valueObject = userDefinition.get(key);
-				if (key.equals("roles")) {
-					for (Integer role : (Set<Integer>)valueObject) {
-						userCredentials.addRole(role);
-					}
-				} else if (!key.equals("email") && !key.equals("password")) {
-					String setterName = "set" + StringUtils.capitalize(key); // e.g. setTimeZone
-					Method setter = null;
-					try {
-						try {
-							setter = userProfileClass.getMethod(setterName, String.class);
-						} catch (NoSuchMethodException e) {
-							// Try a different version?
-							if (!key.toLowerCase().equals(key)) {
-								setterName = "set" + StringUtils.capitalize(key.toLowerCase()); // e.g. setTimezone
-								setter = userProfileClass.getMethod(setterName, String.class);
-							} else {
-								throw e;
-							}
-						}
-						setter.invoke(userProfile, (String)valueObject);
-					} catch (SecurityException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-						log.error("Can't set attribute '{}' on {} (skipped)", key, userProfileClass, e);
-					}
-				}
-				
 			}
 		}
     }	

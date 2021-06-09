@@ -10,8 +10,8 @@
 </error-page>
 
 <session-config>
-	<!-- ATTENZIONE: questo va tenuto allineato con conf.webapp.xml altrimenti la sessione potrebbe non scadere mai -->
-  <session-timeout>240</session-timeout> <!-- 240 Minuti -->
+	<!-- WARNING: this value must be the same as the value of sessionTimeoutMinutes in conf.webapp.<ENV>.xml or the session might never expire -->
+	<session-timeout>240</session-timeout> <!-- 240 minutes -->
 </session-config>
 
 </web-app>

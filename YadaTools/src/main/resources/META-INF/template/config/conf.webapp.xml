@@ -79,11 +79,10 @@
 	<setup>
 		<users>
 			<user>
-				<name>admin</name>
+				<nickname>admin</nickname> <!-- This is an example of UserProfile customization -->
 				<email>admin@EXAMPLE.com</email>
 				<password>myAppPassword</password>
-				<language>en</language>
-				<country>it</country>
+				<locale>en_US</locale>
 				<timezone>Europe/Rome</timezone>
 				<role>USER</role>
 				<role>ADMIN</role>
@@ -92,10 +91,11 @@
 	</setup>
 	
 	<security>
-		<!-- Questo valore viene usato lato javascript per controllare se la sessione è scaduta -->
-		<sessionTimeoutMinutes>240</sessionTimeoutMinutes><!-- ATTENZIONE: questo va tenuto allineato con web.xml altrimenti la sessione potrebbe non scadere mai -->
+		<!-- sessionTimeoutMinutes is used via javascript to check if the browser session is expired and show a warning modal -->
+		<!-- WARNING: this value must be the same as the value of session-timeout in /src/main/webapp/WEB-INF/web.xml or the session might never expire -->
+		<sessionTimeoutMinutes>240</sessionTimeoutMinutes>
 		<passwordLength min='5' max='128' />
-		<encodePassword>false</encodePassword>
+		<encodePassword>true</encodePassword>
 		<maxFailedAttempts>10</maxFailedAttempts>
 		<failedAttemptsLockoutMinutes>10</failedAttemptsLockoutMinutes>
 		<autologinExpirationHours>48</autologinExpirationHours>

@@ -74,8 +74,8 @@ dependencies {
 	
     implementation 'org.springframework:spring-webmvc:5.2.+',
 		'org.springframework:spring-context-support:5.2.+',
-		'org.springframework:spring-tx:5.2.+',
-		'org.springframework:spring-jdbc:5.2.+',
+		// 'org.springframework:spring-tx:5.2.+',
+		// 'org.springframework:spring-jdbc:5.2.+',
 		'org.springframework:spring-orm:5.2.+',
 		'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
         'org.hibernate:hibernate-entitymanager:5.4.+',

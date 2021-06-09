@@ -17,7 +17,7 @@ public class UserProfile extends YadaUserProfile {
 	private static final long serialVersionUID = 1L;
 
 	@Column(length = 32)
-	String nickname;
+	String nickname; // This is an example of UserProfile customization
 
 	/**
 	 * Used by DataTables
