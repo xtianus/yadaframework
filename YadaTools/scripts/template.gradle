@@ -19,6 +19,16 @@ apply plugin: 'eclipse-wtp'
 apply plugin: 'net.yadaframework.tools'
 apply plugin: 'org.hidetake.ssh'        // https://gradle-ssh-plugin.github.io
 
+def YadaWebLib = "$projectDir/../../yadaframework/YadaWeb";
+def YadaWebCmsLib = "$projectDir/../../yadaframework/YadaWebCMS";
+
+sassCompile {
+    source = project.files(fileTree("src/main/webapp/res/css"), fileTree("$YadaWebLib/src/main/resources/net/yadaframework/views/yada/css"), fileTree("$YadaWebCmsLib/src/main/resources/net/yadaframework/views/yada/css")) 
+    include("**/*.sass", "**/*.scss", "**/*.css")
+    exclude("**/*.min.*", "**/_*.sass", "**/_*.scss")
+    output = file("src/main/webapp/res/css")
+}
+
 eclipse {
     jdt {
         sourceCompatibility = 1.8
@@ -59,9 +69,6 @@ compileTestJava.options.encoding = 'UTF-8'
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF8'
 }
-
-def YadaWebLib = "$projectDir/../../yadaframework/YadaWeb";
-def YadaWebCmsLib = "$projectDir/../../yadaframework/YadaWebCMS";
 
 repositories {
     mavenCentral()
@@ -119,3 +126,12 @@ task dbSchema(dependsOn: [classes], type: net.yadaframework.tools.YadaCreateDbSc
     inputs.files configurations.hibtools
     outputfilename = "${acronym}.sql"
 }
+
+sass {
+	properties = "$rootDir/sass.properties"
+    download {
+		version = "1.23.1"
+		output = "$rootDir/.sass"
+    }
+}
+
