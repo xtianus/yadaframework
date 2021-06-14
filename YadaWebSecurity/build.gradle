@@ -35,7 +35,7 @@ repositories {
 
 dependencies {
 	api 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5:3.0.4.RELEASE',
-		'org.springframework.security:spring-security-config:5.3.3.RELEASE',
+		'org.springframework.security:spring-security-config:5.5.0',
 		'org.apache.tomcat:tomcat-servlet-api:8.0.48'
 
     implementation	project(':YadaWeb'),
