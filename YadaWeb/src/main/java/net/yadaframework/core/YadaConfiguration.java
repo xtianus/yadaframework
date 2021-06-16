@@ -1001,11 +1001,11 @@ public abstract class YadaConfiguration {
 	 * @return an array with email and personal name
 	 */
 	public String[] getEmailFrom() {
-		try {
-			String address = configuration.getString("config/email/from/address");
-			String personal = configuration.getString("config/email/from/name");
+		String address = configuration.getString("config/email/from/address");
+		String personal = configuration.getString("config/email/from/name");
+		if (address!=null) {
 			return new String[] {address, personal};
-		} catch (Exception e) {
+		} else {
 			// Legacy
 			return new String[] { configuration.getString("config/email/from"), null };
 		}

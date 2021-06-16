@@ -19,7 +19,7 @@
 	        	<i th:class="|yadaIcon yadaIcon-${iconName} ${YADA_TOTSEVERITY}|"></i>
 		        <span class="modal-title"></span>
 	        </h4>
-	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="yadaIcon yadaIcon-close"></i></button>
+	        <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true"><i class="yadaIcon yadaIcon-close"></i></button>
 	      </div>
 	      <div class="modal-body">
 	      	<div class="panel-group" id="messageAccordion" role="tablist" aria-multiselectable="true">
@@ -42,7 +42,7 @@
 			</div>    	
 	      </div>
 	      <div class="modal-footer" th:if="${YADA_AUTOCLOSE==null}">
-	        <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{yada.view.modal.button.close}">Close</button>
+	        <button type="button" class="btn btn-default" data-bs-dismiss="modal" th:text="#{yada.view.modal.button.close}">Close</button>
 	      </div>
 	    </div>
 
@@ -53,13 +53,13 @@
 	        	<i th:class="|yadaIcon yadaIcon-${iconName} ${YADA_TOTSEVERITY}|"></i>
 		        <span th:text="${YADA_NTITLE!=null?YADA_NTITLE.get(0):''}" class="modal-title">Modal title</span>
 	        </h4>
-	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="yadaIcon yadaIcon-close"></i></button>
+	        <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true"><i class="yadaIcon yadaIcon-close"></i></button>
 	      </div>
 	      <div class="modal-body">
 	        <p th:utext="${YADA_NBODY!=null?YADA_NBODY.get(0):''}">Message body here</p>
 	      </div>
 	      <div class="modal-footer" th:if="${YADA_AUTOCLOSE==null}">
-	        <button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{yada.view.modal.button.close}">Close</button>
+	        <button type="button" class="btn btn-default" data-bs-dismiss="modal" th:text="#{yada.view.modal.button.close}">Close</button>
 	      </div>
 	    </div>
 	    

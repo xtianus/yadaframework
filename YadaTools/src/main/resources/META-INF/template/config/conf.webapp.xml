@@ -13,7 +13,11 @@
 	</paths>
 	<email>
 		<enabled>true</enabled>
-		<from>noreply@EXAMPLE.com</from>
+		<from>
+			<address>noreply@EXAMPLE.com</address>
+			<name>EXAMPLE SENDER</name>
+		</from>
+		
 		<support>
 			<!-- Addresses to which a support request is sent -->
 			<to>admin@EXAMPLE.com</to>

@@ -118,6 +118,17 @@ public class YadaUtil {
     }
 	
 	/**
+	 * Returns a random integer number 
+	 * @param minIncluded minimum value, included
+	 * @param maxIncluded maximum value, included
+	 * @return
+	 */
+	public int getRandom(int minIncluded, int maxIncluded) {
+		int maxExcluded = maxIncluded - minIncluded + 1;
+		return secureRandom.nextInt(maxExcluded) + minIncluded;
+	}
+	
+	/**
 	 * Given the instance of a "specific" class created specifying a single type T while extending a generic class, 
 	 * retrieve the class of the type T.
 	 * Example:
