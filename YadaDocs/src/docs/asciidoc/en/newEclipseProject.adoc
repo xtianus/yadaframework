@@ -167,7 +167,7 @@ Update your installation with "Help > Check for Updates" and follow the instruct
 you from adding a Tomcat server later.
 
 From the "Window > Preferences > Gradle" dialog set the "Java home" entry to your JDK installation,
-which would be `C:\Local\jdk8` if you followed the instructions above.
+which would be `C:\Local\jdk8` if you followed the instructions above. This is very important. Failing to do so may result in a "java facet" mismatch error on compilation. 
 
 Set the editors file encoding to UTF-8, at least "General > Workspace > Text file encoding" and "Web > CSS Files > Encoding":
 
@@ -334,6 +334,7 @@ If it complains about some unbound system library, open "Properties > Java build
 
 You should now have, in your workspace, the following Yada projects:
 
+* YadaTools
 * YadaWeb
 * YadaWebCMS
 * YadaWebCommerce
@@ -363,7 +364,7 @@ based for example on GitLab and clone the repository locally, being careful to c
 When using GitLab, let it create a default readme.md file so that you'll be able to check out the repository easily (there should be a
 similar option on GitHub). Then add the repository location to the Git Perspective as done for the Yada Framework.
 
-After the repository has been added to Eclipse, to add your project to the local git repository right-click on it and 
+After the repository has been added to Eclipse, to add your project to the git repository right-click on it and 
 choose "Team > Share Project...".
 In the dialog you should just select the correct repository and accept the defaults.
 The resulting filesystem structure will be as follows:
@@ -396,6 +397,7 @@ Finally edit `.gitignore` in the root of your project to make it look like the f
 /.classpath
 /.project
 !gradle-wrapper.jar
+/.sass/
 ----
 
 If you don't see the file, you should change the workspace filter. Next to the "Package Explorer" title there's a
@@ -464,6 +466,7 @@ Ensure you have these folders in your project before the next step, and create t
 * `src/main/webapp`
 
 Use the `Gradle > Refresh Gradle Project` project menu item to initialise the project.
+Check the Elcipse console (Window > Show view > Console) to see if there are any problems.
 
 [WARNING]
 ====
@@ -539,8 +542,8 @@ You can skip the "tst" and "prod" files until you're ready to deploy to a test/p
 ////
 
 ==  Database Setup
-The default database schema, user and password are found both in `/src/main/resources/conf.webapp.dev.xml` and
-`/env/dev/createDatabaseAndUser.bat`. If you want to change them, do so in both files.
+The default database schema, user and password are found in `/src/main/resources/conf.webapp.dev.xml`, `/src/main/resources/META-INF/persistence.xml`, `/src/main/webapp/META-INF/context.xml` and
+`/env/dev/createDatabaseAndUser.bat`. If you want to change them, do so in all files.
 
 [.bookstore]
 --
@@ -569,7 +572,7 @@ As you will be doing this often, you should create a "Run Configuration" in Ecli
 Click on "Run > Run Configurations... > Gradle Task" then press the "New launch configuration" icon.
 A new configuration called "New_configuration" will be created. Change the name to anything you like, 
 for example "MySiteProject - DB Schema", add a Gradle Task named "dbSchema", set your application project as the Working Directory,
-then in the "Common" tab choose "Save as > Shared file" and type "MySiteProject\Launches"
+then in the "Common" tab choose "Save as > Shared file" and type "\MySiteProject\Launches"
 
 [.center]
 .Run Configuration for schema creation
@@ -581,7 +584,7 @@ To load the schema into the database, use the `/env/dev/dropAndCreateDatabase.ba
 script (or an equivalent linux/mac version).
 
 You may get some compilation errors that need to be fixed.
-If the schema generator can't connect to the database check that /src/main/resources/META-INF/persistence.xml (and /src/main/webapp/META-INF/context.xml) has the right DB credentials.
+If the schema generator can't connect to the database check that all configuration files listed above (`persistence.xml` etc.) have the right DB credentials.
 
 == Tomcat server
 This section is about setting up a standalone Tomcat server that can be controlled from Eclipse. 

@@ -146,7 +146,7 @@ To send a form via ajax you just need to add the `yadaAjax` class:
 
 [source,html]
 ----
-<form class="jadaAjax" action="/subscribe">
+<form class="yadaAjax" action="/subscribe">
 ----
 
 When a form is added dynamically via custom javascript, you also need to call
@@ -175,7 +175,7 @@ Example:
 
 [source,html]
 ----
-<form class="jadaAjax" action="/subscribe" yada:submitHandler="validateInput">
+<form class="yadaAjax" action="/subscribe" yada:submitHandler="validateInput">
 ----
 
 Submit handlers can be set on the form tag and on any submit button.
@@ -190,7 +190,7 @@ returned html:
 
 [source,html]
 ----
-<form class="jadaAjax" action="/subscribe" yada:updateOnSuccess="#someSection">
+<form class="yadaAjax" action="/subscribe" yada:updateOnSuccess="#someSection">
 ----
 
 [.todo]

@@ -459,7 +459,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </ul>
 </li>
 <li><a href="#_javascript_api">Javascript API</a></li>
-<li><a href="#_customization">Customization</a></li>
+<li><a href="#_customization">Customization</a>
+<ul class="sectlevel2">
+<li><a href="#_modal_icons">Modal icons</a></li>
+<li><a href="#_full_customization">Full customization</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -574,7 +579,7 @@ yadaNotify.title("Login " + failed?"failed":"success", model).ok(!failed).error(
 </div>
 </div>
 <div class="paragraph">
-<p>The previous example shows the use of <a href="https://www.slf4j.org/faq.html#logging_performance">slf4j placeholders</a> in the message() method.</p>
+<p>The previous example shows the use of <a href="https://www.slf4j.org/faq.html#logging_performance++">slf4j placeholders</a> in the message() method.</p>
 </div>
 <div class="paragraph">
 <p>When calling the add() method you&#8217;re actually creating a message with the values previously stored in the builder, adding it to the current HTTP Request.
@@ -815,6 +820,31 @@ yada.showErrorModal(title, message, redirectUrl)</code></pre>
 <div class="sect1">
 <h2 id="_customization">Customization</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_modal_icons">Modal icons</h3>
+<div class="paragraph">
+<p>Notification modals use a "severity icon" on the top left and a "close icon" on the top right.
+These can be customized using the following CSS classes: <code>yadaIcon</code>, <code>yadaNotify</code>, <code>yadaIcon-ok</code>, <code>yadaIcon-warning</code>, <code>yadaIcon-error</code>, <code>close</code>, <code>yadaIcon-close</code>.
+The full list of provided icons can be found in <code>/YadaWeb/src/main/resources/net/yadaframework/views/yada/css/yada.css</code>.
+The current icons are implemented using <a href="https://fontawesome.com/v5.15/icons?d=gallery&amp;p=1" target="_blank" rel="noopener">Font Awesome 5 Free</a>.
+A different icon set can be easily used by setting the proper font family on yadaIcon and the right content on the other classes.
+Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="css" class="language-css hljs">.yadaIcon {
+	font-family: 'Font Awesome 5 Free';
+	font-weight: 900;
+}
+
+.yadaIcon-ok:before {
+    content: "\f00c";
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_full_customization">Full customization</h3>
 <div class="paragraph">
 <p>The notification modal can either be customized via CSS or by implementing a new html file.
 In the second case you should copy the original file from <code>/YadaWeb/src/main/resources/net/yadaframework/views/yada/modalNotify.html</code> and
@@ -846,10 +876,11 @@ change it while preserving some key elements that are used as reference to add c
 </div>
 </div>
 </div>
+</div>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-02-05 19:47:53 +0100
+Last updated 2021-06-16 13:56:22 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

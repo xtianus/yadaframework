@@ -172,7 +172,7 @@ AJAX_REDIRECT
 
 a| AJAX_REDIRECT_URL_RELATIVE
 
-a| The target url relative to the webapp, used if AJAX_REDIRECT_URL is not set
+a| The target url relative to the webapp, used if AJAX_REDIRECT_URL is not set. Do not prefix with the language path: it is done automatically.
 
 a| 
 AJAX_REDIRECT

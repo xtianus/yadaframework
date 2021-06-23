@@ -755,7 +755,7 @@ you from adding a Tomcat server later.</p>
 </div>
 <div class="paragraph">
 <p>From the "Window &gt; Preferences &gt; Gradle" dialog set the "Java home" entry to your JDK installation,
-which would be <code>C:\Local\jdk8</code> if you followed the instructions above.</p>
+which would be <code>C:\Local\jdk8</code> if you followed the instructions above. This is very important. Failing to do so may result in a "java facet" mismatch error on compilation.</p>
 </div>
 <div class="paragraph">
 <p>Set the editors file encoding to UTF-8, at least "General &gt; Workspace &gt; Text file encoding" and "Web &gt; CSS Files &gt; Encoding":</p>
@@ -1006,6 +1006,9 @@ If it complains about some unbound system library, open "Properties &gt; Java bu
 <div class="ulist">
 <ul>
 <li>
+<p>YadaTools</p>
+</li>
+<li>
 <p>YadaWeb</p>
 </li>
 <li>
@@ -1052,7 +1055,7 @@ based for example on GitLab and clone the repository locally, being careful to c
 similar option on GitHub). Then add the repository location to the Git Perspective as done for the Yada Framework.</p>
 </div>
 <div class="paragraph">
-<p>After the repository has been added to Eclipse, to add your project to the local git repository right-click on it and
+<p>After the repository has been added to Eclipse, to add your project to the git repository right-click on it and
 choose "Team &gt; Share Project&#8230;&#8203;".
 In the dialog you should just select the correct repository and accept the defaults.
 The resulting filesystem structure will be as follows:</p>
@@ -1085,7 +1088,8 @@ The resulting filesystem structure will be as follows:</p>
 /.settings/
 /.classpath
 /.project
-!gradle-wrapper.jar</code></pre>
+!gradle-wrapper.jar
+/.sass/</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1192,7 +1196,8 @@ and is handy when you plan to work on the YadaWeb sources to fix and improve the
 </ul>
 </div>
 <div class="paragraph">
-<p>Use the <code>Gradle &gt; Refresh Gradle Project</code> project menu item to initialise the project.</p>
+<p>Use the <code>Gradle &gt; Refresh Gradle Project</code> project menu item to initialise the project.
+Check the Elcipse console (Window &gt; Show view &gt; Console) to see if there are any problems.</p>
 </div>
 <div class="admonitionblock warning">
 <table>
@@ -1301,8 +1306,8 @@ admin user email to your own email address in order to receive emails from the a
 <h2 id="_database_setup">Database Setup</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The default database schema, user and password are found both in <code>/src/main/resources/conf.webapp.dev.xml</code> and
-<code>/env/dev/createDatabaseAndUser.bat</code>. If you want to change them, do so in both files.</p>
+<p>The default database schema, user and password are found in <code>/src/main/resources/conf.webapp.dev.xml</code>, <code>/src/main/resources/META-INF/persistence.xml</code>, <code>/src/main/webapp/META-INF/context.xml</code> and
+<code>/env/dev/createDatabaseAndUser.bat</code>. If you want to change them, do so in all files.</p>
 </div>
 <div class="openblock bookstore">
 <div class="content">
@@ -1344,7 +1349,7 @@ On Windows you can open a cmd window and drag the file there from Eclipse, then 
 Click on "Run &gt; Run Configurations&#8230;&#8203; &gt; Gradle Task" then press the "New launch configuration" icon.
 A new configuration called "New_configuration" will be created. Change the name to anything you like,
 for example "MySiteProject - DB Schema", add a Gradle Task named "dbSchema", set your application project as the Working Directory,
-then in the "Common" tab choose "Save as &gt; Shared file" and type "MySiteProject\Launches"</p>
+then in the "Common" tab choose "Save as &gt; Shared file" and type "\MySiteProject\Launches"</p>
 </div>
 <div class="imageblock center">
 <div class="content">
@@ -1360,7 +1365,7 @@ script (or an equivalent linux/mac version).</p>
 </div>
 <div class="paragraph">
 <p>You may get some compilation errors that need to be fixed.
-If the schema generator can&#8217;t connect to the database check that /src/main/resources/META-INF/persistence.xml (and /src/main/webapp/META-INF/context.xml) has the right DB credentials.</p>
+If the schema generator can&#8217;t connect to the database check that all configuration files listed above (<code>persistence.xml</code> etc.) have the right DB credentials.</p>
 </div>
 </div>
 </div>
@@ -1495,7 +1500,7 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-04-18 15:00:57 +0200
+Last updated 2021-06-10 15:42:31 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
