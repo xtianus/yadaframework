@@ -9,6 +9,17 @@
 
 <th:block th:include="~{/header :: body}"/>
 
+<nav class="sidebar">
+	<ul>
+		<li>In vendita</li>
+		<li>In affitto</li>
+		<li>Utenti</li>
+	</ul>
+
+
+</nav>
+
+
 <main>
 	<article>
 		<header>
@@ -28,16 +39,21 @@
 
 <script type="text/javascript" th:inline="javascript">
 	//<![CDATA[
-		<!--/* Error modal for unhandled exceptions */-->
-		if ([[${yadaExceptionObject!=null}]]==true) {
-			yada.showErrorModal([[#{yada.error.http.other}]], [[${yadaExceptionObject!=null?yadaExceptionObject.getMessage():''}]]);
+	$(document).ready(function() {
+	
+		// Error modal for unhandled exceptions
+		if (/*[[${yadaExceptionObject!=null}]]*/ "placeholder") {
+			yada.showErrorModal(/*[[#{yada.error.http.other}]]*/ "placeholder", /*[[${yadaExceptionObject!=null?yadaExceptionObject.getMessage():''}]]*/ "placeholder");
 		}
 		
-		<!--/* HTTP Error modal */-->
-		if ([[${yadaHttpStatus!=null}]]==true) {
-			yada.showErrorModal([[${#messages.msg('yada.error.http.title', yadaHttpStatus)}]], [[#{|yada.error.http.${yadaHttpStatus}|}]]);
+		// HTTP Error modal
+		if (/*[[${yadaHttpStatus!=null}]]*/ "placeholder") {
+			yada.showErrorModal(/*[[${#messages.msg('yada.error.http.title', yadaHttpStatus)}]]*/ "placeholder", /*[[#{|yada.error.http.${yadaHttpStatus}|}]]*/ "placeholder");
 		}
+	});
+	
 	//]]>
+
 </script>
 
 </body>
