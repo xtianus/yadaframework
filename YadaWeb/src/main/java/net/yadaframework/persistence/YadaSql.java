@@ -40,6 +40,7 @@ public class YadaSql implements CloneableDeep {
 	StringBuilder joins = new StringBuilder();
 	StringBuilder whereConditions = new StringBuilder();
 	StringBuilder havingConditions = new StringBuilder();
+	String selectFrom = null; // Keep it here for use when replacing it
 	String groupBy = "";
 	String orderBy = "";
 	Integer limit = null;
@@ -232,23 +233,42 @@ public class YadaSql implements CloneableDeep {
 //	}
 //
 //	// TODO more parameter types
-
+	
 	/**
-	 * Start or extend a "select ... from ..." query.
-	 * If this method has already been called, the new select text is inserted before the "from" after a comma
+	 * Replaces the current "select... from..." with another one
 	 * @param selectFrom
 	 * @return
 	 */
+	public YadaSql selectFromReplace(String selectFrom) {
+		if (this.selectFrom==null) {
+			return selectFrom(selectFrom); // Fallback
+		}
+		int pos = this.selectFrom.length();
+		queryBuffer.replace(0, pos, selectFrom);
+		this.selectFrom = selectFrom;
+		return this;
+	}
+
+	/**
+	 * Start or extend a "select ... from ..." query.
+	 * If this method has already been called, the new select text is inserted before the "from" after a comma: "select x, y from" when the parameter is "y"
+	 * @param selectFrom either a "select... from..." statement or a new select section to add to the current one
+	 * @return
+	 */
 	public YadaSql selectFrom(String selectFrom) {
-		String currentQuery = queryBuffer.toString().toLowerCase();
-		boolean alreadyThere = currentQuery.startsWith("from ") || currentQuery.indexOf(" from ")>-1;
-		if (!alreadyThere) {
+		// String currentQuery = queryBuffer.toString().toLowerCase();
+		// boolean alreadyThere = currentQuery.startsWith("from ") || currentQuery.indexOf(" from ")>-1;
+		if (this.selectFrom==null) {
+			this.selectFrom = selectFrom;
 			return appendQuery(selectFrom);
 		}
 		// The selectFrom is already in the query, so add the new one before the from
 		int pos = queryBuffer.indexOf("from");
+		int pos2 = this.selectFrom.indexOf("from");
 		queryBuffer.insert(pos, ", " + selectFrom + " ");
 		lastSkipped = false;
+		pos = queryBuffer.indexOf("from"); // new position of "from"
+		this.selectFrom = queryBuffer.substring(0, pos) + this.selectFrom.substring(pos2);
 		return this;
 	}
 
