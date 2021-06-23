@@ -17,6 +17,7 @@ Parameters:
 - disabled = true for a disabled field - NOT SENT TO SERVER (optional)
 - help = testo per il pulsante di help (optional)
 - attachedFile = (optional) YadaAttachedFile instance for which to add a download link if not null
+- showMaxUploadSize = (optional) when true, show the configured max upload file size limit using text from yada.form.fileUpload.sizeLimit
 
 Message keys:
 - yada.form.fileUpload.minimumSize
@@ -37,6 +38,7 @@ Example:
 		<i class="fa fa-question-circle fa-lg"></i>
 	</a>
 	<div th:if="${size!=null}" class="yadaMinimumSize"><span th:text="${size}">100x100</span> [[#{yada.form.fileUpload.minimumSize}]]</div>
+	<div th:if="${showMaxUploadSize==true}" class="yadaMinimumSize"><span th:text="${@config.maxFileUploadSizeMega}">60</span>[[#{yada.form.fileUpload.sizeLimit}]]</div>
 	<input th:field="*{__${fieldName}__}" type="file" th:disabled="${disabled}" th:required="${required}" class="form-control has-feedback" 
 		th:accept="${accept}?:''" th:id="${#ids.seq(seqName)}" th:attr="aria-describedby=${#ids.next(seqName)}"/>
 	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
@@ -56,7 +58,7 @@ Example:
 		</div>
 	</div>
 	
-	<div th:if="${attachedFile!=null && attachedFile.image}" class="row yadaUploadedImages">
+	<div th:if="${attachedFile!=null && attachedFile.image && (attachedFile.desktopImage || attachedFile.mobileImage)}" class="row yadaUploadedImages">
 		<div th:if="${attachedFile.desktopImage}" th:class="${attachedFile.mobileImage}?'col-xs-8':'col-xs-12'">
 			<a th:href="${@yadaFileManager.getDesktopImageUrl(attachedFile)}" target="_blank">
 				<img class="img-responsive" th:src="@{${@yadaFileManager.getDesktopImageUrl(attachedFile)}}">

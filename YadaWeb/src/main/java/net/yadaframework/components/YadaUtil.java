@@ -116,6 +116,41 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+	
+	/**
+	 * Merges all files matched by a pattern, in no particular order.
+	 * @param sourceFolder root folder where files are to be found
+	 * @param sourceFilePattern regex pattern to match files, e.g. ".*.js"
+	 * @param outputFile file that will contain the joined files
+	 * @param depth (optional) max depth of folders: null or 1 for no recursion
+	 * @param deleteSource (optional) Boolean.TRUE to attempt deletion of source files
+	 * @throws IOException 
+	 */
+	public void joinFiles(Path sourceFolder, String sourceFilePattern, File outputFile, Integer depth, Boolean deleteSource) throws IOException {
+		depth = depth==null ? 1 : depth; // By default we don't look into subfolders
+		FileOutputStream joinedStream = new FileOutputStream(outputFile);
+		Iterator<Path> allFilesIter = java.nio.file.Files.find(sourceFolder, depth, (path, basicFileAttributes) -> path.toFile().getName().matches(sourceFilePattern)).iterator();
+		while (allFilesIter.hasNext()) {
+			Path filePath = allFilesIter.next();
+			com.google.common.io.Files.copy(filePath.toFile(), joinedStream);
+			if (Boolean.TRUE.equals(deleteSource)) {
+				filePath.toFile().delete();
+			}
+		}
+		joinedStream.close();
+	}
+	
+	/**
+	 * Creates a folder in the system temp folder. The name is prefixed with "yada".
+	 * @return
+	 * @throws IOException
+	 */
+	public File makeTempFolder() throws IOException {
+		File file = File.createTempFile("yada", "");
+		file.delete();
+        file.mkdir();
+        return file;
+	}
 
 	/**
 	 * Split an HTML string in two parts, not breaking words, handling closing and reopening of html tags.
@@ -211,18 +246,23 @@ public class YadaUtil {
 
 	/**
 	 * Ensure that the given filename has not been already used, by adding a counter.
-	 * For example, a list containing {"dog.jpg", "dog.jpg", "dog.jpg"} becomes {"dog.jpg", "dog_1.jpg", "dog_2.jpg"}
+	 * For example, if baseName is "dog" and usedNames is {"dog.jpg", "dog_1.jpg", "dog_2.jpg"}, the
+	 * result will be "dog_3.jpg"
+	 * The usedNames array doesn't have to contain identical or sequential baseNames: {"dog.jpg", "cat.jpg", "dog_2.jpg"}
 	 * This version does not check if a file exists on disk. For that, see {@link #findAvailableName(File, String, String, String)}
-	 * @param usedNames filenames used so far, must start empty and will be modified
+	 * This method can be used with any strings, not necessarily filenames: just use null for the extension.
 	 * @param baseName filename to add, without extension
-	 * @param extensionNoDot filename extension without dot
-	 * @param counterSeparator string to separate the filename and the counter
+	 * @param extensionNoDot filename extension without dot, can be empty or null if the extension is not needed
+	 * @param counterSeparator string to separate the filename and the counter, can be empty or null
+	 * @param usedNames filenames used so far, must start empty and will be modified
 	 * @return the original filename with extension, or a new version with a counter added
 	 * @throws IOException
 	 * @see {@link #findAvailableName(File, String, String, String)}
 	 */
+	// TODO remove the IOException and just use a random number on timeout
 	public String findAvailableFilename(String baseName, String extensionNoDot, String counterSeparator, Set<String> usedNames) throws IOException {
-		String extension = "." + extensionNoDot;
+		counterSeparator = counterSeparator==null?"":counterSeparator;
+		String extension = StringUtils.isAllBlank(extensionNoDot) ? "" : "." + extensionNoDot;
 		String fullName = baseName + extension;
 		int counter = 0;
 		long startTime = System.currentTimeMillis();
