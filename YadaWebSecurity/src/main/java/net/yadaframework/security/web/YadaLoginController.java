@@ -31,7 +31,7 @@ import net.yadaframework.security.components.YadaTokenHandler;
 import net.yadaframework.security.components.YadaUserDetailsService;
 import net.yadaframework.security.persistence.entity.YadaAutoLoginToken;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
-import net.yadaframework.security.persistence.repository.YadaAutoLoginTokenRepository;
+import net.yadaframework.security.persistence.repository.YadaAutoLoginTokenDao;
 import net.yadaframework.web.YadaViews;
 
 /**
@@ -48,7 +48,7 @@ public class YadaLoginController {
 	@Autowired private YadaSession yadaSession;
 	@Autowired private YadaConfiguration yadaConfiguration;
 	@Autowired private YadaTokenHandler yadaTokenHandler;
-	@Autowired private YadaAutoLoginTokenRepository yadaAutoLoginTokenRepository;
+	@Autowired private YadaAutoLoginTokenDao yadaAutoLoginTokenDao;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	@Autowired private YadaAuthenticationFailureHandler failureHandler;
 	@Autowired protected YadaAuthenticationSuccessHandler successHandler;
@@ -101,7 +101,7 @@ public class YadaLoginController {
 		if (parts!=null && parts.length==2) {
 			long id = parts[0];
 			long token = parts[1];
-			List<YadaAutoLoginToken> yadaAutoLoginTokenList = yadaAutoLoginTokenRepository.findByIdAndTokenOrderByTimestampDesc(id, token);
+			List<YadaAutoLoginToken> yadaAutoLoginTokenList = yadaAutoLoginTokenDao.findByIdAndTokenOrderByTimestampDesc(id, token);
 			if (yadaAutoLoginTokenList!=null && !yadaAutoLoginTokenList.isEmpty()) {
 				YadaAutoLoginToken yadaAutoLoginToken = yadaAutoLoginTokenList.get(0);
 				Date expiration = yadaAutoLoginToken.getExpiration();

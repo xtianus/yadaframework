@@ -29,7 +29,7 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.persistence.entity.YadaJob;
 import net.yadaframework.persistence.entity.YadaJobState;
-import net.yadaframework.persistence.repository.YadaJobRepository;
+import net.yadaframework.persistence.repository.YadaJobDao;
 import net.yadaframework.persistence.repository.YadaJobSchedulerDao;
 
 /**
@@ -48,7 +48,7 @@ import net.yadaframework.persistence.repository.YadaJobSchedulerDao;
 class YadaJobScheduler implements Runnable {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
-    @Autowired private YadaJobRepository yadaJobRepository;
+    @Autowired private YadaJobDao yadaJobDao;
     @Autowired private YadaJobSchedulerDao yadaJobSchedulerDao;
     @Autowired private YadaUtil yadaUtil;
     @Autowired private YadaConfiguration config;
@@ -98,7 +98,7 @@ class YadaJobScheduler implements Runnable {
 			.build(
 				new CacheLoader<Long, YadaJob>() {
 					public YadaJob load(Long id) {
-						return yadaJobRepository.findById(id).orElse(null);
+						return yadaJobDao.findById(id).orElse(null);
 					}
 				}
 			);
@@ -128,7 +128,7 @@ class YadaJobScheduler implements Runnable {
 			}
 			// Check if a job of the same group is already running, by looking into the cache.
 			// This works because when a job is evicted we interrupt it if still running.
-			YadaJob runningSameGroup = yadaJobRepository.findRunning(candidateGroup);
+			YadaJob runningSameGroup = yadaJobDao.findRunning(candidateGroup);
 			if (runningSameGroup!=null) {
 				// The running instance is NOT the same as the one in the jobCache, so replace the instance
 				YadaJob cachedRunning = jobCache.getIfPresent(runningSameGroup.getId());
@@ -185,10 +185,10 @@ class YadaJobScheduler implements Runnable {
 //			log.info("Job not found when trying to run it, id={}", toRun);
 //			return;
 //		}
-		yadaJobRepository.stateChangeFromTo(yadaJob, YadaJobState.ACTIVE, YadaJobState.RUNNING); // Needed for database queries on running jobs
+		yadaJobDao.stateChangeFromTo(yadaJob, YadaJobState.ACTIVE, YadaJobState.RUNNING); // Needed for database queries on running jobs
 		yadaJob.setJobStateObject(YadaJobState.RUNNING.toYadaPersistentEnum()); // Needed to check for stale jobs
 		Date startTime = new Date();
-		yadaJobRepository.setStartTime(yadaJob.getId(), startTime);
+		yadaJobDao.setStartTime(yadaJob.getId(), startTime);
 		yadaJob.setJobStartTime(startTime); // Needed to check for stale jobs
 		ListenableFuture<Void> jobHandle = jobScheduler.submit(yadaJob);
 		yadaJob.yadaInternalJobHandle = jobHandle;

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = 'master'
+version = '0.7.0'
 
 apply plugin: 'eclipse-wtp'
 
@@ -29,15 +29,15 @@ compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
-    jcenter()
+    mavenCentral()
 	mavenLocal()
 }
 
 dependencies {
 		
 	implementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'),
-		'org.hibernate:hibernate-entitymanager:5.4.12.Final',
-		'org.springframework.data:spring-data-jpa:2.3.2.RELEASE'
+		'org.springframework:spring-webmvc:5.3.8',
+		'org.hibernate:hibernate-entitymanager:5.5.0.Final'
 		
 	testImplementation 'junit:junit:4.12'
 }
@@ -45,7 +45,7 @@ dependencies {
 jar {
     manifest {
         attributes("Implementation-Title": "YadaWebCommerce",
-                   "Implementation-Version": version)
+                   "Implementation-Version": archiveVersion)
     }
 }
 

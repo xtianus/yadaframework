@@ -1,21 +1,12 @@
 plugins {
 	id 'java-library'
-	id 'org.hidetake.ssh' version '2.7.0'
+	id 'org.hidetake.ssh' version '2.10.1'
 	id 'maven-publish'
+	id 'signing'
 }
 
 group = 'net.yadaframework'
-version = '0.6.9'
-
-// PublishToMavenLocal task
-publishing {
-    publications {
-        maven(MavenPublication) {
-            artifactId = 'yadatools'
-            from components.java
-        }
-    }
-}
+version = '0.7.2'
 
 apply plugin: 'groovy'
 // apply plugin: 'java-gradle-plugin'
@@ -39,7 +30,7 @@ eclipse {
 }
 
 repositories {
-	jcenter()
+	mavenCentral()
 }
 
 dependencies {
@@ -86,3 +77,70 @@ task terraforming {
 	}
 }
 
+
+task sourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+        	artifactId = 'yadatools'
+            from components.java
+
+            artifact sourcesJar
+            artifact javadocJar
+			pom {
+			    name = 'YadaTools'
+			    description = 'Some useful tasks for the Yada Framework'
+			    url = 'https://yadaframework.net/en/index.html'
+			    inceptionYear = '2014'
+			    packaging = 'jar'
+			    licenses {
+			        license {
+			            name = 'MIT License'
+			            url = 'https://en.wikipedia.org/wiki/MIT_License'
+			        }
+			    }
+			    developers {
+			        developer {
+			            id = 'xtianus'
+			            name = 'Studio Ghezzi'
+			            email = 'studio@ghezzi.net'
+			        }
+			    }
+			    organization {
+			    	name = 'Studio Ghezzi'
+			    	url = 'https://studio.ghezzi.net/'
+			    }
+			    scm {
+			        connection = 'scm:git:git@github.com:xtianus/yadaframework.git'
+			        developerConnection = 'scm:git:git@github.com:xtianus/yadaframework.git'
+			        url = 'https://github.com/xtianus/yadaframework'
+			    }
+			}
+        }
+    }
+    repositories {
+        maven {
+            // url = "file://${buildDir}/repotest"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials(PasswordCredentials) {
+            	username = ossrhUsername
+            	password = ossrhPassword
+            }
+        }
+    }    
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}

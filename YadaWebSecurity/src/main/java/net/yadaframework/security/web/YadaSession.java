@@ -15,8 +15,8 @@ import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.security.components.YadaUserDetailsService;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
-import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
-import net.yadaframework.security.persistence.repository.YadaUserProfileRepository;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
+import net.yadaframework.security.persistence.repository.YadaUserProfileDao;
 import net.yadaframework.web.YadaCropQueue;
 
 /**
@@ -31,9 +31,9 @@ public class YadaSession<T extends YadaUserProfile> {
 	@Autowired protected YadaSecurityUtil yadaSecurityUtil;
 	// Attenzione: questo sarebbe da mettere transient perchè tomcat tenta di persistere la session ma non ce la fa. Pero' se lo si mette transient,
 	// quando la session viene ricaricata questo non viene valorizzato. Come si fa a inizializzare questo oggetto quando tomcat lo ricarica dallo storage?
-	@Autowired protected YadaUserProfileRepository<T> yadaUserProfileRepository;
+	@Autowired protected YadaUserProfileDao<T> yadaUserProfileDao;
 	@Autowired protected YadaUserDetailsService yadaUserDetailsService;
-	@Autowired protected YadaUserCredentialsRepository yadaUserCredentialsRepository;
+	@Autowired protected YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired protected YadaFileManagerDao yadaFileManagerDao;
 	@Autowired protected YadaUtil yadaUtil;
 
@@ -78,7 +78,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	public void impersonate(Long targetUserProfileId) {
 		impersonatorUserId = getCurrentUserProfileId();
 		impersonatedUserId = targetUserProfileId;
-		YadaUserCredentials targetUserCredentials = yadaUserCredentialsRepository.findByUserProfileId(targetUserProfileId);
+		YadaUserCredentials targetUserCredentials = yadaUserCredentialsDao.findByUserProfileId(targetUserProfileId);
 		yadaUserDetailsService.authenticateAs(targetUserCredentials, false);
 		loggedInUserProfileId = targetUserProfileId;
 		log.info("Impersonification by #{} as {} started", impersonatorUserId, targetUserCredentials);
@@ -99,7 +99,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	 */
 	public boolean depersonate() {
 		if (isImpersonationActive()) {
-			YadaUserCredentials originalCredentials = yadaUserCredentialsRepository.findByUserProfileId(impersonatorUserId);
+			YadaUserCredentials originalCredentials = yadaUserCredentialsDao.findByUserProfileId(impersonatorUserId);
 			yadaUserDetailsService.authenticateAs(originalCredentials);
 			log.info("Impersonification by {} ended", originalCredentials);
 			clearCaches();
@@ -117,7 +117,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	public boolean isAdmin() {
 		Long idToCheck = getCurrentUserProfileId();
 		if (idToCheck!=null) {
-			return yadaUserProfileRepository.findRoleIds(idToCheck).contains(config.getRoleId("ADMIN"));
+			return yadaUserProfileDao.findRoleIds(idToCheck).contains(config.getRoleId("ADMIN"));
 		}
 		return false;
 	}
@@ -141,7 +141,7 @@ public class YadaSession<T extends YadaUserProfile> {
 		if (loggedInUserProfileId==null && yadaSecurityUtil!=null) {
 			String username = yadaSecurityUtil.getUsername();
 			if (username!=null) {
-				loggedInUserProfileId = yadaUserProfileRepository.findUserProfileIdByUsername(username);
+				loggedInUserProfileId = yadaUserProfileDao.findUserProfileIdByUsername(username);
 			}
 		}
 		return loggedInUserProfileId;
@@ -155,7 +155,7 @@ public class YadaSession<T extends YadaUserProfile> {
 		if (loggedInUserProfileId==null) {
 			getCurrentUserProfileId();
 		}
-		Optional<T> result = loggedInUserProfileId==null?null:yadaUserProfileRepository.findById(loggedInUserProfileId);
+		Optional<T> result = loggedInUserProfileId==null?null:yadaUserProfileDao.findById(loggedInUserProfileId);
 		return (result == null || !result.isPresent())?null:result.get();
 	}
 

@@ -11,7 +11,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.zip.DeflaterInputStream;
 import java.util.zip.GZIPInputStream;
 
@@ -24,9 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
-
-import net.yadaframework.persistence.entity.YadaBrowserId;
-import net.yadaframework.persistence.repository.YadaBrowserIdRepository;
 
 /**
  * Miscellaneous HTTP functions
@@ -325,6 +321,7 @@ public class YadaHttpUtil {
 	
 	/**
 	 * Extract the address from a url, without schema and path but with port. The schema or path can be missing.
+	 * The result will be forced lowercase.
 	 * @param url an url like http://www.myserver.net:8080/context/path or //www.myserver.net:8080/context/path
 	 * @return the host[:port] like www.myserver.net:8080, or ""
 	 */
@@ -335,7 +332,7 @@ public class YadaHttpUtil {
 				pos = (pos<0?0:pos+2);
 				int pos2 = url.indexOf("/", pos);
 				pos2 = (pos2<0?url.length():pos2);
-				return url.substring(pos, pos2);
+				return url.substring(pos, pos2).toLowerCase();
 			} catch (Exception e) {
 				log.error("Can't extract address from {}", url);
 			}

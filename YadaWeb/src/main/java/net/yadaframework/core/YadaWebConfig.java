@@ -15,8 +15,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
+// import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+// import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.format.Formatter;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
@@ -47,7 +47,8 @@ import net.yadaframework.web.dialect.YadaDialect;
 
 //@Configuration not needed when using WebApplicationInitializer.java
 @EnableWebMvc
-@EnableSpringDataWebSupport
+// Needed for Spring Data
+// @EnableSpringDataWebSupport
 @EnableScheduling
 @EnableAsync
 @ComponentScan(basePackages = { "net.yadaframework.web" })
@@ -131,12 +132,13 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		return STATIC_FILE_FOLDER;
 	}
 	
-	// Questo permette di usare Pageable nei Controller (Spring Data)
-	@Override
-	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-	    PageableHandlerMethodArgumentResolver resolver = new PageableHandlerMethodArgumentResolver();
-	    argumentResolvers.add(resolver);	
-	}
+	// Needed for Spring Data
+	// Lets you use Pageable in @Controller request parameters
+	//	@Override
+	//	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	//	    PageableHandlerMethodArgumentResolver resolver = new PageableHandlerMethodArgumentResolver();
+	//	    argumentResolvers.add(resolver);	
+	//	}
 	
 	//
 	// Locale handling

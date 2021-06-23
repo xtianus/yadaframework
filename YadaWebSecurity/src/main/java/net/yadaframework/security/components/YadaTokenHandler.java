@@ -19,7 +19,7 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.security.persistence.entity.YadaAutoLoginToken;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
-import net.yadaframework.security.persistence.repository.YadaAutoLoginTokenRepository;
+import net.yadaframework.security.persistence.repository.YadaAutoLoginTokenDao;
 
 /**
  * Handles autologin links: creation and parsing.
@@ -34,7 +34,7 @@ public class YadaTokenHandler {
     @Autowired private YadaUtil yadaUtil;
     @Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaConfiguration config;
-	@Autowired private YadaAutoLoginTokenRepository yadaAutoLoginTokenRepository;
+	@Autowired private YadaAutoLoginTokenDao yadaAutoLoginTokenDao;
 	
 	/**
 	 * Create a new YadaAutoLoginToken for the given user that expires after the configured amount of hours (config/security/autologinExpirationHours)
@@ -53,11 +53,11 @@ public class YadaTokenHandler {
 	 * @return
 	 */
     public YadaAutoLoginToken makeAutoLoginToken(YadaUserCredentials targetUser, Date expiration) {
-    	yadaAutoLoginTokenRepository.deleteExpired(); // Cleanup expired ones
+    	yadaAutoLoginTokenDao.deleteExpired(); // Cleanup expired ones
     	YadaAutoLoginToken yadaAutoLoginToken = new YadaAutoLoginToken();
     	yadaAutoLoginToken.setExpiration(expiration);
     	yadaAutoLoginToken.setYadaUserCredentials(targetUser);
-    	yadaAutoLoginToken = yadaAutoLoginTokenRepository.save(yadaAutoLoginToken);
+    	yadaAutoLoginToken = yadaAutoLoginTokenDao.save(yadaAutoLoginToken);
     	return yadaAutoLoginToken;
     }
 

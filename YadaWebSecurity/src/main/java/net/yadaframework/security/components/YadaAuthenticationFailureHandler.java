@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.DisabledException;
@@ -26,7 +25,7 @@ import org.springframework.stereotype.Component;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.TooManyFailedAttemptsException;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
-import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 
 /**
  * Questa classe aggiunge un pò di informazioni in request quando il login fallisce.
@@ -54,7 +53,7 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
 	private String failureUrlAjaxRequest = null;
 	private String failureUrlNormalRequest = null;
 
-	@Autowired private YadaUserCredentialsRepository userCredentialsRepository;
+	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired private YadaConfiguration yadaConfiguration;
 
 	public YadaAuthenticationFailureHandler() {
@@ -101,7 +100,7 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
 		try {
 			if (exception instanceof BadCredentialsException) {
 				request.setAttribute(REQUESTATTR_PASSWORDERRORFLAG, REQUESTATTR_PASSWORDERRORFLAG);
-				userCredentialsRepository.incrementFailedAttempts(username);
+				yadaUserCredentialsDao.incrementFailedAttempts(username);
 			} else if (exception instanceof DisabledException) {
 				request.setAttribute(REQUESTATTR_USERDISABLEDFLAG, REQUESTATTR_USERDISABLEDFLAG);
 			} else if (exception instanceof CredentialsExpiredException) {
@@ -109,13 +108,15 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
 				request.getRequestDispatcher("/pwdChange").forward(request, response);
 				return;
 			} else if (exception instanceof TooManyFailedAttemptsException) {
-				YadaUserCredentials yadaUserCredentials = userCredentialsRepository.findByUsername(username.toLowerCase(), PageRequest.of(0, 1)).get(0);
-				int lockMinutes = yadaConfiguration.getPasswordFailedAttemptsLockoutMinutes();
-				Date lastFailedTimestamp = yadaUserCredentials.getLastFailedAttempt();
-				if (lastFailedTimestamp!=null) {
-					long minutesPassed = (long) Math.ceil((System.currentTimeMillis() - lastFailedTimestamp.getTime()) / 60000);
-					long minutesLeft = lockMinutes - minutesPassed;
-					request.setAttribute(REQUESTATTR_LOCKOUTMINUTES, minutesLeft);
+				YadaUserCredentials yadaUserCredentials = yadaUserCredentialsDao.findFirstByUsername(username.toLowerCase());
+				if (yadaUserCredentials!=null) {
+					int lockMinutes = yadaConfiguration.getPasswordFailedAttemptsLockoutMinutes();
+					Date lastFailedTimestamp = yadaUserCredentials.getLastFailedAttempt();
+					if (lastFailedTimestamp!=null) {
+						long minutesPassed = (long) Math.ceil((System.currentTimeMillis() - lastFailedTimestamp.getTime()) / 60000);
+						long minutesLeft = lockMinutes - minutesPassed;
+						request.setAttribute(REQUESTATTR_LOCKOUTMINUTES, minutesLeft);
+					}
 				}
 			} else if (exception instanceof UsernameNotFoundException) {
 				// ATTENZIONE, deve essere l'ultima della catena di if altrimenti le sottoclassi non vengono considerate

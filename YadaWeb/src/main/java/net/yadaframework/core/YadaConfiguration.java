@@ -1001,11 +1001,11 @@ public abstract class YadaConfiguration {
 	 * @return an array with email and personal name
 	 */
 	public String[] getEmailFrom() {
-		try {
-			String address = configuration.getString("config/email/from/address");
-			String personal = configuration.getString("config/email/from/name");
+		String address = configuration.getString("config/email/from/address");
+		String personal = configuration.getString("config/email/from/name");
+		if (address!=null) {
 			return new String[] {address, personal};
-		} catch (Exception e) {
+		} else {
 			// Legacy
 			return new String[] { configuration.getString("config/email/from"), null };
 		}
@@ -1248,13 +1248,13 @@ public abstract class YadaConfiguration {
 	// Selenium Web Driver
 
 	public int seleniumWaitQuick() {
-		return configuration.getInt("config/selenium/timeout/waitQuickSeconds", 4);
+		return configuration.getInt("config/selenium/timeout/waitQuickSeconds", 8);
 	}
 	public int seleniumWait() {
-		return configuration.getInt("config/selenium/timeout/waitSeconds", 8);
+		return configuration.getInt("config/selenium/timeout/waitSeconds", 10);
 	}
 	public int seleniumWaitSlow() {
-		return configuration.getInt("config/selenium/timeout/waitSlowSeconds", 16);
+		return configuration.getInt("config/selenium/timeout/waitSlowSeconds", 18);
 	}
 
 	/**

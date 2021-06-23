@@ -6,13 +6,13 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1">
 	<!-- 
-    <link rel="stylesheet" type="text/css" yada:href="@{/static/bootstrap-4.5.0-dist/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/static/bootstrap-4.5.0-dist/css/bootstrap.min.css}"/>
     <script th:src="@{/static/jquery-3.5.1.min.js}"></script>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
 	 -->
-	<link th:if="${"\$"}{@config.developmentEnvironment}" rel="stylesheet" type="text/css" yada:href="@{/yadares/css/yada.css}" />
-    <link th:if="${"\$"}{!@config.developmentEnvironment}" rel="stylesheet" type="text/css" yada:href="@{/res/css/yada.min.css}" />
-	<link rel="stylesheet" type="text/css" yada:href="@{|/res/css/$acronym${"\$"}{@config.min}.css|}" />
+	<link th:if="${"\$"}{@config.developmentEnvironment}" rel="stylesheet" type="text/css" th:href="@{/yadares/css/yada.css}" />
+    <link th:if="${"\$"}{!@config.developmentEnvironment}" rel="stylesheet" type="text/css" th:href="@{/res/css/yada.min.css}" />
+	<link rel="stylesheet" type="text/css" th:href="@{|/res/css/$acronym${"\$"}{@config.min}.css|}" />
 </head>
 <body>
 <header>

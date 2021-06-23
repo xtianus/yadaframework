@@ -1,6 +1,7 @@
 package net.yadaframework.persistence.repository;
 
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -11,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +28,23 @@ public class YadaBrowserIdDao {
 
     @PersistenceContext EntityManager em;
     
-    @Autowired YadaBrowserIdRepository yadaBrowserIdRepository;
     private YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
+
+	/**
+	 * Find the instance with the given value
+	 * @param mostSigBits
+	 * @param leastSigBits
+	 * @return
+	 */
+    public YadaBrowserId findByMostSigBitsAndLeastSigBits(long mostSigBits, long leastSigBits) {
+    	String sql = "select e from YadaBrowserId e where e.mostSigBits = :mostSigBits and e.leastSigBits = :leastSigBits";
+		List<YadaBrowserId> resultList = em.createQuery(sql, YadaBrowserId.class)
+			.setMaxResults(1)
+			.setParameter("mostSigBits", mostSigBits)
+			.setParameter("leastSigBits", leastSigBits)
+			.getResultList();
+		return normaliseSingleResult(resultList);
+    }
 
 	
 	/**
@@ -48,7 +63,7 @@ public class YadaBrowserIdDao {
 		if (uuidString!=null) {
 			try {
 				UUID uuid = UUID.fromString(uuidString);
-				YadaBrowserId yadaBrowserId = yadaBrowserIdRepository.findByMostSigBitsAndLeastSigBits(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
+				YadaBrowserId yadaBrowserId = findByMostSigBitsAndLeastSigBits(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
 				if (yadaBrowserId!=null) {
 					return yadaBrowserId;
 				}
@@ -60,9 +75,9 @@ public class YadaBrowserIdDao {
 		// Create and set
 		UUID uuid = UUID.randomUUID();
 		YadaBrowserId yadaBrowserId = new YadaBrowserId();
+		em.persist(yadaBrowserId);
 		yadaBrowserId.setMostSigBits(uuid.getMostSignificantBits());
 		yadaBrowserId.setLeastSigBits(uuid.getLeastSignificantBits());
-		yadaBrowserId = yadaBrowserIdRepository.save(yadaBrowserId);
 		Cookie cookie = new Cookie(cookieName, uuid.toString());
 		cookie.setMaxAge(expirationSeconds);
 		cookie.setPath("/");
@@ -77,13 +92,28 @@ public class YadaBrowserIdDao {
      */
     @Transactional(readOnly = false) 
     public YadaBrowserId findOrCreate(UUID uuid) {
-    	YadaBrowserId yadaBrowserId = yadaBrowserIdRepository.findByMostSigBitsAndLeastSigBits(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
+    	YadaBrowserId yadaBrowserId = findByMostSigBitsAndLeastSigBits(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
     	if (yadaBrowserId==null) {
     		yadaBrowserId = new YadaBrowserId();
+    		em.persist(yadaBrowserId);
     		yadaBrowserId.setUUID(uuid);
-    		yadaBrowserId = yadaBrowserIdRepository.save(yadaBrowserId);
     	}
     	return yadaBrowserId;
     }
+    
+    /**
+     * For backwards compatibility, returns null when no result is found
+     * @param resultList
+     * @return
+     */
+    private YadaBrowserId normaliseSingleResult(List<YadaBrowserId> resultList) {
+		// Need to keep the contract of the Spring Data Repository, so we return null when no value found.
+		if (resultList.isEmpty()) {
+			return null;
+		} else {
+			return resultList.get(0);
+		}
+    }
+
 	
 }

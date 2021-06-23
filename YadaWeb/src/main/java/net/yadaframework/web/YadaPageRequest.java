@@ -1,16 +1,32 @@
 package net.yadaframework.web;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * A page for pageable content.
- * 
+ * A common use case is to implement web pagination in both directions.
+ * It also solves the problem of the browser back button not loading previously loaded values, via the loadPrevious flag.
  */
 public class YadaPageRequest {
 	private int page = -1;
 	private int size = 0;
 	private boolean loadPrevious = false;
-	
+	private List<String> sort = new ArrayList<>(); // Request parameters
+	private YadaPageSort parsedSort = null; // Parsed request sort parameters
+
+	/**
+	 * Creates a YadaPageRequest with the given page and size.
+	 * Drop-in replacement for the equivalent Spring Data PageRequest.of() method
+	 * @param page
+	 * @param size
+	 * @return
+	 */
+	public static YadaPageRequest of(int page, int size) {
+		return new YadaPageRequest(page, size);
+	}
+
 	/**
 	 * Creates a new "invalid" YadaPageRequest, with {@code page=-1, size=0}.
 	 * Has the same meaning of a "null" value. 
@@ -59,6 +75,27 @@ public class YadaPageRequest {
 		this.size = size;
 		this.loadPrevious = loadPrevious;
 	}
+	
+	/**
+	 * @return the page sort options
+	 */
+	public YadaPageSort getPageSort() {
+		if (parsedSort==null && !sort.isEmpty()) {
+			parsedSort = new YadaPageSort();
+			for (String requestParam : sort) {
+				parsedSort.add(requestParam);
+			}
+		}
+		return parsedSort;
+	}
+	
+	/**
+	 * Set the page sort options
+	 * @param pageSort
+	 */
+	public void setPageSort(YadaPageSort pageSort) {
+		this.parsedSort = pageSort;
+	}
 
 	/**
 	 * Tell if data from previous pages should also be returned
@@ -68,50 +105,32 @@ public class YadaPageRequest {
 		this.loadPrevious = loadPrevious;
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see org.springframework.data.domain.YadaPageRequest#next()
-	 */
 	public YadaPageRequest getNextPageRequest() {
 		return new YadaPageRequest(page + 1, size);
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see org.springframework.data.domain.AbstractYadaPageRequest#previous()
-	 */
 	public YadaPageRequest getPreviousPageRequest() {
 		return page == 0 ? this : new YadaPageRequest(page - 1, size);
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see org.springframework.data.domain.YadaPageRequest#first()
-	 */
 	public YadaPageRequest getFirstPageRequest() {
 		return new YadaPageRequest(0, size);
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		return String.format("Page request [page: %d, size %d]", page, size);
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see org.springframework.data.domain.YadaPageRequest#getPageSize()
+	/**
+	 * @return the number of rows for this page
 	 */
 	public int getSize() {
 		return size;
 	}
 
-	/* 
-	 * (non-Javadoc)
-	 * @see org.springframework.data.domain.YadaPageRequest#getPageNumber()
+	/**
+	 * @return The current page number starting at 0
 	 */
 	public int getPage() {
 		return page;
@@ -135,11 +154,15 @@ public class YadaPageRequest {
 	}
 	
 	/**
-	 * Returns the amount of rows to fetch from the database. 
+	 * Returns the amount of rows to fetch from the database + 1. 
 	 * It is equal to {@link #getSize()+1} when loadPrevious is false, otherwise it
-	 * adds the count of all the previous pages to the value then adds 1.
-	 * 1 is added to find out if there are more rows to fetch after this page.
+	 * adds the count of all the previous pages to the value then adds 1
+	 * to find out if there are more rows to fetch after this page.
+	 * Note: this method must only be used when the results are stored into a YadaPageRows object
+	 * otherwise the page size will be one element bigger than expected.
+	 * <p>If you are not going to store the result in YadaPageRows, use {@link #getSize()} instead</p>
 	 * @return
+	 * @see YadaPageRows
 	 */
 	public int getMaxResults() {
 		return loadPrevious ? getOffset() + size + 1: size + 1;
@@ -180,5 +203,32 @@ public class YadaPageRequest {
 
 	public void setSize(int size) {
 		this.size = size;
-	}	
+	}
+	
+	/**
+	 * Spring Data - compatible method to get the page size (number of rows)
+	 * @return
+	 * @see #getSize()
+	 */
+	public int getPageSize() {
+		return page;
+	}
+
+	/**
+	 * sort strings passed as request parameters - not to be used by the application
+	 * @return
+	 * @see #getPageSort()
+	 */
+	public List<String> getSort() {
+		return sort;
+	}
+
+	/**
+	 * sort strings passed as request parameters - not to be used by the application
+	 * @param sort
+	 */
+	public void setSort(List<String> sort) {
+		this.sort = sort;
+	}
+	
 }

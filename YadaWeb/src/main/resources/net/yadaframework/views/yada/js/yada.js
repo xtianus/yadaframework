@@ -104,7 +104,8 @@
 		}
 		$('a[data-yadaHash], button[data-yadaHash]', $element).not(".yadaHashed").click(function(){
 			var hashValue = $(this).attr('data-yadaHash')
-			history.pushState({'yadaHash': true}, null, window.location.pathname + '#' + hashValue)
+			const newUrl = yada.replaceHash(window.location.href, hashValue);
+			history.pushState({'yadaHash': true, 'hashValue' : hashValue}, null, newUrl);
 		}).addClass("yadaHashed");
 	}
 
@@ -287,9 +288,9 @@
 	};
 	
 	/**
-	 * Returns an url parameter when found, null when not found
+	 * Returns an url parameter when found, null when not found or empty
 	 * Adapted from http://stackoverflow.com/questions/2090551/parse-query-string-in-javascript
-	 * @param url can be a url, a query string or even part of it, but everything before "?" or "&" will be skipped
+	 * @param url can be a url, a query string or even part of it, or null; everything before "?" or "&" will be skipped.
 	 */
 	yada.getUrlParameter = function(url, varName){
 		 var queryStr = url + '&';
@@ -494,10 +495,33 @@
 		return str;
 	}
 	
+	/**
+	 * Replaces the current hash value with the new one, or adds the new one if no hash is present.
+	 * @param someUrl any string with an optional hash character
+	 * @param newHashValue some string to place after the existing hash value, or to add at the end following a new hash character
+	 */
+	yada.replaceHash = function(someUrl, newHashValue) {
+		return yada.removeHash(someUrl) + '#' + newHashValue;
+	}
+	
 	// Elimina l'hash (anchor) da un url, se presente.
 	yada.removeHash = function(someUrl) {
 		var parts = someUrl.split('#');
 		return parts[0];
+	}
+	
+	/**
+	 * Removes the current hash from the url, if any, without a page reload or a page scroll.
+	 * @param replaceState true to replace the current history entry, false to add to the history
+	 * See https://stackoverflow.com/a/5298684/587641
+	 */
+	yada.removeCurrentHash = function(replaceState) {
+		const cleanUrl = window.location.origin + window.location.pathname + window.location.search;
+		if (replaceState==true) {
+			history.replaceState("", document.title, cleanUrl);
+		} else {
+			history.pushState("", document.title, cleanUrl);
+		}
 	}
 	
 	// Transforms a string after the hash into an object, e.g. #story=132;command=message

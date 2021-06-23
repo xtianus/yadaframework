@@ -7,6 +7,12 @@ import java.util.Objects;
 
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
+/**
+ * A page of rows fetched using YadaPageRequest 
+ *
+ * @param <T> the type of each row
+ * @see YadaPageRequest
+ */
 public class YadaPageRows<T> implements Iterable<T> {
 	private final List<T> rows = new ArrayList<T>();
 	private final YadaPageRequest currentPageRequest;
@@ -32,7 +38,6 @@ public class YadaPageRows<T> implements Iterable<T> {
 	 * 
 	 * @param rows the result
 	 * @param currentPageRequest the page request that generated this result
-	 * @param hasMoreRows true if there are more rows to fetch from the database
 	 */
 	public YadaPageRows(List<T> rows, YadaPageRequest currentPageRequest) {
 		this.rows.addAll(rows);
@@ -79,7 +84,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	
 	/**
 	 * 
-	 * @return the next page number
+	 * @return the next page number. If there are no more rows, this number is invalid.
 	 */
 	public int getNextPage() {
 		return currentPageRequest.getNextPageRequest().getPage();
@@ -158,6 +163,17 @@ public class YadaPageRows<T> implements Iterable<T> {
 		YadaPageRows<T> other = (YadaPageRows<T>) obj;
 		return Objects.equals(rows, other.rows) && hasMoreRows == other.hasMoreRows && outOfRows == other.outOfRows
 				&& Objects.equals(currentPageRequest, other.currentPageRequest);
+	}
+
+	/**
+	 * Returns the next page request, for use in the "load more" buttons, or null if this is the last page.
+	 * @return
+	 */
+	public YadaPageRequest getNextPageRequest() {
+		if (!hasMoreRows) {
+			return null;
+		}
+		return currentPageRequest.getNextPageRequest();
 	}
 
 

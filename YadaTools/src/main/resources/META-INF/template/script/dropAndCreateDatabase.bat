@@ -1,11 +1,9 @@
 @echo off
-echo Rigenerazione del DB
-echo (mysql.exe deve essere nel PATH di sistema)
+echo Database regeneration: all data will be lost!
+echo (mysql.exe must be in the system PATH)
 
 mysqladmin --user=root --host=localhost drop ${acronym}db$env
 mysqladmin --user=root --host=localhost refresh
-
-REM devo usare mysql e non mysqladmin perche' il secondo non mi setta il charset
 
 mysql.exe -u root -h localhost -e "create database ${acronym}db$env character set utf8mb4;"
 

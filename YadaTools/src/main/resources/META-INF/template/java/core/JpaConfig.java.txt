@@ -3,11 +3,11 @@ package $basePackage.core;
 import net.yadaframework.core.YadaJpaConfig;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 // Warning: do not remove @Configuration or save() operations will fail with no error message!
 // TODO test if it can indeed be removed because we're using WebApplicationInitializer
 @Configuration
-@EnableJpaRepositories(basePackages = "$basePackage.persistence.repository")
+// This can be added when using Spring Data
+// @EnableJpaRepositories(basePackages = "$basePackage.persistence.repository")
 public class JpaConfig extends YadaJpaConfig {
 }

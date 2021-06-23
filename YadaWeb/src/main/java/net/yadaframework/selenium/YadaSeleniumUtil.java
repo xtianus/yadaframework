@@ -63,6 +63,42 @@ public class YadaSeleniumUtil {
 	private YadaHttpUtil yadaHttpUtil = new YadaHttpUtil();
 	private Pattern matchNonEmptyText = Pattern.compile(".*\\w+.*"); // Match any string that contains at least a word character
 
+	  /**
+	   * Run some javascript.
+	   *
+	   * <p>
+	   * If the script has a return value (i.e. if the script contains a <code>return</code> statement),
+	   * then the following steps will be taken:
+	   *
+	   * <ul>
+	   * <li>For an HTML element, this method returns a WebElement</li>
+	   * <li>For a decimal, a Double is returned</li>
+	   * <li>For a non-decimal number, a Long is returned</li>
+	   * <li>For a boolean, a Boolean is returned</li>
+	   * <li>For all other cases, a String is returned.</li>
+	   * <li>For an array, return a List&lt;Object&gt; with each object following the rules above. We
+	   * support nested lists.</li>
+	   * <li>For a map, return a Map&lt;String, Object&gt; with values following the rules above.</li>
+	   * <li>Unless the value is null or there is no return value, in which null is returned</li>
+	   * </ul>
+	   *
+	   * <p>
+	   * Arguments must be a number, a boolean, a String, WebElement, or a List of any combination of
+	   * the above. An exception will be thrown if the arguments do not meet these criteria. The
+	   * arguments will be made available to the JavaScript via the "arguments" magic variable, as if
+	   * the function were called via "Function.apply"
+	   *
+	   * @param script The JavaScript to execute
+	   * @param webDriver
+	   * @param args The arguments to the script. May be empty. They will be available to the script as the arguments[] array.
+	   * @return One of Boolean, Long, Double, String, List, Map or WebElement. Or null.
+	 */
+	public Object runJavascript(String script,  WebDriver webDriver, Object...args) {
+		JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
+		return javascriptExecutor.executeScript(script, args);
+	}
+
+	
 	/**
 	 * Returns true if the current url matches the specified pattern
 	 * @param urlPattern
@@ -198,6 +234,17 @@ public class YadaSeleniumUtil {
 	}
 
 	/**
+	 * Get an element by id
+	 * @param id
+	 * @param webDriver
+	 * @return
+	 */
+	public WebElement findById(String id, WebDriver webDriver) {
+		List<WebElement> contents = webDriver.findElements(By.id(id));
+		return contents.isEmpty()?null:contents.get(0);
+	}
+	
+	/**
 	 * Check if an element with a given id exists
 	 * @param id
 	 * @param webDriver
@@ -228,21 +275,23 @@ public class YadaSeleniumUtil {
 	 * @param driverType DRIVER_FIREFOX, DRIVER_CHROME
 	 * @return
 	 */
-	public WebDriver makeWebDriver(File customProfileDir, InetSocketAddress proxyToUse, Set<Cookie> cookiesToSet, int driverType) {
-		return this.makeWebDriver(customProfileDir, proxyToUse, cookiesToSet, driverType, null);
+	public WebDriver makeWebDriver(File customProfileDir, InetSocketAddress proxyToUse, String proxyUser, String proxyPassword, Set<Cookie> cookiesToSet, int driverType) {
+		return this.makeWebDriver(customProfileDir, proxyToUse, proxyUser, proxyPassword, cookiesToSet, driverType, null);
 	}	
 	
 	/**
 	 * Create a new browser instance positioning the window 
 	 * @param customProfileDir the folder where to store the user profile, can be null to use the default temporary profile. The folder is created when missing.
 	 * @param proxyToUse the address of the proxy, or null for direct connection
+	 * @param proxyUser can be set for SOCKS5 proxies only
+	 * @param proxyPassword can be set for SOCKS5 proxies only
 	 * @param cookiesToSet cookies to set after the first get of a document. Can be null or empty. Cookies are set only when a 
 	 * cookie with the same name has not been received. It's not possible to set cookies BEFORE the first get (by design of WebDriver).
 	 * @param driverType DRIVER_FIREFOX, DRIVER_CHROME
 	 * @param userAgent the user agent string, null for keeping the current browser's default. Not implemented for Firefox.
 	 * @return
 	 */
-	public WebDriver makeWebDriver(File customProfileDir, InetSocketAddress proxyToUse, Set<Cookie> cookiesToSet, int driverType, String userAgent) {
+	public WebDriver makeWebDriver(File customProfileDir, InetSocketAddress proxyToUse, String proxyUser, String proxyPassword, Set<Cookie> cookiesToSet, int driverType, String userAgent) {
 		final Set<Cookie> initialCookies = new HashSet<Cookie>();
 		if (cookiesToSet!=null) {
 			// Make a copy because we need to clear the set later
@@ -257,9 +306,18 @@ public class YadaSeleniumUtil {
 			}
 			int proxyPort = proxyToUse.getPort();
 			log.debug("Setting browser proxy to {}:{}", proxyHost, proxyPort);
-			browserProxy.setHttpProxy(proxyHost + ":" + proxyPort);
-			browserProxy.setSslProxy(proxyHost + ":" + proxyPort);
-			browserProxy.setProxyType(ProxyType.MANUAL);
+			// Only socks proxies can have authentication (limitation of Selenium API?)
+			// and if a proxy has authentication it must be socks5
+			if (proxyUser!=null && proxyPassword!=null) {
+				browserProxy.setSocksVersion(5);
+				browserProxy.setSocksProxy(proxyHost + ":" + proxyPort);
+				browserProxy.setSocksUsername(proxyUser);
+				browserProxy.setSocksPassword(proxyPassword);
+			} else {
+				browserProxy.setHttpProxy(proxyHost + ":" + proxyPort);
+				browserProxy.setSslProxy(proxyHost + ":" + proxyPort);
+			}
+			// browserProxy.setProxyType(ProxyType.MANUAL);
 		}
 		
 		MutableCapabilities capability;

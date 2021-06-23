@@ -11,14 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.persistence.entity.YadaClause;
-import net.yadaframework.persistence.repository.YadaClauseRepository;
+import net.yadaframework.persistence.repository.YadaClauseDao;
 
 // Not a @Component
 abstract public class YadaSetup {
 	private transient Logger log = LoggerFactory.getLogger(YadaSetup.class);
 	
 	@Autowired private YadaConfiguration yadaConfiguration;
-	@Autowired private YadaClauseRepository yadaClauseRepository;
+	@Autowired private YadaClauseDao yadaClauseDao;
 
 	@PostConstruct
 	public void init() throws Exception {
@@ -30,10 +30,10 @@ abstract public class YadaSetup {
 		setupUsers(userList);
 		
 		// Se nel database non ce ne sono, vengono create le clauses
-		if (yadaClauseRepository.count()==0) {
+		if (yadaClauseDao.count()==0) {
 			List<YadaClause> yadaClauses = yadaConfiguration.getSetupClauses();
 			if (!yadaClauses.isEmpty()) {
-				yadaClauseRepository.saveAll(yadaClauses);
+				yadaClauseDao.saveAll(yadaClauses);
 			}
 		}
 		

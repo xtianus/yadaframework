@@ -1,6 +1,7 @@
 package net.yadaframework.persistence.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -89,6 +90,12 @@ public class YadaAttachedFileDao {
 		yadaAttachedFile = em.merge(yadaAttachedFile);
 		entity = em.merge(entity);
 		list.add(yadaAttachedFile);
+	}
+
+	// Kept for compatibility with Spring Data Repository
+	public Optional<YadaAttachedFile> findById(Long yadaAttachedFileId) {
+		YadaAttachedFile result = em.find(YadaAttachedFile.class, yadaAttachedFileId);
+		return  Optional.ofNullable(result);
 	}
 
 }

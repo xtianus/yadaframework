@@ -1,25 +1,16 @@
 package net.yadaframework.security.components;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.thymeleaf.util.StringUtils;
 
 import net.yadaframework.components.YadaSetup;
-import net.yadaframework.exceptions.YadaConfigurationException;
-import net.yadaframework.exceptions.YadaInvalidUsageException;
-import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
-import net.yadaframework.security.persistence.repository.YadaUserCredentialsRepository;
-import net.yadaframework.security.persistence.repository.YadaUserProfileRepository;
+import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 
 /**
  * Convenience method to create configured application users.
@@ -42,80 +33,28 @@ import net.yadaframework.security.persistence.repository.YadaUserProfileReposito
 		&lt;/users>
 	&lt;/setup>
 	</pre>
-
  *
  * @param <T> the application-specific extension of YadaUserProfile
  */
+//Not a @Component
 abstract public class YadaUserSetup<T extends YadaUserProfile> extends YadaSetup {
 	private transient Logger log = LoggerFactory.getLogger(YadaUserSetup.class);
 
-	@Autowired private YadaUserCredentialsRepository userCredentialsRepository;
-	@Autowired private YadaUserProfileRepository<T> yadaUserProfileRepository;
-	@Autowired private PasswordEncoder encoder;
+	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
 	
 	@Override
 	protected void setupApplication() {
 		// Default empty method
+		log.debug("setupApplication() does nothing");
 	}
 
 	@Override
 	protected void setupUsers(List<Map<String, Object>> userList) {
 		// Retrieve the generics YadaUserProfile subclass: https://stackoverflow.com/a/75345/587641 
-		Class userProfileClass = (Class)((ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+		Class<T> userProfileClass = (Class<T>)((ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 		//
 		for (Map<String, Object> userDefinition : userList) {
-			// The map is a key-value pair of user attributes except "roles" which is a list of role ids
-			String email = (String) userDefinition.get("email");
-			String password = (String) userDefinition.get("password");
-			if (email==null || password==null) {
-				throw new YadaConfigurationException("setup users must have <email> and <password> elements");
-			}
-			YadaUserCredentials existingUserCredentials = userCredentialsRepository.findFirstByUsername(email);
-			if (existingUserCredentials == null) {
-				log.info("Setup: creating user {}", email);
-				T userProfile;
-				try {
-					userProfile = (T) userProfileClass.newInstance();
-				} catch (InstantiationException | IllegalAccessException e1) {
-					log.error("Failed to setup user of type {}", userProfileClass, e1);
-					throw new YadaInvalidUsageException("Invalid user type {}", userProfileClass);
-				}
-				YadaUserCredentials userCredentials = new YadaUserCredentials();
-				userCredentials.setUsername(email);
-				userCredentials.changePassword(password, encoder);
-				userCredentials.setEnabled(true);
-				userProfile.setUserCredentials(userCredentials);
-				for (String key : userDefinition.keySet()) {
-					Object valueObject = userDefinition.get(key);
-					if (key.equals("roles")) {
-						for (Integer role : (Set<Integer>)valueObject) {
-							userCredentials.addRole(role);
-						}
-					} else if (!key.equals("email") && !key.equals("password")) {
-						String setterName = "set" + StringUtils.capitalize(key); // e.g. setTimeZone
-						Method setter = null;
-						try {
-							try {
-								setter = userProfileClass.getMethod(setterName, String.class);
-							} catch (NoSuchMethodException e) {
-								// Try a different version?
-								if (!key.toLowerCase().equals(key)) {
-									setterName = "set" + StringUtils.capitalize(key.toLowerCase()); // e.g. setTimezone
-									setter = userProfileClass.getMethod(setterName, String.class);
-								} else {
-									throw e;
-								}
-							}
-							setter.invoke(userProfile, (String)valueObject);
-						} catch (SecurityException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-							log.error("Can't set attribute '{}' on {} (skipped)", key, userProfileClass, e);
-						}
-					}
-					
-				}
-				userProfile = yadaUserProfileRepository.save(userProfile);
-				userCredentialsRepository.save(userCredentials);
-			}
+			yadaUserCredentialsDao.create(userDefinition, userProfileClass);
 		}
 	}
 

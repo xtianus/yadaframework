@@ -92,7 +92,7 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected String title;
 	
-	@Column(length=8192)
+	@Column(length=12000) // Should it be Lob?
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected String message;
 	

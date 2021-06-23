@@ -1,8 +1,6 @@
 package net.yadaframework.security;
 
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -13,7 +11,8 @@ import net.yadaframework.security.web.YadaDialectWithSecurity;
 
 //@Configuration not needed when using WebApplicationInitializer.java
 @EnableWebMvc
-@EnableSpringDataWebSupport
+// Needed to use Spring Data
+// @EnableSpringDataWebSupport
 @EnableScheduling
 @EnableAsync
 @ComponentScan(basePackages = { "net.yadaframework.security.web" })

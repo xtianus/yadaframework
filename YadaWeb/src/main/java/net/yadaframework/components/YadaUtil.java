@@ -116,6 +116,32 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+	
+	/**
+	 * Returns a random integer number 
+	 * @param minIncluded minimum value, included
+	 * @param maxIncluded maximum value, included
+	 * @return
+	 */
+	public int getRandom(int minIncluded, int maxIncluded) {
+		int maxExcluded = maxIncluded - minIncluded + 1;
+		return secureRandom.nextInt(maxExcluded) + minIncluded;
+	}
+	
+	/**
+	 * Given the instance of a "specific" class created specifying a single type T while extending a generic class, 
+	 * retrieve the class of the type T.
+	 * Example:
+	 * the generic class is public abstract class Shape<T extends Color> {...}
+	 * the specific class is public class Circle extends Shape<Red>
+	 * the instance is new Circle()
+	 * the returned value is Red.class
+	 * @param specificClassInstance instance of the specific class, usually "this" when called from inside either the specific or the generic abstract class.
+	 * @return the class T used to make the generic specific
+	 */
+	public Class<?> findGenericClass(Object specificClassInstance) {
+		return (Class<?>)((ParameterizedType)specificClassInstance.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+	}
 
 	/**
 	 * Split an HTML string in two parts, not breaking words, handling closing and reopening of html tags.
@@ -397,8 +423,13 @@ public class YadaUtil {
 		int timeoutMillis = 20000; // 20 seconds to find a result seems to be reasonable
 		while (true) {
 			File candidateFile = new File(targetFolder, filename);
-			if (candidateFile.createNewFile()) {
-				return candidateFile;
+			try {
+				if (candidateFile.createNewFile()) {
+					return candidateFile;
+				}
+			} catch (IOException e) {
+				log.error("Can't create file {}", candidateFile);
+				throw e;
 			}
 			counter++;
 			filename = baseName + counterSeparator + counter + extension;
@@ -1777,6 +1808,44 @@ public class YadaUtil {
 //	public void copyFields(Calendar fromCal, Calendar toCal) {
 //
 //	}
+	
+	/**
+	 * Check if a date is within two dates expressed as month/day, regardless of the year and of the validity of such dates.
+	 * @param dateToCheck for example new GregorianCalendar()
+	 * @param fromMonth 0-based, better use Calendar.JANUARY etc.
+	 * @param fromDayInclusive 1-based
+	 * @param toMonth 0-based, better use Calendar.JANUARY etc.
+	 * @param toDayExcluded 1-based
+	 * @return
+	 */
+	public static boolean dateWithin(Calendar dateToCheck, int fromMonth, int fromDayInclusive, int toMonth, int toDayExcluded) {
+		if (fromMonth<0 || fromMonth>11) {
+			throw new YadaInvalidUsageException("Month must be in the range 0-11");
+		}
+		if (toMonth<0 || toMonth>11) {
+			throw new YadaInvalidUsageException("Month must be in the range 0-11");
+		}
+		if (fromDayInclusive<1 || fromDayInclusive>31) {
+			throw new YadaInvalidUsageException("Day must be in the range 1-31");
+		}
+		if (toDayExcluded<1 || toDayExcluded>31) {
+			throw new YadaInvalidUsageException("Day must be in the range 1-31");
+		}
+		boolean sameYear = fromMonth<=toMonth;
+		int monthToCheck = dateToCheck.get(Calendar.MONTH);
+		if (sameYear && (monthToCheck<fromMonth || monthToCheck>toMonth)) {
+			return false;
+		}
+		if (!sameYear && (monthToCheck<fromMonth && monthToCheck>toMonth)) {
+			return false;
+		}
+		// The month is within range, keep checking...
+		int dayToCheck = dateToCheck.get(Calendar.DAY_OF_MONTH);
+		if ((monthToCheck==fromMonth && dayToCheck<fromDayInclusive) || (monthToCheck==toMonth && dayToCheck>=toDayExcluded)) {
+			return false;
+		}
+		return true;
+	}
 
 	/** Ritorna l'ora più vicina nel passato alla data specificata
 	 * @return
@@ -2255,7 +2324,7 @@ public class YadaUtil {
 				return "";
 			}
 		}
-		originalFilename = YadaWebUtil.removeHtmlStatic(originalFilename);
+		//originalFilename = YadaWebUtil.removeHtmlStatic(originalFilename);
 		char[] resultChars = originalFilename.toCharArray();
 		char[] lowerChars = originalFilename.toLowerCase().toCharArray();
 		for (int i = 0; i < resultChars.length; i++) {
