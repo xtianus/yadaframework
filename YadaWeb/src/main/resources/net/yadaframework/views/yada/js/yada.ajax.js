@@ -12,6 +12,7 @@
 	yada.postLoginHandler = null; // Handler to run after login, if any
 	
 	var markerAjaxButtonOnly = 'yadaAjaxButtonOnly';
+	var markerAjaxModal = 'yadaAjaxModal';
 	var clickedButton;
 	
 	// WARNING: if you change this, also change it in yada.js
@@ -1189,16 +1190,18 @@
 				// Open any other modal
 				var $loadedModalDialog=$(responseHtml).find(".modal > .modal-dialog").first();
 				if ($loadedModalDialog.length==1) {
+					$("#loginModal").remove(); // TODO still needed?
 					// A modal was returned. Is it a "sticky" modal?
 					var stickyModal = $loadedModalDialog.hasClass("yadaStickyModal");
-					$("#loginModal").remove();
-
-					var $modalObject = null;
+					
+					// Remove any currently downloaded modals (markerAjaxModal) if they are open and not sticky
+					$(".modal.show."+markerAjaxModal+":not(.yadaStickyModal)").remove();
+					
+					// modals are appended to the body
+					const $modalObject = $(responseHtml).find(".modal").first();
+					// Add the marker class 
+					$loadedModalDialog.addClass(markerAjaxModal);
 					if (stickyModal) {
-						// Sticky modals are appended to the body
-						$modalObject = $(responseHtml).find(".modal").first();
-						// Remove the modalGenericDialog id if present, because it could conflict with future dialogs
-						$("#modalGenericDialog", $modalObject).removeAttr('id');
 						// This container is needed to keep the scrollbar when a second modal is closed
 						var $container = $("<div class='modal-open'></div>");
 						$container.append($modalObject);
@@ -1207,10 +1210,10 @@
 							$container.remove(); // Remove modal on close
 						});
 					} else {
-						// Normal modals are appended to the common placeholder
-						$modalObject = $("#ajaxModal");
-						$("#ajaxModal").children().remove();
-						$("#ajaxModal").append($loadedModalDialog);
+						$("body").prepend($modalObject);
+						$modalObject.on('hidden.bs.modal', function (e) {
+							$modalObject.remove(); // Remove modal on close
+						});
 					}
 					
 					// Adding the modal head elements to the main document
@@ -1291,7 +1294,6 @@
 		});
 	}
 
-	
 	/**
 	 * Se esiste un confirm nel response, lo visualizza e, in caso l'utente confermi, esegue la chiamata originale aggiungendo "confirmed" ai parametri.
 	 * WARNING: any modal will be closed and its close-handlers invoked before showing the confirm dialog
@@ -1301,7 +1303,9 @@
 		var $modalConfirm=$(responseHtml).find(".s_modalConfirm .modal");
 		if ($modalConfirm.length>0) {
 			// Close all non-sticky modals
-			var $currentModals = $(".modal:visible").filter(function(){return $(".yadaStickyModal", this).length==0});			$currentModals.modal('hide'); // Hide any modal that might be already open
+			var $currentModals = $(".modal:not(.yadaStickyModal):visible");			
+			// var $currentModals = $(".modal:visible").filter(function(){return $(".yadaStickyModal", this).length==0});			
+			$currentModals.modal('hide'); // Hide any modal that might be already open
 			$("#yada-confirm .modal").children().remove();
 			$("#yada-confirm .modal").append($(".modal-dialog", $modalConfirm));
 			$("#yada-confirm .modal").modal('show');
@@ -1382,7 +1386,7 @@
 		var notification=$(responseHtml).find(".s_modalNotify .yadaNotify");
 		if (notification.length==1) {
 			// Mostro la notification
-			$('#ajaxModal:visible').modal('hide'); // Close any current modals
+			$('.modal:visible').modal('hide'); // Close any current modals
 			$('#yada-notification').children().remove();
 			$('#yada-notification').append(notification);
 			// We need to show the modal after a delay or it won't show sometimes (!)
