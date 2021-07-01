@@ -1200,7 +1200,7 @@
 					// modals are appended to the body
 					const $modalObject = $(responseHtml).find(".modal").first();
 					// Add the marker class 
-					$loadedModalDialog.addClass(markerAjaxModal);
+					$modalObject.addClass(markerAjaxModal);
 					if (stickyModal) {
 						// This container is needed to keep the scrollbar when a second modal is closed
 						var $container = $("<div class='modal-open'></div>");
