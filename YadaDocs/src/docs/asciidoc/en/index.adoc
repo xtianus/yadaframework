@@ -57,7 +57,7 @@ that will show you how to quickly create a web application
 
 <<ajax.adoc#>>:: TODO
 
-<<ajaxModal.adoc#>>:: TODO
+<<ajaxModal.adoc#>>:: Open a modal as a result of an ajax call
 
 <<datatables.adoc#>>:: TODO
 
