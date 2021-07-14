@@ -199,7 +199,7 @@ if [[ $cfgPkgApache ]]; then
 	
 	if [[ $cfgPkgModJk ]]; then
 		apt-get -o Dpkg::Options::="--force-confnew" -y install $cfgPkgModJk
-		sed -i 's/JkLogLevel info/JkLogLevel warn/g' /etc/apache2/mods-available/jk.conf
+		sed -i 's/JkLogLevel info/JkLogLevel warn/g' /etc/apache2/mods-available/httpd-jk.conf
 		a2enmod jk
 		# Enabling AJP Connector
 		if [[ $CATALINA_BASE ]]; then
@@ -275,7 +275,7 @@ if [[ $cfgPkgApache ]]; then
 	        echo "Worker $WORKER already configured in $modjkFile (skipped)"
 	fi
 	
-	sed -i 's/JkLogLevel info/JkLogLevel warn/g' /etc/apache2/mods-available/jk.conf
+	sed -i 's/JkLogLevel info/JkLogLevel warn/g' /etc/apache2/mods-available/httpd-jk.conf
 	
 	a2enmod jk
 	a2dissite 000-default
