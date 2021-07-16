@@ -29,7 +29,7 @@ Parameters:
 - maxlength = max number of characters accepted (optional). When greater than 80, a textarea is generated instead of an input tag.
 - rows = number of rows for the textarea (optional)
 - addonLeft = character to set as a bootstrap "input-group-prepend" to the left of the input field (optional)
-- addonRight = character to set as a bootstrap "input-group-append" to the right of the input field (optional)
+- addonRight = character to set as a bootstrap "input-group-text" to the right of the input field (optional)
 - help = testo per il pulsante di help, se non c'è helpKey (optional)
 - helpKey = chiave del testo per il pulsante di help (optional)
 - editor = true/false to use ckeditor
@@ -70,7 +70,7 @@ Example:
 			th:tabindex="${tabindex}"
 			th:autocomplete="${autocomplete}"
 			th:id="${id}?:${#ids.seq(seqName)}" th:attr="aria-describedby=${id}?:${#ids.next(seqName)}"/>
-		<div th:if="${addonRight!=null}" class="input-group-append">
+		<div th:if="${addonRight!=null}" class="input-group-text">
 			<span class="input-group-text" th:text="${addonRight}">.00</span>
 			<span th:if="${type=='password' && noShowPassword!=true}" class="input-group-text">
 				<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
@@ -85,7 +85,7 @@ Example:
 			th:autocomplete="${autocomplete}"
 			th:id="${id}?:${#ids.seq(seqName)}" th:attr="aria-describedby=${id}?:${#ids.next(seqName)}"></textarea>
 		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
-			<a th:if="${help!=null}" class="yadaHelpButton input-group-append" data-trigger="focus" data-container="body" 
+			<a th:if="${help!=null}" class="yadaHelpButton input-group-text" data-trigger="focus" data-container="body" 
 				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
 				data-html="true"
 				th:attr="data-content=${help}">

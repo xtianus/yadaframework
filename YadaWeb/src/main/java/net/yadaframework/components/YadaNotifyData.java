@@ -155,7 +155,6 @@ public class YadaNotifyData {
 	/**
 	 * Set the notification message using localization. Can be HTML.
 	 * @param messageKeyAndArgs the message key, followed by optional arguments to be replaced in the localized value
-	 * @throws YadaInvalidUsageException if yadaMessageSource() hasn't been called
 	 * @return
 	 */
 	public YadaNotifyData messageKey(String ... messageKeyAndArgs) {

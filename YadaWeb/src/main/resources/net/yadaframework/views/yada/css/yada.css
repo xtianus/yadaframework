@@ -102,6 +102,10 @@
     cursor: pointer;
 }
 
+.yadaHelpButton.input-group-text {
+	margin-right: 0;
+}
+
 a.yadaHelpButton:focus {
 	outline: none;
 }
