@@ -6,9 +6,8 @@
 		<p>This is the footer</p>
 	</footer>
 	
-	<!-- 
-	<script th:src="@{/static/popper-2.4.4.min.js}"></script>
-	<script th:src="@{/static/bootstrap-4.5.0/js/bootstrap.min.js}"></script>
+	<!-- Enable the next line after saving the bootstrap bundle to the /static folder
+	<script th:src="@{/static/bootstrap-5.0.1/js/bootstrap.bundle.min.js}"></script>
 	 -->	
 	<script th:if="${"\$"}{!@config.developmentEnvironment}" yada:src="@{/res/js/yada.min.js}"></script>
 	<script th:if="${"\$"}{@config.developmentEnvironment}" yada:src="@{/yadares/js/yada.js}"></script>
@@ -23,8 +22,10 @@
 
 	<!--/* Notify modal */-->
 	<div th:include="/yada/modalNotify :: modal" class="modal fade" id="yada-notification" role="dialog"></div>
-	<script th:if="${"\$"}{YADA_NBODY!=null}" type="text/javascript">
-		${"\$"}('#yada-notification').modal('show');
+	<script th:if="${YADA_NBODY!=null}" type="text/javascript">
+		$(document).ready(function() {
+			$('#yada-notification').modal('show');
+		});
 	</script>
 	<script type="text/javascript">
 		// Devo resettare le icone ad ogni chiusura per riusarlo via js
