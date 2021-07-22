@@ -1,5 +1,7 @@
 package net.yadaframework.security.persistence.repository;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,7 +32,7 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 	public List<Integer> findRoleIds(Long userProfileId) {
 		String sql = "select r.roles from YadaUserProfile yup join YadaUserCredentials yuc on yup.userCredentials_id = yuc.id " + 
 			"join YadaUserCredentials_roles r on yuc.id = r.YadaUserCredentials_id where yup.id=:userProfileId";
-		return em.createNativeQuery(sql, Integer.class)
+		return em.createNativeQuery(sql)
 				.setParameter("userProfileId", userProfileId)
 				.getResultList();
 	}
@@ -41,12 +43,12 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 	 * @return
 	 */
 	public Long findUserProfileIdByUsername(String username) {
-		String sql = "select up.id from YadaUserProfile up join YadaUserCredentials uc ON uc.id = up.userCredentials_id where uc.username=:username limit 1";
+		String sql = "select up.id from YadaUserProfile up join YadaUserCredentials uc ON uc.id = up.userCredentials_id where uc.username=:username";
 		try {
-			return (Long) em.createNativeQuery(sql, Long.class)
+			return ((BigInteger)em.createNativeQuery(sql)
 				.setParameter("username", username)
 				.setMaxResults(1)
-				.getSingleResult();
+				.getSingleResult()).longValue();
 		} catch (NonUniqueResultException | NoResultException e) {
 			return null; // Nothing found
 		}

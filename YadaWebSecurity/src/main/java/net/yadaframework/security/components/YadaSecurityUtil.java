@@ -113,8 +113,11 @@ public class YadaSecurityUtil {
 	public boolean performPasswordChange(YadaFormPasswordChange yadaFormPasswordChange) {
 		long[] parts = yadaTokenHandler.parseLink(yadaFormPasswordChange.getToken());
 		try {
-			if (parts!=null) {
+			if (parts!=null && parts.length==2) {
 				YadaRegistrationRequest registrationRequest = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]).get(0);
+				if (registrationRequest==null) {
+					return false;
+				}
 				String username = registrationRequest.getEmail();
 				YadaUserCredentials yadaUserCredentials = yadaUserCredentialsDao.findFirstByUsername(StringUtils.trimToEmpty(username).toLowerCase());
 				if (yadaUserCredentials!=null) {
