@@ -884,8 +884,8 @@
 				//
 				buttonName = $(clickedButton).attr("name");
 				buttonValue = $(clickedButton).attr("value") || "";
-				if (multipart && buttonName!=null && !data.has('buttonName')) {
-					data.append('buttonName', buttonValue);
+				if (multipart && buttonName!=null && !data.has(buttonName)) {
+					data.append(buttonName, buttonValue);
 				} else if (!multipart && buttonName!=null && data[buttonName]==null) {
 					data.push({name: buttonName, value: buttonValue});
 				}
