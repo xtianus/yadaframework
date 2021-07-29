@@ -1279,7 +1279,17 @@
 //				document.close();
 			},
 			timeout: yada.devMode?0:timeout,
-			traditional: true // Serve per non avere id[] : '12' ma id : '12'
+			traditional: true, // Serve per non avere id[] : '12' ma id : '12'
+			xhr: function() {
+				// Changes the bootstrap progress bar width
+				$(".loader .progress-bar").css("width", 0);
+				var xhr = $.ajaxSettings.xhr() ;
+				xhr.upload.onprogress = function(evt){
+					$(".loader .progress-bar").css("width", evt.loaded/evt.total*100+"%");
+				} ;
+				// xhr.upload.onload = function(){ console.log('DONE!') } ;
+				return xhr ;
+			}
 		});
 		
 	}
