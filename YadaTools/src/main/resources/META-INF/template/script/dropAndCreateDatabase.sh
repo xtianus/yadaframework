@@ -1,6 +1,5 @@
 #!/bin/bash
-# Usare il parametro "force" per bypassare il prompt
-# NOTA: questo script VIENE COPIATO ogni volta dal build.xml del workspace, quindi non fare modifiche su ubuntu
+# Use the "force" parameter to skip prompts
 # Note for yada developers: the ${"\$"} in the yada template is the escaped form of the dollar sign
 
 hostname=localhost
