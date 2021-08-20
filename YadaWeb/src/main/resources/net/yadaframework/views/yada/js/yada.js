@@ -1141,6 +1141,20 @@
 		});
 	}
 	
+	yada.updateInputCounter = function($inputTag, $counterDiv) {
+		const maxlength = $inputTag.attr("maxlength");
+		var currentLength = $inputTag.val().length;
+		if (maxlength==null) {
+			console.error("Missing maxlength attribute on input tag with data-yadaTagId=" + $inputTag.attr("data-yadaTagId"));
+			return;
+		}
+		$("span:first-child", $counterDiv).text(currentLength);
+		$("span:last-child", $counterDiv).text(maxlength);
+		$inputTag.on("input", function() {
+			currentLength = this.value.length;
+			$("span:first-child", $counterDiv).text(currentLength);
+		});
+	}
 
 	
 }( window.yada = window.yada || {} ));
