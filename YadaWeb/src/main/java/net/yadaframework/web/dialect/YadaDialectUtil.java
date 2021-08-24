@@ -139,7 +139,13 @@ public class YadaDialectUtil {
 					break;
 				default:
 					// Most th: attributes have plain HTML equivalent
-					newAttributes.put(attributeName, parsedValue);
+					// but as they must be inserted via th:attr in the template, I need to convert the value
+					// into a sum of strings in order to handle single quotes correctly.
+					// Example original html: <yada:input th:oninput="|handleTag('@{/some/url(id=${someid})}')|">
+					// Example of final html: <input th:attr="oninput='handleTag('+'\''+'/some/url?id=123'+'\''+')'">
+					parsedValue = parsedValue.replaceAll("'", "'+'\\\\''+'");
+					// The parsedValue is now a plain string so we quote it to be EL compatible
+					newAttributes.put(attributeName, "'" + parsedValue + "'");
 				}
 			}
 		}
