@@ -78,6 +78,10 @@ public class YadaDialectUtil {
 			String attributeName = sourceAttribute.getKey();
 			String attributeValue = sourceAttribute.getValue();
 			if (!attributeName.startsWith(YADA_PREFIX_WITHCOLUMN) && !attributeName.startsWith(THYMELEAF_PREFIX_WITHCOLUMN)) {
+				if ("type".equalsIgnoreCase(attributeName) && "number".equalsIgnoreCase(attributeValue)) {
+					// The "type='number'" attribute must be removed from the output tag because it is handled in a custom way
+					continue;
+				}
 				newAttributes.put(attributeName, attributeValue==null?attributeName:attributeValue);
 			}
 		}

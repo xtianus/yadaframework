@@ -117,6 +117,11 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
 				}
 			} 
 		}
+        if (inputSourceAttributes.get("type")==null) {
+        	// If "type" is missing, need to add it because it's used by the tag HTML fragment
+        	inputSourceAttributes = new HashMap<String, String>(inputSourceAttributes); // Need to clone the source map which is readonly
+        	inputSourceAttributes.put("type", "text"); // Default type for input tag
+        }
         structureHandler.setLocalVariable(TAG_NAME, inputSourceAttributes); // So I can do ${input.id} to get the original id attribute and so on
         structureHandler.setLocalVariable("targetAttributesString", targetAttributesString);
 	}

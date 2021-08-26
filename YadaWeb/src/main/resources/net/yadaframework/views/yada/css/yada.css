@@ -492,3 +492,7 @@ input.yadaSwitch-round:checked ~ label:after {
 	content: "/";
 	margin-left: 0.4em;
 }
+
+.yadaInputNumber {
+	text-align: end;
+}

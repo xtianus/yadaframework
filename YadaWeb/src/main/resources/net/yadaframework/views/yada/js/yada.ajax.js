@@ -33,6 +33,7 @@
 		yada.enableAjaxSelects(null, $element);
 		yada.enableAjaxCheckboxes(null, $element);
 		yada.enableAjaxFragments(null, $element);
+		yada.enableAjaxInputs();
 	}
 	//////////////////////
 	/// Pagination support
@@ -395,8 +396,24 @@
 		$select.removeClass('yadaAjax');
 		$select.not('.'+markerClass).addClass(markerClass);
 	};
-
 	
+	yada.enableAjaxSelect = function($select, handler) {
+		// If array, recurse to unroll
+		if ($select.length>1) {
+			$select.each(function() {
+				yada.enableAjaxSelect($(this), handler);
+			});
+			return;
+		}
+		// From here on the $select is a single element, not an array
+		$select.not('.'+markerClass).change(function(e) {
+			$select = $(this); // Needed otherwise $select could be stale (from a previous ajax replacement) 
+			return makeAjaxCall(e, $select, handler);
+		})
+		$select.removeClass('yadaAjax');
+		$select.not('.'+markerClass).addClass(markerClass);
+	};
+
 	/**
 	 * Sends a link/button via ajax, it doesn't have to have class .yadaAjax.
 	 * Buttons must have a yada-href attribute and not be submit buttons.
@@ -423,6 +440,24 @@
 		$link.removeClass('yadaAjax');
 		$link.removeClass('s_ajaxLink'); // Legacy
 		$link.not('.'+markerClass).addClass(markerClass);
+	};
+
+	/**
+	 * Enables ajax calls on input fields.
+	 * There is no need to pass any element because it is always registered even on dynamically added content.
+	 */
+	yada.enableAjaxInputs = function() {
+		if (this.enableAjaxInputsDone) {
+			// Prevent binding multiple event handlers because yada.enableAjaxInputs is called after each ajax call for legacy reasons
+			return;
+		}
+		// All input fields that are either yadaAjax or data-yadaHref get handled.
+		const selector = "input.yadaAjax, input[data-yadaHref]";
+		$(document).on("input", selector, function(e) {
+			return makeAjaxCall(e, $(this), null, true);
+		});
+		this.enableAjaxInputsDone = true;
+		$(selector).addClass(markerClass); // Not really needed
 	};
 	
 	/**
@@ -451,8 +486,10 @@
 	/**
 	 * Make an ajax call when a link is clicked, a select is chosen, a checkbox is selected
 	 */
-	function makeAjaxCall(e, $element, handler) {
-		e.preventDefault();
+	function makeAjaxCall(e, $element, handler, allowDefault) {
+		if (!allowDefault==true) {
+			e.preventDefault();
+		}
 		if ($element.hasClass("yadaLinkDisabled")) {
 			return false;
 		}
@@ -489,10 +526,14 @@
 		// In a select, set the data object to the selected option
 		if ($element.is("select")) {
 			$("option:selected", $element).each(function(){ // Could be a multiselect!
-				value.push($(this).val());
+				value.push($(this).val()); // $(this) is correct here
 			});
-		} else if ($element.is("input") && $element.prop('type')=="checkbox") {
-			value.push($element.prop('checked')); // Always send the element value
+		} else if ($element.is("input")) {
+			if ($element.prop('type')=="checkbox") {
+				value.push($element.prop('checked')); // Always send the element value
+			} else {
+				value.push($element.val());
+			}
 		}
 		if (name !=null) {
 			data = {};
