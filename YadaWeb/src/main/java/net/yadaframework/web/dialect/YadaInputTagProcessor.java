@@ -34,7 +34,7 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
 	private static final String TAG_NAME = "input"; // Tag of the dialect: "yada:input"
-    private static final int PRECEDENCE = 100;
+	public static final int PRECEDENCE = 12000; // Must be higher than any yada: attribute
     
     private final String dialectPrefix;
     

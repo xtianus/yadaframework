@@ -19,18 +19,14 @@ public class YadaDialect extends AbstractProcessorDialect {
 	 * @param config
 	 */
 	public YadaDialect(YadaConfiguration config) {
-        // We will set this dialect the same "dialect processor" precedence as
-        // the Standard Dialect, so that processor executions can interleave.
-		super("Yada Dialect", YadaDialectUtil.YADA_PREFIX, StandardDialect.PROCESSOR_PRECEDENCE);
+		// The precedence is higher than the standard "th:" dialect so that th: attributes are processed before.
+		// The only th: tag that doesn't work is th:field because it checks which tag it's being used on
+		// and skips all custom tags.
+		super("Yada Dialect", YadaDialectUtil.YADA_PREFIX, StandardDialect.PROCESSOR_PRECEDENCE+1);
 		this.config = config;
 	}
 
-//	@Override
-//	public String getPrefix() {
-//		return "yada";
-//	}
-
-	 @Override
+	@Override
     public Set<IProcessor> getProcessors(final String dialectPrefix) {
         final Set<IProcessor> processors = new HashSet<>();
         processors.add(new YadaHrefAttrProcessor(dialectPrefix, config));

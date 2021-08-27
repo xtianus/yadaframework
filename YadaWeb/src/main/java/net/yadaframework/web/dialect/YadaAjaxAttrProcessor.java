@@ -21,12 +21,8 @@ import org.thymeleaf.templatemode.TemplateMode;
  */
 public class YadaAjaxAttrProcessor extends AbstractAttributeTagProcessor {
 	private final Logger log = LoggerFactory.getLogger(getClass());
-	// Tutorial: http://www.thymeleaf.org/doc/html/Extending-Thymeleaf.html
-   // A value of 10000 is higher than any attribute in the
-    // SpringStandard dialect. So this attribute will execute
-    // after all other attributes from that dialect, if in the
-    // same tag.
-	public static final int ATTR_PRECEDENCE = 9000;
+	
+	public static final int ATTR_PRECEDENCE = 10000;
     public static final String ATTR_NAME = "ajax";
     public static final String RESULT_ATTRIBUTE = "data-yadaHref";
    

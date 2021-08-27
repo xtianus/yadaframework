@@ -49,8 +49,8 @@ public class YadaDialectUtil {
 	}
 	
 	/**
-	 * Retrieves a map of attributes from the custom tag, where all HTML attributes are kept as they are and thymeleaf
-	 * th: attributes are converted to HTML attributes when possible. The map is then converted to a comma-separated string
+	 * Retrieves a map of attributes from the custom tag, where all HTML attributes are kept as they are (NO: and thymeleaf
+	 * th: attributes are converted to HTML attributes when possible). The map is then converted to a comma-separated string
 	 * @param customTag
 	 * @param context
 	 * @return a comma-separated string of name=value attributes to be used in th:attr
@@ -58,8 +58,9 @@ public class YadaDialectUtil {
 	public String getConvertedCustomTagAttributeString(IOpenElementTag customTag, ITemplateContext context) {
 		// First, get all HTML attributes
 		Map<String, String> newAttributes = getHtmlAttributes(customTag);
-		// Then convert all th: attributes to HTML attributes
-		convertThAttributes(customTag, newAttributes, context);
+		// NO: Then convert all th: attributes to HTML attributes
+		// This was used when the YadaDialect precedence was the same as the StandardDialect
+		// convertThAttributes(customTag, newAttributes, context);
         String newAttributesString = newAttributes.toString();
         newAttributesString = StringUtils.chop(newAttributesString); // Remove }
         newAttributesString = StringUtils.removeStart(newAttributesString, "{"); // Remove {
@@ -82,12 +83,24 @@ public class YadaDialectUtil {
 					// The "type='number'" attribute must be removed from the output tag because it is handled in a custom way
 					continue;
 				}
-				newAttributes.put(attributeName, attributeValue==null?attributeName:attributeValue);
+				// Convert null to name
+				if (attributeValue==null) {
+					attributeValue = attributeName;
+				}
+				// Escape single quote
+				attributeValue = attributeValue.replaceAll("'", "\\\\'");
+				// Add single quote around value so that equal sign doesn't mess up th:attr
+				attributeValue = "'" + attributeValue + "'";
+				newAttributes.put(attributeName, attributeValue);
+//				// Skip attributes with empty value (didn't find a way to set an empty attribute with thymeleaf!)
+//				if (attributeValue.length()>0) {
+//				}
 			}
 		}
 		return newAttributes;
 	}
 	
+	@Deprecated // Not used anymore because the YadaDialect has a higher precedence so th attributes are stripped before
 	private void convertThAttributes(IOpenElementTag sourceTag, Map<String, String> newAttributes, ITemplateContext context) {
 		Map<String, String> sourceAttributes = sourceTag.getAttributeMap();
 		final IEngineConfiguration configuration = context.getConfiguration();
@@ -100,7 +113,7 @@ public class YadaDialectUtil {
 				String attributeName = removePrefix(fullThAttributeName, THYMELEAF_PREFIX); // from "th:value" to "value"
 				String parsedValue = null;
 				if (!"attr".equals(attributeName) && !"attrappend".equals(attributeName) && !"attrprepend".equals(attributeName)) {
-					// attr and simila attributes don't use expressions as value
+					// attr and similar attributes don't use expressions as value
 					try {
 						final IStandardExpression expression = parser.parseExpression(context, attributeValue);
 						parsedValue = (String) expression.execute(context);

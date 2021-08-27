@@ -1,5 +1,7 @@
 package net.yadaframework.web.dialect;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.engine.AttributeName;
@@ -16,7 +18,9 @@ import org.unbescape.html.HtmlEscape;
  * Adds the yada:newlinetext="" attribute that converts ASCII newlines to HTML newlines, and the yada:unewlinetext that does not escape the original text
  */
 public class YadaNewlineTextAttrProcessor extends AbstractAttributeTagProcessor {
-	public static final int ATTR_PRECEDENCE = 9000;
+	private final Logger log = LoggerFactory.getLogger(getClass());
+
+	public static final int ATTR_PRECEDENCE = 10000;
     public static final String ATTR_NAME = "newlinetext"; // becomes unewlinetext to not escape text
     private boolean escapeText = true;
    

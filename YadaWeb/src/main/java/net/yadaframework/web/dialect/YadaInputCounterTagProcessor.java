@@ -34,7 +34,7 @@ public class YadaInputCounterTagProcessor extends AbstractElementModelProcessor 
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
 	private static final String TAG_NAME = "inputCounter";
-    private static final int PRECEDENCE = 100;
+	public static final int PRECEDENCE = 12000; // Must be higher than any yada: attribute
     
     private final String dialectPrefix;
     
@@ -65,7 +65,7 @@ public class YadaInputCounterTagProcessor extends AbstractElementModelProcessor 
         		switch (tagName) {
         		case "inputCounter":
         			processTag(openTag, context, structureHandler);
-        			structureHandler.setLocalVariable("yadaTagId",  yadaDialectUtil.makeYadaTagId(openTag));
+        			structureHandler.setLocalVariable("yadaTagId",  yadaDialectUtil.makeYadaTagId(openTag)); // Not used yet
         			break;
         		}
         	}
