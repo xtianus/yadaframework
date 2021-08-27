@@ -13,18 +13,18 @@ It is used internally by the yada dialect processor to render the <yada:input> t
 <body>
 	<!-- Can use any th attributes on the tag here because the original ones have been replaced with plain HTML tags already, so no conflicts can arise -->
 	<th:block th:fragment="field" th:with="numeric=${input.type=='number'}, password=${input.type=='password'}">
-		<div class="input-group">
+		<div class="input-group yadaInput" th:classappend="${input.class}">
 			<a th:if="${numeric}" class="input-group-text yadaInputNumericDecrement" href="javascript:;" tabindex=-1>-</a>
 			<span th:if="${addonLeft!=null}" class="input-group-text" th:text="${addonLeft}">@</span>
 			
-			<input th:attr="data-yadaTagId=${yadaTagId},__${targetAttributesString}__" th:classappend="'form-control yadaInput' + ${numeric?' yadaInputNumber':''}">
+			<input th:attr="data-yadaTagId=${yadaTagId},__${targetAttributesString}__" th:classappend="'form-control' + ${numeric?' yadaInputNumber':''}">
 			
 			<th:block th:if="${addonRight!=null}" class="input-group-text">
 				<span class="input-group-text" th:text="${addonRight}">@example.com</span>
-				<span th:if="${password && noShowPassword!=true}" class="input-group-text">
-					<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
-				</span>
 			</th:block>
+			<span th:if="${password}" class="input-group-btn yadaShowPasswordAddon">
+				<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
+			</span>
 			
 			<a th:if="${numeric}" class="input-group-text yadaInputNumericIncrement" href="javascript:;" tabindex=-1>+</a>
 			

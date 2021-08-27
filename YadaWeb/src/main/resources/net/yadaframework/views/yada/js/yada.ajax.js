@@ -366,6 +366,9 @@
 	 * @param handler a function to call upon successful link submission, can be null
 	 * @param $element the element on which to enable ajax, can be null for the entire body
 	 */
+	
+	// TODO this may conflict with yada.enableAjaxInputs and should be replaced with that one if possible
+
 	yada.enableAjaxSelects = function(handler, $element) {
 		if ($element==null || $element=="") {
 			$element = $('body');
@@ -443,7 +446,7 @@
 	};
 
 	/**
-	 * Enables ajax calls on input fields.
+	 * Enables ajax calls on input fields that fire the "input" event.
 	 * There is no need to pass any element because it is always registered even on dynamically added content.
 	 */
 	yada.enableAjaxInputs = function() {
