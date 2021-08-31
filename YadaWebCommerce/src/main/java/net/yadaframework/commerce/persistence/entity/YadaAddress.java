@@ -18,12 +18,12 @@ import net.yadaframework.security.persistence.entity.YadaUserProfile;
 @Entity
 public class YadaAddress implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(insertable = false, updatable = false, columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified;
-	
+
 	// For optimistic locking
 	@Version
 	protected long version;
@@ -31,7 +31,7 @@ public class YadaAddress implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
-	
+
 	@ManyToOne
 	protected YadaUserProfile owner;
 
@@ -40,16 +40,16 @@ public class YadaAddress implements Serializable {
 
 	@Column(length = 8)
 	protected String number;
-	
+
 	@Column(length = 64)
 	protected String city;
-	
+
 	@Column(length = 16)
 	protected String zipCode;
-	
+
 	@Column(length = 64)
 	protected String state;
-	
+
 	@Column(length = 64)
 	protected String country; // SOUTH GEORGIA AND THE SOUTH SANDWICH ISLANDS
 
