@@ -1716,7 +1716,13 @@ public class YadaUtil {
 							// per questi faccio la copia deep.
 							for (Object value : sourceCollection) {
 								if (isType(value.getClass(), CloneableDeep.class)) {
-									targetCollection.add(YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap)); // deep
+									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap); // deep
+									targetCollection.add(clonedValue);
+									// For YadaAttachedFile objects, duplicate the file on disk too
+									if (isType(value.getClass(), YadaAttachedFile.class)) {
+										yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+									}
+
 								} else {
 									targetCollection.add(value); // shallow
 								}
@@ -1736,7 +1742,11 @@ public class YadaUtil {
 							for (Object key : sourceMap.keySet()) {
 								Object value = sourceMap.get(key);
 								if (isType(value.getClass(), CloneableDeep.class)) {
-									targetMap.put(key, YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap)); // deep
+									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap); // deep
+									targetMap.put(key, clonedValue);
+									if (isType(value.getClass(), YadaAttachedFile.class)) {
+										yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+									}
 								} else {
 									targetMap.put(key, value); // shallow
 								}
