@@ -269,7 +269,19 @@ public class YadaDataTableDao {
 						// attributeName could be composite like company.name so we can't get the Field directly
 //						Field field = targetClass.getDeclaredField(attributeName);
 //						Class attributeType = field.getType();
-						Class attributeType = yadaUtil.getType(targetClass, attributeName);
+						Class attributeType;
+						try {
+							attributeType = yadaUtil.getType(targetClass, attributeName);
+						} catch (Exception e) {
+							// If the searched attribute is composite like "shape.color" but some part of the path is implemented in a
+							// subclass (for example the "color" attribute is only implemented in the class ColoredShape that is a subclass
+							// of the class Shape that is the type of the shape attribute), we get an exception because the
+							// subclass can not be searched for the attribute.
+							// There's nothing we can do about it because from the superclass we can't get the subclass.
+							// As a fallback, we use the String type but this can not be always appropriate.
+							log.warn("Can't find type for {}.{}, using String.class as a fallback (might not work)", targetClass.getSimpleName(), attributeName);
+							attributeType = String.class;
+						}
 						// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
 						attributeName = addLeftJoins(attributeName, yadaSql, targetClass);
 						if (attributeType == String.class) {

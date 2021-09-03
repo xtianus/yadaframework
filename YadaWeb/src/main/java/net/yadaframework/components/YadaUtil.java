@@ -757,6 +757,7 @@ public class YadaUtil {
 					exception=e;
 				}
 				rootClass = rootClass.getSuperclass();
+				// TODO sometimes the attribute is not in the superclass but in the subclass. How do we get that?
 			}
 		}
 		if (field==null) {
@@ -1717,12 +1718,11 @@ public class YadaUtil {
 							for (Object value : sourceCollection) {
 								if (isType(value.getClass(), CloneableDeep.class)) {
 									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap); // deep
-									targetCollection.add(clonedValue);
 									// For YadaAttachedFile objects, duplicate the file on disk too
 									if (isType(value.getClass(), YadaAttachedFile.class)) {
-										yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
 									}
-
+									targetCollection.add(clonedValue);
 								} else {
 									targetCollection.add(value); // shallow
 								}
@@ -1743,10 +1743,11 @@ public class YadaUtil {
 								Object value = sourceMap.get(key);
 								if (isType(value.getClass(), CloneableDeep.class)) {
 									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap); // deep
-									targetMap.put(key, clonedValue);
+									// For YadaAttachedFile objects, duplicate the file on disk too
 									if (isType(value.getClass(), YadaAttachedFile.class)) {
-										yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
 									}
+									targetMap.put(key, clonedValue);
 								} else {
 									targetMap.put(key, value); // shallow
 								}
@@ -1758,12 +1759,12 @@ public class YadaUtil {
 								// Siccome implementa CloneableDeep, lo duplico deep
 								CloneableFiltered fieldValue = setFieldDirectly ? (CloneableFiltered) field.get(source) : (CloneableFiltered) getter.invoke(source);
 								Object clonedValue = YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap); // deep but detached
-								copyValue(setFieldDirectly, field, getter, setter, source, target, clonedValue);
-//								setter.invoke(target, YadaUtil.copyEntity(fieldValue)); // deep but detached
 								// For YadaAttachedFile objects, duplicate the file on disk too
 								if (isType(fieldType, YadaAttachedFile.class)) {
-									yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+									clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
 								}
+								copyValue(setFieldDirectly, field, getter, setter, source, target, clonedValue);
+//								setter.invoke(target, YadaUtil.copyEntity(fieldValue)); // deep but detached
 							} else if (isType(fieldType, StringBuilder.class)) {
 								// String builder/buffer is cloned otherwise changes to the original object would be reflected in the new one
 								StringBuilder fieldValue = setFieldDirectly ? (StringBuilder) field.get(source) : (StringBuilder) getter.invoke(source);
