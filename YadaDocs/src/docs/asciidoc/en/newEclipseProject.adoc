@@ -35,9 +35,9 @@ Currently the Yada Framework source is **tested with Java 8**. Running on an unt
 At the time of writing we failed to run on Java 11.0.6 for problems during Gradle project import.
 ====
 
-You should look on the Oracle site for the "Java SE" installer, which is the "Standard Edition" of Java.
+You should look on the https://www.oracle.com/java/technologies/javase-downloads.html[Oracle site^] for the "Java SE" installer, which is the "Standard Edition" of Java.
 You will probably be required to create an Oracle account and login before being able to download.
-The OpenJDK version of Java should also work fine if you prefer open source software.
+The https://jdk.java.net/java-se-ri/8-MR3[OpenJDK version of Java^] should also work fine if you prefer open source software.
 
 [NOTE]
 .JDK vs JRE
@@ -45,7 +45,7 @@ The OpenJDK version of Java should also work fine if you prefer open source soft
 Before Java 11 there were two components in Java SE: the JDK (Development Kit) and the JRE (Runtime Environment). Since Java 11 the JDK is also a JRE.
 ====
 
-The installation package will install both the JDK and the JRE.
+The installation package will probably install both the JDK and the JRE.
 The JRE - 64 bit - can be any version and generally it will auto-upgrade to the latest.
 To make your installation future-proof, install the java JDK in some folder like `C:\Local\Javas\jdk1.8.0_152` and
 make a symbolic link to it with a generic name, like
@@ -65,10 +65,52 @@ Install https://git-scm.com/downloads[git^] for your OS.
 Install https://dev.mysql.com/downloads/mysql/[MySQL Community Server^] v8: any later versions have not been tested yet.
 
 For a future-proof installation you should not install MySQL as a Service, but run it manually when needed because one day
-you might have more than one version to use. The steps to install MySQL 8 on windows are as follows:
+you might have more than one version to use. 
 
-* download and run the web installer
-* choose the "Custom" installation
+If you don't have a MySQL installation already, the easiest way to install it is by downloading the "MySQL installer":
+
+* on the https://dev.mysql.com/downloads/mysql/[MySQL Download Page^] click on "MySQL Installer":  you will be presented with two downloads, 
+  the smaller one is the "web installer" and it's the one you should use.
+  You will be asked to login or register before download but there's also a link to download right away.
+* run the installer and choose the version you want to install: be sure to check the "Enable the Select Features page
+  to customize product features" checkbox before continuing (NOTE: not sure it's needed but do it anyway) because you'll need to set the "lower_case_table_names" system
+  variable before installation. If you don't do this on Windows, you either need to uninstall and reinstall the MySQL server or
+  ignore the "lower_case_table_names" setting, in which case you might write SQL queries that don't work on the production Linux servers
+
+[.center]
+.MySQL "Features Page" Checkbox
+image::newEclipseProject/MySQL-checkbox.jpg[MySQL "Features Page" Checkbox]
+  
+* when installing you will get to some wizard pages that allow to select the following:
+** "Show Advanced and Logging Options" should be checked
+** authentication method: any would do
+** root password: you may leave it blank on your development computer (do as you wish)
+** install as a service: you should not configure the server as a service if you have many versions on the same
+    port and want to start the one you need manually (recommended approach)
+** "Advanced Options": *"Preserve Given Case" should be checked*. This will set the "lower_case_table_names" appropriately as explained above
+
+[.center]
+.Installing MySQL
+image::newEclipseProject/MySQL-preservecase.jpg[Preserve case]
+
+////
+The steps to install MySQL 8 on windows are as follows:
+
+* if you already have MySQL installed, the wizard will eventually ask you to update it. The best option is probably
+  to install a new version, so click "Cancel" and "Yes" to abort the upgrade
+  
+[.center]
+.Cancel MySQL Upgrade
+image::newEclipseProject/MySQL-cancel.jpg[Cancel MySQL Upgrade]
+
+* from the MySQL Installer you can add a new installation
+
+[.center]
+.MySQL Add Server
+image::newEclipseProject/MySQL-add.jpg[MySQL Add Server]
+
+  
+choose the "Custom" installation
 * select the latest MySQL Server 8 from the list on the left, click on the right arrow to move it to the right, then click on it: a new "Advanced Options" link should appear. Click on it and choose the installation folder, for example `C:\Local\Mysqls\mysql-8.0.19-winx64`
 
 [.center]
@@ -79,19 +121,17 @@ image::newEclipseProject/MySQL-advanced.jpg[MySQL advanced installation]
 * on the "Authentication Method" page choose "Use Legacy Authentication" (second option) to have an easier life: it's a development PC after all
 and you shouldn't have any sensitive information in the database; if you do, you should garble it
 * on the "Advanced Options" choose "Preserve Given Case" - this is important on Windows to prevent problems when running the DB on linux
+////
 
-[.center]
-.Installing MySQL
-image::newEclipseProject/MySQL-preservecase.jpg[Preserve case]
-
-After installation, make a symbolic link to it with a generic name, like
+After installation, make a symbolic link to the server folder with a generic name, like
 
 [source,dos]
 ----
 mklink /D /J C:\Local\mysql80 C:\local\Mysqls\mysql-8.0.19-winx64
 ----
 
-Now you can refer to `C:\Local\mysql80` in your scripts and when you update the MySQL (minor) version you just change the link, not the scripts.
+Now you can refer to `C:\Local\mysql80` in your scripts and when you want to use a different installation
+you just change the link, not the scripts.
 In order to start/stop the MySQL server you should create two scripts and put their shortcut somewhere easy like the desktop or the taskbar.
 
 
@@ -127,8 +167,8 @@ compared to editing files in a generic text editor and compiling from the comman
 
 WARNING: Eclipse jee 2019-12-R throws a weird "VerifyError: Inconsistent stackmap frames" on some occasions. Don't use that version.
 
-Install the latest version of https://www.eclipse.org/downloads/packages/[Eclipse IDE for Enterprise Java Developers^]. 
-Be sure to install the 64 bit "Enterprise" version.
+Install the latest version of https://www.eclipse.org/downloads/packages/[Eclipse IDE for Enterprise Java and Web Developers^]. 
+Be sure to install the 64 bit "Enterprise Java and Web" version.
 
 [CAUTION]
 .Need Enterprise version?
@@ -203,14 +243,22 @@ Install the link:++https://nodejs.org/en/download/++[latest LTS version].
 ===  Add the repositories
 The Yada Framework sources are hosted on the public GitHub site.
 To access the GitHub repository use your GitHub credentials on the https://github.com/xtianus/yadaframework[yadaframework repo^].
-The git url should be like `git@github.com:yourname/yadaframework.git`.
+The git url should be `git@github.com:xtianus/yadaframework.git`.
 
-NOTE: Since 2021 the preferred method for connecting to GitHub is ssh
+[NOTE]
+==== 
+Since 2021 the preferred method for connecting to GitHub is ssh. If you didn't do so already, you should create
+a pair of SSH private/public keys and upload the public one to GitHub https://github.com/settings/keys[here^].
+The keys can be generated on Windows using https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html[PuttyGen^].
+The public one to upload to GitHub is the text shown in the "authorized_keys" box of PuttyGen. The private one to keep on your
+computer must be exported via the "Conversions > Export OpenSSH key" menu without a passphrase.
+
+==== 
 
 Once you have the repository credentials, connect Eclipse:
 
 * Open the SSH2 preferences dialog from "Window > Preferences"
-* browse to the location of your private GitHub ssh key
+* browse to the location of your private GitHub OpenSSH key
 
 [.center]
 .GitHub ssh key

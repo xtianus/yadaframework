@@ -30,10 +30,13 @@ To make an ajax request, add the `yadaAjax` class:
 
 When clicking on the anchor, the `/some/endpoint` url is called via ajax.
 
-[.todo]
-----
-Check that I can use yada:ajax="url" and data-yadaHref="url" instead of href and class. href should be "javascript:;" in that case.
+The alternative way to define an ajax link is to use either the `yada:ajax` or the `data-yadaHref` attributes instead of the `yadaAjax` class:
+The href attribute should be "javascript:;" in that case, to
+prevent the default behaviour (TODO is that needed?).
 
+[source,html]
+----
+<a href="javascript:;" yada:ajax="@{/some/endpoint}">Click here</a>
 ----
 
 ====  Miscellaneous
@@ -46,7 +49,9 @@ disable the link::
 
 The class `yadaDisabled` disables the link
 
+disable the loader::
 
+The loader is started by default. To disable it, add the `yadaNoLoader` class.
 
 
 
@@ -406,16 +411,33 @@ See the  xref:forms/overview.adoc#Ajax Forms[Ajax Forms section] in the Forms ch
 
 Ajax calls can also be made on other HTML elements like buttons and selects by means of the `data-yadahref` attribute or the equivalent `yada:ajax` dialect.
 
+===  Ajax on input fields
+
+An ajax call can be triggered on any <input> field that triggers the "input" event
+on change. Example:
+
+[source,html]
+----
+<input yada:ajax="@{/user/setAddress(userId=${user.id})}" name="address">
+----
+
+It works on `<input type="radio">` too.
 
 ===  Ajax on checkbox
 
+[.todo]
+----
+All <input>, <textarea> and <select> tags can be handled by the new yada.enableAjaxInputs function
+and the legacy code for them should be removed.
+Changing a select or a checkbox sumbits the enclosing form: this should be made an option in the new version.
+----
 
 An ajax call can be originated by a state change in a checkbox. The checkbox must NOT be inside a form otherwise the form would be submitted instead.
 
 [source,html]
 ----
 <input yada:ajax="@{/product/onOff(productId=${product.id})}"
-        th:name="enabled" th:checked="${product.enabled}" type="checkbox" />
+    name="enabled" th:checked="${product.enabled}" type="checkbox" />
 ----
 
 [.todo]

@@ -459,6 +459,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_ajax_forms">Ajax Forms</a></li>
 <li><a href="#_ajax_on_other_elements">Ajax on other elements</a>
 <ul class="sectlevel2">
+<li><a href="#_ajax_on_input_fields">Ajax on input fields</a></li>
 <li><a href="#_ajax_on_checkbox">Ajax on checkbox</a></li>
 </ul>
 </li>
@@ -515,9 +516,14 @@ It is automatically included in production, merged with the other yada javascrip
 <div class="paragraph">
 <p>When clicking on the anchor, the <code>/some/endpoint</code> url is called via ajax.</p>
 </div>
-<div class="listingblock todo">
+<div class="paragraph">
+<p>The alternative way to define an ajax link is to use either the <code>yada:ajax</code> or the <code>data-yadaHref</code> attributes instead of the <code>yadaAjax</code> class:
+The href attribute should be "javascript:;" in that case, to
+prevent the default behaviour (TODO is that needed?).</p>
+</div>
+<div class="listingblock">
 <div class="content">
-<pre>Check that I can use yada:ajax="url" and data-yadaHref="url" instead of href and class. href should be "javascript:;" in that case.</pre>
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a href="javascript:;" yada:ajax="@{/some/endpoint}"&gt;Click here&lt;/a&gt;</code></pre>
 </div>
 </div>
 <div class="sect3">
@@ -531,6 +537,10 @@ It is automatically included in production, merged with the other yada javascrip
 <dt class="hdlist1">disable the link</dt>
 <dd>
 <p>The class <code>yadaDisabled</code> disables the link</p>
+</dd>
+<dt class="hdlist1">disable the loader</dt>
+<dd>
+<p>The loader is started by default. To disable it, add the <code>yadaNoLoader</code> class.</p>
 </dd>
 </dl>
 </div>
@@ -1021,14 +1031,36 @@ When there is a single target, fragments are ignored and the whole result is use
 <p>Ajax calls can also be made on other HTML elements like buttons and selects by means of the <code>data-yadahref</code> attribute or the equivalent <code>yada:ajax</code> dialect.</p>
 </div>
 <div class="sect2">
+<h3 id="_ajax_on_input_fields">Ajax on input fields</h3>
+<div class="paragraph">
+<p>An ajax call can be triggered on any &lt;input&gt; field that triggers the "input" event
+on change. Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;input yada:ajax="@{/user/setAddress(userId=${user.id})}" name="address"&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It works on <code>&lt;input type="radio"&gt;</code> too.</p>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_ajax_on_checkbox">Ajax on checkbox</h3>
+<div class="listingblock todo">
+<div class="content">
+<pre>All &lt;input&gt;, &lt;textarea&gt; and &lt;select&gt; tags can be handled by the new yada.enableAjaxInputs function
+and the legacy code for them should be removed.
+Changing a select or a checkbox sumbits the enclosing form: this should be made an option in the new version.</pre>
+</div>
+</div>
 <div class="paragraph">
 <p>An ajax call can be originated by a state change in a checkbox. The checkbox must NOT be inside a form otherwise the form would be submitted instead.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;input yada:ajax="@{/product/onOff(productId=${product.id})}"
-        th:name="enabled" th:checked="${product.enabled}" type="checkbox" /&gt;</code></pre>
+    name="enabled" th:checked="${product.enabled}" type="checkbox" /&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock todo">
@@ -1243,7 +1275,7 @@ Otherwise the form will be sent with a normal non-ajax request.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-06-16 16:15:04 +0200
+Last updated 2021-08-27 15:16:18 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

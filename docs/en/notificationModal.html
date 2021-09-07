@@ -503,8 +503,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:include="/yada/modalNotify :: modal" class="modal fade" id="yada-notification" role="dialog"&gt;&lt;/div&gt;
 &lt;script th:if="${YADA_NBODY!=null}" type="text/javascript"&gt;
-        $('#yada-notification').modal('show');
+	$(document).ready(function() {
+		$('#yada-notification').modal('show');
+	});
 &lt;/script&gt;
+
 &lt;script type="text/javascript"&gt;
         $('#yada-notification').on('hidden.bs.modal', function (e) {
                 $('#yada-notification .glyphicon').addClass("hidden");
@@ -880,7 +883,7 @@ change it while preserving some key elements that are used as reference to add c
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-06-16 13:56:22 +0200
+Last updated 2021-07-19 11:06:24 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
