@@ -302,16 +302,16 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Gets image dimensions for given file
+	 * Gets image dimensions for given file, ignoring orientation flag
 	 * @param imageFile image file
 	 * @return dimensions of image, or YadaIntDimension.UNSET when not found
 	 */
 	// Adapted from https://stackoverflow.com/a/12164026/587641
-	@Deprecated
-	// Deprecated: the default jpeg image reader does not handle the exif Orientation flag properly
+	// The default jpeg image reader does not handle the exif Orientation flag properly
 	// so a "vertical" image with an orientation flag of 6 is considered horizontal
+	// and will have a width larger than the height
 	// See https://www.impulseadventure.com/photo/exif-orientation.html
-	public YadaIntDimension getImageDimensionLegacy(File imageFile) {
+	public YadaIntDimension getImageDimensionDumb(File imageFile) {
 		String suffix = getFileExtension(imageFile);
 		Iterator<ImageReader> iter = ImageIO.getImageReadersBySuffix(suffix);
 		while (iter.hasNext()) {
@@ -333,6 +333,8 @@ public class YadaUtil {
 	/**
 	 * Gets the image dimensions considering the EXIF orientation flag.
 	 * Remember to use the "-auto-orient" flag of the ImageMagick convert command.
+	 * If the EXIF width and height information is missing, the getImageDimensionDumb() method is called instead.
+ 	 * See https://www.impulseadventure.com/photo/exif-orientation.html
 	 * @param imageFile
 	 * @return
 	 */
@@ -362,8 +364,8 @@ public class YadaUtil {
 			}
 			return new YadaIntDimension(width, height);
 		} catch (Exception e) {
-			log.debug("Error reading dimensions for {}", imageFile, e);
-			return YadaIntDimension.UNSET;
+			log.debug("Error reading EXIF dimensions for {} - fallback to dumb version}", imageFile);
+			return getImageDimensionDumb(imageFile);
 		}
 	}
 
