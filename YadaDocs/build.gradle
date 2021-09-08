@@ -41,8 +41,8 @@ compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
-    jcenter()
-	mavenLocal()
+    mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -89,7 +89,7 @@ asciidoctor {
 	outputDir file('../docs')
 
 	resources {
-		from('src/resources') {
+		from('src/docs/resources') {
 		}
 		into '../'
 	}
