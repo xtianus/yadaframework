@@ -604,6 +604,10 @@ The Java JRE can be installed to the default folder (<code>C:\Program Files</cod
 you might have more than one version to use.</p>
 </div>
 <div class="paragraph">
+<p>If you already have a MySQL installation, you may use it. Just check that the "lower_case_table_names" system variable is set to "2":
+if it&#8217;s not, it can&#8217;t be changed after installation so you can either reinstall, install a new instance or live with it (see below).</p>
+</div>
+<div class="paragraph">
 <p>If you don&#8217;t have a MySQL installation already, the easiest way to install it is by downloading the "MySQL installer":</p>
 </div>
 <div class="ulist">
@@ -696,6 +700,10 @@ C:\Local\mysql80\bin\mysqladmin.exe -u root shutdown</code></pre>
 <pre class="highlightjs highlight"><code data-lang="dos" class="language-dos hljs">mysql -u root -p
 SET PASSWORD FOR 'root'@'localhost' = '';</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>When you start MySQL you may get a few errors and warnings like "Failed to set up SSL" or "Cannot open Windows EventLog": you
+can safely ignore them as long as the process doesn&#8217;t stop.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1525,7 +1533,7 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-09-07 13:05:18 +0200
+Last updated 2021-09-09 10:35:14 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

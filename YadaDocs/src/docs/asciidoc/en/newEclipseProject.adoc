@@ -67,6 +67,9 @@ Install https://dev.mysql.com/downloads/mysql/[MySQL Community Server^] v8: any 
 For a future-proof installation you should not install MySQL as a Service, but run it manually when needed because one day
 you might have more than one version to use. 
 
+If you already have a MySQL installation, you may use it. Just check that the "lower_case_table_names" system variable is set to "2":
+if it's not, it can't be changed after installation so you can either reinstall, install a new instance or live with it (see below).
+
 If you don't have a MySQL installation already, the easiest way to install it is by downloading the "MySQL installer":
 
 * on the https://dev.mysql.com/downloads/mysql/[MySQL Download Page^] click on "MySQL Installer":  you will be presented with two downloads, 
@@ -158,6 +161,9 @@ It is very convenient to set an empty password for root on the development compu
 mysql -u root -p
 SET PASSWORD FOR 'root'@'localhost' = '';
 ----
+
+When you start MySQL you may get a few errors and warnings like "Failed to set up SSL" or "Cannot open Windows EventLog": you
+can safely ignore them as long as the process doesn't stop.
 
 ===  Eclipse
 
