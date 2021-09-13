@@ -84,6 +84,7 @@ public abstract class YadaConfiguration {
 	private int minPwdLen = -1;
 	private String errorPageForward = null;
 	private List<String> locales = null;
+	private Set<Locale> localeSet = null;
 	private Map<String, String> languageToCountry = null;
 	private Boolean localeAddCountry = null;
 	private Boolean localePathVariableEnabled = null;
@@ -99,7 +100,7 @@ public abstract class YadaConfiguration {
 	 * Returns a DataSource that has NOT been configured on JNDI. Given that there is a configuration file for each environment, you
 	 * could have a programmatic datasource in development and a JNDI datasource in production, if needed.
 	 * This method should be overridden to set more parameters than currently implemented.
-	 * @return null if the DataSource is on JNDI (via context.xml), or a new Vibur DataSource otherwise 
+	 * @return null if the DataSource is on JNDI (via context.xml), or a new Vibur DataSource otherwise
 	 */
 	public synchronized DataSource getProgrammaticDatasource() {
 		if (dataSource!=null) {
@@ -107,7 +108,7 @@ public abstract class YadaConfiguration {
 		}
 		try {
 			ImmutableHierarchicalConfiguration datasourceConfig = configuration.immutableConfigurationAt("config/database/datasource");
-			
+
 			ViburDBCPDataSource ds = new ViburDBCPDataSource();
 			ds.setJdbcUrl(datasourceConfig.getString("jdbcUrl"));
 			ds.setUsername(datasourceConfig.getString("username"));
@@ -123,7 +124,7 @@ public abstract class YadaConfiguration {
 			ds.setLogLargeResultSet(datasourceConfig.getLong("logLargeResultSet"));
 			ds.setLogStackTraceForLargeResultSet(datasourceConfig.getBoolean("logStackTraceForLargeResultSet"));
 			ds.setIncludeQueryParameters(datasourceConfig.getBoolean("includeQueryParameters"));
-			
+
 			ds.setStatementCacheMaxSize(datasourceConfig.getInt("statementCacheMaxSize"));
 			// ds.setDriverClassName("com.mysql.cj.jdbc.Driver"); // Not needed
 
@@ -135,8 +136,8 @@ public abstract class YadaConfiguration {
 		}
 	    return null;
 	}
-	
-	
+
+
 	/**
 	 * Returns the configured path for the notification modal.
 	 * The configuration path is config/paths/notificationModalView
@@ -263,6 +264,7 @@ public abstract class YadaConfiguration {
 			return result;
 		}
 		result = new TreeSet<>(new Comparator<Entry<Integer, String>>() {
+			@Override
 			public int compare(Entry<Integer, String> element1, Entry<Integer, String> element2) {
 				return element1.getValue().compareTo(element2.getValue());
 			}
@@ -436,15 +438,28 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
+	 * Get the set of configured locales in no particular order.
+	 * @return
+	 */
+	public Set<Locale> getLocaleSet() {
+		if (localeSet==null) {
+			getLocaleStrings(); // Init the set
+		}
+		return localeSet;
+	}
+
+	/**
 	 * Get a list of iso2 locales that the webapp can handle
 	 * @return
 	 */
 	public List<String> getLocaleStrings() {
 		if (locales==null) {
 			locales = Arrays.asList(configuration.getStringArray("config/i18n/locale"));
+			localeSet = new HashSet<Locale>();
 			for (String locale : locales) {
 				try {
-			        LocaleUtils.toLocale(locale); // Validity check
+			        Locale localeObject = LocaleUtils.toLocale(locale);
+			        localeSet.add(localeObject);
 			    } catch (IllegalArgumentException e) {
 			    	throw new YadaConfigurationException("Locale {} is invalid", locale);
 			    }
@@ -510,7 +525,7 @@ public abstract class YadaConfiguration {
 
 	/**
 	 * Return the webapp address without a trailing slash. E.g. http://www.mysite.com/app or http://www.mysite.com
-	 * The language path is added if enabled 
+	 * The language path is added if enabled
 	 * @return
 	 */
 	public String getWebappAddress(HttpServletRequest request, Locale locale) {
@@ -553,7 +568,7 @@ public abstract class YadaConfiguration {
 		}
 		return serverAddress;
 	}
-	
+
 	/**
 	 * Return the server address without a trailing slash. E.g. http://col.letturedametropolitana.it
 	 * @return
@@ -664,7 +679,7 @@ public abstract class YadaConfiguration {
 	public String getFacebookTestPageAccessToken() {
 		return configuration.getString("config/social/facebook/test/pageAccessToken", "unset");
 	}
-	
+
 	public String getFacebookPageAccessToken() {
 		return configuration.getString("config/social/facebook/pageAccessToken", "unset");
 	}
@@ -679,11 +694,11 @@ public abstract class YadaConfiguration {
 		}
 		return facebookSecret;
 	}
-	
+
 	public String getFacebookTestPageId() {
 		return configuration.getString("config/social/facebook/test/pageId", "unset");
 	}
-	
+
 	public String getFacebookPageId() {
 		if (facebookPageId==null) {
 			facebookPageId = configuration.getString("config/social/facebook/pageId", "unset");
@@ -694,14 +709,14 @@ public abstract class YadaConfiguration {
 	public String getFacebookTestAppId() {
 		return configuration.getString("config/social/facebook/test/appId", "unset");
 	}
-	
+
 	public String getFacebookAppId() {
 		if (facebookAppId==null) {
 			facebookAppId = configuration.getString("config/social/facebook/appId", "unset");
 		}
 		return facebookAppId;
 	}
-	
+
 	/**
 	 */
 	public String getGoogleSecret() {
@@ -978,7 +993,7 @@ public abstract class YadaConfiguration {
 	public String getMaxFileUploadSizeMega() {
 		return "" + getMaxFileUploadSizeBytes() / 1024 / 1024; // 50 mega default
 	}
-	
+
 	public int getMaxFileUploadSizeBytes() {
 		return configuration.getInt("config/maxFileUploadSizeBytes", 50000000); // 50 mega default
 	}
