@@ -457,6 +457,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_enum_values">Enum values</a></li>
 </ul>
 </li>
+<li><a href="#_initial_language_choice">Initial language choice</a></li>
 <li><a href="#_configuring_language_in_the_path">Configuring "language in the path"</a>
 <ul class="sectlevel2">
 <li><a href="#_java_code">Java code</a></li>
@@ -633,6 +634,31 @@ for a single instance in a single language.</p>
 <pre>TO BE CONTINUED...</pre>
 </div>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_initial_language_choice">Initial language choice</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When a user loads the site for the first time, the initial language will be chosen from the
+<code>accept-language</code> header sent by the browser. This is implemented in Spring&#8217;s <code>CookieLocaleResolver</code>
+but overridden in <code>YadaWebConfig</code> so that all values from the header are considered in order to find the
+first language chosen by the user that has also been configured in the webapp. If no values from the header
+are acceptable, the default configured language will be used. Configuration example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">	&lt;i18n localePathVariable="true"&gt;
+      &lt;locale default="true"&gt;en&lt;/locale&gt;
+      &lt;locale&gt;ar&lt;/locale&gt;
+      &lt;locale&gt;de&lt;/locale&gt;
+      &lt;locale&gt;fr&lt;/locale&gt;
+   	&lt;/i18n&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On the following requests, the standard Spring cookie is used to determine the previously chosen locale.</p>
 </div>
 </div>
 </div>
@@ -1005,7 +1031,7 @@ public class Product {
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-09-03 17:04:29 +0200
+Last updated 2021-09-13 19:31:59 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
