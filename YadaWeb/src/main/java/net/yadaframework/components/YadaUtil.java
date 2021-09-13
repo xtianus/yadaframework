@@ -74,6 +74,11 @@ import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
+
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.core.YadaConfiguration;
@@ -116,7 +121,7 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
-	
+
 	/**
 	 * Merges all files matched by a pattern, in no particular order.
 	 * @param sourceFolder root folder where files are to be found
@@ -124,7 +129,7 @@ public class YadaUtil {
 	 * @param outputFile file that will contain the joined files
 	 * @param depth (optional) max depth of folders: null or 1 for no recursion
 	 * @param deleteSource (optional) Boolean.TRUE to attempt deletion of source files
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void joinFiles(Path sourceFolder, String sourceFilePattern, File outputFile, Integer depth, Boolean deleteSource) throws IOException {
 		depth = depth==null ? 1 : depth; // By default we don't look into subfolders
@@ -139,7 +144,7 @@ public class YadaUtil {
 		}
 		joinedStream.close();
 	}
-	
+
 	/**
 	 * Creates a folder in the system temp folder. The name is prefixed with "yada".
 	 * @return
@@ -297,12 +302,16 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Gets image dimensions for given file
+	 * Gets image dimensions for given file, ignoring orientation flag
 	 * @param imageFile image file
 	 * @return dimensions of image, or YadaIntDimension.UNSET when not found
 	 */
 	// Adapted from https://stackoverflow.com/a/12164026/587641
-	public YadaIntDimension getImageDimension(File imageFile) {
+	// The default jpeg image reader does not handle the exif Orientation flag properly
+	// so a "vertical" image with an orientation flag of 6 is considered horizontal
+	// and will have a width larger than the height
+	// See https://www.impulseadventure.com/photo/exif-orientation.html
+	public YadaIntDimension getImageDimensionDumb(File imageFile) {
 		String suffix = getFileExtension(imageFile);
 		Iterator<ImageReader> iter = ImageIO.getImageReadersBySuffix(suffix);
 		while (iter.hasNext()) {
@@ -319,6 +328,45 @@ public class YadaUtil {
 			}
 		}
 		return YadaIntDimension.UNSET;
+	}
+
+	/**
+	 * Gets the image dimensions considering the EXIF orientation flag.
+	 * Remember to use the "-auto-orient" flag of the ImageMagick convert command.
+	 * If the EXIF width and height information is missing, the getImageDimensionDumb() method is called instead.
+ 	 * See https://www.impulseadventure.com/photo/exif-orientation.html
+	 * @param imageFile
+	 * @return
+	 */
+	public YadaIntDimension getImageDimension(File imageFile) {
+		try(InputStream stream = new FileInputStream(imageFile))  {
+			Metadata metadata = ImageMetadataReader.readMetadata(stream);
+			//			for (com.drew.metadata.Directory directory2 : metadata.getDirectories()) {
+			//	            for (com.drew.metadata.Tag tag : directory2.getTags()) {
+			//	            	if (tag.getTagName().equalsIgnoreCase("Orientation")) {
+			//	            		System.out.println(tag.getTagName());
+			//	            		System.out.println(tag);
+			//
+			//	            	}
+			//	            }
+			//			}
+			ExifIFD0Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+			int orientation = 1;
+			if (directory.containsTag(ExifIFD0Directory.TAG_ORIENTATION)) {
+				orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+			}
+			ExifSubIFDDirectory directory2 = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+			int width = directory2.getInt(ExifSubIFDDirectory.TAG_EXIF_IMAGE_WIDTH);
+			int height = directory2.getInt(ExifSubIFDDirectory.TAG_EXIF_IMAGE_HEIGHT);
+			if (orientation==6 || orientation==8) {
+				// Image is rotated 90° so dimensions must be swapped
+				return new YadaIntDimension(height, width);
+			}
+			return new YadaIntDimension(width, height);
+		} catch (Exception e) {
+			log.debug("Error reading EXIF dimensions for {} - fallback to dumb version}", imageFile);
+			return getImageDimensionDumb(imageFile);
+		}
 	}
 
 	/**
@@ -757,6 +805,7 @@ public class YadaUtil {
 					exception=e;
 				}
 				rootClass = rootClass.getSuperclass();
+				// TODO sometimes the attribute is not in the superclass but in the subclass. How do we get that?
 			}
 		}
 		if (field==null) {
@@ -1716,7 +1765,12 @@ public class YadaUtil {
 							// per questi faccio la copia deep.
 							for (Object value : sourceCollection) {
 								if (isType(value.getClass(), CloneableDeep.class)) {
-									targetCollection.add(YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap)); // deep
+									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap); // deep
+									// For YadaAttachedFile objects, duplicate the file on disk too
+									if (isType(value.getClass(), YadaAttachedFile.class)) {
+										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+									}
+									targetCollection.add(clonedValue);
 								} else {
 									targetCollection.add(value); // shallow
 								}
@@ -1736,7 +1790,12 @@ public class YadaUtil {
 							for (Object key : sourceMap.keySet()) {
 								Object value = sourceMap.get(key);
 								if (isType(value.getClass(), CloneableDeep.class)) {
-									targetMap.put(key, YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap)); // deep
+									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap); // deep
+									// For YadaAttachedFile objects, duplicate the file on disk too
+									if (isType(value.getClass(), YadaAttachedFile.class)) {
+										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+									}
+									targetMap.put(key, clonedValue);
 								} else {
 									targetMap.put(key, value); // shallow
 								}
@@ -1748,12 +1807,12 @@ public class YadaUtil {
 								// Siccome implementa CloneableDeep, lo duplico deep
 								CloneableFiltered fieldValue = setFieldDirectly ? (CloneableFiltered) field.get(source) : (CloneableFiltered) getter.invoke(source);
 								Object clonedValue = YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap); // deep but detached
-								copyValue(setFieldDirectly, field, getter, setter, source, target, clonedValue);
-//								setter.invoke(target, YadaUtil.copyEntity(fieldValue)); // deep but detached
 								// For YadaAttachedFile objects, duplicate the file on disk too
 								if (isType(fieldType, YadaAttachedFile.class)) {
-									yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+									clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
 								}
+								copyValue(setFieldDirectly, field, getter, setter, source, target, clonedValue);
+//								setter.invoke(target, YadaUtil.copyEntity(fieldValue)); // deep but detached
 							} else if (isType(fieldType, StringBuilder.class)) {
 								// String builder/buffer is cloned otherwise changes to the original object would be reflected in the new one
 								StringBuilder fieldValue = setFieldDirectly ? (StringBuilder) field.get(source) : (StringBuilder) getter.invoke(source);
