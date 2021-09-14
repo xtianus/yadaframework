@@ -1000,6 +1000,10 @@ public abstract class YadaConfiguration {
 		return result;
 	}
 
+	public String getMaxFileUploadSizeMega() {
+		return "" + getMaxFileUploadSizeBytes() / 1024 / 1024; // 50 mega default
+	}
+	
 	public int getMaxFileUploadSizeBytes() {
 		return configuration.getInt("config/maxFileUploadSizeBytes", 50000000); // 50 mega default
 	}
@@ -1273,13 +1277,13 @@ public abstract class YadaConfiguration {
 	// Selenium Web Driver
 
 	public int seleniumWaitQuick() {
-		return configuration.getInt("config/selenium/timeout/waitQuickSeconds", 4);
+		return configuration.getInt("config/selenium/timeout/waitQuickSeconds", 8);
 	}
 	public int seleniumWait() {
-		return configuration.getInt("config/selenium/timeout/waitSeconds", 8);
+		return configuration.getInt("config/selenium/timeout/waitSeconds", 10);
 	}
 	public int seleniumWaitSlow() {
-		return configuration.getInt("config/selenium/timeout/waitSlowSeconds", 16);
+		return configuration.getInt("config/selenium/timeout/waitSlowSeconds", 18);
 	}
 
 	/**

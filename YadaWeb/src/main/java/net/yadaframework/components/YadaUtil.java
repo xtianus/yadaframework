@@ -74,6 +74,11 @@ import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
+
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.core.YadaConfiguration;
@@ -116,6 +121,41 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+	
+	/**
+	 * Merges all files matched by a pattern, in no particular order.
+	 * @param sourceFolder root folder where files are to be found
+	 * @param sourceFilePattern regex pattern to match files, e.g. ".*.js"
+	 * @param outputFile file that will contain the joined files
+	 * @param depth (optional) max depth of folders: null or 1 for no recursion
+	 * @param deleteSource (optional) Boolean.TRUE to attempt deletion of source files
+	 * @throws IOException
+	 */
+	public void joinFiles(Path sourceFolder, String sourceFilePattern, File outputFile, Integer depth, Boolean deleteSource) throws IOException {
+		depth = depth==null ? 1 : depth; // By default we don't look into subfolders
+		FileOutputStream joinedStream = new FileOutputStream(outputFile);
+		Iterator<Path> allFilesIter = java.nio.file.Files.find(sourceFolder, depth, (path, basicFileAttributes) -> path.toFile().getName().matches(sourceFilePattern)).iterator();
+		while (allFilesIter.hasNext()) {
+			Path filePath = allFilesIter.next();
+			com.google.common.io.Files.copy(filePath.toFile(), joinedStream);
+			if (Boolean.TRUE.equals(deleteSource)) {
+				filePath.toFile().delete();
+			}
+		}
+		joinedStream.close();
+	}
+
+	/**
+	 * Creates a folder in the system temp folder. The name is prefixed with "yada".
+	 * @return
+	 * @throws IOException
+	 */
+	public File makeTempFolder() throws IOException {
+		File file = File.createTempFile("yada", "");
+		file.delete();
+        file.mkdir();
+        return file;
+	}
 	
 	/**
 	 * Finds the folder path between two folders. using forward (unix) slashes as a separator
@@ -233,18 +273,23 @@ public class YadaUtil {
 
 	/**
 	 * Ensure that the given filename has not been already used, by adding a counter.
-	 * For example, a list containing {"dog.jpg", "dog.jpg", "dog.jpg"} becomes {"dog.jpg", "dog_1.jpg", "dog_2.jpg"}
+	 * For example, if baseName is "dog" and usedNames is {"dog.jpg", "dog_1.jpg", "dog_2.jpg"}, the
+	 * result will be "dog_3.jpg"
+	 * The usedNames array doesn't have to contain identical or sequential baseNames: {"dog.jpg", "cat.jpg", "dog_2.jpg"}
 	 * This version does not check if a file exists on disk. For that, see {@link #findAvailableName(File, String, String, String)}
-	 * @param usedNames filenames used so far, must start empty and will be modified
+	 * This method can be used with any strings, not necessarily filenames: just use null for the extension.
 	 * @param baseName filename to add, without extension
-	 * @param extensionNoDot filename extension without dot
-	 * @param counterSeparator string to separate the filename and the counter
+	 * @param extensionNoDot filename extension without dot, can be empty or null if the extension is not needed
+	 * @param counterSeparator string to separate the filename and the counter, can be empty or null
+	 * @param usedNames filenames used so far, must start empty and will be modified
 	 * @return the original filename with extension, or a new version with a counter added
 	 * @throws IOException
 	 * @see {@link #findAvailableName(File, String, String, String)}
 	 */
+	// TODO remove the IOException and just use a random number on timeout
 	public String findAvailableFilename(String baseName, String extensionNoDot, String counterSeparator, Set<String> usedNames) throws IOException {
-		String extension = "." + extensionNoDot;
+		counterSeparator = counterSeparator==null?"":counterSeparator;
+		String extension = StringUtils.isAllBlank(extensionNoDot) ? "" : "." + extensionNoDot;
 		String fullName = baseName + extension;
 		int counter = 0;
 		long startTime = System.currentTimeMillis();
@@ -279,12 +324,16 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Gets image dimensions for given file
+	 * Gets image dimensions for given file, ignoring orientation flag
 	 * @param imageFile image file
 	 * @return dimensions of image, or YadaIntDimension.UNSET when not found
 	 */
 	// Adapted from https://stackoverflow.com/a/12164026/587641
-	public YadaIntDimension getImageDimension(File imageFile) {
+	// The default jpeg image reader does not handle the exif Orientation flag properly
+	// so a "vertical" image with an orientation flag of 6 is considered horizontal
+	// and will have a width larger than the height
+	// See https://www.impulseadventure.com/photo/exif-orientation.html
+	public YadaIntDimension getImageDimensionDumb(File imageFile) {
 		String suffix = getFileExtension(imageFile);
 		Iterator<ImageReader> iter = ImageIO.getImageReadersBySuffix(suffix);
 		while (iter.hasNext()) {
@@ -301,6 +350,45 @@ public class YadaUtil {
 			}
 		}
 		return YadaIntDimension.UNSET;
+	}
+
+	/**
+	 * Gets the image dimensions considering the EXIF orientation flag.
+	 * Remember to use the "-auto-orient" flag of the ImageMagick convert command.
+	 * If the EXIF width and height information is missing, the getImageDimensionDumb() method is called instead.
+ 	 * See https://www.impulseadventure.com/photo/exif-orientation.html
+	 * @param imageFile
+	 * @return
+	 */
+	public YadaIntDimension getImageDimension(File imageFile) {
+		try(InputStream stream = new FileInputStream(imageFile))  {
+			Metadata metadata = ImageMetadataReader.readMetadata(stream);
+			//			for (com.drew.metadata.Directory directory2 : metadata.getDirectories()) {
+			//	            for (com.drew.metadata.Tag tag : directory2.getTags()) {
+			//	            	if (tag.getTagName().equalsIgnoreCase("Orientation")) {
+			//	            		System.out.println(tag.getTagName());
+			//	            		System.out.println(tag);
+			//
+			//	            	}
+			//	            }
+			//			}
+			ExifIFD0Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+			int orientation = 1;
+			if (directory.containsTag(ExifIFD0Directory.TAG_ORIENTATION)) {
+				orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+			}
+			ExifSubIFDDirectory directory2 = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+			int width = directory2.getInt(ExifSubIFDDirectory.TAG_EXIF_IMAGE_WIDTH);
+			int height = directory2.getInt(ExifSubIFDDirectory.TAG_EXIF_IMAGE_HEIGHT);
+			if (orientation==6 || orientation==8) {
+				// Image is rotated 90° so dimensions must be swapped
+				return new YadaIntDimension(height, width);
+			}
+			return new YadaIntDimension(width, height);
+		} catch (Exception e) {
+			log.debug("Error reading EXIF dimensions for {} - fallback to dumb version}", imageFile);
+			return getImageDimensionDumb(imageFile);
+		}
 	}
 
 	/**
@@ -420,10 +508,13 @@ public class YadaUtil {
 		int timeoutMillis = 10000; // 10 seconds to find a result seems reasonable
 		while (true) {
 			File candidateFile = new File(targetFolder, filename);
-			// As createNewFile() is atomic, two concurrent threads can't get the same name so there is no race condition to sync.
-			// Only in a very high concurrent scenario there could be some unlucky thread that doesn't get a chance before the timeout expires.
-			if (candidateFile.createNewFile()) {
-				return candidateFile;
+			try {
+				if (candidateFile.createNewFile()) {
+					return candidateFile;
+				}
+			} catch (IOException e) {
+				log.error("Can't create file {}", candidateFile);
+				throw e;
 			}
 			counter++;
 			filename = baseName + counterSeparator + counter + extension;
@@ -738,6 +829,7 @@ public class YadaUtil {
 					exception=e;
 				}
 				rootClass = rootClass.getSuperclass();
+				// TODO sometimes the attribute is not in the superclass but in the subclass. How do we get that?
 			}
 		}
 		if (field==null) {
@@ -1023,6 +1115,8 @@ public class YadaUtil {
 			// The outputstream is needed so that execution does not block. Will be discarded.
 			outputStream = new ByteArrayOutputStream();
 		}
+		timeoutSeconds = timeoutSeconds<0?60:timeoutSeconds;
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(timeoutSeconds==0?ExecuteWatchdog.INFINITE_TIMEOUT:timeoutSeconds*1000);
 		try {
 			CommandLine commandLine = new CommandLine(command);
 			if (args!=null) {
@@ -1070,7 +1164,6 @@ public class YadaUtil {
 			}
 			DefaultExecutor executor = new DefaultExecutor();
 			// Kill after timeoutSeconds, defaults to 60. 0 means no timeout
-			ExecuteWatchdog watchdog = new ExecuteWatchdog(timeoutSeconds<0?60000:timeoutSeconds==0?ExecuteWatchdog.INFINITE_TIMEOUT:timeoutSeconds*1000);
 			executor.setWatchdog(watchdog);
 			// Output and Error go together
 			PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream);
@@ -1085,6 +1178,9 @@ public class YadaUtil {
 		} catch (IOException e) {
 			log.error("Shell command output: \"{}\"", outputStream.toString());
 			log.error("Failed to execute shell command: {} {} {}", command, args!=null?args.toArray():"", substitutionMap!=null?substitutionMap:"", e);
+			if (watchdog.killedProcess()) {
+				log.error("Process was killed by watchdog after {} seconds timeout", timeoutSeconds);
+			}
 			throw e;
 		} finally {
 			closeSilently(outputStream); // This may not be needed
@@ -1166,6 +1262,7 @@ public class YadaUtil {
 	@Deprecated // use shellExec() instead
 	public String exec(String command, List<String> args, Map substitutionMap, ByteArrayOutputStream outputStream) {
 		int exitValue=1;
+		ExecuteWatchdog watchdog = new ExecuteWatchdog(60000); // Kill after 60 seconds
 		try {
 			CommandLine commandLine = new CommandLine(command);
 			if (args!=null) {
@@ -1207,7 +1304,6 @@ public class YadaUtil {
 			}
 			commandLine.setSubstitutionMap(substitutionMap);
 			DefaultExecutor executor = new DefaultExecutor();
-			ExecuteWatchdog watchdog = new ExecuteWatchdog(60000); // Kill after 60 seconds
 			executor.setWatchdog(watchdog);
 			// Output and Error go together
 			PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream);
@@ -1216,7 +1312,12 @@ public class YadaUtil {
 			exitValue = executor.execute(commandLine);
 		} catch (Exception e) {
 			log.error("Failed to execute shell command: " + command + " " + args, e);
-			return e.getMessage();
+			String message = e.getMessage();
+			if (watchdog.killedProcess()) {
+				log.error("Processed killed by watchdog for timeout after 60 seconds");
+				message += " - timeout after 60 seconds";
+			}
+			return message;
 		}
 		return (exitValue>0)?"":null;
 	}
@@ -1688,7 +1789,12 @@ public class YadaUtil {
 							// per questi faccio la copia deep.
 							for (Object value : sourceCollection) {
 								if (isType(value.getClass(), CloneableDeep.class)) {
-									targetCollection.add(YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap)); // deep
+									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap); // deep
+									// For YadaAttachedFile objects, duplicate the file on disk too
+									if (isType(value.getClass(), YadaAttachedFile.class)) {
+										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+									}
+									targetCollection.add(clonedValue);
 								} else {
 									targetCollection.add(value); // shallow
 								}
@@ -1708,7 +1814,12 @@ public class YadaUtil {
 							for (Object key : sourceMap.keySet()) {
 								Object value = sourceMap.get(key);
 								if (isType(value.getClass(), CloneableDeep.class)) {
-									targetMap.put(key, YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap)); // deep
+									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap); // deep
+									// For YadaAttachedFile objects, duplicate the file on disk too
+									if (isType(value.getClass(), YadaAttachedFile.class)) {
+										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+									}
+									targetMap.put(key, clonedValue);
 								} else {
 									targetMap.put(key, value); // shallow
 								}
@@ -1720,12 +1831,12 @@ public class YadaUtil {
 								// Siccome implementa CloneableDeep, lo duplico deep
 								CloneableFiltered fieldValue = setFieldDirectly ? (CloneableFiltered) field.get(source) : (CloneableFiltered) getter.invoke(source);
 								Object clonedValue = YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap); // deep but detached
-								copyValue(setFieldDirectly, field, getter, setter, source, target, clonedValue);
-//								setter.invoke(target, YadaUtil.copyEntity(fieldValue)); // deep but detached
 								// For YadaAttachedFile objects, duplicate the file on disk too
 								if (isType(fieldType, YadaAttachedFile.class)) {
-									yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+									clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
 								}
+								copyValue(setFieldDirectly, field, getter, setter, source, target, clonedValue);
+//								setter.invoke(target, YadaUtil.copyEntity(fieldValue)); // deep but detached
 							} else if (isType(fieldType, StringBuilder.class)) {
 								// String builder/buffer is cloned otherwise changes to the original object would be reflected in the new one
 								StringBuilder fieldValue = setFieldDirectly ? (StringBuilder) field.get(source) : (StringBuilder) getter.invoke(source);
@@ -1794,6 +1905,44 @@ public class YadaUtil {
 //	public void copyFields(Calendar fromCal, Calendar toCal) {
 //
 //	}
+
+	/**
+	 * Check if a date is within two dates expressed as month/day, regardless of the year and of the validity of such dates.
+	 * @param dateToCheck for example new GregorianCalendar()
+	 * @param fromMonth 0-based, better use Calendar.JANUARY etc.
+	 * @param fromDayInclusive 1-based
+	 * @param toMonth 0-based, better use Calendar.JANUARY etc.
+	 * @param toDayExcluded 1-based
+	 * @return
+	 */
+	public static boolean dateWithin(Calendar dateToCheck, int fromMonth, int fromDayInclusive, int toMonth, int toDayExcluded) {
+		if (fromMonth<0 || fromMonth>11) {
+			throw new YadaInvalidUsageException("Month must be in the range 0-11");
+		}
+		if (toMonth<0 || toMonth>11) {
+			throw new YadaInvalidUsageException("Month must be in the range 0-11");
+		}
+		if (fromDayInclusive<1 || fromDayInclusive>31) {
+			throw new YadaInvalidUsageException("Day must be in the range 1-31");
+		}
+		if (toDayExcluded<1 || toDayExcluded>31) {
+			throw new YadaInvalidUsageException("Day must be in the range 1-31");
+		}
+		boolean sameYear = fromMonth<=toMonth;
+		int monthToCheck = dateToCheck.get(Calendar.MONTH);
+		if (sameYear && (monthToCheck<fromMonth || monthToCheck>toMonth)) {
+			return false;
+		}
+		if (!sameYear && (monthToCheck<fromMonth && monthToCheck>toMonth)) {
+			return false;
+		}
+		// The month is within range, keep checking...
+		int dayToCheck = dateToCheck.get(Calendar.DAY_OF_MONTH);
+		if ((monthToCheck==fromMonth && dayToCheck<fromDayInclusive) || (monthToCheck==toMonth && dayToCheck>=toDayExcluded)) {
+			return false;
+		}
+		return true;
+	}
 
 	/** Ritorna l'ora più vicina nel passato alla data specificata
 	 * @return
@@ -2272,7 +2421,7 @@ public class YadaUtil {
 				return "";
 			}
 		}
-
+		//originalFilename = YadaWebUtil.removeHtmlStatic(originalFilename);
 		char[] resultChars = originalFilename.toCharArray();
 		char[] lowerChars = originalFilename.toLowerCase().toCharArray();
 		for (int i = 0; i < resultChars.length; i++) {

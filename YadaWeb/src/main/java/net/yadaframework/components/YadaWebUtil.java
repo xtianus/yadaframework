@@ -75,7 +75,7 @@ public class YadaWebUtil {
 	public final Pageable FIND_ONE = PageRequest.of(0, 1);
 
 	// Characters that should never be found or placed in a slug
-	private static final String PATTERN_INVALID_SLUG = "[:,;=&!+~()@*$'\"\\s]";
+	private static final String PATTERN_INVALID_SLUG = "[?%:,;=&!+~()@*$'\"\\s]";
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
 
@@ -415,7 +415,8 @@ public class YadaWebUtil {
 			return "";
 		}
 		String slug = removeHtmlStatic(source); //rimuove tutti gli eventuali tag.
-		slug = source.trim().toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e').replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-');
+		slug = source.trim().toLowerCase().replace('à', 'a').replace('è', 'e').replace('é', 'e')
+			.replace('ì', 'i').replace('ò', 'o').replace('ù', 'u').replace('.', '-').replace(',', '-');
 		slug = slug.replaceAll(" +", "-"); // Spaces become dashes
 		slug = slug.replaceAll(PATTERN_INVALID_SLUG, "");
 		slug = StringUtils.removeEnd(slug, ".");

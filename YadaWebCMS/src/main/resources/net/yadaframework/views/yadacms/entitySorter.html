@@ -80,7 +80,7 @@ Example:
 							<input type="hidden" name="currentId" th:value="${sorterEntity.id}">
 							<input type="hidden" name="otherId" th:value="${entities.get(iter.index+1).id}">
 							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" class="yadaNoLoader">
-								<i class="yadaIcon yadaIcon-down"></i>
+								<i class="yadaIcon yadaIcon-down"></i> <!--/* TODO add a localized tooltip and aria- tag */-->
 							</a>
 						</form>
 						<!--/* Move down */-->
@@ -88,7 +88,7 @@ Example:
 							<input type="hidden" name="currentId" th:value="${sorterEntity.id}">
 							<input type="hidden" name="otherId" th:value="${entities.get(iter.index-1).id}">
 							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" class="yadaNoLoader">
-								<i class="yadaIcon yadaIcon-up"></i>
+								<i class="yadaIcon yadaIcon-up"></i> <!--/* TODO add a localized tooltip and aria- tag */-->
 							</a>
 						</form>
 						<!--/* Delete */-->
