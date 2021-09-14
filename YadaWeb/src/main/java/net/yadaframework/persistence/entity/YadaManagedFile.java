@@ -1,26 +1,35 @@
 package net.yadaframework.persistence.entity;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Date;
+import java.util.Map;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.raw.YadaIntDimension;
 
 /**
@@ -30,11 +39,16 @@ import net.yadaframework.raw.YadaIntDimension;
  * Use case 2: upload an image, ask the user to create many cropped versions, then delete the original image.
  */
 
-// This class is not in the YadaCSS project because it has to be used by YadaUtil.copyEntity()
+// This class is not in the YadaWebCMS project because it has to be used by YadaUtil.copyEntity()
 
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+// @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaManagedFile implements CloneableDeep {
+	
+	@Transient @Autowired
+	private YadaWebUtil yadaWebUtil;
+	@Transient @Autowired
+	private YadaUtil yadaUtil;
 
 	// For synchronization with external databases
 	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
@@ -50,9 +64,9 @@ public class YadaManagedFile implements CloneableDeep {
 	protected Long id;
 
 	/**
-	 * Folder where the file is stored, relative to the uploads folder
+	 * Folder where the file is stored, relative to the basePath folder
 	 */
-	protected String relativeFolderPath; // Relative to the "uploads" folder
+	protected String relativeFolderPath; // null if the file is in the basePath folder, but this should never happen
 
 	/**
 	 * The name of the file in the folder
@@ -69,18 +83,36 @@ public class YadaManagedFile implements CloneableDeep {
 
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date uploadTimestamp;
-
+	
 	/**
 	 * Image width and height
 	 */
 	protected YadaIntDimension dimension;
 
 	protected Long sizeInBytes;
-
+	
 	/**
-	 * A temporary file will be deleted after some time.
+	 * A temporary file can be deleted when not needed anymore (application specific).
 	 */
 	protected boolean temporary = true;
+
+	/**
+	 * When false, the file is accessible from the public contents folder directly by apache
+	 */
+	protected boolean privateAccess = false;
+
+	/**
+	 * Linked to cropped images
+	 */
+	@OneToMany(cascade=CascadeType.REMOVE)
+	@MapKeyColumn(name="assetKey") // key
+	protected Map<String, YadaManagedFile> derivedAssets;
+	
+	/**
+	 * When not null, this file can be deleted after the specified timestamp (application specific).
+	 */
+	@Temporal(TemporalType.TIMESTAMP)
+	protected Date expirationTimestamp;
 
 	@Transient
 	private YadaConfiguration config; // Spring can not autowire an Entity
@@ -105,16 +137,34 @@ public class YadaManagedFile implements CloneableDeep {
 	public YadaIntDimension getDimension() {
 		return dimension;
 	}
+	
+	/**
+	 * Moves this file to the target file, overwriting the target if it exists. The filename may change as a result.
+	 * @param targetFile
+	 * @return the targetFile
+	 * @throws IOException 
+	 */
+	@Transient
+	public YadaManagedFile move(File targetFile) throws IOException {
+		Path targetPath = targetFile.toPath();
+		File currentFile = this.getAbsoluteFile();
+		Files.move(currentFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+		this.filename = targetFile.getName();
+		this.setRelativeFolderPath(yadaUtil.relativize(config.getBasePath(), targetPath.getParent()));
+		return this;
+	}
 
 	/**
-	 * Returns the url to show this file on the web
+	 * Returns the url to show this file on the web, but only if it is publicly visible (in a subfolder of the "contents" folder)
 	 * @return
 	 */
 	@Transient
 	public String getUrl() {
-		StringBuilder result = new StringBuilder(config.getUploadsUrl());
-		result.append(StringUtils.isBlank(relativeFolderPath)?"":"/"+relativeFolderPath).append("/").append(filename);
-		return result.toString();
+		if (privateAccess) {
+			throw new YadaInvalidUsageException("Trying to get a url of a private file: {}", this.getAbsoluteFile());
+		}
+		Path relativePath = config.getContentsFolder().toPath().relativize(this.getAbsoluteFile().toPath());
+		return yadaWebUtil.makeUrl(config.getContentUrl(), relativePath.toString());
 	}
 
 	/**
@@ -123,7 +173,7 @@ public class YadaManagedFile implements CloneableDeep {
 	 */
 	@Transient
 	public File getAbsoluteFile() {
-		File result = config.getUploadsFolder();
+		File result = config.getBasePath().toFile();
 		if (StringUtils.isNotBlank(relativeFolderPath)) {
 			result = new File(result, relativeFolderPath);
 		}
@@ -159,12 +209,29 @@ public class YadaManagedFile implements CloneableDeep {
 		this.modified = modified;
 	}
 
+	/**
+	 * Returns the path of the folder where this file is stored, relative to the "base path"
+	 * @return
+	 */
 	public String getRelativeFolderPath() {
 		return relativeFolderPath;
 	}
 
+	/**
+	 * Sets the path of the folder where this file is stored, relative to the "base path"
+	 * @param relativeFolderPath
+	 */
 	public void setRelativeFolderPath(String relativeFolderPath) {
 		this.relativeFolderPath = relativeFolderPath;
+	}
+	
+	/**
+	 * Sets the path of the folder where this file is stored, relative to the "base path"
+	 * @param relativeFolderPath
+	 */
+	@Transient
+	public void setRelativeFolderPath(Path relativeFolderPath) {
+		this.relativeFolderPath = relativeFolderPath!=null?relativeFolderPath.toString():null;
 	}
 
 	public void setFilename(String filename) {
@@ -211,6 +278,10 @@ public class YadaManagedFile implements CloneableDeep {
 		this.sizeInBytes = bytes;
 	}
 
+	public boolean isExpired() {
+		return temporary || (expirationTimestamp!=null && !expirationTimestamp.after(new Date()));
+	}
+	
 	public boolean isTemporary() {
 		return temporary;
 	}
@@ -221,6 +292,34 @@ public class YadaManagedFile implements CloneableDeep {
 
 	public void setDimension(YadaIntDimension dimension) {
 		this.dimension = dimension;
+	}
+
+	public boolean isPrivateAccess() {
+		return privateAccess;
+	}
+
+	public void setPrivateAccess(boolean privateAccess) {
+		this.privateAccess = privateAccess;
+	}
+
+	public Map<String, YadaManagedFile> getDerivedAssets() {
+		return derivedAssets;
+	}
+
+	public void setDerivedAssets(Map<String, YadaManagedFile> derivedAssets) {
+		this.derivedAssets = derivedAssets;
+	}
+
+	public Date getExpirationTimestamp() {
+		return expirationTimestamp;
+	}
+
+	public void setExpirationTimestamp(Date expirationTimestamp) {
+		this.expirationTimestamp = expirationTimestamp;
+	}
+
+	public void setVersion(long version) {
+		this.version = version;
 	}
 
 }

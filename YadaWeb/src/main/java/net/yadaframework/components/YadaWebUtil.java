@@ -1,6 +1,16 @@
 package net.yadaframework.components;
 
-import static net.yadaframework.core.YadaConstants.*;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_AUTOCLOSE;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_BODY;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_CALLSCRIPT;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_REDIRECT;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_RELOADONCLOSE;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_SEVERITY;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_TITLE;
+import static net.yadaframework.core.YadaConstants.KEY_NOTIFICATION_TOTALSEVERITY;
+import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_ERROR;
+import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_INFO;
+import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,12 +26,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -55,6 +63,7 @@ import net.yadaframework.core.YadaConstants;
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
+@Lazy // Lazy because used in YadaCmsConfiguration, and it woud give a circular refecence exception otherwise
 @Service
 public class YadaWebUtil {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
@@ -337,6 +346,17 @@ public class YadaWebUtil {
 		//		try (InputStream inputStream = attachment.getInputStream(); OutputStream outputStream = new FileOutputStream(targetFile)) {
 		//			IOUtils.copy(inputStream, outputStream);
 		//		}
+	}
+	
+	/**
+	 * Assembles a url given its parts as string.
+	 * @param segments the initial parts of the url up to the query string. Leading and trailing slashes are added when missing.
+	 * URLEncoding is not performed.
+	 * @return
+	 * @see #makeUrl(String[], Map, Boolean)
+	 */
+	public String makeUrl(String...segments) {
+		return makeUrl(segments, null, null);
 	}
 	
 	/**

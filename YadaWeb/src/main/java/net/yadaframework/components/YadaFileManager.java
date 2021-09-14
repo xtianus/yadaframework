@@ -50,6 +50,18 @@ public class YadaFileManager {
 	// TODO distinguere tra mobile portrait e mobile landscape
 	// TODO le dimensioni mobile/desktop devono essere configurabili
 	// TODO mantenere l'immagine caricata nella versione originale
+	
+	/**
+	 * Move the file to the public temp folder for later processing.
+	 * @param yadaManagedFile
+	 * @return
+	 * @throws IOException 
+	 */
+	public YadaManagedFile moveToTemp(YadaManagedFile yadaManagedFile) throws IOException {
+		File destinationFile = new File(config.getTempImageDir(), yadaManagedFile.getFilename());
+		destinationFile = YadaUtil.findAvailableName(destinationFile, null);
+		return yadaManagedFile.move(destinationFile);
+	}
 
 	/**
 	 * Remove a managed file from disk and database

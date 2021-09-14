@@ -116,6 +116,28 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+	
+	/**
+	 * Finds the folder path between two folders. using forward (unix) slashes as a separator
+	 * @param ancestorFolder
+	 * @param descendantFolder
+	 * @return
+	 */
+	public String relativize(File ancestorFolder, File descendantFolder) {
+		String segment = ancestorFolder.toPath().relativize(descendantFolder.toPath()).toString();
+		return segment.replaceAll("\\", "/");
+	}
+	
+	/**
+	 * Finds the folder path between two folders. using forward (unix) slashes as a separator
+	 * @param ancestorFolder
+	 * @param descendantFolder
+	 * @return
+	 */
+	public String relativize(Path ancestorFolder, Path descendantFolder) {
+		String segment = ancestorFolder.relativize(descendantFolder).toString();
+		return segment.replaceAll("\\\\", "/");
+	}
 
 	/**
 	 * Split an HTML string in two parts, not breaking words, handling closing and reopening of html tags.
@@ -382,6 +404,7 @@ public class YadaUtil {
 	 * Creates an empty file that doesn't already exist in the specified folder
 	 * with the specified leading characters (baseName).
 	 * A counter may be appended to make the file unique.
+	 * This operation is thread safe.
 	 * @param targetFolder the folder where the file has to be placed
 	 * @param baseName the leading characters for the file, like "product"
 	 * @param extension the extension without a dot, like "jpg"
@@ -394,9 +417,11 @@ public class YadaUtil {
 		String filename = baseName + extension;
 		int counter = 0;
 		long startTime = System.currentTimeMillis();
-		int timeoutMillis = 20000; // 20 seconds to find a result seems to be reasonable
+		int timeoutMillis = 10000; // 10 seconds to find a result seems reasonable
 		while (true) {
 			File candidateFile = new File(targetFolder, filename);
+			// As createNewFile() is atomic, two concurrent threads can't get the same name so there is no race condition to sync.
+			// Only in a very high concurrent scenario there could be some unlucky thread that doesn't get a chance before the timeout expires.
 			if (candidateFile.createNewFile()) {
 				return candidateFile;
 			}
@@ -410,23 +435,24 @@ public class YadaUtil {
 
 	/**
 	 * Creates a file with a unique filename by appending a number after the specified separator if needed.
-	 * If the sourceFile exists already, a new file is created with a proper counter at the end. The counter may be stripped
+	 * If the targetFile exists already, a new file is created with a proper counter at the end. The counter may be stripped
 	 * altogether (if the original file had a counter and no file without counter exists) or added or incremented.
 	 * The new counter might not be higher than the original one, nor sequential. It depends on what's already on
 	 * the filesystem.
-	 * @param sourceFile the file that we want to create.
+	 * This operation is thread safe.
+	 * @param targetFile the file that we want to create.
 	 * @param counterSeparator (optional) when null, "_" is used.
 	 * @return
 	 * @throws IOException
 	 */
-	public static File findAvailableName(File sourceFile, String counterSeparator) throws IOException {
+	public static File findAvailableName(File targetFile, String counterSeparator) throws IOException {
 		if (counterSeparator==null) {
 			counterSeparator="_";
 		}
-		String sourceFilename = sourceFile.getName();
-		String extension = splitFileNameAndExtension(sourceFilename)[1];
-		String strippedName = stripCounterFromFilename(sourceFilename, counterSeparator);
-		return findAvailableName(sourceFile.getParentFile(), strippedName, extension, counterSeparator);
+		String targetFilename = targetFile.getName();
+		String extension = splitFileNameAndExtension(targetFilename)[1];
+		String strippedName = stripCounterFromFilename(targetFilename, counterSeparator);
+		return findAvailableName(targetFile.getParentFile(), strippedName, extension, counterSeparator);
 	}
 
 	/**
