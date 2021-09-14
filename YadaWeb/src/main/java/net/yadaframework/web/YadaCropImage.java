@@ -1,11 +1,15 @@
 package net.yadaframework.web;
 
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import net.yadaframework.components.YadaFileManager;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.exceptions.YadaSystemException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaManagedFile;
 import net.yadaframework.persistence.repository.YadaAttachedFileDao;
@@ -51,9 +55,17 @@ public class YadaCropImage {
 	 * Package-accessible constructor used by YadaCropQueue
 	 * @param imageToCrop
 	 * @param targetDimensions image target desktop and mobile dimensions. Use null when a shrink is not needed, use a null dimension when that crop is not needed.
+	 * @throws IOException 
 	 */
 	// Package visibility
-	YadaCropImage(YadaManagedFile imageToCrop, YadaIntDimension[] targetDimensions, String targetRelativeFolder, String targetNamePrefix) {
+	YadaCropImage(YadaFileManager yadaFileManager, YadaManagedFile imageToCrop, YadaIntDimension[] targetDimensions, String targetRelativeFolder, String targetNamePrefix) {
+		try {
+			// Move the image from the private uploads folder to the public temp folder
+			yadaFileManager.moveToTemp(imageToCrop);
+		} catch (IOException e) {
+			log.error("Failed to move image to temp folder", e);
+			throw new YadaSystemException("File copy error", e);
+		}
 		this.imageToCrop = imageToCrop;
 		this.targetRelativeFolder = targetRelativeFolder;
 		this.targetNamePrefix = targetNamePrefix;

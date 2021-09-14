@@ -1,6 +1,7 @@
 package net.yadaframework.core;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,6 +96,8 @@ public abstract class YadaConfiguration {
 	private String preserveImageExtensions=null;
 	private String defaultNotifyModalView = null;
 	private DataSource dataSource = null;
+	private File uploadsFolder = null;
+	private File tempFolder = null;
 
 	/**
 	 * Returns a DataSource that has NOT been configured on JNDI. Given that there is a configuration file for each environment, you
@@ -287,21 +290,28 @@ public abstract class YadaConfiguration {
 		return uploadsDir;
 	}
 
-	/**
-	 * Returns the url for the uploads folder
-	 * @return
-	 */
-	public String getUploadsUrl() {
-		return this.getContentUrl() + "/" + getUploadsDirname();
-	}
+// This has been removed because uploaded files should not be public.
+// They should be moved to a public folder in order to show them via apache. 	
+//	/**
+//	 * Returns the url for the uploads folder
+//	 * @return
+//	 */
+//	public String getUploadsUrl() {
+//		return this.getContentUrl() + "/" + getUploadsDirname();
+//	}
 
 	/**
-	 * Folder where files are uploaded before processing.
-	 * Also the folder where the Media Manager keeps the files.
+	 * Folder where files are uploaded before processing. Should not be a public folder.
 	 * @return
 	 */
 	public File getUploadsFolder() {
-		return new File(getContentPath(), getUploadsDirname());
+		if (uploadsFolder==null) {
+			uploadsFolder = new File(getBasePathString(), getUploadsDirname());
+			if (!uploadsFolder.exists()) {
+				uploadsFolder.mkdirs();
+			}
+		}
+		return uploadsFolder;
 	}
 
 	/**
@@ -512,7 +522,13 @@ public abstract class YadaConfiguration {
 	 * @return
 	 */
 	public File getTempImageDir() {
-		return new File(getContentPath(), getTempImageRelativePath());
+		if (tempFolder==null) {
+			tempFolder = new File(getContentPath(), getTempImageRelativePath());
+			if (!tempFolder.exists()) {
+				tempFolder.mkdirs();
+			}
+		}
+		return tempFolder;
 	}
 
 	/**
@@ -888,7 +904,7 @@ public abstract class YadaConfiguration {
 	 * @return
 	 */
 	public String getContentPath() {
-		return getBasePath() + "/" + getContentName();
+		return getBasePathString() + "/" + getContentName();
 	}
 
 	/**
@@ -910,10 +926,19 @@ public abstract class YadaConfiguration {
 	 * Example: /srv/myproject
 	 * @return
 	 */
-	protected String getBasePath() {
+	protected String getBasePathString() {
 		return configuration.getString("config/paths/basePath");
 	}
 
+	/**
+	 * Absolute path on the filesystem where application files not belonging to the webapp war are stored.
+	 * Example: /srv/myproject
+	 * @return
+	 */
+	public Path getBasePath() {
+		return new File(configuration.getString("config/paths/basePath")).toPath();
+	}
+	
 	/**
 	 *
 	 * @return e.g. "res"

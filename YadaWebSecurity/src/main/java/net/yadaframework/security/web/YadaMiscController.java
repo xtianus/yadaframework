@@ -92,7 +92,7 @@ public class YadaMiscController {
 			}
 			// Delete original file when temporary
 			YadaManagedFile yadaManagedFile = yadaCropImage.getImageToCrop();
-			if (yadaManagedFile.isTemporary()) {
+			if (yadaManagedFile.isExpired()) {
 				yadaFileManager.delete(yadaManagedFile);
 			}
 		}
