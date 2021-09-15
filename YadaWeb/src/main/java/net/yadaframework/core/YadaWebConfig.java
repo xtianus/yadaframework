@@ -1,11 +1,13 @@
 package net.yadaframework.core;
 
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,7 +24,6 @@ import org.springframework.format.support.FormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.commons.YadaCommonsMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
@@ -61,11 +62,11 @@ public class YadaWebConfig implements WebMvcConfigurer {
 	protected final static String STATIC_RESOURCES_FOLDER = "/res";
 	protected final static String STATIC_YADARESOURCES_FOLDER = "/yadares";
 	protected final static String STATIC_FILE_FOLDER = "/static";
-	
+
 	@Autowired protected YadaConfiguration config;
-	
+
 	@Autowired protected ApplicationContext applicationContext;
-	
+
     @Autowired
     private RequestMappingHandlerAdapter requestMappingHandlerAdapter;
 
@@ -75,7 +76,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
     	// http://www.logicbig.com/tutorials/spring-framework/spring-web-mvc/redirect-attributes/
        requestMappingHandlerAdapter.setIgnoreDefaultModelOnRedirect(true);
     }
-    
+
 	// This is only used when not using YadaWebSecurity
 	@Bean(name="multipartResolver")
 	public CommonsMultipartResolver multipartResolver() {
@@ -84,7 +85,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		// filterMultipartResolver.setResolveLazily(true);
 		return filterMultipartResolver;
 	}
-	
+
 	/**
 	 * Return a string pattern to match urls that should not be localised when using a language path variable
 	 * i.e. the language code will not be added when using @{} in thymeleaf
@@ -107,7 +108,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		result.append(")");
 		return result.toString();
 	}
-	
+
 	/**
 	 * Name of the folder where versioned static yada files are to be found, starting with /
 	 * @return
@@ -115,7 +116,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 	public static String getYadaResourceFolder() {
 		return STATIC_YADARESOURCES_FOLDER;
 	}
-	
+
 	/**
 	 * Name of the folder where versioned static files are to be found, starting with /
 	 * @return
@@ -123,7 +124,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 	public static String getResourceFolder() {
 		return STATIC_RESOURCES_FOLDER;
 	}
-	
+
 	/**
 	 * Name of the folder where non-versioned static files are to be found, starting with /
 	 * @return
@@ -131,15 +132,15 @@ public class YadaWebConfig implements WebMvcConfigurer {
 	public static String getStaticFileFolder() {
 		return STATIC_FILE_FOLDER;
 	}
-	
+
 	// Needed for Spring Data
 	// Lets you use Pageable in @Controller request parameters
 	//	@Override
 	//	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 	//	    PageableHandlerMethodArgumentResolver resolver = new PageableHandlerMethodArgumentResolver();
-	//	    argumentResolvers.add(resolver);	
+	//	    argumentResolvers.add(resolver);
 	//	}
-	
+
 	//
 	// Locale handling
 	//
@@ -167,19 +168,37 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		YadaLocalePathChangeInterceptor localeChangeInterceptor = new YadaLocalePathChangeInterceptor();
 		return localeChangeInterceptor;
 	}
+
 	//
-	// This is setting the locale using cookies
+	// This is setting the locale using cookies.
+	// The first time, when no cookies are set, the locale is taken from the "accept-language" request header
+	// but only if it is an accepted (configured) locale, otherwise the configured default locale is used.
 	//
 	@Bean(name = "localeResolver")
 	public LocaleResolver localeResolver() {
-		CookieLocaleResolver cookieLocaleResolver = new CookieLocaleResolver();
+		CookieLocaleResolver cookieLocaleResolver = new CookieLocaleResolver() {
+			@Override
+			protected Locale determineDefaultLocale(HttpServletRequest request) {
+				Set<Locale> acceptedLocales = config.getLocaleSet();
+				Enumeration<Locale> preferredLocales = request.getLocales();
+				// Find the first locale that is configured
+		        while (preferredLocales.hasMoreElements()) {
+		            Locale preferredLocale = preferredLocales.nextElement();
+		            if (acceptedLocales.contains(preferredLocale)) {
+		            	log.debug("Locale chosen from accept-language header: {}", preferredLocale);
+		            	return preferredLocale;
+		            }
+		        }
+		        // When none of the request locales are accepted, return the default locale
+		        return config.getDefaultLocale();
+			}
+		};
 		cookieLocaleResolver.setCookieMaxAge(Integer.MAX_VALUE);
 		// The default is taken from the request header
-		// cookieLocaleResolver.setDefaultLocale(Locale.ENGLISH);
+		// NO: cookieLocaleResolver.setDefaultLocale(Locale.ENGLISH);
 		return cookieLocaleResolver;
 	}
 
-	
 	@Bean
 	@Autowired // L'ho spostato qui per risolvere il problema "Requested bean is currently in creation"
 	// Questo registra un Date Formatter
@@ -204,15 +223,15 @@ public class YadaWebConfig implements WebMvcConfigurer {
 	 */
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		
+
 		// The official versioning code doesn't seem to work properly: even when adding a ResourceUrlEncodingFilter to rewrite links
-		// See: 
+		// See:
 		// https://spring.io/blog/2014/07/24/spring-framework-4-1-handling-static-web-resources
 		// http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/#mvc-config-static-resources
 		//	registry.addResourceHandler("/resources/**").addResourceLocations("/META-INF/")
 		//		.setCachePeriod(8640000) // 100 days cache period
 		//		.resourceChain(false).addResolver(new VersionResourceResolver().addFixedVersionStrategy(config.getApplicationBuild(), "/**/"));
-		
+
 		String res = STATIC_RESOURCES_FOLDER;
 		if (res.endsWith("/")) {
 			res = StringUtils.chop(res); // Remove last character
@@ -227,7 +246,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 			s = StringUtils.chop(s); // Remove last character
 		}
 		registry.addResourceHandler(s + "/**").addResourceLocations(s+"/").setCachePeriod(8640000); // 100 days cache period
-		
+
 		// yadares prende le risorse dal classpath
 		String yadares = STATIC_YADARESOURCES_FOLDER;
 		if (yadares.endsWith("/")) {
@@ -242,11 +261,11 @@ public class YadaWebConfig implements WebMvcConfigurer {
 			// TODO The problem with contents is that the version should be taken from the file timestamp so here it should accept any value but I don't know how to make it work with any version value
 			registry.addResourceHandler(contentUrl + "/**").addResourceLocations("file:"+config.getContentPath() + "/").setCachePeriod(8640000); // 100 days cache period
 		}
-		
+
 		// robots.txt is usually added by the deploy script depending on the environment
 		registry.addResourceHandler("/robots.txt").addResourceLocations("/").setCachePeriod(86400); // 1 day cache period
 	}
-	
+
 	//
 	// Thymeleaf
 	//
@@ -258,9 +277,9 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		resolver.setPrefix(YadaConstants.YADA_VIEW_PREFIX); // Attenzione allo slash finale!
 //		resolver.setPrefix(YadaConstants.YADA_VIEW_PREFIX + "/"); // Attenzione allo slash finale!
 		/* From the tutorial:
-		 When several template resolvers are applied, it is recommended to specify patterns 
-		 for each template resolver so that Thymeleaf can quickly discard those template resolvers 
-		 that are not meant to resolve the template, enhancing performance. Doing this is not a 
+		 When several template resolvers are applied, it is recommended to specify patterns
+		 for each template resolver so that Thymeleaf can quickly discard those template resolvers
+		 that are not meant to resolve the template, enhancing performance. Doing this is not a
 		 requirement, but a recommendation
 		 */
 		Set<String> patterns = new HashSet<>();
@@ -271,7 +290,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		resolver.setCharacterEncoding("UTF-8");
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setCacheable(config.isProductionEnvironment());
-		resolver.setOrder(10); 
+		resolver.setOrder(10);
 		return resolver;
 	}
 
@@ -289,9 +308,9 @@ public class YadaWebConfig implements WebMvcConfigurer {
 // The final slash is not needed because all email template paths must start with "/email/" as specified in the "patterns.add()" statement below
 //		resolver.setPrefix("/WEB-INF/classes/" + YadaConstants.EMAIL_TEMPLATES_PREFIX + "/");
 		/* From the tutorial:
-		 When several template resolvers are applied, it is recommended to specify patterns 
-		 for each template resolver so that Thymeleaf can quickly discard those template resolvers 
-		 that are not meant to resolve the template, enhancing performance. Doing this is not a 
+		 When several template resolvers are applied, it is recommended to specify patterns
+		 for each template resolver so that Thymeleaf can quickly discard those template resolvers
+		 that are not meant to resolve the template, enhancing performance. Doing this is not a
 		 requirement, but a recommendation
 		 */
 		Set<String> patterns = new HashSet<>();
@@ -304,9 +323,9 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		resolver.setOrder(20);
 		return resolver;
 	}
-	
+
 	// x213
-	
+
 	// @Bean // No need for a @Bean?
 	public ITemplateResolver webTemplateResolver() {
 //		ServletContextTemplateResolver resolver = new ServletContextTemplateResolver();
@@ -326,7 +345,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		resolver.setOrder(30); // The last one, because it doesn't have any ResolvablePatterns
 		return resolver;
 	}
-	
+
 	// @Bean // No need for a @Bean?
 	public ITemplateResolver javascriptTemplateResolver() {
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
@@ -343,7 +362,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		// resolver.setOrder(30); // Order not needed because resolver on different ViewResolver
 		return resolver;
 	}
-	
+
 	// @Bean // No need for a @Bean?
 	public ITemplateResolver xmlTemplateResolver() {
 //		ServletContextTemplateResolver resolver = new ServletContextTemplateResolver();
@@ -362,7 +381,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		// resolver.setOrder(30); // Order not needed because resolver on different ViewResolver
 		return resolver;
 	}
-	
+
 	@Bean 	// WARNING: @Bean annotation needed to make message.properties work properly - DO NOT REMOVE
 			//          because the SpringTemplateEngine has to be injected with the MessageSource bean.
 	public SpringTemplateEngine templateEngine() {
@@ -375,7 +394,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		engine.addTemplateResolver(yadaTemplateResolver());
 		// Fixes urls with @{} adding the language path when configured and versioning resource folders
 		engine.setLinkBuilder(new YadaLinkBuilder(config, getNotLocalizedResourcePattern()));
-		
+
 		// Do this in the subclass
 		//		// http://www.thymeleaf.org/layouts.html
 		//		engine.addDialect(new LayoutDialect()); // thymeleaf-layout-dialect
@@ -383,7 +402,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		addYadaDialect(engine);
 		return engine;
 	}
-	
+
 	/**
 	 * To be overridden when a new dialect has to be added, e.g. engine.addDialect(new LayoutDialect());
 	 * @param engine
@@ -391,7 +410,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 	protected void addExtraDialect(SpringTemplateEngine engine) {
 		// Do nothing
 	}
-	
+
 	protected void addYadaDialect(SpringTemplateEngine engine) {
 		engine.addDialect(new YadaDialect(config));
 	}
@@ -406,7 +425,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		addYadaDialect(engine);
 		return engine;
 	}
-	
+
 	// Ho aggiunto un viewResolver per gestire i file xml. Per usarlo basta che il controller restituisca il nome di un file xml senza estensione che sta in WEB-INF/views/xml
 	// prefissandolo con "/xml", per esempio "/xml/sitemap".
 	@Bean
@@ -422,7 +441,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 
 	/**
 	 * View resolver for js files that can be anywhere in the views folder.
-	 * Contrary to usual practice, the view name MUST include the .js extension: return "/some/path/myfile.js". 
+	 * Contrary to usual practice, the view name MUST include the .js extension: return "/some/path/myfile.js".
 	 * @return
 	 */
 	@Bean
@@ -435,7 +454,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		viewResolver.setViewNames(new String[] { "*.js" });
 		viewResolver.setContentType("application/javascript");
 		// Default is "true": caching is enabled. Disable this only for debugging and development.
-		viewResolver.setCache(config.isProductionEnvironment()); 
+		viewResolver.setCache(config.isProductionEnvironment());
 		return viewResolver;
 	}
 
@@ -453,10 +472,10 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		viewResolver.setViewNames(new String[] { "/xml/*" }); // E' giusto mettere "*" e non "*.xml" perchè il suffisso viene attaccato grazie al resolver.setSuffix(".xml") di xmlTemplateResolver()
 		viewResolver.setContentType("text/xml");
 		// Default is "true": caching is enabled. Disable this only for debugging and development.
-		viewResolver.setCache(config.isProductionEnvironment()); 
+		viewResolver.setCache(config.isProductionEnvironment());
 		return viewResolver;
 	}
-	
+
 	/**
 	 * View resolver for html pages. It handles web pages, mail preview pages from classpath, yada snippets from classpath
 	 * @return
@@ -472,7 +491,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		viewResolver.setOrder(20);
 		viewResolver.setViewNames(new String[] { "*" });
 		// Default is "true": caching is enabled. Disable this only for debugging and development.
-		viewResolver.setCache(config.isProductionEnvironment()); 
+		viewResolver.setCache(config.isProductionEnvironment());
 		return viewResolver;
 	}
 }

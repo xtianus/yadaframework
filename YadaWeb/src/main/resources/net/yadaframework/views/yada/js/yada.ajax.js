@@ -500,7 +500,7 @@
 		var joinedHandler = function(responseText, responseHtml) {
 			showFeedbackIfNeeded($element);
 			deleteOnSuccess($element);
-			updateOnSuccess($element, responseHtml);
+			responseHtml = updateOnSuccess($element, responseHtml);
 			var handlerNames = $element.attr("data-yadaSuccessHandler");
 			if (handlerNames===undefined) {
 				handlerNames = $element.attr("data-successHandler"); // Legacy
@@ -612,38 +612,53 @@
 	/**
 	 * 
 	 * @param $element the link or the form
-	 * @param responseHtml
-	 * @returns true if the "data-yadaUpdateOnSuccess" was present
+	 * @param responseHtml jquery object received from the ajax call
+	 * @returns the jQuery HTML that has been added to the page, which will be a clone 
+	 *		    of responseHtml or the original responseHtml when no update has been made.
+	 *		    In case of multiple replacements, an array will be returned.
 	 */
 	function updateOnSuccess($element, responseHtml) {
 		// If "yadaUpdateOnSuccess" is set, replace its target; if it's empty, replace the original link.
 		// The target can be a parent when the css selector starts with parentSelector (currently "yadaParents:").
 		// The selector can be multiple, separated by comma. The replacement can be multiple, identified by yadaFragment
 		var updateSelector = $element.attr("data-yadaUpdateOnSuccess");
-		if (updateSelector != null) {
-			// Clone so that the original responseHtml is not removed by replaceWith.
-			// All handlers are also cloned.
-			var $replacement = responseHtml.children().clone(true, true); // Uso .children() per skippare il primo div inserito da yada.ajax()
-			var selectors = updateSelector.split(',');
-			var $replacementArray = null;
-			if (selectors.length>1) {
-				// yadaFragment is used only when there is more than one selector, otherwise the whole result is used for replacement
-				$replacementArray = $(".yadaFragment", responseHtml);
-				if ($replacementArray.length==0) {
-					$replacementArray = $("._yadaReplacement_", responseHtml); // Legacy
-				}
+		if (updateSelector == null) {
+			return responseHtml;
+		}
+		// Clone so that the original responseHtml is not removed by replaceWith.
+		// All handlers are also cloned.
+		var $replacement = responseHtml.children().clone(true, true); // Uso .children() per skippare il primo div inserito da yada.ajax()
+		var $return = $replacement;
+		var selectors = updateSelector.split(',');
+		var $replacementArray = null;
+		if (selectors.length>1) {
+			// yadaFragment is used only when there is more than one selector, otherwise the whole result is used for replacement
+			$replacementArray = $(".yadaFragment", responseHtml);
+			if ($replacementArray.length==0) {
+				$replacementArray = $("._yadaReplacement_", responseHtml); // Legacy
 			}
-			var fragmentCount = 0;
-			for (var count=0; count<selectors.length; count++) {
-				var selector = selectors[count];
-				if ($replacementArray!=null && $replacementArray.length>0) {
-					// Clone so that the original responseHtml is not removed by replaceWith.
-					// All handlers are also cloned.
-					$replacement = $replacementArray.eq(fragmentCount).clone(true, true);
-					// When there are more selectors than fragments, fragments are cycled from the first one
-					fragmentCount = (fragmentCount+1) % $replacementArray.length;
+		}
+		if ($replacementArray!=null && $replacementArray.length>1) {
+			$return = [];
+		}
+		var fragmentCount = 0;
+		for (var count=0; count<selectors.length; count++) {
+			var selector = selectors[count];
+			if ($replacementArray!=null && $replacementArray.length>0) {
+				// Clone so that the original responseHtml is not removed by replaceWith.
+				// All handlers are also cloned.
+				$replacement = $replacementArray.eq(fragmentCount).clone(true, true);
+				if (count==0 && $replacementArray.length==1) {
+					$return = $replacement;
+				} else {
+					$return.push($replacement);
 				}
-				yada.extendedSelect($element, selector).replaceWith($replacement);
+				// When there are more selectors than fragments, fragments are cycled from the first one
+				fragmentCount = (fragmentCount+1) % $replacementArray.length;
+			}
+			yada.extendedSelect($element, selector).replaceWith($replacement);
+		}
+		return $return;
 
 //				if (selector == "") {
 //					// 
@@ -667,12 +682,8 @@
 //						$element.closest(splitSelector[0]).find(splitSelector[1]).replaceWith($replacement);
 //					}
 //				}
-				// Not needed  because handlers are initialized before entering this method, then cloned
-				// yada.initHandlersOn($replacement);
-			}
-			return true;
-		}
-		return false;
+			// Not needed  because handlers are initialized before entering this method, then cloned
+			// yada.initHandlersOn($replacement);
 	}
 	
 	/**
@@ -954,9 +965,10 @@
 				if (!deleted) {
 					deleteOnSuccess($form);
 				}
-				var updated = updateOnSuccess($(localClickedButton), responseHtml);
-				if (!updated) {
-					updateOnSuccess($form, responseHtml);
+				if ($(localClickedButton).attr("data-yadaUpdateOnSuccess")!=null) {
+					responseHtml = updateOnSuccess($(localClickedButton), responseHtml);
+				} else {
+					responseHtml = updateOnSuccess($form, responseHtml);
 				}
 				var formHandlerNames = $form.attr("data-yadaSuccessHandler");
 				if (formHandlerNames===undefined) {
@@ -1470,5 +1482,70 @@
 		return result;
 	}
 
+	/**
+	 * Used by <yada:input> to implement the suggestion list
+	 * @param event the onkeyup KeyboardEvent
+	 */		
+	yada.suggestionList = function(event) {
+		const input = event.target;
+		const $input = $(input);
+		const inputValue = $.trim(input.value);
+		const addElementUrl = $input.attr("data-yadaSuggestionAddUrl");
+		const suggestionUrl = $input.attr("data-yadaSuggestionListUrl");
+		const suggestionReplace = $input.attr("data-yadaUpdateOnSuccess");
+		const key = event.key; // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
+
+		const addSuggestedElement = function(responseText, $responseHtml) {
+			yada.extendedSelect($input, suggestionReplace).replaceWith($responseHtml); 
+			$responseHtml.find("input").focus(); // This may not always be correct
+		}
+		
+		// When newline, space, comma, cursor up/down/right are pressed, make the call to create a new element
+		if (inputValue!="" && inputValue!="#" && (key=="Enter" || key==" " || key=="," || key=="ArrowRight" || key=="ArrowUp")) {
+			const remoteUrl = addElementUrl + '&value=' + encodeURIComponent(inputValue); 
+			yada.ajax(remoteUrl, null, addSuggestedElement, null, null, false);
+			input.value="";
+			input.dispatchEvent(new Event('input')); // Resets the counter
+			event.preventDefault();
+			return false;
+		}
+		
+		// Arrow down moves to the suggestion list
+		if (key=="ArrowDown") {
+			// Move the focus to the suggestion list if any
+			const $suggestionList = $(input).closest(".dropdown").find(".jsSuggestionList:visible");
+			if ($("a", $suggestionList).length>0) {
+				$("a", $suggestionList).get(0).focus();
+			}
+			return;
+		}
+		
+		// Otherwise, show the suggestion list
+		const data = {
+			prefix: inputValue
+		} 
+		const $dropdown = $input.closest(".dropdown");
+		yada.ajax(suggestionUrl, data, function(responseText, responseHtml){
+			const $newSuggestionList = responseHtml.find(".jsSuggestionList");
+			$dropdown.find(".jsSuggestionList").replaceWith($newSuggestionList); 
+			$("a", $newSuggestionList).click(function() {
+				// Insert into the input field the suggested text when clicked
+				const clickedValue = $(this).text();
+				$input.val(clickedValue);
+				// Trigger a keyup event so that any char counter is changed
+				var e = jQuery.Event("keyup");
+				e.key = "Enter"
+				$input.trigger(e); 
+			});
+			// Show or hide the suggestions if there are some or none
+			const $toggler = $dropdown.find("div[data-bs-toggle=dropdown]");
+			const dropdownApi = new bootstrap.Dropdown($toggler[0]);
+			if ($("a", $newSuggestionList).length>0) {
+				dropdownApi.show();
+			} else {
+				dropdownApi.hide();
+			}
+		}, null, null, true);
+	}
 
 }( window.yada = window.yada || {} ));

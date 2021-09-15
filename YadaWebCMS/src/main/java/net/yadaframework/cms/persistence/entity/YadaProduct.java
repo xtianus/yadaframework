@@ -2,6 +2,7 @@ package net.yadaframework.cms.persistence.entity;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -92,14 +93,14 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 		name="YadaProduct_categories",
 		uniqueConstraints = @UniqueConstraint(columnNames={"YadaProduct_id", "categories_id"})
 	)
-	protected List<YadaPersistentEnum<?>> categories;
+	protected List<YadaPersistentEnum<?>> categories = new ArrayList<>();
 
 	@ManyToMany
 	@JoinTable(
 		name="YadaProduct_subcategories",
 		uniqueConstraints = @UniqueConstraint(columnNames={"YadaProduct_id", "subcategories_id"})
 	)
-	protected List<YadaPersistentEnum<?>> subcategories;
+	protected List<YadaPersistentEnum<?>> subcategories = new ArrayList<>();
 
 	/**
 	 * true if the YadaProduct is an accessory
@@ -108,13 +109,13 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 
 	@ManyToMany
 	@JoinTable(name="YadaProduct_accessories")
-	protected List<YadaProduct> accessories;
+	protected List<YadaProduct> accessories = new ArrayList<>();
 
 	@ManyToMany(mappedBy="accessories")
-	protected List<YadaProduct> accessoryOf;
+	protected List<YadaProduct> accessoryOf = new ArrayList<>();
 
 	@OneToMany(mappedBy="product")
-	protected List<YadaArticle> articles; // The version of a product with a specific color, size, etc.
+	protected List<YadaArticle> articles = new ArrayList<>(); // The version of a product with a specific color, size, etc.
 
 	protected boolean published;
 
@@ -122,13 +123,13 @@ public class YadaProduct implements CloneableFiltered, Serializable {
 	@OneToMany // (cascade=CascadeType.REMOVE, orphanRemoval=true)
 	@JoinTable(name="YadaProduct_galleryImages")
 	@OrderBy("sortOrder")
-	protected List<YadaAttachedFile> galleryImages;
+	protected List<YadaAttachedFile> galleryImages = new ArrayList<>();
 
 	// A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance
 	@OneToMany // (cascade=CascadeType.REMOVE, orphanRemoval=true)
 	@JoinTable(name="YadaProduct_attachments")
 	@OrderBy("sortOrder")
-	protected List<YadaAttachedFile> attachments;
+	protected List<YadaAttachedFile> attachments = new ArrayList<>();
 
 	/**
 	 * The main image to show in lists etc. (for example a thumbnail)

@@ -80,22 +80,23 @@ public class YadaFileManagerDao {
 		deleteStale(); // Cleanup
 		String originalFilename = multipartFile.getOriginalFilename();
 		long size = multipartFile.getSize();
-		Path uploadPath = config.getUploadsFolder().toPath();
-		Path targetFilePath = uploadedFile.toPath();
-		Path relativeFolderPath = uploadPath.relativize(targetFilePath).getParent(); // Can be null
+		// Path uploadPath = config.getUploadsFolder().toPath();
+		String relativeFolderPath = yadaUtil.relativize(config.getBasePath(), uploadedFile.getParentFile().toPath());
+		// Path relativeFolderPath = .relativize(uploadedFile.toPath()).getParent(); // Can be null
 		YadaIntDimension dimension = yadaUtil.getImageDimension(uploadedFile);
 		//
 		YadaManagedFile yadaManagedFile = new YadaManagedFile();
     	yadaManagedFile.setClientFilename(originalFilename);
     	yadaManagedFile.setDescription(description);
     	yadaManagedFile.setFilename(uploadedFile.getName());
-    	yadaManagedFile.setRelativeFolderPath(relativeFolderPath!=null?relativeFolderPath.toString():null);
+    	yadaManagedFile.setRelativeFolderPath(relativeFolderPath);
     	yadaManagedFile.setUploadTimestamp(new Date());
     	yadaManagedFile.setDimension(dimension);
     	yadaManagedFile.setSizeInBytes(size);
     	em.persist(yadaManagedFile);
+    	yadaUtil.autowire(yadaManagedFile);
     	return yadaManagedFile;
     }
-
+	
 
 }

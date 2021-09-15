@@ -38,7 +38,12 @@ It is used internally by the yada dialect processor to render the <yada:input> t
 				$(document).ready(function() {
 					const inputCounterId = /*[[${inputCounterId}]]*/ 0;
 					const yadaTagId = /*[[${yadaTagId}]]*/ 0;
+					const suggestion = /*[[${suggestion}]]*/ false;
 					yada.updateInputCounter($("input[data-yadaTagId="+yadaTagId+"]"), $("#"+inputCounterId));
+					if (suggestion==true) {
+						// Show suggestion list on user input
+						$("input[data-yadaTagId="+yadaTagId+"]").on("keyup", yada.suggestionList);
+					}
 				});
 			</script>
 		</div>

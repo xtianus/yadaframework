@@ -5,7 +5,7 @@ buildscript {
 	}
 	dependencies {
 		// Needed for test schema creation
-		classpath 'net.yadaframework:yadatools:0.6.9'
+		classpath 'net.yadaframework:yadatools:0.7.2'
 		// classpath 'kr.motd.gradle:sphinx-gradle-plugin:2.2.0'
 	}                    
 }
@@ -93,6 +93,7 @@ dependencies {
 		'org.seleniumhq.selenium:selenium-support:3.8.+',
 		'org.seleniumhq.selenium:selenium-firefox-driver:3.8.+',
 		'org.seleniumhq.selenium:selenium-chrome-driver:3.8.+',
+		'com.drewnoakes:metadata-extractor:2.16.0',
 		// 'org.littleshoot:littleproxy:1.1.2',
 		// 'org.quartz-scheduler:quartz:2.2.3',
 		'org.flywaydb:flyway-core:5.0.5',

@@ -1,5 +1,6 @@
 package net.yadaframework.web;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -7,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import net.yadaframework.components.YadaFileManager;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
@@ -26,6 +28,7 @@ public class YadaCropQueue {
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private YadaFileManagerDao yadaFileManagerDao;
 	@Autowired private YadaAttachedFileDao yadaAttachedFileDao;
+	@Autowired private YadaFileManager yadaFileManager;
 	// private @Autowired YadaConfiguration config;
 
 
@@ -106,6 +109,7 @@ public class YadaCropQueue {
 	 * @param targetDimensions desktop and mobile target dimensions, use null when a crop is not needed for some dimension
 	 * @param targetRelativeFolder Folder where to place cropped images, relative to the contents folder
 	 * @param targetNamePrefix Prefix to use for the target file, can be empty or null
+	 * @throws IOException 
 	 */
 	public YadaCropImage addCropImage(YadaManagedFile imageToCrop, YadaIntDimension[] targetDimensions, String targetRelativeFolder, String targetNamePrefix) {
 		if (this.cropImages==null) {
@@ -114,7 +118,7 @@ public class YadaCropQueue {
 		if (targetDimensions == null || targetDimensions.length<3) {
 			throw new YadaInvalidUsageException("Please call YadaCropQueue.addCropImage() with a targetDimensions array of three elements that can be null");
 		}
-		YadaCropImage yadaCropImage = new YadaCropImage(imageToCrop, targetDimensions, targetRelativeFolder, targetNamePrefix);
+		YadaCropImage yadaCropImage = new YadaCropImage(yadaFileManager, imageToCrop, targetDimensions, targetRelativeFolder, targetNamePrefix);
 		yadaCropImage = (YadaCropImage) yadaUtil.autowireAndInitialize(yadaCropImage);
 		this.cropImages.add(yadaCropImage);
 		return yadaCropImage;

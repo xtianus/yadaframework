@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
@@ -61,6 +62,7 @@ import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.web.YadaPageRequest;
 
+@Lazy // Lazy because used in YadaCmsConfiguration, and it woud give a circular refecence exception otherwise
 @Service
 public class YadaWebUtil {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
@@ -343,6 +345,17 @@ public class YadaWebUtil {
 		//		try (InputStream inputStream = attachment.getInputStream(); OutputStream outputStream = new FileOutputStream(targetFile)) {
 		//			IOUtils.copy(inputStream, outputStream);
 		//		}
+	}
+	
+	/**
+	 * Assembles a url given its parts as string.
+	 * @param segments the initial parts of the url up to the query string. Leading and trailing slashes are added when missing.
+	 * URLEncoding is not performed.
+	 * @return
+	 * @see #makeUrl(String[], Map, Boolean)
+	 */
+	public String makeUrl(String...segments) {
+		return makeUrl(segments, null, null);
 	}
 	
 	/**
