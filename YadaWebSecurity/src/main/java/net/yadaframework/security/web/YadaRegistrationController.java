@@ -36,6 +36,7 @@ import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.security.persistence.repository.YadaRegistrationRequestDao;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 import net.yadaframework.security.persistence.repository.YadaUserProfileDao;
+import net.yadaframework.web.YadaViews;
 import net.yadaframework.web.form.YadaFormPasswordChange;
 
 @Controller
@@ -44,14 +45,12 @@ public class YadaRegistrationController {
 
 	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired private YadaUserProfileDao yadaUserProfileDao;
-	@Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaSecurityUtil yadaSecurityUtil;
 	@Autowired private YadaRegistrationRequestDao yadaRegistrationRequestDao;
 	@Autowired private YadaSecurityEmailService yadaSecurityEmailService;
 	@Autowired private YadaTokenHandler yadaTokenHandler;
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	@Autowired private YadaConfiguration yadaConfiguration;
-	@Autowired private MessageSource messageSource;
 	@Autowired private YadaNotify yadaNotify;
 
 	// For some reason, autowiring of the "passwordEncoder" created by YadaSecurityConfig doesn't work: bean is not found
@@ -245,14 +244,14 @@ public class YadaRegistrationController {
 		boolean done = yadaSecurityUtil.performPasswordChange(yadaFormPasswordChange);
 		if (done) {
 			log.info("Password changed for user '{}'", yadaFormPasswordChange.getUsername());
-			yadaNotify.title("Password Changed", model).ok().message("Your password has been changed").add();
+			yadaNotify.titleKey(model, locale, "yada.pwdreset.done.title").ok().messageKey("yada.pwdreset.done.message").add();
 			model.addAttribute("pwdChangeOk", "pwdChangeOk");
 		} else {
 			log.error("Password change failed for user '{}'", yadaFormPasswordChange.getUsername());
 			model.addAttribute("fatalError", "fatalError");
-			yadaNotify.title("Password change failed", model).ok().message("An error occurred while changing the password. Please try again and contact us if the problem persists").add();
+			yadaNotify.titleKey(model, locale, "yada.pwdreset.failed.title").error().messageKey("yada.pwdreset.failed.message").add();
 		}
-		return "/yada/modalPasswordChange";
+		return YadaViews.AJAX_NOTIFY;
 	}
 
 	/**
@@ -268,29 +267,21 @@ public class YadaRegistrationController {
 
 	/** To be called in the controller that handles the password recovery link in the email.
 	 * It creates these model attributes: username, token, dialogType=passwordRecovery
-	 * @return false for an invalid request, true if valid
+	 * @return false for an invalid request (link expired), true if valid
 	 */
 	public boolean passwordResetForm(String token, Model model, RedirectAttributes redirectAttributes) {
 		long[] parts = yadaTokenHandler.parseLink(token);
-		try {
-			if (parts!=null) {
-				List<YadaRegistrationRequest> registrationRequests = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]);
-				if (registrationRequests.isEmpty()) {
-					// TODO remove this message, the caller should add its own
-					yadaWebUtil.modalError("Password change failed", "The link for password change is expired. Please repeat the change request from the start.", redirectAttributes);
-					return false;
-				}
-				YadaRegistrationRequest registrationRequest = registrationRequests.get(0);
-				model.addAttribute("username", registrationRequest.getEmail());
-				model.addAttribute("token", token);
-				model.addAttribute("dialogType", "passwordRecovery");
-				return true;
+		if (parts!=null) {
+			List<YadaRegistrationRequest> registrationRequests = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]);
+			if (registrationRequests.isEmpty()) {
+				return false;
 			}
-		} catch (Exception e) {
-			log.debug("Recupero Password Fallito", e);
+			YadaRegistrationRequest registrationRequest = registrationRequests.get(0);
+			model.addAttribute("username", registrationRequest.getEmail());
+			model.addAttribute("token", token);
+			model.addAttribute("dialogType", "passwordRecovery");
+			return true;
 		}
-		// TODO remove this message, the caller should add its own
-		yadaWebUtil.modalError("Password change failed", "An error occurred while changing the password. Please try again and contact us if the problem persists.", redirectAttributes);
 		return false;
 	}
 

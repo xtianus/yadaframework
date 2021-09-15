@@ -13,10 +13,13 @@ import net.yadaframework.components.YadaNotify;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaLocalePathChangeInterceptor;
+import net.yadaframework.security.components.YadaSecurityUtil;
+import net.yadaframework.web.YadaViews;
 
 @Controller
 public class HomeController {
 	@Autowired YadaWebUtil yadaWebUtil;
+	@Autowired YadaSecurityUtil yadaSecurityUtil;
 	@Autowired YadaNotify yadaNotify;
 	@Autowired YadaConfiguration config;
 
@@ -30,23 +33,41 @@ public class HomeController {
 	}
 
 	@RequestMapping("/")
-	public String home(HttpServletRequest request, Locale locale) {
+	public String home(HttpServletRequest request, Model model, Locale locale) {
 		// You get here either when the url is just "/" or when it is "en/" with localepath configured.
 		// We need to insert the locale path when missing
 		// NOTE: any 404 NOT FOUND error opens the home page and gets here too.
-		if (!config.isLocalePathVariableEnabled() || YadaLocalePathChangeInterceptor.localePathRequested(request)) {
-			// Either the locale is not in the path or it has been set already
+		if (!config.isLocalePathVariableEnabled() || YadaLocalePathChangeInterceptor.localePathRequested(request) || model.containsAttribute("login")) {
+			// Should normally get here
 			return "/home";
 		}
-		// Set the locale explicitly
+		// The locale is missing so set it explicitly
 		return yadaWebUtil.redirectString("/", locale); // Moved temporarily
 	}
 	
 	// The login page is the home page with an attribute set
 	@RequestMapping("/login")
-	public String login(Model model) {
-		model.addAttribute("login", "login");
-		return "/home";
+	public String login(HttpServletRequest request, Model model, Locale locale) {
+		if (config.isLocalePathVariableEnabled() && !YadaLocalePathChangeInterceptor.localePathRequested(request)) {
+			// Spring security redirects to /login without the language, so we need to redirect to the language version, for consistency
+			return yadaWebUtil.redirectString("/login", locale); // Moved temporarily
+		}
+		
+		boolean loggedIn = yadaSecurityUtil.isLoggedIn();
+		if (!yadaWebUtil.isAjaxRequest()) {
+			// Normal request
+			if (!loggedIn) {
+				model.addAttribute("login", "login");
+			}
+			return home(request, model, locale);
+		} else {
+			// Ajax request
+			if (!loggedIn) {
+				return "/modalLogin";
+			} else {
+				return YadaViews.AJAX_SUCCESS; // Do nothing
+			}
+		}
 	}
 	
 

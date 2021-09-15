@@ -102,6 +102,10 @@
     cursor: pointer;
 }
 
+.yadaHelpButton.input-group-text {
+	margin-right: 0;
+}
+
 a.yadaHelpButton:focus {
 	outline: none;
 }
@@ -474,4 +478,21 @@ input.yadaSwitch-round:checked ~ label:after {
 }
 #yadaCookieBanner a {
 	color: white;
+}
+
+.yadaInputCounter {
+	font-size: 0.7em;
+	display: flex;
+	align-items: flex-end;
+}
+.yadaInputCounter span:first-child {
+	margin-right: 0.4em;
+}
+.yadaInputCounter span:first-child:after {
+	content: "/";
+	margin-left: 0.4em;
+}
+
+.yadaInputNumber {
+	text-align: end;
 }

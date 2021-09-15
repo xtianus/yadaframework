@@ -26,18 +26,18 @@ import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.web.YadaPageRequest;
 
 /**
- * YadaUserCredentials database operations. 
+ * YadaUserCredentials database operations.
  * Converted from YadaUserCredentialsRepository before deleting it.
  */
 @Repository
-@Transactional(readOnly = true) 
+@Transactional(readOnly = true)
 public class YadaUserCredentialsDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
     @PersistenceContext private EntityManager em;
-    
+
 	@Autowired private PasswordEncoder encoder;
-    
+
 	/**
 	 * Change the password
 	 * @param yadaUserCredentials
@@ -50,7 +50,7 @@ public class YadaUserCredentialsDao {
 		yadaUserCredentials.changePassword(password, encoder);
 		return yadaUserCredentials;
 	}
-	
+
 	/**
 	 * Creates a user when it doesn't exists, using the configured attributes.
 	 * The user class must extend YadaUserProfile and implement the getter/setter of all attributes specified in the configuration and not already implemented
@@ -73,10 +73,10 @@ public class YadaUserCredentialsDao {
 		&lt;/setup>
 		</pre>
 	 * @param userDefinition
-	 * @return
+	 * @return the created user if it didn't exist already, null otherwise
 	 */
-    @Transactional(readOnly = false) 
-    public <T extends YadaUserProfile> void create(Map<String, Object> userDefinition, Class<T> userProfileClass) {
+    @Transactional(readOnly = false)
+    public <T extends YadaUserProfile> T create(Map<String, Object> userDefinition, Class<T> userProfileClass) {
 		// The map is a key-value pair of user attributes except "roles" which is a list of role ids
 		String email = (String) userDefinition.get("email");
 		String password = (String) userDefinition.get("password");
@@ -125,15 +125,17 @@ public class YadaUserCredentialsDao {
 							log.error("Can't set attribute '{}' on {} (skipped)", key, userProfileClass, e);
 						}
 					}
-					
+
 				}
+				return userProfile;
 			} catch (InstantiationException | IllegalAccessException e1) {
 				log.error("Failed to setup user of type {}", userProfileClass, e1);
 				throw new YadaInvalidUsageException("Invalid user type {}", userProfileClass);
 			}
 		}
-    }	
-	
+		return null;
+    }
+
 	/**
 	 * Create a new YadaUserCredentials object that holds login information for the user
 	 * @param username
@@ -142,7 +144,7 @@ public class YadaUserCredentialsDao {
 	 * @param timezone
 	 * @return
 	 */
-    @Transactional(readOnly = false) 
+    @Transactional(readOnly = false)
     public YadaUserCredentials create(String username, String password, Set<Integer> roles) {
 		YadaUserCredentials userCredentials = new YadaUserCredentials();
 		em.persist(userCredentials);
@@ -228,7 +230,7 @@ public class YadaUserCredentialsDao {
 	 * Updates the login timestamp of the user
 	 * @param username
 	 */
-	@Transactional(readOnly = false) 
+	@Transactional(readOnly = false)
 	public void updateLoginTimestamp(String username) {
 		String sql = "update YadaUserCredentials e set e.lastSuccessfulLogin = NOW() where e.username = :username";
 		em.createQuery(sql).setParameter("username", username).executeUpdate();
@@ -238,7 +240,7 @@ public class YadaUserCredentialsDao {
 	 * Updates the login failed attempts counter for the user
 	 * @param username
 	 */
-	@Transactional(readOnly = false) 
+	@Transactional(readOnly = false)
 	public void incrementFailedAttempts(String username) {
 		String sql = "update YadaUserCredentials e set e.failedAttempts = e.failedAttempts + 1, e.lastFailedAttempt = NOW() where e.username = :username";
 		em.createQuery(sql).setParameter("username", username).executeUpdate();
@@ -248,7 +250,7 @@ public class YadaUserCredentialsDao {
 	 * Resets the login failed attempts counter for the user
 	 * @param username
 	 */
-	@Transactional(readOnly = false) 
+	@Transactional(readOnly = false)
 	public void resetFailedAttempts(String username) {
 		String sql = "update YadaUserCredentials e set e.failedAttempts = 0, e.lastFailedAttempt = null where e.username = :username";
 		em.createQuery(sql).setParameter("username", username).executeUpdate();
@@ -261,11 +263,11 @@ public class YadaUserCredentialsDao {
 	 * @see #create(String, String, Set)
 	 */
 	@Deprecated
-	@Transactional(readOnly = false) 
+	@Transactional(readOnly = false)
 	public void save(YadaUserCredentials userCredentials) {
 		userCredentials = em.merge(userCredentials);
 	}
-	
+
     /**
      * For backwards compatibility, returns null when no result is found
      * @param resultList
@@ -279,5 +281,5 @@ public class YadaUserCredentialsDao {
 			return resultList.get(0);
 		}
     }
-	
+
 }

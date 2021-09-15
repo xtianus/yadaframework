@@ -7,18 +7,23 @@
 	<meta charset="utf-8" />
 </head>
 <body>
-<!--/* 
-	Questo layout è per un modal generico composto da titolo e contenuto che viene usato come ajaxModal.
-	Il primo div qui sotto con classe "modal" viene in realtà ignorato in quanto il chiamante utilizza l'ajaxModal di mainLayout.html
+<!--/*
+	 * This is a generic template for a bootstrap modal with title and body, to be returned via ajax.
+	 * @param title modal-title text. Not used when header is specified
+	 * @param header optional custom modal-header
+	 * @param body modal-body
+	 * @param footer optional custom modal-footer
+	 * @param script optional script
+	 * @param extraDialogClasses any classes to be added to the modal-dialog
  */-->
-<div th:fragment="fragment(title,header,body,footer,script,extraDialogClasses)" 
-	class="modal fade" tabindex="-1" role="dialog" aria-labelledby="ajaxModalTitle" aria-hidden="true"> <!--/* Il primo div è ignorato */-->
-	<div id="modalGenericDialog" class="modal-dialog" th:classappend="${extraDialogClasses}" role="document">
+<div th:fragment="fragment(title,header,body,footer,script,extraDialogClasses)" th:with="titleId='t'+${#strings.randomAlphanumeric(16)}"
+	class="modal fade" tabindex="-1" role="dialog" th:aria-labelledby="${titleId}" aria-hidden="true">
+	<div class="modal-dialog" th:classappend="${extraDialogClasses}" role="document">
     	<div class="modal-content">
     		<div th:replace="${header}">
 	    		<div class="modal-header">
-	    			<h4 class="modal-title" id="ajaxModalTitle"><span th:replace="${title}"></span></h4>
-	    			<button type="button" class="close" data-dismiss="modal" aria-hidden="true" ><i class="yadaIcon yadaIcon-close"></i></button>
+	    			<h4 class="modal-title" th:id="${titleId}"><span th:replace="${title}"></span></h4>
+	    			<button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true" ><i class="yadaIcon yadaIcon-close"></i></button>
 	   			</div>
     		</div>
      		<div th:replace="${body}">
@@ -27,7 +32,7 @@
  			</div>
  			<div th:replace="${footer}">
 	   			<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal" th:text="#{yada.view.modal.button.close}">Close</button>
+					<button type="button" class="btn btn-default" data-bs-dismiss="modal" th:text="#{yada.view.modal.button.close}">Close</button>
 	   			</div>
  			</div>   		
   		</div>

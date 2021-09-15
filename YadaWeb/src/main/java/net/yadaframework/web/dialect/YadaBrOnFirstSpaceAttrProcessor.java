@@ -1,5 +1,7 @@
 package net.yadaframework.web.dialect;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.engine.AttributeName;
@@ -17,7 +19,9 @@ import org.unbescape.html.HtmlEscape;
  * Also yada:ubrspace to not escape text.
  */
 public class YadaBrOnFirstSpaceAttrProcessor extends AbstractAttributeTagProcessor {
-	public static final int ATTR_PRECEDENCE = 9000;
+	private final Logger log = LoggerFactory.getLogger(getClass());
+
+	public static final int ATTR_PRECEDENCE = 10000;
     public static final String ATTR_NAME = "brspace"; // becomes ubrspace to not escape text
     private boolean escapeText = true;
 

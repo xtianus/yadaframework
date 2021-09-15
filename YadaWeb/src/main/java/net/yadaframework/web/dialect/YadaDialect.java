@@ -19,18 +19,14 @@ public class YadaDialect extends AbstractProcessorDialect {
 	 * @param config
 	 */
 	public YadaDialect(YadaConfiguration config) {
-        // We will set this dialect the same "dialect processor" precedence as
-        // the Standard Dialect, so that processor executions can interleave.
-		super("Yada Dialect", "yada", StandardDialect.PROCESSOR_PRECEDENCE);
+		// The precedence is higher than the standard "th:" dialect so that th: attributes are processed before.
+		// The only th: tag that doesn't work is th:field because it checks which tag it's being used on
+		// and skips all custom tags.
+		super("Yada Dialect", YadaDialectUtil.YADA_PREFIX, StandardDialect.PROCESSOR_PRECEDENCE+1);
 		this.config = config;
 	}
 
-//	@Override
-//	public String getPrefix() {
-//		return "yada";
-//	}
-
-	 @Override
+	@Override
     public Set<IProcessor> getProcessors(final String dialectPrefix) {
         final Set<IProcessor> processors = new HashSet<>();
         processors.add(new YadaHrefAttrProcessor(dialectPrefix, config));
@@ -50,6 +46,8 @@ public class YadaDialect extends AbstractProcessorDialect {
         processors.add(new YadaNewlineTextAttrProcessor(dialectPrefix, true));	// newlinetext
         processors.add(new YadaBrOnFirstSpaceAttrProcessor(dialectPrefix, false));	// ubrspace
         processors.add(new YadaBrOnFirstSpaceAttrProcessor(dialectPrefix, true));	// brspace
+        processors.add(new YadaInputTagProcessor(dialectPrefix, config));	// yada:input
+        processors.add(new YadaInputCounterTagProcessor(dialectPrefix, config));	// yada:inputCounter
         // TODO move YadaActionUploadAttrProcessor to a yada security dialect
         // processors.add(new YadaActionUploadAttrProcessor(dialectPrefix));
         // Rimuove lo yada:xxx namespace dal tag <html>

@@ -27,12 +27,12 @@ import net.yadaframework.security.persistence.entity.YadaUserProfile;
 @Entity
 public class YadaOrder implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(insertable = false, updatable = false, columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified;
-	
+
 	// For optimistic locking
 	@Version
 	protected long version;
@@ -40,31 +40,31 @@ public class YadaOrder implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
-	
+
 	@ManyToOne
 	protected YadaUserProfile owner;
-	
+
 	@OneToOne(fetch = FetchType.EAGER)
 	protected YadaPersistentEnum<YadaOrderStatus> orderStatus;
-	
+
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date creationTimestamp;
-	
+
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date stateChangeTimestamp;
-	
+
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date shippingTimestamp;
-	
+
 	@Column(length=512)
 	protected String trackingData;
-	
+
 	@Column(length=2048)
 	protected String notes;
-	
+
 	@Convert(converter = YadaMoneyConverter.class)
 	protected YadaMoney totalPrice;
-	
+
 	@OneToMany(mappedBy="order", cascade=CascadeType.ALL, orphanRemoval=true)
 	protected List<YadaOrderItem> orderItems;
 

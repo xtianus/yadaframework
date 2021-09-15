@@ -44,7 +44,7 @@ import net.yadaframework.web.YadaJsonView;
 /**
  * A message sent to some user by another user or by the system.
  * Identical consecutive messages can be "stacked" on a single row by incrementing the "stackSize" and adding a new "created" date
- * 
+ *
  * @param <E> a localized enum for the message type
  */
 @Entity
@@ -55,21 +55,21 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	@Version
 	protected long version; // For optimistic locking
-	
+
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
-	
+
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int priority; // Priority or severity, 0 is lowest
-	
+
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected boolean readByRecipient = false; // Read by recipient
-	
+
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected boolean emailed = false; // Emailed to recipient
-	
+
 	@ElementCollection
 	@Temporal(TemporalType.TIMESTAMP)
 	//@JsonView(YadaJsonView.WithEagerAttributes.class)
@@ -77,10 +77,10 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	protected List<Date> created; // Creation date of the message, a new date is added for each stacked message
 
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
-	@Column(columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP")
+	@Column(insertable = false, updatable = false, columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified = new Date();
-	
+
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int stackSize = 0; // Counter for identical messages (stacked)
 
@@ -91,31 +91,31 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	@Column(length=80)
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected String title;
-	
+
 	@Column(length=12000) // Should it be Lob?
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected String message;
-	
+
 	@ManyToOne(optional = true)
 	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	protected YadaUserProfile sender;
-	
+
 	@ManyToOne(optional = true)
 	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	protected YadaUserProfile recipient;
-	
+
 	//@JsonView(YadaJsonView.WithLazyAttributes.class)
 	@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true) // It was REMOVE - why?
 	protected List<YadaAttachedFile> attachment = new ArrayList<>();
-	
+
 	@Column(length=1024)
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected String data; // Can store a url here, or the identity of a non-user sender
-	
+
 	protected int contentHash; // To check message equality for stackability
-	
+
 	@Transient
-	protected boolean stackable; // true if same-content messages should be counted not added 
+	protected boolean stackable; // true if same-content messages should be counted not added
 
 	/**
 	 * Used in Datatables to define the row class.
@@ -138,11 +138,11 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 		computeHash();
 		setInitialDate();
 	}
-	
+
 	/**
 	 * Escape all markup-significant characters
 	 * @param message
-	 * @return 
+	 * @return
 	 * @return the current instance
 	 */
 	@Transient
@@ -150,7 +150,7 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 		this.message = HtmlEscape.escapeHtml5Xml(message);
 		return this;
 	}
-	
+
 	public void computeHash() {
 		if (type==null) {
 			Type missingEnum = null;
@@ -171,19 +171,19 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 			created.add(new Date());
 		}
 	}
-	
+
 	public void incrementStack() {
 		this.stackSize++;
 		this.created.add(new Date());
 	}
-	
+
 	public void setType(YadaLocalEnum<E> localEnum) {
 		this.type = localEnum.toYadaPersistentEnum();
 	}
-	
+
 	/***********************************************************************/
 	/* DataTables                                                          */
-	
+
 	@Transient
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@JsonProperty("DT_RowId")
@@ -191,7 +191,7 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	public String getDT_RowId() {
 		return this.getClass().getSimpleName()+"#"+this.id; // YadaUserMessage#142
 	}
-	
+
 	@Transient
 	@JsonProperty
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
@@ -201,21 +201,21 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 		}
 		return null;
 	}
-	
+
 	@Transient
 	@JsonProperty
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	public String getReceiverName() {
 		return recipient!=null?recipient.getUserCredentials().getUsername():"-";
 	}
-	
+
 	/** Adds a new attachment to this message
-	 * 
+	 *
 	 */
 	public void addAttachment(YadaAttachedFile newAttachment) {
 		attachment.add(newAttachment);
 	}
-	
+
 	/***********************************************************************/
 	/* Plain getter / setter                                               */
 	@JsonSerialize(using=YadaJsonDateTimeShortSerializer.class)
@@ -355,5 +355,5 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 		this.readByRecipient = readByRecipient;
 	}
 
-	
+
 }

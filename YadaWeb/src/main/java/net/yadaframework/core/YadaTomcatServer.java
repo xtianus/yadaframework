@@ -84,6 +84,7 @@ public class YadaTomcatServer {
 			String shutdownCommand = acroenv+"down";
 			tomcat.getServer().setShutdown(shutdownCommand);
 			tomcat.start();
+			log.info("Shutdown port is {}, shutdown command is '{}'", 8005, shutdownCommand);
 			log.info("Tomcat embedded server started in {} ms: ready for connections", System.currentTimeMillis() - startTime);
 			tomcat.getServer().await();
 		} catch (LifecycleException e) {

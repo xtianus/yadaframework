@@ -20,12 +20,12 @@ import net.yadaframework.persistence.YadaMoneyConverter;
 @Entity
 public class YadaOrderItem implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(insertable = false, updatable = false, columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified;
-	
+
 	// For optimistic locking
 	@Version
 	protected long version;
@@ -33,15 +33,15 @@ public class YadaOrderItem implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
-	
+
 	protected int quantity;
-	
+
 	@Convert(converter = YadaMoneyConverter.class)
 	protected YadaMoney unitPrice;
-	
+
 	// Not a reference to YadaArticle so that we can delete old articles but still have the correct code in the order item
-	protected String articleCode; 
-	
+	protected String articleCode;
+
 	@ManyToOne(optional=false)
 	protected YadaOrder order;
 

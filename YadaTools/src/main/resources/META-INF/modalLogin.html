@@ -16,7 +16,7 @@
     			<h3 class="modal-title" id="loginModalTitle">Login</h3>
     		</div>
     		<div class="modal-body">
-				<form th:action="@{/login}" role="form" method="post" id="loginForm">
+				<form th:action="@{/loginPost}" role="form" method="post" id="loginForm">
 					<fieldset>
 						<div th:if="${lockoutMinutes}" class="alert alert-danger">Too many failed attempts: login disabled.<br/>Wait <span th:text="${lockoutMinutes}">5</span> minute<span th:text="${lockoutMinutes>1?'s':''}">s</span> and retry, or <a th:href="@{/passwordReset(email=${username})}">recover your password</a> in the meantime</div>
 						<div th:if="${loginError}" class="alert alert-danger">Can't login. Please try again later and contact us if the problem persists.</div>
@@ -61,7 +61,9 @@
 		//<![CDATA[
 		    yada.loaderOff();
 		    yada.enableShowPassword();
-		    yada.openLoginModal();
+		    $(document).ready(function() {
+			    yada.openLoginModal();
+		    });
 		    
 		    $('#pwdRecoverForm a').click(function(e) {
 		    	e.preventDefault();

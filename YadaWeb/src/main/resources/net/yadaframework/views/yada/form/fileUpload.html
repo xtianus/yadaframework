@@ -44,7 +44,7 @@ Example:
 	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
 	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
 		<span th:text="${err}" th:id="${#ids.seq(seqName)}">Error Text</span>
-		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		<button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	</div>
 	<div th:if="${attachedFile!=null && !attachedFile.image}">
 		<div th:if="${attachedFile.filename!=null}">

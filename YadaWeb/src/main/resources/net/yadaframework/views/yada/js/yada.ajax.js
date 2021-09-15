@@ -12,6 +12,7 @@
 	yada.postLoginHandler = null; // Handler to run after login, if any
 	
 	var markerAjaxButtonOnly = 'yadaAjaxButtonOnly';
+	var markerAjaxModal = 'yadaAjaxModal';
 	var clickedButton;
 	
 	// WARNING: if you change this, also change it in yada.js
@@ -32,6 +33,7 @@
 		yada.enableAjaxSelects(null, $element);
 		yada.enableAjaxCheckboxes(null, $element);
 		yada.enableAjaxFragments(null, $element);
+		yada.enableAjaxInputs();
 	}
 	//////////////////////
 	/// Pagination support
@@ -364,6 +366,9 @@
 	 * @param handler a function to call upon successful link submission, can be null
 	 * @param $element the element on which to enable ajax, can be null for the entire body
 	 */
+	
+	// TODO this may conflict with yada.enableAjaxInputs and should be replaced with that one if possible
+
 	yada.enableAjaxSelects = function(handler, $element) {
 		if ($element==null || $element=="") {
 			$element = $('body');
@@ -394,8 +399,24 @@
 		$select.removeClass('yadaAjax');
 		$select.not('.'+markerClass).addClass(markerClass);
 	};
-
 	
+	yada.enableAjaxSelect = function($select, handler) {
+		// If array, recurse to unroll
+		if ($select.length>1) {
+			$select.each(function() {
+				yada.enableAjaxSelect($(this), handler);
+			});
+			return;
+		}
+		// From here on the $select is a single element, not an array
+		$select.not('.'+markerClass).change(function(e) {
+			$select = $(this); // Needed otherwise $select could be stale (from a previous ajax replacement) 
+			return makeAjaxCall(e, $select, handler);
+		})
+		$select.removeClass('yadaAjax');
+		$select.not('.'+markerClass).addClass(markerClass);
+	};
+
 	/**
 	 * Sends a link/button via ajax, it doesn't have to have class .yadaAjax.
 	 * Buttons must have a yada-href attribute and not be submit buttons.
@@ -422,6 +443,24 @@
 		$link.removeClass('yadaAjax');
 		$link.removeClass('s_ajaxLink'); // Legacy
 		$link.not('.'+markerClass).addClass(markerClass);
+	};
+
+	/**
+	 * Enables ajax calls on input fields that fire the "input" event.
+	 * There is no need to pass any element because it is always registered even on dynamically added content.
+	 */
+	yada.enableAjaxInputs = function() {
+		if (this.enableAjaxInputsDone) {
+			// Prevent binding multiple event handlers because yada.enableAjaxInputs is called after each ajax call for legacy reasons
+			return;
+		}
+		// All input fields that are either yadaAjax or data-yadaHref get handled.
+		const selector = "input.yadaAjax, input[data-yadaHref]";
+		$(document).on("input", selector, function(e) {
+			return makeAjaxCall(e, $(this), null, true);
+		});
+		this.enableAjaxInputsDone = true;
+		$(selector).addClass(markerClass); // Not really needed
 	};
 	
 	/**
@@ -450,8 +489,10 @@
 	/**
 	 * Make an ajax call when a link is clicked, a select is chosen, a checkbox is selected
 	 */
-	function makeAjaxCall(e, $element, handler) {
-		e.preventDefault();
+	function makeAjaxCall(e, $element, handler, allowDefault) {
+		if (!allowDefault==true) {
+			e.preventDefault();
+		}
 		if ($element.hasClass("yadaLinkDisabled")) {
 			return false;
 		}
@@ -488,10 +529,14 @@
 		// In a select, set the data object to the selected option
 		if ($element.is("select")) {
 			$("option:selected", $element).each(function(){ // Could be a multiselect!
-				value.push($(this).val());
+				value.push($(this).val()); // $(this) is correct here
 			});
-		} else if ($element.is("input") && $element.prop('type')=="checkbox") {
-			value.push($element.prop('checked')); // Always send the element value
+		} else if ($element.is("input")) {
+			if ($element.prop('type')=="checkbox") {
+				value.push($element.prop('checked')); // Always send the element value
+			} else {
+				value.push($element.val());
+			}
 		}
 		if (name !=null) {
 			data = {};
@@ -883,8 +928,8 @@
 				//
 				buttonName = $(clickedButton).attr("name");
 				buttonValue = $(clickedButton).attr("value") || "";
-				if (multipart && buttonName!=null && !data.has('buttonName')) {
-					data.append('buttonName', buttonValue);
+				if (multipart && buttonName!=null && !data.has(buttonName)) {
+					data.append(buttonName, buttonValue);
 				} else if (!multipart && buttonName!=null && data[buttonName]==null) {
 					data.push({name: buttonName, value: buttonValue});
 				}
@@ -1189,16 +1234,18 @@
 				// Open any other modal
 				var $loadedModalDialog=$(responseHtml).find(".modal > .modal-dialog").first();
 				if ($loadedModalDialog.length==1) {
+					$("#loginModal").remove(); // TODO still needed?
 					// A modal was returned. Is it a "sticky" modal?
 					var stickyModal = $loadedModalDialog.hasClass("yadaStickyModal");
-					$("#loginModal").remove();
-
-					var $modalObject = null;
+					
+					// Remove any currently downloaded modals (markerAjaxModal) if they are open and not sticky
+					$(".modal.show."+markerAjaxModal+":not(.yadaStickyModal)").remove();
+					
+					// modals are appended to the body
+					const $modalObject = $(responseHtml).find(".modal").first();
+					// Add the marker class 
+					$modalObject.addClass(markerAjaxModal);
 					if (stickyModal) {
-						// Sticky modals are appended to the body
-						$modalObject = $(responseHtml).find(".modal").first();
-						// Remove the modalGenericDialog id if present, because it could conflict with future dialogs
-						$("#modalGenericDialog", $modalObject).removeAttr('id');
 						// This container is needed to keep the scrollbar when a second modal is closed
 						var $container = $("<div class='modal-open'></div>");
 						$container.append($modalObject);
@@ -1207,10 +1254,10 @@
 							$container.remove(); // Remove modal on close
 						});
 					} else {
-						// Normal modals are appended to the common placeholder
-						$modalObject = $("#ajaxModal");
-						$("#ajaxModal").children().remove();
-						$("#ajaxModal").append($loadedModalDialog);
+						$("body").prepend($modalObject);
+						$modalObject.on('hidden.bs.modal', function (e) {
+							$modalObject.remove(); // Remove modal on close
+						});
 					}
 					
 					// Adding the modal head elements to the main document
@@ -1276,7 +1323,17 @@
 //				document.close();
 			},
 			timeout: yada.devMode?0:timeout,
-			traditional: true // Serve per non avere id[] : '12' ma id : '12'
+			traditional: true, // Serve per non avere id[] : '12' ma id : '12'
+			xhr: function() {
+				// Changes the bootstrap progress bar width
+				$(".loader .progress-bar").css("width", 0);
+				var xhr = $.ajaxSettings.xhr() ;
+				xhr.upload.onprogress = function(evt){
+					$(".loader .progress-bar").css("width", evt.loaded/evt.total*100+"%");
+				} ;
+				// xhr.upload.onload = function(){ console.log('DONE!') } ;
+				return xhr ;
+			}
 		});
 		
 	}
@@ -1291,7 +1348,6 @@
 		});
 	}
 
-	
 	/**
 	 * Se esiste un confirm nel response, lo visualizza e, in caso l'utente confermi, esegue la chiamata originale aggiungendo "confirmed" ai parametri.
 	 * WARNING: any modal will be closed and its close-handlers invoked before showing the confirm dialog
@@ -1301,7 +1357,9 @@
 		var $modalConfirm=$(responseHtml).find(".s_modalConfirm .modal");
 		if ($modalConfirm.length>0) {
 			// Close all non-sticky modals
-			var $currentModals = $(".modal:visible").filter(function(){return $(".yadaStickyModal", this).length==0});			$currentModals.modal('hide'); // Hide any modal that might be already open
+			var $currentModals = $(".modal:not(.yadaStickyModal):visible");			
+			// var $currentModals = $(".modal:visible").filter(function(){return $(".yadaStickyModal", this).length==0});			
+			$currentModals.modal('hide'); // Hide any modal that might be already open
 			$("#yada-confirm .modal").children().remove();
 			$("#yada-confirm .modal").append($(".modal-dialog", $modalConfirm));
 			$("#yada-confirm .modal").modal('show');
@@ -1382,7 +1440,7 @@
 		var notification=$(responseHtml).find(".s_modalNotify .yadaNotify");
 		if (notification.length==1) {
 			// Mostro la notification
-			$('#ajaxModal:visible').modal('hide'); // Close any current modals
+			$('.modal:visible').modal('hide'); // Close any current modals
 			$('#yada-notification').children().remove();
 			$('#yada-notification').append(notification);
 			// We need to show the modal after a delay or it won't show sometimes (!)

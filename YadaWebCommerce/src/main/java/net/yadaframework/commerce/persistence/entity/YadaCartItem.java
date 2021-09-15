@@ -16,12 +16,12 @@ import javax.persistence.Version;
 @Entity
 public class YadaCartItem implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	// For synchronization with external databases
-	@Column(columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+	@Column(insertable = false, updatable = false, columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified;
-	
+
 	// For optimistic locking
 	@Version
 	protected long version;
@@ -29,12 +29,12 @@ public class YadaCartItem implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
-	
+
 	protected int quantity;
-	
+
 	@ManyToOne
 	protected YadaCommerceArticle article;
-	
+
 	@ManyToOne
 	protected YadaCart cart;
 
@@ -81,6 +81,6 @@ public class YadaCartItem implements Serializable {
 	public long getVersion() {
 		return version;
 	}
-	
+
 
 }

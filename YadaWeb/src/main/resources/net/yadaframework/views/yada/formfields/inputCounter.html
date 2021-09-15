@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://www.yadaframework.net" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
+
+<!--/*
+Template for <yada:inputCounter> resulting HTML.
+It is used internally by the yada dialect processor to render the <yada:input> tag but could be included directly in a HTML template if needed.
+
+*/-->
+
+<body>
+	<!-- The first span is the count, the second span is the total -->
+	<!-- Can use any th attributes on the tag because the original ones have been replaced with plain HTML tags already, so no conflicts can arise -->
+	<th:block th:fragment="field">
+		<div th:attr="__${targetAttributesString}__" th:classappend="yadaInputCounter"><span></span><span></span></div>
+	</th:block>
+</body>
+</html>
+		

@@ -48,6 +48,7 @@ public class YadaRegistrationRequestDao {
 
 	@Transactional(readOnly = false)
 	public void delete(YadaRegistrationRequest registrationRequest) {
+		registrationRequest = em.merge(registrationRequest);
 		em.remove(registrationRequest);
 	}
 

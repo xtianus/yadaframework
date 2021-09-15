@@ -1,5 +1,7 @@
 package net.yadaframework.web.dialect;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.engine.AttributeName;
@@ -21,7 +23,9 @@ import net.yadaframework.core.YadaConfiguration;
  */
 @Deprecated // Just use th:href because YadaLinkBuilder takes care of everything
 public class YadaSrcsetAttrProcessor extends AbstractAttributeTagProcessor {
-	public static final int ATTR_PRECEDENCE = 9000;
+	private final Logger log = LoggerFactory.getLogger(getClass());
+
+	public static final int ATTR_PRECEDENCE = 10000;
     public static final String ATTR_NAME = "srcset";
 
     private final YadaDialectUtil yadaDialectUtil;

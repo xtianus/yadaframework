@@ -50,7 +50,7 @@
 		<databaseMigrationAtStartup>false</databaseMigrationAtStartup>
 		<!-- Datasource for embedded Tomcat -->
 		<datasource>
-			<jdbcUrl>jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false</jdbcUrl>
+			<jdbcUrl>jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</jdbcUrl>
 			<username>${acronym}user$env</username>
 			<password>$dbpwd</password>
 			

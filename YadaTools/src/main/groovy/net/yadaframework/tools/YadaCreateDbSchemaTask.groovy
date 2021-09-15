@@ -9,6 +9,9 @@ import javax.persistence.Persistence;
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.OutputFile
 
 /**
 * Docs: https://docs.jboss.org/tools/latest/en/hibernatetools/html/ant.html
@@ -16,8 +19,10 @@ import org.gradle.api.tasks.TaskAction
 * @param update (true/false) set to true for the schema delta (might not be accurate)
 */
 class YadaCreateDbSchemaTask extends DefaultTask {
-	Map properties;
+	// Map properties;
+	@OutputFile
 	def outputfilename = "generated.sql";
+	@Internal
 	def update = false;
 	
 	@TaskAction
