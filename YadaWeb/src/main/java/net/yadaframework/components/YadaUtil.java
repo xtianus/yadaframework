@@ -121,9 +121,21 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
-	
+
 	/**
-	 * Returns a random integer number 
+	 * Convert a map of strings to a commaspace-separated string of name=value pairs
+	 * @param stringMap
+	 * @return a name-value string like "n1=v1, n2=v2"
+	 */
+	public String mapToString(Map<String, String> stringMap) {
+		String result = stringMap.toString(); // "{n1=v1, n2=v2}"
+		result = StringUtils.chop(result); // Remove }
+		result = StringUtils.removeStart(result, "{"); // Remove {
+		return result;
+	}
+
+	/**
+	 * Returns a random integer number
 	 * @param minIncluded minimum value, included
 	 * @param maxIncluded maximum value, included
 	 * @return
@@ -132,9 +144,9 @@ public class YadaUtil {
 		int maxExcluded = maxIncluded - minIncluded + 1;
 		return secureRandom.nextInt(maxExcluded) + minIncluded;
 	}
-	
+
 	/**
-	 * Given the instance of a "specific" class created specifying a single type T while extending a generic class, 
+	 * Given the instance of a "specific" class created specifying a single type T while extending a generic class,
 	 * retrieve the class of the type T.
 	 * Example:
 	 * the generic class is public abstract class Shape<T extends Color> {...}
@@ -182,7 +194,7 @@ public class YadaUtil {
         file.mkdir();
         return file;
 	}
-	
+
 	/**
 	 * Finds the folder path between two folders. using forward (unix) slashes as a separator
 	 * @param ancestorFolder
@@ -193,7 +205,7 @@ public class YadaUtil {
 		String segment = ancestorFolder.toPath().relativize(descendantFolder.toPath()).toString();
 		return segment.replaceAll("\\", "/");
 	}
-	
+
 	/**
 	 * Finds the folder path between two folders. using forward (unix) slashes as a separator
 	 * @param ancestorFolder
@@ -204,7 +216,7 @@ public class YadaUtil {
 		String segment = ancestorFolder.relativize(descendantFolder).toString();
 		return segment.replaceAll("\\\\", "/");
 	}
-	
+
 	/**
 	 * Split an HTML string in two parts, not breaking words, handling closing and reopening of html tags.
 	 * Useful when showing some part of a text and the whole of it after a user clicks.
@@ -2368,6 +2380,7 @@ public class YadaUtil {
 	public static SortedSet<Entry<String,String>> sortByValue(Map data) {
 		// Uso il giro del TreeSet per sortare in base al value
 		SortedSet<Entry<String,String>> result = new TreeSet<>(new Comparator<Entry<String, String>>() {
+			@Override
 			public int compare(Entry<String, String> element1, Entry<String, String> element2) {
 				return element1.getValue().compareTo(element2.getValue());
 			}
@@ -2386,6 +2399,7 @@ public class YadaUtil {
 	public static SortedSet<Entry<String,String>> sortByKey(Map data) {
 		// Uso il giro del TreeSet per sortare in base al value
 		SortedSet<Entry<String,String>> result = new TreeSet<>(new Comparator<Entry<String, String>>() {
+			@Override
 			public int compare(Entry<String, String> element1, Entry<String, String> element2) {
 				return element1.getKey().compareTo(element2.getKey());
 			}

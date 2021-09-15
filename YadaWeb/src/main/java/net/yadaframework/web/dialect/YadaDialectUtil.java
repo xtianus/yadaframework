@@ -14,31 +14,53 @@ import org.thymeleaf.standard.expression.IStandardExpression;
 import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.StandardExpressions;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 
 public class YadaDialectUtil {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	private final YadaConfiguration config;
-	
+
 	static final String YADA_PREFIX = "yada";
 	static final String THYMELEAF_PREFIX = "th";
-	
+
     public final static String YADA_PREFIX_WITHCOLUMN = YADA_PREFIX + ":";
     public final static String THYMELEAF_PREFIX_WITHCOLUMN = THYMELEAF_PREFIX + ":";
-
 
     private enum AppendType {
     	NONE,
     	APPEND,
-    	PREPEND, 
-    	APPEND_WITH_SPACE, 
+    	PREPEND,
+    	APPEND_WITH_SPACE,
     	PREPEND_WITH_SPACE;
     }
 
 	public YadaDialectUtil(YadaConfiguration config) {
 		this.config=config;
 	}
-	
+
+	/**
+	 * Concatenate some strings using the given joiner, checking that the joiner is not added when already present and it is trimmed
+	 * from the result.
+	 * Example:
+	 * <pre>joinStrings(" - ", "a, b", "c, d")    = "a, b - c, d"</pre>
+	 * <pre>joinStrings(" - ", "a, b - ", "c, d") = "a, b - c, d"</pre>
+	 * <pre>joinStrings(" - ", "a, b", "c, d - ") = "a, b - c, d"</pre>
+	 * @param joiner a string to use as a joiner (separator)
+	 * @param start the initial string
+	 * @param append a number of other strings
+	 * @return a string where all parameters have been joined with the joiner string that appears only once and not at the result edges
+	 */
+	public String joinStrings(String joiner, String start, String ... append) {
+		StringBuilder result = new StringBuilder(StringUtils.removeEnd(start, joiner));
+		result.append(joiner);
+		for (String a : append) {
+			result.append(StringUtils.removeEnd(StringUtils.removeStart(a, joiner), joiner));
+			result.append(joiner);
+		}
+		return StringUtils.removeEnd(result.toString(), joiner);
+	}
+
 	/**
 	 * Returns a unique identifier on the page, for the given tag
 	 * @param someTag
@@ -47,7 +69,7 @@ public class YadaDialectUtil {
 	public String makeYadaTagId(ITemplateEvent someTag) {
 		return someTag.getLine() + "c" + someTag.getCol();
 	}
-	
+
 	/**
 	 * Retrieves a map of attributes from the custom tag, where all HTML attributes are kept as they are (NO: and thymeleaf
 	 * th: attributes are converted to HTML attributes when possible). The map is then converted to a comma-separated string
@@ -61,17 +83,14 @@ public class YadaDialectUtil {
 		// NO: Then convert all th: attributes to HTML attributes
 		// This was used when the YadaDialect precedence was the same as the StandardDialect
 		// convertThAttributes(customTag, newAttributes, context);
-        String newAttributesString = newAttributes.toString();
-        newAttributesString = StringUtils.chop(newAttributesString); // Remove }
-        newAttributesString = StringUtils.removeStart(newAttributesString, "{"); // Remove {
-		return newAttributesString;
+		return YadaUtil.INSTANCE.mapToString(newAttributes);
 	}
-	
+
 	/**
-	 * Get all HTML attributes from the custom sourceTag 
+	 * Get all HTML attributes from the custom sourceTag
 	 * @param sourceTag
 	 * @return the HTML attributes found on the tag
-	 */ 
+	 */
 	private Map<String, String> getHtmlAttributes(IOpenElementTag sourceTag) {
 		Map<String, String> newAttributes = new HashMap<>();
 		Map<String, String> sourceAttributes = sourceTag.getAttributeMap();
@@ -99,7 +118,7 @@ public class YadaDialectUtil {
 		}
 		return newAttributes;
 	}
-	
+
 	@Deprecated // Not used anymore because the YadaDialect has a higher precedence so th attributes are stripped before
 	private void convertThAttributes(IOpenElementTag sourceTag, Map<String, String> newAttributes, ITemplateContext context) {
 		Map<String, String> sourceAttributes = sourceTag.getAttributeMap();
@@ -167,7 +186,7 @@ public class YadaDialectUtil {
 			}
 		}
 	}
-	
+
 	/**
 	 * Handles "th:attr", "th:attrappend", "th:attrprepend" by splitting the comma-separated string into individual name-values pairs for newAttributes
 	 * @param attributeValue
@@ -189,7 +208,7 @@ public class YadaDialectUtil {
 			appendMapValue(name, finalValue, appendType, newAttributes);
 		}
 	}
-	
+
 	/**
 	 * The value is appended to existing values found in the map with the same name
 	 * @param name
@@ -216,7 +235,7 @@ public class YadaDialectUtil {
 		}
 		newAttributes.put(name, value);
 	}
-	
+
 	/**
 	 * Remove the dialect prefix from the start of the value
 	 * @param value e.g. "yada:someAttributeName"
