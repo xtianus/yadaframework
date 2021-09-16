@@ -81,3 +81,7 @@ code.hljs.language-gradle::after {
     top: -3px;
     font-size: 1.7rem;
 }
+
+.conum[data-value] {
+	background-color: #337a4669;
+}

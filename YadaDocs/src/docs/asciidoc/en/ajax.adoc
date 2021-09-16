@@ -213,53 +213,36 @@ The following `data-` attributes allow you to perform postprocessing when return
 [cols="<33,<33,<33",options="header"]
 |===
 h| name
-
 a| value
-
 a| description
 
-a| 
-`data-yadaUpdateOnSuccess`
-
+a| `data-yadaUpdateOnSuccess`
 a| jQuery selector list
-
 a| replace the selector targets with the result of the ajax call, or replace each selector target with a different part of the result (see below)
 
-a| 
-`data-yadaDeleteOnSuccess`
-
+a| `data-yadaDeleteOnSuccess`
 a| jQuery selector list
-
 a| delete the target elements
 
-a| 
-`data-yadaSuccessHandler`
-
+a| `data-yadaSuccessHandler`
 a| comma-separated list of function names
-
 a| call the specified functions
-
-a| 
 |===
 
 Yada-dialect variants:
-[cols="<50,<50",options="header"]
+[cols="1,1",options="header"]
 |===
-h| `data-yadaUpdateOnSuccess`
+| data- HTML attribute
+| yada-dialect attribute
 
-a| `yada:updateOnSuccess`
+| `data-yadaUpdateOnSuccess`
+| `yada:updateOnSuccess`
 
-a| 
-`data-yadaDeleteOnSuccess`
+| `data-yadaDeleteOnSuccess`
+| `yada:deleteOnSuccess`
 
-a| `yada:deleteOnSuccess`
-
-a| 
-`data-yadaSuccessHandler`
-
-a| `yada:successHandler`
-
-a| 
+| `data-yadaSuccessHandler`
+| `yada:successHandler`
 |===
 
 [CAUTION]
@@ -271,6 +254,7 @@ in the value, but you have to be careful to enclose complex strings in single qu
 otherwise you get a parse error from Thymeleaf: `org.thymeleaf.exceptions.TemplateProcessingException: Could not parse as expression`.
 ====
 
+See below for details.
 
 ====  Replacing and Deleting
 
@@ -283,25 +267,16 @@ Each selector can also have the following special prefixes:
 [cols="<50,<50",options="header"]
 |===
 h| name
-
 a| description
 
-a| 
-`yadaParents:`
-
+a| `yadaParents:`
 a| the selector is searched in the parents of the current element using `$.closest()`
 
-a| 
-`yadaSiblings:`
-
+a| `yadaSiblings:`
 a| the selector is searched in the siblings of the current element
 
-a| 
-`yadaClosestFind:`
-
+a| `yadaClosestFind:`
 a| splits the selector at the first space then uses `$.closest()` with the first part and `$.find()` with the second
-
-a| 
 |===
 
 *Multiple replacement values*
@@ -313,7 +288,6 @@ When there is a single target, fragments are ignored and the whole result is use
 [.todo]
 ----
 Examples (see OneNote)
-
 
 ----
 
@@ -328,27 +302,26 @@ The success handlers are called in sequence and should have the following signat
 function someHandler(responseText, responseHtml, link) {
 ----
 
-
 responseText:: 
-
 either the unparsed text received from the ajax call, or a json object if the response text is json
 
-
-
 responseHtml:: 
-
-the ajax response converted to html objects
-
-
+the ajax response converted to jQuery html objects
 
 link:: 
-
 the original anchor object (DOM, not jQuery)
 
+The `link` argument is also the same as the current `this` context.
 
+[NOTE]
+====
+If you use both `yadaUpdateOnSuccess` and `yadaSuccessHandler`, the handlers will be called
+after the page has been modified and the *responseHtml* argument would point to the new page content.
+The *this* context would be the original element, that may no longer be on page if replaced.
 
-
-
+In case `yadaUpdateOnSuccess` replaced multiple elements, the *responseHtml* argument would be an
+array of all sections inserted in page.
+====
 
 
 ====  Modal Dialog
@@ -364,57 +337,43 @@ You can show a confirm dialog before the ajax call is made. The user will be sho
 [cols="<33,<33,<33",options="header"]
 |===
 h| data
-
 a| tag
-
 a| description
 
-a| 
-`data-yadaConfirm`
-
+a| `data-yadaConfirm`
 a| `yada:confirm`
-
 a| text to show in the dialog
 
-a| 
-`data-yadaTitle`
-
+a| `data-yadaTitle`
 a| `yada:title`
-
 a| (optional) title of the dialog
 
-a| 
-`data-yadaOkButton`
-
+a| `data-yadaOkButton`
 a| `yada:okButton`
-
 a| (optional) text of the confirm button
 
-a| 
-`data-yadaCancelButton`
-
+a| `data-yadaCancelButton`
 a| `yada:cancelButton`
-
 a| (optional) text of the cancel button
-
-a| 
 |===
 
 
 ==  Ajax Forms
 
-
 See the  xref:forms/overview.adoc#Ajax Forms[Ajax Forms section] in the Forms chapter.
 
 ==  Ajax on other elements
-
 
 Ajax calls can also be made on other HTML elements like buttons and selects by means of the `data-yadahref` attribute or the equivalent `yada:ajax` dialect.
 
 ===  Ajax on input fields
 
 An ajax call can be triggered on any <input> field that triggers the "input" event
-on change. Example:
+on change, by just setting the `yada:ajax` or `data-yadaHref` attribute. 
+
+The value of the input field will be sent to the given URL at each keystroke.
+
+Example:
 
 [source,html]
 ----
@@ -560,13 +519,13 @@ The success handler is called when the server returns without errors:
 
 [source,javascript]
 ----
-successHandler(responseText, responseHtml)
+successHandler(responseText, $responseHtml)
 ----
 
 responseText:: 
 the raw original text returned by the server, or a json object if json was returned
-responseHtml:: 
-the original response converted to a div with jQuery.html()
+$responseHtml:: 
+the original response converted to a div with `jQuery.html()`
 
 The successHandler is not invoked if the call returns with a YadaNotify error, unless the `executeAnyway` flag is true:
 

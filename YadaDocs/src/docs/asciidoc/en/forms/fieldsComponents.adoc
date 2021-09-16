@@ -1,47 +1,225 @@
-=  Form Fields and Components
+=  Form Components
 :docinfo: shared
+:imagesdir: ../../img/
 
-Quickly assembling forms
-
+Quickly assembling forms with advanced functionality
 
 ==  Description
+Creating a form often implies adding a lot of code to make input fields more user-friendly, like showing validation
+messages, adding help and sort buttons, implement value suggestions, etc.
+The Yada Framework offers some reusable code in the form of Thymeleaf includes and custom dialect tags.
 
-
-Creating a form often implies not only adding the input fields, but also all the elements that make the form more usable: validation messages, help text,
-sort buttons, etc.
-The use of yada form fields and form components speeds up form development.
-
-
-==  General Syntax
-
-
-Form fields and form elements are inserted using Thymeleaf template directives.
-Example:
+== Thymeleaf Includes
+=== General Syntax
+The `net.yadaframework.views.yada.form` package inside `/YadaWeb/src/main/resources` contains some
+HTML files that can be included in the Thymeleaf templates with the standard syntax:
 
 [source,html]
 ----
 <div th:replace="/yada/form/text::field(fieldName='subject',maxlength=64,required=true,labelKey='form.label.subject')"></div>
 ----
 
-Parameters can be specified, as usual, either on the replace directive itself or by creating variables on some parent element using th:with.
+Parameters can be specified, as usual, either on the replace directive itself or by creating variables on some parent element using `th:with`.
 
-The difference between form fields and form components is that usually the formers are little more than a decorated form input element while the latter
-could implement complex interactions.
+[NOTE]
+====
+Some of these components are being replaced by custom dialect tags to offer an easier syntax.
+====
+
+===  Available Fragments
+
+boolean:: A checkbox for boolean elements
+checklist:: A checkbox list for objects, maps or static (Spring-EL) elements
+enum:: A select list for enums
+fileUpload:: A file-upload input element
+list:: A select list for objects, maps or static (Spring-EL) elements
+radio-values:: A radio list for static (Spring-EL) elements
+range:: A range numeric input with label and value display
+text:: A text input element
+
+A detailed syntax of the usage can be found in the source of each fragment.
+
+[.todo]
+----
+Entity Sorter: allows to add, edit and sort a set of database @Entity objects
+
+link to file upload page
+
+explain all
+----
+
+== Thymeleaf Yada Dialect
+=== Introduction
+The Yada Dialect is a custom Thymeleaf Dialect that adds Yada functionality generally already
+available with some other syntax (e.g. template fragments or data- attributes) but makes the source code
+more readable.
+Some tags implement form components.
+
+[.todo]
+----
+link to generic introduction to the yada dialect
+----
+
+=== <yada:input>
+The `<yada:input>` purpose is to eventually replace the `text` fragment, but it currently implements some
+different functionality:
+
+- numeric fields show increment/decrement buttons
+- a bootstrap "addon" can be set right and left of the field
+- password fields have a "show" button
+- a help button can be added
+- can control the value of the character counter `<yada:inputCounter>`
+- show a dropdown with input suggestions
+
+[NOTE]
+====
+`th:field` can not be used on this tag yet (as of v0.7.0)
+====
+
+All attributes that are normally available on a HTML `<input>` tag can also be used.
+
+Example of a numeric input field with increment/decrement buttons that
+submits its value via ajax when it changes:
+
+[.center]
+image::forms/numericInput.jpg[Numeric input field]
+
+[source,html]
+----
+<yada:input type="number" min="0" max="99" 
+	yada:ajax="@{/setRooms(annuncioId=${annuncio.id})}" 
+	class="yadaNoLoader"> # <1>
+</yada:input>
+----
+<1> The `yadaNoLoader` class is added to hide the loader on the ajax call
+
+Note: ajax submission also works on plain `<input>` tags using the `yada:ajax` attribute.
+
+Example of a numeric input field that shows trailing zeroes without increment/decrement buttons:
+
+[.center]
+image::forms/numberwithzero.jpg[Numeric input with attachment]
+
+[source,html]
+----
+<yada:input name="price" type="number" min="0" 
+	class="noButtons"> # <1>
+	<yada:addonRight>.00</yada:addonRight>
+</yada:input>
+----
+<1> The `noButtons` class is added in order to hide the unneeded buttons with some custom CSS:
+
+[source,css]
+----
+.yadaInput.noButtons {
+	.yadaInputNumericDecrement, .yadaInputNumericIncrement, .yadaShowPasswordAddon {
+		display: none;
+	}
+}
+----
+
+[TIP]
+====
+The tag is implemented in `YadaInputTagProcessor.java` and `input.html`.
+====
+
+==== Suggestion list
+The `<yada:input>` tag can be used to implement a dropdown that shows a list of suggestions as the user
+types some characters. It needs a backend @RequestMapping that receives the field value and returns
+the HTML of the dropdown.
+
+The usage scenario is that the user types some characters in the input field and sees some suggestions;
+he can either choose one of the suggestions or keep typing until an "end-of-input" character is typed.
+The text (or text and id) is then sent to the backend that will add a new element and return an HTML
+showing all elements so far added. This HTML will be inserted in page.
+
+Input tag example:
+
+[.center]
+image::forms/suggestion.jpg[Suggestion list]
+
+[source,html]
+----
+<yada:input name="dogname">
+	<yada:suggestion 
+		yada:addUrl="@{/addDog(ownerId=${owner.id})}" # <1>
+		yada:listUrl="@{/dognameSuggestion}" # <2>
+		yada:updateOnSuccess="'yadaParents:.jsDogsSection'"> # <3>
+	</yada:suggestion>
+</yada:input>
+----
+<1> ajax URL called when the user chooses a value from the suggestion list or types an "end-of-input" character
+like Enter, Space, Comma etc. (see `yada.suggestionList` in `yada.dialect.js` for details)
+<2> ajax URL called to retrieve the HTML of the suggestions
+<3> selector that identifies the portion of the page that has to be replaced with the result of the "addUrl" call
+
+Backend code for the `listURL`:
+
+[source,java]
+----
+@RequestMapping("/dognameSuggestion")
+public String dognameSuggestion(String prefix, Model model, Locale locale) {
+	List<String> suggestions = getDognameSuggestions(prefix, locale); // Some DB query
+	model.addAttribute("suggestions", suggestions);
+	return "/fragments/dogsuggestionlist :: fragment";
+}
+----
+
+HTML fragment for the suggestion list `/fragments/dogsuggestionlist.html`:
+
+[source,html]
+----
+<th:block th:fragment="fragment">
+	<ul class="dropdown-menu wide jsSuggestionList"> # <1>
+		<li th:each="suggestion : ${suggestions}">
+			<a class="dropdown-item" href="javascript:;" th:text="${suggestion}">Fido</a>
+		</li>
+	</ul>
+</th:block>
+----
+<1> the `jsSuggestionList` class is required
+
+[.todo]
+----
+can the suggestion list fragment be implemented in yada?
+----
+
+Backend code for the `addURL` that receives the `value` of the field and any other parameters of the URL:
+
+[source,java]
+----
+@RequestMapping("/addDog")
+public String addDog(String value, Long ownerId, Model model, Locale locale) {
+	List<String> allDogs = addDog(ownerID, value);; // Some code to add the name of the dog to its owner
+	model.addAttribute("allDogs", allDogs);
+	return "/fragments/dogList :: fragment";
+}
+----
 
 
-==  Form Fields
+=== <yada:inputCounter>
+The `<yada:inputCounter>` purpose is to show a character counter when the user types in 
+a `<yada:input>` text field.
+It can be placed anywhere in the HTML but must have a unique id that must be referenced from
+the `yada:inputCounterId` attribute of the `<yada:input>` tag.
+
+[.center]
+image::forms/counter.jpg[Text field with counter]
+
+[source,html]
+----
+<yada:inputCounter id="titleCounter"></yada:inputCounter>
+<yada:input yada:inputCounterId="titleCounter" name="title" maxlength="70"></yada:input>
+----
+
+[TIP]
+====
+The tag is implemented in `YadaInputCounterTagProcessor.java` and `inputCounter.html`.
+====
 
 
-TODO all fields + link to file upload page
-
-
-==  Form Components
 
 
 
-===  Entity Sorter
 
 
-The Entity Sorter is a form component that allows to add, edit and sort a set of database @Entity objects.
-
-TODO

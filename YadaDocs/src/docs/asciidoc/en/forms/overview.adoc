@@ -7,13 +7,11 @@ Handling user-submitted data
 
 <<uploads.adoc#, File Uploads>>:: How to upload and handle files using forms
 
-<<fieldsComponents.adoc#>>:: TODO
+<<fieldsComponents.adoc#, Form Components>>:: Enhanced input fields
 
 ==  Description
-
-
 Forms are used to gather information from users. You could also use plain anchors with request attributes, but forms are way more convenient especially
-for more than a couple of fields and for performing validation.
+for more than a couple of fields and when performing validation.
 
 The more general kind of form has some input fields that are sent to the server in a POST and received from the @Controller as method parameters. This is a
 link:++https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#mvc-controller++[standard Spring Web MVC feature] and quite straightforward to implement.

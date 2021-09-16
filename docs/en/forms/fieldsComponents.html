@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>Form Fields and Components</title>
+<title>Form Components</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -440,7 +440,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1>Form Fields and Components</h1>
+<h1>Form Components</h1>
 <div class="details">
 <span id="revnumber">version 0.7.0</span>
 </div>
@@ -448,11 +448,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_description">Description</a></li>
-<li><a href="#_general_syntax">General Syntax</a></li>
-<li><a href="#_form_fields">Form Fields</a></li>
-<li><a href="#_form_components">Form Components</a>
+<li><a href="#_thymeleaf_includes">Thymeleaf Includes</a>
 <ul class="sectlevel2">
-<li><a href="#_entity_sorter">Entity Sorter</a></li>
+<li><a href="#_general_syntax">General Syntax</a></li>
+<li><a href="#_available_fragments">Available Fragments</a></li>
+</ul>
+</li>
+<li><a href="#_thymeleaf_yada_dialect">Thymeleaf Yada Dialect</a>
+<ul class="sectlevel2">
+<li><a href="#_introduction">Introduction</a></li>
+<li><a href="#_yadainput">&lt;yada:input&gt;</a></li>
+<li><a href="#_yadainputcounter">&lt;yada:inputCounter&gt;</a></li>
 </ul>
 </li>
 </ul>
@@ -462,7 +468,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Quickly assembling forms</p>
+<p>Quickly assembling forms with advanced functionality</p>
 </div>
 </div>
 </div>
@@ -470,18 +476,20 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_description">Description</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Creating a form often implies not only adding the input fields, but also all the elements that make the form more usable: validation messages, help text,
-sort buttons, etc.
-The use of yada form fields and form components speeds up form development.</p>
+<p>Creating a form often implies adding a lot of code to make input fields more user-friendly, like showing validation
+messages, adding help and sort buttons, implement value suggestions, etc.
+The Yada Framework offers some reusable code in the form of Thymeleaf includes and custom dialect tags.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_general_syntax">General Syntax</h2>
+<h2 id="_thymeleaf_includes">Thymeleaf Includes</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_general_syntax">General Syntax</h3>
 <div class="paragraph">
-<p>Form fields and form elements are inserted using Thymeleaf template directives.
-Example:</p>
+<p>The <code>net.yadaframework.views.yada.form</code> package inside <code>/YadaWeb/src/main/resources</code> contains some
+HTML files that can be included in the Thymeleaf templates with the standard syntax:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -489,32 +497,349 @@ Example:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Parameters can be specified, as usual, either on the replace directive itself or by creating variables on some parent element using th:with.</p>
+<p>Parameters can be specified, as usual, either on the replace directive itself or by creating variables on some parent element using <code>th:with</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Some of these components are being replaced by custom dialect tags to offer an easier syntax.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_available_fragments">Available Fragments</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">boolean</dt>
+<dd>
+<p>A checkbox for boolean elements</p>
+</dd>
+<dt class="hdlist1">checklist</dt>
+<dd>
+<p>A checkbox list for objects, maps or static (Spring-EL) elements</p>
+</dd>
+<dt class="hdlist1">enum</dt>
+<dd>
+<p>A select list for enums</p>
+</dd>
+<dt class="hdlist1">fileUpload</dt>
+<dd>
+<p>A file-upload input element</p>
+</dd>
+<dt class="hdlist1">list</dt>
+<dd>
+<p>A select list for objects, maps or static (Spring-EL) elements</p>
+</dd>
+<dt class="hdlist1">radio-values</dt>
+<dd>
+<p>A radio list for static (Spring-EL) elements</p>
+</dd>
+<dt class="hdlist1">range</dt>
+<dd>
+<p>A range numeric input with label and value display</p>
+</dd>
+<dt class="hdlist1">text</dt>
+<dd>
+<p>A text input element</p>
+</dd>
+</dl>
 </div>
 <div class="paragraph">
-<p>The difference between form fields and form components is that usually the formers are little more than a decorated form input element while the latter
-could implement complex interactions.</p>
+<p>A detailed syntax of the usage can be found in the source of each fragment.</p>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>Entity Sorter: allows to add, edit and sort a set of database @Entity objects
+
+link to file upload page
+
+explain all</pre>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_form_fields">Form Fields</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>TODO all fields + link to file upload page</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_form_components">Form Components</h2>
+<h2 id="_thymeleaf_yada_dialect">Thymeleaf Yada Dialect</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_entity_sorter">Entity Sorter</h3>
+<h3 id="_introduction">Introduction</h3>
 <div class="paragraph">
-<p>The Entity Sorter is a form component that allows to add, edit and sort a set of database @Entity objects.</p>
+<p>The Yada Dialect is a custom Thymeleaf Dialect that adds Yada functionality generally already
+available with some other syntax (e.g. template fragments or data- attributes) but makes the source code
+more readable.
+Some tags implement form components.</p>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>link to generic introduction to the yada dialect</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_yadainput">&lt;yada:input&gt;</h3>
+<div class="paragraph">
+<p>The <code>&lt;yada:input&gt;</code> purpose is to eventually replace the <code>text</code> fragment, but it currently implements some
+different functionality:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>numeric fields show increment/decrement buttons</p>
+</li>
+<li>
+<p>a bootstrap "addon" can be set right and left of the field</p>
+</li>
+<li>
+<p>password fields have a "show" button</p>
+</li>
+<li>
+<p>a help button can be added</p>
+</li>
+<li>
+<p>can control the value of the character counter <code>&lt;yada:inputCounter&gt;</code></p>
+</li>
+<li>
+<p>show a dropdown with input suggestions</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p><code>th:field</code> can not be used on this tag yet (as of v0.7.0)</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
-<p>TODO</p>
+<p>All attributes that are normally available on a HTML <code>&lt;input&gt;</code> tag can also be used.</p>
+</div>
+<div class="paragraph">
+<p>Example of a numeric input field with increment/decrement buttons that
+submits its value via ajax when it changes:</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/forms/numericInput.jpg" alt="Numeric input field">
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input type="number" min="0" max="99"
+	yada:ajax="@{/setRooms(annuncioId=${annuncio.id})}"
+	class="yadaNoLoader"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
+&lt;/yada:input&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>yadaNoLoader</code> class is added to hide the loader on the ajax call</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Note: ajax submission also works on plain <code>&lt;input&gt;</code> tags using the <code>yada:ajax</code> attribute.</p>
+</div>
+<div class="paragraph">
+<p>Example of a numeric input field that shows trailing zeroes without increment/decrement buttons:</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/forms/numberwithzero.jpg" alt="Numeric input with attachment">
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input name="price" type="number" min="0"
+	class="noButtons"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
+	&lt;yada:addonRight&gt;.00&lt;/yada:addonRight&gt;
+&lt;/yada:input&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>noButtons</code> class is added in order to hide the unneeded buttons with some custom CSS:</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="css" class="language-css hljs">.yadaInput.noButtons {
+	.yadaInputNumericDecrement, .yadaInputNumericIncrement, .yadaShowPasswordAddon {
+		display: none;
+	}
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The tag is implemented in <code>YadaInputTagProcessor.java</code> and <code>input.html</code>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_suggestion_list">Suggestion list</h4>
+<div class="paragraph">
+<p>The <code>&lt;yada:input&gt;</code> tag can be used to implement a dropdown that shows a list of suggestions as the user
+types some characters. It needs a backend @RequestMapping that receives the field value and returns
+the HTML of the dropdown.</p>
+</div>
+<div class="paragraph">
+<p>The usage scenario is that the user types some characters in the input field and sees some suggestions;
+he can either choose one of the suggestions or keep typing until an "end-of-input" character is typed.
+The text (or text and id) is then sent to the backend that will add a new element and return an HTML
+showing all elements so far added. This HTML will be inserted in page.</p>
+</div>
+<div class="paragraph">
+<p>Input tag example:</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/forms/suggestion.jpg" alt="Suggestion list">
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input name="dogname"&gt;
+	&lt;yada:suggestion
+		yada:addUrl="@{/addDog(ownerId=${owner.id})}" <i class="conum" data-value="1"></i><b>(1)</b>
+		yada:listUrl="@{/dognameSuggestion}" <i class="conum" data-value="2"></i><b>(2)</b>
+		yada:updateOnSuccess="'yadaParents:.jsDogsSection'"&gt; <i class="conum" data-value="3"></i><b>(3)</b>
+	&lt;/yada:suggestion&gt;
+&lt;/yada:input&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>ajax URL called when the user chooses a value from the suggestion list or types an "end-of-input" character
+like Enter, Space, Comma etc. (see <code>yada.suggestionList</code> in <code>yada.dialect.js</code> for details)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>ajax URL called to retrieve the HTML of the suggestions</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>selector that identifies the portion of the page that has to be replaced with the result of the "addUrl" call</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Backend code for the <code>listURL</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/dognameSuggestion")
+public String dognameSuggestion(String prefix, Model model, Locale locale) {
+	List&lt;String&gt; suggestions = getDognameSuggestions(prefix, locale); // Some DB query
+	model.addAttribute("suggestions", suggestions);
+	return "/fragments/dogsuggestionlist :: fragment";
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>HTML fragment for the suggestion list <code>/fragments/dogsuggestionlist.html</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;th:block th:fragment="fragment"&gt;
+	&lt;ul class="dropdown-menu wide jsSuggestionList"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
+		&lt;li th:each="suggestion : ${suggestions}"&gt;
+			&lt;a class="dropdown-item" href="javascript:;" th:text="${suggestion}"&gt;Fido&lt;/a&gt;
+		&lt;/li&gt;
+	&lt;/ul&gt;
+&lt;/th:block&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the <code>jsSuggestionList</code> class is required</td>
+</tr>
+</table>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>can the suggestion list fragment be implemented in yada?</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Backend code for the <code>addURL</code> that receives the <code>value</code> of the field and any other parameters of the URL:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/addDog")
+public String addDog(String value, Long ownerId, Model model, Locale locale) {
+	List&lt;String&gt; allDogs = addDog(ownerID, value);; // Some code to add the name of the dog to its owner
+	model.addAttribute("allDogs", allDogs);
+	return "/fragments/dogList :: fragment";
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_yadainputcounter">&lt;yada:inputCounter&gt;</h3>
+<div class="paragraph">
+<p>The <code>&lt;yada:inputCounter&gt;</code> purpose is to show a character counter when the user types in
+a <code>&lt;yada:input&gt;</code> text field.
+It can be placed anywhere in the HTML but must have a unique id that must be referenced from
+the <code>yada:inputCounterId</code> attribute of the <code>&lt;yada:input&gt;</code> tag.</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/forms/counter.jpg" alt="Text field with counter">
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:inputCounter id="titleCounter"&gt;&lt;/yada:inputCounter&gt;
+&lt;yada:input yada:inputCounterId="titleCounter" name="title" maxlength="70"&gt;&lt;/yada:input&gt;</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The tag is implemented in <code>YadaInputCounterTagProcessor.java</code> and <code>inputCounter.html</code>.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -523,7 +848,7 @@ could implement complex interactions.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-02-05 19:46:56 +0100
+Last updated 2021-09-16 12:39:49 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

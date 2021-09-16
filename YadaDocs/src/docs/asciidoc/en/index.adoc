@@ -49,21 +49,19 @@ MySQL, Eclipse. It will then show you how to create an Eclipse project with a da
 been set by following the instructions in the previous chapter, you can start this tutorial
 that will show you how to quickly create a web application
 
-<<internationalization.adoc#>>:: This section shows how easy it is to handle different languages
+<<internationalization.adoc#,i18n>>:: Implement a multilanguage site
 
 <<database/pagination.adoc#>>:: TODO
 
-<<forms/overview.adoc#Forms,Forms>>:: TODO
+<<forms/overview.adoc#Forms,Forms>>:: Submitting data to the server
 
-<<ajax.adoc#>>:: TODO
+<<ajax.adoc#,Ajax>>:: Easy async operations
 
-<<ajaxModal.adoc#>>:: Open a modal as a result of an ajax call
+<<ajaxModal.adoc#, Ajax Modals>>:: Open a modal as a result of an ajax call
 
 <<datatables.adoc#>>:: TODO
 
 <<emails.adoc#>>:: TODO
-
-<<internationalization.adoc#>>:: TODO
 
 <<notificationModal.adoc#>>:: TODO
 
