@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:yada="http://www.yadaframework.net">
+<head>
+	<meta charset="UTF-8"/>
+</head>
+<body>
+
+<th:block th:fragment="fragment">
+	<ul class="dropdown-menu wide jsYadaSuggestionList">
+
+		<!--/* When the controller is returning a Map of id-value */-->
+		<th:block th:if="${yadaSuggestions!=null && yadaSuggestions instanceof T(java.util.Map)}">
+			<li th:each="suggestionEntry : ${yadaSuggestions.entrySet()}">
+				<a class="dropdown-item" href="javascript:;" 
+					th:text="${suggestionEntry.value}" 
+					th:data-id="${suggestionEntry.key}"
+					>#villa</a>
+			</li>
+		</th:block>
+
+		<!--/* When the controller is returning a List of Strings or Objects */-->
+		<th:block th:if="${yadaSuggestions!=null && yadaSuggestions instanceof T(java.util.List)}">
+			<li th:each="suggestion : ${yadaSuggestions}" th:with="complex = ${suggestion instanceof T(net.yadaframework.web.dialect.YadaInputTagSuggestion)}">
+				<a th:unless="${complex}" class="dropdown-item" href="javascript:;" 
+					th:text="${suggestion}"
+					>#villa</a>
+				<a th:if="${complex}" class="dropdown-item" href="javascript:;" 
+					th:text="${suggestion.getSuggestionText(#ctx.locale)}"
+					th:data-idname="${suggestion.suggestionIdRequestName}"
+					th:data-id="${suggestion.suggestionId}"
+					>#villa</a>
+			</li>
+		</th:block>
+	</ul>
+
+</th:block>
+
+</body>
+</html>

@@ -15,6 +15,7 @@ import org.thymeleaf.model.IText;
 import org.thymeleaf.processor.element.AbstractElementModelProcessor;
 import org.thymeleaf.processor.element.IElementModelStructureHandler;
 import org.thymeleaf.templatemode.TemplateMode;
+import org.thymeleaf.util.StringUtils;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
@@ -81,7 +82,7 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
         		case "suggestion":
         			String newAttributes = processSuggestionTag(openTag, context, structureHandler);
         			targetAttributesString = yadaDialectUtil.joinStrings(", ", targetAttributesString, newAttributes);
-        			structureHandler.setLocalVariable("suggestion", Boolean.TRUE);
+        			structureHandler.setLocalVariable("suggestionEnabled", Boolean.TRUE);
         			break;
         		case "help":
         			text = (IText) model.get(++i); // Text node
@@ -114,17 +115,20 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
 				String attributeValue = sourceAttribute.getValue();
 				String yadaAttributeName = yadaDialectUtil.removePrefix(attributeName, dialectPrefix);
 				switch (yadaAttributeName) {
-				case "addUrl":
-					resultMap.put("data-yadaSuggestionAddUrl", attributeValue);
-					break;
-				case "listUrl":
-					resultMap.put("data-yadaSuggestionListUrl", attributeValue);
-					break;
+//				case "addUrl":
+//					resultMap.put("data-yadaSuggestionAddUrl", attributeValue);
+//					break;
+//				case "listUrl":
+//					resultMap.put("data-yadaSuggestionListUrl", attributeValue);
+//					break;
 				case "updateOnSuccess":
+					// We keep the known yadaUpdateOnSuccess name attribute for familiarity, not for necessity: it could be any other name
 					resultMap.put("data-yadaUpdateOnSuccess", attributeValue);
 					break;
 				default:
-					log.error("Unknown attribute for tag {}: {}", sourceTag.getElementCompleteName(), yadaAttributeName);
+					// Any other attribute is converted to a data-yadaSuggestion attribute:
+					// addUrl --> data-yadaSuggestionAddUrl
+					resultMap.put("data-yadaSuggestion" + StringUtils.capitalize(yadaAttributeName), attributeValue);
 				}
 			}
 		}

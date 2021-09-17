@@ -17,21 +17,37 @@
 	yada.suggestionList = function(event) {
 		const input = event.target;
 		const $input = $(input);
+		const $dropdown = $input.closest(".dropdown");
 		const inputValue = $.trim(input.value);
-		const addElementUrl = $input.attr("data-yadaSuggestionAddUrl");
+		const addElementUrl = $input.attr("data-yadaSuggestionAddUrl"); // Optional
 		const suggestionUrl = $input.attr("data-yadaSuggestionListUrl");
-		const suggestionReplace = $input.attr("data-yadaUpdateOnSuccess");
+		const suggestionReplace = $input.attr("data-yadaUpdateOnSuccess"); // Optional
 		const key = event.key; // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
 
 		const addSuggestedElement = function(responseText, $responseHtml) {
-			yada.extendedSelect($input, suggestionReplace).replaceWith($responseHtml); 
+			if (suggestionReplace!=null) {
+				yada.extendedSelect($input, suggestionReplace).replaceWith($responseHtml); 
+			}
 			$responseHtml.find("input").focus(); // This may not always be correct
+		}
+
+		if ($dropdown.length==0) {
+			console.error("Missing dropdown element around input tag - aborting suggestions");
+			return;
 		}
 		
 		// When newline, space, comma, cursor up/down/right are pressed, make the call to create a new element
-		if (inputValue!="" && inputValue!="#" && (key=="Enter" || key==" " || key=="," || key=="ArrowRight" || key=="ArrowUp")) {
-			const remoteUrl = addElementUrl + '&value=' + encodeURIComponent(inputValue); 
-			yada.ajax(remoteUrl, null, addSuggestedElement, null, null, false);
+		if (addElementUrl!=null && inputValue!="" && inputValue!="#" && (key=="Enter" || key==" " || key=="," || key=="ArrowRight" || key=="ArrowUp")) {
+			const suggestionId = input.suggestionId; // set when clicking on the suggestion
+			const suggestionIdname = input.suggestionIdname || "id"; // set when clicking on the suggestion
+			const data = {
+				value: inputValue
+			}
+			if (suggestionId) {
+				data[suggestionIdname] = suggestionId;
+			}
+			// const remoteUrl = addElementUrl + '&value=' + encodeURIComponent(inputValue); 
+			yada.ajax(addElementUrl, data, addSuggestedElement, null, null, false);
 			input.value="";
 			input.dispatchEvent(new Event('input')); // Resets the counter
 			event.preventDefault();
@@ -41,7 +57,7 @@
 		// Arrow down moves to the suggestion list
 		if (key=="ArrowDown") {
 			// Move the focus to the suggestion list if any
-			const $suggestionList = $(input).closest(".dropdown").find(".jsSuggestionList:visible");
+			const $suggestionList = $(input).closest(".dropdown").find(".jsYadaSuggestionList:visible");
 			if ($("a", $suggestionList).length>0) {
 				$("a", $suggestionList).get(0).focus();
 			}
@@ -52,14 +68,17 @@
 		const data = {
 			prefix: inputValue
 		} 
-		const $dropdown = $input.closest(".dropdown");
 		yada.ajax(suggestionUrl, data, function(responseText, responseHtml){
-			const $newSuggestionList = responseHtml.find(".jsSuggestionList");
-			$dropdown.find(".jsSuggestionList").replaceWith($newSuggestionList); 
+			const $newSuggestionList = responseHtml.find(".jsYadaSuggestionList");
+			$dropdown.find(".jsYadaSuggestionList").replaceWith($newSuggestionList); 
 			$("a", $newSuggestionList).click(function() {
 				// Insert into the input field the suggested text when clicked
 				const clickedValue = $(this).text();
 				$input.val(clickedValue);
+				// Also set the suggestionId and suggestionIdName attributes on the input for use on submission
+				// See /YadaWeb/src/main/resources/net/yadaframework/views/yada/formfields/inputSuggestionFragment.html
+				input.suggestionId = $(this).attr("data-id"); 
+				input.suggestionIdname = $(this).attr("data-idname");
 				// Trigger a keyup event so that any char counter is changed
 				var e = jQuery.Event("keyup");
 				e.key = "Enter"
