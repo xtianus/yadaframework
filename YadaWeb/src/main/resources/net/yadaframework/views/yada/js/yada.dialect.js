@@ -26,7 +26,7 @@
 
 		const addSuggestedElement = function(responseText, $responseHtml) {
 			if (suggestionReplace!=null) {
-				yada.extendedSelect($input, suggestionReplace).replaceWith($responseHtml); 
+				yada.extendedSelect($input, suggestionReplace).replaceWith($responseHtml.children()); 
 			}
 			$responseHtml.find("input").focus(); // This may not always be correct
 		}

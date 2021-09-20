@@ -1,7 +1,6 @@
 package net.yadaframework.security.persistence.repository;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,23 +21,23 @@ import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.web.YadaPageRequest;
 
 @Repository
-@Transactional(readOnly = true) 
+@Transactional(readOnly = true)
 public class YadaUserProfileDao<T extends YadaUserProfile> {
-	
+
 	@PersistenceContext EntityManager em;
-	
+
 	@Autowired YadaUtil yadaUtil;
-	
+
 	public List<Integer> findRoleIds(Long userProfileId) {
-		String sql = "select r.roles from YadaUserProfile yup join YadaUserCredentials yuc on yup.userCredentials_id = yuc.id " + 
+		String sql = "select r.roles from YadaUserProfile yup join YadaUserCredentials yuc on yup.userCredentials_id = yuc.id " +
 			"join YadaUserCredentials_roles r on yuc.id = r.YadaUserCredentials_id where yup.id=:userProfileId";
 		return em.createNativeQuery(sql)
 				.setParameter("userProfileId", userProfileId)
 				.getResultList();
 	}
-	
+
 	/**
-	 * Retrieve the userprofile id given the username
+	 * Retrieve the userprofile id given the username (email)
 	 * @param username
 	 * @return
 	 */
@@ -53,7 +52,7 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 			return null; // Nothing found
 		}
 	}
-	
+
 	public List<T> findByUserCredentials(YadaUserCredentials userCredentials, YadaPageRequest pageable) {
 		String sql = "from YadaUserProfile where userCredentials = :userCredentials";
 		boolean isPage = pageable!=null && pageable.isValid();
@@ -69,7 +68,7 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 		return query.getResultList();
 	}
 
-	
+
 	public List<T> findByUserCredentialsUsername(String username, YadaPageRequest pageable) {
 		String sql = "from YadaUserProfile where userCredentials.username = :username";
 		boolean isPage = pageable!=null && pageable.isValid();
@@ -98,7 +97,7 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 		return query.getResultList();
 	}
 
-	
+
 	/**
 	 * Find by enabled flag
 	 * @return
@@ -109,13 +108,13 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 		return em.createQuery(sql, returnTypeClass).getResultList();
 	}
 
-	
+
 	/**
 	 * Find the profile for the given user credentials id
 	 * @param userProfileId
 	 * @return
 	 */
-	public YadaUserProfile findByUserCredentialsId(Long userCredentialsId) {
+	public T findByUserCredentialsId(Long userCredentialsId) {
 		String sql = "select up from YadaUserProfile up join up.userCredentials yuc where userCredentials_id = :userCredentialsId";
 		List<YadaUserProfile> resultList = em.createQuery(sql, YadaUserProfile.class)
 			.setMaxResults(1)
@@ -124,8 +123,8 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 		return normaliseSingleResult(resultList);
 	}
 
-	
-	public YadaUserProfile findUserProfileByUsername(String username) {
+
+	public T findUserProfileByUsername(String username) {
 		String sql = "select up from YadaUserProfile up join up.userCredentials yuc where username=:username";
 		List<YadaUserProfile> resultList = em.createQuery(sql, YadaUserProfile.class)
 			.setMaxResults(1)
@@ -139,12 +138,12 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
      * @param resultList
      * @return
      */
-    private YadaUserProfile normaliseSingleResult(List<YadaUserProfile> resultList) {
+    private T normaliseSingleResult(List<YadaUserProfile> resultList) {
 		// Need to keep the contract of the Spring Data Repository, so we return null when no value found.
 		if (resultList.isEmpty()) {
 			return null;
 		} else {
-			return resultList.get(0);
+			return (T) resultList.get(0);
 		}
     }
 
@@ -163,8 +162,8 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 	// Signature kept for legacy Spring Data Repository compatibility
 	public Optional<T> findById(Long entityId) {
 		// Class<T> returnTypeClass = (Class<T>) yadaUtil.findGenericClass(this); // Returns the class that extends YadaUserProfile e.g. UserProfile.class
-		T result = (T) em.find(YadaUserProfile.class, entityId);
-		return Optional.ofNullable(result);
-	}	
+		YadaUserProfile result = em.find(YadaUserProfile.class, entityId);
+		return (Optional<T>) Optional.ofNullable(result);
+	}
 
 }

@@ -67,7 +67,7 @@ public class YadaDialectUtil {
 	 * @return
 	 */
 	public String makeYadaTagId(ITemplateEvent someTag) {
-		return someTag.getLine() + "c" + someTag.getCol();
+		return someTag.getLine() + "c" + someTag.getCol() + "r" + YadaUtil.INSTANCE.getRandom(0, Integer.MAX_VALUE);
 	}
 
 	/**

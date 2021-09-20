@@ -108,6 +108,9 @@ public class YadaUtil {
 	public final static long MILLIS_IN_DAY = 24*MILLIS_IN_HOUR;
 
 	private SecureRandom secureRandom = new SecureRandom();
+	private final static char CHAR_AT = '@';
+	private final static char CHAR_DOT = '.';
+	private final static char CHAR_SPACE = ' ';
 
 	private static Locale defaultLocale = null;
 
@@ -121,6 +124,34 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+
+	/**
+	 * Simple email address syntax check: the format should be X@Y.Y
+	 * where X does not contain @ and Y does not contain @, nor . at the edges.
+	 * Also no spaces anywhere.
+	 * @param email
+	 * @return
+	 */
+	public boolean isEmailValid(String email) {
+		if (email.indexOf(CHAR_SPACE)>-1) {
+			return false;
+		}
+		int firstAtPos = email.indexOf(CHAR_AT);
+		int lastAtPos = email.lastIndexOf(CHAR_AT);
+		if (firstAtPos<0 || firstAtPos != lastAtPos || lastAtPos==email.length()-1) {
+			return false; // No @ or more than one or one at the end
+		}
+		int lastDotPos = email.lastIndexOf(CHAR_DOT);
+		if (lastDotPos<0 						|| // No DOT
+			lastDotPos<firstAtPos 				|| // No DOT after the AT
+			lastDotPos==email.length()-1 		|| // DOT at the end
+			email.charAt(firstAtPos+1)==CHAR_DOT || // DOT after the AT
+			email.charAt(lastDotPos-1)==CHAR_DOT   // Two consecutive dots
+			) {
+			return false;
+		}
+		return true;
+	}
 
 	/**
 	 * Convert a map of strings to a commaspace-separated string of name=value pairs
@@ -141,6 +172,9 @@ public class YadaUtil {
 	 * @return
 	 */
 	public int getRandom(int minIncluded, int maxIncluded) {
+		if (maxIncluded==Integer.MAX_VALUE) {
+			maxIncluded = Integer.MAX_VALUE - 1; // Needed to prevent overflow of maxExcluded below
+		}
 		int maxExcluded = maxIncluded - minIncluded + 1;
 		return secureRandom.nextInt(maxExcluded) + minIncluded;
 	}
