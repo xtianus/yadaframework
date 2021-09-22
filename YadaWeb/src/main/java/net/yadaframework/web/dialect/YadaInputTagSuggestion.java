@@ -10,7 +10,8 @@ import java.util.Locale;
 public interface YadaInputTagSuggestion {
 
 	/**
-	 * Value that will be returned to the backend as the "id" parameter. The "id" name can be changed by implementing the getSuggestionIdRequestName() method
+	 * Value that will be returned to the backend as the "id" parameter.
+	 * The "id" name can be changed by implementing the getSuggestionIdRequestName() method
 	 * @return
 	 */
 	String getSuggestionId();

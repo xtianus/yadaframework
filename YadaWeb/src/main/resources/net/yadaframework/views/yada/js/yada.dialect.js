@@ -22,6 +22,7 @@
 		const addElementUrl = $input.attr("data-yadaSuggestionAddUrl"); // Optional
 		const suggestionUrl = $input.attr("data-yadaSuggestionListUrl");
 		const suggestionReplace = $input.attr("data-yadaUpdateOnSuccess"); // Optional
+		const addIdRequestNameOverride = $input.attr("data-yadaSuggestionAddIdRequestNameOverride"); // Optional with precedence
 		const key = event.key; // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
 
 		const addSuggestedElement = function(responseText, $responseHtml) {
@@ -36,13 +37,14 @@
 			return;
 		}
 		
+		// Send input field value to server
 		// When newline, space, comma, cursor up/down/right are pressed, make the call to create a new element
 		if (addElementUrl!=null && inputValue!="" && inputValue!="#" && (key=="Enter" || key==" " || key=="," || key=="ArrowRight" || key=="ArrowUp")) {
 			const suggestionId = input.suggestionId; // set when clicking on the suggestion
-			const suggestionIdname = input.suggestionIdname || "id"; // set when clicking on the suggestion
-			const data = {
-				value: inputValue
-			}
+			const suggestionIdname = addIdRequestNameOverride || input.suggestionIdname || "id"; // set when clicking on the suggestion
+			const data = {};
+			const inputName = input.name || 'value';
+			data[inputName] = inputValue;
 			if (suggestionId) {
 				data[suggestionIdname] = suggestionId;
 			}
