@@ -19,10 +19,10 @@ public class YadaDialect extends AbstractProcessorDialect {
 	 * @param config
 	 */
 	public YadaDialect(YadaConfiguration config) {
-		// The precedence is higher than the standard "th:" dialect so that th: attributes are processed before.
+		// NO: The precedence is higher than the standard "th:" dialect so that th: attributes are processed before.
 		// The only th: tag that doesn't work is th:field because it checks which tag it's being used on
 		// and skips all custom tags.
-		super("Yada Dialect", YadaDialectUtil.YADA_PREFIX, StandardDialect.PROCESSOR_PRECEDENCE+1);
+		super("Yada Dialect", YadaDialectUtil.YADA_PREFIX, StandardDialect.PROCESSOR_PRECEDENCE);
 		this.config = config;
 	}
 

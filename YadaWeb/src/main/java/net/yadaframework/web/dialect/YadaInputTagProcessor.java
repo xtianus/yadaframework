@@ -2,6 +2,7 @@ package net.yadaframework.web.dialect;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.context.ITemplateContext;
@@ -15,7 +16,6 @@ import org.thymeleaf.model.IText;
 import org.thymeleaf.processor.element.AbstractElementModelProcessor;
 import org.thymeleaf.processor.element.IElementModelStructureHandler;
 import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.util.StringUtils;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
@@ -73,26 +73,32 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
         			break;
         		case "addonLeft":
         			IText text = (IText) model.get(++i); // Text node
-        			structureHandler.setLocalVariable("addonLeft", text.getText());
+        			structureHandler.setLocalVariable("yadaAddonLeft", text.getText());
         			break;
         		case "addonRight":
         			text = (IText) model.get(++i); // Text node
-        			structureHandler.setLocalVariable("addonRight", text.getText());
+        			structureHandler.setLocalVariable("yadaAddonRight", text.getText());
         			break;
         		case "suggestion":
         			String newAttributes = processSuggestionTag(openTag, context, structureHandler);
         			targetAttributesString = yadaDialectUtil.joinStrings(", ", targetAttributesString, newAttributes);
-        			structureHandler.setLocalVariable("suggestionEnabled", Boolean.TRUE);
+        			structureHandler.setLocalVariable("yadaSuggestionEnabled", Boolean.TRUE);
+        			break;
+        		case "validationError":
+        			// Does not work properly yet, because th: attributes are not executed so the error message can only be static
+        			text = (IText) model.get(++i); // Text node
+        			processValidationErrorTag(openTag, context, structureHandler, text);
+        			// structureHandler.setLocalVariable("yadaValidationMessage", text.getText());
         			break;
         		case "help":
         			text = (IText) model.get(++i); // Text node
-        			structureHandler.setLocalVariable("helpText", text.getText());
+        			structureHandler.setLocalVariable("yadaHelpText", text.getText());
         			break;
         		}
         	}
 		}
 
-        structureHandler.setLocalVariable("targetAttributesString", targetAttributesString);
+        structureHandler.setLocalVariable("yadaTargetAttributesString", targetAttributesString);
 
         // Add the replacement tag
         Map<String, String> divAttributes = new HashMap<>();
@@ -105,11 +111,59 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
         model.add(replacementTagClose);
 	}
 
-	private String processSuggestionTag(IOpenElementTag sourceTag, ITemplateContext context, IElementModelStructureHandler structureHandler) {
-        Map<String, String> sourceAttributes = sourceTag.getAttributeMap();
-        Map<String, String> resultMap = new HashMap<String, String>();
-        // Handle "yada:" attributes
+	private void processValidationErrorTag(IOpenElementTag sourceTag, ITemplateContext context, IElementModelStructureHandler structureHandler, IText textNode) {
+        String errorText = StringUtils.trimToNull(textNode.getText());
+        String yadaMessageKey = null;
+        Boolean yadaInvalidFlag = null;
+		Map<String, String> sourceAttributes = sourceTag.getAttributeMap();
         for (Map.Entry<String,String> sourceAttribute : sourceAttributes.entrySet()) {
+			String attributeName = sourceAttribute.getKey();
+			String attributeValue = sourceAttribute.getValue();
+			if (attributeName.startsWith(YadaDialectUtil.YADA_PREFIX_WITHCOLUMN)) {
+				// Handle "yada:" attributes
+				String yadaAttributeName = yadaDialectUtil.removePrefix(attributeName, dialectPrefix);
+				switch (yadaAttributeName) {
+				case "invalidFlag":
+					Object invalidFlagValue = yadaDialectUtil.parseExpression(attributeValue, context, Object.class);
+					if (invalidFlagValue instanceof Boolean) {
+						yadaInvalidFlag = (Boolean) invalidFlagValue;
+					} else if (invalidFlagValue!=null) {
+						yadaInvalidFlag = true;
+					}
+					break;
+				case "messageKey":
+					// messageKey has precedence over any other text
+					yadaMessageKey = yadaDialectUtil.parseExpression(attributeValue, context, String.class);
+					if (yadaInvalidFlag==null) {
+						// If yadaInvalidFlag has not been specified, set it to true when the key exists
+						yadaInvalidFlag = (yadaMessageKey!=null);
+					}
+					break;
+				default:
+					// yada:xyyy becomes a yadaXyyy variable
+					structureHandler.setLocalVariable("yada" + StringUtils.capitalize(yadaAttributeName), attributeValue);
+				}
+			} else if (attributeName.startsWith("th:")) {
+				// Handle some th: attributes because currently they are not processed for nested custom tags
+				// TODO this won't be needed when we fix the parsing of th: attributes
+				if ("th:text".equals(attributeName) || "th:utext".equals(attributeName)) {
+					errorText = yadaDialectUtil.parseExpression(attributeValue, context, String.class);
+				}
+			}
+		}
+        structureHandler.setLocalVariable("yadaInvalidFlag", yadaInvalidFlag);
+        if (yadaMessageKey==null) {
+        	structureHandler.setLocalVariable("yadaValidationMessage", errorText);
+        } else {
+        	structureHandler.setLocalVariable("yadaMessageKey", yadaMessageKey);
+        }
+	}
+
+	private String processSuggestionTag(IOpenElementTag sourceTag, ITemplateContext context, IElementModelStructureHandler structureHandler) {
+		Map<String, String> sourceAttributes = sourceTag.getAttributeMap();
+		Map<String, String> resultMap = new HashMap<String, String>();
+		// Handle "yada:" attributes
+		for (Map.Entry<String,String> sourceAttribute : sourceAttributes.entrySet()) {
 			String attributeName = sourceAttribute.getKey();
 			if (attributeName.startsWith(YadaDialectUtil.YADA_PREFIX_WITHCOLUMN)) {
 				String attributeValue = sourceAttribute.getValue();
@@ -132,7 +186,7 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
 				}
 			}
 		}
-        return YadaUtil.INSTANCE.mapToString(resultMap);
+		return YadaUtil.INSTANCE.mapToString(resultMap);
 	}
 
 	private String processInputTag(IOpenElementTag sourceTag, ITemplateContext context, IElementModelStructureHandler structureHandler) {
@@ -146,14 +200,22 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
 			if (attributeName.startsWith(YadaDialectUtil.YADA_PREFIX_WITHCOLUMN)) {
 				String yadaAttributeName = yadaDialectUtil.removePrefix(attributeName, dialectPrefix);
 				switch (yadaAttributeName) {
+				case "validationError":
+					String yadaValidationMessage = yadaDialectUtil.parseExpression(attributeValue, context, String.class);
+					if (StringUtils.isNotBlank(yadaValidationMessage)) {
+						structureHandler.setLocalVariable("yadaValidationMessage", yadaValidationMessage);
+						structureHandler.setLocalVariable("yadaInvalidFlag", true);
+					}
+					break;
 				case "editor":
 					// TODO use ckedit
 					break;
 				default:
 					// Every yada attribute becomes a local variable
-					// inputCounterId
+					// yadaInputCounterId
 					// etc.
-					structureHandler.setLocalVariable(yadaAttributeName, attributeValue==null?true:attributeValue);
+					String name = "yada" + StringUtils.capitalize(yadaAttributeName);
+					structureHandler.setLocalVariable(name, attributeValue==null?true:attributeValue);
 				}
 			}
 		}
@@ -166,7 +228,8 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
         	// When class is missing, set it to empty string
         	inputSourceAttributes.put("class", "");
         }
-        structureHandler.setLocalVariable(TAG_NAME, inputSourceAttributes); // So I can do ${input.id} to get the original id attribute and so on
+        String name = "yada" + StringUtils.capitalize(TAG_NAME);
+        structureHandler.setLocalVariable(name, inputSourceAttributes); // So I can do ${yadaInput.id} to get the original id attribute and so on
         return targetAttributesString;
 	}
 

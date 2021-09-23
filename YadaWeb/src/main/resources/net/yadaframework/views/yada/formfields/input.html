@@ -12,10 +12,12 @@ It is used internally by the yada dialect processor to render the <yada:input> t
 
 <body>
 	<!-- Can use any th attributes on the tag here because the original ones have been replaced with plain HTML tags already, so no conflicts can arise -->
-	<th:block th:fragment="field" th:with="numeric=${input.type=='number'}, password=${input.type=='password'}">
+	<th:block th:fragment="field" th:with="_numeric_=${yadaInput.type=='number'},
+		_password_=${yadaInput.type=='password'},
+		_validationFailed_=${yadaInvalidFlag==true}">
 	
 		<!--/* When suggestions are required, we must wrap the code inside a dropdown */-->
-		<th:block th:if="${suggestionEnabled==true}">
+		<th:block th:if="${yadaSuggestionEnabled==true}">
 			<div class="dropdown">
 				<div data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false" data-bs-reference="parent"></div>
 				<div th:replace=" :: .yadaInput"></div>
@@ -30,36 +32,41 @@ It is used internally by the yada dialect processor to render the <yada:input> t
 		</th:block>
 		
 		<!--/* When suggestions are not required, the dropdown is not needed */-->
-		<th:block th:unless="${suggestionEnabled==true}">
+		<th:block th:unless="${yadaSuggestionEnabled==true}">
 			<div th:replace=" :: .yadaInput"></div>
 		</th:block>
 	
 		<!--/* This fragment is removed from output because included above */-->
 		<th:block th:remove="all">
-			<div class="input-group yadaInput" th:classappend="${input.class}">
-				<a th:if="${numeric}" class="input-group-text yadaInputNumericDecrement" href="javascript:;" tabindex=-1>-</a>
-				<span th:if="${addonLeft!=null}" class="input-group-text" th:text="${addonLeft}">@</span>
+			<div class="input-group yadaInput" th:classappend="${yadaInput.class}">
+				<a th:if="${_numeric_}" class="input-group-text yadaInputNumericDecrement" href="javascript:;" tabindex=-1>-</a>
+				<span th:if="${yadaAddonLeft!=null}" class="input-group-text" th:text="${yadaAddonLeft}">@</span>
 				
-				<input th:attr="data-yadaTagId=${yadaTagId},__${targetAttributesString}__" th:classappend="'form-control' + ${numeric?' yadaInputNumber':''}">
+				<input th:attr="data-yadaTagId=${yadaTagId},__${yadaTargetAttributesString}__" th:classappend="'form-control' + ${_numeric_?' yadaInputNumber':''} + ${_validationFailed_?' is-invalid':''}">
 				
-				<th:block th:if="${addonRight!=null}" class="input-group-text">
-					<span class="input-group-text" th:text="${addonRight}">@example.com</span>
+				<th:block th:if="${yadaAddonRight!=null}" class="input-group-text">
+					<span class="input-group-text" th:text="${yadaAddonRight}">@example.com</span>
 				</th:block>
-				<span th:if="${password}" class="input-group-btn yadaShowPasswordAddon">
+				<span th:if="${_password_}" class="input-group-btn yadaShowPasswordAddon">
 					<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
 				</span>
 				
-				<a th:if="${numeric}" class="input-group-text yadaInputNumericIncrement" href="javascript:;" tabindex=-1>+</a>
+				<a th:if="${_numeric_}" class="input-group-text yadaInputNumericIncrement" href="javascript:;" tabindex=-1>+</a>
 				
-				<a th:if="${helpText!=null}" class="yadaHelpButton input-group-text" data-trigger="focus" data-container="body" 
+				<a th:if="${yadaHelpText!=null}" class="yadaHelpButton input-group-text" data-trigger="focus" data-container="body" 
 					data-toggle="popover" data-placement="auto bottom"
 					data-html="true"
 					th:attr="data-content=${help}">
 					<i class="fa fa-question-circle fa-lg"></i>
 				</a>
-				<script th:if="${inputCounterId!=null}" th:inline="javascript">
+				
+				<div th:if="${_validationFailed_}" th:text="${yadaValidationMessage}?:#{__${yadaMessageKey}__}" class="invalid-feedback"> <!-- Bootstrap 5 -->
+      				Please enter a valid value
+    			</div>
+    
+				<script th:if="${yadaInputCounterId!=null}" th:inline="javascript">
 					$(document).ready(function() {
-						const inputCounterId = /*[[${inputCounterId}]]*/ 0;
+						const inputCounterId = /*[[${yadaInputCounterId}]]*/ 0;
 						const yadaTagId = /*[[${yadaTagId}]]*/ 0;
 						yada.updateInputCounter($("input[data-yadaTagId="+yadaTagId+"]"), $("#"+inputCounterId));
 					});

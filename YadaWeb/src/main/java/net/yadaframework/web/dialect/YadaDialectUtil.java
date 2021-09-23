@@ -40,6 +40,29 @@ public class YadaDialectUtil {
 	}
 
 	/**
+	 * Parse some value as a EL expression
+	 * @param value
+	 * @param context
+	 * @param resultClass the type of the expected return value
+	 * @return
+	 * @return the result of evaluating the expression, or the original value in case of errors
+	 */
+	public <T> T parseExpression(String value, ITemplateContext context, Class<T> resultClass) {
+		try {
+			final IEngineConfiguration configuration = context.getConfiguration();
+			final IStandardExpressionParser parser = StandardExpressions.getExpressionParser(configuration);
+			final IStandardExpression expression = parser.parseExpression(context, value);
+			return (T) expression.execute(context);
+		} catch (RuntimeException e) {
+			log.debug("Expression evaluation of {} failed", value, e);
+			if (resultClass.equals(String.class)) {
+				return (T) value; // Maybe it's just a string
+			}
+			throw e;
+		}
+	}
+
+	/**
 	 * Concatenate some strings using the given joiner, checking that the joiner is not added when already present and it is trimmed
 	 * from the result.
 	 * Example:
