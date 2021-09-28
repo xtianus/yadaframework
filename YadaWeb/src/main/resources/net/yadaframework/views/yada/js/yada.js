@@ -43,7 +43,9 @@
 		// Be aware that all ajax links and forms will NOT be ajax if the user clicks while the document is still loading.
 		// To prevent that, call yada.initAjaxHandlersOn($('form,a')); at the html bottom and just after including the yada.ajax.js script
 		initHandlers();
-		initYadaDialect();
+		if (typeof yada.initYadaDialect == "function") {
+			yada.initYadaDialect();
+		}
 	});
 	
 	function initHandlers() {
@@ -181,7 +183,28 @@
 		}
 	};
 
-
+	
+	/**
+	 * When a function can be called repeatedly but only the last call is useful, previous
+	 * calls can be cancelled by next ones if within a given timeout.
+	 * When the funcion takes too long to execute, the timeout is increased so that less calls are perfomed.
+	 * Useful when making ajax calls.
+	 * @param domElement any dom element on which a flag can be set. Must be the same for repeated calls.
+	 * @param functionToCall any function (can be an inline function)
+	 */
+	yada.dequeueFunctionCall = function(domElement, functionToCall) {
+		var callTimeout = 200;
+		if (domElement.yadaDequeueFunctionCallRunning!=null) {
+			// Ajax call still running, so delay a bit longer before the next one
+			callTimeout = 2000;
+		}
+		clearTimeout(domElement.yadaDequeueFunctionTimeoutHandler);
+		domElement.yadaDequeueFunctionTimeoutHandler = setTimeout(function(){
+			domElement.yadaDequeueFunctionCallRunning = true;
+			functionToCall.bind(domElement)();
+			domElement.yadaDequeueFunctionCallRunning = null; // This may clear some other's call flag but don't care
+		}, callTimeout);
+	}
 	
 	//////////////////////
 	/// Url Parameters ///
@@ -1142,114 +1165,6 @@
 		});
 	}
 	
-	yada.updateInputCounter = function($inputTag, $counterDiv) {
-		const maxlength = $inputTag.attr("maxlength");
-		var currentLength = $inputTag.val().length;
-		if (maxlength==null) {
-			console.error("Missing maxlength attribute on input tag with data-yadaTagId=" + $inputTag.attr("data-yadaTagId"));
-			return;
-		}
-		$("span:first-child", $counterDiv).text(currentLength);
-		$("span:last-child", $counterDiv).text(maxlength);
-		$inputTag.on("input", function() {
-			currentLength = this.value.length;
-			$("span:first-child", $counterDiv).text(currentLength);
-		});
-	}
-
-	function initYadaDialect() {
-		// Allow only certain characters to be typed into an input field based on a regexp
-		// Taken from https://stackoverflow.com/questions/995183/how-to-allow-only-numeric-0-9-in-html-inputbox-using-jquery/995193#995193
-		$.fn.yadaInputFilter = function(inputFilter) {
-			return this.on("input keydown keyup mousedown mouseup select contextmenu drop", function() {
-				if (inputFilter(this.value)) {
-					this.oldValue = this.value;
-					this.oldSelectionStart = this.selectionStart;
-					this.oldSelectionEnd = this.selectionEnd;
-				} else if (this.hasOwnProperty("oldValue")) {
-					this.value = this.oldValue;
-					this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
-				} else {
-					this.value = "";
-				}
-			});
-		}
-		// Only allow digits in numeric input fields
-		$(".yadaInputNumber").yadaInputFilter(function(value) {
-    		return /^-?\d*$/.test(value);    // Allow digits only and an initial -, using a RegExp
-  		});
-		// initialise numeric input fields with the min attribute
-		$(".yadaInputNumber").each(function(){
-			const min = $(this).attr("min");
-			if (min!=null) {
-				$(this).val(min);
-			}
-		});
-		// Change the numeric field using plus/minus buttons
-		function changeNumericField($inputTag, valueToAdd) {
-			const min = Number($inputTag.attr("min")||Number.MIN_SAFE_INTEGER);
-			const max = Number($inputTag.attr("max")||Number.MAX_SAFE_INTEGER);
-			var mousePressed = true;
-			$(this).on("mouseup mouseleave mousedrag", function() {
-				$(this).off("mouseup mouseleave mousedrag");
-				mousePressed=false;
-			});
-			function changeValue() {
-				var value = Number($inputTag.val());
-				if (valueToAdd>0 && value>max-valueToAdd) {
-					return;
-				}
-				if (valueToAdd<0 && value<min-valueToAdd) {
-					return;
-				}
-				$inputTag.val(value+valueToAdd);
-				$inputTag.trigger('input');
-			}
-			function reschedule() {
-				if (mousePressed) {
-					changeValue();
-					setTimeout(reschedule, 100);
-				}
-			}
-			changeValue();
-			setTimeout(function(){
-				reschedule()
-			}, 500);
-		}
-		$(".yadaInputNumericIncrement").on("mousedown", function() {
-			const $inputTag = $(this).siblings("input.yadaInputNumber");
-			const step = Number($inputTag.attr("step")||1);
-			changeNumericField.bind(this)($inputTag, step);
-		});
-		$(".yadaInputNumericDecrement").on("mousedown", function() {
-			const $inputTag = $(this).siblings("input.yadaInputNumber");
-			const step = Number($inputTag.attr("step")||1);
-			changeNumericField.bind(this)($inputTag, -step);
-		});
-		// Constrain the numeric value to min/max
-		$("input.yadaInputNumber").on("input", function() {
-			const $inputTag = $(this);
-			const minText = $inputTag.attr("min");
-			const maxText = $inputTag.attr("max");
-			const value = Number($inputTag.val());
-			if (minText!=null) {
-				const min = Number(minText);
-				if (value<min) {
-					$inputTag.val(min);
-					// Don't do this because we don't swallow the event: $inputTag.trigger('input');
-				}
-			}
-			if (maxText!=null) {
-				const max = Number(maxText);
-				if (value>max) {
-					$inputTag.val(max);
-					// Don't do this because we don't swallow the event: $inputTag.trigger('input');
-				}
-			}
-		});
-		
-	};		
-		
 		
 }( window.yada = window.yada || {} ));
 

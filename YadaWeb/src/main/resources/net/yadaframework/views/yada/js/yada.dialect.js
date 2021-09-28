@@ -19,50 +19,29 @@
 		const $input = $(input);
 		const $dropdown = $input.closest(".dropdown");
 		const inputValue = $.trim(input.value);
-		const addElementUrl = $input.attr("data-yadaSuggestionAddUrl"); // Optional
 		const suggestionUrl = $input.attr("data-yadaSuggestionListUrl");
-		const suggestionReplace = $input.attr("data-yadaUpdateOnSuccess"); // Optional
-		const addIdRequestNameOverride = $input.attr("data-yadaSuggestionAddIdRequestNameOverride"); // Optional with precedence
-		const key = event.key; // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
-
-		const addSuggestedElement = function(responseText, $responseHtml) {
-			if (suggestionReplace!=null) {
-				yada.extendedSelect($input, suggestionReplace).replaceWith($responseHtml.children()); 
-			}
-			$responseHtml.find("input").focus(); // This may not always be correct
-		}
+		const requestIdNameOverride = $input.attr("data-yadaSuggestionRequestIdNameOverride"); // Optional with precedence
 
 		if ($dropdown.length==0) {
 			console.error("Missing dropdown element around input tag - aborting suggestions");
 			return;
 		}
 		
-		// Send input field value to server
-		// When newline, space, comma, cursor up/down/right are pressed, make the call to create a new element
-		if (addElementUrl!=null && inputValue!="" && inputValue!="#" && (key=="Enter" || key==" " || key=="," || key=="ArrowRight" || key=="ArrowUp")) {
-			const suggestionId = input.suggestionId; // set when clicking on the suggestion
-			const suggestionIdname = addIdRequestNameOverride || input.suggestionIdname || "id"; // set when clicking on the suggestion
-			const data = {};
-			const inputName = input.name || 'value';
-			data[inputName] = inputValue;
-			if (suggestionId) {
-				data[suggestionIdname] = suggestionId;
-			}
-			// const remoteUrl = addElementUrl + '&value=' + encodeURIComponent(inputValue); 
-			yada.ajax(addElementUrl, data, addSuggestedElement, null, null, false);
-			input.value="";
-			input.dispatchEvent(new Event('input')); // Resets the counter
-			event.preventDefault();
-			return false;
-		}
-		
-		// Arrow down moves to the suggestion list
-		if (key=="ArrowDown") {
+		// Arrow up/down moves to the suggestion list
+		const key = event.key;
+		if (key=="ArrowDown" || key=="ArrowUp") {
 			// Move the focus to the suggestion list if any
 			const $suggestionList = $(input).closest(".dropdown").find(".jsYadaSuggestionList:visible");
-			if ($("a", $suggestionList).length>0) {
-				$("a", $suggestionList).get(0).focus();
+			const tot = $("a", $suggestionList).length;
+			if (tot>0) {
+				var toFocus = (key=="ArrowDown")? 0 : (tot-1);
+				$("a", $suggestionList).get(toFocus).focus();
 			}
+			return;
+		}
+		
+		if (yada.isAjaxTriggerKey(event)) {
+			// Ajax call triggered, so no suggestion list must be returned
 			return;
 		}
 		
@@ -70,31 +49,147 @@
 		const data = {
 			prefix: inputValue
 		} 
-		yada.ajax(suggestionUrl, data, function(responseText, responseHtml){
-			const $newSuggestionList = responseHtml.find(".jsYadaSuggestionList");
-			$dropdown.find(".jsYadaSuggestionList").replaceWith($newSuggestionList); 
-			$("a", $newSuggestionList).click(function() {
-				// Insert into the input field the suggested text when clicked
-				const clickedValue = $(this).text();
-				$input.val(clickedValue);
-				// Also set the suggestionId and suggestionIdName attributes on the input for use on submission
-				// See /YadaWeb/src/main/resources/net/yadaframework/views/yada/formfields/inputSuggestionFragment.html
-				input.suggestionId = $(this).attr("data-id"); 
-				input.suggestionIdname = $(this).attr("data-idname");
-				// Trigger a keyup event so that any char counter is changed
-				var e = jQuery.Event("keyup");
-				e.key = "Enter"
-				$input.trigger(e); 
-			});
-			// Show or hide the suggestions if there are some or none
-			const $toggler = $dropdown.find("div[data-bs-toggle=dropdown]");
-			const dropdownApi = new bootstrap.Dropdown($toggler[0]);
-			if ($("a", $newSuggestionList).length>0) {
-				dropdownApi.show();
-			} else {
-				dropdownApi.hide();
-			}
-		}, null, null, true);
+		
+		yada.dequeueFunctionCall(input, function() {
+			yada.ajax(suggestionUrl, data, function(responseText, responseHtml){
+				const $newSuggestionList = responseHtml.find(".jsYadaSuggestionList");
+				$dropdown.find(".jsYadaSuggestionList").replaceWith($newSuggestionList); 
+				$("a", $newSuggestionList).click(function() {
+					// Insert into the input field the suggested text when clicked
+					const clickedValue = $(this).text();
+					$input.val(clickedValue);
+					// Also set the suggestionId and suggestionIdName attributes on the input for use on submission
+					// See /YadaWeb/src/main/resources/net/yadaframework/views/yada/formfields/inputSuggestionFragment.html
+					const yadaRequestData = input.yadaRequestData || {};
+					const suggestionIdValue = $(this).attr("data-id");
+					if (suggestionIdValue) {
+						const suggestionIdname = requestIdNameOverride || $(this).attr("data-idname") || "id";
+						yadaRequestData[suggestionIdname] = suggestionIdValue;
+						input.yadaRequestData = yadaRequestData;
+					}
+					// Trigger a keyup event so that any char counter is changed and any ajax call is made
+					var e = jQuery.Event("keyup");
+					e.key = "Enter"
+					$input.trigger(e); 
+				});
+				// Show or hide the suggestions if there are some or none
+				const $toggler = $dropdown.find("div[data-bs-toggle=dropdown]");
+				const dropdownApi = new bootstrap.Dropdown($toggler[0]);
+				if ($("a", $newSuggestionList).length>0) {
+					dropdownApi.show();
+				} else {
+					dropdownApi.hide();
+				}
+			}, null, null, true);
+		}); // dequeueFunctionCall
 	}
 
+	yada.updateInputCounter = function($inputTag, $counterDiv) {
+		const maxlength = $inputTag.attr("maxlength");
+		var currentLength = $inputTag.val().length;
+		if (maxlength==null) {
+			console.error("Missing maxlength attribute on input tag with data-yadaTagId=" + $inputTag.attr("data-yadaTagId"));
+			return;
+		}
+		$("span:first-child", $counterDiv).text(currentLength);
+		$("span:last-child", $counterDiv).text(maxlength);
+		$inputTag.on("input", function() {
+			currentLength = this.value.length;
+			$("span:first-child", $counterDiv).text(currentLength);
+		});
+	}
+
+	yada.initYadaDialect = function() {
+		// Allow only certain characters to be typed into an input field based on a regexp
+		// Taken from https://stackoverflow.com/questions/995183/how-to-allow-only-numeric-0-9-in-html-inputbox-using-jquery/995193#995193
+		$.fn.yadaInputFilter = function(inputFilter) {
+			return this.on("input keydown keyup mousedown mouseup select contextmenu drop", function() {
+				if (inputFilter(this.value)) {
+					this.oldValue = this.value;
+					this.oldSelectionStart = this.selectionStart;
+					this.oldSelectionEnd = this.selectionEnd;
+				} else if (this.hasOwnProperty("oldValue")) {
+					this.value = this.oldValue;
+					this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+				} else {
+					this.value = "";
+				}
+			});
+		}
+		// Only allow digits in numeric input fields
+		$(".yadaInputNumber").yadaInputFilter(function(value) {
+    		return /^-?\d*$/.test(value);    // Allow digits only and an initial -, using a RegExp
+  		});
+		// initialise numeric input fields with the min attribute
+		$(".yadaInputNumber").each(function(){
+			const min = $(this).attr("min");
+			if (min!=null) {
+				$(this).val(min);
+			}
+		});
+		// Change the numeric field using plus/minus buttons
+		function changeNumericField($inputTag, valueToAdd) {
+			const min = Number($inputTag.attr("min")||Number.MIN_SAFE_INTEGER);
+			const max = Number($inputTag.attr("max")||Number.MAX_SAFE_INTEGER);
+			var mousePressed = true;
+			$(this).on("mouseup mouseleave mousedrag", function() {
+				$(this).off("mouseup mouseleave mousedrag");
+				mousePressed=false;
+			});
+			function changeValue() {
+				var value = Number($inputTag.val());
+				if (valueToAdd>0 && value>max-valueToAdd) {
+					return;
+				}
+				if (valueToAdd<0 && value<min-valueToAdd) {
+					return;
+				}
+				$inputTag.val(value+valueToAdd);
+				$inputTag.trigger('input');
+			}
+			function reschedule() {
+				if (mousePressed) {
+					changeValue();
+					setTimeout(reschedule, 100);
+				}
+			}
+			changeValue();
+			setTimeout(function(){
+				reschedule()
+			}, 500);
+		}
+		$(".yadaInputNumericIncrement").on("mousedown", function() {
+			const $inputTag = $(this).siblings("input.yadaInputNumber");
+			const step = Number($inputTag.attr("step")||1);
+			changeNumericField.bind(this)($inputTag, step);
+		});
+		$(".yadaInputNumericDecrement").on("mousedown", function() {
+			const $inputTag = $(this).siblings("input.yadaInputNumber");
+			const step = Number($inputTag.attr("step")||1);
+			changeNumericField.bind(this)($inputTag, -step);
+		});
+		// Constrain the numeric value to min/max
+		$("input.yadaInputNumber").on("input", function() {
+			const $inputTag = $(this);
+			const minText = $inputTag.attr("min");
+			const maxText = $inputTag.attr("max");
+			const value = Number($inputTag.val());
+			if (minText!=null) {
+				const min = Number(minText);
+				if (value<min) {
+					$inputTag.val(min);
+					// Don't do this because we don't swallow the event: $inputTag.trigger('input');
+				}
+			}
+			if (maxText!=null) {
+				const max = Number(maxText);
+				if (value>max) {
+					$inputTag.val(max);
+					// Don't do this because we don't swallow the event: $inputTag.trigger('input');
+				}
+			}
+		});
+		
+	}	
+	
 }( window.yada = window.yada || {} ));

@@ -189,6 +189,20 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
 		return YadaUtil.INSTANCE.mapToString(resultMap);
 	}
 
+	/**
+	 * Add a key='value' pair to a string of comma-separated pairs
+	 * @param existing
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	private String appendAttribute(String existing, String key, String value) {
+		if (!existing.isEmpty()) {
+			existing += ",";
+		}
+		return existing + key + "='" + value + "'";
+	}
+
 	private String processInputTag(IOpenElementTag sourceTag, ITemplateContext context, IElementModelStructureHandler structureHandler) {
         // Convert all attributes of the source tag
         Map<String, String> inputSourceAttributes = sourceTag.getAttributeMap();
@@ -209,6 +223,12 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
 					break;
 				case "editor":
 					// TODO use ckedit
+					break;
+				case "ajaxTriggerKeys":
+					targetAttributesString = appendAttribute(targetAttributesString, "data-yadaAjaxTriggerKeys", attributeValue);
+					break;
+				case "ajaxResultFocus":
+					targetAttributesString = appendAttribute(targetAttributesString, "data-yadaAjaxResultFocus", attributeValue);
 					break;
 				default:
 					// Every yada attribute becomes a local variable

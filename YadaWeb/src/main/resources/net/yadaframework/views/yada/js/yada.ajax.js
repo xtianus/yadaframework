@@ -444,9 +444,37 @@
 		$link.removeClass('s_ajaxLink'); // Legacy
 		$link.not('.'+markerClass).addClass(markerClass);
 	};
+	
+	/**
+	 * Returns true if the current input key is listed in the data-yadaAjaxTriggerKeys attibute.
+	 * Also returns true if the current event is not a key event (like the input event)
+	 * Example: yada:ajaxTriggerKeys="Enter| |,"
+	 * @param inputEvent the input event that has been triggered
+	 * return true if the key that triggered the event is listed in 
+	 * the "data-yadaAjaxTriggerKeys" when present or if that attribute is not present
+	 */
+	yada.isAjaxTriggerKey  = function(keyEvent) {
+		const key = keyEvent.key; // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
+		if (key==null) {
+			return true; // Not a key event so we can't check the key
+		}
+		const input = keyEvent.target;
+		const $input = $(input);
+		const ajaxTriggerKeys = $input.attr("data-yadaAjaxTriggerKeys");
+		if (ajaxTriggerKeys==null) {
+			return true; // Do ajax call on any key when no attribute present
+		}
+		const triggerKeys = ajaxTriggerKeys.split("|");
+		for (var i=0; i<triggerKeys.length; i++) {
+			if (key==triggerKeys[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
-	 * Enables ajax calls on input fields that fire the "input" event.
+	 * Enables ajax calls on <input> fields that fire the "keyup" event.
 	 * There is no need to pass any element because it is always registered even on dynamically added content.
 	 */
 	yada.enableAjaxInputs = function() {
@@ -456,8 +484,16 @@
 		}
 		// All input fields that are either yadaAjax or data-yadaHref get handled.
 		const selector = "input.yadaAjax, input[data-yadaHref]";
-		$(document).on("input", selector, function(e) {
-			return makeAjaxCall(e, $(this), null, true);
+		$(document).on("keyup", selector, function(e) {
+			// If "data-yadaAjaxTriggerKeys" is present, call ajax only when one of the keys is pressed.
+			// If attribute not present, always call ajax
+			if (yada.isAjaxTriggerKey(e)) {
+				const $input = $(this);
+				// Ajax calls are not executed immediately, but after a timeout that is reset each time a valid key is pressed
+				yada.dequeueFunctionCall(this, function(){
+					makeAjaxCall(e, $input, null, true);
+				});
+			}
 		});
 		this.enableAjaxInputsDone = true;
 		$(selector).addClass(markerClass); // Not really needed
@@ -487,7 +523,7 @@
 	}
 	
 	/**
-	 * Make an ajax call when a link is clicked, a select is chosen, a checkbox is selected
+	 * Make an ajax call when a link is clicked, a select is chosen, a checkbox is selected etc.
 	 */
 	function makeAjaxCall(e, $element, handler, allowDefault) {
 		if (!allowDefault==true) {
@@ -520,11 +556,15 @@
 		if (url==null || url=='') {
 			url = $element.attr('href');
 		}
+		if (url==null || url=='') {
+			console.log("No url for ajax call");
+			return false;
+		}
 		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
 		// Create data for submission
 		var data = null;
 		var value = [];
-		var name = $element.attr("name");
+		var name = $element.attr("name") || "value"; // Parameter name fallback to "value" by default
 		var noLoader = hasNoLoader($element);	
 		// In a select, set the data object to the selected option
 		if ($element.is("select")) {
@@ -539,7 +579,7 @@
 			}
 		}
 		if (name !=null) {
-			data = {};
+			data = $element[0].yadaRequestData || {}; // Any yadaRequestData is also sent (see yada.dialect.js)
 			if (value.length>0) {
 				data[name] = value;
 			}
@@ -642,6 +682,7 @@
 			$return = [];
 		}
 		var fragmentCount = 0;
+		var focused = false;
 		for (var count=0; count<selectors.length; count++) {
 			var selector = selectors[count];
 			if ($replacementArray!=null && $replacementArray.length>0) {
@@ -657,6 +698,14 @@
 				fragmentCount = (fragmentCount+1) % $replacementArray.length;
 			}
 			yada.extendedSelect($element, selector).replaceWith($replacement);
+			if (!focused) {
+				// Focus on the first result element with data-yadaAjaxResultFocus
+				const $toFocus = $("[data-yadaAjaxResultFocus]", $replacement);
+				if ($toFocus.length>0) {
+					$toFocus.get(0).focus();
+					focused=true;
+				}
+			}
 		}
 		return $return;
 
