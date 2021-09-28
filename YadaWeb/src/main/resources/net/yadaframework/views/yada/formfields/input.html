@@ -71,6 +71,23 @@ It is used internally by the yada dialect processor to render the <yada:input> t
 						yada.updateInputCounter($("input[data-yadaTagId="+yadaTagId+"]"), $("#"+inputCounterId));
 					});
 				</script>
+				<script th:if="${_numeric_}" th:inline="javascript">
+					$(document).ready(function() {
+						// initialise numeric input fields with the min attribute
+						const yadaTagId = /*[[${yadaTagId}]]*/ 0;
+						$("input[data-yadaTagId="+yadaTagId+"]").each(function(){
+							const min = $(this).attr("min");
+							if (min!=null && $(this).val()<min) {
+								$(this).val(min);
+							}
+						});
+						// Only allow digits in numeric input fields
+						$("input[data-yadaTagId="+yadaTagId+"]").yadaInputFilter(function(value) {
+				    		return /^-?\d*$/.test(value);    // Allow digits only and an initial -, using a RegExp
+				  		});
+						
+					});
+				</script>
 			</div>
 		</th:block>
 	</th:block>

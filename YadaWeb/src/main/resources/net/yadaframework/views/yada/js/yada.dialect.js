@@ -100,33 +100,6 @@
 	}
 
 	yada.initYadaDialect = function() {
-		// Allow only certain characters to be typed into an input field based on a regexp
-		// Taken from https://stackoverflow.com/questions/995183/how-to-allow-only-numeric-0-9-in-html-inputbox-using-jquery/995193#995193
-		$.fn.yadaInputFilter = function(inputFilter) {
-			return this.on("input keydown keyup mousedown mouseup select contextmenu drop", function() {
-				if (inputFilter(this.value)) {
-					this.oldValue = this.value;
-					this.oldSelectionStart = this.selectionStart;
-					this.oldSelectionEnd = this.selectionEnd;
-				} else if (this.hasOwnProperty("oldValue")) {
-					this.value = this.oldValue;
-					this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
-				} else {
-					this.value = "";
-				}
-			});
-		}
-		// Only allow digits in numeric input fields
-		$(".yadaInputNumber").yadaInputFilter(function(value) {
-    		return /^-?\d*$/.test(value);    // Allow digits only and an initial -, using a RegExp
-  		});
-		// initialise numeric input fields with the min attribute
-		$(".yadaInputNumber").each(function(){
-			const min = $(this).attr("min");
-			if (min!=null) {
-				$(this).val(min);
-			}
-		});
 		// Change the numeric field using plus/minus buttons
 		function changeNumericField($inputTag, valueToAdd) {
 			const min = Number($inputTag.attr("min")||Number.MIN_SAFE_INTEGER);
@@ -135,6 +108,9 @@
 			$(this).on("mouseup mouseleave mousedrag", function() {
 				$(this).off("mouseup mouseleave mousedrag");
 				mousePressed=false;
+				const e = jQuery.Event("keyup");
+				e.key = "Enter"
+				$inputTag.trigger(e); 
 			});
 			function changeValue() {
 				var value = Number($inputTag.val());
@@ -145,7 +121,6 @@
 					return;
 				}
 				$inputTag.val(value+valueToAdd);
-				$inputTag.trigger('input');
 			}
 			function reschedule() {
 				if (mousePressed) {
@@ -158,18 +133,19 @@
 				reschedule()
 			}, 500);
 		}
-		$(".yadaInputNumericIncrement").on("mousedown", function() {
+		
+		$(document).on("mousedown", ".yadaInputNumericIncrement", function() {
 			const $inputTag = $(this).siblings("input.yadaInputNumber");
 			const step = Number($inputTag.attr("step")||1);
 			changeNumericField.bind(this)($inputTag, step);
 		});
-		$(".yadaInputNumericDecrement").on("mousedown", function() {
+		$(document).on("mousedown", ".yadaInputNumericDecrement", function() {
 			const $inputTag = $(this).siblings("input.yadaInputNumber");
 			const step = Number($inputTag.attr("step")||1);
 			changeNumericField.bind(this)($inputTag, -step);
 		});
 		// Constrain the numeric value to min/max
-		$("input.yadaInputNumber").on("input", function() {
+		$(document).on("input", "input.yadaInputNumber", function() {
 			const $inputTag = $(this);
 			const minText = $inputTag.attr("min");
 			const maxText = $inputTag.attr("max");

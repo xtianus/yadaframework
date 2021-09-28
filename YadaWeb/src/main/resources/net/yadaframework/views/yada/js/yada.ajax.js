@@ -700,7 +700,7 @@
 			yada.extendedSelect($element, selector).replaceWith($replacement);
 			if (!focused) {
 				// Focus on the first result element with data-yadaAjaxResultFocus
-				const $toFocus = $("[data-yadaAjaxResultFocus]", $replacement);
+				const $toFocus = $("[data-yadaAjaxResultFocus]:not([readonly]):not([disabled])", $replacement);
 				if ($toFocus.length>0) {
 					$toFocus.get(0).focus();
 					focused=true;
