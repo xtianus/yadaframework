@@ -45,7 +45,7 @@ public class YadaDialectUtil {
 	 * @param context
 	 * @param resultClass the type of the expected return value
 	 * @return
-	 * @return the result of evaluating the expression, or the original value in case of errors
+	 * @return the result of evaluating the expression, or the original value in case of errors and String result
 	 */
 	public <T> T parseExpression(String value, ITemplateContext context, Class<T> resultClass) {
 		try {
