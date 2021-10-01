@@ -13,6 +13,7 @@ It is used internally by the yada dialect processor to render the <yada:input> t
 <body>
 	<!-- Can use any th attributes on the tag here because the original ones have been replaced with plain HTML tags already, so no conflicts can arise -->
 	<th:block th:fragment="field" th:with="_numeric_=${yadaInput.type=='number'},
+		_file_=${yadaInput.type=='file'},
 		_password_=${yadaInput.type=='password'},
 		_validationFailed_=${yadaInvalidFlag==true}">
 	
@@ -40,13 +41,14 @@ It is used internally by the yada dialect processor to render the <yada:input> t
 		<th:block th:remove="all">
 			<div class="input-group yadaInput" th:classappend="${yadaInput.class}">
 				<a th:if="${_numeric_}" class="input-group-text yadaInputNumericDecrement" href="javascript:;" tabindex=-1>-</a>
-				<span th:if="${yadaAddonLeft!=null}" class="input-group-text" th:text="${yadaAddonLeft}">@</span>
+				
+				<div th:if="${yadaAddonLeft!=null}" class="input-group-text" th:utext="${yadaAddonLeft}">@</div>
 				
 				<input th:attr="data-yadaTagId=${yadaTagId},__${yadaTargetAttributesString}__" th:classappend="'form-control' + ${_numeric_?' yadaInputNumber':''} + ${_validationFailed_?' is-invalid':''}">
 				
-				<th:block th:if="${yadaAddonRight!=null}" class="input-group-text">
-					<span class="input-group-text" th:text="${yadaAddonRight}">@example.com</span>
-				</th:block>
+				<div th:if="${yadaAddonRight!=null}" class="input-group-text" th:utext="${yadaAddonRight}">@example.com</div>
+				<div th:if="${_file_}" class="jsYadaFileDelete yadaHidden input-group-text"><i class="yadaIcon yadaIcon-delete"></i></div>
+				
 				<span th:if="${_password_}" class="input-group-btn yadaShowPasswordAddon">
 					<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
 				</span>
@@ -63,7 +65,24 @@ It is used internally by the yada dialect processor to render the <yada:input> t
 				<div th:if="${_validationFailed_}" th:text="${yadaValidationMessage}?:#{__${yadaMessageKey}__}" class="invalid-feedback"> <!-- Bootstrap 5 -->
       				Please enter a valid value
     			</div>
-    
+    			
+    			<script th:if="${_file_}" th:inline="javascript">
+					$(document).ready(function() {
+						const yadaTagId = /*[[${yadaTagId}]]*/ 0;
+						const $inputTag = $("input[data-yadaTagId="+yadaTagId+"]");
+						$inputTag.on("change", function(e){
+							const input = e.target;
+							if (input.files.length>0) {
+								const $deleteIcon = $inputTag.siblings(".jsYadaFileDelete");
+								$deleteIcon.removeClass("yadaHidden");
+								$deleteIcon.on("click", function(){
+									$inputTag.val("");
+									$deleteIcon.addClass("yadaHidden");
+								});
+							}
+						});
+					});
+				</script>
 				<script th:if="${yadaInputCounterId!=null}" th:inline="javascript">
 					$(document).ready(function() {
 						const inputCounterId = /*[[${yadaInputCounterId}]]*/ 0;

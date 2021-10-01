@@ -60,6 +60,7 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
 	@Override
 	protected void doProcess(ITemplateContext context, IModel model, IElementModelStructureHandler structureHandler) {
 
+		IText text;
 		String targetAttributesString = "";
         for (int i = 0; i < model.size(); i++) {
         	ITemplateEvent iTemplateEvent = model.get(i);
@@ -72,12 +73,12 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
         			structureHandler.setLocalVariable("yadaTagId",  yadaDialectUtil.makeYadaTagId(openTag));
         			break;
         		case "addonLeft":
-        			IText text = (IText) model.get(++i); // Text node
-        			structureHandler.setLocalVariable("yadaAddonLeft", text.getText());
+        			// IText text = (IText) model.get(++i); // Text node
+        			structureHandler.setLocalVariable("yadaAddonLeft", yadaDialectUtil.getInnerHtml(model, i));
         			break;
         		case "addonRight":
-        			text = (IText) model.get(++i); // Text node
-        			structureHandler.setLocalVariable("yadaAddonRight", text.getText());
+        			// text = (IText) model.get(++i); // Text node
+        			structureHandler.setLocalVariable("yadaAddonRight", yadaDialectUtil.getInnerHtml(model, i));
         			break;
         		case "suggestion":
         			String newAttributes = processSuggestionTag(openTag, context, structureHandler);

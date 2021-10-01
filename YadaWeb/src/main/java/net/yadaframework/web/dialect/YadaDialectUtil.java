@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.context.ITemplateContext;
+import org.thymeleaf.model.ICloseElementTag;
+import org.thymeleaf.model.IModel;
 import org.thymeleaf.model.IOpenElementTag;
 import org.thymeleaf.model.ITemplateEvent;
 import org.thymeleaf.standard.expression.IStandardExpression;
@@ -16,6 +18,7 @@ import org.thymeleaf.standard.expression.StandardExpressions;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 public class YadaDialectUtil {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
@@ -37,6 +40,37 @@ public class YadaDialectUtil {
 
 	public YadaDialectUtil(YadaConfiguration config) {
 		this.config=config;
+	}
+
+	/**
+	 * Returns the HTML contained in a tag, as a string
+	 * @param model
+	 * @param openNodeIndex the index of the open tag in the model
+	 * @return
+	 */
+	public String getInnerHtml(IModel model, int openNodeIndex) {
+		StringBuilder result = new StringBuilder();
+		ITemplateEvent iTemplateEvent = model.get(openNodeIndex);
+		if (!(iTemplateEvent instanceof IOpenElementTag)) {
+			throw new YadaInvalidUsageException("The openNodeIndex should point to an open tag");
+		}
+		final IOpenElementTag openTag = (IOpenElementTag) iTemplateEvent;
+		String outerTagName = openTag.getElementCompleteName();
+		int i = openNodeIndex;
+		while (++i<model.size()) {
+			ITemplateEvent node = model.get(i);
+			if (node instanceof ICloseElementTag) {
+				if (((ICloseElementTag)node).getElementCompleteName().equals(outerTagName)) {
+					return result.toString();
+				}
+			}
+			result.append(node.toString());
+			if (node instanceof IOpenElementTag) {
+				result.append(getInnerHtml(model, i));
+			}
+		}
+		log.error("Malformed HTML: no close tag for {} in {} line {} (ignored)", outerTagName, iTemplateEvent.getTemplateName(), iTemplateEvent.getLine());
+		return result.toString(); // Should never get here
 	}
 
 	/**
