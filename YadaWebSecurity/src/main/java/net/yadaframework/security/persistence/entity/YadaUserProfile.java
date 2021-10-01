@@ -20,6 +20,7 @@ import org.apache.commons.lang3.LocaleUtils;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.web.YadaJsonView;
 
 @Entity
@@ -27,11 +28,11 @@ import net.yadaframework.web.YadaJsonView;
 // @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaUserProfile implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	// For optimistic locking
 	@Version
 	protected long version;
-	
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
@@ -49,20 +50,23 @@ public class YadaUserProfile implements Serializable {
 	@NotNull
 	@OneToOne(optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
 	protected YadaUserCredentials userCredentials;
-	
+
 	@Column(length = 32)
 	protected Locale locale;
-	
+
 	@Column(length = 64)
 	protected TimeZone timezone; 	// Timezone ID: "America/Los_Angeles",
 									// "America/Argentina/ComodRivadavia"
 									// https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
+	@OneToOne(cascade=CascadeType.PERSIST)
+	protected YadaAttachedFile avatar;
+
 // Removed because I don't want to force the use of a YadaTicket table
 //	@JsonIgnore
 //	@OneToMany(mappedBy="owner", cascade=CascadeType.ALL)
 //	protected List<YadaTicket> tickets;
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -115,7 +119,7 @@ public class YadaUserProfile implements Serializable {
 	public void setTimezone(String timezoneString) {
 		this.timezone = TimeZone.getTimeZone(timezoneString);
 	}
-	
+
 	public long getVersion() {
 		return version;
 	}
@@ -127,7 +131,7 @@ public class YadaUserProfile implements Serializable {
 	public void setLocale(Locale locale) {
 		this.locale = locale;
 	}
-	
+
 	/**
 	 * Set the locale from a locale string in the form ll_CC like en_US. Case sensitive.
 	 */
@@ -154,5 +158,13 @@ public class YadaUserProfile implements Serializable {
 		}
 		return super.equals(obj);
 	}
-	
+
+	public YadaAttachedFile getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(YadaAttachedFile avatar) {
+		this.avatar = avatar;
+	}
+
 }

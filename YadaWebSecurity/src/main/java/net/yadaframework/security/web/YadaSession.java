@@ -10,7 +10,6 @@ import org.springframework.web.context.annotation.SessionScope;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
-import net.yadaframework.persistence.repository.YadaFileManagerDao;
 import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.security.components.YadaUserDetailsService;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
@@ -34,7 +33,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	@Autowired protected YadaUserProfileDao<T> yadaUserProfileDao;
 	@Autowired protected YadaUserDetailsService yadaUserDetailsService;
 	@Autowired protected YadaUserCredentialsDao yadaUserCredentialsDao;
-	@Autowired protected YadaFileManagerDao yadaFileManagerDao;
+	// @Autowired protected YadaFileManagerDao yadaFileManagerDao;
 	@Autowired protected YadaUtil yadaUtil;
 
 	protected Long impersonatorUserId = null;
