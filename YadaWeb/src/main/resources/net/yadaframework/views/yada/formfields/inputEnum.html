@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://www.yadaframework.net" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
+
+<!--/*
+Template for <yada:input yada:enumclassname> resulting HTML.
+It is used internally by the yada dialect processor to render the <yada:input> tag but could be included directly in a HTML template if needed.
+
+*/-->
+
+<body>
+	<!-- Can use any th attributes on the tag here because the original ones have been replaced with plain HTML tags already, so no conflicts can arise -->
+	<th:block th:fragment="field">
+	
+		<div class="input-group yadaInput" th:classappend="${yadaInput.class}">
+			<div th:each="radioValue : ${T(__${yadaenumclassname}__).values()}" class="form-check form-check-inline">
+				<input th:attr="data-yadaTagId=${yadaTagId},__${yadaTargetAttributesString}__" th:classappend="form-check-input"
+					th:checked="${yadaInput.value==radioValue.name()}" th:id="${yadaTagId+radioValue}"
+					th:value="${radioValue.name()}">
+				<label class="form-check-label" th:for="${yadaTagId+radioValue}" 
+				 	th:text="#{${yadalabelkeyprefix}+${radioValue.name()}}">MyRadio1</label>
+			</div>
+				
+		</div>
+			
+	</th:block>
+</body>
+</html>
+		

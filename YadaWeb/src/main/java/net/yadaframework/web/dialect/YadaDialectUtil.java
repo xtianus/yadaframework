@@ -1,7 +1,9 @@
 package net.yadaframework.web.dialect;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -134,9 +136,15 @@ public class YadaDialectUtil {
 	 * @param context
 	 * @return a comma-separated string of name=value attributes to be used in th:attr
 	 */
-	public String getConvertedCustomTagAttributeString(IOpenElementTag customTag, ITemplateContext context) {
+	public String getConvertedCustomTagAttributeString(IOpenElementTag customTag, ITemplateContext context, String...ignoreAttributes) {
 		// First, get all HTML attributes
-		Map<String, String> newAttributes = getHtmlAttributes(customTag);
+		Set<String> ignore = new HashSet<String>();
+		for (int i=0; i<ignoreAttributes.length; i++) {
+			if (ignoreAttributes[i]!=null) {
+				ignore.add(ignoreAttributes[i].toLowerCase());
+			}
+		}
+		Map<String, String> newAttributes = getHtmlAttributes(customTag, ignore);
 		// NO: Then convert all th: attributes to HTML attributes
 		// This was used when the YadaDialect precedence was the same as the StandardDialect
 		// convertThAttributes(customTag, newAttributes, context);
@@ -148,13 +156,15 @@ public class YadaDialectUtil {
 	 * @param sourceTag
 	 * @return the HTML attributes found on the tag
 	 */
-	private Map<String, String> getHtmlAttributes(IOpenElementTag sourceTag) {
+	private Map<String, String> getHtmlAttributes(IOpenElementTag sourceTag, Set<String> ignore) {
 		Map<String, String> newAttributes = new HashMap<>();
 		Map<String, String> sourceAttributes = sourceTag.getAttributeMap();
 		for (Map.Entry<String,String> sourceAttribute : sourceAttributes.entrySet()) {
-			String attributeName = sourceAttribute.getKey();
+			String attributeName = sourceAttribute.getKey().toLowerCase();
 			String attributeValue = sourceAttribute.getValue();
-			if (!attributeName.startsWith(YADA_PREFIX_WITHCOLUMN) && !attributeName.startsWith(THYMELEAF_PREFIX_WITHCOLUMN)) {
+			if (!attributeName.startsWith(YADA_PREFIX_WITHCOLUMN) &&
+				!attributeName.startsWith(THYMELEAF_PREFIX_WITHCOLUMN) &&
+				!ignore.contains(attributeName)) {
 				if ("type".equalsIgnoreCase(attributeName) && "number".equalsIgnoreCase(attributeValue)) {
 					// The "type='number'" attribute must be removed from the output tag because it is handled in a custom way
 					continue;

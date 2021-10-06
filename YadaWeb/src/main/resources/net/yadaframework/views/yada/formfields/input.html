@@ -83,9 +83,9 @@ It is used internally by the yada dialect processor to render the <yada:input> t
 						});
 					});
 				</script>
-				<script th:if="${yadaInputCounterId!=null}" th:inline="javascript">
+				<script th:if="${yadainputcounterid!=null}" th:inline="javascript">
 					$(document).ready(function() {
-						const inputCounterId = /*[[${yadaInputCounterId}]]*/ 0;
+						const inputCounterId = /*[[${yadainputcounterid}]]*/ 0;
 						const yadaTagId = /*[[${yadaTagId}]]*/ 0;
 						yada.updateInputCounter($("input[data-yadaTagId="+yadaTagId+"]"), $("#"+inputCounterId));
 					});

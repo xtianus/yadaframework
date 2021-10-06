@@ -61,16 +61,20 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
 	protected void doProcess(ITemplateContext context, IModel model, IElementModelStructureHandler structureHandler) {
 
 		IText text;
+		boolean inputEnum = false;
 		String targetAttributesString = "";
         for (int i = 0; i < model.size(); i++) {
         	ITemplateEvent iTemplateEvent = model.get(i);
         	if (iTemplateEvent instanceof IOpenElementTag) {
         		final IOpenElementTag openTag = (IOpenElementTag) iTemplateEvent;
+        		// If yada:enumclassname is defined, use a radio
+        		inputEnum = openTag.getAttributeMap().get("yada:enumclassname") != null;
         		String tagName = yadaDialectUtil.removePrefix(openTag.getElementCompleteName(), dialectPrefix);
         		switch (tagName) {
         		case "input":
-        			targetAttributesString = processInputTag(openTag, context, structureHandler);
+        			targetAttributesString = processInputTag(openTag, context, structureHandler, inputEnum);
         			structureHandler.setLocalVariable("yadaTagId",  yadaDialectUtil.makeYadaTagId(openTag));
+        			//
         			break;
         		case "addonLeft":
         			// IText text = (IText) model.get(++i); // Text node
@@ -103,7 +107,8 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
 
         // Add the replacement tag
         Map<String, String> divAttributes = new HashMap<>();
-        divAttributes.put("th:replace", "/yada/formfields/input::field");
+        String targetImplementation = inputEnum ? "/yada/formfields/inputEnum::field" : "/yada/formfields/input::field";
+        divAttributes.put("th:replace", targetImplementation);
         final IModelFactory modelFactory = context.getModelFactory();
         IOpenElementTag replacementTagOpen = modelFactory.createOpenElementTag("div", divAttributes, AttributeValueQuotes.DOUBLE, false);
         ICloseElementTag replacementTagClose = modelFactory.createCloseElementTag("div");
@@ -204,10 +209,10 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
 		return existing + key + "='" + value + "'";
 	}
 
-	private String processInputTag(IOpenElementTag sourceTag, ITemplateContext context, IElementModelStructureHandler structureHandler) {
+	private String processInputTag(IOpenElementTag sourceTag, ITemplateContext context, IElementModelStructureHandler structureHandler, boolean inputEnum) {
         // Convert all attributes of the source tag
         Map<String, String> inputSourceAttributes = sourceTag.getAttributeMap();
-        String targetAttributesString = yadaDialectUtil.getConvertedCustomTagAttributeString(sourceTag, context);
+        String targetAttributesString = yadaDialectUtil.getConvertedCustomTagAttributeString(sourceTag, context, inputEnum?"value":null);
         // Handle "yada:" attributes
         for (Map.Entry<String,String> sourceAttribute : inputSourceAttributes.entrySet()) {
 			String attributeName = sourceAttribute.getKey();
@@ -231,11 +236,14 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
 				case "ajaxResultFocus":
 					targetAttributesString = appendAttribute(targetAttributesString, "data-yadaAjaxResultFocus", attributeValue);
 					break;
+				case "":
 				default:
-					// Every yada attribute becomes a local variable
-					// yadaInputCounterId
+					// Every yada attribute becomes a local variable. Watch the case!
+					// yadainputcounterid
+					// yadaenumclassname
+					// yadalabelkeyprefix
 					// etc.
-					String name = "yada" + StringUtils.capitalize(yadaAttributeName);
+					String name = "yada" + yadaAttributeName.toLowerCase();
 					structureHandler.setLocalVariable(name, attributeValue==null?true:attributeValue);
 				}
 			}
