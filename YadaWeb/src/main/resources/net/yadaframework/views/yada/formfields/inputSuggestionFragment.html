@@ -25,7 +25,7 @@
 					th:text="${suggestion}"
 					>#villa</a>
 				<a th:if="${complex}" class="dropdown-item" href="javascript:;" 
-					th:text="${suggestion.getSuggestionText(#ctx.locale)}"
+					th:text="${suggestion.getSuggestionText(#locale)}"
 					th:data-idname="${suggestion.suggestionIdRequestName}"
 					th:data-id="${suggestion.suggestionId}"
 					>#villa</a>
