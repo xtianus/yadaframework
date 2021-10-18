@@ -1301,6 +1301,30 @@ public class YadaUtil {
 	 * @param shellCommandKey xpath key of the shell command, e.g. "config/shell/cropImage"
 	 * @param substitutionMap optional key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
 	 * pair is like "key"-->"value". If the value is a collection, arguments are unrolled so key-->collection will result in key0=val0 key1=val1...
+	 * @return the command exit value
+	 * @throws IOException
+	 */
+	public int shellExec(String shellCommandKey, Map substitutionMap) throws IOException {
+		return shellExec(shellCommandKey, substitutionMap, null);
+	}
+
+	/**
+	 * Run an external shell command that has been defined in the configuration file.
+	 * The command must be as in the following example:
+	 * <pre>
+ 	&lt;imageConvert timeoutseconds="20">
+		&lt;executable windows="true">magick&lt;/executable>
+		&lt;executable mac="true" linux="true">/usr/local/bin/magick&lt;/executable>
+		&lt;arg>convert&lt;/arg>
+		&lt;arg>${FILENAMEIN}&lt;/arg>
+		&lt;arg>${FILENAMEOUT}&lt;/arg>
+	&lt;/imageConvert>
+	 * </pre>
+	 * Be aware that args can not contain "Commons Configuration variables" because they clash with placeholders as defined below.
+	 * See the yadaframework documentation for full syntax.
+	 * @param shellCommandKey xpath key of the shell command, e.g. "config/shell/cropImage"
+	 * @param substitutionMap optional key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
+	 * pair is like "key"-->"value". If the value is a collection, arguments are unrolled so key-->collection will result in key0=val0 key1=val1...
 	 * @param outputStream optional ByteArrayOutputStream that will contain the command output (out + err)
 	 * @return the command exit value
 	 * @throws IOException

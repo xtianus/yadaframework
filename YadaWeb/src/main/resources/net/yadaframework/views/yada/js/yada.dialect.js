@@ -42,6 +42,7 @@
 		
 		if (yada.isAjaxTriggerKey(event)) {
 			// Ajax call triggered, so no suggestion list must be returned
+			event.preventDefault();
 			return;
 		}
 		

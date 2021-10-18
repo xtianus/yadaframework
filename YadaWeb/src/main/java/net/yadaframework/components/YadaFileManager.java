@@ -50,12 +50,12 @@ public class YadaFileManager {
 	// TODO distinguere tra mobile portrait e mobile landscape
 	// TODO le dimensioni mobile/desktop devono essere configurabili
 	// TODO mantenere l'immagine caricata nella versione originale
-	
+
 	/**
 	 * Move the file to the public temp folder for later processing.
 	 * @param yadaManagedFile
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public YadaManagedFile moveToTemp(YadaManagedFile yadaManagedFile) throws IOException {
 		File destinationFile = new File(config.getTempImageDir(), yadaManagedFile.getFilename());
@@ -414,6 +414,22 @@ public class YadaFileManager {
 			clientFilename = multipartFile.getOriginalFilename();
 		}
 		return attach(currentAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
+	}
+
+	/**
+	 * Copies an uploaded file to the destination folder, creating a database association to assign to an Entity.
+	 * The name of the file is in the format [basename]managedFileName_id.ext.
+	 * Images are not resized.
+	 * @param multipartFile the original uploaded file
+	 * @param relativeFolderPath path of the target folder relative to the contents folder
+	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
+	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
+	 * @throws IOException
+	 * @see {@link #attach(File, String, String, String, Integer, Integer)}
+	 */
+	public YadaAttachedFile attachNew(MultipartFile multipartFile, String relativeFolderPath, String namePrefix) throws IOException {
+		File managedFile = uploadFile(multipartFile);
+		return attachNew(managedFile, multipartFile, relativeFolderPath, namePrefix, null, null, null);
 	}
 
 	/**
