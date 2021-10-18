@@ -22,7 +22,8 @@ public class YadaAttachedFileDao {
     @PersistenceContext private EntityManager em;
 
     /**
-     * Delete a YadaAttachedFile using fast native queries
+     * Delete a YadaAttachedFile and connected data, but not the file on disk. If there is a relationship between an Entity and the YadaAttachedFile,
+     * deletion fails because of the foreign key. The relationship should be removed before calling this method.
      * @param yadaAttachedFileId
      */
     @Transactional(readOnly = false)
@@ -44,13 +45,14 @@ public class YadaAttachedFileDao {
     }
 
     /**
-     * Deletes a YadaAttachedFile after merging it (slower)
+     * Deletes a YadaAttachedFile when not null
      * @param yadaAttachedFile
      */
     @Transactional(readOnly = false)
     public void delete(YadaAttachedFile yadaAttachedFile) {
-    	yadaAttachedFile = em.merge(yadaAttachedFile);
-    	em.remove(yadaAttachedFile);
+    	if (yadaAttachedFile!=null && yadaAttachedFile.getId()!=null) {
+    		delete(yadaAttachedFile.getId());
+    	}
     }
 
 	/**

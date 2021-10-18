@@ -325,6 +325,7 @@
 	/**
 	 * Enables ajax on a checkbox change. Will either submit a parent form or make an ajax call directly.
 	 */
+	// Legacy version
 	yada.enableAjaxCheckboxes = function(handler, $element) {
 		if ($element==null || $element=="") {
 			$element = $('body');
@@ -338,6 +339,7 @@
 			yada.enableAjaxCheckbox($(this), handler);
 		});
 	};
+	// Legacy version
 	yada.enableAjaxCheckbox = function($checkbox, handler) {
 		// If array, recurse to unroll
 		if ($checkbox.length>1) {
@@ -369,6 +371,7 @@
 	
 	// TODO this may conflict with yada.enableAjaxInputs and should be replaced with that one if possible
 
+	// Legacy version
 	yada.enableAjaxSelects = function(handler, $element) {
 		if ($element==null || $element=="") {
 			$element = $('body');
@@ -382,7 +385,7 @@
 			yada.enableAjaxSelect($(this), handler);
 		});
 	};
-	
+	// Legacy version
 	yada.enableAjaxSelect = function($select, handler) {
 		// If array, recurse to unroll
 		if ($select.length>1) {
@@ -400,23 +403,6 @@
 		$select.not('.'+markerClass).addClass(markerClass);
 	};
 	
-	yada.enableAjaxSelect = function($select, handler) {
-		// If array, recurse to unroll
-		if ($select.length>1) {
-			$select.each(function() {
-				yada.enableAjaxSelect($(this), handler);
-			});
-			return;
-		}
-		// From here on the $select is a single element, not an array
-		$select.not('.'+markerClass).change(function(e) {
-			$select = $(this); // Needed otherwise $select could be stale (from a previous ajax replacement) 
-			return makeAjaxCall(e, $select, handler);
-		})
-		$select.removeClass('yadaAjax');
-		$select.not('.'+markerClass).addClass(markerClass);
-	};
-
 	/**
 	 * Sends a link/button via ajax, it doesn't have to have class .yadaAjax.
 	 * Buttons must have a yada-href attribute and not be submit buttons.
@@ -424,6 +410,7 @@
 	 * @param $link the jquery anchor or button (could be an array), e.g. $('.niceLink')
 	 * @param handler funzione chiamata in caso di successo e nessun yadaWebUtil.modalError()
 	 */
+	// Legacy version
 	yada.enableAjaxLink = function($link, handler) {
 		// If array, recurse to unroll
 		if ($link.length>1) {
@@ -482,8 +469,8 @@
 			// Prevent binding multiple event handlers because yada.enableAjaxInputs is called after each ajax call for legacy reasons
 			return;
 		}
-		// All input fields that are either yadaAjax or data-yadaHref get handled.
-		const selector = "input.yadaAjax, input[data-yadaHref]";
+		// All input fields that are either yadaAjax or data-yadaHref get handled, if they are not radio
+		var selector = "input.yadaAjax:not([type=radio]), input[data-yadaHref]:not([type=radio])";
 		$(document).on("keyup", selector, function(e) {
 			// If "data-yadaAjaxTriggerKeys" is present, call ajax only when one of the keys is pressed.
 			// If attribute not present, always call ajax
@@ -494,6 +481,12 @@
 					makeAjaxCall(e, $input, null, true);
 				});
 			}
+		});
+		// Radio buttons that do not use keyup
+		selector = "input.yadaAjax[type=radio], input[data-yadaHref][type=radio]";
+		$(document).on("input", selector, function(e) {
+			const $input = $(this);
+			makeAjaxCall(e, $input, null, true);
 		});
 		this.enableAjaxInputsDone = true;
 		$(selector).addClass(markerClass); // Not really needed
