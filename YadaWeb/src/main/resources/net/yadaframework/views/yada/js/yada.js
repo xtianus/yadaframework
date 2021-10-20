@@ -180,6 +180,27 @@
 		}
 	};
 
+	/**
+	 * When a function can be called repeatedly but only the last call is useful, previous
+	 * calls can be cancelled by next ones if within a given timeout.
+	 * When the funcion takes too long to execute, the timeout is increased so that less calls are performed.
+	 * Useful when making ajax calls.
+	 * @param domElement any dom element on which a flag can be set. Must be the same for repeated calls.
+	 * @param functionToCall any function (can be an inline function)
+	 */
+	yada.dequeueFunctionCall = function(domElement, functionToCall) {
+		var callTimeout = 200;
+		if (domElement.yadaDequeueFunctionCallRunning!=null) {
+			// Ajax call still running, so delay a bit longer before the next one
+			callTimeout = 2000;
+		}
+		clearTimeout(domElement.yadaDequeueFunctionTimeoutHandler);
+		domElement.yadaDequeueFunctionTimeoutHandler = setTimeout(function(){
+			domElement.yadaDequeueFunctionCallRunning = true;
+			functionToCall.bind(domElement)();
+			domElement.yadaDequeueFunctionCallRunning = null; // This may clear some other's call flag but don't care
+		}, callTimeout);
+	}
 
 	
 	//////////////////////
