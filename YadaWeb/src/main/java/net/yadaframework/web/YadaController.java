@@ -1,8 +1,11 @@
 package net.yadaframework.web;
 
+import java.time.ZoneOffset;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -15,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.core.YadaConstants;
 
 @Controller
 public class YadaController {
@@ -22,6 +26,22 @@ public class YadaController {
 
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaWebUtil yadaWebUtil;
+
+	/**
+	 * Set the user timezone. Called by yada.js at each new browser session
+	 * @param timezoneOffset the offset in minutes from UTC
+	 * @return
+	 */
+	@RequestMapping("/yadaTimezone")
+	public String yadaTimezone(int timezoneOffset, HttpSession httpSession, Model model, Locale locale) {
+		int offsetHours =  timezoneOffset/60;
+		int offsetMinues = timezoneOffset - offsetHours*60;
+		ZoneOffset userZoneOffset = ZoneOffset.ofHoursMinutes(-offsetHours, -offsetMinues);
+		TimeZone timeZone = TimeZone.getTimeZone(userZoneOffset);
+		//  Can't use YadaSession here
+		httpSession.setAttribute(YadaConstants.SESSION_USER_TIMEZONE, timeZone);
+		return YadaViews.AJAX_SUCCESS;
+	}
 
 	// Error page for HTTP error codes
     @RequestMapping("/yadaError")
@@ -50,6 +70,6 @@ public class YadaController {
         return "forward:" + config.getErrorPageForward();
 //        YadaLocalePathVariableFilter.resetCalledFlag(request); // Reset so that the locale is set again and stripped
 //        return "forward:" + yadaWebUtil.getLocaleSafeForward(config.getErrorPageForward());
-    }	
+    }
 
 }

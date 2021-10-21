@@ -18,8 +18,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
@@ -38,7 +36,7 @@ import net.yadaframework.web.YadaJsonView;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaUserCredentials implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	// For optimistic locking
 	@Version
 	private long version;
@@ -46,53 +44,53 @@ public class YadaUserCredentials implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
-	
+
 	// Non può essere NaturalId perchè sarebbe immutable
-	// @NaturalId 
+	// @NaturalId
 	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Column(nullable=false, unique=true, length=128)
 	private String username; // uso sempre l'email
-	
+
 	@JsonIgnore
 	@Column(nullable=false, length=128)
 	private String password;
-	
+
 	@Transient
 	private String newPassword; // For use in forms
-	
+
 	private Date passwordDate;
-	
+
 	private boolean changePassword=false; // true quando un utente deve cambiare password al prossimo login
-	
+
 	private Date creationDate;
-	
+
 	private boolean enabled=false;
-	
+
 	@ElementCollection(fetch=FetchType.EAGER)
 	@Fetch(FetchMode.SUBSELECT) // Questo permette di fare una query sola invece di una per role
-	private List<Integer> roles; 
-	
+	private List<Integer> roles;
+
 	private int failedAttempts; // Fallimenti di login consecutivi. Viene modificato direttamente nel db da UserCredentialsRepository.resetFailedAttempts()
 	private Date lastFailedAttempt; // timestamp dell'ultimo login fallito
 	@JsonSerialize(using=YadaJsonDateTimeShortSerializer.class)
 	private Date lastSuccessfulLogin; // timestamp dell'ultimo login completato - settare con userCredentialsRepository.updateLoginTimestamp()
-	
+
 	@JsonIgnore // Ignored because of lazy association
-	@OneToMany(fetch=FetchType.LAZY, cascade=CascadeType.ALL, mappedBy="yadaUserCredentials") // Non posso mettere orphanRemoval=true perchè prendo una eccezione: A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance 
+	@OneToMany(fetch=FetchType.LAZY, cascade=CascadeType.ALL, mappedBy="yadaUserCredentials") // Non posso mettere orphanRemoval=true perchè prendo una eccezione: A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance
 	private List<YadaSocialCredentials> yadaSocialCredentialsList;
-	
+
 //	@NotNull
 //	@OneToOne(cascade = CascadeType.ALL, optional=false)
 //	@MapsId // UserProfile condivide l'id
 //	@OneToOne(cascade = CascadeType.ALL)
 //    @MapsId("id")
 //    private UserProfile userProfile = new UserProfile();
-	
+
 	@PrePersist
 	void setDefaults() {
 		creationDate = new Date();
 	}
-	
+
 //	@Transient
 //	@JsonProperty("lastSuccessfulLogin")
 //	// TODO questo è da rifare con @JsonSerialize(using=JsonDateSimpleSerializer.class)
@@ -106,7 +104,7 @@ public class YadaUserCredentials implements Serializable {
 //		}
 //		return null;
 //	}
-	
+
 	/**
 	 * Setta un unico ruolo cancellando quelli eventualmente presenti
 	 * @param role
@@ -124,7 +122,7 @@ public class YadaUserCredentials implements Serializable {
 		}
 		return roles.contains(role);
 	}
-	
+
 	/**
 	 * Add all roles if not already present
 	 * @param roles
@@ -135,7 +133,7 @@ public class YadaUserCredentials implements Serializable {
 			addRole(role);
 		}
 	}
-	
+
 	/**
 	 * Add a role if not already present
 	 * @param role
@@ -149,7 +147,7 @@ public class YadaUserCredentials implements Serializable {
 			roles.add(role);
 		}
 	}
-	
+
 	/**
 	 * Remove a role if present
 	 * @param role
@@ -162,19 +160,23 @@ public class YadaUserCredentials implements Serializable {
 			}
 		}
 	}
-	
+
 	public String getUsername() {
 		return username;
 	}
-	
+
+	/**
+	 * Sets the username after trimming and lowercase conversion in the default locale
+	 * @param username
+	 */
 	public void setUsername(String username) {
-		this.username = username;
+		this.username = username==null?null:username.trim().toLowerCase();
 	}
-	
+
 	public String getPassword() {
 		return password;
 	}
-	
+
 	/**
 	 * Sets the password and its timestamp then clears the "password change needed" flag
 	 * @param password
@@ -188,7 +190,7 @@ public class YadaUserCredentials implements Serializable {
 		this.changePassword = false;
 		this.failedAttempts = 0;
 	}
-	
+
 	public void setPassword(String password) {
 		this.password = password;
 	}
@@ -302,7 +304,7 @@ public class YadaUserCredentials implements Serializable {
 			List<YadaSocialCredentials> yadaSocialCredentialsList) {
 		this.yadaSocialCredentialsList = yadaSocialCredentialsList;
 	}
-	
+
 	@Transient
 	public void addYadaSocialCredentials(YadaSocialCredentials yadaSocialCredentials) {
 		if (this.yadaSocialCredentialsList==null) {

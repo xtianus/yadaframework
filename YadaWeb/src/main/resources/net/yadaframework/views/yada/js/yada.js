@@ -34,10 +34,12 @@
 	
 	var siteMatcher=RegExp("(?:http.?://)?([^/:]*).*"); // Extract the server name from a url like "http://www.aaa.com/xxx" or "www.aaa.com"
 	
-	var parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
-	var siblingsSelector = "yadaSiblings:"; // Used to indicate that a CSS selector should be searched in the siblings()
-	var closestFindSelector = "yadaClosestFind:"; // Used to indicate that a two-part CSS selector should be searched with closest() then with find()
-	var siblingsFindSelector = "yadaSiblingsFind:"; // Used to indicate that a two-part CSS selector should be searched with siblings() then with find()
+	const parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
+	const siblingsSelector = "yadaSiblings:"; // Used to indicate that a CSS selector should be searched in the siblings()
+	const closestFindSelector = "yadaClosestFind:"; // Used to indicate that a two-part CSS selector should be searched with closest() then with find()
+	const siblingsFindSelector = "yadaSiblingsFind:"; // Used to indicate that a two-part CSS selector should be searched with siblings() then with find()
+	
+	const cookieNameTimezone = "yada.timezone.sent";
 	
 	$(document).ready(function() {
 		// Be aware that all ajax links and forms will NOT be ajax if the user clicks while the document is still loading.
@@ -46,6 +48,18 @@
 		if (typeof yada.initYadaDialect == "function") {
 			yada.initYadaDialect();
 		}
+		
+		// Send the current timezone offset to the server, once per browser session
+		const timezoneSent = yada.getCookie(cookieNameTimezone);
+		if (!timezoneSent) {
+			const data = {
+				'timezoneOffset': new Date().getTimezoneOffset()
+			}
+			jQuery.post("/yadaTimezone", data, function(){
+				yada.setCookie(cookieNameTimezone, true); // Session cookie
+			});
+		}
+		
 	});
 	
 	function initHandlers() {
@@ -187,7 +201,7 @@
 	/**
 	 * When a function can be called repeatedly but only the last call is useful, previous
 	 * calls can be cancelled by next ones if within a given timeout.
-	 * When the funcion takes too long to execute, the timeout is increased so that less calls are perfomed.
+	 * When the funcion takes too long to execute, the timeout is increased so that less calls are performed.
 	 * Useful when making ajax calls.
 	 * @param domElement any dom element on which a flag can be set. Must be the same for repeated calls.
 	 * @param functionToCall any function (can be an inline function)
@@ -957,12 +971,21 @@
 	/// Cookie ///
 	//////////////
 
+	/**
+	 * Set a cookie on the document root
+	 * @param name the cookie name
+	 * @param value the cookie value
+	 * @param expiryDays expiration in days from now. When null, create a session cookie
+	**/
 	yada.setCookie = function(name, value, expiryDays) {
-	    var d = new Date();
-	    // d.setTime(d.getTime() + (expiryDays*24*60*60*1000));
-	    d.setDate(d.getDate() + expiryDays);
-	    var expires = "expires="+d.toGMTString()+"; path=/";
-	    document.cookie = name + "=" + value + "; " + expires;
+		var expires = "";
+		if (expiryDays!=null) {
+		    var d = new Date();
+		    // d.setTime(d.getTime() + (expiryDays*24*60*60*1000));
+		    d.setDate(d.getDate() + expiryDays);
+		    expires = ";expires="+d.toGMTString();
+		}
+	    document.cookie = name + "=" + value + " ;path=/ " + expires;
 	}
 	
 	yada.getCookie = function(cname) {

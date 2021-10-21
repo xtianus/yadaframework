@@ -3,6 +3,7 @@ package net.yadaframework.security.persistence.repository;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
+import java.util.TimeZone;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -27,6 +28,18 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 	@PersistenceContext EntityManager em;
 
 	@Autowired YadaUtil yadaUtil;
+
+	@Transactional(readOnly = false)
+	public void updateTimezone(String username, TimeZone timezone) {
+		if (username==null || timezone==null) {
+			return;
+		}
+		String sql = "update YadaUserProfile yup join YadaUserCredentials yuc on yup.userCredentials_id=yuc.id set yup.timezone=:timezone where yuc.username=:username";
+		em.createNativeQuery(sql)
+			.setParameter("username", username)
+			.setParameter("timezone", timezone.getID())
+			.executeUpdate();
+	}
 
 	public List<Integer> findRoleIds(Long userProfileId) {
 		String sql = "select r.roles from YadaUserProfile yup join YadaUserCredentials yuc on yup.userCredentials_id = yuc.id " +
