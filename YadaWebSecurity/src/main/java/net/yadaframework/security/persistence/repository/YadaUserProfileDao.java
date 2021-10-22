@@ -34,7 +34,8 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 		if (username==null || timezone==null) {
 			return;
 		}
-		String sql = "update YadaUserProfile yup join YadaUserCredentials yuc on yup.userCredentials_id=yuc.id set yup.timezone=:timezone where yuc.username=:username";
+		String sql = "update YadaUserProfile yup join YadaUserCredentials yuc on yup.userCredentials_id=yuc.id "
+			+ "set yup.timezone=:timezone where yuc.username=:username and yup.timezoneSetByUser=false";
 		em.createNativeQuery(sql)
 			.setParameter("username", username)
 			.setParameter("timezone", timezone.getID())

@@ -39,7 +39,7 @@
 	const closestFindSelector = "yadaClosestFind:"; // Used to indicate that a two-part CSS selector should be searched with closest() then with find()
 	const siblingsFindSelector = "yadaSiblingsFind:"; // Used to indicate that a two-part CSS selector should be searched with siblings() then with find()
 	
-	const cookieNameTimezone = "yada.timezone.sent";
+	const sessionStorageKeyTimezone = "yada.timezone.sent";
 	
 	$(document).ready(function() {
 		// Be aware that all ajax links and forms will NOT be ajax if the user clicks while the document is still loading.
@@ -50,16 +50,15 @@
 		}
 		
 		// Send the current timezone offset to the server, once per browser session
-		const timezoneSent = yada.getCookie(cookieNameTimezone);
+		const timezoneSent = sessionStorage.getItem(sessionStorageKeyTimezone);
 		if (!timezoneSent) {
 			const data = {
-				'timezoneOffset': new Date().getTimezoneOffset()
+				'timezone': Intl.DateTimeFormat().resolvedOptions().timeZone
 			}
 			jQuery.post("/yadaTimezone", data, function(){
-				yada.setCookie(cookieNameTimezone, true); // Session cookie
+				sessionStorage.setItem(sessionStorageKeyTimezone, true);
 			});
 		}
-		
 	});
 	
 	function initHandlers() {

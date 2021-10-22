@@ -114,6 +114,7 @@ public class YadaUtil {
 
 	private static Locale defaultLocale = null;
 
+	private List<String> computedTimezoneOffsets = null;
 	private List<String> computedTimezones = null;
 
 	/**
@@ -128,25 +129,43 @@ public class YadaUtil {
     }
 
 	/**
-	 * Get a list of GMT/UTC time zones/offsets from UTC-12:00 to UTC+14:00
-	 * @param prefix use either "GMT" or "UTC"
-	 * @return
+	 * Returns a list of user-friendly timezones like "Europe/Rome"
+	 * @return 
 	 */
-	public List<String> getTimezones(String prefix) {
+	public List<String> getTimezones() {
 		if (computedTimezones==null) {
 			computedTimezones = new ArrayList<String>();
-			// https://en.wikipedia.org/wiki/List_of_UTC_time_offsets
-			for (int i=-12; i<=14; i++) {
-				computedTimezones.add(String.format("%s%+03d:00", prefix, i));
-				if (i==-10 || i==-4 || i==3 || i==4 || i==5 || i==6 || i==9 || i==10) {
-					computedTimezones.add(String.format("%s%+03d:30", prefix, i+(i<0?1:0)));
-				}
-				if (i==5 || i==8 || i==12) {
-					computedTimezones.add(String.format("%s%+03d:45", prefix, i));
+			String[] allTimezones = TimeZone.getAvailableIDs();
+			for (String timezone : allTimezones) {
+				// Only timezones with a / that start with a continent, like "Europe/Rome"
+				if (timezone.indexOf('/')>-1 && !timezone.startsWith("Etc/") && !timezone.startsWith("SystemV/")) {
+					computedTimezones.add(timezone);
 				}
 			}
 		}
 		return computedTimezones;
+	}
+
+	/**
+	 * Get a list of GMT/UTC time offsets from UTC-12:00 to UTC+14:00
+	 * @param prefix use either "GMT" or "UTC"
+	 * @return from "GMT-12:00" to "GMT+14:00"
+	 */
+	public List<String> getTimezoneOffsets(String prefix) {
+		if (computedTimezoneOffsets==null) {
+			computedTimezoneOffsets = new ArrayList<String>();
+			// https://en.wikipedia.org/wiki/List_of_UTC_time_offsets
+			for (int i=-12; i<=14; i++) {
+				computedTimezoneOffsets.add(String.format("%s%+03d:00", prefix, i));
+				if (i==-10 || i==-4 || i==3 || i==4 || i==5 || i==6 || i==9 || i==10) {
+					computedTimezoneOffsets.add(String.format("%s%+03d:30", prefix, i+(i<0?1:0)));
+				}
+				if (i==5 || i==8 || i==12) {
+					computedTimezoneOffsets.add(String.format("%s%+03d:45", prefix, i));
+				}
+			}
+		}
+		return computedTimezoneOffsets;
 	}
 
 	/**

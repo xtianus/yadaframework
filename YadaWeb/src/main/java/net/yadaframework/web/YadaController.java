@@ -1,6 +1,5 @@
 package net.yadaframework.web;
 
-import java.time.ZoneOffset;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -29,17 +28,17 @@ public class YadaController {
 
 	/**
 	 * Set the user timezone. Called by yada.js at each new browser session
-	 * @param timezoneOffset the offset in minutes from UTC
+	 * @param timezone the timezone from the browser
 	 * @return
 	 */
 	@RequestMapping("/yadaTimezone")
-	public String yadaTimezone(int timezoneOffset, HttpSession httpSession, Model model, Locale locale) {
-		int offsetHours =  timezoneOffset/60;
-		int offsetMinues = timezoneOffset - offsetHours*60;
-		ZoneOffset userZoneOffset = ZoneOffset.ofHoursMinutes(-offsetHours, -offsetMinues);
-		TimeZone timeZone = TimeZone.getTimeZone(userZoneOffset);
+	public String yadaTimezone(String timezone, HttpSession httpSession, Model model, Locale locale) {
+//		int offsetHours =  timezoneOffset/60;
+//		int offsetMinues = timezoneOffset - offsetHours*60;
+//		ZoneOffset userZoneOffset = ZoneOffset.ofHoursMinutes(-offsetHours, -offsetMinues);
+		TimeZone userTimeZone = TimeZone.getTimeZone(StringUtils.trimToEmpty(timezone));
 		//  Can't use YadaSession here
-		httpSession.setAttribute(YadaConstants.SESSION_USER_TIMEZONE, timeZone);
+		httpSession.setAttribute(YadaConstants.SESSION_USER_TIMEZONE, userTimeZone);
 		return YadaViews.AJAX_SUCCESS;
 	}
 

@@ -58,6 +58,7 @@ public class YadaUserProfile implements Serializable {
 	protected TimeZone timezone; 	// Timezone ID: "America/Los_Angeles",
 									// "America/Argentina/ComodRivadavia"
 									// https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+	protected boolean timezoneSetByUser = false; // True when the user has manually set the timezone and there is no more need to set it automatically
 
 	@OneToOne(cascade=CascadeType.PERSIST)
 	protected YadaAttachedFile avatar;
@@ -165,6 +166,14 @@ public class YadaUserProfile implements Serializable {
 
 	public void setAvatar(YadaAttachedFile avatar) {
 		this.avatar = avatar;
+	}
+
+	public boolean isTimezoneSetByUser() {
+		return timezoneSetByUser;
+	}
+
+	public void setTimezoneSetByUser(boolean timezoneSetByUser) {
+		this.timezoneSetByUser = timezoneSetByUser;
 	}
 
 }
