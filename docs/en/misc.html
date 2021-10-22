@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>Yada Framework</title>
+<title>Misc</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -441,184 +441,65 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1>Yada Framework</h1>
+<h1>Misc</h1>
 <div class="details">
 <span id="revnumber">version 0.7.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_general_principles">General Principles</a></li>
-<li><a href="#_documentation_chapters">Documentation Chapters</a></li>
-<li><a href="#_current_status">Current Status</a></li>
+<li><a href="#_client_timezone">Client Timezone</a></li>
 </ul>
 </div>
 </div>
 <div id="content">
-<div class="sect1">
-<h2 id="_general_principles">General Principles</h2>
+<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>The <strong>Yada Framework</strong> is a collection of libraries, patterns, tools, code snippets and best practices to speed up web site
-development.
-The main focus is on <strong>productivity</strong> and the approach is to use proven and known technologies
-in a repeatable way, so that each new project is easier to develop and maintain.
-Another goal is <strong>simplicity</strong> as defined by the KISS principle: some technology that is very powerful and exciting and
-complicated to use, won&#8217;t find a place here.</p>
-</div>
-<div class="paragraph">
-<p>The technology stack is as follows:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://www.oracle.com/java/technologies/javase-downloads.html" target="_blank" rel="noopener">Java</a></p>
-</li>
-<li>
-<p><a href="https://tomcat.apache.org/download-80.cgi" target="_blank" rel="noopener">Tomcat</a></p>
-</li>
-<li>
-<p><a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web.html" target="_blank" rel="noopener">Spring Web MVC</a></p>
-</li>
-<li>
-<p><a href="https://dev.mysql.com/downloads/mysql/" target="_blank" rel="noopener">MySQL Community Server</a></p>
-</li>
-<li>
-<p><a href="https://hibernate.org/orm/" target="_blank" rel="noopener">Hibernate ORM</a></p>
-</li>
-<li>
-<p><a href="https://www.thymeleaf.org/" target="_blank" rel="noopener">Thymeleaf</a></p>
-</li>
-<li>
-<p><a href="https://jquery.com/" target="_blank" rel="noopener">jQuery</a></p>
-</li>
-<li>
-<p>Javascript</p>
-</li>
-<li>
-<p>HTML, CSS, <a href="https://sass-lang.com/" target="_blank" rel="noopener">SASS</a></p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Tools used:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://www.eclipse.org/downloads/" target="_blank" rel="noopener">Eclipse IDE</a></p>
-</li>
-<li>
-<p><a href="https://gradle.org/" target="_blank" rel="noopener">Gradle</a></p>
-</li>
-<li>
-<p><a href="https://git-scm.com/" target="_blank" rel="noopener">git</a></p>
-</li>
-<li>
-<p><a href="https://asciidoctor.org/" target="_blank" rel="noopener">Asciidoctor</a></p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>It is our strong belief that productivity is increased when using old and proven technologies (less bugs,
-less chance of deprecation, more documentation, more tools, more developer experience), and that
-simple architectures can efficiently solve most practical problems a developer will ever have to face.</p>
+<p>Miscellaneous features</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_documentation_chapters">Documentation Chapters</h2>
+<h2 id="_client_timezone">Client Timezone</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The documentation is a mix of tutorial and reference. It loosely follows the official
-Java <a href="https://eclipse-ee4j.github.io/jakartaee-tutorial/dukes-bookstore.html" target="_blank" rel="noopener">"Duke’s Bookstore Case Study Example"</a> with many improvements in functionality.</p>
+<p>The timezone of the user is retrieved via javascript on first page load and sent to the server
+for storage in the HTTP Session. This is done via an ajax call at each new browser session.
+The timezone for unlogged users can be retrieved from the <code>YadaConstants.SESSION_USER_TIMEZONE</code> session
+attribute:</p>
 </div>
-<div class="openblock bookstore">
+<div class="listingblock">
 <div class="content">
-<div class="paragraph">
-<p>The tutorial sections are shown using this visual style.</p>
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">TimeZone userTimezone = (TimeZone) session.getAttribute(YadaConstants.SESSION_USER_TIMEZONE);</code></pre>
 </div>
-</div>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><a href="newEclipseProject.html">Getting Started</a></dt>
-<dd>
-<p>This section will guide you through the setup of the development environment: installing Java, git,
-MySQL, Eclipse. It will then show you how to create an Eclipse project with a database and a web server</p>
-</dd>
-<dt class="hdlist1"><a href="examples/bookstoreTutorial.html">Bookstore Tutorial</a></dt>
-<dd>
-<p>When your development environment has
-been set by following the instructions in the previous chapter, you can start this tutorial
-that will show you how to quickly create a web application</p>
-</dd>
-<dt class="hdlist1"><a href="internationalization.html">i18n</a></dt>
-<dd>
-<p>Implement a multilanguage site</p>
-</dd>
-<dt class="hdlist1"><a href="database/pagination.html">database/pagination.html</a></dt>
-<dd>
-<p>TODO</p>
-</dd>
-<dt class="hdlist1"><a href="forms/overview.html#Forms">Forms</a></dt>
-<dd>
-<p>Submitting data to the server</p>
-</dd>
-<dt class="hdlist1"><a href="ajax.html">Ajax</a></dt>
-<dd>
-<p>Easy async operations</p>
-</dd>
-<dt class="hdlist1"><a href="ajaxModal.html">Ajax Modals</a></dt>
-<dd>
-<p>Open a modal as a result of an ajax call</p>
-</dd>
-<dt class="hdlist1"><a href="datatables.html">datatables.html</a></dt>
-<dd>
-<p>TODO</p>
-</dd>
-<dt class="hdlist1"><a href="emails.html">emails.html</a></dt>
-<dd>
-<p>TODO</p>
-</dd>
-<dt class="hdlist1"><a href="notificationModal.html">notificationModal.html</a></dt>
-<dd>
-<p>TODO</p>
-</dd>
-<dt class="hdlist1"><a href="misc.html">Miscellaneous</a></dt>
-<dd>
-<p>Other features</p>
-</dd>
-<dt class="hdlist1"><a href="troubleshooting.html">troubleshooting.html</a></dt>
-<dd>
-<p>TODO</p>
-</dd>
-<dt class="hdlist1"><a href="upgrade.html">Upgrade Yada Framework Version</a></dt>
-<dd>
-<p>new versions are announced on this page, together
-with instructions on how to migrate from the previous one</p>
-</dd>
-</dl>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_current_status">Current Status</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The Yada Framework will always be a work in progress: open source libraries will evolve,
-our ways of using them will improve, the Yada code will get smarter, best practices will change,
-bugs will be fixed&#8230;&#8203; and documentation will always lag behind.</p>
 </div>
 <div class="paragraph">
-<p>The master branch in the git repository contains the latest "unstable" development.
-Each new stable version will have its own branch on which non-disruptive changes will be committed.
-Users, when starting the development of a new project, should pick the latest version on a branch and stick to it.
-Every new version might have breaking changes so you should upgrade only when you know you can afford the time of
-fixing your code.</p>
+<p>On user registration, the timezone is stored in the YadaRegistrationRequest and later in the YadaUserProfile
+when registration is confirmed. It is also refreshed at each user login so that it is always up to date.
+It can therefore be retrieved with</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">TimeZone userTimezone = userProfile.getTimezone();</code></pre>
+</div>
 </div>
 <div class="paragraph">
-<p>A step-by-step guide on how to migrate from a version to the next will be provided <a href="upgrade.html">here</a>.</p>
+<p>This feature is totally transparent to the user.
+For use cases where the user must be allowed to set the timezone explicitly, the <code>YadaUtil.getTimezones()</code> method
+can be used to retrieve a list of readable timezones to present in a select. When the user sends the
+chosen timezone to the server, the <code>yadaUserProfile.timezoneSetByUser</code> flag should be set to true in order
+to prevent the default automatic timezone change on login.
+For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">if (!formBean.getTimezoneId().equals(userProfile.getTimezone().getID())) {
+	// If the timezone is different from before, set the flag
+	userProfile.setTimezoneSetByUser(true);
+}
+userProfile.setTimezone(TimeZone.getTimeZone(formBean.getTimezoneId()));</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -626,7 +507,7 @@ fixing your code.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-10-22 16:48:12 +0200
+Last updated 2021-10-22 17:02:28 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

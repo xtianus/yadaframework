@@ -65,6 +65,8 @@ that will show you how to quickly create a web application
 
 <<notificationModal.adoc#>>:: TODO
 
+<<misc.adoc#,Miscellaneous>>:: Other features
+
 <<troubleshooting.adoc#>>:: TODO
 
 <<upgrade.adoc#,Upgrade Yada Framework Version>>:: new versions are announced on this page, together

@@ -245,16 +245,18 @@ Yada-dialect variants:
 | `yada:successHandler`
 |===
 
-[CAUTION]
+See below for details.
+
+[IMPORTANT]
 ====
 
 the difference between using the data- attribute version and the yada: dialect version is that
 the latter receives an expression that will be evaluated by Thymeleaf. Therefore you can use ${variables}
-in the value, but you have to be careful to enclose complex strings in single quotes, like `"'#one, .two'"`,
-otherwise you get a parse error from Thymeleaf: `org.thymeleaf.exceptions.TemplateProcessingException: Could not parse as expression`.
+in the value. When the Thymeleaf expression generates a parse error, it is considered a plain string and
+used as it is: this is different from the th: attributes behavior but it allows using "some plain strings" without
+quoting them in single quotes.
 ====
 
-See below for details.
 
 ====  Replacing and Deleting
 
@@ -371,14 +373,26 @@ Ajax calls can also be made on other HTML elements like buttons and selects by m
 An ajax call can be triggered on any <input> field that triggers the "input" event
 on change, by just setting the `yada:ajax` or `data-yadaHref` attribute. 
 
-The value of the input field will be sent to the given URL at each keystroke.
+The value of the input field will be sent to the given URL at each keystroke. It is possible
+to specify which keystrokes trigger the ajax call by means of the `yada:ajaxTriggerKeys` attribute,
+that can contain a pipe-separated list of https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values[KeyboardEvent.key^] values.
 
 Example:
 
 [source,html]
 ----
-<input yada:ajax="@{/user/setAddress(userId=${user.id})}" name="address">
+<input 
+	yada:ajax="@{/user/setAddress(userId=${user.id})}" # <1>
+	yada:ajaxTriggerKeys="Enter|ArrowRight| |," # <2>
+	yada:updateOnSuccess="yadaParents:.addresses"
+	yada:ajaxResultFocus # <3>
+	name="address">
 ----
+<1> URL to call
+<2> optional list of keys that trigger the call: enter, cursor right,space and comma in this example
+<3> on return from the ajax call, after updating the page with the result, if there is an
+    element in the result that has this attribute and is neither disabled nor readonly, it 
+    will receive focus (the first one found)
 
 It works on `<input type="radio">` too.
 
@@ -547,8 +561,22 @@ See <<Returning from the backend>> for an example on how to send a PDF file from
 yada.ajax("/catalog", null, null, null, null, null, null, "blob");
 ----
 
+== Utilities
+=== dequeueFunctionCall
 
-==  Class Reference
+The `yada.dequeueFunctionCall` function can be used to prevent queuing of ajax calls when only the last call
+is useful and a small delay can be tolerated. For example, when sending the value of an input text field at
+each keystroke there's no need to send each keystroke change but only the last value. Using this function, a
+keystroke done within the timeout of 200ms will cancel the previous call. Example:
+
+[source,javascript]
+----
+yada.dequeueFunctionCall(document, someFunction);
+----
+
+The parameters are any DOM element used to store a flag, and the function to call.
+
+== Class Reference
 
 yadaAjax:: 
 Change the standard behavior of the element so that it calls the server via ajax

@@ -627,7 +627,8 @@ different functionality:</p>
 </table>
 </div>
 <div class="paragraph">
-<p>All attributes that are normally available on a HTML <code>&lt;input&gt;</code> tag can also be used.</p>
+<p>All attributes that are normally available on a HTML <code>&lt;input&gt;</code> tag can also be used,
+including all <a href="overview.html#_ajax_forms">Yada ajax directives</a>.</p>
 </div>
 <div class="paragraph">
 <p>Example of a numeric input field with increment/decrement buttons that
@@ -669,7 +670,7 @@ submits its value via ajax when it changes:</p>
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input name="price" type="number" min="0"
 	class="noButtons"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
-	&lt;yada:addonRight&gt;.00&lt;/yada:addonRight&gt;
+	&lt;yada:addonRight&gt;.00&lt;/yada:addonRight&gt; <i class="conum" data-value="2"></i><b>(2)</b>
 &lt;/yada:input&gt;</code></pre>
 </div>
 </div>
@@ -678,6 +679,10 @@ submits its value via ajax when it changes:</p>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
 <td>The <code>noButtons</code> class is added in order to hide the unneeded buttons with some custom CSS:</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>bootstrap addon</td>
 </tr>
 </table>
 </div>
@@ -690,6 +695,75 @@ submits its value via ajax when it changes:</p>
 }</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>A <a href="https://getbootstrap.com/docs/5.1/forms/input-group/" target="_blank" rel="noopener">boostrap addon</a> can be set either right or left of the input
+field with the <code>addonLeft</code> and <code>addonRight</code> tags, that accept valid HTML:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input name="price"&gt;
+	&lt;yada:addonLeft&gt;&lt;b&gt;$&lt;/b&gt;&lt;/yada:addonLeft&gt;
+	&lt;yada:addonRight&gt;.00&lt;/yada:addonRight&gt;
+&lt;/yada:input&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When the input tag is of <code>type="file"</code>, the standard behavior is extended so that the chosen file can also
+be removed via a specific trash icon that appears after file selection.</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/forms/upload.jpg" alt="File input">
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input type="file" id="someFileUpload"&gt;
+	&lt;yada:addonRight&gt;
+		&lt;i class="bi bi-upload" onclick="$('#someFileUpload').click();"&gt;&lt;/i&gt; <i class="conum" data-value="1"></i><b>(1)</b>
+	&lt;/yada:addonRight&gt;
+&lt;/yada:input&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>This optional addon is for the upload icon shown in the above image</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The tag works perfectly with <code>type="radio"</code> inputs, but when the possible radio values come from an Enum a single
+tag can show all choices:</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/forms/enum.jpg" alt="Radio backed by Enum">
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input type="radio" name="color" th:value="${product.color}"
+	yada:enumclassname="com.example.ColorEnum" <i class="conum" data-value="1"></i><b>(1)</b>
+	yada:labelKeyPrefix="enum.campaignType." <i class="conum" data-value="2"></i><b>(2)</b>
+	yada:ajax="@{/setColor(productId=${product.id})}"&gt;
+&lt;/yada:input&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>yada:enumclassname</code> attribute specifies the Enum where values have to be taken</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>yada:labelKeyPrefix</code> attribute specifies the key in <code>message.properties</code> for the label:
+the enum value is appended to the prefix in order to derive the key</td>
+</tr>
+</table>
+</div>
 <div class="admonitionblock tip">
 <table>
 <tr>
@@ -698,7 +772,7 @@ submits its value via ajax when it changes:</p>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>The tag is implemented in <code>YadaInputTagProcessor.java</code> and <code>input.html</code>.</p>
+<p>The tag is implemented in <code>YadaInputTagProcessor.java</code>, <code>YadaInputCounterTagProcessor.java</code>, <code>input.html</code>, <code>inputEnum.html</code>, <code>inputCounter.html</code>.</p>
 </div>
 </td>
 </tr>
@@ -727,11 +801,12 @@ showing all elements so far added. This HTML will be inserted in page.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input name="dogname"&gt;
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input name="dogname"
+	yada:ajax="@{/addDog(ownerId=${owner.id})}" <i class="conum" data-value="1"></i><b>(1)</b>
+	yada:updateOnSuccess="'yadaParents:.jsDogsSection'"&gt; <i class="conum" data-value="2"></i><b>(2)</b>
 	&lt;yada:suggestion
-		yada:addUrl="@{/addDog(ownerId=${owner.id})}" <i class="conum" data-value="1"></i><b>(1)</b>
-		yada:listUrl="@{/dognameSuggestion}" <i class="conum" data-value="2"></i><b>(2)</b>
-		yada:updateOnSuccess="'yadaParents:.jsDogsSection'"&gt; <i class="conum" data-value="3"></i><b>(3)</b>
+		yada:listUrl="@{/dognameSuggestion}" <i class="conum" data-value="3"></i><b>(3)</b>
+		yada:suggestionRequestIdNameOverride="dogId"&gt; <i class="conum" data-value="4"></i><b>(4)</b>
 	&lt;/yada:suggestion&gt;
 &lt;/yada:input&gt;</code></pre>
 </div>
@@ -745,66 +820,184 @@ like Enter, Space, Comma etc. (see <code>yada.suggestionList</code> in <code>yad
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>ajax URL called to retrieve the HTML of the suggestions</td>
+<td>selector that identifies the portion of the page that has to be replaced with the result of the ajax call</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>selector that identifies the portion of the page that has to be replaced with the result of the "addUrl" call</td>
+<td>ajax URL called to retrieve the HTML of the suggestions</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>when the optional <code>yada:suggestionRequestIdNameOverride</code> is specified, this is the name of the request parameter
+that contains the id of the element chosen from the suggestion list (see below) when sending the chosen value via ajax</td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>Backend code for the <code>listURL</code>:</p>
+<p>The backend code for the <code>listURL</code> can return any HTML with a <code>&lt;ul class="dropdown-menu wide jsYadaSuggestionList"&gt;</code>
+element that contains '&lt;a&gt;' elements. The anchors text is used as the value for the field. The anchors
+<code>data-id</code> attribute is sent to the backend when present.</p>
+</div>
+<div class="paragraph">
+<p>A ready-made HTML for this is implemented in <code>/YadaWeb/src/main/resources/net/yadaframework/views/yada/formfields/inputSuggestionFragment.html</code>
+and can be used by adding a model attribute named <code>yadaSuggestions</code> with a value of either a "value List" or a
+"value-id Map", and returning <code>YadaViews.AJAX_SUGGESTION_FRAGMENT</code>:</p>
 </div>
 <div class="listingblock">
+<div class="title">Returning a List of strings:</div>
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/dognameSuggestion")
 public String dognameSuggestion(String prefix, Model model, Locale locale) {
 	List&lt;String&gt; suggestions = getDognameSuggestions(prefix, locale); // Some DB query
-	model.addAttribute("suggestions", suggestions);
-	return "/fragments/dogsuggestionlist :: fragment";
+	model.addAttribute("yadaSuggestions", suggestions);
+	return YadaViews.AJAX_SUGGESTION_FRAGMENT;
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>HTML fragment for the suggestion list <code>/fragments/dogsuggestionlist.html</code>:</p>
+<p>The above example is the simplest case where just the text of the chosen suggestion is sent to the
+backend when calling the <code>addURL</code>. The name of the request parameter will be the same as the name
+of the input field, or "value" if no name has been specified.</p>
+</div>
+<div class="paragraph">
+<p>When a Map is used, choosing a suggestion will send the map key as the "id" request parameter and the map value
+as the value of the input field.
+The name of the "id" parameter can be overridden with the <code>addIdRequestNameOverride</code> attribute as
+seen above: this has precedence over anything else (see <code>YadaInputTagSuggestion</code> interface below).</p>
 </div>
 <div class="listingblock">
+<div class="title">Returning a Map:</div>
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;th:block th:fragment="fragment"&gt;
-	&lt;ul class="dropdown-menu wide jsSuggestionList"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
-		&lt;li th:each="suggestion : ${suggestions}"&gt;
-			&lt;a class="dropdown-item" href="javascript:;" th:text="${suggestion}"&gt;Fido&lt;/a&gt;
-		&lt;/li&gt;
-	&lt;/ul&gt;
-&lt;/th:block&gt;</code></pre>
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/dognameSuggestion")
+public String dognameSuggestion(String prefix, Model model, Locale locale) {
+	List&lt;Dog&gt; suggestions = getDogs(prefix, locale); // Some DB query that returns Dog objects
+	// Convert the list to a map
+	Map&lt;Long, String&gt; idToValue = suggestions.stream().collect(Collectors.toMap(Dog::getId, Dog::getName));
+	model.addAttribute("yadaSuggestions", idToValue);
+	return YadaViews.AJAX_SUGGESTION_FRAGMENT;
+}</code></pre>
 </div>
 </div>
-<div class="colist arabic">
+<div class="admonitionblock tip">
 <table>
 <tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>the <code>jsSuggestionList</code> class is required</td>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>For more advanced use cases or when you don&#8217;t want to convert a list of objects to a Map,
+those objects can implement the <code>YadaInputTagSuggestion</code> interface.</p>
+</div>
+<div class="paragraph">
+<p>You can then return computed values for the text and the id, and rename the
+request parameter for the id by implementing the <code>getSuggestionIdRequestName()</code> method
+if no <code>addIdRequestNameOverride</code> is specified.</p>
+</div>
+</td>
 </tr>
 </table>
 </div>
-<div class="listingblock todo">
-<div class="content">
-<pre>can the suggestion list fragment be implemented in yada?</pre>
-</div>
-</div>
 <div class="paragraph">
-<p>Backend code for the <code>addURL</code> that receives the <code>value</code> of the field and any other parameters of the URL:</p>
+<p>Backend code for the <code>addURL</code> that receives the <code>dogname</code> field and any other
+parameters set on the URL (<code>ownerId</code> in this example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/addDog")
-public String addDog(String value, Long ownerId, Model model, Locale locale) {
-	List&lt;String&gt; allDogs = addDog(ownerID, value);; // Some code to add the name of the dog to its owner
+public String addDog(String dogname, Long ownerId, Model model, Locale locale) {
+	List&lt;String&gt; allDogs = addDog(ownerID, dogname);; // Some code to add the name of the dog to its owner
 	model.addAttribute("allDogs", allDogs);
 	return "/fragments/dogList :: fragment";
 }</code></pre>
 </div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The tag is implemented in <code>YadaInputTagSuggestion.java</code>, <code>input.html</code>, <code>inputSuggestionFragment.html</code>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_ajax_and_validation_messages">Ajax and Validation Messages</h4>
+<div class="paragraph">
+<p>When using ajax to handle input field submissions, the standard <code>th:errors</code> tags and <code>BindingResult</code>
+techniques won&#8217;t work unless returning the whole form (but <code>th:field</code> on <code>yada:input</code> currently
+doesn&#8217;t work).</p>
+</div>
+<div class="paragraph">
+<p>Other than implementing your custom solution, you can use either the <code>yada:validationError</code> attribute
+or the <code>&lt;yada:validationError&gt;</code> tag:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="HTML" class="language-HTML hljs">&lt;yada:input name="dogname" yada:validationError="${dogNameError}"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When the value of <code>yada:validationError</code> is not blank, the error is shown below the input tag
+using Bootstrap 5 classes for styling.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="HTML" class="language-HTML hljs">&lt;yada:input name="dogname"
+	...
+	&lt;yada:validationError yada:invalidFlag="${dognameHasError}" th:text="#{error.dogname}"&gt;
+		(Dummy) error text here
+	&lt;/yada:validationError&gt;</code></pre>
+</div>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/forms/validationerror.jpg" alt="Validation error message">
+</div>
+</div>
+<div class="paragraph">
+<p>Using the tag syntax, an error is shown when the value of <code>yada:invalidFlag</code> is neither null
+nor false. In the above example the error is shown with</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">model.addAttribute("dognameHasError", true);
+// Also:
+model.addAttribute("dognameHasError", "yes");</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The error message can either be the static text inside the tag, or any <code>th:text</code> value. In the
+above example, a localized text is being fetched from <code>message.properties</code>.</p>
+</div>
+<div class="paragraph">
+<p>The tag syntax also accepts a <code>MessageSource</code> key:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="HTML" class="language-HTML hljs">&lt;yada:input name="dogname"
+	...
+	&lt;yada:validationError yada:messageKey="${dognameErrorKey}"&gt;
+		Localized error text example
+	&lt;/yada:validationError&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">model.addAttribute("dognameErrorKey", "error.dogname.short");
+// or
+model.addAttribute("dognameErrorKey", "error.dogname.long");</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The error is visible only if <code>${dognameErrorKey}</code> is not null.
+The <code>yada:invalidFlag</code> attribute is optional when <code>yada:messageKey</code> is used.</p>
 </div>
 </div>
 </div>
@@ -848,7 +1041,7 @@ the <code>yada:inputCounterId</code> attribute of the <code>&lt;yada:input&gt;</
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-09-16 12:39:49 +0200
+Last updated 2021-10-22 16:21:40 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

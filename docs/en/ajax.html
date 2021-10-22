@@ -471,6 +471,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_responsetype">responseType</a></li>
 </ul>
 </li>
+<li><a href="#_utilities">Utilities</a>
+<ul class="sectlevel2">
+<li><a href="#_dequeuefunctioncall">dequeueFunctionCall</a></li>
+</ul>
+</li>
 <li><a href="#_class_reference">Class Reference</a></li>
 </ul>
 </div>
@@ -830,25 +835,26 @@ The following <code>data-</code> attributes allow you to perform postprocessing 
 </tr>
 </tbody>
 </table>
-<div class="admonitionblock caution">
+<div class="paragraph">
+<p>See below for details.</p>
+</div>
+<div class="admonitionblock important">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-caution" title="Caution"></i>
+<i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
 <div class="paragraph">
 <p>the difference between using the data- attribute version and the yada: dialect version is that
 the latter receives an expression that will be evaluated by Thymeleaf. Therefore you can use ${variables}
-in the value, but you have to be careful to enclose complex strings in single quotes, like <code>"'#one, .two'"</code>,
-otherwise you get a parse error from Thymeleaf: <code>org.thymeleaf.exceptions.TemplateProcessingException: Could not parse as expression</code>.</p>
+in the value. When the Thymeleaf expression generates a parse error, it is considered a plain string and
+used as it is: this is different from the th: attributes behavior but it allows using "some plain strings" without
+quoting them in single quotes.</p>
 </div>
 </td>
 </tr>
 </table>
-</div>
-<div class="paragraph">
-<p>See below for details.</p>
 </div>
 <div class="sect3">
 <h4 id="_replacing_and_deleting">Replacing and Deleting</h4>
@@ -1059,15 +1065,40 @@ array of all sections inserted in page.</p>
 on change, by just setting the <code>yada:ajax</code> or <code>data-yadaHref</code> attribute.</p>
 </div>
 <div class="paragraph">
-<p>The value of the input field will be sent to the given URL at each keystroke.</p>
+<p>The value of the input field will be sent to the given URL at each keystroke. It is possible
+to specify which keystrokes trigger the ajax call by means of the <code>yada:ajaxTriggerKeys</code> attribute,
+that can contain a pipe-separated list of <a href="https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values" target="_blank" rel="noopener">KeyboardEvent.key</a> values.</p>
 </div>
 <div class="paragraph">
 <p>Example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;input yada:ajax="@{/user/setAddress(userId=${user.id})}" name="address"&gt;</code></pre>
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;input
+	yada:ajax="@{/user/setAddress(userId=${user.id})}" <i class="conum" data-value="1"></i><b>(1)</b>
+	yada:ajaxTriggerKeys="Enter|ArrowRight| |," <i class="conum" data-value="2"></i><b>(2)</b>
+	yada:updateOnSuccess="yadaParents:.addresses"
+	yada:ajaxResultFocus <i class="conum" data-value="3"></i><b>(3)</b>
+	name="address"&gt;</code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>URL to call</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>optional list of keys that trigger the call: enter, cursor right,space and comma in this example</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>on return from the ajax call, after updating the page with the result, if there is an
+element in the result that has this attribute and is neither disabled nor readonly, it
+will receive focus (the first one found)</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>It works on <code>&lt;input type="radio"&gt;</code> too.</p>
@@ -1279,6 +1310,28 @@ See <a href="#_returning_from_the_backend">Returning from the backend</a> for an
 </div>
 </div>
 <div class="sect1">
+<h2 id="_utilities">Utilities</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_dequeuefunctioncall">dequeueFunctionCall</h3>
+<div class="paragraph">
+<p>The <code>yada.dequeueFunctionCall</code> function can be used to prevent queuing of ajax calls when only the last call
+is useful and a small delay can be tolerated. For example, when sending the value of an input text field at
+each keystroke there&#8217;s no need to send each keystroke change but only the last value. Using this function, a
+keystroke done within the timeout of 200ms will cancel the previous call. Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.dequeueFunctionCall(document, someFunction);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The parameters are any DOM element used to store a flag, and the function to call.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_class_reference">Class Reference</h2>
 <div class="sectionbody">
 <div class="dlist">
@@ -1303,7 +1356,7 @@ Otherwise the form will be sent with a normal non-ajax request.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-09-15 18:47:46 +0200
+Last updated 2021-10-22 16:43:00 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

@@ -808,6 +808,14 @@ if (newIcon!=null) {
 </div>
 </div>
 <div class="paragraph">
+<p>The <code>yadaFileManager.uploadFile()</code> call can be skipped when passing the MultipartFile directly to <code>attachNew()</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "userData", "icon");</code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p>The association between the owning Entity and the new YadaAttachedFile instance is not created automatically by yadaFileManager.attachNew() and you
 have to do it explicitly as shown above.
 When the attach method is called, the original uploaded file is copied from the "uploads" folder into the target folder.
@@ -961,9 +969,9 @@ yadaFileManager.duplicateFiles(clone.getIcon());</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaAttachedFile icon = user.getIcon();
 yadaFileManager.deleteFileAttachment(icon);
-yadaAttachedFileRepository.delete(icon);
-user.setIcon(null);
-userRepository.save(user);</code></pre>
+user.setIcon(null); // Remove relationship before deletion
+user = userDao.save(user);
+yadaAttachedFileDao.delete(icon);</code></pre>
 </div>
 </div>
 <div class="listingblock todo">
@@ -1252,7 +1260,7 @@ If the <code>YadaAttachedFile</code> is modified outside the <code>link</code> m
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">newOrExisting.setTitle(news.getTitle());
-newOrExisting = yadaAttachedFileRepository.save(newOrExisting);
+newOrExisting = yadaAttachedFileDao.save(newOrExisting);
 yadaCropImage.setYadaAttachedFile(newOrExisting);</code></pre>
 </div>
 </div>
@@ -1329,7 +1337,7 @@ This always happens in the following cases:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-04-12 13:12:02 +0200
+Last updated 2021-10-22 16:29:01 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

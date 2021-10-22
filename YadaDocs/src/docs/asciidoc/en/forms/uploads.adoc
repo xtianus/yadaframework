@@ -212,6 +212,14 @@ if (newIcon!=null) {
 }
 ----
 
+The `yadaFileManager.uploadFile()` call can be skipped when passing the MultipartFile directly to `attachNew()`:
+
+[source,java]
+----
+YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "userData", "icon");
+----
+
+
 The association between the owning Entity and the new YadaAttachedFile instance is not created automatically by yadaFileManager.attachNew() and you
 have to do it explicitly as shown above.
 When the attach method is called, the original uploaded file is copied from the "uploads" folder into the target folder.
@@ -332,9 +340,9 @@ Files can be removed from the filesystem with `YadaFileManager.deleteFileAttachm
 ----
 YadaAttachedFile icon = user.getIcon();
 yadaFileManager.deleteFileAttachment(icon);
-yadaAttachedFileRepository.delete(icon);
-user.setIcon(null);
-userRepository.save(user);
+user.setIcon(null); // Remove relationship before deletion
+user = userDao.save(user);
+yadaAttachedFileDao.delete(icon);
 ----
 
 [.todo]
@@ -571,7 +579,7 @@ If the `YadaAttachedFile` is modified outside the `link` method, it should be pu
 [source,java]
 ----
 newOrExisting.setTitle(news.getTitle());
-newOrExisting = yadaAttachedFileRepository.save(newOrExisting);
+newOrExisting = yadaAttachedFileDao.save(newOrExisting);
 yadaCropImage.setYadaAttachedFile(newOrExisting);
 ----
 

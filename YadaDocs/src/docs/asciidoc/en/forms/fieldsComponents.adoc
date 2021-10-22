@@ -76,7 +76,8 @@ different functionality:
 `th:field` can not be used on this tag yet (as of v0.7.0)
 ====
 
-All attributes that are normally available on a HTML `<input>` tag can also be used.
+All attributes that are normally available on a HTML `<input>` tag can also be used,
+including all <<overview.adoc#_ajax_forms,Yada ajax directives>>.
 
 Example of a numeric input field with increment/decrement buttons that
 submits its value via ajax when it changes:
@@ -104,10 +105,11 @@ image::forms/numberwithzero.jpg[Numeric input with attachment]
 ----
 <yada:input name="price" type="number" min="0" 
 	class="noButtons"> # <1>
-	<yada:addonRight>.00</yada:addonRight>
+	<yada:addonRight>.00</yada:addonRight> # <2>
 </yada:input>
 ----
 <1> The `noButtons` class is added in order to hide the unneeded buttons with some custom CSS:
+<2> bootstrap addon
 
 [source,css]
 ----
@@ -118,9 +120,55 @@ image::forms/numberwithzero.jpg[Numeric input with attachment]
 }
 ----
 
+A https://getbootstrap.com/docs/5.1/forms/input-group/[boostrap addon^] can be set either right or left of the input
+field with the `addonLeft` and `addonRight` tags, that accept valid HTML:
+
+[source,html]
+----
+<yada:input name="price">
+	<yada:addonLeft><b>$</b></yada:addonLeft>
+	<yada:addonRight>.00</yada:addonRight>
+</yada:input>
+----
+
+
+When the input tag is of `type="file"`, the standard behavior is extended so that the chosen file can also
+be removed via a specific trash icon that appears after file selection.
+
+[.center]
+image::forms/upload.jpg[File input]
+
+[source,html]
+----
+<yada:input type="file" id="someFileUpload">
+	<yada:addonRight>
+		<i class="bi bi-upload" onclick="$('#someFileUpload').click();"></i> # <1>
+	</yada:addonRight>
+</yada:input>
+----
+<1> This optional addon is for the upload icon shown in the above image
+
+The tag works perfectly with `type="radio"` inputs, but when the possible radio values come from an Enum a single
+tag can show all choices:
+
+[.center]
+image::forms/enum.jpg[Radio backed by Enum]
+
+[source,html]
+----
+<yada:input type="radio" name="color" th:value="${product.color}"
+	yada:enumclassname="com.example.ColorEnum" # <1>
+	yada:labelKeyPrefix="enum.campaignType." # <2>
+	yada:ajax="@{/setColor(productId=${product.id})}">
+</yada:input>
+----
+<1> The `yada:enumclassname` attribute specifies the Enum where values have to be taken
+<2> The `yada:labelKeyPrefix` attribute specifies the key in `message.properties` for the label: 
+    the enum value is appended to the prefix in order to derive the key
+
 [TIP]
 ====
-The tag is implemented in `YadaInputTagProcessor.java` and `input.html`.
+The tag is implemented in `YadaInputTagProcessor.java`, `YadaInputCounterTagProcessor.java`, `input.html`, `inputEnum.html`, `inputCounter.html`.
 ====
 
 ==== Suggestion list
@@ -140,61 +188,152 @@ image::forms/suggestion.jpg[Suggestion list]
 
 [source,html]
 ----
-<yada:input name="dogname">
+<yada:input name="dogname"
+	yada:ajax="@{/addDog(ownerId=${owner.id})}" # <1>
+	yada:updateOnSuccess="'yadaParents:.jsDogsSection'"> # <2>
 	<yada:suggestion 
-		yada:addUrl="@{/addDog(ownerId=${owner.id})}" # <1>
-		yada:listUrl="@{/dognameSuggestion}" # <2>
-		yada:updateOnSuccess="'yadaParents:.jsDogsSection'"> # <3>
+		yada:listUrl="@{/dognameSuggestion}" # <3>
+		yada:suggestionRequestIdNameOverride="dogId"> # <4>
 	</yada:suggestion>
 </yada:input>
 ----
 <1> ajax URL called when the user chooses a value from the suggestion list or types an "end-of-input" character
 like Enter, Space, Comma etc. (see `yada.suggestionList` in `yada.dialect.js` for details)
-<2> ajax URL called to retrieve the HTML of the suggestions
-<3> selector that identifies the portion of the page that has to be replaced with the result of the "addUrl" call
+<2> selector that identifies the portion of the page that has to be replaced with the result of the ajax call
+<3> ajax URL called to retrieve the HTML of the suggestions
+<4> when the optional `yada:suggestionRequestIdNameOverride` is specified, this is the name of the request parameter
+that contains the id of the element chosen from the suggestion list (see below) when sending the chosen value via ajax 
 
-Backend code for the `listURL`:
+The backend code for the `listURL` can return any HTML with a `<ul class="dropdown-menu wide jsYadaSuggestionList">`
+element that contains '<a>' elements. The anchors text is used as the value for the field. The anchors
+`data-id` attribute is sent to the backend when present.
 
+A ready-made HTML for this is implemented in `/YadaWeb/src/main/resources/net/yadaframework/views/yada/formfields/inputSuggestionFragment.html`
+and can be used by adding a model attribute named `yadaSuggestions` with a value of either a "value List" or a
+"value-id Map", and returning `YadaViews.AJAX_SUGGESTION_FRAGMENT`:
+
+.Returning a List of strings:
 [source,java]
 ----
 @RequestMapping("/dognameSuggestion")
 public String dognameSuggestion(String prefix, Model model, Locale locale) {
 	List<String> suggestions = getDognameSuggestions(prefix, locale); // Some DB query
-	model.addAttribute("suggestions", suggestions);
-	return "/fragments/dogsuggestionlist :: fragment";
+	model.addAttribute("yadaSuggestions", suggestions);
+	return YadaViews.AJAX_SUGGESTION_FRAGMENT;
 }
 ----
 
-HTML fragment for the suggestion list `/fragments/dogsuggestionlist.html`:
+The above example is the simplest case where just the text of the chosen suggestion is sent to the
+backend when calling the `addURL`. The name of the request parameter will be the same as the name
+of the input field, or "value" if no name has been specified.
 
-[source,html]
-----
-<th:block th:fragment="fragment">
-	<ul class="dropdown-menu wide jsSuggestionList"> # <1>
-		<li th:each="suggestion : ${suggestions}">
-			<a class="dropdown-item" href="javascript:;" th:text="${suggestion}">Fido</a>
-		</li>
-	</ul>
-</th:block>
-----
-<1> the `jsSuggestionList` class is required
+When a Map is used, choosing a suggestion will send the map key as the "id" request parameter and the map value
+as the value of the input field. 
+The name of the "id" parameter can be overridden with the `addIdRequestNameOverride` attribute as
+seen above: this has precedence over anything else (see `YadaInputTagSuggestion` interface below).
 
-[.todo]
+.Returning a Map:
+[source,java]
 ----
-can the suggestion list fragment be implemented in yada?
+@RequestMapping("/dognameSuggestion")
+public String dognameSuggestion(String prefix, Model model, Locale locale) {
+	List<Dog> suggestions = getDogs(prefix, locale); // Some DB query that returns Dog objects
+	// Convert the list to a map
+	Map<Long, String> idToValue = suggestions.stream().collect(Collectors.toMap(Dog::getId, Dog::getName));
+	model.addAttribute("yadaSuggestions", idToValue);
+	return YadaViews.AJAX_SUGGESTION_FRAGMENT;
+}
 ----
 
-Backend code for the `addURL` that receives the `value` of the field and any other parameters of the URL:
+[TIP]
+====
+For more advanced use cases or when you don't want to convert a list of objects to a Map,
+those objects can implement the `YadaInputTagSuggestion` interface.
+
+You can then return computed values for the text and the id, and rename the 
+request parameter for the id by implementing the `getSuggestionIdRequestName()` method
+if no `addIdRequestNameOverride` is specified.
+====
+
+Backend code for the `addURL` that receives the `dogname` field and any other 
+parameters set on the URL (`ownerId` in this example: 
 
 [source,java]
 ----
 @RequestMapping("/addDog")
-public String addDog(String value, Long ownerId, Model model, Locale locale) {
-	List<String> allDogs = addDog(ownerID, value);; // Some code to add the name of the dog to its owner
+public String addDog(String dogname, Long ownerId, Model model, Locale locale) {
+	List<String> allDogs = addDog(ownerID, dogname);; // Some code to add the name of the dog to its owner
 	model.addAttribute("allDogs", allDogs);
 	return "/fragments/dogList :: fragment";
 }
 ----
+
+[TIP]
+====
+The tag is implemented in `YadaInputTagSuggestion.java`, `input.html`, `inputSuggestionFragment.html`.
+====
+
+==== Ajax and Validation Messages
+When using ajax to handle input field submissions, the standard `th:errors` tags and `BindingResult`
+techniques won't work unless returning the whole form (but `th:field` on `yada:input` currently
+doesn't work).
+
+Other than implementing your custom solution, you can use either the `yada:validationError` attribute
+or the `<yada:validationError>` tag:
+
+[source,HTML]
+----
+<yada:input name="dogname" yada:validationError="${dogNameError}"
+----
+
+When the value of `yada:validationError` is not blank, the error is shown below the input tag
+using Bootstrap 5 classes for styling.
+
+[source,HTML]
+----
+<yada:input name="dogname" 
+	...
+	<yada:validationError yada:invalidFlag="${dognameHasError}" th:text="#{error.dogname}">
+		(Dummy) error text here
+	</yada:validationError>
+----
+
+[.center]
+image::forms/validationerror.jpg[Validation error message]
+
+Using the tag syntax, an error is shown when the value of `yada:invalidFlag` is neither null
+nor false. In the above example the error is shown with
+
+[source,java]
+----
+model.addAttribute("dognameHasError", true);
+// Also:
+model.addAttribute("dognameHasError", "yes");
+----
+
+The error message can either be the static text inside the tag, or any `th:text` value. In the
+above example, a localized text is being fetched from `message.properties`.
+
+The tag syntax also accepts a `MessageSource` key:
+
+[source,HTML]
+----
+<yada:input name="dogname" 
+	...
+	<yada:validationError yada:messageKey="${dognameErrorKey}">
+		Localized error text example
+	</yada:validationError>
+----
+
+[source,java]
+----
+model.addAttribute("dognameErrorKey", "error.dogname.short");
+// or
+model.addAttribute("dognameErrorKey", "error.dogname.long");
+----
+
+The error is visible only if `${dognameErrorKey}` is not null.
+The `yada:invalidFlag` attribute is optional when `yada:messageKey` is used. 
 
 
 === <yada:inputCounter>

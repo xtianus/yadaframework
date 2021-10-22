@@ -136,9 +136,7 @@ test that the above code works
 
 It's always better to use a specific name for the @Entity id, like `bookId` and not just `id`, so that you can handle different @Entity instances in the same @Controller.
 
-
-==  Ajax Forms
-
+== Ajax Forms
 
 To send a form via ajax you just need to add the `yadaAjax` class:
 
