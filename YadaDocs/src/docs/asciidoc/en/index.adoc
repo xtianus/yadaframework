@@ -2,6 +2,9 @@
 :docinfo: shared
 
 ==  General Principles
+
+Git repository: https://github.com/xtianus/yadaframework
+
 The *Yada Framework* is a collection of libraries, patterns, tools, code snippets and best practices to speed up web site
 development.
 The main focus is on *productivity* and the approach is to use proven and known technologies

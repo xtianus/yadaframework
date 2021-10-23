@@ -85,3 +85,12 @@ code.hljs.language-gradle::after {
 .conum[data-value] {
 	background-color: #337a4669;
 }
+
+#navigator {
+	border: thin solid #dedede;
+    color: #7a2518;
+    cursor: pointer;
+}
+#navigator option {
+	color: #2156a5;
+}
