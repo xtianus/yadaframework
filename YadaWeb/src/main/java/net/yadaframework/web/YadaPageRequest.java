@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * A page for pageable content.
  * A common use case is to implement web pagination in both directions.
@@ -29,14 +31,14 @@ public class YadaPageRequest {
 
 	/**
 	 * Creates a new "invalid" YadaPageRequest, with {@code page=-1, size=0}.
-	 * Has the same meaning of a "null" value. 
+	 * Has the same meaning of a "null" value.
 	 * Used by Spring when injecting method parameters in a @Controller
 	 * with no request values to set.
 	 * See {@link #isValid()}
 	 */
 	public YadaPageRequest() {
 	}
-	
+
 	/**
 	 * Check if this object has been created with actual values.
 	 * @return true if this object has been initialized
@@ -48,18 +50,18 @@ public class YadaPageRequest {
 	/**
 	 * Creates a new {@link YadaPageRequest}. Pages are zero indexed, thus providing 0 for {@code page} will return the first
 	 * page.
-	 * 
+	 *
 	 * @param page zero-based page index, must not be less than zero.
 	 * @param size the size of the page to be returned, must not be less than one.
 	 */
 	public YadaPageRequest(int page, int size) {
 		this(page, size, false);
 	}
-	
+
 	/**
 	 * Creates a new {@link YadaPageRequest}. Pages are zero indexed, thus providing 0 for {@code page} will return the first
 	 * page.
-	 * 
+	 *
 	 * @param page zero-based page index, must not be less than zero.
 	 * @param size the size of the page to be returned, must not be less than one.
 	 * @param loadPrevious true if all pages before this one must be fetched from database
@@ -75,7 +77,32 @@ public class YadaPageRequest {
 		this.size = size;
 		this.loadPrevious = loadPrevious;
 	}
-	
+
+	/**
+	 * Add a sort order to this request
+	 * @param paramName the name to sort on, can be multiple comma-separated names
+	 * @param desc true for descending order, otherwise false or null
+	 * @param ignoreCase true to ignore case when sorting, otherwise false or null
+	 * @return
+	 */
+	public YadaPageRequest addSort(String paramName, Boolean desc, Boolean ignoreCase) {
+		paramName = StringUtils.trimToNull(paramName);
+		if (paramName==null) {
+			throw new IllegalArgumentException("Sort parameter name not specified");
+		}
+		if (Boolean.TRUE.equals(desc)) {
+			paramName += "," + YadaPageSort.KEYWORD_DESC;
+		}
+		if (Boolean.TRUE.equals(ignoreCase)) {
+			paramName += "," + YadaPageSort.KEYWORD_IGNORECASE;
+		}
+		if (parsedSort==null) {
+			parsedSort = new YadaPageSort();
+		}
+		parsedSort.add(paramName);
+		return this;
+	}
+
 	/**
 	 * @return the page sort options
 	 */
@@ -88,7 +115,7 @@ public class YadaPageRequest {
 		}
 		return parsedSort;
 	}
-	
+
 	/**
 	 * Set the page sort options
 	 * @param pageSort
@@ -143,18 +170,18 @@ public class YadaPageRequest {
 	public int getOffset() {
 		return page * size;
 	}
-	
+
 	/**
-	 * Returns the position of the first element to be loaded from the database: 
+	 * Returns the position of the first element to be loaded from the database:
 	 * {@code size*page} when loadPrevious is false, 0 otherwise
 	 * @return
 	 */
 	public int getFirstResult() {
 		return loadPrevious ? 0 : page * size;
 	}
-	
+
 	/**
-	 * Returns the amount of rows to fetch from the database + 1. 
+	 * Returns the amount of rows to fetch from the database + 1.
 	 * It is equal to {@link #getSize()+1} when loadPrevious is false, otherwise it
 	 * adds the count of all the previous pages to the value then adds 1
 	 * to find out if there are more rows to fetch after this page.
@@ -167,7 +194,7 @@ public class YadaPageRequest {
 	public int getMaxResults() {
 		return loadPrevious ? getOffset() + size + 1: size + 1;
 	}
-	
+
 	public boolean isFirst() {
 		return page == 0;
 	}
@@ -204,7 +231,7 @@ public class YadaPageRequest {
 	public void setSize(int size) {
 		this.size = size;
 	}
-	
+
 	/**
 	 * Spring Data - compatible method to get the page size (number of rows)
 	 * @return
@@ -230,5 +257,5 @@ public class YadaPageRequest {
 	public void setSort(List<String> sort) {
 		this.sort = sort;
 	}
-	
+
 }

@@ -202,6 +202,7 @@
 	 * calls can be cancelled by next ones if within a given timeout.
 	 * When the funcion takes too long to execute, the timeout is increased so that less calls are performed.
 	 * Useful when making ajax calls.
+	 * A small delay must be tolerated.
 	 * @param domElement any dom element on which a flag can be set. Must be the same for repeated calls.
 	 * @param functionToCall any function (can be an inline function)
 	 */

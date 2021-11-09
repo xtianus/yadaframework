@@ -421,7 +421,7 @@ public class YadaFileManager {
 	 * The name of the file is in the format [basename]managedFileName_id.ext.
 	 * Images are not resized.
 	 * @param multipartFile the original uploaded file
-	 * @param relativeFolderPath path of the target folder relative to the contents folder
+	 * @param relativeFolderPath path of the target folder relative to the contents folder, starting with a slash /
 	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
 	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
 	 * @throws IOException
