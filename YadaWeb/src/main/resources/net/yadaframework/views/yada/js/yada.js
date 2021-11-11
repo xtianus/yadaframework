@@ -96,6 +96,12 @@
 		yada.enableHashing($element);
 	}
 	
+	yada.log = function(message) {
+		if (yada.devMode) {
+			console.log("[yada] " + message);
+		}
+	}
+	
 	yada.loaderOn = function() {
 		loaderStart = Date.now();
 		$(".loader").show();

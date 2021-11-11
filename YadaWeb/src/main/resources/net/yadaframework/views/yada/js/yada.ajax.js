@@ -498,6 +498,7 @@
 						// e.stopImmediatePropagation();
 						e.preventDefault(); // No submit, but exec other handlers
 						$form.data("yadaDoNotSubmitNow", false);
+						yada.log("Form submission prevented");
 						// return false;
 					}
 				});
