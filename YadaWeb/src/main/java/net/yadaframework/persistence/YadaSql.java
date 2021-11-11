@@ -842,6 +842,9 @@ public class YadaSql implements CloneableDeep {
 		if (queryDone && parameters.isEmpty()) {
 			throw new YadaInternalException("Parameters should be set before calling query()");
 		}
+		if (value.getClass().isArray()) {
+			value = Arrays.asList((Object[])value);
+		}
 		parameters.put(name, value);
 		return this;
 	}

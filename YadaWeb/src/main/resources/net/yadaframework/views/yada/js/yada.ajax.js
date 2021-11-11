@@ -482,6 +482,41 @@
 				});
 			}
 		});
+		// Prevent form submission on Enter otherwise the ajax call is not made
+		$(selector).each(function(){
+			const $input = $(this);
+			// Form submission by Enter keypress is allowed when the input element ajax call is not triggered by "Enter".
+			// This only happens if yadaAjaxTriggerKeys is present and does not contain "Enter"
+			const ajaxTriggerKeys = $input.attr("data-yadaAjaxTriggerKeys");
+			if (ajaxTriggerKeys==null || yada.stringContains(ajaxTriggerKeys, "Enter")) {
+				const $form = $input.closest("form").not(".yadaEnterNoSubmit");
+				$form.addClass("yadaEnterNoSubmit").on("submit", function(e){
+					// The "yadaDoNotSubmitNow" flag is added when the Enter key is pressed in any input element
+					// that does not call ajax when pressing Enter
+					const preventSubmit = $form.data("yadaDoNotSubmitNow")==true;
+					if (preventSubmit) {
+						// e.stopImmediatePropagation();
+						e.preventDefault(); // No submit, but exec other handlers
+						$form.data("yadaDoNotSubmitNow", false);
+						// return false;
+					}
+				});
+				$form.on("keydown", function(keyEvent){
+					if (keyEvent.key=="Enter") {
+						const $target = $(keyEvent.target);
+						// The target could be any control in the form, also non-ajax inputs
+						if (!$target.hasClass("yadaAjax") && $target.attr("data-yadaHref")==null) {
+							return; // Non-ajax element can trigger submit
+						}
+						// Prevent submission depending on value of yadaAjaxTriggerKeys 
+						const targetAjaxTriggerKeys = $target.attr("data-yadaAjaxTriggerKeys");
+						if (targetAjaxTriggerKeys==null || yada.stringContains(targetAjaxTriggerKeys, "Enter")) {
+							$form.data("yadaDoNotSubmitNow", true); // Let the ajax call on the input element run
+						}
+					}
+				});
+			}
+		});
 		// Radio buttons that do not use keyup
 		selector = "input.yadaAjax[type=radio], input[data-yadaHref][type=radio]";
 		$(document).on("input", selector, function(e) {
