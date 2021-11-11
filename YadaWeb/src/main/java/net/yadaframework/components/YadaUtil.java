@@ -130,7 +130,7 @@ public class YadaUtil {
 
 	/**
 	 * Returns a list of user-friendly timezones like "Europe/Rome"
-	 * @return 
+	 * @return
 	 */
 	public List<String> getTimezones() {
 		if (computedTimezones==null) {
@@ -476,6 +476,11 @@ public class YadaUtil {
 	 * @return
 	 */
 	public YadaIntDimension getImageDimension(File imageFile) {
+		String suffix = getFileExtension(imageFile);
+		if (!ImageIO.getImageReadersBySuffix(suffix).hasNext()) {
+			return YadaIntDimension.UNSET; // Not an image
+		}
+
 		try(InputStream stream = new FileInputStream(imageFile))  {
 			Metadata metadata = ImageMetadataReader.readMetadata(stream);
 			//			for (com.drew.metadata.Directory directory2 : metadata.getDirectories()) {

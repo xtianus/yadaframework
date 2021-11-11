@@ -347,7 +347,7 @@ public class YadaFileManager {
 	 */
 	public File uploadFile(MultipartFile multipartFile) throws IOException {
 		if (multipartFile==null || multipartFile.getSize()==0) {
-			log.debug("No file sent for upload");
+			log.debug("No file sent for upload of {}", multipartFile.getName());
 			return null;
 		}
 		File targetFile = uploadFileInternal(multipartFile);

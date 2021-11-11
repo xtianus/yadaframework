@@ -1312,7 +1312,10 @@
 						// Keep going...
 					}
 				}
-				// If it is a full page, overwrite the current one. The class .yadafullPage must not be on the body
+				// If it is a full page, overwrite the current one. The class .yadafullPage must not be on the body.
+				// No: The result is a full page if it has "<!doctype" in the first 50 characters
+				// This is not true because I can return a "<!doctype" via ajax
+				// const isFullPage = responseText.substring(0, 50).toLowerCase().indexOf("<!doctype") > -1;
 				if ($('.yadafullPage', responseHtml).length>0 || $('.s_fullPage', responseHtml).length>0) {
 					showFullPage(responseText);
 					yada.loaderOff();
@@ -1321,7 +1324,7 @@
 				if (notify) {
 					return;
 				}
-				// Open any other modal
+				// Open any other modal, excluding any embedded confirm modal
 				var $loadedModalDialog=$(responseHtml).find(".modal > .modal-dialog").first();
 				if ($loadedModalDialog.length==1) {
 					$("#loginModal").remove(); // TODO still needed?
