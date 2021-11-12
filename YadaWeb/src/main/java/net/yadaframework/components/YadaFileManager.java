@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaManagedFile;
 import net.yadaframework.persistence.repository.YadaAttachedFileDao;
@@ -384,9 +385,21 @@ public class YadaFileManager {
 	/**
 	 * Replace the file associated with the current attachment
 	 * @param currentAttachedFile an existing attachment, never null
+	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
+	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
+	 * @throws IOException
+	 */
+	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, MultipartFile multipartFile, String namePrefix) throws IOException {
+		File managedFile = uploadFile(multipartFile);
+		return attachReplace(currentAttachedFile, managedFile, multipartFile, namePrefix);
+	}
+
+	/**
+	 * Replace the file associated with the current attachment
+	 * @param currentAttachedFile an existing attachment, never null
 	 * @param managedFile the new file to set
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
-	 * @return
+	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
 	 * @throws IOException
 	 */
 	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix) throws IOException {
@@ -407,6 +420,10 @@ public class YadaFileManager {
 	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
 		if (managedFile==null) {
 			return null;
+		}
+		if (currentAttachedFile==null) {
+			// We can't call attachNew() instead, because we don't have relativeFolderPath here
+			throw new YadaInvalidUsageException("currentAttachedFile is missing");
 		}
 		deleteFileAttachment(currentAttachedFile); // Delete any previous attached files
 		String clientFilename = null;
