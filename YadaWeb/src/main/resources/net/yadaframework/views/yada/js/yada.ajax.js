@@ -482,7 +482,8 @@
 				});
 			}
 		});
-		// Prevent form submission on Enter otherwise the ajax call is not made
+		// Prevent form submission on Enter otherwise the ajax call is not made.
+		// Browsers simulate a click on submit buttons when the enter key is pressed in a form, so we check using the "yadaDoNotSubmitNow" flag 
 		$(selector).each(function(){
 			const $input = $(this);
 			// Form submission by Enter keypress is allowed when the input element ajax call is not triggered by "Enter".
@@ -499,6 +500,7 @@
 						e.preventDefault(); // No submit, but exec other handlers
 						$form.data("yadaDoNotSubmitNow", false);
 						yada.log("Form submission prevented");
+						yada.loaderOff();
 						// return false;
 					}
 				});
@@ -509,7 +511,12 @@
 						if (!$target.hasClass("yadaAjax") && $target.attr("data-yadaHref")==null) {
 							return; // Non-ajax element can trigger submit
 						}
-						// Prevent submission depending on value of yadaAjaxTriggerKeys 
+						// Prevent submission depending on value of yadaAjaxTriggerKeys, but only if there is a submit control
+						const wouldSubmit = $("[type=submit]:enabled", $form).length>0; 
+						if (!wouldSubmit) {
+							// The enter key would not cause a submit, so keep going normally
+							return;
+						}
 						const targetAjaxTriggerKeys = $target.attr("data-yadaAjaxTriggerKeys");
 						if (targetAjaxTriggerKeys==null || yada.stringContains(targetAjaxTriggerKeys, "Enter")) {
 							$form.data("yadaDoNotSubmitNow", true); // Let the ajax call on the input element run

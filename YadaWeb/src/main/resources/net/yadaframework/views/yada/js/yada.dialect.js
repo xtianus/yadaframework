@@ -42,7 +42,7 @@
 		
 		if (yada.isAjaxTriggerKey(event)) {
 			// Ajax call triggered, so no suggestion list must be returned
-			event.preventDefault();
+			// event.preventDefault(); WRONG because form submission prevention is handled in yada.enableAjaxInputs
 			return;
 		}
 		
