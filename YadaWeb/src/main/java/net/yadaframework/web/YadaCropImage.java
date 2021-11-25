@@ -55,7 +55,7 @@ public class YadaCropImage {
 	 * Package-accessible constructor used by YadaCropQueue
 	 * @param imageToCrop
 	 * @param targetDimensions image target desktop and mobile dimensions. Use null when a shrink is not needed, use a null dimension when that crop is not needed.
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	// Package visibility
 	YadaCropImage(YadaFileManager yadaFileManager, YadaManagedFile imageToCrop, YadaIntDimension[] targetDimensions, String targetRelativeFolder, String targetNamePrefix) {
@@ -178,7 +178,9 @@ public class YadaCropImage {
 	/**
 	 * Enables image cropping for desktop size
 	 * @return
+	 * @deprecated this flag depends on the presence of the relative dimensions in the configuration
 	 */
+	@Deprecated
 	public YadaCropImage cropDesktop() {
 		this.cropDesktop = true;
 		return this;
@@ -187,7 +189,9 @@ public class YadaCropImage {
 	/**
 	 * Enables image cropping for mobile size
 	 * @return
+	 * @deprecated this flag depends on the presence of the relative dimensions in the configuration
 	 */
+	@Deprecated
 	public YadaCropImage cropMobile() {
 		this.cropMobile = true;
 		return this;
@@ -196,7 +200,9 @@ public class YadaCropImage {
 	/**
 	 * Enables image cropping for pdf size
 	 * @return
+	 * @deprecated this flag depends on the presence of the relative dimensions in the configuration
 	 */
+	@Deprecated
 	public YadaCropImage cropPdf() {
 		this.cropPdf= true;
 		return this;
