@@ -13,6 +13,8 @@
 
 </head>
 <body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
 <select id="navigator">
 	<option>Choose chapter...</option>
 	<option data-link="./index.html">Index</option>
@@ -22,13 +24,13 @@
 	<option data-link="./database/pagination.html">Database pagination</option>
 	<option data-link="./forms/overview.html">Forms</option>
 	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
 	<option data-link="./misc.html">Misc</option>
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
-
 </select>
 <script>
 document.querySelector("#navigator").addEventListener("change", function (event) {
@@ -47,6 +49,7 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
+<li><a href="#_shell_command_execution">Shell Command Execution</a></li>
 <li><a href="#_client_timezone">Client Timezone</a></li>
 </ul>
 </div>
@@ -56,6 +59,77 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <div class="sectionbody">
 <div class="paragraph">
 <p>Miscellaneous features</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_shell_command_execution">Shell Command Execution</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Shell commands can be configured with variable parameters and executed via the
+<code>YadaUtil.shellExec()</code> method. They can be specific to an environment (development, test, production)
+ or generic, and the executable can be different for different OS.</p>
+</div>
+<div class="paragraph">
+<p>The following example, added to <code>conf.webapp.prod.xml</code> only, defines an imagemagick conversion
+task that can be used in every environment and different OS:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;imageConversion timeoutseconds="10"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
+	&lt;executable windows="true"&gt;magick&lt;/executable&gt; <i class="conum" data-value="2"></i><b>(2)</b>
+	&lt;executable mac="true" linux="true"&gt;/usr/local/bin/magick&lt;/executable&gt; <i class="conum" data-value="2"></i><b>(2)</b>
+	&lt;arg&gt;convert&lt;/arg&gt;
+	&lt;arg&gt;${FILENAMEIN}&lt;/arg&gt; <i class="conum" data-value="3"></i><b>(3)</b>
+	&lt;arg&gt;${FILENAMEOUT}&lt;/arg&gt;
+&lt;/imageConversion&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>A timeout in seconds can be specified, the default being 60 seconds</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>There can be more than one executable if needed</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Dynamic parameters can be added</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>A different environment can have a specific configuration section with the same first tag (<code>&lt;imageConversion&gt;</code> in the above example).</p>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you are used to Commons Configuration <a href="http://commons.apache.org/proper/commons-configuration/userguide/howto_basicfeatures.html#Variable_Interpolation" target="_blank" rel="noopener">variable interpolation</a>, please note that it can&#8217;t
+be used in &lt;arg&gt; values. This is because the syntax clashes with the <a href="https://commons.apache.org/proper/commons-exec/tutorial.html" target="_blank" rel="noopener">substitution map</a> of Apache
+Commons Exec.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The above configuration can be used with a code similar to the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Map&lt;String, String&gt; params = new HashMap&lt;&gt;();
+params.put("FILENAMEIN", imageToCropFile.getAbsolutePath());
+params.put("FILENAMEOUT", destinationFile.getAbsolutePath());
+int exitValue = yadaUtil.shellExec("config/imageConversion", params, null);</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -106,7 +180,7 @@ userProfile.setTimezone(TimeZone.getTimeZone(formBean.getTimezoneId()));</code><
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-10-22 17:02:28 +0200
+Last updated 2021-11-23 17:11:08 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

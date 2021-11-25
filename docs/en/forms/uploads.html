@@ -12,6 +12,8 @@
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
 <select id="navigator">
 	<option>Choose chapter...</option>
 	<option data-link="./index.html">Index</option>
@@ -21,13 +23,13 @@
 	<option data-link="./database/pagination.html">Database pagination</option>
 	<option data-link="./forms/overview.html">Forms</option>
 	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
 	<option data-link="./misc.html">Misc</option>
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
-
 </select>
 <script>
 document.querySelector("#navigator").addEventListener("change", function (event) {
@@ -473,19 +475,17 @@ There is no way to detect if you are using the wrong method, so be careful.</p>
  */
 public String updateProfile(MultipartFile uploadedMultipart) {
     if (uploadedMultipart!=null &amp;&amp; !uploadedMultipart.isEmpty()) {
-        // Saving the uploaded file to the uploads folder
-        File uploadedFile = yadaFileManager.uploadFile(uploadedMultipart);
         YadaAttachedFile previousIcon = user.getIcon();
         if (previousIcon==null) {
             // Move the file to the "someFolder" directory and create a new YadaAttachedFile
-            YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "someFolder", "myprefix");
+            YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "someFolder", "myprefix");
             if (newIcon!=null) {
                 user.setIcon(newIcon);
                 userRepository.save(user);
             }
         } else {
             // Replace the existing file with the uploaded one
-            yadaFileManager.attachReplace(previousIcon, uploadedFile, uploadedMultipart, "myprefix", "jpg", null, null);
+            yadaFileManager.attachReplace(previousIcon, uploadedMultipart, "myprefix", "jpg", null, null);
         }
     }</code></pre>
 </div>
@@ -620,18 +620,24 @@ crop all images added to the queue until there are no more left.</p>
             &lt;top&gt;
                 &lt;desktop&gt;1920,1200&lt;/desktop&gt;
                 &lt;mobile&gt;768,610&lt;/mobile&gt;
+                &lt;pdf&gt;3840,2400&lt;/pdf&gt;
             &lt;/top&gt;
             &lt;thumbnail&gt;
-                &lt;desktop&gt;1920,1374&lt;/desktop&gt;
-                &lt;mobile&gt;768,533&lt;/mobile&gt;
+                &lt;desktop&gt;800,800&lt;/desktop&gt;
+                &lt;mobile&gt;400,400&lt;/mobile&gt;
+                &lt;pdf&gt;2000,2000&lt;/pdf&gt;
             &lt;/thumbnail&gt;
         &lt;/news&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>targetImageExtension</code> is the image format that all uploaded images will be converted to, unless specified in <code>preserveImageExtensions</code>
-which is a comma-separated list of extensions that should not be converted. This can be useful to preserve animated gifs.
-The following xml specifies the desktop and mobile dimensions required for each image.
+<p><code>targetImageExtension</code> is the image format that all uploaded images will be converted to, unless specified
+in <code>preserveImageExtensions</code> which is a comma-separated list of extensions that should not be converted.
+This can be useful to preserve animated gifs.
+Then the desktop/mobile/PDF dimensions required for each image are specified, but all are optional.
+In this example there is one "news" image in three cropped sizes, one named "top" and another named "thumbnail".
+There&#8217;s no need to specify all the three dimensions (desktop/mobile/PDF), but at least one is required
+to make any sense of the crop operation.
 The above configuration can be read in your subclass of <code>YadaConfiguration</code>:</p>
 </div>
 <div class="listingblock">
@@ -642,7 +648,8 @@ The above configuration can be read in your subclass of <code>YadaConfiguration<
 </div>
 </div>
 <div class="paragraph">
-<p>This will return an array of YadaIntDimension holding the desktop and mobile dimensions at position 0 and 1.</p>
+<p>This will return an array of YadaIntDimension holding the desktop, mobile and PDF dimensions at position 0, 1 and 2,
+with a null value when the dimension has not been configured.</p>
 </div>
 <div class="paragraph">
 <p>The command to crop and resize images must be specified in the configuration too.
@@ -652,7 +659,7 @@ This example can crop and resize any image, preserving animated gifs if the gif 
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;config&gt;
     &lt;shell&gt;
-        &lt;yadaCropAndResize&gt;
+        &lt;yadaCropAndResize timeoutseconds="20"&gt;
             &lt;executable&gt;convert&lt;/executable&gt;
             &lt;arg&gt;${FILENAMEIN}&lt;/arg&gt;
             &lt;arg&gt;-coalesce&lt;/arg&gt;
@@ -672,7 +679,7 @@ This example can crop and resize any image, preserving animated gifs if the gif 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;yadaCropAndResize&gt;
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;yadaCropAndResize timeoutseconds="20"&gt;
     &lt;executable&gt;convert&lt;/executable&gt;
     &lt;arg&gt;${FILENAMEIN}&lt;/arg&gt;
     &lt;arg&gt;-background&lt;/arg&gt; &lt;!-- "-background white -flatten" converts any transparent png backround to white instead of the default black --&gt;
@@ -696,11 +703,14 @@ This example can crop and resize any image, preserving animated gifs if the gif 
 &lt;arg&gt;${FILENAMEIN}&lt;/arg&gt;</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>For more details on shell command executions, see <a href="../misc.html#_shell_command_execution">Shell Command Execution</a>.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_java_form_bean">Java form bean</h3>
 <div class="paragraph">
-<p>The easiest way to handle file uploads is to use the <em>ref</em>`forms/overview:Entity Backing Beans` technique. You need to add a <code>@Transient</code> field (with getter and setter)
+<p>The easiest way to handle file uploads is to use the <a href="overview.html#_entity_backing_beans">Entity Backing Beans</a> technique. You need to add a <code>@Transient</code> field (with getter and setter)
 for each multipart file you need to receive:</p>
 </div>
 <div class="listingblock">
@@ -715,13 +725,25 @@ public class News implements CloneableDeep {
 </div>
 </div>
 <div class="paragraph">
-<p>This allows for easy validation and handling of the uploaded file.</p>
+<p>This allows for easy validation and handling of the uploaded file.
+You can also use a <a href="overview.html#_form_backing_beans">Form Backing Bean</a> of course.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_html_form">HTML form</h3>
 <div class="paragraph">
-<p>The upload form is the same as already seen elsewhere, with the added <code>size</code> option:</p>
+<p>The upload form can be as simple as a plain file input (here with spring/bootstrap5 validation added):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/addOrUpdateNews}" th:object="${news}" enctype="multipart/form-data"
+	method="post" role="form" th:with="hasError=${#fields.hasErrors('myFieldName')}"&gt;
+	&lt;input type="file" name="myFieldName" accept="image/*" th:classappend="${hasError}?is-invalid"&gt;
+	&lt;div th:each="err : ${#fields.errors('myFieldName')}" th:text="${err}" class="invalid-feedback"&gt;Invalid image&lt;/div&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The form can also be implemented using the <code>/yada/form/fileUpload</code> fragment:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -755,7 +777,7 @@ public class News implements CloneableDeep {
 <div class="sect2">
 <h3 id="_java_controller_to_show_the_form">Java Controller to show the form</h3>
 <div class="paragraph">
-<p>When showing the form, the size model attribute must be set:</p>
+<p>When showing the form using the fragment example, the <code>size</code> model attribute must be set:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -768,7 +790,7 @@ model.addAttribute("thumbnailSize", biggestNeeded);</code></pre>
 <div class="sect2">
 <h3 id="_java_form_submission">Java Form submission</h3>
 <div class="paragraph">
-<p>When the Controller receives the submitted data inside an instance of the Entity, the first thing is to check for the upload file size and issue an error when the file is too big:</p>
+<p>When the Controller receives the submitted data inside an instance of the Entity, the first thing is to check for the upload file size, then issue an error when the file is too big:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -817,6 +839,7 @@ if (thumbnailImage!=null &amp;&amp; !thumbnailImage.isEmpty()) {
 }
 
 if (!valid) {
+	yadaFileManager.delete(thumbnailManagedFile);
     return EDIT_VIEW;
 }</code></pre>
 </div>
@@ -829,8 +852,8 @@ It is important that, if the YadaSession object has been subclassed, it has the 
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Component
-@SessionScope
 @Primary
+@Scope(value="session", proxyMode=ScopedProxyMode.TARGET_CLASS)
 public class ApplicationSession extends YadaSession&lt;UserProfile&gt; {</code></pre>
 </div>
 </div>
@@ -845,7 +868,7 @@ String finalRedirect = yadaWebUtil.redirectString("/manager/journal", locale);
 YadaCropQueue yadaCropQueue = applicationSession.addCropQueue(cropRedirect, finalRedirect); // Clear any previous abandoned crops and set the destination
 if (thumbnailManagedFile!=null) {
     YadaCropImage yadaCropImage = yadaCropQueue.addCropImage(thumbnailManagedFile, thumbnailDimensionsDesktopMobile, FOLDER_NEWS, "thumb-");
-    YadaAttachedFile newOrExisting = yadaCropImage.titleKey("crop.news.thumbnail").cropDesktop().cropMobile().link(news.getThumbnail());
+    YadaAttachedFile newOrExisting = yadaCropImage.titleKey("crop.news.thumbnail").link(news.getThumbnail());
     news.setThumbnail(newOrExisting);
     imageLoaded=true;
 }</code></pre>
@@ -890,9 +913,11 @@ yadaCropImage.setYadaAttachedFile(newOrExisting);</code></pre>
     &lt;script th:src="@{/static/jcrop-3/jcrop.js}"&gt;&lt;/script&gt;
 &lt;/head&gt;
 &lt;body class="yadaCropPage"&gt;
-    &lt;div class=" container-fluid sec" th:with="cropQueue=${@applicationSession.cropQueue}, cropImage=${cropQueue.currentImage}"&gt;
+    &lt;div class="container-fluid sec" th:with="cropQueue=${@applicationSession.cropQueue}, cropImage=${cropQueue.currentImage}"&gt;
 
-        &lt;h1&gt;&lt;span th:text="#{${cropImage.titleKey}}"&gt;This is the title&lt;/span&gt; ([[${cropQueue.count}]] left)&lt;/h1&gt;
+        &lt;h1&gt;&lt;span th:text="#{${cropImage.titleKey}}"&gt;This is the title&lt;/span&gt;
+        	&lt;span th:if="${cropQueue.totInitialImages&gt;1}"&gt; ([[#{crop.images.left(${cropQueue.count})}]])&lt;/span&gt;
+        &lt;/h1&gt;
         &lt;p&gt;Drag the handles to the desired crop, then press the [[#{yada.crop.cropSubmit}]] button&lt;/p&gt;
 
         &lt;div th:replace="~{/yadacms/imageCropper::component(cropQueue=${cropQueue})}"&gt;&lt;/div&gt;
@@ -900,6 +925,10 @@ yadaCropImage.setYadaAttachedFile(newOrExisting);</code></pre>
     &lt;/div&gt;
 &lt;/body&gt;</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The actual crop of the image is already implemented in <code>YadaMiscController</code> so there&#8217;s nothing more to do.
+To post the form to a custom crop method instead, call the <code>YadaCropQueue.setCropPerformAction()</code>.</p>
 </div>
 </div>
 <div class="sect2">
@@ -936,7 +965,7 @@ This always happens in the following cases:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-10-22 16:29:01 +0200
+Last updated 2021-11-25 15:52:13 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

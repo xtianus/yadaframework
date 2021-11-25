@@ -12,6 +12,8 @@
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
 <select id="navigator">
 	<option>Choose chapter...</option>
 	<option data-link="./index.html">Index</option>
@@ -21,13 +23,13 @@
 	<option data-link="./database/pagination.html">Database pagination</option>
 	<option data-link="./forms/overview.html">Forms</option>
 	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
 	<option data-link="./misc.html">Misc</option>
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
-
 </select>
 <script>
 document.querySelector("#navigator").addEventListener("change", function (event) {
@@ -93,10 +95,18 @@ as many rows as were loaded by the user using the "load more" button. This infor
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/searchBook}"&gt;
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/searchBook(sort='title,asc,ignorecase',sort='date,desc')}"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
         &lt;input name="searchString" th:value="${searchString}"&gt;
         &lt;button type="submit"&gt;</code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The action in this example contains the sort parameters</td>
+</tr>
+</table>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -117,6 +127,8 @@ then call the proper DAO to fetch data from the database, that will be stored in
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">if (!yadaPageRequest.isValid()) {
         yadaPageRequest = new YadaPageRequest(0, PAGE_SIZE);
+        yadaPageRequest.addSort("title", false, true);
+        yadaPageRequest.addSort("date", true, false);
 }
 YadaPageRows&lt;Book&gt; result = searchDao.find(searchString, yadaPageRequest);
 model.addAttribute("books", result);
@@ -136,6 +148,7 @@ public class SearchDao {
         public YadaPageRows&lt;Book&gt; find(String searchString, YadaPageRequest yadaPageRequest) {
                 List&lt;Book&gt; found = YadaSql.instance().selectFrom("from Book b")
                         .where("b.title LIKE CONCAT('%',:search,'%')")
+                        .orderBy(yadaPageRequest)
                         .setParameter("search", searchString)
                         .query(em, Book.class)
                         .setFirstResult(yadaPageRequest.getFirstResult())
@@ -209,7 +222,7 @@ like <code>yada:paginationHistory="'product.page, product.size, product.loadPrev
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-02-05 19:48:12 +0100
+Last updated 2021-11-04 15:17:53 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

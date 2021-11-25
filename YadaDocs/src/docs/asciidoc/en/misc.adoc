@@ -3,6 +3,46 @@
 
 Miscellaneous features
 
+== Shell Command Execution
+Shell commands can be configured with variable parameters and executed via the 
+`YadaUtil.shellExec()` method. They can be specific to an environment (development, test, production)
+ or generic, and the executable can be different for different OS.
+ 
+The following example, added to `conf.webapp.prod.xml` only, defines an imagemagick conversion
+task that can be used in every environment and different OS: 
+ 
+[source,xml]
+----
+<imageConversion timeoutseconds="10"> # <1>
+	<executable windows="true">magick</executable> # <2>
+	<executable mac="true" linux="true">/usr/local/bin/magick</executable> # <2>
+	<arg>convert</arg>
+	<arg>${FILENAMEIN}</arg> # <3>
+	<arg>${FILENAMEOUT}</arg>
+</imageConversion>
+----
+<1> A timeout in seconds can be specified, the default being 60 seconds
+<2> There can be more than one executable if needed
+<3> Dynamic parameters can be added
+
+A different environment can have a specific configuration section with the same first tag (`<imageConversion>` in the above example).
+
+[CAUTION]
+====
+If you are used to Commons Configuration http://commons.apache.org/proper/commons-configuration/userguide/howto_basicfeatures.html#Variable_Interpolation[variable interpolation^], please note that it can't
+be used in <arg> values. This is because the syntax clashes with the https://commons.apache.org/proper/commons-exec/tutorial.html[substitution map^] of Apache
+Commons Exec.
+====
+
+The above configuration can be used with a code similar to the following:
+
+[source,java]
+----
+Map<String, String> params = new HashMap<>();
+params.put("FILENAMEIN", imageToCropFile.getAbsolutePath());
+params.put("FILENAMEOUT", destinationFile.getAbsolutePath());
+int exitValue = yadaUtil.shellExec("config/imageConversion", params, null);
+----
 
 ==  Client Timezone
 The timezone of the user is retrieved via javascript on first page load and sent to the server

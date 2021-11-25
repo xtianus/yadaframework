@@ -31,8 +31,7 @@ To make an ajax request, add the `yadaAjax` class:
 When clicking on the anchor, the `/some/endpoint` url is called via ajax.
 
 The alternative way to define an ajax link is to use either the `yada:ajax` or the `data-yadaHref` attributes instead of the `yadaAjax` class:
-The href attribute should be "javascript:;" in that case, to
-prevent the default behaviour (TODO is that needed?).
+The href attribute should either be empty or "javascript:;" in that case.
 
 [source,html]
 ----

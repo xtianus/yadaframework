@@ -13,6 +13,8 @@
 
 </head>
 <body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
 <select id="navigator">
 	<option>Choose chapter...</option>
 	<option data-link="./index.html">Index</option>
@@ -22,13 +24,13 @@
 	<option data-link="./database/pagination.html">Database pagination</option>
 	<option data-link="./forms/overview.html">Forms</option>
 	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
 	<option data-link="./misc.html">Misc</option>
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
-
 </select>
 <script>
 document.querySelector("#navigator").addEventListener("change", function (event) {
@@ -122,8 +124,7 @@ It is automatically included in production, merged with the other yada javascrip
 </div>
 <div class="paragraph">
 <p>The alternative way to define an ajax link is to use either the <code>yada:ajax</code> or the <code>data-yadaHref</code> attributes instead of the <code>yadaAjax</code> class:
-The href attribute should be "javascript:;" in that case, to
-prevent the default behaviour (TODO is that needed?).</p>
+The href attribute should either be empty or "javascript:;" in that case.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -955,7 +956,7 @@ Otherwise the form will be sent with a normal non-ajax request.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-10-23 16:10:27 +0200
+Last updated 2021-11-12 16:39:20 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

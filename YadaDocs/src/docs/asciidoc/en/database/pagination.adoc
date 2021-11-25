@@ -31,10 +31,11 @@ as many rows as were loaded by the user using the "load more" button. This infor
 
 [source,html]
 ----
-<form th:action="@{/searchBook}">
+<form th:action="@{/searchBook(sort='title,asc,ignorecase',sort='date,desc')}"> # <1>
         <input name="searchString" th:value="${searchString}">
         <button type="submit">
 ----
+<1> The action in this example contains the sort parameters
 
 [source,java]
 ----
@@ -54,6 +55,8 @@ then call the proper DAO to fetch data from the database, that will be stored in
 ----
 if (!yadaPageRequest.isValid()) {
         yadaPageRequest = new YadaPageRequest(0, PAGE_SIZE);
+        yadaPageRequest.addSort("title", false, true);
+        yadaPageRequest.addSort("date", true, false);
 }
 YadaPageRows<Book> result = searchDao.find(searchString, yadaPageRequest);
 model.addAttribute("books", result);
@@ -72,6 +75,7 @@ public class SearchDao {
         public YadaPageRows<Book> find(String searchString, YadaPageRequest yadaPageRequest) {
                 List<Book> found = YadaSql.instance().selectFrom("from Book b")
                         .where("b.title LIKE CONCAT('%',:search,'%')")
+                        .orderBy(yadaPageRequest)
                         .setParameter("search", searchString)
                         .query(em, Book.class)
                         .setFirstResult(yadaPageRequest.getFirstResult())
