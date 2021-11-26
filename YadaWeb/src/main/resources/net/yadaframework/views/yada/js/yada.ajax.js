@@ -57,7 +57,8 @@
 		sizeParam = sizeParam || "size";
 		loadPreviousParam = loadPreviousParam || "loadPrevious";
 		// 
-		const nextPageUrl = $linkOrForm.attr("href"); // ".../en/search/loadMoreProducts?searchString=tolo&page=2&size=4"
+		// ".../en/search/loadMoreProducts?searchString=tolo&page=2&size=4"
+		const nextPageUrl = $linkOrForm.attr("data-yadahref") || $linkOrForm.attr("href");
 		var nextPage = yada.getUrlParameter(nextPageUrl, NEXTPAGE_NAME);
 		var nextSize = yada.getUrlParameter(nextPageUrl, NEXTSIZE_NAME);
 		if (nextPageUrl==null) {
@@ -77,9 +78,12 @@
 	 * @return true if the attribute is present.
 	 */
 	function handlePaginationHistoryAttribute($elem, $linkOrForm) {
-		const yadaPagination = $elem.attr("data-yadaPaginationHistory"); // ="pageParam, sizeParam, loadPreviousParam"
+		var yadaPagination = $elem.attr("data-yadaPaginationHistory"); // ="pageParam, sizeParam, loadPreviousParam"
 		if (yadaPagination==null) {
 			return false;
+		}
+		if (yadaPagination=="") {
+			yadaPagination=null;
 		}
 		const paginationParams = yada.listToArray(yadaPagination);
 		yada.fixPaginationLinkHistory($linkOrForm, paginationParams[0], paginationParams[1], paginationParams[2]);
