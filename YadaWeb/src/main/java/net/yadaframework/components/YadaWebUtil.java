@@ -217,7 +217,7 @@ public class YadaWebUtil {
 		}
 		return result.toString();
 	}
-	
+
 	/**
 	 * Make a zip file and send it to the client. The temp file is automatically deleted.
 	 * @param returnedFilename the name of the file to create and send, with extension. E.g.: data.zip
@@ -346,7 +346,7 @@ public class YadaWebUtil {
 		//			IOUtils.copy(inputStream, outputStream);
 		//		}
 	}
-	
+
 	/**
 	 * Assembles a url given its parts as string.
 	 * @param segments the initial parts of the url up to the query string. Leading and trailing slashes are added when missing.
@@ -357,11 +357,11 @@ public class YadaWebUtil {
 	public String makeUrl(String...segments) {
 		return makeUrl(segments, null, null);
 	}
-	
+
 	/**
 	 * Assembles a url given its parts as string.
 	 * @param segments the initial parts of the url up to the query string. Leading and trailing slashes are added when missing.
-	 * @param requestParams optional name/value pairs of request parameters that will compose the query string. 
+	 * @param requestParams optional name/value pairs of request parameters that will compose the query string.
 	 * Use null for no parameters, use a null value for no value (just the name will be added)
 	 * @param urlEncode use Boolean.TRUE to encode the parameters, null or anything else not to encode
 	 * @return
@@ -380,7 +380,7 @@ public class YadaWebUtil {
 			result.append("?");
 			String[] keys = requestParams.keySet().toArray(new String[0]);
 			for (int i=0; i<keys.length; i++) {
-				String key = keys[i]; 
+				String key = keys[i];
 				String value = requestParams.get(key);
 				result.append(encode?urlEncode(key):key);
 				if (value!=null) {
@@ -561,11 +561,13 @@ public class YadaWebUtil {
 	}
 
 	/**
-	 * Ritorna l'indirizzo completo della webapp, tipo http://www.yodadog.net:8080/site, senza slash finale
+	 * Ritorna l'indirizzo completo della webapp, tipo http://www.yadaframework.net:8080/site, senza slash finale
 	 * Da thymeleaf si usa con ${@yadaWebUtil.getWebappAddress(#httpServletRequest)}
 	 * @param request
 	 * @return
+	 * @deprecated use YadaConfiguration.getWebappAddress instead, because this version does not work behind an ajp connector
 	 */
+	@Deprecated
 	public String getWebappAddress(HttpServletRequest request) {
 		int port = request.getServerPort();
 		String pattern = port==80||port==443?"%s://%s%s":"%s://%s:%d%s";

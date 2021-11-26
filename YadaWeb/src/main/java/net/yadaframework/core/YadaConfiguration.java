@@ -291,7 +291,7 @@ public abstract class YadaConfiguration {
 	}
 
 // This has been removed because uploaded files should not be public.
-// They should be moved to a public folder in order to show them via apache. 	
+// They should be moved to a public folder in order to show them via apache.
 //	/**
 //	 * Returns the url for the uploads folder
 //	 * @return
@@ -541,17 +541,22 @@ public abstract class YadaConfiguration {
 
 	/**
 	 * Return the webapp address without a trailing slash. E.g. http://www.mysite.com/app or http://www.mysite.com
-	 * The language path is added if enabled
+	 * The address is computed from the request when not null, else it is read from the configuration.
 	 * @return
 	 */
-	public String getWebappAddress(HttpServletRequest request, Locale locale) {
+	public String getWebappAddress(HttpServletRequest request) {
 		if (webappAddress==null) {
-			StringBuilder address = new StringBuilder(getServerAddress(request)); // http://www.example.com
-			address.append(request.getContextPath()); // http://www.example.com/appname
-			if (isLocalePathVariableEnabled() && locale!=null) {
-				address.append("/").append(locale.getLanguage()); // http://www.example.com/en
+			if (request!=null) {
+				StringBuilder address = new StringBuilder(getServerAddress(request)); // http://www.example.com
+				address.append(request.getContextPath()); // http://www.example.com/appname
+				// Adding the language is a bug because the value is cached
+				//			if (isLocalePathVariableEnabled() && locale!=null) {
+				//				address.append("/").append(locale.getLanguage()); // http://www.example.com/en
+				//			}
+				webappAddress = address.toString();
+			} else {
+				webappAddress = getWebappAddress();
 			}
-			webappAddress = address.toString();
 		}
 		return webappAddress;
 	}
@@ -571,6 +576,7 @@ public abstract class YadaConfiguration {
 
 	/**
 	 * Return the server address without a trailing slash. E.g. http://col.letturedametropolitana.it
+	 * Warning: this version does not work properly behind an ajp connector
 	 * @return
 	 */
 	public String getServerAddress(HttpServletRequest request) {
@@ -938,7 +944,7 @@ public abstract class YadaConfiguration {
 	public Path getBasePath() {
 		return new File(configuration.getString("config/paths/basePath")).toPath();
 	}
-	
+
 	/**
 	 *
 	 * @return e.g. "res"
