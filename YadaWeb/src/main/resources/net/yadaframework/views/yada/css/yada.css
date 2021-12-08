@@ -1,4 +1,7 @@
-/* Questo consente di piazzare una "cover" */
+.yadaHidden {
+	display: none !important;
+}
+
 .yadaCover {
 	background-color: white;
     position: absolute;

@@ -19,10 +19,10 @@ public class YadaDialect extends AbstractProcessorDialect {
 	 * @param config
 	 */
 	public YadaDialect(YadaConfiguration config) {
-		// The precedence is higher than the standard "th:" dialect so that th: attributes are processed before.
+		// NO: The precedence is higher than the standard "th:" dialect so that th: attributes are processed before.
 		// The only th: tag that doesn't work is th:field because it checks which tag it's being used on
 		// and skips all custom tags.
-		super("Yada Dialect", YadaDialectUtil.YADA_PREFIX, StandardDialect.PROCESSOR_PRECEDENCE+1);
+		super("Yada Dialect", YadaDialectUtil.YADA_PREFIX, StandardDialect.PROCESSOR_PRECEDENCE);
 		this.config = config;
 	}
 
@@ -33,15 +33,15 @@ public class YadaDialect extends AbstractProcessorDialect {
         processors.add(new YadaSrcAttrProcessor(dialectPrefix, config));
         processors.add(new YadaSrcsetAttrProcessor(dialectPrefix, config));
         processors.add(new YadaAjaxAttrProcessor(dialectPrefix));
-        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "paginationHistory", "data-yadaPaginationHistory"));
-        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "submitHandler", "data-yadaSubmitHandler"));
-        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "successHandler", "data-yadaSuccessHandler"));
-        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "updateOnSuccess", "data-yadaUpdateOnSuccess"));
-        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "deleteOnSuccess", "data-yadaDeleteOnSuccess"));
-        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "confirm", "data-yadaConfirm"));
-        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "title", "data-yadaTitle"));
-        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "okButton", "data-yadaOkButton"));
-        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "cancelButton", "data-yadaCancelButton"));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "paginationHistory", "data-yadaPaginationHistory", config));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "submitHandler", "data-yadaSubmitHandler", config));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "successHandler", "data-yadaSuccessHandler", config));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "updateOnSuccess", "data-yadaUpdateOnSuccess", config));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "deleteOnSuccess", "data-yadaDeleteOnSuccess", config));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "confirm", "data-yadaConfirm", config));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "title", "data-yadaTitle", config));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "okButton", "data-yadaOkButton", config));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "cancelButton", "data-yadaCancelButton", config));
         processors.add(new YadaNewlineTextAttrProcessor(dialectPrefix, false)); // unewlinetext
         processors.add(new YadaNewlineTextAttrProcessor(dialectPrefix, true));	// newlinetext
         processors.add(new YadaBrOnFirstSpaceAttrProcessor(dialectPrefix, false));	// ubrspace

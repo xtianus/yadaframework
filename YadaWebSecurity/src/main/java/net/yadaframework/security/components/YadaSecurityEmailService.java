@@ -53,8 +53,8 @@ public class YadaSecurityEmailService {
 		final String emailName = "emailChangeConfirmation";
 		final String[] toEmail = {yadaRegistrationRequest.getEmail()};
 
-		// Creo il link che l'utente deve cliccare
-		String myServerAddress = yadaWebUtil.getWebappAddress(request);
+		// In the dev environment we use the request to get the address, otherwise it must have been configured
+		String myServerAddress = config.isDevelopmentEnvironment() ? config.getWebappAddress(request) : config.getWebappAddress();
 		String fullLink = myServerAddress + "/changeEmailConfirm/" + yadaTokenHandler.makeLink(yadaRegistrationRequest, null);
 
 		final Map<String, Object> templateParams = new HashMap<>();
@@ -78,7 +78,8 @@ public class YadaSecurityEmailService {
 		final String[] toEmail = {yadaRegistrationRequest.getEmail()};
 		final String[] subjectParams = {yadaEmailService.timestamp(locale)};
 		String link = config.getRegistrationConfirmationLink(locale);
-		String myServerAddress = yadaWebUtil.getWebappAddress(request);
+		// In the dev environment we use the request to get the address, otherwise it must have been configured
+		String myServerAddress = config.isDevelopmentEnvironment() ? config.getWebappAddress(request) : config.getWebappAddress();
 		String fullLink = myServerAddress + link + yadaTokenHandler.makeLink(yadaRegistrationRequest, linkParameters);
 
 		final Map<String, Object> templateParams = new HashMap<>();
@@ -111,7 +112,8 @@ public class YadaSecurityEmailService {
 			destinationUrl =  yadaRegistrationRequest.getDestinationUrl();
 		}
 
-		String myServerAddress = yadaWebUtil.getWebappAddress(request);
+		// In the dev environment we use the request to get the address, otherwise it must have been configured
+		String myServerAddress = config.isDevelopmentEnvironment() ? config.getWebappAddress(request) : config.getWebappAddress();
 		String fullLink = myServerAddress + destinationUrl + yadaTokenHandler.makeLink(yadaRegistrationRequest, null);
 
 		final Map<String, Object> templateParams = new HashMap<>();

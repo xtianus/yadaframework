@@ -63,4 +63,9 @@ public interface YadaViews {
 	 * Model attribute that contains the custom error description
 	 */
 	String AJAX_SERVER_ERROR_DESCRIPTION = "errorDescription";
+
+	/**
+	 * HTML that shows suggestions, to be used with the yada:input and yada:suggestion tags
+	 */
+	String AJAX_SUGGESTION_FRAGMENT = "/yada/formfields/inputSuggestionFragment :: fragment";
 }

@@ -2,6 +2,7 @@ package net.yadaframework.security.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.TimeZone;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -81,6 +82,10 @@ public class YadaRegistrationRequest implements Serializable {
 
 	@OneToOne
 	private YadaClause trattamentoDati; // Usato per visualizzare la clausola nel form, e poi per sapere quale clausola è stata accettata in fase di creazione utente
+
+	// Browser timezone
+	@Column(length = 64)
+	private TimeZone timezone;
 
 	@Transient
 	private boolean trattamentoDatiAccepted=false; // usato nel form
@@ -199,6 +204,14 @@ public class YadaRegistrationRequest implements Serializable {
 
 	public void setDestinationUrl(String destinationUrl) {
 		this.destinationUrl = destinationUrl;
+	}
+
+	public TimeZone getTimezone() {
+		return timezone;
+	}
+
+	public void setTimezone(TimeZone timezone) {
+		this.timezone = timezone;
 	}
 
 //	public String getGeneric1() {

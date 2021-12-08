@@ -62,7 +62,7 @@ public class YadaSql implements CloneableDeep {
 		this.parent = parent;
 		this.enabled = enabled;
 	}
-	
+
 	/**
 	 * Returns the "order by" statement in MySql syntax
 	 * @param yadaPageRequest
@@ -233,7 +233,7 @@ public class YadaSql implements CloneableDeep {
 //	}
 //
 //	// TODO more parameter types
-	
+
 	/**
 	 * Replaces the current "select... from..." with another one
 	 * @param selectFrom
@@ -646,11 +646,14 @@ public class YadaSql implements CloneableDeep {
 
 
 	/**
-	 * Add sorting from a Spring Data Pageable
-	 * @param pageable
+	 * Add sorting from a YadaPageRequest
+	 * @param yadaPageRequest
 	 * @return
 	 */
 	public YadaSql orderBy(YadaPageRequest yadaPageRequest) {
+		if (yadaPageRequest.getPageSort()==null) {
+			return this; // No sort information
+		}
 		Iterator<YadaPageSort.Order> orders = yadaPageRequest.getPageSort().iterator();
 		while (orders.hasNext()) {
 			YadaPageSort.Order order = orders.next();
@@ -750,9 +753,9 @@ public class YadaSql implements CloneableDeep {
 		fixQuery(query);
 		return query;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param em
 	 * @param resultSetMapping the name of the result set mapping, defined with a @SqlResultSetMapping annotation on the @Entity
 	 * @return
@@ -838,6 +841,9 @@ public class YadaSql implements CloneableDeep {
 	public YadaSql setParameter(String name, Object value) {
 		if (queryDone && parameters.isEmpty()) {
 			throw new YadaInternalException("Parameters should be set before calling query()");
+		}
+		if (value.getClass().isArray()) {
+			value = Arrays.asList((Object[])value);
 		}
 		parameters.put(name, value);
 		return this;

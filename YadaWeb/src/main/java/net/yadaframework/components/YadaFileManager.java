@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaManagedFile;
 import net.yadaframework.persistence.repository.YadaAttachedFileDao;
@@ -50,12 +51,12 @@ public class YadaFileManager {
 	// TODO distinguere tra mobile portrait e mobile landscape
 	// TODO le dimensioni mobile/desktop devono essere configurabili
 	// TODO mantenere l'immagine caricata nella versione originale
-	
+
 	/**
 	 * Move the file to the public temp folder for later processing.
 	 * @param yadaManagedFile
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public YadaManagedFile moveToTemp(YadaManagedFile yadaManagedFile) throws IOException {
 		File destinationFile = new File(config.getTempImageDir(), yadaManagedFile.getFilename());
@@ -347,7 +348,7 @@ public class YadaFileManager {
 	 */
 	public File uploadFile(MultipartFile multipartFile) throws IOException {
 		if (multipartFile==null || multipartFile.getSize()==0) {
-			log.debug("No file sent for upload");
+			log.debug("No file sent for upload of {}", multipartFile.getName());
 			return null;
 		}
 		File targetFile = uploadFileInternal(multipartFile);
@@ -384,9 +385,21 @@ public class YadaFileManager {
 	/**
 	 * Replace the file associated with the current attachment
 	 * @param currentAttachedFile an existing attachment, never null
+	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
+	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
+	 * @throws IOException
+	 */
+	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, MultipartFile multipartFile, String namePrefix) throws IOException {
+		File managedFile = uploadFile(multipartFile);
+		return attachReplace(currentAttachedFile, managedFile, multipartFile, namePrefix);
+	}
+
+	/**
+	 * Replace the file associated with the current attachment
+	 * @param currentAttachedFile an existing attachment, never null
 	 * @param managedFile the new file to set
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
-	 * @return
+	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
 	 * @throws IOException
 	 */
 	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix) throws IOException {
@@ -408,12 +421,32 @@ public class YadaFileManager {
 		if (managedFile==null) {
 			return null;
 		}
+		if (currentAttachedFile==null) {
+			// We can't call attachNew() instead, because we don't have relativeFolderPath here
+			throw new YadaInvalidUsageException("currentAttachedFile is missing");
+		}
 		deleteFileAttachment(currentAttachedFile); // Delete any previous attached files
 		String clientFilename = null;
 		if (multipartFile!=null) {
 			clientFilename = multipartFile.getOriginalFilename();
 		}
 		return attach(currentAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
+	}
+
+	/**
+	 * Copies an uploaded file to the destination folder, creating a database association to assign to an Entity.
+	 * The name of the file is in the format [basename]managedFileName_id.ext.
+	 * Images are not resized.
+	 * @param multipartFile the original uploaded file
+	 * @param relativeFolderPath path of the target folder relative to the contents folder, starting with a slash /
+	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
+	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
+	 * @throws IOException
+	 * @see {@link #attach(File, String, String, String, Integer, Integer)}
+	 */
+	public YadaAttachedFile attachNew(MultipartFile multipartFile, String relativeFolderPath, String namePrefix) throws IOException {
+		File managedFile = uploadFile(multipartFile);
+		return attachNew(managedFile, multipartFile, relativeFolderPath, namePrefix, null, null, null);
 	}
 
 	/**

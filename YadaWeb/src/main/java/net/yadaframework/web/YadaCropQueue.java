@@ -37,6 +37,7 @@ public class YadaCropQueue {
 	private Queue<YadaCropImage> cropImages; // Images to crop
 	private String cropRedirect; // Where to go to show the crop page, e.g. "redirect:/en/cropPage"
 	private String destinationRedirect; // Where to go after all the crop has been done, e.g. "redirect:/en/dashboard/finishProfile?id=13"
+	private int totInitialImages = 0; // Total number of images that needed to be cropped
 
 	public final static String SESSION_KEY = "net.yadaframework.web.YadaCropQueue";
 
@@ -109,7 +110,7 @@ public class YadaCropQueue {
 	 * @param targetDimensions desktop and mobile target dimensions, use null when a crop is not needed for some dimension
 	 * @param targetRelativeFolder Folder where to place cropped images, relative to the contents folder
 	 * @param targetNamePrefix Prefix to use for the target file, can be empty or null
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public YadaCropImage addCropImage(YadaManagedFile imageToCrop, YadaIntDimension[] targetDimensions, String targetRelativeFolder, String targetNamePrefix) {
 		if (this.cropImages==null) {
@@ -121,6 +122,7 @@ public class YadaCropQueue {
 		YadaCropImage yadaCropImage = new YadaCropImage(yadaFileManager, imageToCrop, targetDimensions, targetRelativeFolder, targetNamePrefix);
 		yadaCropImage = (YadaCropImage) yadaUtil.autowireAndInitialize(yadaCropImage);
 		this.cropImages.add(yadaCropImage);
+		totInitialImages++;
 		return yadaCropImage;
 	}
 
@@ -169,6 +171,10 @@ public class YadaCropQueue {
 	@SuppressWarnings("unused")
 	private void setCropRedirect(String cropRedirect) {
 		this.cropRedirect = cropRedirect;
+	}
+
+	public int getTotInitialImages() {
+		return totInitialImages;
 	}
 
 }

@@ -8,10 +8,11 @@ import org.thymeleaf.engine.AttributeName;
 import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.element.AbstractAttributeTagProcessor;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
-import org.thymeleaf.standard.expression.IStandardExpression;
 import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templatemode.TemplateMode;
+
+import net.yadaframework.core.YadaConfiguration;
 
 /**
  * Converts from a "yada:xxx" thymeleaf attribute to a plain html attribute.
@@ -24,6 +25,7 @@ public class YadaSimpleAttrProcessor extends AbstractAttributeTagProcessor {
 	public static final int ATTR_PRECEDENCE = 10000;
 
 	private String replacementAttribute;
+	private final YadaDialectUtil yadaDialectUtil;
 
 	/**
 	 * Creates a new attribute processor that converts from the thymeleaf attribute to a html attribute.
@@ -31,7 +33,7 @@ public class YadaSimpleAttrProcessor extends AbstractAttributeTagProcessor {
 	 * @param attributeFrom attribute to convert from (e.g. "confirm")
 	 * @param attributeTo attribute to convert to (e.g. "data-yadaConfirm")
 	 */
-	public YadaSimpleAttrProcessor(final String dialectPrefix, String attributeFrom, String attributeTo) {
+	public YadaSimpleAttrProcessor(final String dialectPrefix, String attributeFrom, String attributeTo, YadaConfiguration config) {
         super(
                 TemplateMode.HTML, // This processor will apply only to HTML mode
                 dialectPrefix,     // Prefix to be applied to name for matching
@@ -42,6 +44,7 @@ public class YadaSimpleAttrProcessor extends AbstractAttributeTagProcessor {
                 ATTR_PRECEDENCE,   // Precedence (inside dialect's own precedence)
                 true);             // Remove the matched attribute afterwards
         replacementAttribute = attributeTo;
+        this.yadaDialectUtil = new YadaDialectUtil(config);
 	}
 
 //	@Override
@@ -62,33 +65,35 @@ public class YadaSimpleAttrProcessor extends AbstractAttributeTagProcessor {
             final IElementTagStructureHandler structureHandler) {
 
         final IEngineConfiguration configuration = context.getConfiguration();
-        
+
         String value = "";
         if (attributeValue!=null) {
         	/*
         	 * Obtain the Thymeleaf Standard Expression parser
         	 */
         	final IStandardExpressionParser parser = StandardExpressions.getExpressionParser(configuration);
-        	
-        	try {
+
+        	//try {
 				/*
 				 * Parse the attribute value as a Thymeleaf Standard Expression
 				 */
-				final IStandardExpression expression = parser.parseExpression(context, attributeValue);
-				
+				// final IStandardExpression expression = parser.parseExpression(context, attributeValue);
+        		// This won't throw an exception if the value is a plain "string" with no inner quotes like "'string'"
+        		value = yadaDialectUtil.parseExpression(attributeValue, context, String.class);
+
 				/*
 				 * Execute the expression just parsed
 				 */
-				value = (String) expression.execute(context);
-			} catch (org.thymeleaf.exceptions.TemplateProcessingException e) {
-				// Check if the expression is actually just a single word: in that case use it literally
-				if (attributeValue.indexOf(' ')==-1) {
-					// No spaces == single word
-					value = attributeValue;
-				} else {
-					throw e;
-				}
-			}
+				//value = (String) expression.execute(context);
+//			} catch (org.thymeleaf.exceptions.TemplateProcessingException e) {
+//				// Check if the expression is actually just a single word: in that case use it literally
+//				if (attributeValue.indexOf(' ')==-1) {
+//					// No spaces == single word
+//					value = attributeValue;
+//				} else {
+//					throw e;
+//				}
+//			}
         }
 
         structureHandler.setAttribute(replacementAttribute, value);

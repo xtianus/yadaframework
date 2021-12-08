@@ -108,8 +108,14 @@ public class YadaUtil {
 	public final static long MILLIS_IN_DAY = 24*MILLIS_IN_HOUR;
 
 	private SecureRandom secureRandom = new SecureRandom();
+	private final static char CHAR_AT = '@';
+	private final static char CHAR_DOT = '.';
+	private final static char CHAR_SPACE = ' ';
 
 	private static Locale defaultLocale = null;
+
+	private List<String> computedTimezoneOffsets = null;
+	private List<String> computedTimezones = null;
 
 	/**
 	 * Instance to be used when autowiring is not available
@@ -121,6 +127,74 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+
+	/**
+	 * Returns a list of user-friendly timezones like "Europe/Rome"
+	 * @return
+	 */
+	public List<String> getTimezones() {
+		if (computedTimezones==null) {
+			computedTimezones = new ArrayList<String>();
+			String[] allTimezones = TimeZone.getAvailableIDs();
+			for (String timezone : allTimezones) {
+				// Only timezones with a / that start with a continent, like "Europe/Rome"
+				if (timezone.indexOf('/')>-1 && !timezone.startsWith("Etc/") && !timezone.startsWith("SystemV/")) {
+					computedTimezones.add(timezone);
+				}
+			}
+		}
+		return computedTimezones;
+	}
+
+	/**
+	 * Get a list of GMT/UTC time offsets from UTC-12:00 to UTC+14:00
+	 * @param prefix use either "GMT" or "UTC"
+	 * @return from "GMT-12:00" to "GMT+14:00"
+	 */
+	public List<String> getTimezoneOffsets(String prefix) {
+		if (computedTimezoneOffsets==null) {
+			computedTimezoneOffsets = new ArrayList<String>();
+			// https://en.wikipedia.org/wiki/List_of_UTC_time_offsets
+			for (int i=-12; i<=14; i++) {
+				computedTimezoneOffsets.add(String.format("%s%+03d:00", prefix, i));
+				if (i==-10 || i==-4 || i==3 || i==4 || i==5 || i==6 || i==9 || i==10) {
+					computedTimezoneOffsets.add(String.format("%s%+03d:30", prefix, i+(i<0?1:0)));
+				}
+				if (i==5 || i==8 || i==12) {
+					computedTimezoneOffsets.add(String.format("%s%+03d:45", prefix, i));
+				}
+			}
+		}
+		return computedTimezoneOffsets;
+	}
+
+	/**
+	 * Simple email address syntax check: the format should be X@Y.Y
+	 * where X does not contain @ and Y does not contain @, nor . at the edges.
+	 * Also no spaces anywhere.
+	 * @param email
+	 * @return
+	 */
+	public boolean isEmailValid(String email) {
+		if (email.indexOf(CHAR_SPACE)>-1) {
+			return false;
+		}
+		int firstAtPos = email.indexOf(CHAR_AT);
+		int lastAtPos = email.lastIndexOf(CHAR_AT);
+		if (firstAtPos<0 || firstAtPos != lastAtPos || lastAtPos==email.length()-1) {
+			return false; // No @ or more than one or one at the end
+		}
+		int lastDotPos = email.lastIndexOf(CHAR_DOT);
+		if (lastDotPos<0 						|| // No DOT
+			lastDotPos<firstAtPos 				|| // No DOT after the AT
+			lastDotPos==email.length()-1 		|| // DOT at the end
+			email.charAt(firstAtPos+1)==CHAR_DOT || // DOT after the AT
+			email.charAt(lastDotPos-1)==CHAR_DOT   // Two consecutive dots
+			) {
+			return false;
+		}
+		return true;
+	}
 
 	/**
 	 * Convert a map of strings to a commaspace-separated string of name=value pairs
@@ -141,6 +215,9 @@ public class YadaUtil {
 	 * @return
 	 */
 	public int getRandom(int minIncluded, int maxIncluded) {
+		if (maxIncluded==Integer.MAX_VALUE) {
+			maxIncluded = Integer.MAX_VALUE - 1; // Needed to prevent overflow of maxExcluded below
+		}
 		int maxExcluded = maxIncluded - minIncluded + 1;
 		return secureRandom.nextInt(maxExcluded) + minIncluded;
 	}
@@ -399,6 +476,11 @@ public class YadaUtil {
 	 * @return
 	 */
 	public YadaIntDimension getImageDimension(File imageFile) {
+		String suffix = getFileExtension(imageFile);
+		if (!ImageIO.getImageReadersBySuffix(suffix).hasNext()) {
+			return YadaIntDimension.UNSET; // Not an image
+		}
+
 		try(InputStream stream = new FileInputStream(imageFile))  {
 			Metadata metadata = ImageMetadataReader.readMetadata(stream);
 			//			for (com.drew.metadata.Directory directory2 : metadata.getDirectories()) {
@@ -1248,6 +1330,30 @@ public class YadaUtil {
 			executable = config.getString(shellCommandKey + "/executable[not(@mac) and not(@linux) and not(@windows)]"); // Fallback to generic OS
 		}
 		return executable;
+	}
+
+	/**
+	 * Run an external shell command that has been defined in the configuration file.
+	 * The command must be as in the following example:
+	 * <pre>
+ 	&lt;imageConvert timeoutseconds="20">
+		&lt;executable windows="true">magick&lt;/executable>
+		&lt;executable mac="true" linux="true">/usr/local/bin/magick&lt;/executable>
+		&lt;arg>convert&lt;/arg>
+		&lt;arg>${FILENAMEIN}&lt;/arg>
+		&lt;arg>${FILENAMEOUT}&lt;/arg>
+	&lt;/imageConvert>
+	 * </pre>
+	 * Be aware that args can not contain "Commons Configuration variables" because they clash with placeholders as defined below.
+	 * See the yadaframework documentation for full syntax.
+	 * @param shellCommandKey xpath key of the shell command, e.g. "config/shell/cropImage"
+	 * @param substitutionMap optional key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
+	 * pair is like "key"-->"value". If the value is a collection, arguments are unrolled so key-->collection will result in key0=val0 key1=val1...
+	 * @return the command exit value
+	 * @throws IOException
+	 */
+	public int shellExec(String shellCommandKey, Map substitutionMap) throws IOException {
+		return shellExec(shellCommandKey, substitutionMap, null);
 	}
 
 	/**

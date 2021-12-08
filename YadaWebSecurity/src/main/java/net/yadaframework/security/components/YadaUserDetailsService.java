@@ -2,7 +2,6 @@ package net.yadaframework.security.components;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,7 +35,7 @@ public class YadaUserDetailsService implements UserDetailsService {
 	@Autowired PasswordEncoder encoder;
 	@Autowired YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired YadaConfiguration yadaConfiguration;
-	
+
 	/**
 	 * Change the roles of the currently authenticated user, but not on the database
 	 * @param authentication the current Authentication object
@@ -50,18 +49,16 @@ public class YadaUserDetailsService implements UserDetailsService {
 	    Authentication newAuth = new UsernamePasswordAuthenticationToken(authentication.getPrincipal(), authentication.getCredentials(), authorities);
 	    SecurityContextHolder.getContext().setAuthentication(newAuth);
 	}
-	
+
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, InternalAuthenticationException, TooManyFailedAttemptsException {
+		username = username.trim().toLowerCase();
 		UserDetails result = null;
 		YadaUserCredentials yadaUserCredentials = null;
-		int totFound=-1;
 		boolean lockout=false;
 		try {
-			List<YadaUserCredentials> userCredentialsList = yadaUserCredentialsDao.findByUsername(username.toLowerCase());
-			totFound = userCredentialsList.size();
-			if (totFound==1) {
-				yadaUserCredentials = userCredentialsList.get(0);
+			yadaUserCredentials = yadaUserCredentialsDao.findFirstByUsername(username);
+			if (yadaUserCredentials!=null) {
 				// BFA prevention: dopo N tentativi sbagliati consecutivi, blocco l'accesso per tot minuti
 				// Il modo in cui è fatto è ridicolo perchè resetta il conto solo se sbaglio dopo che è passato il timeout...!
 				int maxFailed = yadaConfiguration.getMaxPasswordFailedAttempts();
@@ -71,7 +68,7 @@ public class YadaUserDetailsService implements UserDetailsService {
 					if (System.currentTimeMillis()-lastFailedTimestamp.getTime()<lockMillis) {
 						lockout = true;
 					} else {
-						yadaUserCredentialsDao.resetFailedAttempts(username.toLowerCase());
+						yadaUserCredentialsDao.resetFailedAttempts(username);
 					}
 				}
 				if (!lockout) {
@@ -82,11 +79,11 @@ public class YadaUserDetailsService implements UserDetailsService {
 			log.error("Internal error while authenticating user", e);
 			throw new InternalAuthenticationException("Internal Error", e);
 		}
-		if (totFound>1) {
-			log.error("Internal Error: more than one UserCredentials with username='{}' - rejecting login", username);
-			throw new InternalAuthenticationException("Too many users with same username");
-		}
-		if (totFound<1) {
+//		if (totFound>1) {
+//			log.error("Internal Error: more than one UserCredentials with username='{}' - rejecting login", username);
+//			throw new InternalAuthenticationException("Too many users with same username");
+//		}
+		if (yadaUserCredentials==null) {
 			log.debug("Username '{}' not found", username);
 			throw new UsernameNotFoundException("Username " + username + " not found");
 		}
@@ -96,7 +93,7 @@ public class YadaUserDetailsService implements UserDetailsService {
 		}
 		return result;
 	}
-	
+
 	private UserDetails createUserDetails(YadaUserCredentials userCredentials) {
 		Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
 		for (Integer roleId : userCredentials.getRoles()) {
@@ -105,15 +102,15 @@ public class YadaUserDetailsService implements UserDetailsService {
 		UserDetails userDetails = new org.springframework.security.core.userdetails.User(userCredentials.getUsername().toLowerCase(), userCredentials.getPassword(), userCredentials.isEnabled(), true, !userCredentials.isChangePassword(), true, authorities);
 		return userDetails;
 	}
-	
+
 	/**
 	 * Authenticate the user without setting the lastSuccessfulLogin timestamp
 	 * @param userCredentials
 	 */
 	public Authentication authenticateAs(YadaUserCredentials userCredentials) {
-		return authenticateAs(userCredentials, true);	
+		return authenticateAs(userCredentials, true);
 	}
-	
+
 	/**
 	 * Authenticate the user
 	 * @param userCredentials
@@ -124,12 +121,12 @@ public class YadaUserDetailsService implements UserDetailsService {
 		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 		SecurityContextHolder.getContext().setAuthentication(auth);
 		if (setTimestamp) {
-			yadaUserCredentialsDao.updateLoginTimestamp(userCredentials.getUsername().toLowerCase());
-			yadaUserCredentialsDao.resetFailedAttempts(userCredentials.getUsername().toLowerCase());
+			yadaUserCredentialsDao.updateLoginTimestamp(userCredentials.getUsername());
+			yadaUserCredentialsDao.resetFailedAttempts(userCredentials.getUsername());
 		}
 		return auth;
 	}
-	
+
 	public void changePasswordIfAuthenticated(String username, String passwordTyped, String newPassword) throws UsernameNotFoundException, InternalAuthenticationException, BadCredentialsException {
 		// Prima controllo che username e password siano validi, poi setto la nuova password
 		try {
@@ -153,7 +150,7 @@ public class YadaUserDetailsService implements UserDetailsService {
 			throw new InternalAuthenticationException("Internal Error", e);
 		}
 	}
-	
+
 	/**
 	 * Ritorna true se la password passata è valida per l'utente
 	 * @param passwordTyped
@@ -169,15 +166,15 @@ public class YadaUserDetailsService implements UserDetailsService {
 		}
 		return pwdMatch;
 	}
-	
+
 	public boolean validatePasswordSyntax(String password, int minLen, int maxLen) {
 		return !StringUtils.isEmpty(password) && password.length()>=minLen && password.length()<=maxLen;
 	}
-	
+
 	public boolean validatePasswordSyntax(String password) {
 		return validatePasswordSyntax(password, yadaConfiguration.getMinPasswordLength(), yadaConfiguration.getMaxPasswordLength());
 	}
-	
+
 
 
 }

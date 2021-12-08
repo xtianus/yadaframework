@@ -1,13 +1,17 @@
 package net.yadaframework.web.dialect;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.context.ITemplateContext;
+import org.thymeleaf.model.ICloseElementTag;
+import org.thymeleaf.model.IModel;
 import org.thymeleaf.model.IOpenElementTag;
 import org.thymeleaf.model.ITemplateEvent;
 import org.thymeleaf.standard.expression.IStandardExpression;
@@ -16,6 +20,7 @@ import org.thymeleaf.standard.expression.StandardExpressions;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 public class YadaDialectUtil {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
@@ -37,6 +42,60 @@ public class YadaDialectUtil {
 
 	public YadaDialectUtil(YadaConfiguration config) {
 		this.config=config;
+	}
+
+	/**
+	 * Returns the HTML contained in a tag, as a string
+	 * @param model
+	 * @param openNodeIndex the index of the open tag in the model
+	 * @return
+	 */
+	public String getInnerHtml(IModel model, int openNodeIndex) {
+		StringBuilder result = new StringBuilder();
+		ITemplateEvent iTemplateEvent = model.get(openNodeIndex);
+		if (!(iTemplateEvent instanceof IOpenElementTag)) {
+			throw new YadaInvalidUsageException("The openNodeIndex should point to an open tag");
+		}
+		final IOpenElementTag openTag = (IOpenElementTag) iTemplateEvent;
+		String outerTagName = openTag.getElementCompleteName();
+		int i = openNodeIndex;
+		while (++i<model.size()) {
+			ITemplateEvent node = model.get(i);
+			if (node instanceof ICloseElementTag) {
+				if (((ICloseElementTag)node).getElementCompleteName().equals(outerTagName)) {
+					return result.toString();
+				}
+			}
+			result.append(node.toString());
+			if (node instanceof IOpenElementTag) {
+				result.append(getInnerHtml(model, i));
+			}
+		}
+		log.error("Malformed HTML: no close tag for {} in {} line {} (ignored)", outerTagName, iTemplateEvent.getTemplateName(), iTemplateEvent.getLine());
+		return result.toString(); // Should never get here
+	}
+
+	/**
+	 * Parse some value as a EL expression
+	 * @param value
+	 * @param context
+	 * @param resultClass the type of the expected return value
+	 * @return
+	 * @return the result of evaluating the expression, or the original value in case of errors and String result
+	 */
+	public <T> T parseExpression(String value, ITemplateContext context, Class<T> resultClass) {
+		try {
+			final IEngineConfiguration configuration = context.getConfiguration();
+			final IStandardExpressionParser parser = StandardExpressions.getExpressionParser(configuration);
+			final IStandardExpression expression = parser.parseExpression(context, value);
+			return (T) expression.execute(context);
+		} catch (RuntimeException e) {
+			log.debug("Expression evaluation of \"{}\" failed - using as literal string", value);
+			if (resultClass.equals(String.class)) {
+				return (T) value; // Maybe it's just a string
+			}
+			throw e;
+		}
 	}
 
 	/**
@@ -67,7 +126,7 @@ public class YadaDialectUtil {
 	 * @return
 	 */
 	public String makeYadaTagId(ITemplateEvent someTag) {
-		return someTag.getLine() + "c" + someTag.getCol();
+		return someTag.getLine() + "c" + someTag.getCol() + "r" + YadaUtil.INSTANCE.getRandom(0, Integer.MAX_VALUE);
 	}
 
 	/**
@@ -77,9 +136,15 @@ public class YadaDialectUtil {
 	 * @param context
 	 * @return a comma-separated string of name=value attributes to be used in th:attr
 	 */
-	public String getConvertedCustomTagAttributeString(IOpenElementTag customTag, ITemplateContext context) {
+	public String getConvertedCustomTagAttributeString(IOpenElementTag customTag, ITemplateContext context, String...ignoreAttributes) {
 		// First, get all HTML attributes
-		Map<String, String> newAttributes = getHtmlAttributes(customTag);
+		Set<String> ignore = new HashSet<String>();
+		for (int i=0; i<ignoreAttributes.length; i++) {
+			if (ignoreAttributes[i]!=null) {
+				ignore.add(ignoreAttributes[i].toLowerCase());
+			}
+		}
+		Map<String, String> newAttributes = getHtmlAttributes(customTag, ignore);
 		// NO: Then convert all th: attributes to HTML attributes
 		// This was used when the YadaDialect precedence was the same as the StandardDialect
 		// convertThAttributes(customTag, newAttributes, context);
@@ -91,13 +156,15 @@ public class YadaDialectUtil {
 	 * @param sourceTag
 	 * @return the HTML attributes found on the tag
 	 */
-	private Map<String, String> getHtmlAttributes(IOpenElementTag sourceTag) {
+	private Map<String, String> getHtmlAttributes(IOpenElementTag sourceTag, Set<String> ignore) {
 		Map<String, String> newAttributes = new HashMap<>();
 		Map<String, String> sourceAttributes = sourceTag.getAttributeMap();
 		for (Map.Entry<String,String> sourceAttribute : sourceAttributes.entrySet()) {
-			String attributeName = sourceAttribute.getKey();
+			String attributeName = sourceAttribute.getKey().toLowerCase();
 			String attributeValue = sourceAttribute.getValue();
-			if (!attributeName.startsWith(YADA_PREFIX_WITHCOLUMN) && !attributeName.startsWith(THYMELEAF_PREFIX_WITHCOLUMN)) {
+			if (!attributeName.startsWith(YADA_PREFIX_WITHCOLUMN) &&
+				!attributeName.startsWith(THYMELEAF_PREFIX_WITHCOLUMN) &&
+				!ignore.contains(attributeName)) {
 				if ("type".equalsIgnoreCase(attributeName) && "number".equalsIgnoreCase(attributeValue)) {
 					// The "type='number'" attribute must be removed from the output tag because it is handled in a custom way
 					continue;

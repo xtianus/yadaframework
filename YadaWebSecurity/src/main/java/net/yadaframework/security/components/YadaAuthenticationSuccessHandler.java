@@ -2,10 +2,12 @@ package net.yadaframework.security.components;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +20,10 @@ import org.springframework.util.StringUtils;
 
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.core.YadaConstants;
 import net.yadaframework.core.YadaLocalePathChangeInterceptor;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
+import net.yadaframework.security.persistence.repository.YadaUserProfileDao;
 
 // Si può inserire il codice da eseguire dopo un login che ha avuto successo
 @Component
@@ -32,6 +36,7 @@ public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 
 	@Autowired private YadaConfiguration yadaConfiguration;
 	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
+	@Autowired private YadaUserProfileDao yadaUserProfileDao;
 	@Autowired private YadaWebUtil yadaWebUtil;
 
 	private final static String UNSET_TARGET_URL = "/YADA_UNSET_TARGET_URL"; // Can't just use null because it's rejected
@@ -40,16 +45,24 @@ public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 		// Set so that we know when to return our saved value in determineTargetUrl()
 		super.setDefaultTargetUrl(UNSET_TARGET_URL);
 	}
-	
+
 	/**
 	 * Custom code to be executed after login or autologin. Can be overridden.
 	 * @param request
 	 * @param authentication
 	 */
 	public void onAuthenticationSuccessCustom(HttpServletRequest request, Authentication authentication) {
-		String username = authentication.getName();
-		yadaUserCredentialsDao.updateLoginTimestamp(username.toLowerCase());
-		yadaUserCredentialsDao.resetFailedAttempts(username.toLowerCase());
+		String username = authentication.getName().toLowerCase();
+		yadaUserCredentialsDao.updateLoginTimestamp(username);
+		yadaUserCredentialsDao.resetFailedAttempts(username);
+		// Refresh the timezone too
+		HttpSession session = request.getSession(false);
+		if (session!=null) {
+			TimeZone timezone = (TimeZone) session.getAttribute(YadaConstants.SESSION_USER_TIMEZONE);
+			if (timezone!=null) {
+				yadaUserProfileDao.updateTimezone(username, timezone);
+			}
+		}
 	}
 
 	@Override
@@ -110,7 +123,7 @@ public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 					targetUrl = yadaWebUtil.enhanceUrl(targetUrl, requestLocale);
 				}
 			}
-			
+
 		}
 		return targetUrl;
 	}

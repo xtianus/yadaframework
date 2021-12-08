@@ -52,15 +52,15 @@ Example:
 			<div class="form-group legend">
 				<p th:if="${cropImage.cropDesktop}" class="yadaDesktop active">
 					<span></span> <span th:text="#{yada.crop.legendDesktopKey}">Legend for desktop goes here</span>
-					([[${cropImage.targetDesktopDimension}]]) <span id="yadaDesktopCropSize"><span>???</span>x<span>???</span></span>
+					([[#{yada.crop.legend.minimum}]] [[${cropImage.targetDesktopDimension}]]) <span id="yadaDesktopCropSize"><span>???</span>x<span>???</span></span>
 				</p>
 				<p th:if="${cropImage.cropMobile}" class="yadaMobile">
 					<span></span> <span th:text="#{yada.crop.legendMobileKey}">Legend for mobile goes here</span>
-					([[${cropImage.targetMobileDimension}]]) <span id="yadaMobileCropSize"><span>???</span>x<span>???</span></span>
+					([[#{yada.crop.legend.minimum}]] [[${cropImage.targetMobileDimension}]]) <span id="yadaMobileCropSize"><span>???</span>x<span>???</span></span>
 				</p>
 				<p th:if="${cropImage.cropPdf}" class="yadaPdf">
 					<span></span> <span th:text="#{yada.crop.legendPdfKey}">Legend for pdf goes here</span>
-					([[${cropImage.targetPdfDimension}]]) <span id="yadaPdfCropSize"><span>???</span>x<span>???</span></span>
+					([[#{yada.crop.legend.minimum}]] [[${cropImage.targetPdfDimension}]]) <span id="yadaPdfCropSize"><span>???</span>x<span>???</span></span>
 				</p>
 			</div>
 			

@@ -57,7 +57,8 @@
 		sizeParam = sizeParam || "size";
 		loadPreviousParam = loadPreviousParam || "loadPrevious";
 		// 
-		const nextPageUrl = $linkOrForm.attr("href"); // ".../en/search/loadMoreProducts?searchString=tolo&page=2&size=4"
+		// ".../en/search/loadMoreProducts?searchString=tolo&page=2&size=4"
+		const nextPageUrl = $linkOrForm.attr("data-yadahref") || $linkOrForm.attr("href");
 		var nextPage = yada.getUrlParameter(nextPageUrl, NEXTPAGE_NAME);
 		var nextSize = yada.getUrlParameter(nextPageUrl, NEXTSIZE_NAME);
 		if (nextPageUrl==null) {
@@ -77,9 +78,12 @@
 	 * @return true if the attribute is present.
 	 */
 	function handlePaginationHistoryAttribute($elem, $linkOrForm) {
-		const yadaPagination = $elem.attr("data-yadaPaginationHistory"); // ="pageParam, sizeParam, loadPreviousParam"
+		var yadaPagination = $elem.attr("data-yadaPaginationHistory"); // ="pageParam, sizeParam, loadPreviousParam"
 		if (yadaPagination==null) {
 			return false;
+		}
+		if (yadaPagination=="") {
+			yadaPagination=null;
 		}
 		const paginationParams = yada.listToArray(yadaPagination);
 		yada.fixPaginationLinkHistory($linkOrForm, paginationParams[0], paginationParams[1], paginationParams[2]);
@@ -325,6 +329,7 @@
 	/**
 	 * Enables ajax on a checkbox change. Will either submit a parent form or make an ajax call directly.
 	 */
+	// Legacy version
 	yada.enableAjaxCheckboxes = function(handler, $element) {
 		if ($element==null || $element=="") {
 			$element = $('body');
@@ -338,6 +343,7 @@
 			yada.enableAjaxCheckbox($(this), handler);
 		});
 	};
+	// Legacy version
 	yada.enableAjaxCheckbox = function($checkbox, handler) {
 		// If array, recurse to unroll
 		if ($checkbox.length>1) {
@@ -369,6 +375,7 @@
 	
 	// TODO this may conflict with yada.enableAjaxInputs and should be replaced with that one if possible
 
+	// Legacy version
 	yada.enableAjaxSelects = function(handler, $element) {
 		if ($element==null || $element=="") {
 			$element = $('body');
@@ -382,7 +389,7 @@
 			yada.enableAjaxSelect($(this), handler);
 		});
 	};
-	
+	// Legacy version
 	yada.enableAjaxSelect = function($select, handler) {
 		// If array, recurse to unroll
 		if ($select.length>1) {
@@ -400,23 +407,6 @@
 		$select.not('.'+markerClass).addClass(markerClass);
 	};
 	
-	yada.enableAjaxSelect = function($select, handler) {
-		// If array, recurse to unroll
-		if ($select.length>1) {
-			$select.each(function() {
-				yada.enableAjaxSelect($(this), handler);
-			});
-			return;
-		}
-		// From here on the $select is a single element, not an array
-		$select.not('.'+markerClass).change(function(e) {
-			$select = $(this); // Needed otherwise $select could be stale (from a previous ajax replacement) 
-			return makeAjaxCall(e, $select, handler);
-		})
-		$select.removeClass('yadaAjax');
-		$select.not('.'+markerClass).addClass(markerClass);
-	};
-
 	/**
 	 * Sends a link/button via ajax, it doesn't have to have class .yadaAjax.
 	 * Buttons must have a yada-href attribute and not be submit buttons.
@@ -424,6 +414,7 @@
 	 * @param $link the jquery anchor or button (could be an array), e.g. $('.niceLink')
 	 * @param handler funzione chiamata in caso di successo e nessun yadaWebUtil.modalError()
 	 */
+	// Legacy version
 	yada.enableAjaxLink = function($link, handler) {
 		// If array, recurse to unroll
 		if ($link.length>1) {
@@ -444,9 +435,37 @@
 		$link.removeClass('s_ajaxLink'); // Legacy
 		$link.not('.'+markerClass).addClass(markerClass);
 	};
+	
+	/**
+	 * Returns true if the current input key is listed in the data-yadaAjaxTriggerKeys attibute.
+	 * Also returns true if the current event is not a key event (like the input event)
+	 * Example: yada:ajaxTriggerKeys="Enter| |,"
+	 * @param inputEvent the input event that has been triggered
+	 * return true if the key that triggered the event is listed in 
+	 * the "data-yadaAjaxTriggerKeys" when present or if that attribute is not present
+	 */
+	yada.isAjaxTriggerKey  = function(keyEvent) {
+		const key = keyEvent.key; // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
+		if (key==null) {
+			return true; // Not a key event so we can't check the key
+		}
+		const input = keyEvent.target;
+		const $input = $(input);
+		const ajaxTriggerKeys = $input.attr("data-yadaAjaxTriggerKeys");
+		if (ajaxTriggerKeys==null) {
+			return true; // Do ajax call on any key when no attribute present
+		}
+		const triggerKeys = ajaxTriggerKeys.split("|");
+		for (var i=0; i<triggerKeys.length; i++) {
+			if (key==triggerKeys[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
-	 * Enables ajax calls on input fields that fire the "input" event.
+	 * Enables ajax calls on <input> fields that fire the "keyup" event.
 	 * There is no need to pass any element because it is always registered even on dynamically added content.
 	 */
 	yada.enableAjaxInputs = function() {
@@ -454,10 +473,67 @@
 			// Prevent binding multiple event handlers because yada.enableAjaxInputs is called after each ajax call for legacy reasons
 			return;
 		}
-		// All input fields that are either yadaAjax or data-yadaHref get handled.
-		const selector = "input.yadaAjax, input[data-yadaHref]";
+		// All input fields that are either yadaAjax or data-yadaHref get handled, if they are not radio
+		var selector = "input.yadaAjax:not([type=radio]), input[data-yadaHref]:not([type=radio])";
+		$(document).on("keyup", selector, function(e) {
+			// If "data-yadaAjaxTriggerKeys" is present, call ajax only when one of the keys is pressed.
+			// If attribute not present, always call ajax
+			if (yada.isAjaxTriggerKey(e)) {
+				const $input = $(this);
+				// Ajax calls are not executed immediately, but after a timeout that is reset each time a valid key is pressed
+				yada.dequeueFunctionCall(this, function(){
+					makeAjaxCall(e, $input, null, true);
+				});
+			}
+		});
+		// Prevent form submission on Enter otherwise the ajax call is not made.
+		// Browsers simulate a click on submit buttons when the enter key is pressed in a form, so we check using the "yadaDoNotSubmitNow" flag 
+		$(selector).each(function(){
+			const $input = $(this);
+			// Form submission by Enter keypress is allowed when the input element ajax call is not triggered by "Enter".
+			// This only happens if yadaAjaxTriggerKeys is present and does not contain "Enter"
+			const ajaxTriggerKeys = $input.attr("data-yadaAjaxTriggerKeys");
+			if (ajaxTriggerKeys==null || yada.stringContains(ajaxTriggerKeys, "Enter")) {
+				const $form = $input.closest("form").not(".yadaEnterNoSubmit");
+				$form.addClass("yadaEnterNoSubmit").on("submit", function(e){
+					// The "yadaDoNotSubmitNow" flag is added when the Enter key is pressed in any input element
+					// that does not call ajax when pressing Enter
+					const preventSubmit = $form.data("yadaDoNotSubmitNow")==true;
+					if (preventSubmit) {
+						// e.stopImmediatePropagation();
+						e.preventDefault(); // No submit, but exec other handlers
+						$form.data("yadaDoNotSubmitNow", false);
+						yada.log("Form submission prevented");
+						yada.loaderOff();
+						// return false;
+					}
+				});
+				$form.on("keydown", function(keyEvent){
+					if (keyEvent.key=="Enter") {
+						const $target = $(keyEvent.target);
+						// The target could be any control in the form, also non-ajax inputs
+						if (!$target.hasClass("yadaAjax") && $target.attr("data-yadaHref")==null) {
+							return; // Non-ajax element can trigger submit
+						}
+						// Prevent submission depending on value of yadaAjaxTriggerKeys, but only if there is a submit control
+						const wouldSubmit = $("[type=submit]:enabled", $form).length>0; 
+						if (!wouldSubmit) {
+							// The enter key would not cause a submit, so keep going normally
+							return;
+						}
+						const targetAjaxTriggerKeys = $target.attr("data-yadaAjaxTriggerKeys");
+						if (targetAjaxTriggerKeys==null || yada.stringContains(targetAjaxTriggerKeys, "Enter")) {
+							$form.data("yadaDoNotSubmitNow", true); // Let the ajax call on the input element run
+						}
+					}
+				});
+			}
+		});
+		// Radio buttons that do not use keyup
+		selector = "input.yadaAjax[type=radio], input[data-yadaHref][type=radio]";
 		$(document).on("input", selector, function(e) {
-			return makeAjaxCall(e, $(this), null, true);
+			const $input = $(this);
+			makeAjaxCall(e, $input, null, true);
 		});
 		this.enableAjaxInputsDone = true;
 		$(selector).addClass(markerClass); // Not really needed
@@ -487,7 +563,7 @@
 	}
 	
 	/**
-	 * Make an ajax call when a link is clicked, a select is chosen, a checkbox is selected
+	 * Make an ajax call when a link is clicked, a select is chosen, a checkbox is selected etc.
 	 */
 	function makeAjaxCall(e, $element, handler, allowDefault) {
 		if (!allowDefault==true) {
@@ -520,11 +596,15 @@
 		if (url==null || url=='') {
 			url = $element.attr('href');
 		}
+		if (url==null || url=='') {
+			console.log("No url for ajax call");
+			return false;
+		}
 		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
 		// Create data for submission
 		var data = null;
 		var value = [];
-		var name = $element.attr("name");
+		var name = $element.attr("name") || "value"; // Parameter name fallback to "value" by default
 		var noLoader = hasNoLoader($element);	
 		// In a select, set the data object to the selected option
 		if ($element.is("select")) {
@@ -539,7 +619,7 @@
 			}
 		}
 		if (name !=null) {
-			data = {};
+			data = $element[0].yadaRequestData || {}; // Any yadaRequestData is also sent (see yada.dialect.js)
 			if (value.length>0) {
 				data[name] = value;
 			}
@@ -642,6 +722,7 @@
 			$return = [];
 		}
 		var fragmentCount = 0;
+		var focused = false;
 		for (var count=0; count<selectors.length; count++) {
 			var selector = selectors[count];
 			if ($replacementArray!=null && $replacementArray.length>0) {
@@ -657,6 +738,14 @@
 				fragmentCount = (fragmentCount+1) % $replacementArray.length;
 			}
 			yada.extendedSelect($element, selector).replaceWith($replacement);
+			if (!focused) {
+				// Focus on the first result element with data-yadaAjaxResultFocus
+				const $toFocus = $("[data-yadaAjaxResultFocus]:not([readonly]):not([disabled])", $replacement);
+				if ($toFocus.length>0) {
+					$toFocus.get(0).focus();
+					focused=true;
+				}
+			}
 		}
 		return $return;
 
@@ -1234,7 +1323,10 @@
 						// Keep going...
 					}
 				}
-				// If it is a full page, overwrite the current one. The class .yadafullPage must not be on the body
+				// If it is a full page, overwrite the current one. The class .yadafullPage must not be on the body.
+				// No: The result is a full page if it has "<!doctype" in the first 50 characters
+				// This is not true because I can return a "<!doctype" via ajax
+				// const isFullPage = responseText.substring(0, 50).toLowerCase().indexOf("<!doctype") > -1;
 				if ($('.yadafullPage', responseHtml).length>0 || $('.s_fullPage', responseHtml).length>0) {
 					showFullPage(responseText);
 					yada.loaderOff();
@@ -1243,7 +1335,7 @@
 				if (notify) {
 					return;
 				}
-				// Open any other modal
+				// Open any other modal, excluding any embedded confirm modal
 				var $loadedModalDialog=$(responseHtml).find(".modal > .modal-dialog").first();
 				if ($loadedModalDialog.length==1) {
 					$("#loginModal").remove(); // TODO still needed?
@@ -1480,72 +1572,6 @@
 			result[key] = value;
 		});
 		return result;
-	}
-
-	/**
-	 * Used by <yada:input> to implement the suggestion list
-	 * @param event the onkeyup KeyboardEvent
-	 */		
-	yada.suggestionList = function(event) {
-		const input = event.target;
-		const $input = $(input);
-		const inputValue = $.trim(input.value);
-		const addElementUrl = $input.attr("data-yadaSuggestionAddUrl");
-		const suggestionUrl = $input.attr("data-yadaSuggestionListUrl");
-		const suggestionReplace = $input.attr("data-yadaUpdateOnSuccess");
-		const key = event.key; // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
-
-		const addSuggestedElement = function(responseText, $responseHtml) {
-			yada.extendedSelect($input, suggestionReplace).replaceWith($responseHtml); 
-			$responseHtml.find("input").focus(); // This may not always be correct
-		}
-		
-		// When newline, space, comma, cursor up/down/right are pressed, make the call to create a new element
-		if (inputValue!="" && inputValue!="#" && (key=="Enter" || key==" " || key=="," || key=="ArrowRight" || key=="ArrowUp")) {
-			const remoteUrl = addElementUrl + '&value=' + encodeURIComponent(inputValue); 
-			yada.ajax(remoteUrl, null, addSuggestedElement, null, null, false);
-			input.value="";
-			input.dispatchEvent(new Event('input')); // Resets the counter
-			event.preventDefault();
-			return false;
-		}
-		
-		// Arrow down moves to the suggestion list
-		if (key=="ArrowDown") {
-			// Move the focus to the suggestion list if any
-			const $suggestionList = $(input).closest(".dropdown").find(".jsSuggestionList:visible");
-			if ($("a", $suggestionList).length>0) {
-				$("a", $suggestionList).get(0).focus();
-			}
-			return;
-		}
-		
-		// Otherwise, show the suggestion list
-		const data = {
-			prefix: inputValue
-		} 
-		const $dropdown = $input.closest(".dropdown");
-		yada.ajax(suggestionUrl, data, function(responseText, responseHtml){
-			const $newSuggestionList = responseHtml.find(".jsSuggestionList");
-			$dropdown.find(".jsSuggestionList").replaceWith($newSuggestionList); 
-			$("a", $newSuggestionList).click(function() {
-				// Insert into the input field the suggested text when clicked
-				const clickedValue = $(this).text();
-				$input.val(clickedValue);
-				// Trigger a keyup event so that any char counter is changed
-				var e = jQuery.Event("keyup");
-				e.key = "Enter"
-				$input.trigger(e); 
-			});
-			// Show or hide the suggestions if there are some or none
-			const $toggler = $dropdown.find("div[data-bs-toggle=dropdown]");
-			const dropdownApi = new bootstrap.Dropdown($toggler[0]);
-			if ($("a", $newSuggestionList).length>0) {
-				dropdownApi.show();
-			} else {
-				dropdownApi.hide();
-			}
-		}, null, null, true);
 	}
 
 }( window.yada = window.yada || {} ));

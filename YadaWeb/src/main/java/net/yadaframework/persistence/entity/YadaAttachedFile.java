@@ -154,6 +154,9 @@ public class YadaAttachedFile implements CloneableDeep {
 	 */
 	protected Locale forLocale;
 
+	@Column(length=1024)
+	protected String metadata; // Can be anything related to the file
+
 	@Transient
 	private YadaConfiguration config; // Spring can not autowire an Entity
 
@@ -520,6 +523,14 @@ public class YadaAttachedFile implements CloneableDeep {
 
 	public void setPdfImageDimension(YadaIntDimension pdfImageDimension) {
 		this.pdfImageDimension = pdfImageDimension;
+	}
+
+	public String getMetadata() {
+		return metadata;
+	}
+
+	public void setMetadata(String metadata) {
+		this.metadata = metadata;
 	}
 
 }

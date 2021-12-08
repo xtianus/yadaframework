@@ -30,12 +30,12 @@ import net.yadaframework.security.persistence.repository.YadaAutoLoginTokenDao;
 @Component
 public class YadaTokenHandler {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
-	
+
     @Autowired private YadaUtil yadaUtil;
     @Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaAutoLoginTokenDao yadaAutoLoginTokenDao;
-	
+
 	/**
 	 * Create a new YadaAutoLoginToken for the given user that expires after the configured amount of hours (config/security/autologinExpirationHours)
 	 * @param targetUser
@@ -45,7 +45,7 @@ public class YadaTokenHandler {
 		Date expiration = yadaUtil.addHours(new Date(), config.getAutologinExpirationHours());
 		return makeAutoLoginToken(targetUser, expiration);
 	}
-	
+
 	/**
 	 * Create a new YadaAutoLoginToken for the given user
 	 * @param targetUser
@@ -62,20 +62,18 @@ public class YadaTokenHandler {
     }
 
 	/**
-	 * If the myServerAddress param is null, fetch it either from request or from the configuration, in this order.
+	 * If the myServerAddress param is null, fetch it either from request (in development) or from the configuration.
 	 * @param myServerAddress can be null
 	 * @param request can be null
 	 * @return
 	 */
 	private String ensureServerAddress(String myServerAddress, HttpServletRequest request) {
-		if (myServerAddress==null && request!=null) {
-			myServerAddress = yadaWebUtil.getWebappAddress(request);
+		if (myServerAddress==null) {
+			// In the dev environment we use the request to get the address, otherwise it must have been configured
+			myServerAddress = config.isDevelopmentEnvironment() ? config.getWebappAddress(request) : config.getWebappAddress();
 		}
 		if (myServerAddress==null) {
-			myServerAddress = config.getServerAddress();
-		}
-		if (myServerAddress==null) {
-			throw new YadaInvalidUsageException("The server address should be specified in the configuration when both arguments are null");
+			throw new YadaInvalidUsageException("The server address should be specified in the configuration");
 		}
 		return myServerAddress;
 	}
@@ -100,7 +98,7 @@ public class YadaTokenHandler {
 		}
     	return result.toString();
 	}
-	
+
 	//Idem but without HttpServletRequest because we have the myServerAddress not null
 	/**
 	 * Return the autologin link generated from the given parameters
@@ -121,7 +119,7 @@ public class YadaTokenHandler {
 		}
 		return result.toString();
 	}
-			
+
 	/**
 	 * Create a token-link
 	 * @param yadaRegistrationRequest

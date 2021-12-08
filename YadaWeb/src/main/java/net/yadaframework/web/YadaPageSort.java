@@ -15,14 +15,14 @@ public class YadaPageSort {
 	public final static String KEYWORD_ASC="asc";
 	public final static String KEYWORD_DESC="desc";
 	public final static String KEYWORD_IGNORECASE="ignorecase";
-	
+
 	private List<Order> orders = new ArrayList<>();
-	
+
 	public class Order {
 		String property = null;
 		String direction = ""; // default
 		boolean ignorecase = false;
-		
+
 		public String getProperty() {
 			return property;
 		}
@@ -42,7 +42,7 @@ public class YadaPageSort {
 			this.ignorecase = ignorecase;
 		}
 	}
-	
+
 	/**
 	 * Spring Data compatible API to retrieve sort parameters.
 	 * @return
@@ -50,7 +50,7 @@ public class YadaPageSort {
 	public Iterator<Order> iterator() {
 		return this.orders.iterator();
 	}
-	
+
 	/**
 	 * @return all the sort parameters
 	 */
@@ -60,8 +60,8 @@ public class YadaPageSort {
 
 	/**
 	 * Parses the sort string. Can be called multiple times.
-	 * The sort string syntax is the same as for Spring Data: <pre>property,property(,ASC|DESC)(,IgnoreCase)</pre>
-	 * 
+	 * The sort string syntax is the same as for Spring Data: <pre>property(,property)(,ASC|DESC)(,IgnoreCase)</pre>
+	 *
 	 * @param requestParam example: <pre>"firstname,lastname,desc,ignorecase"</pre>
 	 * @see <a href="https://docs.spring.io/spring-data/commons/docs/2.5.0/reference/html/#core.web.basic.paging-and-sorting">Spring Data</a>
 	 */
@@ -104,7 +104,7 @@ public class YadaPageSort {
 		}
 		orders.addAll(result);
 	}
-	
+
 	/**
 	 * Adds the given sort order to the list.
 	 * @param order
@@ -112,5 +112,5 @@ public class YadaPageSort {
 	public void add(Order order) {
 		this.orders.add(order);
 	}
-	
+
 }
