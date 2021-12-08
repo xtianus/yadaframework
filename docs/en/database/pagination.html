@@ -51,6 +51,7 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <li><a href="#_description">Description</a></li>
 <li><a href="#_first_query">First query</a></li>
 <li><a href="#_load_more_query">Load More query</a></li>
+<li><a href="#_advanced_usage">Advanced Usage</a></li>
 </ul>
 </div>
 </div>
@@ -96,8 +97,8 @@ as many rows as were loaded by the user using the "load more" button. This infor
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/searchBook(sort='title,asc,ignorecase',sort='date,desc')}"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
-        &lt;input name="searchString" th:value="${searchString}"&gt;
-        &lt;button type="submit"&gt;</code></pre>
+	&lt;input name="searchString" th:value="${searchString}"&gt;
+	&lt;button type="submit"&gt;</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -112,9 +113,9 @@ as many rows as were loaded by the user using the "load more" button. This infor
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Controller
 public class BookController {
-        final static int PAGE_SIZE =  10;
-        @RequestMapping("/searchBook")
-        public String searchBook(String searchString, YadaPageRequest yadaPageRequest, Model model) {</code></pre>
+    final static int PAGE_SIZE =  10;
+    @RequestMapping("/searchBook")
+    public String searchBook(String searchString, YadaPageRequest yadaPageRequest, Model model) {</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -126,9 +127,9 @@ then call the proper DAO to fetch data from the database, that will be stored in
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">if (!yadaPageRequest.isValid()) {
-        yadaPageRequest = new YadaPageRequest(0, PAGE_SIZE);
-        yadaPageRequest.addSort("title", false, true);
-        yadaPageRequest.addSort("date", true, false);
+    yadaPageRequest = new YadaPageRequest(0, PAGE_SIZE);
+    yadaPageRequest.addSort("title", false, true);
+    yadaPageRequest.addSort("date", true, false);
 }
 YadaPageRows&lt;Book&gt; result = searchDao.find(searchString, yadaPageRequest);
 model.addAttribute("books", result);
@@ -143,19 +144,19 @@ return "/searchResult";</code></pre>
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Repository
 @Transactional(readOnly = true)
 public class SearchDao {
-        @PersistenceContext EntityManager em;
+    @PersistenceContext EntityManager em;
 
-        public YadaPageRows&lt;Book&gt; find(String searchString, YadaPageRequest yadaPageRequest) {
-                List&lt;Book&gt; found = YadaSql.instance().selectFrom("from Book b")
-                        .where("b.title LIKE CONCAT('%',:search,'%')")
-                        .orderBy(yadaPageRequest)
-                        .setParameter("search", searchString)
-                        .query(em, Book.class)
-                        .setFirstResult(yadaPageRequest.getFirstResult())
-                        .setMaxResults(yadaPageRequest.getMaxResults())
-                        .getResultList();
-                return new YadaPageRows&lt;Book&gt;(found, yadaPageRequest);
-        }</code></pre>
+    public YadaPageRows&lt;Book&gt; find(String searchString, YadaPageRequest yadaPageRequest) {
+        List&lt;Book&gt; found = YadaSql.instance().selectFrom("from Book b")
+            .where("b.title LIKE CONCAT('%',:search,'%')")
+            .orderBy(yadaPageRequest)
+            .setParameter("search", searchString)
+            .query(em, Book.class)
+            .setFirstResult(yadaPageRequest.getFirstResult())
+            .setMaxResults(yadaPageRequest.getMaxResults())
+            .getResultList();
+        return new YadaPageRows&lt;Book&gt;(found, yadaPageRequest);
+    }</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -167,19 +168,16 @@ implement pagination.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:unless="${books.empty}"&gt;
-        &lt;th:block fragment="bookList"&gt;
-                &lt;div th:each="book : ${books}" th:text="${book.title}"&gt;Book title here&lt;/div&gt;
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;th:block fragment="bookList" th:unless="${books.empty}"&gt;
+	&lt;div th:each="book : ${books}" th:text="${book.title}"&gt;Book title here&lt;/div&gt;
 
-                &lt;div id="loadMoreBooks" th:unless="${books.last}"&gt;
-                        &lt;a class="yadaAjax"
-                                th:href="@{/searchBookMore(searchString=${searchString},page=${books.nextPage},size=${books.pageSize})}"
-                                yada:paginationHistory
-                                yada:updateOnSuccess="'#loadMoreBooks'"&gt;Load More
-                        &lt;/a&gt;
-                &lt;/div&gt;
-        &lt;/th:block&gt;
-&lt;/div&gt;</code></pre>
+	&lt;div class="jsLoadMoreBooks" th:unless="${books.last}"&gt;
+    	&lt;a yada:ajax="@{/searchBookMore(searchString=${searchString},page=${books.nextPage},size=${books.pageSize})}"
+        	yada:paginationHistory
+            yada:updateOnSuccess="yadaParents:.jsLoadMoreBooks" href=""&gt;Load More
+        &lt;/a&gt;
+    &lt;/div&gt;
+&lt;/th:block&gt;</code></pre>
 </div>
 </div>
 </div>
@@ -194,15 +192,20 @@ When the user clicks on that link, an ajax call is made to the server in order t
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/searchBookMore")
-public String addBook(String searchString, YadaPageRequest yadaPageRequest, Model model) {
-        YadaPageRows&lt;Book&gt; result = searchDao.find(searchString, yadaPageRequest);
-        model.addAttribute("books", result);
-        return "/searchResult :: bookList";
+public String searchBookMore(String searchString, YadaPageRequest yadaPageRequest, Model model) {
+    YadaPageRows&lt;Book&gt; result = searchDao.find(searchString, yadaPageRequest);
+    model.addAttribute("books", result);
+    return "/searchResult :: bookList";
 }</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>That&#8217;s all there is to it.</p>
+</div>
+<div class="paragraph">
+<p>The <code>YadaPageRows.isLast()</code> method works automatically with no need for an expensive count query:
+the <code>YadaPageRequest</code> will try to fetch one row more than the page size in order to tell
+if there are more results to fetch.</p>
 </div>
 <div class="paragraph">
 <p>The <code>yada:paginationHistory</code> attribute, with no value, will add the <code>page</code>, <code>size</code> and <code>loadPrevious</code> request
@@ -211,10 +214,26 @@ the back button those values will be sent to the "first query" method seen at th
 pages up to the current one will be fetched from database and shown. The <code>yada:paginationHistory</code> attribute
 must be set on the link or button that loads the next page.</p>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_advanced_usage">Advanced Usage</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>This example can of course be optimized by using a single method both for the first query and for the following ones,
+<p>This example can be optimized by using a single method both for the first query and for the following ones,
 and many paginations can be used on a single web page by keeping distinct <code>yada:paginationHistory</code> parameters,
 like <code>yada:paginationHistory="'product.page, product.size, product.loadPrevious'"</code> and <code>yada:paginationHistory="'project.page, project.size, project.loadPrevious'"</code>.</p>
+</div>
+<div class="paragraph">
+<p>To use the same method for the first query and the loadMore ones, just check if the request is ajax
+in order to return either the full initial web page or the pagination fragment:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public String searchBook(String searchString, YadaPageRequest yadaPageRequest, Model model) {
+	...
+	return yadaWebUtil.isAjaxRequest() ? "/searchResult :: bookList" : "/searchResult";</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -222,7 +241,7 @@ like <code>yada:paginationHistory="'product.page, product.size, product.loadPrev
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-11-04 15:17:53 +0100
+Last updated 2021-11-26 19:35:05 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

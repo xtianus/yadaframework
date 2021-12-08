@@ -54,7 +54,7 @@ that will show you how to quickly create a web application
 
 <<internationalization.adoc#,i18n>>:: Implement a multilanguage site
 
-<<database/pagination.adoc#>>:: TODO
+<<database/pagination.adoc#>>:: Fetch big data one piece at a time
 
 <<forms/overview.adoc#Forms,Forms>>:: Submitting data to the server
 
