@@ -202,7 +202,6 @@
 		}
 	};
 
-	
 	/**
 	 * When a function can be called repeatedly but only the last call is useful, previous
 	 * calls can be cancelled by next ones if within a given timeout.
