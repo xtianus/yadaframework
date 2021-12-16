@@ -96,18 +96,10 @@ as many rows as were loaded by the user using the "load more" button. This infor
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/searchBook(sort='title,asc,ignorecase',sort='date,desc')}"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/searchBook}"&gt;
 	&lt;input name="searchString" th:value="${searchString}"&gt;
 	&lt;button type="submit"&gt;</code></pre>
 </div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>The action in this example contains the sort parameters</td>
-</tr>
-</table>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -120,7 +112,7 @@ public class BookController {
 </div>
 <div class="paragraph">
 <p>When the web page is loaded for the first time, Spring calls the "first query" method and creates an instance of
-YadaPageRequest but doesn&#8217;t set any values in it because there are no request parameters to set.
+YadaPageRequest but doesn&#8217;t set any values in it because there are no request parameters to set for <code>page</code> and <code>size</code>.
 You should check if the yadaPageRequest is valid and set it to a default initial value when it&#8217;s not,
 then call the proper DAO to fetch data from the database, that will be stored in a <code>YadaPageRows</code> instance:</p>
 </div>
@@ -128,8 +120,8 @@ then call the proper DAO to fetch data from the database, that will be stored in
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">if (!yadaPageRequest.isValid()) {
     yadaPageRequest = new YadaPageRequest(0, PAGE_SIZE);
-    yadaPageRequest.addSort("title", false, true);
-    yadaPageRequest.addSort("date", true, false);
+    yadaPageRequest.appendSort("title").ignorecase();
+    yadaPageRequest.appendSort("date").desc();
 }
 YadaPageRows&lt;Book&gt; result = searchDao.find(searchString, yadaPageRequest);
 model.addAttribute("books", result);
@@ -172,13 +164,23 @@ implement pagination.</p>
 	&lt;div th:each="book : ${books}" th:text="${book.title}"&gt;Book title here&lt;/div&gt;
 
 	&lt;div class="jsLoadMoreBooks" th:unless="${books.last}"&gt;
-    	&lt;a yada:ajax="@{/searchBookMore(searchString=${searchString},page=${books.nextPage},size=${books.pageSize})}"
+    	&lt;a yada:ajax="@{/searchBookMore(searchString=${searchString},
+    		page=${books.nextPage},size=${books.pageSize},
+    		sort='title,asc,ignorecase',sort='date,desc')}" <i class="conum" data-value="1"></i><b>(1)</b>
         	yada:paginationHistory
             yada:updateOnSuccess="yadaParents:.jsLoadMoreBooks" href=""&gt;Load More
         &lt;/a&gt;
     &lt;/div&gt;
 &lt;/th:block&gt;</code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The action in this example contains two sort parameters, but they can be hardcoded in the Controller when they are not dynamically chosen by the user</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -201,6 +203,12 @@ public String searchBookMore(String searchString, YadaPageRequest yadaPageReques
 </div>
 <div class="paragraph">
 <p>That&#8217;s all there is to it.</p>
+</div>
+<div class="paragraph">
+<p>Sort options can either be dynamically inserted in the action parameters as shown in the above
+example, or coded in the Controller using <code>yadaPageRequest.appendSort()</code>.
+A mixed solution is also possible, and Controller sort parameters can be inserted before the ones
+received from the Request by means of <code>yadaPageRequest.prependSort()</code>.</p>
 </div>
 <div class="paragraph">
 <p>The <code>YadaPageRows.isLast()</code> method works automatically with no need for an expensive count query:
@@ -241,7 +249,7 @@ in order to return either the full initial web page or the pagination fragment:<
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-11-26 19:35:05 +0100
+Last updated 2021-12-16 16:17:55 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

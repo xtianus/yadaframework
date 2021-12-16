@@ -31,11 +31,10 @@ as many rows as were loaded by the user using the "load more" button. This infor
 
 [source,html]
 ----
-<form th:action="@{/searchBook(sort='title,asc,ignorecase',sort='date,desc')}"> # <1>
+<form th:action="@{/searchBook}">
 	<input name="searchString" th:value="${searchString}">
 	<button type="submit">
 ----
-<1> The action in this example contains the sort parameters
 
 [source,java]
 ----
@@ -47,7 +46,7 @@ public class BookController {
 ----
 
 When the web page is loaded for the first time, Spring calls the "first query" method and creates an instance of
-YadaPageRequest but doesn't set any values in it because there are no request parameters to set.
+YadaPageRequest but doesn't set any values in it because there are no request parameters to set for `page` and `size`.
 You should check if the yadaPageRequest is valid and set it to a default initial value when it's not,
 then call the proper DAO to fetch data from the database, that will be stored in a `YadaPageRows` instance:
 
@@ -55,8 +54,8 @@ then call the proper DAO to fetch data from the database, that will be stored in
 ----
 if (!yadaPageRequest.isValid()) {
     yadaPageRequest = new YadaPageRequest(0, PAGE_SIZE);
-    yadaPageRequest.addSort("title", false, true);
-    yadaPageRequest.addSort("date", true, false);
+    yadaPageRequest.appendSort("title").ignorecase();
+    yadaPageRequest.appendSort("date").desc();
 }
 YadaPageRows<Book> result = searchDao.find(searchString, yadaPageRequest);
 model.addAttribute("books", result);
@@ -96,14 +95,16 @@ The result can be shown with the following `searchResult.html`:
 	<div th:each="book : ${books}" th:text="${book.title}">Book title here</div>
 
 	<div class="jsLoadMoreBooks" th:unless="${books.last}">
-    	<a yada:ajax="@{/searchBookMore(searchString=${searchString},page=${books.nextPage},size=${books.pageSize})}"
+    	<a yada:ajax="@{/searchBookMore(searchString=${searchString},
+    		page=${books.nextPage},size=${books.pageSize},
+    		sort='title,asc,ignorecase',sort='date,desc')}" # <1>
         	yada:paginationHistory
             yada:updateOnSuccess="yadaParents:.jsLoadMoreBooks" href="">Load More
         </a>
     </div>
 </th:block>
 ----
-
+<1> The action in this example contains two sort parameters, but they can be hardcoded in the Controller when they are not dynamically chosen by the user
 
 ==  Load More query
 
@@ -122,6 +123,11 @@ public String searchBookMore(String searchString, YadaPageRequest yadaPageReques
 ----
 
 That's all there is to it.
+
+Sort options can either be dynamically inserted in the action parameters as shown in the above
+example, or coded in the Controller using `yadaPageRequest.appendSort()`.
+A mixed solution is also possible, and Controller sort parameters can be inserted before the ones
+received from the Request by means of `yadaPageRequest.prependSort()`.
 
 The `YadaPageRows.isLast()` method works automatically with no need for an expensive count query:
 the `YadaPageRequest` will try to fetch one row more than the page size in order to tell
