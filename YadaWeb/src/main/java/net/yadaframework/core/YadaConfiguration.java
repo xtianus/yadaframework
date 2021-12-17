@@ -479,7 +479,8 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
-	 * Returns the page to forward to after an unhandled exception or HTTP error
+	 * Returns the page to forward to after an unhandled exception or HTTP error.
+	 * The value is the @RequestMapping value, without language in the path
 	 * @return
 	 */
 	public String getErrorPageForward() {

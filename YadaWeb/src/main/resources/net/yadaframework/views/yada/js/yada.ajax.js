@@ -495,7 +495,8 @@
 			const ajaxTriggerKeys = $input.attr("data-yadaAjaxTriggerKeys");
 			if (ajaxTriggerKeys==null || yada.stringContains(ajaxTriggerKeys, "Enter")) {
 				const $form = $input.closest("form").not(".yadaEnterNoSubmit");
-				$form.addClass("yadaEnterNoSubmit").on("submit", function(e){
+				$form.addClass("yadaEnterNoSubmit");
+				$form.on("submit", function(e){
 					// The "yadaDoNotSubmitNow" flag is added when the Enter key is pressed in any input element
 					// that does not call ajax when pressing Enter
 					const preventSubmit = $form.data("yadaDoNotSubmitNow")==true;
@@ -508,6 +509,7 @@
 						// return false;
 					}
 				});
+				
 				$form.on("keydown", function(keyEvent){
 					if (keyEvent.key=="Enter") {
 						const $target = $(keyEvent.target);

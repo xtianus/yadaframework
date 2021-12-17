@@ -71,7 +71,7 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 		String sql = "from YadaUserProfile where userCredentials = :userCredentials";
 		boolean isPage = pageable!=null && pageable.isValid();
 		if (isPage) {
-			sql += " " + YadaSql.getOrderBy(pageable);
+			sql += " " + YadaSql.getOrderByNative(pageable);
 		}
 		Class<T> returnTypeClass = (Class<T>) yadaUtil.findGenericClass(this); // Returns the class that extends YadaUserProfile e.g. UserProfile.class
 		TypedQuery<T> query = em.createQuery(sql, returnTypeClass)
@@ -87,7 +87,7 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 		String sql = "from YadaUserProfile where userCredentials.username = :username";
 		boolean isPage = pageable!=null && pageable.isValid();
 		if (isPage) {
-			sql += " " + YadaSql.getOrderBy(pageable);
+			sql += " " + YadaSql.getOrderByNative(pageable);
 		}
 		Class<T> returnTypeClass = (Class<T>) yadaUtil.findGenericClass(this); // Returns the class that extends YadaUserProfile e.g. UserProfile.class
 		TypedQuery<T> query = em.createQuery(sql, returnTypeClass)

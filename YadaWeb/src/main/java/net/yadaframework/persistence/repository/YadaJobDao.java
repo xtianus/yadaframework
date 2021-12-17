@@ -248,7 +248,7 @@ public class YadaJobDao {
 		String sql = "select e from YadaJob e join e.jobStateObject where e.jobGroup=:jobGroup and e.jobStateObject = :stateObject";
 		boolean isPage = pageable!=null && pageable.isValid();
 		if (isPage) {
-			sql += " " + YadaSql.getOrderBy(pageable);
+			sql += " " + YadaSql.getOrderByNative(pageable);
 		}
 		TypedQuery<YadaJob> query = em.createQuery(sql, YadaJob.class)
 			.setParameter("jobGroup", jobGroup)

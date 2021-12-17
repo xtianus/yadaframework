@@ -78,6 +78,14 @@ public class YadaWebUtil {
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
 
+	/**
+	 * Returns true if we are in a forward that should display an error handled by YadaController.yadaError() or YadaGlobalExceptionHandler
+	 * @param request
+	 * @return
+	 */
+	public boolean isErrorPage(HttpServletRequest request) {
+		return request.getAttribute(YadaConstants.REQUEST_HASERROR_FLAG)!=null;
+	}
 
 	/**
 	 * Copies the content of a file to the Response then deletes the file.

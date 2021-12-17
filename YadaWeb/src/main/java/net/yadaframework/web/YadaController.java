@@ -57,6 +57,7 @@ public class YadaController {
         } else {
         	log.error("Error (HTTP {} '{}') shown to user", errorCode, errorMessage, exception);
         }
+        model.addAttribute(YadaConstants.REQUEST_HASERROR_FLAG, "true");
         // If it was an ajax request, return an error object
         if (yadaWebUtil.isAjaxRequest(request)) {
         	model.addAttribute("errorDescription", errorMessage);

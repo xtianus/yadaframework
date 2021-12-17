@@ -37,7 +37,7 @@ public class HomeController {
 		// You get here either when the url is just "/" or when it is "en/" with localepath configured.
 		// We need to insert the locale path when missing
 		// NOTE: any 404 NOT FOUND error opens the home page and gets here too.
-		if (!config.isLocalePathVariableEnabled() || YadaLocalePathChangeInterceptor.localePathRequested(request) || model.containsAttribute("login")) {
+		if (!config.isLocalePathVariableEnabled() || YadaLocalePathChangeInterceptor.localePathRequested(request) || model.containsAttribute("login") || yadaWebUtil.isErrorPage(request)) {
 			// Should normally get here
 			return "/home";
 		}

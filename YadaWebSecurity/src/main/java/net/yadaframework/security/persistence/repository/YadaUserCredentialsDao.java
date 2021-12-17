@@ -201,7 +201,7 @@ public class YadaUserCredentialsDao {
 			log.debug("Invalid page request");
 			return new ArrayList<YadaUserCredentials>();
 		}
-		sql += " " + YadaSql.getOrderBy(pageable);
+		sql += " " + YadaSql.getOrderByNative(pageable);
 		List<YadaUserCredentials> resultList = em.createQuery(sql, YadaUserCredentials.class)
 			.setParameter("username", username)
 			.setFirstResult(pageable.getOffset())
