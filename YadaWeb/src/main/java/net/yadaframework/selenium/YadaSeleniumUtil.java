@@ -453,8 +453,18 @@ public class YadaSeleniumUtil {
 		// Move the mouse over the element, just in case
 		// // When using the W3C Action commands, offsets are from the center of element
 		Dimension dimension = webElement.getSize();
-		int offx = (int) ThreadLocalRandom.current().nextDouble(dimension.width*minPercentX/100d, dimension.width*maxPercentX/100d)/2;
-		int offy = (int) ThreadLocalRandom.current().nextDouble(dimension.height*minPercentY/100d, dimension.height*maxPercentY/100d)/2;
+		int offx = 0;
+		int offy = 0;
+		try {
+			offx = (int) ThreadLocalRandom.current().nextDouble(dimension.width*minPercentX/100d, dimension.width*maxPercentX/100d)/2;
+		} catch (Exception e) {
+			// Ignored
+		}
+		try {
+			offy = (int) ThreadLocalRandom.current().nextDouble(dimension.height*minPercentY/100d, dimension.height*maxPercentY/100d)/2;
+		} catch (Exception e) {
+			// Ignored
+		}
 		Actions actions = new Actions(webDriver); 
 		actions.moveToElement(webElement, offx, offy);
 		//
