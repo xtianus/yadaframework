@@ -37,7 +37,7 @@ dependencies {
     implementation	project(':YadaWeb'),
     	'org.springframework:spring-webmvc:4.3.13.RELEASE',
     	'org.springframework:spring-context-support:4.3.13.RELEASE',
- 		'org.thymeleaf:thymeleaf-spring4:3.0.11.RELEASE',
+ 		'org.thymeleaf:thymeleaf-spring4:3.0.14.RELEASE',
     	'org.springframework.security:spring-security-web:4.2.13.RELEASE',
 		'org.springframework.data:spring-data-jpa:1.11.9.RELEASE',
 		'org.hibernate:hibernate-entitymanager:5.3.7.Final',
