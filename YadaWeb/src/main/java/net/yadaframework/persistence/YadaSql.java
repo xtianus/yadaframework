@@ -855,14 +855,14 @@ public class YadaSql implements CloneableDeep {
 	/**
 	 * To be used before calling query() or nativeQuery()
 	 * @param name the parameter name, without the initial :
-	 * @param value
+	 * @param value the parameter value
 	 * @return
 	 */
 	public YadaSql setParameter(String name, Object value) {
 		if (queryDone && parameters.isEmpty()) {
 			throw new YadaInternalException("Parameters should be set before calling query()");
 		}
-		if (value.getClass().isArray()) {
+		if (value!=null && value.getClass().isArray()) {
 			value = Arrays.asList((Object[])value);
 		}
 		parameters.put(name, value);
