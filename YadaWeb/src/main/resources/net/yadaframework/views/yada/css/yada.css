@@ -290,7 +290,8 @@ input.yadaSwitch-round ~ label:after {
   transition: margin 0.4s;
 }
 input.yadaSwitch-round:disabled ~ label:after {
-	display: none;
+	display: none; /* This may not be correct */
+	cursor: not-allowed;
 }
 input.yadaSwitch-round:disabled ~ label:before {
   cursor: not-allowed;
