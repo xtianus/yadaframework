@@ -79,6 +79,20 @@ public class YadaWebUtil {
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
 
 	/**
+	 * Returns a full url, including the server address and any optional request parameters.
+	 * @param relativeUrl a server-relative url without language component
+	 * @param locale
+	 * @param params optional request parameters to be set on the url, in the form of comma-separated name,value pairs. E.g. "id","123","name","joe".
+	 * 			Existing parameters are not replaced. Null values become empty strings. Null names are skipped with their values.
+	 * @return a full url like https://myapp.com/en/relative/url
+	 */
+	public String getFullUrl(String relativeUrl, Locale locale, String...params) {
+		String webappAddress = config.getWebappAddress();
+		String urlWithLocale = enhanceUrl(relativeUrl, locale, params);
+		return makeUrl(webappAddress, urlWithLocale);
+	}
+
+	/**
 	 * Returns true if we are in a forward that should display an error handled by YadaController.yadaError() or YadaGlobalExceptionHandler
 	 * @param request
 	 * @return

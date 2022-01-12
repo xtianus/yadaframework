@@ -34,6 +34,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
@@ -153,16 +154,21 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 
 	public void computeHash() {
 		if (type==null) {
-			Type missingEnum = null;
-			try {
-				missingEnum = ((java.lang.reflect.ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-			} catch (Exception e) {
-				// Ignored
+			// get the type of the enum: if it is a YadaPersistentEnum throw an exception with info
+			Class<?> genericClass = YadaUtil.INSTANCE.findGenericClass(this);
+			boolean isYadaLocalEnum = YadaLocalEnum.class.isAssignableFrom(genericClass);
+			if (isYadaLocalEnum) {
+				Type missingEnum = null;
+				try {
+					missingEnum = ((java.lang.reflect.ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+				} catch (Exception e) {
+					// Ignored
+				}
+				String enumName = missingEnum!=null?missingEnum.toString():"all YadaLocalEnum classes";
+				throw new YadaInternalException("YadaUserMessage type is null - did you remember to add " + enumName + " to yadaPersistentEnumDao.initDatabase() during application setup?");
 			}
-			String enumName = missingEnum!=null?missingEnum.toString():"all YadaLocalEnum classes";
-			throw new YadaInternalException("YadaUserMessage type is null - did you remember to add " + enumName + " to yadaPersistentEnumDao.initDatabase() during application setup?");
 		}
-		this.contentHash = Objects.hash(type.getEnum(), title, message, data);
+		this.contentHash = Objects.hash(type==null?null:type.getEnum(), title, message, data);
 	}
 
 	public void setInitialDate() {

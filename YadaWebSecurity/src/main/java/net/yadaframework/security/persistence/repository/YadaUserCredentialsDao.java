@@ -45,6 +45,7 @@ public class YadaUserCredentialsDao {
 	 * @return the updated object
 	 * @see YadaUserCredentials#changePassword(String, PasswordEncoder)
 	 */
+	@Transactional(readOnly = false)
 	public YadaUserCredentials changePassword(YadaUserCredentials yadaUserCredentials, String password) {
 		yadaUserCredentials = em.merge(yadaUserCredentials);
 		yadaUserCredentials.changePassword(password, encoder);
