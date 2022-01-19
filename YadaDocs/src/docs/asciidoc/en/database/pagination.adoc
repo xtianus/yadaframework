@@ -98,13 +98,39 @@ The result can be shown with the following `searchResult.html`:
     	<a yada:ajax="@{/searchBookMore(searchString=${searchString},
     		page=${books.nextPage},size=${books.pageSize},
     		sort='title,asc,ignorecase',sort='date,desc')}" # <1>
-        	yada:paginationHistory
+        	yada:paginationHistory yada:successHandler="initLoadMoreObserver"
             yada:updateOnSuccess="yadaParents:.jsLoadMoreBooks" href="">Load More
         </a>
     </div>
 </th:block>
 ----
 <1> The action in this example contains two sort parameters, but they can be hardcoded in the Controller when they are not dynamically chosen by the user
+
+[source,javascript]
+----
+<script type="text/javascript" th:inline="javascript">
+	const loadMoreObserver = new IntersectionObserver(entries => {
+		entries.forEach(entry => {
+			if (entry.intersectionRatio > 0) {
+				$(entry.target).click();
+			}
+		})
+	})
+	function initLoadMoreObserver() {
+		$(".jsLoadMoreBooks a").each(function(){
+			loadMoreObserver.observe(this);
+		});
+	}
+	
+	$(document).ready(function() {
+		initLoadMoreObserver();
+	});
+	
+</script>
+----
+
+The javascript section is needed to perform auto pagination on scroll: when the "Load More"
+button becomes visible, it is activated by javascript.
 
 ==  Load More query
 

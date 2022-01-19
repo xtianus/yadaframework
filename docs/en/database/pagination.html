@@ -167,7 +167,7 @@ implement pagination.</p>
     	&lt;a yada:ajax="@{/searchBookMore(searchString=${searchString},
     		page=${books.nextPage},size=${books.pageSize},
     		sort='title,asc,ignorecase',sort='date,desc')}" <i class="conum" data-value="1"></i><b>(1)</b>
-        	yada:paginationHistory
+        	yada:paginationHistory yada:successHandler="initLoadMoreObserver"
             yada:updateOnSuccess="yadaParents:.jsLoadMoreBooks" href=""&gt;Load More
         &lt;/a&gt;
     &lt;/div&gt;
@@ -181,6 +181,33 @@ implement pagination.</p>
 <td>The action in this example contains two sort parameters, but they can be hardcoded in the Controller when they are not dynamically chosen by the user</td>
 </tr>
 </table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">&lt;script type="text/javascript" th:inline="javascript"&gt;
+	const loadMoreObserver = new IntersectionObserver(entries =&gt; {
+		entries.forEach(entry =&gt; {
+			if (entry.intersectionRatio &gt; 0) {
+				$(entry.target).click();
+			}
+		})
+	})
+	function initLoadMoreObserver() {
+		$(".jsLoadMoreBooks a").each(function(){
+			loadMoreObserver.observe(this);
+		});
+	}
+
+	$(document).ready(function() {
+		initLoadMoreObserver();
+	});
+
+&lt;/script&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The javascript section is needed to perform auto pagination on scroll: when the "Load More"
+button becomes visible, it is activated by javascript.</p>
 </div>
 </div>
 </div>
@@ -249,7 +276,7 @@ in order to return either the full initial web page or the pagination fragment:<
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-12-16 16:17:55 +0100
+Last updated 2022-01-19 12:58:16 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
