@@ -124,7 +124,7 @@
 		if ($element==null) {
 			$element = $('body');
 		}
-		$('a[data-yadaHash], button[data-yadaHash]', $element).not(".yadaHashed").click(function(){
+		$('[data-yadaHash]', $element).not(".yadaHashed").click(function(){
 			var hashValue = $(this).attr('data-yadaHash')
 			const newUrl = yada.replaceHash(window.location.href, hashValue);
 			history.pushState({'yadaHash': true, 'hashValue' : hashValue}, null, newUrl);
