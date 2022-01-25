@@ -29,10 +29,12 @@ public class YadaDialect extends AbstractProcessorDialect {
 	@Override
     public Set<IProcessor> getProcessors(final String dialectPrefix) {
         final Set<IProcessor> processors = new HashSet<>();
-        processors.add(new YadaHrefAttrProcessor(dialectPrefix, config));
+        // processors.add(new YadaHrefAttrProcessor(dialectPrefix, config));
         processors.add(new YadaSrcAttrProcessor(dialectPrefix, config));
         processors.add(new YadaSrcsetAttrProcessor(dialectPrefix, config));
-        processors.add(new YadaAjaxAttrProcessor(dialectPrefix));
+        processors.add(new YadaAjaxAttrProcessor(dialectPrefix)); // yada:ajax
+        processors.add(new YadaHrefAttrProcessor(dialectPrefix)); // yada:href
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "triggerInViewport", "data-yadaTriggerInViewport", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "paginationHistory", "data-yadaPaginationHistory", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "submitHandler", "data-yadaSubmitHandler", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "successHandler", "data-yadaSuccessHandler", config));
@@ -52,6 +54,8 @@ public class YadaDialect extends AbstractProcessorDialect {
         // processors.add(new YadaActionUploadAttrProcessor(dialectPrefix));
         // Rimuove lo yada:xxx namespace dal tag <html>
         processors.add(new StandardXmlNsTagProcessor(TemplateMode.HTML, dialectPrefix));
+        // TEST !!!!!!!!!!!!!!!!!!!!!
+        processors.add(new TestTagProcessor(dialectPrefix));	// yada:test
         return processors;
     }
 }

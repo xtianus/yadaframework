@@ -140,7 +140,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	}
 
 	/**
-	 * Returns the id of the YadaUserProfile for the currently logged-in user
+	 * Returns the id of the YadaUserProfile for the currently logged-in user, if any
 	 * @return the id or null
 	 */
 	public Long getCurrentUserProfileId() {

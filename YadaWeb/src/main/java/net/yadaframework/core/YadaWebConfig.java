@@ -48,8 +48,6 @@ import net.yadaframework.web.dialect.YadaDialect;
 
 //@Configuration not needed when using WebApplicationInitializer.java
 @EnableWebMvc
-// Needed for Spring Data
-// @EnableSpringDataWebSupport
 @EnableScheduling
 @EnableAsync
 @ComponentScan(basePackages = { "net.yadaframework.web" })
@@ -148,6 +146,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(localeChangeInterceptor());
 		registry.addInterceptor(yadaLocalePathChangeInterceptor());
+		registry.addInterceptor(new YadaAjaxInterceptor());
 	}
 	//
 	// This is the standard locale implementation using request parameters

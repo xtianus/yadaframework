@@ -32,7 +32,7 @@
 		yada.enableAjaxLinks(null, $element);
 		yada.enableAjaxSelects(null, $element);
 		yada.enableAjaxCheckboxes(null, $element);
-		yada.enableAjaxFragments(null, $element);
+		yada.enableAjaxTriggerInViewport($element);
 		yada.enableAjaxInputs();
 	}
 	//////////////////////
@@ -231,48 +231,21 @@
 	function hasNoLoader($element) {
 		return $element.hasClass("noLoader") || $element.hasClass("noloader") || $element.hasClass("yadaNoLoader") || $element.hasClass("yadaNoloader") || $element.hasClass("yadanoloader");
 	}
-	
-	// Loads a data-yadaAjaxFragment
-	function loadAjaxFragment($toBeReplaced) {
-		var fetchUrl = $toBeReplaced.attr("data-yadaAjaxFragment");
-		if (fetchUrl!=null) {
-			$toBeReplaced.removeAttr('data-yadaAjaxFragment');
-			var noLoader = hasNoLoader($toBeReplaced);
-			yada.ajax(fetchUrl, null, (function($replaceable){
-				return function(responseText, responseHtml) {
-					yada.initAjaxHandlersOn(responseHtml.children());
-					$replaceable.replaceWith(responseHtml.children());
-				}
-			})($toBeReplaced), "POST", null, noLoader);
-		}
-	}
 
-	// The observer is called whenever a hidden parent (or self) of a yadaAjaxFragment becomes visible
-	var ajaxFragmentsVisibilityObserver = new MutationObserver(function(mutationsList) {
-		for (var i = 0; i < mutationsList.length; i++) { 
-			// Can't use "of" because yuicompressor fails
-			// for (var record of mutationsList) { 
-			var $node = $(mutationsList[i].target);
-			if ($node.is(":visible")) {
-				// Check the current node and all its children
-				var $nodeSet = $('[data-yadaAjaxFragment]:visible', $node);
-				if ($node.attr('data-yadaAjaxFragment')!=undefined) {
-					$nodeSet.push($node);
-				}
-				$nodeSet.each(function(){
-					loadAjaxFragment($(this));
-				});
+	const ajaxTriggerInViewportObserver = new IntersectionObserver(entries => {
+		entries.forEach(entry => {
+			if (entry.intersectionRatio > 0) {
+				ajaxTriggerInViewportObserver.unobserve(entry.target); // Fires once only
+ 				makeAjaxCall(null, $(entry.target));
 			}
-		}
-	});
-
+		})
+	})
 	
 	/**
-	 * Enables the loading of page fragments via ajax.
-	 * @param handler a function to call upon successful insertion, can be null
-	 * @param $element the element on which to enable the fragment insertion, can be null for the entire body
+	 * Enables the triggering of ajax calls when the element is entering the viewport (or is already in the viewport).
+	 * @param $element the dom section where to look for elements to enable, can be null for the entire body
 	 */
-	yada.enableAjaxFragments = function(handler, $element) {
+	yada.enableAjaxTriggerInViewport = function($element) {
 		if ($element==null || $element=="") {
 			$element = $('body');
 		}
@@ -281,23 +254,10 @@
 			$target = $element;
 		}
 
-		var config = { attributes: true, attributeFilter: ['style', 'class'] };
-		$('[data-yadaAjaxFragment]', $target).each(function() {
-			var $toBeReplaced=$(this);
-			var fetchUrl = $toBeReplaced.attr("data-yadaAjaxFragment");
+		$('[data-yadaTriggerInViewport]', $target).each(function() {
+			var fetchUrl = $(this).attr("data-yadaHref");
 			if (fetchUrl!=null) {
-				// If the element is visible, replace it now.
-				// If the element is not visible, set an observer to replace it when it becomes visible
-				var visible = $toBeReplaced.is(":visible");
-				if (visible) {
-					loadAjaxFragment($toBeReplaced);
-				} else {
-					ajaxFragmentsVisibilityObserver.observe(this, config);
-					// As the observer is not called when a parent changes, I have to set an observer on all the parents that are not currently visible
-					$toBeReplaced.parents(':hidden').each(function() {
-						ajaxFragmentsVisibilityObserver.observe(this, config);
-					});
-				}
+				ajaxTriggerInViewportObserver.observe(this);
 			}
 		});
 	};
@@ -566,12 +526,16 @@
 	
 	/**
 	 * Make an ajax call when a link is clicked, a select is chosen, a checkbox is selected etc.
+	 * @param e the triggering event, can be null (for yadaTriggerInViewport)
+	 * @param $element the jQuery element that triggered the ajax call
+	 * @param optional additional handler to call on success
+	 * @param allowDefault true to allow the default event action, if any
 	 */
 	function makeAjaxCall(e, $element, handler, allowDefault) {
-		if (!allowDefault==true) {
+		if (e && !allowDefault==true) {
 			e.preventDefault();
 		}
-		if ($element.hasClass("yadaLinkDisabled")) {
+		if ($element.hasClass("yadaAjaxDisabled")) {
 			return false;
 		}
 		// Call, in sequence, the handler specified in data-successHandler and the one passed to this function
@@ -1231,6 +1195,7 @@
 			success: function(responseText, statusText, jqXHR) {
 				var responseTrimmed = "";
 				var responseObject = null;
+				closeLoginModalIfAny(jqXHR);
 				if (responseText instanceof Blob) {
 					var contentDisposition = jqXHR.getResponseHeader("Content-Disposition");
 					var filename = yada.getAfter(contentDisposition, "filename=");
@@ -1443,6 +1408,12 @@
 		});
 		
 	}
+	
+	function closeLoginModalIfAny(jqXHR) {
+		if (jqXHR.getResponseHeader("Yada-Ajax-Just-LoggedIn")!=null) {
+			yada.reload();
+		}
+	};
 	
 	function removeHeadNodes(headNodes, $modalObject) {
 		$modalObject.on('hidden.bs.modal', function (e) {

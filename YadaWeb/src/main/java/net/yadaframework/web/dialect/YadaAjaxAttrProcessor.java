@@ -21,24 +21,29 @@ import org.thymeleaf.templatemode.TemplateMode;
  */
 public class YadaAjaxAttrProcessor extends AbstractAttributeTagProcessor {
 	private final Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	public static final int ATTR_PRECEDENCE = 10000;
     public static final String ATTR_NAME = "ajax";
-    public static final String RESULT_ATTRIBUTE = "data-yadaHref";
-   
+
+    protected String resultAttribute = "data-yadaHref";
+
 	/**
 	 * @param config
 	 */
 	public YadaAjaxAttrProcessor(final String dialectPrefix) {
-        super(
-                TemplateMode.HTML, // This processor will apply only to HTML mode
-                dialectPrefix,     // Prefix to be applied to name for matching
-                null,              // No tag name: match any tag name
-                false,             // No prefix to be applied to tag name
-                ATTR_NAME,         // Name of the attribute that will be matched
-                true,              // Apply dialect prefix to attribute name
-                ATTR_PRECEDENCE,   // Precedence (inside dialect's own precedence)
-                true);             // Remove the matched attribute afterwards
+        this(dialectPrefix, ATTR_PRECEDENCE, ATTR_NAME);
+	}
+
+	protected YadaAjaxAttrProcessor(final String dialectPrefix, int attrPrecedence, String attrName) {
+		super(
+            TemplateMode.HTML, // This processor will apply only to HTML mode
+            dialectPrefix,     // Prefix to be applied to name for matching
+            null,              // No tag name: match any tag name
+            false,             // No prefix to be applied to tag name
+            attrName,         // Name of the attribute that will be matched
+            true,              // Apply dialect prefix to attribute name
+            attrPrecedence,   // Precedence (inside dialect's own precedence)
+            true);             // Remove the matched attribute afterwards
 	}
 
 
@@ -64,7 +69,7 @@ public class YadaAjaxAttrProcessor extends AbstractAttributeTagProcessor {
     		log.error("yada:ajax can not be used on submit buttons because they have a different usage");
     		return;
     	}
-    	
+
         final IEngineConfiguration configuration = context.getConfiguration();
 
         /*
@@ -81,19 +86,19 @@ public class YadaAjaxAttrProcessor extends AbstractAttributeTagProcessor {
          * Execute the expression just parsed
          */
         final String targetUrl = (String) expression.execute(context);
-        
+
         /*
          * Set the value into the 'data-yadaHref' attribute
          */
         if (targetUrl != null) {
-        	structureHandler.setAttribute(RESULT_ATTRIBUTE, targetUrl);
+        	structureHandler.setAttribute(resultAttribute, targetUrl);
         	String currentClasses = StringUtils.trimToEmpty(tag.getAttributeValue("class"));
         	structureHandler.setAttribute("class", currentClasses + (StringUtils.isEmpty(currentClasses)?"":" ") + "yadaAjax");
         }
 
     }
     /**
-     * 
+     *
      */
 //    @Override
 //    protected String getTargetAttributeValue(final Arguments arguments, final Element element, final String attributeName) {
@@ -102,7 +107,7 @@ public class YadaAjaxAttrProcessor extends AbstractAttributeTagProcessor {
 //        return RequestDataValueProcessorUtils.processUrl(arguments.getConfiguration(), arguments, resultUrl);
 //    }
 
-//	@Override	
+//	@Override
 //	protected ModificationType getModificationType(Arguments arguments, Element element, String attributeName, String newAttributeName) {
 //		return ModificationType.SUBSTITUTION;
 //	}
@@ -121,7 +126,7 @@ public class YadaAjaxAttrProcessor extends AbstractAttributeTagProcessor {
 //		}
 //		final Map<String,String> values = new HashMap<String, String>();
 //		values.put("href", getResourcesUrl(trailingUrl));
-//		return values;	
+//		return values;
 //	}
 
 //	@Override

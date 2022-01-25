@@ -90,7 +90,7 @@ public class YadaDialectUtil {
 			final IStandardExpression expression = parser.parseExpression(context, value);
 			return (T) expression.execute(context);
 		} catch (RuntimeException e) {
-			log.debug("Expression evaluation of \"{}\" failed - using as literal string", value);
+			log.trace("Expression evaluation of \"{}\" failed - using as literal string", value);
 			if (resultClass.equals(String.class)) {
 				return (T) value; // Maybe it's just a string
 			}

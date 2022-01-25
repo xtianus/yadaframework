@@ -514,9 +514,11 @@
 		return id;
 	}
 	
-	// Returns a likely unique id prefixed by the given string
+	/**
+	* Returns a likely unique id optionally prefixed by the given string
+	*/
 	yada.getRandomId = function(prefix) {
-		return prefix + Math.floor(Math.random() * 999999999);  
+		return (prefix || "") + Math.floor(Math.random() * 999999999);  
 	} 
 	
 	/////////////////

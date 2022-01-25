@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -22,6 +23,7 @@ import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
 import net.yadaframework.core.YadaLocalePathChangeInterceptor;
+import net.yadaframework.security.YadaWrappedSavedRequest;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 import net.yadaframework.security.persistence.repository.YadaUserProfileDao;
 
@@ -30,6 +32,12 @@ import net.yadaframework.security.persistence.repository.YadaUserProfileDao;
 @Scope("prototype") // In case you have more than one YadaSecurityConfig bean
 public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
+
+	// Must be the same as HttpSessionRequestCache.SAVED_REQUEST
+	static final String SAVED_REQUEST = "SPRING_SECURITY_SAVED_REQUEST";
+
+	public final static String AJAX_LOGGEDIN_PARAM = "yadaAjaxJustLoggedIn";
+	public final static String AJAX_LOGGEDIN_HEADER = "Yada-Ajax-Just-LoggedIn";
 
 	private String defaultTargetUrlAjaxRequest = "/";
 	private String defaultTargetUrlNormalRequest = "/";
@@ -68,6 +76,19 @@ public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
 		onAuthenticationSuccessCustom(request, authentication);
+		// Add a request attribute to the originally saved ajax request so that the page knows we're getting
+		// there after a redirected login, so it has a chance of closing the login modal
+		HttpSession session = request.getSession(false);
+		SavedRequest savedRequest = session != null ? (SavedRequest) session.getAttribute(SAVED_REQUEST) : null;
+		if (savedRequest!=null && !savedRequest.getHeaderValues("X-Requested-With").isEmpty()) {
+			// I need to replace the original saved request with a wrapper that returns a modified url,
+			// because the original savedRequest is immutable.
+			YadaWrappedSavedRequest yadaWrappedSavedRequest = new YadaWrappedSavedRequest(savedRequest, yadaWebUtil);
+			// The url parameter is added to the target url so that the YadaAuthenticationSuccessFilter
+			// can add the AJAX_LOGGEDIN_HEADER header to the response, where it is picked up by yada.ajax.js
+			yadaWrappedSavedRequest.addOrUpdateUrlParameter(AJAX_LOGGEDIN_PARAM, "true");
+			session.setAttribute(SAVED_REQUEST, yadaWrappedSavedRequest);
+		}
 		super.onAuthenticationSuccess(request, response, authentication);
 	}
 
@@ -127,5 +148,6 @@ public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthentic
 		}
 		return targetUrl;
 	}
+
 
 }
