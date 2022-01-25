@@ -46,7 +46,7 @@ You can set a timeout on the ajax call with `data-yadaTimeout="<milliseconds>"`
 
 disable the link:: 
 
-The class `yadaDisabled` disables the link
+The class `yadaAjaxDisabled` disables the link. Can also be used on any other element.
 
 disable the loader::
 
@@ -366,6 +366,8 @@ See the  xref:forms/overview.adoc#Ajax Forms[Ajax Forms section] in the Forms ch
 ==  Ajax on other elements
 
 Ajax calls can also be made on other HTML elements like buttons and selects by means of the `data-yadahref` attribute or the equivalent `yada:ajax` dialect.
+Furthermore, any HTML element can become a trigger for an ajax call that can asynchronously update a page region when that element
+enters the viewport.
 
 ===  Ajax on input fields
 
@@ -418,6 +420,107 @@ complete list of ajaxifyable elements. Is the yadaAjax class needed? Examples.
         showFeedbackIfNeeded
 
 ----
+
+===  Ajax async element load
+
+There are may use cases where it is desirable to load an element of the page only when that element scrolls into view.
+For example, deferring the load of a big image or the calculation of a computationally intensive value.
+This is achieved using the same `yada:ajax` syntax seen above, with the addition of `yada:triggerInViewport`: when 
+any element (even a span) is tagged with `yada:triggerInViewport`, it behaves like a clicked anchor when it enters the
+viewport (or if it is there already on page load).
+
+The following example shows an async "like button". On page load the state of the button is unknown so it shows
+as "not liked". As soon as it gets into view, an ajax call retrieves the real state of the button by querying the DB. 
+
+[source,html]
+----
+<span yada:triggerInViewport # <1>
+	class="yadaNoLoader"
+	yada:ajax="@{/getBookLikeButtonFragment(bookId=${book.id})}" # <2>
+	yada:updateOnSuccess="yadaSiblings:.like"> # <3>
+</span>
+<a class="like" th:fragment="bookLikeButtonFragment" # <4>
+	th:classappend="${isLikedByUser}?liked"> # <5>
+	<i class="bi bi-heart-fill"></i> 
+</a>
+----
+<1> the trigger is a span with no body, but it could be any element, even the button itself (beware of loops!)
+<2> the ajax call sends the book id to the backend; together with the current user id taken from the session (if any) the like state is determined
+<3> when the ajax call returns, the like button is replaced with the result, which is the button itself in this example
+<4> the fragment returned from the Controller is the like button itself (see Java below)
+<5> the "liked" class is added in return from the ajax call when needed
+
+[source,java]
+----
+@RequestMapping("/getBookLikeButtonFragment")
+public String getBookLikeButtonFragment(Long bookId, Model model, Locale locale) {
+	boolean isLikedByUser = false;
+	Long currentUserProfileId = mySession.getCurrentUserProfileId();
+	if (currentUserProfileId!=null) {
+		isLikedByUser = bookDao.isLiked(bookId, currentUserProfileId);
+	}
+	model.addAttribute("isLikedByUser", isLikedByUser);
+	return "/myBooksPage :: bookLikeButtonFragment";
+}
+
+----
+
+Considering that the initial ajax call could be slow and allow users to click on the like button
+before it is loaded, it could be desirable to disable it unless it has been loaded via ajax. This
+is easily achieved by checking the presence of the `yadaIsAjaxResponse` model attribute, that is
+inserted at each ajax call. The syntax for adding a second conditional class, in this case `yadaAjaxDisabled`,
+is a bit more complicated:
+
+[source,html]
+----
+<a class="like" ...
+	th:classappend="|${isLikedByUser==true?'liked':''} ${yadaIsAjaxResponse!=null?'':'yadaAjaxDisabled'}|" # <1>
+	...
+----
+<1> `yadaAjaxDisabled` prevents any ajax call and is already defined in `yada.css` with a `no-drop` cursor
+ 
+The above example doesn't take into consideration the action performed when clicking on the like button.
+This would be implemented with a plain `yada:ajax` call that toggles the like status and returns the 
+button fragment again:
+
+[source,html]
+----
+<a class="like" ...
+	yada:ajax="@{/user/toggleBookLike(bookId=${book.id},currentLike=${isLikedByUser})}"
+	yada:updateOnSuccess="">
+</a>
+----
+
+Another step would be to take care of "login redirects": when a logged out user clicks on the
+like button a login modal would be triggered if the url is protected (as it should) and the
+Controller, called after login with a redirect to the original url, wouldn't know the
+real like status from `currentLike`. It can be assumed that the user wants to like the item when the like button
+is clicked before login (as it is snown as "not liked" by default). For that, there is a request parameter
+that is added to the original url and can be checked in the Controller, called `yadaAjaxJustLoggedIn`:
+
+
+[source,java]
+----
+@RequestMapping("/toggleBookLike")
+public String toggleBookLike(Long bookId, Boolean currentLike, Boolean yadaAjaxJustLoggedIn, Model model, Locale locale) {
+	Long currentUserProfileId = mySession.getCurrentUserProfileId();
+	if (currentUserProfileId!=null) {
+		if (Boolean.TRUE.equals(yadaAjaxJustLoggedIn)) { # <1>
+			bookDao.ensureLiked(bookId, currentUserProfileId); # <2>
+			model.addAttribute("isLikedByUser", true);
+		} else {
+			bookDao.toggleLiked(currentLike, bookId, currentUserProfileId); # <3>
+			model.addAttribute("isLikedByUser", !currentLike);
+		}
+	}
+	return "/myBooksPage :: bookLikeButtonFragment";
+}
+----
+<1> `yadaAjaxJustLoggedIn` is `true` when the Controller is called after a login redirect, `null` otherwise
+<2> force to "like" after a login
+<3> toggle like when no login has just occurred
+
+
 
 
 ==  Ajax method

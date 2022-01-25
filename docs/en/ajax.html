@@ -62,6 +62,7 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <ul class="sectlevel2">
 <li><a href="#_ajax_on_input_fields">Ajax on input fields</a></li>
 <li><a href="#_ajax_on_checkbox">Ajax on checkbox</a></li>
+<li><a href="#_ajax_async_element_load">Ajax async element load</a></li>
 </ul>
 </li>
 <li><a href="#_ajax_method">Ajax method</a>
@@ -141,7 +142,7 @@ The href attribute should either be empty or "javascript:;" in that case.</p>
 </dd>
 <dt class="hdlist1">disable the link</dt>
 <dd>
-<p>The class <code>yadaDisabled</code> disables the link</p>
+<p>The class <code>yadaAjaxDisabled</code> disables the link. Can also be used on any other element.</p>
 </dd>
 <dt class="hdlist1">disable the loader</dt>
 <dd>
@@ -656,7 +657,9 @@ array of all sections inserted in page.</p>
 <h2 id="_ajax_on_other_elements">Ajax on other elements</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Ajax calls can also be made on other HTML elements like buttons and selects by means of the <code>data-yadahref</code> attribute or the equivalent <code>yada:ajax</code> dialect.</p>
+<p>Ajax calls can also be made on other HTML elements like buttons and selects by means of the <code>data-yadahref</code> attribute or the equivalent <code>yada:ajax</code> dialect.
+Furthermore, any HTML element can become a trigger for an ajax call that can asynchronously update a page region when that element
+enters the viewport.</p>
 </div>
 <div class="sect2">
 <h3 id="_ajax_on_input_fields">Ajax on input fields</h3>
@@ -727,6 +730,148 @@ Changing a select or a checkbox sumbits the enclosing form: this should be made 
 <pre>complete list of ajaxifyable elements. Is the yadaAjax class needed? Examples.
         showFeedbackIfNeeded</pre>
 </div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ajax_async_element_load">Ajax async element load</h3>
+<div class="paragraph">
+<p>There are may use cases where it is desirable to load an element of the page only when that element scrolls into view.
+For example, deferring the load of a big image or the calculation of a computationally intensive value.
+This is achieved using the same <code>yada:ajax</code> syntax seen above, with the addition of <code>yada:triggerInViewport</code>: when
+any element (even a span) is tagged with <code>yada:triggerInViewport</code>, it behaves like a clicked anchor when it enters the
+viewport (or if it is there already on page load).</p>
+</div>
+<div class="paragraph">
+<p>The following example shows an async "like button". On page load the state of the button is unknown so it shows
+as "not liked". As soon as it gets into view, an ajax call retrieves the real state of the button by querying the DB.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;span yada:triggerInViewport <i class="conum" data-value="1"></i><b>(1)</b>
+	class="yadaNoLoader"
+	yada:ajax="@{/getBookLikeButtonFragment(bookId=${book.id})}" <i class="conum" data-value="2"></i><b>(2)</b>
+	yada:updateOnSuccess="yadaSiblings:.like"&gt; <i class="conum" data-value="3"></i><b>(3)</b>
+&lt;/span&gt;
+&lt;a class="like" th:fragment="bookLikeButtonFragment" <i class="conum" data-value="4"></i><b>(4)</b>
+	th:classappend="${isLikedByUser}?liked"&gt; <i class="conum" data-value="5"></i><b>(5)</b>
+	&lt;i class="bi bi-heart-fill"&gt;&lt;/i&gt;
+&lt;/a&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the trigger is a span with no body, but it could be any element, even the button itself (beware of loops!)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>the ajax call sends the book id to the backend; together with the current user id taken from the session (if any) the like state is determined</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>when the ajax call returns, the like button is replaced with the result, which is the button itself in this example</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>the fragment returned from the Controller is the like button itself (see Java below)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>the "liked" class is added in return from the ajax call when needed</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/getBookLikeButtonFragment")
+public String getBookLikeButtonFragment(Long bookId, Model model, Locale locale) {
+	boolean isLikedByUser = false;
+	Long currentUserProfileId = mySession.getCurrentUserProfileId();
+	if (currentUserProfileId!=null) {
+		isLikedByUser = bookDao.isLiked(bookId, currentUserProfileId);
+	}
+	model.addAttribute("isLikedByUser", isLikedByUser);
+	return "/myBooksPage :: bookLikeButtonFragment";
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Considering that the initial ajax call could be slow and allow users to click on the like button
+before it is loaded, it could be desirable to disable it unless it has been loaded via ajax. This
+is easily achieved by checking the presence of the <code>yadaIsAjaxResponse</code> model attribute, that is
+inserted at each ajax call. The syntax for adding a second conditional class, in this case <code>yadaAjaxDisabled</code>,
+is a bit more complicated:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a class="like" ...
+	th:classappend="|${isLikedByUser==true?'liked':''} ${yadaIsAjaxResponse!=null?'':'yadaAjaxDisabled'}|" <i class="conum" data-value="1"></i><b>(1)</b>
+	...</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>yadaAjaxDisabled</code> prevents any ajax call and is already defined in <code>yada.css</code> with a <code>no-drop</code> cursor</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The above example doesn&#8217;t take into consideration the action performed when clicking on the like button.
+This would be implemented with a plain <code>yada:ajax</code> call that toggles the like status and returns the
+button fragment again:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a class="like" ...
+	yada:ajax="@{/user/toggleBookLike(bookId=${book.id},currentLike=${isLikedByUser})}"
+	yada:updateOnSuccess=""&gt;
+&lt;/a&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Another step would be to take care of "login redirects": when a logged out user clicks on the
+like button a login modal would be triggered if the url is protected (as it should) and the
+Controller, called after login with a redirect to the original url, wouldn&#8217;t know the
+real like status from <code>currentLike</code>. It can be assumed that the user wants to like the item when the like button
+is clicked before login (as it is snown as "not liked" by default). For that, there is a request parameter
+that is added to the original url and can be checked in the Controller, called <code>yadaAjaxJustLoggedIn</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/toggleBookLike")
+public String toggleBookLike(Long bookId, Boolean currentLike, Boolean yadaAjaxJustLoggedIn, Model model, Locale locale) {
+	Long currentUserProfileId = mySession.getCurrentUserProfileId();
+	if (currentUserProfileId!=null) {
+		if (Boolean.TRUE.equals(yadaAjaxJustLoggedIn)) { <i class="conum" data-value="1"></i><b>(1)</b>
+			bookDao.ensureLiked(bookId, currentUserProfileId); <i class="conum" data-value="2"></i><b>(2)</b>
+			model.addAttribute("isLikedByUser", true);
+		} else {
+			bookDao.toggleLiked(currentLike, bookId, currentUserProfileId); <i class="conum" data-value="3"></i><b>(3)</b>
+			model.addAttribute("isLikedByUser", !currentLike);
+		}
+	}
+	return "/myBooksPage :: bookLikeButtonFragment";
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>yadaAjaxJustLoggedIn</code> is <code>true</code> when the Controller is called after a login redirect, <code>null</code> otherwise</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>force to "like" after a login</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>toggle like when no login has just occurred</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -956,7 +1101,7 @@ Otherwise the form will be sent with a normal non-ajax request.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-12-08 19:20:31 +0100
+Last updated 2022-01-25 15:48:34 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
