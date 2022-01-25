@@ -54,8 +54,6 @@ public class YadaDialect extends AbstractProcessorDialect {
         // processors.add(new YadaActionUploadAttrProcessor(dialectPrefix));
         // Rimuove lo yada:xxx namespace dal tag <html>
         processors.add(new StandardXmlNsTagProcessor(TemplateMode.HTML, dialectPrefix));
-        // TEST !!!!!!!!!!!!!!!!!!!!!
-        processors.add(new TestTagProcessor(dialectPrefix));	// yada:test
         return processors;
     }
 }
