@@ -20,30 +20,33 @@ public enum YadaUserMessageType implements YadaLocalEnum<YadaUserMessageType> {
 	TICKET("yada.messagetype.ticket"),
 	COMMENT("yada.messagetype.comment"),
 	OTHER("yada.messagetype.other");
-	
+	// Add new values to the end because the existing ones may be in a database already
+
 	private String messageKey;
 	private YadaPersistentEnum<YadaUserMessageType> yadaPersistentEnum;
-	
+
 	private YadaUserMessageType(String messageKey) {
 		this.messageKey = messageKey;
 	}
-	
+
+	@Override
 	public YadaPersistentEnum<YadaUserMessageType> toYadaPersistentEnum() {
 		return yadaPersistentEnum;
 	}
-	
-	// TODO fix generics
-	public void setYadaPersistentEnum(YadaPersistentEnum yadaPersistentEnum) {
+
+	@Override
+	public void setYadaPersistentEnum(YadaPersistentEnum<YadaUserMessageType> yadaPersistentEnum) {
 		this.yadaPersistentEnum = yadaPersistentEnum;
-		
+
 	}
-	
+
 	/**
 	 * Return the localized text for this enum
 	 * @param messageSource
 	 * @param locale
 	 * @return
 	 */
+	@Override
 	public String toString(MessageSource messageSource, Locale locale) {
 		return messageSource.getMessage(messageKey, null, locale);
 	}

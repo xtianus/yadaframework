@@ -48,6 +48,10 @@ public class HomeController {
 	// The login page is the home page with an attribute set
 	@RequestMapping("/login")
 	public String login(HttpServletRequest request, Model model, Locale locale) {
+		// When the user explicitly clicks on the login button, any previously saved request
+		// must be reset or he will end up in there after login
+		yadaSecurityUtil.clearAnySavedRequest();
+	
 		if (config.isLocalePathVariableEnabled() && !YadaLocalePathChangeInterceptor.localePathRequested(request)) {
 			// Spring security redirects to /login without the language, so we need to redirect to the language version, for consistency
 			return yadaWebUtil.redirectString("/login", locale); // Moved temporarily

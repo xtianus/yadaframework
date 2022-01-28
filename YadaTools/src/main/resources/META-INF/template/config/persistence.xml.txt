@@ -32,6 +32,7 @@
   		<class>net.yadaframework.security.persistence.entity.YadaTicket</class>
   		<class>net.yadaframework.security.persistence.entity.YadaTicketMessage</class>
   		<class>net.yadaframework.security.persistence.entity.YadaUserMessage</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaCommentMessage</class>
      	<% out.print (yadaWebSecurityFound?"":"-->"); %>
      	<% out.print (yadaWebCmsFound?"":"<!--"); %> 
   		<class>net.yadaframework.cms.persistence.entity.YadaArticle</class>

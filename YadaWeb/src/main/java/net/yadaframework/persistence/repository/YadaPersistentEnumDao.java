@@ -1,6 +1,7 @@
 package net.yadaframework.persistence.repository;
 
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -22,27 +23,27 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
 
 /**
- * 
+ *
  */
 
 // TODO fix the generics stuff
 
 @Repository
-@Transactional(readOnly = true) 
+@Transactional(readOnly = true)
 public class YadaPersistentEnumDao {
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
     @PersistenceContext EntityManager em;
-    
+
     @Autowired MessageSource messageSource;
-	
+
     /**
      * Returns the persistent entity representing the given YadaLocalEnum implementation.
      * @param yadaLocalEnum
      * @return
      * @throws YadaInvalidUsageException if the enum has not been previously saved to the database (with initDatabase())
-     * @see initDatabase 
+     * @see initDatabase
      */
     public <T extends Enum<T>> YadaPersistentEnum<T> find(YadaLocalEnum<T> yadaLocalEnum) throws YadaInvalidUsageException {
     	String enumClassName = yadaLocalEnum.getClass().getName();
@@ -50,7 +51,7 @@ public class YadaPersistentEnumDao {
     	try {
 			String sql = "from YadaPersistentEnum where enumClassName=:enumClassName and enumOrdinal=:enumOrdinal";
 			@SuppressWarnings("unchecked")
-			YadaPersistentEnum<T> result = 
+			YadaPersistentEnum<T> result =
 				(YadaPersistentEnum<T>) em.createQuery(sql)
 				.setParameter("enumClassName", enumClassName)
 				.setParameter("enumOrdinal", enumOrdinal)
@@ -61,7 +62,7 @@ public class YadaPersistentEnumDao {
 			throw new YadaInvalidUsageException(enumClassName + " misconfigured");
 		}
     }
-    
+
 	/**
 	 * Fills the database with enum localized values, when missing. Can be used at app startup.
 	 * Can add new enum values for a given enum class, but not remove them (must be done manually).
@@ -69,10 +70,10 @@ public class YadaPersistentEnumDao {
 	 * A change in the localized text is handled properly.
 	 */
     @Transactional(readOnly = false)
-	public void initDatabase(List<Class<? extends YadaLocalEnum<?>>> enumClasses, List<Locale> locales) {
+	public void initDatabase(List<Class<? extends YadaLocalEnum<?>>> enumClasses, Collection<Locale> locales) {
 		for (Class<? extends YadaLocalEnum<?>> enumClass : enumClasses) {
 			String enumClassName = enumClass.getName();
-			YadaLocalEnum<?>[] enumElements = (YadaLocalEnum[]) enumClass.getEnumConstants(); // RUNNING, STOPPED
+			YadaLocalEnum<?>[] enumElements = enumClass.getEnumConstants(); // RUNNING, STOPPED
 			// Check if each row is in the database
 			for (YadaLocalEnum<?> enumElement : enumElements) {
 				YadaPersistentEnum yadaPersistentEnum; // TODO fix generics

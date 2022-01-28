@@ -225,16 +225,25 @@ public class YadaUtil {
 	/**
 	 * Given the instance of a "specific" class created specifying a single type T while extending a generic class,
 	 * retrieve the class of the type T.
+	 * It also works when looking for the generic super-super class at any hierarchy level.
 	 * Example:
 	 * the generic class is public abstract class Shape<T extends Color> {...}
 	 * the specific class is public class Circle extends Shape<Red>
 	 * the instance is new Circle()
 	 * the returned value is Red.class
 	 * @param specificClassInstance instance of the specific class, usually "this" when called from inside either the specific or the generic abstract class.
-	 * @return the class T used to make the generic specific
+	 * @return the class T used to make the generic specific, or null if there is no generic superclass in the hierarchy
 	 */
 	public Class<?> findGenericClass(Object specificClassInstance) {
-		return (Class<?>)((ParameterizedType)specificClassInstance.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+		Class<?> theClass = specificClassInstance.getClass();
+
+		while (theClass!=null && !(theClass.getGenericSuperclass() instanceof ParameterizedType)) {
+			theClass = theClass.getSuperclass();
+		}
+		if (theClass!=null) {
+			return (Class<?>)((ParameterizedType)theClass.getGenericSuperclass()).getActualTypeArguments()[0];
+		}
+		return null;
 	}
 
 	/**
