@@ -219,6 +219,10 @@ a| `data-yadaUpdateOnSuccess`
 a| jQuery selector list
 a| replace the selector targets with the result of the ajax call, or replace each selector target with a different part of the result (see below)
 
+a| `data-yadaAppendOnSuccess`
+a| jQuery selector list
+a| uses jQuery.append() on the selector targets with the result of the ajax call, or with different parts of the result (see below)
+
 a| `data-yadaDeleteOnSuccess`
 a| jQuery selector list
 a| delete the target elements
@@ -236,6 +240,9 @@ Yada-dialect variants:
 
 | `data-yadaUpdateOnSuccess`
 | `yada:updateOnSuccess`
+
+| `data-yadaAppendOnSuccess`
+| `yada:appendOnSuccess`
 
 | `data-yadaDeleteOnSuccess`
 | `yada:deleteOnSuccess`
@@ -316,11 +323,11 @@ The `link` argument is also the same as the current `this` context.
 
 [NOTE]
 ====
-If you use both `yadaUpdateOnSuccess` and `yadaSuccessHandler`, the handlers will be called
+If you use both `yadaUpdateOnSuccess`/`yadaAppendOnSuccess` and `yadaSuccessHandler`, the handlers will be called
 after the page has been modified and the *responseHtml* argument would point to the new page content.
 The *this* context would be the original element, that may no longer be on page if replaced.
 
-In case `yadaUpdateOnSuccess` replaced multiple elements, the *responseHtml* argument would be an
+In case `yadaUpdateOnSuccess`/`yadaAppendOnSuccess` worked on multiple elements, the *responseHtml* argument would be an
 array of all sections inserted in page.
 ====
 
@@ -435,6 +442,7 @@ as "not liked". As soon as it gets into view, an ajax call retrieves the real st
 [source,html]
 ----
 <span yada:triggerInViewport # <1>
+	th:if="${@yadaSecurityUtil.loggedIn}"
 	class="yadaNoLoader"
 	yada:ajax="@{/getBookLikeButtonFragment(bookId=${book.id})}" # <2>
 	yada:updateOnSuccess="yadaSiblings:.like"> # <3>

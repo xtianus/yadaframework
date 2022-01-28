@@ -385,6 +385,17 @@ The following <code>data-</code> attributes allow you to perform postprocessing 
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>data-yadaAppendOnSuccess</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>jQuery selector list</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>uses jQuery.append() on the selector targets with the result of the ajax call, or with different parts of the result (see below)</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p><code>data-yadaDeleteOnSuccess</code></p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
@@ -425,6 +436,10 @@ The following <code>data-</code> attributes allow you to perform postprocessing 
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data-yadaUpdateOnSuccess</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>yada:updateOnSuccess</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data-yadaAppendOnSuccess</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>yada:appendOnSuccess</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data-yadaDeleteOnSuccess</code></p></td>
@@ -556,12 +571,12 @@ When there is a single target, fragments are ignored and the whole result is use
 </td>
 <td class="content">
 <div class="paragraph">
-<p>If you use both <code>yadaUpdateOnSuccess</code> and <code>yadaSuccessHandler</code>, the handlers will be called
+<p>If you use both <code>yadaUpdateOnSuccess</code>/<code>yadaAppendOnSuccess</code> and <code>yadaSuccessHandler</code>, the handlers will be called
 after the page has been modified and the <strong>responseHtml</strong> argument would point to the new page content.
 The <strong>this</strong> context would be the original element, that may no longer be on page if replaced.</p>
 </div>
 <div class="paragraph">
-<p>In case <code>yadaUpdateOnSuccess</code> replaced multiple elements, the <strong>responseHtml</strong> argument would be an
+<p>In case <code>yadaUpdateOnSuccess</code>/<code>yadaAppendOnSuccess</code> worked on multiple elements, the <strong>responseHtml</strong> argument would be an
 array of all sections inserted in page.</p>
 </div>
 </td>
@@ -748,6 +763,7 @@ as "not liked". As soon as it gets into view, an ajax call retrieves the real st
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;span yada:triggerInViewport <i class="conum" data-value="1"></i><b>(1)</b>
+	th:if="${@yadaSecurityUtil.loggedIn}"
 	class="yadaNoLoader"
 	yada:ajax="@{/getBookLikeButtonFragment(bookId=${book.id})}" <i class="conum" data-value="2"></i><b>(2)</b>
 	yada:updateOnSuccess="yadaSiblings:.like"&gt; <i class="conum" data-value="3"></i><b>(3)</b>
@@ -1101,7 +1117,7 @@ Otherwise the form will be sent with a normal non-ajax request.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2022-01-25 15:48:34 +0100
+Last updated 2022-01-28 20:03:28 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

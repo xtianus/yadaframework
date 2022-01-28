@@ -241,7 +241,7 @@ implement filesystem feature
 ----
 
 In case you're replacing a previous attachment, you only need to pass the previous YadaAttachedFile: the old files will be deleted and replaced with
-the new ones. No database operation is needed in this case.
+the new ones. No explicit database operation is needed in this case.
 
 [source,java]
 ----

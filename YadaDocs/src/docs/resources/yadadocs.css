@@ -87,10 +87,15 @@ code.hljs.language-gradle::after {
 }
 
 #navigator {
+	font-size: 1.7em;
 	border: thin solid #dedede;
     color: #7a2518;
     cursor: pointer;
 }
+#navigator option:first-child {
+	display: none;
+}
 #navigator option {
+	font-size: 0.6em;
 	color: #2156a5;
 }
