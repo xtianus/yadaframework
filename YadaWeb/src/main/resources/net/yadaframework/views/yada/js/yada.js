@@ -940,14 +940,15 @@
 	 * @param value the cookie value
 	 * @param expiryDays expiration in days from now. When null, create a session cookie
 	**/
-	yada.setCookie = function(name, value, expiryDays) {
+	yada.setCookie = function(name, value, expiryDays, domain) {
 		var expires = "";
 		if (expiryDays!=null) {
 		    var d = new Date();
 		    d.setDate(d.getDate() + expiryDays);
 		    expires = ";expires="+d.toGMTString();
 		}
-	    document.cookie = name + "=" + value + " ;path=/ " + expires;
+		domain = domain!=null ? ";domain=" + domain : "";
+	    document.cookie = name + "=" + value + domain + " ;path=/ " + expires;
 	}
 	
 	yada.getCookie = function(cname) {
@@ -959,6 +960,10 @@
 	        if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
 	    }
 	    return "";
+	}
+	
+	yada.deleteCookie = function(name, domain) {
+		yada.setCookie(name, "", 0, domain);
 	}
 	
 //	function checkCookie() {
