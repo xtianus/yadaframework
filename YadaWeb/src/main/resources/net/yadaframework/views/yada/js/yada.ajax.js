@@ -374,7 +374,7 @@
 	 * @param $link the jquery anchor or button (could be an array), e.g. $('.niceLink')
 	 * @param handler funzione chiamata in caso di successo e nessun yadaWebUtil.modalError()
 	 */
-	// Legacy version
+	// Legacy version - see yada.enableAjaxLinks
 	yada.enableAjaxLink = function($link, handler) {
 		// If array, recurse to unroll
 		if ($link.length>1) {
@@ -447,7 +447,8 @@
 			}
 		});
 		// Prevent form submission on Enter otherwise the ajax call is not made.
-		// Browsers simulate a click on submit buttons when the enter key is pressed in a form, so we check using the "yadaDoNotSubmitNow" flag 
+		// Browsers simulate a click on submit buttons when the enter key is pressed in a form, so we check using the "yadaDoNotSubmitNow" flag.
+		// This doesn't always work and may be necessary to replace submit buttons with normal buttons to prevent form submission on enter. 
 		$(selector).each(function(){
 			const $input = $(this);
 			// Form submission by Enter keypress is allowed when the input element ajax call is not triggered by "Enter".

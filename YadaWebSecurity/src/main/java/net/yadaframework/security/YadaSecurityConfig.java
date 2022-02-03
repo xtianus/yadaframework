@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.components.YadaAuthenticationFailureHandler;
 import net.yadaframework.security.components.YadaAuthenticationSuccessHandler;
@@ -49,6 +50,7 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 	/**
 	 * Configures basic security settings. Must be overridden to configure url protections.
 	 */
+	@Override
 	public void configure(HttpSecurity http) throws Exception {
 		failureHandler.setFailureUrlAjaxRequest("/ajaxLoginForm");
 		failureHandler.setFailureUrlNormalRequest("/login");
