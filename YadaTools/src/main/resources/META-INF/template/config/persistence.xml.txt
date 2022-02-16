@@ -47,6 +47,7 @@
   		<class>net.yadaframework.commerce.persistence.entity.YadaCart</class>
   		<class>net.yadaframework.commerce.persistence.entity.YadaCartItem</class>
   		<class>net.yadaframework.commerce.persistence.entity.YadaCommerceArticle</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaTransaction</class>
       	<% out.print (yadaWebCommerceFound?"":"-->"); %>
  	
       <properties>

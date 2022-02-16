@@ -2,6 +2,7 @@ package net.yadaframework.commerce.persistence.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -9,6 +10,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -18,6 +21,7 @@ import net.yadaframework.persistence.YadaMoney;
 import net.yadaframework.persistence.YadaMoneyConverter;
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaOrderItem implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -95,6 +99,27 @@ public class YadaOrderItem implements Serializable {
 
 	public long getVersion() {
 		return version;
+	}
+
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		YadaOrderItem other = (YadaOrderItem) obj;
+		return Objects.equals(id, other.id);
 	}
 
 }

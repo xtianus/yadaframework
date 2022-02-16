@@ -7,11 +7,11 @@ import net.yadaframework.cms.persistence.entity.YadaArticle;
 @Entity
 public class YadaCommerceArticle extends YadaArticle {
 	private static final long serialVersionUID = 1L;
-	
+
 	protected int availableQuantity; // Warehouse stock
-	
+
 	protected int daysBeforeAvailable; // Usually available in X days
-	
+
 	public int getAvailableQuantity() {
 		return availableQuantity;
 	}

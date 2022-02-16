@@ -13,7 +13,7 @@ public class YadaMoneyConverter implements AttributeConverter<YadaMoney, Long> {
 		if (attribute==null) {
 			return null;
 		}
-		return attribute.getAmount();
+		return attribute.getInternalValue();
 	}
 
 	@Override
@@ -21,7 +21,9 @@ public class YadaMoneyConverter implements AttributeConverter<YadaMoney, Long> {
 		if (dbData==null) {
 			return null;
 		}
-		return new YadaMoney(dbData);
+		YadaMoney result = new YadaMoney();
+		result.setInternalValue(dbData);
+		return result;
 	}
 
 

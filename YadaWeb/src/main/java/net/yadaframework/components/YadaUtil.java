@@ -129,6 +129,87 @@ public class YadaUtil {
     }
 
 	/**
+	 * Given a json stored as a map, returns the json at the specified key
+	 * @param jsonSource
+	 * @param objectPath the name of a (nested) json property holding an object
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getJsonObject(Map<String, Object> jsonSource, String objectPath) {
+		return (Map<String, Object>) getJsonPath(jsonSource, objectPath);
+	}
+
+	/**
+	 * Given a json stored as a map, returns the json at the specified list index
+	 * @param jsonSource
+	 * @param listPath the path of the json property holing the list
+	 * @param listIndex the list index
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getJsonObject(Map<String, Object> jsonSource, String listPath, int listIndex) {
+		return (Map<String, Object>) getJsonArray(jsonSource, listPath).get(listIndex);
+	}
+
+	/**
+	 * Given a json stored as a map, returns the json array at the specified key
+	 * @param jsonSource
+	 * @param objectPath
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Object> getJsonArray(Map<String, Object> jsonSource, String objectPath) {
+		return (List<Object>) getJsonPath(jsonSource, objectPath);
+	}
+
+	/**
+	 * Given a json stored as a map, returns the String value at the specified key, with optional nesting
+	 * @param jsonSource
+	 * @param objectPath the path of the attribute, using dot notation. E.g. "order.amount.currency"
+	 * @return
+	 */
+	public String getJsonAttribute(Map<String, Object> jsonSource, String objectPath) {
+		return (String) getJsonPath(jsonSource, objectPath);
+	}
+
+	private Object getJsonPath(Map<String, Object> jsonSource, String objectPath) {
+		Object result = jsonSource;
+		String[] parts = objectPath.split("\\.");
+		for (int i = 0; i < parts.length; i++) {
+			String segment = parts[i];
+			int index = -1;
+			if (segment.endsWith("]")) {
+				String[] split = segment.split("[\\[\\]]");
+				segment = split[0];
+				String indexString = split[1];
+				try {
+					index = Integer.parseInt(indexString);
+				} catch (NumberFormatException e) {
+					log.debug("Invalid index '{}' in segment '{}' (ignored)", indexString, parts[i]);
+				}
+			}
+			result = ((Map<String, Object>) result).get(segment);
+			if (result==null) {
+				log.debug("Null value at {}", segment);
+				return null;
+			}
+			if (index>-1) { // Array
+				try {
+					result = ((List<Object>)result).get(index);
+				} catch (IndexOutOfBoundsException e) {
+					log.debug("Index out of bounds at {}[{}]", segment, index);
+					return null;
+				}
+				if (result==null) {
+					log.debug("Null value at {}[{}]", segment, index);
+					return null;
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * Returns a list of user-friendly timezones like "Europe/Rome"
 	 * @return
 	 */
@@ -2229,7 +2310,7 @@ public class YadaUtil {
 	/**
 	 * Adds or removes the days. The original object is cloned.
 	 * @param calendar
-	 * @param minutes
+	 * @param days
 	 * @return
 	 */
 	public static Calendar addDaysClone(Calendar source, int days) {
@@ -2239,7 +2320,7 @@ public class YadaUtil {
 	/**
 	 * Adds or removes the days. The original object is modified.
 	 * @param calendar
-	 * @param minutes
+	 * @param days
 	 * @return
 	 */
 	public static Calendar addDays(Calendar calendar, int days) {

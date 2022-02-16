@@ -12,6 +12,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -25,6 +27,7 @@ import net.yadaframework.persistence.entity.YadaPersistentEnum;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaOrder implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -48,7 +51,7 @@ public class YadaOrder implements Serializable {
 	protected YadaPersistentEnum<YadaOrderStatus> orderStatus;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	protected Date creationTimestamp;
+	protected Date creationTimestamp = new Date();
 
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date stateChangeTimestamp;
@@ -64,6 +67,9 @@ public class YadaOrder implements Serializable {
 
 	@Convert(converter = YadaMoneyConverter.class)
 	protected YadaMoney totalPrice;
+
+	@Column(length=4)
+	protected String currency; // "EUR"
 
 	@OneToMany(mappedBy="order", cascade=CascadeType.ALL, orphanRemoval=true)
 	protected List<YadaOrderItem> orderItems;
@@ -158,6 +164,14 @@ public class YadaOrder implements Serializable {
 
 	public long getVersion() {
 		return version;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
 	}
 
 }
