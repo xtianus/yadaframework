@@ -377,21 +377,11 @@ The following <code>data-</code> attributes allow you to perform postprocessing 
 <p><code>data-yadaUpdateOnSuccess</code></p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>jQuery selector list</p>
+<p>jQuery selector list (extended syntax)</p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>replace the selector targets with the result of the ajax call, or replace each selector target with a different part of the result (see below)</p>
-</div></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p><code>data-yadaAppendOnSuccess</code></p>
-</div></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>jQuery selector list</p>
-</div></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>uses jQuery.append() on the selector targets with the result of the ajax call, or with different parts of the result (see below)</p>
+<p>replace (default) the selector targets with the result of the ajax call, or replace (default) each selector target with a different part of the result (see below).
+   Other than replacing, also append/prepend operations are possible.</p>
 </div></div></td>
 </tr>
 <tr>
@@ -399,7 +389,7 @@ The following <code>data-</code> attributes allow you to perform postprocessing 
 <p><code>data-yadaDeleteOnSuccess</code></p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>jQuery selector list</p>
+<p>jQuery selector list (extended syntax)</p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>delete the target elements</p>
@@ -436,10 +426,6 @@ The following <code>data-</code> attributes allow you to perform postprocessing 
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data-yadaUpdateOnSuccess</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>yada:updateOnSuccess</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data-yadaAppendOnSuccess</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>yada:appendOnSuccess</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>data-yadaDeleteOnSuccess</code></p></td>
@@ -484,8 +470,8 @@ If the selector is an #id, you should ensure that the same id is not present in 
 </div>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
 </colgroup>
 <thead>
 <tr>
@@ -521,16 +507,121 @@ If the selector is an #id, you should ensure that the same id is not present in 
 </tbody>
 </table>
 <div class="paragraph">
+<p>Each selector can also be the argument of a function that alters the behavior from replacing to appending/prepending:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">name</th>
+<th class="tableblock halign-left valign-top">description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>$replace()</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>the selected target is replaced with the ajax result (default operation)</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>$replaceWith()</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>the selected target is replaced with the ajax result (alias for $replace())</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>$prepend()</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>the ajax result is inserted as the first child of the selected target</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>$append()</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>the ajax result is inserted as the last child of the selected target</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The next example prepends the ajax result to the closest div of the clicked button:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;button yada:ajax="@{/someUrl}" yada:updateOnSuccess="$prepend(yadaParents:div)"</code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p><strong>Multiple replacement values</strong></p>
 </div>
 <div class="paragraph">
-<p>If the selector list has many targets and the result contains as many elements tagged with the class <code>yadaFragment</code>, then each target is given a different <code>yadaFragment</code> element.
+<p>If the selector list has many comma-separated selectors and the result contains as many elements
+tagged with the class <code>yadaFragment</code>, then each selector target is given a different <code>yadaFragment</code> element.
 When there are more targets than replacements, replacements are cycled from the start.
-When there is a single target, fragments are ignored and the whole result is used as usual.</p>
+When there is a single selector, fragments are ignored and the whole result is used as usual.</p>
 </div>
-<div class="listingblock todo">
+<div class="paragraph">
+<p>The next example shows a @Controller returning two Items, one to be prepended at the button location and another to be appended elsewhere.</p>
+</div>
+<div class="listingblock">
 <div class="content">
-<pre>Examples (see OneNote)</pre>
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div id="root"&gt; <i class="conum" data-value="4"></i><b>(4)</b>
+	&lt;h1&gt;There you go&lt;/h1&gt;
+	&lt;!-- itemRoot will end up here --&gt;
+&lt;/div&gt;
+&lt;th:block th:fragment="itemListFragment"&gt; <i class="conum" data-value="2"></i><b>(2)</b>
+	&lt;div th:each="item : ${itemList}" class="yadaFragment"&gt;
+		&lt;p th:text="${item.text}"&gt;Item text here&lt;/p&gt;
+	&lt;/div&gt;
+&lt;/th:block&gt;
+&lt;div&gt; <i class="conum" data-value="3"></i><b>(3)</b>
+	&lt;!-- itemButton will end up here --&gt;
+	&lt;button yada:ajax="@{/someUrl}" <i class="conum" data-value="1"></i><b>(1)</b>
+		yada:updateOnSuccess="$prepend(yadaParents:div), $append(#root)"&gt;
+	&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>When the user clicks on the button, the controller is called</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The controller returns two items, each tagged with class <code>yadaFragment</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The first item is prepended here by <code>$prepend(yadaParents:div)</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The second item is appended here by <code>$append(#root)</code></td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/someUrl")
+public String someUrl(Model model) {
+	...
+	model.addAttribute("itemList", new Item[] {itemButton, itemRoot});
+	return "/itemList :: itemListFragment";
+}</code></pre>
 </div>
 </div>
 </div>
@@ -571,12 +662,12 @@ When there is a single target, fragments are ignored and the whole result is use
 </td>
 <td class="content">
 <div class="paragraph">
-<p>If you use both <code>yadaUpdateOnSuccess</code>/<code>yadaAppendOnSuccess</code> and <code>yadaSuccessHandler</code>, the handlers will be called
+<p>If you use both <code>yadaUpdateOnSuccess</code> and <code>yadaSuccessHandler</code>, the handlers will be called
 after the page has been modified and the <strong>responseHtml</strong> argument would point to the new page content.
 The <strong>this</strong> context would be the original element, that may no longer be on page if replaced.</p>
 </div>
 <div class="paragraph">
-<p>In case <code>yadaUpdateOnSuccess</code>/<code>yadaAppendOnSuccess</code> worked on multiple elements, the <strong>responseHtml</strong> argument would be an
+<p>In case <code>yadaUpdateOnSuccess</code> worked on multiple elements, the <strong>responseHtml</strong> argument would be an
 array of all sections inserted in page.</p>
 </div>
 </td>
@@ -1117,7 +1208,7 @@ Otherwise the form will be sent with a normal non-ajax request.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2022-01-28 20:03:28 +0100
+Last updated 2022-02-17 15:50:00 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

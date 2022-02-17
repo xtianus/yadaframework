@@ -216,15 +216,12 @@ a| value
 a| description
 
 a| `data-yadaUpdateOnSuccess`
-a| jQuery selector list
-a| replace the selector targets with the result of the ajax call, or replace each selector target with a different part of the result (see below)
-
-a| `data-yadaAppendOnSuccess`
-a| jQuery selector list
-a| uses jQuery.append() on the selector targets with the result of the ajax call, or with different parts of the result (see below)
+a| jQuery selector list (extended syntax)
+a| replace (default) the selector targets with the result of the ajax call, or replace (default) each selector target with a different part of the result (see below).
+   Other than replacing, also append/prepend operations are possible.
 
 a| `data-yadaDeleteOnSuccess`
-a| jQuery selector list
+a| jQuery selector list (extended syntax)
 a| delete the target elements
 
 a| `data-yadaSuccessHandler`
@@ -240,9 +237,6 @@ Yada-dialect variants:
 
 | `data-yadaUpdateOnSuccess`
 | `yada:updateOnSuccess`
-
-| `data-yadaAppendOnSuccess`
-| `yada:appendOnSuccess`
 
 | `data-yadaDeleteOnSuccess`
 | `yada:deleteOnSuccess`
@@ -272,7 +266,7 @@ If the selector list is empty, the target is the element itself.
 If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.
 
 Each selector can also have the following special prefixes:
-[cols="<50,<50",options="header"]
+[cols="<25,<50",options="header"]
 |===
 h| name
 a| description
@@ -287,17 +281,73 @@ a| `yadaClosestFind:`
 a| splits the selector at the first space then uses `$.closest()` with the first part and `$.find()` with the second
 |===
 
+Each selector can also be the argument of a function that alters the behavior from replacing to appending/prepending:
+[cols="<25,<50",options="header"]
+|===
+h| name
+a| description
+
+a| `$replace()`
+a| the selected target is replaced with the ajax result (default operation)
+
+a| `$replaceWith()`
+a| the selected target is replaced with the ajax result (alias for $replace())
+
+a| `$prepend()`
+a| the ajax result is inserted as the first child of the selected target
+
+a| `$append()`
+a| the ajax result is inserted as the last child of the selected target
+|===
+
+The next example prepends the ajax result to the closest div of the clicked button:
+[source,html]
+----
+<button yada:ajax="@{/someUrl}" yada:updateOnSuccess="$prepend(yadaParents:div)"
+----
+
 *Multiple replacement values*
 
-If the selector list has many targets and the result contains as many elements tagged with the class `yadaFragment`, then each target is given a different `yadaFragment` element.
+If the selector list has many comma-separated selectors and the result contains as many elements 
+tagged with the class `yadaFragment`, then each selector target is given a different `yadaFragment` element.
 When there are more targets than replacements, replacements are cycled from the start.
-When there is a single target, fragments are ignored and the whole result is used as usual.
+When there is a single selector, fragments are ignored and the whole result is used as usual.
 
-[.todo]
-----
-Examples (see OneNote)
+The next example shows a @Controller returning two Items, one to be prepended at the button location and another to be appended elsewhere.
 
+[source,html]
 ----
+<div id="root"> # <4>
+	<h1>There you go</h1>
+	<!-- itemRoot will end up here -->
+</div>
+<th:block th:fragment="itemListFragment"> # <2>
+	<div th:each="item : ${itemList}" class="yadaFragment">
+		<p th:text="${item.text}">Item text here</p>
+	</div>
+</th:block>
+<div> # <3>
+	<!-- itemButton will end up here -->
+	<button yada:ajax="@{/someUrl}" # <1>
+		yada:updateOnSuccess="$prepend(yadaParents:div), $append(#root)">
+	</button>
+</div>
+----
+<1> When the user clicks on the button, the controller is called
+<2> The controller returns two items, each tagged with class `yadaFragment`
+<3> The first item is prepended here by `$prepend(yadaParents:div)`
+<4> The second item is appended here by `$append(#root)`
+
+[source,java]
+----
+@RequestMapping("/someUrl")
+public String someUrl(Model model) {
+	...
+	model.addAttribute("itemList", new Item[] {itemButton, itemRoot});
+	return "/itemList :: itemListFragment";
+}
+----
+
 
 
 ====  Calling some Handler
@@ -323,11 +373,11 @@ The `link` argument is also the same as the current `this` context.
 
 [NOTE]
 ====
-If you use both `yadaUpdateOnSuccess`/`yadaAppendOnSuccess` and `yadaSuccessHandler`, the handlers will be called
+If you use both `yadaUpdateOnSuccess` and `yadaSuccessHandler`, the handlers will be called
 after the page has been modified and the *responseHtml* argument would point to the new page content.
 The *this* context would be the original element, that may no longer be on page if replaced.
 
-In case `yadaUpdateOnSuccess`/`yadaAppendOnSuccess` worked on multiple elements, the *responseHtml* argument would be an
+In case `yadaUpdateOnSuccess` worked on multiple elements, the *responseHtml* argument would be an
 array of all sections inserted in page.
 ====
 
