@@ -1,4 +1,5 @@
 package net.yadaframework.security.persistence.repository;
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -16,15 +17,54 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.YadaSql;
 import net.yadaframework.security.persistence.entity.YadaUserMessage;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
+import net.yadaframework.web.YadaPageRequest;
+import net.yadaframework.web.YadaPageRows;
 
 @Repository
 @Transactional(readOnly = true)
-public class YadaUserMessageDao {
+public class YadaUserMessageDao<E extends YadaUserMessage<?>> {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired private YadaUtil yadaUtil;
 
     @PersistenceContext EntityManager em;
+
+	public E find(Long id) {
+		return (E) em.find(YadaUserMessage.class, id);
+	}
+
+    /**
+     * Find a page of notifications
+     * @param currentUserProfileId
+     * @param yadaPageRequest
+     * @return
+     */
+	public YadaPageRows<E> find(Long recipientUserProfileId, YadaPageRequest yadaPageRequest) {
+		List<E> found = (List<E>) YadaSql.instance().selectFrom("from YadaUserMessage")
+            .where("recipient.id = :userProfileId")
+            .orderBy(yadaPageRequest)
+            .setParameter("userProfileId", recipientUserProfileId)
+            .query(em, YadaUserMessage.class)
+            .setFirstResult(yadaPageRequest.getFirstResult())
+            .setMaxResults(yadaPageRequest.getMaxResults())
+            .getResultList();
+        return new YadaPageRows<E>(found, yadaPageRequest);
+	}
+
+    /**
+     * Returns true if there exists at least one unread message for the user
+     * @param userProfile
+     * @return
+     */
+    public boolean hasUnreadMessage(YadaUserProfile userProfile) {
+    	String sql = "select case when exists ( "
+			+ "select 1 from YadaUserMessage s where s.recipient_id=:userProfileId and s.readByRecipient=false limit 1 "
+			+ ") then 1 else 0 end";
+    	BigInteger singleResult = (BigInteger) em.createNativeQuery(sql)
+    		.setParameter("userProfileId", userProfile.getId())
+    		.getSingleResult();
+    	return singleResult.intValue()==1;
+    }
 
     /**
      * Delete all messages that do not involve users other than the one specified (no other users as sender o recipient)
@@ -100,7 +140,7 @@ public class YadaUserMessageDao {
     	}
     }
 
-	List<YadaUserMessage> findOldYadaUserMessages() {
+	List<E> findOldYadaUserMessages() {
 		String sql = "select * from YadaUserMessage  where modified <= (NOW() - INTERVAL 30 DAY)";
 		return em.createNativeQuery(sql, YadaUserMessage.class)
 				.getResultList();

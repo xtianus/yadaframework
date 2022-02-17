@@ -736,6 +736,23 @@
 	}
 	
 	/**
+	 * Returns the smallest portion of the string inside the prefix and suffix, if found, otherwise return the empty string.
+	 */
+	yada.extract = function(str, prefix, suffix) {
+		const regex = new RegExp(escapeRegExp(prefix) + "(.*?)" + escapeRegExp(suffix));
+		const matched = regex.exec(str);
+		if (matched!=null && matched.length>1 && matched[1]!=null) {
+			return matched[1];
+		}
+		return "";
+	}
+	
+	function escapeRegExp(string) {
+		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+  		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+	}
+	
+	/**
 	 * Aggiunge al valore numerico di un elemento una quantità algebrica eventualmente limitandola a un minimo o massimo
 	 * Esempio: yada.numberAdd('#totMessaggiCounter', -1, 0, true);
 	 * @param elementSelector id dell'elemento incluso l'hash, e.g. #myCounter, oppure un suo selector qualsiasi come ".myElement > div"

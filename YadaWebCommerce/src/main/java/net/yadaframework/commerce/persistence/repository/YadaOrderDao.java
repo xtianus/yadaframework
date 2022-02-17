@@ -23,7 +23,7 @@ public class YadaOrderDao {
     @PersistenceContext private EntityManager em;
 
     /**
-     * Find a previously saved YadaOrderItem
+     * Find a previously saved YadaOrderItem. Can be many if the user repeated the request.
      * @param owner
      * @param articleCode
      * @return
@@ -33,6 +33,7 @@ public class YadaOrderDao {
     		.join("join yoi.order yo")
     		.where("yo.owner = :owner").and()
     		.where("yoi.articleCode = :articleCode")
+    		.orderBy("yoi.modified desc")
     		.setParameter("owner", owner)
     		.setParameter("articleCode", articleCode)
     		.query(em, YadaOrderItem.class)

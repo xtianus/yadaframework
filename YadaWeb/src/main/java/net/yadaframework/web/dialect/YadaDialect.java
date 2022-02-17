@@ -39,7 +39,8 @@ public class YadaDialect extends AbstractProcessorDialect {
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "submitHandler", "data-yadaSubmitHandler", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "successHandler", "data-yadaSuccessHandler", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "updateOnSuccess", "data-yadaUpdateOnSuccess", config));
-        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "appendOnSuccess", "data-yadaAppendOnSuccess", config));
+        // For append, use the $append() extended selector syntax in updateOnSuccess
+        // processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "appendOnSuccess", "data-yadaAppendOnSuccess", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "deleteOnSuccess", "data-yadaDeleteOnSuccess", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "confirm", "data-yadaConfirm", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "title", "data-yadaTitle", config));

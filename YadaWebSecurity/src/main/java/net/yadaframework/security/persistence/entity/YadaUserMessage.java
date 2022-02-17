@@ -177,6 +177,17 @@ public class YadaUserMessage<YLE extends YadaLocalEnum<?>> implements Serializab
 		}
 	}
 
+	/**
+	 * Returns the most recent date of the message stack - which is the initial date if the message is not stackable
+	 * @return
+	 */
+	public Date getLastDate() {
+		if (created!=null && created.size()>0) {
+			return created.get(created.size()-1);
+		}
+		return null;
+	}
+
 	public void incrementStack() {
 		this.stackSize++;
 		this.created.add(new Date());

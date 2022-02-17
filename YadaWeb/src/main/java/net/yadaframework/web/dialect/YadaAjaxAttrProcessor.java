@@ -65,7 +65,7 @@ public class YadaAjaxAttrProcessor extends AbstractAttributeTagProcessor {
             final IElementTagStructureHandler structureHandler) {
 
     	// Prevent use on button type="submit"
-    	if (tag.getElementCompleteName().equals("button") && tag.getAttributeValue("type").equals("submit")) {
+    	if ("button".equals(tag.getElementCompleteName()) && "submit".equals(tag.getAttributeValue("type"))) {
     		log.error("yada:ajax can not be used on submit buttons because they have a different usage");
     		return;
     	}

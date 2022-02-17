@@ -544,7 +544,7 @@
 			showFeedbackIfNeeded($element);
 			deleteOnSuccess($element);
 			responseHtml = updateOnSuccess($element, responseHtml);
-			responseHtml = appendOnSuccess($element, responseHtml);
+			// responseHtml = appendOnSuccess($element, responseHtml);
 			var handlerNames = $element.attr("data-yadaSuccessHandler");
 			if (handlerNames===undefined) {
 				handlerNames = $element.attr("data-successHandler"); // Legacy
@@ -728,13 +728,16 @@
 	 * @returns the jQuery HTML that has been added to the page, which will be a clone 
 	 *		    of responseHtml or the original responseHtml when no update has been made.
 	 *		    In case of multiple appends, an array will be returned.
+	 * @deprecated use $append() in the selector instead
 	 */
+	 /*
 	function appendOnSuccess($element, responseHtml) {
 		// If "yadaAppendOnSuccess" is set, append to its target; if it's empty, append to the original element.
 		// The target can be a parent when the css selector starts with parentSelector (currently "yadaParents:").
 		// The selector can be multiple, separated by comma. The appended HTML can be multiple, identified by yadaFragment
 		return postprocessOnSuccess($element, responseHtml, "data-yadaAppendOnSuccess", $.fn.append);
 	}
+	*/
 
 	/**
 	 * This function performs either an update or an append (or more in the future) depending on the parameters.
@@ -763,7 +766,7 @@
 		var fragmentCount = 0;
 		var focused = false;
 		for (var count=0; count<selectors.length; count++) {
-			var selector = selectors[count];
+			var selector = selectors[count].trim();
 			if ($replacementArray!=null && $replacementArray.length>0) {
 				// Clone so that the original responseHtml is not removed by replaceWith.
 				// All handlers are also cloned.
@@ -776,6 +779,24 @@
 				// When there are more selectors than fragments, fragments are cycled from the first one
 				fragmentCount = (fragmentCount+1) % $replacementArray.length;
 			}
+			// Detect the jquery funcion used in the selector, if any
+			var jqueryFunction = $.fn.replaceWith; // Default
+			var jqueryFunctions = [
+				{"jqfunction": $.fn.replaceWith, "prefix": "$replaceWith"},
+				{"jqfunction": $.fn.replaceWith, "prefix": "$replace"},		// $replace() is an alias for $replaceWith()
+				{"jqfunction": $.fn.append, "prefix": "$append"},
+				{"jqfunction": $.fn.prepend, "prefix": "$prepend"}
+				// More can be added
+			]
+			for (var i = 0; i < jqueryFunctions.length; i++) {
+				const toCheck = jqueryFunctions[i];
+				if (yada.startsWith(selector, toCheck.prefix + "(") && selector.indexOf(")") > toCheck.prefix.length) {
+					jqueryFunction = toCheck.jqfunction;
+					selector = yada.extract(selector, toCheck.prefix + "(", ")");
+					break;
+				}
+			}
+			
 			jqueryFunction.call(yada.extendedSelect($element, selector), $replacement);
 			if (!focused) {
 				// Focus on the first result element with data-yadaAjaxResultFocus
@@ -1073,11 +1094,13 @@
 				} else {
 					responseHtml = updateOnSuccess($form, responseHtml);
 				}
+				/*
 				if ($(localClickedButton).attr("data-yadaAppendOnSuccess")!=null) {
 					responseHtml = appendOnSuccess($(localClickedButton), responseHtml);
 				} else {
 					responseHtml = appendOnSuccess($form, responseHtml);
 				}
+				*/
 				var formHandlerNames = $form.attr("data-yadaSuccessHandler");
 				if (formHandlerNames===undefined) {
 					formHandlerNames = $form.attr("data-successHandler"); // Legacy
