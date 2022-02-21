@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -24,7 +25,6 @@ import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Proxy;
-import org.openqa.selenium.Proxy.ProxyType;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -185,7 +185,7 @@ public class YadaSeleniumUtil {
 	 * @param timeoutSeconds timeout in seconds
 	 */
 	public void setPageloadTimeoutSeconds(WebDriver webDriver, long timeoutSeconds) {
-		webDriver.manage().timeouts().pageLoadTimeout(timeoutSeconds, TimeUnit.SECONDS);
+		webDriver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(timeoutSeconds));
 		log.debug("Selenium page load timeout set to {}", timeoutSeconds);
 	}
 	
@@ -408,9 +408,13 @@ public class YadaSeleniumUtil {
 			}
 		};
 		// WebDriver driver = new FirefoxDriver();
-		driver.manage().timeouts().pageLoadTimeout(config.getSeleniumTimeoutPageLoadSeconds(), TimeUnit.SECONDS);
-		driver.manage().timeouts().setScriptTimeout(config.getSeleniumTimeoutScriptSeconds(), TimeUnit.SECONDS);
-		driver.manage().timeouts().implicitlyWait(config.getSeleniumTimeoutImplicitlyWaitSeconds(), TimeUnit.SECONDS);
+		// driver.manage().timeouts().pageLoadTimeout(config.getSeleniumTimeoutPageLoadSeconds(), TimeUnit.SECONDS);
+		// driver.manage().timeouts().setScriptTimeout(config.getSeleniumTimeoutScriptSeconds(), TimeUnit.SECONDS);
+		// driver.manage().timeouts().implicitlyWait(config.getSeleniumTimeoutImplicitlyWaitSeconds(), TimeUnit.SECONDS);
+		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(config.getSeleniumTimeoutImplicitlyWaitSeconds()));
+		driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(config.getSeleniumTimeoutScriptSeconds()));
+		driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(config.getSeleniumTimeoutPageLoadSeconds()));
+
 		return driver;
 	}
 	
@@ -565,7 +569,8 @@ public class YadaSeleniumUtil {
 	 * @param timeOutInSeconds
 	 */
 	public void waitUntilAttributeNotEmpty(WebElement element, String attribute, WebDriver webDriver, long timeOutInSeconds) {
-		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, Duration.ofSeconds(timeOutInSeconds), Duration.ofMillis(calcSleepTimeMillis(timeOutInSeconds)));
+		// WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
 		webDriverWait.until(ExpectedConditions.attributeToBeNotEmpty(element, attribute));
 	}
 	
@@ -577,7 +582,8 @@ public class YadaSeleniumUtil {
 	 * @see #waitUntilAttributeNotEmpty
 	 */
 	public void waitWhileEmptyText(WebElement element, WebDriver webDriver, long timeOutInSeconds) {
-		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, Duration.ofSeconds(timeOutInSeconds), Duration.ofMillis(calcSleepTimeMillis(timeOutInSeconds)));
+		// WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
 		webDriverWait.until(ExpectedConditions.not(ExpectedConditions.textToBePresentInElement(element, "")));
 	}
 	
@@ -588,7 +594,8 @@ public class YadaSeleniumUtil {
 	 * @param timeOutInSeconds
 	 */
 	public void waitWhileEmptyText(String cssSelector, WebDriver webDriver, long timeOutInSeconds) {
-		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, Duration.ofSeconds(timeOutInSeconds), Duration.ofMillis(calcSleepTimeMillis(timeOutInSeconds)));
+		// WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
 		webDriverWait.until(ExpectedConditions.textMatches(By.cssSelector(cssSelector), matchNonEmptyText));
 	}
 	
@@ -599,7 +606,8 @@ public class YadaSeleniumUtil {
 	 * @param timeOutInSeconds
 	 */
 	public void waitUntilPresent(String cssSelector, WebDriver webDriver, long timeOutInSeconds) {
-		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, Duration.ofSeconds(timeOutInSeconds), Duration.ofMillis(calcSleepTimeMillis(timeOutInSeconds)));
+		// WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
 		webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(cssSelector)));
 	}
 	
@@ -610,7 +618,8 @@ public class YadaSeleniumUtil {
 	 * @param timeOutInSeconds
 	 */
 	public void waitUntilVisible(String cssSelector, WebDriver webDriver, long timeOutInSeconds) {
-		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, Duration.ofSeconds(timeOutInSeconds), Duration.ofMillis(calcSleepTimeMillis(timeOutInSeconds)));
+		// WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
 		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(cssSelector)));
 	}
 	
@@ -621,17 +630,20 @@ public class YadaSeleniumUtil {
 	 * @param timeOutInSeconds
 	 */
 	public void waitWhilePresent(String cssSelector, WebDriver webDriver, long timeOutInSeconds) {
-		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, Duration.ofSeconds(timeOutInSeconds), Duration.ofMillis(calcSleepTimeMillis(timeOutInSeconds)));
+		// WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
 		webDriverWait.until(ExpectedConditions.numberOfElementsToBe(By.cssSelector(cssSelector), 0));
 	}
 	
 	public void waitWhileVisible(String cssSelector, WebDriver webDriver, long timeOutInSeconds) {
-		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, Duration.ofSeconds(timeOutInSeconds), Duration.ofMillis(calcSleepTimeMillis(timeOutInSeconds)));
+		// WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
 		webDriverWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(cssSelector)));
 	}
 	
 	public void waitWhileVisible(WebElement webElement, WebDriver webDriver, long timeOutInSeconds) {
-		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, Duration.ofSeconds(timeOutInSeconds), Duration.ofMillis(calcSleepTimeMillis(timeOutInSeconds)));
+		// WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
 		webDriverWait.until(ExpectedConditions.invisibilityOf(webElement));
 	}
 	
@@ -643,12 +655,14 @@ public class YadaSeleniumUtil {
 	 * @param timeOutInSeconds
 	 */
 	public void waitUntilLost(WebElement webElement, WebDriver webDriver, long timeOutInSeconds) {
-		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, Duration.ofSeconds(timeOutInSeconds), Duration.ofMillis(calcSleepTimeMillis(timeOutInSeconds)));
+		// WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
 		webDriverWait.until(ExpectedConditions.stalenessOf(webElement));
 	}
 	
 	public void waitWhileVisible(List<WebElement> webElements, WebDriver webDriver, long timeOutInSeconds) {
-		WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
+		WebDriverWait webDriverWait = new WebDriverWait(webDriver, Duration.ofSeconds(timeOutInSeconds), Duration.ofMillis(calcSleepTimeMillis(timeOutInSeconds)));
+		// WebDriverWait webDriverWait = new WebDriverWait(webDriver, timeOutInSeconds, calcSleepTimeMillis(timeOutInSeconds));
 		webDriverWait.until(ExpectedConditions.invisibilityOfAllElements(webElements));
 	}
 	
