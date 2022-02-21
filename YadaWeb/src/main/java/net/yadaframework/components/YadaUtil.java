@@ -24,6 +24,9 @@ import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -127,6 +130,27 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+
+	public String getIsoDateStringForTimezone(Date date, TimeZone timezone) {
+		return formatDateTimeForTimezone(date, timezone, DateTimeFormatter.ISO_LOCAL_DATE);
+	}
+
+	public String getIsoTimeStringForTimezone(Date time, TimeZone timezone) {
+		return formatDateTimeForTimezone(time, timezone, DateTimeFormatter.ISO_LOCAL_TIME);
+	}
+
+	public String getIsoDateTimeStringForTimezone(Date dateTime, TimeZone timezone) {
+		return formatDateTimeForTimezone(dateTime, timezone, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+	}
+
+	private String formatDateTimeForTimezone(Date datetime, TimeZone timezone, DateTimeFormatter formatter) {
+		if (datetime==null) {
+			return "";
+		}
+		ZoneId zoneId = timezone.toZoneId();
+		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(datetime.toInstant(), zoneId);
+		return zonedDateTime.format(formatter);
+	}
 
 	/**
 	 * Given a json stored as a map, returns the json at the specified key

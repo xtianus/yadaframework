@@ -22,15 +22,15 @@ import net.yadaframework.web.YadaPageRows;
 
 @Repository
 @Transactional(readOnly = true)
-public class YadaUserMessageDao<E extends YadaUserMessage<?>> {
+public class YadaUserMessageDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired private YadaUtil yadaUtil;
 
     @PersistenceContext EntityManager em;
 
-	public E find(Long id) {
-		return (E) em.find(YadaUserMessage.class, id);
+	public YadaUserMessage find(Long id) {
+		return em.find(YadaUserMessage.class, id);
 	}
 
     /**
@@ -39,8 +39,8 @@ public class YadaUserMessageDao<E extends YadaUserMessage<?>> {
      * @param yadaPageRequest
      * @return
      */
-	public YadaPageRows<E> find(Long recipientUserProfileId, YadaPageRequest yadaPageRequest) {
-		List<E> found = (List<E>) YadaSql.instance().selectFrom("from YadaUserMessage")
+	public YadaPageRows<YadaUserMessage> find(Long recipientUserProfileId, YadaPageRequest yadaPageRequest) {
+		List<YadaUserMessage> found = YadaSql.instance().selectFrom("from YadaUserMessage")
             .where("recipient.id = :userProfileId")
             .orderBy(yadaPageRequest)
             .setParameter("userProfileId", recipientUserProfileId)
@@ -48,7 +48,7 @@ public class YadaUserMessageDao<E extends YadaUserMessage<?>> {
             .setFirstResult(yadaPageRequest.getFirstResult())
             .setMaxResults(yadaPageRequest.getMaxResults())
             .getResultList();
-        return new YadaPageRows<E>(found, yadaPageRequest);
+        return new YadaPageRows<YadaUserMessage>(found, yadaPageRequest);
 	}
 
     /**
@@ -140,7 +140,7 @@ public class YadaUserMessageDao<E extends YadaUserMessage<?>> {
     	}
     }
 
-	List<E> findOldYadaUserMessages() {
+	List<YadaUserMessage> findOldYadaUserMessages() {
 		String sql = "select * from YadaUserMessage  where modified <= (NOW() - INTERVAL 30 DAY)";
 		return em.createNativeQuery(sql, YadaUserMessage.class)
 				.getResultList();

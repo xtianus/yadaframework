@@ -109,6 +109,8 @@ public class YadaUserMessage<YLE extends YadaLocalEnum<?>> implements Serializab
 
 	protected int contentHash; // To check message equality for stackability
 
+	protected Integer status; // Application-defined status for this message
+
 	////////////////////////////////////////////
 
 	@Transient
@@ -366,6 +368,14 @@ public class YadaUserMessage<YLE extends YadaLocalEnum<?>> implements Serializab
 
 	public void setReadByRecipient(boolean readByRecipient) {
 		this.readByRecipient = readByRecipient;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
 	}
 
 }
