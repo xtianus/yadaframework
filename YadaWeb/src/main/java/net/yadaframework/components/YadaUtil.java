@@ -172,13 +172,6 @@ public class YadaUtil {
 	 */
 	public String[] splitHtml(String htmlToSplit, int splitPos) {
 		String[] result = new String[2];
-
-		do {
-			// Remove enclosing <p> if any
-			htmlToSplit = htmlToSplit.substring("<p>".length(), htmlToSplit.length() - "</p>".length());
-		} while (htmlToSplit.startsWith("<p>") && htmlToSplit.endsWith("</p>"));
-		htmlToSplit = htmlToSplit.replace("<br />", "<br/>");
-
 		char[] charArray = htmlToSplit.toCharArray();
 		int maxPos = charArray.length-1;
 		boolean tag = false; // True when the current character is inside an HTML tag
