@@ -400,10 +400,10 @@ The following <code>data-</code> attributes allow you to perform postprocessing 
 <p><code>data-yadaSuccessHandler</code></p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>comma-separated list of function names</p>
+<p>comma-separated list of function names or function body</p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>call the specified functions</p>
+<p>call the specified functions or execute the code</p>
 </div></div></td>
 </tr>
 </tbody>
@@ -627,6 +627,21 @@ public String someUrl(Model model) {
 </div>
 <div class="sect3">
 <h4 id="_calling_some_handler">Calling some Handler</h4>
+<div class="paragraph">
+<p>The value of the yadaSuccessHandler attribute can either be a comma-separated list
+of function names or bodies of a function.</p>
+</div>
+<div class="paragraph">
+<p>Examples:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">yada:successHandler="countItems"
+yada:successHandler="countItems, showValue"
+yada:successHandler="|$('#${messageId}').addClass('obsolete');|"
+yada:successHandler="alert(responseText), alert('hello')"</code></pre>
+</div>
+</div>
 <div class="paragraph">
 <p>The success handlers are called in sequence and should have the following signature:</p>
 </div>
@@ -1208,7 +1223,7 @@ Otherwise the form will be sent with a normal non-ajax request.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2022-02-17 15:50:00 +0100
+Last updated 2022-03-03 12:54:33 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

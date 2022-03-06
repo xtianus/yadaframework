@@ -225,8 +225,8 @@ a| jQuery selector list (extended syntax)
 a| delete the target elements
 
 a| `data-yadaSuccessHandler`
-a| comma-separated list of function names
-a| call the specified functions
+a| comma-separated list of function names or function body
+a| call the specified functions or execute the code
 |===
 
 Yada-dialect variants:
@@ -352,6 +352,18 @@ public String someUrl(Model model) {
 
 ====  Calling some Handler
 
+The value of the yadaSuccessHandler attribute can either be a comma-separated list
+of function names or bodies of a function.
+
+Examples:
+
+[source,html]
+----
+yada:successHandler="countItems"
+yada:successHandler="countItems, showValue"
+yada:successHandler="|$('#${messageId}').addClass('obsolete');|"
+yada:successHandler="alert(responseText), alert('hello')"
+----
 
 The success handlers are called in sequence and should have the following signature:
 
@@ -380,7 +392,6 @@ The *this* context would be the original element, that may no longer be on page 
 In case `yadaUpdateOnSuccess` worked on multiple elements, the *responseHtml* argument would be an
 array of all sections inserted in page.
 ====
-
 
 ====  Modal Dialog
 
