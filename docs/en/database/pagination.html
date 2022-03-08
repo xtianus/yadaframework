@@ -49,9 +49,14 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_description">Description</a></li>
-<li><a href="#_first_query">First query</a></li>
-<li><a href="#_load_more_query">Load More query</a></li>
-<li><a href="#_advanced_usage">Advanced Usage</a></li>
+<li><a href="#_first_query">"First" Query</a></li>
+<li><a href="#_load_more_query">"Load More" Query</a></li>
+<li><a href="#_advanced_usage">Advanced Usage</a>
+<ul class="sectlevel2">
+<li><a href="#_single_controller_method">Single Controller Method</a></li>
+<li><a href="#_multiple_paginations">Multiple Paginations</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -70,15 +75,19 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <p>Loading the whole content of a table onto a web page is never a good idea if the row count is high, both
 from a performance and usability perspective.
 In such case it&#8217;s better to implement database pagination: loading a few rows at a time via ajax when the user wants
-to see more.
-This section shows how to implement pagination on a web page using a "load more" button, with support
+to see more.</p>
+</div>
+<div class="paragraph">
+<p>This section shows how to implement pagination on a web page using a "load more" button, with support
 for bookmarking and for the
-browser back button: when going back to a web page where more data was loaded, that data is still there.</p>
+browser back button: when going back to a web page where more pages were loaded, the page looks exactly the same,
+showing all the pages that were loaded the first time. This allows sharing a paginated page knowing that the user
+receiving the link will reach the original page and not just the first one.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_first_query">First query</h2>
+<h2 id="_first_query">"First" Query</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The "first query" happens when a user loads the web page for the first time, either from normal link navigation
@@ -88,7 +97,7 @@ results building a page with a "load more" button when there is more data to sho
 </div>
 <div class="paragraph">
 <p>The "first query" is also called when the user later reloads the web page using the browser "refresh" button,
-using the browser "back" button or by clicking on a previously saved bookmark.</p>
+using the browser "back" button or by clicking on a previously saved bookmark or shared link.</p>
 </div>
 <div class="paragraph">
 <p>It is therefore important that the method handling the first query receives the information needed to load
@@ -113,8 +122,8 @@ public class BookController {
 <div class="paragraph">
 <p>When the web page is loaded for the first time, Spring calls the "first query" method and creates an instance of
 YadaPageRequest but doesn&#8217;t set any values in it because there are no request parameters to set for <code>page</code> and <code>size</code>.
-You should check if the yadaPageRequest is valid and set it to a default initial value when it&#8217;s not,
-then call the proper DAO to fetch data from the database, that will be stored in a <code>YadaPageRows</code> instance:</p>
+You should check if the yadaPageRequest is valid and set it to a default initial value when it&#8217;s not.
+Then call the proper DAO to fetch data from the database and store it in a <code>YadaPageRows</code> instance:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -160,27 +169,35 @@ implement pagination.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;th:block fragment="bookList" th:unless="${books.empty}"&gt;
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div fragment="bookList" th:unless="${books.empty}" id="bookListId"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
 	&lt;div th:each="book : ${books}" th:text="${book.title}"&gt;Book title here&lt;/div&gt;
 
 	&lt;div class="jsLoadMoreBooks" th:unless="${books.last}"&gt;
     	&lt;a yada:ajax="@{/searchBookMore(searchString=${searchString},
     		page=${books.nextPage},size=${books.pageSize},
-    		sort='title,asc,ignorecase',sort='date,desc')}" <i class="conum" data-value="1"></i><b>(1)</b>
+    		sort='title,asc,ignorecase',sort='date,desc')}" <i class="conum" data-value="2"></i><b>(2)</b>
         	yada:paginationHistory yada:successHandler="initLoadMoreObserver"
             yada:updateOnSuccess="yadaParents:.jsLoadMoreBooks" href=""&gt;Load More
         &lt;/a&gt;
     &lt;/div&gt;
-&lt;/th:block&gt;</code></pre>
+&lt;/div&gt;</code></pre>
 </div>
 </div>
 <div class="colist arabic">
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The id is needed to implement automatic scrolling for bookmarked urls</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
 <td>The action in this example contains two sort parameters, but they can be hardcoded in the Controller when they are not dynamically chosen by the user</td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>We also need some javascript to trigger the load more button automatically when it becomes visible and
+to make autoscroll work:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -200,19 +217,20 @@ implement pagination.</p>
 
 	$(document).ready(function() {
 		initLoadMoreObserver();
+		const yadaContainerId = /*[[${yadaContainer}]]*/ dummy;
+		if (yadaContainerId!=null) {
+			const yadaScroll = /*[[${yadaScroll}]]*/ dummy;
+			$("#" + yadaContainerId).scrollTop(yadaScroll);
+		}
 	});
 
 &lt;/script&gt;</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>The javascript section is needed to perform auto pagination on scroll: when the "Load More"
-button becomes visible, it is activated by javascript.</p>
-</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_load_more_query">Load More query</h2>
+<h2 id="_load_more_query">"Load More" Query</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The above code prints the found rows, then adds a "Load More" link in case there are more results.
@@ -224,9 +242,19 @@ When the user clicks on that link, an ajax call is made to the server in order t
 public String searchBookMore(String searchString, YadaPageRequest yadaPageRequest, Model model) {
     YadaPageRows&lt;Book&gt; result = searchDao.find(searchString, yadaPageRequest);
     model.addAttribute("books", result);
+	model.addAttribute("yadaContainer", yadaPageRequest.getYadaContainer()); <i class="conum" data-value="1"></i><b>(1)</b>
+	model.addAttribute("yadaScroll", yadaPageRequest.getYadaScroll());
     return "/searchResult :: bookList";
 }</code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the yadaContainer and yadaScroll attributes should be added to the model in order to perform autoscroll when opening a bookmark</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>That&#8217;s all there is to it.</p>
@@ -243,10 +271,10 @@ the <code>YadaPageRequest</code> will try to fetch one row more than the page si
 if there are more results to fetch.</p>
 </div>
 <div class="paragraph">
-<p>The <code>yada:paginationHistory</code> attribute, with no value, will add the <code>page</code>, <code>size</code> and <code>loadPrevious</code> request
+<p>The <code>yada:paginationHistory</code> attribute, with no value, will add the <code>page</code>, <code>size</code>, <code>loadPrevious</code>, <code>yadaContainer</code> and <code>yadaScroll</code> request
 parameters to the current page URL in the history, so that when using a bookmark, reloading the page or using
 the back button those values will be sent to the "first query" method seen at the start, and all
-pages up to the current one will be fetched from database and shown. The <code>yada:paginationHistory</code> attribute
+pages up to the current one will be fetched from database and shown at the original scroll position. The <code>yada:paginationHistory</code> attribute
 must be set on the link or button that loads the next page.</p>
 </div>
 </div>
@@ -254,20 +282,43 @@ must be set on the link or button that loads the next page.</p>
 <div class="sect1">
 <h2 id="_advanced_usage">Advanced Usage</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_single_controller_method">Single Controller Method</h3>
 <div class="paragraph">
-<p>This example can be optimized by using a single method both for the first query and for the following ones,
-and many paginations can be used on a single web page by keeping distinct <code>yada:paginationHistory</code> parameters,
-like <code>yada:paginationHistory="'product.page, product.size, product.loadPrevious'"</code> and <code>yada:paginationHistory="'project.page, project.size, project.loadPrevious'"</code>.</p>
-</div>
-<div class="paragraph">
-<p>To use the same method for the first query and the loadMore ones, just check if the request is ajax
-in order to return either the full initial web page or the pagination fragment:</p>
+<p>The "first query" method and the "load more" method can be merged into a single one:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public String searchBook(String searchString, YadaPageRequest yadaPageRequest, Model model) {
-	...
-	return yadaWebUtil.isAjaxRequest() ? "/searchResult :: bookList" : "/searchResult";</code></pre>
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Controller
+public class BookController {
+    final static int PAGE_SIZE =  10;
+    @RequestMapping("/searchBook")
+    public String searchBook(String searchString, YadaPageRequest yadaPageRequest, HttpServletRequest request, Model model) {
+		if (!yadaPageRequest.isValid()) {
+		    yadaPageRequest = new YadaPageRequest(0, PAGE_SIZE);
+		    yadaPageRequest.appendSort("title").ignorecase();
+		    yadaPageRequest.appendSort("date").desc();
+		}
+		YadaPageRows&lt;Book&gt; result = searchDao.find(searchString, yadaPageRequest);
+		model.addAttribute("books", result);
+		model.addAttribute("yadaContainer", yadaPageRequest.getYadaContainer()); <i class="conum" data-value="1"></i><b>(1)</b>
+		model.addAttribute("yadaScroll", yadaPageRequest.getYadaScroll());
+
+	    return yadaWebUtil.isAjaxRequest(request) ? "/searchResult :: bookList" : "/searchResult";
+    }</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_multiple_paginations">Multiple Paginations</h3>
+<div class="paragraph">
+<p>Many paginations can be used on different sections of a single web page by keeping distinct <code>yada:paginationHistory</code> parameters on the different load more buttons,
+like <code>yada:paginationHistory="'product.page, product.size, product.loadPrevious'"</code> and <code>yada:paginationHistory="'project.page, project.size, project.loadPrevious'"</code>.</p>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>Having multiple autoscroll sections has not yet been implemented.</pre>
+</div>
 </div>
 </div>
 </div>
@@ -276,7 +327,7 @@ in order to return either the full initial web page or the pagination fragment:<
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2022-01-19 12:58:16 +0100
+Last updated 2022-03-08 22:48:15 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
