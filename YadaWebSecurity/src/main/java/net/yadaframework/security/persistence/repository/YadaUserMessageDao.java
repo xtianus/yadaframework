@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,25 @@ public class YadaUserMessageDao {
     @Autowired private YadaUtil yadaUtil;
 
     @PersistenceContext EntityManager em;
+
+	/**
+	 * Returns the most recent date of the message stack - which is the initial date if the message is not stackable
+	 * @return
+	 */
+    public Date getLastDate(YadaUserMessage message) {
+    	message = em.merge(message);
+    	return message.getLastDate();
+    }
+
+	@Transactional(readOnly = false)
+	public void markAsRead(List<YadaUserMessage> messages) {
+		String jpql = "update YadaUserMessage m set m.readByRecipient = true where m in :messages";
+		em.createQuery(jpql).setParameter("messages", messages).executeUpdate();
+		// Don't do this or "unread" messages won't show as such
+		// for (YadaUserMessage yadaUserMessage : messages) {
+		// 		yadaUserMessage.setReadByRecipient(true);
+		// }
+	}
 
 	public YadaUserMessage find(Long id) {
 		return em.find(YadaUserMessage.class, id);
@@ -60,9 +80,9 @@ public class YadaUserMessageDao {
     	String sql = "select case when exists ( "
 			+ "select 1 from YadaUserMessage s where s.recipient_id=:userProfileId and s.readByRecipient=false limit 1 "
 			+ ") then 1 else 0 end";
-    	BigInteger singleResult = (BigInteger) em.createNativeQuery(sql)
-    		.setParameter("userProfileId", userProfile.getId())
-    		.getSingleResult();
+    	Query nativeQuery = em.createNativeQuery(sql);
+    	nativeQuery.setParameter("userProfileId", userProfile.getId());
+    	BigInteger singleResult = (BigInteger) nativeQuery.getSingleResult();
     	return singleResult.intValue()==1;
     }
 
@@ -145,5 +165,7 @@ public class YadaUserMessageDao {
 		return em.createNativeQuery(sql, YadaUserMessage.class)
 				.getResultList();
 	}
+
+
 
 }

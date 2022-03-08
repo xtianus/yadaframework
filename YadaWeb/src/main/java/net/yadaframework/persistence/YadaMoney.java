@@ -2,7 +2,11 @@ package net.yadaframework.persistence;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.ParsePosition;
 import java.util.Locale;
+
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -13,6 +17,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * place than you actually require to allow for rounding."
  * https://stackoverflow.com/q/224462/587641
  * Some world currencies use 3 decimals: http://www.thefinancials.com/Default.aspx?SubSectionID=curformat
+ *
+ * This class can be stored in the database as a long when converted with YadaMoneyConverter:
+ * <pre>
+ * @Convert(converter = YadaMoneyConverter.class)
+ * private YadaMoney balance;
+ * </pre>
  */
 public class YadaMoney {
 	private long internalValue = 0; // Amount in 1/10000 of the currency
@@ -26,6 +36,27 @@ public class YadaMoney {
 	 * @param amount an amount of money with no decimals
 	 */
 	public YadaMoney(int amount) {
+		this.internalValue = amount * multiplier;
+	}
+
+	/**
+	 * Convert a string with a decimal value that uses the comma separator of the specified locale
+	 * @param amount the decimal value like "12,87"
+	 * @param locale the locale to parse the comma separator, like Locale.ITALY
+	 * @throws ParseException if the amount contains invalid characters
+	 */
+	public YadaMoney(String amount, Locale locale) throws ParseException {
+		// From https://stackoverflow.com/a/16879667/587641
+		NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
+		ParsePosition parsePosition = new ParsePosition(0);
+		Number number = numberFormat.parse(amount, parsePosition);
+		if (parsePosition.getIndex() != amount.length()){
+			throw new ParseException("Invalid double input: '" + amount + "'", parsePosition.getIndex());
+		}
+		this.internalValue = (long)(number.doubleValue() * multiplier);
+	}
+
+	public YadaMoney(long amount) {
 		this.internalValue = amount * multiplier;
 	}
 
@@ -70,7 +101,11 @@ public class YadaMoney {
 	@JsonProperty("value")
 	public String toString() {
 		// Decimal formats are generally not synchronized
-		NumberFormat formatter = new DecimalFormat("#0.##");
+		Locale locale = LocaleContextHolder.getLocale();
+		NumberFormat formatter = NumberFormat.getNumberInstance(locale);
+		if (formatter instanceof DecimalFormat) {
+			((DecimalFormat) formatter).applyPattern("#0.00");
+		}
 		return formatter.format(getRoundValue());
 	}
 

@@ -3,6 +3,7 @@ package net.yadaframework.commerce.persistence.entity;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,6 +15,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
+import net.yadaframework.persistence.YadaMoney;
+import net.yadaframework.persistence.YadaMoneyConverter;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 
 /**
@@ -37,14 +40,16 @@ public class YadaTransaction {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
 
-	@ManyToOne(optional = false)
+	@ManyToOne(optional = true)
 	protected YadaUserProfile payer;
 
 	@ManyToOne(optional = true)
 	protected YadaUserProfile payee;
 
 	// Could be cents or thousandth depending on the application
-	protected long amount;
+	@Convert(converter = YadaMoneyConverter.class)
+	@Column(nullable = false)
+	protected YadaMoney amount;
 
 	@Column(length = 8)
 	protected String currencyCode;
@@ -55,6 +60,9 @@ public class YadaTransaction {
 	protected String status;
 	protected String transactionId;
 	protected String description;
+
+	@Column(length = 8192)
+	protected String data; // Any application-specific data
 
 	///////////////////////////////////
 
@@ -112,10 +120,10 @@ public class YadaTransaction {
 	public void setTransactionId(String transactionId) {
 		this.transactionId = transactionId;
 	}
-	public long getAmount() {
+	public YadaMoney getAmount() {
 		return amount;
 	}
-	public void setAmount(long amount) {
+	public void setAmount(YadaMoney amount) {
 		this.amount = amount;
 	}
 	public String getDescription() {
@@ -123,6 +131,12 @@ public class YadaTransaction {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public String getData() {
+		return data;
+	}
+	public void setData(String data) {
+		this.data = data;
 	}
 
 

@@ -8,7 +8,7 @@ import java.util.Objects;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 /**
- * A page of rows fetched using YadaPageRequest 
+ * A page of rows fetched using YadaPageRequest
  *
  * @param <T> the type of each row
  * @see YadaPageRequest
@@ -18,7 +18,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	private final YadaPageRequest currentPageRequest;
 	private Long outOfRows = null; // Total number of elements that would be returned without pagination
 	private boolean hasMoreRows = false;
-	
+
 	/**
 	 * @param rows the result
 	 * @param currentPageRequest the page request that generated this result
@@ -35,7 +35,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param rows the result
 	 * @param currentPageRequest the page request that generated this result
 	 */
@@ -59,39 +59,39 @@ public class YadaPageRows<T> implements Iterable<T> {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the number of rows fetched from database, can be less, equal or higher than the page size
 	 */
 	public int getRowNumber() {
 		return rows.size();
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return the page size
 	 */
 	public int getPageSize() {
 		return currentPageRequest.getSize();
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return the page number
 	 */
 	public int getPage() {
 		return currentPageRequest.getPage();
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return the next page number. If there are no more rows, this number is invalid.
 	 */
 	public int getNextPage() {
 		return currentPageRequest.getNextPageRequest().getPage();
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return the YadaPageRequest that generated this YadaPageContent
 	 */
 	public YadaPageRequest getYadaPageRequest() {
@@ -99,7 +99,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the total number of rows (count) that would be returned without pagination
 	 */
 	public long getOutOfRows() {
@@ -110,13 +110,13 @@ public class YadaPageRows<T> implements Iterable<T> {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return true if there is more data to fetch from the database, false if this is the last available page
 	 */
 	public boolean hasMoreRows() {
 		return hasMoreRows;
 	}
-	
+
 	/**
 	 * @return true if there are no elements
 	 */

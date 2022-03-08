@@ -24,6 +24,7 @@ import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -131,14 +132,60 @@ public class YadaUtil {
 		yadaFileManager = getBean(YadaFileManager.class);
     }
 
+	/**
+	 * Given a ISO date, a ISO time and a timezone, return the Date.
+	 * @param isoDateString like '2011-12-03'
+	 * @param isoTimeString like '10:15' or '10:15:30'
+	 * @param timezone the timezone where the date/time strings belong
+	 * @return a Date representing the datetime in the timezone
+	 */
+	public Date getDateFromDateTimeIsoString(String isoDateString, String isoTimeString, TimeZone timezone) {
+		String isoDateTimeString = isoDateString + "T" + isoTimeString;
+		LocalDateTime chosenDateTime = LocalDateTime.parse(isoDateTimeString);
+		ZonedDateTime chosenDateTimeZoned = chosenDateTime.atZone(timezone.toZoneId());
+		return Date.from(chosenDateTimeZoned.toInstant());
+	}
+
+	/**
+	 * Returns a string for date and time in the specified timezone and locale
+	 * @param date the date to format
+	 * @param timezone the timezone in which the date is to be considered
+	 * @param locale the locale to use for formatting
+	 * @return The RFC-1123 formatted date, such as 'Tue, 3 Jun 2008 11:05:30 GMT'.
+	 */
+	public String getRfcDateTimeStringForTimezone(Date date, TimeZone timezone, Locale locale) {
+		DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME.withLocale(locale);
+		ZoneId zoneId = timezone.toZoneId();
+		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(date.toInstant(), zoneId);
+		return zonedDateTime.format(formatter);
+	}
+
+	/**
+	 * Convert a date in the timezone to a ISO string, like '2011-12-03'
+	 * @param date
+	 * @param timezone
+	 * @return
+	 */
 	public String getIsoDateStringForTimezone(Date date, TimeZone timezone) {
 		return formatDateTimeForTimezone(date, timezone, DateTimeFormatter.ISO_LOCAL_DATE);
 	}
 
+	/**
+	 * Convert a time in the timezone to a ISO string, like '10:15' or '10:15:30'
+	 * @param date
+	 * @param timezone
+	 * @return
+	 */
 	public String getIsoTimeStringForTimezone(Date time, TimeZone timezone) {
 		return formatDateTimeForTimezone(time, timezone, DateTimeFormatter.ISO_LOCAL_TIME);
 	}
 
+	/**
+	 * Convert a datetime in the timezone to a ISO string, like '2011-12-03T10:15:30'
+	 * @param date
+	 * @param timezone
+	 * @return
+	 */
 	public String getIsoDateTimeStringForTimezone(Date dateTime, TimeZone timezone) {
 		return formatDateTimeForTimezone(dateTime, timezone, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 	}

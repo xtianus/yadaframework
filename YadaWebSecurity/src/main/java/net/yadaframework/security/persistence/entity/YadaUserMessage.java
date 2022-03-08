@@ -38,6 +38,7 @@ import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
+import net.yadaframework.security.persistence.repository.YadaUserMessageDao;
 import net.yadaframework.web.YadaJsonDateTimeShortSerializer;
 
 /**
@@ -182,6 +183,7 @@ public class YadaUserMessage<YLE extends YadaLocalEnum<?>> implements Serializab
 	/**
 	 * Returns the most recent date of the message stack - which is the initial date if the message is not stackable
 	 * @return
+	 * @see {@link YadaUserMessageDao#getLastDate()}
 	 */
 	public Date getLastDate() {
 		if (created!=null && created.size()>0) {

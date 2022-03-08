@@ -19,7 +19,9 @@ public class YadaPageRequest {
 	private boolean loadPrevious = false;
 	private List<String> sort = new ArrayList<>(); // Request parameters
 	private YadaPageSort parsedSort = null; // Parsed request sort parameters
-
+	// Attributes for scrolling into position when using a bookmark
+	private String yadaContainer; // id of the element that contains the rows and needs scrolling
+	private int yadaScroll = 0; // Scroll amount
 
 	/**
 	 * Add sort parameters after any existing ones
@@ -281,6 +283,22 @@ public class YadaPageRequest {
 	 */
 	public void setSort(List<String> sort) {
 		this.sort = sort;
+	}
+
+	public String getYadaContainer() {
+		return yadaContainer;
+	}
+
+	public void setYadaContainer(String yadaContainer) {
+		this.yadaContainer = yadaContainer;
+	}
+
+	public int getYadaScroll() {
+		return yadaScroll;
+	}
+
+	public void setYadaScroll(int yadaScroll) {
+		this.yadaScroll = yadaScroll;
 	}
 
 }

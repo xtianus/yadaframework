@@ -52,6 +52,8 @@
 	yada.fixPaginationLinkHistory = function($linkOrForm, pageParam, sizeParam, loadPreviousParam) {
 		const NEXTPAGE_NAME="page";
 		const NEXTSIZE_NAME="size";
+		const CONTAINERID_NAME="yadaContainer";
+		const CONTAINERSCROLL_NAME="yadaScroll";
 		// Default param names
 		pageParam = pageParam || "page";
 		sizeParam = sizeParam || "size";
@@ -70,6 +72,18 @@
 		var newUrl = yada.addOrUpdateUrlParameter(currentUrl, pageParam, nextPage);
 		newUrl = yada.addOrUpdateUrlParameter(newUrl, sizeParam, nextSize);
 		newUrl = yada.addOrUpdateUrlParameter(newUrl, loadPreviousParam, true); // This is always true
+		// Add the container id and the scroll position. 
+		// We presume that the scrolling element is the parent of the update target
+		const updateTargetSelector = $linkOrForm.attr("data-yadaUpdateOnSuccess");
+		const $container = yada.extendedSelect($linkOrForm, updateTargetSelector).parent();
+		var containerId = $container.attr("id");
+		if (containerId!=null) {
+			// If there is no id, there is no autoscroll (which is both easier to implement and a way to turn off the scroll behavior somehow)
+			const scrollPos = $container.scrollTop();
+			newUrl = yada.addOrUpdateUrlParameter(newUrl, CONTAINERID_NAME, containerId);
+			newUrl = yada.addOrUpdateUrlParameter(newUrl, CONTAINERSCROLL_NAME, scrollPos);
+		}
+		
 		history.pushState({}, "", newUrl);
 	};
 	
@@ -503,26 +517,33 @@
 	};
 	
 	/**
-	 * Execute function by name
+	 * Execute function by name. Also execute an inline function (a function body).
 	 * See https://stackoverflow.com/a/359910/587641
 	 * @param functionName the name of the function, in the window scope, that can have namespaces like "mylib.myfunc"
 	 * @param thisObject the object that will become the this object in the called function
 	 * Any number of arguments can be passed to the function
 	 */
 	function executeFunctionByName(functionName, thisObject /*, args */) {
-			var context = window; // The functionName is always searched in the current window
-		  var args = Array.prototype.slice.call(arguments, 2);
-		  var namespaces = functionName.split(".");
-		  var func = namespaces.pop();
-		  for(var i = 0; i < namespaces.length; i++) {
-		    context = context[namespaces[i]];
-		  }
-		  var functionObject = context[func];
-		  if (functionObject==null) {
-			  console.log("[yada] Function " + func + " not found (ignored)");
-			  return true; // so that other handlers can be called
-		  }
-		  return functionObject.apply(thisObject, args);
+		var context = window; // The functionName is always searched in the current window
+		var args = Array.prototype.slice.call(arguments, 2);
+		var namespaces = functionName.split(".");
+		var func = namespaces.pop();
+		for(var i = 0; i < namespaces.length && context!=null; i++) {
+			context = context[namespaces[i]];
+		}
+		var functionObject = context?context[func]:null;
+		if (functionObject==null) {
+			// It might be a function body
+			try {
+				const theFunction = new Function('responseText', 'responseHtml', 'link', functionName);
+				return theFunction.apply(thisObject, args);
+			} catch (error) {
+				// Ignored
+			}
+			console.log("[yada] Function '" + func + "' not found (ignored)");
+			return true; // so that other handlers can be called
+		}
+		return functionObject.apply(thisObject, args);
 	}
 	
 	/**
@@ -796,7 +817,6 @@
 					break;
 				}
 			}
-			
 			jqueryFunction.call(yada.extendedSelect($element, selector), $replacement);
 			if (!focused) {
 				// Focus on the first result element with data-yadaAjaxResultFocus
