@@ -811,6 +811,21 @@ public class YadaWebUtil {
 //		}
 //	}
 
+	/**
+	 * Returns the browser's remote ip address. 
+	 * If the connection uses a proxy that sets the "X-Forwarded-For" header, the result is taken from that header.
+	 * @param request
+	 * @return The client IP address, ignoring any proxy address when possible
+	 */
+	public String getClientAddress(HttpServletRequest request) {
+		String forwardedFor = request.getHeader("X-Forwarded-For"); // X-Forwarded-For: 203.0.113.195, 70.41.3.18, 150.172.238.178
+		if (!StringUtils.isBlank(forwardedFor)) {
+			return forwardedFor.split(",", 2)[0].trim();
+		}
+		return request.getRemoteAddr();
+	}
+	
+	@Deprecated // Quite useless because of the format of the result
 	public String getClientIp(HttpServletRequest request) {
 		String remoteAddr = request.getRemoteAddr();
 		String forwardedFor = request.getHeader("X-Forwarded-For");

@@ -5,11 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.View;
 
 import net.yadaframework.core.YadaConfiguration;
 
@@ -39,8 +39,9 @@ public class YadaGlobalExceptionHandler {
 		}
 		request.setAttribute(LOOPCOUNTER_KEY, loops);
 		if (loops>=LOOPCOUNTER_MAX) {
-			log.error("Emergency exit from request after {} loops - redirecting to home", loops);
-			modelAndView.setViewName("redirect:/");
+			log.error("Emergency exit from request after {} loops - returning blank", loops);
+			// modelAndView.setViewName("redirect:/");
+			modelAndView.setStatus(HttpStatus.LOOP_DETECTED); // This is sadly ignored
 			return modelAndView; 
 		}
 		
