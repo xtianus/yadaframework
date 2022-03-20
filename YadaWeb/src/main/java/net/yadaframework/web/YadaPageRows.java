@@ -20,6 +20,14 @@ public class YadaPageRows<T> implements Iterable<T> {
 	private boolean hasMoreRows = false;
 
 	/**
+	 * This constructor is useful when dynamically adding rows to an existing list on user interaction
+	 */
+	public YadaPageRows() {
+		currentPageRequest = null;
+		hasMoreRows = false;
+	}
+
+	/**
 	 * @param rows the result
 	 * @param currentPageRequest the page request that generated this result
 	 * @param outOfRows count of the total number of rows that would be returned without pagination
@@ -71,7 +79,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	 * @return the page size
 	 */
 	public int getPageSize() {
-		return currentPageRequest.getSize();
+		return currentPageRequest!=null?currentPageRequest.getSize():0;
 	}
 
 	/**
@@ -79,7 +87,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	 * @return the page number
 	 */
 	public int getPage() {
-		return currentPageRequest.getPage();
+		return currentPageRequest!=null?currentPageRequest.getPage():0;
 	}
 
 	/**
@@ -87,7 +95,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	 * @return the next page number. If there are no more rows, this number is invalid.
 	 */
 	public int getNextPage() {
-		return currentPageRequest.getNextPageRequest().getPage();
+		return currentPageRequest!=null?currentPageRequest.getNextPageRequest().getPage():0;
 	}
 
 	/**
@@ -128,7 +136,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	 * @return true if this is the first page
 	 */
 	public boolean isFirst() {
-		return currentPageRequest.isFirst();
+		return currentPageRequest!=null?currentPageRequest.isFirst():true;
 	}
 
 	/**
@@ -174,6 +182,13 @@ public class YadaPageRows<T> implements Iterable<T> {
 			return null;
 		}
 		return currentPageRequest.getNextPageRequest();
+	}
+
+	/**
+	 * This method is useful when dynamically adding rows to an existing list on user interaction
+	 */
+	public void add(T row) {
+		rows.add(row);
 	}
 
 

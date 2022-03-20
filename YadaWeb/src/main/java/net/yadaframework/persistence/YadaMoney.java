@@ -60,6 +60,50 @@ public class YadaMoney {
 		this.internalValue = amount * multiplier;
 	}
 
+	/**
+	 * Returns a new instance with the positive value of the current value
+	 * @return
+	 */
+	public YadaMoney getAbsolute() {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = Math.abs(this.internalValue);
+		return result;
+	}
+
+	/**
+	 * Returns a new instance with the negative value of the current value
+	 * @return
+	 */
+	public YadaMoney getNegated() {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = - this.internalValue;
+		return result;
+	}
+
+	/**
+	 * Returns true if the value is zero
+	 * @return
+	 */
+	public boolean isZero() {
+		return this.internalValue == 0;
+	}
+
+	/**
+	 * Returns true if the value is lower than zero
+	 * @return
+	 */
+	public boolean isNegative() {
+		return this.internalValue<0;
+	}
+
+	/**
+	 * Returns true if the value is greater than zero
+	 * @return
+	 */
+	public boolean isPositive() {
+		return this.internalValue>0;
+	}
+
 	public YadaMoney addCents(long cents) {
 		this.internalValue += (cents * multiplier / 100);
 		return this;

@@ -108,8 +108,9 @@ public class YadaUserMessageDao {
 
     /**
      * Save a message. If the message is stackable, only increment the counter of an existing message with identical
-     * content and same recipient and same sender and same data, if not older than one day
-     * @param m the message
+     * content and same recipient and same sender and same data, if not older than one day.
+     * @param m the new message that will be persisted if not already in the database. On return, in any case this will hold
+     *          the result of the database operation (either a new instance or an existing element with incremented counter)
      * @return true if the message has been created, false if the counter incremented
      */
     @Transactional(readOnly = false)

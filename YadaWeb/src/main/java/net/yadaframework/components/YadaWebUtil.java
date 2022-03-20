@@ -61,6 +61,7 @@ import net.yadaframework.core.YadaConstants;
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.web.YadaPageRequest;
+import net.yadaframework.web.YadaPageRows;
 
 @Lazy // Lazy because used in YadaCmsConfiguration, and it woud give a circular refecence exception otherwise
 @Service
@@ -77,6 +78,11 @@ public class YadaWebUtil {
 	private static final String PATTERN_INVALID_SLUG = "[?%:,;=&!+~()@*$'\"\\s]";
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
+
+
+	public boolean isEmpty(YadaPageRows<?> yadaPageRows) {
+		return yadaPageRows==null || yadaPageRows.isEmpty();
+	}
 
 	/**
 	 * Add a url parameter or change its value if present

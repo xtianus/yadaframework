@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
@@ -41,15 +42,15 @@ public class YadaTransaction {
 	protected Long id;
 
 	@ManyToOne(optional = true)
-	protected YadaUserProfile payer;
+	protected YadaUserProfile accountOwner; // Sends or receives money
 
 	@ManyToOne(optional = true)
-	protected YadaUserProfile payee;
+	protected YadaUserProfile otherParty; 	// Receives or sends money
 
 	// Could be cents or thousandth depending on the application
 	@Convert(converter = YadaMoneyConverter.class)
 	@Column(nullable = false)
-	protected YadaMoney amount;
+	protected YadaMoney amount; // The account movement: negative when sending money, positive when receiving
 
 	@Column(length = 8)
 	protected String currencyCode;
@@ -59,10 +60,18 @@ public class YadaTransaction {
 	@Column(length = 32)
 	protected String status;
 	protected String transactionId;
+	protected String payerId1; // ID on the payment system, e.g. paypal "payer_id"
+	protected String payerId2; // Another ID on the payment system, e.g. paypal "email_address"
 	protected String description;
 
 	@Column(length = 8192)
 	protected String data; // Any application-specific data
+
+	@OneToOne
+	protected YadaOrder order;
+
+	// True when this is the twin transaction in a double-ledger system
+	protected Boolean inverse;
 
 	///////////////////////////////////
 
@@ -84,17 +93,17 @@ public class YadaTransaction {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public YadaUserProfile getPayer() {
-		return payer;
+	public YadaUserProfile getAccountOwner() {
+		return accountOwner;
 	}
-	public void setPayer(YadaUserProfile payer) {
-		this.payer = payer;
+	public void setAccountOwner(YadaUserProfile payer) {
+		this.accountOwner = payer;
 	}
-	public YadaUserProfile getPayee() {
-		return payee;
+	public YadaUserProfile getOtherParty() {
+		return otherParty;
 	}
-	public void setPayee(YadaUserProfile payee) {
-		this.payee = payee;
+	public void setOtherParty(YadaUserProfile payee) {
+		this.otherParty = payee;
 	}
 	public String getCurrencyCode() {
 		return currencyCode;
@@ -137,6 +146,30 @@ public class YadaTransaction {
 	}
 	public void setData(String data) {
 		this.data = data;
+	}
+	public YadaOrder getOrder() {
+		return order;
+	}
+	public void setOrder(YadaOrder order) {
+		this.order = order;
+	}
+	public String getPayerId1() {
+		return payerId1;
+	}
+	public void setPayerId1(String payerId1) {
+		this.payerId1 = payerId1;
+	}
+	public String getPayerId2() {
+		return payerId2;
+	}
+	public void setPayerId2(String payerId2) {
+		this.payerId2 = payerId2;
+	}
+	public Boolean getInverse() {
+		return inverse;
+	}
+	public void setInverse(Boolean inverse) {
+		this.inverse = inverse;
 	}
 
 
