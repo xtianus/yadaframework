@@ -60,6 +60,10 @@ public class YadaMoney {
 		this.internalValue = amount * multiplier;
 	}
 
+	public YadaMoney(double doubleValue) {
+		this.internalValue = (long) (doubleValue * multiplier);
+	}
+
 	/**
 	 * Returns a new instance with the positive value of the current value
 	 * @return
