@@ -200,6 +200,15 @@ public class YadaUtil {
 	}
 
 	/**
+	 * Create a single empty "json" object for use in other methods.
+	 * Json objects are actually maps that get converted by Spring on return.
+	 * @return
+	 */
+	public Map<String, Object> makeJsonObject() {
+			return new HashMap<String, Object>();
+	}
+
+	/**
 	 * Given a json stored as a map, returns the json at the specified key
 	 * @param jsonSource
 	 * @param objectPath the name of a (nested) json property holding an object
@@ -236,11 +245,86 @@ public class YadaUtil {
 	/**
 	 * Given a json stored as a map, returns the String value at the specified key, with optional nesting
 	 * @param jsonSource
-	 * @param objectPath the path of the attribute, using dot notation. E.g. "order.amount.currency"
+	 * @param objectPath the path of the attribute, using dot notation and arrays. E.g. "order.amount[2].currency"
 	 * @return
 	 */
 	public String getJsonAttribute(Map<String, Object> jsonSource, String objectPath) {
 		return (String) getJsonPath(jsonSource, objectPath);
+	}
+
+	/**
+	 * Creates an empty json object at the given path
+	 * @param parentObject the json object containing the new object
+	 * @param path where the object should be created, using dot notation and arrays. E.g. "order.amount[2].currency".
+	 * Any missing array cells are also created with an empty object as needed.
+	 * @return
+	 */
+	public Map<String, Object> makeJsonObject(Map<String, Object> parentObject, String path) {
+		return (Map<String, Object>) setJsonAttributeRecurse(parentObject, path, null);
+	}
+
+	/**
+	 * Sets a json property at the given path
+	 * @param jsonObject the json object that should contain the property
+	 * @param path path of the property using dot notation and arrays. E.g. "order.amount[2].currency".
+	 * Any missing array cells are also created with an empty object as needed.
+	 * @param value the value to store, can also be a "json object"
+	 */
+	public void setJsonAttribute(Map<String, Object> jsonObject, String path, Object value) {
+		boolean isString = value instanceof String;
+		boolean isJsonObject = value instanceof Map;
+		if (!isString && !isJsonObject) {
+			value = String.valueOf(value);
+//			throw new YadaInvalidValueException("\"value\" must be either a string or a map");
+		}
+		setJsonAttributeRecurse(jsonObject, path, value);
+	}
+
+	private Object setJsonAttributeRecurse(Map<String, Object> jsonObject, String path, Object value) {
+		if (path.length()==0 && value==null) {
+			return jsonObject; // makeJsonObject called
+		}
+		String[] parts = path.split("\\.", 2); // {"a", "b[2].c"}
+		String segment = parts[0]; // "a", "b[2]", "c"
+		int index = -1;
+		if (segment.endsWith("]")) {
+			// Array
+			String[] split = segment.split("[\\[\\]]");
+			segment = split[0]; // "b"
+			String indexString = split[1]; // "2"
+			try {
+				index = Integer.parseInt(indexString);
+			} catch (NumberFormatException e) {
+				log.debug("Invalid index '{}' in segment '{}' (ignored)", indexString, segment);
+			}
+		}
+		boolean lastSegment = (parts.length==1);
+		if (lastSegment && value!=null) {
+			return jsonObject.put(segment, value);
+		}
+		Object currentObject = jsonObject.get(segment); // Either Object, List or Null
+		if (currentObject==null) {
+			if (index>-1) {
+				currentObject = new ArrayList<Object>();
+			} else {
+				currentObject = makeJsonObject();
+			}
+			jsonObject.put(segment, currentObject);
+		}
+		if (currentObject instanceof ArrayList) {
+			if (index<0) {
+				throw new YadaInvalidValueException("Not an array at {}", segment);
+			}
+			List<Object> currentList = (List<Object>) currentObject;
+			for (int k = currentList.size(); k <= index; k++) {
+				// Add missing cells if any
+				currentList.add(makeJsonObject());
+			}
+			currentObject = currentList.get(index);
+		}
+		int dotPos = path.indexOf(".");
+		String remainingPath = dotPos > -1 ? path.substring(dotPos+1) : "";
+		return setJsonAttributeRecurse((Map<String, Object>)currentObject, remainingPath, value);
 	}
 
 	private Object getJsonPath(Map<String, Object> jsonSource, String objectPath) {
@@ -250,6 +334,7 @@ public class YadaUtil {
 			String segment = parts[i];
 			int index = -1;
 			if (segment.endsWith("]")) {
+				// Array
 				String[] split = segment.split("[\\[\\]]");
 				segment = split[0];
 				String indexString = split[1];

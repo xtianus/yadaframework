@@ -519,7 +519,8 @@
 	/**
 	 * Execute function by name. Also execute an inline function (a function body).
 	 * See https://stackoverflow.com/a/359910/587641
-	 * @param functionName the name of the function, in the window scope, that can have namespaces like "mylib.myfunc"
+	 * @param functionName the name of the function, in the window scope, that can have namespaces like "mylib.myfunc".
+	 *			It can also be an inline function (with or without function(){} declaration).
 	 * @param thisObject the object that will become the this object in the called function
 	 * Any number of arguments can be passed to the function
 	 */
@@ -535,10 +536,15 @@
 		if (functionObject==null) {
 			// It might be a function body
 			try {
-				const theFunction = new Function('responseText', 'responseHtml', 'link', functionName);
+				var functionBody = functionName.trim();
+				// Strip any "function(){xxx}" declaration
+				if (yada.startsWith(functionName, "function")) {
+					functionBody = functionName.replace(new RegExp("(?:function\\s*\\(\\)\\s*{)?([^}]+)}?"), "$1");
+				}
+				const theFunction = new Function('responseText', 'responseHtml', 'link', functionBody);
 				return theFunction.apply(thisObject, args);
 			} catch (error) {
-				// Ignored
+				console.error(error);
 			}
 			console.log("[yada] Function '" + func + "' not found (ignored)");
 			return true; // so that other handlers can be called
