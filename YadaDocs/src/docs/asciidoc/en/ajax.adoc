@@ -91,7 +91,7 @@ A String map can easily be converted to JSON using the standard Spring features:
 
 [source,java]
 ----
-@RequestMapping(path = "/people", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(path = "/people", produces = MediaType.APPLICATION_JSON_VALUE)
 @ResponseBody
 public Map<String, Object> people() {
     Map<String, Object> map = new HashMap<String, Object>();
