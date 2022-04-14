@@ -39,9 +39,9 @@ dependencies {
 		'org.apache.tomcat:tomcat-servlet-api:8.0.48'
 
     implementation	project(':YadaWeb'),
-    	'org.springframework:spring-webmvc:5.3.8',
-    	'org.springframework:spring-context-support:5.3.8',
-		'org.springframework:spring-orm:5.3.8',
+    	'org.springframework:spring-webmvc:5.3.18',
+    	'org.springframework:spring-context-support:5.3.18',
+		'org.springframework:spring-orm:5.3.18',
  		'org.thymeleaf:thymeleaf-spring5:3.0.14.RELEASE',
     	'org.springframework.security:spring-security-web:5.5.0',
 		'org.hibernate:hibernate-entitymanager:5.5.0.Final',

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://www.yadaframework.net" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
+
+<!--/*
+Template for <yada:textarea> resulting HTML.
+It is used internally by the yada dialect processor to render the <yada:textarea> tag but could be included directly in a HTML template if needed.
+
+*/-->
+
+<body>
+	<!-- Can use any th attributes on the tag here because the original ones have been replaced with plain HTML tags already, so no conflicts can arise -->
+	<th:block th:fragment="field" th:with="_validationFailed_=${yadaInvalidFlag==true}">
+	
+		<div class="input-group yadaInput" th:classappend="${yadaTextarea.class}">
+			
+			<div th:if="${yadaAddonLeft!=null}" class="input-group-text" th:utext="${yadaAddonLeft}">@</div>
+			
+			<textarea th:attr="data-yadaTagId=${yadaTagId},__${yadaTargetAttributesString}__" th:classappend="'form-control' + ${_validationFailed_?' is-invalid':''}" th:text="${yadaTextareaValue}?:''">
+			</textarea>
+			
+			<div th:if="${yadaAddonRight!=null}" class="input-group-text" th:utext="${yadaAddonRight}">@example.com</div>
+			
+			<a th:if="${yadaHelpText!=null}" class="yadaHelpButton input-group-text" data-trigger="focus" data-container="body" 
+				data-toggle="popover" data-placement="auto bottom"
+				data-html="true"
+				th:attr="data-content=${help}">
+				<i class="fa fa-question-circle fa-lg"></i>
+			</a>
+			
+			<div th:if="${_validationFailed_}" th:text="${yadaValidationMessage}?:#{__${yadaMessageKey}__}" class="invalid-feedback"> <!-- Bootstrap 5 -->
+     				Please enter a valid value
+   			</div>
+   			
+			<script th:if="${yadainputcounterid!=null}" th:inline="javascript">
+				$(document).ready(function() {
+					const inputCounterId = /*[[${yadainputcounterid}]]*/ 0;
+					const yadaTagId = /*[[${yadaTagId}]]*/ 0;
+					yada.updateInputCounter($("textarea[data-yadaTagId="+yadaTagId+"]"), $("#"+inputCounterId));
+				});
+			</script>
+			
+		</div>
+	</th:block>
+</body>
+</html>
+		

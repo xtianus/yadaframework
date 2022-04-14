@@ -52,6 +52,7 @@ public class YadaDialect extends AbstractProcessorDialect {
         processors.add(new YadaBrOnFirstSpaceAttrProcessor(dialectPrefix, true));	// brspace
         processors.add(new YadaInputTagProcessor(dialectPrefix, config));	// yada:input
         processors.add(new YadaInputCounterTagProcessor(dialectPrefix, config));	// yada:inputCounter
+        processors.add(new YadaTextareaTagProcessor(dialectPrefix, config));	// yada:textarea
         // TODO move YadaActionUploadAttrProcessor to a yada security dialect
         // processors.add(new YadaActionUploadAttrProcessor(dialectPrefix));
         // Rimuove lo yada:xxx namespace dal tag <html>
