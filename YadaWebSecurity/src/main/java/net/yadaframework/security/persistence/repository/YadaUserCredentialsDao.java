@@ -45,6 +45,7 @@ public class YadaUserCredentialsDao {
 	 * @return the updated object
 	 * @see YadaUserCredentials#changePassword(String, PasswordEncoder)
 	 */
+	@Transactional(readOnly = false)
 	public YadaUserCredentials changePassword(YadaUserCredentials yadaUserCredentials, String password) {
 		yadaUserCredentials = em.merge(yadaUserCredentials);
 		yadaUserCredentials.changePassword(password, encoder);
@@ -201,7 +202,7 @@ public class YadaUserCredentialsDao {
 			log.debug("Invalid page request");
 			return new ArrayList<YadaUserCredentials>();
 		}
-		sql += " " + YadaSql.getOrderBy(pageable);
+		sql += " " + YadaSql.getOrderByNative(pageable);
 		List<YadaUserCredentials> resultList = em.createQuery(sql, YadaUserCredentials.class)
 			.setParameter("username", username)
 			.setFirstResult(pageable.getOffset())

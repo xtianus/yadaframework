@@ -384,6 +384,8 @@ public class YadaFileManager {
 
 	/**
 	 * Replace the file associated with the current attachment
+	 * The multipartFile is moved to the destination when config.isFileManagerDeletingUploads() is true, otherwise the original is copied
+	 * and left unchanged.
 	 * @param currentAttachedFile an existing attachment, never null
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
 	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
@@ -396,10 +398,12 @@ public class YadaFileManager {
 
 	/**
 	 * Replace the file associated with the current attachment
+	 * The managedFile is moved to the destination when config.isFileManagerDeletingUploads() is true, otherwise the original is copied
+	 * and left unchanged.
 	 * @param currentAttachedFile an existing attachment, never null
 	 * @param managedFile the new file to set
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
-	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
+	 * @return YadaAttachedFile if the file has been replaced, null if managedFile is null
 	 * @throws IOException
 	 */
 	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix) throws IOException {
@@ -408,13 +412,15 @@ public class YadaFileManager {
 
 	/**
 	 * Replace the file associated with the current attachment, only if a file was actually attached
+	 * The managedFile is moved to the destination when config.isFileManagerDeletingUploads() is true, otherwise the original is copied
+	 * and left unchanged.
 	 * @param currentAttachedFile an existing attachment, never null
 	 * @param managedFile the new file to set
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
 	 * @param targetExtension optional, to convert image file formats
 	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
 	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
-	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
+	 * @return YadaAttachedFile if the file has been replaced, null if managedFile is null
 	 * @throws IOException
 	 */
 	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
@@ -520,9 +526,11 @@ public class YadaFileManager {
 	}
 
 	/**
-	 * Performs file copy and (for images) resize to different versions
+	 * Performs file copy and (for images) resize to different versions.
+	 * The managedFile is moved to the destination when config.isFileManagerDeletingUploads() is true, otherwise the original is copied
+	 * and left unchanged.
 	 * @param yadaAttachedFile object to fill with values
-	 * @param managedFile an uploaded file, can be an image or not. When null, nothing is done.
+	 * @param managedFile some file to attach or replace, can be an image or not. When null, nothing is done.
 	 * @param clientFilename the client filename. If null, the client filename is not changed.
 	 * @param namePrefix prefix to attach before the original file name to make the target name. Add a separator (like a dash) if you need one. Can be null.
 	 * @param targetExtension optional, to convert image file formats

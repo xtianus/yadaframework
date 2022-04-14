@@ -6,6 +6,8 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
+import net.yadaframework.web.YadaPageSort.YadaPageSortApi;
+
 /**
  * A page for pageable content.
  * A common use case is to implement web pagination in both directions.
@@ -17,6 +19,27 @@ public class YadaPageRequest {
 	private boolean loadPrevious = false;
 	private List<String> sort = new ArrayList<>(); // Request parameters
 	private YadaPageSort parsedSort = null; // Parsed request sort parameters
+
+
+	/**
+	 * Add sort parameters after any existing ones
+	 * @param paramNames comma-separated list of sort parameters
+	 * @return
+	 */
+	public YadaPageSortApi appendSort(String paramNames) {
+		parsedSort = new YadaPageSort();
+		return parsedSort.addSortParameters(paramNames, false);
+	}
+
+	/**
+	 * Add sort parameters before any existing ones
+	 * @param paramNames comma-separated list of sort parameters
+	 * @return
+	 */
+	public YadaPageSortApi prependSort(String paramNames) {
+		parsedSort = new YadaPageSort();
+		return parsedSort.addSortParameters(paramNames, false);
+	}
 
 	/**
 	 * Creates a YadaPageRequest with the given page and size.
@@ -84,7 +107,9 @@ public class YadaPageRequest {
 	 * @param desc true for descending order, otherwise false or null
 	 * @param ignoreCase true to ignore case when sorting, otherwise false or null
 	 * @return
+	 * @deprecated use {@link #appendSort(String)} and {@link #prependSort(String)} instead
 	 */
+	@Deprecated
 	public YadaPageRequest addSort(String paramName, Boolean desc, Boolean ignoreCase) {
 		paramName = StringUtils.trimToNull(paramName);
 		if (paramName==null) {

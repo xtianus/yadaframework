@@ -18,19 +18,19 @@ import net.yadaframework.security.persistence.entity.YadaUserMessage;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 
 @Repository
-@Transactional(readOnly = true) 
+@Transactional(readOnly = true)
 public class YadaUserMessageDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired private YadaUtil yadaUtil;
-	
+
     @PersistenceContext EntityManager em;
-    
+
     /**
      * Delete all messages that do not involve users other than the one specified (no other users as sender o recipient)
      * @param userProfile the receiver/sender of the message
      */
-    @Transactional(readOnly = false) 
+    @Transactional(readOnly = false)
     public void deleteBelongingTo(YadaUserProfile userProfile) {
     	// Messages that have the user as sender or recipient, and nobody else involved, or
     	// where the user is both sender and recipient
@@ -45,18 +45,18 @@ public class YadaUserMessageDao {
 			em.remove(yadaUserMessage);
 		}
     }
-    
+
     /**
      * Save a message. If the message is stackable, only increment the counter of an existing message with identical
      * content and same recipient and same sender and same data, if not older than one day
      * @param m the message
      * @return true if the message has been created, false if the counter incremented
      */
-    @Transactional(readOnly = false) 
+    @Transactional(readOnly = false)
     public boolean createOrIncrement(YadaUserMessage<?> m) {
-    	log.debug("YadaUserMessage to {} from {}: [{}] '{}' - {} (data={})", 
-    		m.getReceiverName()!=null?m.getReceiverName():"-", 
-    		m.getSender()!=null?m.getSenderName():"-", 
+    	log.debug("YadaUserMessage to {} from {}: [{}] \"{}\" {} (data={})",
+    		m.getReceiverName()!=null?m.getReceiverName():"-",
+    		m.getSender()!=null?m.getSenderName():"-",
     		m.getPriority(), m.getTitle(), m.getMessage(), m.getData());
     	if (m.getId()!=null) {
     		throw new YadaInvalidUsageException("Message already exists with id=" + m.getId());
@@ -87,7 +87,7 @@ public class YadaUserMessageDao {
     		.setParameter("sender", m.getSender())
     		.setParameter("data", m.getData())
     		.query(em, YadaUserMessage.class).setMaxResults(1).getResultList();
-    	
+
     	if (existingList.isEmpty()) {
     		em.persist(m);
     		return true; // Created new
@@ -99,7 +99,7 @@ public class YadaUserMessageDao {
     		return false;
     	}
     }
-    
+
 	List<YadaUserMessage> findOldYadaUserMessages() {
 		String sql = "select * from YadaUserMessage  where modified <= (NOW() - INTERVAL 30 DAY)";
 		return em.createNativeQuery(sql, YadaUserMessage.class)

@@ -2,6 +2,8 @@ package net.yadaframework.core;
 
 public interface YadaConstants {
 
+	String REQUEST_HASERROR_FLAG = "YADA_HAS_ERROR";
+
 	String SESSION_USER_TIMEZONE = "YADA_USER_TIMEZONE";
 
 	String EMAIL_TEMPLATES_PREFIX = "template"; // Folder in the classpath for email templates (NO LEADING SLASH!)

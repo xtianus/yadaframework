@@ -68,7 +68,7 @@ public class YadaSql implements CloneableDeep {
 	 * @param yadaPageRequest
 	 * @return "order by xxx" or "" if there is no sort to do
 	 */
-	public static String getOrderBy(YadaPageRequest yadaPageRequest) {
+	public static String getOrderByNative(YadaPageRequest yadaPageRequest) {
 		StringBuilder result = new StringBuilder();
 		List<Order> orders = yadaPageRequest.getPageSort().getOrders();
 		for (Order order : orders) {
@@ -644,13 +644,26 @@ public class YadaSql implements CloneableDeep {
 		return this;
 	}
 
-
 	/**
-	 * Add sorting from a YadaPageRequest
+	 * Add sorting from a YadaPageRequest, using MySQL syntax
 	 * @param yadaPageRequest
 	 * @return
 	 */
+	public YadaSql orderByNative(YadaPageRequest yadaPageRequest) {
+		return orderBy(yadaPageRequest, true);
+	}
+
+	/**
+	 * Add sorting from a YadaPageRequest, using JPA syntax
+	 * @param yadaPageRequest
+	 * @return
+	 * @see #orderByNative(YadaPageRequest)
+	 */
 	public YadaSql orderBy(YadaPageRequest yadaPageRequest) {
+		return orderBy(yadaPageRequest, false);
+	}
+
+	private YadaSql orderBy(YadaPageRequest yadaPageRequest, boolean nativeQuery) {
 		if (yadaPageRequest.getPageSort()==null) {
 			return this; // No sort information
 		}
@@ -669,8 +682,15 @@ public class YadaSql implements CloneableDeep {
 				property = parts[0];
 				direction = parts[1];
 			}
+			if (ignorecase && nativeQuery) {
+				property += " " + MYSQL_IGNORECASE;
+			}
+			if (ignorecase && !nativeQuery) {
+				property = "lower(" + property + ")";
+			}
+
 			//
-			orderBy(property + " " + (ignorecase?MYSQL_IGNORECASE+" ":"") + direction);
+			orderBy(property + " " + direction);
 		}
 		return this;
 	}
@@ -835,14 +855,14 @@ public class YadaSql implements CloneableDeep {
 	/**
 	 * To be used before calling query() or nativeQuery()
 	 * @param name the parameter name, without the initial :
-	 * @param value
+	 * @param value the parameter value
 	 * @return
 	 */
 	public YadaSql setParameter(String name, Object value) {
 		if (queryDone && parameters.isEmpty()) {
 			throw new YadaInternalException("Parameters should be set before calling query()");
 		}
-		if (value.getClass().isArray()) {
+		if (value!=null && value.getClass().isArray()) {
 			value = Arrays.asList((Object[])value);
 		}
 		parameters.put(name, value);

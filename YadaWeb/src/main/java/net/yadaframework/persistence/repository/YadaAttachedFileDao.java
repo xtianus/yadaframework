@@ -94,6 +94,15 @@ public class YadaAttachedFileDao {
 		list.add(yadaAttachedFile);
 	}
 
+	/**
+	 * Find entity from the id
+	 * @param yadaAttachedFileId
+	 * @return the found entity instance or null if the entity doesnot exist
+	 */
+	public YadaAttachedFile find(Long yadaAttachedFileId) {
+		return em.find(YadaAttachedFile.class, yadaAttachedFileId);
+	}
+
 	// Kept for compatibility with Spring Data Repository
 	public Optional<YadaAttachedFile> findById(Long yadaAttachedFileId) {
 		YadaAttachedFile result = em.find(YadaAttachedFile.class, yadaAttachedFileId);

@@ -884,6 +884,7 @@ public class YadaUtil {
 	 * Use a small buffer (256) when data is over the internet to prevent timeouts somewhere. Use a big buffer for in-memory or disk operations.
 	 * @param sizeLimit the maximum number of bytes to read (inclusive)
 	 * @return the number of bytes read, or -1 if the sizeLimit has been exceeded.
+	 * @see java.nio.file.Files#copy(Path, Path, java.nio.file.CopyOption...)
 	 * @see org.apache.commons.io.IOUtils#copy(InputStream, OutputStream)
 	 * @throws IOException
 	 */
