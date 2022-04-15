@@ -1616,7 +1616,7 @@
 	// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
 	// Ritorna true se la notify è stata mostrata.
 	yada.handleNotify = function(responseHtml) {
-		var notification=$(responseHtml).find(".s_modalNotify .yadaNotify");
+		var notification=$(responseHtml).find(".yadaNotify");
 		if (notification.length==1) {
 			// Mostro la notification
 			$('.modal:visible').modal('hide'); // Close any current modals
