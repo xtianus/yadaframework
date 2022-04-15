@@ -356,8 +356,38 @@ image::forms/counter.jpg[Text field with counter]
 The tag is implemented in `YadaInputCounterTagProcessor.java` and `inputCounter.html`.
 ====
 
+=== <yada:textarea>
+The `<yada:textarea>` tag produces a standard `<textarea>` HTML tag but can also use some of 
+the features available to the `<yada:input>` tag. 
 
+[.todo]
+----
+Currently only the `<yada:inputCounter>` tag has been implemented and tested with `<yada:textarea>`, while other features like addons and validation have been copied over from the input tag but never tested. 
+----
 
+The value of a `<textarea>` can normally be implemented with a `th:text` attribute but this currently doesn't
+work, so the `yada:text` attribute should be used instead for this specific purpose.
+
+[.center]
+image::forms/textarea01.jpg[Textarea with counter]
+
+[source,html]
+----
+<yada:inputCounter id="descriptionCounter"></yada:inputCounter>
+<yada:textarea id="description" name="description" 
+	yada:text="*{description}" # <1> 
+	yada:inputCounterId="descriptionCounter" # <2> 
+	maxlength="8192"> # <3>
+</yada:textarea>
+----
+<1> The value of the textarea is set with `yada:text`
+<2> A counter can be used
+<3> The length must be set in order to use the counter
+
+[TIP]
+====
+The tag is implemented in `YadaTextareaTagProcessor.java` and `textarea.html`.
+====
 
 
 

@@ -60,6 +60,7 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <li><a href="#_introduction">Introduction</a></li>
 <li><a href="#_yadainput">&lt;yada:input&gt;</a></li>
 <li><a href="#_yadainputcounter">&lt;yada:inputCounter&gt;</a></li>
+<li><a href="#_yadatextarea">&lt;yada:textarea&gt;</a></li>
 </ul>
 </li>
 </ul>
@@ -636,13 +637,74 @@ the <code>yada:inputCounterId</code> attribute of the <code>&lt;yada:input&gt;</
 </table>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_yadatextarea">&lt;yada:textarea&gt;</h3>
+<div class="paragraph">
+<p>The <code>&lt;yada:textarea&gt;</code> tag produces a standard <code>&lt;textarea&gt;</code> HTML tag but can also use some of
+the features available to the <code>&lt;yada:input&gt;</code> tag.</p>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>Currently only the `&lt;yada:inputCounter&gt;` tag has been implemented and tested with `&lt;yada:textarea&gt;`, while other features like addons and validation have been copied over from the input tag but never tested.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The value of a <code>&lt;textarea&gt;</code> can normally be implemented with a <code>th:text</code> attribute but this currently doesn&#8217;t
+work, so the <code>yada:text</code> attribute should be used instead for this specific purpose.</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/forms/textarea01.jpg" alt="Textarea with counter">
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:inputCounter id="descriptionCounter"&gt;&lt;/yada:inputCounter&gt;
+&lt;yada:textarea id="description" name="description"
+	yada:text="*{description}" <i class="conum" data-value="1"></i><b>(1)</b>
+	yada:inputCounterId="descriptionCounter" <i class="conum" data-value="2"></i><b>(2)</b>
+	maxlength="8192"&gt; <i class="conum" data-value="3"></i><b>(3)</b>
+&lt;/yada:textarea&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The value of the textarea is set with <code>yada:text</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>A counter can be used</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The length must be set in order to use the counter</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The tag is implemented in <code>YadaTextareaTagProcessor.java</code> and <code>textarea.html</code>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-12-08 19:20:31 +0100
+Last updated 2022-04-15 10:12:16 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

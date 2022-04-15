@@ -192,7 +192,7 @@ public String addRowAjax() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping(path = "/people", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping(path = "/people", produces = MediaType.APPLICATION_JSON_VALUE)
 @ResponseBody
 public Map&lt;String, Object&gt; people() {
     Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
@@ -1223,7 +1223,7 @@ Otherwise the form will be sent with a normal non-ajax request.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2022-03-03 12:54:33 +0100
+Last updated 2022-03-22 16:37:53 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
