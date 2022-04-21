@@ -72,7 +72,7 @@ dependencies {
 	// Needed by Commons Configuration
     runtimeOnly 'commons-jxpath:commons-jxpath:1.+'
 	
-    implementation 'org.springframework:spring-webmvc:5.2.8.RELEASE',
+    implementation 'org.springframework:spring-webmvc:5.2.20.RELEASE',
 		'org.springframework:spring-context-support:5.2.8.RELEASE',
 		// 'org.springframework.data:spring-data-jpa:1.11.9.RELEASE',
 		'org.springframework.data:spring-data-jpa:2.3.2.RELEASE',
