@@ -23,6 +23,8 @@
 	var postLoginData = null;
 	var postLoginType = null;
 	
+	const yadaAjaxResponseHtmlRoot = "<div class='yadaAjaxResponseHtml'>";
+	
 	/**
 	 * Init yada ajax handlers on the specified element
 	 * @param $element the element, or null for the entire body
@@ -32,9 +34,17 @@
 		yada.enableAjaxLinks(null, $element);
 		yada.enableAjaxSelects(null, $element);
 		yada.enableAjaxCheckboxes(null, $element);
-		yada.enableAjaxTriggerInViewport($element);
+		initObservers($element)
 		yada.enableAjaxInputs();
 	}
+	
+	/**
+	* All observers should be enabled in this function, that is also called after a returned ajax HTML is cloned.
+	*/
+	function initObservers($element) {
+		yada.enableAjaxTriggerInViewport($element);
+	}
+	
 	//////////////////////
 	/// Pagination support
 	/**
@@ -221,7 +231,7 @@
 	yada.openLoginModalAjax = function(loginFormUrl, handler, errorTitle, errorText) {
 		yada.postLoginHandler = handler;
 		$.get(loginFormUrl, function(responseText, statusText) {
-			var responseHtml=$("<div>").html(responseText);
+			var responseHtml=$(yadaAjaxResponseHtmlRoot).html(responseText);
 			var loginReceived = openLoginModalIfPresent(responseHtml);
 			if (!loginReceived) {
 				yada.showErrorModal(errorTitle, errorText);
@@ -249,6 +259,7 @@
 	const ajaxTriggerInViewportObserver = new IntersectionObserver(entries => {
 		entries.forEach(entry => {
 			if (entry.intersectionRatio > 0) {
+				// console.log("firing " + $(entry.target).attr("data-yadahref"));
 				ajaxTriggerInViewportObserver.unobserve(entry.target); // Fires once only
  				makeAjaxCall(null, $(entry.target));
 			}
@@ -272,6 +283,7 @@
 			var fetchUrl = $(this).attr("data-yadaHref");
 			if (fetchUrl!=null) {
 				ajaxTriggerInViewportObserver.observe(this);
+				// console.log("Observing " + $(this).attr("data-yadahref"));
 			}
 		});
 	};
@@ -570,7 +582,11 @@
 		var joinedHandler = function(responseText, responseHtml) {
 			showFeedbackIfNeeded($element);
 			deleteOnSuccess($element);
-			responseHtml = updateOnSuccess($element, responseHtml);
+			responseHtml = updateOnSuccess($element, responseHtml); // This removes the added root <div>
+			// No: Put the responseHtml back into a div if it is not an array and not the original yadaAjaxResponseHtml
+			// if (!(responseHtml instanceof Array) && responseHtml.attr("class")!="yadaAjaxResponseHtml") {				
+			// 	responseHtml = $(yadaAjaxResponseHtmlRoot).append(responseHtml);
+			// }
 			// responseHtml = appendOnSuccess($element, responseHtml);
 			var handlerNames = $element.attr("data-yadaSuccessHandler");
 			if (handlerNames===undefined) {
@@ -696,6 +712,7 @@
 		// If "yadaUpdateOnSuccess" is set, replace its target; if it's empty, replace the original link.
 		// The target can be a parent when the css selector starts with parentSelector (currently "yadaParents:").
 		// The selector can be multiple, separated by comma. The replacement can be multiple, identified by yadaFragment
+		// return postprocessOnSuccess($element, responseHtml, "data-yadaUpdateOnSuccess", $.fn.replaceWith);
 		return postprocessOnSuccess($element, responseHtml, "data-yadaUpdateOnSuccess", $.fn.replaceWith);
 		/*
 		var updateSelector = $element.attr("data-yadaUpdateOnSuccess");
@@ -777,6 +794,7 @@
 		// Clone so that the original responseHtml is not removed by appending.
 		// All handlers are also cloned.
 		var $replacement = responseHtml.children().clone(true, true); // Uso .children() per skippare il primo div inserito da yada.ajax()
+		initObservers($replacement);
 		var $return = $replacement;
 		var selectors = selector.split(',');
 		var $replacementArray = null;
@@ -798,6 +816,7 @@
 				// Clone so that the original responseHtml is not removed by replaceWith.
 				// All handlers are also cloned.
 				$replacement = $replacementArray.eq(fragmentCount).clone(true, true);
+				initObservers($replacement);
 				if (count==0 && $replacementArray.length==1) {
 					$return = $replacement;
 				} else {
@@ -1341,7 +1360,10 @@
 					}
 					// Keep going, there could be a handler
 				}
-				var responseHtml=$("<div>").html(responseTrimmed);
+				// Putting the returned HTML inside a <div> for some reason - not sure it is a good idea but legacy code needs it now.
+				// The bad thing is that the enclosing div is stripped when updateOnSuccess is called, so the successHandler
+				// can receive both versions (with or without root div) depending on the presence of the updateOnSuccess call.
+				var responseHtml=$(yadaAjaxResponseHtmlRoot).html(responseTrimmed);
 				// Check if we just did a login.
 				// A successful login can also return a redirect, which will skip the PostLoginHandler 
 				if ("loginSuccess" == responseTrimmed) {

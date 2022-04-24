@@ -173,7 +173,7 @@ public class YadaPageRequest {
 
 	@Override
 	public String toString() {
-		return String.format("Page request [page: %d, size %d]", page, size);
+		return String.format("Page request [page: %d, size: %d]", page, size);
 	}
 
 	/**

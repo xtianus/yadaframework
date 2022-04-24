@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.YadaSql;
+import net.yadaframework.persistence.entity.YadaPersistentEnum;
 import net.yadaframework.security.persistence.entity.YadaUserMessage;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.web.YadaPageRequest;
@@ -53,22 +54,28 @@ public class YadaUserMessageDao {
 		return em.find(YadaUserMessage.class, id);
 	}
 
-    /**
-     * Find a page of notifications
-     * @param currentUserProfileId
-     * @param yadaPageRequest
-     * @return
-     */
-	public YadaPageRows<YadaUserMessage> find(Long recipientUserProfileId, YadaPageRequest yadaPageRequest) {
-		List<YadaUserMessage> found = YadaSql.instance().selectFrom("from YadaUserMessage")
-            .where("recipient.id = :userProfileId")
-            .orderBy(yadaPageRequest)
-            .setParameter("userProfileId", recipientUserProfileId)
-            .query(em, YadaUserMessage.class)
-            .setFirstResult(yadaPageRequest.getFirstResult())
-            .setMaxResults(yadaPageRequest.getMaxResults())
-            .getResultList();
-        return new YadaPageRows<YadaUserMessage>(found, yadaPageRequest);
+	/**
+	 * Find a page of notifications
+	 * @param currentUserProfileId
+	 * @param yadaPageRequest
+	 * @param types required types, can be omitted
+	 * @return
+	 */
+	public YadaPageRows<YadaUserMessage> find(Long recipientUserProfileId, YadaPageRequest yadaPageRequest, YadaPersistentEnum<?> ... types) {
+		boolean hasTypes = types!=null && types.length>0;
+		List<YadaUserMessage> found = YadaSql.instance().selectFrom("select yum from YadaUserMessage yum")
+			.join("join yum.recipient recipient")
+			.join(hasTypes, "join yum.type t")
+			.where(hasTypes, "t in :types").and()
+			.where("recipient.id = :userProfileId").and()
+			.orderBy(yadaPageRequest)
+			.setParameter("types", types)
+			.setParameter("userProfileId", recipientUserProfileId)
+			.query(em, YadaUserMessage.class)
+			.setFirstResult(yadaPageRequest.getFirstResult())
+			.setMaxResults(yadaPageRequest.getMaxResults())
+			.getResultList();
+		return new YadaPageRows<YadaUserMessage>(found, yadaPageRequest);
 	}
 
     /**

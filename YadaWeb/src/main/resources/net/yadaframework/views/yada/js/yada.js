@@ -1235,4 +1235,11 @@
 		
 }( window.yada = window.yada || {} ));
 
-
+// jquery extension: find including the root nodes
+// https://stackoverflow.com/a/62190609/587641
+// Usage: $(element).findWithSelf('.target')
+// --> will also find the root element if it is a .target
+// Does not work properly with selectors that match self and a child, like ".self .child"
+jQuery.fn.findWithSelf = function(...args) {
+  return this.pushStack(this.find(...args).add(this.filter(...args)));
+};

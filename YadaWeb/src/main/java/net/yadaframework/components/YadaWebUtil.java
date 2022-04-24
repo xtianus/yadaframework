@@ -423,6 +423,23 @@ public class YadaWebUtil {
 	}
 
 	/**
+	 * Fix a url so that it valid and doesn't allow XSS attacks
+	 * @see https://cheatsheetseries.owasp.org/cheatsheets/XSS_Filter_Evasion_Cheat_Sheet.html
+	 * @param url some text typed by the user
+	 * @return the same url or null if blank or a fixed one that may or may not work as expected, but won't pose a security risk
+	 */
+	public String sanitizeUrl(String url) {
+		if (StringUtils.isBlank(url)) {
+			return null;
+		}
+		url = url.replaceAll("[^-A-Za-z0-9+&@#/%?=~_|!:,.;\\(\\)]", "");
+		if (!url.startsWith("http://") && !url.startsWith("https://")) {
+			url = "http://" + url;
+		}
+		return url;
+	}
+
+	/**
 	 * Assembles a url given its parts as string.
 	 * @param segments the initial parts of the url up to the query string. Leading and trailing slashes are added when missing.
 	 * URLEncoding is not performed.
