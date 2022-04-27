@@ -199,15 +199,20 @@ The last version is very convenient when returning a message at the end of the @
 
 The problem with the above approach is that you might want to also return some other HTML,
 for example the original form with validation errors, or something to insert in the page.
-The solution is to add a conditional include of the modalNotify in your returned view:
+The solution is to add a conditional include of the modalNotify in your returned view. If
+the returned view is also used in normal requests, an ajax check can be used:
 
 [source,html]
 ----
 <!-- Some other html that you need goes before or after -->
-<div class="yadaResponseData">
-        <div th:if="${YADA_NBODY}" th:include="/yada/modalNotify :: body" th:remove="tag"></div>
+<div th:if="${@yadaWebUtil.AjaxRequest}" class="yadaResponseData"> # <1>
+        <div th:if="${YADA_NBODY}" # <2> 
+        	th:include="/yada/modalNotify :: body" th:remove="tag">
+        </div>
 </div>
 ----
+<1> only add the notification modal in ajax requests (normal request might have it already embedded)
+<2> only add the notification modal if there is a message to show
 
 The yadaResponseData element is hidden by `*yada.css*`.
 

@@ -181,7 +181,7 @@ The "this" object is either the form or the clicked button, depending on where t
 
 
 There are many options to handle the server response, like replacing page content or invoking some
-handler. See __ref__`ajax:Ajax Links` for more details. For example, this form replaces a page element with the
+handler. See <<../ajax.adoc#_ajax_links,Ajax Links>> for more details. For example, this form replaces a page element with the
 returned html:
 
 [source,html]

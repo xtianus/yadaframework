@@ -185,7 +185,7 @@ public String addRowAjax() {
 <p>Note that <code>#table</code> must be in single quotes inside double quotes because it&#8217;s a EL literal string.</p>
 </div>
 <div class="paragraph">
-<p><strong>Returning JSON</strong></p>
+<p><strong>Returning JSON (using a Map)</strong></p>
 </div>
 <div class="paragraph">
 <p>A String map can easily be converted to JSON using the standard Spring features:</p>
@@ -204,6 +204,33 @@ public Map&lt;String, Object&gt; people() {
 </div>
 <div class="paragraph">
 <p>Please note the needed <code>@ResponseBody</code> tag.</p>
+</div>
+<div class="paragraph">
+<p>The <code>YadaUtil</code> class contains some utility methods to work with
+json as Maps: <code>makeJsonObject()</code>, <code>setJsonAttribute()</code>, <code>getJsonAttribute()</code> etc.</p>
+</div>
+<div class="paragraph">
+<p><strong>Returning JSON (using a template)</strong></p>
+</div>
+<div class="paragraph">
+<p>A specific Thymeleaf syntax can result in the production of a json object using the standard
+Model attribute substitution.
+The template must have the following form (also in a fragment):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;th:block th:inline="text"&gt;["error",
+{
+	"description": "[[${errorDescription}]]"
+}
+]
+&lt;/th:block&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This approach has the advantage that the <code>@RequestMapping</code> method does not need to return a <code>@ResponseBody</code>
+so that the json could be conditionally returned (the <code>produces</code> attribute should
+be skipped too in this case).</p>
 </div>
 <div class="paragraph">
 <p><strong>Returning any MIME type</strong></p>
@@ -677,13 +704,29 @@ yada:successHandler="alert(responseText), alert('hello')"</code></pre>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>If you use both <code>yadaUpdateOnSuccess</code> and <code>yadaSuccessHandler</code>, the handlers will be called
+<p>If you use both <code>yada:updateOnSuccess</code> and <code>yada:successHandler</code>, the handlers will be called
 after the page has been modified and the <strong>responseHtml</strong> argument would point to the new page content.
 The <strong>this</strong> context would be the original element, that may no longer be on page if replaced.</p>
 </div>
 <div class="paragraph">
-<p>In case <code>yadaUpdateOnSuccess</code> worked on multiple elements, the <strong>responseHtml</strong> argument would be an
+<p>In case <code>yada:updateOnSuccess</code> worked on multiple elements, the <strong>responseHtml</strong> argument would be an
 array of all sections inserted in page.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>When using both <code>yada:updateOnSuccess</code> and <code>yada:successHandler</code>, the <strong>responseHtml</strong> argument
+is whatever was returned by the ajax call and could have multiple root objects.
+When <code>yada:successHandler</code> is used alone though, the <strong>responseHtml</strong> is added to a parent <code>&lt;div&gt;</code>.</p>
 </div>
 </td>
 </tr>
@@ -1223,7 +1266,7 @@ Otherwise the form will be sent with a normal non-ajax request.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2022-03-22 16:37:53 +0100
+Last updated 2022-04-24 18:41:04 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

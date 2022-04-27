@@ -296,15 +296,30 @@ The last version is very convenient when returning a message at the end of the @
 <div class="paragraph">
 <p>The problem with the above approach is that you might want to also return some other HTML,
 for example the original form with validation errors, or something to insert in the page.
-The solution is to add a conditional include of the modalNotify in your returned view:</p>
+The solution is to add a conditional include of the modalNotify in your returned view. If
+the returned view is also used in normal requests, an ajax check can be used:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;!-- Some other html that you need goes before or after --&gt;
-&lt;div class="yadaResponseData"&gt;
-        &lt;div th:if="${YADA_NBODY}" th:include="/yada/modalNotify :: body" th:remove="tag"&gt;&lt;/div&gt;
+&lt;div th:if="${@yadaWebUtil.AjaxRequest}" class="yadaResponseData"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
+        &lt;div th:if="${YADA_NBODY}" <i class="conum" data-value="2"></i><b>(2)</b>
+        	th:include="/yada/modalNotify :: body" th:remove="tag"&gt;
+        &lt;/div&gt;
 &lt;/div&gt;</code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>only add the notification modal in ajax requests (normal request might have it already embedded)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>only add the notification modal if there is a message to show</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>The yadaResponseData element is hidden by <code><strong>yada.css</strong></code>.</p>
@@ -484,7 +499,7 @@ change it while preserving some key elements that are used as reference to add c
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2021-12-08 19:20:30 +0100
+Last updated 2022-04-20 12:31:44 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
