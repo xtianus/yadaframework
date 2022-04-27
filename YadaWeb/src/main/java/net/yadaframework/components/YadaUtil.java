@@ -259,7 +259,7 @@ public class YadaUtil {
 	 * @param baseName filename to add, without extension
 	 * @param extensionNoDot filename extension without dot, can be empty or null if the extension is not needed
 	 * @param counterSeparator string to separate the filename and the counter, can be empty or null
-	 * @param usedNames filenames used so far, must start empty and will be modified
+	 * @param usedNames filenames used so far, can start empty but never null, and will be modified by adding the new name
 	 * @return the original filename with extension, or a new version with a counter added
 	 * @throws IOException
 	 * @see {@link #findAvailableName(File, String, String, String)}

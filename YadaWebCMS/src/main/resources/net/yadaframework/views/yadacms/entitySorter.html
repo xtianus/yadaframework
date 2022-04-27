@@ -115,6 +115,11 @@ Example:
 					</div>
 					<div class="clearfix"></div>
 				</div>
+				
+				<div th:if="${@yadaWebUtil.AjaxRequest}" class="yadaResponseData">
+        			<div th:if="${YADA_NBODY}" th:include="/yada/modalNotify :: body" th:remove="tag"></div>
+				</div>
+				
 			</div>
 		</div>
 	</div>

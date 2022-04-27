@@ -39,6 +39,7 @@ Parameters:
 - tabindex = the tabindex for the field (optional)
 - autocomplete = the autocomplete value (optional)
 - oninput = function to call on the input event. It receives the 'input' event (optional)
+- ariaDescribedby = id for the aria-describedby attribute
 
 
 Example:
@@ -67,7 +68,8 @@ Example:
 			th:classappend="${readonly==true?'yadaReadonly':(noFeedback==true?'':' has-feedback')}" th:maxlength="${maxlength}" 
 			th:tabindex="${tabindex}"
 			th:autocomplete="${autocomplete}"
-			th:id="${id}?:${#ids.seq(seqName)}" th:attr="aria-describedby=${id}?:${#ids.next(seqName)}"/>
+			th:id="${id}?:${#ids.seq(seqName)}" 
+			th:aria-describedby="${ariaDescribedby}?:(${id}?:${#ids.next(seqName)})"/>
 		<div th:if="${addonRight!=null}" th:text="${addonRight}" class="input-group-addon">.00</div>
 		<span th:if="${type=='password' && noShowPassword!=true}" class="input-group-btn">
 			<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>

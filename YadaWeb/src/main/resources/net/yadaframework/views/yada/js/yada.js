@@ -934,12 +934,21 @@
 	/// Cookie ///
 	//////////////
 
-	yada.setCookie = function(name, value, expiryDays) {
-	    var d = new Date();
-	    // d.setTime(d.getTime() + (expiryDays*24*60*60*1000));
-	    d.setDate(d.getDate() + expiryDays);
-	    var expires = "expires="+d.toGMTString()+"; path=/";
-	    document.cookie = name + "=" + value + "; " + expires;
+	/**
+	 * Set a cookie on the document root
+	 * @param name the cookie name
+	 * @param value the cookie value
+	 * @param expiryDays expiration in days from now. When null, create a session cookie
+	**/
+	yada.setCookie = function(name, value, expiryDays, domain) {
+		var expires = "";
+		if (expiryDays!=null) {
+		    var d = new Date();
+		    d.setDate(d.getDate() + expiryDays);
+		    expires = ";expires="+d.toGMTString();
+		}
+		domain = domain!=null ? ";domain=" + domain : "";
+	    document.cookie = name + "=" + value + domain + " ;path=/ " + expires;
 	}
 	
 	yada.getCookie = function(cname) {
@@ -951,6 +960,10 @@
 	        if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
 	    }
 	    return "";
+	}
+	
+	yada.deleteCookie = function(name, domain) {
+		yada.setCookie(name, "", 0, domain);
 	}
 	
 //	function checkCookie() {
