@@ -38,6 +38,23 @@ The href attribute should either be empty or "javascript:;" in that case.
 <a href="javascript:;" yada:ajax="@{/some/endpoint}">Click here</a>
 ----
 
+====  Sending a Form Group
+
+The ajax link can be part of a <<forms/overview.adoc#_scattered_forms_form_groups,Form Group>>, in which case all data gathered from
+the forms in the group is sent together with any url parameters:
+
+[source,html]
+----
+<a yada:href="@{/some/endpoint(a=1)}" yada:formGroup="myGroup">Click here</a>
+<form action="ignored" yada:formGroup="myGroup">
+	<input name="b" value="2">
+</form>
+----
+
+The above example would send `a=1&b=2` when clicking on the link.
+
+The link is ignored when the ajax call is started by a form in the group.
+
 ====  Miscellaneous
 
 timeout:: 

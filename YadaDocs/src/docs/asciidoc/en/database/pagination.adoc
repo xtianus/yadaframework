@@ -197,18 +197,48 @@ public class BookController {
 		}
 		YadaPageRows<Book> result = searchDao.find(searchString, yadaPageRequest);
 		model.addAttribute("books", result);
-		model.addAttribute("yadaContainer", yadaPageRequest.getYadaContainer()); # <1>
+		model.addAttribute("yadaContainer", yadaPageRequest.getYadaContainer());
 		model.addAttribute("yadaScroll", yadaPageRequest.getYadaScroll());
 		
 	    return yadaWebUtil.isAjaxRequest(request) ? "/searchResult :: bookList" : "/searchResult";
     }
 ----
 
+The `yadaWebUtil.isAjaxRequest()` method is used to tell between the first call and a "load more" call.
+
+CAUTION: Don't be tempted to replace the `isAjaxRequest()` call with a check on the validity of `yadaPageRequest` because this would
+prevent bookmarks to load properly (`yadaPageRequest` would be valid but it wouldn't be an ajax request).
+
 === Multiple Paginations
 
-Many paginations can be used on different sections of a single web page by keeping distinct `yada:paginationHistory` parameters on the different load more buttons, 
-like `yada:paginationHistory="'product.page, product.size, product.loadPrevious'"` and `yada:paginationHistory="'project.page, project.size, project.loadPrevious'"`.
+Many paginations can be used on different sections (or tabs) of a single web page by keeping distinct `yada:paginationHistory` parameters on the different load more buttons, 
+like `yada:paginationHistory="product.page, product.size, product.loadPrevious"` and `yada:paginationHistory="project.page, project.size, project.loadPrevious"`.
+This requires a simple change on the @Controller in order to receive the pagination attributes on
+different objects. A clean solution would be to create a new class holding a `YadaPageRequest` for
+each pagination section:
 
+[source,java]
+----
+public class SearchPagination {
+	public YadaPageRequest product = new YadaPageRequest(0, SearchController.PAGE_SIZE);
+	public YadaPageRequest project = new YadaPageRequest(0, SearchController.PAGE_SIZE);
+----
+
+The @Controller would then receive a `SearchPagination` instead of a `YadaPageRequest`:
+
+[source,java]
+----
+@Controller
+public class SearchController {
+    final static int PAGE_SIZE =  10;
+    @RequestMapping("/search")
+    public String search(String searchString, SearchPagination searchPagination, Model model) {
+		YadaPageRows<Product> products = searchDao.find(searchString, searchPagination.product);
+		YadaPageRows<Project> projects = searchDao.find(searchString, searchPagination.project);
+----
+
+
+=== Other
 
 [.todo]
 ----

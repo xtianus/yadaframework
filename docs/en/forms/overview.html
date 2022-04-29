@@ -55,6 +55,7 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <li><a href="#_entity_backing_beans">Entity Backing Beans</a></li>
 <li><a href="#_ajax_forms">Ajax Forms</a>
 <ul class="sectlevel2">
+<li><a href="#_scattered_forms_form_groups">Scattered Forms (form groups)</a></li>
 <li><a href="#_postprocessing">Postprocessing</a></li>
 </ul>
 </li>
@@ -285,6 +286,82 @@ to be called in order. Submission is aborted if any returns false and any follow
 The "this" object is either the form or the clicked button, depending on where the tag has been placed.</p>
 </div>
 <div class="sect2">
+<h3 id="_scattered_forms_form_groups">Scattered Forms (form groups)</h3>
+<div class="paragraph">
+<p>Multiple forms scattered around the page can be submitted together if they belong to the same "Form Group":
+when any ajax form in the group is submitted, the fields from all other forms in the same group are added
+to the payload.
+When a non-ajax form is submitted, the group is ignored.</p>
+</div>
+<div class="paragraph">
+<p>The syntax to define a form group is the following:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">data attribute</th>
+<th class="tableblock halign-left valign-top">yada dialect</th>
+<th class="tableblock halign-left valign-top">value</th>
+<th class="tableblock halign-left valign-top">description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data-yadaFormGroup</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">yada:formGroup</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">any name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Identifies the form as belonging to the given group</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form action="/realAction" yada:formGroup="myGroup" class="yadaAjax"&gt;
+	&lt;input name="a" value="1"&gt;
+	&lt;button type="submit"&gt;Submit&lt;/button&gt;
+&lt;/form&gt;
+&lt;form action="ignored" yada:formGroup="myGroup"&gt;
+	&lt;input name="b" value="2"&gt;
+&lt;/form&gt;
+&lt;form action="ignored" yada:formGroup="myGroup"&gt;
+	&lt;input name="c" value="3"&gt;
+&lt;/form&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the above example, submitting the first form would send <code>"a=1&amp;b=2&amp;c=3"</code> to <code>/realAction</code>.</p>
+</div>
+<div class="paragraph">
+<p>A similar behavior would be obtained by using the "form" attribute on the <code>&lt;input&gt;</code> tags of child forms.
+The use of <code>yada:formGroup</code> has the following advantages:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>it is quicker to type on large forms</p>
+</li>
+<li>
+<p>does not prevent the individual submission of non-ajax forms in the group the standard way</p>
+</li>
+<li>
+<p>can be used together with ajax calls on elements other than forms (e.g. <a href="../ajax.html#_ajax_links">ajax links</a>)</p>
+</li>
+<li>
+<p>a future improvement could allow forms to belong to multiple groups, something that can&#8217;t be done with the "form" attribute</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_postprocessing">Postprocessing</h3>
 <div class="paragraph">
 <p>There are many options to handle the server response, like replacing page content or invoking some
@@ -311,7 +388,7 @@ returned html:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2022-04-15 11:30:40 +0200
+Last updated 2022-04-29 15:35:55 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

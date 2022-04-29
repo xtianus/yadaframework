@@ -55,6 +55,7 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <ul class="sectlevel2">
 <li><a href="#_single_controller_method">Single Controller Method</a></li>
 <li><a href="#_multiple_paginations">Multiple Paginations</a></li>
+<li><a href="#_other">Other</a></li>
 </ul>
 </li>
 </ul>
@@ -301,20 +302,63 @@ public class BookController {
 		}
 		YadaPageRows&lt;Book&gt; result = searchDao.find(searchString, yadaPageRequest);
 		model.addAttribute("books", result);
-		model.addAttribute("yadaContainer", yadaPageRequest.getYadaContainer()); <i class="conum" data-value="1"></i><b>(1)</b>
+		model.addAttribute("yadaContainer", yadaPageRequest.getYadaContainer());
 		model.addAttribute("yadaScroll", yadaPageRequest.getYadaScroll());
 
 	    return yadaWebUtil.isAjaxRequest(request) ? "/searchResult :: bookList" : "/searchResult";
     }</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>The <code>yadaWebUtil.isAjaxRequest()</code> method is used to tell between the first call and a "load more" call.</p>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+Don&#8217;t be tempted to replace the <code>isAjaxRequest()</code> call with a check on the validity of <code>yadaPageRequest</code> because this would
+prevent bookmarks to load properly (<code>yadaPageRequest</code> would be valid but it wouldn&#8217;t be an ajax request).
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_multiple_paginations">Multiple Paginations</h3>
 <div class="paragraph">
-<p>Many paginations can be used on different sections of a single web page by keeping distinct <code>yada:paginationHistory</code> parameters on the different load more buttons,
-like <code>yada:paginationHistory="'product.page, product.size, product.loadPrevious'"</code> and <code>yada:paginationHistory="'project.page, project.size, project.loadPrevious'"</code>.</p>
+<p>Many paginations can be used on different sections (or tabs) of a single web page by keeping distinct <code>yada:paginationHistory</code> parameters on the different load more buttons,
+like <code>yada:paginationHistory="product.page, product.size, product.loadPrevious"</code> and <code>yada:paginationHistory="project.page, project.size, project.loadPrevious"</code>.
+This requires a simple change on the @Controller in order to receive the pagination attributes on
+different objects. A clean solution would be to create a new class holding a <code>YadaPageRequest</code> for
+each pagination section:</p>
 </div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public class SearchPagination {
+	public YadaPageRequest product = new YadaPageRequest(0, SearchController.PAGE_SIZE);
+	public YadaPageRequest project = new YadaPageRequest(0, SearchController.PAGE_SIZE);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The @Controller would then receive a <code>SearchPagination</code> instead of a <code>YadaPageRequest</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Controller
+public class SearchController {
+    final static int PAGE_SIZE =  10;
+    @RequestMapping("/search")
+    public String search(String searchString, SearchPagination searchPagination, Model model) {
+		YadaPageRows&lt;Product&gt; products = searchDao.find(searchString, searchPagination.product);
+		YadaPageRows&lt;Project&gt; projects = searchDao.find(searchString, searchPagination.project);</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_other">Other</h3>
 <div class="listingblock todo">
 <div class="content">
 <pre>Having multiple autoscroll sections has not yet been implemented.</pre>
@@ -327,7 +371,7 @@ like <code>yada:paginationHistory="'product.page, product.size, product.loadPrev
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2022-03-08 22:48:15 +0100
+Last updated 2022-04-29 15:26:06 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
