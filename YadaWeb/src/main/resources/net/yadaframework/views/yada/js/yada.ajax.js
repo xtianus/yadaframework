@@ -613,9 +613,9 @@
 		}
 		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
 		// Create data for submission
-		var data = null;
+		var data = [];
 		var value = [];
-		var name = $element.attr("name") || "value"; // Parameter name fallback to "value" by default
+		var multipart = false;
 		var noLoader = hasNoLoader($element);	
 		// In a select, set the data object to the selected option
 		if ($element.is("select")) {
@@ -629,12 +629,31 @@
 				value.push($element.val());
 			}
 		}
-		if (name !=null) {
-			data = $element[0].yadaRequestData || {}; // Any yadaRequestData is also sent (see yada.dialect.js)
-			if (value.length>0) {
-				data[name] = value;
+		// Add form data when specified with yadaFormGroup
+		const yadaFormGroup = $element.attr('data-yadaFormGroup');
+		if (yadaFormGroup!=null) {
+			// Find all forms of the same group
+			const $formGroup = $('form[data-yadaFormGroup='+yadaFormGroup+']');
+			if ($formGroup.length>0) {
+				multipart = $formGroup.filter("[enctype='multipart/form-data']").length > 0;
+				data = multipart ? new FormData() : [];
+				addAllFormsInGroup($formGroup, data);
 			}
 		}
+		// Any yadaRequestData is also sent (see yada.dialect.js)
+		const yadaRequestData = $element[0].yadaRequestData; // Object with name=value
+		data = mergeData(data, yadaRequestData);
+		// Add element value
+		if (value.length>0) {
+			const name = $element.attr("name") || "value"; // Parameter name fallback to "value" by default
+			const toAdd = {};
+			toAdd[name] = value;
+			data = mergeData(data, toAdd);
+		}
+		if (!multipart) {
+			data = $.param(data);
+		}	
+		//
 		if (confirmText!=null && confirmText!="") {
 			var title = $element.attr("data-yadaTitle");
 			var okButton = $element.attr("data-yadaOkButton") || $element.attr("data-okButton") || yada.messages.confirmButtons.ok;
@@ -936,6 +955,71 @@
 		}
 		return true;
 	}
+	
+	// data is either an array of objects or a FormData
+	// mergeFrom is an object with name=value or null
+	// returns eitehr a FormData or an array of objects
+	
+	/**
+	 * Merge some new data into an existing object
+	 * @param data the object that receives the new data, can be either Array of objects or FormData  
+	 * @param mergeFrom the object that contains new data, or null
+	 * @return the 'data' object with new data
+	*/
+	function mergeData(data, mergeFrom) {
+		if (mergeFrom==null) {
+			return data;
+		}
+		const multipart = data instanceof FormData;
+		if (!multipart && !(data instanceof Array)) {
+			console.error("YadaError: data should be Array or FormData in mergeData().")
+			return data;
+		}
+		Object.keys(mergeFrom).forEach(function(name) {
+  			const value = mergeFrom[name];
+	    	if (multipart) {
+		        data.append(name, value);
+			} else {
+				data.push({name: value});
+			}
+		});
+		return data;
+	}
+	
+	/**
+	 * Adds to data all fields in all the forms in the group, optionally excluding one of them
+	 * @param $formGroup an array of jquery forms from which input data should be gathered
+	 * @param data an array of objects (created with $.serializeArray()) that may already hold some form data and will contain all the gathered data
+	 * @param $form some jquery form to exclude (optional)
+	 */
+	function addAllFormsInGroup($formGroup, data, $formToExclude) {
+		const multipart = data instanceof FormData;
+		if (!multipart && !(data instanceof Array)) {
+			console.error("YadaError: data should be Array or FormData in addAllFormsInGroup().")
+			return;
+		}
+		$formGroup.each(function() {
+			var $eachForm = $(this);
+			if (!$eachForm.is($formToExclude)) {
+				if (multipart) {
+					var eachFormdata = new FormData(this);
+					// Can't use for - of with the current minifyjs version, so trying with a while loop
+					//	for (var pair of eachFormdata.entries()) {
+					//		data.append(pair[0], pair[1]);
+					//	}
+					var iterator = eachFormdata.entries();
+					var iterElem = iterator.next();
+				    while ( ! iterElem.done ) {
+				    	var pair = iterElem.value;
+				        data.append(pair[0], pair[1]);
+				        iterElem = iterator.next();
+				    }
+				} else {
+					$.merge(data, $eachForm.serializeArray());
+				}
+			}
+		});
+	}
 
 	/**
 	 * Sends a form via ajax, it doesn't have to have class .yadaAjax.
@@ -1053,27 +1137,7 @@
 			var data = multipart ? new FormData(this) : $(this).serializeArray();
 			// Add data from the form group if any
 			if ($formGroup.length>1) {
-				$formGroup.each(function() {
-					var $eachForm = $(this);
-					if (!$eachForm.is($form)) {
-						if (multipart) {
-							var eachFormdata = new FormData(this);
-							// Can't use for - of with the current minifyjs version, so trying with a while loop
-							//	for (var pair of eachFormdata.entries()) {
-							//		data.append(pair[0], pair[1]);
-							//	}
-							var iterator = eachFormdata.entries();
-							var iterElem = iterator.next();
-						    while ( ! iterElem.done ) {
-						    	var pair = iterElem.value;
-						        data.append(pair[0], pair[1]);
-						        iterElem = iterator.next();
-						    }
-						} else {
-							$.merge(data, $eachForm.serializeArray());
-						}
-					}
-				});
+				addAllFormsInGroup($formGroup, data, $form);
 			}
 			// Add data from any child form recursively, if any
 			var $childForm = $form[0]['yadaChildForm'];

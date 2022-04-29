@@ -34,6 +34,7 @@ public class YadaDialect extends AbstractProcessorDialect {
         processors.add(new YadaSrcsetAttrProcessor(dialectPrefix, config));
         processors.add(new YadaAjaxAttrProcessor(dialectPrefix)); // yada:ajax
         processors.add(new YadaHrefAttrProcessor(dialectPrefix)); // yada:href
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "formGroup", "data-yadaFormGroup", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "triggerInViewport", "data-yadaTriggerInViewport", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "paginationHistory", "data-yadaPaginationHistory", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "submitHandler", "data-yadaSubmitHandler", config));
