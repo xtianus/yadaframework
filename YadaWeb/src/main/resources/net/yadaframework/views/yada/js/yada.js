@@ -83,6 +83,7 @@
 	 * @param $element the element, or null for the entire body
 	 */
 	yada.initHandlersOn = function($element) {
+		// Use case for $element being not null: after an ajax call in order to init just the added HTML
 		yada.enableParentForm($element);
 		yada.enableShowPassword($element);
 		yada.enableRefreshButtons($element);
@@ -94,6 +95,7 @@
 			yada.initAjaxHandlersOn($element);
 		}
 		yada.enableHashing($element);
+		yada.enableFormGroup($element);
 	}
 	
 	yada.log = function(message) {
@@ -360,6 +362,22 @@
 		 var regex = new RegExp('.*?[&\\?]' + varName + '=(.*?)[&#].*');
 		 var val = queryStr.replace(regex, "$1");
 		 return val == queryStr ? null : unescape(val);
+	};
+
+	/**
+	 * Returns an URLSearchParams object: https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams.
+	 * It can be iterated upon with:
+	 * for (var nameValue of yada.getUrlParameters(url).entries()) {
+	 * 		const name = nameValue[0];
+	 * 		const value = nameValue[1];
+	 * }
+	 * @param url can be a url, a query string or even part of it, or null
+	 */
+	yada.getUrlParameters = function(url) {
+		// Keep query string only
+		url = yada.getAfter(url, "?", 0);
+		url = yada.removeHash(url);
+		return new URLSearchParams(url);
 	};
 
 	//Rimpiazza un singolo carattere
@@ -633,6 +651,33 @@
 		return result;
 	}
 	
+	////////////////////
+	/// Array functions
+
+	/**
+	 * Check if an array contains some value, that can also be an object (comparing same keys)
+	 */
+	// TODO not tested !!!
+	yada.arrayContains = function(array, value) {
+		if (!(value instanceof Object)) {
+			return array.includes(value);
+		}
+		const valueKeys = Object.keys(value);
+		for (let i=0; i<array.length; i++) {
+			const existing = array[i];
+			if (existing instanceof Object) {
+				// Check if objects have the same keys 
+				const existingKeys = Object.keys(existing);
+				// https://stackoverflow.com/a/7726509/587641
+				const equal = $(valueKeys).not(existingKeys).length === 0 && $(existingKeys).not(valueKeys).length === 0;
+				if (equal) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	////////////////////
 	/// String functions
 	
@@ -1178,8 +1223,144 @@
 		return $fromElement;
 	}
 	
+	// Remove a field from a form, but only if it is going to be submitted
+	function removeFormField(form, field) {
+		// form and field are DOM elements, not jQuery
+		// https://stackoverflow.com/a/53366001/587641
+		if (field.disabled || ((field.type=='radio' || field.type=='checkbox') && !field.checked)) {
+			return;
+			// TODO need to check for list options?
+		}
+		const fieldName = field.name;
+        Array.prototype.forEach.call(form.elements, function (element) {
+             if (fieldName!='' && element.name === fieldName) {
+                 element.parentNode.removeChild(element);
+             }
+        });
+	}
+	
+	// Adds a field to a form, but only if it is not already present and enabled/checkd
+	function addMissingFormField(form, field) {
+		const existingField = form.elements[field.name];
+		if (existingField!=null && existingField.disabled!=true) {
+			return;
+		}
+		form.appendChild(field);
+	}
+	
+	// This is used by yada.ajax.js too (for non-ajax submit)
+	yada.addFormGroupFields = function($form, $formGroup) {
+		// Append all other inputs to the current form and let it submit normally.
+		// Non need to clone anything because the page will be reloaded anyway (not ajax here).
+		if ($formGroup.length>1) {
+			$formGroup.each(function() {
+				let $eachForm = $(this);
+				if (!$eachForm.is($form)) {
+					$eachForm.find(":input").each(function() { // All inputs including textarea etc.
+						let $field = $(this);
+						$field.css("display", "none");
+						// addMissingFormField($form.get(0), $field.get(0)); // No duplicates: same name is ignored
+						removeFormField($form.get(0), $field.get(0)); // No duplicates: same name overrides previous
+						$field.appendTo($form);
+					});
+				}
+			});
+		}
+	}
+	
+	/**
+	 * Enable form groups for non-ajax forms and any clickable element
+	 */
+	yada.enableFormGroup = function($root) {
+		if ($root==null) {
+			$root = $('body');
+		}
+		var $target = $root.parent();
+		if ($target.length==0) {
+			$target = $root;
+		}
+		$('form', $target).not('.yadaAjax').not('.yadaAjaxed').submit(function() {
+			const $form = $(this);
+			// Add all other form inputs in the group
+			var yadaFormGroup = $form.attr('data-yadaFormGroup');
+			if (yadaFormGroup!=null && this.yadaFormGroupAdded==null) {
+				// Find all forms of the same group
+				const $formGroup = $('form[data-yadaFormGroup='+yadaFormGroup+']');
+				yada.addFormGroupFields($form, $formGroup);
+			}
+			// continue normal submission...
+		});
+		
+		// Other clickable elements that are not forms and not ajax (usually an anchor)
+		$('[data-yadaFormGroup]', $target).not('form').not('.yadaAjax').not('.yadaAjaxed').click(function(e) {
+			const $clickedElement = $(this);
+			var yadaFormGroup = $clickedElement.attr('data-yadaFormGroup');
+			if (yadaFormGroup!=null) {
+				const $formGroupForms = $('form[data-yadaFormGroup='+yadaFormGroup+']');
+				// If there are no forms, do nothing special
+				if ($formGroupForms.length==0) {
+					return;
+				}
+				e.preventDefault(); // Prevent links from sending requests
+				/* TODO not sure is needed.
+				// Find all elements of the same group that are not forms, and gather name/value pairs
+				const $formGroupNoforms = $('[data-yadaFormGroup='+yadaFormGroup+']').not('form');
+				const nameValues = []; // e.g. [{product: 'shoe'}, {price: 132}, {...}]
+				if ($formGroupNoforms.length>1) {
+					$formGroupNoforms.each(function() {
+						let $eachElement = $(this);
+						if (!$eachElement.is($clickedElement)) {
+							// Get name/value of input, checkbox, radio, select, textarea...
+							// TODO not implemented yet. See yada.ajax.js in function makeAjaxCall() near "option:selected" for hints						
+						}
+					});
+				} */
+				// Submit any of the forms in the group, after adding the nameValues, using the url of the clicked element if any
+				const $toSubmit = $formGroupForms.first();
+				yada.addFormGroupFields($toSubmit, $formGroupForms);
+				$toSubmit[0].yadaFormGroupAdded=true; // Prevent adding the form group inputs again 
+				// The new action can also be on a data-href attribute
+				const newAction = $clickedElement.attr("href") || $clickedElement.attr("data-href");
+				if (newAction!=null) {
+					$toSubmit.attr("action", newAction);
+					// Add any url parameters to the form
+					for (var nameValue of yada.getUrlParameters(newAction).entries()) {
+						const name = nameValue[0];
+						const value = nameValue[1];
+						const input = document.createElement('input');
+    					input.setAttribute('name', name);
+    					input.setAttribute('value', value);
+    					input.setAttribute('type', 'hidden');
+    					removeFormField($toSubmit.get(0), input); // No duplicates: url param overrides form
+						$toSubmit.append(input);
+					}
+				}
+				/* TODO not sure is needed.
+				if (nameValues.length>0) {
+					// Not tested yet
+					for (const nameValue of nameValues) {
+						const keys = Object.keys(nameValue);
+						 for (var i = 0; i < keys.length; i++) {
+        					const name = keys[i];
+        					const value = nameValue[name];
+							const input = document.createElement('input');
+        					input.setAttribute('name', name);
+        					input.setAttribute('value', value);
+        					input.setAttribute('type', 'hidden');
+							$toSubmit.append(input);
+						}
+					}
+				}
+				*/
+				$toSubmit.submit();
+				return false;
+			} // if (yadaFormGroup!=null)
+		});
+	}
+	
 	/**
 	 * Enable yadaParentForm
+	 * @Deprecated Should use "formGroup" instead
 	 */
 	yada.enableParentForm = function($element) {
 		if ($element==null) {

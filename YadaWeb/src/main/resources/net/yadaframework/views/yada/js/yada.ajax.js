@@ -956,14 +956,10 @@
 		return true;
 	}
 	
-	// data is either an array of objects or a FormData
-	// mergeFrom is an object with name=value or null
-	// returns eitehr a FormData or an array of objects
-	
 	/**
 	 * Merge some new data into an existing object
 	 * @param data the object that receives the new data, can be either Array of objects or FormData  
-	 * @param mergeFrom the object that contains new data, or null
+	 * @param mergeFrom the object that contains new data like {product: "shoe", quantity: 2}, or null
 	 * @return the 'data' object with new data
 	*/
 	function mergeData(data, mergeFrom) {
@@ -978,9 +974,12 @@
 		Object.keys(mergeFrom).forEach(function(name) {
   			const value = mergeFrom[name];
 	    	if (multipart) {
-		        data.append(name, value);
+		        data.set(name, value); // Add data with no duplicates, overwriting previous
 			} else {
-				data.push({name: value});
+				// Add data with no duplicates, overwriting previous
+				const obj = {};
+				obj[name] = value;
+				$.extend(true, data, [obj]);
 			}
 		});
 		return data;
@@ -989,7 +988,7 @@
 	/**
 	 * Adds to data all fields in all the forms in the group, optionally excluding one of them
 	 * @param $formGroup an array of jquery forms from which input data should be gathered
-	 * @param data an array of objects (created with $.serializeArray()) that may already hold some form data and will contain all the gathered data
+	 * @param data FormData or an array of objects (created with $.serializeArray()) that may already hold some form data and will contain all the gathered data
 	 * @param $form some jquery form to exclude (optional)
 	 */
 	function addAllFormsInGroup($formGroup, data, $formToExclude) {
@@ -1011,11 +1010,15 @@
 					var iterElem = iterator.next();
 				    while ( ! iterElem.done ) {
 				    	var pair = iterElem.value;
-				        data.append(pair[0], pair[1]);
+				    	// const newData = {};
+				    	// newData[pair[0]] = pair[1];
+				    	// data = mergeData(data, newData); // Add data with no duplicates, keeping first value
+				        data.set(pair[0], pair[1]); // Add data with no duplicates, overwriting previous
 				        iterElem = iterator.next();
 				    }
 				} else {
-					$.merge(data, $eachForm.serializeArray());
+					// mergeData(data, $eachForm.serializeArray()); // Add data with no duplicates, keeping first value
+					$.extend(true, data, $eachForm.serializeArray()); // Add data with no duplicates, overwriting previous
 				}
 			}
 		});
@@ -1110,16 +1113,7 @@
 			// If the form is marked as markerAjaxButtonOnly do not submit it via ajax unless the clicked button is marked with 'yadaAjax'
 			if ($form.hasClass(markerAjaxButtonOnly)) {
 				if (clickedButton==null || !$(clickedButton).hasClass('yadaAjax')) {
-					// If it is a group of forms, append all other inputs to the current form and let it submit normally.
-					// Non need to clone anything because the page will be reloaded anyway (not ajax here)
-					if ($formGroup.length>1) {
-						$formGroup.each(function() {
-							var $eachForm = $(this);
-							if (!$eachForm.is($form)) {
-								$eachForm.find(":input").appendTo($form); // All inputs including textarea etc.
-							}
-						});
-					}
+					yada.addFormGroupFields($form, $formGroup); // Non-ajax submit
 					// In any case, let it continue with the submit
 					return; // Do a normal submit
 				}
