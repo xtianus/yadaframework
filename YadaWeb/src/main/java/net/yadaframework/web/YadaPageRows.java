@@ -58,6 +58,24 @@ public class YadaPageRows<T> implements Iterable<T> {
 		}
 	}
 
+	public String getPageParam() {
+		String paramPrefix = currentPageRequest.getParamPrefix();
+		paramPrefix = paramPrefix==null?"":paramPrefix + ".";
+		return paramPrefix + "page";
+	}
+
+	public String getSizeParam() {
+		String paramPrefix = currentPageRequest.getParamPrefix();
+		paramPrefix = paramPrefix==null?"":paramPrefix + ".";
+		return paramPrefix + "size";
+	}
+
+	public String getLoadPreviousParam() {
+		String paramPrefix = currentPageRequest.getParamPrefix();
+		paramPrefix = paramPrefix==null?"":paramPrefix + ".";
+		return paramPrefix + "loadPrevious";
+	}
+
 	/**
 	 * Returns the page data fetched from database. It also contains the rows of all previous pages if {@link YadaPageRequest#isLoadPrevious()} is true
 	 * @return
