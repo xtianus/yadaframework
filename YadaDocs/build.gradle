@@ -3,8 +3,8 @@ version = '0.3.0'
 
 buildscript {
 	repositories {
-		mavenLocal()
 		mavenCentral()
+		mavenLocal()
 	}
 }
 
@@ -37,8 +37,8 @@ compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
-    jcenter()
-	mavenLocal()
+	// jcenter()
+	mavenCentral()
 }
 
 dependencies {

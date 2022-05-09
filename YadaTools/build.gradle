@@ -31,7 +31,9 @@ eclipse {
 }
 
 repositories {
-	jcenter()
+	// jcenter()
+	mavenCentral()
+	mavenLocal()
 }
 
 dependencies {
