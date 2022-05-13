@@ -21,9 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaManagedFile;
-import net.yadaframework.persistence.repository.YadaAttachedFileRepository;
+import net.yadaframework.persistence.repository.YadaAttachedFileDao;
 import net.yadaframework.persistence.repository.YadaFileManagerDao;
 import net.yadaframework.raw.YadaIntDimension;
 
@@ -37,7 +38,7 @@ import net.yadaframework.raw.YadaIntDimension;
 public class YadaFileManager {
 	private final transient Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Autowired private YadaAttachedFileRepository yadaAttachedFileRepository;
+	@Autowired private YadaAttachedFileDao yadaAttachedFileDao;
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private YadaFileManagerDao yadaFileManagerDao;
@@ -118,7 +119,7 @@ public class YadaFileManager {
 			}
 			yadaAttachedFile.setFilename(newFile.getName());
 		}
-		return yadaAttachedFileRepository.save(yadaAttachedFile);
+		return yadaAttachedFileDao.save(yadaAttachedFile);
 	}
 
 	/**
@@ -187,16 +188,18 @@ public class YadaFileManager {
 	 * Find one from repository
 	 * @param yadaAttachedFileId the attachment id
 	 */
+	@Deprecated // Removed in yada 0.7.0
 	public YadaAttachedFile findOne(Long yadaAttachedFileId) {
-		return yadaAttachedFileRepository.findOne(yadaAttachedFileId);
+		return yadaAttachedFileDao.find(yadaAttachedFileId);
 	}
 	/**
 	 * Deletes from the filesystem all files related to the attachment
 	 * @param yadaAttachedFileId the attachment id
 	 * @see #deleteFileAttachment(YadaAttachedFile)
 	 */
+	@Deprecated // Removed in yada 0.7.0
 	public void deleteFileAttachment(Long yadaAttachedFileId) {
-		deleteFileAttachment(yadaAttachedFileRepository.findOne(yadaAttachedFileId));
+		deleteFileAttachment(yadaAttachedFileDao.find(yadaAttachedFileId));
 	}
 
 	/**
@@ -335,7 +338,7 @@ public class YadaFileManager {
 	 */
 	public File uploadFile(MultipartFile multipartFile) throws IOException {
 		if (multipartFile==null || multipartFile.getSize()==0) {
-			log.debug("No file sent for upload");
+			log.debug("No file sent for upload of {}", multipartFile.getName());
 			return null;
 		}
 		File targetFile = uploadFileInternal(multipartFile);
@@ -371,10 +374,26 @@ public class YadaFileManager {
 
 	/**
 	 * Replace the file associated with the current attachment
+	 * The multipartFile is moved to the destination when config.isFileManagerDeletingUploads() is true, otherwise the original is copied
+	 * and left unchanged.
+	 * @param currentAttachedFile an existing attachment, never null
+	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
+	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
+	 * @throws IOException
+	 */
+	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, MultipartFile multipartFile, String namePrefix) throws IOException {
+		File managedFile = uploadFile(multipartFile);
+		return attachReplace(currentAttachedFile, managedFile, multipartFile, namePrefix);
+	}
+
+	/**
+	 * Replace the file associated with the current attachment
+	 * The managedFile is moved to the destination when config.isFileManagerDeletingUploads() is true, otherwise the original is copied
+	 * and left unchanged.
 	 * @param currentAttachedFile an existing attachment, never null
 	 * @param managedFile the new file to set
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
-	 * @return
+	 * @return YadaAttachedFile if the file has been replaced, null if managedFile is null
 	 * @throws IOException
 	 */
 	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix) throws IOException {
@@ -383,18 +402,24 @@ public class YadaFileManager {
 
 	/**
 	 * Replace the file associated with the current attachment, only if a file was actually attached
+	 * The managedFile is moved to the destination when config.isFileManagerDeletingUploads() is true, otherwise the original is copied
+	 * and left unchanged.
 	 * @param currentAttachedFile an existing attachment, never null
 	 * @param managedFile the new file to set
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
 	 * @param targetExtension optional, to convert image file formats
 	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
 	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
-	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
+	 * @return YadaAttachedFile if the file has been replaced, null if managedFile is null
 	 * @throws IOException
 	 */
 	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
 		if (managedFile==null) {
 			return null;
+		}
+		if (currentAttachedFile==null) {
+			// We can't call attachNew() instead, because we don't have relativeFolderPath here
+			throw new YadaInvalidUsageException("currentAttachedFile is missing");
 		}
 		deleteFileAttachment(currentAttachedFile); // Delete any previous attached files
 		String clientFilename = null;
@@ -402,6 +427,22 @@ public class YadaFileManager {
 			clientFilename = multipartFile.getOriginalFilename();
 		}
 		return attach(currentAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
+	}
+
+	/**
+	 * Copies an uploaded file to the destination folder, creating a database association to assign to an Entity.
+	 * The name of the file is in the format [basename]managedFileName_id.ext.
+	 * Images are not resized.
+	 * @param multipartFile the original uploaded file
+	 * @param relativeFolderPath path of the target folder relative to the contents folder, starting with a slash /
+	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
+	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
+	 * @throws IOException
+	 * @see {@link #attach(File, String, String, String, Integer, Integer)}
+	 */
+	public YadaAttachedFile attachNew(MultipartFile multipartFile, String relativeFolderPath, String namePrefix) throws IOException {
+		File managedFile = uploadFile(multipartFile);
+		return attachNew(managedFile, multipartFile, relativeFolderPath, namePrefix, null, null, null);
 	}
 
 	/**
@@ -468,16 +509,18 @@ public class YadaFileManager {
 		// yadaAttachedFile.setAttachedToId(attachToId);
 		yadaAttachedFile.setRelativeFolderPath(relativeFolderPath);
 		// This save should not bee needed anymore because of @PostPersist in YadaAttachedFile
-		yadaAttachedFile = yadaAttachedFileRepository.save(yadaAttachedFile); // Get the id
+		yadaAttachedFile = yadaAttachedFileDao.save(yadaAttachedFile); // Get the id
 		File targetFolder = new File(config.getContentPath(), relativeFolderPath);
 		targetFolder.mkdirs();
 		return attach(yadaAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
 	}
 
 	/**
-	 * Performs file copy and (for images) resize to different versions
+	 * Performs file copy and (for images) resize to different versions.
+	 * The managedFile is moved to the destination when config.isFileManagerDeletingUploads() is true, otherwise the original is copied
+	 * and left unchanged.
 	 * @param yadaAttachedFile object to fill with values
-	 * @param managedFile an uploaded file, can be an image or not. When null, nothing is done.
+	 * @param managedFile some file to attach or replace, can be an image or not. When null, nothing is done.
 	 * @param clientFilename the client filename. If null, the client filename is not changed.
 	 * @param namePrefix prefix to attach before the original file name to make the target name. Add a separator (like a dash) if you need one. Can be null.
 	 * @param targetExtension optional, to convert image file formats
@@ -535,7 +578,7 @@ public class YadaFileManager {
 				managedFile.delete();
 			}
 		}
-		return yadaAttachedFileRepository.save(yadaAttachedFile);
+		return yadaAttachedFileDao.save(yadaAttachedFile);
 	}
 
 	/**

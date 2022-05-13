@@ -767,6 +767,7 @@ public class YadaUtil {
 	 * @return the Field found or null
 	 * @throws YadaInvalidValueException if attributeName is a path (with a dot in it)
 	 */
+	// Probably can be replaced by PropertyUtils.getSimpleProperty() from Commons BeanUtils
 	public Field getFieldNoTraversing(Class rootClass, String attributeName) {
 		if (attributeName.indexOf('.')>-1) {
 			throw new YadaInvalidValueException("Attribute name expected, attribute path found: {}", attributeName);
@@ -2250,6 +2251,7 @@ public class YadaUtil {
 		return calendar.getTime();
 	}
 
+	@Deprecated // To be removed from Yada Framework
 	public static String normalizzaCellulareItaliano(String cellulare) {
 		if (cellulare==null || cellulare.trim().length()==0) {
 			return cellulare;
@@ -2263,6 +2265,7 @@ public class YadaUtil {
 		return "+39"+cellulare; // Metto prefisso
 	}
 
+	@Deprecated // To be removed from Yada Framework
 	public static boolean validaCellulare(String cellulare) {
 		try {
 			if (cellulare.startsWith("+")) {

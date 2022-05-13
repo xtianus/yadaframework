@@ -1,6 +1,7 @@
 package net.yadaframework.persistence.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -21,7 +22,8 @@ public class YadaAttachedFileDao {
     @PersistenceContext private EntityManager em;
 
     /**
-     * Delete a YadaAttachedFile using fast native queries
+     * Delete a YadaAttachedFile and connected data, but not the file on disk. If there is a relationship between an Entity and the YadaAttachedFile,
+     * deletion fails because of the foreign key. The relationship should be removed before calling this method.
      * @param yadaAttachedFileId
      */
     @Transactional(readOnly = false)
@@ -43,13 +45,14 @@ public class YadaAttachedFileDao {
     }
 
     /**
-     * Deletes a YadaAttachedFile after merging it (slower)
+     * Deletes a YadaAttachedFile when not null
      * @param yadaAttachedFile
      */
     @Transactional(readOnly = false)
     public void delete(YadaAttachedFile yadaAttachedFile) {
-    	yadaAttachedFile = em.merge(yadaAttachedFile);
-    	em.remove(yadaAttachedFile);
+    	if (yadaAttachedFile!=null && yadaAttachedFile.getId()!=null) {
+    		delete(yadaAttachedFile.getId());
+    	}
     }
 
 	/**
@@ -89,6 +92,21 @@ public class YadaAttachedFileDao {
 		yadaAttachedFile = em.merge(yadaAttachedFile);
 		entity = em.merge(entity);
 		list.add(yadaAttachedFile);
+	}
+
+	/**
+	 * Find entity from the id
+	 * @param yadaAttachedFileId
+	 * @return the found entity instance or null if the entity doesnot exist
+	 */
+	public YadaAttachedFile find(Long yadaAttachedFileId) {
+		return em.find(YadaAttachedFile.class, yadaAttachedFileId);
+	}
+
+	// Kept for compatibility with Spring Data Repository
+	public Optional<YadaAttachedFile> findById(Long yadaAttachedFileId) {
+		YadaAttachedFile result = em.find(YadaAttachedFile.class, yadaAttachedFileId);
+		return  Optional.ofNullable(result);
 	}
 
 }
