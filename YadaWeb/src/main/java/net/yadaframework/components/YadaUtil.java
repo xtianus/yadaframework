@@ -24,6 +24,10 @@ import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -108,8 +112,14 @@ public class YadaUtil {
 	public final static long MILLIS_IN_DAY = 24*MILLIS_IN_HOUR;
 
 	private SecureRandom secureRandom = new SecureRandom();
+	private final static char CHAR_AT = '@';
+	private final static char CHAR_DOT = '.';
+	private final static char CHAR_SPACE = ' ';
 
 	private static Locale defaultLocale = null;
+
+	private List<String> computedTimezoneOffsets = null;
+	private List<String> computedTimezones = null;
 
 	/**
 	 * Instance to be used when autowiring is not available
@@ -121,6 +131,357 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+
+	/**
+	 * Given a ISO date, a ISO time and a timezone, return the Date.
+	 * @param isoDateString like '2011-12-03'
+	 * @param isoTimeString like '10:15' or '10:15:30'
+	 * @param timezone the timezone where the date/time strings belong
+	 * @return a Date representing the datetime in the timezone
+	 */
+	public Date getDateFromDateTimeIsoString(String isoDateString, String isoTimeString, TimeZone timezone) {
+		String isoDateTimeString = isoDateString + "T" + isoTimeString;
+		LocalDateTime chosenDateTime = LocalDateTime.parse(isoDateTimeString);
+		ZonedDateTime chosenDateTimeZoned = chosenDateTime.atZone(timezone.toZoneId());
+		return Date.from(chosenDateTimeZoned.toInstant());
+	}
+
+	/**
+	 * Returns a string for date and time in the specified timezone and locale
+	 * @param date the date to format
+	 * @param timezone the timezone in which the date is to be considered
+	 * @param locale the locale to use for formatting
+	 * @return The RFC-1123 formatted date, such as 'Tue, 3 Jun 2008 11:05:30 GMT'.
+	 */
+	public String getRfcDateTimeStringForTimezone(Date date, TimeZone timezone, Locale locale) {
+		DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME.withLocale(locale);
+		ZoneId zoneId = timezone.toZoneId();
+		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(date.toInstant(), zoneId);
+		return zonedDateTime.format(formatter);
+	}
+
+	/**
+	 * Convert a date in the timezone to a ISO string, like '2011-12-03'
+	 * @param date
+	 * @param timezone
+	 * @return
+	 */
+	public String getIsoDateStringForTimezone(Date date, TimeZone timezone) {
+		return formatDateTimeForTimezone(date, timezone, DateTimeFormatter.ISO_LOCAL_DATE);
+	}
+
+	/**
+	 * Convert a time in the timezone to a ISO string, like '10:15' or '10:15:30'
+	 * @param date
+	 * @param timezone
+	 * @return
+	 */
+	public String getIsoTimeStringForTimezone(Date time, TimeZone timezone) {
+		return formatDateTimeForTimezone(time, timezone, DateTimeFormatter.ISO_LOCAL_TIME);
+	}
+
+	/**
+	 * Convert a datetime in the timezone to a ISO string, like '2011-12-03T10:15:30'
+	 * @param date
+	 * @param timezone
+	 * @return
+	 */
+	public String getIsoDateTimeStringForTimezone(Date dateTime, TimeZone timezone) {
+		return formatDateTimeForTimezone(dateTime, timezone, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+	}
+
+	private String formatDateTimeForTimezone(Date datetime, TimeZone timezone, DateTimeFormatter formatter) {
+		if (datetime==null) {
+			return "";
+		}
+		ZoneId zoneId = timezone.toZoneId();
+		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(datetime.toInstant(), zoneId);
+		return zonedDateTime.format(formatter);
+	}
+
+	/**
+	 * Create a single empty "json" object for use in other methods.
+	 * Json objects are actually maps that get converted by Spring on return.
+	 * @return
+	 */
+	public Map<String, Object> makeJsonObject() {
+			return new HashMap<String, Object>();
+	}
+
+	/**
+	 * Given a json stored as a map, returns the json at the specified key
+	 * @param jsonSource
+	 * @param objectPath the name of a (nested) json property holding an object
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getJsonObject(Map<String, Object> jsonSource, String objectPath) {
+		return (Map<String, Object>) getJsonPath(jsonSource, objectPath);
+	}
+
+	/**
+	 * Given a json stored as a map, returns the json at the specified list index
+	 * @param jsonSource
+	 * @param listPath the path of the json property holing the list
+	 * @param listIndex the list index
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getJsonObject(Map<String, Object> jsonSource, String listPath, int listIndex) {
+		return (Map<String, Object>) getJsonArray(jsonSource, listPath).get(listIndex);
+	}
+
+	/**
+	 * Given a json stored as a map, returns the json array at the specified key
+	 * @param jsonSource
+	 * @param objectPath
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Object> getJsonArray(Map<String, Object> jsonSource, String objectPath) {
+		return (List<Object>) getJsonPath(jsonSource, objectPath);
+	}
+
+	/**
+	 * Given a json stored as a map, returns the String value at the specified key, with optional nesting
+	 * @param jsonSource
+	 * @param objectPath the path of the attribute, using dot notation and arrays. E.g. "order.amount[2].currency"
+	 * @return
+	 */
+	public String getJsonAttribute(Map<String, Object> jsonSource, String objectPath) {
+		return (String) getJsonPath(jsonSource, objectPath);
+	}
+
+	/**
+	 * Creates an empty json object at the given path
+	 * @param parentObject the json object containing the new object
+	 * @param path where the object should be created, using dot notation and arrays. E.g. "order.amount[2].currency".
+	 * Any missing array cells are also created with an empty object as needed.
+	 * @return
+	 */
+	public Map<String, Object> makeJsonObject(Map<String, Object> parentObject, String path) {
+		return (Map<String, Object>) setJsonAttributeRecurse(parentObject, path, null);
+	}
+
+	/**
+	 * Sets a json property at the given path
+	 * @param jsonObject the json object that should contain the property
+	 * @param path path of the property using dot notation and arrays. E.g. "order.amount[2].currency".
+	 * Any missing array cells are also created with an empty object as needed.
+	 * @param value the value to store, can also be a "json object"
+	 */
+	public void setJsonAttribute(Map<String, Object> jsonObject, String path, Object value) {
+		boolean isString = value instanceof String;
+		boolean isJsonObject = value instanceof Map;
+		if (!isString && !isJsonObject) {
+			value = String.valueOf(value);
+//			throw new YadaInvalidValueException("\"value\" must be either a string or a map");
+		}
+		setJsonAttributeRecurse(jsonObject, path, value);
+	}
+
+	private Object setJsonAttributeRecurse(Map<String, Object> jsonObject, String path, Object value) {
+		if (path.length()==0 && value==null) {
+			return jsonObject; // makeJsonObject called
+		}
+		String[] parts = path.split("\\.", 2); // {"a", "b[2].c"}
+		String segment = parts[0]; // "a", "b[2]", "c"
+		int index = -1;
+		if (segment.endsWith("]")) {
+			// Array
+			String[] split = segment.split("[\\[\\]]");
+			segment = split[0]; // "b"
+			String indexString = split[1]; // "2"
+			try {
+				index = Integer.parseInt(indexString);
+			} catch (NumberFormatException e) {
+				log.debug("Invalid index '{}' in segment '{}' (ignored)", indexString, segment);
+			}
+		}
+		boolean lastSegment = (parts.length==1);
+		if (lastSegment && value!=null) {
+			return jsonObject.put(segment, value);
+		}
+		Object currentObject = jsonObject.get(segment); // Either Object, List or Null
+		if (currentObject==null) {
+			if (index>-1) {
+				currentObject = new ArrayList<Object>();
+			} else {
+				currentObject = makeJsonObject();
+			}
+			jsonObject.put(segment, currentObject);
+		}
+		if (currentObject instanceof ArrayList) {
+			if (index<0) {
+				throw new YadaInvalidValueException("Not an array at {}", segment);
+			}
+			List<Object> currentList = (List<Object>) currentObject;
+			for (int k = currentList.size(); k <= index; k++) {
+				// Add missing cells if any
+				currentList.add(makeJsonObject());
+			}
+			currentObject = currentList.get(index);
+		}
+		int dotPos = path.indexOf(".");
+		String remainingPath = dotPos > -1 ? path.substring(dotPos+1) : "";
+		return setJsonAttributeRecurse((Map<String, Object>)currentObject, remainingPath, value);
+	}
+
+	private Object getJsonPath(Map<String, Object> jsonSource, String objectPath) {
+		Object result = jsonSource;
+		String[] parts = objectPath.split("\\.");
+		for (int i = 0; i < parts.length; i++) {
+			String segment = parts[i];
+			int index = -1;
+			if (segment.endsWith("]")) {
+				// Array
+				String[] split = segment.split("[\\[\\]]");
+				segment = split[0];
+				String indexString = split[1];
+				try {
+					index = Integer.parseInt(indexString);
+				} catch (NumberFormatException e) {
+					log.debug("Invalid index '{}' in segment '{}' (ignored)", indexString, parts[i]);
+				}
+			}
+			result = ((Map<String, Object>) result).get(segment);
+			if (result==null) {
+				log.debug("Null value at {}", segment);
+				return null;
+			}
+			if (index>-1) { // Array
+				try {
+					result = ((List<Object>)result).get(index);
+				} catch (IndexOutOfBoundsException e) {
+					log.debug("Index out of bounds at {}[{}]", segment, index);
+					return null;
+				}
+				if (result==null) {
+					log.debug("Null value at {}[{}]", segment, index);
+					return null;
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns a list of user-friendly timezones like "Europe/Rome"
+	 * @return
+	 */
+	public List<String> getTimezones() {
+		if (computedTimezones==null) {
+			computedTimezones = new ArrayList<String>();
+			String[] allTimezones = TimeZone.getAvailableIDs();
+			for (String timezone : allTimezones) {
+				// Only timezones with a / that start with a continent, like "Europe/Rome"
+				if (timezone.indexOf('/')>-1 && !timezone.startsWith("Etc/") && !timezone.startsWith("SystemV/")) {
+					computedTimezones.add(timezone);
+				}
+			}
+		}
+		return computedTimezones;
+	}
+
+	/**
+	 * Get a list of GMT/UTC time offsets from UTC-12:00 to UTC+14:00
+	 * @param prefix use either "GMT" or "UTC"
+	 * @return from "GMT-12:00" to "GMT+14:00"
+	 */
+	public List<String> getTimezoneOffsets(String prefix) {
+		if (computedTimezoneOffsets==null) {
+			computedTimezoneOffsets = new ArrayList<String>();
+			// https://en.wikipedia.org/wiki/List_of_UTC_time_offsets
+			for (int i=-12; i<=14; i++) {
+				computedTimezoneOffsets.add(String.format("%s%+03d:00", prefix, i));
+				if (i==-10 || i==-4 || i==3 || i==4 || i==5 || i==6 || i==9 || i==10) {
+					computedTimezoneOffsets.add(String.format("%s%+03d:30", prefix, i+(i<0?1:0)));
+				}
+				if (i==5 || i==8 || i==12) {
+					computedTimezoneOffsets.add(String.format("%s%+03d:45", prefix, i));
+				}
+			}
+		}
+		return computedTimezoneOffsets;
+	}
+
+	/**
+	 * Simple email address syntax check: the format should be X@Y.Y
+	 * where X does not contain @ and Y does not contain @, nor . at the edges.
+	 * Also no spaces anywhere.
+	 * @param email
+	 * @return
+	 */
+	public boolean isEmailValid(String email) {
+		if (email.indexOf(CHAR_SPACE)>-1) {
+			return false;
+		}
+		int firstAtPos = email.indexOf(CHAR_AT);
+		int lastAtPos = email.lastIndexOf(CHAR_AT);
+		if (firstAtPos<0 || firstAtPos != lastAtPos || lastAtPos==email.length()-1) {
+			return false; // No @ or more than one or one at the end
+		}
+		int lastDotPos = email.lastIndexOf(CHAR_DOT);
+		if (lastDotPos<0 						|| // No DOT
+			lastDotPos<firstAtPos 				|| // No DOT after the AT
+			lastDotPos==email.length()-1 		|| // DOT at the end
+			email.charAt(firstAtPos+1)==CHAR_DOT || // DOT after the AT
+			email.charAt(lastDotPos-1)==CHAR_DOT   // Two consecutive dots
+			) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Convert a map of strings to a commaspace-separated string of name=value pairs
+	 * @param stringMap
+	 * @return a name-value string like "n1=v1, n2=v2"
+	 */
+	public String mapToString(Map<String, String> stringMap) {
+		String result = stringMap.toString(); // "{n1=v1, n2=v2}"
+		result = StringUtils.chop(result); // Remove }
+		result = StringUtils.removeStart(result, "{"); // Remove {
+		return result;
+	}
+
+	/**
+	 * Returns a random integer number
+	 * @param minIncluded minimum value, included
+	 * @param maxIncluded maximum value, included
+	 * @return
+	 */
+	public int getRandom(int minIncluded, int maxIncluded) {
+		if (maxIncluded==Integer.MAX_VALUE) {
+			maxIncluded = Integer.MAX_VALUE - 1; // Needed to prevent overflow of maxExcluded below
+		}
+		int maxExcluded = maxIncluded - minIncluded + 1;
+		return secureRandom.nextInt(maxExcluded) + minIncluded;
+	}
+
+	/**
+	 * Given the instance of a "specific" class created specifying a single type T while extending a generic class,
+	 * retrieve the class of the type T.
+	 * It also works when looking for the generic super-super class at any hierarchy level.
+	 * Example:
+	 * the generic class is public abstract class Shape<T extends Color> {...}
+	 * the specific class is public class Circle extends Shape<Red>
+	 * the instance is new Circle()
+	 * the returned value is Red.class
+	 * @param specificClassInstance instance of the specific class, usually "this" when called from inside either the specific or the generic abstract class.
+	 * @return the class T used to make the generic specific, or null if there is no generic superclass in the hierarchy
+	 */
+	public Class<?> findGenericClass(Object specificClassInstance) {
+		Class<?> theClass = specificClassInstance.getClass();
+
+		while (theClass!=null && !(theClass.getGenericSuperclass() instanceof ParameterizedType)) {
+			theClass = theClass.getSuperclass();
+		}
+		if (theClass!=null) {
+			return (Class<?>)((ParameterizedType)theClass.getGenericSuperclass()).getActualTypeArguments()[0];
+		}
+		return null;
+	}
 
 	/**
 	 * Merges all files matched by a pattern, in no particular order.
@@ -155,6 +516,28 @@ public class YadaUtil {
 		file.delete();
         file.mkdir();
         return file;
+	}
+
+	/**
+	 * Finds the folder path between two folders. using forward (unix) slashes as a separator
+	 * @param ancestorFolder
+	 * @param descendantFolder
+	 * @return
+	 */
+	public String relativize(File ancestorFolder, File descendantFolder) {
+		String segment = ancestorFolder.toPath().relativize(descendantFolder.toPath()).toString();
+		return segment.replaceAll("\\", "/");
+	}
+
+	/**
+	 * Finds the folder path between two folders. using forward (unix) slashes as a separator
+	 * @param ancestorFolder
+	 * @param descendantFolder
+	 * @return
+	 */
+	public String relativize(Path ancestorFolder, Path descendantFolder) {
+		String segment = ancestorFolder.relativize(descendantFolder).toString();
+		return segment.replaceAll("\\\\", "/");
 	}
 
 	/**
@@ -339,6 +722,11 @@ public class YadaUtil {
 	 * @return
 	 */
 	public YadaIntDimension getImageDimension(File imageFile) {
+		String suffix = getFileExtension(imageFile);
+		if (!ImageIO.getImageReadersBySuffix(suffix).hasNext()) {
+			return YadaIntDimension.UNSET; // Not an image
+		}
+
 		try(InputStream stream = new FileInputStream(imageFile))  {
 			Metadata metadata = ImageMetadataReader.readMetadata(stream);
 			//			for (com.drew.metadata.Directory directory2 : metadata.getDirectories()) {
@@ -470,6 +858,7 @@ public class YadaUtil {
 	 * Creates an empty file that doesn't already exist in the specified folder
 	 * with the specified leading characters (baseName).
 	 * A counter may be appended to make the file unique.
+	 * This operation is thread safe.
 	 * @param targetFolder the folder where the file has to be placed
 	 * @param baseName the leading characters for the file, like "product"
 	 * @param extension the extension without a dot, like "jpg"
@@ -482,7 +871,7 @@ public class YadaUtil {
 		String filename = baseName + extension;
 		int counter = 0;
 		long startTime = System.currentTimeMillis();
-		int timeoutMillis = 20000; // 20 seconds to find a result seems to be reasonable
+		int timeoutMillis = 10000; // 10 seconds to find a result seems reasonable
 		while (true) {
 			File candidateFile = new File(targetFolder, filename);
 			try {
@@ -503,30 +892,31 @@ public class YadaUtil {
 
 	/**
 	 * Creates a file with a unique filename by appending a number after the specified separator if needed.
-	 * If the sourceFile exists already, a new file is created with a proper counter at the end. The counter may be stripped
+	 * If the targetFile exists already, a new file is created with a proper counter at the end. The counter may be stripped
 	 * altogether (if the original file had a counter and no file without counter exists) or added or incremented.
 	 * The new counter might not be higher than the original one, nor sequential. It depends on what's already on
 	 * the filesystem.
-	 * @param sourceFile the file that we want to create.
+	 * This operation is thread safe.
+	 * @param targetFile the file that we want to create.
 	 * @param counterSeparator (optional) when null, "_" is used.
 	 * @return
 	 * @throws IOException
 	 */
-	public static File findAvailableName(File sourceFile, String counterSeparator) throws IOException {
+	public static File findAvailableName(File targetFile, String counterSeparator) throws IOException {
 		if (counterSeparator==null) {
 			counterSeparator="_";
 		}
-		String sourceFilename = sourceFile.getName();
-		String extension = splitFileNameAndExtension(sourceFilename)[1];
-		String strippedName = stripCounterFromFilename(sourceFilename, counterSeparator);
-		return findAvailableName(sourceFile.getParentFile(), strippedName, extension, counterSeparator);
+		String targetFilename = targetFile.getName();
+		String extension = splitFileNameAndExtension(targetFilename)[1];
+		String strippedName = stripCounterFromFilename(targetFilename, counterSeparator);
+		return findAvailableName(targetFile.getParentFile(), strippedName, extension, counterSeparator);
 	}
 
 	/**
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
 	 * It must be called in a transaction.
 	 * @param fetchedEntity object fetched from database that may contain localized strings
-	 * @param targetClass type of fetchedEntities elements
+	 * @param targetClass type of fetchedEntity element
 	 */
 	public static <targetClass> void prefetchLocalizedStrings(targetClass fetchedEntity, Class<?> targetClass) {
 		if (fetchedEntity!=null) {
@@ -602,7 +992,7 @@ public class YadaUtil {
 	 * @param entityClass type of fetchedEntities elements
 	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
 	 */
-	public static <entityClass> void prefetchLocalizedStringList(List<entityClass> entities, Class<?> entityClass, String...attributes) {
+	public static <entityClass> void prefetchLocalizedStringList(Collection<entityClass> entities, Class<?> entityClass, String...attributes) {
 		List<String> attributeNames = Arrays.asList(attributes);
 		if (entities==null || entities.isEmpty()) {
 			return;
@@ -740,6 +1130,7 @@ public class YadaUtil {
 	 * Use a small buffer (256) when data is over the internet to prevent timeouts somewhere. Use a big buffer for in-memory or disk operations.
 	 * @param sizeLimit the maximum number of bytes to read (inclusive)
 	 * @return the number of bytes read, or -1 if the sizeLimit has been exceeded.
+	 * @see java.nio.file.Files#copy(Path, Path, java.nio.file.CopyOption...)
 	 * @see org.apache.commons.io.IOUtils#copy(InputStream, OutputStream)
 	 * @throws IOException
 	 */
@@ -922,7 +1313,7 @@ public class YadaUtil {
 		if (applicationContext!=null) {
 			return applicationContext.getBean(nameInApplicationContext);
 		}
-		log.debug("No applicationContext injected in getBean() yet - returning null");
+		log.debug("No applicationContext injected in getBean() yet - returning null for '{}'", nameInApplicationContext);
 		return null;
 	}
 
@@ -1187,6 +1578,30 @@ public class YadaUtil {
 			executable = config.getString(shellCommandKey + "/executable[not(@mac) and not(@linux) and not(@windows)]"); // Fallback to generic OS
 		}
 		return executable;
+	}
+
+	/**
+	 * Run an external shell command that has been defined in the configuration file.
+	 * The command must be as in the following example:
+	 * <pre>
+ 	&lt;imageConvert timeoutseconds="20">
+		&lt;executable windows="true">magick&lt;/executable>
+		&lt;executable mac="true" linux="true">/usr/local/bin/magick&lt;/executable>
+		&lt;arg>convert&lt;/arg>
+		&lt;arg>${FILENAMEIN}&lt;/arg>
+		&lt;arg>${FILENAMEOUT}&lt;/arg>
+	&lt;/imageConvert>
+	 * </pre>
+	 * Be aware that args can not contain "Commons Configuration variables" because they clash with placeholders as defined below.
+	 * See the yadaframework documentation for full syntax.
+	 * @param shellCommandKey xpath key of the shell command, e.g. "config/shell/cropImage"
+	 * @param substitutionMap optional key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
+	 * pair is like "key"-->"value". If the value is a collection, arguments are unrolled so key-->collection will result in key0=val0 key1=val1...
+	 * @return the command exit value
+	 * @throws IOException
+	 */
+	public int shellExec(String shellCommandKey, Map substitutionMap) throws IOException {
+		return shellExec(shellCommandKey, substitutionMap, null);
 	}
 
 	/**
@@ -1883,6 +2298,44 @@ public class YadaUtil {
 //
 //	}
 
+	/**
+	 * Check if a date is within two dates expressed as month/day, regardless of the year and of the validity of such dates.
+	 * @param dateToCheck for example new GregorianCalendar()
+	 * @param fromMonth 0-based, better use Calendar.JANUARY etc.
+	 * @param fromDayInclusive 1-based
+	 * @param toMonth 0-based, better use Calendar.JANUARY etc.
+	 * @param toDayExcluded 1-based
+	 * @return
+	 */
+	public static boolean dateWithin(Calendar dateToCheck, int fromMonth, int fromDayInclusive, int toMonth, int toDayExcluded) {
+		if (fromMonth<0 || fromMonth>11) {
+			throw new YadaInvalidUsageException("Month must be in the range 0-11");
+		}
+		if (toMonth<0 || toMonth>11) {
+			throw new YadaInvalidUsageException("Month must be in the range 0-11");
+		}
+		if (fromDayInclusive<1 || fromDayInclusive>31) {
+			throw new YadaInvalidUsageException("Day must be in the range 1-31");
+		}
+		if (toDayExcluded<1 || toDayExcluded>31) {
+			throw new YadaInvalidUsageException("Day must be in the range 1-31");
+		}
+		boolean sameYear = fromMonth<=toMonth;
+		int monthToCheck = dateToCheck.get(Calendar.MONTH);
+		if (sameYear && (monthToCheck<fromMonth || monthToCheck>toMonth)) {
+			return false;
+		}
+		if (!sameYear && (monthToCheck<fromMonth && monthToCheck>toMonth)) {
+			return false;
+		}
+		// The month is within range, keep checking...
+		int dayToCheck = dateToCheck.get(Calendar.DAY_OF_MONTH);
+		if ((monthToCheck==fromMonth && dayToCheck<fromDayInclusive) || (monthToCheck==toMonth && dayToCheck>=toDayExcluded)) {
+			return false;
+		}
+		return true;
+	}
+
 	/** Ritorna l'ora più vicina nel passato alla data specificata
 	 * @return
 	 */
@@ -2014,7 +2467,7 @@ public class YadaUtil {
 	/**
 	 * Adds or removes the days. The original object is cloned.
 	 * @param calendar
-	 * @param minutes
+	 * @param days
 	 * @return
 	 */
 	public static Calendar addDaysClone(Calendar source, int days) {
@@ -2024,7 +2477,7 @@ public class YadaUtil {
 	/**
 	 * Adds or removes the days. The original object is modified.
 	 * @param calendar
-	 * @param minutes
+	 * @param days
 	 * @return
 	 */
 	public static Calendar addDays(Calendar calendar, int days) {
@@ -2283,6 +2736,7 @@ public class YadaUtil {
 	public static SortedSet<Entry<String,String>> sortByValue(Map data) {
 		// Uso il giro del TreeSet per sortare in base al value
 		SortedSet<Entry<String,String>> result = new TreeSet<>(new Comparator<Entry<String, String>>() {
+			@Override
 			public int compare(Entry<String, String> element1, Entry<String, String> element2) {
 				return element1.getValue().compareTo(element2.getValue());
 			}
@@ -2301,6 +2755,7 @@ public class YadaUtil {
 	public static SortedSet<Entry<String,String>> sortByKey(Map data) {
 		// Uso il giro del TreeSet per sortare in base al value
 		SortedSet<Entry<String,String>> result = new TreeSet<>(new Comparator<Entry<String, String>>() {
+			@Override
 			public int compare(Entry<String, String> element1, Entry<String, String> element2) {
 				return element1.getKey().compareTo(element2.getKey());
 			}

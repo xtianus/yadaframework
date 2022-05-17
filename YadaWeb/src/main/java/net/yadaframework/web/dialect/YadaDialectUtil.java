@@ -1,38 +1,340 @@
 package net.yadaframework.web.dialect;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.context.ITemplateContext;
+import org.thymeleaf.model.ICloseElementTag;
+import org.thymeleaf.model.IModel;
+import org.thymeleaf.model.IOpenElementTag;
+import org.thymeleaf.model.ITemplateEvent;
+import org.thymeleaf.standard.expression.IStandardExpression;
+import org.thymeleaf.standard.expression.IStandardExpressionParser;
+import org.thymeleaf.standard.expression.StandardExpressions;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
-import net.yadaframework.exceptions.YadaInvalidValueException;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 public class YadaDialectUtil {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	private final YadaConfiguration config;
 
+	static final String YADA_PREFIX = "yada";
+	static final String THYMELEAF_PREFIX = "th";
+
+    public final static String YADA_PREFIX_WITHCOLUMN = YADA_PREFIX + ":";
+    public final static String THYMELEAF_PREFIX_WITHCOLUMN = THYMELEAF_PREFIX + ":";
+
+    private enum AppendType {
+    	NONE,
+    	APPEND,
+    	PREPEND,
+    	APPEND_WITH_SPACE,
+    	PREPEND_WITH_SPACE;
+    }
+
 	public YadaDialectUtil(YadaConfiguration config) {
 		this.config=config;
+	}
+
+	/**
+	 * Returns the HTML contained in a tag, as a string
+	 * @param model
+	 * @param openNodeIndex the index of the open tag in the model
+	 * @return
+	 */
+	public String getInnerHtml(IModel model, int openNodeIndex) {
+		StringBuilder result = new StringBuilder();
+		ITemplateEvent iTemplateEvent = model.get(openNodeIndex);
+		if (!(iTemplateEvent instanceof IOpenElementTag)) {
+			throw new YadaInvalidUsageException("The openNodeIndex should point to an open tag");
+		}
+		final IOpenElementTag openTag = (IOpenElementTag) iTemplateEvent;
+		String outerTagName = openTag.getElementCompleteName();
+		int i = openNodeIndex;
+		while (++i<model.size()) {
+			ITemplateEvent node = model.get(i);
+			if (node instanceof ICloseElementTag) {
+				if (((ICloseElementTag)node).getElementCompleteName().equals(outerTagName)) {
+					return result.toString();
+				}
+			}
+			result.append(node.toString());
+			if (node instanceof IOpenElementTag) {
+				result.append(getInnerHtml(model, i));
+			}
+		}
+		log.error("Malformed HTML: no close tag for {} in {} line {} (ignored)", outerTagName, iTemplateEvent.getTemplateName(), iTemplateEvent.getLine());
+		return result.toString(); // Should never get here
+	}
+
+	/**
+	 * Parse some value as a EL expression
+	 * @param value
+	 * @param context
+	 * @param resultClass the type of the expected return value
+	 * @return
+	 * @return the result of evaluating the expression, or the original value in case of errors and String result
+	 */
+	public <T> T parseExpression(String value, ITemplateContext context, Class<T> resultClass) {
+		try {
+			final IEngineConfiguration configuration = context.getConfiguration();
+			final IStandardExpressionParser parser = StandardExpressions.getExpressionParser(configuration);
+			final IStandardExpression expression = parser.parseExpression(context, value);
+			return (T) expression.execute(context);
+		} catch (RuntimeException e) {
+			log.trace("Expression evaluation of \"{}\" failed - using as literal string", value);
+			if (resultClass.equals(String.class)) {
+				return (T) value; // Maybe it's just a string
+			}
+			throw e;
+		}
+	}
+
+	/**
+	 * Concatenate some strings using the given joiner, checking that the joiner is not added when already present and it is trimmed
+	 * from the result.
+	 * Example:
+	 * <pre>joinStrings(" - ", "a, b", "c, d")    = "a, b - c, d"</pre>
+	 * <pre>joinStrings(" - ", "a, b - ", "c, d") = "a, b - c, d"</pre>
+	 * <pre>joinStrings(" - ", "a, b", "c, d - ") = "a, b - c, d"</pre>
+	 * @param joiner a string to use as a joiner (separator)
+	 * @param start the initial string
+	 * @param append a number of other strings
+	 * @return a string where all parameters have been joined with the joiner string that appears only once and not at the result edges
+	 */
+	public String joinStrings(String joiner, String start, String ... append) {
+		StringBuilder result = new StringBuilder(StringUtils.removeEnd(start, joiner));
+		result.append(joiner);
+		for (String a : append) {
+			result.append(StringUtils.removeEnd(StringUtils.removeStart(a, joiner), joiner));
+			result.append(joiner);
+		}
+		return StringUtils.removeEnd(result.toString(), joiner);
+	}
+
+	/**
+	 * Returns a unique identifier on the page, for the given tag
+	 * @param someTag
+	 * @return
+	 */
+	public String makeYadaTagId(ITemplateEvent someTag) {
+		return someTag.getLine() + "c" + someTag.getCol() + "r" + YadaUtil.INSTANCE.getRandom(0, Integer.MAX_VALUE);
+	}
+
+	/**
+	 * Retrieves a map of attributes from the custom tag, where all HTML attributes are kept as they are (NO: and thymeleaf
+	 * th: attributes are converted to HTML attributes when possible). The map is then converted to a comma-separated string
+	 * @param customTag
+	 * @param context
+	 * @return a comma-separated string of name=value attributes to be used in th:attr
+	 */
+	public String getConvertedCustomTagAttributeString(IOpenElementTag customTag, ITemplateContext context, String...ignoreAttributes) {
+		// First, get all HTML attributes
+		Set<String> ignore = new HashSet<String>();
+		for (int i=0; i<ignoreAttributes.length; i++) {
+			if (ignoreAttributes[i]!=null) {
+				ignore.add(ignoreAttributes[i].toLowerCase());
+			}
+		}
+		Map<String, String> newAttributes = getHtmlAttributes(customTag, ignore);
+		// NO: Then convert all th: attributes to HTML attributes
+		// This was used when the YadaDialect precedence was the same as the StandardDialect
+		// convertThAttributes(customTag, newAttributes, context);
+		return YadaUtil.INSTANCE.mapToString(newAttributes);
+	}
+
+	/**
+	 * Get all HTML attributes from the custom sourceTag
+	 * @param sourceTag
+	 * @return the HTML attributes found on the tag
+	 */
+	private Map<String, String> getHtmlAttributes(IOpenElementTag sourceTag, Set<String> ignore) {
+		Map<String, String> newAttributes = new HashMap<>();
+		Map<String, String> sourceAttributes = sourceTag.getAttributeMap();
+		for (Map.Entry<String,String> sourceAttribute : sourceAttributes.entrySet()) {
+			String attributeName = sourceAttribute.getKey().toLowerCase();
+			String attributeValue = sourceAttribute.getValue();
+			if (!attributeName.startsWith(YADA_PREFIX_WITHCOLUMN) &&
+				!attributeName.startsWith(THYMELEAF_PREFIX_WITHCOLUMN) &&
+				!ignore.contains(attributeName)) {
+				if ("type".equalsIgnoreCase(attributeName) && "number".equalsIgnoreCase(attributeValue)) {
+					// The "type='number'" attribute must be removed from the output tag because it is handled in a custom way
+					continue;
+				}
+				// Convert null to name
+				if (attributeValue==null) {
+					attributeValue = attributeName;
+				}
+				// Escape single quote
+				attributeValue = attributeValue.replaceAll("'", "\\\\'");
+				// Add single quote around value so that equal sign doesn't mess up th:attr
+				attributeValue = "'" + attributeValue + "'";
+				newAttributes.put(attributeName, attributeValue);
+//				// Skip attributes with empty value (didn't find a way to set an empty attribute with thymeleaf!)
+//				if (attributeValue.length()>0) {
+//				}
+			}
+		}
+		return newAttributes;
+	}
+
+	@Deprecated // Not used anymore because the YadaDialect has a higher precedence so th attributes are stripped before
+	private void convertThAttributes(IOpenElementTag sourceTag, Map<String, String> newAttributes, ITemplateContext context) {
+		Map<String, String> sourceAttributes = sourceTag.getAttributeMap();
+		final IEngineConfiguration configuration = context.getConfiguration();
+		final IStandardExpressionParser parser = StandardExpressions.getExpressionParser(configuration);
+		// Most of th: attributes have a direct equivalent, some must have a special treatment
+		for (Map.Entry<String,String> sourceAttribute : sourceAttributes.entrySet()) {
+			String fullThAttributeName = sourceAttribute.getKey();
+			String attributeValue = sourceAttribute.getValue();
+			if (fullThAttributeName.startsWith(THYMELEAF_PREFIX_WITHCOLUMN)) {
+				String attributeName = removePrefix(fullThAttributeName, THYMELEAF_PREFIX); // from "th:value" to "value"
+				String parsedValue = null;
+				if (!"attr".equals(attributeName) && !"attrappend".equals(attributeName) && !"attrprepend".equals(attributeName)) {
+					// attr and similar attributes don't use expressions as value
+					try {
+						final IStandardExpression expression = parser.parseExpression(context, attributeValue);
+						parsedValue = (String) expression.execute(context);
+					} catch (Exception e) {
+						log.debug("Can't parse \"{}\" for attribute \"{}\" - skipping", attributeValue, fullThAttributeName);
+						continue; // Next attribute
+					}
+				}
+				// Hanlde some th attributes
+				switch (attributeName) {
+				case "field":
+					// Add "name" and "value" attributes
+					newAttributes.put("name", parsedValue);
+					newAttributes.put("value", parsedValue);
+					break;
+				case "attr":
+					handleAttr(attributeValue, newAttributes, AppendType.NONE, context, parser);
+					break;
+				case "alt-title":
+					// Add "alt" and "title" attributes
+					newAttributes.put("alt", parsedValue);
+					newAttributes.put("title", parsedValue);
+					break;
+				case "lang-xmllang":
+					// Add "lang" and "xmllang" attributes
+					newAttributes.put("lang", parsedValue);
+					newAttributes.put("xmllang", parsedValue);
+					break;
+				case "attrappend":
+					handleAttr(attributeValue, newAttributes, AppendType.APPEND, context, parser);
+					break;
+				case "attrprepend":
+					handleAttr(attributeValue, newAttributes, AppendType.PREPEND, context, parser);
+					break;
+				case "classappend":
+					appendMapValue("class", attributeValue, AppendType.APPEND_WITH_SPACE, newAttributes);
+					break;
+				case "styleappend":
+					appendMapValue("style", attributeValue, AppendType.APPEND, newAttributes);
+					break;
+				default:
+					// Most th: attributes have plain HTML equivalent
+					// but as they must be inserted via th:attr in the template, I need to convert the value
+					// into a sum of strings in order to handle single quotes correctly.
+					// Example original html: <yada:input th:oninput="|handleTag('@{/some/url(id=${someid})}')|">
+					// Example of final html: <input th:attr="oninput='handleTag('+'\''+'/some/url?id=123'+'\''+')'">
+					parsedValue = parsedValue.replaceAll("'", "'+'\\\\''+'");
+					// The parsedValue is now a plain string so we quote it to be EL compatible
+					newAttributes.put(attributeName, "'" + parsedValue + "'");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Handles "th:attr", "th:attrappend", "th:attrprepend" by splitting the comma-separated string into individual name-values pairs for newAttributes
+	 * @param attributeValue
+	 * @param newAttributes
+	 * @param appendType
+	 * @param context
+	 * @param parser
+	 */
+	private void handleAttr(String attributeValue, Map<String, String> newAttributes, AppendType appendType, ITemplateContext context, IStandardExpressionParser parser) {
+		// Add each comma-separated attribute
+		String[] attrAttributes = attributeValue.split(" *, *");
+		for (String attrAttribute : attrAttributes) {
+			// "name=value"
+			String[] nameThenValue = attrAttribute.split(" *= *");
+			String name = nameThenValue[0];
+			String value = nameThenValue[1];
+			final IStandardExpression attrExpression = parser.parseExpression(context, value);
+			String finalValue = (String) attrExpression.execute(context);
+			appendMapValue(name, finalValue, appendType, newAttributes);
+		}
+	}
+
+	/**
+	 * The value is appended to existing values found in the map with the same name
+	 * @param name
+	 * @param value
+	 * @param appendType
+	 * @param newAttributes
+	 */
+	private void appendMapValue(String name, String value, AppendType appendType, Map<String, String> newAttributes) {
+		String current  = newAttributes.get(name);
+		if (StringUtils.isNotBlank(current)) {
+			if (appendType==AppendType.APPEND) {
+				// Append to current value
+				value = current + value;
+			} else if (appendType==AppendType.PREPEND) {
+				// Prepend to current value
+				value = value + current;
+			} else if (appendType==AppendType.APPEND_WITH_SPACE) {
+				// Prepend to current value
+				value = current + " " + value;
+			} else if (appendType==AppendType.PREPEND_WITH_SPACE) {
+				// Prepend to current value
+				value = value + " " + current;
+			}
+		}
+		newAttributes.put(name, value);
+	}
+
+	/**
+	 * Remove the dialect prefix from the start of the value
+	 * @param value e.g. "yada:someAttributeName"
+	 * @param dialectPrefixNoColumn e.g. "yada"
+	 * @return the value stripped from the starting dialect prefix, e.g. "someAttributeName"
+	 */
+	public String removePrefix(String value, String dialectPrefixNoColumn) {
+		return StringUtils.removeStart(value, dialectPrefixNoColumn + ":");
 	}
 
     /**
      * Browser cache bypass trick for resources.
      * Converts "/res/xxx" into "/res-123/xxx", "/yadares/xxx" into "/yadares-7/xxx", where the number is the application build number.
      */
-    protected String getVersionedAttributeValue(final ITemplateContext context, String value) {
+	public String getVersionedAttributeValue(String value) {
     	try {
     		if (StringUtils.isBlank(value)) {
     			return value;
+    		}
+    		if (value.startsWith("//")) {
+    			return value;
+    		}
+    		if (!value.startsWith("/")) {
+    			return value; // Don't handle relative paths, for speed
     		}
 			// The contextPath is applied by @{} so it's not needed here
 			// String contextPath = ((org.thymeleaf.context.IWebContext)context).getRequest().getContextPath();
 			int dividerPos = value.indexOf('/', 1); // Second slash
 			if (dividerPos<0) {
-				throw new YadaInvalidValueException("Invalid url: {}", value);
+				return value; // No second slash
 			}
 			String valueType = value.substring(1, dividerPos); // e.g. "res"
-//    	String valuePrefix = value.substring(0, dividerPos); // e.g. "/res"
 			String valueSuffix = value.substring(dividerPos); // e.g. "/xxx"
 			boolean isResource = config.getResourceDir().equals(valueType);
 			if (isResource) {

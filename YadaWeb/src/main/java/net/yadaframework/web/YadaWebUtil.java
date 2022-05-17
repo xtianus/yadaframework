@@ -26,9 +26,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -79,6 +81,30 @@ public class YadaWebUtil {
 	private static final String PATTERN_INVALID_SLUG = "[?%:,;=&!+~()@*$'\"\\s]";
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
+	
+	/**
+	 * Adds all request parameters to the Model, optionally filtering by name.
+	 * Existing model attributes are not overwritten.
+	 * @param model
+	 * @param request
+	 * @param nameFilter parameter names that should pass through to the Model
+	 */
+	public void passThrough(Model model, HttpServletRequest request, String ... nameFilter) {
+		Map<String, String[]> parameterMap = request.getParameterMap();
+		Set<String> nameFilterSet = new HashSet<>();
+		nameFilterSet.addAll(Arrays.asList(nameFilter));
+		
+		for (Map.Entry<String, String[]> param : parameterMap.entrySet()) {
+			String key = param.getKey();
+			if (nameFilterSet.isEmpty() || nameFilterSet.contains(key)) {
+				String[] valueArray = param.getValue();
+				Object value = valueArray.length==1?valueArray[0]:valueArray;
+				if (value!=null && !model.containsAttribute(key)) {
+					model.addAttribute(key, value);
+				}
+			}
+		}
+	}
 
 	/**
 	 * Copies the content of a file to the Response then deletes the file.

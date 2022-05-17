@@ -20,6 +20,7 @@ import javax.persistence.Version;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 
@@ -113,6 +114,22 @@ public class YadaGallerySlide implements CloneableDeep {
 	@Override
 	public Field[] getExcludedFields() {
 		return null;
+	}
+	
+	public String getText5localValue() {
+		 return YadaUtil.getLocalValue(text5local);
+	}
+	
+	public String getText6localValue() {
+		return YadaUtil.getLocalValue(text6local);
+	}
+	
+	public String getText7localValue() {
+		return YadaUtil.getLocalValue(text7local);
+	}
+	
+	public String getText8localValue() {
+		return YadaUtil.getLocalValue(text8local);
 	}
 
 	/////////////////////////////////////////////////////////////

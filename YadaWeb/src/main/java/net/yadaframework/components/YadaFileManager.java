@@ -346,7 +346,7 @@ public class YadaFileManager {
 	}
 
 	/**
-	 * Copies a received file to the upload folder. A pointer to the file is stored in the database as
+	 * Copies a received file to the upload folder. A pointer to the file is stored in the database as YadaManagedFile
 	 * @param multipartFile file coming from the http request
 	 * @return the uploaded file with a unique name, or null if the user did not send any file
 	 * @throws IOException
@@ -356,7 +356,7 @@ public class YadaFileManager {
 	}
 
 	/**
-	 * Copies a received file to the upload folder. A pointer to the file is stored in the database as
+	 * Copies a received file to the upload folder. A pointer to the file is stored in the database as YadaManagedFile
 	 * @param multipartFile file coming from the http request
 	 * @param description a user description for the file
 	 * @return the uploaded file with a unique name, or null if the user did not send any file
