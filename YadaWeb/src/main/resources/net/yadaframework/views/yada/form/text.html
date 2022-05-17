@@ -60,7 +60,7 @@ Example:
 	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perchÃ© se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
 		<!--/* Can't use th:field="*{__${fieldName}__}" because somehow passwords remain blank when they already have a value */-->
 		<div th:if="${addonLeft!=null}" th:text="${addonLeft}" class="input-group-addon">$</div>
-		<input th:if="${maxlength==null or maxlength le 80}" th:name="${fieldName}" th:value="*{{__${fieldName}__}}"
+		<input th:if="${(maxlength==null or maxlength <= 80) and editor!=true}" th:name="${fieldName}" th:value="*{{__${fieldName}__}}" 
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:type="${type}?:'text'" th:readonly="${readonly}" 
 			th:min="${min}" th:max="${max}" th:step="${step}" 
@@ -68,20 +68,21 @@ Example:
 			th:classappend="${readonly==true?'yadaReadonly':(noFeedback==true?'':' has-feedback')}" th:maxlength="${maxlength}" 
 			th:tabindex="${tabindex}"
 			th:autocomplete="${autocomplete}"
-			th:id="${id}?:${#ids.seq(seqName)}" 
-			th:aria-describedby="${ariaDescribedby}?:(${id}?:${#ids.next(seqName)})"/>
+			th:id="${id}?:${#ids.seq(seqName)}"  
+			th:aria-describedby="${ariaDescribedby}?:(${id}?:${#ids.next(seqName)})"> <!--/* WRONG ID */-->
 		<div th:if="${addonRight!=null}" th:text="${addonRight}" class="input-group-addon">.00</div>
 		<span th:if="${type=='password' && noShowPassword!=true}" class="input-group-btn">
 			<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
 		</span>
-		<textarea th:if="${maxlength gt 80}" th:rows="${rows}?:3" th:field="*{{__${fieldName}__}}" 
+		<textarea th:if="${maxlength > 80 or editor==true}" th:rows="${rows}?:3" th:field="*{{__${fieldName}__}}" 
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:maxlength="${maxlength}" 
 			th:class="${classes}?:'form-control'"
 			th:classappend="${readonly==true?'yadaReadonly':(noFeedback==true?'':' has-feedback')}"
 			th:tabindex="${tabindex}"
 			th:autocomplete="${autocomplete}"
-			th:id="${id}?:${#ids.seq(seqName)}" th:attr="aria-describedby=${id}?:${#ids.next(seqName)}"></textarea>
+			th:id="${id}?:${#ids.seq(seqName)}" 
+			th:attr="aria-describedby=${id}?:${#ids.next(seqName)}"></textarea> <!--/* WRONG ID */-->
 		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
 			<a th:if="${help!=null}" class="yadaHelpButton input-group-addon" data-trigger="focus" data-container="body" 
 				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
@@ -100,7 +101,14 @@ Example:
             		// Possible values for Classic build:
             		// ["undo", "redo", "bold", "italic", "blockQuote", "ckfinder", "imageTextAlternative", "imageUpload", "heading", "imageStyle:full", "imageStyle:side", "indent", "outdent", "link", "numberedList", "bulletedList", "mediaEmbed", "insertTable", "tableColumn", "tableRow", "mergeTableCells"]
             		// "link" removed because it doesn't work in modals
-            		toolbar: [[${toolbar}?:${ {"undo", "redo", "bold", "italic", "blockQuote", "heading", "indent", "outdent", "numberedList", "bulletedList", "insertTable", "tableColumn", "tableRow", "mergeTableCells"} }]]
+            		removePlugins: [ 'Image', 'Media embed' ],
+            		toolbar: [[${toolbar}?:${ {"undo", "redo", "bold", "italic", "blockQuote", "heading", "indent", "outdent", "numberedList", "bulletedList", "insertTable", "tableColumn", "tableRow", "mergeTableCells"} }]],
+            		image: {
+            			toolbar: ['|']
+            		},
+            		mediaEmbed: {
+            			toolbar: ['|']
+            		}
             	})
             	// Show all toolbar values with the following code:
             	// .then( editor => {
@@ -110,13 +118,6 @@ Example:
             	.catch( error => {
                 console.error( error );
             } );
-        	/* CKEditor 4
-			$([['#'+${id}?:${#ids.prev(seqName)}]]).ckeditor(function( textarea ) {
-			}, {
-				removeButtons : 'Save,About',
-				height : 400
-			}).editor;
-        	*/
         });
 		//]]>
 	</script>
