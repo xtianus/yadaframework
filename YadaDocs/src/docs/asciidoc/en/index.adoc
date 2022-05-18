@@ -54,25 +54,25 @@ that will show you how to quickly create a web application
 
 <<internationalization.adoc#,i18n>>:: Implement a multilanguage site
 
-<<database/pagination.adoc#>>:: Fetch big data one piece at a time
+<<database/pagination.adoc#,Database pagination>>:: Fetch big data one piece at a time
 
 <<forms/overview.adoc#Forms,Forms>>:: Submitting data to the server
 
 <<ajax.adoc#,Ajax>>:: Easy async operations
 
-<<ajaxModal.adoc#, Ajax Modals>>:: Open a modal as a result of an ajax call
+<<ajaxModal.adoc#,Ajax Modals>>:: Open a modal as a result of an ajax call
 
-<<datatables.adoc#>>:: TODO
+<<datatables.adoc#,DataTables>>:: Effective handling of tabular data
 
-<<emails.adoc#>>:: TODO
+<<emails.adoc#,Sending Emails>>:: Templating applied to emails
 
-<<notificationModal.adoc#>>:: TODO
+<<notificationModal.adoc#,Notification Modal>>:: Quick messages to the user
 
 <<misc.adoc#,Miscellaneous>>:: Other features
 
-<<troubleshooting.adoc#>>:: TODO
+<<troubleshooting.adoc#,Troubleshooting>>:: Some hints for fixing problems
 
-<<upgrade.adoc#,Upgrade Yada Framework Version>>:: new versions are announced on this page, together
+<<upgrade.adoc#,Upgrade Yada Framework Version>>:: New versions are announced on this page, together
 with instructions on how to migrate from the previous one
 
 ==  Current Status

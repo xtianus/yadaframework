@@ -55,10 +55,10 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <li><a href="#_entity_backing_beans">Entity Backing Beans</a></li>
 <li><a href="#_ajax_forms">Ajax Forms</a>
 <ul class="sectlevel2">
-<li><a href="#_scattered_forms_form_groups">Scattered Forms (form groups)</a></li>
 <li><a href="#_postprocessing">Postprocessing</a></li>
 </ul>
 </li>
+<li><a href="#_form_groups">Form groups</a></li>
 </ul>
 </div>
 </div>
@@ -286,12 +286,32 @@ to be called in order. Submission is aborted if any returns false and any follow
 The "this" object is either the form or the clicked button, depending on where the tag has been placed.</p>
 </div>
 <div class="sect2">
-<h3 id="_scattered_forms_form_groups">Scattered Forms (form groups)</h3>
+<h3 id="_postprocessing">Postprocessing</h3>
+<div class="paragraph">
+<p>There are many options to handle the server response, like replacing page content or invoking some
+handler. See <a href="../ajax.html#_ajax_links">Ajax Links</a> for more details. For example, this form replaces a page element with the
+returned html:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form class="yadaAjax" action="/subscribe" yada:updateOnSuccess="#someSection"&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_form_groups">Form groups</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>Multiple forms scattered around the page can be submitted together if they belong to the same "Form Group":
-when any ajax form in the group is submitted, the fields from all other forms in the same group are added
-to the payload.
-When a non-ajax form is submitted, the group is ignored.</p>
+when any (ajax or not) form in the group is submitted, the fields from all other forms in the same group are added
+to the payload. If a field has the same name in more than one form, only the first found is considered.</p>
+</div>
+<div class="paragraph">
+<p>The submission of a form group can also be triggered by an anchor or any other type of element
+with a <code>href</code> or <code>data-href</code> attribute (ajax or not). Any request parameter on the url is added to the payload and
+overwrites any form fields with the same name.</p>
 </div>
 <div class="paragraph">
 <p>The syntax to define a form group is the following:</p>
@@ -321,11 +341,11 @@ When a non-ajax form is submitted, the group is ignored.</p>
 </tbody>
 </table>
 <div class="paragraph">
-<p>Example:</p>
+<p>Example with a triggering form:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form action="/realAction" yada:formGroup="myGroup" class="yadaAjax"&gt;
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form action="/someAction" yada:formGroup="myGroup"&gt;
 	&lt;input name="a" value="1"&gt;
 	&lt;button type="submit"&gt;Submit&lt;/button&gt;
 &lt;/form&gt;
@@ -338,7 +358,7 @@ When a non-ajax form is submitted, the group is ignored.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>In the above example, submitting the first form would send <code>"a=1&amp;b=2&amp;c=3"</code> to <code>/realAction</code>.</p>
+<p>In the above example, submitting the first form would send <code>"a=1&amp;b=2&amp;c=3"</code> to <code>/someAction</code>.</p>
 </div>
 <div class="paragraph">
 <p>A similar behavior would be obtained by using the "form" attribute on the <code>&lt;input&gt;</code> tags of child forms.
@@ -350,28 +370,31 @@ The use of <code>yada:formGroup</code> has the following advantages:</p>
 <p>it is quicker to type on large forms</p>
 </li>
 <li>
-<p>does not prevent the individual submission of non-ajax forms in the group the standard way</p>
-</li>
-<li>
-<p>can be used together with ajax calls on elements other than forms (e.g. <a href="../ajax.html#_ajax_links">ajax links</a>)</p>
+<p>can be used together with (ajax or not) requests from elements other than forms (e.g. <a href="../ajax.html#_ajax_links">ajax links</a>)</p>
 </li>
 <li>
 <p>a future improvement could allow forms to belong to multiple groups, something that can&#8217;t be done with the "form" attribute</p>
 </li>
 </ul>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_postprocessing">Postprocessing</h3>
 <div class="paragraph">
-<p>There are many options to handle the server response, like replacing page content or invoking some
-handler. See <a href="../ajax.html#_ajax_links">Ajax Links</a> for more details. For example, this form replaces a page element with the
-returned html:</p>
+<p>Example with a triggering anchor in ajax:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form class="yadaAjax" action="/subscribe" yada:updateOnSuccess="#someSection"&gt;</code></pre>
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a href="" yada:ajax="/someUrl?a=9" yada:formGroup="myGroup"&gt;Click me&lt;/a&gt;
+&lt;form action="/someAction" yada:formGroup="myGroup"&gt;
+	&lt;input name="a" value="1"&gt;
+	&lt;input name="c" value="3"&gt;
+	&lt;button type="submit"&gt;Submit&lt;/button&gt;
+&lt;/form&gt;
+&lt;form action="ignored" yada:formGroup="myGroup"&gt;
+	&lt;input name="b" value="2"&gt;
+&lt;/form&gt;</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>In the above example, clicking on the link would send <code>"a=9&amp;b=2&amp;c=3"</code> to <code>/someUrl</code>.</p>
 </div>
 <div class="listingblock todo">
 <div class="content">
@@ -384,11 +407,10 @@ returned html:</p>
 </div>
 </div>
 </div>
-</div>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2022-04-29 15:35:55 +0200
+Last updated 2022-05-02 12:32:38 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

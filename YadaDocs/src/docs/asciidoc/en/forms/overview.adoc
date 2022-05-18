@@ -177,12 +177,26 @@ Example:
 Submit handlers can be set on the form tag and on any submit button.
 The "this" object is either the form or the clicked button, depending on where the tag has been placed.
 
-===  Scattered Forms (form groups)
+===  Postprocessing
+
+There are many options to handle the server response, like replacing page content or invoking some
+handler. See <<../ajax.adoc#_ajax_links,Ajax Links>> for more details. For example, this form replaces a page element with the
+returned html:
+
+[source,html]
+----
+<form class="yadaAjax" action="/subscribe" yada:updateOnSuccess="#someSection">
+----
+
+==  Form groups
 
 Multiple forms scattered around the page can be submitted together if they belong to the same "Form Group":
-when any ajax form in the group is submitted, the fields from all other forms in the same group are added
-to the payload.
-When a non-ajax form is submitted, the group is ignored.
+when any (ajax or not) form in the group is submitted, the fields from all other forms in the same group are added
+to the payload. If a field has the same name in more than one form, only the first found is considered.
+
+The submission of a form group can also be triggered by an anchor or any other type of element 
+with a `href` or `data-href` attribute (ajax or not). Any request parameter on the url is added to the payload and 
+overwrites any form fields with the same name.
 
 The syntax to define a form group is the following:
 
@@ -193,11 +207,11 @@ The syntax to define a form group is the following:
 |data-yadaFormGroup   |yada:formGroup   |any name  | Identifies the form as belonging to the given group   
 |===
 
-Example:
+Example with a triggering form:
 
 [source,html]
 ----
-<form action="/realAction" yada:formGroup="myGroup" class="yadaAjax">
+<form action="/someAction" yada:formGroup="myGroup">
 	<input name="a" value="1">
 	<button type="submit">Submit</button>
 </form>
@@ -209,26 +223,32 @@ Example:
 </form>
 ----
 
-In the above example, submitting the first form would send `"a=1&b=2&c=3"` to `/realAction`.
+In the above example, submitting the first form would send `"a=1&b=2&c=3"` to `/someAction`.
 
 A similar behavior would be obtained by using the "form" attribute on the `<input>` tags of child forms.
 The use of `yada:formGroup` has the following advantages:
 
 - it is quicker to type on large forms
-- does not prevent the individual submission of non-ajax forms in the group the standard way
-- can be used together with ajax calls on elements other than forms (e.g. <<../ajax.adoc#_ajax_links,ajax links>>)  
+- can be used together with (ajax or not) requests from elements other than forms (e.g. <<../ajax.adoc#_ajax_links,ajax links>>)  
 - a future improvement could allow forms to belong to multiple groups, something that can't be done with the "form" attribute
 
-===  Postprocessing
-
-There are many options to handle the server response, like replacing page content or invoking some
-handler. See <<../ajax.adoc#_ajax_links,Ajax Links>> for more details. For example, this form replaces a page element with the
-returned html:
+Example with a triggering anchor in ajax:
 
 [source,html]
 ----
-<form class="yadaAjax" action="/subscribe" yada:updateOnSuccess="#someSection">
+<a href="" yada:ajax="/someUrl?a=9" yada:formGroup="myGroup">Click me</a>
+<form action="/someAction" yada:formGroup="myGroup">
+	<input name="a" value="1">
+	<input name="c" value="3">
+	<button type="submit">Submit</button>
+</form>
+<form action="ignored" yada:formGroup="myGroup">
+	<input name="b" value="2">
+</form>
 ----
+
+In the above example, clicking on the link would send `"a=9&b=2&c=3"` to `/someUrl`.
+
 
 [.todo]
 ----
