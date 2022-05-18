@@ -318,6 +318,14 @@ public abstract class YadaConfiguration {
 	public boolean useDatabaseMigrationAtStartup() {
 		return configuration.getBoolean("config/database/databaseMigrationAtStartup", false);
 	}
+	/**
+	 * "Out of order" flag in FlyWay 
+	 * https://flywaydb.org/documentation/configuration/parameters/outOfOrder
+	 * @return
+	 */
+	public boolean useDatabaseMigrationOutOfOrder() {
+		return configuration.getBoolean("config/database/databaseMigrationAtStartup/@outOfOrder", false);
+	}
 
 	/**
 	 * Returns the configured default locale.
