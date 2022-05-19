@@ -81,6 +81,35 @@ public class YadaWebUtil {
 	private static final String PATTERN_INVALID_SLUG = "[?%:,;=&!+~()@*$'\"\\s]";
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
+
+	/**
+	 * If the url is a full url that points to our server, make it relative to the server and strip any language in the path.
+	 * The result can be used in thymeleaf @{url} statements and will get the proper browser language when needed.
+	 * @param fullUrlWithHttp something like "https://my.site.com/en/something/here", can be empty or null
+	 * @param request
+	 * @return someting like "/something/here", or null
+	 */
+	public String removeLanguageFromOurUrl(String fullUrlWithHttp, HttpServletRequest request) {
+		String url = StringUtils.trimToNull(fullUrlWithHttp); // "https://my.site.com/en/something/here"
+		if (url==null) {
+			return null;
+		}
+		String ourAddress = this.getWebappAddress(request); // "https://my.site.com"
+		if (url.startsWith(ourAddress)) {
+			url = url.substring(ourAddress.length()); // "/en/something/here"
+			if (config.isLocalePathVariableEnabled() && url.length()>=3) {
+				// If the url starts with a configured language, strip it
+				List<String> localeStrings = config.getLocaleStrings();
+				for (String language : localeStrings) {
+					if (url.startsWith("/" + language + "/")) {
+						url = url.substring(language.length()+1); // "/something/here"
+						break;
+					}
+				}
+			}
+		}
+		return url;
+	}
 	
 	/**
 	 * Adds all request parameters to the Model, optionally filtering by name.

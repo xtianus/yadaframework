@@ -90,6 +90,21 @@ public abstract class YadaConfiguration {
 	private String targetImageExtension=null;
 	private String preserveImageExtensions=null;
 	private String defaultNotifyModalView = null;
+	
+	/**
+	 * Gets the value of any config key defined in the /config/local configuration 
+	 * file (it should reside on the developers computer in a personal folder, not shared).
+	 * When not defined, the value is an empty string.
+	 * Only available in dev env.
+	 * @param name
+	 * @return
+	 */
+	public Object getLocalConfig(String name) {
+		if (!isDevelopmentEnvironment()) {
+			return "";
+		}
+		return configuration.getString("config/local/"+name, "");
+	}
 
 	/**
 	 * Returns the configured path for the notification modal.
@@ -398,7 +413,7 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
-	 * Get a list of iso2 locales that the webapp can handle
+	 * Get a list of iso2 locales that the webapp can handle (language only)
 	 * @return
 	 */
 	public List<String> getLocaleStrings() {

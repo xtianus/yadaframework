@@ -14,7 +14,7 @@ Parameters:
 - fieldName = name of the field holding the value
 - id = id of the field holding the value (optional)
 - labelKey = key in messages.properties for the label text
-- label = label to use, if not using a labelKey
+- label = label to use, if not using a labelKey (optional)
 - classes = base classes to set on the input/textarea element. When not specified, "form-control" is used
 - placeholderKey = key in messages.properties for the placeholder text (optional)
 - placeholder = placeholder to use, if not using a placeholderKey (optional)
@@ -26,8 +26,10 @@ Parameters:
 - required = true for a required value (optional)
 - disabled = true for a disabled field - NOT SENT TO SERVER (optional)
 - readonly = true for readonly (optional)
-- maxlength = max number of characters accepted (optional). When greater than 80, a textarea is generated instead of an input tag.
+- maxlength = max number of characters accepted (optional). 
+              When greater than 80, a textarea is generated instead of an input tag, unless notextarea is true.
 - rows = number of rows for the textarea (optional)
+- notextarea = do not automatically use textarea when maxlength>80 (optional)
 - addonLeft = character to set as a bootstrap "input-group-addon" to the left of the input field (optional)
 - addonRight = character to set as a bootstrap "input-group-addon" to the right of the input field (optional)
 - help = testo per il pulsante di help, se non c'è helpKey (optional)
@@ -51,6 +53,7 @@ Example:
 */-->
 <body>
 <div th:fragment="field"> <!--/* Top-level div container is needed for fragment replacement */-->
+<!--/* TODO see boolean.html for how to set a unique default id when fields in a modal have the same name as fields in the main page */-->
 <th:block th:with="tmp=${fieldName+'seqName'},seqName=${#strings.replace(#strings.replace(tmp,']',''),'[','')}">
 <input th:if="${#strings.equals(type,'hidden')}" th:field="*{{__${fieldName}__}}" th:disabled="${disabled}" th:type="hidden" th:id="${id}?:${#ids.seq(seqName)}" />
 <div th:if="${!#strings.equals(type,'hidden')}" class="form-group" 
@@ -60,7 +63,7 @@ Example:
 	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perchÃ© se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
 		<!--/* Can't use th:field="*{__${fieldName}__}" because somehow passwords remain blank when they already have a value */-->
 		<div th:if="${addonLeft!=null}" th:text="${addonLeft}" class="input-group-addon">$</div>
-		<input th:if="${(maxlength==null or maxlength <= 80) and editor!=true}" th:name="${fieldName}" th:value="*{{__${fieldName}__}}" 
+		<input th:if="${(maxlength==null or maxlength <= 80 or notextarea==true) and editor!=true}" th:name="${fieldName}" th:value="*{{__${fieldName}__}}" 
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:type="${type}?:'text'" th:readonly="${readonly}" 
 			th:min="${min}" th:max="${max}" th:step="${step}" 
@@ -74,7 +77,7 @@ Example:
 		<span th:if="${type=='password' && noShowPassword!=true}" class="input-group-btn">
 			<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
 		</span>
-		<textarea th:if="${maxlength > 80 or editor==true}" th:rows="${rows}?:3" th:field="*{{__${fieldName}__}}" 
+		<textarea th:if="${(maxlength > 80 and notextarea!=true) or editor==true}" th:rows="${rows}?:3" th:field="*{{__${fieldName}__}}" 
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:maxlength="${maxlength}" 
 			th:class="${classes}?:'form-control'"

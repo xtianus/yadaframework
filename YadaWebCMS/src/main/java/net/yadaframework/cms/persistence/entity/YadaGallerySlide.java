@@ -116,19 +116,19 @@ public class YadaGallerySlide implements CloneableDeep {
 		return null;
 	}
 	
-	public String getText5localValue() {
+	public String getText5LocalValue() {
 		 return YadaUtil.getLocalValue(text5local);
 	}
 	
-	public String getText6localValue() {
+	public String getText6LocalValue() {
 		return YadaUtil.getLocalValue(text6local);
 	}
 	
-	public String getText7localValue() {
+	public String getText7LocalValue() {
 		return YadaUtil.getLocalValue(text7local);
 	}
 	
-	public String getText8localValue() {
+	public String getText8LocalValue() {
 		return YadaUtil.getLocalValue(text8local);
 	}
 
