@@ -918,11 +918,11 @@ public class YadaUtil {
 	 * @param fetchedEntity object fetched from database that may contain localized strings
 	 * @param targetClass type of fetchedEntity element
 	 */
-	public static <targetClass> void prefetchLocalizedStrings(targetClass fetchedEntity, Class<?> targetClass) {
+	public static <targetClass> void prefetchLocalizedStrings(targetClass fetchedEntity, Class<?> targetClass, String...attributes) {
 		if (fetchedEntity!=null) {
 			List<targetClass> list = new ArrayList<>();
 			list.add(fetchedEntity);
-			prefetchLocalizedStringList(list, targetClass);
+			prefetchLocalizedStringList(list, targetClass, attributes);
 		}
 	}
 
