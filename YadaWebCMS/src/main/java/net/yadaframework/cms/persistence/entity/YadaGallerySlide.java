@@ -53,10 +53,10 @@ public class YadaGallerySlide implements CloneableDeep {
 	private String data5;
 	private String data6;
 	
-	@OneToOne(cascade=CascadeType.ALL) // Remember to delete the file from disk on REMOVE
+	@OneToOne(cascade= {CascadeType.PERSIST, CascadeType.REMOVE}) // Remember to delete the file from disk on REMOVE
 	private YadaAttachedFile video;
 	
-	@OneToOne(cascade= {CascadeType.PERSIST, CascadeType.REMOVE})
+	@OneToOne(cascade= {CascadeType.PERSIST, CascadeType.REMOVE}) // Remember to delete the file from disk on REMOVE
 	private YadaAttachedFile image;
 
 	// Single language texts

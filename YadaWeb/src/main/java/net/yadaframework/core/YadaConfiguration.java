@@ -92,6 +92,21 @@ public abstract class YadaConfiguration {
 	private String defaultNotifyModalView = null;
 	
 	/**
+	 * Gets the value of any boolean config key defined in the /config/local configuration 
+	 * file (it should reside on the developers computer in a personal folder, not shared).
+	 * When not defined or not a boolean, the value is false.
+	 * Only available in dev env.
+	 * @param name
+	 * @return
+	 */
+	public boolean isLocalFlag(String name) {
+		if (!isDevelopmentEnvironment()) {
+			return false;
+		}
+		return configuration.getBoolean("config/local/"+name, false);
+	}
+	
+	/**
 	 * Gets the value of any config key defined in the /config/local configuration 
 	 * file (it should reside on the developers computer in a personal folder, not shared).
 	 * When not defined, the value is an empty string.

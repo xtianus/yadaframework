@@ -69,7 +69,7 @@ public class YadaNotifyData {
 		activateNormal();
 		return configuration.getNotifyModalView();
 	}
-
+	
 	/**
 	 * Set the notification title
 	 * @param title
