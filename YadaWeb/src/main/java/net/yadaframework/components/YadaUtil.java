@@ -131,6 +131,47 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+	
+	/**
+	 * Add an element to the list only if the element is not null
+	 * @param <T>
+	 * @param list
+	 * @param element
+	 */
+	public <T> void addIfNotNull(List<T> list, T element) {
+		if (element!=null) {
+			list.add(element);
+		}
+	}
+	
+	/**
+	 * Create a new TreeSet that sorts values according to the order specified in the parameter.
+	 * Values that are missing from sortOrder are sorted alphabetically
+	 * @param sortOrder
+	 * @return an empty sorted set that can receive a subset of the values in the sortOrder and keep them sorted the same way
+	 */
+	public Set<String> getEmptySortedSet(List<String> sortOrder) {
+    	Map<String, Integer> order = new HashMap<String, Integer>(); // From value to position
+    	for (int j = 0; j < sortOrder.size(); j++) {
+    		order.put(sortOrder.get(j), j);
+		}
+    	Set<String> result = new TreeSet<>(new Comparator<String>() {
+			@Override
+			public int compare(String left, String right) {
+				try {
+					return order.get(left).compareTo(order.get(right));
+				} catch (Exception e) {
+					// In case of error, fallback to alphabetical
+					log.error("Can't compare {} with {} (ignored)", left, right);
+					if (left!=null) {
+						return left.compareTo(right);
+					}
+					return right!=null?1:0;
+				}
+			}
+    	});
+		return result;
+	}
 
 	/**
 	 * Given a ISO date, a ISO time and a timezone, return the Date.
