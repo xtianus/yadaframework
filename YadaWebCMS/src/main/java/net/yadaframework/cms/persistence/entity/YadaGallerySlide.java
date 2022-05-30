@@ -38,7 +38,7 @@ public class YadaGallerySlide implements CloneableDeep {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 	
-	private boolean enabled = true; 
+	private boolean slideEnabled = true; 
 	
 	private Long pos; // Position in the sequence to which the slide belongs
 	
@@ -207,12 +207,12 @@ public class YadaGallerySlide implements CloneableDeep {
 		this.pos = pos;
 	}
 
-	public boolean isEnabled() {
-		return enabled;
+	public boolean isSlideEnabled() {
+		return slideEnabled;
 	}
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
+	public void setSlideEnabled(boolean enabled) {
+		this.slideEnabled = enabled;
 	}
 
 	public boolean isFlag1() {
