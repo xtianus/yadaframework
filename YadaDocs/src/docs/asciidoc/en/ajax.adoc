@@ -302,6 +302,7 @@ quoting them in single quotes.
 
 
 The "jQuery selector list" is a comma-separated list of jQuery selectors, like `"#someId, .someClass > a"`.
+It is searched in all the document unless a special yada prefix is used (see below).
 If the selector list is empty, the target is the element itself.
 If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.
 
@@ -311,14 +312,20 @@ Each selector can also have the following special prefixes:
 h| name
 a| description
 
+a| `yadaFind:`
+a| the selector is searched in the children of the current element using `$.find()`
+
 a| `yadaParents:`
 a| the selector is searched in the parents of the current element using `$.closest()`
 
 a| `yadaSiblings:`
-a| the selector is searched in the siblings of the current element
+a| the selector is searched in the siblings of the current element using `$.siblings()`
 
 a| `yadaClosestFind:`
 a| splits the selector at the first space then uses `$.closest()` with the first part and `$.find()` with the second
+
+a| `yadaSiblingsFind:`
+a| splits the selector at the first space then uses `$.siblings()` with the first part and `$.find()` with the second
 |===
 
 Each selector can also be the argument of a function that alters the behavior from replacing to appending/prepending:
