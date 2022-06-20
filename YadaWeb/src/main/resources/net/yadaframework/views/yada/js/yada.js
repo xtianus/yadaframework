@@ -34,6 +34,7 @@
 	
 	var siteMatcher=RegExp("(?:http.?://)?([^/:]*).*"); // Extract the server name from a url like "http://www.aaa.com/xxx" or "www.aaa.com"
 	
+	const findSelector = "yadaFind:"; // Used to indicate that a CSS selector should be searched in the children using find()
 	const parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
 	const siblingsSelector = "yadaSiblings:"; // Used to indicate that a CSS selector should be searched in the siblings()
 	const closestFindSelector = "yadaClosestFind:"; // Used to indicate that a two-part CSS selector should be searched with closest() then with find()
@@ -137,14 +138,14 @@
 		if ($element==null) {
 			$element = $('body');
 		}
-	    $('.s_tooltip', $element).tooltip();
+	    $('.s_tooltip', $element).tooltip && $('.s_tooltip', $element).tooltip();
 	};
 	
 	yada.enableHelpButton = function($element) {
 		if ($element==null) {
 			$element = $('body');
 		}
-		$('.yadaHelpButton', $element).popover();
+		$('.yadaHelpButton', $element).popover && $('.yadaHelpButton', $element).popover();
 	};
 
 	/**
@@ -1191,19 +1192,23 @@
 	
 	/**
 	 * Returns a jquery element searched using the extended yada selector prefixes. The empty selector is the $fromElement
-	 * @param $fromElement the element to start from. Ignored if no yada prefix is used.
+	 * @param $fromElement the element to start from. Ignored if no yada prefix is used: the selector will be searched in all the document.
 	 * @param selector the CSS selector prefixed with a yada prefix (or not)
 	 */
 	yada.extendedSelect = function($fromElement, selector) {
 		if (selector == null || selector.trim()=="") {
 			return $fromElement;
 		}
+		var fromChildren = yada.startsWith(selector, findSelector); // yadaFind:
 		var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
 		var fromSiblings = yada.startsWith(selector, siblingsSelector); // yadaSiblings:
 		var fromClosestFind = yada.startsWith(selector, closestFindSelector); // yadaClosestFind:
 		var fromSiblingsFind = yada.startsWith(selector, siblingsFindSelector); // yadaSiblingsFind:
-		if (fromParents==false && fromSiblings==false && fromClosestFind==false && fromSiblingsFind==false) {
+		if (fromChildren==false && fromParents==false && fromSiblings==false && fromClosestFind==false && fromSiblingsFind==false) {
 			return $(selector);
+		} else if (fromChildren) {
+			selector = selector.replace(findSelector, "").trim();
+			return $fromElement.find(selector);
 		} else if (fromParents) {
 			selector = selector.replace(parentSelector, "").trim();
 			return $fromElement.parent().closest(selector);
