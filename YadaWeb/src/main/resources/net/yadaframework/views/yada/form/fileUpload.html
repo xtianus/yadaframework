@@ -38,7 +38,7 @@ Example:
 		<i class="fa fa-question-circle fa-lg"></i>
 	</a>
 	<div th:if="${size!=null}" class="yadaMinimumSize"><span th:text="${size}">100x100</span> [[#{yada.form.fileUpload.minimumSize}]]</div>
-	<div th:if="${showMaxUploadSize==true}" class="yadaMinimumSize"><span th:text="${@config.maxFileUploadSizeMega}">60</span>[[#{yada.form.fileUpload.sizeLimit}]]</div>
+	<div th:if="${showMaxUploadSize==true}" class="yadaMinimumFileSize"><span th:text="${@config.maxFileUploadSizeMega}">60</span>[[#{yada.form.fileUpload.sizeLimit}]]</div>
 	<input th:field="*{__${fieldName}__}" type="file" th:disabled="${disabled}" th:required="${required}" class="form-control has-feedback" 
 		th:accept="${accept}?:''" th:id="${#ids.seq(seqName)}" th:attr="aria-describedby=${#ids.next(seqName)}"/>
 	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>

@@ -31,10 +31,10 @@ Example: <div th:replace="/yada/form/boolean::field(fieldName='useGold',label='U
 	 */--> 
 <div class="form-group has-feedback" 
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}, 
-		inputId=${id?:#ids.seq(#request.getRequestURI())}"
+		inputId=${id?:#ids.seq(@yadaWebUtil.getRequestMapping(#request))}"
 		th:classappend="${hasError}? has-error">
 	<div class="checkbox">
-		<label th:if="${switch==null or switch!=true}" class="control-label" id="${inputId}+'label'">
+		<label th:if="${switch==null or switch!=true}" class="control-label" th:id="${inputId}+'label'">
 			<input type="checkbox" th:field="*{__${fieldName}__}" th:required="${required}" th:disabled="${disabled}" 
 				class="has-feedback" th:id="${inputId}" th:attr="aria-describedby=${inputId}+'label'"/>
 			<span th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Subscribe</span> 

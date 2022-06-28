@@ -81,6 +81,20 @@ public class YadaWebUtil {
 	private static final String PATTERN_INVALID_SLUG = "[?%:,;=&!+~()@*$'\"\\s]";
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
+	
+	/**
+	 * Returns the last part of the current request, for example from "/some/product" returns "product"
+	 * @param request
+	 * @return
+	 */
+	public String getRequestMapping(HttpServletRequest request) {
+		String path = request.getServletPath();
+		String[] parts = path.split("/");
+		if (parts.length==0) {
+			return "/";
+		}
+		return parts[parts.length-1];
+	}
 
 	/**
 	 * If the url is a full url that points to our server, make it relative to the server and strip any language in the path.

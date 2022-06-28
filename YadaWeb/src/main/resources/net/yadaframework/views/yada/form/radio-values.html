@@ -10,6 +10,7 @@ TODO: fare una versione che riceve un enum per avere la lista dei valori
 
 Parameters:
 - fieldName = name of the field holding the value
+- id = id of the field holding the value (optional)
 - labelKey = key in messages.properties for the top label text
 - label = top label to use, if not using a labelKey
 - values = a static list, like ${ {true,false} } (space is important) - can be absent for empty select
@@ -22,12 +23,17 @@ Example:
 
 */-->
 <body>
+<!--/* The default id (inputId) is a sequence derived from the current URI, so that ajax-loaded modals get a different id from the
+	 * main page. This doesn't work when many page elements are ajax-loaded from the same url of course, in which
+	 * case you need to pass a specific id.
+	 */--> 	
 <div th:fragment="field"
-	class="form-group has-feedback" th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
+	class="form-group has-feedback" th:with="hasError=${#fields.hasErrors('__${fieldName}__')},
+	inputId=${id?:#ids.seq(@yadaWebUtil.getRequestMapping(#request))}" th:classappend="${hasError}? has-error">
 	<label th:if="${label!=null || labelKey!=null}" class="control-label" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
 	<div class="radio" th:each="value : ${values}">
 		<label class="control-label">
-			<input type="radio" th:field="*{__${fieldName}__}" th:value="${value}" th:id="${#ids.seq('fieldId')}" />
+			<input type="radio" th:field="*{__${fieldName}__}" th:value="${value}" th:id="${inputId}" />
 			<span th:text="#{${labelPrefix+value}}">Radio Text</span>
 			<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
 		</label>
