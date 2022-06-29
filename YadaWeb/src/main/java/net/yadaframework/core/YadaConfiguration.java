@@ -98,6 +98,20 @@ public abstract class YadaConfiguration {
 	private DataSource dataSource = null;
 	private File uploadsFolder = null;
 	private File tempFolder = null;
+	private String googleApiKey = null;
+
+
+	/**
+	 * Google api key (for Maps etc) read from "security.properties"
+	 * @return
+	 */
+	public String getGoogleApiKey() {
+		if (googleApiKey==null) {
+			// Does not start with "config/" because it is in security.properties
+			googleApiKey = configuration.getString("google/api/key", "");
+		}
+		return googleApiKey;
+	}
 
 	/**
 	 * Returns a DataSource that has NOT been configured on JNDI. Given that there is a configuration file for each environment, you
