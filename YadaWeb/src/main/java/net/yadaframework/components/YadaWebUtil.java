@@ -26,9 +26,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -82,6 +84,73 @@ public class YadaWebUtil {
 
 	public boolean isEmpty(YadaPageRows<?> yadaPageRows) {
 		return yadaPageRows==null || yadaPageRows.isEmpty();
+	}
+
+	/**
+	 * Returns the last part of the current request, for example from "/some/product" returns "product"
+	 * @param request
+	 * @return
+	 */
+	public String getRequestMapping(HttpServletRequest request) {
+		String path = request.getServletPath();
+		String[] parts = path.split("/");
+		if (parts.length==0) {
+			return "/";
+		}
+		return parts[parts.length-1];
+	}
+
+	/**
+	 * If the url is a full url that points to our server, make it relative to the server and strip any language in the path.
+	 * The result can be used in thymeleaf @{url} statements and will get the proper browser language when needed.
+	 * @param fullUrlWithHttp something like "https://my.site.com/en/something/here", can be empty or null
+	 * @param request
+	 * @return someting like "/something/here", or null
+	 */
+	public String removeLanguageFromOurUrl(String fullUrlWithHttp, HttpServletRequest request) {
+		String url = StringUtils.trimToNull(fullUrlWithHttp); // "https://my.site.com/en/something/here"
+		if (url==null) {
+			return null;
+		}
+		String ourAddress = this.getWebappAddress(request); // "https://my.site.com"
+		if (url.startsWith(ourAddress)) {
+			url = url.substring(ourAddress.length()); // "/en/something/here"
+			if (config.isLocalePathVariableEnabled() && url.length()>=3) {
+				// If the url starts with a configured language, strip it
+				List<String> localeStrings = config.getLocaleStrings();
+				for (String language : localeStrings) {
+					if (url.startsWith("/" + language + "/")) {
+						url = url.substring(language.length()+1); // "/something/here"
+						break;
+					}
+				}
+			}
+		}
+		return url;
+	}
+
+	/**
+	 * Adds all request parameters to the Model, optionally filtering by name.
+	 * Existing model attributes are not overwritten.
+	 * @param model
+	 * @param request
+	 * @param nameFilter parameter names that should pass through to the Model
+	 */
+	public void passThrough(Model model, HttpServletRequest request, String ... nameFilter) {
+		Map<String, String[]> parameterMap = request.getParameterMap();
+		Set<String> nameFilterSet = new HashSet<>();
+		nameFilterSet.addAll(Arrays.asList(nameFilter));
+
+		for (Map.Entry<String, String[]> param : parameterMap.entrySet()) {
+			String key = param.getKey();
+			if (nameFilterSet.isEmpty() || nameFilterSet.contains(key)) {
+				String[] valueArray = param.getValue();
+				Object value = valueArray.length==1?valueArray[0]:valueArray;
+				if (value!=null && !model.containsAttribute(key)) {
+					model.addAttribute(key, value);
+				}
+			}
+		}
 	}
 
 	/**
@@ -953,6 +1022,21 @@ public class YadaWebUtil {
 //		}
 //	}
 
+	/**
+	 * Returns the browser's remote ip address.
+	 * If the connection uses a proxy that sets the "X-Forwarded-For" header, the result is taken from that header.
+	 * @param request
+	 * @return The client IP address, ignoring any proxy address when possible
+	 */
+	public String getClientAddress(HttpServletRequest request) {
+		String forwardedFor = request.getHeader("X-Forwarded-For"); // X-Forwarded-For: 203.0.113.195, 70.41.3.18, 150.172.238.178
+		if (!StringUtils.isBlank(forwardedFor)) {
+			return forwardedFor.split(",", 2)[0].trim();
+		}
+		return request.getRemoteAddr();
+	}
+
+	@Deprecated // Quite useless because of the format of the result
 	public String getClientIp(HttpServletRequest request) {
 		String remoteAddr = request.getRemoteAddr();
 		String forwardedFor = request.getHeader("X-Forwarded-For");

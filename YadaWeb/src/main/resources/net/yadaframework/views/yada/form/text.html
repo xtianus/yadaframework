@@ -14,7 +14,7 @@ Parameters:
 - fieldName = name of the field holding the value
 - id = id of the field holding the value (optional)
 - labelKey = key in messages.properties for the label text
-- label = label to use, if not using a labelKey
+- label = label to use, if not using a labelKey (optional)
 - classes = base classes to set on the input/textarea element. When not specified, "form-control" is used
 - placeholderKey = key in messages.properties for the placeholder text (optional)
 - placeholder = placeholder to use, if not using a placeholderKey (optional)
@@ -26,8 +26,10 @@ Parameters:
 - required = true for a required value (optional)
 - disabled = true for a disabled field - NOT SENT TO SERVER (optional)
 - readonly = true for readonly (optional)
-- maxlength = max number of characters accepted (optional). When greater than 80, a textarea is generated instead of an input tag.
+- maxlength = max number of characters accepted (optional). 
+              When greater than 80, a textarea is generated instead of an input tag, unless notextarea is true.
 - rows = number of rows for the textarea (optional)
+- notextarea = do not automatically use textarea when maxlength>80 (optional)
 - addonLeft = character to set as a bootstrap "input-group-prepend" to the left of the input field (optional)
 - addonRight = character to set as a bootstrap "input-group-text" to the right of the input field (optional)
 - help = testo per il pulsante di help, se non c'è helpKey (optional)
@@ -39,6 +41,7 @@ Parameters:
 - tabindex = the tabindex for the field (optional)
 - autocomplete = the autocomplete value (optional)
 - oninput = function to call on the input event. It receives the 'input' event (optional)
+- ariaDescribedby = id for the aria-describedby attribute
 
 
 Example:
@@ -50,6 +53,7 @@ Example:
 */-->
 <body>
 <div th:fragment="field"> <!--/* Top-level div container is needed for fragment replacement */-->
+<!--/* TODO see boolean.html for how to set a unique default id when fields in a modal have the same name as fields in the main page */-->
 <th:block th:with="tmp=${fieldName+'seqName'},seqName=${#strings.replace(#strings.replace(tmp,']',''),'[','')}">
 <input th:if="${#strings.equals(type,'hidden')}" th:field="*{{__${fieldName}__}}" th:disabled="${disabled}" th:type="hidden" th:id="${id}?:${#ids.seq(seqName)}" />
 <div th:if="${!#strings.equals(type,'hidden')}" class="form-group "
@@ -61,7 +65,7 @@ Example:
 		<div th:if="${addonLeft!=null}" class="input-group-prepend">
 			<span class="input-group-text" th:text="${addonLeft}">$</span>
 		</div>
-		<input th:if="${maxlength==null or maxlength le 80}" th:name="${fieldName}" th:value="*{{__${fieldName}__}}"
+		<input th:if="${(maxlength==null or maxlength <= 80 or notextarea==true) and editor!=true}" th:name="${fieldName}" th:value="*{{__${fieldName}__}}" 
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:type="${type}?:'text'" th:readonly="${readonly}" 
 			th:min="${min}" th:max="${max}" th:step="${step}" 
@@ -69,21 +73,23 @@ Example:
 			th:classappend="${readonly==true?'yadaReadonly':(noFeedback==true?'':' has-feedback')}" th:maxlength="${maxlength}" 
 			th:tabindex="${tabindex}"
 			th:autocomplete="${autocomplete}"
-			th:id="${id}?:${#ids.seq(seqName)}" th:attr="aria-describedby=${id}?:${#ids.next(seqName)}"/>
+			th:id="${id}?:${#ids.seq(seqName)}"  
+			th:aria-describedby="${ariaDescribedby}?:(${id}?:${#ids.next(seqName)})"> <!--/* WRONG ID */-->
 		<div th:if="${addonRight!=null}" class="input-group-text">
 			<span class="input-group-text" th:text="${addonRight}">.00</span>
 			<span th:if="${type=='password' && noShowPassword!=true}" class="input-group-text">
 				<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
 			</span>
 		</div>
-		<textarea th:if="${maxlength gt 80}" th:rows="${rows}?:3" th:field="*{{__${fieldName}__}}" 
+		<textarea th:if="${(maxlength > 80 and notextarea!=true) or editor==true}" th:rows="${rows}?:3" th:field="*{{__${fieldName}__}}" 
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
 			th:required="${required}" th:disabled="${disabled}" th:maxlength="${maxlength}" 
 			th:class="${classes}?:'form-control'"
 			th:classappend="${readonly==true?'yadaReadonly':(noFeedback==true?'':' has-feedback')}"
 			th:tabindex="${tabindex}"
 			th:autocomplete="${autocomplete}"
-			th:id="${id}?:${#ids.seq(seqName)}" th:attr="aria-describedby=${id}?:${#ids.next(seqName)}"></textarea>
+			th:id="${id}?:${#ids.seq(seqName)}" 
+			th:attr="aria-describedby=${id}?:${#ids.next(seqName)}"></textarea> <!--/* WRONG ID */-->
 		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
 			<a th:if="${help!=null}" class="yadaHelpButton input-group-text" data-trigger="focus" data-container="body" 
 				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
@@ -102,7 +108,14 @@ Example:
             		// Possible values for Classic build:
             		// ["undo", "redo", "bold", "italic", "blockQuote", "ckfinder", "imageTextAlternative", "imageUpload", "heading", "imageStyle:full", "imageStyle:side", "indent", "outdent", "link", "numberedList", "bulletedList", "mediaEmbed", "insertTable", "tableColumn", "tableRow", "mergeTableCells"]
             		// "link" removed because it doesn't work in modals
-            		toolbar: [[${toolbar}?:${ {"undo", "redo", "bold", "italic", "blockQuote", "heading", "indent", "outdent", "numberedList", "bulletedList", "insertTable", "tableColumn", "tableRow", "mergeTableCells"} }]]
+            		removePlugins: [ 'Image', 'Media embed' ],
+            		toolbar: [[${toolbar}?:${ {"undo", "redo", "bold", "italic", "blockQuote", "heading", "indent", "outdent", "numberedList", "bulletedList", "insertTable", "tableColumn", "tableRow", "mergeTableCells"} }]],
+            		image: {
+            			toolbar: ['|']
+            		},
+            		mediaEmbed: {
+            			toolbar: ['|']
+            		}
             	})
             	// Show all toolbar values with the following code:
             	// .then( editor => {
@@ -112,13 +125,6 @@ Example:
             	.catch( error => {
                 console.error( error );
             } );
-        	/* CKEditor 4
-			$([['#'+${id}?:${#ids.prev(seqName)}]]).ckeditor(function( textarea ) {
-			}, {
-				removeButtons : 'Save,About',
-				height : 400
-			}).editor;
-        	*/
         });
 		//]]>
 	</script>
