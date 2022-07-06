@@ -176,15 +176,27 @@ public class YadaUtil {
 	/**
 	 * Given a ISO date, a ISO time and a timezone, return the Date.
 	 * @param isoDateString like '2011-12-03'
-	 * @param isoTimeString like '10:15' or '10:15:30'
-	 * @param timezone the timezone where the date/time strings belong
-	 * @return a Date representing the datetime in the timezone
+	 * @param isoTimeString like '10:15' or '10:15:30' (optional, can be null or empty)
+	 * @param timezone the timezone where the date/time strings belong (optional, can be null)
+	 * @return a Date representing the datetime in the timezone, or null when invalid
 	 */
 	public Date getDateFromDateTimeIsoString(String isoDateString, String isoTimeString, TimeZone timezone) {
-		String isoDateTimeString = isoDateString + "T" + isoTimeString;
-		LocalDateTime chosenDateTime = LocalDateTime.parse(isoDateTimeString);
-		ZonedDateTime chosenDateTimeZoned = chosenDateTime.atZone(timezone.toZoneId());
-		return Date.from(chosenDateTimeZoned.toInstant());
+		if (isoDateString==null) {
+			return null;
+		}
+		isoTimeString = StringUtils.trimToNull(isoTimeString);
+		String isoDateTimeString = isoDateString + (isoTimeString!=null? ("T" + isoTimeString) : "T00:00");
+		try {
+			LocalDateTime chosenDateTime = LocalDateTime.parse(isoDateTimeString);
+			if (timezone == null) {
+				timezone = TimeZone.getDefault();
+			}
+			ZonedDateTime chosenDateTimeZoned = chosenDateTime.atZone(timezone.toZoneId());
+			return Date.from(chosenDateTimeZoned.toInstant());
+		} catch (Exception e) {
+			log.error("Invalid ISO date/time (returning null)", e);
+			return null;
+		}
 	}
 
 	/**

@@ -208,7 +208,7 @@ public class YadaWebUtil {
 	}
 
 	/**
-	 * Create a redirect string to be returned by a @Controller, taking into account the locale in the path.
+	 * Create a redirect string (302 moved temporarily) to be returned by a @Controller, taking into account the locale in the path.
 	 * If you can do a redirect with a relative url ("some/url") you don't need to use this method because the language path
 	 * won't be overwritten. Otherwise if you need to use an absolute url ("/some/url") then this method inserts the appropriate language path
 	 * in the url (and any parameters at the end too).
