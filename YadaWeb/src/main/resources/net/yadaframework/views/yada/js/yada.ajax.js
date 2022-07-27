@@ -647,7 +647,8 @@
 		if (value.length>0) {
 			const name = $element.attr("name") || "value"; // Parameter name fallback to "value" by default
 			const toAdd = {};
-			toAdd[name] = value;
+			toAdd.name = name;
+			toAdd.value = value;
 			data = mergeData(data, toAdd);
 		}
 		if (!multipart) {
