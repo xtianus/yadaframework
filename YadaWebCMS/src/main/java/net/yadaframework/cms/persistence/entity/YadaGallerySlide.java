@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -37,11 +38,13 @@ public class YadaGallerySlide implements CloneableDeep {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
-	
-	private boolean slideEnabled = true; 
-	
-	private Long pos; // Position in the sequence to which the slide belongs
-	
+
+	private boolean slideEnabled = true;
+
+	// Position in the sequence to which the slide belongs.
+	// Automatically set to the id on persist. Can be swapped with another pos for sorting.
+	private Long pos;
+
 	private boolean flag1 = false; // This could be used e.g. for choosing an alternative layout of the single slide
 	private boolean flag2 = false; // This could be used e.g. for choosing an alternative layout of the single slide
 
@@ -52,24 +55,24 @@ public class YadaGallerySlide implements CloneableDeep {
 	private String data4;
 	private String data5;
 	private String data6;
-	
+
 	@OneToOne(cascade= {CascadeType.PERSIST, CascadeType.REMOVE}) // Remember to delete the file from disk on REMOVE
 	private YadaAttachedFile video;
-	
+
 	@OneToOne(cascade= {CascadeType.PERSIST, CascadeType.REMOVE}) // Remember to delete the file from disk on REMOVE
 	private YadaAttachedFile image;
 
 	// Single language texts
-	
+
 	@Column(length=2048)
 	private String text1;
 
 	@Column(length=2048)
 	private String text2;
-	
+
 	@Column(length=2048)
 	private String text3;
-	
+
 	@Column(length=2048)
 	private String text4;
 
@@ -79,17 +82,17 @@ public class YadaGallerySlide implements CloneableDeep {
 	@Column(length=2048)
 	@MapKeyColumn(name="locale", length=32)
 	private Map<Locale, String> text5local = new HashMap<>();
-	
+
 	@ElementCollection
 	@Column(length=2048)
 	@MapKeyColumn(name="locale", length=32)
 	private Map<Locale, String> text6local = new HashMap<>();
-	
+
 	@ElementCollection
 	@Column(length=2048)
 	@MapKeyColumn(name="locale", length=32)
 	private Map<Locale, String> text7local = new HashMap<>();
-	
+
 	@ElementCollection
 	@Column(length=2048)
 	@MapKeyColumn(name="locale", length=32)
@@ -97,15 +100,15 @@ public class YadaGallerySlide implements CloneableDeep {
 
 	/////////////////////////////////////////////////////////////
 	// Transients for POST
-	
+
 	@Transient
 	private  MultipartFile multipartImage;
 
 	@Transient
 	private  MultipartFile multipartVideo;
-	
+
 	/////////////////////////////////////////////////////////////
-	
+
 	@PostPersist
 	private void postPersist() {
 		this.pos = this.id;
@@ -115,19 +118,19 @@ public class YadaGallerySlide implements CloneableDeep {
 	public Field[] getExcludedFields() {
 		return null;
 	}
-	
+
 	public String getText5LocalValue() {
 		 return YadaUtil.getLocalValue(text5local);
 	}
-	
+
 	public String getText6LocalValue() {
 		return YadaUtil.getLocalValue(text6local);
 	}
-	
+
 	public String getText7LocalValue() {
 		return YadaUtil.getLocalValue(text7local);
 	}
-	
+
 	public String getText8LocalValue() {
 		return YadaUtil.getLocalValue(text8local);
 	}
@@ -317,6 +320,26 @@ public class YadaGallerySlide implements CloneableDeep {
 
 	public void setMultipartVideo(MultipartFile multipartVideo) {
 		this.multipartVideo = multipartVideo;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		YadaGallerySlide other = (YadaGallerySlide) obj;
+		return Objects.equals(id, other.id);
 	}
 
 }

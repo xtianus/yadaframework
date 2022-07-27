@@ -799,6 +799,14 @@
 	}
 	
 	/**
+	 * Increment a numeric value.
+	 * @param elementSelector the jquery selector that identifies the element(s) to increment 
+	 */
+	yada.increment = function(elementSelector) {
+		return yada.numberAdd(elementSelector, 1);
+	}
+	
+	/**
 	 * Aggiunge al valore numerico di un elemento una quantità algebrica eventualmente limitandola a un minimo o massimo
 	 * Esempio: yada.numberAdd('#totMessaggiCounter', -1, 0, true);
 	 * @param elementSelector id dell'elemento incluso l'hash, e.g. #myCounter, oppure un suo selector qualsiasi come ".myElement > div"

@@ -117,6 +117,15 @@ public class YadaTransactionDao {
 	}
 
     @Transactional(readOnly = false)
+    public YadaTransaction find(Long id) {
+    	if (id==null) {
+    		return null;
+    	} else {
+    		return em.find(YadaTransaction.class, id);
+    	}
+    }
+
+    @Transactional(readOnly = false)
     public YadaTransaction save(YadaTransaction entity) {
     	if (entity.getId()==null) {
     		em.persist(entity);

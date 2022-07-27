@@ -22,19 +22,19 @@
 	        <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true"><i class="yadaIcon yadaIcon-close"></i></button>
 	      </div>
 	      <div class="modal-body">
-	      	<div class="panel-group" id="messageAccordion" role="tablist" aria-multiselectable="true">
-				<div class="panel panel-default" th:each="title,iterStat : ${YADA_NTITLE}">
-					<div class="panel-heading" role="tab" th:id="|#heading${iterStat.index}|">
-						<h4 class="panel-title">
-							<a data-toggle="collapse" data-parent="#messageAccordion" th:href="|#collapse${iterStat.index}|" 
+	      	<div class="" id="messageAccordion" role="tablist" aria-multiselectable="true">
+				<div class="" th:each="title,iterStat : ${YADA_NTITLE}">
+					<div class="" role="tab" th:id="|#heading${iterStat.index}|">
+						<h5>
+							<a data-bs-toggle="collapse" data-bs-parent="#messageAccordion" th:href="|#collapse${iterStat.index}|" 
 							aria-expanded="true" th:attr="aria-controls=${'collapse' + iterStat.index}">
 								<i th:class="|yadaIcon yadaIcon-${iconName} ${YADA_SEVERITY.get(iterStat.index)}|"></i>
 								<span th:text="${title}">Collapsible Group Item #1</span>
 							</a>
-						</h4>
+						</h5>
 	      			</div>
-					<div th:id="|collapse${iterStat.index}|" class="panel-collapse collapse in" role="tabpanel" th:attr="aria-labelledby=${'heading' + iterStat.index}">
-						<div class="panel-body" th:utext="${YADA_NBODY.get(iterStat.index)}">
+					<div th:id="|collapse${iterStat.index}|" class="collapse in" role="tabpanel" th:attr="aria-labelledby=${'heading' + iterStat.index}">
+						<div class="notifyMessage" th:utext="${YADA_NBODY.get(iterStat.index)}">
 							Anim pariatur cliche reprehenderit
 						</div>
 					</div>
