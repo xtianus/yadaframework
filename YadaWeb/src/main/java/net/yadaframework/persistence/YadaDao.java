@@ -30,7 +30,7 @@ public class YadaDao {
      */
     @Transactional(readOnly = false)
 	public Object save(Object entity) {
-    	Long id = (Long) getEntityAttributeValue(entity, "id");
+    	Long id = (Long) getEntityAttributeValuePrivate(entity, "id");
 		if (id==null) {
 			em.persist(entity);
 			return entity;
@@ -38,20 +38,25 @@ public class YadaDao {
 			return em.merge(entity);
 		}
 	}
-   
+
+    private Object getEntityAttributeValuePrivate(Object entity, String attributeName) {
+    	try {
+			return PropertyUtils.getSimpleProperty(entity, attributeName);
+		} catch (Exception e) {
+			throw new YadaInternalException("Can't get field {} of class {}", attributeName, entity.getClass(), e);
+		}
+    }
+
 	/**
 	 * Get the value of some field on any entity, within a transaction.
+	 * Warning: it does a merge, which may trigger an insert to the database.
 	 * @param entity
 	 * @param attributeName
 	 * @return
 	 */
     public Object getEntityAttributeValue(Object entity, String attributeName) {
     	entity = em.merge(entity);
-    	try {
-			return PropertyUtils.getSimpleProperty(entity, attributeName);
-		} catch (Exception e) {
-			throw new YadaInternalException("Can't get field {} of class {}", attributeName, entity.getClass(), e);
-		}
+    	return getEntityAttributeValuePrivate(entity, attributeName);
     }
     
     /**
