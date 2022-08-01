@@ -154,7 +154,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	}
 
 	/**
-	 * Returns the currently logged-in user profile
+	 * Returns the currently logged-in user profile or null
 	 * @return
 	 */
 	public T getCurrentUserProfile() {
