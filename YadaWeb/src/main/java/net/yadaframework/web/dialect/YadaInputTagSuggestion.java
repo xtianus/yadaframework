@@ -24,6 +24,14 @@ public interface YadaInputTagSuggestion {
 	String getSuggestionText(Locale locale);
 
 	/**
+	 * Optional counter to show after the suggestion, for example the number of usages.
+	 * @return the counter, or null for not showing anything
+	 */
+	default Integer getSuggestionCount() {
+		return null;
+	}
+
+	/**
 	 * Return the name to use as a request parameter when sending the suggestion id. Defaults to "id" when not implemented.
 	 * @return
 	 */
