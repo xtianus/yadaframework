@@ -554,6 +554,9 @@
 	 * Joins two url segments taking care of the separator / character
 	 */
 	yada.joinUrls = function(left, right) {
+		if (right==null) {
+			return left;
+		}
 		if (yada.endsWith(left, "/") && yada.startsWith(right, "/")) {
 			return left + right.substring(1);
 		}
@@ -561,6 +564,18 @@
 			return left + right;
 		}
 		return left + "/" + right;
+	}
+	
+	/**
+	 * Joins up to five urls taking care of correct slash separator.
+	 * Parameters from 'two' onwards are optional.
+	*/
+	yada.joinManyUrls = function(one, two, three, four, five) {
+		var result = yada.joinUrls(one, two);
+		result = yada.joinUrls(result, three);
+		result = yada.joinUrls(result, four);
+		result = yada.joinUrls(result, five);
+		return result;
 	}
 	
 	yada.getResourcePath = function() {
