@@ -1445,6 +1445,21 @@
 		});
 	}
 	
+	/**
+	 * Find a child from a given parent that can also be the first node (root) of the tree, 
+     * where normally it would not be found by $.find('parentSelector childSelector', $html)
+	 * @param $html where to perform the search, can be an array of root nodes
+	 * @param parentSelector the CSS selector of the parent element
+	 * @param childSelector the CSS selector of the child element
+	*/
+	yada.findFromParent = function(parentSelector, childSelector, $html) {
+		var $root = $html.find(parentSelector);
+		if ($root.length==0) {
+			$root = $html.filter(parentSelector);
+		}
+		return $root.find(childSelector);
+	}
+	
 		
 }( window.yada = window.yada || {} ));
 
@@ -1452,7 +1467,7 @@
 // https://stackoverflow.com/a/62190609/587641
 // Usage: $(element).findWithSelf('.target')
 // --> will also find the root element if it is a .target
-// Does not work properly with selectors that match self and a child, like ".self .child"
+// Does not work properly with selectors that match a child after self, like ".self .child"
 jQuery.fn.findWithSelf = function(...args) {
   return this.pushStack(this.find(...args).add(this.filter(...args)));
 };

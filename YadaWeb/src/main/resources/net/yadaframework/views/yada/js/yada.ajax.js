@@ -584,6 +584,7 @@
 			deleteOnSuccess($element);
 			responseHtml = updateOnSuccess($element, responseHtml); // This removes the added root <div>
 			// No: Put the responseHtml back into a div if it is not an array and not the original yadaAjaxResponseHtml
+			//     Can't be done because the html is removed from the page on append()
 			// if (!(responseHtml instanceof Array) && responseHtml.attr("class")!="yadaAjaxResponseHtml") {				
 			// 	responseHtml = $(yadaAjaxResponseHtmlRoot).append(responseHtml);
 			// }
@@ -767,7 +768,7 @@
 					$return = $replacement;
 				} else {
 					$return.push($replacement);
-				}
+	}
 				// When there are more selectors than fragments, fragments are cycled from the first one
 				fragmentCount = (fragmentCount+1) % $replacementArray.length;
 			}
@@ -818,6 +819,7 @@
 		var $return = $replacement;
 		var selectors = selector.split(',');
 		var $replacementArray = null;
+		// Handle multiple selectors in the update/append attribute
 		if (selectors.length>1) {
 			// yadaFragment is used only when there is more than one selector, otherwise the whole result is used for replacement
 			$replacementArray = $(".yadaFragment", responseHtml);
@@ -828,10 +830,12 @@
 		if ($replacementArray!=null && $replacementArray.length>1) {
 			$return = [];
 		}
+		//
 		var fragmentCount = 0;
 		var focused = false;
 		for (var count=0; count<selectors.length; count++) {
 			var selector = selectors[count].trim();
+			// Handle multiple selectors in the update/append attribute
 			if ($replacementArray!=null && $replacementArray.length>0) {
 				// Clone so that the original responseHtml is not removed by replaceWith.
 				// All handlers are also cloned.
@@ -862,6 +866,7 @@
 					break;
 				}
 			}
+			// Call the jquery function
 			jqueryFunction.call(yada.extendedSelect($element, selector), $replacement);
 			if (!focused) {
 				// Focus on the first result element with data-yadaAjaxResultFocus
@@ -1419,9 +1424,12 @@
 					}
 					// Keep going, there could be a handler
 				}
-				// Putting the returned HTML inside a <div> for some reason - not sure it is a good idea but legacy code needs it now.
+				// Putting the returned HTML inside a <div> so that $find() works when multiple root elements are returned. 
+				// - not sure it is a good idea but legacy code needs it now.
 				// The bad thing is that the enclosing div is stripped when updateOnSuccess is called, so the successHandler
 				// can receive both versions (with or without root div) depending on the presence of the updateOnSuccess call.
+				// The reason for stripping it is that "replaceWith" and other successHandler functions move the children from the
+				// added top <div> element, so it can't be returned anyway because it would be empty.
 				var responseHtml=$(yadaAjaxResponseHtmlRoot).html(responseTrimmed);
 				// Check if we just did a login.
 				// A successful login can also return a redirect, which will skip the PostLoginHandler 
