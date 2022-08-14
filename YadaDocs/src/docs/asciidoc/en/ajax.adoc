@@ -409,7 +409,7 @@ Examples:
 yada:successHandler="countItems"
 yada:successHandler="countItems, showValue"
 yada:successHandler="|$('#${messageId}').addClass('obsolete');|"
-yada:successHandler="alert(responseText), alert('hello')"
+yada:successHandler="alert(responseText), alert('hello'), link.reset()"
 ----
 
 The success handlers are called in sequence and should have the following signature:
@@ -426,9 +426,11 @@ responseHtml::
 the ajax response converted to jQuery html objects
 
 link:: 
-the original anchor object (DOM, not jQuery)
+the original anchor object (DOM, not jQuery). Could also be a form or anything else, not just a "link".
 
 The `link` argument is also the same as the current `this` context.
+
+When using function bodies, the above three arguments are valid objects. 
 
 [NOTE]
 ====
@@ -442,9 +444,13 @@ array of all sections inserted in page.
 
 [WARNING] 
 ==== 
-When using both `yada:updateOnSuccess` and `yada:successHandler`, the *responseHtml* argument
-is whatever was returned by the ajax call and could have multiple root objects. 
-When `yada:successHandler` is used alone though, the *responseHtml* is added to a parent `<div>`.
+When `yada:successHandler` is used alone, the *responseHtml* is added to a parent `<div>` so that
+css selection (like `$.find()`) can match root nodes.
+When using both `yada:updateOnSuccess` and `yada:successHandler`, the *responseHtml* argument does not have the
+added `<div>` (stripped by `yada:updateOnSuccess` for technical reasons) and it stays 
+whatever was returned by the ajax call: if you need to match a root object, the selector won't work.
+You may consider using `yada.findFromParent('.parent', '.child', responseHtml)` in all handlers to cater for both cases, instead of
+the classic `responseHtml.find('.parent .child')` or `$('.parent .child', responseHtml)` that may fail.   
 ====
 
 ====  Modal Dialog

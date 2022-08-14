@@ -704,7 +704,7 @@ of function names or bodies of a function.</p>
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">yada:successHandler="countItems"
 yada:successHandler="countItems, showValue"
 yada:successHandler="|$('#${messageId}').addClass('obsolete');|"
-yada:successHandler="alert(responseText), alert('hello')"</code></pre>
+yada:successHandler="alert(responseText), alert('hello'), link.reset()"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -727,12 +727,15 @@ yada:successHandler="alert(responseText), alert('hello')"</code></pre>
 </dd>
 <dt class="hdlist1">link</dt>
 <dd>
-<p>the original anchor object (DOM, not jQuery)</p>
+<p>the original anchor object (DOM, not jQuery). Could also be a form or anything else, not just a "link".</p>
 </dd>
 </dl>
 </div>
 <div class="paragraph">
 <p>The <code>link</code> argument is also the same as the current <code>this</code> context.</p>
+</div>
+<div class="paragraph">
+<p>When using function bodies, the above three arguments are valid objects.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -762,9 +765,13 @@ array of all sections inserted in page.</p>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>When using both <code>yada:updateOnSuccess</code> and <code>yada:successHandler</code>, the <strong>responseHtml</strong> argument
-is whatever was returned by the ajax call and could have multiple root objects.
-When <code>yada:successHandler</code> is used alone though, the <strong>responseHtml</strong> is added to a parent <code>&lt;div&gt;</code>.</p>
+<p>When <code>yada:successHandler</code> is used alone, the <strong>responseHtml</strong> is added to a parent <code>&lt;div&gt;</code> so that
+css selection (like <code>$.find()</code>) can match root nodes.
+When using both <code>yada:updateOnSuccess</code> and <code>yada:successHandler</code>, the <strong>responseHtml</strong> argument does not have the
+added <code>&lt;div&gt;</code> (stripped by <code>yada:updateOnSuccess</code> for technical reasons) and it stays
+whatever was returned by the ajax call: if you need to match a root object, the selector won&#8217;t work.
+You may consider using <code>yada.findFromParent('.parent', '.child', responseHtml)</code> in all handlers to cater for both cases, instead of
+the classic <code>responseHtml.find('.parent .child')</code> or <code>$('.parent .child', responseHtml)</code> that may fail.</p>
 </div>
 </td>
 </tr>
@@ -1304,7 +1311,7 @@ Otherwise the form will be sent with a normal non-ajax request.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2022-06-20 13:04:28 +0200
+Last updated 2022-08-10 18:01:48 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
