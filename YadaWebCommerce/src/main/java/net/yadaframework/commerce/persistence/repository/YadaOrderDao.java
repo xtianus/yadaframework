@@ -40,19 +40,30 @@ public class YadaOrderDao {
     		.getResultList();
     }
 
+    /**
+     * Delete unpaid orders after 20 days
+     */
     @Transactional(readOnly = false)
     public void cleanup() {
-    	Date thePast = YadaUtil.addDays(new Date(), -20);
+    	cleanup(20); // 20 days expiration
+    }
+
+    /**
+     * Delete unpaid orders after some time
+     */
+    @Transactional(readOnly = false)
+    public void cleanup(int daysPassed) {
+    	Date thePast = YadaUtil.addDays(new Date(), -daysPassed);
     	String sql = "select yo from YadaOrder yo "
-			+ "where yo.modified < :someDate and "
-			+ "yo.orderStatus = :someStatus";
+    			+ "where yo.modified < :someDate and "
+    			+ "yo.orderStatus = :someStatus";
     	List<YadaOrder> resultList = em.createQuery(sql, YadaOrder.class)
-    		.setParameter("someDate", thePast)
-    		.setParameter("someStatus", YadaOrderStatus.UNPAID.toYadaPersistentEnum())
-    		.getResultList();
+    			.setParameter("someDate", thePast)
+    			.setParameter("someStatus", YadaOrderStatus.UNPAID.toYadaPersistentEnum())
+    			.getResultList();
     	for (YadaOrder yadaOrder : resultList) {
-			em.remove(yadaOrder);
-		}
+    		em.remove(yadaOrder);
+    	}
     }
 
     @Transactional(readOnly = false)

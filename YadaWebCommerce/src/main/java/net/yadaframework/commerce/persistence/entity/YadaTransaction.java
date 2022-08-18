@@ -63,6 +63,8 @@ public class YadaTransaction {
 	protected String payerId1; // ID on the payment system, e.g. paypal "payer_id"
 	protected String payerId2; // Another ID on the payment system, e.g. paypal "email_address"
 	protected String description;
+	@Column(length = 32)
+	protected String paymentSystem; // i.e. "paypal" or "balance"
 
 	@Column(length = 8192)
 	protected String data; // Any application-specific data
@@ -71,7 +73,9 @@ public class YadaTransaction {
 	protected YadaOrder order;
 
 	// True when this is the twin transaction in a double-ledger system
-	protected Boolean inverse;
+	protected Boolean inverse = false;
+
+	protected Boolean suspended = false; // true when the transaction has not been performed yet
 
 	///////////////////////////////////
 
@@ -170,6 +174,18 @@ public class YadaTransaction {
 	}
 	public void setInverse(Boolean inverse) {
 		this.inverse = inverse;
+	}
+	public String getPaymentSystem() {
+		return paymentSystem;
+	}
+	public void setPaymentSystem(String paymentSystem) {
+		this.paymentSystem = paymentSystem;
+	}
+	public Boolean getSuspended() {
+		return suspended;
+	}
+	public void setSuspended(Boolean suspended) {
+		this.suspended = suspended;
 	}
 
 

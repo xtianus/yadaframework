@@ -22,7 +22,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -131,6 +133,24 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+
+	/**
+	 * Parse a string as a double, using the correct decimal separator (if any).
+	 * @param value a number that may have a decimal part
+	 * @param locale
+	 * @return a double
+	 * @throws ParseException if the string is not a valid double in the locale specified
+	 */
+	public double stringToDouble(String value, Locale locale) throws ParseException {
+		// From https://stackoverflow.com/a/16879667/587641
+		NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
+		ParsePosition parsePosition = new ParsePosition(0);
+		Number number = numberFormat.parse(value, parsePosition);
+		if (parsePosition.getIndex() != value.length()){
+			throw new ParseException("Invalid double input: '" + value + "'", parsePosition.getIndex());
+		}
+		return number.doubleValue();
+	}
 
 	/**
 	 * Given a ISO date, a ISO time and a timezone, return the Date.

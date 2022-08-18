@@ -42,6 +42,7 @@ public class YadaTransactionDao {
 		yadaTransaction.setPayerId2(payment.getPayerId2());
 		yadaTransaction.setOrder(payment.getOrder());
 		yadaTransaction.setData(payment.getData());
+		yadaTransaction.setPaymentSystem(payment.getPaymentSystem());
 		yadaTransaction.setInverse(true); // twin transaction
 		em.persist(yadaTransaction);
 		return yadaTransaction;

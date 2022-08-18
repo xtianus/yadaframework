@@ -1448,6 +1448,7 @@
 	/**
 	 * Find a child from a given parent that can also be the first node (root) of the tree, 
      * where normally it would not be found by $.find('parentSelector childSelector', $html)
+     * Note: we can't just always use $html.parent().find() because it gets any sibilings outside of $html
 	 * @param $html where to perform the search, can be an array of root nodes
 	 * @param parentSelector the CSS selector of the parent element
 	 * @param childSelector the CSS selector of the child element
