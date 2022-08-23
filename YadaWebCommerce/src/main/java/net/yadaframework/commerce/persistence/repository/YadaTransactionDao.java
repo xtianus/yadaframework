@@ -83,7 +83,17 @@ public class YadaTransactionDao {
 
 
     /**
-     * Find all direct transactions (not the inverse) related to an order
+     * Delete all suspended transactions relative to an order.
+     * @param order
+     */
+    @Transactional(readOnly = false)
+	public void deleteSuspended(YadaOrder yadaOrder) {
+		String sql = "delete from YadaTransaction where order = :yadaOrder and suspended is true";
+		em.createQuery(sql).setParameter("yadaOrder", yadaOrder).executeUpdate();
+	}
+
+    /**
+     * Find all direct transactions (not the inverse) related to an order, and not suspended
      * i.e. only the originating transactions of the double ledger, that may be two in case of a refund
      * @param yadaOrder
      * @return
@@ -92,6 +102,7 @@ public class YadaTransactionDao {
 		List<YadaTransaction> found = YadaSql.instance().selectFrom("from YadaTransaction")
 				.where("order = :yadaOrder").and()
 				.where("inverse != true").and()
+				.where("suspended != true").and()
 	            .setParameter("yadaOrder", yadaOrder)
 	            .query(em, YadaTransaction.class)
 	            .getResultList();

@@ -28,12 +28,12 @@ import net.yadaframework.components.YadaUtil;
  * </pre>
  */
 public class YadaMoney implements Comparable<YadaMoney> {
-	private final long internalValue; // Amount in 1/10000 of the currency
+	private /*final*/ long internalValue; // Amount in 1/10000 of the currency
 	private static final int multiplier = 10000;
 
 	private YadaUtil yadaUtil = new YadaUtil();
 
-	public YadaMoney() {
+	YadaMoney() {
 		this.internalValue = 0;
 	}
 
@@ -108,7 +108,8 @@ public class YadaMoney implements Comparable<YadaMoney> {
 	 * @return a positive value
 	 */
 	public YadaMoney getAbsolute() {
-		YadaMoney result = new YadaMoney(Math.abs(this.internalValue));
+		YadaMoney result = new YadaMoney();
+		result.internalValue = Math.abs(this.internalValue);
 		return result;
 	}
 
@@ -128,7 +129,8 @@ public class YadaMoney implements Comparable<YadaMoney> {
 	 * @return a negative value
 	 */
 	public YadaMoney getNegative() {
-		YadaMoney result = new YadaMoney(- Math.abs(this.internalValue));
+		YadaMoney result = new YadaMoney();
+		result.internalValue = - Math.abs(this.internalValue);
 		return result;
 	}
 
@@ -138,7 +140,8 @@ public class YadaMoney implements Comparable<YadaMoney> {
 	 * @return a positive value when this was negative, a negative value when this was positive
 	 */
 	public YadaMoney getNegated() {
-		YadaMoney result = new YadaMoney(- this.internalValue);
+		YadaMoney result = new YadaMoney();
+		result.internalValue = - this.internalValue;
 		return result;
 	}
 
@@ -166,27 +169,45 @@ public class YadaMoney implements Comparable<YadaMoney> {
 		return this.internalValue>0;
 	}
 
-	public YadaMoney addCents(long cents) {
-		long newValue = this.internalValue + (cents * multiplier / 100);
-		YadaMoney result = new YadaMoney(newValue);
+	public YadaMoney getSum(long cents) {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = this.internalValue + (cents * multiplier / 100);
 		return result;
 	}
 
-	public YadaMoney add(YadaMoney toAdd) {
-		long newValue = this.internalValue + toAdd.internalValue;
-		YadaMoney result = new YadaMoney(newValue);
+	/**
+	 * Return a new YadaMoney where the value is the sum of the current value and the argument.
+	 * The original object is not changed.
+	 * @param toAdd amount to add
+	 * @return a new instance of YadaMoney
+	 */
+	public YadaMoney getSum(YadaMoney toAdd) {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = this.internalValue + toAdd.internalValue;
 		return result;
 	}
 
-	public YadaMoney subtract(YadaMoney toRemove) {
-		long newValue = this.internalValue - toRemove.internalValue;
-		YadaMoney result = new YadaMoney(newValue);
+	/**
+	 * Return a new YadaMoney where the value is the subtraction of the current value and the argument.
+	 * The original object is not changed.
+	 * @param toRemove
+	 * @return a new instance of YadaMoney
+	 */
+	public YadaMoney getSubtract(YadaMoney toRemove) {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = this.internalValue - toRemove.internalValue;
 		return result;
 	}
 
-	public YadaMoney divideBy(double factor) {
-		long newValue = (long) (this.internalValue / factor);
-		YadaMoney result = new YadaMoney(newValue);
+	/**
+	 * Return a new YadaMoney where the value is the division of the current value by the argument.
+	 * The original object is not changed.
+	 * @param factor
+	 * @return a new instance of YadaMoney
+	 */
+	public YadaMoney getDivide(double factor) {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = (long) (this.internalValue / factor);
 		return result;
 	}
 
