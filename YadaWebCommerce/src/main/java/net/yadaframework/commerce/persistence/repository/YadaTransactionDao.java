@@ -83,13 +83,13 @@ public class YadaTransactionDao {
 
 
     /**
-     * Delete all suspended transactions relative to an order.
+     * Delete a suspended transaction relative to an order.
      * @param order
      */
     @Transactional(readOnly = false)
-	public void deleteSuspended(YadaOrder yadaOrder) {
+	public int deleteSuspended(YadaOrder yadaOrder) {
 		String sql = "delete from YadaTransaction where order = :yadaOrder and suspended is true";
-		em.createQuery(sql).setParameter("yadaOrder", yadaOrder).executeUpdate();
+		return em.createQuery(sql).setParameter("yadaOrder", yadaOrder).executeUpdate();
 	}
 
     /**
