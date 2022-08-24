@@ -2429,13 +2429,25 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Returns the minutes between two dates
+	 * Returns the minutes between two dates.
+	 * It is negative when the first argument is earlier than the second.
 	 * @param recentDate
 	 * @param oldDate
 	 * @return
 	 */
 	public static long minutesDifference(Date recentDate, Date oldDate) {
 		return (recentDate.getTime()-oldDate.getTime()) / MILLIS_IN_MINUTE;
+	}
+
+	/**
+	 * Returns the absolute value of the minutes between two dates.
+	 * It will always be positive.
+	 * @param firstDate
+	 * @param secondDate
+	 * @return
+	 */
+	public static long minutesDifferenceAbs(Date firstDate, Date secondDate) {
+		return Math.abs(firstDate.getTime()-secondDate.getTime()) / MILLIS_IN_MINUTE;
 	}
 
 	/**

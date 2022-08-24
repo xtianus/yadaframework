@@ -1194,10 +1194,6 @@
 			var localClickedButton = clickedButton; // Create a closure otherwise the clicked button is lost
 			var joinedHandler = function(responseText, responseHtml) {
 				showFeedbackIfNeeded($form);
-				var deleted = deleteOnSuccess($(localClickedButton));
-				if (!deleted) {
-					deleteOnSuccess($form);
-				}
 				if ($(localClickedButton).attr("data-yadaUpdateOnSuccess")!=null) {
 					responseHtml = updateOnSuccess($(localClickedButton), responseHtml);
 				} else {
@@ -1236,6 +1232,11 @@
 				}
 				if (handler != null) {
 					handler(responseText, responseHtml, this, localClickedButton);
+				}
+				// Deletion must be done later or it could prevent other actions from working when the target is self
+				var deleted = deleteOnSuccess($(localClickedButton));
+				if (!deleted) {
+					deleteOnSuccess($form);
 				}
 			};
 			var method = $form.attr('method') || "POST";

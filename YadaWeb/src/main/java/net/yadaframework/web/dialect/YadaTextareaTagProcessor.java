@@ -205,7 +205,8 @@ public class YadaTextareaTagProcessor extends AbstractElementModelProcessor {
 					// yadalabelkeyprefix
 					// etc.
 					String name = "yada" + yadaAttributeName.toLowerCase();
-					structureHandler.setLocalVariable(name, attributeValue==null?true:attributeValue);
+					String parsedValue = yadaDialectUtil.parseExpression(attributeValue, context, String.class);
+					structureHandler.setLocalVariable(name, attributeValue==null?true:parsedValue);
 				}
 			}
 		}
