@@ -1461,6 +1461,28 @@
 		return $root.find(childSelector);
 	}
 	
+	// From https://stackoverflow.com/a/69122877/587641
+	// Neither tested not used - could be removed
+	yada.toTimeAgo = function(dateInThePast, locale) {
+		const date = (dateInThePast instanceof Date) ? dateInThePast : new Date(dateInThePast);
+		const formatter = new Intl.RelativeTimeFormat(locale);
+		const ranges = {
+			years: 3600 * 24 * 365,
+			months: 3600 * 24 * 30,
+			weeks: 3600 * 24 * 7,
+			days: 3600 * 24,
+			hours: 3600,
+			minutes: 60,
+			seconds: 1
+		};
+		const secondsElapsed = (date.getTime() - Date.now()) / 1000;
+		for (let key in ranges) {
+			if (ranges[key] < Math.abs(secondsElapsed)) {
+			  const delta = secondsElapsed / ranges[key];
+			  return formatter.format(Math.round(delta), key);
+			}
+		}
+	}
 		
 }( window.yada = window.yada || {} ));
 

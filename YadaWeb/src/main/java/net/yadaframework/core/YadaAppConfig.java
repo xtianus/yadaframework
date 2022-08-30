@@ -16,10 +16,10 @@ import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -41,12 +41,16 @@ import net.yadaframework.web.dialect.YadaDialect;
 @EnableAsync
 public class YadaAppConfig {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
-	
+
 	@Autowired private YadaConfiguration config;
 	@Autowired DataSource dataSource;
-	
+	@Autowired ApplicationContext applicationContext;
+
 	@PostConstruct
 	public void init() {
+		// Inject the applicationContext in YadaUtil because it may be used before it's injected by Spring
+		YadaUtil.applicationContext = applicationContext;
+
 		// Automatic database schema migration (aka versioning).
 		// See https://flywaydb.org
 		if (config.useDatabaseMigrationAtStartup()) {
@@ -56,12 +60,12 @@ public class YadaAppConfig {
 			flyway.setLocations("classpath:database"); // Where sql scripts are stored
 			flyway.setDataSource(dataSource);
 			// If the db is not empty and there is no metadata, add the metadata instead of failing, setting the version to 1
-			flyway.setBaselineOnMigrate(true); 
+			flyway.setBaselineOnMigrate(true);
 			flyway.migrate();
 		}
 	}
-	
-	
+
+
 	public ClassLoaderTemplateResolver emailTemplateResolver() {
 		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
 		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
@@ -77,7 +81,7 @@ public class YadaAppConfig {
 		// resolver.setOrder(40); // Order not needed because resolver on different SpringTemplateEngine
 		return resolver;
 	}
-	
+
 	@Bean
 	public SpringTemplateEngine emailTemplateEngine() {
 		SpringTemplateEngine engine = new SpringTemplateEngine();
@@ -98,13 +102,13 @@ public class YadaAppConfig {
 	protected void addExtraDialect(SpringTemplateEngine engine) {
 		// Do nothing
 	}
-	
+
 	@Bean
 	public TaskScheduler taskScheduler() {
 		TaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 		return taskScheduler;
 	}
-	
+
 	/**
 	 * Creates a ThreadPoolTaskExecutor with default values.
 	 * If you need to configure it, override this method in your appConfig bean.
@@ -113,7 +117,7 @@ public class YadaAppConfig {
     public Executor taskExecutor() {
     	return new ThreadPoolTaskExecutor();
     }
-	
+
 	@Bean
 	public MessageSource messageSource() {
 		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
@@ -153,12 +157,12 @@ public class YadaAppConfig {
 		}
 		return mailSender;
 	}
-	
+
 	/**
 	 * Ritorna una istanza di YadaConfiguration. Il progetto deve dichiarare la sua sottoclasse specifica in configuration.xml e fare un override
 	 * di questo metodo per ritornare il tipo castato alla sottoclasse, oltre ad aggiungere @Bean
 	 * @return
-	 * @throws ConfigurationException 
+	 * @throws ConfigurationException
 	 */
 	protected void makeCombinedConfiguration(YadaConfiguration yadaConfiguration) throws ConfigurationException {
 		Parameters params = new Parameters();
@@ -169,7 +173,7 @@ public class YadaAppConfig {
 				);
 		yadaConfiguration.setBuilder(builder);
 //		yadaConfiguration.setConfiguration(ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration()));
-		
+
 //		builder.addEventListener(ConfigurationBuilderEvent.CONFIGURATION_REQUEST, new EventListener<Event>() {
 //			@Override
 //			public void onEvent(Event event) {

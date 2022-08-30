@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -106,8 +107,8 @@ public class YadaUtil {
 
     static private YadaFileManager yadaFileManager;
 
-    static ApplicationContext applicationContext; 	// To access the ApplicationContext from anywhere
-    static public MessageSource messageSource; 		// To access the MessageSource from anywhere
+    static public ApplicationContext applicationContext; 	// To access the ApplicationContext from anywhere
+    static public MessageSource messageSource; 		// To access the MessageSource from anywhere, injected by YadaAppConfig
 
     public final static long MILLIS_IN_MINUTE = 60*1000;
 	public final static long MILLIS_IN_HOUR = 60*MILLIS_IN_MINUTE;
@@ -133,6 +134,60 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+
+	/**
+	 * Given a date in the past, returns a string like "12 minutes ago", "2 hours ago", "today at 12:51", "yesterday at 5:32"...
+	 * For dates before yesterday, the full RFC_1123 format is used, as 'Tue, 3 Jun 2008 11:05:30 GMT'.
+	 * No "x days ago" format is currently provided.
+	 * @param timestamp
+	 * @param locale
+	 * @param maxHours the max value of x for using the "x hours ago" format after which the "today at hh:mm" format is used
+	 * 			The default is 3 when null. There is no maximum value, in order to have a "76 hours ago" result if needed.
+	 * @return
+	 */
+	public String getTimestampAsRelative(ZonedDateTime timestamp, Locale locale, Integer maxHours) {
+		maxHours = maxHours==null?3:maxHours;
+		final long MILLIS_PER_SECOND = 1000;
+		final long MILLIS_PER_MINUTE = MILLIS_PER_SECOND*60;
+		final long MILLIS_PER_HOUR = MILLIS_PER_MINUTE*60;
+		// final long MILLIS_PER_DAY = MILLIS_PER_HOUR*24;
+		long elapsedMillis = System.currentTimeMillis()-timestamp.toInstant().toEpochMilli();
+		//
+		// Small intervals up to maxHours
+		if (elapsedMillis<MILLIS_PER_SECOND) {
+			return messageSource.getMessage("yada.timestamp.now", null, locale); // "now"
+		}
+		if (elapsedMillis<MILLIS_PER_MINUTE) {
+			Long value = elapsedMillis / MILLIS_PER_SECOND;
+			return messageSource.getMessage("yada.timestamp.secondsago", new Object[] {value}, locale); // "3 seconds ago"
+		}
+		if (elapsedMillis<MILLIS_PER_HOUR) {
+			Long value = elapsedMillis / MILLIS_PER_MINUTE;
+			return messageSource.getMessage("yada.timestamp.minutesago", new Object[] {value}, locale); // "3 minutes ago"
+		}
+		if (elapsedMillis<(maxHours+1)*MILLIS_PER_HOUR) {
+			Long value = elapsedMillis / MILLIS_PER_HOUR;
+			return messageSource.getMessage("yada.timestamp.hoursago", new Object[] {value}, locale); // "3 hours ago"
+		}
+		//
+		// Medium intervals from maxHours up to yesterday
+		ZonedDateTime zonedNow = ZonedDateTime.now(timestamp.getZone());
+		long elapsedDays = daysBetween(timestamp, zonedNow);
+		if (elapsedDays<2) {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:m");
+			String hm = timestamp.format(formatter);
+			if (elapsedDays==0) {
+				// Today
+				return messageSource.getMessage("yada.timestamp.todayAt", new Object[] {hm}, locale); // "today at 12:43"
+			} else if (elapsedDays==1) {
+				// Yesterday
+				return messageSource.getMessage("yada.timestamp.yesterdayAt", new Object[] {hm}, locale); // "yesterday at 12:43"
+			}
+		}
+		//
+		// Long intervals: just show the full date and time
+		return timestamp.format(DateTimeFormatter.RFC_1123_DATE_TIME);
+	}
 
 	/**
 	 * Parse a string as a double, using the correct decimal separator (if any).
@@ -2401,6 +2456,21 @@ public class YadaUtil {
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.MILLISECOND, 0);
 		return calendar.getTime();
+	}
+
+	/**
+	 * Returns the days between two dates.
+	 * It doesn't take into consideration the time component, so the difference between some time yesterday and any other time today
+	 * will always be 1
+	 * @param olderDate
+	 * @param earlierDate
+	 * @return
+	 * @see ZonedDateTime#until(java.time.temporal.Temporal, java.time.temporal.TemporalUnit)
+	 */
+	public long daysBetween(ZonedDateTime olderDate, ZonedDateTime earlierDate) {
+		ZonedDateTime olderDateBack = olderDate.truncatedTo(ChronoUnit.DAYS);
+		ZonedDateTime earlierDateBack = earlierDate.truncatedTo(ChronoUnit.DAYS);
+		return ChronoUnit.DAYS.between(olderDateBack, earlierDateBack);
 	}
 
 	/**
