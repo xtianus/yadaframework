@@ -359,6 +359,14 @@ public class YadaAttachedFile implements CloneableDeep {
 		this.description = description;
 	}
 
+	/**
+	 * Returns the localized title in the current request locale
+	 * @return
+	 */
+	public String getLocalDescription() {
+		return YadaUtil.getLocalValue(description);
+	}
+
 	public Date getUploadTimestamp() {
 		return uploadTimestamp;
 	}
