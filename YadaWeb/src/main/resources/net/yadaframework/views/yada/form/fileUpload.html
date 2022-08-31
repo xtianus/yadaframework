@@ -46,6 +46,11 @@ Example:
 		<span th:text="${err}" th:id="${#ids.seq(seqName)}">Error Text</span>
 		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	</div>
+	<div th:if="${attachedFile!=null && attachedFile.image}">
+		<div th:if="${attachedFile.filename!=null}">
+			File: <a th:href="@{${@yadaFileManager.getFileUrl(attachedFile)}}" target="_blank" class="yadaNoLoader">[[${attachedFile.clientFilename}]]</a>
+		</div>
+	</div>
 	<div th:if="${attachedFile!=null && !attachedFile.image}">
 		<div th:if="${attachedFile.filename!=null}">
 			File: <a th:href="@{${@yadaFileManager.getFileUrl(attachedFile)}}" target="_blank" class="yadaNoLoader">[[${attachedFile.clientFilename}]]</a>
