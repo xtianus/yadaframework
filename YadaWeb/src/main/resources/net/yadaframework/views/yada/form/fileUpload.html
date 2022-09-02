@@ -46,19 +46,14 @@ Example:
 		<span th:text="${err}" th:id="${#ids.seq(seqName)}">Error Text</span>
 		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	</div>
-	<div th:if="${attachedFile!=null && attachedFile.image}">
+	<div th:if="${attachedFile!=null}">
 		<div th:if="${attachedFile.filename!=null}">
 			File: <a th:href="@{${@yadaFileManager.getFileUrl(attachedFile)}}" target="_blank" class="yadaNoLoader">[[${attachedFile.clientFilename}]]</a>
 		</div>
-	</div>
-	<div th:if="${attachedFile!=null && !attachedFile.image}">
-		<div th:if="${attachedFile.filename!=null}">
-			File: <a th:href="@{${@yadaFileManager.getFileUrl(attachedFile)}}" target="_blank" class="yadaNoLoader">[[${attachedFile.clientFilename}]]</a>
-		</div>
-		<div th:if="${attachedFile.filenameDesktop!=null}">
+		<div th:if="${attachedFile.filename==null && attachedFile.filenameDesktop!=null}">
 			Desktop: <a th:href="@{${@yadaFileManager.getDesktopImageUrl(attachedFile)}}" target="_blank" class="yadaNoLoader">[[${attachedFile.clientFilename}]]</a>
 		</div>
-		<div th:if="${attachedFile.filenameMobile!=null}">
+		<div th:if="${attachedFile.filename==null && attachedFile.filenameMobile!=null}">
 			Mobile: <a th:href="@{${@yadaFileManager.getMobileImageUrl(attachedFile)}}" target="_blank" class="yadaNoLoader">[[${attachedFile.clientFilename}]]</a>
 		</div>
 	</div>
