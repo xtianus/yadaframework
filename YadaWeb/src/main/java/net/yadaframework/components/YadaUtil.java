@@ -154,18 +154,18 @@ public class YadaUtil {
 		long elapsedMillis = System.currentTimeMillis()-timestamp.toInstant().toEpochMilli();
 		//
 		// Small intervals up to maxHours
-		if (elapsedMillis<MILLIS_PER_SECOND) {
+		if (elapsedMillis >= 0 && elapsedMillis<MILLIS_PER_SECOND) {
 			return messageSource.getMessage("yada.timestamp.now", null, locale); // "now"
 		}
-		if (elapsedMillis<MILLIS_PER_MINUTE) {
+		if (elapsedMillis >= 0 && elapsedMillis<MILLIS_PER_MINUTE) {
 			Long value = elapsedMillis / MILLIS_PER_SECOND;
 			return messageSource.getMessage("yada.timestamp.secondsago", new Object[] {value}, locale); // "3 seconds ago"
 		}
-		if (elapsedMillis<MILLIS_PER_HOUR) {
+		if (elapsedMillis >= 0 && elapsedMillis<MILLIS_PER_HOUR) {
 			Long value = elapsedMillis / MILLIS_PER_MINUTE;
 			return messageSource.getMessage("yada.timestamp.minutesago", new Object[] {value}, locale); // "3 minutes ago"
 		}
-		if (elapsedMillis<(maxHours+1)*MILLIS_PER_HOUR) {
+		if (elapsedMillis >= 0 && elapsedMillis<(maxHours+1)*MILLIS_PER_HOUR) {
 			Long value = elapsedMillis / MILLIS_PER_HOUR;
 			return messageSource.getMessage("yada.timestamp.hoursago", new Object[] {value}, locale); // "3 hours ago"
 		}
@@ -173,7 +173,7 @@ public class YadaUtil {
 		// Medium intervals from maxHours up to yesterday
 		ZonedDateTime zonedNow = ZonedDateTime.now(timestamp.getZone());
 		long elapsedDays = daysBetween(timestamp, zonedNow);
-		if (elapsedDays<2) {
+		if (elapsedDays>=0 && elapsedDays<2) {
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:m");
 			String hm = timestamp.format(formatter);
 			if (elapsedDays==0) {

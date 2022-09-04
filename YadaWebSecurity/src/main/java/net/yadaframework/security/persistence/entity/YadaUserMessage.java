@@ -2,10 +2,13 @@ package net.yadaframework.security.persistence.entity;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.TimeZone;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -26,6 +29,8 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
@@ -74,7 +79,8 @@ public class YadaUserMessage<YLE extends YadaLocalEnum<?>> implements Serializab
 
 	protected boolean emailed = false; // Emailed to recipient
 
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
+	@Fetch(FetchMode.SELECT)
 	@Temporal(TemporalType.TIMESTAMP)
 	//@JsonView(YadaJsonView.WithEagerAttributes.class)
 	//@JsonView(YadaJsonView.WithLazyAttributes.class)
@@ -140,6 +146,20 @@ public class YadaUserMessage<YLE extends YadaLocalEnum<?>> implements Serializab
 	public void init() {
 		computeHash();
 		setInitialDate();
+	}
+
+	/**
+	 * Returns the timestamp formatted as a relative time from now, in the recipient's timezone
+	 * @param locale
+	 * @return a relative time like "1 minute ago"
+	 */
+	public String getTimestampAsRelative(Locale locale) {
+		// YadaUserMessageDao yadaUserMessageDao = YadaUtil.getBean(YadaUserMessageDao.class);
+		TimeZone timezone = recipient.getTimezone();
+		Date created = getLastDate();
+		// Date created = yadaUserMessageDao.getLastDate(this);
+		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(created.toInstant(), timezone.toZoneId());
+		return YadaUtil.INSTANCE.getTimestampAsRelative(zonedDateTime, locale, null);
 	}
 
 	/**

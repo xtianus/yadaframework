@@ -1,6 +1,8 @@
 package net.yadaframework.commerce.persistence.entity;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.Locale;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -16,6 +18,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.persistence.YadaMoney;
 import net.yadaframework.persistence.YadaMoneyConverter;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
@@ -78,6 +81,16 @@ public class YadaTransaction {
 	protected Boolean suspended = false; // true when the transaction has not been performed yet
 
 	///////////////////////////////////
+
+	/**
+	 * Returns the timestamp formatted as a relative time from now, in the account owner's timezone
+	 * @param locale
+	 * @return a relative time like "1 minute ago"
+	 */
+	public String getTimestampAsRelative(Locale locale) {
+		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(timestamp.toInstant(), accountOwner.getTimezone().toZoneId());
+		return YadaUtil.INSTANCE.getTimestampAsRelative(zonedDateTime, locale, null);
+	}
 
 	public Date getModified() {
 		return modified;
