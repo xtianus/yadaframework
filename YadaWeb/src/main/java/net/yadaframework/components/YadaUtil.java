@@ -1,10 +1,12 @@
 package net.yadaframework.components;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,6 +20,7 @@ import java.math.BigInteger;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -50,6 +53,7 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -2606,6 +2610,85 @@ public class YadaUtil {
 		int bDay = bCalendar.get(Calendar.DAY_OF_YEAR);
 		int bYear = bCalendar.get(Calendar.YEAR);
 		return aDay==bDay && aYear == bYear;
+	}
+	
+	/**
+	 * Create a zip of a set of files using an external process. The process must be configured as "config/shell/zipWithRename"
+	 * and should use zip and zipnote (for renaming). See the /YadaWeb/scripts folder for an example.
+	 * @param zipFile the zip file that has to be created
+	 * @param sourceFiles the files to add to the zip
+	 * @param filenames optional names to give to each added file, in order
+	 * @param fixNames when true, any repeated name will be given an incremental number (regardless or renaming) 
+	 * 		  and if filenames is provided, the renamed file will be forced to have the same
+	 * 		  extension of the source file (existing extensions will be removed).
+	 * @return true if the zip file has been created
+	 * @throws IOException 
+	 * @throws YadaInvalidUsageException when the length of filenames is greater than zero but different from the length of sourceFiles 
+	 */
+	public boolean createZipProcess(File zipFile, File[] sourceFiles, String[] filenames, boolean fixNames) throws IOException {
+		if (filenames!=null && filenames.length>0 && filenames.length!=sourceFiles.length) {
+			throw new YadaInvalidUsageException("When provided, there must be as many filenames as source files");
+		}
+		Map<String, String> params = new HashMap<>();
+		String shellCommandKey = "config/shell/zipWithRename";
+		File folder = zipFile.getParentFile(); // We create all temporary files in the same folder of the target zip
+		File tempZip = java.nio.file.Files.createTempFile(folder.toPath(), "_tmp_", ".zip").toFile();
+		// The zip file must not exist yet, so delete it
+		tempZip.delete();
+		File tempRename = java.nio.file.Files.createTempFile(folder.toPath(), "_tmp_", ".txt").toFile();
+		// String sourceNames = Arrays.stream(sourceFiles).map(File::getAbsolutePath).collect(Collectors.joining(" "));
+		
+		// Create the rename file and the source names list
+		Set<String> addedFilenames = new HashSet<>();
+		StringBuilder sourceNames = new StringBuilder();
+		try (BufferedWriter renameWriter = new BufferedWriter(new FileWriter(tempRename))) {
+			for (int i=0; i<sourceFiles.length; i++) {
+				File sourceFile = sourceFiles[i];
+				if (sourceFile!=null && sourceFile.canRead()) {
+					sourceNames.append(sourceFile.getAbsolutePath()).append(" ");
+					String sourceFilename = sourceFile.getName();
+					String sourceExtensionNoDot = getFileExtension(sourceFilename); // jpg
+					// When there is no filenames and no fixNames, the target file name is the same as the source file name
+					String targetName = sourceFilename;
+					if (filenames!=null) {
+						// When new names are provided, the target file name is the provided name
+						targetName = filenames[i];
+					}
+					if (fixNames) {
+						// Make names unique and use source extension as target
+						String targetNameNoExtension = splitFileNameAndExtension(targetName)[0];
+						targetName = findAvailableFilename(targetNameNoExtension, sourceExtensionNoDot, "_", addedFilenames);
+					}
+					// zipnote format
+					renameWriter.append("@ "+sourceFilename+"\n");
+					renameWriter.append("@="+targetName+"\n");
+					renameWriter.append("@ (comment above this line)\n");
+				} // sourceFile!=null		
+			}
+		} // try
+	    	
+		params.put("ZIPFILE", tempZip.getAbsolutePath());
+		params.put("ZIPNOTEFILE", tempRename.getAbsolutePath());
+		params.put("FILES", sourceNames.toString());
+		try {
+			int returnCode = shellExec(shellCommandKey, params, null);
+			if (returnCode!=0) {
+				log.error("Failed to create zip file {} from {}: return code is {}", tempZip, sourceFiles, returnCode);
+				tempZip.delete();
+				tempRename.delete();
+				return false;
+			}
+		} catch (Exception e) {
+			log.error("Failed to create zip file {} from {}", tempZip, sourceFiles);
+			tempZip.delete();
+			tempRename.delete();
+			throw e;
+		}
+		// Move the zip back into the intended place
+		Files.move(tempZip.toPath(), zipFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		// Delete the zipnote file
+		tempRename.delete();
+		return true;
 	}
 
 	/**
