@@ -1504,7 +1504,9 @@
 					var stickyModal = $loadedModalDialog.hasClass("yadaStickyModal");
 					
 					// Remove any currently downloaded modals (markerAjaxModal) if they are open and not sticky
-					$(".modal.show."+markerAjaxModal+":not(.yadaStickyModal)").remove();
+					const $existingModals = $(".modal.show."+markerAjaxModal+":not(.yadaStickyModal)");
+					$existingModals.modal("hide"); // Remove the background too
+					$existingModals.remove();
 					
 					// modals are appended to the body
 					const $modalObject = $(responseHtml).find(".modal").first();

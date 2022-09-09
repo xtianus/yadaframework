@@ -993,8 +993,12 @@
 			$('#yada-confirm .okButton').text(previousOkButtonText);
 			$('#yada-confirm .cancelButton').text(previousCancelButtonText);
 			if (cancelClicked || (okClicked && okShowsPreviousModal==true)) {
-				$currentModals.css('display', 'block'); // Show the previous modals again on cancel
+				if ($currentModals.length>0) {
+					// Show the previous modals again on cancel or when okShowsPreviousModal is true
+					$currentModals.css('display', 'block');
+				}
 			} else {
+				// Not cancelled and not okShowsPreviousModal.
 				// Just for consistency, I restore the modals then hide them properly
 				$currentModals.css('display', 'block');
 				$currentModals.modal("hide"); 
@@ -1048,6 +1052,8 @@
 			.not($notThese);
 		// Do not use modal('hide') because it may trigger some events that shouldn't be triggered
 		$modals.css("display", "none");
+		// Also remove the dark layer because it would be doubled otherwise
+		// $(".modal-backdrop.fade.show").first().removeClass("show");
 		return $modals;		
 	}
 	
