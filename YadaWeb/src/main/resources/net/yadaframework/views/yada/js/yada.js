@@ -956,10 +956,9 @@
 	 */
 	yada.confirm = function(title, message, callback, okButtonText, cancelButtonText, okShowsPreviousModal) {
 		// okButtonText e cancelButtonText sono opzionali
-		var $currentModals = $(".modal:visible");
+		var $currentModals = hideAllModals($("#yada-confirm"));
 		var okClicked = false;
 		var cancelClicked = false;
-		hideAllModals();
 		// Turn off the loader else the confirm dialog won't show
 		yada.loaderOff();
 		// $('#yada-confirm').modal('hide'); // Eventualmente fosse già aperto
@@ -994,7 +993,11 @@
 			$('#yada-confirm .okButton').text(previousOkButtonText);
 			$('#yada-confirm .cancelButton').text(previousCancelButtonText);
 			if (cancelClicked || (okClicked && okShowsPreviousModal==true)) {
-				$currentModals.modal('show');
+				$currentModals.css('display', 'block'); // Show the previous modals again on cancel
+			} else {
+				// Just for consistency, I restore the modals then hide them properly
+				$currentModals.css('display', 'block');
+				$currentModals.modal("hide"); 
 			}
 		});		
 	}
@@ -1016,7 +1019,7 @@
 	}
 	
 	function showNotificationModal(title, message, severity, redirectUrl) {
-		hideAllModals();
+		$(".modal").modal("hide"); // Hide previous existing modals
 		yada.loaderOff();
 		var glyphNames = {ok : 'ok-circle', info : 'exclamation-sign', error : 'remove-circle'};
 		// $('#yada-notification').modal('hide'); // Eventualmente fosse già aperto
@@ -1033,14 +1036,21 @@
 		}
 	}
 	
-	function hideAllModals() {
-		$("#loginModal:visible").modal('hide');
-		$("#ajaxModal:visible").modal('hide');
-		$('#yada-notification:visible').modal('hide');
-		$('#yada-confirm:visible').modal('hide');
+	/**
+	 * Make all current visible modals not visible.
+	 * @return the hidden modals
+	*/
+	function hideAllModals($notThese) {
+		const $modals = $("#loginModal:visible")
+			.add($(".modal.show."+yada.markerAjaxModal+":visible"))
+			.add($("#yada-notification:visible"))
+			.add($("#yada-confirm:visible"))
+			.not($notThese);
+		// Do not use modal('hide') because it may trigger some events that shouldn't be triggered
+		$modals.css("display", "none");
+		return $modals;		
 	}
 	
-
 	/////////////////////
 	/// Local Storage ///
 	/////////////////////

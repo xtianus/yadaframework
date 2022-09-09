@@ -25,6 +25,8 @@
 	
 	const yadaAjaxResponseHtmlRoot = "<div class='yadaAjaxResponseHtml'>";
 	
+	yada.markerAjaxModal = markerAjaxModal; // For use in other scripts
+	
 	/**
 	 * Init yada ajax handlers on the specified element
 	 * @param $element the element, or null for the entire body
