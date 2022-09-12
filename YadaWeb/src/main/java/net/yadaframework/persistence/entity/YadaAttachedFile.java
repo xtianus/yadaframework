@@ -1,6 +1,7 @@
 package net.yadaframework.persistence.entity;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.Locale;
@@ -25,11 +26,16 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.io.Files;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.raw.YadaIntDimension;
 
 /**
@@ -43,6 +49,7 @@ import net.yadaframework.raw.YadaIntDimension;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaAttachedFile implements CloneableDeep {
+	private final transient Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public enum YadaAttachedFileType {
 		DESKTOP,
@@ -279,6 +286,44 @@ public class YadaAttachedFile implements CloneableDeep {
 	@Deprecated // Do not use config
 	public File getAbsoluteFile(YadaAttachedFileType type, YadaConfiguration config) {
 		return getAbsoluteFile(type);
+	}
+	
+	/**
+	 * Rename a file in the same folder. Do not use to move to a different folder.
+	 * @param newName the new exact name, with no path. Will overwrite an existing file with the same name.
+	 * @param type
+	 * @return true if the file was renamed successfully
+	 */
+	public boolean rename(String newName, YadaAttachedFileType type) {
+		newName = StringUtils.trimToNull(newName);
+		if (newName==null) {
+			throw new YadaInvalidValueException("Invalid filename for rename: " + newName);
+		}
+		File source = getAbsoluteFile(type);
+		File target = new File(source.getParentFile(), newName);
+		try {
+			Files.move(source, target);
+			switch (type) {
+			case DESKTOP:
+				filenameDesktop=newName;
+				break;
+			case MOBILE:
+				filenameMobile=newName;
+				break;
+			case PDF:
+				filenamePdf=newName;
+				break;
+			case DEFAULT:
+				filename=newName;
+				break;
+			default:
+				throw new YadaInvalidUsageException("Invalid type: " + type);		
+			}
+			return true;
+		} catch (IOException e) {
+			log.error("Can't rename file from {} to {}: {}", source, target, e.getMessage());
+			return false;
+		}
 	}
 
 	/**
