@@ -1,6 +1,5 @@
 package net.yadaframework.persistence;
 
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -28,6 +27,7 @@ import net.yadaframework.components.YadaUtil;
  * </pre>
  */
 public class YadaMoney implements Comparable<YadaMoney> {
+	// Having this "final" makes everything more complicated
 	private /*final*/ long internalValue; // Amount in 1/10000 of the currency
 	private static final int multiplier = 10000;
 
@@ -72,14 +72,25 @@ public class YadaMoney implements Comparable<YadaMoney> {
 		this.internalValue = (long) (doubleValue * multiplier);
 	}
 
+//	/**
+//	 * Creates a YadaMoney by setting the internal value directly
+//	 * @param internalValue
+//	 */
+//	// Package accessibility because it is implementation-dependent.
+//	// Need to pass a BigDecimal so that it can be different from the public long version.
+//	YadaMoney(BigDecimal internalValue) {
+//		this.internalValue = internalValue.longValue();
+//	}
+
 	/**
-	 * Creates a YadaMoney by setting the internal value directly
-	 * @param internalValue
+	 * Create a YadaMoney from the value stored in the database
+	 * @param dbValue
+	 * @return
 	 */
-	// Package accessibility because it is implementation-dependent.
-	// Need to pass a BigDecimal so that it can be different from the public long version.
-	YadaMoney(BigDecimal internalValue) {
-		this.internalValue = internalValue.longValue();
+	public static YadaMoney fromDatabaseColumn(Long dbValue) {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = dbValue;
+		return result;
 	}
 
 	/**
@@ -278,6 +289,10 @@ public class YadaMoney implements Comparable<YadaMoney> {
 		return yadaMoney;
 	}
 
+	/**
+	 * Package visibility to be used by {@link YadaMoneyConverter}
+	 * @return
+	 */
 	Long getInternalValue() {
 		return this.internalValue;
 	}

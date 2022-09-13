@@ -10,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import net.yadaframework.commerce.persistence.entity.YadaOrder;
 import net.yadaframework.commerce.persistence.entity.YadaTransaction;
+import net.yadaframework.persistence.YadaMoney;
 import net.yadaframework.persistence.YadaSql;
+import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.web.YadaPageRequest;
 import net.yadaframework.web.YadaPageRows;
 
@@ -19,6 +21,21 @@ import net.yadaframework.web.YadaPageRows;
 public class YadaTransactionDao {
 
     @PersistenceContext private EntityManager em;
+
+    /**
+     * Returns the sum of all transaction amounts for the given user or for all users.
+     * @param accountOwner when null, all transactions from all users are counted. The result should be zero in a
+     * double ledger system.
+     * @return
+     */
+    public YadaMoney sumAmount(YadaUserProfile accountOwner) {
+    	Long sum = (Long) YadaSql.instance().selectFrom("select SUM(amount) from YadaTransaction")
+    		.where(accountOwner!=null, "where accountOwner=:accountOwner")
+    		.setParameter("accountOwner", accountOwner)
+    		.query(em).getSingleResult();
+    	YadaMoney result = YadaMoney.fromDatabaseColumn(sum);
+    	return result;
+    	}
 
     /**
      * Given an existing transaction, create the twin opposite transaction in order to implement a double ledger
