@@ -1112,10 +1112,16 @@ public class YadaUtil {
 	 * @return the localized value, or the empty string if no value has been defined and no default locale has been configured
 	 */
 	public static String getLocalValue(Map<Locale, String> LocalizedValueMap, Locale locale) {
-		if (locale==null) {
-			locale = LocaleContextHolder.getLocale();
+		String result=null;
+		try {
+			if (locale==null) {
+				locale = LocaleContextHolder.getLocale();
+			}
+			result = LocalizedValueMap.get(locale);
+		} catch (Exception e) {
+			log.debug("Exception while getting localized value from {} with locale={} (ignored): {}", LocalizedValueMap, locale, e.getMessage());
+			// Keep going
 		}
-		String result = LocalizedValueMap.get(locale);
 		if (StringUtils.isEmpty(result) && defaultLocale!=null && !defaultLocale.equals(locale)) {
 			result = LocalizedValueMap.get(defaultLocale);
 		}
