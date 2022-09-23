@@ -228,7 +228,6 @@ public class YadaAttachedFile implements CloneableDeep {
 	 * @param targetExtension the needed file extension without dot, can be null if no conversion has to be performed
 	 * @param targetWidth the needed image width, null if no resize has to be performed
 	 * @param type the type of file
-	 * @param targetFolder where the file has to be stored
 	 * @return
 	 */
 	@Transient
@@ -286,6 +285,38 @@ public class YadaAttachedFile implements CloneableDeep {
 	@Deprecated // Do not use config
 	public File getAbsoluteFile(YadaAttachedFileType type, YadaConfiguration config) {
 		return getAbsoluteFile(type);
+	}
+	
+	/**
+	 * Moves all files to a different relative path
+	 * @param newRelativeFolderPath
+	 * @throws IOException
+	 */
+	public void move(String newRelativeFolderPath) throws IOException {
+		// Ensure the target folder exists
+		File targetFolder = config.getContentsFolder();
+		if (StringUtils.isNotBlank(newRelativeFolderPath)) {
+			targetFolder = new File(targetFolder, newRelativeFolderPath);
+		}
+		targetFolder.mkdirs();
+		//
+		File sourceFileMobile = getAbsoluteFile(YadaAttachedFileType.MOBILE);
+		File sourceFileDesktop = getAbsoluteFile(YadaAttachedFileType.DESKTOP);
+		File sourceFilePdf = getAbsoluteFile(YadaAttachedFileType.PDF);
+		File sourceFile = getAbsoluteFile(YadaAttachedFileType.DEFAULT);
+		this.setRelativeFolderPath(newRelativeFolderPath);
+		if (sourceFileMobile!=null) {
+			Files.move(sourceFileMobile, getAbsoluteFile(YadaAttachedFileType.MOBILE));
+		}
+		if (sourceFileDesktop!=null) {
+			Files.move(sourceFileDesktop, getAbsoluteFile(YadaAttachedFileType.DESKTOP));
+		}
+		if (sourceFilePdf!=null) {
+			Files.move(sourceFilePdf, getAbsoluteFile(YadaAttachedFileType.PDF));
+		}
+		if (sourceFile!=null) {
+			Files.move(sourceFile, getAbsoluteFile(YadaAttachedFileType.DEFAULT));
+		}
 	}
 	
 	/**
