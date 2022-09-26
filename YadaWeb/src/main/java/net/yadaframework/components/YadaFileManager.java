@@ -118,6 +118,9 @@ public class YadaFileManager {
 		File sourceFileDesktop = getAbsoluteDesktopFile(yadaAttachedFile);
 		File sourceFilePdf = getAbsolutePdfFile(yadaAttachedFile);
 		File sourceFile = getAbsoluteFile(yadaAttachedFile);
+		// Sometimes sourceFileDesktop and sourceFile have the same value: don't copy the file twice!
+		boolean deskSameAsDefault = sourceFileDesktop!=null && sourceFile!=null && 
+			sourceFileDesktop.getAbsolutePath().equals(sourceFile.getAbsolutePath());
 		
 		if (yadaAttachedFileCloneSet!=null) {
 			yadaAttachedFileCloneSet.handle(yadaAttachedFile); // Moved to temp folder
@@ -131,8 +134,9 @@ public class YadaFileManager {
 			}
 			yadaAttachedFile.setFilenameMobile(targetFileMobile.getName());
 		}
+		File targetFileDesktop = null;
 		if (sourceFileDesktop!=null) {
-			File targetFileDesktop = getAbsoluteDesktopFile(yadaAttachedFile);
+			targetFileDesktop = getAbsoluteDesktopFile(yadaAttachedFile);
 			targetFileDesktop = YadaUtil.findAvailableName(targetFileDesktop, null);
 			try (InputStream inputStream = new FileInputStream(sourceFileDesktop); OutputStream outputStream = new FileOutputStream(targetFileDesktop)) {
 				IOUtils.copy(inputStream, outputStream);
@@ -147,13 +151,17 @@ public class YadaFileManager {
 			}
 			yadaAttachedFile.setFilenamePdf(targetFilePdf.getName());
 		}
-		if (sourceFile!=null) {
+		if (sourceFile!=null && !deskSameAsDefault) {
 			File targetFile = getAbsoluteFile(yadaAttachedFile);
 			targetFile = YadaUtil.findAvailableName(targetFile, null);
 			try (InputStream inputStream = new FileInputStream(sourceFile); OutputStream outputStream = new FileOutputStream(targetFile)) {
 				IOUtils.copy(inputStream, outputStream);
 			}
 			yadaAttachedFile.setFilename(targetFile.getName());
+		}
+		if (deskSameAsDefault && targetFileDesktop!=null) {
+			// Default file is the same as desktop file
+			yadaAttachedFile.setFilename(targetFileDesktop.getName());
 		}
 		return yadaAttachedFileDao.save(yadaAttachedFile);
 	}

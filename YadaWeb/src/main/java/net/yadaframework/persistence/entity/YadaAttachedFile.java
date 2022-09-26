@@ -305,16 +305,16 @@ public class YadaAttachedFile implements CloneableDeep {
 		File sourceFilePdf = getAbsoluteFile(YadaAttachedFileType.PDF);
 		File sourceFile = getAbsoluteFile(YadaAttachedFileType.DEFAULT);
 		this.setRelativeFolderPath(newRelativeFolderPath);
-		if (sourceFileMobile!=null) {
+		if (sourceFileMobile!=null && sourceFileMobile.canRead()) {
 			Files.move(sourceFileMobile, getAbsoluteFile(YadaAttachedFileType.MOBILE));
 		}
-		if (sourceFileDesktop!=null) {
+		if (sourceFileDesktop!=null && sourceFileDesktop.canRead()) {
 			Files.move(sourceFileDesktop, getAbsoluteFile(YadaAttachedFileType.DESKTOP));
 		}
-		if (sourceFilePdf!=null) {
+		if (sourceFilePdf!=null && sourceFilePdf.canRead()) {
 			Files.move(sourceFilePdf, getAbsoluteFile(YadaAttachedFileType.PDF));
 		}
-		if (sourceFile!=null) {
+		if (sourceFile!=null && sourceFile.canRead()) {
 			Files.move(sourceFile, getAbsoluteFile(YadaAttachedFileType.DEFAULT));
 		}
 	}
