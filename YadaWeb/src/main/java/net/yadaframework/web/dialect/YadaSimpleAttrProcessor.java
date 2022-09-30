@@ -2,14 +2,11 @@ package net.yadaframework.web.dialect;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.engine.AttributeName;
 import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.element.AbstractAttributeTagProcessor;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
-import org.thymeleaf.standard.expression.IStandardExpressionParser;
-import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templatemode.TemplateMode;
 
 import net.yadaframework.core.YadaConfiguration;
@@ -47,98 +44,18 @@ public class YadaSimpleAttrProcessor extends AbstractAttributeTagProcessor {
         this.yadaDialectUtil = new YadaDialectUtil(config);
 	}
 
-//	@Override
-//	public int getPrecedence() {
-//        return ATTR_PRECEDENCE;
-//	}
-
-//    @Override
-//    protected String getTargetAttributeName(
-//            final Arguments arguments, final Element element, final String attributeName) {
-//        return ATTR_NAME;
-//    }
-
     @Override
     protected void doProcess(
             final ITemplateContext context, final IProcessableElementTag tag,
             final AttributeName attributeName, final String attributeValue,
             final IElementTagStructureHandler structureHandler) {
 
-        final IEngineConfiguration configuration = context.getConfiguration();
-
         String value = "";
         if (attributeValue!=null) {
-        	/*
-        	 * Obtain the Thymeleaf Standard Expression parser
-        	 */
-        	final IStandardExpressionParser parser = StandardExpressions.getExpressionParser(configuration);
-
-        	//try {
-				/*
-				 * Parse the attribute value as a Thymeleaf Standard Expression
-				 */
-				// final IStandardExpression expression = parser.parseExpression(context, attributeValue);
-        		// This won't throw an exception if the value is a plain "string" with no inner quotes like "'string'"
-        		value = yadaDialectUtil.parseExpression(attributeValue, context, String.class);
-
-				/*
-				 * Execute the expression just parsed
-				 */
-				//value = (String) expression.execute(context);
-//			} catch (org.thymeleaf.exceptions.TemplateProcessingException e) {
-//				// Check if the expression is actually just a single word: in that case use it literally
-//				if (attributeValue.indexOf(' ')==-1) {
-//					// No spaces == single word
-//					value = attributeValue;
-//				} else {
-//					throw e;
-//				}
-//			}
+        	value = yadaDialectUtil.parseExpression(attributeValue, context, String.class);
         }
 
         structureHandler.setAttribute(replacementAttribute, value);
     }
-
-    /**
-     *
-     */
-//    @Override
-//    protected String getTargetAttributeValue(final Arguments arguments, final Element element, final String attributeName) {
-//    	String url = super.getTargetAttributeValue(arguments, element, attributeName);
-//    	String resultUrl = yadaDialectUtil.getResAttributeValue(arguments, url);
-//        return RequestDataValueProcessorUtils.processUrl(arguments.getConfiguration(), arguments, resultUrl);
-//    }
-
-//	@Override
-//	protected ModificationType getModificationType(Arguments arguments, Element element, String attributeName, String newAttributeName) {
-//		return ModificationType.SUBSTITUTION;
-//	}
-
-//	@Override
-//	protected Map<String, String> getModifiedAttributeValues(Arguments arguments, Element element, String attributeName) {
-//		final Configuration configuration = arguments.getConfiguration();
-//		final String attributeValue = element.getAttributeValue(attributeName);
-//		final IStandardExpressionParser parser = StandardExpressions.getExpressionParser(configuration);
-//		String trailingUrl = attributeValue; // Nel caso sia stato usato un character literal che manda in exception il parser
-//		try {
-//			final IStandardExpression expression = parser.parseExpression(configuration, arguments, attributeValue);
-//			trailingUrl = (String) expression.execute(configuration, arguments);
-//		} catch (Exception e) {
-//			// Ignored
-//		}
-//		final Map<String,String> values = new HashMap<String, String>();
-//		values.put("href", getResourcesUrl(trailingUrl));
-//		return values;
-//	}
-
-//	@Override
-//	protected boolean recomputeProcessorsAfterExecution(Arguments arguments, Element element, String attributeName) {
-//		return false;
-//	}
-//
-//	@Override
-//	protected boolean removeAttributeIfEmpty(Arguments arguments, Element element, String attributeName, String newAttributeName) {
-//		return false;
-//	}
 
 }

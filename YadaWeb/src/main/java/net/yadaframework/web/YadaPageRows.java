@@ -8,7 +8,7 @@ import java.util.Objects;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 /**
- * A page of rows fetched using YadaPageRequest 
+ * A page of rows fetched using YadaPageRequest
  *
  * @param <T> the type of each row
  * @see YadaPageRequest
@@ -18,7 +18,15 @@ public class YadaPageRows<T> implements Iterable<T> {
 	private final YadaPageRequest currentPageRequest;
 	private Long outOfRows = null; // Total number of elements that would be returned without pagination
 	private boolean hasMoreRows = false;
-	
+
+	/**
+	 * This constructor is useful when dynamically adding rows to an existing list on user interaction
+	 */
+	public YadaPageRows() {
+		currentPageRequest = null;
+		hasMoreRows = false;
+	}
+
 	/**
 	 * @param rows the result
 	 * @param currentPageRequest the page request that generated this result
@@ -35,7 +43,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param rows the result
 	 * @param currentPageRequest the page request that generated this result
 	 */
@@ -50,6 +58,24 @@ public class YadaPageRows<T> implements Iterable<T> {
 		}
 	}
 
+	public String getPageParam() {
+		String paramPrefix = currentPageRequest.getParamPrefix();
+		paramPrefix = paramPrefix==null?"":paramPrefix + ".";
+		return paramPrefix + "page";
+	}
+
+	public String getSizeParam() {
+		String paramPrefix = currentPageRequest.getParamPrefix();
+		paramPrefix = paramPrefix==null?"":paramPrefix + ".";
+		return paramPrefix + "size";
+	}
+
+	public String getLoadPreviousParam() {
+		String paramPrefix = currentPageRequest.getParamPrefix();
+		paramPrefix = paramPrefix==null?"":paramPrefix + ".";
+		return paramPrefix + "loadPrevious";
+	}
+
 	/**
 	 * Returns the page data fetched from database. It also contains the rows of all previous pages if {@link YadaPageRequest#isLoadPrevious()} is true
 	 * @return
@@ -59,39 +85,39 @@ public class YadaPageRows<T> implements Iterable<T> {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the number of rows fetched from database, can be less, equal or higher than the page size
 	 */
 	public int getRowNumber() {
 		return rows.size();
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return the page size
 	 */
 	public int getPageSize() {
-		return currentPageRequest.getSize();
+		return currentPageRequest!=null?currentPageRequest.getSize():0;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return the page number
 	 */
 	public int getPage() {
-		return currentPageRequest.getPage();
+		return currentPageRequest!=null?currentPageRequest.getPage():0;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return the next page number. If there are no more rows, this number is invalid.
 	 */
 	public int getNextPage() {
-		return currentPageRequest.getNextPageRequest().getPage();
+		return currentPageRequest!=null?currentPageRequest.getNextPageRequest().getPage():0;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @return the YadaPageRequest that generated this YadaPageContent
 	 */
 	public YadaPageRequest getYadaPageRequest() {
@@ -99,7 +125,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the total number of rows (count) that would be returned without pagination
 	 */
 	public long getOutOfRows() {
@@ -110,13 +136,13 @@ public class YadaPageRows<T> implements Iterable<T> {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return true if there is more data to fetch from the database, false if this is the last available page
 	 */
 	public boolean hasMoreRows() {
 		return hasMoreRows;
 	}
-	
+
 	/**
 	 * @return true if there are no elements
 	 */
@@ -128,7 +154,7 @@ public class YadaPageRows<T> implements Iterable<T> {
 	 * @return true if this is the first page
 	 */
 	public boolean isFirst() {
-		return currentPageRequest.isFirst();
+		return currentPageRequest!=null?currentPageRequest.isFirst():true;
 	}
 
 	/**
@@ -174,6 +200,13 @@ public class YadaPageRows<T> implements Iterable<T> {
 			return null;
 		}
 		return currentPageRequest.getNextPageRequest();
+	}
+
+	/**
+	 * This method is useful when dynamically adding rows to an existing list on user interaction
+	 */
+	public void add(T row) {
+		rows.add(row);
 	}
 
 

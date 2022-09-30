@@ -61,6 +61,7 @@ import net.yadaframework.core.YadaConstants;
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.web.YadaPageRequest;
+import net.yadaframework.web.YadaPageRows;
 
 @Lazy // Lazy because used in YadaCmsConfiguration, and it woud give a circular refecence exception otherwise
 @Service
@@ -77,6 +78,58 @@ public class YadaWebUtil {
 	private static final String PATTERN_INVALID_SLUG = "[?%:,;=&!+~()@*$'\"\\s]";
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
+
+
+	public boolean isEmpty(YadaPageRows<?> yadaPageRows) {
+		return yadaPageRows==null || yadaPageRows.isEmpty();
+	}
+
+	/**
+	 * Add a url parameter or change its value if present
+	 * @param sourceUrl a full or relative url. Can also be just the query string starting with "?"
+	 * @param paramName the name of the parameter, not urlencoded
+	 * @param paramValue the value of the parameter, not urlencoded. Can be null to only have the paramName in the url
+	 * @return
+	 */
+	// Not tested yet
+	public String addOrUpdateUrlParameter(String sourceUrl, String paramName, String paramValue) {
+		String encodedParamName = urlEncode(paramName);
+		String encodedParamValue = urlEncode(paramValue); // Can be null
+		String equalsAndValue = encodedParamValue==null? "" : "=" + encodedParamValue;
+		StringBuilder result = new StringBuilder();
+		int queryPos = sourceUrl.indexOf("?");
+		boolean found=false;
+		if (queryPos<0) {
+			// There is no query string yet
+			result.append(sourceUrl);
+		} else if (queryPos>0) {
+			// There is a query string already
+			result.append(sourceUrl.substring(0, queryPos));
+		}
+		result.append("?");
+		if (queryPos>-1) {
+			// Check existing parameters
+			String query = sourceUrl.substring(queryPos); // "?xxx=yyy&zzz"
+			String[] params = query.split("[?&]"); // ["xxx=yyy", "zzz"]
+			for (int i = 0; i < params.length; i++) {
+				String[] parts = params[i].split("=");
+				String name = parts[0];
+				if (name.equals(encodedParamName)) {
+					result.append(encodedParamName).append(equalsAndValue);
+					found = true;
+				} else {
+					result.append(params[i]);
+				}
+				if (i<params.length) {
+					result.append("&");
+				}
+			}
+		}
+		if (!found) {
+			result.append(encodedParamName).append(equalsAndValue);
+		}
+		return result.toString();
+	}
 
 	/**
 	 * Returns a full url, including the server address and any optional request parameters.
@@ -370,6 +423,23 @@ public class YadaWebUtil {
 	}
 
 	/**
+	 * Fix a url so that it valid and doesn't allow XSS attacks
+	 * @see https://cheatsheetseries.owasp.org/cheatsheets/XSS_Filter_Evasion_Cheat_Sheet.html
+	 * @param url some text typed by the user
+	 * @return the same url or null if blank or a fixed one that may or may not work as expected, but won't pose a security risk
+	 */
+	public String sanitizeUrl(String url) {
+		if (StringUtils.isBlank(url)) {
+			return null;
+		}
+		url = url.replaceAll("[^-A-Za-z0-9+&@#/%?=~_|!:,.;\\(\\)]", "");
+		if (!url.startsWith("http://") && !url.startsWith("https://")) {
+			url = "http://" + url;
+		}
+		return url;
+	}
+
+	/**
 	 * Assembles a url given its parts as string.
 	 * @param segments the initial parts of the url up to the query string. Leading and trailing slashes are added when missing.
 	 * URLEncoding is not performed.
@@ -484,9 +554,12 @@ public class YadaWebUtil {
 	/**
 	 * Encodes a string with URLEncoder, handling the useless try-catch that is needed
 	 * @param source
-	 * @return
+	 * @return the encoded source or null if the source is null
 	 */
 	public String urlEncode(String source) {
+		if (source==null) {
+			return null;
+		}
 		final String encoding = "UTF-8";
 		try {
 			return URLEncoder.encode(source, encoding);

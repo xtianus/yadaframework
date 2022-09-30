@@ -2,104 +2,161 @@ package net.yadaframework.persistence;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.ParsePosition;
 import java.util.Locale;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
+import org.springframework.context.i18n.LocaleContextHolder;
 
-import net.yadaframework.web.YadaJsonView;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * An amount of money with a 1/10000 precision, stored as a long both in java and in the database.
- * "The rule of thumb for storage of fixed point decimal values is to store at least one more decimal 
+ * The currency must be stored somewhere else.
+ * "The rule of thumb for storage of fixed point decimal values is to store at least one more decimal
  * place than you actually require to allow for rounding."
  * https://stackoverflow.com/q/224462/587641
  * Some world currencies use 3 decimals: http://www.thefinancials.com/Default.aspx?SubSectionID=curformat
+ *
+ * This class can be stored in the database as a long when converted with YadaMoneyConverter:
+ * <pre>
+ * @Convert(converter = YadaMoneyConverter.class)
+ * private YadaMoney balance;
+ * </pre>
  */
 public class YadaMoney {
-	private long amount = 0; // Amount in 1/10000 of the default currency
+	private long internalValue = 0; // Amount in 1/10000 of the currency
 	private static final int multiplier = 10000;
-	
+
 	public YadaMoney() {
 	}
-	
+
 	/**
-	 * Set the given amount expressed as an integer multiple of the base unit. For example
-	 * dollars or euro.
-	 * @param integralCurrency an amount of money with no fractional part, like $9
+	 *
+	 * @param amount an amount of money with no decimals
 	 */
-	public void setCurrency(long integralCurrency) {
-		this.amount = integralCurrency * multiplier;
-	}
-	
-	/**
-	 * Gets the amount with no decimal part. So 9.23 becomes 9, expressed as a multiple of the base unit, not as a fraction.
-	 * @return
-	 */
-	public long getCurrency() {
-		return amount / multiplier;
-	}
-	
-	/**
-	 * 
-	 * @param amount value expressed in 1/10000 of the base unit
-	 */
-	public YadaMoney(Long amount) {
-		if (amount!=null) {
-			this.amount = amount.longValue();
-		}	
+	public YadaMoney(int amount) {
+		this.internalValue = amount * multiplier;
 	}
 
 	/**
-	 * 
-	 * @param toAdd value expressed in 1/10000 of the base unit
+	 * Convert a string with a decimal value that uses the comma separator of the specified locale
+	 * @param amount the decimal value like "12,87"
+	 * @param locale the locale to parse the comma separator, like Locale.ITALY
+	 * @throws ParseException if the amount contains invalid characters
+	 */
+	public YadaMoney(String amount, Locale locale) throws ParseException {
+		// From https://stackoverflow.com/a/16879667/587641
+		NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
+		ParsePosition parsePosition = new ParsePosition(0);
+		Number number = numberFormat.parse(amount, parsePosition);
+		if (parsePosition.getIndex() != amount.length()){
+			throw new ParseException("Invalid double input: '" + amount + "'", parsePosition.getIndex());
+		}
+		this.internalValue = (long)(number.doubleValue() * multiplier);
+	}
+
+	public YadaMoney(long amount) {
+		this.internalValue = amount * multiplier;
+	}
+
+	public YadaMoney(double doubleValue) {
+		this.internalValue = (long) (doubleValue * multiplier);
+	}
+
+	/**
+	 * Returns a new instance with the positive value of the current value
 	 * @return
 	 */
+	public YadaMoney getAbsolute() {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = Math.abs(this.internalValue);
+		return result;
+	}
+
+	/**
+	 * Returns a new instance with the negative value of the current value
+	 * @return
+	 */
+	public YadaMoney getNegated() {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = - this.internalValue;
+		return result;
+	}
+
+	/**
+	 * Returns true if the value is zero
+	 * @return
+	 */
+	public boolean isZero() {
+		return this.internalValue == 0;
+	}
+
+	/**
+	 * Returns true if the value is lower than zero
+	 * @return
+	 */
+	public boolean isNegative() {
+		return this.internalValue<0;
+	}
+
+	/**
+	 * Returns true if the value is greater than zero
+	 * @return
+	 */
+	public boolean isPositive() {
+		return this.internalValue>0;
+	}
+
+	public YadaMoney addCents(long cents) {
+		this.internalValue += (cents * multiplier / 100);
+		return this;
+	}
+
 	public YadaMoney add(YadaMoney toAdd) {
-		this.amount += toAdd.amount;
+		this.internalValue += toAdd.internalValue;
 		return this;
 	}
 
-	/**
-	 * 
-	 * @param toRemove value expressed in 1/10000 of the base unit
-	 * @return
-	 */
 	public YadaMoney subtract(YadaMoney toRemove) {
-		this.amount -= toRemove.amount;
+		this.internalValue -= toRemove.internalValue;
 		return this;
 	}
-	
+
 	/**
 	 * Returns the value with N decimal places
 	 * @param decimals the number of decimal places
 	 * @return
 	 */
-	public double toCurrency(int decimals) {
+	public double getRoundValue(int decimals) {
 		double toKeep = Math.pow(10, decimals); // 100 for 2 decimals
-		long rounded = Math.round(amount*toKeep/multiplier); // Round to the nearest. TODO see https://en.wikipedia.org/wiki/Rounding#Round_half_away_from_zero
+		long rounded = Math.round(internalValue*toKeep/multiplier); // Round to the nearest. TODO see https://en.wikipedia.org/wiki/Rounding#Round_half_away_from_zero
 		return rounded/toKeep;
 	}
-	
+
 	/**
 	 * Returns the value with 2 decimal places
 	 * @return
 	 */
-	public double toCurrency() {
-		return toCurrency(2);
+	public double getRoundValue() {
+		return getRoundValue(2);
 	}
-	
+
 	/**
 	 * Convert to a string with 2 decimal places
 	 */
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
+	@Override
 	@JsonProperty("value")
 	public String toString() {
 		// Decimal formats are generally not synchronized
-		NumberFormat formatter = new DecimalFormat("#0.##");
-		return formatter.format(toCurrency());
+		Locale locale = LocaleContextHolder.getLocale();
+		NumberFormat formatter = NumberFormat.getNumberInstance(locale);
+		if (formatter instanceof DecimalFormat) {
+			((DecimalFormat) formatter).applyPattern("#0.00");
+		}
+		return formatter.format(getRoundValue());
 	}
-	
+
 	/**
 	 * Convert to a string with 2 decimal places
 	 */
@@ -107,37 +164,31 @@ public class YadaMoney {
 		// Decimal formats are generally not synchronized
 		DecimalFormat formatter = (DecimalFormat) NumberFormat.getNumberInstance(locale);
 		formatter.applyPattern("#0.##");
-		return formatter.format(toCurrency());
-	}
-
-	/**
-	 * The amount in 1/10000th
-	 * @return
-	 */
-	public long getAmount() {
-		return amount;
-	}
-
-	/**
-	 * 
-	 * @param amount the amount in 1/10000th
-	 */
-	public void setAmount(long amount) {
-		this.amount = amount;
+		return formatter.format(getRoundValue());
 	}
 
 	@Override
 	public int hashCode() {
-		return new Long(amount).hashCode();
+		return new Long(internalValue).hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof YadaMoney && ((YadaMoney)obj).amount == amount;
+		return obj instanceof YadaMoney && ((YadaMoney)obj).internalValue == internalValue;
 	}
 
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
-		return new YadaMoney(amount);
+		YadaMoney yadaMoney = new YadaMoney();
+		yadaMoney.internalValue = this.internalValue;
+		return yadaMoney;
+	}
+
+	Long getInternalValue() {
+		return this.internalValue;
+	}
+
+	void setInternalValue(long internalValue) {
+		this.internalValue = internalValue;
 	}
 }

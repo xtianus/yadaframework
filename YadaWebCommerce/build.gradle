@@ -36,8 +36,10 @@ repositories {
 dependencies {
 		
 	implementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'),
-		'org.springframework:spring-webmvc:5.3.8',
-		'org.hibernate:hibernate-entitymanager:5.5.0.Final'
+		'org.springframework:spring-webmvc:5.3.18',
+		'org.springframework:spring-orm:5.3.18',
+		'org.hibernate:hibernate-entitymanager:5.5.0.Final',
+		'com.paypal.sdk:checkout-sdk:1.0.5'
 		
 	testImplementation 'junit:junit:4.12'
 }

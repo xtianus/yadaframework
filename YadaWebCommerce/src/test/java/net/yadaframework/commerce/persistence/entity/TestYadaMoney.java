@@ -1,22 +1,22 @@
 package net.yadaframework.commerce.persistence.entity;
 
-import org.junit.Test;
-
-import net.yadaframework.persistence.YadaMoney;
-
 import static org.junit.Assert.assertEquals;
 
 import java.util.Locale;
+
+import org.junit.Test;
+
+import net.yadaframework.persistence.YadaMoney;
 
 public class TestYadaMoney {
 
 	@Test
 	public void testRounding() {
-		long toTest = 123456789l;
+		int toTest = 123456789;
 		YadaMoney yadaMoney = new YadaMoney(toTest);
 		double pow = 1;
 		for (int i = 0; i < 5; i++) {
-			double value = yadaMoney.toCurrency(i);
+			double value = yadaMoney.getRoundValue(i);
 			double check =  Math.round(toTest*pow/10000d)/pow;
 			// System.out.println("value = " + value);
 			assertEquals(value, check, 0);

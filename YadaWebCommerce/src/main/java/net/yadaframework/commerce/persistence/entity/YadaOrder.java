@@ -12,6 +12,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -19,12 +21,15 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
+import net.yadaframework.commerce.exceptions.YadaCurrencyMismatchException;
+import net.yadaframework.commerce.persistence.repository.YadaTransactionDao;
 import net.yadaframework.persistence.YadaMoney;
 import net.yadaframework.persistence.YadaMoneyConverter;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaOrder implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -48,7 +53,7 @@ public class YadaOrder implements Serializable {
 	protected YadaPersistentEnum<YadaOrderStatus> orderStatus;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	protected Date creationTimestamp;
+	protected Date creationTimestamp = new Date();
 
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date stateChangeTimestamp;
@@ -62,11 +67,41 @@ public class YadaOrder implements Serializable {
 	@Column(length=2048)
 	protected String notes;
 
+	/**
+	 * The cost of this order. May not have been paid.
+	 * @see #getTotalPayment(YadaTransactionDao)
+	 */
 	@Convert(converter = YadaMoneyConverter.class)
 	protected YadaMoney totalPrice;
 
+	@Column(length=4)
+	protected String currency; // "EUR"
+
 	@OneToMany(mappedBy="order", cascade=CascadeType.ALL, orphanRemoval=true)
 	protected List<YadaOrderItem> orderItems;
+
+	///////////////////////////////////////////
+
+	/**
+	 * Returns the sum of all transactions relative to this order created by the owner.
+	 * The result can be positive, negative or zero (no transaction or payment+refund), but never null.
+	 * @param yadaTransactionDao
+	 * @return a positive value if all transactions sum to a negative value (payment has been made)
+	 */
+	public YadaMoney getTotalPayment(YadaTransactionDao yadaTransactionDao) {
+		YadaMoney total = new YadaMoney();
+		String currencyCode = null;
+		List<YadaTransaction> yadaTransactions = yadaTransactionDao.find(this);
+		for (YadaTransaction yadaTransaction : yadaTransactions) {
+			String newCurrency = yadaTransaction.getCurrencyCode();
+			if (currencyCode!=null && !currencyCode.equals(newCurrency)) {
+				throw new YadaCurrencyMismatchException("Currency {} differs from {}", currencyCode, newCurrency);
+			}
+			currencyCode = newCurrency;
+			total.add(yadaTransaction.getAmount());
+		}
+		return total.getNegated();
+	}
 
 	public Long getId() {
 		return id;
@@ -158,6 +193,14 @@ public class YadaOrder implements Serializable {
 
 	public long getVersion() {
 		return version;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
 	}
 
 }

@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 // Needed for Spring Data
 // @EnableJpaRepositories(basePackages = "net.yadaframework.commerce.persistence.repository")
-@ComponentScan(basePackages = { "net.yadaframework.commerce.persistence" })
+@ComponentScan(basePackages = { "net.yadaframework.commerce.persistence"})
 public class YadaCommerceConfig {
 
 

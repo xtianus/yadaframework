@@ -133,7 +133,14 @@ public class YadaSession<T extends YadaUserProfile> {
 	}
 
 	/**
-	 * Returns the id of the YadaUserProfile for the currently logged-in user
+	 * Check if the current user is authenticated (logged in) not anonymously.
+	 */
+	public boolean isLoggedIn() {
+		return yadaSecurityUtil.isLoggedIn();
+	}
+
+	/**
+	 * Returns the id of the YadaUserProfile for the currently logged-in user, if any
 	 * @return the id or null
 	 */
 	public Long getCurrentUserProfileId() {

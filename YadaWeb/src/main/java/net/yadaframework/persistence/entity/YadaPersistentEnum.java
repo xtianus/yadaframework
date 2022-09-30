@@ -59,19 +59,19 @@ import net.yadaframework.exceptions.YadaInvalidValueException;
 )
 @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaPersistentEnum<E extends Enum<E>> {
-	
+
 	@Deprecated // TODO delete because not used anymore for datatables
 	static class YadaPersistentEnumSerializer extends JsonSerializer<YadaPersistentEnum<?>> {
 		@Override
 		public void serialize(YadaPersistentEnum<?> value, JsonGenerator generator, SerializerProvider serializers) throws IOException, JsonProcessingException {
 			generator.writeString(value.getLocalText());
 		}
-		
+
 	}
-	
+
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
@@ -81,14 +81,15 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 	private int enumOrdinal;		// 2
 	@Column(nullable=false)
 	private String enumName;		// "RUNNING"
-	
+
 	@ElementCollection(fetch = FetchType.EAGER)
 	@MapKeyColumn(name="language", length=32) // th_TH_TH_#u-nu-thai
 	@Column(name="localText", length=128)
 	Map<String, String> langToText = new HashMap<>(); // Language code to localized text: { "it_IT" = "In esecuzione", "en_US" = "Running" }
 
 	/**
-	 * Check this instance with a normal enum for equality
+	 * Check this instance with a normal enum for equality.
+	 * This is the preferred way for checking enums.
 	 * @param enumValue
 	 * @return
 	 */
@@ -96,7 +97,7 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 	public boolean equals(Enum<? extends YadaLocalEnum<?>> enumValue) {
 		return enumValue.getClass().getName().equals(this.enumClassName) && enumValue.ordinal() == this.enumOrdinal;
 	}
-	
+
 	@Transient
 	@Override
 	public boolean equals(Object obj) {
@@ -112,7 +113,7 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 	public int hashCode() {
 		return Objects.hashCode(this.enumClassName, this.enumOrdinal);
 	}
-	
+
 	/**
 	 * Sets the attributes of a normal enum into this instance, but not the localized text
 	 * @param enumValue
@@ -123,7 +124,7 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 		this.enumOrdinal = enumValue.ordinal();
 		this.enumName = enumValue.name();
 	}
-	
+
 	/**
 	 * Returns the localized value in the current locale
 	 * @return
@@ -133,27 +134,33 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 		Locale locale = LocaleContextHolder.getLocale();
 		return langToText.get(locale.getLanguage());
 	}
-	
+
 	/**
 	 * Convert the localised enum back to a normal Enum instance. Same as getEnum()
+	 * WARNING: the enum returned fails to be compared with the original enum. Use {@link #equals(Enum)} instead.
 	 * @return
-	 * @throws YadaInvalidValueException 
+	 * @throws YadaInvalidValueException
 	 * @see #getEnum()
 	 */
 	public E toEnum() throws YadaInvalidValueException {
 		return getEnum();
 	}
-	
+
 	/**
 	 * Convert the localised enum back to a normal Enum instance. Same as toEnum()
+	 * WARNING: the enum returned fails to be compared with the original enum. Use {@link #equals(Enum)} instead.
 	 * @return
-	 * @throws YadaInvalidValueException 
+	 * @throws YadaInvalidValueException
 	 * @see #toEnum()
 	 */
 		public E getEnum() throws YadaInvalidValueException {
 		try {
 			Class<E> enumClassClass = (Class<E>) Class.forName(this.enumClassName);
-			return (E) Enum.valueOf(enumClassClass, enumName);
+			E result = Enum.valueOf(enumClassClass, enumName);
+			if (result instanceof YadaLocalEnum) {
+				((YadaLocalEnum)result).setYadaPersistentEnum(this);
+			}
+			return result;
 		} catch (ClassNotFoundException e) {
 			throw new YadaInvalidValueException(e);
 		}
@@ -199,5 +206,5 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 		this.enumClassName = enumClassName;
 	}
 
-	
+
 }

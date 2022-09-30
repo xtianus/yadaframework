@@ -24,6 +24,10 @@ import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -129,6 +133,239 @@ public class YadaUtil {
     }
 
 	/**
+	 * Given a ISO date, a ISO time and a timezone, return the Date.
+	 * @param isoDateString like '2011-12-03'
+	 * @param isoTimeString like '10:15' or '10:15:30'
+	 * @param timezone the timezone where the date/time strings belong
+	 * @return a Date representing the datetime in the timezone
+	 */
+	public Date getDateFromDateTimeIsoString(String isoDateString, String isoTimeString, TimeZone timezone) {
+		String isoDateTimeString = isoDateString + "T" + isoTimeString;
+		LocalDateTime chosenDateTime = LocalDateTime.parse(isoDateTimeString);
+		ZonedDateTime chosenDateTimeZoned = chosenDateTime.atZone(timezone.toZoneId());
+		return Date.from(chosenDateTimeZoned.toInstant());
+	}
+
+	/**
+	 * Returns a string for date and time in the specified timezone and locale
+	 * @param date the date to format
+	 * @param timezone the timezone in which the date is to be considered
+	 * @param locale the locale to use for formatting
+	 * @return The RFC-1123 formatted date, such as 'Tue, 3 Jun 2008 11:05:30 GMT'.
+	 */
+	public String getRfcDateTimeStringForTimezone(Date date, TimeZone timezone, Locale locale) {
+		DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME.withLocale(locale);
+		ZoneId zoneId = timezone.toZoneId();
+		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(date.toInstant(), zoneId);
+		return zonedDateTime.format(formatter);
+	}
+
+	/**
+	 * Convert a date in the timezone to a ISO string, like '2011-12-03'
+	 * @param date
+	 * @param timezone
+	 * @return
+	 */
+	public String getIsoDateStringForTimezone(Date date, TimeZone timezone) {
+		return formatDateTimeForTimezone(date, timezone, DateTimeFormatter.ISO_LOCAL_DATE);
+	}
+
+	/**
+	 * Convert a time in the timezone to a ISO string, like '10:15' or '10:15:30'
+	 * @param date
+	 * @param timezone
+	 * @return
+	 */
+	public String getIsoTimeStringForTimezone(Date time, TimeZone timezone) {
+		return formatDateTimeForTimezone(time, timezone, DateTimeFormatter.ISO_LOCAL_TIME);
+	}
+
+	/**
+	 * Convert a datetime in the timezone to a ISO string, like '2011-12-03T10:15:30'
+	 * @param date
+	 * @param timezone
+	 * @return
+	 */
+	public String getIsoDateTimeStringForTimezone(Date dateTime, TimeZone timezone) {
+		return formatDateTimeForTimezone(dateTime, timezone, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+	}
+
+	private String formatDateTimeForTimezone(Date datetime, TimeZone timezone, DateTimeFormatter formatter) {
+		if (datetime==null) {
+			return "";
+		}
+		ZoneId zoneId = timezone.toZoneId();
+		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(datetime.toInstant(), zoneId);
+		return zonedDateTime.format(formatter);
+	}
+
+	/**
+	 * Create a single empty "json" object for use in other methods.
+	 * Json objects are actually maps that get converted by Spring on return.
+	 * @return
+	 */
+	public Map<String, Object> makeJsonObject() {
+			return new HashMap<String, Object>();
+	}
+
+	/**
+	 * Given a json stored as a map, returns the json at the specified key
+	 * @param jsonSource
+	 * @param objectPath the name of a (nested) json property holding an object
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getJsonObject(Map<String, Object> jsonSource, String objectPath) {
+		return (Map<String, Object>) getJsonPath(jsonSource, objectPath);
+	}
+
+	/**
+	 * Given a json stored as a map, returns the json at the specified list index
+	 * @param jsonSource
+	 * @param listPath the path of the json property holing the list
+	 * @param listIndex the list index
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getJsonObject(Map<String, Object> jsonSource, String listPath, int listIndex) {
+		return (Map<String, Object>) getJsonArray(jsonSource, listPath).get(listIndex);
+	}
+
+	/**
+	 * Given a json stored as a map, returns the json array at the specified key
+	 * @param jsonSource
+	 * @param objectPath
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Object> getJsonArray(Map<String, Object> jsonSource, String objectPath) {
+		return (List<Object>) getJsonPath(jsonSource, objectPath);
+	}
+
+	/**
+	 * Given a json stored as a map, returns the String value at the specified key, with optional nesting
+	 * @param jsonSource
+	 * @param objectPath the path of the attribute, using dot notation and arrays. E.g. "order.amount[2].currency"
+	 * @return
+	 */
+	public String getJsonAttribute(Map<String, Object> jsonSource, String objectPath) {
+		return (String) getJsonPath(jsonSource, objectPath);
+	}
+
+	/**
+	 * Creates an empty json object at the given path
+	 * @param parentObject the json object containing the new object
+	 * @param path where the object should be created, using dot notation and arrays. E.g. "order.amount[2].currency".
+	 * Any missing array cells are also created with an empty object as needed.
+	 * @return
+	 */
+	public Map<String, Object> makeJsonObject(Map<String, Object> parentObject, String path) {
+		return (Map<String, Object>) setJsonAttributeRecurse(parentObject, path, null);
+	}
+
+	/**
+	 * Sets a json property at the given path
+	 * @param jsonObject the json object that should contain the property
+	 * @param path path of the property using dot notation and arrays. E.g. "order.amount[2].currency".
+	 * Any missing array cells are also created with an empty object as needed.
+	 * @param value the value to store, can also be a "json object"
+	 */
+	public void setJsonAttribute(Map<String, Object> jsonObject, String path, Object value) {
+		boolean isString = value instanceof String;
+		boolean isJsonObject = value instanceof Map;
+		if (!isString && !isJsonObject) {
+			value = String.valueOf(value);
+//			throw new YadaInvalidValueException("\"value\" must be either a string or a map");
+		}
+		setJsonAttributeRecurse(jsonObject, path, value);
+	}
+
+	private Object setJsonAttributeRecurse(Map<String, Object> jsonObject, String path, Object value) {
+		if (path.length()==0 && value==null) {
+			return jsonObject; // makeJsonObject called
+		}
+		String[] parts = path.split("\\.", 2); // {"a", "b[2].c"}
+		String segment = parts[0]; // "a", "b[2]", "c"
+		int index = -1;
+		if (segment.endsWith("]")) {
+			// Array
+			String[] split = segment.split("[\\[\\]]");
+			segment = split[0]; // "b"
+			String indexString = split[1]; // "2"
+			try {
+				index = Integer.parseInt(indexString);
+			} catch (NumberFormatException e) {
+				log.debug("Invalid index '{}' in segment '{}' (ignored)", indexString, segment);
+			}
+		}
+		boolean lastSegment = (parts.length==1);
+		if (lastSegment && value!=null) {
+			return jsonObject.put(segment, value);
+		}
+		Object currentObject = jsonObject.get(segment); // Either Object, List or Null
+		if (currentObject==null) {
+			if (index>-1) {
+				currentObject = new ArrayList<Object>();
+			} else {
+				currentObject = makeJsonObject();
+			}
+			jsonObject.put(segment, currentObject);
+		}
+		if (currentObject instanceof ArrayList) {
+			if (index<0) {
+				throw new YadaInvalidValueException("Not an array at {}", segment);
+			}
+			List<Object> currentList = (List<Object>) currentObject;
+			for (int k = currentList.size(); k <= index; k++) {
+				// Add missing cells if any
+				currentList.add(makeJsonObject());
+			}
+			currentObject = currentList.get(index);
+		}
+		int dotPos = path.indexOf(".");
+		String remainingPath = dotPos > -1 ? path.substring(dotPos+1) : "";
+		return setJsonAttributeRecurse((Map<String, Object>)currentObject, remainingPath, value);
+	}
+
+	private Object getJsonPath(Map<String, Object> jsonSource, String objectPath) {
+		Object result = jsonSource;
+		String[] parts = objectPath.split("\\.");
+		for (int i = 0; i < parts.length; i++) {
+			String segment = parts[i];
+			int index = -1;
+			if (segment.endsWith("]")) {
+				// Array
+				String[] split = segment.split("[\\[\\]]");
+				segment = split[0];
+				String indexString = split[1];
+				try {
+					index = Integer.parseInt(indexString);
+				} catch (NumberFormatException e) {
+					log.debug("Invalid index '{}' in segment '{}' (ignored)", indexString, parts[i]);
+				}
+			}
+			result = ((Map<String, Object>) result).get(segment);
+			if (result==null) {
+				log.debug("Null value at {}", segment);
+				return null;
+			}
+			if (index>-1) { // Array
+				try {
+					result = ((List<Object>)result).get(index);
+				} catch (IndexOutOfBoundsException e) {
+					log.debug("Index out of bounds at {}[{}]", segment, index);
+					return null;
+				}
+				if (result==null) {
+					log.debug("Null value at {}[{}]", segment, index);
+					return null;
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * Returns a list of user-friendly timezones like "Europe/Rome"
 	 * @return
 	 */
@@ -225,16 +462,25 @@ public class YadaUtil {
 	/**
 	 * Given the instance of a "specific" class created specifying a single type T while extending a generic class,
 	 * retrieve the class of the type T.
+	 * It also works when looking for the generic super-super class at any hierarchy level.
 	 * Example:
 	 * the generic class is public abstract class Shape<T extends Color> {...}
 	 * the specific class is public class Circle extends Shape<Red>
 	 * the instance is new Circle()
 	 * the returned value is Red.class
 	 * @param specificClassInstance instance of the specific class, usually "this" when called from inside either the specific or the generic abstract class.
-	 * @return the class T used to make the generic specific
+	 * @return the class T used to make the generic specific, or null if there is no generic superclass in the hierarchy
 	 */
 	public Class<?> findGenericClass(Object specificClassInstance) {
-		return (Class<?>)((ParameterizedType)specificClassInstance.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+		Class<?> theClass = specificClassInstance.getClass();
+
+		while (theClass!=null && !(theClass.getGenericSuperclass() instanceof ParameterizedType)) {
+			theClass = theClass.getSuperclass();
+		}
+		if (theClass!=null) {
+			return (Class<?>)((ParameterizedType)theClass.getGenericSuperclass()).getActualTypeArguments()[0];
+		}
+		return null;
 	}
 
 	/**
@@ -2220,7 +2466,7 @@ public class YadaUtil {
 	/**
 	 * Adds or removes the days. The original object is cloned.
 	 * @param calendar
-	 * @param minutes
+	 * @param days
 	 * @return
 	 */
 	public static Calendar addDaysClone(Calendar source, int days) {
@@ -2230,7 +2476,7 @@ public class YadaUtil {
 	/**
 	 * Adds or removes the days. The original object is modified.
 	 * @param calendar
-	 * @param minutes
+	 * @param days
 	 * @return
 	 */
 	public static Calendar addDays(Calendar calendar, int days) {

@@ -19,7 +19,10 @@ public class YadaPageRequest {
 	private boolean loadPrevious = false;
 	private List<String> sort = new ArrayList<>(); // Request parameters
 	private YadaPageSort parsedSort = null; // Parsed request sort parameters
-
+	// Attributes for scrolling into position when using a bookmark
+	private String yadaContainer; // id of the element that contains the rows and needs scrolling
+	private int yadaScroll = 0; // Scroll amount
+	private String paramPrefix = null; // prefix on page parameters for multiple pagination sections
 
 	/**
 	 * Add sort parameters after any existing ones
@@ -90,6 +93,19 @@ public class YadaPageRequest {
 	 * @param loadPrevious true if all pages before this one must be fetched from database
 	 */
 	public YadaPageRequest(int page, int size, boolean loadPrevious) {
+		this(page, size, false, null);
+	}
+
+	/**
+	 * Creates a new {@link YadaPageRequest}. Pages are zero indexed, thus providing 0 for {@code page} will return the first
+	 * page.
+	 *
+	 * @param page zero-based page index, must not be less than zero.
+	 * @param size the size of the page to be returned, must not be less than one.
+	 * @param loadPrevious true if all pages before this one must be fetched from database
+	 * @param paramPrefix prefix to pagination request parameters to use for multiple paginations on same page
+	 */
+	public YadaPageRequest(int page, int size, boolean loadPrevious, String paramPrefix) {
 		if (page < 0) {
 			throw new IllegalArgumentException("Page index must not be less than zero!");
 		}
@@ -99,6 +115,7 @@ public class YadaPageRequest {
 		this.page = page;
 		this.size = size;
 		this.loadPrevious = loadPrevious;
+		this.paramPrefix = paramPrefix;
 	}
 
 	/**
@@ -171,7 +188,7 @@ public class YadaPageRequest {
 
 	@Override
 	public String toString() {
-		return String.format("Page request [page: %d, size %d]", page, size);
+		return String.format("Page request [page: %d, size: %d]", page, size);
 	}
 
 	/**
@@ -281,6 +298,30 @@ public class YadaPageRequest {
 	 */
 	public void setSort(List<String> sort) {
 		this.sort = sort;
+	}
+
+	public String getYadaContainer() {
+		return yadaContainer;
+	}
+
+	public void setYadaContainer(String yadaContainer) {
+		this.yadaContainer = yadaContainer;
+	}
+
+	public int getYadaScroll() {
+		return yadaScroll;
+	}
+
+	public void setYadaScroll(int yadaScroll) {
+		this.yadaScroll = yadaScroll;
+	}
+
+	public String getParamPrefix() {
+		return paramPrefix;
+	}
+
+	public void setParamPrefix(String paramPrefix) {
+		this.paramPrefix = paramPrefix;
 	}
 
 }

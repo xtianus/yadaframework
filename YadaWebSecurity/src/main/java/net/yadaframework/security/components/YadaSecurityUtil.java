@@ -42,9 +42,9 @@ public class YadaSecurityUtil {
 	private final static int MAX_AGE_DAY=20; // Tempo dopo il quale una richiesta viene cancellata
 	private final static long MILLIS_IN_DAY = 24*60*60*1000; // Millesimi di secondo in un giorno
 	private final static String SAVED_REQUEST = "SPRING_SECURITY_SAVED_REQUEST"; // copiato da org.springframework.security.web.savedrequest.HttpSessionRequestCache
-	
+
 	private SecureRandom secureRandom = new SecureRandom();
-	
+
 	@Autowired private HttpSession httpSession; // Funziona perchè è un proxy
 	@Autowired private YadaTokenHandler yadaTokenHandler;
 	@Autowired private YadaRegistrationRequestDao yadaRegistrationRequestDao;
@@ -52,7 +52,7 @@ public class YadaSecurityUtil {
 	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired private YadaWebUtil yadaWebUtil;
 
-	
+
 	/**
 	 * Copy all not-null login error parameters to the Model
 	 * @param request
@@ -137,7 +137,7 @@ public class YadaSecurityUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the username of the logged-in user, or null
 	 */
 	public String getUsername() {
@@ -174,10 +174,10 @@ public class YadaSecurityUtil {
 	public boolean loggedIn() {
 		return isLoggedIn();
 	}
-	
+
 	/**
 	 * Check if the current user is authenticated (logged in) not anonymously.
-	 * Use in thymeleaf with th:if="${@YadaSecurityUtil.loggedIn}"
+	 * Use in thymeleaf with th:if="${@yadaSecurityUtil.loggedIn}"
 	 * @return
 	 */
 	public boolean isLoggedIn() {
@@ -192,7 +192,7 @@ public class YadaSecurityUtil {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Check if the current user is logged in.
 	 * Use in thymeleaf with th:if="${@yadaWebUtil.loggedIn(#httpServletRequest)}"
@@ -202,7 +202,11 @@ public class YadaSecurityUtil {
 	public boolean loggedIn(HttpServletRequest request) {
 		return request.getRemoteUser()!=null;
 	}
-	
+
+	public void clearAnySavedRequest() {
+		httpSession.removeAttribute(SAVED_REQUEST);
+	}
+
 	/**
 	 * Ritorna la richiesta che era stata salvata da Spring Security prima del login, bloccata perchè l'utente non era autenticato
 	 * @return la url originale completa di http://, oppure null se non c'è in sessione
@@ -215,7 +219,7 @@ public class YadaSecurityUtil {
 		log.debug("No saved request found in session");
 		return null;
 	}
-	
+
 	/**
 	 * Ritorna uno o l'altro parametro a seconda che l'utente corrente sia autenticato o meno
 	 * @param anonymousValue
@@ -231,7 +235,7 @@ public class YadaSecurityUtil {
 		}
 		return authenticated ? authenticatedValue : anonymousValue;
 	}
-	
+
 	/**
 	 * Cancello le registration request vecchie o con lo stesso email e tipo. Se la registrationRequest passata � sul database, non viene cancellata.
 	 * @param registrationRequest prototipo di richiesta da cancellare (ne viene usato email e tipo)
@@ -264,7 +268,7 @@ public class YadaSecurityUtil {
 			}
 		}
 	}
-	
+
 	public Set<String> getCurrentRoles() {
 		Set<String> roles = new HashSet<>();
 		try {
@@ -282,7 +286,7 @@ public class YadaSecurityUtil {
 		}
 		return roles;
 	}
-	
+
 	/**
 	 * Controlla se l'utente attuale possiede il ruolo specificato. Case Sensitive!
 	 * @param roleToCheck nel formato senza ROLE_ iniziale
@@ -302,5 +306,5 @@ public class YadaSecurityUtil {
 		Set<String> currentRoles = getCurrentRoles();
 		Set<String> requiredRoles = new HashSet<>(Arrays.asList(rolesToCheck));
 		return CollectionUtils.containsAny(currentRoles, requiredRoles);
-	}	
+	}
 }

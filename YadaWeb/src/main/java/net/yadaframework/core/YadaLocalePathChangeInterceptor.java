@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.AsyncHandlerInterceptor;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
@@ -12,7 +12,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * Locale in the path
  * See https://stackoverflow.com/a/23847484/587641
  */
-public class YadaLocalePathChangeInterceptor implements AsyncHandlerInterceptor {
+public class YadaLocalePathChangeInterceptor implements HandlerInterceptor {
 	public static final String LOCALE_ATTRIBUTE_NAME = YadaLocalePathChangeInterceptor.class.getName() + ".LOCALE";
 
 	/**
@@ -23,7 +23,7 @@ public class YadaLocalePathChangeInterceptor implements AsyncHandlerInterceptor 
 	public static boolean localePathRequested(HttpServletRequest request) {
 		return request.getAttribute(LOCALE_ATTRIBUTE_NAME)!=null;
 	}
-	
+
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 	    Object newLocale = request.getAttribute(LOCALE_ATTRIBUTE_NAME);

@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import net.yadaframework.components.YadaUtil;
@@ -39,8 +38,8 @@ import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
+import net.yadaframework.security.persistence.repository.YadaUserMessageDao;
 import net.yadaframework.web.YadaJsonDateTimeShortSerializer;
-import net.yadaframework.web.YadaJsonView;
 
 /**
  * A message sent to some user by another user or by the system.
@@ -51,24 +50,28 @@ import net.yadaframework.web.YadaJsonView;
 @Entity
 // Use a joined table for inheritance so that the subclasses can independently add any attributes without interference
 @Inheritance(strategy = InheritanceType.JOINED)
-public class YadaUserMessage<E extends Enum<E>> implements Serializable {
+// Should actually be YadaUserMessage<YLE extends YadaLocalEnum<E extends Enum<E>>
+// so that every subclass of YadaPersistentEnum handles its own Enum<E> type
+// and I get compiler error on a mismatched setType/getType
+// but apparently there is no way of doing this in Java 8.
+// Using YadaUserMessage<E extends Enum<E>> fixes getType/setType but would cause a runtime error when E is a plain enum
+// because the type attribute should be a YadaPersistentEnum as there is a foreign key in the database.
+// So I use YadaUserMessage<YLE extends YadaLocalEnum<?>> but I may need to check the enum consistency at runtime
+// because the compiler can't do that. There will also be a runtime error on a mismatched setType/getType.
+public class YadaUserMessage<YLE extends YadaLocalEnum<?>> implements Serializable {
 	private static final long serialVersionUID = 7008892353441772768L;
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	@Version
 	protected long version; // For optimistic locking
 
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
 
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int priority; // Priority or severity, 0 is lowest
 
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected boolean readByRecipient = false; // Read by recipient
 
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected boolean emailed = false; // Emailed to recipient
 
 	@ElementCollection
@@ -77,32 +80,25 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	//@JsonView(YadaJsonView.WithLazyAttributes.class)
 	protected List<Date> created; // Creation date of the message, a new date is added for each stacked message
 
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Column(insertable = false, updatable = false, columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified = new Date();
 
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int stackSize = 0; // Counter for identical messages (stacked)
 
 	@OneToOne(fetch = FetchType.EAGER, optional=true)
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
-	protected YadaPersistentEnum<E> type;
+	protected YadaPersistentEnum<?> type;
 
 	@Column(length=80)
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected String title;
 
 	@Column(length=12000) // Should it be Lob?
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected String message;
 
 	@ManyToOne(optional = true)
-	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	protected YadaUserProfile sender;
 
 	@ManyToOne(optional = true)
-	@JsonView(YadaJsonView.WithLazyAttributes.class)
 	protected YadaUserProfile recipient;
 
 	//@JsonView(YadaJsonView.WithLazyAttributes.class)
@@ -110,19 +106,25 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	protected List<YadaAttachedFile> attachment = new ArrayList<>();
 
 	@Column(length=1024)
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected String data; // Can store a url here, or the identity of a non-user sender
 
 	protected int contentHash; // To check message equality for stackability
 
+	protected Integer status; // Application-defined status for this message
+
+	////////////////////////////////////////////
+
 	@Transient
 	protected boolean stackable; // true if same-content messages should be counted not added
+
+	private Type getCurrentEnumType() {
+		return ((java.lang.reflect.ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+	}
 
 	/**
 	 * Used in Datatables to define the row class.
 	 * @See {@link https://datatables.net/manual/server-side}
 	 */
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@JsonProperty("DT_RowClass")
 	public String getDT_RowClass() {
 		// We set the class according to the read state of the message
@@ -146,27 +148,27 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	 * @return
 	 * @return the current instance
 	 */
-	@Transient
-	public YadaUserMessage<E> setMessageEscaped(String message) {
+	public YadaUserMessage<YLE> setMessageEscaped(String message) {
 		this.message = HtmlEscape.escapeHtml5Xml(message);
 		return this;
 	}
 
 	public void computeHash() {
+		// The type is null when the YadaPersistentEnum has not been initialized in the database
 		if (type==null) {
 			// get the type of the enum: if it is a YadaPersistentEnum throw an exception with info
 			Class<?> genericClass = YadaUtil.INSTANCE.findGenericClass(this);
-			boolean isYadaLocalEnum = YadaLocalEnum.class.isAssignableFrom(genericClass);
-			if (isYadaLocalEnum) {
-				Type missingEnum = null;
-				try {
-					missingEnum = ((java.lang.reflect.ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-				} catch (Exception e) {
-					// Ignored
-				}
-				String enumName = missingEnum!=null?missingEnum.toString():"all YadaLocalEnum classes";
-				throw new YadaInternalException("YadaUserMessage type is null - did you remember to add " + enumName + " to yadaPersistentEnumDao.initDatabase() during application setup?");
-			}
+//			boolean isYadaLocalEnum = YadaLocalEnum.class.isAssignableFrom(genericClass);
+//			if (isYadaLocalEnum) {
+//				Type missingEnum = null;
+//				try {
+//					missingEnum = getCurrentEnumType();
+//				} catch (Exception e) {
+//					// Ignored
+//				}
+//				String enumName = missingEnum!=null?missingEnum.toString():"all YadaLocalEnum classes";
+//			}
+			throw new YadaInternalException("YadaUserMessage 'type' is null - did you remember to add " + genericClass + " to yadaPersistentEnumDao.initDatabase() during application setup?");
 		}
 		this.contentHash = Objects.hash(type==null?null:type.getEnum(), title, message, data);
 	}
@@ -178,12 +180,24 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 		}
 	}
 
+	/**
+	 * Returns the most recent date of the message stack - which is the initial date if the message is not stackable
+	 * @return
+	 * @see {@link YadaUserMessageDao#getLastDate()}
+	 */
+	public Date getLastDate() {
+		if (created!=null && created.size()>0) {
+			return created.get(created.size()-1);
+		}
+		return null;
+	}
+
 	public void incrementStack() {
 		this.stackSize++;
 		this.created.add(new Date());
 	}
 
-	public void setType(YadaLocalEnum<E> localEnum) {
+	public void setType(YLE localEnum) {
 		this.type = localEnum.toYadaPersistentEnum();
 	}
 
@@ -191,7 +205,6 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 	/* DataTables                                                          */
 
 	@Transient
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@JsonProperty("DT_RowId")
 	@Deprecated // can be removed now that it is added automatically by YadaDataTableDao
 	public String getDT_RowId() {
@@ -200,7 +213,6 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 
 	@Transient
 	@JsonProperty
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	public String getSenderName() {
 		if (sender!=null) {
 			return sender.getUserCredentials().getUsername();
@@ -210,7 +222,6 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 
 	@Transient
 	@JsonProperty
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
 	public String getReceiverName() {
 		return recipient!=null?recipient.getUserCredentials().getUsername():"-";
 	}
@@ -273,11 +284,11 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 		this.stackSize = count;
 	}
 
-	public YadaPersistentEnum<E> getType() {
+	public YadaPersistentEnum<?> getType() {
 		return type;
 	}
 
-	public void setType(YadaPersistentEnum<E> type) {
+	public void setType(YadaPersistentEnum<?> type) {
 		this.type = type;
 	}
 
@@ -361,5 +372,12 @@ public class YadaUserMessage<E extends Enum<E>> implements Serializable {
 		this.readByRecipient = readByRecipient;
 	}
 
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
 
 }

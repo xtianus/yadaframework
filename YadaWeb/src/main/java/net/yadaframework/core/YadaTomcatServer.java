@@ -22,27 +22,31 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 /**
  * Tomcat Embedded. Use the args constructor to accept the provided configurator. To create a different configuration, extend this class.
+ * HTTPS is only enabled in "dev mode", which is activated when the last command line argument (baseDir) is missing.
  *
  */
 public class YadaTomcatServer {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
-	
+
+	private final String KEYSTOREFILE = "/srv/devtomcatkeystore"; // Needed for HTTPS - See comments below
+
     private Tomcat tomcat;
     private String acroenv;
-    
+
     /**
      * Starts the standalone server on port 8080
-     * @param args 
+     * @param args
      *        - acronym+environment used for the shutdown command
      *        - relative path of the webapp folder in eclipse ("src/main/webapp"), or the full path elsewhere
      *        - the last argument is optional in Eclipse, otherwise it must be the full path of the temp folder for Tomcat data (where the war is exploded)
+     *        When the last argument is not provided, "dev mode" is assumed.
      * @throws Exception
      */
 	public static void main(String[] args) throws Exception {
 		YadaTomcatServer yadaTomcatServer = new YadaTomcatServer(args);
 		yadaTomcatServer.start();
 	}
-	
+
 	/**
 	 * Create an instance of the server for custom configuration
 	 */
@@ -75,7 +79,7 @@ public class YadaTomcatServer {
 		}
 		this.configure(webappFolder, baseDir, dev);
 	}
-	
+
 	public void start() throws LifecycleException {
 		try {
 			log.info("Starting Tomcat embedded server...");
@@ -92,7 +96,7 @@ public class YadaTomcatServer {
 			log.error("Server exited in error", e);
 		}
 	}
-	
+
 	/**
 	 * Compression only works on the standard HTTP connector, not for AJP.
 	 * Override this method to add compressable mime types or to disable compression.
@@ -104,7 +108,7 @@ public class YadaTomcatServer {
 		if (!"".equals(mimeTypeList)) {
 			connector.setProperty("compression", "on");
 			if (mimeTypeList==null) {
-				connector.setProperty("compressableMimeType", 
+				connector.setProperty("compressableMimeType",
 						"text/html,"
 						+ "text/xml,"
 						+ "text/plain,"
@@ -165,7 +169,28 @@ public class YadaTomcatServer {
         ((AbstractAjpProtocol) ajpConnector.getProtocolHandler()).setAddress(InetAddress.getByAddress(new byte[] {0,0,0,0}));
         tomcat.getService().addConnector(ajpConnector);
 
+        // HTTPS Connector
+        if (dev && new File(KEYSTOREFILE).canRead()) {
+	        Connector httpsConnector = new Connector("HTTP/1.1");
+	        httpsConnector.setPort(8443);
+	        httpsConnector.setSecure(true);
+	        httpsConnector.setScheme("https");
+	        httpsConnector.setProperty("SSLEnabled", "true");
+	        httpsConnector.setProperty("clientAuth", "false");
+	        httpsConnector.setProperty("sslProtocol", "TLS");
+	        // Create keystore with
+	        // keytool -genkey -noprompt -alias tomcat -dname "CN=localhost, OU=Unknown, O=Unknown, L=Unknown, S=Unknown, C=Unknown" -keystore /srv/devtomcatkeystore -storepass changeit -keypass changeit -keyalg RSA
+	        // Export certificate with
+	        // keytool -export -noprompt -keystore /srv/devtomcatkeystore -alias tomcat -storepass changeit -file /tmp/tomcat.cer
+	        // and double click the file to import it in the browser
+	        httpsConnector.setProperty("keystoreFile", KEYSTOREFILE);
+	        httpsConnector.setProperty("keystorePass", "changeit");
+	        tomcat.getService().addConnector(httpsConnector);
+	        log.debug("HTTPS Connector enabled");
+        } else {
+        	log.debug("HTTPS Connector not enabled");
+        }
 	}
-	
+
 }
 

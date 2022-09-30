@@ -23,6 +23,8 @@
 	var postLoginData = null;
 	var postLoginType = null;
 	
+	const yadaAjaxResponseHtmlRoot = "<div class='yadaAjaxResponseHtml'>";
+	
 	/**
 	 * Init yada ajax handlers on the specified element
 	 * @param $element the element, or null for the entire body
@@ -32,9 +34,17 @@
 		yada.enableAjaxLinks(null, $element);
 		yada.enableAjaxSelects(null, $element);
 		yada.enableAjaxCheckboxes(null, $element);
-		yada.enableAjaxFragments(null, $element);
+		initObservers($element)
 		yada.enableAjaxInputs();
 	}
+	
+	/**
+	* All observers should be enabled in this function, that is also called after a returned ajax HTML is cloned.
+	*/
+	function initObservers($element) {
+		yada.enableAjaxTriggerInViewport($element);
+	}
+	
 	//////////////////////
 	/// Pagination support
 	/**
@@ -52,6 +62,8 @@
 	yada.fixPaginationLinkHistory = function($linkOrForm, pageParam, sizeParam, loadPreviousParam) {
 		const NEXTPAGE_NAME="page";
 		const NEXTSIZE_NAME="size";
+		const CONTAINERID_NAME="yadaContainer";
+		const CONTAINERSCROLL_NAME="yadaScroll";
 		// Default param names
 		pageParam = pageParam || "page";
 		sizeParam = sizeParam || "size";
@@ -70,6 +82,18 @@
 		var newUrl = yada.addOrUpdateUrlParameter(currentUrl, pageParam, nextPage);
 		newUrl = yada.addOrUpdateUrlParameter(newUrl, sizeParam, nextSize);
 		newUrl = yada.addOrUpdateUrlParameter(newUrl, loadPreviousParam, true); // This is always true
+		// Add the container id and the scroll position. 
+		// We presume that the scrolling element is the parent of the update target
+		const updateTargetSelector = $linkOrForm.attr("data-yadaUpdateOnSuccess");
+		const $container = yada.extendedSelect($linkOrForm, updateTargetSelector).parent();
+		var containerId = $container.attr("id");
+		if (containerId!=null) {
+			// If there is no id, there is no autoscroll (which is both easier to implement and a way to turn off the scroll behavior somehow)
+			const scrollPos = $container.scrollTop();
+			newUrl = yada.addOrUpdateUrlParameter(newUrl, CONTAINERID_NAME, containerId);
+			newUrl = yada.addOrUpdateUrlParameter(newUrl, CONTAINERSCROLL_NAME, scrollPos);
+		}
+		
 		history.pushState({}, "", newUrl);
 	};
 	
@@ -207,7 +231,7 @@
 	yada.openLoginModalAjax = function(loginFormUrl, handler, errorTitle, errorText) {
 		yada.postLoginHandler = handler;
 		$.get(loginFormUrl, function(responseText, statusText) {
-			var responseHtml=$("<div>").html(responseText);
+			var responseHtml=$(yadaAjaxResponseHtmlRoot).html(responseText);
 			var loginReceived = openLoginModalIfPresent(responseHtml);
 			if (!loginReceived) {
 				yada.showErrorModal(errorTitle, errorText);
@@ -231,48 +255,22 @@
 	function hasNoLoader($element) {
 		return $element.hasClass("noLoader") || $element.hasClass("noloader") || $element.hasClass("yadaNoLoader") || $element.hasClass("yadaNoloader") || $element.hasClass("yadanoloader");
 	}
-	
-	// Loads a data-yadaAjaxFragment
-	function loadAjaxFragment($toBeReplaced) {
-		var fetchUrl = $toBeReplaced.attr("data-yadaAjaxFragment");
-		if (fetchUrl!=null) {
-			$toBeReplaced.removeAttr('data-yadaAjaxFragment');
-			var noLoader = hasNoLoader($toBeReplaced);
-			yada.ajax(fetchUrl, null, (function($replaceable){
-				return function(responseText, responseHtml) {
-					yada.initAjaxHandlersOn(responseHtml.children());
-					$replaceable.replaceWith(responseHtml.children());
-				}
-			})($toBeReplaced), "POST", null, noLoader);
-		}
-	}
 
-	// The observer is called whenever a hidden parent (or self) of a yadaAjaxFragment becomes visible
-	var ajaxFragmentsVisibilityObserver = new MutationObserver(function(mutationsList) {
-		for (var i = 0; i < mutationsList.length; i++) { 
-			// Can't use "of" because yuicompressor fails
-			// for (var record of mutationsList) { 
-			var $node = $(mutationsList[i].target);
-			if ($node.is(":visible")) {
-				// Check the current node and all its children
-				var $nodeSet = $('[data-yadaAjaxFragment]:visible', $node);
-				if ($node.attr('data-yadaAjaxFragment')!=undefined) {
-					$nodeSet.push($node);
-				}
-				$nodeSet.each(function(){
-					loadAjaxFragment($(this));
-				});
+	const ajaxTriggerInViewportObserver = new IntersectionObserver(entries => {
+		entries.forEach(entry => {
+			if (entry.intersectionRatio > 0) {
+				// console.log("firing " + $(entry.target).attr("data-yadahref"));
+				ajaxTriggerInViewportObserver.unobserve(entry.target); // Fires once only
+ 				makeAjaxCall(null, $(entry.target));
 			}
-		}
-	});
-
+		})
+	})
 	
 	/**
-	 * Enables the loading of page fragments via ajax.
-	 * @param handler a function to call upon successful insertion, can be null
-	 * @param $element the element on which to enable the fragment insertion, can be null for the entire body
+	 * Enables the triggering of ajax calls when the element is entering the viewport (or is already in the viewport).
+	 * @param $element the dom section where to look for elements to enable, can be null for the entire body
 	 */
-	yada.enableAjaxFragments = function(handler, $element) {
+	yada.enableAjaxTriggerInViewport = function($element) {
 		if ($element==null || $element=="") {
 			$element = $('body');
 		}
@@ -281,23 +279,11 @@
 			$target = $element;
 		}
 
-		var config = { attributes: true, attributeFilter: ['style', 'class'] };
-		$('[data-yadaAjaxFragment]', $target).each(function() {
-			var $toBeReplaced=$(this);
-			var fetchUrl = $toBeReplaced.attr("data-yadaAjaxFragment");
+		$('[data-yadaTriggerInViewport]', $target).each(function() {
+			var fetchUrl = $(this).attr("data-yadaHref");
 			if (fetchUrl!=null) {
-				// If the element is visible, replace it now.
-				// If the element is not visible, set an observer to replace it when it becomes visible
-				var visible = $toBeReplaced.is(":visible");
-				if (visible) {
-					loadAjaxFragment($toBeReplaced);
-				} else {
-					ajaxFragmentsVisibilityObserver.observe(this, config);
-					// As the observer is not called when a parent changes, I have to set an observer on all the parents that are not currently visible
-					$toBeReplaced.parents(':hidden').each(function() {
-						ajaxFragmentsVisibilityObserver.observe(this, config);
-					});
-				}
+				ajaxTriggerInViewportObserver.observe(this);
+				// console.log("Observing " + $(this).attr("data-yadahref"));
 			}
 		});
 	};
@@ -414,7 +400,7 @@
 	 * @param $link the jquery anchor or button (could be an array), e.g. $('.niceLink')
 	 * @param handler funzione chiamata in caso di successo e nessun yadaWebUtil.modalError()
 	 */
-	// Legacy version
+	// Legacy version - see yada.enableAjaxLinks
 	yada.enableAjaxLink = function($link, handler) {
 		// If array, recurse to unroll
 		if ($link.length>1) {
@@ -487,7 +473,8 @@
 			}
 		});
 		// Prevent form submission on Enter otherwise the ajax call is not made.
-		// Browsers simulate a click on submit buttons when the enter key is pressed in a form, so we check using the "yadaDoNotSubmitNow" flag 
+		// Browsers simulate a click on submit buttons when the enter key is pressed in a form, so we check using the "yadaDoNotSubmitNow" flag.
+		// This doesn't always work and may be necessary to replace submit buttons with normal buttons to prevent form submission on enter. 
 		$(selector).each(function(){
 			const $input = $(this);
 			// Form submission by Enter keypress is allowed when the input element ajax call is not triggered by "Enter".
@@ -542,43 +529,65 @@
 	};
 	
 	/**
-	 * Execute function by name
+	 * Execute function by name. Also execute an inline function (a function body).
 	 * See https://stackoverflow.com/a/359910/587641
-	 * @param functionName the name of the function, in the window scope, that can have namespaces like "mylib.myfunc"
+	 * @param functionName the name of the function, in the window scope, that can have namespaces like "mylib.myfunc".
+	 *			It can also be an inline function (with or without function(){} declaration).
 	 * @param thisObject the object that will become the this object in the called function
 	 * Any number of arguments can be passed to the function
 	 */
 	function executeFunctionByName(functionName, thisObject /*, args */) {
-			var context = window; // The functionName is always searched in the current window
-		  var args = Array.prototype.slice.call(arguments, 2);
-		  var namespaces = functionName.split(".");
-		  var func = namespaces.pop();
-		  for(var i = 0; i < namespaces.length; i++) {
-		    context = context[namespaces[i]];
-		  }
-		  var functionObject = context[func];
-		  if (functionObject==null) {
-			  console.log("[yada] Function " + func + " not found (ignored)");
-			  return true; // so that other handlers can be called
-		  }
-		  return functionObject.apply(thisObject, args);
+		var context = window; // The functionName is always searched in the current window
+		var args = Array.prototype.slice.call(arguments, 2);
+		var namespaces = functionName.split(".");
+		var func = namespaces.pop();
+		for(var i = 0; i < namespaces.length && context!=null; i++) {
+			context = context[namespaces[i]];
+		}
+		var functionObject = context?context[func]:null;
+		if (functionObject==null) {
+			// It might be a function body
+			try {
+				var functionBody = functionName.trim();
+				// Strip any "function(){xxx}" declaration
+				if (yada.startsWith(functionName, "function")) {
+					functionBody = functionName.replace(new RegExp("(?:function\\s*\\(\\)\\s*{)?([^}]+)}?"), "$1");
+				}
+				const theFunction = new Function('responseText', 'responseHtml', 'link', functionBody);
+				return theFunction.apply(thisObject, args);
+			} catch (error) {
+				console.error(error);
+			}
+			console.log("[yada] Function '" + func + "' not found (ignored)");
+			return true; // so that other handlers can be called
+		}
+		return functionObject.apply(thisObject, args);
 	}
 	
 	/**
 	 * Make an ajax call when a link is clicked, a select is chosen, a checkbox is selected etc.
+	 * @param e the triggering event, can be null (for yadaTriggerInViewport)
+	 * @param $element the jQuery element that triggered the ajax call
+	 * @param optional additional handler to call on success
+	 * @param allowDefault true to allow the default event action, if any
 	 */
 	function makeAjaxCall(e, $element, handler, allowDefault) {
-		if (!allowDefault==true) {
+		if (e && !allowDefault==true) {
 			e.preventDefault();
 		}
-		if ($element.hasClass("yadaLinkDisabled")) {
+		if ($element.hasClass("yadaAjaxDisabled")) {
 			return false;
 		}
 		// Call, in sequence, the handler specified in data-successHandler and the one passed to this function
 		var joinedHandler = function(responseText, responseHtml) {
 			showFeedbackIfNeeded($element);
 			deleteOnSuccess($element);
-			responseHtml = updateOnSuccess($element, responseHtml);
+			responseHtml = updateOnSuccess($element, responseHtml); // This removes the added root <div>
+			// No: Put the responseHtml back into a div if it is not an array and not the original yadaAjaxResponseHtml
+			// if (!(responseHtml instanceof Array) && responseHtml.attr("class")!="yadaAjaxResponseHtml") {				
+			// 	responseHtml = $(yadaAjaxResponseHtmlRoot).append(responseHtml);
+			// }
+			// responseHtml = appendOnSuccess($element, responseHtml);
 			var handlerNames = $element.attr("data-yadaSuccessHandler");
 			if (handlerNames===undefined) {
 				handlerNames = $element.attr("data-successHandler"); // Legacy
@@ -604,9 +613,9 @@
 		}
 		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
 		// Create data for submission
-		var data = null;
+		var data = [];
 		var value = [];
-		var name = $element.attr("name") || "value"; // Parameter name fallback to "value" by default
+		var multipart = false;
 		var noLoader = hasNoLoader($element);	
 		// In a select, set the data object to the selected option
 		if ($element.is("select")) {
@@ -620,12 +629,31 @@
 				value.push($element.val());
 			}
 		}
-		if (name !=null) {
-			data = $element[0].yadaRequestData || {}; // Any yadaRequestData is also sent (see yada.dialect.js)
-			if (value.length>0) {
-				data[name] = value;
+		// Add form data when specified with yadaFormGroup
+		const yadaFormGroup = $element.attr('data-yadaFormGroup');
+		if (yadaFormGroup!=null) {
+			// Find all forms of the same group
+			const $formGroup = $('form[data-yadaFormGroup='+yadaFormGroup+']');
+			if ($formGroup.length>0) {
+				multipart = $formGroup.filter("[enctype='multipart/form-data']").length > 0;
+				data = multipart ? new FormData() : [];
+				addAllFormsInGroup($formGroup, data);
 			}
 		}
+		// Any yadaRequestData is also sent (see yada.dialect.js)
+		const yadaRequestData = $element[0].yadaRequestData; // Object with name=value
+		data = mergeData(data, yadaRequestData);
+		// Add element value
+		if (value.length>0) {
+			const name = $element.attr("name") || "value"; // Parameter name fallback to "value" by default
+			const toAdd = {};
+			toAdd[name] = value;
+			data = mergeData(data, toAdd);
+		}
+		if (!multipart) {
+			data = $.param(data);
+		}	
+		//
 		if (confirmText!=null && confirmText!="") {
 			var title = $element.attr("data-yadaTitle");
 			var okButton = $element.attr("data-yadaOkButton") || $element.attr("data-okButton") || yada.messages.confirmButtons.ok;
@@ -703,6 +731,9 @@
 		// If "yadaUpdateOnSuccess" is set, replace its target; if it's empty, replace the original link.
 		// The target can be a parent when the css selector starts with parentSelector (currently "yadaParents:").
 		// The selector can be multiple, separated by comma. The replacement can be multiple, identified by yadaFragment
+		// return postprocessOnSuccess($element, responseHtml, "data-yadaUpdateOnSuccess", $.fn.replaceWith);
+		return postprocessOnSuccess($element, responseHtml, "data-yadaUpdateOnSuccess", $.fn.replaceWith);
+		/*
 		var updateSelector = $element.attr("data-yadaUpdateOnSuccess");
 		if (updateSelector == null) {
 			return responseHtml;
@@ -750,32 +781,98 @@
 			}
 		}
 		return $return;
-
-//				if (selector == "") {
-//					// 
-//					$element.replaceWith($replacement);
-//				} else {
-//					var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
-//					var fromSiblings = yada.startsWith(selector, siblingSelector); // yadaSiblings:
-//					var fromClosestFind = yada.startsWith(selector, closestFindSelector); // yadaClosestFind:
-//					if (fromParents==false && fromSiblings==false && fromClosestFind==false) {
-//						var $oldElement = $(selector);
-//						$oldElement.replaceWith($replacement);
-//					} else if (fromParents) {
-//						selector = selector.replace(parentSelector, "").trim();
-//						$element.parent().closest(selector).replaceWith($replacement);
-//					} else if (fromSiblings) {
-//						selector = selector.replace(siblingSelector, "").trim();
-//						$element.siblings(selector).replaceWith($replacement);
-//					} else if (fromClosestFind) {
-//						selector = selector.replace(closestFindSelector, "").trim();
-//						var splitSelector = selector.split(" ", 2);
-//						$element.closest(splitSelector[0]).find(splitSelector[1]).replaceWith($replacement);
-//					}
-//				}
-			// Not needed  because handlers are initialized before entering this method, then cloned
-			// yada.initHandlersOn($replacement);
+		*/
 	}
+	
+	/**
+	 * 
+	 * @param $element the link or the form
+	 * @param responseHtml jquery object received from the ajax call
+	 * @returns the jQuery HTML that has been added to the page, which will be a clone 
+	 *		    of responseHtml or the original responseHtml when no update has been made.
+	 *		    In case of multiple appends, an array will be returned.
+	 * @deprecated use $append() in the selector instead
+	 */
+	 /*
+	function appendOnSuccess($element, responseHtml) {
+		// If "yadaAppendOnSuccess" is set, append to its target; if it's empty, append to the original element.
+		// The target can be a parent when the css selector starts with parentSelector (currently "yadaParents:").
+		// The selector can be multiple, separated by comma. The appended HTML can be multiple, identified by yadaFragment
+		return postprocessOnSuccess($element, responseHtml, "data-yadaAppendOnSuccess", $.fn.append);
+	}
+	*/
+
+	/**
+	 * This function performs either an update or an append (or more in the future) depending on the parameters.
+	*/
+	function postprocessOnSuccess($element, responseHtml, attributeName, jqueryFunction) {
+		var selector = $element.attr(attributeName);
+		if (selector == null) {
+			return responseHtml;
+		}
+		// Clone so that the original responseHtml is not removed by appending.
+		// All handlers are also cloned.
+		var $replacement = responseHtml.children().clone(true, true); // Uso .children() per skippare il primo div inserito da yada.ajax()
+		initObservers($replacement);
+		var $return = $replacement;
+		var selectors = selector.split(',');
+		var $replacementArray = null;
+		if (selectors.length>1) {
+			// yadaFragment is used only when there is more than one selector, otherwise the whole result is used for replacement
+			$replacementArray = $(".yadaFragment", responseHtml);
+			if ($replacementArray.length==0) {
+				$replacementArray = $("._yadaReplacement_", responseHtml); // Legacy
+			}
+		}
+		if ($replacementArray!=null && $replacementArray.length>1) {
+			$return = [];
+		}
+		var fragmentCount = 0;
+		var focused = false;
+		for (var count=0; count<selectors.length; count++) {
+			var selector = selectors[count].trim();
+			if ($replacementArray!=null && $replacementArray.length>0) {
+				// Clone so that the original responseHtml is not removed by replaceWith.
+				// All handlers are also cloned.
+				$replacement = $replacementArray.eq(fragmentCount).clone(true, true);
+				initObservers($replacement);
+				if (count==0 && $replacementArray.length==1) {
+					$return = $replacement;
+				} else {
+					$return.push($replacement);
+				}
+				// When there are more selectors than fragments, fragments are cycled from the first one
+				fragmentCount = (fragmentCount+1) % $replacementArray.length;
+			}
+			// Detect the jquery funcion used in the selector, if any
+			var jqueryFunction = $.fn.replaceWith; // Default
+			var jqueryFunctions = [
+				{"jqfunction": $.fn.replaceWith, "prefix": "$replaceWith"},
+				{"jqfunction": $.fn.replaceWith, "prefix": "$replace"},		// $replace() is an alias for $replaceWith()
+				{"jqfunction": $.fn.append, "prefix": "$append"},
+				{"jqfunction": $.fn.prepend, "prefix": "$prepend"}
+				// More can be added
+			]
+			for (var i = 0; i < jqueryFunctions.length; i++) {
+				const toCheck = jqueryFunctions[i];
+				if (yada.startsWith(selector, toCheck.prefix + "(") && selector.indexOf(")") > toCheck.prefix.length) {
+					jqueryFunction = toCheck.jqfunction;
+					selector = yada.extract(selector, toCheck.prefix + "(", ")");
+					break;
+				}
+			}
+			jqueryFunction.call(yada.extendedSelect($element, selector), $replacement);
+			if (!focused) {
+				// Focus on the first result element with data-yadaAjaxResultFocus
+				const $toFocus = $("[data-yadaAjaxResultFocus]:not([readonly]):not([disabled])", $replacement);
+				if ($toFocus.length>0) {
+					$toFocus.get(0).focus();
+					focused=true;
+				}
+			}
+		}
+		return $return;
+	}	
 	
 	/**
 	 * Show a checkmark fading in and out
@@ -857,6 +954,74 @@
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * Merge some new data into an existing object
+	 * @param data the object that receives the new data, can be either Array of objects or FormData  
+	 * @param mergeFrom the object that contains new data like {product: "shoe", quantity: 2}, or null
+	 * @return the 'data' object with new data
+	*/
+	function mergeData(data, mergeFrom) {
+		if (mergeFrom==null) {
+			return data;
+		}
+		const multipart = data instanceof FormData;
+		if (!multipart && !(data instanceof Array)) {
+			console.error("YadaError: data should be Array or FormData in mergeData().")
+			return data;
+		}
+		Object.keys(mergeFrom).forEach(function(name) {
+  			const value = mergeFrom[name];
+	    	if (multipart) {
+		        data.set(name, value); // Add data with no duplicates, overwriting previous
+			} else {
+				// Add data with no duplicates, overwriting previous
+				const obj = {};
+				obj[name] = value;
+				$.extend(true, data, [obj]);
+			}
+		});
+		return data;
+	}
+	
+	/**
+	 * Adds to data all fields in all the forms in the group, optionally excluding one of them
+	 * @param $formGroup an array of jquery forms from which input data should be gathered
+	 * @param data FormData or an array of objects (created with $.serializeArray()) that may already hold some form data and will contain all the gathered data
+	 * @param $form some jquery form to exclude (optional)
+	 */
+	function addAllFormsInGroup($formGroup, data, $formToExclude) {
+		const multipart = data instanceof FormData;
+		if (!multipart && !(data instanceof Array)) {
+			console.error("YadaError: data should be Array or FormData in addAllFormsInGroup().")
+			return;
+		}
+		$formGroup.each(function() {
+			var $eachForm = $(this);
+			if (!$eachForm.is($formToExclude)) {
+				if (multipart) {
+					var eachFormdata = new FormData(this);
+					// Can't use for - of with the current minifyjs version, so trying with a while loop
+					//	for (var pair of eachFormdata.entries()) {
+					//		data.append(pair[0], pair[1]);
+					//	}
+					var iterator = eachFormdata.entries();
+					var iterElem = iterator.next();
+				    while ( ! iterElem.done ) {
+				    	var pair = iterElem.value;
+				    	// const newData = {};
+				    	// newData[pair[0]] = pair[1];
+				    	// data = mergeData(data, newData); // Add data with no duplicates, keeping first value
+				        data.set(pair[0], pair[1]); // Add data with no duplicates, overwriting previous
+				        iterElem = iterator.next();
+				    }
+				} else {
+					// mergeData(data, $eachForm.serializeArray()); // Add data with no duplicates, keeping first value
+					$.extend(true, data, $eachForm.serializeArray()); // Add data with no duplicates, overwriting previous
+				}
+			}
+		});
 	}
 
 	/**
@@ -948,16 +1113,7 @@
 			// If the form is marked as markerAjaxButtonOnly do not submit it via ajax unless the clicked button is marked with 'yadaAjax'
 			if ($form.hasClass(markerAjaxButtonOnly)) {
 				if (clickedButton==null || !$(clickedButton).hasClass('yadaAjax')) {
-					// If it is a group of forms, append all other inputs to the current form and let it submit normally.
-					// Non need to clone anything because the page will be reloaded anyway (not ajax here)
-					if ($formGroup.length>1) {
-						$formGroup.each(function() {
-							var $eachForm = $(this);
-							if (!$eachForm.is($form)) {
-								$eachForm.find(":input").appendTo($form); // All inputs including textarea etc.
-							}
-						});
-					}
+					yada.addFormGroupFields($form, $formGroup); // Non-ajax submit
 					// In any case, let it continue with the submit
 					return; // Do a normal submit
 				}
@@ -975,27 +1131,7 @@
 			var data = multipart ? new FormData(this) : $(this).serializeArray();
 			// Add data from the form group if any
 			if ($formGroup.length>1) {
-				$formGroup.each(function() {
-					var $eachForm = $(this);
-					if (!$eachForm.is($form)) {
-						if (multipart) {
-							var eachFormdata = new FormData(this);
-							// Can't use for - of with the current minifyjs version, so trying with a while loop
-							//	for (var pair of eachFormdata.entries()) {
-							//		data.append(pair[0], pair[1]);
-							//	}
-							var iterator = eachFormdata.entries();
-							var iterElem = iterator.next();
-						    while ( ! iterElem.done ) {
-						    	var pair = iterElem.value;
-						        data.append(pair[0], pair[1]);
-						        iterElem = iterator.next();
-						    }
-						} else {
-							$.merge(data, $eachForm.serializeArray());
-						}
-					}
-				});
+				addAllFormsInGroup($formGroup, data, $form);
 			}
 			// Add data from any child form recursively, if any
 			var $childForm = $form[0]['yadaChildForm'];
@@ -1061,6 +1197,13 @@
 				} else {
 					responseHtml = updateOnSuccess($form, responseHtml);
 				}
+				/*
+				if ($(localClickedButton).attr("data-yadaAppendOnSuccess")!=null) {
+					responseHtml = appendOnSuccess($(localClickedButton), responseHtml);
+				} else {
+					responseHtml = appendOnSuccess($form, responseHtml);
+				}
+				*/
 				var formHandlerNames = $form.attr("data-yadaSuccessHandler");
 				if (formHandlerNames===undefined) {
 					formHandlerNames = $form.attr("data-successHandler"); // Legacy
@@ -1231,6 +1374,7 @@
 			success: function(responseText, statusText, jqXHR) {
 				var responseTrimmed = "";
 				var responseObject = null;
+				closeLoginModalIfAny(jqXHR);
 				if (responseText instanceof Blob) {
 					var contentDisposition = jqXHR.getResponseHeader("Content-Disposition");
 					var filename = yada.getAfter(contentDisposition, "filename=");
@@ -1274,7 +1418,10 @@
 					}
 					// Keep going, there could be a handler
 				}
-				var responseHtml=$("<div>").html(responseTrimmed);
+				// Putting the returned HTML inside a <div> for some reason - not sure it is a good idea but legacy code needs it now.
+				// The bad thing is that the enclosing div is stripped when updateOnSuccess is called, so the successHandler
+				// can receive both versions (with or without root div) depending on the presence of the updateOnSuccess call.
+				var responseHtml=$(yadaAjaxResponseHtmlRoot).html(responseTrimmed);
 				// Check if we just did a login.
 				// A successful login can also return a redirect, which will skip the PostLoginHandler 
 				if ("loginSuccess" == responseTrimmed) {
@@ -1444,6 +1591,12 @@
 		
 	}
 	
+	function closeLoginModalIfAny(jqXHR) {
+		if (jqXHR.getResponseHeader("Yada-Ajax-Just-LoggedIn")!=null) {
+			yada.reload();
+		}
+	};
+	
 	function removeHeadNodes(headNodes, $modalObject) {
 		$modalObject.on('hidden.bs.modal', function (e) {
 			if (headNodes!=null) {
@@ -1543,7 +1696,7 @@
 	// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
 	// Ritorna true se la notify è stata mostrata.
 	yada.handleNotify = function(responseHtml) {
-		var notification=$(responseHtml).find(".s_modalNotify .yadaNotify");
+		var notification=$(responseHtml).find(".yadaNotify");
 		if (notification.length==1) {
 			// Mostro la notification
 			$('.modal:visible').modal('hide'); // Close any current modals

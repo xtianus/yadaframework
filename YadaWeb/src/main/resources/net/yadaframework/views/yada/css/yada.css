@@ -1,3 +1,7 @@
+.yadaInvisible {
+	visibility: hidden !important;
+}
+
 .yadaHidden {
 	display: none !important;
 }
@@ -25,6 +29,10 @@
     display: none;
     z-index: 1000000;
     pointer-events: none;
+}
+
+.yadaAjaxDisabled {
+	cursor: no-drop;
 }
 
 /*

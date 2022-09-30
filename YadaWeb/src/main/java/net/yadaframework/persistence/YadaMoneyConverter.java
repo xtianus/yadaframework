@@ -11,17 +11,19 @@ public class YadaMoneyConverter implements AttributeConverter<YadaMoney, Long> {
 	@Override
 	public Long convertToDatabaseColumn(YadaMoney attribute) {
 		if (attribute==null) {
-			return null;
+			return 0l;
 		}
-		return attribute.getAmount();
+		return attribute.getInternalValue();
 	}
 
 	@Override
 	public YadaMoney convertToEntityAttribute(Long dbData) {
 		if (dbData==null) {
-			return null;
+			dbData = 0l;
 		}
-		return new YadaMoney(dbData);
+		YadaMoney result = new YadaMoney();
+		result.setInternalValue(dbData);
+		return result;
 	}
 
 
