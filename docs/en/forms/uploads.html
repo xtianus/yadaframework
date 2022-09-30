@@ -401,7 +401,7 @@ created automatically if the tomcat process has enough permissions, otherwise yo
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "userData", "icon");
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "/userData", "icon");
 if (newIcon!=null) {
     user.setIcon(newIcon);
     userRepository.save(user);
@@ -413,7 +413,7 @@ if (newIcon!=null) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "userData", "icon");</code></pre>
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "/userData", "icon");</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -474,11 +474,12 @@ There is no way to detect if you are using the wrong method, so be careful.</p>
  * Uploads an "icon" image for the user
  */
 public String updateProfile(MultipartFile uploadedMultipart) {
+	... fetch 'user' somehow ...
     if (uploadedMultipart!=null &amp;&amp; !uploadedMultipart.isEmpty()) {
         YadaAttachedFile previousIcon = user.getIcon();
         if (previousIcon==null) {
             // Move the file to the "someFolder" directory and create a new YadaAttachedFile
-            YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "someFolder", "myprefix");
+            YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "/someFolder", "myprefix");
             if (newIcon!=null) {
                 user.setIcon(newIcon);
                 userRepository.save(user);
@@ -965,7 +966,7 @@ This always happens in the following cases:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2022-01-26 11:03:59 +0100
+Last updated 2022-09-29 19:03:04 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

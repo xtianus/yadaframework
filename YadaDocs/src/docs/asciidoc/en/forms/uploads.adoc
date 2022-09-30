@@ -205,7 +205,7 @@ The File can then be attached to an Entity:
 
 [source,java]
 ----
-YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "userData", "icon");
+YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "/userData", "icon");
 if (newIcon!=null) {
     user.setIcon(newIcon);
     userRepository.save(user);
@@ -216,7 +216,7 @@ The `yadaFileManager.uploadFile()` call can be skipped when passing the Multipar
 
 [source,java]
 ----
-YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "userData", "icon");
+YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "/userData", "icon");
 ----
 
 
@@ -266,11 +266,12 @@ There is no way to detect if you are using the wrong method, so be careful.
  * Uploads an "icon" image for the user
  */
 public String updateProfile(MultipartFile uploadedMultipart) {
+	... fetch 'user' somehow ...
     if (uploadedMultipart!=null && !uploadedMultipart.isEmpty()) {
         YadaAttachedFile previousIcon = user.getIcon();
         if (previousIcon==null) {
             // Move the file to the "someFolder" directory and create a new YadaAttachedFile
-            YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "someFolder", "myprefix");
+            YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "/someFolder", "myprefix");
             if (newIcon!=null) {
                 user.setIcon(newIcon);
                 userRepository.save(user);

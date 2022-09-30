@@ -62,9 +62,9 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <ul class="sectlevel2">
 <li><a href="#_ajax_on_input_fields">Ajax on input fields</a></li>
 <li><a href="#_ajax_on_checkbox">Ajax on checkbox</a></li>
-<li><a href="#_ajax_async_element_load">Ajax async element load</a></li>
 </ul>
 </li>
+<li><a href="#_ajax_async_element_load">Ajax async element load</a></li>
 <li><a href="#_ajax_method">Ajax method</a>
 <ul class="sectlevel2">
 <li><a href="#_url">URL</a></li>
@@ -511,8 +511,25 @@ quoting them in single quotes.</p>
 <div class="paragraph">
 <p>The "jQuery selector list" is a comma-separated list of jQuery selectors, like <code>"#someId, .someClass &gt; a"</code>.
 It is searched in all the document unless a special yada prefix is used (see below).
-If the selector list is empty, the target is the element itself.
-If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.</p>
+If the selector list is empty, the target is the element itself.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>When deleting both the element and something else, the empty selector must be
+placed at the end of the list or the deletion might not work properly when using an extended selector. For example: <code>"yadaSiblings:div,"</code></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.</p>
 </div>
 <div class="paragraph">
 <p>Each selector can also have the following special prefixes:</p>
@@ -941,8 +958,11 @@ Changing a select or a checkbox sumbits the enclosing form: this should be made 
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_ajax_async_element_load">Ajax async element load</h3>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ajax_async_element_load">Ajax async element load</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>There are may use cases where it is desirable to load an element of the page only when that element scrolls into view.
 For example, deferring the load of a big image or the calculation of a computationally intensive value.
@@ -1082,7 +1102,6 @@ public String toggleBookLike(Long bookId, Boolean currentLike, Boolean yadaAjaxJ
 <td>toggle like when no login has just occurred</td>
 </tr>
 </table>
-</div>
 </div>
 </div>
 </div>
@@ -1311,7 +1330,7 @@ Otherwise the form will be sent with a normal non-ajax request.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2022-08-10 18:01:48 +0200
+Last updated 2022-09-13 19:07:46 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

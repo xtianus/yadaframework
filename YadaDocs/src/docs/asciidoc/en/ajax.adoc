@@ -303,7 +303,14 @@ quoting them in single quotes.
 
 The "jQuery selector list" is a comma-separated list of jQuery selectors, like `"#someId, .someClass > a"`.
 It is searched in all the document unless a special yada prefix is used (see below).
-If the selector list is empty, the target is the element itself.
+If the selector list is empty, the target is the element itself. 
+
+[TIP]
+====
+When deleting both the element and something else, the empty selector must be
+placed at the end of the list or the deletion might not work properly when using an extended selector. For example: `"yadaSiblings:div,"`
+====
+
 If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.
 
 Each selector can also have the following special prefixes:
@@ -549,7 +556,7 @@ complete list of ajaxifyable elements. Is the yadaAjax class needed? Examples.
 
 ----
 
-===  Ajax async element load
+==  Ajax async element load
 
 There are may use cases where it is desirable to load an element of the page only when that element scrolls into view.
 For example, deferring the load of a big image or the calculation of a computationally intensive value.

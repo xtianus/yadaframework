@@ -384,6 +384,17 @@ image::forms/textarea01.jpg[Textarea with counter]
 <2> A counter can be used
 <3> The length must be set in order to use the counter
 
+The label to the left of the counter isn't added automatically: it can be set
+with a container div that has the following CSS:
+ 
+[source,CSS]
+----
+.labelAndCounter {
+	display: flex;
+	justify-content: space-between;
+} 
+----
+
 [TIP]
 ====
 The tag is implemented in `YadaTextareaTagProcessor.java` and `textarea.html`.
