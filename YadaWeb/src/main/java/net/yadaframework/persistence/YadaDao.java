@@ -1,5 +1,7 @@
 package net.yadaframework.persistence;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -14,10 +16,11 @@ import net.yadaframework.exceptions.YadaInvalidValueException;
 
 /**
  * Generic database methods
- *
+ * @deprecated because you will eventually need a specific select, so better make a specific DAO which has type checking
  */
 @Repository
 @Transactional(readOnly = true) 
+@Deprecated // Should make a specific DAO anyway because sooner or later you'll need a specific select
 public class YadaDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
@@ -60,13 +63,25 @@ public class YadaDao {
     }
     
     /**
+     * Find all objects of a given type
+     * @param <T>
+     * @param someClass
+     * @param id
+     * @return
+     */
+    public <T> List<T> findAll(Class<T> someClass) {
+    	String sql = "from " + someClass.getSimpleName();
+    	return em.createQuery(sql, someClass).getResultList();
+    }
+    
+    /**
      * Find any object given its class and id
      * @param <T>
      * @param someClass
      * @param id
      * @return
      */
-    public <T> T find (Class<T> someClass, Long id) {
+    public <T> T find(Class<T> someClass, Long id) {
     	return em.find(someClass, id);
     }
 	
