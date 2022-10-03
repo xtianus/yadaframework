@@ -600,7 +600,7 @@
 	 * @param newHashValue some string to place after the existing hash value, or to add at the end following a new hash character
 	 */
 	yada.replaceHash = function(someUrl, newHashValue) {
-		return yada.removeHash(someUrl) + '#' + newHashValue;
+		return yada.removeHash(someUrl) + '#' + yada.removeHash(newHashValue);
 	}
 	
 	// Elimina l'hash (anchor) da un url, se presente.
