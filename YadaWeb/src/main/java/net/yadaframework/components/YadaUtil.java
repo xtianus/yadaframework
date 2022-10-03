@@ -1,10 +1,12 @@
 package net.yadaframework.components;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,6 +20,7 @@ import java.math.BigInteger;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -207,6 +210,47 @@ public class YadaUtil {
 		return number.doubleValue();
 	}
 
+	/**
+	 * Add an element to the list only if the element is not null
+	 * @param <T>
+	 * @param list
+	 * @param element
+	 */
+	public <T> void addIfNotNull(List<T> list, T element) {
+		if (element!=null) {
+			list.add(element);
+		}
+	}
+	
+	/**
+	 * Create a new TreeSet that sorts values according to the order specified in the parameter.
+	 * Values that are missing from sortOrder are sorted alphabetically
+	 * @param sortOrder
+	 * @return an empty sorted set that can receive a subset of the values in the sortOrder and keep them sorted the same way
+	 */
+	public Set<String> getEmptySortedSet(List<String> sortOrder) {
+    	Map<String, Integer> order = new HashMap<String, Integer>(); // From value to position
+    	for (int j = 0; j < sortOrder.size(); j++) {
+    		order.put(sortOrder.get(j), j);
+		}
+    	Set<String> result = new TreeSet<>(new Comparator<String>() {
+			@Override
+			public int compare(String left, String right) {
+				try {
+					return order.get(left).compareTo(order.get(right));
+				} catch (Exception e) {
+					// In case of error, fallback to alphabetical
+					log.error("Can't compare {} with {} (ignored)", left, right);
+					if (left!=null) {
+						return left.compareTo(right);
+					}
+					return right!=null?1:0;
+				}
+			}
+    	});
+		return result;
+	}
+	
 	/**
 	 * Given a ISO date, a ISO time and a timezone, return the Date.
 	 * @param isoDateString like '2011-12-03'
@@ -585,7 +629,10 @@ public class YadaUtil {
 	 * Creates a folder in the system temp folder. The name is prefixed with "yada".
 	 * @return
 	 * @throws IOException
+	 * @see {@link Files#createTempDirectory(String, java.nio.file.attribute.FileAttribute...)}
 	 */
+	@Deprecated // This should not be used because the operation is not atomic
+	// Use Files.createTempDirectory() instead
 	public File makeTempFolder() throws IOException {
 		File file = File.createTempFile("yada", "");
 		file.delete();
@@ -717,7 +764,7 @@ public class YadaUtil {
 	 * @param baseName filename to add, without extension
 	 * @param extensionNoDot filename extension without dot, can be empty or null if the extension is not needed
 	 * @param counterSeparator string to separate the filename and the counter, can be empty or null
-	 * @param usedNames filenames used so far, must start empty and will be modified
+	 * @param usedNames filenames used so far, can start empty but never null, and will be modified by adding the new name
 	 * @return the original filename with extension, or a new version with a counter added
 	 * @throws IOException
 	 * @see {@link #findAvailableName(File, String, String, String)}
@@ -991,13 +1038,13 @@ public class YadaUtil {
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
 	 * It must be called in a transaction.
 	 * @param fetchedEntity object fetched from database that may contain localized strings
-	 * @param targetClass type of fetchedEntities elements
+	 * @param targetClass type of fetchedEntity element
 	 */
-	public static <targetClass> void prefetchLocalizedStrings(targetClass fetchedEntity, Class<?> targetClass) {
+	public static <targetClass> void prefetchLocalizedStrings(targetClass fetchedEntity, Class<?> targetClass, String...attributes) {
 		if (fetchedEntity!=null) {
 			List<targetClass> list = new ArrayList<>();
 			list.add(fetchedEntity);
-			prefetchLocalizedStringList(list, targetClass);
+			prefetchLocalizedStringList(list, targetClass, attributes);
 		}
 	}
 
@@ -1067,7 +1114,7 @@ public class YadaUtil {
 	 * @param entityClass type of fetchedEntities elements
 	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
 	 */
-	public static <entityClass> void prefetchLocalizedStringList(List<entityClass> entities, Class<?> entityClass, String...attributes) {
+	public static <entityClass> void prefetchLocalizedStringList(Collection<entityClass> entities, Class<?> entityClass, String...attributes) {
 		List<String> attributeNames = Arrays.asList(attributes);
 		if (entities==null || entities.isEmpty()) {
 			return;
@@ -1130,10 +1177,16 @@ public class YadaUtil {
 	 * @return the localized value, or the empty string if no value has been defined and no default locale has been configured
 	 */
 	public static String getLocalValue(Map<Locale, String> LocalizedValueMap, Locale locale) {
+		String result=null;
+		try {
 		if (locale==null) {
 			locale = LocaleContextHolder.getLocale();
 		}
-		String result = LocalizedValueMap.get(locale);
+			result = LocalizedValueMap.get(locale);
+		} catch (Exception e) {
+			log.debug("Exception while getting localized value from {} with locale={} (ignored): {}", LocalizedValueMap, locale, e.getMessage());
+			// Keep going
+		}
 		if (StringUtils.isEmpty(result) && defaultLocale!=null && !defaultLocale.equals(locale)) {
 			result = LocalizedValueMap.get(defaultLocale);
 		}
@@ -1145,12 +1198,15 @@ public class YadaUtil {
 	 * @param file the file. It could also be an empty foder. Folders containing files are not deleted.
 	 */
 	public boolean deleteFileSilently(Path file) {
+		if (file!=null) {
 		try {
 			return Files.deleteIfExists(file);
 		} catch (Throwable e) {
+				log.debug("File {} not deleted: " + e.getMessage(), file);
+			}
+		}
 			return false;
 		}
-	}
 
 	/**
 	 * Close a closeable ignoring exceptions and null.
@@ -1233,6 +1289,7 @@ public class YadaUtil {
 	 * @return the Field found or null
 	 * @throws YadaInvalidValueException if attributeName is a path (with a dot in it)
 	 */
+	// Probably can be replaced by PropertyUtils.getSimpleProperty() from Commons BeanUtils
 	public Field getFieldNoTraversing(Class rootClass, String attributeName) {
 		if (attributeName.indexOf('.')>-1) {
 			throw new YadaInvalidValueException("Attribute name expected, attribute path found: {}", attributeName);
@@ -1419,7 +1476,7 @@ public class YadaUtil {
 			try {
 				return file.delete();
 			} catch (Exception e) {
-				log.debug("File {} not deleted: " + e.getMessage(), file);;
+				log.debug("File {} not deleted: " + e.getMessage(), file);
 			}
 		}
 		return false;
@@ -1443,6 +1500,7 @@ public class YadaUtil {
 
 	/**
 	 * Removes files from a folder starting with the prefix (can be an empty string)
+	 * The folder itself is not removed.
 	 * @param folder
 	 * @param prefix the initial part of the filename or "" for any file
 	 * return the number of deleted files
@@ -1461,7 +1519,8 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Removes files from a folder starting with the prefix (can be an empty string) and older than the given date
+	 * Removes files from a folder starting with the prefix (can be an empty string) and older than the given date.
+	 * The folder itself is not removed.
 	 * @param folder
 	 * @param prefix
 	 * @param olderThan
@@ -2003,7 +2062,8 @@ public class YadaUtil {
 	 * All objects are shallow copied unless they implement CloneableDeep, in which case they are copied with this same method.
 	 * Map keys are never cloned.
 	 *
-	 * NOTE: the object doesn't have to be an @Entity
+	 * NOTE: the object doesn't have to be an @Entity, despite the method name
+	 * NOTE: collection fields of an @Entity must be initialized to an empty instance in the class, or they won't be cloned
 	 * NOTE: any @Entity in the hierarchy is cloned without id and should be explicitly persisted after cloning unless there's PERSIST propagation.
 	 * NOTE: this method works quite well and should be trusted to copy even complex hierarchies.
 	 * NOTE: a transaction should be active to copy entities with lazy associations
@@ -2065,7 +2125,7 @@ public class YadaUtil {
 	 * - da verificare se gli attributi dei parent sono duplicati pure loro
 	 *
 	 * @param source
-	 * @param classObject classe da usare per creare il clone quando il source è nascosto dentro a un HibernateProxy
+	 * @param classObject class to use to create the new clone when the source is inside a HibernateProxy
 	 * @return
 	 */
 	public static Object copyEntity(CloneableFiltered source, Class classObject) {
@@ -2074,10 +2134,26 @@ public class YadaUtil {
 
 	public static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly) {
 		Map<CloneableFiltered, Object> alreadyCopiedMap = new HashMap<>();
-		return copyEntity(source, classObject, setFieldDirectly, alreadyCopiedMap);
+		return copyEntity(source, classObject, setFieldDirectly, alreadyCopiedMap, null);
 	}
 
-	private static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap) {
+	/**
+	 * 
+	 * @param source the instance to copy
+	 * @param classObject class to use to create the new clone when the source is inside a HibernateProxy
+	 * @param setFieldDirectly false to use getter/setter, true to access the Field directly
+	 * @param yadaAttachedFileCloneSet when not null, all files are copied to a temp folder. 
+	 * 	      This is useful when the final path depends on the id
+	 * 		  of a cloned object so it can't be determined during cloning.
+	 * 		  The method yadaAttachedFileCloneSet.moveAll() will have to be called after the clone has been persisted.
+	 * @return
+	 */
+	public static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly, YadaAttachedFileCloneSet yadaAttachedFileCloneSet) {
+		Map<CloneableFiltered, Object> alreadyCopiedMap = new HashMap<>();
+		return copyEntity(source, classObject, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet);
+	}
+
+	private static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap, YadaAttachedFileCloneSet yadaAttachedFileCloneSet) {
 		if (source==null) {
 			return null;
 		}
@@ -2093,7 +2169,7 @@ public class YadaUtil {
 		try {
 			// The constructor may be private, so don't just use newInstance()
 	        // Object target = sourceClass.newInstance();
-			Constructor constructor = sourceClass.getDeclaredConstructor(new Class[0]);
+			Constructor<?> constructor = sourceClass.getDeclaredConstructor(new Class[0]);
 	        constructor.setAccessible(true);
 			Object target = constructor.newInstance(new Object[0]);
 			if(target instanceof org.hibernate.proxy.HibernateProxy && classObject!=null) {
@@ -2101,11 +2177,11 @@ public class YadaUtil {
 			}
 
 			alreadyCopiedMap.put(source, target); // Needed to avoid infinite recursion if a value holds a reference to the parent
-			copyFields(source, sourceClass, target, setFieldDirectly, alreadyCopiedMap);
+			copyFields(source, sourceClass, target, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet);
 			Class<?> superclass = sourceClass.getSuperclass();
 			while (superclass!=null && superclass!=Object.class) {
 				sourceClass = superclass;
-				copyFields(source, sourceClass, target, setFieldDirectly, alreadyCopiedMap);
+				copyFields(source, sourceClass, target, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet);
 				superclass = sourceClass.getSuperclass();
 			}
 			return target;
@@ -2162,7 +2238,7 @@ public class YadaUtil {
 //		copyFields(source, sourceClass, target, false);
 //	}
 
-	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap) {
+	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap, YadaAttachedFileCloneSet yadaAttachedFileCloneSet) {
 		log.debug("Copio oggetto {} di tipo {}", source, sourceClass);
 		Field[] fields = sourceClass.getDeclaredFields();
 		Field[] excludedFields = source.getExcludedFields();
@@ -2255,10 +2331,10 @@ public class YadaUtil {
 							// per questi faccio la copia deep.
 							for (Object value : sourceCollection) {
 								if (isType(value.getClass(), CloneableDeep.class)) {
-									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap); // deep
+									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
 									// For YadaAttachedFile objects, duplicate the file on disk too
 									if (isType(value.getClass(), YadaAttachedFile.class)) {
-										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
 									}
 									targetCollection.add(clonedValue);
 								} else {
@@ -2280,10 +2356,10 @@ public class YadaUtil {
 							for (Object key : sourceMap.keySet()) {
 								Object value = sourceMap.get(key);
 								if (isType(value.getClass(), CloneableDeep.class)) {
-									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap); // deep
+									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
 									// For YadaAttachedFile objects, duplicate the file on disk too
 									if (isType(value.getClass(), YadaAttachedFile.class)) {
-										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
 									}
 									targetMap.put(key, clonedValue);
 								} else {
@@ -2296,10 +2372,10 @@ public class YadaUtil {
 							if (isType(fieldType, CloneableDeep.class)) {
 								// Siccome implementa CloneableDeep, lo duplico deep
 								CloneableFiltered fieldValue = setFieldDirectly ? (CloneableFiltered) field.get(source) : (CloneableFiltered) getter.invoke(source);
-								Object clonedValue = YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap); // deep but detached
+								Object clonedValue = YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep but detached
 								// For YadaAttachedFile objects, duplicate the file on disk too
 								if (isType(fieldType, YadaAttachedFile.class)) {
-									clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+									clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
 								}
 								copyValue(setFieldDirectly, field, getter, setter, source, target, clonedValue);
 //								setter.invoke(target, YadaUtil.copyEntity(fieldValue)); // deep but detached
@@ -2657,6 +2733,85 @@ public class YadaUtil {
 	}
 
 	/**
+	 * Create a zip of a set of files using an external process. The process must be configured as "config/shell/zipWithRename"
+	 * and should use zip and zipnote (for renaming). See the /YadaWeb/scripts folder for an example.
+	 * @param zipFile the zip file that has to be created
+	 * @param sourceFiles the files to add to the zip
+	 * @param filenames optional names to give to each added file, in order
+	 * @param fixNames when true, any repeated name will be given an incremental number (regardless or renaming) 
+	 * 		  and if filenames is provided, the renamed file will be forced to have the same
+	 * 		  extension of the source file (existing extensions will be removed).
+	 * @return true if the zip file has been created
+	 * @throws IOException 
+	 * @throws YadaInvalidUsageException when the length of filenames is greater than zero but different from the length of sourceFiles 
+	 */
+	public boolean createZipProcess(File zipFile, File[] sourceFiles, String[] filenames, boolean fixNames) throws IOException {
+		if (filenames!=null && filenames.length>0 && filenames.length!=sourceFiles.length) {
+			throw new YadaInvalidUsageException("When provided, there must be as many filenames as source files");
+		}
+		Map<String, String> params = new HashMap<>();
+		String shellCommandKey = "config/shell/zipWithRename";
+		File folder = zipFile.getParentFile(); // We create all temporary files in the same folder of the target zip
+		File tempZip = java.nio.file.Files.createTempFile(folder.toPath(), "_tmp_", ".zip").toFile();
+		// The zip file must not exist yet, so delete it
+		tempZip.delete();
+		File tempRename = java.nio.file.Files.createTempFile(folder.toPath(), "_tmp_", ".txt").toFile();
+		// String sourceNames = Arrays.stream(sourceFiles).map(File::getAbsolutePath).collect(Collectors.joining(" "));
+		
+		// Create the rename file and the source names list
+		Set<String> addedFilenames = new HashSet<>();
+		StringBuilder sourceNames = new StringBuilder();
+		try (BufferedWriter renameWriter = new BufferedWriter(new FileWriter(tempRename))) {
+			for (int i=0; i<sourceFiles.length; i++) {
+				File sourceFile = sourceFiles[i];
+				if (sourceFile!=null && sourceFile.canRead()) {
+					sourceNames.append(sourceFile.getAbsolutePath()).append(" ");
+					String sourceFilename = sourceFile.getName();
+					String sourceExtensionNoDot = getFileExtension(sourceFilename); // jpg
+					// When there is no filenames and no fixNames, the target file name is the same as the source file name
+					String targetName = sourceFilename;
+					if (filenames!=null) {
+						// When new names are provided, the target file name is the provided name
+						targetName = filenames[i];
+					}
+					if (fixNames) {
+						// Make names unique and use source extension as target
+						String targetNameNoExtension = splitFileNameAndExtension(targetName)[0];
+						targetName = findAvailableFilename(targetNameNoExtension, sourceExtensionNoDot, "_", addedFilenames);
+					}
+					// zipnote format
+					renameWriter.append("@ "+sourceFilename+"\n");
+					renameWriter.append("@="+targetName+"\n");
+					renameWriter.append("@ (comment above this line)\n");
+				} // sourceFile!=null		
+			}
+		} // try
+	    	
+		params.put("ZIPFILE", tempZip.getAbsolutePath());
+		params.put("ZIPNOTEFILE", tempRename.getAbsolutePath());
+		params.put("FILES", sourceNames.toString());
+		try {
+			int returnCode = shellExec(shellCommandKey, params, null);
+			if (returnCode!=0) {
+				log.error("Failed to create zip file {} from {}: return code is {}", tempZip, sourceFiles, returnCode);
+				tempZip.delete();
+				tempRename.delete();
+				return false;
+			}
+		} catch (Exception e) {
+			log.error("Failed to create zip file {} from {}", tempZip, sourceFiles);
+			tempZip.delete();
+			tempRename.delete();
+			throw e;
+		}
+		// Move the zip back into the intended place
+		Files.move(tempZip.toPath(), zipFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		// Delete the zipnote file
+		tempRename.delete();
+		return true;
+	}
+
+	/**
 	 * Create a zip file of a folder
 	 * @param zipFile the target zip file
 	 * @param foldersToZip the folders to zip
@@ -2805,6 +2960,7 @@ public class YadaUtil {
 		return calendar.getTime();
 	}
 
+	@Deprecated // To be removed from Yada Framework
 	public static String normalizzaCellulareItaliano(String cellulare) {
 		if (cellulare==null || cellulare.trim().length()==0) {
 			return cellulare;
@@ -2818,6 +2974,7 @@ public class YadaUtil {
 		return "+39"+cellulare; // Metto prefisso
 	}
 
+	@Deprecated // To be removed from Yada Framework
 	public static boolean validaCellulare(String cellulare) {
 		try {
 			if (cellulare.startsWith("+")) {
