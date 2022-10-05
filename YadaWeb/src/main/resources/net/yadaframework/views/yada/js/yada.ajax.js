@@ -694,29 +694,16 @@
 		var deleteSelector = $element.attr("data-yadaDeleteOnSuccess");
 		if (deleteSelector != null) {
 			var selectors = deleteSelector.split(',');
+			// If we delete the $element first, then any following selected elements may not match when relative to the $element.
+			// We therefore first get all selected element then delete them.
+			const toDelete = [];
+			
 			for (var count=0; count<selectors.length; count++) {
 				var selector = selectors[count];
-				yada.extendedSelect($element, selector).remove();
-//				if (selector=="") {
-//					$element.remove();
-//				} else {
-//					var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
-//					var fromSiblings = yada.startsWith(selector, siblingSelector); // yadaSiblings:
-//					var fromClosestFind = yada.startsWith(selector, closestFindSelector); // yadaClosestFind:
-//					if (fromParents==false && fromSiblings==false && fromClosestFind==false) {
-//						$(selector).remove();
-//					} else if (fromParents) {
-//						selector = selector.replace(parentSelector, "").trim();
-//						$element.parent().closest(selector).remove();
-//					} else if (fromSiblings) {
-//						selector = selector.replace(siblingSelector, "").trim();
-//						$element.siblings(selector).remove();
-//					} else if (fromClosestFind) {
-//						selector = selector.replace(closestFindSelector, "").trim();
-//						var splitSelector = selector.split(" ", 2);
-//						$element.closest(splitSelector[0]).find(splitSelector[1]).remove();
-//					}
-//				}
+				toDelete.push(yada.extendedSelect($element, selector));
+			}
+			for (var count=0; count<toDelete.length; count++) {
+				toDelete[count].remove();
 			}
 			return true;
 		}
@@ -853,6 +840,7 @@
 			}
 			// Detect the jquery funcion used in the selector, if any
 			var jqueryFunction = $.fn.replaceWith; // Default
+			var isReplace = true;
 			var jqueryFunctions = [
 				{"jqfunction": $.fn.replaceWith, "prefix": "$replaceWith"},
 				{"jqfunction": $.fn.replaceWith, "prefix": "$replace"},		// $replace() is an alias for $replaceWith()
@@ -865,11 +853,18 @@
 				if (yada.startsWith(selector, toCheck.prefix + "(") && selector.indexOf(")") > toCheck.prefix.length) {
 					jqueryFunction = toCheck.jqfunction;
 					selector = yada.extract(selector, toCheck.prefix + "(", ")");
+					if (!yada.startsWith(toCheck.prefix, "$replace")) {
+						isReplace = false; // Not a replace function
+					}
 					break;
 				}
 			}
 			// Call the jquery function
 			jqueryFunction.call(yada.extendedSelect($element, selector), $replacement);
+			if (isReplace && (selector == null || selector.trim()=="")) {
+				// The original element has been replaced so we need to change it or following selectors won't work anymore
+				$element = $replacement;
+			}
 			if (!focused) {
 				// Focus on the first result element with data-yadaAjaxResultFocus
 				const $toFocus = $("[data-yadaAjaxResultFocus]:not([readonly]):not([disabled])", $replacement);
