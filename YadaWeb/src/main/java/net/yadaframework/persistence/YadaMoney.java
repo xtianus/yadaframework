@@ -89,7 +89,7 @@ public class YadaMoney implements Comparable<YadaMoney> {
 	 */
 	public static YadaMoney fromDatabaseColumn(Long dbValue) {
 		YadaMoney result = new YadaMoney();
-		result.internalValue = dbValue;
+		result.internalValue = dbValue==null?0:dbValue;
 		return result;
 	}
 

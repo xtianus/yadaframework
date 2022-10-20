@@ -22,11 +22,9 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
 
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
-import net.yadaframework.web.YadaJsonView;
 
 /**
  *
@@ -35,25 +33,27 @@ import net.yadaframework.web.YadaJsonView;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaTicket implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	// For optimistic locking
 	@Version
 	protected long version;
-	
+
 	//@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
-	
+
 	@Column(length=80)
 	//@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected String title;
 
 	//@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected int priority;
-	
+
+	@Column(columnDefinition="TIMESTAMP NULL")
+	@Temporal(TemporalType.TIMESTAMP)
 	protected Date creationDate = new Date();
-	
+
 	@OneToOne(fetch = FetchType.EAGER)
 	//@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected YadaPersistentEnum<?> type; // Can't set the generics type <?> because enum subclasses are not possible in Java and I wouldn't be able to set an application-defined enum
@@ -61,74 +61,74 @@ public class YadaTicket implements Serializable {
 	@OneToOne(fetch = FetchType.EAGER)
 	//@JsonView(YadaJsonView.WithEagerAttributes.class)
 	protected YadaPersistentEnum<YadaTicketStatus> status;
-	
+
 	@Column
 	//@JsonView(YadaJsonView.WithLazyAttributes.class)
 	@OneToMany(mappedBy="yadaTicket", cascade=CascadeType.ALL, orphanRemoval=true)
 	protected List<YadaTicketMessage> messages;
-	
-	
+
+
 	@ManyToOne(optional = false)
 	@OneToOne
 	protected YadaUserProfile owner;
-	
+
 	@ManyToOne(optional = true)
 	@OneToOne
 	protected YadaUserProfile assigned;
-	
-	
-// TODO allegare uno o più file	
+
+
+// TODO allegare uno o più file
 //	/**
 //	 * The main image to show in lists etc.
 //	 */
 //	//@JsonView(YadaJsonView.WithEagerAttributes.class)
 //	@OneToOne(cascade=CascadeType.REMOVE, orphanRemoval=true)
 //	protected YadaAttachedFile attachment;
-	
+
 	/***********************************************************************/
 	/* Id for DataTables                                                   */
-	
+
 	@Transient
 	//@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@JsonProperty("DT_RowId")
 	public String getDT_RowId() {
 		return this.getClass().getSimpleName()+"#"+this.id; // YadaProduct#142
 	}
-	
+
 	@Transient
 	@JsonProperty
 	//@JsonView(YadaJsonView.WithEagerAttributes.class)
 	public String getOwnerName() {
 		return owner.getUserCredentials().getUsername();
 	}
-	
+
 	@Transient
 	@JsonProperty
 	//@JsonView(YadaJsonView.WithEagerAttributes.class)
 	public String getAssignedName() {
 		return assigned!=null?assigned.getUserCredentials().getUsername():null;
 	}
-	
+
 	@Transient
 	public void setType(YadaLocalEnum<?> type) {
 		this.type = type.toYadaPersistentEnum();
 	}
-	
+
 	@Transient
 	public boolean isOpen() {
 		return status!=null && status.getEnum().equals(YadaTicketStatus.OPEN);
 	}
-	
+
 	@Transient
 	public boolean isClosed() {
 		return status!=null && status.getEnum().equals(YadaTicketStatus.CLOSED);
 	}
-	
+
 	@Transient
 	public boolean isAnswered() {
 		return status!=null && status.getEnum().equals(YadaTicketStatus.ANSWERED);
 	}
-	
+
 	/* //new
 	@JsonProperty
 	//@JsonView(YadaJsonView.WithEagerAttributes.class)
@@ -137,11 +137,11 @@ public class YadaTicket implements Serializable {
 		if (messages.size()>0) {
 			subject = messages.get(0).getTitle();
 		}
-		
+
 		return subject;
 	}
 	*/
-		
+
 	/*
 	@JsonProperty("message")
 	//@JsonView(YadaJsonView.WithEagerAttributes.class)
@@ -153,10 +153,10 @@ public class YadaTicket implements Serializable {
 		return message;
 	}
 	*/
-	
+
 	/***********************************************************************/
 	/* Plain getter / setter                                               */
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -164,7 +164,7 @@ public class YadaTicket implements Serializable {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
+
 	/////////////////////////
 	public YadaPersistentEnum<?> getType() {
 		return type;
@@ -181,12 +181,12 @@ public class YadaTicket implements Serializable {
 	public void setStatus(YadaPersistentEnum<YadaTicketStatus> status) {
 		this.status = status;
 	}
-	
+
 	public void setStatus(YadaTicketStatus status) {
 		this.status = status.toYadaPersistentEnum();
 	}
-	
-	
+
+
 	/*
 	public String getSubject() {
 		return subject;
@@ -195,8 +195,8 @@ public class YadaTicket implements Serializable {
 	public void setSubject(String subject) {
 		this.subject = subject;
 	}
-	
-	
+
+
 	public String getMessage() {
 		return message;
 	}
@@ -262,5 +262,5 @@ public class YadaTicket implements Serializable {
 	}
 
 
-	
+
 }

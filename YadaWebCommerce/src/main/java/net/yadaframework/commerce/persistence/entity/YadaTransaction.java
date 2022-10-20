@@ -58,6 +58,8 @@ public class YadaTransaction {
 	@Column(length = 8)
 	protected String currencyCode;
 
+	@Column(columnDefinition="TIMESTAMP NULL")
+	@Temporal(TemporalType.TIMESTAMP)
 	protected Date timestamp;
 
 	@Column(length = 32)

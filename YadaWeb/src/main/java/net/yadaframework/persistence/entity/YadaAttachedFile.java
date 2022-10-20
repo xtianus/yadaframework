@@ -151,6 +151,7 @@ public class YadaAttachedFile implements CloneableDeep {
 	@MapKeyColumn(name="locale", length=32)
 	protected Map<Locale, String> description;
 
+	@Column(columnDefinition="TIMESTAMP NULL")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date uploadTimestamp;
 
@@ -321,7 +322,7 @@ public class YadaAttachedFile implements CloneableDeep {
 			Files.move(sourceFile, getAbsoluteFile(YadaAttachedFileType.DEFAULT));
 		}
 	}
-	
+
 	/**
 	 * Rename a file in the same folder. Do not use to move to a different folder.
 	 * @param newName the new exact name, with no path. Will overwrite an existing file with the same name.
@@ -351,7 +352,7 @@ public class YadaAttachedFile implements CloneableDeep {
 				filename=newName;
 				break;
 			default:
-				throw new YadaInvalidUsageException("Invalid type: " + type);		
+				throw new YadaInvalidUsageException("Invalid type: " + type);
 			}
 			return true;
 		} catch (IOException e) {

@@ -52,12 +52,15 @@ public class YadaOrder implements Serializable {
 	@OneToOne(fetch = FetchType.EAGER)
 	protected YadaPersistentEnum<YadaOrderStatus> orderStatus;
 
+	@Column(columnDefinition="TIMESTAMP NULL")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date creationTimestamp = new Date();
 
+	@Column(columnDefinition="TIMESTAMP NULL")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date stateChangeTimestamp;
 
+	@Column(columnDefinition="TIMESTAMP NULL")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date shippingTimestamp;
 

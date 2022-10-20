@@ -19,7 +19,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import javax.persistence.Version;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +38,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 public abstract class YadaJob implements Callable<Void> {
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
-	
+
 //	// For optimistic locking
 //	@Version
 //	protected long version;
@@ -50,20 +49,20 @@ public abstract class YadaJob implements Callable<Void> {
 
 	@OneToOne(fetch = FetchType.EAGER)
 	private YadaPersistentEnum<YadaJobState> jobStateObject = YadaJobState.PAUSED.toYadaPersistentEnum();
-	
+
 	protected boolean jobGroupPaused = false;
-	
+
 	@Column(columnDefinition="TIMESTAMP NULL")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date jobScheduledTime;
-	
+
 	@Column(columnDefinition="TIMESTAMP NULL")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date jobLastSuccessfulRun;
-	
+
 	@Column(length=128)
 	protected String jobName;
-	
+
 	/**
 	 * Jobs in the same jobGroup are subject to preemption
 	 */
@@ -76,7 +75,7 @@ public abstract class YadaJob implements Callable<Void> {
 	 * Higher priority jobs can preempt lower priority jobs of the same jobGroup
 	 */
 	protected int jobPriority = 10; // 0 = lowest priority, MAX_INTEGER = highest priority
-	
+
 	/**
 	 * Run the current job only while the jobMustBeActive instance is active.
 	 * If that instance is deleted, the current job is deactivated
@@ -99,10 +98,10 @@ public abstract class YadaJob implements Callable<Void> {
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name="YadaJob_BeCompleted")
 	protected List<YadaJob> jobsMustComplete;
-	
+
 	/**
 	 * Tell if a job should be started immediately again from the beginning after a system crash/shutdown while running.
-	 * When true, the job should take care of deleting or skipping any partial results, if needed. 
+	 * When true, the job should take care of deleting or skipping any partial results, if needed.
 	 * When false, the job will become DISABLED after a system crash
 	 * (true by default)
 	 */
@@ -112,34 +111,36 @@ public abstract class YadaJob implements Callable<Void> {
 	 * Should be incremented every time a job does not execute successfully and set to zero on successful execution.
 	 */
 	protected int errorStreakCount = 0;
-	
+
 	/**
 	 * The time at which the job was started - null if the job is not in the RUNNING state.
 	 */
+	@Column(columnDefinition="TIMESTAMP NULL")
+	@Temporal(TemporalType.TIMESTAMP)
 	protected Date jobStartTime = null;
-	
+
 	/**
 	 * True when the current invocation is on a job that was running when the server crashed and has the jobRecoverable flag true.
 	 * Implementations can choose what to do when recovering from a crash.
 	 */
 	@Transient
 	protected boolean recovered = false;
-	
+
 	/**
 	 * Handle returned by ListeningExecutorService.submit() - internal use only
 	 */
 	@Transient
 	public ListenableFuture<Void> yadaInternalJobHandle;
-	
+
 	/**
 	 * Needed for DataTables integration
 	 */
-	@Transient 
+	@Transient
 	@JsonProperty("DT_RowId")
 	public String getDT_RowId() {
 		return this.getClass().getSimpleName()+"#"+this.id; // YadaJob#142
 	}
-	
+
 	/**
 	 * Returns the plain enum of the job state
 	 * @return
@@ -148,7 +149,7 @@ public abstract class YadaJob implements Callable<Void> {
 	public YadaJobState getJobState() {
 		return jobStateObject.toEnum();
 	}
-	
+
 	/**
 	 * Set the persistent state of this job
 	 * @param jobState
@@ -157,7 +158,7 @@ public abstract class YadaJob implements Callable<Void> {
 	public void setJobState(YadaJobState jobState) {
 		this.jobStateObject = jobState.toYadaPersistentEnum();
 	}
-	
+
 	/**
 	 * Set the job state to active and return the previous state
 	 * @return the previous state
@@ -167,7 +168,7 @@ public abstract class YadaJob implements Callable<Void> {
 		this.jobStateObject = YadaJobState.ACTIVE.toYadaPersistentEnum();
 		return result;
 	}
-	
+
 	/**
 	 * Set the job state to paused and return the previous state
 	 * @return the previous state
@@ -177,7 +178,7 @@ public abstract class YadaJob implements Callable<Void> {
 		this.jobStateObject = YadaJobState.PAUSED.toYadaPersistentEnum();
 		return result;
 	}
-	
+
 	/**
 	 * Set the job state to disabled and return the previous state
 	 * @return
@@ -187,7 +188,7 @@ public abstract class YadaJob implements Callable<Void> {
 		this.jobStateObject = YadaJobState.DISABLED.toYadaPersistentEnum();
 		return result;
 	}
-	
+
 	/**
 	 * Set the job state to completed and return the previous state
 	 * @return
@@ -197,32 +198,32 @@ public abstract class YadaJob implements Callable<Void> {
 		this.jobStateObject = YadaJobState.COMPLETED.toYadaPersistentEnum();
 		return result;
 	}
-	
+
 	@Transient
 	public boolean isActive() {
 		return getJobState() == YadaJobState.ACTIVE;
 	}
-	
+
 	@Transient
 	public boolean isCompleted() {
 		return getJobState() == YadaJobState.COMPLETED;
 	}
-	
+
 	@Transient
 	public boolean isDisabled() {
 		return getJobState() == YadaJobState.DISABLED;
 	}
-	
+
 	@Transient
 	public boolean isPaused() {
 		return getJobState() == YadaJobState.PAUSED;
 	}
-	
+
 	@Transient
 	public boolean isRunning() {
 		return getJobState() == YadaJobState.RUNNING;
 	}
-	
+
 	/**
 	 * Increment the error streak count returning the new value
 	 * @return
@@ -252,7 +253,7 @@ public abstract class YadaJob implements Callable<Void> {
 	public int hashCode() {
 		return Objects.hash(id);
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -332,7 +333,7 @@ public abstract class YadaJob implements Callable<Void> {
 	public void setJobStateObject(YadaPersistentEnum<YadaJobState> jobStateObject) {
 		this.jobStateObject = jobStateObject;
 	}
-	
+
 	public boolean isJobRecoverable() {
 		return jobRecoverable;
 	}
@@ -409,5 +410,5 @@ public abstract class YadaJob implements Callable<Void> {
 		this.errorStreakCount = errorStreakCount;
 	}
 
-	
+
 }
