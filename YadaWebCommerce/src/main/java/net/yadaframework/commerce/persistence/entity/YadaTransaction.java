@@ -82,6 +82,8 @@ public class YadaTransaction {
 
 	protected Boolean suspended = false; // true when the transaction has not been performed yet
 
+	protected Boolean external = false; // true when the transaction is on external systems, like a bank transfer
+
 	///////////////////////////////////
 
 	/**
@@ -201,6 +203,14 @@ public class YadaTransaction {
 	}
 	public void setSuspended(Boolean suspended) {
 		this.suspended = suspended;
+	}
+
+	public Boolean getExternal() {
+		return external;
+	}
+
+	public void setExternal(Boolean external) {
+		this.external = external;
 	}
 
 

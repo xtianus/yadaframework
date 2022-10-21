@@ -11,7 +11,7 @@ It is used internally by the yada dialect processor to render the <yada:input> t
 */-->
 
 <body>
-	<!-- Can use any th attributes on the tag here because the original ones have been replaced with plain HTML tags already, so no conflicts can arise -->
+	<!--/* Can use any th attributes on the tag here because the original ones have been replaced with plain HTML tags already, so no conflicts can arise */-->
 	<th:block th:fragment="field" th:with="_numeric_=${yadaInput.type=='number'},
 		_file_=${yadaInput.type=='file'},
 		_password_=${yadaInput.type=='password'},

@@ -64,6 +64,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -137,6 +138,26 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+
+	/**
+	 * Joins a number of strings, adding a separator only when the strings are not empty.
+	 * In other words, null or empty strings are skipped without adding a separator.
+	 * @param separator
+	 * @param toJoin
+	 * @return
+	 */
+	public String joinIfNotEmpty(@NotNull String separator, String...toJoin) {
+		StringBuilder result = new StringBuilder();
+		for (String part : toJoin) {
+			if (StringUtils.isNotEmpty(part)) {
+				if (result.length()>0) {
+					result.append(separator);
+				}
+				result.append(part);
+			}
+		}
+		return result.toString();
+	}
 
 	/**
 	 * Given a date in the past, returns a string like "12 minutes ago", "2 hours ago", "today at 12:51", "yesterday at 5:32"...
@@ -221,7 +242,7 @@ public class YadaUtil {
 			list.add(element);
 		}
 	}
-	
+
 	/**
 	 * Create a new TreeSet that sorts values according to the order specified in the parameter.
 	 * Values that are missing from sortOrder are sorted alphabetically
@@ -250,7 +271,7 @@ public class YadaUtil {
     	});
 		return result;
 	}
-	
+
 	/**
 	 * Given a ISO date, a ISO time and a timezone, return the Date.
 	 * @param isoDateString like '2011-12-03'
@@ -2138,11 +2159,11 @@ public class YadaUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param source the instance to copy
 	 * @param classObject class to use to create the new clone when the source is inside a HibernateProxy
 	 * @param setFieldDirectly false to use getter/setter, true to access the Field directly
-	 * @param yadaAttachedFileCloneSet when not null, all files are copied to a temp folder. 
+	 * @param yadaAttachedFileCloneSet when not null, all files are copied to a temp folder.
 	 * 	      This is useful when the final path depends on the id
 	 * 		  of a cloned object so it can't be determined during cloning.
 	 * 		  The method yadaAttachedFileCloneSet.moveAll() will have to be called after the clone has been persisted.
@@ -2738,12 +2759,12 @@ public class YadaUtil {
 	 * @param zipFile the zip file that has to be created
 	 * @param sourceFiles the files to add to the zip
 	 * @param filenames optional names to give to each added file, in order
-	 * @param fixNames when true, any repeated name will be given an incremental number (regardless or renaming) 
+	 * @param fixNames when true, any repeated name will be given an incremental number (regardless or renaming)
 	 * 		  and if filenames is provided, the renamed file will be forced to have the same
 	 * 		  extension of the source file (existing extensions will be removed).
 	 * @return true if the zip file has been created
-	 * @throws IOException 
-	 * @throws YadaInvalidUsageException when the length of filenames is greater than zero but different from the length of sourceFiles 
+	 * @throws IOException
+	 * @throws YadaInvalidUsageException when the length of filenames is greater than zero but different from the length of sourceFiles
 	 */
 	public boolean createZipProcess(File zipFile, File[] sourceFiles, String[] filenames, boolean fixNames) throws IOException {
 		if (filenames!=null && filenames.length>0 && filenames.length!=sourceFiles.length) {
@@ -2757,7 +2778,7 @@ public class YadaUtil {
 		tempZip.delete();
 		File tempRename = java.nio.file.Files.createTempFile(folder.toPath(), "_tmp_", ".txt").toFile();
 		// String sourceNames = Arrays.stream(sourceFiles).map(File::getAbsolutePath).collect(Collectors.joining(" "));
-		
+
 		// Create the rename file and the source names list
 		Set<String> addedFilenames = new HashSet<>();
 		StringBuilder sourceNames = new StringBuilder();
@@ -2783,10 +2804,10 @@ public class YadaUtil {
 					renameWriter.append("@ "+sourceFilename+"\n");
 					renameWriter.append("@="+targetName+"\n");
 					renameWriter.append("@ (comment above this line)\n");
-				} // sourceFile!=null		
+				} // sourceFile!=null
 			}
 		} // try
-	    	
+
 		params.put("ZIPFILE", tempZip.getAbsolutePath());
 		params.put("ZIPNOTEFILE", tempRename.getAbsolutePath());
 		params.put("FILES", sourceNames.toString());

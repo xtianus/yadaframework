@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +29,7 @@ public class YadaTransactionDao {
      * double ledger system.
      * @return
      */
-    public YadaMoney sumAmount(YadaUserProfile accountOwner) {
+    public YadaMoney sumAmount(@Nullable YadaUserProfile accountOwner) {
     	Long sum = (Long) YadaSql.instance().selectFrom("select SUM(amount) from YadaTransaction")
     		.where(accountOwner!=null, "where accountOwner=:accountOwner")
     		.setParameter("accountOwner", accountOwner)
@@ -116,13 +117,13 @@ public class YadaTransactionDao {
      * @return
      */
     public List<YadaTransaction> find(YadaOrder yadaOrder) {
-		List<YadaTransaction> found = YadaSql.instance().selectFrom("from YadaTransaction")
-				.where("order = :yadaOrder").and()
-				.where("inverse != true").and()
-				.where("suspended != true").and()
-	            .setParameter("yadaOrder", yadaOrder)
-	            .query(em, YadaTransaction.class)
-	            .getResultList();
+    	List<YadaTransaction> found = YadaSql.instance().selectFrom("from YadaTransaction")
+			.where("order = :yadaOrder").and()
+			.where("inverse != true").and()
+			.where("suspended != true").and()
+            .setParameter("yadaOrder", yadaOrder)
+            .query(em, YadaTransaction.class)
+            .getResultList();
 		return found;
     }
 
@@ -145,7 +146,6 @@ public class YadaTransactionDao {
         return new YadaPageRows<YadaTransaction>(found, yadaPageRequest);
 	}
 
-    @Transactional(readOnly = false)
     public YadaTransaction find(Long id) {
     	if (id==null) {
     		return null;
