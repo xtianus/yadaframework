@@ -286,8 +286,9 @@ or the `<yada:validationError>` tag:
 <yada:input name="dogname" yada:validationError="${dogNameError}"
 ----
 
-When the value of `yada:validationError` is not blank, the error is shown below the input tag
-using Bootstrap 5 classes for styling.
+When the value of `yada:validationError` is not blank, its value is shown as an error below the input tag
+using Bootstrap 5 classes for styling. This is the quickest solution.
+When you need more control on the error appearance, you can use the `<yada:validationError>` tag instead:
 
 [source,HTML]
 ----
@@ -351,6 +352,27 @@ image::forms/counter.jpg[Text field with counter]
 <yada:input yada:inputCounterId="titleCounter" name="title" maxlength="70"></yada:input>
 ----
 
+The label to the left of the counter isn't added automatically: it can be set
+with a container div with appropriate CSS:
+
+[source,html]
+----
+<div class="labelAndCounter">
+	<label for="title">Title</label>
+	<yada:inputCounter id="titleCounter"></yada:inputCounter>
+</div>
+<yada:input yada:inputCounterId="titleCounter" name="title" maxlength="70"></yada:input>
+----
+ 
+[source,CSS]
+----
+.labelAndCounter {
+	display: flex;
+	justify-content: space-between;
+} 
+----
+
+
 [TIP]
 ====
 The tag is implemented in `YadaInputCounterTagProcessor.java` and `inputCounter.html`.
@@ -385,15 +407,8 @@ image::forms/textarea01.jpg[Textarea with counter]
 <3> The length must be set in order to use the counter
 
 The label to the left of the counter isn't added automatically: it can be set
-with a container div that has the following CSS:
+with a container div as shown above for the `<yada:input>` tag.
  
-[source,CSS]
-----
-.labelAndCounter {
-	display: flex;
-	justify-content: space-between;
-} 
-----
 
 [TIP]
 ====

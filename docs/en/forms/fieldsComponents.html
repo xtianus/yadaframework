@@ -546,8 +546,9 @@ or the <code>&lt;yada:validationError&gt;</code> tag:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>When the value of <code>yada:validationError</code> is not blank, the error is shown below the input tag
-using Bootstrap 5 classes for styling.</p>
+<p>When the value of <code>yada:validationError</code> is not blank, its value is shown as an error below the input tag
+using Bootstrap 5 classes for styling. This is the quickest solution.
+When you need more control on the error appearance, you can use the <code>&lt;yada:validationError&gt;</code> tag instead:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -622,6 +623,27 @@ the <code>yada:inputCounterId</code> attribute of the <code>&lt;yada:input&gt;</
 &lt;yada:input yada:inputCounterId="titleCounter" name="title" maxlength="70"&gt;&lt;/yada:input&gt;</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>The label to the left of the counter isn&#8217;t added automatically: it can be set
+with a container div with appropriate CSS:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div class="labelAndCounter"&gt;
+	&lt;label for="title"&gt;Title&lt;/label&gt;
+	&lt;yada:inputCounter id="titleCounter"&gt;&lt;/yada:inputCounter&gt;
+&lt;/div&gt;
+&lt;yada:input yada:inputCounterId="titleCounter" name="title" maxlength="70"&gt;&lt;/yada:input&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="CSS" class="language-CSS hljs">.labelAndCounter {
+	display: flex;
+	justify-content: space-between;
+}</code></pre>
+</div>
+</div>
 <div class="admonitionblock tip">
 <table>
 <tr>
@@ -685,15 +707,7 @@ work, so the <code>yada:text</code> attribute should be used instead for this sp
 </div>
 <div class="paragraph">
 <p>The label to the left of the counter isn&#8217;t added automatically: it can be set
-with a container div that has the following CSS:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="CSS" class="language-CSS hljs">.labelAndCounter {
-	display: flex;
-	justify-content: space-between;
-}</code></pre>
-</div>
+with a container div as shown above for the <code>&lt;yada:input&gt;</code> tag.</p>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -716,7 +730,7 @@ with a container div that has the following CSS:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2022-08-24 17:59:07 +0200
+Last updated 2022-10-24 12:49:33 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
