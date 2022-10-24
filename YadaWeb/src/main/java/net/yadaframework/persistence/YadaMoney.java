@@ -3,16 +3,18 @@ package net.yadaframework.persistence;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.text.ParsePosition;
 import java.util.Locale;
 
 import org.springframework.context.i18n.LocaleContextHolder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import net.yadaframework.components.YadaUtil;
+
 /**
  * An amount of money with a 1/10000 precision, stored as a long both in java and in the database.
  * The currency must be stored somewhere else.
+ * Immutable value object: math operations create new instances.
  * "The rule of thumb for storage of fixed point decimal values is to store at least one more decimal
  * place than you actually require to allow for rounding."
  * https://stackoverflow.com/q/224462/587641
@@ -24,11 +26,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * private YadaMoney balance;
  * </pre>
  */
-public class YadaMoney {
-	private long internalValue = 0; // Amount in 1/10000 of the currency
+public class YadaMoney implements Comparable<YadaMoney> {
+	// Having this "final" makes everything more complicated
+	private /*final*/ long internalValue; // Amount in 1/10000 of the currency
 	private static final int multiplier = 10000;
 
-	public YadaMoney() {
+	private YadaUtil yadaUtil = new YadaUtil();
+
+	YadaMoney() {
+		this.internalValue = 0;
 	}
 
 	/**
@@ -46,27 +52,71 @@ public class YadaMoney {
 	 * @throws ParseException if the amount contains invalid characters
 	 */
 	public YadaMoney(String amount, Locale locale) throws ParseException {
-		// From https://stackoverflow.com/a/16879667/587641
-		NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
-		ParsePosition parsePosition = new ParsePosition(0);
-		Number number = numberFormat.parse(amount, parsePosition);
-		if (parsePosition.getIndex() != amount.length()){
-			throw new ParseException("Invalid double input: '" + amount + "'", parsePosition.getIndex());
-		}
-		this.internalValue = (long)(number.doubleValue() * multiplier);
+		double value = yadaUtil.stringToDouble(amount, locale);
+		this.internalValue = (long)(value * multiplier);
 	}
 
+	/**
+	 *
+	 * @param integer amount
+	 */
 	public YadaMoney(long amount) {
 		this.internalValue = amount * multiplier;
 	}
 
+	/**
+	 *
+	 * @param doubleValue
+	 */
 	public YadaMoney(double doubleValue) {
 		this.internalValue = (long) (doubleValue * multiplier);
 	}
 
+//	/**
+//	 * Creates a YadaMoney by setting the internal value directly
+//	 * @param internalValue
+//	 */
+//	// Package accessibility because it is implementation-dependent.
+//	// Need to pass a BigDecimal so that it can be different from the public long version.
+//	YadaMoney(BigDecimal internalValue) {
+//		this.internalValue = internalValue.longValue();
+//	}
+
+	/**
+	 * Create a YadaMoney from the value stored in the database
+	 * @param dbValue
+	 * @return
+	 */
+	public static YadaMoney fromDatabaseColumn(Long dbValue) {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = dbValue==null?0:dbValue;
+		return result;
+	}
+
+	/**
+	 * Returns true if the current value is equal to the amount specified or higher
+	 * @param amount a double with an optional decimal part
+	 * @param locale used for the decimal separator
+	 * @return
+	 * @throws ParseException
+	 */
+	public boolean isAtLeast(String amount, Locale locale) throws ParseException {
+		double value = yadaUtil.stringToDouble(amount, locale);
+		return this.internalValue >= value * multiplier;
+	}
+
+	/**
+	 * Returns true if the current value is equal to the amount specified or higher
+	 * @param amount
+	 * @return
+	 */
+	public boolean isAtLeast(int amount) {
+		return this.internalValue >= amount * multiplier;
+	}
+
 	/**
 	 * Returns a new instance with the positive value of the current value
-	 * @return
+	 * @return a positive value
 	 */
 	public YadaMoney getAbsolute() {
 		YadaMoney result = new YadaMoney();
@@ -75,8 +125,30 @@ public class YadaMoney {
 	}
 
 	/**
-	 * Returns a new instance with the negative value of the current value
-	 * @return
+	 * Returns a new instance with the positive value of the current value.
+	 * Same as getAbsolute()
+	 * @return a positive value
+	 * @see YadaMoney#getAbsolute()
+	 */
+	public YadaMoney getPositive() {
+		return getAbsolute();
+	}
+
+	/**
+	 * Returns a new instance with the negative value of the current value.
+	 * If the current value was already negative, it stays negative.
+	 * @return a negative value
+	 */
+	public YadaMoney getNegative() {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = - Math.abs(this.internalValue);
+		return result;
+	}
+
+	/**
+	 * Returns a new instance with the negated (inverted) value of the current value.
+	 * It will be positive if the current value is negative, it will be negative if the current value is positive.
+	 * @return a positive value when this was negative, a negative value when this was positive
 	 */
 	public YadaMoney getNegated() {
 		YadaMoney result = new YadaMoney();
@@ -108,19 +180,46 @@ public class YadaMoney {
 		return this.internalValue>0;
 	}
 
-	public YadaMoney addCents(long cents) {
-		this.internalValue += (cents * multiplier / 100);
-		return this;
+	public YadaMoney getSum(long cents) {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = this.internalValue + (cents * multiplier / 100);
+		return result;
 	}
 
-	public YadaMoney add(YadaMoney toAdd) {
-		this.internalValue += toAdd.internalValue;
-		return this;
+	/**
+	 * Return a new YadaMoney where the value is the sum of the current value and the argument.
+	 * The original object is not changed.
+	 * @param toAdd amount to add
+	 * @return a new instance of YadaMoney
+	 */
+	public YadaMoney getSum(YadaMoney toAdd) {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = this.internalValue + toAdd.internalValue;
+		return result;
 	}
 
-	public YadaMoney subtract(YadaMoney toRemove) {
-		this.internalValue -= toRemove.internalValue;
-		return this;
+	/**
+	 * Return a new YadaMoney where the value is the subtraction of the current value and the argument.
+	 * The original object is not changed.
+	 * @param toRemove
+	 * @return a new instance of YadaMoney
+	 */
+	public YadaMoney getSubtract(YadaMoney toRemove) {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = this.internalValue - toRemove.internalValue;
+		return result;
+	}
+
+	/**
+	 * Return a new YadaMoney where the value is the division of the current value by the argument.
+	 * The original object is not changed.
+	 * @param factor
+	 * @return a new instance of YadaMoney
+	 */
+	public YadaMoney getDivide(double factor) {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = (long) (this.internalValue / factor);
+		return result;
 	}
 
 	/**
@@ -158,6 +257,13 @@ public class YadaMoney {
 	}
 
 	/**
+	 * Convert to a string with no decimal places (truncated)
+	 */
+	public String toIntString() {
+		return Long.toString(internalValue/multiplier);
+	}
+
+	/**
 	 * Convert to a string with 2 decimal places
 	 */
 	public String toString(Locale locale) {
@@ -179,16 +285,20 @@ public class YadaMoney {
 
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
-		YadaMoney yadaMoney = new YadaMoney();
-		yadaMoney.internalValue = this.internalValue;
+		YadaMoney yadaMoney = new YadaMoney(this.internalValue);
 		return yadaMoney;
 	}
 
+	/**
+	 * Package visibility to be used by {@link YadaMoneyConverter}
+	 * @return
+	 */
 	Long getInternalValue() {
 		return this.internalValue;
 	}
 
-	void setInternalValue(long internalValue) {
-		this.internalValue = internalValue;
+	@Override
+	public int compareTo(YadaMoney other) {
+		return (this.internalValue < other.internalValue) ? -1 : ((this.internalValue == other.internalValue) ? 0 : 1);
 	}
 }

@@ -41,6 +41,7 @@ public class YadaCart implements Serializable {
 	@ManyToOne
 	protected YadaUserProfile owner;
 
+	@Column(columnDefinition="TIMESTAMP NULL")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date creationTimestamp;
 

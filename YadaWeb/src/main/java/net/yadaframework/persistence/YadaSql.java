@@ -418,7 +418,9 @@ public class YadaSql implements CloneableDeep {
 	 * @param values a list of values (e.g. integers)
 	 */
 	public YadaSql whereIn(String attributeName, Collection values) {
+		lastSkipped=true;
 		if (CollectionUtils.isNotEmpty(values)) {
+			lastSkipped=false;
 			String valueListString = StringUtils.join(values, ',');
 			where(attributeName + " in ("+valueListString+")");
 		}

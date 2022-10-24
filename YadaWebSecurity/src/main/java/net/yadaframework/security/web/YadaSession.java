@@ -26,7 +26,7 @@ import net.yadaframework.web.YadaCropQueue;
 // NOTE: Use @Primary in subclasses
 public class YadaSession<T extends YadaUserProfile> {
 	private final Logger log = LoggerFactory.getLogger(getClass());
-	@Autowired private YadaConfiguration config;
+	@Autowired protected YadaConfiguration config;
 	@Autowired protected YadaSecurityUtil yadaSecurityUtil;
 	// Attenzione: questo sarebbe da mettere transient perchè tomcat tenta di persistere la session ma non ce la fa. Pero' se lo si mette transient,
 	// quando la session viene ricaricata questo non viene valorizzato. Come si fa a inizializzare questo oggetto quando tomcat lo ricarica dallo storage?
@@ -154,7 +154,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	}
 
 	/**
-	 * Returns the currently logged-in user profile
+	 * Returns the currently logged-in user profile or null
 	 * @return
 	 */
 	public T getCurrentUserProfile() {

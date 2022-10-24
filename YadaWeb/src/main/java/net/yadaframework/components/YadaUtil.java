@@ -1,10 +1,12 @@
 package net.yadaframework.components;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,16 +20,20 @@ import java.math.BigInteger;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -58,6 +64,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -104,8 +111,8 @@ public class YadaUtil {
 
     static private YadaFileManager yadaFileManager;
 
-    static ApplicationContext applicationContext; 	// To access the ApplicationContext from anywhere
-    static public MessageSource messageSource; 		// To access the MessageSource from anywhere
+    static public ApplicationContext applicationContext; 	// To access the ApplicationContext from anywhere
+    static public MessageSource messageSource; 		// To access the MessageSource from anywhere, injected by YadaAppConfig
 
     public final static long MILLIS_IN_MINUTE = 60*1000;
 	public final static long MILLIS_IN_HOUR = 60*MILLIS_IN_MINUTE;
@@ -131,6 +138,139 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+
+	/**
+	 * Joins a number of strings, adding a separator only when the strings are not empty.
+	 * In other words, null or empty strings are skipped without adding a separator.
+	 * @param separator
+	 * @param toJoin
+	 * @return
+	 */
+	public String joinIfNotEmpty(@NotNull String separator, String...toJoin) {
+		StringBuilder result = new StringBuilder();
+		for (String part : toJoin) {
+			if (StringUtils.isNotEmpty(part)) {
+				if (result.length()>0) {
+					result.append(separator);
+				}
+				result.append(part);
+			}
+		}
+		return result.toString();
+	}
+
+	/**
+	 * Given a date in the past, returns a string like "12 minutes ago", "2 hours ago", "today at 12:51", "yesterday at 5:32"...
+	 * For dates before yesterday, the full RFC_1123 format is used, as 'Tue, 3 Jun 2008 11:05:30 GMT'.
+	 * No "x days ago" format is currently provided.
+	 * @param timestamp
+	 * @param locale
+	 * @param maxHours the max value of x for using the "x hours ago" format after which the "today at hh:mm" format is used
+	 * 			The default is 3 when null. There is no maximum value, in order to have a "76 hours ago" result if needed.
+	 * @return
+	 */
+	public String getTimestampAsRelative(ZonedDateTime timestamp, Locale locale, Integer maxHours) {
+		maxHours = maxHours==null?3:maxHours;
+		final long MILLIS_PER_SECOND = 1000;
+		final long MILLIS_PER_MINUTE = MILLIS_PER_SECOND*60;
+		final long MILLIS_PER_HOUR = MILLIS_PER_MINUTE*60;
+		// final long MILLIS_PER_DAY = MILLIS_PER_HOUR*24;
+		long elapsedMillis = System.currentTimeMillis()-timestamp.toInstant().toEpochMilli();
+		//
+		// Small intervals up to maxHours
+		if (elapsedMillis >= 0 && elapsedMillis<MILLIS_PER_SECOND) {
+			return messageSource.getMessage("yada.timestamp.now", null, locale); // "now"
+		}
+		if (elapsedMillis >= 0 && elapsedMillis<MILLIS_PER_MINUTE) {
+			Long value = elapsedMillis / MILLIS_PER_SECOND;
+			return messageSource.getMessage("yada.timestamp.secondsago", new Object[] {value}, locale); // "3 seconds ago"
+		}
+		if (elapsedMillis >= 0 && elapsedMillis<MILLIS_PER_HOUR) {
+			Long value = elapsedMillis / MILLIS_PER_MINUTE;
+			return messageSource.getMessage("yada.timestamp.minutesago", new Object[] {value}, locale); // "3 minutes ago"
+		}
+		if (elapsedMillis >= 0 && elapsedMillis<(maxHours+1)*MILLIS_PER_HOUR) {
+			Long value = elapsedMillis / MILLIS_PER_HOUR;
+			return messageSource.getMessage("yada.timestamp.hoursago", new Object[] {value}, locale); // "3 hours ago"
+		}
+		//
+		// Medium intervals from maxHours up to yesterday
+		ZonedDateTime zonedNow = ZonedDateTime.now(timestamp.getZone());
+		long elapsedDays = daysBetween(timestamp, zonedNow);
+		if (elapsedDays>=0 && elapsedDays<2) {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("H:m");
+			String hm = timestamp.format(formatter);
+			if (elapsedDays==0) {
+				// Today
+				return messageSource.getMessage("yada.timestamp.todayAt", new Object[] {hm}, locale); // "today at 12:43"
+			} else if (elapsedDays==1) {
+				// Yesterday
+				return messageSource.getMessage("yada.timestamp.yesterdayAt", new Object[] {hm}, locale); // "yesterday at 12:43"
+			}
+		}
+		//
+		// Long intervals: just show the full date and time
+		return timestamp.format(DateTimeFormatter.RFC_1123_DATE_TIME);
+	}
+
+	/**
+	 * Parse a string as a double, using the correct decimal separator (if any).
+	 * @param value a number that may have a decimal part
+	 * @param locale
+	 * @return a double
+	 * @throws ParseException if the string is not a valid double in the locale specified
+	 */
+	public double stringToDouble(String value, Locale locale) throws ParseException {
+		// From https://stackoverflow.com/a/16879667/587641
+		NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
+		ParsePosition parsePosition = new ParsePosition(0);
+		Number number = numberFormat.parse(value, parsePosition);
+		if (parsePosition.getIndex() != value.length()){
+			throw new ParseException("Invalid double input: '" + value + "'", parsePosition.getIndex());
+		}
+		return number.doubleValue();
+	}
+
+	/**
+	 * Add an element to the list only if the element is not null
+	 * @param <T>
+	 * @param list
+	 * @param element
+	 */
+	public <T> void addIfNotNull(List<T> list, T element) {
+		if (element!=null) {
+			list.add(element);
+		}
+	}
+
+	/**
+	 * Create a new TreeSet that sorts values according to the order specified in the parameter.
+	 * Values that are missing from sortOrder are sorted alphabetically
+	 * @param sortOrder
+	 * @return an empty sorted set that can receive a subset of the values in the sortOrder and keep them sorted the same way
+	 */
+	public Set<String> getEmptySortedSet(List<String> sortOrder) {
+    	Map<String, Integer> order = new HashMap<String, Integer>(); // From value to position
+    	for (int j = 0; j < sortOrder.size(); j++) {
+    		order.put(sortOrder.get(j), j);
+		}
+    	Set<String> result = new TreeSet<>(new Comparator<String>() {
+			@Override
+			public int compare(String left, String right) {
+				try {
+					return order.get(left).compareTo(order.get(right));
+				} catch (Exception e) {
+					// In case of error, fallback to alphabetical
+					log.error("Can't compare {} with {} (ignored)", left, right);
+					if (left!=null) {
+						return left.compareTo(right);
+					}
+					return right!=null?1:0;
+				}
+			}
+    	});
+		return result;
+	}
 
 	/**
 	 * Given a ISO date, a ISO time and a timezone, return the Date.
@@ -510,7 +650,10 @@ public class YadaUtil {
 	 * Creates a folder in the system temp folder. The name is prefixed with "yada".
 	 * @return
 	 * @throws IOException
+	 * @see {@link Files#createTempDirectory(String, java.nio.file.attribute.FileAttribute...)}
 	 */
+	@Deprecated // This should not be used because the operation is not atomic
+	// Use Files.createTempDirectory() instead
 	public File makeTempFolder() throws IOException {
 		File file = File.createTempFile("yada", "");
 		file.delete();
@@ -642,7 +785,7 @@ public class YadaUtil {
 	 * @param baseName filename to add, without extension
 	 * @param extensionNoDot filename extension without dot, can be empty or null if the extension is not needed
 	 * @param counterSeparator string to separate the filename and the counter, can be empty or null
-	 * @param usedNames filenames used so far, must start empty and will be modified
+	 * @param usedNames filenames used so far, can start empty but never null, and will be modified by adding the new name
 	 * @return the original filename with extension, or a new version with a counter added
 	 * @throws IOException
 	 * @see {@link #findAvailableName(File, String, String, String)}
@@ -916,13 +1059,13 @@ public class YadaUtil {
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
 	 * It must be called in a transaction.
 	 * @param fetchedEntity object fetched from database that may contain localized strings
-	 * @param targetClass type of fetchedEntities elements
+	 * @param targetClass type of fetchedEntity element
 	 */
-	public static <targetClass> void prefetchLocalizedStrings(targetClass fetchedEntity, Class<?> targetClass) {
+	public static <targetClass> void prefetchLocalizedStrings(targetClass fetchedEntity, Class<?> targetClass, String...attributes) {
 		if (fetchedEntity!=null) {
 			List<targetClass> list = new ArrayList<>();
 			list.add(fetchedEntity);
-			prefetchLocalizedStringList(list, targetClass);
+			prefetchLocalizedStringList(list, targetClass, attributes);
 		}
 	}
 
@@ -992,7 +1135,7 @@ public class YadaUtil {
 	 * @param entityClass type of fetchedEntities elements
 	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
 	 */
-	public static <entityClass> void prefetchLocalizedStringList(List<entityClass> entities, Class<?> entityClass, String...attributes) {
+	public static <entityClass> void prefetchLocalizedStringList(Collection<entityClass> entities, Class<?> entityClass, String...attributes) {
 		List<String> attributeNames = Arrays.asList(attributes);
 		if (entities==null || entities.isEmpty()) {
 			return;
@@ -1055,10 +1198,16 @@ public class YadaUtil {
 	 * @return the localized value, or the empty string if no value has been defined and no default locale has been configured
 	 */
 	public static String getLocalValue(Map<Locale, String> LocalizedValueMap, Locale locale) {
+		String result=null;
+		try {
 		if (locale==null) {
 			locale = LocaleContextHolder.getLocale();
 		}
-		String result = LocalizedValueMap.get(locale);
+			result = LocalizedValueMap.get(locale);
+		} catch (Exception e) {
+			log.debug("Exception while getting localized value from {} with locale={} (ignored): {}", LocalizedValueMap, locale, e.getMessage());
+			// Keep going
+		}
 		if (StringUtils.isEmpty(result) && defaultLocale!=null && !defaultLocale.equals(locale)) {
 			result = LocalizedValueMap.get(defaultLocale);
 		}
@@ -1070,12 +1219,15 @@ public class YadaUtil {
 	 * @param file the file. It could also be an empty foder. Folders containing files are not deleted.
 	 */
 	public boolean deleteFileSilently(Path file) {
+		if (file!=null) {
 		try {
 			return Files.deleteIfExists(file);
 		} catch (Throwable e) {
+				log.debug("File {} not deleted: " + e.getMessage(), file);
+			}
+		}
 			return false;
 		}
-	}
 
 	/**
 	 * Close a closeable ignoring exceptions and null.
@@ -1158,6 +1310,7 @@ public class YadaUtil {
 	 * @return the Field found or null
 	 * @throws YadaInvalidValueException if attributeName is a path (with a dot in it)
 	 */
+	// Probably can be replaced by PropertyUtils.getSimpleProperty() from Commons BeanUtils
 	public Field getFieldNoTraversing(Class rootClass, String attributeName) {
 		if (attributeName.indexOf('.')>-1) {
 			throw new YadaInvalidValueException("Attribute name expected, attribute path found: {}", attributeName);
@@ -1344,7 +1497,7 @@ public class YadaUtil {
 			try {
 				return file.delete();
 			} catch (Exception e) {
-				log.debug("File {} not deleted: " + e.getMessage(), file);;
+				log.debug("File {} not deleted: " + e.getMessage(), file);
 			}
 		}
 		return false;
@@ -1368,6 +1521,7 @@ public class YadaUtil {
 
 	/**
 	 * Removes files from a folder starting with the prefix (can be an empty string)
+	 * The folder itself is not removed.
 	 * @param folder
 	 * @param prefix the initial part of the filename or "" for any file
 	 * return the number of deleted files
@@ -1386,7 +1540,8 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Removes files from a folder starting with the prefix (can be an empty string) and older than the given date
+	 * Removes files from a folder starting with the prefix (can be an empty string) and older than the given date.
+	 * The folder itself is not removed.
 	 * @param folder
 	 * @param prefix
 	 * @param olderThan
@@ -1928,7 +2083,8 @@ public class YadaUtil {
 	 * All objects are shallow copied unless they implement CloneableDeep, in which case they are copied with this same method.
 	 * Map keys are never cloned.
 	 *
-	 * NOTE: the object doesn't have to be an @Entity
+	 * NOTE: the object doesn't have to be an @Entity, despite the method name
+	 * NOTE: collection fields of an @Entity must be initialized to an empty instance in the class, or they won't be cloned
 	 * NOTE: any @Entity in the hierarchy is cloned without id and should be explicitly persisted after cloning unless there's PERSIST propagation.
 	 * NOTE: this method works quite well and should be trusted to copy even complex hierarchies.
 	 * NOTE: a transaction should be active to copy entities with lazy associations
@@ -1990,7 +2146,7 @@ public class YadaUtil {
 	 * - da verificare se gli attributi dei parent sono duplicati pure loro
 	 *
 	 * @param source
-	 * @param classObject classe da usare per creare il clone quando il source è nascosto dentro a un HibernateProxy
+	 * @param classObject class to use to create the new clone when the source is inside a HibernateProxy
 	 * @return
 	 */
 	public static Object copyEntity(CloneableFiltered source, Class classObject) {
@@ -1999,10 +2155,26 @@ public class YadaUtil {
 
 	public static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly) {
 		Map<CloneableFiltered, Object> alreadyCopiedMap = new HashMap<>();
-		return copyEntity(source, classObject, setFieldDirectly, alreadyCopiedMap);
+		return copyEntity(source, classObject, setFieldDirectly, alreadyCopiedMap, null);
 	}
 
-	private static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap) {
+	/**
+	 *
+	 * @param source the instance to copy
+	 * @param classObject class to use to create the new clone when the source is inside a HibernateProxy
+	 * @param setFieldDirectly false to use getter/setter, true to access the Field directly
+	 * @param yadaAttachedFileCloneSet when not null, all files are copied to a temp folder.
+	 * 	      This is useful when the final path depends on the id
+	 * 		  of a cloned object so it can't be determined during cloning.
+	 * 		  The method yadaAttachedFileCloneSet.moveAll() will have to be called after the clone has been persisted.
+	 * @return
+	 */
+	public static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly, YadaAttachedFileCloneSet yadaAttachedFileCloneSet) {
+		Map<CloneableFiltered, Object> alreadyCopiedMap = new HashMap<>();
+		return copyEntity(source, classObject, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet);
+	}
+
+	private static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap, YadaAttachedFileCloneSet yadaAttachedFileCloneSet) {
 		if (source==null) {
 			return null;
 		}
@@ -2018,7 +2190,7 @@ public class YadaUtil {
 		try {
 			// The constructor may be private, so don't just use newInstance()
 	        // Object target = sourceClass.newInstance();
-			Constructor constructor = sourceClass.getDeclaredConstructor(new Class[0]);
+			Constructor<?> constructor = sourceClass.getDeclaredConstructor(new Class[0]);
 	        constructor.setAccessible(true);
 			Object target = constructor.newInstance(new Object[0]);
 			if(target instanceof org.hibernate.proxy.HibernateProxy && classObject!=null) {
@@ -2026,11 +2198,11 @@ public class YadaUtil {
 			}
 
 			alreadyCopiedMap.put(source, target); // Needed to avoid infinite recursion if a value holds a reference to the parent
-			copyFields(source, sourceClass, target, setFieldDirectly, alreadyCopiedMap);
+			copyFields(source, sourceClass, target, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet);
 			Class<?> superclass = sourceClass.getSuperclass();
 			while (superclass!=null && superclass!=Object.class) {
 				sourceClass = superclass;
-				copyFields(source, sourceClass, target, setFieldDirectly, alreadyCopiedMap);
+				copyFields(source, sourceClass, target, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet);
 				superclass = sourceClass.getSuperclass();
 			}
 			return target;
@@ -2087,7 +2259,7 @@ public class YadaUtil {
 //		copyFields(source, sourceClass, target, false);
 //	}
 
-	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap) {
+	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap, YadaAttachedFileCloneSet yadaAttachedFileCloneSet) {
 		log.debug("Copio oggetto {} di tipo {}", source, sourceClass);
 		Field[] fields = sourceClass.getDeclaredFields();
 		Field[] excludedFields = source.getExcludedFields();
@@ -2180,10 +2352,10 @@ public class YadaUtil {
 							// per questi faccio la copia deep.
 							for (Object value : sourceCollection) {
 								if (isType(value.getClass(), CloneableDeep.class)) {
-									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap); // deep
+									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
 									// For YadaAttachedFile objects, duplicate the file on disk too
 									if (isType(value.getClass(), YadaAttachedFile.class)) {
-										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
 									}
 									targetCollection.add(clonedValue);
 								} else {
@@ -2205,10 +2377,10 @@ public class YadaUtil {
 							for (Object key : sourceMap.keySet()) {
 								Object value = sourceMap.get(key);
 								if (isType(value.getClass(), CloneableDeep.class)) {
-									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap); // deep
+									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
 									// For YadaAttachedFile objects, duplicate the file on disk too
 									if (isType(value.getClass(), YadaAttachedFile.class)) {
-										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
 									}
 									targetMap.put(key, clonedValue);
 								} else {
@@ -2221,10 +2393,10 @@ public class YadaUtil {
 							if (isType(fieldType, CloneableDeep.class)) {
 								// Siccome implementa CloneableDeep, lo duplico deep
 								CloneableFiltered fieldValue = setFieldDirectly ? (CloneableFiltered) field.get(source) : (CloneableFiltered) getter.invoke(source);
-								Object clonedValue = YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap); // deep but detached
+								Object clonedValue = YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep but detached
 								// For YadaAttachedFile objects, duplicate the file on disk too
 								if (isType(fieldType, YadaAttachedFile.class)) {
-									clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue);
+									clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
 								}
 								copyValue(setFieldDirectly, field, getter, setter, source, target, clonedValue);
 //								setter.invoke(target, YadaUtil.copyEntity(fieldValue)); // deep but detached
@@ -2384,6 +2556,21 @@ public class YadaUtil {
 	}
 
 	/**
+	 * Returns the days between two dates.
+	 * It doesn't take into consideration the time component, so the difference between some time yesterday and any other time today
+	 * will always be 1
+	 * @param olderDate
+	 * @param earlierDate
+	 * @return
+	 * @see ZonedDateTime#until(java.time.temporal.Temporal, java.time.temporal.TemporalUnit)
+	 */
+	public long daysBetween(ZonedDateTime olderDate, ZonedDateTime earlierDate) {
+		ZonedDateTime olderDateBack = olderDate.truncatedTo(ChronoUnit.DAYS);
+		ZonedDateTime earlierDateBack = earlierDate.truncatedTo(ChronoUnit.DAYS);
+		return ChronoUnit.DAYS.between(olderDateBack, earlierDateBack);
+	}
+
+	/**
 	 * Counts the days interval between two dates. Time component is ignored.
 	 * @param date1
 	 * @param date2
@@ -2409,13 +2596,25 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Returns the minutes between two dates
+	 * Returns the minutes between two dates.
+	 * It is negative when the first argument is earlier than the second.
 	 * @param recentDate
 	 * @param oldDate
 	 * @return
 	 */
 	public static long minutesDifference(Date recentDate, Date oldDate) {
 		return (recentDate.getTime()-oldDate.getTime()) / MILLIS_IN_MINUTE;
+	}
+
+	/**
+	 * Returns the absolute value of the minutes between two dates.
+	 * It will always be positive.
+	 * @param firstDate
+	 * @param secondDate
+	 * @return
+	 */
+	public static long minutesDifferenceAbs(Date firstDate, Date secondDate) {
+		return Math.abs(firstDate.getTime()-secondDate.getTime()) / MILLIS_IN_MINUTE;
 	}
 
 	/**
@@ -2552,6 +2751,85 @@ public class YadaUtil {
 		int bDay = bCalendar.get(Calendar.DAY_OF_YEAR);
 		int bYear = bCalendar.get(Calendar.YEAR);
 		return aDay==bDay && aYear == bYear;
+	}
+
+	/**
+	 * Create a zip of a set of files using an external process. The process must be configured as "config/shell/zipWithRename"
+	 * and should use zip and zipnote (for renaming). See the /YadaWeb/scripts folder for an example.
+	 * @param zipFile the zip file that has to be created
+	 * @param sourceFiles the files to add to the zip
+	 * @param filenames optional names to give to each added file, in order
+	 * @param fixNames when true, any repeated name will be given an incremental number (regardless or renaming)
+	 * 		  and if filenames is provided, the renamed file will be forced to have the same
+	 * 		  extension of the source file (existing extensions will be removed).
+	 * @return true if the zip file has been created
+	 * @throws IOException
+	 * @throws YadaInvalidUsageException when the length of filenames is greater than zero but different from the length of sourceFiles
+	 */
+	public boolean createZipProcess(File zipFile, File[] sourceFiles, String[] filenames, boolean fixNames) throws IOException {
+		if (filenames!=null && filenames.length>0 && filenames.length!=sourceFiles.length) {
+			throw new YadaInvalidUsageException("When provided, there must be as many filenames as source files");
+		}
+		Map<String, String> params = new HashMap<>();
+		String shellCommandKey = "config/shell/zipWithRename";
+		File folder = zipFile.getParentFile(); // We create all temporary files in the same folder of the target zip
+		File tempZip = java.nio.file.Files.createTempFile(folder.toPath(), "_tmp_", ".zip").toFile();
+		// The zip file must not exist yet, so delete it
+		tempZip.delete();
+		File tempRename = java.nio.file.Files.createTempFile(folder.toPath(), "_tmp_", ".txt").toFile();
+		// String sourceNames = Arrays.stream(sourceFiles).map(File::getAbsolutePath).collect(Collectors.joining(" "));
+
+		// Create the rename file and the source names list
+		Set<String> addedFilenames = new HashSet<>();
+		StringBuilder sourceNames = new StringBuilder();
+		try (BufferedWriter renameWriter = new BufferedWriter(new FileWriter(tempRename))) {
+			for (int i=0; i<sourceFiles.length; i++) {
+				File sourceFile = sourceFiles[i];
+				if (sourceFile!=null && sourceFile.canRead()) {
+					sourceNames.append(sourceFile.getAbsolutePath()).append(" ");
+					String sourceFilename = sourceFile.getName();
+					String sourceExtensionNoDot = getFileExtension(sourceFilename); // jpg
+					// When there is no filenames and no fixNames, the target file name is the same as the source file name
+					String targetName = sourceFilename;
+					if (filenames!=null) {
+						// When new names are provided, the target file name is the provided name
+						targetName = filenames[i];
+					}
+					if (fixNames) {
+						// Make names unique and use source extension as target
+						String targetNameNoExtension = splitFileNameAndExtension(targetName)[0];
+						targetName = findAvailableFilename(targetNameNoExtension, sourceExtensionNoDot, "_", addedFilenames);
+					}
+					// zipnote format
+					renameWriter.append("@ "+sourceFilename+"\n");
+					renameWriter.append("@="+targetName+"\n");
+					renameWriter.append("@ (comment above this line)\n");
+				} // sourceFile!=null
+			}
+		} // try
+
+		params.put("ZIPFILE", tempZip.getAbsolutePath());
+		params.put("ZIPNOTEFILE", tempRename.getAbsolutePath());
+		params.put("FILES", sourceNames.toString());
+		try {
+			int returnCode = shellExec(shellCommandKey, params, null);
+			if (returnCode!=0) {
+				log.error("Failed to create zip file {} from {}: return code is {}", tempZip, sourceFiles, returnCode);
+				tempZip.delete();
+				tempRename.delete();
+				return false;
+			}
+		} catch (Exception e) {
+			log.error("Failed to create zip file {} from {}", tempZip, sourceFiles);
+			tempZip.delete();
+			tempRename.delete();
+			throw e;
+		}
+		// Move the zip back into the intended place
+		Files.move(tempZip.toPath(), zipFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		// Delete the zipnote file
+		tempRename.delete();
+		return true;
 	}
 
 	/**
@@ -2703,6 +2981,7 @@ public class YadaUtil {
 		return calendar.getTime();
 	}
 
+	@Deprecated // To be removed from Yada Framework
 	public static String normalizzaCellulareItaliano(String cellulare) {
 		if (cellulare==null || cellulare.trim().length()==0) {
 			return cellulare;
@@ -2716,6 +2995,7 @@ public class YadaUtil {
 		return "+39"+cellulare; // Metto prefisso
 	}
 
+	@Deprecated // To be removed from Yada Framework
 	public static boolean validaCellulare(String cellulare) {
 		try {
 			if (cellulare.startsWith("+")) {

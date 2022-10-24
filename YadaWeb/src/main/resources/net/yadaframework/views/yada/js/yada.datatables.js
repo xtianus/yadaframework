@@ -20,6 +20,8 @@
 	 * 	- url that returns the edit form e.g. [[@{/gestione/ajaxRenameTagForm}]]
 	 * 	- title to show in the tooltip
 	 *  - idName the name of the id request parameter (optional - defaults to "id")
+	 *  - noLoader true to hide the ajax loader
+	 *  - noAjax true to make a normal request and load a new page
 	 * @param deleteDef object containing url and text (can be null):
 	 * 	- url to delete the row e.g. [[@{/gestione/ajaxDeleteTag}]]
 	 * 	- title to show in the tooltip
@@ -296,6 +298,11 @@
 				e.preventDefault();
 				var id = yada.getHashValue($(this).attr('href'));
 				var idName = editDef.idName || "id";
+				if (editDef.noAjax==true) {
+					const targetUrl = yada.addOrUpdateUrlParameter(editDef.url, idName, id);
+					window.location.href = targetUrl;
+					return;
+				}
 				var requestData = {};
 				var noLoader = editDef.noLoader || false;
 				requestData[idName] = id;

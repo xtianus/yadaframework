@@ -21,8 +21,7 @@ public class YadaMoneyConverter implements AttributeConverter<YadaMoney, Long> {
 		if (dbData==null) {
 			dbData = 0l;
 		}
-		YadaMoney result = new YadaMoney();
-		result.setInternalValue(dbData);
+		YadaMoney result = YadaMoney.fromDatabaseColumn(dbData);
 		return result;
 	}
 

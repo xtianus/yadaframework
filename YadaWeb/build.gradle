@@ -1,7 +1,7 @@
 buildscript {
 	repositories {
-		mavenLocal()
 		mavenCentral()
+		mavenLocal()
 	}
 	dependencies {
 		// Needed for test schema creation

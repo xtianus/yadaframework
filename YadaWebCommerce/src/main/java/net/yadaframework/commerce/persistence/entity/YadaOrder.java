@@ -52,12 +52,15 @@ public class YadaOrder implements Serializable {
 	@OneToOne(fetch = FetchType.EAGER)
 	protected YadaPersistentEnum<YadaOrderStatus> orderStatus;
 
+	@Column(columnDefinition="TIMESTAMP NULL")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date creationTimestamp = new Date();
 
+	@Column(columnDefinition="TIMESTAMP NULL")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date stateChangeTimestamp;
 
+	@Column(columnDefinition="TIMESTAMP NULL")
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date shippingTimestamp;
 
@@ -89,7 +92,7 @@ public class YadaOrder implements Serializable {
 	 * @return a positive value if all transactions sum to a negative value (payment has been made)
 	 */
 	public YadaMoney getTotalPayment(YadaTransactionDao yadaTransactionDao) {
-		YadaMoney total = new YadaMoney();
+		YadaMoney total = new YadaMoney(0);
 		String currencyCode = null;
 		List<YadaTransaction> yadaTransactions = yadaTransactionDao.find(this);
 		for (YadaTransaction yadaTransaction : yadaTransactions) {
@@ -98,7 +101,7 @@ public class YadaOrder implements Serializable {
 				throw new YadaCurrencyMismatchException("Currency {} differs from {}", currencyCode, newCurrency);
 			}
 			currencyCode = newCurrency;
-			total.add(yadaTransaction.getAmount());
+			total = total.getSum(yadaTransaction.getAmount());
 		}
 		return total.getNegated();
 	}

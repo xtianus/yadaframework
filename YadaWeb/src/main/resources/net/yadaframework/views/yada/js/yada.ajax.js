@@ -25,6 +25,8 @@
 	
 	const yadaAjaxResponseHtmlRoot = "<div class='yadaAjaxResponseHtml'>";
 	
+	yada.markerAjaxModal = markerAjaxModal; // For use in other scripts
+	
 	/**
 	 * Init yada ajax handlers on the specified element
 	 * @param $element the element, or null for the entire body
@@ -584,6 +586,7 @@
 			deleteOnSuccess($element);
 			responseHtml = updateOnSuccess($element, responseHtml); // This removes the added root <div>
 			// No: Put the responseHtml back into a div if it is not an array and not the original yadaAjaxResponseHtml
+			//     Can't be done because the html is removed from the page on append()
 			// if (!(responseHtml instanceof Array) && responseHtml.attr("class")!="yadaAjaxResponseHtml") {				
 			// 	responseHtml = $(yadaAjaxResponseHtmlRoot).append(responseHtml);
 			// }
@@ -647,7 +650,8 @@
 		if (value.length>0) {
 			const name = $element.attr("name") || "value"; // Parameter name fallback to "value" by default
 			const toAdd = {};
-			toAdd[name] = value;
+			toAdd.name = name;
+			toAdd.value = value;
 			data = mergeData(data, toAdd);
 		}
 		if (!multipart) {
@@ -690,29 +694,16 @@
 		var deleteSelector = $element.attr("data-yadaDeleteOnSuccess");
 		if (deleteSelector != null) {
 			var selectors = deleteSelector.split(',');
+			// If we delete the $element first, then any following selected elements may not match when relative to the $element.
+			// We therefore first get all selected element then delete them.
+			const toDelete = [];
+			
 			for (var count=0; count<selectors.length; count++) {
 				var selector = selectors[count];
-				yada.extendedSelect($element, selector).remove();
-//				if (selector=="") {
-//					$element.remove();
-//				} else {
-//					var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
-//					var fromSiblings = yada.startsWith(selector, siblingSelector); // yadaSiblings:
-//					var fromClosestFind = yada.startsWith(selector, closestFindSelector); // yadaClosestFind:
-//					if (fromParents==false && fromSiblings==false && fromClosestFind==false) {
-//						$(selector).remove();
-//					} else if (fromParents) {
-//						selector = selector.replace(parentSelector, "").trim();
-//						$element.parent().closest(selector).remove();
-//					} else if (fromSiblings) {
-//						selector = selector.replace(siblingSelector, "").trim();
-//						$element.siblings(selector).remove();
-//					} else if (fromClosestFind) {
-//						selector = selector.replace(closestFindSelector, "").trim();
-//						var splitSelector = selector.split(" ", 2);
-//						$element.closest(splitSelector[0]).find(splitSelector[1]).remove();
-//					}
-//				}
+				toDelete.push(yada.extendedSelect($element, selector));
+			}
+			for (var count=0; count<toDelete.length; count++) {
+				toDelete[count].remove();
 			}
 			return true;
 		}
@@ -766,7 +757,7 @@
 					$return = $replacement;
 				} else {
 					$return.push($replacement);
-				}
+	}
 				// When there are more selectors than fragments, fragments are cycled from the first one
 				fragmentCount = (fragmentCount+1) % $replacementArray.length;
 			}
@@ -817,6 +808,7 @@
 		var $return = $replacement;
 		var selectors = selector.split(',');
 		var $replacementArray = null;
+		// Handle multiple selectors in the update/append attribute
 		if (selectors.length>1) {
 			// yadaFragment is used only when there is more than one selector, otherwise the whole result is used for replacement
 			$replacementArray = $(".yadaFragment", responseHtml);
@@ -827,10 +819,12 @@
 		if ($replacementArray!=null && $replacementArray.length>1) {
 			$return = [];
 		}
+		//
 		var fragmentCount = 0;
 		var focused = false;
 		for (var count=0; count<selectors.length; count++) {
 			var selector = selectors[count].trim();
+			// Handle multiple selectors in the update/append attribute
 			if ($replacementArray!=null && $replacementArray.length>0) {
 				// Clone so that the original responseHtml is not removed by replaceWith.
 				// All handlers are also cloned.
@@ -846,6 +840,7 @@
 			}
 			// Detect the jquery funcion used in the selector, if any
 			var jqueryFunction = $.fn.replaceWith; // Default
+			var isReplace = true;
 			var jqueryFunctions = [
 				{"jqfunction": $.fn.replaceWith, "prefix": "$replaceWith"},
 				{"jqfunction": $.fn.replaceWith, "prefix": "$replace"},		// $replace() is an alias for $replaceWith()
@@ -858,10 +853,18 @@
 				if (yada.startsWith(selector, toCheck.prefix + "(") && selector.indexOf(")") > toCheck.prefix.length) {
 					jqueryFunction = toCheck.jqfunction;
 					selector = yada.extract(selector, toCheck.prefix + "(", ")");
+					if (!yada.startsWith(toCheck.prefix, "$replace")) {
+						isReplace = false; // Not a replace function
+					}
 					break;
 				}
 			}
+			// Call the jquery function
 			jqueryFunction.call(yada.extendedSelect($element, selector), $replacement);
+			if (isReplace && (selector == null || selector.trim()=="")) {
+				// The original element has been replaced so we need to change it or following selectors won't work anymore
+				$element = $replacement;
+			}
 			if (!focused) {
 				// Focus on the first result element with data-yadaAjaxResultFocus
 				const $toFocus = $("[data-yadaAjaxResultFocus]:not([readonly]):not([disabled])", $replacement);
@@ -1188,10 +1191,6 @@
 			var localClickedButton = clickedButton; // Create a closure otherwise the clicked button is lost
 			var joinedHandler = function(responseText, responseHtml) {
 				showFeedbackIfNeeded($form);
-				var deleted = deleteOnSuccess($(localClickedButton));
-				if (!deleted) {
-					deleteOnSuccess($form);
-				}
 				if ($(localClickedButton).attr("data-yadaUpdateOnSuccess")!=null) {
 					responseHtml = updateOnSuccess($(localClickedButton), responseHtml);
 				} else {
@@ -1230,6 +1229,11 @@
 				}
 				if (handler != null) {
 					handler(responseText, responseHtml, this, localClickedButton);
+				}
+				// Deletion must be done later or it could prevent other actions from working when the target is self
+				var deleted = deleteOnSuccess($(localClickedButton));
+				if (!deleted) {
+					deleteOnSuccess($form);
 				}
 			};
 			var method = $form.attr('method') || "POST";
@@ -1418,9 +1422,12 @@
 					}
 					// Keep going, there could be a handler
 				}
-				// Putting the returned HTML inside a <div> for some reason - not sure it is a good idea but legacy code needs it now.
+				// Putting the returned HTML inside a <div> so that $find() works when multiple root elements are returned. 
+				// - not sure it is a good idea but legacy code needs it now.
 				// The bad thing is that the enclosing div is stripped when updateOnSuccess is called, so the successHandler
 				// can receive both versions (with or without root div) depending on the presence of the updateOnSuccess call.
+				// The reason for stripping it is that "replaceWith" and other successHandler functions move the children from the
+				// added top <div> element, so it can't be returned anyway because it would be empty.
 				var responseHtml=$(yadaAjaxResponseHtmlRoot).html(responseTrimmed);
 				// Check if we just did a login.
 				// A successful login can also return a redirect, which will skip the PostLoginHandler 
@@ -1492,7 +1499,9 @@
 					var stickyModal = $loadedModalDialog.hasClass("yadaStickyModal");
 					
 					// Remove any currently downloaded modals (markerAjaxModal) if they are open and not sticky
-					$(".modal.show."+markerAjaxModal+":not(.yadaStickyModal)").remove();
+					const $existingModals = $(".modal.show."+markerAjaxModal+":not(.yadaStickyModal)");
+					$existingModals.modal("hide"); // Remove the background too
+					$existingModals.remove();
 					
 					// modals are appended to the body
 					const $modalObject = $(responseHtml).find(".modal").first();

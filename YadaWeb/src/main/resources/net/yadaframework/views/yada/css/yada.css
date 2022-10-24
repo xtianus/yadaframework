@@ -220,6 +220,9 @@ table.dataTable th.sorting_asc, table.dataTable th.sorting_desc {
 .yadaNotify .yadaIcon.info {
 	color: #209EF9;
 }
+.yadaNotify .notifyMessage {
+	margin-bottom: 10px;
+}
 
 /***********************/
 /* BOOTSTRAP OVERRIDE  */

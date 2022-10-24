@@ -18,10 +18,6 @@ import javax.persistence.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonView;
-
-import net.yadaframework.web.YadaJsonView;
-
 /**
  * Used to create an url to access the site with an automatic login.
  */
@@ -32,23 +28,28 @@ public class YadaAutoLoginToken implements Serializable {
 
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	// For optimistic locking
 	@Version
 	protected long version;
-	
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 
 	private long token;
-	
+
+	@Column(columnDefinition="TIMESTAMP NULL")
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date timestamp; // Token creation date
+
+	@Column(columnDefinition="TIMESTAMP NULL")
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date expiration; // Token expiration. Null = never expire
 
 	@OneToOne
 	private YadaUserCredentials yadaUserCredentials;
-	
+
 	@PrePersist
 	void setDefaults() {
 		timestamp = new Date();
@@ -103,6 +104,6 @@ public class YadaAutoLoginToken implements Serializable {
 		this.version = version;
 	}
 
-	
+
 
 }

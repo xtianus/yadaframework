@@ -5,12 +5,15 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.yadaframework.commerce.persistence.entity.YadaOrder;
 import net.yadaframework.commerce.persistence.entity.YadaTransaction;
+import net.yadaframework.persistence.YadaMoney;
 import net.yadaframework.persistence.YadaSql;
+import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.web.YadaPageRequest;
 import net.yadaframework.web.YadaPageRows;
 
@@ -19,6 +22,21 @@ import net.yadaframework.web.YadaPageRows;
 public class YadaTransactionDao {
 
     @PersistenceContext private EntityManager em;
+
+    /**
+     * Returns the sum of all transaction amounts for the given user or for all users.
+     * @param accountOwner when null, all transactions from all users are counted. The result should be zero in a
+     * double ledger system.
+     * @return
+     */
+    public YadaMoney sumAmount(@Nullable YadaUserProfile accountOwner) {
+    	Long sum = (Long) YadaSql.instance().selectFrom("select SUM(amount) from YadaTransaction")
+    		.where(accountOwner!=null, "where accountOwner=:accountOwner")
+    		.setParameter("accountOwner", accountOwner)
+    		.query(em).getSingleResult();
+    	YadaMoney result = YadaMoney.fromDatabaseColumn(sum);
+    	return result;
+    	}
 
     /**
      * Given an existing transaction, create the twin opposite transaction in order to implement a double ledger
@@ -42,6 +60,7 @@ public class YadaTransactionDao {
 		yadaTransaction.setPayerId2(payment.getPayerId2());
 		yadaTransaction.setOrder(payment.getOrder());
 		yadaTransaction.setData(payment.getData());
+		yadaTransaction.setPaymentSystem(payment.getPaymentSystem());
 		yadaTransaction.setInverse(true); // twin transaction
 		em.persist(yadaTransaction);
 		return yadaTransaction;
@@ -82,18 +101,29 @@ public class YadaTransactionDao {
 
 
     /**
-     * Find all direct transactions (not the inverse) related to an order
+     * Delete a suspended transaction relative to an order.
+     * @param order
+     */
+    @Transactional(readOnly = false)
+	public int deleteSuspended(YadaOrder yadaOrder) {
+		String sql = "delete from YadaTransaction where order = :yadaOrder and suspended is true";
+		return em.createQuery(sql).setParameter("yadaOrder", yadaOrder).executeUpdate();
+	}
+
+    /**
+     * Find all direct transactions (not the inverse) related to an order, and not suspended
      * i.e. only the originating transactions of the double ledger, that may be two in case of a refund
      * @param yadaOrder
      * @return
      */
     public List<YadaTransaction> find(YadaOrder yadaOrder) {
-		List<YadaTransaction> found = YadaSql.instance().selectFrom("from YadaTransaction")
-				.where("order = :yadaOrder").and()
-				.where("inverse != true").and()
-	            .setParameter("yadaOrder", yadaOrder)
-	            .query(em, YadaTransaction.class)
-	            .getResultList();
+    	List<YadaTransaction> found = YadaSql.instance().selectFrom("from YadaTransaction")
+			.where("order = :yadaOrder").and()
+			.where("inverse != true").and()
+			.where("suspended != true").and()
+            .setParameter("yadaOrder", yadaOrder)
+            .query(em, YadaTransaction.class)
+            .getResultList();
 		return found;
     }
 
@@ -115,6 +145,14 @@ public class YadaTransactionDao {
             .getResultList();
         return new YadaPageRows<YadaTransaction>(found, yadaPageRequest);
 	}
+
+    public YadaTransaction find(Long id) {
+    	if (id==null) {
+    		return null;
+    	} else {
+    		return em.find(YadaTransaction.class, id);
+    	}
+    }
 
     @Transactional(readOnly = false)
     public YadaTransaction save(YadaTransaction entity) {

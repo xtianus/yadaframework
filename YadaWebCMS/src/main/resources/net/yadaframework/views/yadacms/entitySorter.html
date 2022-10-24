@@ -91,7 +91,9 @@ Example:
 								<i class="yadaIcon yadaIcon-up"></i> <!--/* TODO add a localized tooltip and aria- tag */-->
 							</a>
 						</form>
-						<!--/* Delete */-->
+						<!--/* Delete
+							* Do not be tempted to use yadaDeleteOnSuccess because you'd have to fix the command bar too (e.g. when you delete the last element) 
+						*/-->
 						<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .deleteForm" class="pull-right yadaDeletetButton">
 							<input type="hidden" th:name="${entityIdName}" th:value="${sorterEntity.id}">
 							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" class="yadaNoLoader" title="Delete">

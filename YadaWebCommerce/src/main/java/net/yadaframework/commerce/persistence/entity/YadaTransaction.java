@@ -1,6 +1,8 @@
 package net.yadaframework.commerce.persistence.entity;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.Locale;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -16,6 +18,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.persistence.YadaMoney;
 import net.yadaframework.persistence.YadaMoneyConverter;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
@@ -55,6 +58,8 @@ public class YadaTransaction {
 	@Column(length = 8)
 	protected String currencyCode;
 
+	@Column(columnDefinition="TIMESTAMP NULL")
+	@Temporal(TemporalType.TIMESTAMP)
 	protected Date timestamp;
 
 	@Column(length = 32)
@@ -63,6 +68,8 @@ public class YadaTransaction {
 	protected String payerId1; // ID on the payment system, e.g. paypal "payer_id"
 	protected String payerId2; // Another ID on the payment system, e.g. paypal "email_address"
 	protected String description;
+	@Column(length = 32)
+	protected String paymentSystem; // i.e. "paypal" or "balance"
 
 	@Column(length = 8192)
 	protected String data; // Any application-specific data
@@ -71,9 +78,23 @@ public class YadaTransaction {
 	protected YadaOrder order;
 
 	// True when this is the twin transaction in a double-ledger system
-	protected Boolean inverse;
+	protected Boolean inverse = false;
+
+	protected Boolean suspended = false; // true when the transaction has not been performed yet
+
+	protected Boolean external = false; // true when the transaction is on external systems, like a bank transfer
 
 	///////////////////////////////////
+
+	/**
+	 * Returns the timestamp formatted as a relative time from now, in the account owner's timezone
+	 * @param locale
+	 * @return a relative time like "1 minute ago"
+	 */
+	public String getTimestampAsRelative(Locale locale) {
+		ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(timestamp.toInstant(), accountOwner.getTimezone().toZoneId());
+		return YadaUtil.INSTANCE.getTimestampAsRelative(zonedDateTime, locale, null);
+	}
 
 	public Date getModified() {
 		return modified;
@@ -170,6 +191,26 @@ public class YadaTransaction {
 	}
 	public void setInverse(Boolean inverse) {
 		this.inverse = inverse;
+	}
+	public String getPaymentSystem() {
+		return paymentSystem;
+	}
+	public void setPaymentSystem(String paymentSystem) {
+		this.paymentSystem = paymentSystem;
+	}
+	public Boolean getSuspended() {
+		return suspended;
+	}
+	public void setSuspended(Boolean suspended) {
+		this.suspended = suspended;
+	}
+
+	public Boolean getExternal() {
+		return external;
+	}
+
+	public void setExternal(Boolean external) {
+		this.external = external;
 	}
 
 

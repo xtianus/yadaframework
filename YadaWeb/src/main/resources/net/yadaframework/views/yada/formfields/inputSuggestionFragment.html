@@ -25,10 +25,11 @@
 					th:text="${suggestion}"
 					>#villa</a>
 				<a th:if="${complex}" class="dropdown-item" href="javascript:;" 
-					th:text="${suggestion.getSuggestionText(#locale)}"
 					th:data-idname="${suggestion.suggestionIdRequestName}"
-					th:data-id="${suggestion.suggestionId}"
-					>#villa</a>
+					th:data-id="${suggestion.suggestionId}">
+					<span th:text="${suggestion.getSuggestionText(#locale)}">#villa</span>
+					<th:block th:if="${suggestion.suggestionCount!=null}">&nbsp;<span class="badge text-bg-secondary">[[${suggestion.suggestionCount}]]</span></th:block>
+				</a>
 			</li>
 		</th:block>
 	</ul>

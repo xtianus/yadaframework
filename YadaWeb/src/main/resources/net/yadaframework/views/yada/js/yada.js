@@ -34,6 +34,7 @@
 	
 	var siteMatcher=RegExp("(?:http.?://)?([^/:]*).*"); // Extract the server name from a url like "http://www.aaa.com/xxx" or "www.aaa.com"
 	
+	const findSelector = "yadaFind:"; // Used to indicate that a CSS selector should be searched in the children using find()
 	const parentSelector = "yadaParents:"; // Used to indicate that a CSS selector should be searched in the parents()
 	const siblingsSelector = "yadaSiblings:"; // Used to indicate that a CSS selector should be searched in the siblings()
 	const closestFindSelector = "yadaClosestFind:"; // Used to indicate that a two-part CSS selector should be searched with closest() then with find()
@@ -137,14 +138,14 @@
 		if ($element==null) {
 			$element = $('body');
 		}
-	    $('.s_tooltip', $element).tooltip();
+	    $('.s_tooltip', $element).tooltip && $('.s_tooltip', $element).tooltip();
 	};
 	
 	yada.enableHelpButton = function($element) {
 		if ($element==null) {
 			$element = $('body');
 		}
-		$('.yadaHelpButton', $element).popover();
+		$('.yadaHelpButton', $element).popover && $('.yadaHelpButton', $element).popover();
 	};
 
 	/**
@@ -553,6 +554,9 @@
 	 * Joins two url segments taking care of the separator / character
 	 */
 	yada.joinUrls = function(left, right) {
+		if (right==null) {
+			return left;
+		}
 		if (yada.endsWith(left, "/") && yada.startsWith(right, "/")) {
 			return left + right.substring(1);
 		}
@@ -560,6 +564,18 @@
 			return left + right;
 		}
 		return left + "/" + right;
+	}
+	
+	/**
+	 * Joins up to five urls taking care of correct slash separator.
+	 * Parameters from 'two' onwards are optional.
+	*/
+	yada.joinManyUrls = function(one, two, three, four, five) {
+		var result = yada.joinUrls(one, two);
+		result = yada.joinUrls(result, three);
+		result = yada.joinUrls(result, four);
+		result = yada.joinUrls(result, five);
+		return result;
 	}
 	
 	yada.getResourcePath = function() {
@@ -584,7 +600,7 @@
 	 * @param newHashValue some string to place after the existing hash value, or to add at the end following a new hash character
 	 */
 	yada.replaceHash = function(someUrl, newHashValue) {
-		return yada.removeHash(someUrl) + '#' + newHashValue;
+		return yada.removeHash(someUrl) + '#' + yada.removeHash(newHashValue);
 	}
 	
 	// Elimina l'hash (anchor) da un url, se presente.
@@ -798,6 +814,14 @@
 	}
 	
 	/**
+	 * Increment a numeric value.
+	 * @param elementSelector the jquery selector that identifies the element(s) to increment 
+	 */
+	yada.increment = function(elementSelector) {
+		return yada.numberAdd(elementSelector, 1);
+	}
+	
+	/**
 	 * Aggiunge al valore numerico di un elemento una quantità algebrica eventualmente limitandola a un minimo o massimo
 	 * Esempio: yada.numberAdd('#totMessaggiCounter', -1, 0, true);
 	 * @param elementSelector id dell'elemento incluso l'hash, e.g. #myCounter, oppure un suo selector qualsiasi come ".myElement > div"
@@ -932,10 +956,9 @@
 	 */
 	yada.confirm = function(title, message, callback, okButtonText, cancelButtonText, okShowsPreviousModal) {
 		// okButtonText e cancelButtonText sono opzionali
-		var $currentModals = $(".modal:visible");
+		var $currentModals = hideAllModals($("#yada-confirm"));
 		var okClicked = false;
 		var cancelClicked = false;
-		hideAllModals();
 		// Turn off the loader else the confirm dialog won't show
 		yada.loaderOff();
 		// $('#yada-confirm').modal('hide'); // Eventualmente fosse già aperto
@@ -970,7 +993,15 @@
 			$('#yada-confirm .okButton').text(previousOkButtonText);
 			$('#yada-confirm .cancelButton').text(previousCancelButtonText);
 			if (cancelClicked || (okClicked && okShowsPreviousModal==true)) {
-				$currentModals.modal('show');
+				if ($currentModals.length>0) {
+					// Show the previous modals again on cancel or when okShowsPreviousModal is true
+					$currentModals.css('display', 'block');
+				}
+			} else {
+				// Not cancelled and not okShowsPreviousModal.
+				// Just for consistency, I restore the modals then hide them properly
+				$currentModals.css('display', 'block');
+				$currentModals.modal("hide"); 
 			}
 		});		
 	}
@@ -992,7 +1023,7 @@
 	}
 	
 	function showNotificationModal(title, message, severity, redirectUrl) {
-		hideAllModals();
+		$(".modal").modal("hide"); // Hide previous existing modals
 		yada.loaderOff();
 		var glyphNames = {ok : 'ok-circle', info : 'exclamation-sign', error : 'remove-circle'};
 		// $('#yada-notification').modal('hide'); // Eventualmente fosse già aperto
@@ -1009,14 +1040,23 @@
 		}
 	}
 	
-	function hideAllModals() {
-		$("#loginModal:visible").modal('hide');
-		$("#ajaxModal:visible").modal('hide');
-		$('#yada-notification:visible').modal('hide');
-		$('#yada-confirm:visible').modal('hide');
+	/**
+	 * Make all current visible modals not visible.
+	 * @return the hidden modals
+	*/
+	function hideAllModals($notThese) {
+		const $modals = $("#loginModal:visible")
+			.add($(".modal.show."+yada.markerAjaxModal+":visible"))
+			.add($("#yada-notification:visible"))
+			.add($("#yada-confirm:visible"))
+			.not($notThese);
+		// Do not use modal('hide') because it may trigger some events that shouldn't be triggered
+		$modals.css("display", "none");
+		// Also remove the dark layer because it would be doubled otherwise
+		// $(".modal-backdrop.fade.show").first().removeClass("show");
+		return $modals;		
 	}
 	
-
 	/////////////////////
 	/// Local Storage ///
 	/////////////////////
@@ -1046,15 +1086,15 @@
 	 * @param value the cookie value
 	 * @param expiryDays expiration in days from now. When null, create a session cookie
 	**/
-	yada.setCookie = function(name, value, expiryDays) {
+	yada.setCookie = function(name, value, expiryDays, domain) {
 		var expires = "";
 		if (expiryDays!=null) {
 		    var d = new Date();
-		    // d.setTime(d.getTime() + (expiryDays*24*60*60*1000));
 		    d.setDate(d.getDate() + expiryDays);
 		    expires = ";expires="+d.toGMTString();
 		}
-	    document.cookie = name + "=" + value + " ;path=/ " + expires;
+		domain = domain!=null ? ";domain=" + domain : "";
+	    document.cookie = name + "=" + value + domain + " ;path=/ " + expires;
 	}
 	
 	yada.getCookie = function(cname) {
@@ -1066,6 +1106,10 @@
 	        if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
 	    }
 	    return "";
+	}
+	
+	yada.deleteCookie = function(name, domain) {
+		yada.setCookie(name, "", 0, domain);
 	}
 	
 //	function checkCookie() {
@@ -1191,19 +1235,23 @@
 	
 	/**
 	 * Returns a jquery element searched using the extended yada selector prefixes. The empty selector is the $fromElement
-	 * @param $fromElement the element to start from. Ignored if no yada prefix is used.
+	 * @param $fromElement the element to start from. Ignored if no yada prefix is used: the selector will be searched in all the document.
 	 * @param selector the CSS selector prefixed with a yada prefix (or not)
 	 */
 	yada.extendedSelect = function($fromElement, selector) {
 		if (selector == null || selector.trim()=="") {
 			return $fromElement;
 		}
+		var fromChildren = yada.startsWith(selector, findSelector); // yadaFind:
 		var fromParents = yada.startsWith(selector, parentSelector); // yadaParents:
 		var fromSiblings = yada.startsWith(selector, siblingsSelector); // yadaSiblings:
 		var fromClosestFind = yada.startsWith(selector, closestFindSelector); // yadaClosestFind:
 		var fromSiblingsFind = yada.startsWith(selector, siblingsFindSelector); // yadaSiblingsFind:
-		if (fromParents==false && fromSiblings==false && fromClosestFind==false && fromSiblingsFind==false) {
+		if (fromChildren==false && fromParents==false && fromSiblings==false && fromClosestFind==false && fromSiblingsFind==false) {
 			return $(selector);
+		} else if (fromChildren) {
+			selector = selector.replace(findSelector, "").trim();
+			return $fromElement.find(selector);
 		} else if (fromParents) {
 			selector = selector.replace(parentSelector, "").trim();
 			return $fromElement.parent().closest(selector);
@@ -1413,6 +1461,44 @@
 		});
 	}
 	
+	/**
+	 * Find a child from a given parent that can also be the first node (root) of the tree, 
+     * where normally it would not be found by $.find('parentSelector childSelector', $html)
+     * Note: we can't just always use $html.parent().find() because it gets any sibilings outside of $html
+	 * @param $html where to perform the search, can be an array of root nodes
+	 * @param parentSelector the CSS selector of the parent element
+	 * @param childSelector the CSS selector of the child element
+	*/
+	yada.findFromParent = function(parentSelector, childSelector, $html) {
+		var $root = $html.find(parentSelector);
+		if ($root.length==0) {
+			$root = $html.filter(parentSelector);
+		}
+		return $root.find(childSelector);
+	}
+	
+	// From https://stackoverflow.com/a/69122877/587641
+	// Neither tested not used - could be removed
+	yada.toTimeAgo = function(dateInThePast, locale) {
+		const date = (dateInThePast instanceof Date) ? dateInThePast : new Date(dateInThePast);
+		const formatter = new Intl.RelativeTimeFormat(locale);
+		const ranges = {
+			years: 3600 * 24 * 365,
+			months: 3600 * 24 * 30,
+			weeks: 3600 * 24 * 7,
+			days: 3600 * 24,
+			hours: 3600,
+			minutes: 60,
+			seconds: 1
+		};
+		const secondsElapsed = (date.getTime() - Date.now()) / 1000;
+		for (let key in ranges) {
+			if (ranges[key] < Math.abs(secondsElapsed)) {
+			  const delta = secondsElapsed / ranges[key];
+			  return formatter.format(Math.round(delta), key);
+			}
+		}
+	}
 		
 }( window.yada = window.yada || {} ));
 
@@ -1420,7 +1506,7 @@
 // https://stackoverflow.com/a/62190609/587641
 // Usage: $(element).findWithSelf('.target')
 // --> will also find the root element if it is a .target
-// Does not work properly with selectors that match self and a child, like ".self .child"
+// Does not work properly with selectors that match a child after self, like ".self .child"
 jQuery.fn.findWithSelf = function(...args) {
   return this.pushStack(this.find(...args).add(this.filter(...args)));
 };
