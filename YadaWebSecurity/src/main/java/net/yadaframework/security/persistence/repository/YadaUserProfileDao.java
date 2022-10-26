@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.persistence.YadaSql;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
@@ -28,6 +29,7 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 	@PersistenceContext EntityManager em;
 
 	@Autowired YadaUtil yadaUtil;
+	@Autowired YadaConfiguration config;
 
 	@Transactional(readOnly = false)
 	public void updateTimezone(String username, TimeZone timezone) {
@@ -42,12 +44,24 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 			.executeUpdate();
 	}
 
+	/**
+	 * Find all user profiles that have the given role key
+	 * @param roleKey the role key from config, like "ADMIN" or "USER"
+	 */
+	public List<T> findByRoleKey(String roleKey) {
+		Integer roleId = config.getRoleId(roleKey);
+		String sql = "select yup from YadaUserProfile yup join yup.userCredentials uc where :roleId member of uc.roles";
+		return em.createQuery(sql)
+			.setParameter("roleId", roleId)
+			.getResultList();
+	}
+
 	public List<Integer> findRoleIds(Long userProfileId) {
 		String sql = "select r.roles from YadaUserProfile yup join YadaUserCredentials yuc on yup.userCredentials_id = yuc.id " +
 			"join YadaUserCredentials_roles r on yuc.id = r.YadaUserCredentials_id where yup.id=:userProfileId";
 		return em.createNativeQuery(sql)
-				.setParameter("userProfileId", userProfileId)
-				.getResultList();
+			.setParameter("userProfileId", userProfileId)
+			.getResultList();
 	}
 
 	/**
