@@ -1,6 +1,7 @@
 plugins {
 	id 'java-library'
 	id 'maven-publish'
+	id 'signing'
 }
 
 group = 'net.yadaframework'
@@ -62,12 +63,84 @@ processResources {
 	}
 }
 
+task sourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+javadoc {
+    options.encoding = 'UTF-8'
+    options.docEncoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+}
+
+// http://stackoverflow.com/a/27853822/587641
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}   
+
 // PublishToMavenLocal task
 publishing {
     publications {
-        maven(MavenPublication) {
+        mavenJava(MavenPublication) {
             artifactId = 'yadawebcms'
             from components.java
+            artifact sourcesJar
+            // Not ready for this: artifact javadocJar
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+            }
+  			pom {
+			    name = 'YadaWebCMS'
+			    description = 'Yada Framework for creating Content Management Systems'
+			    url = 'https://yadaframework.net/en/index.html'
+			    inceptionYear = '2014'
+			    packaging = 'jar'
+			    licenses {
+			        license {
+			            name = 'MIT License'
+			            url = 'https://en.wikipedia.org/wiki/MIT_License'
+			        }
+			    }
+			    developers {
+			        developer {
+			            id = 'xtianus'
+			            name = 'Studio Ghezzi'
+			            email = 'studio@ghezzi.net'
+			        }
+			    }
+			    organization {
+			    	name = 'Studio Ghezzi'
+			    	url = 'https://studio.ghezzi.net/'
+			    }
+			    scm {
+			        connection = 'scm:git:git@github.com:xtianus/yadaframework.git'
+			        developerConnection = 'scm:git:git@github.com:xtianus/yadaframework.git'
+			        url = 'https://github.com/xtianus/yadaframework'
+			    }
+			}
         }
     }
+    repositories {
+        maven {
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+			credentials(PasswordCredentials) {
+				username = ossrhUsername
+				password = ossrhPassword
+			}
+            // url = "file://${buildDir}/repotest"
+        }
+    }    
+}
+
+signing {
+    sign publishing.publications.mavenJava
 }
