@@ -336,6 +336,9 @@ public class YadaAttachedFile implements CloneableDeep {
 		}
 		File source = getAbsoluteFile(type);
 		File target = new File(source.getParentFile(), newName);
+		if (source.equals(target)) {
+			return true;
+		}
 		try {
 			Files.move(source, target);
 			switch (type) {
