@@ -77,8 +77,8 @@ For example, consider a Product with a non-localized "name" and a localized "des
 |===
 |ID   |NAME   
 //-------------
-|1   |AirOne   
-|2   |AirOne   
+|1   |Mercury Ball   
+|2   |Jupiter Ball   
 |===
 
 .Product_description
