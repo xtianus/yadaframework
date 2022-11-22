@@ -16,7 +16,7 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.7.0'
+version = '0.7.3'
 
 // PublishToMavenLocal task
 publishing {
