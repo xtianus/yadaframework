@@ -323,7 +323,7 @@ public class YadaAttachedFile implements CloneableDeep {
 	 * Rename a file in the same folder. Do not use to move to a different folder.
 	 * @param newName the new exact name, with no path. Will overwrite an existing file with the same name.
 	 * @param type
-	 * @return true if the file was renamed successfully
+	 * @return true if the file was renamed successfully or if the new name is the same as the old one
 	 */
 	public boolean rename(String newName, YadaAttachedFileType type) {
 		newName = StringUtils.trimToNull(newName);
@@ -332,6 +332,9 @@ public class YadaAttachedFile implements CloneableDeep {
 		}
 		File source = getAbsoluteFile(type);
 		File target = new File(source.getParentFile(), newName);
+		if (source.equals(target)) {
+			return true;
+		}
 		try {
 			Files.move(source, target);
 			switch (type) {
