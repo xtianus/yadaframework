@@ -28,6 +28,7 @@ javadoc {
     options.encoding = 'UTF-8'
     options.docEncoding = 'UTF-8'
     options.charSet = 'UTF-8'
+    failOnError = false
 }
 
 // http://stackoverflow.com/a/27853822/587641
@@ -36,13 +37,20 @@ task javadocJar(type: Jar) {
     from javadoc
 }   
 
+tasks.withType(GenerateModuleMetadata).configureEach {
+    // The value 'enforced-platform' is provided in the validation
+    // error message you got
+    suppressedValidationErrors.add("bad use of '>'")
+    suppressedValidationErrors.add("@param name not found")
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             artifactId = 'yadaweb'
             from components.java
             artifact sourcesJar
-            // Not ready for this: artifact javadocJar
+            artifact javadocJar
             versionMapping {
                 usage('java-api') {
                     fromResolutionOf('runtimeClasspath')
