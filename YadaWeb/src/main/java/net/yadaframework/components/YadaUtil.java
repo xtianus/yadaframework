@@ -1008,6 +1008,12 @@ public class YadaUtil {
 	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
 	 */
 	public static <entityClass> void prefetchLocalizedStringListRecursive(List<entityClass> entities, Class<?> entityClass, String...attributes) {
+		// TODO I don't actually get how this works.
+		//      It looks like it's prefetching all first-level local strings, then
+		//      if an attribute is not a generic, it will fetch all first-level local strings there.
+		//      It doesn't make sense.
+		//      It should instead recurse on itself for all attributes that are neither primitive not local strings,
+		//		unrolling collections and arrays.
 		if (entities==null || entities.isEmpty()) {
 			return;
 		}

@@ -63,8 +63,8 @@ public class AuditFilter extends OncePerRequestFilter {
 			try {
 				YadaConfiguration config = (YadaConfiguration) YadaUtil.getBean("config"); // Throws NoSuchBeanDefinitionException
 				contentUrlStart = request.getContextPath() + config.getContentUrl();  // /site/contents
-			} catch (NoSuchBeanDefinitionException e) {
-				log.debug("No YadaConfiguration found yet");
+			} catch (Exception e) {
+				log.debug("No YadaConfiguration found yet (ignored)");
 			}
 		}
 		if (!filesLog.isInfoEnabled() && isFile(request)) {
