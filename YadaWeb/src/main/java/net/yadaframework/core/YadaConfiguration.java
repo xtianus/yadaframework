@@ -81,6 +81,7 @@ public abstract class YadaConfiguration {
 	private int minPwdLen = -1;
 	private String errorPageForward = null;
 	private List<String> locales = null;
+	private List<Locale> localeObjects = null;
 	private Map<String, String> languageToCountry = null;
 	private Boolean localeAddCountry = null;
 	private Boolean localePathVariableEnabled = null;
@@ -434,15 +435,35 @@ public abstract class YadaConfiguration {
 	public List<String> getLocaleStrings() {
 		if (locales==null) {
 			locales = Arrays.asList(configuration.getStringArray("config/i18n/locale"));
-			for (String locale : locales) {
-				try {
-			        LocaleUtils.toLocale(locale); // Validity check
-			    } catch (IllegalArgumentException e) {
-			    	throw new YadaConfigurationException("Locale {} is invalid", locale);
-			    }
-			}
+			locales = Collections.unmodifiableList(locales);
+//			for (String locale : locales) {
+//				try {
+//			        LocaleUtils.toLocale(locale); // Validity check
+//			    } catch (IllegalArgumentException e) {
+//			    	throw new YadaConfigurationException("Locale {} is invalid", locale);
+//			    }
+//			}
 		}
 		return locales;
+	}
+	
+	/**
+	 * Returns the configured locales as objects, using countries if configured
+	 * @return
+	 */
+	public List<Locale> getLocales() {
+		if (localeObjects==null) {
+			localeObjects = new ArrayList<Locale>();
+			List<ImmutableHierarchicalConfiguration> locales = configuration.immutableConfigurationsAt("config/i18n/locale");
+			for (ImmutableHierarchicalConfiguration localeConfig : locales) {
+				String languageKey = localeConfig.getString(".");
+				String countryValue = localeConfig.getString("./@country", null);
+				Locale locale = countryValue==null?new Locale(languageKey):new Locale(languageKey, countryValue);
+				localeObjects.add(locale);
+			}
+			localeObjects = Collections.unmodifiableList(localeObjects);
+		}
+		return localeObjects;
 	}
 
 	/**
@@ -786,6 +807,8 @@ public abstract class YadaConfiguration {
 				roleIdToKeyMap.put(id, key.toUpperCase());
 				roleKeyToIdMap.put(key.toUpperCase(), id);
 			}
+			roleIdToKeyMap = Collections.unmodifiableMap(roleIdToKeyMap);
+			roleKeyToIdMap = Collections.unmodifiableMap(roleKeyToIdMap);
 		}
 	}
 

@@ -82,6 +82,10 @@ public class YadaWebUtil {
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
 	
+	public boolean isEmpty(YadaPageRows<?> yadaPageRows) {
+		return yadaPageRows==null || yadaPageRows.isEmpty();
+	}
+
 	/**
 	 * Returns the last part of the current request, for example from "/some/product" returns "product"
 	 * @param request
@@ -147,6 +151,76 @@ public class YadaWebUtil {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Add a url parameter or change its value if present
+	 * @param sourceUrl a full or relative url. Can also be just the query string starting with "?"
+	 * @param paramName the name of the parameter, not urlencoded
+	 * @param paramValue the value of the parameter, not urlencoded. Can be null to only have the paramName in the url
+	 * @return
+	 */
+	// Not tested yet
+	public String addOrUpdateUrlParameter(String sourceUrl, String paramName, String paramValue) {
+		String encodedParamName = urlEncode(paramName);
+		String encodedParamValue = urlEncode(paramValue); // Can be null
+		String equalsAndValue = encodedParamValue==null? "" : "=" + encodedParamValue;
+		StringBuilder result = new StringBuilder();
+		int queryPos = sourceUrl.indexOf("?");
+		boolean found=false;
+		if (queryPos<0) {
+			// There is no query string yet
+			result.append(sourceUrl);
+		} else if (queryPos>0) {
+			// There is a query string already
+			result.append(sourceUrl.substring(0, queryPos));
+		}
+		result.append("?");
+		if (queryPos>-1) {
+			// Check existing parameters
+			String query = sourceUrl.substring(queryPos); // "?xxx=yyy&zzz"
+			String[] params = query.split("[?&]"); // ["xxx=yyy", "zzz"]
+			for (int i = 0; i < params.length; i++) {
+				String[] parts = params[i].split("=");
+				String name = parts[0];
+				if (name.equals(encodedParamName)) {
+					result.append(encodedParamName).append(equalsAndValue);
+					found = true;
+				} else {
+					result.append(params[i]);
+				}
+				if (i<params.length) {
+					result.append("&");
+				}
+			}
+		}
+		if (!found) {
+			result.append(encodedParamName).append(equalsAndValue);
+		}
+		return result.toString();
+	}
+
+	/**
+	 * Returns a full url, including the server address and any optional request parameters.
+	 * @param relativeUrl a server-relative url without language component
+	 * @param locale
+	 * @param params optional request parameters to be set on the url, in the form of comma-separated name,value pairs. E.g. "id","123","name","joe".
+	 * 			Existing parameters are not replaced. Null values become empty strings. Null names are skipped with their values.
+	 * @return a full url like https://myapp.com/en/relative/url
+	 */
+	public String getFullUrl(String relativeUrl, Locale locale, String...params) {
+		String webappAddress = config.getWebappAddress();
+		String urlWithLocale = enhanceUrl(relativeUrl, locale, params);
+		return makeUrl(webappAddress, urlWithLocale);
+	}
+
+	/**
+	 * Returns true if we are in a forward that should display an error handled by YadaController.yadaError() or YadaGlobalExceptionHandler
+	 * @param request
+	 * @return
+	 */
+	public boolean isErrorPage(HttpServletRequest request) {
+		return request.getAttribute(YadaConstants.REQUEST_HASERROR_FLAG)!=null;
 	}
 
 	/**
@@ -355,7 +429,7 @@ public class YadaWebUtil {
 				// Invalid header - ignored
 			}
 		}
-		return "";
+		return languageHeader;
 	}
 
 	/**
@@ -417,6 +491,70 @@ public class YadaWebUtil {
 		//		}
 	}
 
+	/**
+	 * Fix a url so that it valid and doesn't allow XSS attacks
+	 * @see https://cheatsheetseries.owasp.org/cheatsheets/XSS_Filter_Evasion_Cheat_Sheet.html
+	 * @param url some text typed by the user
+	 * @return the same url or null if blank or a fixed one that may or may not work as expected, but won't pose a security risk
+	 */
+	public String sanitizeUrl(String url) {
+		if (StringUtils.isBlank(url)) {
+			return null;
+		}
+		url = url.replaceAll("[^-A-Za-z0-9+&@#/%?=~_|!:,.;\\(\\)]", "");
+		if (!url.startsWith("http://") && !url.startsWith("https://")) {
+			url = "http://" + url;
+		}
+		return url;
+	}
+
+	/**
+	 * Assembles a url given its parts as string.
+	 * @param segments the initial parts of the url up to the query string. Leading and trailing slashes are added when missing.
+	 * URLEncoding is not performed.
+	 * @return
+	 * @see #makeUrl(String[], Map, Boolean)
+	 */
+	public String makeUrl(String...segments) {
+		return makeUrl(segments, null, null);
+	}
+
+	/**
+	 * Assembles a url given its parts as string.
+	 * @param segments the initial parts of the url up to the query string. Leading and trailing slashes are added when missing.
+	 * @param requestParams optional name/value pairs of request parameters that will compose the query string.
+	 * Use null for no parameters, use a null value for no value (just the name will be added)
+	 * @param urlEncode use Boolean.TRUE to encode the parameters, null or anything else not to encode
+	 * @return
+	 */
+	public String makeUrl(String[] segments, Map<String, String> requestParams, Boolean urlEncode) {
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i < segments.length; i++) {
+			result.append(segments[i]);
+			// Add a separator when needed
+			if (i<segments.length-1 && !segments[i].endsWith("/") && !segments[i+1].startsWith("/")) {
+				result.append("/");
+			}
+		}
+		if (requestParams!=null) {
+			boolean encode = Boolean.TRUE == urlEncode;
+			result.append("?");
+			String[] keys = requestParams.keySet().toArray(new String[0]);
+			for (int i=0; i<keys.length; i++) {
+				String key = keys[i];
+				String value = requestParams.get(key);
+				result.append(encode?urlEncode(key):key);
+				if (value!=null) {
+					result.append("=").append(encode?urlEncode(value):value);
+				}
+				if (i<keys.length-1) {
+					result.append("&");
+				}
+			}
+		}
+		return result.toString();
+	}
+	
 	/**
 	 * From a given string, creates a "slug" that can be inserted in a url and still be readable.
 	 * @param source the string to convert
@@ -486,9 +624,12 @@ public class YadaWebUtil {
 	/**
 	 * Encodes a string with URLEncoder, handling the useless try-catch that is needed
 	 * @param source
-	 * @return
+	 * @return the encoded source or null if the source is null
 	 */
 	public String urlEncode(String source) {
+		if (source==null) {
+			return null;
+		}
 		final String encoding = "UTF-8";
 		try {
 			return URLEncoder.encode(source, encoding);
@@ -585,11 +726,13 @@ public class YadaWebUtil {
 	}
 
 	/**
-	 * Ritorna l'indirizzo completo della webapp, tipo http://www.yodadog.net:8080/site, senza slash finale
+	 * Ritorna l'indirizzo completo della webapp, tipo http://www.yadaframework.net:8080/site, senza slash finale
 	 * Da thymeleaf si usa con ${@yadaWebUtil.getWebappAddress(#httpServletRequest)}
 	 * @param request
 	 * @return
+	 * @deprecated use YadaConfiguration.getWebappAddress instead, because this version does not work behind an ajp connector
 	 */
+	@Deprecated
 	public String getWebappAddress(HttpServletRequest request) {
 		int port = request.getServerPort();
 		String pattern = port==80||port==443?"%s://%s%s":"%s://%s:%d%s";
