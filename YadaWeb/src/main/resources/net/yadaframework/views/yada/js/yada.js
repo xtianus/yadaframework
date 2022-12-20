@@ -38,8 +38,10 @@
 	var siblingsSelector = "yadaSiblings:"; // Used to indicate that a CSS selector should be searched in the siblings()
 	var closestFindSelector = "yadaClosestFind:"; // Used to indicate that a two-part CSS selector should be searched with closest() then with find()
 	var siblingsFindSelector = "yadaSiblingsFind:"; // Used to indicate that a two-part CSS selector should be searched with siblings() then with find()
+	const scrollTopParamName = "scrolltop";
 	
 	$(document).ready(function() {
+		handleScrollTop();
 		// Be aware that all ajax links and forms will NOT be ajax if the user clicks while the document is still loading.
 		// To prevent that, call yada.initAjaxHandlersOn($('form,a')); at the html bottom and just after including the yada.ajax.js script
 		initHandlers();
@@ -206,6 +208,18 @@
 	//////////////////////
 	/// Url Parameters ///
 	//////////////////////
+	
+	yada.addScrollTop = function(url) {
+		return yada.addOrUpdateUrlParameter(url, scrollTopParamName, $(window).scrollTop());
+	}
+	
+	function handleScrollTop() {
+		const scrollTopValue = yada.getUrlParameter(window.location.href, scrollTopParamName);
+		if (scrollTopValue!=null) {
+			$(window).scrollTop(scrollTopValue);
+			history.replaceState(null, "", yada.removeUrlParameter(window.location.href, scrollTopParamName));
+		}
+	}
 	
 	// Ritorna true se la url contiene il parametro indicato
 	yada.hasUrlParameter = function(url, param) {
