@@ -148,6 +148,18 @@ public class YadaUtil {
 	}
 	
 	/**
+	 * Add an element to the list only if not there already
+	 * @param <T>
+	 * @param list
+	 * @param element
+	 */
+	public <T> void addIfMissing(List<T> list, T element) {
+		if (!list.contains(element)) {
+			list.add(element);
+		}
+	}
+	
+	/**
 	 * Create a new TreeSet that sorts values according to the order specified in the parameter.
 	 * Values that are missing from sortOrder are sorted alphabetically
 	 * @param sortOrder
