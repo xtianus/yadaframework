@@ -89,7 +89,7 @@ public class YadaLoginController {
 	}
 
 	@RequestMapping("/autologin/{tokenLink}")
-	public String autologin(@PathVariable String tokenLink, String action, RedirectAttributes  redirectAttributes, HttpSession session, HttpServletRequest request) {
+	public String autologin(@PathVariable("tokenLink") String tokenLink, String action, RedirectAttributes  redirectAttributes, HttpSession session, HttpServletRequest request) {
 		try {
 			action = URLDecoder.decode(action, "UTF-8");
 		} catch (UnsupportedEncodingException e) {

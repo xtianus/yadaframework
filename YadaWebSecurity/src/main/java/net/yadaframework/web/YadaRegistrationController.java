@@ -249,7 +249,7 @@ public class YadaRegistrationController {
 	 * @return
 	 */
 	@RequestMapping("/yadaPasswordChangeModal/{token}/{username}/end")
-	public String passwordChangeModal(@PathVariable String token, @PathVariable String username, @ModelAttribute YadaFormPasswordChange yadaFormPasswordChange) {
+	public String passwordChangeModal(@PathVariable("token") String token, @PathVariable("username") String username, @ModelAttribute YadaFormPasswordChange yadaFormPasswordChange) {
 		return "/yada/modalPasswordChange";
 	}
 
