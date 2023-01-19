@@ -81,6 +81,7 @@ javadoc {
     options.encoding = 'UTF-8'
     options.docEncoding = 'UTF-8'
     options.charSet = 'UTF-8'
+    failOnError = false
 }
 
 // http://stackoverflow.com/a/27853822/587641
@@ -96,7 +97,7 @@ publishing {
             artifactId = 'yadawebsecurity'
             from components.java
             artifact sourcesJar
-            // Not ready for this: artifact javadocJar
+            artifact javadocJar
             versionMapping {
                 usage('java-api') {
                     fromResolutionOf('runtimeClasspath')

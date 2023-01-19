@@ -13,92 +13,19 @@ buildscript {
 plugins {
 	id 'java-library'
 	id 'maven-publish'
-	id 'signing'
 }
 
 group = 'net.yadaframework'
 version = '0.7.3'
 
-task sourcesJar(type: Jar) {
-    archiveClassifier = 'sources'
-    from sourceSets.main.allJava
-}
-
-javadoc {
-    options.encoding = 'UTF-8'
-    options.docEncoding = 'UTF-8'
-    options.charSet = 'UTF-8'
-}
-
-// http://stackoverflow.com/a/27853822/587641
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}   
-
+// PublishToMavenLocal task
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        maven(MavenPublication) {
             artifactId = 'yadaweb'
             from components.java
-            artifact sourcesJar
-            // Not ready for this: artifact javadocJar
-            versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-            }
-  			pom {
-			    name = 'YadaWeb'
-			    description = 'Yada Framework for web applications'
-			    url = 'https://yadaframework.net/en/index.html'
-			    inceptionYear = '2014'
-			    packaging = 'jar'
-			    licenses {
-			        license {
-			            name = 'MIT License'
-			            url = 'https://en.wikipedia.org/wiki/MIT_License'
-			        }
-			    }
-			    developers {
-			        developer {
-			            id = 'xtianus'
-			            name = 'Studio Ghezzi'
-			            email = 'studio@ghezzi.net'
-			        }
-			    }
-			    organization {
-			    	name = 'Studio Ghezzi'
-			    	url = 'https://studio.ghezzi.net/'
-			    }
-			    scm {
-			        connection = 'scm:git:git@github.com:xtianus/yadaframework.git'
-			        developerConnection = 'scm:git:git@github.com:xtianus/yadaframework.git'
-			        url = 'https://github.com/xtianus/yadaframework'
-			    }
-			}
         }
     }
-    repositories {
-        maven {
-            // url = "file://${buildDir}/repotest"
-            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-			credentials(PasswordCredentials) {
-				username = ossrhUsername
-				password = ossrhPassword
-			}
-            // url = "file://${buildDir}/repotest"
-        }
-    }    
-}
-
-signing {
-    sign publishing.publications.mavenJava
 }
 
 apply plugin: 'eclipse-wtp'
@@ -165,10 +92,12 @@ dependencies {
 		'com.sun.mail:javax.mail:1.+',
 		'com.google.guava:guava:31.1-jre',
 		'org.jsoup:jsoup:1.9.+',
+		'ch.qos.logback:logback-classic:1.3.+',
 		'com.fasterxml.jackson.core:jackson-databind:2.13.4',
-		'org.seleniumhq.selenium:selenium-support:3.141.59',
-		'org.seleniumhq.selenium:selenium-firefox-driver:3.141.59',
-		'org.seleniumhq.selenium:selenium-chrome-driver:3.141.59',
+		'org.seleniumhq.selenium:selenium-java:4.1.2',
+		// 'org.seleniumhq.selenium:selenium-chrome-driver:3.141.59',
+		// 'org.seleniumhq.selenium:selenium-support:3.141.59',
+		// 'org.seleniumhq.selenium:selenium-firefox-driver:3.8.1',
 		'com.drewnoakes:metadata-extractor:2.18.0',
 		// 'org.littleshoot:littleproxy:1.1.2',
 		// 'org.quartz-scheduler:quartz:2.2.3',
@@ -209,6 +138,19 @@ processResources {
 		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadaweb.properties", token: '@YADA_VERSION@', value: version)
 	}
 }
+
+
+javadoc {
+    options.encoding = 'UTF-8'
+    options.docEncoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+}
+
+// http://stackoverflow.com/a/27853822/587641
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}   
 
 artifacts {
     archives javadocJar
