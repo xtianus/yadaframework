@@ -98,7 +98,6 @@ public class YadaSeleniumUtil {
 		return javascriptExecutor.executeScript(script, args);
 	}
 
-	
 	/**
 	 * Returns true if the current url matches the specified pattern
 	 * @param urlPattern

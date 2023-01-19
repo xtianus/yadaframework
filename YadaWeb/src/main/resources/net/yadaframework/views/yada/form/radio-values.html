@@ -10,6 +10,7 @@ TODO: fare una versione che riceve un enum per avere la lista dei valori
 
 Parameters:
 - fieldName = name of the field holding the value
+- id = id of the field holding the value (optional)
 - labelKey = key in messages.properties for the top label text
 - label = top label to use, if not using a labelKey
 - values = a static list, like ${ {true,false} } (space is important) - can be absent for empty select
@@ -28,7 +29,7 @@ Example:
 	 */--> 	
 <div th:fragment="field" 
 	class="form-group" th:with="
-	inputId=${id?:#ids.seq(@yadaWebUtil.getRequestMapping(#request))}">
+		inputId=${id?:#ids.seq(@yadaWebUtil.getRequestMapping(#request))}">
 	<label th:if="${label!=null || labelKey!=null}" class="form-check-label" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
 	<div class="form-check has-feedback" th:each="value : ${values}"   th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
 		<input class="form-check-input" type="radio" th:field="*{__${fieldName}__}" th:value="${value}" th:id="${inputId}" />

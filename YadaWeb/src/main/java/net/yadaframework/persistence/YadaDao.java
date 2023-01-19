@@ -14,10 +14,11 @@ import net.yadaframework.exceptions.YadaInvalidValueException;
 
 /**
  * Generic database methods
- *
+ * @deprecated because you will eventually need a specific select, so better make a specific DAO which has type checking
  */
 @Repository
 @Transactional(readOnly = true)
+@Deprecated // Should make a specific DAO anyway because sooner or later you'll need a specific select
 public class YadaDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 

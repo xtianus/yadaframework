@@ -202,6 +202,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 	@Autowired // L'ho spostato qui per risolvere il problema "Requested bean is currently in creation"
 	// Questo registra un Date Formatter
 	public FormattingConversionService mvcConversionService(YadaDateFormatter yadaDateFormatter) {
+		// I should have used DefaultFormattingConversionService but the damage is done
 		FormattingConversionServiceFactoryBean result = new FormattingConversionServiceFactoryBean();
 		Set<Formatter<Date>> formatters = new HashSet<Formatter<Date>>();
 		formatters.add(yadaDateFormatter);
@@ -209,7 +210,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		result.afterPropertiesSet();
 		return result.getObject();
 	}
-
+	
 	/**
 	 * Tutti i file dentro a /res vengono indicati come cacheabili lato browser per 1 anno (tramite l'header expires).
 	 * Per evitare che nuove versioni non vengano mai prese, si usa il "trucco" di indicare il numero di build nell'url, così cambiando

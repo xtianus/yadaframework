@@ -43,7 +43,7 @@ public class YadaGallerySlide implements CloneableDeep {
 
 	// Position in the sequence to which the slide belongs.
 	// Automatically set to the id on persist. Can be swapped with another pos for sorting.
-	private Long pos;
+	private Long pos = null;
 
 	private boolean flag1 = false; // This could be used e.g. for choosing an alternative layout of the single slide
 	private boolean flag2 = false; // This could be used e.g. for choosing an alternative layout of the single slide
@@ -111,7 +111,10 @@ public class YadaGallerySlide implements CloneableDeep {
 
 	@PostPersist
 	private void postPersist() {
-		this.pos = this.id;
+		if (this.pos==null) {
+			// The check is needed to preserve the position on copy
+			this.pos = this.id;
+		}
 	}
 
 	@Override
