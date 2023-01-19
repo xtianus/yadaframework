@@ -86,6 +86,7 @@ public abstract class YadaConfiguration {
 	private String errorPageForward = null;
 	private List<String> locales = null;
 	private Set<Locale> localeSet = null;
+	private List<Locale> localeObjects = null;
 	private Map<String, String> languageToCountry = null;
 	private Boolean localeAddCountry = null;
 	private Boolean localePathVariableEnabled = null;
@@ -419,6 +420,14 @@ public abstract class YadaConfiguration {
 	public boolean useDatabaseMigrationAtStartup() {
 		return configuration.getBoolean("config/database/databaseMigrationAtStartup", false);
 	}
+	/**
+	 * "Out of order" flag in FlyWay 
+	 * https://flywaydb.org/documentation/configuration/parameters/outOfOrder
+	 * @return
+	 */
+	public boolean useDatabaseMigrationOutOfOrder() {
+		return configuration.getBoolean("config/database/databaseMigrationAtStartup/@outOfOrder", false);
+	}
 
 	/**
 	 * Returns the configured default locale.
@@ -519,6 +528,25 @@ public abstract class YadaConfiguration {
 			}
 		}
 		return locales;
+	}
+	
+	/**
+	 * Returns the configured locales as objects, using countries if configured
+	 * @return
+	 */
+	public List<Locale> getLocales() {
+		if (localeObjects==null) {
+			localeObjects = new ArrayList<Locale>();
+			List<ImmutableHierarchicalConfiguration> locales = configuration.immutableConfigurationsAt("config/i18n/locale");
+			for (ImmutableHierarchicalConfiguration localeConfig : locales) {
+				String languageKey = localeConfig.getString(".");
+				String countryValue = localeConfig.getString("./@country", null);
+				Locale locale = countryValue==null?new Locale(languageKey):new Locale(languageKey, countryValue);
+				localeObjects.add(locale);
+			}
+			localeObjects = Collections.unmodifiableList(localeObjects);
+		}
+		return localeObjects;
 	}
 
 	/**
@@ -888,6 +916,8 @@ public abstract class YadaConfiguration {
 				roleIdToKeyMap.put(id, key.toUpperCase());
 				roleKeyToIdMap.put(key.toUpperCase(), id);
 			}
+			roleIdToKeyMap = Collections.unmodifiableMap(roleIdToKeyMap);
+			roleKeyToIdMap = Collections.unmodifiableMap(roleKeyToIdMap);
 		}
 	}
 

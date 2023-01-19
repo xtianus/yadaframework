@@ -42,7 +42,7 @@ public class YadaFileManager {
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private YadaFileManagerDao yadaFileManagerDao;
-
+	
 	protected String COUNTER_SEPARATOR="_";
 
 	// Image to return when no image is available
@@ -93,7 +93,7 @@ public class YadaFileManager {
 //	public void delete(YadaManagedFile managedFile) {
 //		yadaFileManagerDao.delete(managedFile);
 //	}
-
+	
 //	private YadaAttachedFile moveFolderByPattern(YadaAttachedFile toMove, List<YadaPatternAndReplace> fileRenames) {
 //		if (fileRenames!=null) {
 //			String relativeFolderPath = toMove.getRelativeFolderPath();
@@ -247,6 +247,7 @@ public class YadaFileManager {
 //	public YadaAttachedFile findOne(Long yadaAttachedFileId) {
 //		return yadaAttachedFileRepository.findOne(yadaAttachedFileId);
 //	}
+	
 	/**
 	 * Deletes from the filesystem all files related to the attachment
 	 * @param yadaAttachedFileId the attachment id

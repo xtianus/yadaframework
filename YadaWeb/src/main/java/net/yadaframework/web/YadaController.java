@@ -52,10 +52,11 @@ public class YadaController {
         if (StringUtils.isBlank(errorMessage) && exception!=null) {
         	errorMessage = exception.getMessage();
         }
-        if (exception!=null) {
-        	log.error("Error (HTTP {} '{}') shown to user", errorCode, errorMessage);
+        String isAjaxString = yadaWebUtil.isAjaxRequest(request)?" (ajax)":"";
+        if (exception==null) {
+        	log.error("Error (HTTP {} '{}') shown to user {}", errorCode, errorMessage, isAjaxString);
         } else {
-        	log.error("Error (HTTP {} '{}') shown to user", errorCode, errorMessage, exception);
+        	log.error("Error (HTTP {} '{}') shown to user {}", errorCode, errorMessage, isAjaxString, exception);
         }
         model.addAttribute(YadaConstants.REQUEST_HASERROR_FLAG, "true");
         // If it was an ajax request, return an error object

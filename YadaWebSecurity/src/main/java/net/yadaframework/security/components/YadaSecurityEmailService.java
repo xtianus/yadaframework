@@ -66,9 +66,9 @@ public class YadaSecurityEmailService {
 	}
 
 	/**
-	 *
+	 * Send a confirmation email when some user wants to register with his email address
 	 * @param yadaRegistrationRequest
-	 * @param linkParameters can be null
+	 * @param linkParameters name-value paris of url parameters to add at the end of the confirmation link - can be null or empty
 	 * @param request
 	 * @param locale
 	 * @return

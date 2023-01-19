@@ -1,7 +1,6 @@
 package net.yadaframework.core;
 
 public interface YadaConstants {
-
 	String REQUEST_HASERROR_FLAG = "YADA_HAS_ERROR";
 
 	String SESSION_USER_TIMEZONE = "YADA_USER_TIMEZONE";

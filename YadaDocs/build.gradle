@@ -1,7 +1,7 @@
 buildscript {
 	repositories {
-		mavenLocal()
 		mavenCentral()
+		mavenLocal()
 	}
 }
 
@@ -10,7 +10,7 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.7.0'
+version = '0.7.3'
 
 apply plugin: 'java-library'
 apply plugin: 'eclipse-wtp'
@@ -41,8 +41,13 @@ compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
+<<<<<<< HEAD
     mavenCentral()
     mavenLocal()
+=======
+	// jcenter()
+	mavenCentral()
+>>>>>>> refs/remotes/origin/0.7.3
 }
 
 dependencies {

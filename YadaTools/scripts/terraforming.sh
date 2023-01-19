@@ -300,7 +300,7 @@ fi
 
 # certbot for SSL - ubuntu 20
 if [[ $cfgCertbot != "false" ]]; then
-	apt install snapd
+	apt -o Dpkg::Options::="--force-confnew" -y install snapd
 	snap install --classic certbot
 	# certbot --apache
 fi
