@@ -41,13 +41,8 @@ compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
-<<<<<<< HEAD
     mavenCentral()
     mavenLocal()
-=======
-	// jcenter()
-	mavenCentral()
->>>>>>> refs/remotes/origin/0.7.3
 }
 
 dependencies {
