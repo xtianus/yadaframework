@@ -440,10 +440,38 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 
 </head>
 <body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+</script>
 <div id="header">
 <h1>Yada Framework</h1>
 <div class="details">
-<span id="revnumber">version 0.7.0</span>
+<span id="revnumber">version 0.7.3</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -458,6 +486,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_general_principles">General Principles</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>Git repository: <a href="https://github.com/xtianus/yadaframework" class="bare">https://github.com/xtianus/yadaframework</a></p>
+</div>
 <div class="paragraph">
 <p>The <strong>Yada Framework</strong> is a collection of libraries, patterns, tools, code snippets and best practices to speed up web site
 development.
@@ -553,49 +584,49 @@ MySQL, Eclipse. It will then show you how to create an Eclipse project with a da
 been set by following the instructions in the previous chapter, you can start this tutorial
 that will show you how to quickly create a web application</p>
 </dd>
-<dt class="hdlist1"><a href="internationalization.html">internationalization.html</a></dt>
+<dt class="hdlist1"><a href="internationalization.html">i18n</a></dt>
 <dd>
-<p>This section shows how easy it is to handle different languages</p>
+<p>Implement a multilanguage site</p>
 </dd>
-<dt class="hdlist1"><a href="database/pagination.html">database/pagination.html</a></dt>
+<dt class="hdlist1"><a href="database/pagination.html">Database pagination</a></dt>
 <dd>
-<p>TODO</p>
+<p>Fetch big data one piece at a time</p>
 </dd>
 <dt class="hdlist1"><a href="forms/overview.html#Forms">Forms</a></dt>
 <dd>
-<p>TODO</p>
+<p>Submitting data to the server</p>
 </dd>
-<dt class="hdlist1"><a href="ajax.html">ajax.html</a></dt>
+<dt class="hdlist1"><a href="ajax.html">Ajax</a></dt>
 <dd>
-<p>TODO</p>
+<p>Easy async operations</p>
 </dd>
-<dt class="hdlist1"><a href="ajaxModal.html">ajaxModal.html</a></dt>
+<dt class="hdlist1"><a href="ajaxModal.html">Ajax Modals</a></dt>
 <dd>
-<p>TODO</p>
+<p>Open a modal as a result of an ajax call</p>
 </dd>
-<dt class="hdlist1"><a href="datatables.html">datatables.html</a></dt>
+<dt class="hdlist1"><a href="datatables.html">DataTables</a></dt>
 <dd>
-<p>TODO</p>
+<p>Effective handling of tabular data</p>
 </dd>
-<dt class="hdlist1"><a href="emails.html">emails.html</a></dt>
+<dt class="hdlist1"><a href="emails.html">Sending Emails</a></dt>
 <dd>
-<p>TODO</p>
+<p>Templating applied to emails</p>
 </dd>
-<dt class="hdlist1"><a href="internationalization.html">internationalization.html</a></dt>
+<dt class="hdlist1"><a href="notificationModal.html">Notification Modal</a></dt>
 <dd>
-<p>TODO</p>
+<p>Quick messages to the user</p>
 </dd>
-<dt class="hdlist1"><a href="notificationModal.html">notificationModal.html</a></dt>
+<dt class="hdlist1"><a href="misc.html">Miscellaneous</a></dt>
 <dd>
-<p>TODO</p>
+<p>Other features</p>
 </dd>
-<dt class="hdlist1"><a href="troubleshooting.html">troubleshooting.html</a></dt>
+<dt class="hdlist1"><a href="troubleshooting.html">Troubleshooting</a></dt>
 <dd>
-<p>TODO</p>
+<p>Some hints for fixing problems</p>
 </dd>
 <dt class="hdlist1"><a href="upgrade.html">Upgrade Yada Framework Version</a></dt>
 <dd>
-<p>new versions are announced on this page, together
+<p>New versions are announced on this page, together
 with instructions on how to migrate from the previous one</p>
 </dd>
 </dl>
@@ -625,8 +656,8 @@ fixing your code.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.0<br>
-Last updated 2021-04-19 12:05:36 +0200
+Version 0.7.3<br>
+Last updated 2023-01-19 19:03:32 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

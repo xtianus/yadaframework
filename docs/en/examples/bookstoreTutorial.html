@@ -439,10 +439,38 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Misc</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+</script>
 <div id="header">
 <h1>Bookstore Tutorial</h1>
 <div class="details">
-<span id="revnumber">version 0.7.0</span>
+<span id="revnumber">version 0.7.3</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -456,6 +484,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_initial_data">Initial data</a></li>
 </ul>
 </li>
+<li><a href="#_presentation_layer">Presentation Layer</a>
+<ul class="sectlevel2">
+<li><a href="#_general_description">General description</a></li>
+<li><a href="#_book_display">Book Display</a></li>
+</ul>
+</li>
+<li><a href="#_running_the_yada_bookstore_tutorial">Running the Yada Bookstore tutorial</a></li>
 </ul>
 </div>
 </div>
@@ -474,7 +509,7 @@ highlighting the many improvements in maintainability and functionality.</p>
 <div class="openblock bookstore">
 <div class="content">
 <div class="paragraph">
-<p>Java Bookstore tutorial links:</p>
+<p>Original Oracle Java Bookstore tutorial links:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -555,7 +590,11 @@ as explained in the <a href="../newEclipseProject.html#Database Layer">Database 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Entity
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">import javax.persistence.Entity;
+import javax.persistence.Table;
+...
+
+@Entity
 @Table(uniqueConstraints = @UniqueConstraint(  <i class="conum" data-value="1"></i><b>(1)</b>
 		columnNames={"surname", "firstname", "title", "calendarYear"})
 )
@@ -669,7 +708,13 @@ They must be annotated with @Repository and some other transaction-definition el
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Repository
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+...
+
+@Repository
 @Transactional(readOnly = true) <i class="conum" data-value="1"></i><b>(1)</b>
 public class BookDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass()); <i class="conum" data-value="2"></i><b>(2)</b>
@@ -785,7 +830,7 @@ exceptions like <code>BooksNotFoundException</code></td>
 <div class="paragraph">
 <p>In the original Bookstore tutorial, some books are added to the database on application startup using
 the <code>ConfigBean</code> EJB where book definitions are hardcoded. We prefer a different approach: using the
-application configuration file. The <code>/src/main/resources/conf.webapp.prod.xml</code> should be edited to store
+application configuration file. The <code>/src/main/resources/conf.webapp.prod.xml</code> file should be edited to store
 the initial book definitions. This file holds values for the production environment but these values
 are also used in any other lesser environment when the equivalent data is missing. So if the data should be
 the same in every environment, just add it to the production configuration and it will be seen everywhere.</p>
@@ -887,7 +932,7 @@ public void createWhenMissing(List&lt;Book&gt; configuredBooks) {
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>"insert ignore" does the trick of skipping existing elements. It works because of the
+<td><code>insert ignore</code> does the trick of skipping existing elements. It works because of the
 unique constraint that was added in the Book entity</td>
 </tr>
 </table>
@@ -895,7 +940,7 @@ unique constraint that was added in the Book entity</td>
 <div class="openblock bookstore">
 <div class="content">
 <div class="paragraph">
-<p>The original hardcoded version is less maintainable and flexible because it failes with an
+<p>The original hardcoded version is less maintainable and less flexible because it fails with an
 exception when the first book is already stored.</p>
 </div>
 <div class="listingblock">
@@ -913,19 +958,7 @@ public class ConfigBean {
         request.createBook("202", "Jeeves", "",
                 "Web Servers for Fun and Profit", 40.75, true,
                 2010, "What a cool book.", 20);
-        request.createBook("203", "Masterson", "Webster",
-                "Web Components for Web Developers",
-                27.75, false, 2010, "What a cool book.", 20);
-        request.createBook("205", "Novation", "Kevin",
-                "From Oak to Java: The Revolution of a Language",
-                10.75, true, 2008, "What a cool book.", 20);
-        request.createBook("206", "Thrilled", "Ben",
-                "The Green Project: Programming for Consumer Devices",
-                30.00, true, 2008, "What a cool book.", 20);
-        request.createBook("207", "Coding", "Happy",
-                "Java Intermediate Bytecodes", 30.95, true,
-                2010, "What a cool book.", 20);
-
+		...
     }
 }</code></pre>
 </div>
@@ -935,11 +968,65 @@ public class ConfigBean {
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_presentation_layer">Presentation Layer</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_general_description">General description</h3>
+<div class="paragraph">
+<p>The presentation layer receives page requests from the browser and returns HTML ready
+for display. The returned HTML already contains any dynamic information that is specific
+for the parameters sent by the browser. So if the user is trying to open the description of
+a book, the id of the book is be sent in the request and the presentation layer returns the
+HTML containing the description of that specific book.</p>
+</div>
+<div class="paragraph">
+<p>This is in contrast to how some other technologies work, where a generic HTML template is sent to the
+browser, then any request for specific data will return not a new HTML page but just the
+data that will be inserted in the existing template on the browser.</p>
+</div>
+<div class="paragraph">
+<p>In the Yada Framework, web pages are coded in plain HTML that is made dynamic by
+using <a href="https://www.thymeleaf.org/" target="_blank" rel="noopener">Thymeleaf</a> attributes and tags.
+Dynamic values are taken from java beans that are added to the page "model" after being
+fetched from database. The class that receives and handles browser requests is called a "Controller".</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_book_display">Book Display</h3>
+<div class="paragraph">
+<p>The Oracle Bookstore Tutorial starts with a page that shows an image of all available books on a 3x2 grid
+and a similar grid with only the book titles in text form.</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/examples/bookstoreHome.jpg" alt="Oracle Bookstore homepage">
+</div>
+<div class="title">Figure 1. Tomcat configuration</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_running_the_yada_bookstore_tutorial">Running the Yada Bookstore tutorial</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To run the tutorial on an embedded Tomcat</p>
+</div>
+<div class="paragraph">
+<p>The tutorial can either be deployed to a standalone Tomcat server or run with an embedded Tomcat.
+In the latter case, the command from the command line is the following:</p>
+</div>
+<div class="paragraph">
+<p>java net.yadaframework.core.YadaTomcatServer ybsdev src/main/webapp</p>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.0<br>
-Last updated 2021-04-19 21:27:30 +0200
+Version 0.7.3<br>
+Last updated 2023-01-19 19:03:32 +0100
 </div>
 </div>
 <link rel="stylesheet" href="../../highlight/styles/github.min.css">

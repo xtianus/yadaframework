@@ -440,10 +440,38 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 
 </head>
 <body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+</script>
 <div id="header">
 <h1>Getting Started</h1>
 <div class="details">
-<span id="revnumber">version 0.7.0</span>
+<span id="revnumber">version 0.7.3</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -553,9 +581,9 @@ At the time of writing we failed to run on Java 11.0.6 for problems during Gradl
 </table>
 </div>
 <div class="paragraph">
-<p>You should look on the Oracle site for the "Java SE" installer, which is the "Standard Edition" of Java.
+<p>You should look on the <a href="https://www.oracle.com/java/technologies/javase-downloads.html" target="_blank" rel="noopener">Oracle site</a> for the "Java SE" installer, which is the "Standard Edition" of Java.
 You will probably be required to create an Oracle account and login before being able to download.
-The OpenJDK version of Java should also work fine if you prefer open source software.</p>
+The <a href="https://jdk.java.net/java-se-ri/8-MR3" target="_blank" rel="noopener">OpenJDK version of Java</a> should also work fine if you prefer open source software.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -573,7 +601,7 @@ The OpenJDK version of Java should also work fine if you prefer open source soft
 </table>
 </div>
 <div class="paragraph">
-<p>The installation package will install both the JDK and the JRE.
+<p>The installation package will probably install both the JDK and the JRE.
 The JRE - 64 bit - can be any version and generally it will auto-upgrade to the latest.
 To make your installation future-proof, install the java JDK in some folder like <code>C:\Local\Javas\jdk1.8.0_152</code> and
 make a symbolic link to it with a generic name, like</p>
@@ -601,38 +629,60 @@ The Java JRE can be installed to the default folder (<code>C:\Program Files</cod
 </div>
 <div class="paragraph">
 <p>For a future-proof installation you should not install MySQL as a Service, but run it manually when needed because one day
-you might have more than one version to use. The steps to install MySQL 8 on windows are as follows:</p>
+you might have more than one version to use.</p>
+</div>
+<div class="paragraph">
+<p>If you already have a MySQL installation, you may use it. Just check that the "lower_case_table_names" system variable is set to "2":
+if it&#8217;s not, it can&#8217;t be changed after installation so you can either reinstall, install a new instance or live with it (see below).</p>
+</div>
+<div class="paragraph">
+<p>If you don&#8217;t have a MySQL installation already, the easiest way to install it is by downloading the "MySQL installer":</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>download and run the web installer</p>
+<p>on the <a href="https://dev.mysql.com/downloads/mysql/" target="_blank" rel="noopener">MySQL Download Page</a> click on "MySQL Installer":  you will be presented with two downloads,
+the smaller one is the "web installer" and it&#8217;s the one you should use.
+You will be asked to login or register before download but there&#8217;s also a link to download right away.</p>
 </li>
 <li>
-<p>choose the "Custom" installation</p>
-</li>
-<li>
-<p>select the latest MySQL Server 8 from the list on the left, click on the right arrow to move it to the right, then click on it: a new "Advanced Options" link should appear. Click on it and choose the installation folder, for example <code>C:\Local\Mysqls\mysql-8.0.19-winx64</code></p>
+<p>run the installer and choose the version you want to install: be sure to check the "Enable the Select Features page
+to customize product features" checkbox before continuing (NOTE: not sure it&#8217;s needed but do it anyway) because you&#8217;ll need to set the "lower_case_table_names" system
+variable before installation. If you don&#8217;t do this on Windows, you either need to uninstall and reinstall the MySQL server or
+ignore the "lower_case_table_names" setting, in which case you might write SQL queries that don&#8217;t work on the production Linux servers</p>
 </li>
 </ul>
 </div>
 <div class="imageblock center">
 <div class="content">
-<img src="../img/newEclipseProject/MySQL-advanced.jpg" alt="MySQL advanced installation">
+<img src="../img/newEclipseProject/MySQL-checkbox.jpg" alt="MySQL &quot;Features Page&quot; Checkbox">
 </div>
-<div class="title">Figure 1. Installing MySQL</div>
+<div class="title">Figure 1. MySQL "Features Page" Checkbox</div>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>when asked, choose "Show Advanced and Logging options"</p>
+<p>when installing you will get to some wizard pages that allow to select the following:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>"Show Advanced and Logging Options" should be checked</p>
 </li>
 <li>
-<p>on the "Authentication Method" page choose "Use Legacy Authentication" (second option) to have an easier life: it&#8217;s a development PC after all
-and you shouldn&#8217;t have any sensitive information in the database; if you do, you should garble it</p>
+<p>authentication method: any would do</p>
 </li>
 <li>
-<p>on the "Advanced Options" choose "Preserve Given Case" - this is important on Windows to prevent problems when running the DB on linux</p>
+<p>root password: you may leave it blank on your development computer (do as you wish)</p>
+</li>
+<li>
+<p>install as a service: you should not configure the server as a service if you have many versions on the same
+port and want to start the one you need manually (recommended approach)</p>
+</li>
+<li>
+<p>"Advanced Options": <strong>"Preserve Given Case" should be checked</strong>. This will set the "lower_case_table_names" appropriately as explained above</p>
+</li>
+</ul>
+</div>
 </li>
 </ul>
 </div>
@@ -643,7 +693,7 @@ and you shouldn&#8217;t have any sensitive information in the database; if you d
 <div class="title">Figure 2. Installing MySQL</div>
 </div>
 <div class="paragraph">
-<p>After installation, make a symbolic link to it with a generic name, like</p>
+<p>After installation, make a symbolic link to the server folder with a generic name, like</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -651,7 +701,8 @@ and you shouldn&#8217;t have any sensitive information in the database; if you d
 </div>
 </div>
 <div class="paragraph">
-<p>Now you can refer to <code>C:\Local\mysql80</code> in your scripts and when you update the MySQL (minor) version you just change the link, not the scripts.
+<p>Now you can refer to <code>C:\Local\mysql80</code> in your scripts and when you want to use a different installation
+you just change the link, not the scripts.
 In order to start/stop the MySQL server you should create two scripts and put their shortcut somewhere easy like the desktop or the taskbar.</p>
 </div>
 <div class="listingblock">
@@ -678,6 +729,10 @@ C:\Local\mysql80\bin\mysqladmin.exe -u root shutdown</code></pre>
 SET PASSWORD FOR 'root'@'localhost' = '';</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>When you start MySQL you may get a few errors and warnings like "Failed to set up SSL" or "Cannot open Windows EventLog": you
+can safely ignore them as long as the process doesn&#8217;t stop.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_eclipse">Eclipse</h3>
@@ -699,8 +754,8 @@ Eclipse jee 2019-12-R throws a weird "VerifyError: Inconsistent stackmap frames"
 </table>
 </div>
 <div class="paragraph">
-<p>Install the latest version of <a href="https://www.eclipse.org/downloads/packages/" target="_blank" rel="noopener">Eclipse IDE for Enterprise Java Developers</a>.
-Be sure to install the 64 bit "Enterprise" version.</p>
+<p>Install the latest version of <a href="https://www.eclipse.org/downloads/packages/" target="_blank" rel="noopener">Eclipse IDE for Enterprise Java and Web Developers</a>.
+Be sure to install the 64 bit "Enterprise Java and Web" version.</p>
 </div>
 <div class="admonitionblock caution">
 <table>
@@ -711,9 +766,9 @@ Be sure to install the 64 bit "Enterprise" version.</p>
 <td class="content">
 <div class="title">Need Enterprise version?</div>
 <div class="paragraph">
-<p>A 32 bit Eclipse will not run on a 64 bit Java installation so be careful.
+<p>A 32 bit Eclipse will not run on a 64 bit Java installation so be careful not to install the 32 bit.
 The non-enterprise version will not be able to
-run a web application in a standalone Tomcat, and it already comes with some plugins that you
+run a web application in a standalone Tomcat, and it lacks some plugins that you
 would otherwise need to install separately.
 If you need a minimalistic development environment, you should be able to code with the non-enterprise
 version though.</p>
@@ -755,7 +810,7 @@ you from adding a Tomcat server later.</p>
 </div>
 <div class="paragraph">
 <p>From the "Window &gt; Preferences &gt; Gradle" dialog set the "Java home" entry to your JDK installation,
-which would be <code>C:\Local\jdk8</code> if you followed the instructions above.</p>
+which would be <code>C:\Local\jdk8</code> if you followed the instructions above. This is very important. Failing to do so may result in a "java facet" mismatch error on compilation.</p>
 </div>
 <div class="paragraph">
 <p>Set the editors file encoding to UTF-8, at least "General &gt; Workspace &gt; Text file encoding" and "Web &gt; CSS Files &gt; Encoding":</p>
@@ -810,7 +865,7 @@ Install the <a href="https://nodejs.org/en/download/">latest LTS version</a>.</p
 <div class="paragraph">
 <p>The Yada Framework sources are hosted on the public GitHub site.
 To access the GitHub repository use your GitHub credentials on the <a href="https://github.com/xtianus/yadaframework" target="_blank" rel="noopener">yadaframework repo</a>.
-The git url should be like <code>git@github.com:yourname/yadaframework.git</code>.</p>
+The git url should be <code>git@github.com:xtianus/yadaframework.git</code>.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -819,7 +874,13 @@ The git url should be like <code>git@github.com:yourname/yadaframework.git</code
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Since 2021 the preferred method for connecting to GitHub is ssh
+<div class="paragraph">
+<p>Since 2021 the preferred method for connecting to GitHub is ssh. If you didn&#8217;t do so already, you should create
+a pair of SSH private/public keys and upload the public one to GitHub <a href="https://github.com/settings/keys" target="_blank" rel="noopener">here</a>.
+The keys can be generated on Windows using <a href="https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html" target="_blank" rel="noopener">PuttyGen</a>.
+The public one to upload to GitHub is the text shown in the "authorized_keys" box of PuttyGen. The private one to keep on your
+computer must be exported via the "Conversions &gt; Export OpenSSH key" menu without a passphrase.</p>
+</div>
 </td>
 </tr>
 </table>
@@ -833,7 +894,7 @@ Since 2021 the preferred method for connecting to GitHub is ssh
 <p>Open the SSH2 preferences dialog from "Window &gt; Preferences"</p>
 </li>
 <li>
-<p>browse to the location of your private GitHub ssh key</p>
+<p>browse to the location of your private GitHub OpenSSH key</p>
 </li>
 </ul>
 </div>
@@ -1006,6 +1067,9 @@ If it complains about some unbound system library, open "Properties &gt; Java bu
 <div class="ulist">
 <ul>
 <li>
+<p>YadaTools</p>
+</li>
+<li>
 <p>YadaWeb</p>
 </li>
 <li>
@@ -1052,7 +1116,7 @@ based for example on GitLab and clone the repository locally, being careful to c
 similar option on GitHub). Then add the repository location to the Git Perspective as done for the Yada Framework.</p>
 </div>
 <div class="paragraph">
-<p>After the repository has been added to Eclipse, to add your project to the local git repository right-click on it and
+<p>After the repository has been added to Eclipse, to add your project to the git repository right-click on it and
 choose "Team &gt; Share Project&#8230;&#8203;".
 In the dialog you should just select the correct repository and accept the defaults.
 The resulting filesystem structure will be as follows:</p>
@@ -1085,7 +1149,8 @@ The resulting filesystem structure will be as follows:</p>
 /.settings/
 /.classpath
 /.project
-!gradle-wrapper.jar</code></pre>
+!gradle-wrapper.jar
+/.sass/</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1192,7 +1257,8 @@ and is handy when you plan to work on the YadaWeb sources to fix and improve the
 </ul>
 </div>
 <div class="paragraph">
-<p>Use the <code>Gradle &gt; Refresh Gradle Project</code> project menu item to initialise the project.</p>
+<p>Use the <code>Gradle &gt; Refresh Gradle Project</code> project menu item to initialise the project.
+Check the Elcipse console (Window &gt; Show view &gt; Console) to see if there are any problems.</p>
 </div>
 <div class="admonitionblock warning">
 <table>
@@ -1301,8 +1367,8 @@ admin user email to your own email address in order to receive emails from the a
 <h2 id="_database_setup">Database Setup</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The default database schema, user and password are found both in <code>/src/main/resources/conf.webapp.dev.xml</code> and
-<code>/env/dev/createDatabaseAndUser.bat</code>. If you want to change them, do so in both files.</p>
+<p>The default database schema, user and password are found in <code>/src/main/resources/conf.webapp.dev.xml</code>, <code>/src/main/resources/META-INF/persistence.xml</code>, <code>/src/main/webapp/META-INF/context.xml</code> and
+<code>/env/dev/createDatabaseAndUser.bat</code>. If you want to change them, do so in all files.</p>
 </div>
 <div class="openblock bookstore">
 <div class="content">
@@ -1344,7 +1410,7 @@ On Windows you can open a cmd window and drag the file there from Eclipse, then 
 Click on "Run &gt; Run Configurations&#8230;&#8203; &gt; Gradle Task" then press the "New launch configuration" icon.
 A new configuration called "New_configuration" will be created. Change the name to anything you like,
 for example "MySiteProject - DB Schema", add a Gradle Task named "dbSchema", set your application project as the Working Directory,
-then in the "Common" tab choose "Save as &gt; Shared file" and type "MySiteProject\Launches"</p>
+then in the "Common" tab choose "Save as &gt; Shared file" and type "\MySiteProject\Launches"</p>
 </div>
 <div class="imageblock center">
 <div class="content">
@@ -1360,7 +1426,7 @@ script (or an equivalent linux/mac version).</p>
 </div>
 <div class="paragraph">
 <p>You may get some compilation errors that need to be fixed.
-If the schema generator can&#8217;t connect to the database check that /src/main/resources/META-INF/persistence.xml (and /src/main/webapp/META-INF/context.xml) has the right DB credentials.</p>
+If the schema generator can&#8217;t connect to the database check that all configuration files listed above (<code>persistence.xml</code> etc.) have the right DB credentials.</p>
 </div>
 </div>
 </div>
@@ -1494,8 +1560,8 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.0<br>
-Last updated 2021-04-18 15:00:57 +0200
+Version 0.7.3<br>
+Last updated 2023-01-19 19:03:32 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

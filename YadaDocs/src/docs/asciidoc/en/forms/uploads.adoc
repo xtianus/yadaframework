@@ -205,12 +205,20 @@ The File can then be attached to an Entity:
 
 [source,java]
 ----
-YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "userData", "icon");
+YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "/userData", "icon");
 if (newIcon!=null) {
     user.setIcon(newIcon);
     userRepository.save(user);
 }
 ----
+
+The `yadaFileManager.uploadFile()` call can be skipped when passing the MultipartFile directly to `attachNew()`:
+
+[source,java]
+----
+YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "/userData", "icon");
+----
+
 
 The association between the owning Entity and the new YadaAttachedFile instance is not created automatically by yadaFileManager.attachNew() and you
 have to do it explicitly as shown above.
@@ -233,7 +241,7 @@ implement filesystem feature
 ----
 
 In case you're replacing a previous attachment, you only need to pass the previous YadaAttachedFile: the old files will be deleted and replaced with
-the new ones. No database operation is needed in this case.
+the new ones. No explicit database operation is needed in this case.
 
 [source,java]
 ----
@@ -258,20 +266,19 @@ There is no way to detect if you are using the wrong method, so be careful.
  * Uploads an "icon" image for the user
  */
 public String updateProfile(MultipartFile uploadedMultipart) {
+	... fetch 'user' somehow ...
     if (uploadedMultipart!=null && !uploadedMultipart.isEmpty()) {
-        // Saving the uploaded file to the uploads folder
-        File uploadedFile = yadaFileManager.uploadFile(uploadedMultipart);
         YadaAttachedFile previousIcon = user.getIcon();
         if (previousIcon==null) {
             // Move the file to the "someFolder" directory and create a new YadaAttachedFile
-            YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "someFolder", "myprefix");
+            YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "/someFolder", "myprefix");
             if (newIcon!=null) {
                 user.setIcon(newIcon);
                 userRepository.save(user);
             }
         } else {
             // Replace the existing file with the uploaded one
-            yadaFileManager.attachReplace(previousIcon, uploadedFile, uploadedMultipart, "myprefix", "jpg", null, null);
+            yadaFileManager.attachReplace(previousIcon, uploadedMultipart, "myprefix", "jpg", null, null);
         }
     }
 ----
@@ -332,9 +339,9 @@ Files can be removed from the filesystem with `YadaFileManager.deleteFileAttachm
 ----
 YadaAttachedFile icon = user.getIcon();
 yadaFileManager.deleteFileAttachment(icon);
-yadaAttachedFileRepository.delete(icon);
-user.setIcon(null);
-userRepository.save(user);
+user.setIcon(null); // Remove relationship before deletion
+user = userDao.save(user);
+yadaAttachedFileDao.delete(icon);
 ----
 
 [.todo]
@@ -369,17 +376,23 @@ The required image size has to be configured in the `conf.webapp.prod.xml` file,
             <top>
                 <desktop>1920,1200</desktop>
                 <mobile>768,610</mobile>
+                <pdf>3840,2400</pdf>
             </top>
             <thumbnail>
-                <desktop>1920,1374</desktop>
-                <mobile>768,533</mobile>
+                <desktop>800,800</desktop>
+                <mobile>400,400</mobile>
+                <pdf>2000,2000</pdf>
             </thumbnail>
         </news>
 ----
 
-`targetImageExtension` is the image format that all uploaded images will be converted to, unless specified in `preserveImageExtensions`
-which is a comma-separated list of extensions that should not be converted. This can be useful to preserve animated gifs.
-The following xml specifies the desktop and mobile dimensions required for each image.
+`targetImageExtension` is the image format that all uploaded images will be converted to, unless specified 
+in `preserveImageExtensions` which is a comma-separated list of extensions that should not be converted. 
+This can be useful to preserve animated gifs.
+Then the desktop/mobile/PDF dimensions required for each image are specified, but all are optional. 
+In this example there is one "news" image in three cropped sizes, one named "top" and another named "thumbnail".
+There's no need to specify all the three dimensions (desktop/mobile/PDF), but at least one is required 
+to make any sense of the crop operation. 
 The above configuration can be read in your subclass of `YadaConfiguration`:
 
 [source,java]
@@ -389,7 +402,8 @@ public YadaIntDimension[] getDimensionsNewsThumbnail() {
 }
 ----
 
-This will return an array of YadaIntDimension holding the desktop and mobile dimensions at position 0 and 1.
+This will return an array of YadaIntDimension holding the desktop, mobile and PDF dimensions at position 0, 1 and 2,
+with a null value when the dimension has not been configured.
 
 The command to crop and resize images must be specified in the configuration too.
 This example can crop and resize any image, preserving animated gifs if the gif extension has been included in the preserveImageExtensions attribute.
@@ -398,7 +412,7 @@ This example can crop and resize any image, preserving animated gifs if the gif 
 ----
 <config>
     <shell>
-        <yadaCropAndResize>
+        <yadaCropAndResize timeoutseconds="20">
             <executable>convert</executable>
             <arg>${FILENAMEIN}</arg>
             <arg>-coalesce</arg>
@@ -417,7 +431,7 @@ This example works with any image but corrupts gif animations.
 
 [source,xml]
 ----
-<yadaCropAndResize>
+<yadaCropAndResize timeoutseconds="20">
     <executable>convert</executable>
     <arg>${FILENAMEIN}</arg>
     <arg>-background</arg> <!-- "-background white -flatten" converts any transparent png backround to white instead of the default black -->
@@ -440,8 +454,10 @@ Be aware that the most recent version of imagemagick uses the "magick" command i
 <arg>${FILENAMEIN}</arg>
 ----
 
+For more details on shell command executions, see <<../misc.adoc#_shell_command_execution,Shell Command Execution>>.
+
 ===  Java form bean
-The easiest way to handle file uploads is to use the __ref__`forms/overview:Entity Backing Beans` technique. You need to add a `@Transient` field (with getter and setter)
+The easiest way to handle file uploads is to use the <<overview.adoc#_entity_backing_beans,Entity Backing Beans>> technique. You need to add a `@Transient` field (with getter and setter)
 for each multipart file you need to receive:
 
 [source,java]
@@ -456,9 +472,20 @@ public class News implements CloneableDeep {
 ----
 
 This allows for easy validation and handling of the uploaded file.
+You can also use a <<overview.adoc#_form_backing_beans,Form Backing Bean>> of course.
 
 ===  HTML form
-The upload form is the same as already seen elsewhere, with the added `size` option:
+The upload form can be as simple as a plain file input (here with spring/bootstrap5 validation added):
+
+[source,html]
+----
+<form th:action="@{/addOrUpdateNews}" th:object="${news}" enctype="multipart/form-data" 
+	method="post" role="form" th:with="hasError=${#fields.hasErrors('myFieldName')}">
+	<input type="file" name="myFieldName" accept="image/*" th:classappend="${hasError}?is-invalid">
+	<div th:each="err : ${#fields.errors('myFieldName')}" th:text="${err}" class="invalid-feedback">Invalid image</div>
+----
+
+The form can also be implemented using the `/yada/form/fileUpload` fragment:
 
 [source,html]
 ----
@@ -475,7 +502,7 @@ These are the needed parameters:
 * attachedFile: the YadaAttachedFile if you want to show a link to the image below the input field (optional)
 
 ===  Java Controller to show the form
-When showing the form, the size model attribute must be set:
+When showing the form using the fragment example, the `size` model attribute must be set:
 
 [source,java]
 ----
@@ -485,7 +512,7 @@ model.addAttribute("thumbnailSize", biggestNeeded);
 ----
 
 ===  Java Form submission
-When the Controller receives the submitted data inside an instance of the Entity, the first thing is to check for the upload file size and issue an error when the file is too big:
+When the Controller receives the submitted data inside an instance of the Entity, the first thing is to check for the upload file size, then issue an error when the file is too big:
 
 [source,java]
 ----
@@ -532,6 +559,7 @@ if (thumbnailImage!=null && !thumbnailImage.isEmpty()) {
 }
 
 if (!valid) {
+	yadaFileManager.delete(thumbnailManagedFile);
     return EDIT_VIEW;
 }
 ----
@@ -543,8 +571,8 @@ It is important that, if the YadaSession object has been subclassed, it has the 
 [source,java]
 ----
 @Component
-@SessionScope
 @Primary
+@Scope(value="session", proxyMode=ScopedProxyMode.TARGET_CLASS)
 public class ApplicationSession extends YadaSession<UserProfile> {
 ----
 
@@ -558,7 +586,7 @@ String finalRedirect = yadaWebUtil.redirectString("/manager/journal", locale);
 YadaCropQueue yadaCropQueue = applicationSession.addCropQueue(cropRedirect, finalRedirect); // Clear any previous abandoned crops and set the destination
 if (thumbnailManagedFile!=null) {
     YadaCropImage yadaCropImage = yadaCropQueue.addCropImage(thumbnailManagedFile, thumbnailDimensionsDesktopMobile, FOLDER_NEWS, "thumb-");
-    YadaAttachedFile newOrExisting = yadaCropImage.titleKey("crop.news.thumbnail").cropDesktop().cropMobile().link(news.getThumbnail());
+    YadaAttachedFile newOrExisting = yadaCropImage.titleKey("crop.news.thumbnail").link(news.getThumbnail());
     news.setThumbnail(newOrExisting);
     imageLoaded=true;
 }
@@ -571,7 +599,7 @@ If the `YadaAttachedFile` is modified outside the `link` method, it should be pu
 [source,java]
 ----
 newOrExisting.setTitle(news.getTitle());
-newOrExisting = yadaAttachedFileRepository.save(newOrExisting);
+newOrExisting = yadaAttachedFileDao.save(newOrExisting);
 yadaCropImage.setYadaAttachedFile(newOrExisting);
 ----
 
@@ -598,9 +626,11 @@ The crop page can be easily implemented by including the link:++https://jcrop.co
     <script th:src="@{/static/jcrop-3/jcrop.js}"></script>
 </head>
 <body class="yadaCropPage">
-    <div class=" container-fluid sec" th:with="cropQueue=${@applicationSession.cropQueue}, cropImage=${cropQueue.currentImage}">
+    <div class="container-fluid sec" th:with="cropQueue=${@applicationSession.cropQueue}, cropImage=${cropQueue.currentImage}">
 
-        <h1><span th:text="#{${cropImage.titleKey}}">This is the title</span> ([[${cropQueue.count}]] left)</h1>
+        <h1><span th:text="#{${cropImage.titleKey}}">This is the title</span>
+        	<span th:if="${cropQueue.totInitialImages>1}"> ([[#{crop.images.left(${cropQueue.count})}]])</span>
+        </h1>
         <p>Drag the handles to the desired crop, then press the [[#{yada.crop.cropSubmit}]] button</p>
 
         <div th:replace="~{/yadacms/imageCropper::component(cropQueue=${cropQueue})}"></div>
@@ -608,6 +638,9 @@ The crop page can be easily implemented by including the link:++https://jcrop.co
     </div>
 </body>
 ----
+
+The actual crop of the image is already implemented in `YadaMiscController` so there's nothing more to do. 
+To post the form to a custom crop method instead, call the `YadaCropQueue.setCropPerformAction()`. 
 
 ===  Troubleshooting
 The following exception: `YadaInvalidUsageException: Concurrent modification on yadaAttachedFile. This happens if you set 'cascade=CascadeType.ALL' on the owning entity or if the yadaAttachedFile is merged after setting it on YadaCropImage`

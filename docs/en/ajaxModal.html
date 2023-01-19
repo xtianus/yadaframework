@@ -440,16 +440,43 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 
 </head>
 <body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+</script>
 <div id="header">
 <h1>Ajax Modal</h1>
 <div class="details">
-<span id="revnumber">version 0.7.0</span>
+<span id="revnumber">version 0.7.3</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_description">Description</a></li>
-<li><a href="#_html_placeholder">HTML placeholder</a></li>
 <li><a href="#_html_for_the_ajax_call">HTML for the ajax call</a></li>
 <li><a href="#_java_for_the_controller">Java for the @Controller</a></li>
 <li><a href="#_html_of_the_modal">HTML of the modal</a></li>
@@ -474,28 +501,14 @@ For example, by clicking on an "Edit" button
 a modal opens with a form to edit the chosen element.
 The modal content is generated on the server. The browser just opens it.</p>
 </div>
-<div class="imageblock">
+<div class="imageblock center">
 <div class="content">
-<img src="_static/img/modal-example.jpg" alt="Unnamed image">
+<img src="../img/modal-example.jpg" alt="A modal">
 </div>
+<div class="title">Figure 1. A modal</div>
 </div>
 <div class="paragraph">
 <p>The implementation needs the following parts:</p>
-</div>
-<div class="paragraph">
-<p>*</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">HTML placeholder</dt>
-<dd>
-<p>The page must contain the standard HTML placeholder for opening modals. This is
-usually inserted in a common footer so that you don&#8217;t need to remember adding it to the page.</p>
-</dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>*</p>
 </div>
 <div class="dlist">
 <dl>
@@ -503,43 +516,16 @@ usually inserted in a common footer so that you don&#8217;t need to remember add
 <dd>
 <p>The ajax call can be made in many ways: with a <a href="datatables.html">DataTable</a> button, with an <a href="ajax.html">ajax link</a>, via custom javascript &#8230;&#8203;</p>
 </dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>*</p>
-</div>
-<div class="dlist">
-<dl>
 <dt class="hdlist1">Java for the @Controller</dt>
 <dd>
 <p>The modal must be returned by a @RequestMapping method of a @Controller.</p>
 </dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>*</p>
-</div>
-<div class="dlist">
-<dl>
 <dt class="hdlist1">HTML of the modal</dt>
 <dd>
 <p>It specifies the title, header, body, footer and script sections (all are optional). It can also have &lt;head&gt; elements that are
-added to the page while the modal is open and removed on close.</p>
+added to the page &lt;head&gt; while the modal is open and removed on close.</p>
 </dd>
 </dl>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_html_placeholder">HTML placeholder</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>The HTML placeholder must be the <code>class="modal"</code> node of a Bootstrap Modal and have <code>id="ajaxModal"</code>:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div id="ajaxModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"&gt;&lt;/div&gt;</code></pre>
-</div>
 </div>
 </div>
 </div>
@@ -547,11 +533,23 @@ added to the page while the modal is open and removed on close.</p>
 <h2 id="_html_for_the_ajax_call">HTML for the ajax call</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The modal can be opened with any ajax call performed by Yada. In this example we show an ajax link:</p>
+<p>The modal can be opened with any ajax call performed by Yada.</p>
 </div>
-<div class="listingblock todo">
+<div class="paragraph">
+<p>In this example we show an ajax link:</p>
+</div>
+<div class="listingblock">
 <div class="content">
-<pre>Ajax link example</pre>
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a href="/myModal" class="yadaAjax"&gt;Click here&lt;/a&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this example we show an ajax javascript call:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">var data = {name: 'john', surname: 'Doe'};
+yada.ajax(url, data, null, "POST");</code></pre>
 </div>
 </div>
 </div>
@@ -560,11 +558,15 @@ added to the page while the modal is open and removed on close.</p>
 <h2 id="_java_for_the_controller">Java for the @Controller</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The Java @Controller must return a full Bootstrap Modal. The content of the <code>class="modal"</code> node will be inserted in the HTML placeholder and shown.</p>
+<p>The Java @Controller must return a full Bootstrap Modal. The node with <code>class="modal"</code> will be added to the <code>&lt;body&gt;</code> and shown.
+It will be removed from the <code>&lt;body&gt;</code> on close. Any other open modal of this type will be removed unless "sticky" (see below).</p>
 </div>
-<div class="listingblock todo">
+<div class="listingblock">
 <div class="content">
-<pre>@Controller example</pre>
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/myModal")
+public String myModal(Model model, Locale locale) {
+	return "/myModal"; // There must be a myModal.html file
+}</code></pre>
 </div>
 </div>
 </div>
@@ -573,14 +575,11 @@ added to the page while the modal is open and removed on close.</p>
 <h2 id="_html_of_the_modal">HTML of the modal</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You can use your own Bootstrap Modal html or take advantage of the Yada Generic Modal.
+<p>You can use your own Bootstrap Modal html or take advantage of the Yada Generic Modal template.
 With the Yada Generic Modal you only define the section fragments that you need, producing a full Bootstrap Modal.</p>
 </div>
 <div class="paragraph">
 <p>The fragments are:</p>
-</div>
-<div class="paragraph">
-<p>*</p>
 </div>
 <div class="dlist">
 <dl>
@@ -588,66 +587,32 @@ With the Yada Generic Modal you only define the section fragments that you need,
 <dd>
 <p>Visible in the modal header as an &lt;h4&gt; when no custom modal header fragment is given</p>
 </dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>*</p>
-</div>
-<div class="dlist">
-<dl>
 <dt class="hdlist1">custom modal header</dt>
 <dd>
 <p>A full Boostrap modal-header fragment. The modal title is ignored when using this fragment</p>
 </dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>*</p>
-</div>
-<div class="dlist">
-<dl>
 <dt class="hdlist1">modal body</dt>
 <dd>
 <p>The body content</p>
 </dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>*</p>
-</div>
-<div class="dlist">
-<dl>
 <dt class="hdlist1">modal footer</dt>
 <dd>
 <p>The html for the bottom part of the modal. Usually Submit and Close buttons are located here. By default, there&#8217;s just the close button.</p>
 </dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>*</p>
-</div>
-<div class="dlist">
-<dl>
 <dt class="hdlist1">modal script</dt>
 <dd>
 <p>Some custom script to be run when the modal code is inserted on page.</p>
 </dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>*</p>
-</div>
-<div class="dlist">
-<dl>
 <dt class="hdlist1">extra dialog classes</dt>
 <dd>
-<p>You can add a class to the modal-dialog div to set the modal size, the position, or anything that can be set there: <code>modal-dialog-centered</code>, <code>'modal-sm'</code>, <code>'modal-lg'</code>, <code>'modal-xl'</code> and so on. You can also send an empty string <code>''</code> or the empty fragment <code>~{}</code></p>
+<p>You can add a class to the modal-dialog div to set the modal size, the position, or anything that can be set there: <code>modal-dialog-centered</code>, <code>'modal-sm'</code>, <code>'modal-lg'</code>, <code>'modal-xl'</code> and so on.
+You can also use an empty string <code>''</code> or the empty fragment <code>~{}</code></p>
 </dd>
 </dl>
 </div>
 <div class="paragraph">
 <p>The code uses standard Thymeleaf <a href="https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#template-layout">fragment</a> syntax.
-To remove a fragment from the modal, use the ~{} expression. To keep the default value use the _ character:</p>
+To remove a fragment from the modal, use the <code>~{}</code> expression. To keep the default value use the <code>_</code> character:</p>
 </div>
 <div class="paragraph">
 <p>In the following example, three fragments have been defined in the same html file and the footer has been removed.</p>
@@ -680,10 +645,15 @@ To remove a fragment from the modal, use the ~{} expression. To keep the default
 &lt;/html&gt;</code></pre>
 </div>
 </div>
-<div class="imageblock">
+<div class="imageblock center">
 <div class="content">
-<img src="_static/img/modal-example.nofooter.jpg" alt="Unnamed image">
+<img src="../img/modal-example.nofooter.jpg" alt="A modal without footer">
 </div>
+<div class="title">Figure 2. A modal without footer</div>
+</div>
+<div class="paragraph">
+<p>Anything inside the &lt;head&gt; section will be added to the &lt;head&gt; of the page while the modal is open.
+This could be used to load some external js or css files for example.</p>
 </div>
 </div>
 </div>
@@ -691,10 +661,10 @@ To remove a fragment from the modal, use the ~{} expression. To keep the default
 <h2 id="_sticky_modals">Sticky Modals</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Normally, when you open an ajax modal, all existing modals are closed. This is both convenient and compliant with Bootstrap 3 where multiple modals were discouraged.</p>
+<p>Normally, when you open an ajax modal, all existing modals are closed. This is both convenient and compliant with the Bootstrap guidelines.</p>
 </div>
 <div class="paragraph">
-<p>A "sticky modal" is an ajax-loaded modal that can stay open behind anyother ajax modal that is opened afterwords.
+<p>A "sticky modal" is an ajax-loaded modal that can stay open behind anyother ajax modal that is opened afterwards.
 You create a sticky modal by adding the <code>yadaStickyModal</code> class to the <code>modal-dialog</code>, for example:</p>
 </div>
 <div class="listingblock">
@@ -703,12 +673,12 @@ You create a sticky modal by adding the <code>yadaStickyModal</code> class to th
 </div>
 </div>
 <div class="paragraph">
-<p>The modal will not close when another modal is opened but will stay behind: it can only be closed with a <code>data-dismiss</code> button or with a call to <code>.modal("hide")</code>.
+<p>The modal will not close when another normal ajax modal is opened but will stay behind: it can only be closed with a <code>data-dismiss</code> button or with a call to <code>.modal("hide")</code>.
 There can only be one sticky modal at a time: opening a new sticky modal on top of another will hide the new one behind the existing one.</p>
 </div>
 <div class="paragraph">
 <p>It might be convenient to increase the size of a sticky modal so that it remains partially visible behind a normal one. You can achieve this via
-the standard <code>modal-lg</code> or <code>modal-xl</code> classes, or you could implement your own full-screen modal with the following css:</p>
+the standard <code>modal-lg</code> or <code>modal-fullscreen</code> classes, or you could implement your own full-screen modal with the following css:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -723,8 +693,8 @@ the standard <code>modal-lg</code> or <code>modal-xl</code> classes, or you coul
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.0<br>
-Last updated 2021-02-05 19:47:10 +0100
+Version 0.7.3<br>
+Last updated 2023-01-19 19:03:32 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

@@ -7,13 +7,11 @@ Handling user-submitted data
 
 <<uploads.adoc#, File Uploads>>:: How to upload and handle files using forms
 
-<<fieldsComponents.adoc#>>:: TODO
+<<fieldsComponents.adoc#, Form Components>>:: Enhanced input fields
 
 ==  Description
-
-
 Forms are used to gather information from users. You could also use plain anchors with request attributes, but forms are way more convenient especially
-for more than a couple of fields and for performing validation.
+for more than a couple of fields and when performing validation.
 
 The more general kind of form has some input fields that are sent to the server in a POST and received from the @Controller as method parameters. This is a
 link:++https://docs.spring.io/spring/docs/current/spring-framework-reference/web.html#mvc-controller++[standard Spring Web MVC feature] and quite straightforward to implement.
@@ -138,15 +136,13 @@ test that the above code works
 
 It's always better to use a specific name for the @Entity id, like `bookId` and not just `id`, so that you can handle different @Entity instances in the same @Controller.
 
-
-==  Ajax Forms
-
+== Ajax Forms
 
 To send a form via ajax you just need to add the `yadaAjax` class:
 
 [source,html]
 ----
-<form class="jadaAjax" action="/subscribe">
+<form class="yadaAjax" action="/subscribe">
 ----
 
 When a form is added dynamically via custom javascript, you also need to call
@@ -175,7 +171,7 @@ Example:
 
 [source,html]
 ----
-<form class="jadaAjax" action="/subscribe" yada:submitHandler="validateInput">
+<form class="yadaAjax" action="/subscribe" yada:submitHandler="validateInput">
 ----
 
 Submit handlers can be set on the form tag and on any submit button.
@@ -183,15 +179,76 @@ The "this" object is either the form or the clicked button, depending on where t
 
 ===  Postprocessing
 
-
 There are many options to handle the server response, like replacing page content or invoking some
-handler. See __ref__`ajax:Ajax Links` for more details. For example, this form replaces a page element with the
+handler. See <<../ajax.adoc#_ajax_links,Ajax Links>> for more details. For example, this form replaces a page element with the
 returned html:
 
 [source,html]
 ----
-<form class="jadaAjax" action="/subscribe" yada:updateOnSuccess="#someSection">
+<form class="yadaAjax" action="/subscribe" yada:updateOnSuccess="#someSection">
 ----
+
+==  Form groups
+
+Multiple forms scattered around the page can be submitted together if they belong to the same "Form Group":
+when any (ajax or not) form in the group is submitted, the fields from all other forms in the same group are added
+to the payload. If a field has the same name in more than one form, only the first found is considered.
+
+The submission of a form group can also be triggered by an anchor or any other type of element 
+with a `href` or `data-href` attribute (ajax or not). Any request parameter on the url is added to the payload and 
+overwrites any form fields with the same name.
+
+The syntax to define a form group is the following:
+
+[options="header",cols="1,1,1,1"]
+|===
+|data attribute   |yada dialect   | value |description   
+//----------------------
+|data-yadaFormGroup   |yada:formGroup   |any name  | Identifies the form as belonging to the given group   
+|===
+
+Example with a triggering form:
+
+[source,html]
+----
+<form action="/someAction" yada:formGroup="myGroup">
+	<input name="a" value="1">
+	<button type="submit">Submit</button>
+</form>
+<form action="ignored" yada:formGroup="myGroup">
+	<input name="b" value="2">
+</form>
+<form action="ignored" yada:formGroup="myGroup">
+	<input name="c" value="3">
+</form>
+----
+
+In the above example, submitting the first form would send `"a=1&b=2&c=3"` to `/someAction`.
+
+A similar behavior would be obtained by using the "form" attribute on the `<input>` tags of child forms.
+The use of `yada:formGroup` has the following advantages:
+
+- it is quicker to type on large forms
+- can be used together with (ajax or not) requests from elements other than forms (e.g. <<../ajax.adoc#_ajax_links,ajax links>>)  
+- a future improvement could allow forms to belong to multiple groups, something that can't be done with the "form" attribute
+
+Example with a triggering anchor in ajax:
+
+[source,html]
+----
+<a href="" yada:ajax="/someUrl?a=9" yada:formGroup="myGroup">Click me</a>
+<form action="/someAction" yada:formGroup="myGroup">
+	<input name="a" value="1">
+	<input name="c" value="3">
+	<button type="submit">Submit</button>
+</form>
+<form action="ignored" yada:formGroup="myGroup">
+	<input name="b" value="2">
+</form>
+----
+
+In the above example, clicking on the link would send `"a=9&b=2&c=3"` to `/someUrl`.
+
 
 [.todo]
 ----

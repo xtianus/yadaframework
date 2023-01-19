@@ -440,10 +440,38 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 
 </head>
 <body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+</script>
 <div id="header">
 <h1>Ajax</h1>
 <div class="details">
-<span id="revnumber">version 0.7.0</span>
+<span id="revnumber">version 0.7.3</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -459,15 +487,22 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_ajax_forms">Ajax Forms</a></li>
 <li><a href="#_ajax_on_other_elements">Ajax on other elements</a>
 <ul class="sectlevel2">
+<li><a href="#_ajax_on_input_fields">Ajax on input fields</a></li>
 <li><a href="#_ajax_on_checkbox">Ajax on checkbox</a></li>
 </ul>
 </li>
+<li><a href="#_ajax_async_element_load">Ajax async element load</a></li>
 <li><a href="#_ajax_method">Ajax method</a>
 <ul class="sectlevel2">
 <li><a href="#_url">URL</a></li>
 <li><a href="#_data">data</a></li>
 <li><a href="#_successhandler">successHandler</a></li>
 <li><a href="#_responsetype">responseType</a></li>
+</ul>
+</li>
+<li><a href="#_utilities">Utilities</a>
+<ul class="sectlevel2">
+<li><a href="#_dequeuefunctioncall">dequeueFunctionCall</a></li>
 </ul>
 </li>
 <li><a href="#_class_reference">Class Reference</a></li>
@@ -515,9 +550,34 @@ It is automatically included in production, merged with the other yada javascrip
 <div class="paragraph">
 <p>When clicking on the anchor, the <code>/some/endpoint</code> url is called via ajax.</p>
 </div>
-<div class="listingblock todo">
+<div class="paragraph">
+<p>The alternative way to define an ajax link is to use either the <code>yada:ajax</code> or the <code>data-yadaHref</code> attributes instead of the <code>yadaAjax</code> class:
+The href attribute should either be empty or "javascript:;" in that case.</p>
+</div>
+<div class="listingblock">
 <div class="content">
-<pre>Check that I can use yada:ajax="url" and data-yadaHref="url" instead of href and class. href should be "javascript:;" in that case.</pre>
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a href="javascript:;" yada:ajax="@{/some/endpoint}"&gt;Click here&lt;/a&gt;</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_sending_a_form_group">Sending a Form Group</h4>
+<div class="paragraph">
+<p>The ajax link can be part of a <a href="forms/overview.html#_scattered_forms_form_groups">Form Group</a>, in which case all data gathered from
+the forms in the group is sent together with any url parameters:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a yada:href="@{/some/endpoint(a=1)}" yada:formGroup="myGroup"&gt;Click here&lt;/a&gt;
+&lt;form action="ignored" yada:formGroup="myGroup"&gt;
+	&lt;input name="b" value="2"&gt;
+&lt;/form&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above example would send <code>a=1&amp;b=2</code> when clicking on the link.</p>
+</div>
+<div class="paragraph">
+<p>The link is ignored when the ajax call is started by a form in the group.</p>
 </div>
 </div>
 <div class="sect3">
@@ -530,7 +590,11 @@ It is automatically included in production, merged with the other yada javascrip
 </dd>
 <dt class="hdlist1">disable the link</dt>
 <dd>
-<p>The class <code>yadaDisabled</code> disables the link</p>
+<p>The class <code>yadaAjaxDisabled</code> disables the link. Can also be used on any other element.</p>
+</dd>
+<dt class="hdlist1">disable the loader</dt>
+<dd>
+<p>The loader is started by default. To disable it, add the <code>yadaNoLoader</code> class.</p>
 </dd>
 </dl>
 </div>
@@ -569,14 +633,14 @@ public String addRowAjax() {
 <p>Note that <code>#table</code> must be in single quotes inside double quotes because it&#8217;s a EL literal string.</p>
 </div>
 <div class="paragraph">
-<p><strong>Returning JSON</strong></p>
+<p><strong>Returning JSON (using a Map)</strong></p>
 </div>
 <div class="paragraph">
 <p>A String map can easily be converted to JSON using the standard Spring features:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping(path = "/people", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping(path = "/people", produces = MediaType.APPLICATION_JSON_VALUE)
 @ResponseBody
 public Map&lt;String, Object&gt; people() {
     Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
@@ -588,6 +652,33 @@ public Map&lt;String, Object&gt; people() {
 </div>
 <div class="paragraph">
 <p>Please note the needed <code>@ResponseBody</code> tag.</p>
+</div>
+<div class="paragraph">
+<p>The <code>YadaUtil</code> class contains some utility methods to work with
+json as Maps: <code>makeJsonObject()</code>, <code>setJsonAttribute()</code>, <code>getJsonAttribute()</code> etc.</p>
+</div>
+<div class="paragraph">
+<p><strong>Returning JSON (using a template)</strong></p>
+</div>
+<div class="paragraph">
+<p>A specific Thymeleaf syntax can result in the production of a json object using the standard
+Model attribute substitution.
+The template must have the following form (also in a fragment):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;th:block th:inline="text"&gt;["error",
+{
+	"description": "[[${errorDescription}]]"
+}
+]
+&lt;/th:block&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This approach has the advantage that the <code>@RequestMapping</code> method does not need to return a <code>@ResponseBody</code>
+so that the json could be conditionally returned (the <code>produces</code> attribute should
+be skipped too in this case).</p>
 </div>
 <div class="paragraph">
 <p><strong>Returning any MIME type</strong></p>
@@ -702,7 +793,7 @@ Please note that you should NOT use the <code>@ResponseBody</code> tag in this c
 <p>AJAX_REDIRECT_URL_RELATIVE</p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>The target url relative to the webapp, used if AJAX_REDIRECT_URL is not set</p>
+<p>The target url relative to the webapp, used if AJAX_REDIRECT_URL is not set. Do not prefix with the language path: it is done automatically.</p>
 </div></div></td>
 </tr>
 <tr>
@@ -761,10 +852,11 @@ The following <code>data-</code> attributes allow you to perform postprocessing 
 <p><code>data-yadaUpdateOnSuccess</code></p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>jQuery selector list</p>
+<p>jQuery selector list (extended syntax)</p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>replace the selector targets with the result of the ajax call, or replace each selector target with a different part of the result (see below)</p>
+<p>replace (default) the selector targets with the result of the ajax call, or replace (default) each selector target with a different part of the result (see below).
+   Other than replacing, also append/prepend operations are possible.</p>
 </div></div></td>
 </tr>
 <tr>
@@ -772,7 +864,7 @@ The following <code>data-</code> attributes allow you to perform postprocessing 
 <p><code>data-yadaDeleteOnSuccess</code></p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>jQuery selector list</p>
+<p>jQuery selector list (extended syntax)</p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>delete the target elements</p>
@@ -783,10 +875,10 @@ The following <code>data-</code> attributes allow you to perform postprocessing 
 <p><code>data-yadaSuccessHandler</code></p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>comma-separated list of function names</p>
+<p>comma-separated list of function names or function body</p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>call the specified functions</p>
+<p>call the specified functions or execute the code</p>
 </div></div></td>
 </tr>
 </tbody>
@@ -801,41 +893,41 @@ The following <code>data-</code> attributes allow you to perform postprocessing 
 </colgroup>
 <thead>
 <tr>
-<th class="tableblock halign-left valign-top"><code>data-yadaUpdateOnSuccess</code></th>
-<th class="tableblock halign-left valign-top"><code>yada:updateOnSuccess</code></th>
+<th class="tableblock halign-left valign-top">data- HTML attribute</th>
+<th class="tableblock halign-left valign-top">yada-dialect attribute</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p><code>data-yadaDeleteOnSuccess</code></p>
-</div></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p><code>yada:deleteOnSuccess</code></p>
-</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data-yadaUpdateOnSuccess</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>yada:updateOnSuccess</code></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p><code>data-yadaSuccessHandler</code></p>
-</div></div></td>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p><code>yada:successHandler</code></p>
-</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data-yadaDeleteOnSuccess</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>yada:deleteOnSuccess</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data-yadaSuccessHandler</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>yada:successHandler</code></p></td>
 </tr>
 </tbody>
 </table>
-<div class="admonitionblock caution">
+<div class="paragraph">
+<p>See below for details.</p>
+</div>
+<div class="admonitionblock important">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-caution" title="Caution"></i>
+<i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
 <div class="paragraph">
 <p>the difference between using the data- attribute version and the yada: dialect version is that
 the latter receives an expression that will be evaluated by Thymeleaf. Therefore you can use ${variables}
-in the value, but you have to be careful to enclose complex strings in single quotes, like <code>"'#one, .two'"</code>,
-otherwise you get a parse error from Thymeleaf: <code>org.thymeleaf.exceptions.TemplateProcessingException: Could not parse as expression</code>.</p>
+in the value. When the Thymeleaf expression generates a parse error, it is considered a plain string and
+used as it is: this is different from the th: attributes behavior but it allows using "some plain strings" without
+quoting them in single quotes.</p>
 </div>
 </td>
 </tr>
@@ -845,16 +937,19 @@ otherwise you get a parse error from Thymeleaf: <code>org.thymeleaf.exceptions.T
 <h4 id="_replacing_and_deleting">Replacing and Deleting</h4>
 <div class="paragraph">
 <p>The "jQuery selector list" is a comma-separated list of jQuery selectors, like <code>"#someId, .someClass &gt; a"</code>.
-If the selector list is empty, the target is the element itself.
-If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.</p>
+It is searched in all the document unless a special yada prefix is used (see below).
+If the selector list is empty, the target is the element itself.</p>
+</div>
+<div class="paragraph">
+<p>If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.</p>
 </div>
 <div class="paragraph">
 <p>Each selector can also have the following special prefixes:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
 </colgroup>
 <thead>
 <tr>
@@ -863,6 +958,14 @@ If the selector is an #id, you should ensure that the same id is not present in 
 </tr>
 </thead>
 <tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>yadaFind:</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>the selector is searched in the children of the current element using <code>$.find()</code></p>
+</div></div></td>
+</tr>
 <tr>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p><code>yadaParents:</code></p>
@@ -876,7 +979,7 @@ If the selector is an #id, you should ensure that the same id is not present in 
 <p><code>yadaSiblings:</code></p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>the selector is searched in the siblings of the current element</p>
+<p>the selector is searched in the siblings of the current element using <code>$.siblings()</code></p>
 </div></div></td>
 </tr>
 <tr>
@@ -887,24 +990,152 @@ If the selector is an #id, you should ensure that the same id is not present in 
 <p>splits the selector at the first space then uses <code>$.closest()</code> with the first part and <code>$.find()</code> with the second</p>
 </div></div></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>yadaSiblingsFind:</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>splits the selector at the first space then uses <code>$.siblings()</code> with the first part and <code>$.find()</code> with the second</p>
+</div></div></td>
+</tr>
 </tbody>
 </table>
+<div class="paragraph">
+<p>Each selector can also be the argument of a function that alters the behavior from replacing to appending/prepending:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 66.6667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">name</th>
+<th class="tableblock halign-left valign-top">description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>$replace()</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>the selected target is replaced with the ajax result (default operation)</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>$replaceWith()</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>the selected target is replaced with the ajax result (alias for $replace())</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>$prepend()</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>the ajax result is inserted as the first child of the selected target</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>$append()</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>the ajax result is inserted as the last child of the selected target</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The next example prepends the ajax result to the closest div of the clicked button:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;button yada:ajax="@{/someUrl}" yada:updateOnSuccess="$prepend(yadaParents:div)"</code></pre>
+</div>
+</div>
 <div class="paragraph">
 <p><strong>Multiple replacement values</strong></p>
 </div>
 <div class="paragraph">
-<p>If the selector list has many targets and the result contains as many elements tagged with the class <code>yadaFragment</code>, then each target is given a different <code>yadaFragment</code> element.
+<p>If the selector list has many comma-separated selectors and the result contains as many elements
+tagged with the class <code>yadaFragment</code>, then each selector target is given a different <code>yadaFragment</code> element.
 When there are more targets than replacements, replacements are cycled from the start.
-When there is a single target, fragments are ignored and the whole result is used as usual.</p>
+When there is a single selector, fragments are ignored and the whole result is used as usual.</p>
 </div>
-<div class="listingblock todo">
+<div class="paragraph">
+<p>The next example shows a @Controller returning two Items, one to be prepended at the button location and another to be appended elsewhere.</p>
+</div>
+<div class="listingblock">
 <div class="content">
-<pre>Examples (see OneNote)</pre>
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div id="root"&gt; <i class="conum" data-value="4"></i><b>(4)</b>
+	&lt;h1&gt;There you go&lt;/h1&gt;
+	&lt;!-- itemRoot will end up here --&gt;
+&lt;/div&gt;
+&lt;th:block th:fragment="itemListFragment"&gt; <i class="conum" data-value="2"></i><b>(2)</b>
+	&lt;div th:each="item : ${itemList}" class="yadaFragment"&gt;
+		&lt;p th:text="${item.text}"&gt;Item text here&lt;/p&gt;
+	&lt;/div&gt;
+&lt;/th:block&gt;
+&lt;div&gt; <i class="conum" data-value="3"></i><b>(3)</b>
+	&lt;!-- itemButton will end up here --&gt;
+	&lt;button yada:ajax="@{/someUrl}" <i class="conum" data-value="1"></i><b>(1)</b>
+		yada:updateOnSuccess="$prepend(yadaParents:div), $append(#root)"&gt;
+	&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>When the user clicks on the button, the controller is called</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The controller returns two items, each tagged with class <code>yadaFragment</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The first item is prepended here by <code>$prepend(yadaParents:div)</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>The second item is appended here by <code>$append(#root)</code></td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/someUrl")
+public String someUrl(Model model) {
+	...
+	model.addAttribute("itemList", new Item[] {itemButton, itemRoot});
+	return "/itemList :: itemListFragment";
+}</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
 <h4 id="_calling_some_handler">Calling some Handler</h4>
+<div class="paragraph">
+<p>The value of the yadaSuccessHandler attribute can either be a comma-separated list
+of function names or bodies of a function.</p>
+</div>
+<div class="paragraph">
+<p>Examples:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">yada:successHandler="countItems"
+yada:successHandler="countItems, showValue"
+yada:successHandler="|$('#${messageId}').addClass('obsolete');|"
+yada:successHandler="alert(responseText), alert('hello'), link.reset()"</code></pre>
+</div>
+</div>
 <div class="paragraph">
 <p>The success handlers are called in sequence and should have the following signature:</p>
 </div>
@@ -921,13 +1152,59 @@ When there is a single target, fragments are ignored and the whole result is use
 </dd>
 <dt class="hdlist1">responseHtml</dt>
 <dd>
-<p>the ajax response converted to html objects</p>
+<p>the ajax response converted to jQuery html objects</p>
 </dd>
 <dt class="hdlist1">link</dt>
 <dd>
-<p>the original anchor object (DOM, not jQuery)</p>
+<p>the original anchor object (DOM, not jQuery). Could also be a form or anything else, not just a "link".</p>
 </dd>
 </dl>
+</div>
+<div class="paragraph">
+<p>The <code>link</code> argument is also the same as the current <code>this</code> context.</p>
+</div>
+<div class="paragraph">
+<p>When using function bodies, the above three arguments are valid objects.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you use both <code>yada:updateOnSuccess</code> and <code>yada:successHandler</code>, the handlers will be called
+after the page has been modified and the <strong>responseHtml</strong> argument would point to the new page content.
+The <strong>this</strong> context would be the original element, that may no longer be on page if replaced.</p>
+</div>
+<div class="paragraph">
+<p>In case <code>yada:updateOnSuccess</code> worked on multiple elements, the <strong>responseHtml</strong> argument would be an
+array of all sections inserted in page.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>When <code>yada:successHandler</code> is used alone, the <strong>responseHtml</strong> is added to a parent <code>&lt;div&gt;</code> so that
+css selection (like <code>$.find()</code>) can match root nodes.
+When using both <code>yada:updateOnSuccess</code> and <code>yada:successHandler</code>, the <strong>responseHtml</strong> argument does not have the
+added <code>&lt;div&gt;</code> (stripped by <code>yada:updateOnSuccess</code> for technical reasons) and it stays
+whatever was returned by the ajax call: if you need to match a root object, the selector won&#8217;t work.
+You may consider using <code>yada.findFromParent('.parent', '.child', responseHtml)</code> in all handlers to cater for both cases, instead of
+the classic <code>responseHtml.find('.parent .child')</code> or <code>$('.parent .child', responseHtml)</code> that may fail.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect3">
@@ -1018,17 +1295,72 @@ When there is a single target, fragments are ignored and the whole result is use
 <h2 id="_ajax_on_other_elements">Ajax on other elements</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Ajax calls can also be made on other HTML elements like buttons and selects by means of the <code>data-yadahref</code> attribute or the equivalent <code>yada:ajax</code> dialect.</p>
+<p>Ajax calls can also be made on other HTML elements like buttons and selects by means of the <code>data-yadahref</code> attribute or the equivalent <code>yada:ajax</code> dialect.
+Furthermore, any HTML element can become a trigger for an ajax call that can asynchronously update a page region when that element
+enters the viewport.</p>
+</div>
+<div class="sect2">
+<h3 id="_ajax_on_input_fields">Ajax on input fields</h3>
+<div class="paragraph">
+<p>An ajax call can be triggered on any &lt;input&gt; field that triggers the "input" event
+on change, by just setting the <code>yada:ajax</code> or <code>data-yadaHref</code> attribute.</p>
+</div>
+<div class="paragraph">
+<p>The value of the input field will be sent to the given URL at each keystroke. It is possible
+to specify which keystrokes trigger the ajax call by means of the <code>yada:ajaxTriggerKeys</code> attribute,
+that can contain a pipe-separated list of <a href="https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values" target="_blank" rel="noopener">KeyboardEvent.key</a> values.</p>
+</div>
+<div class="paragraph">
+<p>Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;input
+	yada:ajax="@{/user/setAddress(userId=${user.id})}" <i class="conum" data-value="1"></i><b>(1)</b>
+	yada:ajaxTriggerKeys="Enter|ArrowRight| |," <i class="conum" data-value="2"></i><b>(2)</b>
+	yada:updateOnSuccess="yadaParents:.addresses"
+	yada:ajaxResultFocus <i class="conum" data-value="3"></i><b>(3)</b>
+	name="address"&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>URL to call</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>optional list of keys that trigger the call: enter, cursor right,space and comma in this example</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>on return from the ajax call, after updating the page with the result, if there is an
+element in the result that has this attribute and is neither disabled nor readonly, it
+will receive focus (the first one found)</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>It works on <code>&lt;input type="radio"&gt;</code> too.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_ajax_on_checkbox">Ajax on checkbox</h3>
+<div class="listingblock todo">
+<div class="content">
+<pre>All &lt;input&gt;, &lt;textarea&gt; and &lt;select&gt; tags can be handled by the new yada.enableAjaxInputs function
+and the legacy code for them should be removed.
+Changing a select or a checkbox sumbits the enclosing form: this should be made an option in the new version.</pre>
+</div>
+</div>
 <div class="paragraph">
 <p>An ajax call can be originated by a state change in a checkbox. The checkbox must NOT be inside a form otherwise the form would be submitted instead.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;input yada:ajax="@{/product/onOff(productId=${product.id})}"
-        th:name="enabled" th:checked="${product.enabled}" type="checkbox" /&gt;</code></pre>
+    name="enabled" th:checked="${product.enabled}" type="checkbox" /&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock todo">
@@ -1037,6 +1369,151 @@ When there is a single target, fragments are ignored and the whole result is use
         showFeedbackIfNeeded</pre>
 </div>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ajax_async_element_load">Ajax async element load</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are may use cases where it is desirable to load an element of the page only when that element scrolls into view.
+For example, deferring the load of a big image or the calculation of a computationally intensive value.
+This is achieved using the same <code>yada:ajax</code> syntax seen above, with the addition of <code>yada:triggerInViewport</code>: when
+any element (even a span) is tagged with <code>yada:triggerInViewport</code>, it behaves like a clicked anchor when it enters the
+viewport (or if it is there already on page load).</p>
+</div>
+<div class="paragraph">
+<p>The following example shows an async "like button". On page load the state of the button is unknown so it shows
+as "not liked". As soon as it gets into view, an ajax call retrieves the real state of the button by querying the DB.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;span yada:triggerInViewport <i class="conum" data-value="1"></i><b>(1)</b>
+	th:if="${@yadaSecurityUtil.loggedIn}"
+	class="yadaNoLoader"
+	yada:ajax="@{/getBookLikeButtonFragment(bookId=${book.id})}" <i class="conum" data-value="2"></i><b>(2)</b>
+	yada:updateOnSuccess="yadaSiblings:.like"&gt; <i class="conum" data-value="3"></i><b>(3)</b>
+&lt;/span&gt;
+&lt;a class="like" th:fragment="bookLikeButtonFragment" <i class="conum" data-value="4"></i><b>(4)</b>
+	th:classappend="${isLikedByUser}?liked"&gt; <i class="conum" data-value="5"></i><b>(5)</b>
+	&lt;i class="bi bi-heart-fill"&gt;&lt;/i&gt;
+&lt;/a&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the trigger is a span with no body, but it could be any element, even the button itself (beware of loops!)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>the ajax call sends the book id to the backend; together with the current user id taken from the session (if any) the like state is determined</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>when the ajax call returns, the like button is replaced with the result, which is the button itself in this example</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>the fragment returned from the Controller is the like button itself (see Java below)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>the "liked" class is added in return from the ajax call when needed</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/getBookLikeButtonFragment")
+public String getBookLikeButtonFragment(Long bookId, Model model, Locale locale) {
+	boolean isLikedByUser = false;
+	Long currentUserProfileId = mySession.getCurrentUserProfileId();
+	if (currentUserProfileId!=null) {
+		isLikedByUser = bookDao.isLiked(bookId, currentUserProfileId);
+	}
+	model.addAttribute("isLikedByUser", isLikedByUser);
+	return "/myBooksPage :: bookLikeButtonFragment";
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Considering that the initial ajax call could be slow and allow users to click on the like button
+before it is loaded, it could be desirable to disable it unless it has been loaded via ajax. This
+is easily achieved by checking the presence of the <code>yadaIsAjaxResponse</code> model attribute, that is
+inserted at each ajax call. The syntax for adding a second conditional class, in this case <code>yadaAjaxDisabled</code>,
+is a bit more complicated:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a class="like" ...
+	th:classappend="|${isLikedByUser==true?'liked':''} ${yadaIsAjaxResponse!=null?'':'yadaAjaxDisabled'}|" <i class="conum" data-value="1"></i><b>(1)</b>
+	...</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>yadaAjaxDisabled</code> prevents any ajax call and is already defined in <code>yada.css</code> with a <code>no-drop</code> cursor</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The above example doesn&#8217;t take into consideration the action performed when clicking on the like button.
+This would be implemented with a plain <code>yada:ajax</code> call that toggles the like status and returns the
+button fragment again:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a class="like" ...
+	yada:ajax="@{/user/toggleBookLike(bookId=${book.id},currentLike=${isLikedByUser})}"
+	yada:updateOnSuccess=""&gt;
+&lt;/a&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Another step would be to take care of "login redirects": when a logged out user clicks on the
+like button a login modal would be triggered if the url is protected (as it should) and the
+Controller, called after login with a redirect to the original url, wouldn&#8217;t know the
+real like status from <code>currentLike</code>. It can be assumed that the user wants to like the item when the like button
+is clicked before login (as it is snown as "not liked" by default). For that, there is a request parameter
+that is added to the original url and can be checked in the Controller, called <code>yadaAjaxJustLoggedIn</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/toggleBookLike")
+public String toggleBookLike(Long bookId, Boolean currentLike, Boolean yadaAjaxJustLoggedIn, Model model, Locale locale) {
+	Long currentUserProfileId = mySession.getCurrentUserProfileId();
+	if (currentUserProfileId!=null) {
+		if (Boolean.TRUE.equals(yadaAjaxJustLoggedIn)) { <i class="conum" data-value="1"></i><b>(1)</b>
+			bookDao.ensureLiked(bookId, currentUserProfileId); <i class="conum" data-value="2"></i><b>(2)</b>
+			model.addAttribute("isLikedByUser", true);
+		} else {
+			bookDao.toggleLiked(currentLike, bookId, currentUserProfileId); <i class="conum" data-value="3"></i><b>(3)</b>
+			model.addAttribute("isLikedByUser", !currentLike);
+		}
+	}
+	return "/myBooksPage :: bookLikeButtonFragment";
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>yadaAjaxJustLoggedIn</code> is <code>true</code> when the Controller is called after a login redirect, <code>null</code> otherwise</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>force to "like" after a login</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>toggle like when no login has just occurred</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -1179,7 +1656,7 @@ public String addUser(MultipartFile someBinaryArray, String someText, Model mode
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">successHandler(responseText, responseHtml)</code></pre>
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">successHandler(responseText, $responseHtml)</code></pre>
 </div>
 </div>
 <div class="dlist">
@@ -1188,9 +1665,9 @@ public String addUser(MultipartFile someBinaryArray, String someText, Model mode
 <dd>
 <p>the raw original text returned by the server, or a json object if json was returned</p>
 </dd>
-<dt class="hdlist1">responseHtml</dt>
+<dt class="hdlist1">$responseHtml</dt>
 <dd>
-<p>the original response converted to a div with jQuery.html()</p>
+<p>the original response converted to a div with <code>jQuery.html()</code></p>
 </dd>
 </dl>
 </div>
@@ -1219,6 +1696,28 @@ See <a href="#_returning_from_the_backend">Returning from the backend</a> for an
 </div>
 </div>
 <div class="sect1">
+<h2 id="_utilities">Utilities</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_dequeuefunctioncall">dequeueFunctionCall</h3>
+<div class="paragraph">
+<p>The <code>yada.dequeueFunctionCall</code> function can be used to prevent queuing of ajax calls when only the last call
+is useful and a small delay can be tolerated. For example, when sending the value of an input text field at
+each keystroke there&#8217;s no need to send each keystroke change but only the last value. Using this function, a
+keystroke done within the timeout of 200ms will cancel the previous call. Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.dequeueFunctionCall(document, someFunction);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The parameters are any DOM element used to store a flag, and the function to call.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_class_reference">Class Reference</h2>
 <div class="sectionbody">
 <div class="dlist">
@@ -1242,8 +1741,8 @@ Otherwise the form will be sent with a normal non-ajax request.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.0<br>
-Last updated 2021-02-05 19:47:06 +0100
+Version 0.7.3<br>
+Last updated 2023-01-19 19:03:32 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

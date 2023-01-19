@@ -2,6 +2,9 @@
 :docinfo: shared
 
 ==  General Principles
+
+Git repository: https://github.com/xtianus/yadaframework
+
 The *Yada Framework* is a collection of libraries, patterns, tools, code snippets and best practices to speed up web site
 development.
 The main focus is on *productivity* and the approach is to use proven and known technologies
@@ -49,27 +52,27 @@ MySQL, Eclipse. It will then show you how to create an Eclipse project with a da
 been set by following the instructions in the previous chapter, you can start this tutorial
 that will show you how to quickly create a web application
 
-<<internationalization.adoc#>>:: This section shows how easy it is to handle different languages
+<<internationalization.adoc#,i18n>>:: Implement a multilanguage site
 
-<<database/pagination.adoc#>>:: TODO
+<<database/pagination.adoc#,Database pagination>>:: Fetch big data one piece at a time
 
-<<forms/overview.adoc#Forms,Forms>>:: TODO
+<<forms/overview.adoc#Forms,Forms>>:: Submitting data to the server
 
-<<ajax.adoc#>>:: TODO
+<<ajax.adoc#,Ajax>>:: Easy async operations
 
-<<ajaxModal.adoc#>>:: TODO
+<<ajaxModal.adoc#,Ajax Modals>>:: Open a modal as a result of an ajax call
 
-<<datatables.adoc#>>:: TODO
+<<datatables.adoc#,DataTables>>:: Effective handling of tabular data
 
-<<emails.adoc#>>:: TODO
+<<emails.adoc#,Sending Emails>>:: Templating applied to emails
 
-<<internationalization.adoc#>>:: TODO
+<<notificationModal.adoc#,Notification Modal>>:: Quick messages to the user
 
-<<notificationModal.adoc#>>:: TODO
+<<misc.adoc#,Miscellaneous>>:: Other features
 
-<<troubleshooting.adoc#>>:: TODO
+<<troubleshooting.adoc#,Troubleshooting>>:: Some hints for fixing problems
 
-<<upgrade.adoc#,Upgrade Yada Framework Version>>:: new versions are announced on this page, together
+<<upgrade.adoc#,Upgrade Yada Framework Version>>:: New versions are announced on this page, together
 with instructions on how to migrate from the previous one
 
 ==  Current Status

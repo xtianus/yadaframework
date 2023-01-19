@@ -1,0 +1,85 @@
+=  Misc
+:docinfo: shared
+
+Miscellaneous features
+
+== Shell Command Execution
+Shell commands can be configured with variable parameters and executed via the 
+`YadaUtil.shellExec()` method. They can be specific to an environment (development, test, production)
+ or generic, and the executable can be different for different OS.
+ 
+The following example, added to `conf.webapp.prod.xml` only, defines an imagemagick conversion
+task that can be used in every environment and different OS: 
+ 
+[source,xml]
+----
+<imageConversion timeoutseconds="10"> # <1>
+	<executable windows="true">magick</executable> # <2>
+	<executable mac="true" linux="true">/usr/local/bin/magick</executable> # <2>
+	<arg>convert</arg>
+	<arg>${FILENAMEIN}</arg> # <3>
+	<arg>${FILENAMEOUT}</arg>
+</imageConversion>
+----
+<1> A timeout in seconds can be specified, the default being 60 seconds
+<2> There can be more than one executable if needed
+<3> Dynamic parameters can be added
+
+A different environment can have a specific configuration section with the same first tag (`<imageConversion>` in the above example).
+
+[CAUTION]
+====
+If you are used to Commons Configuration http://commons.apache.org/proper/commons-configuration/userguide/howto_basicfeatures.html#Variable_Interpolation[variable interpolation^], please note that it can't
+be used in <arg> values. This is because the syntax clashes with the https://commons.apache.org/proper/commons-exec/tutorial.html[substitution map^] of Apache
+Commons Exec.
+====
+
+The above configuration can be used with a code similar to the following:
+
+[source,java]
+----
+Map<String, String> params = new HashMap<>();
+params.put("FILENAMEIN", imageToCropFile.getAbsolutePath());
+params.put("FILENAMEOUT", destinationFile.getAbsolutePath());
+int exitValue = yadaUtil.shellExec("config/imageConversion", params, null);
+----
+
+==  Client Timezone
+The timezone of the user is retrieved via javascript on first page load and sent to the server
+for storage in the HTTP Session. This is done via an ajax call at each new browser session.
+The timezone for unlogged users can be retrieved from the `YadaConstants.SESSION_USER_TIMEZONE` session
+attribute:
+
+[source,java]
+----
+TimeZone userTimezone = (TimeZone) session.getAttribute(YadaConstants.SESSION_USER_TIMEZONE);
+----
+
+On user registration, the timezone is stored in the YadaRegistrationRequest and later in the YadaUserProfile
+when registration is confirmed. It is also refreshed at each user login so that it is always up to date.
+It can therefore be retrieved with
+
+[source,java]
+----
+TimeZone userTimezone = userProfile.getTimezone();
+----
+
+This feature is totally transparent to the user.
+For use cases where the user must be allowed to set the timezone explicitly, the `YadaUtil.getTimezones()` method
+can be used to retrieve a list of readable timezones to present in a select. When the user sends the
+chosen timezone to the server, the `yadaUserProfile.timezoneSetByUser` flag should be set to true in order
+to prevent the default automatic timezone change on login.
+For example:
+
+[source,java]
+----
+if (!formBean.getTimezoneId().equals(userProfile.getTimezone().getID())) {
+	// If the timezone is different from before, set the flag
+	userProfile.setTimezoneSetByUser(true);
+}
+userProfile.setTimezone(TimeZone.getTimeZone(formBean.getTimezoneId()));
+----
+ 
+
+
+

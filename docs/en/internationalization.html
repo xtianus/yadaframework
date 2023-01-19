@@ -440,10 +440,38 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 
 </head>
 <body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+</script>
 <div id="header">
 <h1>Internationalization</h1>
 <div class="details">
-<span id="revnumber">version 0.7.0</span>
+<span id="revnumber">version 0.7.3</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -457,6 +485,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_enum_values">Enum values</a></li>
 </ul>
 </li>
+<li><a href="#_initial_language_choice">Initial language choice</a></li>
 <li><a href="#_configuring_language_in_the_path">Configuring "language in the path"</a>
 <ul class="sectlevel2">
 <li><a href="#_java_code">Java code</a></li>
@@ -580,11 +609,11 @@ for a single instance in a single language.</p>
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">AirOne</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Mercury Ball</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">2</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">AirOne</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Jupiter Ball</p></td>
 </tr>
 </tbody>
 </table>
@@ -637,6 +666,31 @@ for a single instance in a single language.</p>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_initial_language_choice">Initial language choice</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When a user loads the site for the first time, the initial language will be chosen from the
+<code>accept-language</code> header sent by the browser. This is implemented in Spring&#8217;s <code>CookieLocaleResolver</code>
+but overridden in <code>YadaWebConfig</code> so that all values from the header are considered in order to find the
+first language chosen by the user that has also been configured in the webapp. If no values from the header
+are acceptable, the default configured language will be used. Configuration example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">	&lt;i18n localePathVariable="true"&gt;
+      &lt;locale default="true"&gt;en&lt;/locale&gt;
+      &lt;locale&gt;ar&lt;/locale&gt;
+      &lt;locale&gt;de&lt;/locale&gt;
+      &lt;locale&gt;fr&lt;/locale&gt;
+   	&lt;/i18n&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On the following requests, the standard Spring cookie is used to determine the previously chosen locale.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_configuring_language_in_the_path">Configuring "language in the path"</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -666,8 +720,19 @@ protected Filter[] getServletFilters() {
 <p>The above adds a filter to the Spring servlet engine. It is not needed when using YadaSecurity because the same is
 already done in <code>net.yadaframework.security.SecurityWebApplicationInitializer</code>.</p>
 </div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
 <div class="paragraph">
-<p>:TIP The "language in the path" functionality is implemented in YadaLocalePathVariableFilter, YadaLocalePathChangeInterceptor, YadaLinkBuilder</p>
+<p>The "language in the path" functionality is implemented in YadaLocalePathVariableFilter, YadaLocalePathChangeInterceptor, YadaLinkBuilder</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect2">
@@ -993,8 +1058,8 @@ public class Product {
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.0<br>
-Last updated 2021-02-05 19:47:44 +0100
+Version 0.7.3<br>
+Last updated 2023-01-19 19:03:32 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

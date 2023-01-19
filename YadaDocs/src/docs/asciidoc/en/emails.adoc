@@ -132,9 +132,12 @@ Regex patterns of email addresses that are not accepted at registration
 
 Email content is defined using HTML templates as for web pages.
 Templates must be saved in the `src\main\resources\template\email` folder as html files.
-You can use the standard Thymeleaf notation. Model attributes can be accesed the ususal way with `${myobj}`, as are
-singleton beans `${@mybean}`, urls `@{/myurl}` and localized strings `#{my.local.string}`.
+You can use most of the standard Thymeleaf notation, considering that neither the Model nor the HTTP request are available. 
+Singleton beans `${@mybean}` and localized strings `#{my.local.string}` work as usual.
 Includes can also be used, with a path relative to the `templates` folder.
+Model attributes must be set on a new `Map<String, Object>` and can be accessed the usual way with `${myobj}`.
+URLs need a special handling: the `@{/myurl}` syntax doesn't work because the server address is unknown to Thymeleaf, so
+a "Model attribute" with the full URL must be used instead. The `YadaWebUtil.getFullUrl()` method exists for this purpose.
 
 Example `src\main\resources\template\email\bookVisit.html`:
 
@@ -164,7 +167,6 @@ Example `src\main\resources\template\email\bookVisit.html`:
 </html>
 ----
 
-
 ==  Email Subject
 
 
@@ -189,11 +191,11 @@ It can also handle file attachments.
 ----
 public void confirmVisit(Booking booking, String customerEmail, File catalog, Locale locale) {
 final String emailName = "bookVisit";
-        final String[] toEmail = new String[] { customerEmail };
-        final String[] replyEmail = config.getEmailFrom();
-        String cancelLink = "/booking/cancel/" + booking.getId();
+final String[] toEmail = new String[] { customerEmail };
+final String[] replyEmail = config.getEmailFrom();
+String cancelLink = yadaWebUtil.getFullUrl("/booking/cancel/", locale, "bookingId", booking.getId());
 
-        final Map<String, Object> templateParams = new HashMap<>();
+final Map<String, Object> templateParams = new HashMap<>();
 templateParams.put("slot", booking.getSlot());
 templateParams.put("totPeople", booking.getTotPeople());
 templateParams.put("cancelLink", cancelLink);
@@ -204,9 +206,9 @@ final Map<String, File> attachments = new HashMap<>();
 attachments.put(pdf.getName(), catalog);
 
 Map<String, String> inlineResources = new HashMap<>();
-        inlineResources.put("logosmall", config.getEmailLogoImage());
+inlineResources.put("logosmall", config.getEmailLogoImage());
 
-        yadaEmailService.sendHtmlEmail(replyEmail, toEmail, replyEmail[0], emailName, subjectParams, templateParams, inlineResources, attachments, locale, false);
+yadaEmailService.sendHtmlEmail(replyEmail, toEmail, replyEmail[0], emailName, subjectParams, templateParams, inlineResources, attachments, locale, false);
 }
 ----
 

@@ -26,8 +26,11 @@ The HTML page must contain the following placeholder:
 ----
 <div th:include="/yada/modalNotify :: modal" class="modal fade" id="yada-notification" role="dialog"></div>
 <script th:if="${YADA_NBODY!=null}" type="text/javascript">
-        $('#yada-notification').modal('show');
+	$(document).ready(function() {
+		$('#yada-notification').modal('show');
+	});
 </script>
+
 <script type="text/javascript">
         $('#yada-notification').on('hidden.bs.modal', function (e) {
                 $('#yada-notification .glyphicon').addClass("hidden");
@@ -85,7 +88,7 @@ boolean failed=false;
 yadaNotify.title("Login " + failed?"failed":"success", model).ok(!failed).error(failed).message("You have {}been logged in", failed?"not ":"").add();
 ----
 
-The previous example shows the use of link:++https://www.slf4j.org/faq.html#logging_performance++[slf4j placeholders] in the message() method.
+The previous example shows the use of https://www.slf4j.org/faq.html#logging_performance++[slf4j placeholders] in the message() method.
 
 When calling the add() method you're actually creating a message with the values previously stored in the builder, adding it to the current HTTP Request.
 The add() method also terminates the builder chain and you can't call further methods after it.
@@ -196,15 +199,20 @@ The last version is very convenient when returning a message at the end of the @
 
 The problem with the above approach is that you might want to also return some other HTML,
 for example the original form with validation errors, or something to insert in the page.
-The solution is to add a conditional include of the modalNotify in your returned view:
+The solution is to add a conditional include of the modalNotify in your returned view. If
+the returned view is also used in normal requests, an ajax check can be used:
 
 [source,html]
 ----
 <!-- Some other html that you need goes before or after -->
-<div class="yadaResponseData">
-        <div th:if="${YADA_NBODY}" th:include="/yada/modalNotify :: body" th:remove="tag"></div>
+<div th:if="${@yadaWebUtil.AjaxRequest}" class="yadaResponseData"> # <1>
+        <div th:if="${YADA_NBODY}" # <2> 
+        	th:include="/yada/modalNotify :: body" th:remove="tag">
+        </div>
 </div>
 ----
+<1> only add the notification modal in ajax requests (normal request might have it already embedded)
+<2> only add the notification modal if there is a message to show
 
 The yadaResponseData element is hidden by `*yada.css*`.
 
@@ -324,6 +332,29 @@ optional url to redirect when the modal is closed
 
 ==  Customization
 
+=== Modal icons
+
+Notification modals use a "severity icon" on the top left and a "close icon" on the top right.
+These can be customized using the following CSS classes: `yadaIcon`, `yadaNotify`, `yadaIcon-ok`, `yadaIcon-warning`, `yadaIcon-error`, `close`, `yadaIcon-close`.
+The full list of provided icons can be found in `/YadaWeb/src/main/resources/net/yadaframework/views/yada/css/yada.css`.
+The current icons are implemented using https://fontawesome.com/v5.15/icons?d=gallery&p=1[Font Awesome 5 Free^].
+A different icon set can be easily used by setting the proper font family on yadaIcon and the right content on the other classes.
+Example:
+
+[source,css]
+----
+.yadaIcon {
+	font-family: 'Font Awesome 5 Free';
+	font-weight: 900;
+} 
+
+.yadaIcon-ok:before {
+    content: "\f00c";
+}
+----
+
+
+=== Full customization
 
 The notification modal can either be customized via CSS or by implementing a new html file.
 In the second case you should copy the original file from `/YadaWeb/src/main/resources/net/yadaframework/views/yada/modalNotify.html` and

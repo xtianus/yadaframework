@@ -77,8 +77,8 @@ For example, consider a Product with a non-localized "name" and a localized "des
 |===
 |ID   |NAME   
 //-------------
-|1   |AirOne   
-|2   |AirOne   
+|1   |Mercury Ball   
+|2   |Jupiter Ball   
 |===
 
 .Product_description
@@ -100,6 +100,24 @@ For example, consider a Product with a non-localized "name" and a localized "des
 TO BE CONTINUED...
 ----
 
+==  Initial language choice
+When a user loads the site for the first time, the initial language will be chosen from the
+`accept-language` header sent by the browser. This is implemented in Spring's `CookieLocaleResolver`
+but overridden in `YadaWebConfig` so that all values from the header are considered in order to find the
+first language chosen by the user that has also been configured in the webapp. If no values from the header
+are acceptable, the default configured language will be used. Configuration example:
+
+[source,xml]
+----
+	<i18n localePathVariable="true">
+      <locale default="true">en</locale>
+      <locale>ar</locale>
+      <locale>de</locale>
+      <locale>fr</locale>
+   	</i18n>
+----
+
+On the following requests, the standard Spring cookie is used to determine the previously chosen locale.
 
 ==  Configuring "language in the path"
 
@@ -129,8 +147,10 @@ protected Filter[] getServletFilters() {
 The above adds a filter to the Spring servlet engine. It is not needed when using YadaSecurity because the same is
 already done in `net.yadaframework.security.SecurityWebApplicationInitializer`.
 
-:TIP The "language in the path" functionality is implemented in YadaLocalePathVariableFilter, YadaLocalePathChangeInterceptor, YadaLinkBuilder
-
+[TIP]
+====
+The "language in the path" functionality is implemented in YadaLocalePathVariableFilter, YadaLocalePathChangeInterceptor, YadaLinkBuilder
+====
 
 ===  Application configuration
 

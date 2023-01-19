@@ -440,10 +440,38 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 
 </head>
 <body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+</script>
 <div id="header">
 <h1>Sending Emails</h1>
 <div class="details">
-<span id="revnumber">version 0.7.0</span>
+<span id="revnumber">version 0.7.3</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -579,9 +607,12 @@ Useful in development and test environments to prevent sending fake emails to re
 <div class="paragraph">
 <p>Email content is defined using HTML templates as for web pages.
 Templates must be saved in the <code>src\main\resources\template\email</code> folder as html files.
-You can use the standard Thymeleaf notation. Model attributes can be accesed the ususal way with <code>${myobj}</code>, as are
-singleton beans <code>${@mybean}</code>, urls <code>@{/myurl}</code> and localized strings <code>#{my.local.string}</code>.
-Includes can also be used, with a path relative to the <code>templates</code> folder.</p>
+You can use most of the standard Thymeleaf notation, considering that neither the Model nor the HTTP request are available.
+Singleton beans <code>${@mybean}</code> and localized strings <code>#{my.local.string}</code> work as usual.
+Includes can also be used, with a path relative to the <code>templates</code> folder.
+Model attributes must be set on a new <code>Map&lt;String, Object&gt;</code> and can be accessed the usual way with <code>${myobj}</code>.
+URLs need a special handling: the <code>@{/myurl}</code> syntax doesn&#8217;t work because the server address is unknown to Thymeleaf, so
+a "Model attribute" with the full URL must be used instead. The <code>YadaWebUtil.getFullUrl()</code> method exists for this purpose.</p>
 </div>
 <div class="paragraph">
 <p>Example <code>src\main\resources\template\email\bookVisit.html</code>:</p>
@@ -644,11 +675,11 @@ It can also handle file attachments.</p>
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public void confirmVisit(Booking booking, String customerEmail, File catalog, Locale locale) {
 final String emailName = "bookVisit";
-        final String[] toEmail = new String[] { customerEmail };
-        final String[] replyEmail = config.getEmailFrom();
-        String cancelLink = "/booking/cancel/" + booking.getId();
+final String[] toEmail = new String[] { customerEmail };
+final String[] replyEmail = config.getEmailFrom();
+String cancelLink = yadaWebUtil.getFullUrl("/booking/cancel/", locale, "bookingId", booking.getId());
 
-        final Map&lt;String, Object&gt; templateParams = new HashMap&lt;&gt;();
+final Map&lt;String, Object&gt; templateParams = new HashMap&lt;&gt;();
 templateParams.put("slot", booking.getSlot());
 templateParams.put("totPeople", booking.getTotPeople());
 templateParams.put("cancelLink", cancelLink);
@@ -659,9 +690,9 @@ final Map&lt;String, File&gt; attachments = new HashMap&lt;&gt;();
 attachments.put(pdf.getName(), catalog);
 
 Map&lt;String, String&gt; inlineResources = new HashMap&lt;&gt;();
-        inlineResources.put("logosmall", config.getEmailLogoImage());
+inlineResources.put("logosmall", config.getEmailLogoImage());
 
-        yadaEmailService.sendHtmlEmail(replyEmail, toEmail, replyEmail[0], emailName, subjectParams, templateParams, inlineResources, attachments, locale, false);
+yadaEmailService.sendHtmlEmail(replyEmail, toEmail, replyEmail[0], emailName, subjectParams, templateParams, inlineResources, attachments, locale, false);
 }</code></pre>
 </div>
 </div>
@@ -696,8 +727,8 @@ For example:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.0<br>
-Last updated 2021-02-05 19:47:20 +0100
+Version 0.7.3<br>
+Last updated 2023-01-19 19:03:32 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

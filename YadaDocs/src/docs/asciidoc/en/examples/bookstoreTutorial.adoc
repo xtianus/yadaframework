@@ -76,6 +76,10 @@ Following the official Java Bookstore tutorial, the Book entity class is as foll
 
 [source,java]
 ----
+import javax.persistence.Entity;
+import javax.persistence.Table;
+...
+
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(  # <1>
 		columnNames={"surname", "firstname", "title", "calendarYear"})
@@ -149,6 +153,12 @@ They must be annotated with @Repository and some other transaction-definition el
 
 [source,java]
 ----
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+...
+
 @Repository
 @Transactional(readOnly = true) # <1>
 public class BookDao {
