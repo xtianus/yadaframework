@@ -3,6 +3,30 @@
 
 Miscellaneous features
 
+== Downloading Temporary Files
+Sometimes users must download a file created on the fly,
+for example when exporting rows of a table in xls format.
+This can be done in many ways, for example by returning a FileSystemResource.
+This approach has the drawback of leaving the temporary file on the server and therefore
+requires an external cron job to clean the temporary folder periodically.
+
+A better solution is to delete the temporary file just after it has been downloaded. This can be
+achieved by `yadaWebUtil.downloadFile()`:
+
+[source,java]
+----
+@RequestMapping("/downloadRows")
+public void downloadRows(Long[] id, HttpServletResponse httpResponse) {
+	File xlsFile = File.createTempFile("temp", ".xls");
+	[... fetch data from DB and add to xlsFile ...]
+	yadaWebUtil.downloadFile(xlsFile.toPath(), true, MediaType.APPLICATION_OCTET_STREAM_VALUE, "data.xls", httpResponse);
+}
+----
+
+This will start the download on the browser, resulting in a "data.xls" file on the client computer. The "temp.xls"
+file on the server will be automatically deleted.
+
+
 == Shell Command Execution
 Shell commands can be configured with variable parameters and executed via the 
 `YadaUtil.shellExec()` method. They can be specific to an environment (development, test, production)

@@ -49,6 +49,7 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
+<li><a href="#_downloading_temporary_files">Downloading Temporary Files</a></li>
 <li><a href="#_shell_command_execution">Shell Command Execution</a></li>
 <li><a href="#_client_timezone">Client Timezone</a></li>
 </ul>
@@ -59,6 +60,36 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <div class="sectionbody">
 <div class="paragraph">
 <p>Miscellaneous features</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_downloading_temporary_files">Downloading Temporary Files</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Sometimes users must download a file created on the fly,
+for example when exporting rows of a table in xls format.
+This can be done in many ways, for example by returning a FileSystemResource.
+This approach has the drawback of leaving the temporary file on the server and therefore
+requires an external cron job to clean the temporary folder periodically.</p>
+</div>
+<div class="paragraph">
+<p>A better solution is to delete the temporary file just after it has been downloaded. This can be
+achieved by <code>yadaWebUtil.downloadFile()</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/downloadRows")
+public void downloadRows(Long[] id, HttpServletResponse httpResponse) {
+	File xlsFile = File.createTempFile("temp", ".xls");
+	[... fetch data from DB and add to xlsFile ...]
+	yadaWebUtil.downloadFile(xlsFile.toPath(), true, MediaType.APPLICATION_OCTET_STREAM_VALUE, "data.xls", httpResponse);
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will start the download on the browser, resulting in a "data.xls" file on the client computer. The "temp.xls"
+file on the server will be automatically deleted.</p>
 </div>
 </div>
 </div>
@@ -180,7 +211,7 @@ userProfile.setTimezone(TimeZone.getTimeZone(formBean.getTimezoneId()));</code><
 <div id="footer">
 <div id="footer-text">
 Version 0.7.3<br>
-Last updated 2023-01-19 19:03:32 +0100
+Last updated 2023-01-25 16:25:13 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
