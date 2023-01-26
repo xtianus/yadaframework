@@ -227,6 +227,10 @@ public class YadaWebUtil {
 	 * Copies the content of a file to the Response then deletes the file.
 	 * To be used when the client needs to download a previously-created temporary file that you don't want to keep on server.
 	 * Remember to set the "produces" attribute on the @RequestMapping with the appropriate content-type.
+	 * 
+	 * This version is different from {@link #downloadFile(Path, boolean, String, String, HttpServletResponse)} because
+	 * it can be used when you don't have the source temp File but only its name, for example because the temp file
+	 * has been created in a previous request that redirected to the download url sending just the name of the temp file.
 	 * @param tempFilename the name (without path) of the existing temporary file, created with Files.createTempFile()
 	 * @param contentType the content-type header
 	 * @param clientFilename the filename that will be used on the client browser
@@ -252,9 +256,9 @@ public class YadaWebUtil {
 	}
 
 	/**
-	 * Copies the content of a file to the Response then deletes the file.
+	 * Copies the content of a file to the Response then optionally deletes the file.
 	 * To be used when the client needs to download a previously-created file that you don't want to keep on server.
-	 * Remember to set the "produces" attribute on the @RequestMapping with the appropriate content-type.
+	 * No need to set the "produces" attribute on the @RequestMapping with the appropriate content-type.
 	 * @param fileToDownload the existing file to download and delete
 	 * @param thenDeleteFile true to delete the file when download ends (or fails)
 	 * @param contentType the content-type header
