@@ -1181,11 +1181,24 @@
 			// Recursively add all child forms
 			var $form = $(this);
 			var $childForm = this['yadaChildForm'];
-			while ($childForm != null) {
-				$childForm.children().filter("input, textarea, select").appendTo($form);
-				$childForm = $childForm['yadaChildForm'];
+			// This doesn't work properly because the parent form is modified and after a browser back it is still modified
+			// therefore the previous child fields are submitted with the new ones.
+			//			while ($childForm != null) {
+			//				$childForm.children().filter("input, textarea, select").appendTo($form);
+			//				$childForm = $childForm['yadaChildForm'];
+			//			}
+			//			// continue normal submission...
+			//
+			if ($childForm!=null) {
+				// Replace the current form with a new form composed of all merged input elements
+				var $newform=$($form).clone(true); // Clone also the submit handlers
+				$(document.body).append($newform); // Needed to submit the form (https://stackoverflow.com/a/42081856/587641)
+				$childForm.children().filter("input, textarea, select").clone().appendTo($newform);
+				// Submit the new form and stop the current submission
+				e.preventDefault();
+				$newform.submit();
+				return false;
 			}
-			// continue normal submission...
 		});
 	}
 	
