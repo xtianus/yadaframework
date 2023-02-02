@@ -34,31 +34,31 @@ public class YadaSql implements CloneableDeep {
 
 	private final static String MYSQL_IGNORECASE="COLLATE utf8_general_ci";
 
-	YadaSql parent = null; // Used for subexpressions
-	boolean enabled = true; // Used for subexpressions
-	StringBuilder queryBuffer = new StringBuilder();
-	StringBuilder joins = new StringBuilder();
-	StringBuilder whereConditions = new StringBuilder();
-	StringBuilder havingConditions = new StringBuilder();
-	String selectFrom = null; // Keep it here for use when replacing it
-	String groupBy = "";
-	String orderBy = "";
-	Integer limit = null;
-	boolean nowInHaving = false;
-	boolean lastSkipped = false;
-	String pendingWhereOperand = null;
-	String pendingHavingOperand = null;
-	Boolean nativeQuery;
-	Map<String, Object> insertValues = new HashMap<>();
-	Map<String, Object> parameters = new HashMap<>();
-	boolean queryDone = false;
-	List<YadaSql> unions = new ArrayList<>();
+	protected YadaSql parent = null; // Used for subexpressions
+	protected boolean enabled = true; // Used for subexpressions
+	protected StringBuilder queryBuffer = new StringBuilder();
+	protected StringBuilder joins = new StringBuilder();
+	protected StringBuilder whereConditions = new StringBuilder();
+	protected StringBuilder havingConditions = new StringBuilder();
+	protected String selectFrom = null; // Keep it here for use when replacing it
+	protected String groupBy = "";
+	protected String orderBy = "";
+	protected Integer limit = null;
+	protected boolean nowInHaving = false;
+	protected boolean lastSkipped = false;
+	protected String pendingWhereOperand = null;
+	protected String pendingHavingOperand = null;
+	protected Boolean nativeQuery;
+	protected Map<String, Object> insertValues = new HashMap<>();
+	protected Map<String, Object> parameters = new HashMap<>();
+	protected boolean queryDone = false;
+	protected List<YadaSql> unions = new ArrayList<>();
 //	Map<String, String> aliasMap = new HashMap<>();
 
-	private YadaSql() {
+	protected YadaSql() {
 	}
 
-	private YadaSql(YadaSql parent, boolean enabled) {
+	protected YadaSql(YadaSql parent, boolean enabled) {
 		this.parent = parent;
 		this.enabled = enabled;
 	}
