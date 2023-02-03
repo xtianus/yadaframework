@@ -1233,9 +1233,9 @@ public class YadaUtil {
 	public static String getLocalValue(Map<Locale, String> LocalizedValueMap, Locale locale) {
 		String result=null;
 		try {
-		if (locale==null) {
-			locale = LocaleContextHolder.getLocale();
-		}
+			if (locale==null) {
+				locale = LocaleContextHolder.getLocale();
+			}
 			result = LocalizedValueMap.get(locale);
 		} catch (Exception e) {
 			log.debug("Exception while getting localized value from {} with locale={} (ignored): {}", LocalizedValueMap, locale, e.getMessage());

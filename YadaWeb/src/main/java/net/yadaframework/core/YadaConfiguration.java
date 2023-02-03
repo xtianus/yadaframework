@@ -650,6 +650,7 @@ public abstract class YadaConfiguration {
 	 * Return the server address without a trailing slash. E.g. http://col.letturedametropolitana.it
 	 * Warning: this version does not work properly behind an ajp connector
 	 * @return
+	 * @deprecated use {@link #getServerAddress()} instead
 	 */
 	public String getServerAddress(HttpServletRequest request) {
 		if (serverAddress==null) {
