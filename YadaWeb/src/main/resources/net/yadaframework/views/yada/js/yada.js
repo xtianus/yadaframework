@@ -186,22 +186,24 @@
 			$(this).addClass('yadaRefreshed');
 		});
 	}
-
-	// Da chiamare per abilitare il pulsante di ritorno in cima
+	
+	/**
+	 * Enable the "scroll to top" button.
+	*/
 	yada.enableScrollTopButton = function() {
-		var scrollTopButton = $('.yadaScrollTop');
-		if (scrollTopButton.length>0) {
-			$(scrollTopButton).off().click( function(e){
+		const $scrollTopButton = $('.yadaScrollTop');
+		if ($scrollTopButton.length>0) {
+			$scrollTopButton.off().click( function(e){
 				e.preventDefault();
-				$('html, body').animate({scrollTop:0}, 1000);
-				$(this).hide();
+				window.scrollTo({ top: 0, left: 0, behavior: 'smooth'});
 			});
-			$(document).scroll(function () {
+			$(document).on('scroll', function() {
+				const visible = $scrollTopButton.is(":visible");
 				var y = $(this).scrollTop();
 				if (y > 800) {
-					$(scrollTopButton).fadeIn();
+					visible || $scrollTopButton.fadeIn();
 				} else {
-					$(scrollTopButton).fadeOut();
+					visible && $scrollTopButton.fadeOut();
 				}
 			});
 		}
