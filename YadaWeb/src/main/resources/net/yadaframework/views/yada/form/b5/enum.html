@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
+<!--/*
+A select list for enums. The enum must implement a getKey() method that returns the key for messages.properties, like "enum.CompanyType." + name();
+
+TODO verificare che non si possa utilizzare list anche per gli enum
+
+Parameters:
+- fieldName = name of the field holding the value
+- labelKey = key in messages.properties for the label text
+- label = label to use, if not using a labelKey
+- enumClass = full name of the enum class, like net.yada.CompanyType
+- localized = false if the enum doesn't implement getKey() for localization (optional)
+
+*/-->
+<body>
+<div class="form-group" 
+	th:fragment="field"
+	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}">
+	<label class="control-label" th:for="${#ids.next('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Tipo:</label>
+	<select th:field="*{__${fieldName}__}" class="form-control" th:id="${#ids.seq('fieldId')}" th:classappend="${hasError}? is-invalid" th:attr="aria-describedby=${#ids.next('fieldId')}">
+		<!--/* Non si puÃ² avere un header vuoto perchÃ© ciÃ² impedirebbe di creare l'oggetto enum a server automaticamente */-->
+		<option th:each="type : ${T(__${enumClass}__).values()}" 
+			th:value="${type.name()}" 
+			th:text="#{__${localized==false?type:type.key}__}">RETAILER</option>
+	</select>
+	<span th:if="${hasError}" class="bi bi-x form-control-feedback" aria-hidden="true"></span>
+	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
+		<span th:text="${err}" th:id="${#ids.seq('fieldId')}">Error Text</span>
+		<button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+	</div>
+</div>    	
+</body>
+</html>

@@ -43,6 +43,8 @@
 	const sessionStorageKeyTimezone = "yada.timezone.sent";
 	const scrollTopParamName = "scrolltop";
 	
+	yada.stickyModalMarker = "yadaStickyModal";
+	
 	$(document).ready(function() {
 		handleScrollTop();
 		// Be aware that all ajax links and forms will NOT be ajax if the user clicks while the document is still loading.
@@ -1041,12 +1043,12 @@
 	function showNotificationModal(title, message, severity, redirectUrl) {
 		$(".modal").modal("hide"); // Hide previous existing modals
 		yada.loaderOff();
-		var glyphNames = {ok : 'ok-circle', info : 'exclamation-sign', error : 'remove-circle'};
+		var glyphNames = {ok : 'ok', info : 'info', error : 'error'};
 		// $('#yada-notification').modal('hide'); // Eventualmente fosse già aperto
 		$('#yada-notification .modal-title').text(title);
 		$('#yada-notification .modal-body').html('<p>'+message+'</p>')
-		var icon = $('<span class="glyphicon glyphicon-'+glyphNames[severity]+' '+severity+'"></span>');
-		$('#yada-notification span.glyphicon').replaceWith(icon);
+		var icon = $('<i class="yadaIcon yadaIcon-'+glyphNames[severity]+' '+severity+'"></i>');
+		$('#yada-notification h4 i.yadaIcon').replaceWith(icon);
 		$('#yada-notification:hidden').modal('show');
 		if (redirectUrl!=null) {
 			$('#yada-notification').on('hidden.bs.modal', function (e) {
@@ -1210,7 +1212,7 @@
         	if (v1!="" || v2!="") {
         		$oneForm.addClass('has-error');
         		$oneForm.addClass('yada-password-mismatch');
-        		$check.parent().append('<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>');
+        		$check.parent().append('<span class="bi bi-x form-control-feedback" aria-hidden="true"></span>');
         	}
         }
     }
@@ -1222,7 +1224,7 @@
         $submit.removeAttr("disabled");
         $oneForm.removeClass('has-error');
         $oneForm.removeClass('yada-password-mismatch');
-        $('span.form-control-feedback.glyphicon-remove', $check.parent()).remove();
+        $('span.form-control-feedback.bi-x', $check.parent()).remove();
     }
 
 	/**

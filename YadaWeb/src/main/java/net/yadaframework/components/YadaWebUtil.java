@@ -43,7 +43,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Entities.EscapeMode;
 import org.jsoup.safety.Cleaner;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -696,7 +696,7 @@ public class YadaWebUtil {
 	 * @see #cleanContent(String, String...)
 	 */
 	public static String removeHtmlStatic(String source) {
-		Whitelist allowedTags = Whitelist.none();
+		Safelist allowedTags = Safelist.none();
 		Document dirty = Jsoup.parseBodyFragment(source, "");
 		Cleaner cleaner = new Cleaner(allowedTags);
 		Document clean = cleaner.clean(dirty);
@@ -712,7 +712,7 @@ public class YadaWebUtil {
 	 * @return
 	 */
 	public String cleanContent(String content, String ... extraTags) {
-		Whitelist allowedTags = Whitelist.simpleText(); // This whitelist allows only simple text formatting: b, em, i, strong, u. All other HTML (tags and attributes) will be removed.
+		Safelist allowedTags = Safelist.simpleText(); // This whitelist allows only simple text formatting: b, em, i, strong, u. All other HTML (tags and attributes) will be removed.
 		allowedTags.addTags("br", "cite", "em", "i", "p", "strong", "img", "li", "ul", "ol", "sup", "sub", "s");
 		allowedTags.addTags(extraTags);
 		allowedTags.addAttributes("p", "style"); // Serve per l'allineamento a destra e sinistra

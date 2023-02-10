@@ -340,10 +340,10 @@ input.yadaSwitch-round:checked ~ label:after {
 /***************/
 /* Yada Icons  */
 /***************/
-/* This is for fontawesome 5 but can be overridden for any other icon library */
+/* This is for bootstrap 5 but can be overridden for any other icon library */
 
 .yadaIcon {
-	font-family: "Font Awesome 5 Free";
+	font-family: "bootstrap-icons";
 	-moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
     display: inline-block;
@@ -355,19 +355,19 @@ input.yadaSwitch-round:checked ~ label:after {
 }
 
 .yadaIcon-ok:before {
-    content: "\f058";
+    content: "\F26B";
 }
 
-.yadaIcon-warning:before {
-    content: "\f06a";
+.yadaIcon-info:before, .yadaIcon-warning:before {
+    content: "\F333";
 }
 
 .yadaIcon-error:before {
-    content: "\f057";
+    content: "\F623";
 }
 
 .yadaIcon-close:before {
-    content: "\f00d";
+    content: "\F62A";
     font-weight: 600;	
 }
 
