@@ -52,13 +52,14 @@
 	z-index: 999999;    
 }
 
-.popover .yadaclose {
+.popover-header .yadaclose {
 	float: right;
     border: none;
-    background: transparent;
     margin: 0;
     padding: 0;
-    opacity: .2;
+    /*opacity: .2;*/
+    position: relative;
+    bottom: 18px;
 }
 
 .yadaResponseData {

@@ -22,7 +22,7 @@ In any case it has to be statically included in the hmtl with
 	        <div class="modal-content">
 		      <div class="modal-header">
 		      	<span class="confirm-title"><!--/* Optional title */--></span>
-		        <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true"><i class="yadaIcon yadaIcon-close"></i></button>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		      </div>
 	            <div class="modal-body">
 	                <p th:text="${message}?:#{modal.confirm.default}">Sei sicuro?</p>

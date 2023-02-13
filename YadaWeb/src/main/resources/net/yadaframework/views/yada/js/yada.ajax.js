@@ -538,42 +538,6 @@
 	};
 	
 	/**
-	 * Execute function by name. Also execute an inline function (a function body).
-	 * See https://stackoverflow.com/a/359910/587641
-	 * @param functionName the name of the function, in the window scope, that can have namespaces like "mylib.myfunc".
-	 *			It can also be an inline function (with or without function(){} declaration).
-	 * @param thisObject the object that will become the this object in the called function
-	 * Any number of arguments can be passed to the function
-	 */
-	function executeFunctionByName(functionName, thisObject /*, args */) {
-		var context = window; // The functionName is always searched in the current window
-		var args = Array.prototype.slice.call(arguments, 2);
-		var namespaces = functionName.split(".");
-		var func = namespaces.pop();
-		for(var i = 0; i < namespaces.length && context!=null; i++) {
-			context = context[namespaces[i]];
-		}
-		var functionObject = context?context[func]:null;
-		if (functionObject==null) {
-			// It might be a function body
-			try {
-				var functionBody = functionName.trim();
-				// Strip any "function(){xxx}" declaration
-				if (yada.startsWith(functionName, "function")) {
-					functionBody = functionName.replace(new RegExp("(?:function\\s*\\(\\)\\s*{)?([^}]+)}?"), "$1");
-				}
-				const theFunction = new Function('responseText', 'responseHtml', 'link', functionBody);
-				return theFunction.apply(thisObject, args);
-			} catch (error) {
-				console.error(error);
-			}
-			console.log("[yada] Function '" + func + "' not found (ignored)");
-			return true; // so that other handlers can be called
-		}
-		return functionObject.apply(thisObject, args);
-	}
-	
-	/**
 	 * Make an ajax call when a link is clicked, a select is chosen, a checkbox is selected etc.
 	 * @param e the triggering event, can be null (for yadaTriggerInViewport)
 	 * @param $element the jQuery element that triggered the ajax call
@@ -606,7 +570,7 @@
 				// Can be a comma-separated list of handlers, which are called in sequence
 				var handlerNameArray = yada.listToArray(handlerNames);
 				for (var i = 0; i < handlerNameArray.length; i++) {
-					executeFunctionByName(handlerNameArray[i], $element, responseText, responseHtml, $element[0]);
+					yada.executeFunctionByName(handlerNameArray[i], $element, responseText, responseHtml, $element[0]);
 				}
 			}
 			if (handler != null) {
@@ -958,7 +922,7 @@
 		var submitHandlerNames = $element.attr("data-yadaSubmitHandler");
 		var submitHandlerNameArray = yada.listToArray(submitHandlerNames);
 		for (var z = 0; z < submitHandlerNameArray.length; z++) {
-			const result = executeFunctionByName(submitHandlerNameArray[z], $element);
+			const result = yada.executeFunctionByName(submitHandlerNameArray[z], $element);
 			if (result==false) {
 				return false; // Do not send the form
 			}
@@ -1224,14 +1188,14 @@
 					// Can be a comma-separated list of handlers, which are called in sequence
 					var handlerNameArray = yada.listToArray(buttonHandlerNames);
 					for (var i = 0; i < handlerNameArray.length; i++) {
-						runFormHandler &= executeFunctionByName(handlerNameArray[i], $form, responseText, responseHtml, this, localClickedButton);
+						runFormHandler &= yada.executeFunctionByName(handlerNameArray[i], $form, responseText, responseHtml, this, localClickedButton);
 					}
 				}
 				if (runFormHandler == true && formHandlerNames!=null) {
 					// Can be a comma-separated list of handlers, which are called in sequence
 					var handlerNameArray = yada.listToArray(formHandlerNames);
 					for (var i = 0; i < handlerNameArray.length; i++) {
-						executeFunctionByName(handlerNameArray[i], $form, responseText, responseHtml, this, localClickedButton);
+						yada.executeFunctionByName(handlerNameArray[i], $form, responseText, responseHtml, this, localClickedButton);
 					}
 				}
 				if (handler != null) {
