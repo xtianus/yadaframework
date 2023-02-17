@@ -1,7 +1,7 @@
 buildscript {
     repositories {
-        mavenLocal()
         mavenCentral()
+        mavenLocal()
     }
     dependencies {
         classpath 'net.yadaframework:yadatools:+'
@@ -10,7 +10,7 @@ buildscript {
 
 plugins {
 	id 'org.hidetake.ssh' version '2.10.1'
-	id 'com.meiuwa.gradle.sass' version "1.0.0"	// Only when using SASS !!!
+	id 'com.meiuwa.gradle.sass' version "1.0.0"	// Only when using SASS !!! v2.0.0 may not work
 }
 
 ext.acronym = 'abc' // CHANGE THIS !!!
@@ -27,6 +27,12 @@ sassCompile {
     include("**/*.sass", "**/*.scss", "**/*.css")
     exclude("**/*.min.*", "**/_*.sass", "**/_*.scss")
     output = file("src/main/webapp/res/css")
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
 }
 
 eclipse {
@@ -78,23 +84,14 @@ repositories {
 dependencies {
 
     // Add here any library that you might need (then run "Refresh Gradle Project")
-    // compile  'joda-time:joda-time:2.+'
     
 	implementation	 project(':YadaWeb')
 	implementation	 project(':YadaWebSecurity')	// Remove if not used !!!
 	implementation	 project(':YadaWebCMS')			// Remove if not used !!!
 	implementation	 project(':YadaWebCommerce')	// Remove if not used !!!
 
-   implementation 'org.springframework:spring-webmvc:5.3.8',
-        'org.springframework:spring-context-support:5.3.8',
-		'org.springframework:spring-orm:5.3.8',
-        'org.springframework.security:spring-security-web:5.5.0',
-        'org.hibernate:hibernate-entitymanager:5.5.0.Final',
-        'mysql:mysql-connector-java:8.0.25',
-        'com.fasterxml.jackson.core:jackson-annotations:2.12.+',
-        'com.fasterxml.jackson.core:jackson-core:2.12.+',
-        'com.fasterxml.jackson.core:jackson-databind:2.12.+',
-        'org.thymeleaf:thymeleaf-spring5:3.0.12.RELEASE'
+	// Your libs here:
+	// implementation 'org.springframework:spring-webmvc:5.3.8',
 
     // Needed in Tomcat 8 at runtime
     runtimeOnly 'commons-beanutils:commons-beanutils:1.9.4'
@@ -130,7 +127,7 @@ task dbSchema(dependsOn: [classes], type: net.yadaframework.tools.YadaCreateDbSc
 sass {
 	properties = "$rootDir/sass.properties"
     download {
-		version = "1.23.1"
+		version = "1.58.2"
 		output = "$rootDir/.sass"
     }
 }
