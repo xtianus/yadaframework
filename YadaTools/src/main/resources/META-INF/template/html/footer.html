@@ -23,7 +23,7 @@
 	<!--/* Notify modal */-->
 	<div th:include="/yada/modalNotify :: modal" class="modal fade" id="yada-notification" role="dialog"></div>
 	<script th:if="${"\$"}{YADA_NBODY!=null}" type="text/javascript">
-		$(document).ready(function() {
+		${"\$"}(document).ready(function() {
 			${"\$"}('#yada-notification').modal('show');
 		});
 	</script>
