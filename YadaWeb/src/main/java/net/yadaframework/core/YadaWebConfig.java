@@ -188,8 +188,13 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		            	return preferredLocale;
 		            }
 		        }
-		        // When none of the request locales are accepted, return the default locale
-		        return config.getDefaultLocale();
+		        // When none of the request locales are accepted, return the platform default locale
+		        Locale defaultLocale = config.getDefaultLocale();
+		        if (defaultLocale==null) {
+		        	// This is needed to prevent Thymeleaf errors when no default locale has been configured
+		        	defaultLocale = Locale.getDefault();
+		        }
+		        return defaultLocale;
 			}
 		};
 		cookieLocaleResolver.setCookieMaxAge(Integer.MAX_VALUE);

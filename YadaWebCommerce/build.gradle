@@ -9,6 +9,12 @@ version = '0.7.3'
 
 apply plugin: 'eclipse-wtp'
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
 eclipse {
 	jdt {
 		sourceCompatibility = 1.8

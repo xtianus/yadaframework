@@ -19,7 +19,7 @@
 	        	<i th:class="|yadaIcon yadaIcon-${iconName} ${YADA_TOTSEVERITY}|"></i>
 		        <span class="modal-title"></span>
 	        </h4>
-	        <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true"><i class="yadaIcon yadaIcon-close"></i></button>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 	      </div>
 	      <div class="modal-body">
 	      	<div class="" id="messageAccordion" role="tablist" aria-multiselectable="true">
@@ -53,7 +53,7 @@
 	        	<i th:class="|yadaIcon yadaIcon-${iconName} ${YADA_TOTSEVERITY}|"></i>
 		        <span th:text="${YADA_NTITLE!=null?YADA_NTITLE.get(0):''}" class="modal-title">Modal title</span>
 	        </h4>
-	        <button type="button" class="close" data-bs-dismiss="modal" aria-hidden="true"><i class="yadaIcon yadaIcon-close"></i></button>
+	        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 	      </div>
 	      <div class="modal-body">
 	        <p th:utext="${YADA_NBODY!=null?YADA_NBODY.get(0):''}">Message body here</p>

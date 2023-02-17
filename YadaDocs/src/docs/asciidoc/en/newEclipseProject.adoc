@@ -325,33 +325,61 @@ When you have connected the yada repository, you can switch to the "Java Perspec
 
 
 == The First Project
+=== Creating the Project
 Create a new Eclipse Project using "File > New > Project... > Gradle > Gradle Project" menu.
-Use any name you like ("MySiteProject" in the above example) and accept all defaults. A new Java project will be created in your workspace.
-
-[WARNING]
-====
-If the wizard also created a `lib` project, that's an https://github.com/eclipse/buildship/issues/1077[Eclipse bug^]. The workaround
-is to specify Gradle version 6.6.1 in the Workspace Gradle Preferences.
-
-Be careful: if you specify the Gradle version by overriding the Project options during Project creation instead,
-you will get an inconsistent project because (for a bug?) Eclipse will create a `.settings/org.eclipse.jdt.core.prefs` file
-that will target the latest java version (15) regardless of your Workspace preferences.
-
-You can later change the project properties
-and set a later Gradle version if you wish.
-====
+Use any name you like ("MySiteProject" in the above example) and accept all defaults. Two new Java projects will be created in your workspace.
 
 [.bookstore]
 --
 For the bookstore example the project name will be `YadaBookstore`
 --
 
-Delete any example file and folders inside the "src/main/java" and "src/test/java" folders of the new project.
+[WARNING]
+====
+Since Gradle 7 the wizard creates a `lib` subproject because that's how the Gradle developers want
+to structure https://github.com/eclipse/buildship/issues/1077#issuecomment-970241752[all projects^].
+We want to keep things simple so we're going to restructure the layout in order to have a single project instead.
+====
+
+The following `fix.sh` bash script can be used in order to get rid of the `lib` subproject:
+
+[source,bash]
+----
+	#!/bin/bash
+	# Fix Buildship generated Eclipse project
+	
+	projectFolder=$1
+	
+	sed -i "s/include('lib')//g" $projectFolder/settings.gradle
+	
+	mv $projectFolder/lib/bin $projectFolder
+	mv $projectFolder/lib/src $projectFolder
+	mv $projectFolder/lib/.classpath $projectFolder
+	mv $projectFolder/lib/build.gradle $projectFolder
+	rm -rf $projectFolder/lib
+	rm -rf $projectFolder/src/main/java/*
+	rm -rf $projectFolder/src/test/java/*
+----
+
+It should be run in the parent folder of the project passing the project folder itself as an argument:
+
+[source,bash]
+----
+./fix.sh MySiteProject
+----
+
+[WARNING]
+====
+We don't currently provide a Windows equivalent so you should run the above script under a windows version of bash. 
+Git for windows provides such a program in a path like `C:\Program Files\Git\git-bash.exe`. The https://learn.microsoft.com/en-us/windows/wsl/install["Windows Subsystem for Linux"^]
+also installs a bash executable.
+====
+
+After the project has been fixed, select the old projects in Eclipse and do a "refresh" accepting to delete the `lib` project when prompted.
 
 Optional: edit the `/MySiteProject/gradle/wrapper/gradle-wrapper.properties` file changing the `distributionUrl` to match the version of
-Gradle that you want to use. For example `distributionUrl=https\://services.gradle.org/distributions/gradle-7.0-bin.zip`.
-This is only needed if the gradle you want to use is not yet available in Eclipse or if you were forced to use an old version
-at project creation in order to bypass some bug. Right-click the project and choose "Gradle > Refresh Gradle Project" to update the version of Gradle used.
+Gradle that you want to use. For example `distributionUrl=https\://services.gradle.org/distributions/gradle-7.6-bin.zip`.
+This is only needed if the gradle you want to use is not yet available in Eclipse. Right-click the project and choose "Gradle > Refresh Gradle Project" to update the version of Gradle used.
 
 You can choose to add an external Tomcat server or use the embedded version. In the first case, you should be using the "Enterprise" version of Eclipse.
 If not, you should at least install the "Eclipse Web Tools Platform" (WTP) plugin.
@@ -361,8 +389,19 @@ If not, you should at least install the "Eclipse Web Tools Platform" (WTP) plugi
 The bookstore application will use Tomcat embedded, so no need to install any standalone server.
 --
 
+=== Importing the YadaFramework Projects
 After connecting to the GitHub repository as explained above, you can import the
 needed projects using the "File > Import... > Gradle > Existing Gradle Project" menu.
+
+[WARNING]
+====
+The Yada projects will be located in the git folder you chose before, 
+not along with the new project just created. This may be confusing because
+the Import dialog will initially open in the workspace and you will have to
+browse to the git folder instead.
+After adding the new project to git as explained later, all projects will be
+found in the git folder.
+====
 
 ////
 Import the Yada projects that you need to use, for which there isn't a Maven distribution yet. At the
@@ -383,7 +422,7 @@ image::newEclipseProject/importYada.jpg[Import the YadaWebCommerce project]
 
 The `YadaTools` project should also be imported because you will later need to copy some files from it.
 
-If the imported project has some errors, first of all right-click and choose "Gradle > Refresh Gradle Project".
+If the imported projects have any errors, first of all right-click and choose "Gradle > Refresh Gradle Project".
 If it complains about some unbound system library, open "Properties > Java build path > Libraries" and remove the library.
 
 You should now have, in your workspace, the following Yada projects:

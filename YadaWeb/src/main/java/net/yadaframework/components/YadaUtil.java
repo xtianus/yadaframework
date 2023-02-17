@@ -373,7 +373,8 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Given a json stored as a map, returns the json at the specified key
+	 * Given a json stored as a map, returns the json at the specified key.
+	 * Non need for this method if the objectPath is a simple key: just use the Map get(key) method.
 	 * @param jsonSource
 	 * @param objectPath the name of a (nested) json property holding an object
 	 * @return
@@ -397,6 +398,7 @@ public class YadaUtil {
 
 	/**
 	 * Given a json stored as a map, returns the json array at the specified key
+	 * Non need for this method if the objectPath is a simple key: just use the Map get(key) method.
 	 * @param jsonSource
 	 * @param objectPath
 	 * @return
@@ -407,7 +409,8 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Given a json stored as a map, returns the String value at the specified key, with optional nesting
+	 * Given a json stored as a map, returns the String value at the specified key, with optional nesting.
+	 * Non need for this method if the objectPath is a simple key: just use the Map get(key) method.
 	 * @param jsonSource
 	 * @param objectPath the path of the attribute, using dot notation and arrays. E.g. "order.amount[2].currency"
 	 * @return
@@ -428,7 +431,7 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Sets a json property at the given path
+	 * Sets a json property at the given path. Non need for this method if the path is a simple key: just use the Map put(key, value) method.
 	 * @param jsonObject the json object that should contain the property
 	 * @param path path of the property using dot notation and arrays. E.g. "order.amount[2].currency".
 	 * Any missing array cells are also created with an empty object as needed.
@@ -1230,9 +1233,9 @@ public class YadaUtil {
 	public static String getLocalValue(Map<Locale, String> LocalizedValueMap, Locale locale) {
 		String result=null;
 		try {
-		if (locale==null) {
-			locale = LocaleContextHolder.getLocale();
-		}
+			if (locale==null) {
+				locale = LocaleContextHolder.getLocale();
+			}
 			result = LocalizedValueMap.get(locale);
 		} catch (Exception e) {
 			log.debug("Exception while getting localized value from {} with locale={} (ignored): {}", LocalizedValueMap, locale, e.getMessage());

@@ -64,7 +64,12 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <li><a href="#_add_the_repositories">Add the repositories</a></li>
 </ul>
 </li>
-<li><a href="#_the_first_project">The First Project</a></li>
+<li><a href="#_the_first_project">The First Project</a>
+<ul class="sectlevel2">
+<li><a href="#_creating_the_project">Creating the Project</a></li>
+<li><a href="#_importing_the_yadaframework_projects">Importing the YadaFramework Projects</a></li>
+</ul>
+</li>
 <li><a href="#_the_build_file">The Build File</a></li>
 <li><a href="#_code_generation_just_a_bit">Code Generation (just a bit)</a></li>
 <li><a href="#_initial_customization">Initial Customization</a></li>
@@ -557,9 +562,18 @@ a name of "yadaframework":</p>
 <div class="sect1">
 <h2 id="_the_first_project">The First Project</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_creating_the_project">Creating the Project</h3>
 <div class="paragraph">
 <p>Create a new Eclipse Project using "File &gt; New &gt; Project&#8230;&#8203; &gt; Gradle &gt; Gradle Project" menu.
-Use any name you like ("MySiteProject" in the above example) and accept all defaults. A new Java project will be created in your workspace.</p>
+Use any name you like ("MySiteProject" in the above example) and accept all defaults. Two new Java projects will be created in your workspace.</p>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>For the bookstore example the project name will be <code>YadaBookstore</code></p>
+</div>
+</div>
 </div>
 <div class="admonitionblock warning">
 <table>
@@ -569,37 +583,66 @@ Use any name you like ("MySiteProject" in the above example) and accept all defa
 </td>
 <td class="content">
 <div class="paragraph">
-<p>If the wizard also created a <code>lib</code> project, that&#8217;s an <a href="https://github.com/eclipse/buildship/issues/1077" target="_blank" rel="noopener">Eclipse bug</a>. The workaround
-is to specify Gradle version 6.6.1 in the Workspace Gradle Preferences.</p>
-</div>
-<div class="paragraph">
-<p>Be careful: if you specify the Gradle version by overriding the Project options during Project creation instead,
-you will get an inconsistent project because (for a bug?) Eclipse will create a <code>.settings/org.eclipse.jdt.core.prefs</code> file
-that will target the latest java version (15) regardless of your Workspace preferences.</p>
-</div>
-<div class="paragraph">
-<p>You can later change the project properties
-and set a later Gradle version if you wish.</p>
+<p>Since Gradle 7 the wizard creates a <code>lib</code> subproject because that&#8217;s how the Gradle developers want
+to structure <a href="https://github.com/eclipse/buildship/issues/1077#issuecomment-970241752" target="_blank" rel="noopener">all projects</a>.
+We want to keep things simple so we&#8217;re going to restructure the layout in order to have a single project instead.</p>
 </div>
 </td>
 </tr>
 </table>
 </div>
-<div class="openblock bookstore">
+<div class="paragraph">
+<p>The following <code>fix.sh</code> bash script can be used in order to get rid of the <code>lib</code> subproject:</p>
+</div>
+<div class="listingblock">
 <div class="content">
+<pre class="highlightjs highlight"><code data-lang="bash" class="language-bash hljs">	#!/bin/bash
+	# Fix Buildship generated Eclipse project
+
+	projectFolder=$1
+
+	sed -i "s/include('lib')//g" $projectFolder/settings.gradle
+
+	mv $projectFolder/lib/bin $projectFolder
+	mv $projectFolder/lib/src $projectFolder
+	mv $projectFolder/lib/.classpath $projectFolder
+	mv $projectFolder/lib/build.gradle $projectFolder
+	rm -rf $projectFolder/lib
+	rm -rf $projectFolder/src/main/java/*
+	rm -rf $projectFolder/src/test/java/*</code></pre>
+</div>
+</div>
 <div class="paragraph">
-<p>For the bookstore example the project name will be <code>YadaBookstore</code></p>
+<p>It should be run in the parent folder of the project passing the project folder itself as an argument:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="bash" class="language-bash hljs">./fix.sh MySiteProject</code></pre>
 </div>
 </div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>We don&#8217;t currently provide a Windows equivalent so you should run the above script under a windows version of bash.
+Git for windows provides such a program in a path like <code>C:\Program Files\Git\git-bash.exe</code>. The <a href="https://learn.microsoft.com/en-us/windows/wsl/install" target="_blank" rel="noopener">"Windows Subsystem for Linux"</a>
+also installs a bash executable.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
-<p>Delete any example file and folders inside the "src/main/java" and "src/test/java" folders of the new project.</p>
+<p>After the project has been fixed, select the old projects in Eclipse and do a "refresh" accepting to delete the <code>lib</code> project when prompted.</p>
 </div>
 <div class="paragraph">
 <p>Optional: edit the <code>/MySiteProject/gradle/wrapper/gradle-wrapper.properties</code> file changing the <code>distributionUrl</code> to match the version of
 Gradle that you want to use. For example <code>distributionUrl=https\://services.gradle.org/distributions/gradle-7.0-bin.zip</code>.
-This is only needed if the gradle you want to use is not yet available in Eclipse or if you were forced to use an old version
-at project creation in order to bypass some bug. Right-click the project and choose "Gradle &gt; Refresh Gradle Project" to update the version of Gradle used.</p>
+This is only needed if the gradle you want to use is not yet available in Eclipse. Right-click the project and choose "Gradle &gt; Refresh Gradle Project" to update the version of Gradle used.</p>
 </div>
 <div class="paragraph">
 <p>You can choose to add an external Tomcat server or use the embedded version. In the first case, you should be using the "Enterprise" version of Eclipse.
@@ -612,6 +655,9 @@ If not, you should at least install the "Eclipse Web Tools Platform" (WTP) plugi
 </div>
 </div>
 </div>
+</div>
+<div class="sect2">
+<h3 id="_importing_the_yadaframework_projects">Importing the YadaFramework Projects</h3>
 <div class="paragraph">
 <p>After connecting to the GitHub repository as explained above, you can import the
 needed projects using the "File &gt; Import&#8230;&#8203; &gt; Gradle &gt; Existing Gradle Project" menu.</p>
@@ -729,6 +775,7 @@ The resulting filesystem structure will be as follows:</p>
 <div class="paragraph">
 <p>If you don&#8217;t see the file, you should change the workspace filter. Next to the "Package Explorer" title there&#8217;s a
 menu icon containing the "Filters&#8230;&#8203;" item. Ensure that ".* resources" is NOT selected.</p>
+</div>
 </div>
 </div>
 </div>
@@ -1134,7 +1181,7 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 <div id="footer">
 <div id="footer-text">
 Version 0.7.3<br>
-Last updated 2023-01-19 19:03:32 +0100
+Last updated 2023-02-17 14:36:20 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

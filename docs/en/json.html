@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Json</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="../yadadocs.css" />
+
+</head>
+<body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+</script>
+<div id="header">
+<h1>Json</h1>
+<div class="details">
+<span id="revnumber">version 0.7.3</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_download_json">Download json</a></li>
+<li><a href="#_upload_json">Upload json</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Download and upload json data</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_download_json">Download json</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Soon in this section:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>creating a json response with @ResponseBody public Map&lt;String, Object&gt;</p>
+</li>
+<li>
+<p>creating a json response with &lt;th:block th:inline="text"&gt;</p>
+</li>
+<li>
+<p>creating a json object with yadaUtil.makeJsonObject()</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_upload_json">Upload json</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Soon in this section:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>uploading json data via javascript</p>
+</li>
+<li>
+<p>uploading a json file as MultipartFile</p>
+</li>
+<li>
+<p>parsing json with @RequestBody</p>
+</li>
+<li>
+<p>parsing json with ObjectMapper()</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 0.7.3<br>
+Last updated 2023-01-26 12:28:46 +0100
+</div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>

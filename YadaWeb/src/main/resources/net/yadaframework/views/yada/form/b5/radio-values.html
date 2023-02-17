@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://www.yadaframework.net" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
+<!--/*
+A radio list for static (Spring-EL) elements.
+
+TODO: fare una versione che riceve un enum per avere la lista dei valori
+
+Parameters:
+- fieldName = name of the field holding the value
+- id = id of the field holding the value (optional)
+- labelKey = key in messages.properties for the top label text
+- label = top label to use, if not using a labelKey
+- values = a static list, like ${ {true,false} } (space is important) - can be absent for empty select
+- labelPrefix = the prefix of the key used for radio labels, like 'form.label.'; values will be appended to the prefix to form a messages key
+- helpPrefix = (optional) the prefix of the key used for help texts, like 'form.help.'; values will be appended to the prefix to form a messages key
+
+Example:
+
+<div th:replace="/yada/form/b5/radio-values::field(fieldName='type',values=${ {'notifyEventMilan','notifyEventOther','newsletterUnaTantum'} },labelPrefix='form.label.',helpPrefix='form.help.')"></div>
+
+*/-->
+<body>
+<!--/* The default id (inputId) is a sequence derived from the current URI, so that ajax-loaded modals get a different id from the
+	 * main page. This doesn't work when many page elements are ajax-loaded from the same url of course, in which
+	 * case you need to pass a specific id.
+	 */--> 	
+<div th:fragment="field" 
+	class="form-group" th:with="
+		inputId=${id?:#ids.seq(@yadaWebUtil.getRequestMapping(#request))}">
+	<label th:if="${label!=null || labelKey!=null}" class="form-check-label" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
+	<div class="form-check" th:each="value : ${values}"   th:with="hasError=${#fields.hasErrors('__${fieldName}__')}">
+		<input class="form-check-input" type="radio" th:field="*{__${fieldName}__}" th:classappend="${hasError}? is-invalid" th:value="${value}" th:id="${inputId}" />
+		<label class="form-check-label form-check" th:for="${inputId}" th:text="#{${labelPrefix+value}}">Radio Text</label>
+		<span th:if="${hasError}" class="bi bi-x form-control-feedback" aria-hidden="true"></span>
+		<a th:if="${helpPrefix!=null}" class="yadaHelpButton" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="top" tabindex="-1"
+			th:attr="data-content=#{${helpPrefix+value}}">
+			<i class="fa fa-question-circle fa-lg"></i>
+		</a>
+	</div>		
+</div>    	
+</body>
+</html>
+

@@ -170,6 +170,7 @@
 		});
 	};
 	
+	// @Deprecated. Should use the generic modal instead of the login modal
 	function openLoginModalIfPresent(responseHtml) {
 		var loadedLoginModal=$(responseHtml).find("#loginModal");
 		if (loadedLoginModal.length>0) {
@@ -181,7 +182,10 @@
 				$('#username').focus();
 			} else {
 				// Open a new login modal
-				$("#loginModal").remove();
+				const $existingModals = $(".modal.show");
+				$existingModals.modal("hide"); // Remove the background too
+				$existingModals.remove(); // Remove any existing modals, stick modals too because their content may need to change after login
+				$("#loginModal").remove(); // Just in case
 				$("body").append(loadedLoginModal);
 				$("#loginModal").on('shown.bs.modal', function (e) {
 					$('#username').focus();
@@ -195,6 +199,7 @@
 	}
 
 	// Al ritorno di un post di login, mostra eventuali notify ed esegue l'eventuale handler, oppure ricarica la pagina corrente se l'handler non c'è.
+	// @Deprecated. Should use the generic modal instead of the login modal
 	yada.handlePostLoginHandler = function(responseHtml, responseText) {
 		var isError = yada.isNotifyError(responseHtml);
 		yada.handleNotify(responseHtml);
@@ -212,6 +217,7 @@
 	// Apre il modal del login se è già presente in pagina.
 	// handler viene chiamato quando il login va a buon fine.
 	// return true se il modal è presente ed è stato aperto, false se il modal non c'è e non può essere aperto.
+	// @Deprecated. Should use the generic modal instead of the login modal
 	yada.openLoginModal = function(url, data, handler, type) {
 		if ($('#loginModal').length>0) {
 			// ?????????? A cosa servono questi postXXXX ??????????????????
@@ -230,6 +236,7 @@
 	
 	// Apre il modal del login caricandolo via ajax.
 	// handler viene chiamato quando il login va a buon fine
+	// @Deprecated. Should use the generic modal instead of the login modal
 	yada.openLoginModalAjax = function(loginFormUrl, handler, errorTitle, errorText) {
 		yada.postLoginHandler = handler;
 		$.get(loginFormUrl, function(responseText, statusText) {
@@ -531,42 +538,6 @@
 	};
 	
 	/**
-	 * Execute function by name. Also execute an inline function (a function body).
-	 * See https://stackoverflow.com/a/359910/587641
-	 * @param functionName the name of the function, in the window scope, that can have namespaces like "mylib.myfunc".
-	 *			It can also be an inline function (with or without function(){} declaration).
-	 * @param thisObject the object that will become the this object in the called function
-	 * Any number of arguments can be passed to the function
-	 */
-	function executeFunctionByName(functionName, thisObject /*, args */) {
-		var context = window; // The functionName is always searched in the current window
-		var args = Array.prototype.slice.call(arguments, 2);
-		var namespaces = functionName.split(".");
-		var func = namespaces.pop();
-		for(var i = 0; i < namespaces.length && context!=null; i++) {
-			context = context[namespaces[i]];
-		}
-		var functionObject = context?context[func]:null;
-		if (functionObject==null) {
-			// It might be a function body
-			try {
-				var functionBody = functionName.trim();
-				// Strip any "function(){xxx}" declaration
-				if (yada.startsWith(functionName, "function")) {
-					functionBody = functionName.replace(new RegExp("(?:function\\s*\\(\\)\\s*{)?([^}]+)}?"), "$1");
-				}
-				const theFunction = new Function('responseText', 'responseHtml', 'link', functionBody);
-				return theFunction.apply(thisObject, args);
-			} catch (error) {
-				console.error(error);
-			}
-			console.log("[yada] Function '" + func + "' not found (ignored)");
-			return true; // so that other handlers can be called
-		}
-		return functionObject.apply(thisObject, args);
-	}
-	
-	/**
 	 * Make an ajax call when a link is clicked, a select is chosen, a checkbox is selected etc.
 	 * @param e the triggering event, can be null (for yadaTriggerInViewport)
 	 * @param $element the jQuery element that triggered the ajax call
@@ -599,7 +570,7 @@
 				// Can be a comma-separated list of handlers, which are called in sequence
 				var handlerNameArray = yada.listToArray(handlerNames);
 				for (var i = 0; i < handlerNameArray.length; i++) {
-					executeFunctionByName(handlerNameArray[i], $element, responseText, responseHtml, $element[0]);
+					yada.executeFunctionByName(handlerNameArray[i], $element, responseText, responseHtml, $element[0]);
 				}
 			}
 			if (handler != null) {
@@ -951,7 +922,7 @@
 		var submitHandlerNames = $element.attr("data-yadaSubmitHandler");
 		var submitHandlerNameArray = yada.listToArray(submitHandlerNames);
 		for (var z = 0; z < submitHandlerNameArray.length; z++) {
-			const result = executeFunctionByName(submitHandlerNameArray[z], $element);
+			const result = yada.executeFunctionByName(submitHandlerNameArray[z], $element);
 			if (result==false) {
 				return false; // Do not send the form
 			}
@@ -1217,14 +1188,14 @@
 					// Can be a comma-separated list of handlers, which are called in sequence
 					var handlerNameArray = yada.listToArray(buttonHandlerNames);
 					for (var i = 0; i < handlerNameArray.length; i++) {
-						runFormHandler &= executeFunctionByName(handlerNameArray[i], $form, responseText, responseHtml, this, localClickedButton);
+						runFormHandler &= yada.executeFunctionByName(handlerNameArray[i], $form, responseText, responseHtml, this, localClickedButton);
 					}
 				}
 				if (runFormHandler == true && formHandlerNames!=null) {
 					// Can be a comma-separated list of handlers, which are called in sequence
 					var handlerNameArray = yada.listToArray(formHandlerNames);
 					for (var i = 0; i < handlerNameArray.length; i++) {
-						executeFunctionByName(handlerNameArray[i], $form, responseText, responseHtml, this, localClickedButton);
+						yada.executeFunctionByName(handlerNameArray[i], $form, responseText, responseHtml, this, localClickedButton);
 					}
 				}
 				if (handler != null) {
@@ -1378,7 +1349,7 @@
 			success: function(responseText, statusText, jqXHR) {
 				var responseTrimmed = "";
 				var responseObject = null;
-				closeLoginModalIfAny(jqXHR);
+				closeLoginModalIfAny(jqXHR); // @Deprecated. Should use the generic modal instead of the login modal
 				if (responseText instanceof Blob) {
 					var contentDisposition = jqXHR.getResponseHeader("Content-Disposition");
 					var filename = yada.getAfter(contentDisposition, "filename=");
@@ -1432,6 +1403,7 @@
 				// Check if we just did a login.
 				// A successful login can also return a redirect, which will skip the PostLoginHandler 
 				if ("loginSuccess" == responseTrimmed) {
+					// @Deprecated. Should use the generic modal instead of the login modal
 					$("#loginModal").remove();
 					yada.loaderOff();
 					// window.location.reload(true); // true = skip cache // Non va bene perchè se è stata fatta una post, viene ripetuta!
@@ -1439,11 +1411,13 @@
 					return;
 				}
 				if (openLoginModalIfPresent(responseHtml)) {
+					// @Deprecated. Should use the generic modal instead of the login modal
 					yada.loaderOff();
 					return;
 				}
 				// Controllo se è stata ritornata la home con una richiesta di login
 				if ((typeof responseText == 'string' || responseText instanceof String) && responseText.indexOf('s_loginRequested') !== -1) {
+					// @Deprecated. Should use the generic modal instead of the login modal
 					yada.openLoginModal(url, data, successHandler, method); // E' necessario il login. Viene fatto, e poi eseguito l'handler.
 					yada.loaderOff();
 					return;
@@ -1496,10 +1470,10 @@
 				if ($loadedModalDialog.length==1) {
 					$("#loginModal").remove(); // TODO still needed?
 					// A modal was returned. Is it a "sticky" modal?
-					var stickyModal = $loadedModalDialog.hasClass("yadaStickyModal");
+					var stickyModal = $loadedModalDialog.hasClass(yada.stickyModalMarker);
 					
 					// Remove any currently downloaded modals (markerAjaxModal) if they are open and not sticky
-					const $existingModals = $(".modal.show."+markerAjaxModal+":not(.yadaStickyModal)");
+					const $existingModals = $(".modal.show."+markerAjaxModal+":not(."+yada.stickyModalMarker+")");
 					$existingModals.modal("hide"); // Remove the background too
 					$existingModals.remove();
 					
@@ -1625,7 +1599,7 @@
 		var $modalConfirm=$(responseHtml).find(".s_modalConfirm .modal");
 		if ($modalConfirm.length>0) {
 			// Close all non-sticky modals
-			var $currentModals = $(".modal:not(.yadaStickyModal):visible");			
+			var $currentModals = $(".modal:not(."+yada.stickyModalMarker+"):visible");			
 			// var $currentModals = $(".modal:visible").filter(function(){return $(".yadaStickyModal", this).length==0});			
 			$currentModals.modal('hide'); // Hide any modal that might be already open
 			$("#yada-confirm .modal").children().remove();

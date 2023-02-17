@@ -1,0 +1,21 @@
+=  Json
+:docinfo: shared
+
+Download and upload json data
+
+== Download json
+
+Soon in this section:
+
+- creating a json response with @ResponseBody public Map<String, Object>
+- creating a json response with <th:block th:inline="text">
+- creating a json object with yadaUtil.makeJsonObject()
+
+== Upload json
+
+Soon in this section:
+
+- uploading json data via javascript
+- uploading a json file as MultipartFile
+- parsing json with @RequestBody
+- parsing json with ObjectMapper()

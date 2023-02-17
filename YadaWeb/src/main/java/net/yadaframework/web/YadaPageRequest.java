@@ -149,7 +149,7 @@ public class YadaPageRequest {
 	 * @return the page sort options
 	 */
 	public YadaPageSort getPageSort() {
-		if (parsedSort==null && !sort.isEmpty()) {
+		if (parsedSort==null) {
 			parsedSort = new YadaPageSort();
 			for (String requestParam : sort) {
 				parsedSort.add(requestParam);

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://www.yadaframework.net" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
+<!--/*
+A select list for objects, maps or static (Spring-EL) elements.
+It must be used inside a form with a th:object form bean.
+
+Parameters (can be set in the replace tag or in any parent tag):
+- fieldName = name of the field, in the form bean, holding the chosen value. Can be a path like "recipient.name"
+- labelKey = key in messages.properties for the label text
+- label = label to use, if not using a labelKey
+- options = a list of objects or an instance of YadaLocalEnum or a list of primitive types, like ${users} or ${ {true,false} } (space is important) - can be omitted for an empty select.
+-           It can also be a map of (value-text) entries, 
+			where values are either literal text or suffixes for labelKey (the key of the map is the value returned, the value of the map is the text/key shown).
+- valueAttribute = (optional) the name of the object attribute containing the option value, e.g. "id" - must be omitted for lists of primitives.
+			Careful that if fieldName is an object and options is a list of the same objects, this parameter should not be set
+			otherwise the select list won't be correctly preselected to the current value.
+			In this case is probably always better to specify the object attribute both in fieldName and in valueAttribute.
+			Example: fieldName='product.id',valueAttribute='id'
+- textAttribute = the name of the object attribute (or method with braces) containing the option text (or textKey suffix), e.g. "name" or "toString()", needed for objects - must be omitted for lists of primitives
+- size = number of options to show (optional)
+- textKey = the prefix of the key used for texts, like 'list.enabled.'; options (or option texts) will be appended to the prefix.
+             If null, the option or option text will be used for the text.
+- inline = true to have label and field inline (optional)
+- help = testo per il pulsante di help, se non c'è helpKey (optional)
+- helpKey = chiave del testo per il pulsante di help (optional)
+- addHeader = (optional) true to add the first "empty" (value="-1") option, or a string to set that first option value to the string. For example if options is a list of enums then the addHeader string, if present, should be an enum name.
+- multiple = true for a multiple select box (optional)
+- required = true for a required select box (optional) - does not work when addHeader is true (TODO FIX)
+- disabled = true for a disabled select box (optional)
+- readonly = true for readonly (optional)
+- onchange = function to call on the change event. It receives the 'change' event. (optional)
+- onclick = function to call on the click event. It receives the 'click' event. (optional)
+- idPrefix = string to use as prefix for select IDs. When not set, the constant 'fieldId' is used. Must be set to a unique value when the ajaxList is injected
+             in page many times via javascript, otherwise all selects will end up having the same ids. For example in an ajax modal. 
+             Not needed when the ajaxLists are not inserted via javascript.
+             Could be convenient to set it in a th:with on the form, so that it doesn't have to be repeated.
+- noFeedback = (obsolete) true to remove space reserved for field feedback icon (optional)
+- yadahref = (optional) url to make an ajax call on select change. The value of the select is sent with the call.
+- yadaUpdateOnSuccess = (optional) css selector of an element to update after returning from the ajax call.
+
+Example:
+<div th:replace="/yada/form/b5/list::field(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()',addHeader=true)"></div>
+<div th:replace="/yada/form/b5/list::field(fieldName='userCredentials.enabled',options=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
+<div th:replace="/yada/form/b5/list::field(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
+<div th:replace="/yada/form/b5/list::field(fieldName='building',options=${buildingEnumList},addHeader='UNKNOWN')"></div> where 'UNKNOWN' is an enum name to use for the header value
+
+*/-->
+<body>
+<div class="form-group" 
+	th:fragment="field"
+	th:with="hasError=${#fields.hasErrors('__${fieldName}__')},idPrefix=${idPrefix?:'fieldId'}" 
+	th:classappend="${inline==true}?form-inline">
+	<label th:if="${label!=null or labelKey!=null}" 
+		class="control-label" th:for="${#ids.next(idPrefix)}" 
+		th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
+	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* width is needed when help is not present e.g. in password fields */-->
+		<select th:field="*{__${fieldName}__}" th:multiple="${multiple}" 
+			th:with="isMap=${options instanceof T(java.util.Map)},isYadaLocalEnum=${@yadaFormHelper.isYadaLocalEnum(options)},headerValue=${addHeader==true?'-1':addHeader==false?null:addHeader}"
+			th:size="${size}?:''"
+			th:required="${required}" 
+			th:readonly="${readonly}"
+			th:disabled="${disabled}"
+			th:classappend="|${yadahref!=null?'yadaAjax':''} ${readonly==true?'yadaReadonly':''}|"
+			th:id="${#ids.seq(idPrefix)}" 
+			th:aria-describedby="${#ids.next(idPrefix)}"
+			th:data-yadahref="${yadahref}"
+			th:attr="__${yadaUpdateOnSuccess!=''?'data-yadaUpdateOnSuccess':'dummy'}__=${yadaUpdateOnSuccess}"
+			th:classappend="${hasError==true}?is-invalid"
+			>
+			<option th:if="${headerValue!=null}" th:value="${headerValue}">---</option>
+			<th:block th:if="${!isMap && !isYadaLocalEnum}">
+				<!--/* List */-->
+				<th:block th:each="option : ${options}">
+					<!--/* List of primitives or objects */-->
+					<option th:if="${valueAttribute==null} or ${textAttribute==null}" 
+						th:value="${option}" 
+						th:title="${textKey==null?option:#messages.msg(textKey+option)}"
+						th:text="${textKey==null?option:#messages.msg(textKey+option)}">SomeChoice</option>
+					<!--/* List of object attributes */-->
+					<th:block th:if="${valueAttribute!=null} and ${textAttribute!=null}" th:with="text = ${__${'option.'+textAttribute}__},value=${__${'option.'+valueAttribute}__}">
+						<option 
+							th:value="${value}" 
+							th:title="${textKey==null?text:#messages.msg(textKey+text)}"
+							th:text="${textKey==null?text:#messages.msg(textKey+text)}">SomeChoice</option>
+					</th:block>
+				</th:block>
+			</th:block>
+			<th:block th:if="${isMap}">
+				<!--/* Map */-->
+				<option th:each="entry : ${options.entrySet()}"
+					th:value="${entry.key}" 
+					th:title="${textKey==null?entry.value:#messages.msg(textKey+entry.value)}"
+					th:text="${textKey==null?entry.value:#messages.msg(textKey+entry.value)}">SomeChoice</option>
+			</th:block>
+			<th:block th:if="${isYadaLocalEnum}">
+				<!--/* YadaLocalEnum */-->
+				<option th:each="enum : ${@yadaWebUtil.sortLocalEnum(options, #locale)}"
+					th:value="${enum}" 
+					th:title="${enum.toString(@messageSource, #locale)}"
+					th:text="${enum.toString(@messageSource, #locale)}">SomeChoice</option>
+			</th:block>
+		</select>
+		<script th:if="${onchange!=null}" type="text/javascript">
+			//<![CDATA[
+			$("[['#'+${#ids.prev(idPrefix)}]]").change(function (e) {
+				[[${onchange}]](e);
+			});
+			//]]>
+		</script>
+		<script th:if="${onclick!=null}" type="text/javascript">
+			//<![CDATA[
+			$("[['#'+${#ids.prev(idPrefix)}]]").click(function (e) {
+				[[${onclick}]](e);
+			});
+			//]]>
+		</script>
+		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
+			<a th:if="${help!=null}" class="yadaHelpButton input-group-addon" data-trigger="focus" data-container="body" 
+				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
+				data-html="true"
+				th:attr="data-content=${help}">
+				<i class="fa fa-question-circle fa-lg"></i>
+			</a>
+		</th:block>
+	</div>
+	<span th:if="${hasError}" class="bi bi-x form-control-feedback" aria-hidden="true"></span>
+	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
+		<span th:text="${err}" th:id="${#ids.seq(idPrefix)}">Error Text</span>
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+</div>    	
+</body>
+</html>
+

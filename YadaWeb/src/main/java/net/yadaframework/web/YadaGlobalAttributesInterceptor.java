@@ -28,11 +28,11 @@ public class YadaGlobalAttributesInterceptor extends HandlerInterceptorAdapter {
 		boolean viewNameStartsWithRedirect = (modelAndView!=null && modelAndView.getViewName() == null ? true
 				: modelAndView!=null && modelAndView.getViewName().startsWith(UrlBasedViewResolver.REDIRECT_URL_PREFIX));
 		if (modelAndView!=null && modelAndView.hasView() && !isRedirectView && !viewNameStartsWithRedirect) {
-			addCommonModelData(modelAndView);
+			addCommonModelData(request, response, modelAndView);
 		}
 	}
 
-	public void addCommonModelData(ModelAndView modelAndView){
+	public void addCommonModelData(HttpServletRequest request, HttpServletResponse response, ModelAndView modelAndView){
 		modelAndView.addObject("yadaUtil", yadaUtil); // TODO Rimnuovere: meglio non usare ${yadaUtil} ma preferire ${@yadaUtil}
 	}
 	

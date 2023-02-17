@@ -31,6 +31,11 @@ publishing {
 apply plugin: 'eclipse-wtp'
 // apply plugin: 'kr.motd.sphinx'
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
 eclipse {
 	jdt {
 		sourceCompatibility = 1.8
@@ -64,7 +69,7 @@ dependencies {
 	api 'org.apache.commons:commons-configuration2:2.+'
 	
 	// Fixes commons-text:1.9 CVE-2022-42889 caused by commons-configuration2:2.8.0
-	implementation 'org.apache.commons:commons-text:1.10.0'
+	implementation 'org.apache.commons:commons-text:1.+'
 	
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:8.5.+'
 	// For embedded Tomcat ONLY - add these to your project
@@ -75,33 +80,26 @@ dependencies {
 	// Needed by Commons Configuration
     runtimeOnly 'commons-jxpath:commons-jxpath:1.+'
 	
-    implementation 'org.springframework:spring-webmvc:5.3.23',
-		'org.springframework:spring-context-support:5.3.23',
-		// 'org.springframework:spring-tx:5.2.+',
-		// 'org.springframework:spring-jdbc:5.2.+',
-		'org.springframework:spring-orm:5.3.23',
+    implementation 'org.springframework:spring-webmvc:5.3.+',
+		'org.springframework:spring-context-support:5.3.+',
+		'org.springframework:spring-orm:5.3.+',
 		'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
-        'org.hibernate:hibernate-entitymanager:5.6.8.Final',
+        'org.hibernate:hibernate-entitymanager:5.6.15.Final',
 		'org.hibernate:hibernate-validator:5.4.3.Final',
-		'org.thymeleaf:thymeleaf-spring5:3.1.0.RELEASE',
+		'org.thymeleaf:thymeleaf-spring5:3.1.1.RELEASE',
 		'mysql:mysql-connector-java:8.+',
-		'commons-collections:commons-collections:3.2.+',
+		'commons-collections:commons-collections:3.+',
 		'org.apache.tomcat:tomcat-servlet-api:8.5.+',
-		'commons-fileupload:commons-fileupload:1.3.+',
+		'commons-fileupload:commons-fileupload:1.4',
 		'org.apache.commons:commons-exec:1.3',
 		'com.sun.mail:javax.mail:1.+',
 		'com.google.guava:guava:31.1-jre',
-		'org.jsoup:jsoup:1.9.+',
+		'org.jsoup:jsoup:1.+',
 		'ch.qos.logback:logback-classic:1.3.+',
-		'com.fasterxml.jackson.core:jackson-databind:2.13.4',
-		'org.seleniumhq.selenium:selenium-java:4.1.2',
-		// 'org.seleniumhq.selenium:selenium-chrome-driver:3.141.59',
-		// 'org.seleniumhq.selenium:selenium-support:3.141.59',
-		// 'org.seleniumhq.selenium:selenium-firefox-driver:3.8.1',
-		'com.drewnoakes:metadata-extractor:2.18.0',
-		// 'org.littleshoot:littleproxy:1.1.2',
-		// 'org.quartz-scheduler:quartz:2.2.3',
-		'org.flywaydb:flyway-core:5.0.5',
+		'com.fasterxml.jackson.core:jackson-databind:2.+',
+		'org.seleniumhq.selenium:selenium-java:4.+',
+		'com.drewnoakes:metadata-extractor:2.+',
+		'org.flywaydb:flyway-core:5.+',
 		'commons-beanutils:commons-beanutils:1.9.+'
 		
 	 // Connection pool for embedded Tomcat and programmatic datasource
@@ -112,10 +110,10 @@ dependencies {
 	// runtime 'commons-jxpath:commons-jxpath:1.3'
 
 	testImplementation 'junit:junit:4.+',
-		'org.springframework:spring-test:4.3.+'
+	 	'org.springframework:spring-test:4.3.+'
 	
-	testRuntimeOnly 'commons-beanutils:commons-beanutils:1.9.+',
-		'commons-jxpath:commons-jxpath:1.3'
+	// testRuntimeOnly 'commons-beanutils:commons-beanutils:1.9.+',
+	// 	'commons-jxpath:commons-jxpath:1.3'
 		
 }
 

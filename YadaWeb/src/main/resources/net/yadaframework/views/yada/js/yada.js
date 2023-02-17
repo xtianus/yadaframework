@@ -43,6 +43,8 @@
 	const sessionStorageKeyTimezone = "yada.timezone.sent";
 	const scrollTopParamName = "scrolltop";
 	
+	yada.stickyModalMarker = "yadaStickyModal";
+	
 	$(document).ready(function() {
 		handleScrollTop();
 		// Be aware that all ajax links and forms will NOT be ajax if the user clicks while the document is still loading.
@@ -93,7 +95,7 @@
 		yada.enableConfirmLinks($element);
 		yada.enableHelpButton($element);
 		yada.enableTooltip($element);
-		yada.handleCustomPopover($element);
+		yada.makeCustomPopover($element);
 		if (typeof yada.initAjaxHandlersOn == "function") {
 			yada.initAjaxHandlersOn($element);
 		}
@@ -121,6 +123,42 @@
 			setTimeout(function(){ $(".loader").hide(); }, 200-elapsedMillis);
 		}
 	};
+	
+	/**
+	 * Execute function by name. Also execute an inline function (a function body).
+	 * See https://stackoverflow.com/a/359910/587641
+	 * @param functionName the name of the function, in the window scope, that can have namespaces like "mylib.myfunc".
+	 *			It can also be an inline function (with or without function(){} declaration).
+	 * @param thisObject the object that will become the this object in the called function
+	 * Any number of arguments can be passed to the function
+	 */
+	 yada.executeFunctionByName = function(functionName, thisObject /*, args */) {
+		var context = window; // The functionName is always searched in the current window
+		var args = Array.prototype.slice.call(arguments, 2);
+		var namespaces = functionName.split(".");
+		var func = namespaces.pop();
+		for(var i = 0; i < namespaces.length && context!=null; i++) {
+			context = context[namespaces[i]];
+		}
+		var functionObject = context?context[func]:null;
+		if (functionObject==null) {
+			// It might be a function body
+			try {
+				var functionBody = functionName.trim();
+				// Strip any "function(){xxx}" declaration
+				if (yada.startsWith(functionName, "function")) {
+					functionBody = functionName.replace(new RegExp("(?:function\\s*\\(\\)\\s*{)?([^}]+)}?"), "$1");
+				}
+				const theFunction = new Function('responseText', 'responseHtml', 'link', functionBody);
+				return theFunction.apply(thisObject, args);
+			} catch (error) {
+				console.error(error);
+			}
+			console.log("[yada] Function '" + func + "' not found (ignored)");
+			return true; // so that other handlers can be called
+		}
+		return functionObject.apply(thisObject, args);
+	}
 	
 	/**
 	 * Changes the browser url when an element is clicked
@@ -186,22 +224,24 @@
 			$(this).addClass('yadaRefreshed');
 		});
 	}
-
-	// Da chiamare per abilitare il pulsante di ritorno in cima
+	
+	/**
+	 * Enable the "scroll to top" button.
+	*/
 	yada.enableScrollTopButton = function() {
-		var scrollTopButton = $('.yadaScrollTop');
-		if (scrollTopButton.length>0) {
-			$(scrollTopButton).off().click( function(e){
+		const $scrollTopButton = $('.yadaScrollTop');
+		if ($scrollTopButton.length>0) {
+			$scrollTopButton.off().click( function(e){
 				e.preventDefault();
-				$('html, body').animate({scrollTop:0}, 1000);
-				$(this).hide();
+				window.scrollTo({ top: 0, left: 0, behavior: 'smooth'});
 			});
-			$(document).scroll(function () {
+			$(document).on('scroll', function() {
+				const visible = $scrollTopButton.is(":visible");
 				var y = $(this).scrollTop();
 				if (y > 800) {
-					$(scrollTopButton).fadeIn();
+					visible || $scrollTopButton.fadeIn();
 				} else {
-					$(scrollTopButton).fadeOut();
+					visible && $scrollTopButton.fadeOut();
 				}
 			});
 		}
@@ -710,7 +750,14 @@
 
 	////////////////////
 	/// String functions
-	
+
+	/**
+	 * Returns true if the argument is a string that contains some non-whitespace characters
+	 */
+	yada.stringNotEmpty = function(str) {
+		return str!=null && typeof str=="string" && str.trim().length>0;
+	}
+
 	/**
 	 * Converts a sentence to title case: each first letter of a word is uppercase, the rest lowercase.
 	 * It will also convert "u.s.a" to "U.S.A" and "jim-joe" to "Jim-Joe"
@@ -876,84 +923,82 @@
 	
 	////////////////////
 	/// Bootstrap Tweaks
-	
-	yada.handleCustomPopover = function($element) {
-		if ($element==null) {
-			$element = $('body');
-		}
-		$("[data-yadaCustomPopoverId]", $element).not('.s_customPopovered').each(function(){
-			$(this).addClass('s_customPopovered');
-			var dataIdWithHash = yada.getIdWithHash(this, "data-yadaCustomPopoverId");
-			var dataTitle = $(this).attr("data-title"); // Optional
-			var hasTitle = $(this).attr("title")==null;
-			var dataId = yada.getHashValue(dataIdWithHash);
-			var shownFunction = null;
-			try {
-				shownFunction = eval(dataId+'Shown');
-			} catch (e) {
+
+	/**
+	 * Create a Bootstrap 5 popover with custom HTML content
+	 * @param $element (optional) a jQuery element that contains one or more popover anchors; null for <body>
+	 **/
+	yada.makeCustomPopover = function($element) {
+		$element = $element || $('body');
+		$("[data-yadaPopover]", $element).not('.yadaPopovered').each(function(){
+			const trigger = this;
+			const $trigger = $(trigger);
+			$trigger.addClass('yadaPopovered');
+			const htmlIdWithHash = yada.getIdWithHash(trigger, "data-yadaPopover"); // id of the HTML for the popover
+			//const htmlId = yada.getHashValue(htmlIdWithHash);
+			const contentInstanceId = yada.getRandomId("yada");
+			const htmlTemplate =  document.querySelector(htmlIdWithHash).content.cloneNode(true);
+			const closeButton = '<button type="button" class="btn-close yadaclose" data-bs-toggle="popover" aria-label="Close"></button>';
+			// Check if the anchor is in a modal
+			var container = 'body';
+			var $modalContainer = $trigger.closest(".modal").first();
+			if ($modalContainer.length>0) {
+				container = $modalContainer[0];
 			}
-			var hiddenFunction = null;
-			try {
-				hiddenFunction = eval(dataId+'Hidden');
-			} catch (e) {
+			var defaultTitle = $trigger.attr("data-yadaTitle"); // Optional
+			if (defaultTitle==null) {
+				defaultTitle = htmlTemplate.querySelector("label:first-child")?.innerHTML;
 			}
-			var popoverId = yada.getRandomId("cp");
-			$(this).popover({
+			const content = $("<div id='"+contentInstanceId+"'>").append($(htmlTemplate).children(":not(label)")).prop('outerHTML');
+			const popoverObject = new bootstrap.Popover(trigger, {
 				html : true,
-				title: function() {
-					var closeButton = '<button type="button" class="yadaclose" aria-hidden="true"><i class="fa fa-times fa-lg"></i></button>';
-					// Se è stato specificato data-title, si usa quello, altrimenti si prende il primo div.
-					var titleContent="<span>"+dataTitle+"</span>";
-					if (dataTitle==null) {
-						// Can't just return the div because it would be destroyed on close, so I need to clone it (with all events attached)
-						titleContent = $(dataIdWithHash).children("div:first").clone(true);
-					}
-					return $("<div class='"+dataId+"Title'>").append(closeButton).append(titleContent);
-				},
-				content: function() {
-					// E' sempre il secondo div
-					var contentDiv = $(dataIdWithHash).children("div").eq(1);
-					if (contentDiv.length==0) {
-						return "Internal Error: no popover definition found with id = " + dataId;
-					}
-					// Can't just return the contentDiv because it would be destroyed on close, so I need to clone it (with all events attached)
-					return $("<div class='"+dataId+"Content'>").append(contentDiv.clone(true));
-				},
-				template: '<div data-yadaid="'+popoverId+'" class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
-			});
-			$(this).on('shown.bs.popover', makePopoverShownHandler(popoverId, shownFunction));
-			$(this).on('hidden.bs.popover', makePopoverClosedHandler(popoverId, hiddenFunction));
-		});
-		
-		// Wrap the closure
-		function makePopoverShownHandler(divId, shownFunction) {
-			return function () {
-				var popoverButton = $(this);
-				var popoverDiv = $('[data-yadaid="'+divId+'"]');
-				$(".popover.in").not(popoverDiv).popover('hide'); // Chiudi tutti gli altri popover
-				// $("[data-yadaCustomPopoverId]").not(popoverButton).popover('hide'); // Chiudi tutti gli altri popover
-				popoverButton.tooltip('hide'); // Serve nel caso ci sia un tooltip sul pulsante
-				$("button.yadaclose", popoverDiv).click(function() {
-					$(popoverDiv).popover("hide");
-				});
-				if (typeof shownFunction == 'function') {
-					//var popoverId = $(popoverButton).attr('aria-describedby');
-					shownFunction(popoverButton, popoverDiv);
-				}
+  				title: "<div>" + defaultTitle + "</div>"+closeButton,
+  				container: container,
+				content: content,
+				sanitize: false // Bootstrap sanitizer is too restrictive and customizing allowList is too much work
+  				// template: '<div data-yadaid="'+popoverId+'" class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
+			})
+			
+			// Replace some listeners with improved ones
+			const yadaEventListeners = getYadaEventHandlers($trigger);
+			const insertedListener = yadaEventListeners['inserted.bs.popover']?.handler;
+			const shownListener = yadaEventListeners['shown.bs.popover']?.handler;
+			if (insertedListener!=null) {
+				$trigger.off('inserted.bs.popover').on('inserted.bs.popover', makePopoverInsertedFunction(trigger, popoverObject, contentInstanceId, insertedListener));
 			}
+			if (shownListener!=null) {
+				$trigger.off('shown.bs.popover').on('shown.bs.popover', makePopoverShownFunction(trigger, popoverObject, contentInstanceId, shownListener));
+			}
+		})
+	}
+	function makePopoverInsertedFunction(trigger, popoverObject, contentInstanceId, listener) {
+		return function(e) {
+			const $popoverElement = $("#"+contentInstanceId).closest(".popover");
+			$popoverElement.find("button.yadaclose").click(function(){popoverObject.hide()});			
+			$popoverElement.find("[data-bs-toggle=popover]").click(function(){popoverObject.hide()});	
+			if (listener!=null) {
+				// Execute any "inserted" handler with proper arguments in the trigger context
+				yada.executeFunctionByName(listener, trigger, e, $popoverElement, popoverObject);
+			}		
 		}
-		function makePopoverClosedHandler(divId, hiddenFunction) {
-			return function () {
-				if (typeof hiddenFunction == 'function') {
-					var popoverButton = $(this);
-					// var popoverId = $(popoverButton).attr('aria-describedby');
-					var popoverDiv = $('[data-yadaid="'+divId+'"]');
-					hiddenFunction(popoverButton, popoverDiv);
-				}
-			}
+	}
+	function makePopoverShownFunction(trigger, popoverObject, contentInstanceId, listener) {
+		return function(e) {
+			const $popoverElement = $("#"+contentInstanceId).closest(".popover");
+			$(".popover.show").not($popoverElement).popover('hide'); // Close all other popovers
+			if (listener!=null) {
+				// Execute any "shown" handler with proper arguments in the trigger context
+				yada.executeFunctionByName(listener, trigger, e, $popoverElement, popoverObject);
+			}		
 		}
 	}
 	
+	// @Deprecated use yada.makeCustomPopover() instead
+	yada.handleCustomPopover = function($element) {
+		console.warn("yada.handleCustomPopover() is deprecated in favor of yada.makeCustomPopover()");
+		return yada.makeCustomPopover($element);
+	}
+
 	///////////////////////////////////
 	/// Modal richiesta di conferma ///
 	///////////////////////////////////
@@ -1039,12 +1084,12 @@
 	function showNotificationModal(title, message, severity, redirectUrl) {
 		$(".modal").modal("hide"); // Hide previous existing modals
 		yada.loaderOff();
-		var glyphNames = {ok : 'ok-circle', info : 'exclamation-sign', error : 'remove-circle'};
+		var glyphNames = {ok : 'ok', info : 'info', error : 'error'};
 		// $('#yada-notification').modal('hide'); // Eventualmente fosse già aperto
 		$('#yada-notification .modal-title').text(title);
 		$('#yada-notification .modal-body').html('<p>'+message+'</p>')
-		var icon = $('<span class="glyphicon glyphicon-'+glyphNames[severity]+' '+severity+'"></span>');
-		$('#yada-notification span.glyphicon').replaceWith(icon);
+		var icon = $('<i class="yadaIcon yadaIcon-'+glyphNames[severity]+' '+severity+'"></i>');
+		$('#yada-notification h4 i.yadaIcon').replaceWith(icon);
 		$('#yada-notification:hidden').modal('show');
 		if (redirectUrl!=null) {
 			$('#yada-notification').on('hidden.bs.modal', function (e) {
@@ -1208,7 +1253,7 @@
         	if (v1!="" || v2!="") {
         		$oneForm.addClass('has-error');
         		$oneForm.addClass('yada-password-mismatch');
-        		$check.parent().append('<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>');
+        		$check.parent().append('<span class="bi bi-x form-control-feedback" aria-hidden="true"></span>');
         	}
         }
     }
@@ -1220,7 +1265,7 @@
         $submit.removeAttr("disabled");
         $oneForm.removeClass('has-error');
         $oneForm.removeClass('yada-password-mismatch');
-        $('span.form-control-feedback.glyphicon-remove', $check.parent()).remove();
+        $('span.form-control-feedback.bi-x', $check.parent()).remove();
     }
 
 	/**
@@ -1467,11 +1512,24 @@
 			// Recursively add all child forms
 			var $form = $(this);
 			var $childForm = this['yadaChildForm'];
-			while ($childForm != null) {
-				$childForm.children().filter("input, textarea, select").appendTo($form);
-				$childForm = $childForm['yadaChildForm'];
+			// This doesn't work properly because the parent form is modified and after a browser back it is still modified
+			// therefore the previous child fields are submitted with the new ones.
+			//			while ($childForm != null) {
+			//				$childForm.children().filter("input, textarea, select").appendTo($form);
+			//				$childForm = $childForm['yadaChildForm'];
+			//			}
+			//			// continue normal submission...
+			//
+			if ($childForm!=null) {
+				// Replace the current form with a new form composed of all merged input elements
+				var $newform=$($form).clone(true); // Clone also the submit handlers
+				$(document.body).append($newform); // Needed to submit the form (https://stackoverflow.com/a/42081856/587641)
+				$childForm.children().filter("input, textarea, select").clone().appendTo($newform);
+				// Submit the new form and stop the current submission
+				e.preventDefault();
+				$newform.submit();
+				return false;
 			}
-			// continue normal submission...
 		});
 	}
 	
@@ -1512,6 +1570,28 @@
 			  return formatter.format(Math.round(delta), key);
 			}
 		}
+	}
+	
+	/**
+	* Returns the names of all event handlers added with data-yadaEventHandlers="eventName1:handler1, eventName2:handler2, ..."
+	* @return an associative array of event/handler objects where the key is the event name.
+	*/
+	function getYadaEventHandlers($element) {
+		const allHandlers = $element.attr("data-yadaEventHandlers"); // Comma separated of event:function couples
+		const result = [];
+		if (yada.stringNotEmpty(allHandlers)) {
+			const segments = allHandlers.split(/ *, */); // commma with any number of spaces
+			for (var i=0; i<segments.length; i++) {
+				const listener = {};
+				const nameValue = segments[i].split(/ *: */);
+				if (nameValue.length==2) {
+					listener.event = nameValue[0];
+					listener.handler = nameValue[1];
+					result[nameValue[0]]=listener;
+				}
+			}
+		}
+		return result;
 	}
 		
 }( window.yada = window.yada || {} ));

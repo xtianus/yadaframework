@@ -26,6 +26,8 @@ public void downloadRows(Long[] id, HttpServletResponse httpResponse) {
 This will start the download on the browser, resulting in a "data.xls" file on the client computer. The "temp.xls"
 file on the server will be automatically deleted.
 
+TIP: There's no need to create a temporary file when returning json. See the <<json.adoc#,Json>> section.
+
 
 == Shell Command Execution
 Shell commands can be configured with variable parameters and executed via the 

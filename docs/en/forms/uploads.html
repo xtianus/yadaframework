@@ -255,7 +255,7 @@ $('#theForm').submit(function() {
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form method="POST" enctype="multipart/form-data" action="doUpload"&gt;
     File to upload: &lt;input type="file" name="upfile"&gt;&lt;br/&gt;
-    &lt;input type="submit" value="Press"&gt; to upload the file!
+    &lt;button type="submit"&gt;Upload&lt;/button&gt;
 &lt;/form&gt;</code></pre>
 </div>
 </div>
@@ -456,8 +456,9 @@ YadaAttachedFile iconAttachedFile = yadaFileManager.attachReplace(previousIcon, 
 </td>
 <td class="content">
 <div class="paragraph">
-<p>The difference between <code>attachNew()</code> and <code>attachReplace()</code> is that the former creates a new YadaAttachedFile instance each time and adds it to the database.
-If you use the attachNew variant to replace an existing file, you will have to delete the old YadaAttachedFile yourself so it&#8217;s better to use attachReplace in this scenario.
+<p>The difference between <code>attachNew()</code> and <code>attachReplace()</code> is that the former creates a new YadaAttachedFile instance each time and adds it to the database while
+the latter reuses the existing instance.
+If you use the attachNew method to replace an existing file, you will have to delete the old YadaAttachedFile object yourself so it&#8217;s better to use attachReplace in this scenario.
 AttachNew should be used on the first upload of a file or when an Entity can hold a list of files.
 There is no way to detect if you are using the wrong method, so be careful.</p>
 </div>
@@ -966,7 +967,7 @@ This always happens in the following cases:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.3<br>
-Last updated 2023-01-19 19:03:32 +0100
+Last updated 2023-01-26 12:44:55 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

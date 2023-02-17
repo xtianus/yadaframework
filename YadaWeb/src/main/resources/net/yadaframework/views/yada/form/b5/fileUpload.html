@@ -23,14 +23,14 @@ Message keys:
 - yada.form.fileUpload.minimumSize
 
 Example:
-<div th:replace="/yada/form/fileUpload::field(fieldName='thumbnailImage',label='Upload thumbnail image',size=${thumbnailSize},required=true,help='Image that will be shown in the list',attachedFile=*{thumbnail})"></div>
+<div th:replace="/yada/form/b5/fileUpload::field(fieldName='thumbnailImage',label='Upload thumbnail image',size=${thumbnailSize},required=true,help='Image that will be shown in the list',attachedFile=*{thumbnail})"></div>
 
 
 */-->
 <body>
-<div class="has-feedback yadaFileUpload mb-3" 
+<div class="yadaFileUpload mb-3" 
 	th:fragment="field"
-	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
+	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}">
 <th:block th:with="tmp=${fieldName+'seqName'},seqName=${#strings.replace(#strings.replace(tmp,']',''),'[','')}">
 	<label class="form-label" th:for="${#ids.next(seqName)}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
 	<a th:if="${help!=null}" class="yadaHelpButton" data-trigger="focus" th:id="|help${#ids.next(seqName)}|" data-toggle="popover" data-placement="top" tabindex="-1"
@@ -39,12 +39,13 @@ Example:
 	</a>
 	<div th:if="${size!=null}" class="yadaMinimumSize"><span th:text="${size}">100x100</span> [[#{yada.form.fileUpload.minimumSize}]]</div>
 	<div th:if="${showMaxUploadSize==true}" class="yadaMinimumFileSize"><span th:text="${@config.maxFileUploadSizeMega}">60</span>[[#{yada.form.fileUpload.sizeLimit}]]</div>
-	<input th:field="*{__${fieldName}__}" type="file" th:disabled="${disabled}" th:required="${required}" class="form-control has-feedback" 
+	<input th:field="*{__${fieldName}__}" type="file" th:disabled="${disabled}" th:required="${required}" class="form-control" 
+		th:classappend="${hasError}? is-invalid"
 		th:accept="${accept}?:''" th:id="${#ids.seq(seqName)}" th:attr="aria-describedby=${#ids.next(seqName)}"/>
-	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+	<span th:if="${hasError}" class="bi bi-x form-control-feedback" aria-hidden="true"></span>
 	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
 		<span th:text="${err}" th:id="${#ids.seq(seqName)}">Error Text</span>
-		<button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="visually-hidden">Close</span></button>
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 	</div>
 	<div th:if="${attachedFile!=null && !attachedFile.image}">
 		<div th:if="${attachedFile.filename!=null}">
