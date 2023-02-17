@@ -31,6 +31,11 @@ publishing {
 apply plugin: 'eclipse-wtp'
 // apply plugin: 'kr.motd.sphinx'
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
 eclipse {
 	jdt {
 		sourceCompatibility = 1.8
