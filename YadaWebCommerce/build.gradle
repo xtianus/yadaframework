@@ -41,11 +41,12 @@ repositories {
 }
 
 dependencies {
+	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
 		
-	implementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'),
-		'org.springframework:spring-webmvc:5.3.18',
-		'org.springframework:spring-orm:5.3.18',
-		'org.hibernate:hibernate-entitymanager:5.5.0.Final',
+	api project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'),
+		// 'org.springframework:spring-webmvc:5.3.18',
+		// 'org.springframework:spring-orm:5.3.18',
+		// 'org.hibernate:hibernate-entitymanager:5.5.0.Final',
 		'com.paypal.sdk:checkout-sdk:1.0.5'
 		
 	testImplementation 'junit:junit:4.12'

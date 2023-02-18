@@ -66,7 +66,7 @@
             <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
             <property name="hibernate.connection.username" value="${acronym}user$env"/>
             <property name="hibernate.connection.password" value="$dbpwd"/>
-            <property name="hibernate.connection.url" value="jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false"/>
+            <property name="hibernate.connection.url" value="jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"/>
             <!-- InnoDB Dialect -->
          	<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
          	<!-- MyISAM Dialect (no transactions)
