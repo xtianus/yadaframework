@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Mettere allowLinking="true" nel tag Context se si vuole permettere i link simbolici nelle directory -->
+<!-- Use the allowLinking="true" attribute in the Context tag to allow symlinks in folders -->
 <Context override="true">
-<Manager pathname="" /> <!-- Disabilito session persistence -->
+<Manager pathname="" /> <!-- Disable session persistence -->
 
 <JarScanner>
 	<!-- skip tag/annotation jar scanning: https://tomcat.apache.org/tomcat-8.0-doc/config/jar-scan-filter.html -->
-   	<!-- "main" is needed when running standalone (tomcat embedded) in Eclipse in order to use the Yada projects -->
+   	<!-- "main" is needed when running tomcat embedded in Eclipse in order to use the Yada projects -->
     <JarScanFilter
     	defaultPluggabilityScan="true" pluggabilityScan="main,Yada*,yada*,spring*" pluggabilitySkip="*"
     	defaultTldScan="false" tldScan="" tldSkip="*" />

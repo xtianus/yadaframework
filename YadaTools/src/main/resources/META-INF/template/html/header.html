@@ -2,17 +2,14 @@
 <%/* Careful when editing html templates because $ must be escaped with ${"\$"} unless it is a groovy variable */%>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:yada="http://www.yadaframework.net">
 <head>
-	<meta charset="UTF-8"/>
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1">
-	<!-- 
-    <link rel="stylesheet" type="text/css" th:href="@{/static/bootstrap-4.5.0-dist/css/bootstrap.min.css}"/>
-    <script th:src="@{/static/jquery-3.5.1.min.js}"></script>
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
-	 -->
-	<link th:if="${"\$"}{@config.developmentEnvironment}" rel="stylesheet" type="text/css" th:href="@{/yadares/css/yada.css}" />
-    <link th:if="${"\$"}{!@config.developmentEnvironment}" rel="stylesheet" type="text/css" th:href="@{/res/css/yada.min.css}" />
-	<link rel="stylesheet" type="text/css" th:href="@{|/res/css/$acronym${"\$"}{@config.min}.css|}" />
+	<th:block th:fragment="headFragment">
+		<meta charset="UTF-8"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1">
+		<link th:if="${"\$"}{@config.developmentEnvironment}" rel="stylesheet" type="text/css" th:href="@{/yadares/css/yada.css}" />
+	    <link th:if="${"\$"}{!@config.developmentEnvironment}" rel="stylesheet" type="text/css" th:href="@{/res/css/yada.min.css}" />
+		<link rel="stylesheet" type="text/css" th:href="@{|/res/css/$acronym${"\$"}{@config.min}.css|}" />
+	</th:block>
 </head>
 <body>
 <header>

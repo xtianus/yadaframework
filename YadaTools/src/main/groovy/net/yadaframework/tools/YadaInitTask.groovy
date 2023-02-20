@@ -61,6 +61,7 @@ class YadaInitTask extends YadaProject {
 		File databaseMigrationFolder = new File(resourcesSourceFolder, dbMigrationFolder);
 		File emailTemplateFolder = new File(resourcesSourceFolder, "$DESTEMAILTEMPLATEFOLDER");
 		File schemaFolder = project.file(schemaDirName);
+		File cssFolder = new File(resFolder, "css");
 		File cssImagesFolder = new File(resFolder, "css/images");
 		File staticFolder = new File(webAppRootFolder, "static");
 		resFolder.mkdirs();
@@ -108,6 +109,10 @@ class YadaInitTask extends YadaProject {
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/example_gitignore", project.projectDir);
 		processTemplate(HTMLDIRNAME, "header.html", null, viewsFolder);
 		processTemplate(HTMLDIRNAME, "footer.html", null, viewsFolder);
+		// TODO copy template.css then rename it 
+		// yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/template.css", cssFolder);
+		// TODO process template.js 
+		// processTemplate(JSDIRNAME, "template.js", acronym+".js", jsFolder);
 		//
 		// Environment configuration
 		//

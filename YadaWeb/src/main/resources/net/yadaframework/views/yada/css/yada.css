@@ -52,11 +52,11 @@
 	z-index: 999999;    
 }
 
-.popover-header .yadaclose {
-	float: right;
+.modal .btn-close, .popover .btn-close {
+	/* float: right; */
     border: none;
     margin: 0;
-    padding: 0;
+    /* padding: 0; */
     /*opacity: .2;*/
     position: relative;
     bottom: 18px;
