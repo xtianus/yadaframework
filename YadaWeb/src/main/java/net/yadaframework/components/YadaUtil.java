@@ -801,7 +801,7 @@ public class YadaUtil {
 		result[0] = htmlToSplit;
 		return result;
 	}
-
+	
 	/**
 	 * Ensure that the given filename has not been already used, by adding a counter.
 	 * For example, if baseName is "dog" and usedNames is {"dog.jpg", "dog_1.jpg", "dog_2.jpg"}, the
@@ -817,14 +817,13 @@ public class YadaUtil {
 	 * @throws IOException
 	 * @see {@link #findAvailableName(File, String, String, String)}
 	 */
-	// TODO remove the IOException and just use a random number on timeout
 	public String findAvailableFilename(String baseName, String extensionNoDot, String counterSeparator, Set<String> usedNames) throws IOException {
 		counterSeparator = counterSeparator==null?"":counterSeparator;
 		String extension = StringUtils.isAllBlank(extensionNoDot) ? "" : "." + extensionNoDot;
 		String fullName = baseName + extension;
 		int counter = 0;
 		long startTime = System.currentTimeMillis();
-		int timeoutMillis = 1000; // 1 second to find a result seems to be reasonable
+		int timeoutMillis = 10000; // 10 seconds to find a result seems to be reasonable
 		while (true) {
 			if (!usedNames.contains(fullName)) {
 				usedNames.add(fullName);
@@ -1069,7 +1068,7 @@ public class YadaUtil {
 	 * This operation is thread safe.
 	 * @param targetFile the file that we want to create.
 	 * @param counterSeparator (optional) when null, "_" is used.
-	 * @return
+	 * @return a File that doesn't already exist
 	 * @throws IOException
 	 */
 	public static File findAvailableName(File targetFile, String counterSeparator) throws IOException {

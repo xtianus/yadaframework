@@ -57,7 +57,7 @@
     <!-- To hide WARN: bad write method arg count: public final void org.apache.commons.configuration2.AbstractConfiguration.setProperty -->
     <logger name="org.apache.commons.beanutils.FluentPropertyBeanIntrospector" level="ERROR"/> 
     
-    <logger name="YOUR.PACKAGE.HERE" level="debug"/>
+    <logger name="$basePackage" level="debug"/>
     
 	<root level="info">
 		<appender-ref ref="STDOUT" />

@@ -47,8 +47,6 @@ import net.yadaframework.persistence.entity.YadaAttachedFile;
 public class YadaArticle implements CloneableFiltered, Serializable {
 	private static final long serialVersionUID = 1L;
 
-	public static class SimpleJson{}
-
 	// For synchronization with external databases
 	@Column(insertable = false, updatable = false, columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -61,6 +59,8 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
+	
+	protected String internalName;
 
 	@ElementCollection
 	@Column(length=64)
@@ -68,7 +68,7 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 	protected Map<Locale, String> name = new HashMap<>(); // localized because it could be different for different languages
 
 	@Column(length=32)
-	protected String code;
+	protected String code; // Company code
 
 	@ElementCollection
 	@Column(length=32)
@@ -265,6 +265,14 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 
 	public void setChosenProductId(Long chosenProductId) {
 		this.chosenProductId = chosenProductId;
+	}
+
+	public String getInternalName() {
+		return internalName;
+	}
+
+	public void setInternalName(String internalName) {
+		this.internalName = internalName;
 	}
 
 }

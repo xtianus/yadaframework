@@ -19,7 +19,11 @@ public class YadaDimension {
 
 	protected Float depth;
 
+	protected Float length;
+
 	protected Float diameter;
+
+	protected Float radius;
 
 	protected Float weight;
 

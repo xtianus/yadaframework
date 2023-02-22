@@ -15,19 +15,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import net.yadaframework.components.YadaNotify;
 import net.yadaframework.components.YadaWebUtil;
-import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaLocalePathChangeInterceptor;
 import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.web.YadaViews;
+
+import $basePackage.core.${acronym.capitalize()}Configuration;
 
 @Controller
 public class HomeController {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 	
-	@Autowired YadaWebUtil yadaWebUtil;
-	@Autowired YadaSecurityUtil yadaSecurityUtil;
-	@Autowired YadaNotify yadaNotify;
-	@Autowired YadaConfiguration config;
+	@Autowired private YadaWebUtil yadaWebUtil;
+	@Autowired private YadaSecurityUtil yadaSecurityUtil;
+	@Autowired private YadaNotify yadaNotify;
+	@Autowired private ${acronym.capitalize()}Configuration config;
 
 	/**
 	 * Called after session timeout
