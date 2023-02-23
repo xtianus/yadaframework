@@ -138,6 +138,16 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+	
+	/**
+	 * Returns a random string (currently an hex random number)
+	 * @param minlen minimum length of the string. The maximum length is random.
+	 * @return
+	 */
+	public String getRandomText(int minlen) {
+		int random = getRandom(0, Integer.MAX_VALUE);
+		return String.format("%0"+minlen+"X", random);
+	}
 
 	/**
 	 * Joins a number of strings, adding a separator only when the strings are not empty.
