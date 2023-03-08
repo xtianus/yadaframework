@@ -257,6 +257,7 @@
 	 * @param functionToCall any function (can be an inline function)
 	 */
 	yada.dequeueFunctionCall = function(domElement, functionToCall) {
+		// TODO see https://css-tricks.com/debouncing-throttling-explained-examples/#aa-debounce
 		var callTimeout = 200;
 		if (domElement.yadaDequeueFunctionCallRunning!=null) {
 			// Ajax call still running, so delay a bit longer before the next one
