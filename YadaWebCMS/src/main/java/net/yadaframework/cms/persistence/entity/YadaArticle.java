@@ -67,7 +67,7 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> name = new HashMap<>(); // localized because it could be different for different languages
 
-	@Column(length=32)
+	@Column(length=32, unique=true)
 	protected String sku; // Stock Keeping Unit aka internal company code
 
 	@ElementCollection

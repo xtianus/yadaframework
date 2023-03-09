@@ -59,6 +59,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -1427,7 +1428,7 @@ public class YadaUtil {
 	 * @param params
 	 * @return
 	 */
-	public static String getMessage(String key, Object ... params) {
+	public static String getMessage(String key, @Nullable Object ... params) {
 		return messageSource.getMessage(key, params, LocaleContextHolder.getLocale());
 	}
 
