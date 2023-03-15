@@ -4,72 +4,43 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Implements a table with 6 columns. The purpose is to return the last value given the first ones.
+ * Implements a table with six columns: five keys and one value. The purpose is to return the sixth value given the first five ones.
+ * Can't have rows with the same keys.
  * @param <K1> the type of column 1
  * @param <K2> the type of column 2
  * @param <K3> the type of column 3
  * @param <K4> the type of column 4
  * @param <K5> the type of column 5
- * @param <K6> the type of column 6
+ * @param <V> the type of the value
  */
-public class YadaTableSixColumns<K1, K2, K3, K4, K5, K6> {
-	Map<K1, Map<K2, Map<K3, Map<K4, Map<K5, K6>>>>> col1 = new HashMap<>();
+public class YadaTableSixColumns<K1, K2, K3, K4, K5, V> {
+	Map<K1, YadaTableFiveColumns<K2, K3, K4, K5, V>> col1 = new HashMap<>();
 
 	/**
 	 * Add a new row to the table. Any value can be null.
-	 * @param v1
-	 * @param v2
-	 * @param v3
-	 * @param v4
-	 * @param v5
-	 * @param v6
 	 */
-	public void add(K1 v1, K2 v2, K3 v3, K4 v4, K5 v5, K6 v6) {
-		Map<K2, Map<K3, Map<K4, Map<K5, K6>>>> col2 = col1.get(v1);
+	public void put(K1 key1, K2 key2, K3 key3, K4 key4, K5 key5, V value) {
+		YadaTableFiveColumns<K2, K3, K4, K5, V> col2 = col1.get(key1);
 		if (col2==null) {
-			col2 = new HashMap<>();
-			col1.put(v1, col2);
+			col2 = new YadaTableFiveColumns<>();
+			col1.put(key1, col2);
 		}
-		Map<K3,Map<K4, Map<K5, K6>>> col3 = col2.get(v2);
-		if (col3==null) {
-			col3 = new HashMap<>();
-			col2.put(v2, col3);
-		}
-		Map<K4, Map<K5, K6>> col4 = col3.get(v3);
-		if (col4==null) {
-			col4 = new HashMap<>();
-			col3.put(v3, col4);
-		}
-		Map<K5, K6> col5 = col4.get(v4);
-		if (col5==null) {
-			col5 = new HashMap<>();
-			col4.put(v4, col5);
-		}
-		col5.put(v5, v6);
+		col2.put(key2, key3, key4, key5, value);
 	}
 	
 	/**
 	 * Get the value of the last column given the first ones
-	 * @param v1 can be null
-	 * @param v2 can be null
-	 * @param v3 can be null
-	 * @param v4 can be null
-	 * @param v5 can be null
+	 * @param key1 can be null
+	 * @param key2 can be null
+	 * @param key3 can be null
+	 * @param key4 can be null
+	 * @param key5 can be null
 	 * @return the value of column 6, or null
 	 */
-	public K6 get(K1 v1, K2 v2, K3 v3, K4 v4, K5 v5) {
-		Map<K2, Map<K3, Map<K4, Map<K5, K6>>>> col2 = col1.get(v1);
+	public V get(K1 key1, K2 key2, K3 key3, K4 key4, K5 key5) {
+		YadaTableFiveColumns<K2, K3, K4, K5, V> col2 = col1.get(key1);
 		if (col2!=null) {
-			Map<K3, Map<K4, Map<K5, K6>>> col3 = col2.get(v2);
-			if (col3!=null) {
-				Map<K4, Map<K5, K6>> col4 = col3.get(v3);
-				if (col4!=null) {
-					Map<K5, K6> col5 = col4.get(v4);
-					if (col5!=null) {
-						return col5.get(v5);
-					}
-				}
-			}
+			return col2.get(key2, key3, key4, key5);
 		}
 		return null;
 	}
