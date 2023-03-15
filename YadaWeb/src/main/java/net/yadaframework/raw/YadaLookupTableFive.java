@@ -12,16 +12,16 @@ import java.util.Map;
  * @param <K4> the type of column 4
  * @param <V> the type of the value
  */
-public class YadaTableFiveColumns<K1, K2, K3, K4, V> {
-	Map<K1, YadaTableFourColumns<K2, K3, K4, V>> col1 = new HashMap<>();
+public class YadaLookupTableFive<K1, K2, K3, K4, V> {
+	Map<K1, YadaLookupTableFour<K2, K3, K4, V>> col1 = new HashMap<>();
 
 	/**
 	 * Add a new row to the table. Any value can be null.
 	 */
 	public void put(K1 key1, K2 key2, K3 key3, K4 key4, V value) {
-		YadaTableFourColumns<K2, K3, K4, V> col2 = col1.get(key1);
+		YadaLookupTableFour<K2, K3, K4, V> col2 = col1.get(key1);
 		if (col2==null) {
-			col2 = new YadaTableFourColumns<>();
+			col2 = new YadaLookupTableFour<>();
 			col1.put(key1, col2);
 		}
 		col2.put(key2, key3, key4, value);
@@ -36,7 +36,7 @@ public class YadaTableFiveColumns<K1, K2, K3, K4, V> {
 	 * @return the value of column 5, or null
 	 */
 	public V get(K1 key1, K2 key2, K3 key3, K4 key4) {
-		YadaTableFourColumns<K2, K3, K4, V> col2 = col1.get(key1);
+		YadaLookupTableFour<K2, K3, K4, V> col2 = col1.get(key1);
 		if (col2!=null) {
 			return col2.get(key2, key3, key4);
 		}

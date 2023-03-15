@@ -986,8 +986,6 @@ public class YadaUtil {
 		return result;
 	}
 
-
-
 	/**
 	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity.
 	 * Post processing (@PostConstruct etc) is also performed but initialization is not.

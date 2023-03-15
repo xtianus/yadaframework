@@ -10,7 +10,7 @@ import java.util.Map;
  * @param <K2> the type of column 2
  * @param <V> the type of the value
  */
-public class YadaTableThreeColumns<K1, K2, V> {
+public class YadaLookupTableThree<K1, K2, V> {
 	Map<K1, Map<K2, V>> col1 = new HashMap<>();
 
 	/**
