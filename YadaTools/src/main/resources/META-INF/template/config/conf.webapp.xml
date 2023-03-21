@@ -46,7 +46,10 @@
 	<database>
 		<jndiname>java:comp/env/jdbc/${acronym}db$env</jndiname> <!-- Not used when <datasource> is defined -->
 		<showSql>false</showSql>
+		<% if (env=="prod") { /* TODO remove the "prod" string and use envs[prodIndex] */ %>
+		<!-- Add any number of entityPackage tags here -->
 		<entityPackage>${basePackage}.persistence.entity</entityPackage>
+		<%}%>
 		<databaseMigrationAtStartup>false</databaseMigrationAtStartup>
 		<!-- Datasource for embedded Tomcat -->
 		<datasource>

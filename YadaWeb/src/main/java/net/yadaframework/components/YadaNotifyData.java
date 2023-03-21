@@ -89,7 +89,8 @@ public class YadaNotifyData {
 	public YadaNotifyData setTitleKey(String ... titleKeyAndArgs) {
 		ensureLocalized();
 		String[] argsArray = Arrays.copyOfRange(titleKeyAndArgs, 1, titleKeyAndArgs.length);
-		this.title = messageSource.getMessage(titleKeyAndArgs[0], argsArray, locale);
+		Locale localeToUse = locale==null ? LocaleContextHolder.getLocale() : locale;
+		this.title = messageSource.getMessage(titleKeyAndArgs[0], argsArray, localeToUse);
 		return this;
 	}
 
@@ -160,7 +161,8 @@ public class YadaNotifyData {
 	public YadaNotifyData messageKey(String ... messageKeyAndArgs) {
 		ensureLocalized();
 		String[] argsArray = Arrays.copyOfRange(messageKeyAndArgs, 1, messageKeyAndArgs.length);
-		this.message = messageSource.getMessage(messageKeyAndArgs[0], argsArray, locale);
+		Locale localeToUse = locale==null ? LocaleContextHolder.getLocale() : locale;
+		this.message = messageSource.getMessage(messageKeyAndArgs[0], argsArray, localeToUse);
 		return this;
 	}
 

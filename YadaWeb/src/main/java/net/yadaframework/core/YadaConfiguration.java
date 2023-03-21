@@ -1007,7 +1007,7 @@ public abstract class YadaConfiguration {
 	 * Example: /srv/myproject
 	 * @return
 	 */
-	protected String getBasePathString() {
+	public String getBasePathString() {
 		return configuration.getString("config/paths/basePath");
 	}
 

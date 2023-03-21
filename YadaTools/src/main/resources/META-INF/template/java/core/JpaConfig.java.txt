@@ -9,5 +9,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 // This can be added when using Spring Data
 // @EnableJpaRepositories(basePackages = "$basePackage.persistence.repository")
+// If you get a "Unknown entity" Exception, add the entity package to the config file: config/database/entityPackage
 public class JpaConfig extends YadaJpaConfig {
 }
