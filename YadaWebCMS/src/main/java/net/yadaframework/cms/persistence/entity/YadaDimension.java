@@ -85,4 +85,20 @@ public class YadaDimension {
 		this.elements = elements;
 	}
 
+	public Float getLength() {
+		return length;
+	}
+
+	public void setLength(Float length) {
+		this.length = length;
+	}
+
+	public Float getRadius() {
+		return radius;
+	}
+
+	public void setRadius(Float radius) {
+		this.radius = radius;
+	}
+
 }
