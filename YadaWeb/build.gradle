@@ -35,6 +35,7 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(8)
     }
+    withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
 eclipse {
 	jdt {
@@ -147,14 +148,14 @@ javadoc {
 }
 
 // http://stackoverflow.com/a/27853822/587641
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}   
-
-artifacts {
-    archives javadocJar
-}
+// task javadocJar(type: Jar) {
+//     classifier = 'javadoc'
+//     from javadoc
+// }   
+// 
+// artifacts {
+//     archives javadocJar
+// }
 
 configurations {
 	hibtools {
