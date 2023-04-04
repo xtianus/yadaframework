@@ -154,12 +154,13 @@ public class YadaTomcatServer {
 		tomcat.setAddDefaultWebXmlToWebapp(false); // Use web.xml
 		StandardContext ctx = (StandardContext) tomcat.addWebapp("", new File(webappFolder).getAbsolutePath());
 		if (dev) {
-			// Only needed in Eclipse because classes are found in the "bin" folder
-			File additionWebInfClasses = new File("bin/main");
-			// File additionWebInfClasses = new File("build/classes");
-	        WebResourceRoot resources = new StandardRoot(ctx);
-	        resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", additionWebInfClasses.getAbsolutePath(), "/"));
-	        ctx.setResources(resources);
+			File eclipseClasses = new File("bin/main");
+			if (eclipseClasses.canRead()) {
+				WebResourceRoot resources = new StandardRoot(ctx);
+				// Needed in Eclipse because classes are found in the "bin" folder
+				resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", eclipseClasses.getAbsolutePath(), "/"));
+				ctx.setResources(resources);
+			}
 		}
 
         // AJP Connector
