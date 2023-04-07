@@ -394,8 +394,14 @@ that values are related to their locale:
 @ElementCollection
 @Column(length=8192)
 @MapKeyColumn(name="locale", length=32)
+@CollectionTable(
+	uniqueConstraints = @UniqueConstraint(columnNames={"MyEntityName_id", "locale"})
+)
 private Map<Locale, String> description = new HashMap<>();
 ----
+
+The uniqueContratints (optional) annotation ensures that there can't be two values for a given locale. The "MyEntityName_id" value should be
+the actual column name in the ElementCollection table: it usually is the name of the Entity followed by "_id" with a first capital letter.
 
 To retrieve the value in a specific locale, use YadaUtil.getLocalValue(). This will return the value in the specified locale or null.
 If a default locale has been configured (see <<Application configuration>> above) then the default locale will be tried before returning null.
@@ -419,6 +425,9 @@ public class Product {
   @ElementCollection
   @Column(length=8192)
   @MapKeyColumn(name="locale", length=32)
+  @CollectionTable(
+    uniqueConstraints = @UniqueConstraint(columnNames={"Product_id", "locale"})
+  )
   private Map<Locale, String> description = new HashMap<>();
 
   ...
@@ -433,3 +442,41 @@ This allows for a simple use in Thymeleaf:
 ----
 <p th:text="${product.descriptionLocal}">Some description</p>
 ----
+
+Be careful that Maps are lazy by default, so the localized value won't be returned outside of a transaction. 
+The solution is to either prefetch the map in the DAO (most efficient solution) or to eagerly load it (simpler implementation).
+
+Prefetching in the DAO can be done by simply calling a `.size()` or by using `YadaUtil.prefetchLocalizedStrings()` and similar methods:
+
+[source,java]
+----
+public Product findProduct(Long id) {
+	Product product = em.find(Product.class, id);
+	// Either call .size()
+	product.getDescription().size();
+	// Or prefetch all localized strings via reflection
+	YadaUtil.prefetchLocalizedStrings(product, Product.class);
+	return product;
+}
+----
+
+In order to eagerly load the attribute, use FetchType.EAGER together with FetchMode.SELECT:
+
+[source,java]
+----
+@ElementCollection(fetch = FetchType.EAGER)
+@Fetch(FetchMode.SELECT)
+@Column(length=8192)
+@MapKeyColumn(name="locale", length=32)
+@CollectionTable(
+	uniqueConstraints = @UniqueConstraint(columnNames={"Product_id", "locale"})
+)
+private Map<Locale, String> description = new HashMap<>();
+----
+
+WARNING: not using FetchMode.SELECT may result in a cross join that loads a huge amount of values into memory, possibly causing an OutOfMemory exception!
+
+
+
+
+

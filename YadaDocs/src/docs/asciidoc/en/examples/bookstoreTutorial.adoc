@@ -396,12 +396,15 @@ image::examples/bookstoreHome.jpg[Oracle Bookstore homepage]
 
 
 == Running the Yada Bookstore tutorial
-To run the tutorial on an embedded Tomcat
 
 The tutorial can either be deployed to a standalone Tomcat server or run with an embedded Tomcat.
 In the latter case, the command from the command line is the following:
 
+[source,java]
+----
 java net.yadaframework.core.YadaTomcatServer ybsdev src/main/webapp
+----
+
 
 ////
  List all oracle code that was not needed (if any!)

@@ -224,7 +224,8 @@ image::newEclipseProject/encoding.jpg[Eclipse file encoding]
 
 The "New text file line delimiter" shown in the above image is also better set to "Unix".
 
-Also set UTF-8 in the "Content Types > Text > Java Properties File > Default encoding" field:
+Also set UTF-8 in the "Content Types > Text > Java Properties File > Default encoding" field and be sure to 
+click on "Update" before applying the changes:
 
 [.center]
 .Eclipse file encoding
@@ -283,8 +284,7 @@ image::newEclipseProject/clonegit.jpg[Clone the Git repository]
 .Clone the Git repository
 image::newEclipseProject/clonedialog1.jpg[Clone the Git repository]
 
-On the "Branch Selection" dialog you should select just "master". You will later
-add any branch that you need.
+On the "Branch Selection" dialog you should NOT select "master" but the latest versioned branch, for example "0.7.3".
 
 On the "Local Destination" dialog you need to select a local folder where to clone the repository.
 Here we assume that you are going to create a new Eclipse project called `MySiteProject` (will be explained later) and 
@@ -433,6 +433,8 @@ You should now have, in your workspace, the following Yada projects:
 * YadaWebCommerce
 * YadaWebSecurity
 
+=== Saving to git
+
 The next step is to create a git repository to store your projects. 
 You must definitely use git to store your files, because 
 after sharing the project to the repo it will be moved to the same root folder of the
@@ -491,12 +493,14 @@ Finally edit `.gitignore` in the root of your project to make it look like the f
 /.project
 !gradle-wrapper.jar
 /.sass/
+**/res/css/*.min.*
+**/res/js/*.min.*
 ----
 
 If you don't see the file, you should change the workspace filter. Next to the "Package Explorer" title there's a
 menu icon containing the "Filters..." item. Ensure that ".* resources" is NOT selected.
 
-== The Build File
+=== The Build File
 Replace your `build.gradle` with the contents of `/YadaTools/scripts/template.gradle`.
 
 The lines marked with `// CHANGE THIS !!!` should be edited to suit your needs.
@@ -547,12 +551,14 @@ and is handy when you plan to work on the YadaWeb sources to fix and improve the
 
 [.bookstore]
 --
-Keep `rootProject.name = 'YadaBookstore'` for the bookstore tutorial.
+Use `rootProject.name = 'YadaBookstore'` for the bookstore tutorial.
 --
 
 More information on the wtp syntax https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpComponent.html[here^] and https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpFacet.html[here^].
 
-== Code Generation (just a bit)
+Copy the `/YadaTools/scripts/sass.properties` file into the project folder.
+
+=== Code Generation (just a bit)
 Ensure you have these folders in your project before the next step, and create them when missing:
 
 * `src/main/java`
@@ -595,17 +601,19 @@ You can run the task multiple times and it will never overwrite existing files: 
 Refresh your project in Eclipse (F5). If you see compilation errors ensure that you're just missing some classpath libraries and do a "Refresh Gradle Project" again. If you
 still have errors, try to fix them ;-) For example you might need to remove the dependency on YadaWebSeurity classes if you didn't want to use it.
 
+This may be a good time to commit and push to git.
+
 == Initial Customization
-By default, all files used and created by a running application are to be found inside the `/srv/<acronym><env>` root
+By default, all files used and created by the application are to be found inside the `/srv/<acronym><env>` root
 folder,
 where `<acronym>` is the value of `ext.acronym` in the `build.gradle` file and `<env>` is the "environment", 
-as explained in <<The Build File>> above.
+as explained in <<The Build File>> above. This folder should be manually created.
 
-The predefined user is `admin@EXAMPLE.com` with password `myAppPassword`. 
-
-Before starting the server for the first time, you may want to change the admin email and password by editing
-the `/src/main/resources/conf.webapp.dev.xml` file. The data is stored in the database on first startup
-and never read from file again.
+The predefined application user is (literally) `admin@EXAMPLE.com` with password `myAppPassword`. 
+Before starting the server for the first time, you may want to change that values by editing
+the `/src/main/resources/conf.webapp.dev.xml` file at the <user> tag. The data is stored in the database on first startup
+and never read from file again, so this is the best time to change it to your likes.
+More users can still be added later: only existing users are ignored.
 
 There are some other items that can be customized but they can wait for later:
 
@@ -659,9 +667,12 @@ To create the database and user, run the `/env/dev/createDatabaseAndUser.bat`
 (if you're not on windows, just copy the content and adapt it to your platform).
 On Windows you can open a cmd window and drag the file there from Eclipse, then just press Enter.
 
-If all goes well, you can now generate a schema by running the `dbSchema` gradle task.
-
-As you will be doing this often, you should create a "Run Configuration" in Eclipse to generate the schema.
+If all goes well, you can now generate an initial schema by running the `dbSchema` gradle task. The schema
+will be derived from the classes listed in `/src/main/resources/META-INF/persistence.xml` so, to simplify the schema,
+you may revise this file and remove any unneeded classes. You will always be able to remove/add a class later 
+though you will have to manually delete the removed classes from the database too.
+ 
+As you will be generating a new schema often, you should create a "Run Configuration" in Eclipse to generate the schema.
 Click on "Run > Run Configurations... > Gradle Task" then press the "New launch configuration" icon.
 A new configuration called "New_configuration" will be created. Change the name to anything you like, 
 for example "MySiteProject - DB Schema", add a Gradle Task named "dbSchema", set your application project as the Working Directory,
@@ -676,8 +687,8 @@ If all goes well, the output will be written to the `/schema` folder (you might 
 To load the schema into the database, use the `/env/dev/dropAndCreateDatabase.bat` 
 script (or an equivalent linux/mac version).
 
-You may get some compilation errors that need to be fixed.
-If the schema generator can't connect to the database check that all configuration files listed above (`persistence.xml` etc.) have the right DB credentials.
+You may get some compilation errors that need to be fixed before trying the generation again.
+If the schema generator can't connect to the database check that all configuration files listed above (`persistence.xml` etc.) have the correct DB login credentials.
 
 == Tomcat server
 This section is about setting up a standalone Tomcat server that can be controlled from Eclipse. 
@@ -727,6 +738,41 @@ If your sources in the "Package Explorer" window don't have any red marks (no co
 * Select "Add and Remove... > Add All >>"
 
 If the server starts with no errors, you can see the homepage placeholder at http://localhost:8080/[http://localhost:8080/]
+
+== Embedded Tomcat
+This section is about running the embedded Tomcat server. 
+
+[NOTE]
+====
+You can skip this section if you're going to use the
+standalone version of Tomcat.
+====
+
+The application is started by running the `net.yadaframework.core.YadaTomcatServer` class.
+It accepts two mandatory arguments and an optional one:
+
+acronym+environment::
+a string that will be used by the shutdown command
+webapp folder::
+relative path of the webapp folder in eclipse ("src/main/webapp"), or the full path elsewhere
+temp folder::
+optional in Eclipse, it must be the full path of the temp folder for Tomcat data (where the war is exploded)
+
+When the last argument is missing, "developer mode" is assumed and the HTTPS connector is enabled. It's not
+enabled in all other environments because HTTPS is supposed to be handled by Apache.
+The `YadaTomcatServer` class can be overridden or rewritten to achieve a different behavior.
+
+The command line to start the application on the developer PC is something like
+
+[source,java]
+----
+java net.yadaframework.core.YadaTomcatServer ybsdev src/main/webapp
+----
+
+This can be easily added in Eclipse as a "Java Application" entry in the "Run Configurations" dialog.
+
+After running the server, point the browser to http://localhost:8080/ in order to see a skeleton home page.
+
 
 ==  Troubleshooting
 ===  Compilation Errors

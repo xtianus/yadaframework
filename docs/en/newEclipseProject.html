@@ -68,13 +68,15 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <ul class="sectlevel2">
 <li><a href="#_creating_the_project">Creating the Project</a></li>
 <li><a href="#_importing_the_yadaframework_projects">Importing the YadaFramework Projects</a></li>
-</ul>
-</li>
+<li><a href="#_saving_to_git">Saving to git</a></li>
 <li><a href="#_the_build_file">The Build File</a></li>
 <li><a href="#_code_generation_just_a_bit">Code Generation (just a bit)</a></li>
+</ul>
+</li>
 <li><a href="#_initial_customization">Initial Customization</a></li>
 <li><a href="#_database_setup">Database Setup</a></li>
 <li><a href="#_tomcat_server">Tomcat server</a></li>
+<li><a href="#_embedded_tomcat">Embedded Tomcat</a></li>
 <li><a href="#_troubleshooting">Troubleshooting</a>
 <ul class="sectlevel2">
 <li><a href="#_compilation_errors">Compilation Errors</a></li>
@@ -403,7 +405,8 @@ which would be <code>C:\Local\jdk8</code> if you followed the instructions above
 <p>The "New text file line delimiter" shown in the above image is also better set to "Unix".</p>
 </div>
 <div class="paragraph">
-<p>Also set UTF-8 in the "Content Types &gt; Text &gt; Java Properties File &gt; Default encoding" field:</p>
+<p>Also set UTF-8 in the "Content Types &gt; Text &gt; Java Properties File &gt; Default encoding" field and be sure to
+click on "Update" before applying the changes:</p>
 </div>
 <div class="imageblock center">
 <div class="content">
@@ -508,8 +511,7 @@ computer must be exported via the "Conversions &gt; Export OpenSSH key" menu wit
 <div class="title">Figure 8. Clone the Git repository</div>
 </div>
 <div class="paragraph">
-<p>On the "Branch Selection" dialog you should select just "master". You will later
-add any branch that you need.</p>
+<p>On the "Branch Selection" dialog you should NOT select "master" but the latest versioned branch, for example "0.7.3".</p>
 </div>
 <div class="paragraph">
 <p>On the "Local Destination" dialog you need to select a local folder where to clone the repository.
@@ -641,7 +643,7 @@ also installs a bash executable.</p>
 </div>
 <div class="paragraph">
 <p>Optional: edit the <code>/MySiteProject/gradle/wrapper/gradle-wrapper.properties</code> file changing the <code>distributionUrl</code> to match the version of
-Gradle that you want to use. For example <code>distributionUrl=https\://services.gradle.org/distributions/gradle-7.0-bin.zip</code>.
+Gradle that you want to use. For example <code>distributionUrl=https\://services.gradle.org/distributions/gradle-7.6-bin.zip</code>.
 This is only needed if the gradle you want to use is not yet available in Eclipse. Right-click the project and choose "Gradle &gt; Refresh Gradle Project" to update the version of Gradle used.</p>
 </div>
 <div class="paragraph">
@@ -662,6 +664,25 @@ If not, you should at least install the "Eclipse Web Tools Platform" (WTP) plugi
 <p>After connecting to the GitHub repository as explained above, you can import the
 needed projects using the "File &gt; Import&#8230;&#8203; &gt; Gradle &gt; Existing Gradle Project" menu.</p>
 </div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The Yada projects will be located in the git folder you chose before,
+not along with the new project just created. This may be confusing because
+the Import dialog will initially open in the workspace and you will have to
+browse to the git folder instead.
+After adding the new project to git as explained later, all projects will be
+found in the git folder.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>To import most Yada Framework projects at once you could just import the "YadaWebCommerce" project and rely on dependency resolution to automatically
 import everything else.
@@ -677,7 +698,7 @@ Don&#8217;t worry about Gradle versions here: the version used will be the one c
 <p>The <code>YadaTools</code> project should also be imported because you will later need to copy some files from it.</p>
 </div>
 <div class="paragraph">
-<p>If the imported project has some errors, first of all right-click and choose "Gradle &gt; Refresh Gradle Project".
+<p>If the imported projects have any errors, first of all right-click and choose "Gradle &gt; Refresh Gradle Project".
 If it complains about some unbound system library, open "Properties &gt; Java build path &gt; Libraries" and remove the library.</p>
 </div>
 <div class="paragraph">
@@ -702,6 +723,9 @@ If it complains about some unbound system library, open "Properties &gt; Java bu
 </li>
 </ul>
 </div>
+</div>
+<div class="sect2">
+<h3 id="_saving_to_git">Saving to git</h3>
 <div class="paragraph">
 <p>The next step is to create a git repository to store your projects.
 You must definitely use git to store your files, because
@@ -769,7 +793,9 @@ The resulting filesystem structure will be as follows:</p>
 /.classpath
 /.project
 !gradle-wrapper.jar
-/.sass/</code></pre>
+/.sass/
+**/res/css/*.min.*
+**/res/js/*.min.*</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -777,11 +803,8 @@ The resulting filesystem structure will be as follows:</p>
 menu icon containing the "Filters&#8230;&#8203;" item. Ensure that ".* resources" is NOT selected.</p>
 </div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_the_build_file">The Build File</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_the_build_file">The Build File</h3>
 <div class="paragraph">
 <p>Replace your <code>build.gradle</code> with the contents of <code>/YadaTools/scripts/template.gradle</code>.</p>
 </div>
@@ -851,18 +874,19 @@ and is handy when you plan to work on the YadaWeb sources to fix and improve the
 <div class="openblock bookstore">
 <div class="content">
 <div class="paragraph">
-<p>Keep <code>rootProject.name = 'YadaBookstore'</code> for the bookstore tutorial.</p>
+<p>Use <code>rootProject.name = 'YadaBookstore'</code> for the bookstore tutorial.</p>
 </div>
 </div>
 </div>
 <div class="paragraph">
 <p>More information on the wtp syntax <a href="https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpComponent.html" target="_blank" rel="noopener">here</a> and <a href="https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpFacet.html" target="_blank" rel="noopener">here</a>.</p>
 </div>
+<div class="paragraph">
+<p>Copy the <code>/YadaTools/scripts/sass.properties</code> file into the project folder.</p>
 </div>
 </div>
-<div class="sect1">
-<h2 id="_code_generation_just_a_bit">Code Generation (just a bit)</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_code_generation_just_a_bit">Code Generation (just a bit)</h3>
 <div class="paragraph">
 <p>Ensure you have these folders in your project before the next step, and create them when missing:</p>
 </div>
@@ -938,24 +962,27 @@ The "--no-daemon" option is to stay on the safe side.</p>
 <p>Refresh your project in Eclipse (F5). If you see compilation errors ensure that you&#8217;re just missing some classpath libraries and do a "Refresh Gradle Project" again. If you
 still have errors, try to fix them ;-) For example you might need to remove the dependency on YadaWebSeurity classes if you didn&#8217;t want to use it.</p>
 </div>
+<div class="paragraph">
+<p>This may be a good time to commit and push to git.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_initial_customization">Initial Customization</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>By default, all files used and created by a running application are to be found inside the <code>/srv/&lt;acronym&gt;&lt;env&gt;</code> root
+<p>By default, all files used and created by the application are to be found inside the <code>/srv/&lt;acronym&gt;&lt;env&gt;</code> root
 folder,
 where <code>&lt;acronym&gt;</code> is the value of <code>ext.acronym</code> in the <code>build.gradle</code> file and <code>&lt;env&gt;</code> is the "environment",
-as explained in <a href="#_the_build_file">The Build File</a> above.</p>
+as explained in <a href="#_the_build_file">The Build File</a> above. This folder should be manually created.</p>
 </div>
 <div class="paragraph">
-<p>The predefined user is <code>admin@EXAMPLE.com</code> with password <code>myAppPassword</code>.</p>
-</div>
-<div class="paragraph">
-<p>Before starting the server for the first time, you may want to change the admin email and password by editing
-the <code>/src/main/resources/conf.webapp.dev.xml</code> file. The data is stored in the database on first startup
-and never read from file again.</p>
+<p>The predefined application user is (literally) <code>admin@EXAMPLE.com</code> with password <code>myAppPassword</code>.
+Before starting the server for the first time, you may want to change that values by editing
+the <code>/src/main/resources/conf.webapp.dev.xml</code> file at the &lt;user&gt; tag. The data is stored in the database on first startup
+and never read from file again, so this is the best time to change it to your likes.
+More users can still be added later: only existing users are ignored.</p>
 </div>
 <div class="paragraph">
 <p>There are some other items that can be customized but they can wait for later:</p>
@@ -1023,10 +1050,13 @@ admin user email to your own email address in order to receive emails from the a
 On Windows you can open a cmd window and drag the file there from Eclipse, then just press Enter.</p>
 </div>
 <div class="paragraph">
-<p>If all goes well, you can now generate a schema by running the <code>dbSchema</code> gradle task.</p>
+<p>If all goes well, you can now generate an initial schema by running the <code>dbSchema</code> gradle task. The schema
+will be derived from the classes listed in <code>/src/main/resources/META-INF/persistence.xml</code> so, to simplify the schema,
+you may revise this file and remove any unneeded classes. You will always be able to remove/add a class later
+though you will have to manually delete the removed classes from the database too.</p>
 </div>
 <div class="paragraph">
-<p>As you will be doing this often, you should create a "Run Configuration" in Eclipse to generate the schema.
+<p>As you will be generating a new schema often, you should create a "Run Configuration" in Eclipse to generate the schema.
 Click on "Run &gt; Run Configurations&#8230;&#8203; &gt; Gradle Task" then press the "New launch configuration" icon.
 A new configuration called "New_configuration" will be created. Change the name to anything you like,
 for example "MySiteProject - DB Schema", add a Gradle Task named "dbSchema", set your application project as the Working Directory,
@@ -1045,8 +1075,8 @@ To load the schema into the database, use the <code>/env/dev/dropAndCreateDataba
 script (or an equivalent linux/mac version).</p>
 </div>
 <div class="paragraph">
-<p>You may get some compilation errors that need to be fixed.
-If the schema generator can&#8217;t connect to the database check that all configuration files listed above (<code>persistence.xml</code> etc.) have the right DB credentials.</p>
+<p>You may get some compilation errors that need to be fixed before trying the generation again.
+If the schema generator can&#8217;t connect to the database check that all configuration files listed above (<code>persistence.xml</code> etc.) have the correct DB login credentials.</p>
 </div>
 </div>
 </div>
@@ -1145,6 +1175,68 @@ an error from Tomcat:</p>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_embedded_tomcat">Embedded Tomcat</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section is about running the embedded Tomcat server.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can skip this section if you&#8217;re going to use the
+standalone version of Tomcat.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The application is started by running the <code>net.yadaframework.core.YadaTomcatServer</code> class.
+It accepts two mandatory arguments and an optional one:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">acronym+environment</dt>
+<dd>
+<p>a string that will be used by the shutdown command</p>
+</dd>
+<dt class="hdlist1">webapp folder</dt>
+<dd>
+<p>relative path of the webapp folder in eclipse ("src/main/webapp"), or the full path elsewhere</p>
+</dd>
+<dt class="hdlist1">temp folder</dt>
+<dd>
+<p>optional in Eclipse, it must be the full path of the temp folder for Tomcat data (where the war is exploded)</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>When the last argument is missing, "developer mode" is assumed and the HTTPS connector is enabled. It&#8217;s not
+enabled in all other environments because HTTPS is supposed to be handled by Apache.
+The <code>YadaTomcatServer</code> class can be overridden or rewritten to achieve a different behavior.</p>
+</div>
+<div class="paragraph">
+<p>The command line to start the application on the developer PC is something like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">java net.yadaframework.core.YadaTomcatServer ybsdev src/main/webapp</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This can be easily added in Eclipse as a "Java Application" entry in the "Run Configurations" dialog.</p>
+</div>
+<div class="paragraph">
+<p>After running the server, point the browser to <a href="http://localhost:8080/" class="bare">http://localhost:8080/</a> in order to see a skeleton home page.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_troubleshooting">Troubleshooting</h2>
 <div class="sectionbody">
 <div class="sect2">
@@ -1181,7 +1273,7 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 <div id="footer">
 <div id="footer-text">
 Version 0.7.3<br>
-Last updated 2023-02-17 14:36:20 +0100
+Last updated 2023-02-18 15:58:51 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

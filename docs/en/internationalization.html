@@ -582,8 +582,15 @@ that values are related to their locale:</p>
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@ElementCollection
 @Column(length=8192)
 @MapKeyColumn(name="locale", length=32)
+@CollectionTable(
+	uniqueConstraints = @UniqueConstraint(columnNames={"MyEntityName_id", "locale"})
+)
 private Map&lt;Locale, String&gt; description = new HashMap&lt;&gt;();</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The uniqueContratints (optional) annotation ensures that there can&#8217;t be two values for a given locale. The "MyEntityName_id" value should be
+the actual column name in the ElementCollection table: it usually is the name of the Entity followed by "_id" with a first capital letter.</p>
 </div>
 <div class="paragraph">
 <p>To retrieve the value in a specific locale, use YadaUtil.getLocalValue(). This will return the value in the specified locale or null.
@@ -609,6 +616,9 @@ public class Product {
   @ElementCollection
   @Column(length=8192)
   @MapKeyColumn(name="locale", length=32)
+  @CollectionTable(
+    uniqueConstraints = @UniqueConstraint(columnNames={"Product_id", "locale"})
+  )
   private Map&lt;Locale, String&gt; description = new HashMap&lt;&gt;();
 
   ...
@@ -625,6 +635,52 @@ public class Product {
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;p th:text="${product.descriptionLocal}"&gt;Some description&lt;/p&gt;</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Be careful that Maps are lazy by default, so the localized value won&#8217;t be returned outside of a transaction.
+The solution is to either prefetch the map in the DAO (most efficient solution) or to eagerly load it (simpler implementation).</p>
+</div>
+<div class="paragraph">
+<p>Prefetching in the DAO can be done by simply calling a <code>.size()</code> or by using <code>YadaUtil.prefetchLocalizedStrings()</code> and similar methods:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public Product findProduct(Long id) {
+	Product product = em.find(Product.class, id);
+	// Either call .size()
+	product.getDescription().size();
+	// Or prefetch all localized strings via reflection
+	YadaUtil.prefetchLocalizedStrings(product, Product.class);
+	return product;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In order to eagerly load the attribute, use FetchType.EAGER together with FetchMode.SELECT:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@ElementCollection(fetch = FetchType.EAGER)
+@Fetch(FetchMode.SELECT)
+@Column(length=8192)
+@MapKeyColumn(name="locale", length=32)
+@CollectionTable(
+	uniqueConstraints = @UniqueConstraint(columnNames={"Product_id", "locale"})
+)
+private Map&lt;Locale, String&gt; description = new HashMap&lt;&gt;();</code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+not using FetchMode.SELECT may result in a cross join that loads a huge amount of values into memory, possibly causing an OutOfMemory exception!
+</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 </div>
@@ -632,7 +688,7 @@ public class Product {
 <div id="footer">
 <div id="footer-text">
 Version 0.7.3<br>
-Last updated 2023-01-19 19:03:32 +0100
+Last updated 2023-04-07 15:11:46 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
