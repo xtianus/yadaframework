@@ -131,9 +131,9 @@ Example:
 						</a>
 					</form>
 					<!--/* Delete */-->
-					<form th:action="${urlDelete}" data-yadaParentForm="yadaClosestFind:.yadaImageSorter .deleteForm" >
+					<form th:action="${urlDelete}" data-yadaParentForm="yadaClosestFind:.yadaImageSorter .deleteForm">
 						<input type="hidden" name="imageId" th:value="${galleryImage.id}">
-						<a href="#" onclick="$(this).closest('form').submit(); return false;">
+						<a href="#" onclick="$(this).closest('form').submit(); return false;" th:classappend="${deleteConfirmKey!=null || deleteConfirm!=null} ? yadaNoLoader">
 							<i class="delete fa fa-trash-o" aria-hidden="true"></i>
 						</a>
 					</form>

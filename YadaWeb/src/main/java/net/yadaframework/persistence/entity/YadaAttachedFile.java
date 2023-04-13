@@ -81,6 +81,7 @@ public class YadaAttachedFile implements CloneableDeep {
 	 */
 	// On object creation it can be set the same value as the id, so that no other element will have the same position.
 	// During reordering, values just have to be swapped.
+	// Use @OrderBy("sortOrder") in the owning entity
 	protected long sortOrder=-1;
 
 	/**
