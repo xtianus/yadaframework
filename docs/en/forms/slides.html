@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Multimedia Galleries</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
+</head>
+<body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Misc</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+</script>
+<div id="header">
+<h1>Multimedia Galleries</h1>
+<div class="details">
+<span id="revnumber">version 0.7.3</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_description">Description</a></li>
+<li><a href="#_database_definition">Database Definition</a></li>
+<li><a href="#_html_page">HTML Page</a></li>
+<li><a href="#_java_controller">Java Controller</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Creating and showing image galleries with additional information on each slide</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This page is about handling a complex presentation made of slides that contain an image, a video or both,
+several text fields or links and various flags that can change the way each slide is shown on screen.
+To only handle images with a title and description, see <a href="imageGalleries.html">Image Galleries</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Handling an image gallery with many attributes is complex: it involves uploading and cropping images,
+saving image files on disk, storing image references in the database, acquiring and storing
+image-related information like title and description, editing or deleting all of that, retrieving all this
+information to show it on the web page, and do this for any gallery instance that might be present on page.</p>
+</div>
+<div class="paragraph">
+<p>The Yada Framework offers the YadaGallerySlide java object and some guidelines to streamline that process.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_database_definition">Database Definition</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Each gallery must belong to some database object. For example, the gallery of product images belongs to the
+Product entity. A gallery can be added to an entity with the following code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@OneToMany(cascade=CascadeType.ALL) // Remember to delete files on disk on REMOVE
+@JoinTable(name = "Product_productGallery")
+private List&lt;YadaGallerySlide&gt; productGallery = new ArrayList&lt;&gt;();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>YadaGallerySlide.java</code> object represents a single gallery slide and
+already implements a lot of predefined fields that may come
+useful: sort position, generic flags, generic string data fields, localized text fields,
+one video and one image. If the provided fields are not enough, YadaGallerySlide can be
+easily subclassed.</p>
+</div>
+<div class="paragraph">
+<p>The <code>@JoinTable</code> annotation is really needed only if more than one gallery is defined
+on the same entity.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_html_page">HTML Page</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The page must show a form to add/edit a gallery slide, and a form to reorder or delete the previously
+added ones.</p>
+</div>
+<div class="paragraph">
+<p>The form to add/edit can be like the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/addEditSlide}" yada:updateOnSuccess=""
+	th:object="${yadaGallerySlide}" th:fragment="galleryFormFragment"
+	th:classappend="${#fields.hasErrors('*')}? has-error"
+	enctype="multipart/form-data" class="yadaAjax" method="post" role="form"&gt;
+	&lt;div class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('global')}" th:errors="*{global}"&gt;Some error&lt;/div&gt;
+	&lt;fieldset&gt;
+		&lt;input type="hidden" name="yadaGallerySlideId" th:value="${yadaGallerySlide.id}"&gt;
+		&lt;th:block th:if="${size==null}"&gt;
+			&lt;!--/* Adding a new slide: the size is from config */--&gt;
+			&lt;div th:replace="/yada/form/fileUpload::field(fieldName='multipartImage', label='Add slide',accept='image/*',attachedFile=*{image},required=true,size=${slideImageSize})"&gt;&lt;/div&gt;
+		&lt;/th:block&gt;
+		&lt;th:block th:if="${size!=null}"&gt;
+			&lt;!--/* Editing a slide: the size is from previous choice */--&gt;
+			&lt;div th:replace="/yada/form/fileUpload::field(fieldName='multipartImage', label='Edit slide',accept='image/*',attachedFile=*{image},required=true,size=${size})"&gt;&lt;/div&gt;
+		&lt;/th:block&gt;
+		&lt;button class="btn btn-success" type="submit" name="Save"&gt;[[*{id}!=null?'Save':'Add']] Slide&lt;/button&gt;
+	&lt;/fieldset&gt;
+&lt;/form&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>Some explanation, add some other fields not just image</pre>
+</div>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>Sort form</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_java_controller">Java Controller</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The controller must first show the form, then handle form submission and image cropping.
+A <code>yadaGallerySlide</code> model attribute must be added with an appropriate @ModelAttribute method:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@ModelAttribute("yadaGallerySlide")
+public YadaGallerySlide addYadaGallerySlide(@RequestParam(value="yadaGallerySlideId", required=false) Long yadaGallerySlideId, Model model) {
+	YadaGallerySlide toEdit = null;
+	Exception exception = null;
+	if (yadaGallerySlideId!=null) {
+		try {
+			toEdit = myDao.findYadaGallerySlide(yadaGallerySlideId);
+		} catch (Exception e) {
+			exception = e;
+		}
+		if (toEdit==null) {
+			log.error("Can't find YadaGallerySlide with id={} - (creating new)", yadaGallerySlideId, exception);
+		} else if (log.isDebugEnabled()) {
+			log.debug("YadaGallerySlide {} fetched from DB as ModelAttribute", yadaGallerySlideId);
+		}
+	}
+	if (toEdit==null) {
+		toEdit = new YadaGallerySlide();
+	}
+	return toEdit;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The method that shows the form must get the required image size from the configuration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/galleryCms")
+public String galleryCms(Model model) {
+	YadaIntDimension[] slideDimensions = config.getDimensionsMyGallery();
+	model.addAttribute("slideImageSize", YadaIntDimension.biggestCover(slideDimensions));
+	return "/my/galleryCms";
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The form handling method adds a new YadaGallerySlide to the owning Entity:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/addEditSlide") // Ajax
+public String addEditSlide(YadaGallerySlide yadaGallerySlide, BindingResult yadaGallerySlideBinding, Product product, HttpServletRequest request, Model model, Locale locale) {
+	if (YadaCommonsMultipartResolver.limitExceeded(request)) {
+		// All Request Parameters sent with the form are lost so we can't return the submitted form
+		yadaNotify.title("Slide not saved", model).error().message("Request too big. Total file size limit is " + config.getMaxFileUploadSizeBytes()/(1024*1024) + " MB").add();
+		return YadaViews.AJAX_NOTIFY; // The yada version with icons, not the artemide one
+	}
+	boolean isAdd = yadaGallerySlide.getId()==null;
+	String uploadFolder = "/images/product";
+	//
+	// Validate image size and upload image file, if any
+	//
+	YadaIntDimension[] slideDimensions = config.getDimensionsCatalogHero();
+	YadaManagedFile slideManagedFile = validateAndUploadSlideImage(yadaGallerySlide, yadaGallerySlideBinding, slideDimensions);
+	if (!yadaGallerySlideBinding.hasErrors()) {
+		try {
+			if (isAdd) {
+				// Add new slide to gallery
+				productDao.addProductSlide(yadaGallerySlide, product);
+			} else {
+				// Update existing slide
+				// yadaGallerySlide = (YadaGallerySlide) yadaDao.save(yadaGallerySlide);
+				yadaGallerySlide = productDao.saveGallerySlideWithImage(yadaGallerySlide);
+			}
+
+			//
+			// Upload and crop image if any
+			//
+			if (slideManagedFile!=null) {
+				YadaAttachedFile previousImage = yadaGallerySlide.getImage();
+				if (previousImage!=null) {
+					yadaFileManager.deleteFileAttachment(previousImage);
+				}
+				String cropRedirect = yadaWebUtil.redirectString("/myCms/cropPage", locale);
+				String finalRedirect = yadaWebUtil.redirectString("/galleryCms", locale);
+				YadaCropQueue yadaCropQueue = amdSession.addCropQueue(cropRedirect, finalRedirect); // Clear any previous abandoned crops and set the destination
+				YadaCropImage yadaCropImage = yadaCropQueue.addCropImage(slideManagedFile, slideDimensions, uploadFolder, "product_");
+				YadaAttachedFile newOrExisting  = yadaCropImage.titleKey("crop.gallery.product").cropDesktop().linkAdd();
+				yadaGallerySlide = productDao.addGallerySlideImage(yadaGallerySlide, newOrExisting, yadaCropImage);
+				log.debug("Entering crop workflow for product hero");
+				return yadaCropQueue.getCropRedirect();
+			}
+			amdSession.deleteCropQueue();
+		} catch (Exception e) {
+			log.error("Failed to upload slide", e);
+			yadaFileManager.delete(slideManagedFile);
+			yadaGallerySlideBinding.reject("error.gallery.systemerror");
+		}
+	} else {
+		// Has errors
+		yadaFileManager.delete(slideManagedFile);
+	}
+
+	// Fill form Model attributes to show the form again
+	if (isAdd) {
+		if (!yadaGallerySlideBinding.hasErrors()) {
+			// When adding successfully, need to clear the slide or the add form will be wrong
+			model.addAttribute("yadaGallerySlide", new YadaGallerySlide());
+		}
+		return "/galleryCms::galleryFormFragment";
+	}
+	return "/galleryCms::galleryFormFragment";
+}
+
+private YadaManagedFile validateAndUploadSlideImage(YadaGallerySlide yadaGallerySlide, BindingResult yadaGallerySlideBinding, YadaIntDimension[] slideDimensions) {
+	YadaManagedFile slideManagedFile = null;
+	MultipartFile image = yadaGallerySlide.getMultipartImage();
+	if (image!=null &amp;&amp; !image.isEmpty()) {
+		try {
+			YadaIntDimension biggestNeeded = YadaIntDimension.biggestCover(slideDimensions);
+			// Image upload
+			slideManagedFile = yadaFileManager.manageFile(image);
+			// Validation
+			YadaIntDimension fileDimension = slideManagedFile.getDimension();
+			if (fileDimension.isUnset()) {
+				yadaGallerySlideBinding.rejectValue("multipartImage", "validation.value.invalidImage", "Invalid image file");
+			} else if (biggestNeeded.isAnyBiggerThan(fileDimension)) {
+				yadaGallerySlideBinding.rejectValue("multipartImage", "validation.value.smallImage", new Object[] {fileDimension, biggestNeeded}, "Image too small");
+			}
+		} catch (IOException e) {
+			log.error("Error uploading image", e);
+			yadaGallerySlideBinding.rejectValue("multipartImage", "dashboard.imageupload.error");
+		}
+	}
+	return slideManagedFile;
+}</code></pre>
+</div>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>Explanation, sorting and deleting</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 0.7.3<br>
+Last updated 2023-04-13 16:37:06 +0200
+</div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>

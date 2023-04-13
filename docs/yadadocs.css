@@ -40,18 +40,20 @@ ul li p {
 
 /* Custom code-block icons */
 
+/* 
 code.hljs {
 	margin-left: 28px !important;
 }
-
+*/
+ 
 code.hljs::after { 
 	content: '';
     width: 20px;
     height: 20px;
     display: block;
     position: absolute;
-    left: 0;
-    top: 0;
+	left: -10px;
+    top: -4px;
     background-repeat: no-repeat;
     background-size: contain;
 }
@@ -63,6 +65,14 @@ code.hljs.language-dos::after {
 code.hljs.language-gradle::after { 
 	background-image:url('img/lang/gradle-elephant-icon-dark-green-secondary.svg');
     width: 25px;
+}
+
+/* Code scrolling instead of wrapping */
+code {
+	overflow: auto;
+    width: max-content;
+    margin-left: 0 !important;
+    min-width: 100%;
 }
 
 .bookstore {

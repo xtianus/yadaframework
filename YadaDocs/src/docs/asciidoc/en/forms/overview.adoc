@@ -9,6 +9,10 @@ Handling user-submitted data
 
 <<fieldsComponents.adoc#, Form Components>>:: Enhanced input fields
 
+<<imageGalleries.adoc#, Image Galleries>>:: Upload and edit an image gallery
+
+<<slides.adoc#, Multimedia Galleries>>:: Create complex image galleries
+
 ==  Description
 Forms are used to gather information from users. You could also use plain anchors with request attributes, but forms are way more convenient especially
 for more than a couple of fields and when performing validation.

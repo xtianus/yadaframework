@@ -1,0 +1,244 @@
+=  Image Galleries
+:docinfo: shared
+:imagesdir: ../../img/
+
+Full instructions for implementing an image gallery, from upload to display
+
+==  Description
+NOTE: This page is about handling an image gallery with at most a title and description
+on each slide. When slides have more data, see <<slides.adoc#,Multimedia Galleries>>. 
+
+The process of defining an image gallery involves uploading images, cropping them, handling 
+titles and descriptions, sorting and deleting images, and finally showing them on page.
+Most of this information can be found in the <<uploads.adoc#,File Uploads>> section.
+This page is a summary of what is detailed there and adds some gallery-specific information.
+
+== Database Definition
+An image gallery can be modeled as a list of images belonging to some entity (the "owner").
+For example, the gallery of a Product entity could be a List of YadaAttachedFile:
+
+[source,java]
+----
+@OneToMany(cascade=CascadeType.PERSIST) # <1>
+@OrderBy("sortOrder") # <2>
+protected List<YadaAttachedFile> gallery = new ArrayList<>(); # <3>
+----
+<1> See <<uploads.adoc#_yadaattachedfile,YadaAttachedFile>> for the reason why only PERSIST should be used
+<2> This annotation creates a "order by" query in the database
+<3> Better use a List than a Set because sorting slides requires accessing them by index
+
+== Editing slides: HTML
+In the CMS page, just include the `/yadacms/imageSorter` component to handle creation, editing and sorting:
+
+[source,html]
+----
+<div th:replace="~{/yadacms/imageSorter::component(
+	images=${product.gallery},
+	size=${slideImageSize}, # <1>
+	entityIdName='productId', # <2>
+	entityIdValue=${product.id},
+	accept='image/*',
+	required=true,
+	urlAdd=@{/manager/product/addSlide},
+	urlDelete=@{/manager/product/deleteSlide},
+	urlSort=@{/manager/product/sortSlide},
+	deleteConfirm='Delete slide?',
+	labelAdd='Add product hero image')}">
+</div>
+----
+<1> the `size` parameter shows information about the required minimum size, It is a `YadaIntDimension` instance
+<2> specify the name of the parameter that will contain the id of the owner when submitting to the server
+
+[.center]
+.Slide upload form
+image::forms/galleryForm.jpg[Slide upload form]
+
+This example only shows a file input element for uploading images.
+See `/YadaWebCMS/src/main/resources/net/yadaframework/views/yadacms/imageSorter.html` for a detailed list and explanation 
+of all available parameters. 
+
+== Editing slides: Java
+In order for the imageSorter to work, the Controller must add some attributes to the Model: the `product` and the
+`slideImageSize` in this example. It is convenient to add the Product as a ModelAttribute:
+
+[source,java]
+----
+@ModelAttribute("product")
+public Product addProduct(@RequestParam(value="productId", required=false) Long productId) { # <1>
+	Product toEdit = null;
+	Exception exception = null;
+	if (productId!=null) {
+		try {
+			toEdit = productDao.findProductById(productId);
+		} catch (Exception e) {
+			exception = e;
+		}
+		if (toEdit==null) {
+			log.error("Can't find Product with id={} - (creating Product)", productId, exception);
+		} else if (log.isDebugEnabled()) {
+			log.debug("Product {}-{} fetched from DB as ModelAttribute", productId, toEdit.getName());
+		}
+	}
+	if (toEdit==null) {
+		toEdit = new Product();
+	}
+	return toEdit;
+}
+
+@RequestMapping("/galleryEdit")
+public String galleryEdit(Product product, Model model) {
+	YadaIntDimension[] slideDimensions = config.getDimensionsProductGallery(); # <2>
+	model.addAttribute("slideImageSize", YadaIntDimension.biggestCover(slideDimensions)); # <3>
+	return "/manager/productEdit";
+}
+----
+<1> the name of the request parameter holding the product id must be the same used in the HTML as `entityIdName`
+<2> configuring image dimensions is explained <<uploads.adoc#_configuration_2,here>>
+<3> `YadaIntDimension.biggestCover` returns a new `YadaIntDimension` that can contain all the dimensions passed as argument
+
+Adding a new slide requires validating the input, uploading the file, storing data in the database and starting the crop workflow.
+See <<uploads.adoc#_image_upload_and_crop,the relevant section>> for details on the crop workflow.
+
+[source,java]
+----
+@RequestMapping("/addSlide") // Ajax
+public String addSlide(Product product, HttpServletRequest request, Model model, Locale locale) {
+	if (YadaCommonsMultipartResolver.limitExceeded(request)) {
+		// All Request Parameters sent with the form are lost so we can't return the submitted form
+		yadaNotify.title("Slide not saved", model).error().message("Request too big. Total file size limit is " + config.getMaxFileUploadSizeBytes()/(1024*1024) + " MB").add();
+		return YadaViews.AJAX_NOTIFY;
+	}
+	List<String> errorMessages = new ArrayList<String>(); // Can't use BindingResult in imageSorter because the form is not returned
+	model.addAttribute("errorMessages", errorMessages);
+
+	MultipartFile newImage = product.getNewImage(); # <1>
+	if (newImage!=null && !newImage.isEmpty()) {
+		YadaManagedFile newImageManagedFile = null;
+		YadaIntDimension[] newImageDimensions = config.getDimensionsProductGallery();
+		try {
+			YadaIntDimension biggestNeeded = YadaIntDimension.biggest(newImageDimensions);
+			newImageManagedFile = yadaFileManager.manageFile(newImage);
+			YadaIntDimension fileDimension = newImageManagedFile.getDimension();
+			if (fileDimension.isUnset()) {
+				errorMessages.add(messageSource.getMessage("validation.value.invalidImage", null, locale));
+			} else if (biggestNeeded.isAnyBiggerThan(fileDimension)) {
+				errorMessages.add(messageSource.getMessage("validation.value.smallImage", new Object[] {fileDimension, biggestNeeded}, locale));
+			}
+			if (!errorMessages.isEmpty()) {
+				yadaFileManager.delete(newImageManagedFile);
+				model.addAttribute("images", product.getGallery()); # <2>
+				return "/yadacms/imageSorter :: .yadaImageSorterImages";
+			}
+			//
+			// Upload and crop image
+			//
+			String cropRedirect = yadaWebUtil.redirectString("/manager/cropPage", locale);
+			String finalRedirect = yadaWebUtil.redirectString("/manager/galleryEdit", locale);
+			YadaCropQueue yadaCropQueue = amdSession.addCropQueue(cropRedirect, finalRedirect); // Clear any previous abandoned crops and set the destination
+			YadaCropImage yadaCropImage = yadaCropQueue.addCropImage(newImageManagedFile, newImageDimensions, "/images", "product_");
+			YadaAttachedFile imageAttachedFile  = yadaCropImage.titleKey("crop.product.gallery").cropDesktop().linkAdd();
+			product.getGallery().add(imageAttachedFile);
+			product = productDao.save(product);
+			log.debug("Entering crop workflow for product gallery");
+			return yadaCropQueue.getCropRedirect();
+		} catch (Exception e) {
+			log.error("Error uploading image", e);
+			errorMessages.add(messageSource.getMessage("error.product.gallery.systemerror", null, locale));
+			yadaFileManager.delete(newImageManagedFile);
+		}			
+	}
+	// In case of error, go back to the form immediately
+	model.addAttribute("images", product.getGallery());  # <2>
+	return "/yadacms/imageSorter :: .yadaImageSorterImages";
+}
+----
+<1> the Product entity should have a `@Transient MultipartFile newImage` attribute with getters and setters to receive the file sent from the browser
+<2> as we return a fragment of `imageSorter`, we need a `images` model attribute with the list of `YadaAttachedFile`
+
+Deleting a slide requires removing the file from disk, then removing the data from DB:
+
+[source,java]
+----
+@RequestMapping("/deleteSlide") // Ajax
+public String deleteSlide(Long imageId, Product product, Model model, Locale locale) { # <1>
+	// Delete image from disk
+	YadaAttachedFile yadaAttachedFile = yadaAttachedFileDao.find(imageId);
+	yadaFileManager.deleteFileAttachment(yadaAttachedFile);
+	// Delete from DB
+	Product product = productDao.deleteGallerySlide(product.getId(), imageId);
+	model.addAttribute("images", product.getGallery());
+	return "/yadacms/imageSorter :: .yadaImageSorterImages";
+}
+----
+<1> `imageId` is the id of the `YadaAttachedFile`
+
+The DAO is quite straightforward:
+
+[source,java]
+----
+@Transactional(readOnly = false)
+public Product deleteGallerySlide(Long productId, Long imageId) {
+	em.createNativeQuery("delete from ...") # <1>
+		.setParameter("imageId", imageId)
+		.setParameter("productId", productId)
+		.executeUpdate();
+	yadaAttachedFileDao.delete(imageId);
+	Product product = findAndPrefetch(productId); # <2>
+	return product;
+}
+
+public Product findAndPrefetch(Long productId) {
+	Product product = em.find(Product.class, productId);
+	product.getGallery().size(); // prefetch the List
+	return product;
+}
+----
+<1> the native query should delete the row in the join table before calling `yadaAttachedFileDao.delete()`
+<2> need to refetch the `Product` with an updated gallery. You could also keep using the stale `Product` after deleting the image from the List
+
+Sorting slides is even easier:
+
+[source,java]
+----
+@RequestMapping("/sortSlide") // Ajax
+public String sortSlide(Long productId, Long currentId, Long otherId, Model model, Locale locale) {
+	yadaAttachedFileDao.swapSortOrder(currentId, otherId);
+	Product product = productDao.findAndPrefetch(productId); // Reload the updated list
+	model.addAttribute("images", product.getGallery());
+	return "/yadacms/imageSorter :: .yadaImageSorterImages";
+}
+----
+
+The final result is shown in the next image.
+
+[.center]
+.Gallery editing
+image::forms/galleryComplete.jpg[Gallery editing]
+
+== Showing the gallery
+In order to show the full working gallery on the page, the Controller must fetch the owning entity then show the HTML that implements the gallery:
+
+[source,java]
+----
+@RequestMapping("/showProduct")
+public String showProduct(Long productId, Model model, Locale locale) {
+	Product product = productDao.findAndPrefetch(productId);
+	model.addAttribute("product", product);
+	return "/productPage";
+}
+----
+
+The markup to implement the gallery is not shown here:
+
+[source,html]
+----
+<div th:each="slide: ${product.gallery}">
+	<picture>
+        <source media="(max-width: 767px)" th:srcset="@{${@yadaFileManager.getMobileImageUrl(slide)}}">
+        <img th:src="@{${@yadaFileManager.getDesktopImageUrl(slide)}}">
+	</picture>
+</div>
+----
+
+
+

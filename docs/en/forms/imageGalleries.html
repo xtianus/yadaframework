@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Image Galleries</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
+</head>
+<body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Misc</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+</script>
+<div id="header">
+<h1>Image Galleries</h1>
+<div class="details">
+<span id="revnumber">version 0.7.3</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_description">Description</a></li>
+<li><a href="#_database_definition">Database Definition</a></li>
+<li><a href="#_editing_slides_html">Editing slides: HTML</a></li>
+<li><a href="#_editing_slides_java">Editing slides: Java</a></li>
+<li><a href="#_showing_the_gallery">Showing the gallery</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Full instructions for implementing an image gallery, from upload to display</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This page is about handling an image gallery with at most a title and description
+on each slide. When slides have more data, see <a href="slides.html">Multimedia Galleries</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The process of defining an image gallery involves uploading images, cropping them, handling
+titles and descriptions, sorting and deleting images, and finally showing them on page.
+Most of this information can be found in the <a href="uploads.html">File Uploads</a> section.
+This page is a summary of what is detailed there and adds some gallery-specific information.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_database_definition">Database Definition</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>An image gallery can be modeled as a list of images belonging to some entity (the "owner").
+For example, the gallery of a Product entity could be a List of YadaAttachedFile:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@OneToMany(cascade=CascadeType.PERSIST) <i class="conum" data-value="1"></i><b>(1)</b>
+@OrderBy("sortOrder") <i class="conum" data-value="2"></i><b>(2)</b>
+protected List&lt;YadaAttachedFile&gt; gallery = new ArrayList&lt;&gt;(); <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>See <a href="uploads.html#_yadaattachedfile">YadaAttachedFile</a> for the reason why only PERSIST should be used</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This annotation creates a "order by" query in the database</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Better use a List than a Set because sorting slides requires accessing them by index</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_editing_slides_html">Editing slides: HTML</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the CMS page, just include the <code>/yadacms/imageSorter</code> component to handle creation, editing and sorting:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:replace="~{/yadacms/imageSorter::component(
+	images=${product.gallery},
+	size=${slideImageSize}, <i class="conum" data-value="1"></i><b>(1)</b>
+	entityIdName='productId', <i class="conum" data-value="2"></i><b>(2)</b>
+	entityIdValue=${product.id},
+	accept='image/*',
+	required=true,
+	urlAdd=@{/manager/product/addSlide},
+	urlDelete=@{/manager/product/deleteSlide},
+	urlSort=@{/manager/product/sortSlide},
+	deleteConfirm='Delete slide?',
+	labelAdd='Add product hero image')}"&gt;
+&lt;/div&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the <code>size</code> parameter shows information about the required minimum size, It is a <code>YadaIntDimension</code> instance</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>specify the name of the parameter that will contain the id of the owner when submitting to the server</td>
+</tr>
+</table>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/forms/galleryForm.jpg" alt="Slide upload form">
+</div>
+<div class="title">Figure 1. Slide upload form</div>
+</div>
+<div class="paragraph">
+<p>This example only shows a file input element for uploading images.
+See <code>/YadaWebCMS/src/main/resources/net/yadaframework/views/yadacms/imageSorter.html</code> for a detailed list and explanation
+of all available parameters.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_editing_slides_java">Editing slides: Java</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In order for the imageSorter to work, the Controller must add some attributes to the Model: the <code>product</code> and the
+<code>slideImageSize</code> in this example. It is convenient to add the Product as a ModelAttribute:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@ModelAttribute("product")
+public Product addProduct(@RequestParam(value="productId", required=false) Long productId) { <i class="conum" data-value="1"></i><b>(1)</b>
+	Product toEdit = null;
+	Exception exception = null;
+	if (productId!=null) {
+		try {
+			toEdit = productDao.findProductById(productId);
+		} catch (Exception e) {
+			exception = e;
+		}
+		if (toEdit==null) {
+			log.error("Can't find Product with id={} - (creating Product)", productId, exception);
+		} else if (log.isDebugEnabled()) {
+			log.debug("Product {}-{} fetched from DB as ModelAttribute", productId, toEdit.getName());
+		}
+	}
+	if (toEdit==null) {
+		toEdit = new Product();
+	}
+	return toEdit;
+}
+
+@RequestMapping("/galleryEdit")
+public String galleryEdit(Product product, Model model) {
+	YadaIntDimension[] slideDimensions = config.getDimensionsProductGallery(); <i class="conum" data-value="2"></i><b>(2)</b>
+	model.addAttribute("slideImageSize", YadaIntDimension.biggestCover(slideDimensions)); <i class="conum" data-value="3"></i><b>(3)</b>
+	return "/manager/productEdit";
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the name of the request parameter holding the product id must be the same used in the HTML as <code>entityIdName</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>configuring image dimensions is explained <a href="uploads.html#_configuration_2">here</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><code>YadaIntDimension.biggestCover</code> returns a new <code>YadaIntDimension</code> that can contain all the dimensions passed as argument</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Adding a new slide requires validating the input, uploading the file, storing data in the database and starting the crop workflow.
+See <a href="uploads.html#_image_upload_and_crop">the relevant section</a> for details on the crop workflow.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/addSlide") // Ajax
+public String addSlide(Product product, HttpServletRequest request, Model model, Locale locale) {
+	if (YadaCommonsMultipartResolver.limitExceeded(request)) {
+		// All Request Parameters sent with the form are lost so we can't return the submitted form
+		yadaNotify.title("Slide not saved", model).error().message("Request too big. Total file size limit is " + config.getMaxFileUploadSizeBytes()/(1024*1024) + " MB").add();
+		return YadaViews.AJAX_NOTIFY;
+	}
+	List&lt;String&gt; errorMessages = new ArrayList&lt;String&gt;(); // Can't use BindingResult in imageSorter because the form is not returned
+	model.addAttribute("errorMessages", errorMessages);
+
+	MultipartFile newImage = product.getNewImage(); <i class="conum" data-value="1"></i><b>(1)</b>
+	if (newImage!=null &amp;&amp; !newImage.isEmpty()) {
+		YadaManagedFile newImageManagedFile = null;
+		YadaIntDimension[] newImageDimensions = config.getDimensionsProductGallery();
+		try {
+			YadaIntDimension biggestNeeded = YadaIntDimension.biggest(newImageDimensions);
+			newImageManagedFile = yadaFileManager.manageFile(newImage);
+			YadaIntDimension fileDimension = newImageManagedFile.getDimension();
+			if (fileDimension.isUnset()) {
+				errorMessages.add(messageSource.getMessage("validation.value.invalidImage", null, locale));
+			} else if (biggestNeeded.isAnyBiggerThan(fileDimension)) {
+				errorMessages.add(messageSource.getMessage("validation.value.smallImage", new Object[] {fileDimension, biggestNeeded}, locale));
+			}
+			if (!errorMessages.isEmpty()) {
+				yadaFileManager.delete(newImageManagedFile);
+				model.addAttribute("images", product.getGallery()); <i class="conum" data-value="2"></i><b>(2)</b>
+				return "/yadacms/imageSorter :: .yadaImageSorterImages";
+			}
+			//
+			// Upload and crop image
+			//
+			String cropRedirect = yadaWebUtil.redirectString("/manager/cropPage", locale);
+			String finalRedirect = yadaWebUtil.redirectString("/manager/galleryEdit", locale);
+			YadaCropQueue yadaCropQueue = amdSession.addCropQueue(cropRedirect, finalRedirect); // Clear any previous abandoned crops and set the destination
+			YadaCropImage yadaCropImage = yadaCropQueue.addCropImage(newImageManagedFile, newImageDimensions, "/images", "product_");
+			YadaAttachedFile imageAttachedFile  = yadaCropImage.titleKey("crop.product.gallery").cropDesktop().linkAdd();
+			product.getGallery().add(imageAttachedFile);
+			product = productDao.save(product);
+			log.debug("Entering crop workflow for product gallery");
+			return yadaCropQueue.getCropRedirect();
+		} catch (Exception e) {
+			log.error("Error uploading image", e);
+			errorMessages.add(messageSource.getMessage("error.product.gallery.systemerror", null, locale));
+			yadaFileManager.delete(newImageManagedFile);
+		}
+	}
+	// In case of error, go back to the form immediately
+	model.addAttribute("images", product.getGallery());  <i class="conum" data-value="2"></i><b>(2)</b>
+	return "/yadacms/imageSorter :: .yadaImageSorterImages";
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the Product entity should have a <code>@Transient MultipartFile newImage</code> attribute with getters and setters to receive the file sent from the browser</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>as we return a fragment of <code>imageSorter</code>, we need a <code>images</code> model attribute with the list of <code>YadaAttachedFile</code></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Deleting a slide requires removing the file from disk, then removing the data from DB:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/deleteSlide") // Ajax
+public String deleteSlide(Long imageId, Product product, Model model, Locale locale) { <i class="conum" data-value="1"></i><b>(1)</b>
+	// Delete image from disk
+	YadaAttachedFile yadaAttachedFile = yadaAttachedFileDao.find(imageId);
+	yadaFileManager.deleteFileAttachment(yadaAttachedFile);
+	// Delete from DB
+	Product product = productDao.deleteGallerySlide(product.getId(), imageId);
+	model.addAttribute("images", product.getGallery());
+	return "/yadacms/imageSorter :: .yadaImageSorterImages";
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>imageId</code> is the id of the <code>YadaAttachedFile</code></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The DAO is quite straightforward:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Transactional(readOnly = false)
+public Product deleteGallerySlide(Long productId, Long imageId) {
+	em.createNativeQuery("delete from ...") <i class="conum" data-value="1"></i><b>(1)</b>
+		.setParameter("imageId", imageId)
+		.setParameter("productId", productId)
+		.executeUpdate();
+	yadaAttachedFileDao.delete(imageId);
+	Product product = findAndPrefetch(productId); <i class="conum" data-value="2"></i><b>(2)</b>
+	return product;
+}
+
+public Product findAndPrefetch(Long productId) {
+	Product product = em.find(Product.class, productId);
+	product.getGallery().size(); // prefetch the List
+	return product;
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the native query should delete the row in the join table before calling <code>yadaAttachedFileDao.delete()</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>need to refetch the <code>Product</code> with an updated gallery. You could also keep using the stale <code>Product</code> after deleting the image from the List</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Sorting slides is even easier:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/sortSlide") // Ajax
+public String sortSlide(Long productId, Long currentId, Long otherId, Model model, Locale locale) {
+	yadaAttachedFileDao.swapSortOrder(currentId, otherId);
+	Product product = productDao.findAndPrefetch(productId); // Reload the updated list
+	model.addAttribute("images", product.getGallery());
+	return "/yadacms/imageSorter :: .yadaImageSorterImages";
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The final result is shown in the next image.</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/forms/galleryComplete.jpg" alt="Gallery editing">
+</div>
+<div class="title">Figure 2. Gallery editing</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_showing_the_gallery">Showing the gallery</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In order to show the full working gallery on the page, the Controller must fetch the owning entity then show the HTML that implements the gallery:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/showProduct")
+public String showProduct(Long productId, Model model, Locale locale) {
+	Product product = productDao.findAndPrefetch(productId);
+	model.addAttribute("product", product);
+	return "/productPage";
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The markup to implement the gallery is not shown here:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:each="slide: ${product.gallery}"&gt;
+	&lt;picture&gt;
+        &lt;source media="(max-width: 767px)" th:srcset="@{${@yadaFileManager.getMobileImageUrl(slide)}}"&gt;
+        &lt;img th:src="@{${@yadaFileManager.getDesktopImageUrl(slide)}}"&gt;
+	&lt;/picture&gt;
+&lt;/div&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 0.7.3<br>
+Last updated 2023-04-13 16:39:59 +0200
+</div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+=  Multimedia Galleries
+:docinfo: shared
+:imagesdir: ../../img/
+
+Creating and showing image galleries with additional information on each slide
+
+==  Description
+NOTE: This page is about handling a complex presentation made of slides that contain an image, a video or both,
+several text fields or links and various flags that can change the way each slide is shown on screen. 
+To only handle images with a title and description, see <<imageGalleries.adoc#,Image Galleries>>. 
+
+Handling an image gallery with many attributes is complex: it involves uploading and cropping images, 
+saving image files on disk, storing image references in the database, acquiring and storing
+image-related information like title and description, editing or deleting all of that, retrieving all this 
+information to show it on the web page, and do this for any gallery instance that might be present on page.
+
+The Yada Framework offers the YadaGallerySlide java object and some guidelines to streamline that process.
+
+== Database Definition
+Each gallery must belong to some database object. For example, the gallery of product images belongs to the
+Product entity. A gallery can be added to an entity with the following code:
+
+[source,java]
+----
+@OneToMany(cascade=CascadeType.ALL) // Remember to delete files on disk on REMOVE
+@JoinTable(name = "Product_productGallery")
+private List<YadaGallerySlide> productGallery = new ArrayList<>();
+----
+
+The `YadaGallerySlide.java` object represents a single gallery slide and 
+already implements a lot of predefined fields that may come
+useful: sort position, generic flags, generic string data fields, localized text fields,
+one video and one image. If the provided fields are not enough, YadaGallerySlide can be
+easily subclassed.
+
+The `@JoinTable` annotation is really needed only if more than one gallery is defined
+on the same entity.
+
+== HTML Page
+The page must show a form to add/edit a gallery slide, and a form to reorder or delete the previously
+added ones.
+
+The form to add/edit can be like the following:
+
+[source,html]
+----
+<form th:action="@{/addEditSlide}" yada:updateOnSuccess=""
+	th:object="${yadaGallerySlide}" th:fragment="galleryFormFragment"
+	th:classappend="${#fields.hasErrors('*')}? has-error"
+	enctype="multipart/form-data" class="yadaAjax" method="post" role="form">
+	<div class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('global')}" th:errors="*{global}">Some error</div>
+	<fieldset>
+		<input type="hidden" name="yadaGallerySlideId" th:value="${yadaGallerySlide.id}">
+		<th:block th:if="${size==null}">
+			<!--/* Adding a new slide: the size is from config */-->
+			<div th:replace="/yada/form/fileUpload::field(fieldName='multipartImage', label='Add slide',accept='image/*',attachedFile=*{image},required=true,size=${slideImageSize})"></div>
+		</th:block>
+		<th:block th:if="${size!=null}">
+			<!--/* Editing a slide: the size is from previous choice */-->
+			<div th:replace="/yada/form/fileUpload::field(fieldName='multipartImage', label='Edit slide',accept='image/*',attachedFile=*{image},required=true,size=${size})"></div>
+		</th:block>		
+		<button class="btn btn-success" type="submit" name="Save">[[*{id}!=null?'Save':'Add']] Slide</button>
+	</fieldset>
+</form>					
+----
+
+[.todo]
+----
+Some explanation, add some other fields not just image
+----
+
+[.todo]
+----
+Sort form
+----
+
+== Java Controller
+The controller must first show the form, then handle form submission and image cropping.
+A `yadaGallerySlide` model attribute must be added with an appropriate @ModelAttribute method:
+
+[source,java]
+----
+@ModelAttribute("yadaGallerySlide")
+public YadaGallerySlide addYadaGallerySlide(@RequestParam(value="yadaGallerySlideId", required=false) Long yadaGallerySlideId, Model model) {
+	YadaGallerySlide toEdit = null;
+	Exception exception = null;
+	if (yadaGallerySlideId!=null) {
+		try {
+			toEdit = myDao.findYadaGallerySlide(yadaGallerySlideId);
+		} catch (Exception e) {
+			exception = e;
+		}
+		if (toEdit==null) {
+			log.error("Can't find YadaGallerySlide with id={} - (creating new)", yadaGallerySlideId, exception);
+		} else if (log.isDebugEnabled()) {
+			log.debug("YadaGallerySlide {} fetched from DB as ModelAttribute", yadaGallerySlideId);
+		}
+	}
+	if (toEdit==null) {
+		toEdit = new YadaGallerySlide();
+	}
+	return toEdit;
+}
+----
+
+The method that shows the form must get the required image size from the configuration:
+
+[source,java]
+----
+@RequestMapping("/galleryCms")
+public String galleryCms(Model model) {
+	YadaIntDimension[] slideDimensions = config.getDimensionsMyGallery();
+	model.addAttribute("slideImageSize", YadaIntDimension.biggestCover(slideDimensions));
+	return "/my/galleryCms";
+}
+----
+
+The form handling method adds a new YadaGallerySlide to the owning Entity:
+
+[source,java]
+----
+@RequestMapping("/addEditSlide") // Ajax
+public String addEditSlide(YadaGallerySlide yadaGallerySlide, BindingResult yadaGallerySlideBinding, Product product, HttpServletRequest request, Model model, Locale locale) {
+	if (YadaCommonsMultipartResolver.limitExceeded(request)) {
+		// All Request Parameters sent with the form are lost so we can't return the submitted form
+		yadaNotify.title("Slide not saved", model).error().message("Request too big. Total file size limit is " + config.getMaxFileUploadSizeBytes()/(1024*1024) + " MB").add();
+		return YadaViews.AJAX_NOTIFY; // The yada version with icons, not the artemide one
+	}
+	boolean isAdd = yadaGallerySlide.getId()==null;
+	String uploadFolder = "/images/product";
+	//
+	// Validate image size and upload image file, if any
+	//
+	YadaIntDimension[] slideDimensions = config.getDimensionsCatalogHero();
+	YadaManagedFile slideManagedFile = validateAndUploadSlideImage(yadaGallerySlide, yadaGallerySlideBinding, slideDimensions);
+	if (!yadaGallerySlideBinding.hasErrors()) {
+		try {
+			if (isAdd) {
+				// Add new slide to gallery
+				productDao.addProductSlide(yadaGallerySlide, product);
+			} else {
+				// Update existing slide
+				// yadaGallerySlide = (YadaGallerySlide) yadaDao.save(yadaGallerySlide);
+				yadaGallerySlide = productDao.saveGallerySlideWithImage(yadaGallerySlide);
+			}
+
+			//
+			// Upload and crop image if any
+			//
+			if (slideManagedFile!=null) {
+				YadaAttachedFile previousImage = yadaGallerySlide.getImage();
+				if (previousImage!=null) {
+					yadaFileManager.deleteFileAttachment(previousImage);
+				}
+				String cropRedirect = yadaWebUtil.redirectString("/myCms/cropPage", locale);
+				String finalRedirect = yadaWebUtil.redirectString("/galleryCms", locale);
+				YadaCropQueue yadaCropQueue = amdSession.addCropQueue(cropRedirect, finalRedirect); // Clear any previous abandoned crops and set the destination
+				YadaCropImage yadaCropImage = yadaCropQueue.addCropImage(slideManagedFile, slideDimensions, uploadFolder, "product_");
+				YadaAttachedFile newOrExisting  = yadaCropImage.titleKey("crop.gallery.product").cropDesktop().linkAdd();
+				yadaGallerySlide = productDao.addGallerySlideImage(yadaGallerySlide, newOrExisting, yadaCropImage);
+				log.debug("Entering crop workflow for product hero");
+				return yadaCropQueue.getCropRedirect();
+			}
+			amdSession.deleteCropQueue();
+		} catch (Exception e) {
+			log.error("Failed to upload slide", e);
+			yadaFileManager.delete(slideManagedFile);
+			yadaGallerySlideBinding.reject("error.gallery.systemerror");
+		}
+	} else {
+		// Has errors
+		yadaFileManager.delete(slideManagedFile);
+	}
+
+	// Fill form Model attributes to show the form again
+	if (isAdd) {
+		if (!yadaGallerySlideBinding.hasErrors()) {
+			// When adding successfully, need to clear the slide or the add form will be wrong
+			model.addAttribute("yadaGallerySlide", new YadaGallerySlide());
+		}
+		return "/galleryCms::galleryFormFragment";
+	}
+	return "/galleryCms::galleryFormFragment";
+}
+
+private YadaManagedFile validateAndUploadSlideImage(YadaGallerySlide yadaGallerySlide, BindingResult yadaGallerySlideBinding, YadaIntDimension[] slideDimensions) {
+	YadaManagedFile slideManagedFile = null;
+	MultipartFile image = yadaGallerySlide.getMultipartImage();
+	if (image!=null && !image.isEmpty()) {
+		try {
+			YadaIntDimension biggestNeeded = YadaIntDimension.biggestCover(slideDimensions);
+			// Image upload
+			slideManagedFile = yadaFileManager.manageFile(image);
+			// Validation
+			YadaIntDimension fileDimension = slideManagedFile.getDimension();
+			if (fileDimension.isUnset()) {
+				yadaGallerySlideBinding.rejectValue("multipartImage", "validation.value.invalidImage", "Invalid image file");
+			} else if (biggestNeeded.isAnyBiggerThan(fileDimension)) {
+				yadaGallerySlideBinding.rejectValue("multipartImage", "validation.value.smallImage", new Object[] {fileDimension, biggestNeeded}, "Image too small");
+			}
+		} catch (IOException e) {
+			log.error("Error uploading image", e);
+			yadaGallerySlideBinding.rejectValue("multipartImage", "dashboard.imageupload.error");
+		}
+	}
+	return slideManagedFile;
+}
+
+----
+
+[.todo]
+----
+Explanation, sorting and deleting
+----
+
+
+
+
+
+
+
+
+
