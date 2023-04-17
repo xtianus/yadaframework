@@ -32,9 +32,9 @@ apply plugin: 'eclipse-wtp'
 // apply plugin: 'kr.motd.sphinx'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
-    }
+//     toolchain {
+//         languageVersion = JavaLanguageVersion.of(8)
+//     }
     withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
 eclipse {
