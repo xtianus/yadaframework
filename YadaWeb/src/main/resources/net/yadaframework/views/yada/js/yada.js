@@ -936,39 +936,41 @@
 			const $trigger = $(trigger);
 			$trigger.addClass('yadaPopovered');
 			const htmlIdWithHash = yada.getIdWithHash(trigger, "data-yadaPopover"); // id of the HTML for the popover
-			//const htmlId = yada.getHashValue(htmlIdWithHash);
-			const contentInstanceId = yada.getRandomId("yada");
-			const htmlTemplate =  document.querySelector(htmlIdWithHash).content.cloneNode(true);
-			const closeButton = '<button type="button" class="btn-close yadaclose" data-bs-toggle="popover" aria-label="Close"></button>';
-			// Check if the anchor is in a modal
-			var container = 'body';
-			var $modalContainer = $trigger.closest(".modal").first();
-			if ($modalContainer.length>0) {
-				container = $modalContainer[0];
-			}
-			var defaultTitle = $trigger.attr("data-yadaTitle"); // Optional
-			if (defaultTitle==null) {
-				defaultTitle = htmlTemplate.querySelector("label:first-child")?.innerHTML;
-			}
-			const content = $("<div id='"+contentInstanceId+"'>").append($(htmlTemplate).children(":not(label)")).prop('outerHTML');
-			const popoverObject = new bootstrap.Popover(trigger, {
-				html : true,
-  				title: "<div>" + defaultTitle + "</div>"+closeButton,
-  				container: container,
-				content: content,
-				sanitize: false // Bootstrap sanitizer is too restrictive and customizing allowList is too much work
-  				// template: '<div data-yadaid="'+popoverId+'" class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
-			})
-			
-			// Replace some listeners with improved ones
-			const yadaEventListeners = getYadaEventHandlers($trigger);
-			const insertedListener = yadaEventListeners['inserted.bs.popover']?.handler;
-			const shownListener = yadaEventListeners['shown.bs.popover']?.handler;
-			if (insertedListener!=null) {
-				$trigger.off('inserted.bs.popover').on('inserted.bs.popover', makePopoverInsertedFunction(trigger, popoverObject, contentInstanceId, insertedListener));
-			}
-			if (shownListener!=null) {
-				$trigger.off('shown.bs.popover').on('shown.bs.popover', makePopoverShownFunction(trigger, popoverObject, contentInstanceId, shownListener));
+			if (htmlIdWithHash!=null && htmlIdWithHash!="" && htmlIdWithHash!="#") {
+				//const htmlId = yada.getHashValue(htmlIdWithHash);
+				const contentInstanceId = yada.getRandomId("yada");
+				const htmlTemplate =  document.querySelector(htmlIdWithHash).content.cloneNode(true);
+				// const closeButton = '<button type="button" class="btn-close yadaclose" data-bs-toggle="popover" aria-label="Close"></button>';
+				// Check if the anchor is in a modal
+				var container = 'body';
+				var $modalContainer = $trigger.closest(".modal").first();
+				if ($modalContainer.length>0) {
+					container = $modalContainer[0];
+				}
+				var defaultTitle = $trigger.attr("data-yadaTitle"); // Optional
+				if (defaultTitle==null) {
+					defaultTitle = htmlTemplate.querySelector("label:first-child")?.innerHTML;
+				}
+				const content = $("<div id='"+contentInstanceId+"'>").append($(htmlTemplate).children(":not(label)")).prop('outerHTML');
+				const popoverObject = new bootstrap.Popover(trigger, {
+					html : true,
+	  				title: "<div>" + defaultTitle + "</div>", //+closeButton,
+	  				container: container,
+					content: content,
+					sanitize: false // Bootstrap sanitizer is too restrictive and customizing allowList is too much work
+	  				// template: '<div data-yadaid="'+popoverId+'" class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
+				})
+				
+				// Replace some listeners with improved ones
+				const yadaEventListeners = getYadaEventHandlers($trigger);
+				const insertedListener = yadaEventListeners['inserted.bs.popover']?.handler;
+				const shownListener = yadaEventListeners['shown.bs.popover']?.handler;
+				if (insertedListener!=null) {
+					$trigger.off('inserted.bs.popover').on('inserted.bs.popover', makePopoverInsertedFunction(trigger, popoverObject, contentInstanceId, insertedListener));
+				}
+				if (shownListener!=null) {
+					$trigger.off('shown.bs.popover').on('shown.bs.popover', makePopoverShownFunction(trigger, popoverObject, contentInstanceId, shownListener));
+				}
 			}
 		})
 	}
