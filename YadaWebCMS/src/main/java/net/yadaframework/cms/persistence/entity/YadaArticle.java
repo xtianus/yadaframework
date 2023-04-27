@@ -47,8 +47,6 @@ import net.yadaframework.persistence.entity.YadaAttachedFile;
 public class YadaArticle implements CloneableFiltered, Serializable {
 	private static final long serialVersionUID = 1L;
 
-	public static class SimpleJson{}
-
 	// For synchronization with external databases
 	@Column(insertable = false, updatable = false, columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
 	@Temporal(TemporalType.TIMESTAMP)
@@ -61,14 +59,16 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	protected Long id;
+	
+	protected String internalName;
 
 	@ElementCollection
-	@Column(length=64)
+	@Column(length=256)
 	@MapKeyColumn(name="locale", length=32) // th_TH_TH_#u-nu-thai
 	protected Map<Locale, String> name = new HashMap<>(); // localized because it could be different for different languages
 
-	@Column(length=32)
-	protected String code;
+	@Column(length=32, unique=true)
+	protected String sku; // Stock Keeping Unit aka internal company code
 
 	@ElementCollection
 	@Column(length=32)
@@ -120,10 +120,14 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 		return YadaUtil.getLocalValue(name);
 	}
 
-	public void seLocalName(String name) {
+	public void setLocalName(String name) {
 		this.name.put(LocaleContextHolder.getLocale(), name);
 	}
 
+	public void setLocalName(Locale locale, String name) {
+		this.name.put(locale, name);
+	}
+	
 	/**
 	 * Returns the localized color in the current request locale
 	 * @return
@@ -132,7 +136,7 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 		return YadaUtil.getLocalValue(color);
 	}
 
-	public void seLocalcolor (String color) {
+	public void setLocalcolor (String color) {
 		this.color.put(LocaleContextHolder.getLocale(), color);
 	}
 
@@ -153,12 +157,12 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 		this.id = id;
 	}
 
-	public String getCode() {
-		return code;
+	public String getSku() {
+		return sku;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
+	public void setSku(String code) {
+		this.sku = code;
 	}
 
 	public Map<Locale, String> getColor() {
@@ -265,6 +269,14 @@ public class YadaArticle implements CloneableFiltered, Serializable {
 
 	public void setChosenProductId(Long chosenProductId) {
 		this.chosenProductId = chosenProductId;
+	}
+
+	public String getInternalName() {
+		return internalName;
+	}
+
+	public void setInternalName(String internalName) {
+		this.internalName = internalName;
 	}
 
 }

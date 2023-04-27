@@ -1,6 +1,6 @@
 plugins {
 	id 'java-library'
-	id 'org.hidetake.ssh' version '2.10.1'
+	id 'org.hidetake.ssh' version '2.11.2'
 	id 'maven-publish'
 	id 'signing'
 }
@@ -13,9 +13,9 @@ apply plugin: 'groovy'
 apply plugin: 'eclipse'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
-    }
+     toolchain {
+         languageVersion = JavaLanguageVersion.of(11) // >=11 because of org.hidetake.ssh
+     }
 }
 eclipse {
 	jdt {
@@ -138,8 +138,8 @@ publishing {
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
             credentials(PasswordCredentials) {
-            	username = ossrhUsername
-            	password = ossrhPassword
+            	username = hasProperty('ossrhUsername')?ossrhUsername:''
+            	password = hasProperty('ossrhPassword')?ossrhPassword:''
             }
             // url = "file://${buildDir}/repotest"
         }

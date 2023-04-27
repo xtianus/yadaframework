@@ -59,6 +59,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -138,6 +139,16 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+	
+	/**
+	 * Returns a random string (currently an hex random number)
+	 * @param minlen minimum length of the string. The maximum length is random.
+	 * @return
+	 */
+	public String getRandomText(int minlen) {
+		int random = getRandom(0, Integer.MAX_VALUE);
+		return String.format("%0"+minlen+"X", random);
+	}
 
 	/**
 	 * Joins a number of strings, adding a separator only when the strings are not empty.
@@ -801,7 +812,7 @@ public class YadaUtil {
 		result[0] = htmlToSplit;
 		return result;
 	}
-
+	
 	/**
 	 * Ensure that the given filename has not been already used, by adding a counter.
 	 * For example, if baseName is "dog" and usedNames is {"dog.jpg", "dog_1.jpg", "dog_2.jpg"}, the
@@ -817,14 +828,13 @@ public class YadaUtil {
 	 * @throws IOException
 	 * @see {@link #findAvailableName(File, String, String, String)}
 	 */
-	// TODO remove the IOException and just use a random number on timeout
 	public String findAvailableFilename(String baseName, String extensionNoDot, String counterSeparator, Set<String> usedNames) throws IOException {
 		counterSeparator = counterSeparator==null?"":counterSeparator;
 		String extension = StringUtils.isAllBlank(extensionNoDot) ? "" : "." + extensionNoDot;
 		String fullName = baseName + extension;
 		int counter = 0;
 		long startTime = System.currentTimeMillis();
-		int timeoutMillis = 1000; // 1 second to find a result seems to be reasonable
+		int timeoutMillis = 10000; // 10 seconds to find a result seems to be reasonable
 		while (true) {
 			if (!usedNames.contains(fullName)) {
 				usedNames.add(fullName);
@@ -976,8 +986,6 @@ public class YadaUtil {
 		return result;
 	}
 
-
-
 	/**
 	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity.
 	 * Post processing (@PostConstruct etc) is also performed but initialization is not.
@@ -1069,7 +1077,7 @@ public class YadaUtil {
 	 * This operation is thread safe.
 	 * @param targetFile the file that we want to create.
 	 * @param counterSeparator (optional) when null, "_" is used.
-	 * @return
+	 * @return a File that doesn't already exist
 	 * @throws IOException
 	 */
 	public static File findAvailableName(File targetFile, String counterSeparator) throws IOException {
@@ -1418,7 +1426,7 @@ public class YadaUtil {
 	 * @param params
 	 * @return
 	 */
-	public static String getMessage(String key, Object ... params) {
+	public static String getMessage(String key, @Nullable Object ... params) {
 		return messageSource.getMessage(key, params, LocaleContextHolder.getLocale());
 	}
 

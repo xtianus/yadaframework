@@ -32,14 +32,15 @@ apply plugin: 'eclipse-wtp'
 // apply plugin: 'kr.motd.sphinx'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
-    }
+//     toolchain {
+//         languageVersion = JavaLanguageVersion.of(8)
+//     }
+    withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
 eclipse {
 	jdt {
-		sourceCompatibility = 1.8
-		targetCompatibility = 1.8
+		// sourceCompatibility = 1.8
+		// targetCompatibility = 1.8
 		// https://stackoverflow.com/a/35302104/587641
 		file {
       		File dir = file('.settings')
@@ -66,21 +67,23 @@ repositories {
 }
 
 dependencies {
+	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
+
 	api 'org.apache.commons:commons-configuration2:2.+'
 	
 	// Fixes commons-text:1.9 CVE-2022-42889 caused by commons-configuration2:2.8.0
-	implementation 'org.apache.commons:commons-text:1.+'
+	api 'org.apache.commons:commons-text:1.+'
 	
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:8.5.+'
+    api 'org.apache.tomcat.embed:tomcat-embed-core:8.5.+'
 	// For embedded Tomcat ONLY - add these to your project
     // runtimeOnly 'org.apache.tomcat:tomcat-el-api:8.5.+'
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper-el:8.5.+'
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper:8.5.+'
 	
 	// Needed by Commons Configuration
-    runtimeOnly 'commons-jxpath:commons-jxpath:1.+'
+    api 'commons-jxpath:commons-jxpath:1.+'
 	
-    implementation 'org.springframework:spring-webmvc:5.3.+',
+    api 'org.springframework:spring-webmvc:5.3.+',
 		'org.springframework:spring-context-support:5.3.+',
 		'org.springframework:spring-orm:5.3.+',
 		// 'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
@@ -90,7 +93,7 @@ dependencies {
 		'mysql:mysql-connector-java:8.+',
 		'commons-collections:commons-collections:3.+',
 		'org.apache.tomcat:tomcat-servlet-api:8.5.+',
-		'commons-fileupload:commons-fileupload:1.4',
+		'commons-fileupload:commons-fileupload:1.5',
 		'org.apache.commons:commons-exec:1.3',
 		'com.sun.mail:javax.mail:1.+',
 		'com.google.guava:guava:31.1-jre',
@@ -103,7 +106,7 @@ dependencies {
 		'commons-beanutils:commons-beanutils:1.9.+'
 		
 	 // Connection pool for embedded Tomcat and programmatic datasource
-	implementation 'org.vibur:vibur-dbcp:25.+'
+	api 'org.vibur:vibur-dbcp:25.+'
 	runtimeOnly 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.+'
 	
 	// Needed to run in Tomcat
@@ -142,17 +145,18 @@ javadoc {
     options.encoding = 'UTF-8'
     options.docEncoding = 'UTF-8'
     options.charSet = 'UTF-8'
+    failOnError = false
 }
 
 // http://stackoverflow.com/a/27853822/587641
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}   
-
-artifacts {
-    archives javadocJar
-}
+// task javadocJar(type: Jar) {
+//     classifier = 'javadoc'
+//     from javadoc
+// }   
+// 
+// artifacts {
+//     archives javadocJar
+// }
 
 configurations {
 	hibtools {

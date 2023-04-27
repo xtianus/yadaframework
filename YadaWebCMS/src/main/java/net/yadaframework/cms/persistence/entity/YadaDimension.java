@@ -19,7 +19,11 @@ public class YadaDimension {
 
 	protected Float depth;
 
+	protected Float length;
+
 	protected Float diameter;
+
+	protected Float radius;
 
 	protected Float weight;
 
@@ -79,6 +83,22 @@ public class YadaDimension {
 
 	public void setElements(Integer elements) {
 		this.elements = elements;
+	}
+
+	public Float getLength() {
+		return length;
+	}
+
+	public void setLength(Float length) {
+		this.length = length;
+	}
+
+	public Float getRadius() {
+		return radius;
+	}
+
+	public void setRadius(Float radius) {
+		this.radius = radius;
 	}
 
 }

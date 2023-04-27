@@ -625,14 +625,23 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-
+	
 	/**
 	 *
 	 * @param orderBy can be empty or null
 	 * @return
 	 */
 	public YadaSql orderBy(String orderBy) {
-		if (StringUtils.isNotEmpty(orderBy)) {
+		return orderBy(true, orderBy);
+	}
+
+	/**
+	 *
+	 * @param orderBy can be empty or null
+	 * @return
+	 */
+	public YadaSql orderBy(boolean enabled, String orderBy) {
+		if (enabled && StringUtils.isNotEmpty(orderBy)) {
 			nowInHaving=false;
 			boolean firstOrderBy = this.orderBy.equals("");
 			if (firstOrderBy && !orderBy.toLowerCase().startsWith("order by ")) {
@@ -843,6 +852,9 @@ public class YadaSql implements CloneableDeep {
 	private boolean hasParameter(String parameter) {
 		String regexp = ".*:"+parameter+"\\b.*";
 		if (whereConditions.toString().matches(regexp)) {
+			return true;
+		}
+		if (orderBy.toString().matches(regexp)) {
 			return true;
 		}
 		if (havingConditions.toString().matches(regexp)) {

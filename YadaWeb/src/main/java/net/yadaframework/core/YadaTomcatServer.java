@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.util.Arrays;
 
 import javax.servlet.ServletException;
 
@@ -40,6 +41,7 @@ public class YadaTomcatServer {
      *        - relative path of the webapp folder in eclipse ("src/main/webapp"), or the full path elsewhere
      *        - the last argument is optional in Eclipse, otherwise it must be the full path of the temp folder for Tomcat data (where the war is exploded)
      *        When the last argument is not provided, "dev mode" is assumed.
+     *        When the last argument is specified, an additional fourth argument of "dev" starts in developer mode
      * @throws Exception
      */
 	public static void main(String[] args) throws Exception {
@@ -63,7 +65,8 @@ public class YadaTomcatServer {
 	 */
 	public YadaTomcatServer(String[] args) throws ServletException, MalformedURLException, IOException {
 		this();
-		if (args.length == 0 || args.length>3) {
+		log.debug("Starting Tomcat server with args: {}", Arrays.asList(args));
+		if (args.length == 0 || args.length>4) {
 			throw new YadaInvalidUsageException("Command line parameter missing. Usage: {} <acroenv> <webappFolder> [<baseDir>]", YadaTomcatServer.class.getName());
 		}
 		this.acroenv = args[0];
@@ -71,8 +74,9 @@ public class YadaTomcatServer {
 		String baseDir=null;
 		boolean dev = true;
 		if (args.length>2) {
-			dev = false;
 			baseDir = args[2];
+			// Is there an additional "dev" argument? If not, dev is false
+			dev = args.length>3 && "dev".equals(args[3]);
 			if (!new File(baseDir).canWrite()) {
 				throw new YadaInvalidUsageException("The baseDir {} must exist and be writable", new File(baseDir));
 			}
@@ -137,6 +141,9 @@ public class YadaTomcatServer {
 	 * @throws IOException
 	 */
 	protected void configure(String webappFolder, String baseDir, boolean dev) throws ServletException, MalformedURLException, IOException {
+		log.debug("webappFolder={}", webappFolder);
+		log.debug("baseDir={}", baseDir);
+		log.debug("dev={}", dev);
 		System.setProperty("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE", "true");
 		if (baseDir!=null) {
 			tomcat.setBaseDir(baseDir);
@@ -147,12 +154,13 @@ public class YadaTomcatServer {
 		tomcat.setAddDefaultWebXmlToWebapp(false); // Use web.xml
 		StandardContext ctx = (StandardContext) tomcat.addWebapp("", new File(webappFolder).getAbsolutePath());
 		if (dev) {
-			// Only needed in Eclipse because classes are found in the "bin" folder
-			File additionWebInfClasses = new File("bin/main");
-			// File additionWebInfClasses = new File("build/classes");
-	        WebResourceRoot resources = new StandardRoot(ctx);
-	        resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", additionWebInfClasses.getAbsolutePath(), "/"));
-	        ctx.setResources(resources);
+			File eclipseClasses = new File("bin/main");
+			if (eclipseClasses.canRead()) {
+				WebResourceRoot resources = new StandardRoot(ctx);
+				// Needed in Eclipse because classes are found in the "bin" folder
+				resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", eclipseClasses.getAbsolutePath(), "/"));
+				ctx.setResources(resources);
+			}
 		}
 
         // AJP Connector

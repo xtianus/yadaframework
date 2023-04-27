@@ -3,9 +3,9 @@
 	<logger name="ch.qos.logback" level="warn"/>
 
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>$basePath/$acronym$env/log/site.log</file>
+		<file>$basePath/$acronym$env/logs/site.log</file>
 	 	<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-	    	<fileNamePattern>$basePath/$acronym$env/log/site.%i.log</fileNamePattern>
+	    	<fileNamePattern>$basePath/$acronym$env/logs/site.%i.log</fileNamePattern>
 			<minIndex>1</minIndex>
 			<maxIndex>9</maxIndex>
 	    </rollingPolicy>
@@ -25,9 +25,9 @@
 	</appender>
 
 	<appender name="SEC" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>$basePath/$acronym$env/log/sec.log</file>
+		<file>$basePath/$acronym$env/logs/sec.log</file>
 	 	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-	    	<fileNamePattern>$basePath/$acronym$env/log/sec.%d.log</fileNamePattern>
+	    	<fileNamePattern>$basePath/$acronym$env/logs/sec.%d.log</fileNamePattern>
 			<maxHistory>7</maxHistory>
 	    </rollingPolicy>
 		<encoder>
@@ -57,7 +57,7 @@
     <!-- To hide WARN: bad write method arg count: public final void org.apache.commons.configuration2.AbstractConfiguration.setProperty -->
     <logger name="org.apache.commons.beanutils.FluentPropertyBeanIntrospector" level="ERROR"/> 
     
-    <logger name="YOUR.PACKAGE.HERE" level="debug"/>
+    <logger name="$basePackage" level="debug"/>
     
 	<root level="info">
 		<appender-ref ref="STDOUT" />

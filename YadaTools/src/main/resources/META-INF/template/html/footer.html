@@ -6,9 +6,6 @@
 		<p>This is the footer</p>
 	</footer>
 	
-	<!-- Enable the next line after saving the bootstrap bundle to the /static folder
-	<script th:src="@{/static/bootstrap-5.0.1/js/bootstrap.bundle.min.js}"></script>
-	 -->	
 	<script th:if="${"\$"}{!@config.developmentEnvironment}" yada:src="@{/res/js/yada.min.js}"></script>
 	<script th:if="${"\$"}{@config.developmentEnvironment}" yada:src="@{/yadares/js/yada.js}"></script>
 	<script th:if="${"\$"}{@config.developmentEnvironment}" yada:src="@{/yadares/js/yada.ajax.js}"></script>
@@ -17,42 +14,18 @@
 	<script th:if="${"\$"}{@config.developmentEnvironment}" yada:src="@{/yadares/js/yada.social.js}"></script>
     <script yada:src="@{|/res/js/$acronym${"\$"}{@config.min}.js|}" ></script>
 
-	<!--/* Mltipurpose modal loaded via ajax */-->
-	<div id="ajaxModal" class="modal fade " tabindex="-1" role="dialog" aria-labelledby="ajaxModalTitle" aria-hidden="true"></div>
+	<script type="text/javascript" th:inline="javascript">
+		//<![CDATA[
+			yada.devMode = /*[[${"\$"}{@config.isDevelopmentEnvironment()}]]*/ "unset";
+			yada.baseUrl = /*[[@{/}]]*/ "unset";
+			yada.resourceDir = /*[[${"\$"}{@config.versionedResourceDir}]]*/ "unset";
+			yada.messages.connectionError.title = /*[[#{javascript.connection.error.title}]]*/ "unset";
+			yada.messages.connectionError.message = /*[[#{javascript.connection.error.message}]]*/ "unset";
+		//]]>
+	</script>
 
 	<!--/* Notify modal */-->
 	<div th:include="/yada/modalNotify :: modal" class="modal fade" id="yada-notification" role="dialog"></div>
-	<script th:if="${"\$"}{YADA_NBODY!=null}" type="text/javascript">
-		${"\$"}(document).ready(function() {
-			${"\$"}('#yada-notification').modal('show');
-		});
-	</script>
-	<script type="text/javascript">
-		// Devo resettare le icone ad ogni chiusura per riusarlo via js
-		// TODO spostare in modalNotify.html?
-		${"\$"}('#yada-notification').on('hidden.bs.modal', function (e) {
-			${"\$"}('#yada-notification .glyphicon').addClass("hidden");
-		});
-	</script>
-
-	<script type="text/javascript" th:inline="javascript">
-		//<![CDATA[
-			yada.devMode = [[${"\$"}{@config.isDevelopmentEnvironment()}]];
-			yada.baseUrl = [[@{/}]];
-			yada.resourceDir = [[${"\$"}{@config.versionedResourceDir}]];
-	
-			yada.messages.connectionError.title = [[#{javascript.connection.error.title}]];
-			yada.messages.connectionError.message = [[#{javascript.connection.error.message}]];
-			
-			${"\$"}('#linkLogin').click(function(e) {
-				e.preventDefault();
-				var handler = function() { window.location.href=[[@{/user/dashboard}]]}; // TODO set your own landing page
-				yada.openLoginModalAjax([[@{/ajaxLoginForm}]], handler, [[#{view.error.login.title}]], [[#{view.error.login.text}]]);
-			});
-			
-			yada.cookieBanner([[#{cookiebanner}]]);
-		//]]>
-	</script>
 
 </body>
 </html>

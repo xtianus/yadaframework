@@ -10,15 +10,16 @@ version = '0.7.3'
 apply plugin: 'eclipse-wtp'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
-    }
+//     toolchain {
+//         languageVersion = JavaLanguageVersion.of(8)
+//     }
+	withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
 
 eclipse {
 	jdt {
-		sourceCompatibility = 1.8
-		targetCompatibility = 1.8
+		// sourceCompatibility = 1.8
+		// targetCompatibility = 1.8
 		// https://stackoverflow.com/a/35302104/587641
 		file {
       		File dir = file('.settings')
@@ -41,11 +42,12 @@ repositories {
 }
 
 dependencies {
+	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
 		
-	implementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'),
-		'org.springframework:spring-webmvc:5.3.18',
-		'org.springframework:spring-orm:5.3.18',
-		'org.hibernate:hibernate-entitymanager:5.5.0.Final',
+	api project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'),
+		// 'org.springframework:spring-webmvc:5.3.18',
+		// 'org.springframework:spring-orm:5.3.18',
+		// 'org.hibernate:hibernate-entitymanager:5.5.0.Final',
 		'com.paypal.sdk:checkout-sdk:1.0.5'
 		
 	testImplementation 'junit:junit:4.12'
@@ -78,10 +80,10 @@ javadoc {
 }
 
 // http://stackoverflow.com/a/27853822/587641
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-} 
+// task javadocJar(type: Jar) {
+//     classifier = 'javadoc'
+//     from javadoc
+// } 
 
 // PublishToMavenLocal task
 publishing {
@@ -136,8 +138,8 @@ publishing {
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
 			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 			credentials(PasswordCredentials) {
-				username = ossrhUsername
-				password = ossrhPassword
+				username = hasProperty('ossrhUsername')?ossrhUsername:''
+				password = hasProperty('ossrhPassword')?ossrhPassword:''
 			}
             // url = "file://${buildDir}/repotest"
         }

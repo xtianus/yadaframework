@@ -78,7 +78,7 @@ Example:
 		<div th:if="${addonRight!=null}" class="input-group-text">
 			<span class="input-group-text" th:text="${addonRight}">.00</span>
 			<span th:if="${type=='password' && noShowPassword!=true}" class="input-group-text">
-				<a class="btn btn-default yadaShowPassword" href="#" title="Show password"><span class="bi bi-eye-fill"></span></a>
+				<a class="btn  btn-secondary yadaShowPassword" href="#" title="Show password"><span class="bi bi-eye-fill"></span></a>
 			</span>
 		</div>
 		<textarea th:if="${(maxlength > 80 and notextarea!=true) or editor==true}" th:rows="${rows}?:3" th:field="*{{__${fieldName}__}}" 
