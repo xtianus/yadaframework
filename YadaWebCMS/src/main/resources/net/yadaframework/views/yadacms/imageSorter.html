@@ -11,7 +11,7 @@ Parameters:
 - entityIdValue = the id of the entity holding the gallery. 
   				  It will be sent to the controller as a "id" request parameter if entityIdName is not defined.
 - entityIdName = (optional) the name of the id request parameter - defaults to "id"
-- multipartName = (optional) name of the multipart request parameter that will contain the uploaded image
+- multipartName = (optional) name of the multipart request parameter that will contain the uploaded image. Defaults to "newImage"
 - size = YadaIntDimension for the minimum size of the image (optional)
 - accept = the accept attribute (optional): file_extension, audio/*, image/* etc.
 - required = true for a required value (optional)
@@ -19,7 +19,7 @@ Parameters:
 - urlDelete - url to delete an image. It receives the "imageId" parameter.
 - urlSort - url to sort an image. It receives the "currentId", "otherId" and "${entityIdName}" parameters. The controller should just 
             call yadaAttachedFileRepository.swapSortOrder(currentId, otherId);
-- captions - element referring to the captions of the images - true/false.
+- captions - (optional) element referring to the captions of the images - true/false. Defaults to false.
 - labelCaption - label text - can be null
 - urlCaption - url to modify a caption (multilanguage) - it is used if caption is present.
 - jsOnReload - js to reload the caption (multilanguage) - it could be used if caption is present.
@@ -78,6 +78,9 @@ Example:
 			<input type="hidden" th:name="${entityIdName}" th:value="${entityIdValue}">
 		</form>
 		<div class="yadaImageSorterImages">
+			<th:block th:if="${messages!=null || errorMessages!=null}">
+				<div th:replace="/yada/feedbackMessages :: div"></div>
+			</th:block>
 			<div th:each="galleryImage,iter : ${images}" class="yadaImageControl">
 				<div class="row yadaUploadedImages">
 					<div th:if="${galleryImage.desktopImage}" th:class="${galleryImage.mobileImage}?'col-xs-8':'col-xs-12'">
@@ -128,9 +131,9 @@ Example:
 						</a>
 					</form>
 					<!--/* Delete */-->
-					<form th:action="${urlDelete}" data-yadaParentForm="yadaClosestFind:.yadaImageSorter .deleteForm" >
+					<form th:action="${urlDelete}" data-yadaParentForm="yadaClosestFind:.yadaImageSorter .deleteForm">
 						<input type="hidden" name="imageId" th:value="${galleryImage.id}">
-						<a href="#" onclick="$(this).closest('form').submit(); return false;">
+						<a href="#" onclick="$(this).closest('form').submit(); return false;" th:classappend="${deleteConfirmKey!=null || deleteConfirm!=null} ? yadaNoLoader">
 							<i class="delete fa fa-trash-o" aria-hidden="true"></i>
 						</a>
 					</form>
