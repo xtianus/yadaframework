@@ -154,7 +154,7 @@
 			} catch (error) {
 				console.error(error);
 			}
-			console.log("[yada] Function '" + func + "' not found (ignored)");
+			yada.log("Function '" + func + "' not found (ignored)");
 			return true; // so that other handlers can be called
 		}
 		return functionObject.apply(thisObject, args);
@@ -939,11 +939,13 @@
 			if (htmlIdWithHash!=null && htmlIdWithHash!="" && htmlIdWithHash!="#") {
 				//const htmlId = yada.getHashValue(htmlIdWithHash);
 				const contentInstanceId = yada.getRandomId("yada");
-				const htmlTemplate =  document.querySelector(htmlIdWithHash).content.cloneNode(true);
+				// Using "content" because the HTML is supposed to be in a <template>
+				const originalTemplate = document.querySelector(htmlIdWithHash)?.content || $(htmlIdWithHash, $element)[0]?.content;
+				const htmlTemplate =  originalTemplate.cloneNode(true);
 				// const closeButton = '<button type="button" class="btn-close yadaclose" data-bs-toggle="popover" aria-label="Close"></button>';
 				// Check if the anchor is in a modal
 				var container = 'body';
-				var $modalContainer = $trigger.closest(".modal").first();
+				var $modalContainer = $trigger.closest(".modal-body").first();
 				if ($modalContainer.length>0) {
 					container = $modalContainer[0];
 				}
@@ -951,7 +953,7 @@
 				if (defaultTitle==null) {
 					defaultTitle = htmlTemplate.querySelector("label:first-child")?.innerHTML;
 				}
-				const content = $("<div id='"+contentInstanceId+"'>").append($(htmlTemplate).children(":not(label)")).prop('outerHTML');
+				const content = $("<div id='"+contentInstanceId+"'>").append($(htmlTemplate).children(":not(label:first-child)")).prop('outerHTML');
 				const popoverObject = new bootstrap.Popover(trigger, {
 					html : true,
 	  				title: "<div>" + defaultTitle + "</div>", //+closeButton,
@@ -998,7 +1000,7 @@
 	
 	// @Deprecated use yada.makeCustomPopover() instead
 	yada.handleCustomPopover = function($element) {
-		console.warn("yada.handleCustomPopover() is deprecated in favor of yada.makeCustomPopover()");
+		yada.log("yada.handleCustomPopover() is deprecated in favor of yada.makeCustomPopover()");
 		return yada.makeCustomPopover($element);
 	}
 
