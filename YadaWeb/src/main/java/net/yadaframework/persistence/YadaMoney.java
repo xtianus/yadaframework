@@ -275,7 +275,7 @@ public class YadaMoney implements Comparable<YadaMoney> {
 
 	@Override
 	public int hashCode() {
-		return new Long(internalValue).hashCode();
+		return Long.hashCode(internalValue);
 	}
 
 	@Override
