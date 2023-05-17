@@ -76,7 +76,7 @@ dependencies {
 		'com.drewnoakes:metadata-extractor:2.18.0',
 		// 'org.littleshoot:littleproxy:1.1.2',
 		// 'org.quartz-scheduler:quartz:2.2.3',
-		'org.flywaydb:flyway-core:5.0.5',
+		'org.flywaydb:flyway-mysql:9.+',
 		'commons-beanutils:commons-beanutils:1.9.+'
 	
 	// Needed to run in Tomcat
