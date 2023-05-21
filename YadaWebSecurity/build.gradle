@@ -1,8 +1,20 @@
-group = 'net.yadaframework'
-version = '0.4.1'
+plugins {
+	id 'java-library'
+	id 'maven-publish'
+	id 'signing'
+	id 'eclipse-wtp'
+}
 
-apply plugin: 'java-library'
-apply plugin: 'eclipse-wtp'
+group = 'net.yadaframework'
+version = '0.4.1.2'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(8)
+	}	
+	withSourcesJar()
+    withJavadocJar() // https://stackoverflow.com/a/75710366/587641
+}
 
 eclipse {
 	jdt {
@@ -26,7 +38,6 @@ compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
     mavenCentral()
-	mavenLocal()
 }
 
 dependencies {
@@ -60,7 +71,7 @@ dependencies {
 jar {
     manifest {
         attributes("Implementation-Title": "YadaWebSecurity",
-                   "Implementation-Version": version)
+                   "Implementation-Version": archiveVersion)
     }
 }
 
@@ -70,11 +81,10 @@ processResources {
 		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadawebsecurity.properties", token: '@YADA_VERSION@', value: version)
 	}
 }
-
-apply plugin: 'maven'
-uploadArchives {
-	dependsOn build
-	repositories {
-		mavenLocal()
-	}
+javadoc {
+    options.encoding = 'UTF-8'
+    options.docEncoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    failOnError = false
 }
+
