@@ -12,6 +12,10 @@ apply plugin: 'groovy'
 // apply plugin: 'java-gradle-plugin'
 apply plugin: 'eclipse'
 
+if (!project.hasProperty('repoPath')) {
+	ext.repoPath="repoPathMissing"
+}
+
 java {
      toolchain {
          languageVersion = JavaLanguageVersion.of(11) // >=11 because of org.hidetake.ssh
