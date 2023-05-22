@@ -20,6 +20,10 @@ version = '0.7.3'
 apply plugin: 'eclipse-wtp'
 // apply plugin: 'kr.motd.sphinx'
 
+if (!project.hasProperty('repoPath')) {
+	ext.repoPath="repoPathMissing"
+}
+
 java {
 //     toolchain {
 //         languageVersion = JavaLanguageVersion.of(8)
