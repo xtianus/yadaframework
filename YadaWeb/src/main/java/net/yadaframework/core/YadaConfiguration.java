@@ -420,6 +420,15 @@ public abstract class YadaConfiguration {
 	public boolean useDatabaseMigrationAtStartup() {
 		return configuration.getBoolean("config/database/databaseMigrationAtStartup", false);
 	}
+	
+	/**
+	 * Name of the flyway schema history table. Uses the default name of "flyway_schema_history" when not configured. 
+	 * @return the table name, never null
+	 */
+	public String flywayTableName() {
+		return configuration.getString("config/database/flywayTableName", "flyway_schema_history");
+	}
+	
 	/**
 	 * "Out of order" flag in FlyWay 
 	 * https://flywaydb.org/documentation/configuration/parameters/outOfOrder

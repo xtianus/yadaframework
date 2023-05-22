@@ -26,7 +26,7 @@ public class YadaTestConfig extends YadaAppConfig {
 		Flyway flyway = Flyway.configure()
 			.dataSource(dataSource)
 			.locations("filesystem:schema") // Where sql scripts are stored
-			.table("schema_version") // Legacy name from v5
+			// .table("schema_version") // Legacy name from v5
 			.load();
 		flyway.clean();
 		flyway.migrate();

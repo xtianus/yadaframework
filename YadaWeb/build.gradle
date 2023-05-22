@@ -19,9 +19,9 @@ group = 'net.yadaframework'
 version = '0.7.4'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(8)
-	}	
+	// toolchain {
+	// 	languageVersion = JavaLanguageVersion.of(8)
+	// }	
 	withSourcesJar()
     withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
@@ -32,8 +32,8 @@ if (!project.hasProperty('repoPath')) {
 
 eclipse {
 	jdt {
-		sourceCompatibility = 1.8
-		targetCompatibility = 1.8
+		// sourceCompatibility = 1.8
+		// targetCompatibility = 1.8
 		// https://stackoverflow.com/a/35302104/587641
 		file {
       		File dir = file('.settings')

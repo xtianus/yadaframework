@@ -63,7 +63,7 @@ public class YadaAppConfig {
 				.outOfOrder(config.useDatabaseMigrationOutOfOrder()) // Apply new migrations with lower number added later. Needed for parallel development.
 				// If the db is not empty and there is no metadata, add the metadata instead of failing, setting the version to 1
 				.baselineOnMigrate(true)
-				.table("schema_version") // Legacy name from v5
+				.table(config.flywayTableName())
 				.load();
 			flyway.migrate();
 		}
