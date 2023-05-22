@@ -2,21 +2,20 @@ plugins {
 	id 'java-library'
 	id 'maven-publish'
 	id 'signing'
+	id 'eclipse-wtp'
 }
 
 group = 'net.yadaframework'
-version = '0.7.3'
-
-apply plugin: 'eclipse-wtp'
+version = '0.7.4'
 
 if (!project.hasProperty('repoPath')) {
 	ext.repoPath="repoPathMissing"
 }
 
 java {
-//     toolchain {
-//         languageVersion = JavaLanguageVersion.of(8)
-//     }
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(8)
+	}	
 	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
 	withSourcesJar()
     withJavadocJar() // https://stackoverflow.com/a/75710366/587641
@@ -24,8 +23,8 @@ java {
 
 eclipse {
 	jdt {
-		// sourceCompatibility = 1.8
-		// targetCompatibility = 1.8
+		sourceCompatibility = 1.8
+		targetCompatibility = 1.8
 		// https://stackoverflow.com/a/35302104/587641
 		file {
       		File dir = file('.settings')

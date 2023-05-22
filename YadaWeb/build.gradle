@@ -11,32 +11,29 @@ buildscript {
 
 plugins {
 	id 'java-library'
+	id 'eclipse-wtp'
 	id 'maven-publish'
 }
 
 group = 'net.yadaframework'
-version = '0.7.3'
+version = '0.7.4'
 
-apply plugin: 'eclipse-wtp'
-// apply plugin: 'kr.motd.sphinx'
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(8)
+	}	
+	withSourcesJar()
+    withJavadocJar() // https://stackoverflow.com/a/75710366/587641
+}
 
 if (!project.hasProperty('repoPath')) {
 	ext.repoPath="repoPathMissing"
 }
 
-java {
-//     toolchain {
-//         languageVersion = JavaLanguageVersion.of(8)
-//     }
-	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
-	withSourcesJar()
-    withJavadocJar() // https://stackoverflow.com/a/75710366/587641
-}
-
 eclipse {
 	jdt {
-		// sourceCompatibility = 1.8
-		// targetCompatibility = 1.8
+		sourceCompatibility = 1.8
+		targetCompatibility = 1.8
 		// https://stackoverflow.com/a/35302104/587641
 		file {
       		File dir = file('.settings')
@@ -59,7 +56,6 @@ compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
     mavenCentral()
-	// mavenLocal()
 }
 
 dependencies {
@@ -98,7 +94,7 @@ dependencies {
 		'com.fasterxml.jackson.core:jackson-databind:2.+',
 		'org.seleniumhq.selenium:selenium-java:4.+',
 		'com.drewnoakes:metadata-extractor:2.+',
-		'org.flywaydb:flyway-core:5.+',
+		'org.flywaydb:flyway-mysql:9.+',
 		'commons-beanutils:commons-beanutils:1.9.+'
 		
 	 // Connection pool for embedded Tomcat and programmatic datasource
@@ -180,17 +176,6 @@ task testDbSchema(dependsOn: [testClasses], type: net.yadaframework.tools.YadaCr
 		delete "$buildDir/classes/java/test/META-INF/persistence.xml"
 	}
 }
-
-
-// task sourcesJar(type: Jar) {
-//     archiveClassifier = 'sources'
-//     from sourceSets.main.allJava
-// }
-
-// task javadocJar(type: Jar) {
-//     archiveClassifier = 'javadoc'
-//     from javadoc.destinationDir
-// }
 
 publishing {
     publications {
