@@ -652,6 +652,7 @@ public abstract class YadaConfiguration {
 	 * @return
 	 * @deprecated use {@link #getServerAddress()} instead
 	 */
+	@Deprecated
 	public String getServerAddress(HttpServletRequest request) {
 		if (serverAddress==null) {
 			StringBuilder address = new StringBuilder();

@@ -93,7 +93,7 @@ public class YadaTomcatServer {
 			tomcat.getServer().setShutdown(shutdownCommand);
 			tomcat.start();
 			log.info("Shutdown port is {}, shutdown command is '{}'", 8005, shutdownCommand);
-			log.info("Tomcat embedded server started in {} ms: ready for connections", System.currentTimeMillis() - startTime);
+			log.info("Tomcat embedded server started in {} ms: ready for connections on port 8080 (8443)", System.currentTimeMillis() - startTime);
 			tomcat.getServer().await();
 		} catch (LifecycleException e) {
 			tomcat.destroy();
@@ -155,9 +155,10 @@ public class YadaTomcatServer {
 		StandardContext ctx = (StandardContext) tomcat.addWebapp("", new File(webappFolder).getAbsolutePath());
 		if (dev) {
 			File eclipseClasses = new File("bin/main");
-			if (eclipseClasses.canRead()) {
+			if (eclipseClasses.canRead() && eclipseClasses.list().length>0) {
 				WebResourceRoot resources = new StandardRoot(ctx);
 				// Needed in Eclipse because classes are found in the "bin" folder
+				log.warn("Adding eclipse bin folder to classpath");
 				resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes", eclipseClasses.getAbsolutePath(), "/"));
 				ctx.setResources(resources);
 			}

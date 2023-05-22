@@ -9,12 +9,19 @@ version = '0.7.3'
 
 apply plugin: 'eclipse-wtp'
 
+if (!project.hasProperty('repoPath')) {
+	ext.repoPath="repoPathMissing"
+}
+
 java {
 //     toolchain {
 //         languageVersion = JavaLanguageVersion.of(8)
 //     }
+	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
+	withSourcesJar()
     withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
+
 eclipse {
 	jdt {
 		// sourceCompatibility = 1.8
@@ -37,7 +44,6 @@ compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
     mavenCentral()
-	mavenLocal()
 }
 
 dependencies {
@@ -82,11 +88,6 @@ processResources {
 	}
 }
 
-task sourcesJar(type: Jar) {
-    archiveClassifier = 'sources'
-    from sourceSets.main.allJava
-}
-
 javadoc {
     options.encoding = 'UTF-8'
     options.docEncoding = 'UTF-8'
@@ -103,11 +104,10 @@ javadoc {
 // PublishToMavenLocal task
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        yadaWebSecurityLibrary(MavenPublication) {
             artifactId = 'yadawebsecurity'
             from components.java
-            artifact sourcesJar
-            artifact javadocJar
+
             versionMapping {
                 usage('java-api') {
                     fromResolutionOf('runtimeClasspath')
@@ -158,10 +158,16 @@ publishing {
             }
             // url = "file://${buildDir}/repotest"
         }
+         // Creates task publishYadaWebSecurityLibraryPublicationToLocalRepoRepository
+        maven {
+        	name "LocalRepo"
+        	// repoPath must be passed when invoking gradle using -P
+        	url = "file://${repoPath}"
+    	}    
     }    
 }
 
 signing {
-    sign publishing.publications.mavenJava
+    sign publishing.publications.yadaWebSecurityLibrary
 }
 
