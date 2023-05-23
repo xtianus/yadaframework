@@ -13,6 +13,14 @@ apply plugin: 'groovy'
 // apply plugin: 'java-gradle-plugin'
 apply plugin: 'eclipse'
 
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(8)
+	    sourceCompatibility = JavaVersion.VERSION_1_8
+	    targetCompatibility = JavaVersion.VERSION_1_8
+	}	
+}
+
 eclipse {
 	jdt {
 		sourceCompatibility = 1.8
@@ -31,9 +39,7 @@ eclipse {
 }
 
 repositories {
-	// jcenter()
 	mavenCentral()
-	mavenLocal()
 }
 
 dependencies {
