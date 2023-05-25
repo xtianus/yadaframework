@@ -104,4 +104,8 @@ public class YadaPersistentEnumDao {
 			}
 		}
 	}
+
+	public <T extends Enum<T>> YadaPersistentEnum<T> findOne(Long id) {
+		return em.find(YadaPersistentEnum.class, id);
+	}
 }

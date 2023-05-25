@@ -40,7 +40,7 @@ import net.yadaframework.persistence.entity.YadaAttachedFile;
 
 /**
  * An Article is the actual physical item that can be produced and sold, so it will have a specific color, size, price, etc.
- *
+ * Uses joined inheritance so that subclasses have their own table; the subclass id, which must not be declared in java but exists in the table, gets the same value as the YadaArticle id.
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
