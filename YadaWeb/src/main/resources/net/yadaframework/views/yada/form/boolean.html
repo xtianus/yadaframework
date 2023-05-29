@@ -31,7 +31,7 @@ Example: <div th:replace="/yada/form/boolean::field(fieldName='useGold',label='U
 	 */--> 
 <div class="form-group has-feedback" 
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}, 
-		inputId=${id?:#ids.seq(@yadaWebUtil.getRequestMapping(#request))}"
+		inputId=${id?:#ids.seq(@yadaWebUtil.getRequestMapping())}"
 		th:classappend="${hasError}? has-error">
 	<div class="checkbox">
 		<label th:if="${switch==null or switch!=true}" class="control-label" th:id="${inputId}+'label'">

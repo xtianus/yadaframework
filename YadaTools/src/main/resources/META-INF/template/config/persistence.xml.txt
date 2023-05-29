@@ -40,9 +40,6 @@
   		<class>net.yadaframework.cms.persistence.entity.YadaAttachedFile</class>
        	<% out.print (yadaWebCmsFound?"":"-->"); %>
      	<% out.print (yadaWebCommerceFound?"":"<!--"); %> 
-  		<class>net.yadaframework.commerce.persistence.entity.YadaOrder</class>
-  		<class>net.yadaframework.commerce.persistence.entity.YadaOrderItem</class>
-  		<class>net.yadaframework.commerce.persistence.entity.YadaArticle</class>
   		<class>net.yadaframework.commerce.persistence.entity.YadaAddress</class>
   		<class>net.yadaframework.commerce.persistence.entity.YadaCart</class>
   		<class>net.yadaframework.commerce.persistence.entity.YadaCartItem</class>

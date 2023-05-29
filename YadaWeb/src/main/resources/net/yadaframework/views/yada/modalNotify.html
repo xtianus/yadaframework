@@ -10,7 +10,7 @@
 	<div th:replace="/yada/ajaxResponseData :: .yadaResponseData" th:if="${resultMap!=null}"></div>
   <div th:fragment="modal" class="modal-dialog yadaNotify" th:classappend="${extraDialogClasses}"
   	th:with="iconName=${YADA_TOTSEVERITY=='ok'?'ok':YADA_TOTSEVERITY=='error'?'error':'warning'}">
-
+	<th:block th:fragment="modal-content">
 	<!--/* Versione con tanti messaggi */-->
     <div class="modal-content" th:if="${YADA_NTITLE!=null and YADA_NTITLE.size()>1}">
       <div class="modal-header">
@@ -84,8 +84,8 @@
 			<div th:replace="/script :: '#'+${scriptId}"></div>
 	  	</th:block>
 	  </th:block>
-  
-  </div><!-- /.modal-dialog -->
+  	</th:block> <!--/* /.modal-content */-->
+  </div> <!--/* /.modal-dialog */-->
 	  
 </div>
 </body>

@@ -57,6 +57,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
@@ -90,6 +91,7 @@ public class YadaWebUtil {
 	 * Returns the last part of the current request, for example from "/some/product" returns "product"
 	 * @param request
 	 * @return
+	 * @see #getRequestMapping()
 	 */
 	public String getRequestMapping(HttpServletRequest request) {
 		String path = request.getServletPath();
@@ -98,6 +100,18 @@ public class YadaWebUtil {
 			return "/";
 		}
 		return parts[parts.length-1];
+	}
+	
+	/**
+	 * Returns the last part of the current request, for example from "/some/product" returns "product"
+	 * This version does not require the request to be passed as parameter.
+	 * @return
+	 * @see #getRequestMapping(HttpServletRequest)
+	 */
+	public String getRequestMapping() {
+        ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        UriComponentsBuilder ucb = UriComponentsBuilder.fromPath(sra.getRequest().getRequestURI());
+        return ucb.build().getPathSegments().get(ucb.build().getPathSegments().size()-1);
 	}
 
 	/**

@@ -16,6 +16,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.MapKeyColumn;
@@ -40,9 +42,11 @@ import net.yadaframework.persistence.entity.YadaPersistentEnum;
  * So a "Paris T-Shirt" is a very specific product but it comes in different sizes, so it doesn't exist unless
  * you specify the size.
  * The Medium Paris T-Shirt is an article that actually exists and can be sold.
+ * Uses joined inheritance so that subclasses have their own table; the subclass id, which must not be declared in java but exists in the table, gets the same value as the YadaProduct id.
  *
  */
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public class YadaProduct implements CloneableFiltered, Serializable {
 	private static final long serialVersionUID = 1L;
 

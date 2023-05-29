@@ -82,7 +82,8 @@
 	}
 	
 	/**
-	 * Google log out
+	 * Google log out (still valid for 2023 version)
+	 * See https://developers.google.com/identity/sign-in/web/sign-in#sign_out_a_user
 	 */
 	yada.googleSignOut = function() {
 		if (gapi!=undefined && gapi.auth2!=undefined) {
@@ -94,9 +95,9 @@
 	}
 	
 	/**
-	 * Function called by the google login button
+	 * Function called by the google login button - old
 	 */
-	var handleGoogleLoginButton = function(serverUrl, googleUser) {
+	var handleGoogleLoginButtonDEPRECATED = function(serverUrl, googleUser) {
 		var profile = googleUser.getBasicProfile();
 		//		console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
 		//		console.log('Name: ' + profile.getName());
@@ -109,12 +110,12 @@
 	}
 
 	/**
-	 * Enables the google login button via Google API.
+	 * Enables the google login button via Google API. - old
 	 * @param id the element that will be replaced by the generated button
 	 * @param serverUrl the application url where the token will be sent
 	 * @param options the google render options: https://developers.google.com/identity/sign-in/web/reference#gapisignin2renderid-options
 	 */
-	yada.enableGoogleLoginButton = function(serverUrl, id, options) {
+	yada.enableGoogleLoginButtonDEPRECATED = function(serverUrl, id, options) {
 		options.onsuccess = function(googleUser) {
 			handleGoogleLoginButton(serverUrl, googleUser);
 		}
