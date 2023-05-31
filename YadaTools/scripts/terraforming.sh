@@ -91,11 +91,11 @@ useradd ${cfgUser} -p \"'$cfgUserPwd'\" -m -g ${cfgUser} -G root -s /bin/bash
 echo -e "\nAllowUsers ${cfgUser}\nPasswordAuthentication no\n" >> /etc/ssh/sshd_config
 
 mkdir ${homedir}/.ssh
-echo $cfgAuthorizedKeys > ${homedir}/.ssh/authorized_keys2
+echo $cfgAuthorizedKeys > ${homedir}/.ssh/authorized_keys
 
 chown -R ${cfgUser}:${cfgUser} ${homedir}/.ssh
 chmod 700 ${homedir}/.ssh
-chmod 600 ${homedir}/.ssh/authorized_keys2
+chmod 600 ${homedir}/.ssh/authorized_keys
 
 if [ "$cfgNoUfw" != "true" ]; then
 	apt-get -o Dpkg::Options::="--force-confnew" -y install ufw
@@ -298,7 +298,7 @@ if [[ $cfgPkgMysql ]]; then
 	fi
 fi
 
-# certbot for SSL - ubuntu 20
+# certbot for SSL - ubuntu 20-22
 if [[ $cfgCertbot != "false" ]]; then
 	apt -o Dpkg::Options::="--force-confnew" -y install snapd
 	snap install --classic certbot
@@ -306,13 +306,15 @@ if [[ $cfgCertbot != "false" ]]; then
 fi
 
 # Altro
+timedatectl set-timezone Europe/Rome
+# OLD:
 # Spiegato qui:  http://stackoverflow.com/questions/8671308/non-interactive-method-for-dpkg-reconfigure
-echo -e "\ntzdata tzdata/Areas select Europe\ntzdata tzdata/Zones/Europe select Rome\n" > /tmp/preseed.txt
-debconf-set-selections /tmp/preseed.txt
+# echo -e "\ntzdata tzdata/Areas select Europe\ntzdata tzdata/Zones/Europe select Rome\n" > /tmp/preseed.txt
+#debconf-set-selections /tmp/preseed.txt
 # Siccome non son sicuro che funzioni, faccio anche questo:
-echo "Europe/Rome" > /etc/timezone
+#echo "Europe/Rome" > /etc/timezone
 #
-dpkg-reconfigure -f noninteractive tzdata
+#dpkg-reconfigure -f noninteractive tzdata
 
 # Stampa l'hostname ad ogni login
 sed -i '$aecho\necho "***********"\necho "* '$( hostname )' *"\necho "***********"\necho'  /etc/bash.bashrc
