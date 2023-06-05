@@ -252,6 +252,7 @@ public class YadaSql implements CloneableDeep {
 	/**
 	 * Start or extend a "select ... from ..." query.
 	 * If this method has already been called, the new select text is inserted before the "from" after a comma: "select x, y from" when the parameter is "y"
+	 * This method also accepts a full query (with join, where etc)
 	 * @param selectFrom either a "select... from..." statement or a new select section to add to the current one
 	 * @return
 	 */

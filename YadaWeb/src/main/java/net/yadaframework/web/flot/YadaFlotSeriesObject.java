@@ -78,7 +78,7 @@ public class YadaFlotSeriesObject extends YadaFlotSeriesOptions implements Seria
 	 *
 	 */
 	public void setRightYAxis() {
-		this.yaxis = new Integer(2);
+		this.yaxis = 2;
 	}
 
 	/**

@@ -2,19 +2,24 @@ plugins {
 	id 'java-library'
 	id 'maven-publish'
 	id 'signing'
+	id 'eclipse-wtp'
 }
 
 group = 'net.yadaframework'
-version = '0.7.3'
+version = '0.7.5'
 
-apply plugin: 'eclipse-wtp'
+if (!project.hasProperty('repoPath')) {
+	ext.repoPath="repoPathMissing"
+}
 
 java {
-//     toolchain {
-//         languageVersion = JavaLanguageVersion.of(8)
-//     }
+	// toolchain {
+	// 	languageVersion = JavaLanguageVersion.of(8)
+	// }	
+	withSourcesJar()
     withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
+
 eclipse {
 	jdt {
 		// sourceCompatibility = 1.8
@@ -37,13 +42,12 @@ compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
     mavenCentral()
-	mavenLocal()
 }
 
 dependencies {
 	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
 		
-	api project(':YadaWeb'), project(':YadaWebSecurity'), 
+	implementation project(':YadaWeb'), project(':YadaWebSecurity'), 
 		// 'org.springframework:spring-webmvc:5.3.23',
 		// 'org.springframework:spring-orm:5.3.23',
 		// 'org.hibernate:hibernate-entitymanager:5.5.0.Final',
@@ -51,7 +55,6 @@ dependencies {
         'com.fasterxml.jackson.core:jackson-core:2.13.4',
 		// 'com.fasterxml.jackson.core:jackson-databind:2.13.4',
 		'org.apache.commons:commons-io:1.3.2'
-		
 		
 	testImplementation 'junit:junit:4.12'
 }
@@ -70,11 +73,6 @@ processResources {
 	}
 }
 
-task sourcesJar(type: Jar) {
-    archiveClassifier = 'sources'
-    from sourceSets.main.allJava
-}
-
 javadoc {
     options.encoding = 'UTF-8'
     options.docEncoding = 'UTF-8'
@@ -90,11 +88,10 @@ javadoc {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        yadaWebCMSLibrary(MavenPublication) {
             artifactId = 'yadawebcms'
             from components.java
-            artifact sourcesJar
-            artifact javadocJar
+
             versionMapping {
                 usage('java-api') {
                     fromResolutionOf('runtimeClasspath')
@@ -143,11 +140,18 @@ publishing {
 				username = hasProperty('ossrhUsername')?ossrhUsername:''
 				password = hasProperty('ossrhPassword')?ossrhPassword:''
 			}
-            // url = "file://${buildDir}/repotest"
         }
+         // Creates task publishYadaWebCMSLibraryPublicationToLocalRepoRepository
+        maven {
+        	name "LocalRepo"
+        	// repoPath must be passed when invoking gradle using -P
+        	url = "file://${repoPath}"
+    	}
     }    
 }
 
 signing {
-    sign publishing.publications.mavenJava
+    sign publishing.publications.yadaWebCMSLibrary
 }
+
+

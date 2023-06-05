@@ -1,7 +1,6 @@
 buildscript {
 	repositories {
 		mavenCentral()
-		mavenLocal()
 	}
 	dependencies {
 		// Needed for test schema creation
@@ -12,31 +11,22 @@ buildscript {
 
 plugins {
 	id 'java-library'
+	id 'eclipse-wtp'
 	id 'maven-publish'
 }
 
 group = 'net.yadaframework'
-version = '0.7.3'
-
-// PublishToMavenLocal task
-publishing {
-    publications {
-        maven(MavenPublication) {
-            artifactId = 'yadaweb'
-            from components.java
-        }
-    }
-}
-
-apply plugin: 'eclipse-wtp'
-// apply plugin: 'kr.motd.sphinx'
+version = '0.7.5'
 
 java {
-//     toolchain {
-//         languageVersion = JavaLanguageVersion.of(8)
-//     }
+	withSourcesJar()
     withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
+
+if (!project.hasProperty('repoPath')) {
+	ext.repoPath="repoPathMissing"
+}
+
 eclipse {
 	jdt {
 		// sourceCompatibility = 1.8
@@ -63,7 +53,6 @@ compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
     mavenCentral()
-	mavenLocal()
 }
 
 dependencies {
@@ -74,7 +63,7 @@ dependencies {
 	// Fixes commons-text:1.9 CVE-2022-42889 caused by commons-configuration2:2.8.0
 	api 'org.apache.commons:commons-text:1.+'
 	
-    api 'org.apache.tomcat.embed:tomcat-embed-core:8.5.+'
+    compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:8.5.+'
 	// For embedded Tomcat ONLY - add these to your project
     // runtimeOnly 'org.apache.tomcat:tomcat-el-api:8.5.+'
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper-el:8.5.+'
@@ -102,7 +91,7 @@ dependencies {
 		'com.fasterxml.jackson.core:jackson-databind:2.+',
 		'org.seleniumhq.selenium:selenium-java:4.+',
 		'com.drewnoakes:metadata-extractor:2.+',
-		'org.flywaydb:flyway-core:5.+',
+		'org.flywaydb:flyway-mysql:9.+',
 		'commons-beanutils:commons-beanutils:1.9.+'
 		
 	 // Connection pool for embedded Tomcat and programmatic datasource
@@ -139,7 +128,6 @@ processResources {
 		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadaweb.properties", token: '@YADA_VERSION@', value: version)
 	}
 }
-
 
 javadoc {
     options.encoding = 'UTF-8'
@@ -186,4 +174,60 @@ task testDbSchema(dependsOn: [testClasses], type: net.yadaframework.tools.YadaCr
 	}
 }
 
+publishing {
+    publications {
+        yadaWebLibrary(MavenPublication) {
+        	artifactId = 'yadaweb'
+            from components.java
+            
+			pom {
+			    name = 'YadaWeb'
+			    description = 'Some useful tasks for the Yada Framework'
+			    url = 'https://yadaframework.net/en/index.html'
+			    inceptionYear = '2014'
+			    packaging = 'jar'
+			    licenses {
+			        license {
+			            name = 'MIT License'
+			            url = 'https://en.wikipedia.org/wiki/MIT_License'
+			        }
+			    }
+			    developers {
+			        developer {
+			            id = 'xtianus'
+			            name = 'Studio Ghezzi'
+			            email = 'studio@ghezzi.net'
+			        }
+			    }
+			    organization {
+			    	name = 'Studio Ghezzi'
+			    	url = 'https://studio.ghezzi.net/'
+			    }
+			    scm {
+			        connection = 'scm:git:git@github.com:xtianus/yadaframework.git'
+			        developerConnection = 'scm:git:git@github.com:xtianus/yadaframework.git'
+			        url = 'https://github.com/xtianus/yadaframework'
+			    }
+			}
+        }
+    }
+    repositories {
+        maven {
+        	name "PublicRepo"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials(PasswordCredentials) {
+            	username = hasProperty('ossrhUsername')?ossrhUsername:''
+            	password = hasProperty('ossrhPassword')?ossrhPassword:''
+            }
+        }
+        // Creates task publishYadaWebLibraryPublicationToLocalRepoRepository
+        maven {
+        	name "LocalRepo"
+        	// repoPath must be passed when invoking gradle using -P
+        	url = "file://${repoPath}"
+    	}
+    }    
+}
 

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" >
+<head>
+	<meta charset="utf-8" />
+</head>
+<body>
+
+<!--/* Modal per la conferma - Bootstrap 3
+It can be used either via javascript yada.confirm(), 
+or via ajax, in which case the Controller method has to return yadaWebUtil.modalConfirm()
+
+In any case it has to be statically included in the hmtl with
+
+<th:block th:replace="~{/yada/modalConfirmB3 :: modalBlock}" id="yada-confirm"></div>
+
+ */-->
+
+<div class="s_modalConfirm"> <!--/* Only seen when loaded via ajax */-->
+<th:block th:fragment="modalBlock">
+	<div th:fragment="modalBlockInner" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+	    <div class="modal-dialog" th:classappend="${extraDialogClasses}">
+	        <div class="modal-content">
+		      <div class="modal-header">
+		      	<span class="confirm-title"><!--/* Optional title */--></span>
+		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="yadaIcon yadaIcon-close"></i></button>
+		      </div>
+	            <div class="modal-body">
+	                <p th:text="${message}?:#{modal.confirm.default}">Sei sicuro?</p>
+	            </div>
+	            <div class="modal-footer">
+	                <button type="button" class="btn btn-danger okButton" data-dismiss="modal" th:text="${confirmButton}?:#{modal.confirm.confirm}">Esegui</button>
+	                <button type="button" class="btn btn-default cancelButton" data-dismiss="modal" th:text="${cancelButton}?:#{modal.confirm.cancel}">Annulla</button>
+	            </div>
+	        </div>
+	        
+      		<script defer="defer" th:if="${reloadOnConfirm!=null}" type="text/javascript" th:inline="javascript" class="s_theScript">
+		        function yadaModalConfirmHandler() {
+					if ([[${openModal}]]) {
+						$('.s_theScript').parents('.modal').modal('show');
+					}
+					$('.s_theScript').parents('.modal-dialog').find('.okButton').click(function () {
+						yada.loaderOn();
+						window.location.href=yada.addUrlParameterIfMissing(window.location.href, 'yadaconfirmed');
+					});
+		        };
+      		  if (document.readyState != 'loading'){
+      			yadaModalConfirmHandler();
+      		  } else {
+      		    document.addEventListener('DOMContentLoaded', yadaModalConfirmHandler);
+      		  }
+		  </script>
+	        
+	    </div>
+	</div>
+</th:block>
+</div>
+
+</body>
+</html>

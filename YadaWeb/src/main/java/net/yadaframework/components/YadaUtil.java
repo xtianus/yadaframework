@@ -388,7 +388,8 @@ public class YadaUtil {
 	 * Non need for this method if the objectPath is a simple key: just use the Map get(key) method.
 	 * @param jsonSource
 	 * @param objectPath the name of a (nested) json property holding an object
-	 * @return
+	 * @return the object or null if it does not exist
+	 * @see #makeJsonObject(parentObject, path)
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> getJsonObject(Map<String, Object> jsonSource, String objectPath) {

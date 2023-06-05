@@ -23,9 +23,11 @@ public class YadaTestConfig extends YadaAppConfig {
 		super.dataSource = dataSource;
 		builder.activate();
 		// Database
-		Flyway flyway = new Flyway();
-		flyway.setLocations("filesystem:schema"); // Where sql test scripts are stored
-		flyway.setDataSource(dataSource);
+		Flyway flyway = Flyway.configure()
+			.dataSource(dataSource)
+			.locations("filesystem:schema") // Where sql scripts are stored
+			// .table("schema_version") // Legacy name from v5
+			.load();
 		flyway.clean();
 		flyway.migrate();
 	}

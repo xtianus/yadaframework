@@ -35,7 +35,7 @@ public class YadaGlobalExceptionHandler {
 		// Count the times we get here, to avoid looping in case of repeating errors on forward
 		Integer loops = (Integer) request.getAttribute(LOOPCOUNTER_KEY);
 		if (loops==null) {
-			loops = new Integer(1);
+			loops = 1;
 		} else {
 			loops = loops+1;
 		}

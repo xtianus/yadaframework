@@ -6,21 +6,29 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.7.3'
+version = '0.7.5'
 
 apply plugin: 'groovy'
 // apply plugin: 'java-gradle-plugin'
 apply plugin: 'eclipse'
 
-java {
-     toolchain {
-         languageVersion = JavaLanguageVersion.of(11) // >=11 because of org.hidetake.ssh
-     }
+if (!project.hasProperty('repoPath')) {
+	ext.repoPath="repoPathMissing"
 }
+
+java {
+     // toolchain {
+     //     languageVersion = JavaLanguageVersion.of(11) // >=11 because of org.hidetake.ssh
+     // }
+	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
+	withSourcesJar()
+    withJavadocJar() // https://stackoverflow.com/a/75710366/587641
+}
+
 eclipse {
 	jdt {
-		sourceCompatibility = 1.8
-		targetCompatibility = 1.8
+		// sourceCompatibility = 1.8
+		// targetCompatibility = 1.8
 		// https://stackoverflow.com/a/35302104/587641
 		file {
       		File dir = file('.settings')
@@ -82,25 +90,19 @@ task terraforming {
 	}
 }
 
-
-task sourcesJar(type: Jar) {
-    archiveClassifier = 'sources'
-    from sourceSets.main.allJava
-}
-
-task javadocJar(type: Jar) {
-    archiveClassifier = 'javadoc'
-    from javadoc.destinationDir
+javadoc {
+    options.encoding = 'UTF-8'
+    options.docEncoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    failOnError = false
 }
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        yadaToolsLibrary(MavenPublication) {
         	artifactId = 'yadatools'
             from components.java
 
-            artifact sourcesJar
-            artifact javadocJar
 			pom {
 			    name = 'YadaTools'
 			    description = 'Some useful tasks for the Yada Framework'
@@ -134,6 +136,7 @@ publishing {
     }
     repositories {
         maven {
+        	name "PublicRepo"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
@@ -141,11 +144,23 @@ publishing {
             	username = hasProperty('ossrhUsername')?ossrhUsername:''
             	password = hasProperty('ossrhPassword')?ossrhPassword:''
             }
-            // url = "file://${buildDir}/repotest"
         }
+        // Creates task publishYadaToolsLibraryPublicationToLocalRepoRepository
+        maven {
+        	name "LocalRepo"
+        	// repoPath must be passed when invoking gradle
+        	url = "file://${repoPath}"
+    	}
     }    
 }
 
+tasks.getByName("publishYadaToolsLibraryPublicationToLocalRepoRepository") { 
+	it.dependsOn ':YadaWeb:publishYadaWebLibraryPublicationToLocalRepoRepository',
+		":YadaWebCMS:publishYadaWebCMSLibraryPublicationToLocalRepoRepository",
+		":YadaWebCommerce:publishYadaWebCommerceLibraryPublicationToLocalRepoRepository",
+		":YadaWebSecurity:publishYadaWebSecurityLibraryPublicationToLocalRepoRepository"
+}
+
 signing {
-    sign publishing.publications.mavenJava
+    sign publishing.publications.yadaToolsLibrary
 }

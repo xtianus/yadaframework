@@ -5,15 +5,21 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.7.3'
+version = '0.7.5'
 
 apply plugin: 'eclipse-wtp'
+
+if (!project.hasProperty('repoPath')) {
+	ext.repoPath="repoPathMissing"
+}
 
 java {
 //     toolchain {
 //         languageVersion = JavaLanguageVersion.of(8)
 //     }
-	withJavadocJar() // https://stackoverflow.com/a/75710366/587641
+	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
+	withSourcesJar()
+    withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
 
 eclipse {
@@ -38,18 +44,18 @@ compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
     mavenCentral()
-	mavenLocal()
 }
 
 dependencies {
 	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
 		
-	api project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'),
+	implementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS')
 		// 'org.springframework:spring-webmvc:5.3.18',
 		// 'org.springframework:spring-orm:5.3.18',
 		// 'org.hibernate:hibernate-entitymanager:5.5.0.Final',
-		'com.paypal.sdk:checkout-sdk:1.0.5'
 		
+	compileOnly 'com.paypal.sdk:checkout-sdk:1.0.5'
+
 	testImplementation 'junit:junit:4.12'
 }
 
@@ -65,11 +71,6 @@ processResources {
 	doLast {
 		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadawebcommerce.properties", token: '@YADA_VERSION@', value: version)
 	}
-}
-
-task sourcesJar(type: Jar) {
-    archiveClassifier = 'sources'
-    from sourceSets.main.allJava
 }
 
 javadoc {
@@ -88,11 +89,10 @@ javadoc {
 // PublishToMavenLocal task
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        yadaWebCommerceLibrary(MavenPublication) {
             artifactId = 'yadawebcommerce'
             from components.java
-            artifact sourcesJar
-            artifact javadocJar
+
             versionMapping {
                 usage('java-api') {
                     fromResolutionOf('runtimeClasspath')
@@ -141,12 +141,17 @@ publishing {
 				username = hasProperty('ossrhUsername')?ossrhUsername:''
 				password = hasProperty('ossrhPassword')?ossrhPassword:''
 			}
-            // url = "file://${buildDir}/repotest"
         }
+         // Creates task publishYadaWebCommerceLibraryPublicationToLocalRepoRepository
+        maven {
+        	name "LocalRepo"
+        	// repoPath must be passed when invoking gradle using -P
+        	url = "file://${repoPath}"
+    	}    
     }    
 }
 
 signing {
-    sign publishing.publications.mavenJava
+    sign publishing.publications.yadaWebCommerceLibrary
 }
 
