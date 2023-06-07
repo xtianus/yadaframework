@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import net.yadaframework.core.YadaAppConfig;
 
 //@Configuration not needed when using WebApplicationInitializer.java
+// WARNING: do not add the "web" package here ("$basePackage.web"), or Spring will fail to find the YadaWebSecurity controllers for autowiring
+//          Just set it in the WebConfig class, not here.
 @ComponentScan(basePackages = { "$basePackage.components", "$basePackage.persistence.entity", "$basePackage.persistence.repository" })
 public class AppConfig extends YadaAppConfig {
 	

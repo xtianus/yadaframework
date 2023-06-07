@@ -231,11 +231,11 @@ public class YadaRegistrationController {
 	////// Password Recovery                                                                            /////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/** Default method to change a user password.
-	 *
+	/** 
+	 * Default method to change a user password.
 	 * @return
 	 */
-	@RequestMapping("/passwordChangeAfterRequest")
+	@RequestMapping("/passwordChangeAfterRequest") // Ajax
 	public String passwordChangeAfterRequest(YadaFormPasswordChange yadaFormPasswordChange, BindingResult bindingResult, Model model, Locale locale) {
 		if (!yadaUserDetailsService.validatePasswordSyntax(yadaFormPasswordChange.getPassword())) {
 			bindingResult.rejectValue("password", "validation.password.length", new Object[]{yadaConfiguration.getMinPasswordLength(), yadaConfiguration.getMaxPasswordLength()}, "Wrong password length");
@@ -244,7 +244,8 @@ public class YadaRegistrationController {
 		boolean done = yadaSecurityUtil.performPasswordChange(yadaFormPasswordChange);
 		if (done) {
 			log.info("Password changed for user '{}'", yadaFormPasswordChange.getUsername());
-			yadaNotify.titleKey(model, locale, "yada.pwdreset.done.title").ok().messageKey("yada.pwdreset.done.message").add();
+			// redirectOnClose() is to show the logged in version of the site (no "login" link)
+			yadaNotify.titleKey(model, locale, "yada.pwdreset.done.title").ok().messageKey("yada.pwdreset.done.message").redirectOnClose("/").add();
 			model.addAttribute("pwdChangeOk", "pwdChangeOk");
 		} else {
 			log.error("Password change failed for user '{}'", yadaFormPasswordChange.getUsername());
