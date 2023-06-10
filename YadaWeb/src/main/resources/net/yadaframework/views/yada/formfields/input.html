@@ -59,7 +59,7 @@ It is used internally by the yada dialect processor to render the <yada:input> t
 					data-toggle="popover" data-placement="auto bottom"
 					data-html="true"
 					th:attr="data-content=${help}">
-					<i class="fa fa-question-circle fa-lg"></i>
+					<i class="yadaIcon yadaIcon-help"></i>
 				</a>
 				
 				<div th:if="${_validationFailed_}" th:text="${yadaValidationMessage}?:#{__${yadaMessageKey}__}" class="invalid-feedback"> <!-- Bootstrap 5 -->

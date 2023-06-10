@@ -130,8 +130,10 @@ a.yadaHelpButton:focus {
 	margin-top: 10px;
 }
 
-input.yadaReadonly {
+input.yadaReadonly, input.yadaReadonly:focus, input.yadaReadonly:hover {
 	border: none;
+	box-shadow: none;
+	cursor: default;
 }
 
 .yadaWidth80 input {
@@ -373,26 +375,34 @@ input.yadaSwitch-round:checked ~ label:after {
 }
 
 .yadaIcon-down:before {
-    content: "\f107";
+    content: "\F128";
     font-weight: 600;	
 }
 
 .yadaIcon-up:before {
-    content: "\f106";
+    content: "\F148";
     font-weight: 600;	
 }
 
 .yadaIcon-edit:before {
-    content: "\f303";
+    content: "\F4CB";
     font-weight: 900;
 }
 
 .yadaIcon-delete:before {
-    content: "\f2ed";
+    content: "\F5DE";
 }
 
 .yadaIcon-clone:before {
-    content: "\f24d";
+    content: "\F3C2";
+}
+
+.yadaIcon-add:before {
+    content: "\F4FD";
+}
+
+.yadaIcon-help:before {
+    content: "\F505";
 }
 
 /********************/

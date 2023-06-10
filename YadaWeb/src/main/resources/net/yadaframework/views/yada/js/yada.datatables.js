@@ -210,11 +210,11 @@
 		        	}
 		        	if (editDef!=null) {
 		        		buttons +=
-		        			'<a class="s_editRow yadaRowCommandButton" href="#'+rowId+'" title="'+editDef.title+'"><i class="fa fa-pencil-square-o"></i></a>';
+		        			'<a class="s_editRow yadaRowCommandButton" href="#'+rowId+'" title="'+editDef.title+'"><i class="yadaIcon yadaIcon-edit"></i></a>';
 		        	}
 		        	if (deleteDef!=null) {
 		        		buttons +=
-		        			'<a class="s_deleteRow yadaRowCommandButton" href="#'+rowId+'" title="'+deleteDef.title+'"><i class="fa fa-trash-o"></i></a>';
+		        			'<a class="s_deleteRow yadaRowCommandButton" href="#'+rowId+'" title="'+deleteDef.title+'"><i class="yadaIcon yadaIcon-delete"></i></a>';
 		        	}
 		        	return buttons;
 		        }
@@ -447,7 +447,7 @@
 				var disabled = (btndef.toolbarClass != "yadaTableAlwaysButton") ? "disabled" : "";
 				var buttonHtml = '<a class="btn btn-primary '+disabled+' '+btndef.toolbarClass+' s_toolbarExtraButton' + i + '"' +
 				' href="#" title="'+ btndef.title +'">' +
-				btndef.icon.replace('fa ', 'fa fa-lg ') + ' <span>'+btndef.toolbarText+'</span>' +
+				btndef.icon /*.replace('fa ', 'fa fa-lg ')*/ + ' <span>'+btndef.toolbarText+'</span>' +
 				'</a> ';
 				var pos = btndef.toolbarPosition;
 				var $yadaTableToolbar = $table.parents('.yadaTableBlock').find('.yadaTableToolbar');

@@ -48,9 +48,8 @@ Example:
 <div th:replace="/yada/form/b5/list::field(fieldName='building',options=${buildingEnumList},addHeader='UNKNOWN')"></div> where 'UNKNOWN' is an enum name to use for the header value
 
 */-->
-<body>
-<div class="form-group" 
-	th:fragment="field"
+<body th:remove="tag">
+<div class="form-group mb-3" 
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')},idPrefix=${idPrefix?:'fieldId'}" 
 	th:classappend="${inline==true}?form-inline">
 	<label th:if="${label!=null or labelKey!=null}" 
@@ -63,12 +62,11 @@ Example:
 			th:required="${required}" 
 			th:readonly="${readonly}"
 			th:disabled="${disabled}"
-			th:classappend="|${yadahref!=null?'yadaAjax':''} ${readonly==true?'yadaReadonly':''}|"
+			th:classappend="|${yadahref!=null?'yadaAjax':''} ${readonly==true?'yadaReadonly':''} ${hasError==true}?is-invalid|"
 			th:id="${#ids.seq(idPrefix)}" 
 			th:aria-describedby="${#ids.next(idPrefix)}"
 			th:data-yadahref="${yadahref}"
 			th:attr="__${yadaUpdateOnSuccess!=''?'data-yadaUpdateOnSuccess':'dummy'}__=${yadaUpdateOnSuccess}"
-			th:classappend="${hasError==true}?is-invalid"
 			>
 			<option th:if="${headerValue!=null}" th:value="${headerValue}">---</option>
 			<th:block th:if="${!isMap && !isYadaLocalEnum}">
@@ -122,7 +120,7 @@ Example:
 				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
 				data-html="true"
 				th:attr="data-content=${help}">
-				<i class="fa fa-question-circle fa-lg"></i>
+				<i class="yadaIcon yadaIcon-help"></i>
 			</a>
 		</th:block>
 	</div>

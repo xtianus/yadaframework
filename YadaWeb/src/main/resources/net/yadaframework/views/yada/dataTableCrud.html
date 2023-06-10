@@ -47,13 +47,13 @@
 	</table>
 	<div th:if="${!(false==checkbox)}" class="yadaTableToolbar">
 		<a th:unless="${disableAdd==true}" class="btn btn-primary s_addButton" href="#">
-			<i class="fa fa-plus fa-lg"></i> <span th:text="${addButtonText}?:#{button.add}">Add</span>
+			<i class="yadaIcon yadaIcon-add"></i> <span th:text="${addButtonText}?:#{button.add}">Add</span>
 		</a>
 		<a th:unless="${disableEdit==true}" class="btn btn-primary disabled s_singlerowButton s_editButton" href="#">
-			<i class="fa fa-pencil-square-o fa-lg"></i> <span th:text="${editButtonText}?:#{button.edit}">Edit</span>
+			<i class="yadaIcon yadaIcon-edit"></i> <span th:text="${editButtonText}?:#{button.edit}">Edit</span>
 		</a>
 		<a th:unless="${disableDelete==true}" class="btn btn-danger disabled s_singlerowButton s_multirowButton s_deleteButton" href="#">
-			<i class="fa fa-trash-o fa-lg"></i> <span th:text="${deleteButtonText}?:#{button.delete}">Delete</span>
+			<i class="yadaIcon yadaIcon-delete"></i> <span th:text="${deleteButtonText}?:#{button.delete}">Delete</span>
 		</a>
 	</div>
 </div>

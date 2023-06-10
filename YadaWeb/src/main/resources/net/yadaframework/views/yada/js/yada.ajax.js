@@ -1602,6 +1602,9 @@
 			var $currentModals = $(".modal:not(."+yada.stickyModalMarker+"):visible");			
 			// var $currentModals = $(".modal:visible").filter(function(){return $(".yadaStickyModal", this).length==0});			
 			$currentModals.modal('hide'); // Hide any modal that might be already open
+			if ($("#yada-confirm .modal").length==0) {
+				console.error("[yada] No confirm modal found: did you include it?");
+			}
 			$("#yada-confirm .modal").children().remove();
 			$("#yada-confirm .modal").append($(".modal-dialog", $modalConfirm));
 			$("#yada-confirm .modal").modal('show');
@@ -1625,7 +1628,9 @@
 			$("#yada-confirm .cancelButton").click(function() {
 				$('#yada-confirm .modal').one('hidden.bs.modal', function (e) {
 					$currentModals.modal('show');
-					$('#yada-confirm .modal').off('hidden.bs.modal');
+					// TODO restore handlers because they are lost on hide
+					// Useless:: yada.initHandlersOn($currentModals);
+					$('#yada-confirm .modal').off('hidden.bs.modal'); // Useless?
 				});
 				// $("#yada-confirm .modal").modal('hide');
 			});

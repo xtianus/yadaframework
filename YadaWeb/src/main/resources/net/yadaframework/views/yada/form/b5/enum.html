@@ -16,9 +16,8 @@ Parameters:
 - localized = false if the enum doesn't implement getKey() for localization (optional)
 
 */-->
-<body>
+<body th:remove="tag">
 <div class="form-group" 
-	th:fragment="field"
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}">
 	<label class="control-label" th:for="${#ids.next('fieldId')}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Tipo:</label>
 	<select th:field="*{__${fieldName}__}" class="form-control" th:id="${#ids.seq('fieldId')}" th:classappend="${hasError}? is-invalid" th:attr="aria-describedby=${#ids.next('fieldId')}">

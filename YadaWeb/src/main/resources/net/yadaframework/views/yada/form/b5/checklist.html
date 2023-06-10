@@ -32,9 +32,8 @@ Example:
 <div th:replace="/yada/form/b5/checklist::field(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
 
 */-->
-<body>
+<body th:remove="tag">
 <div class="form-group" 
-	th:fragment="field"
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')},idPrefix=${idPrefix?:'fieldId'},isMap=${options instanceof T(java.util.Map)}" 
 	>
 	<label th:if="${label!=null or labelKey!=null}" 
@@ -96,7 +95,7 @@ Example:
 			data-toggle="popover" data-placement="auto bottom" tabindex="-1"
 			data-html="true"
 			th:attr="data-content=${help}">
-			<i class="fa fa-question-circle fa-lg"></i>
+			<i class="yadaIcon yadaIcon-help"></i>
 		</a>
 	</th:block>
 	<span th:if="${hasError}" class="bi bi-x form-control-feedback" aria-hidden="true"></span>
