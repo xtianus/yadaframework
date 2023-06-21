@@ -9,7 +9,6 @@
 	// For a private property use "var xxx = "
 	// For a private function use "function xxx(..."
 	
-	yada.postLoginHandler = null; // Handler to run after login, if any
 	
 	var markerAjaxButtonOnly = 'yadaAjaxButtonOnly';
 	var markerAjaxModal = 'yadaAjaxModal';
@@ -18,7 +17,8 @@
 	// WARNING: if you change this, also change it in yada.js
 	var markerClass = 'yadaAjaxed'; // To prevent double submission
 	
-	// ?????????? A cosa servono questi postXXXX ??????????????????
+	// Deprecated: these were once used when opening the login form via yada.openLoginModal and yada.openLoginModalAjax
+	yada.postLoginHandler = null; // Handler to run after login, if any
 	var postLoginUrl = null;
 	var postLoginData = null;
 	var postLoginType = null;
@@ -208,6 +208,10 @@
 				yada.postLoginHandler(responseText, responseHtml); 
 			}
 		} else {
+			// Not good: reload or not reload is application specific
+			console.error("YadaWarning: deprecated page reload after ajax login")
+			// If you really need to reload the page, do it in the login form successHandler
+			debugger; // Set a debugger point here otherwise the above message is lost on page reload
 			yada.loaderOn();
 			window.location.href=yada.removeHash(window.location.href); // Ricarico la pagina corrente (senza ripetere la post) se non ho un handler
 		}
@@ -1349,7 +1353,6 @@
 			success: function(responseText, statusText, jqXHR) {
 				var responseTrimmed = "";
 				var responseObject = null;
-				closeLoginModalIfAny(jqXHR); // @Deprecated. Should use the generic modal instead of the login modal
 				if (responseText instanceof Blob) {
 					var contentDisposition = jqXHR.getResponseHeader("Content-Disposition");
 					var filename = yada.getAfter(contentDisposition, "filename=");
@@ -1404,7 +1407,7 @@
 				// A successful login can also return a redirect, which will skip the PostLoginHandler 
 				if ("loginSuccess" == responseTrimmed) {
 					// @Deprecated. Should use the generic modal instead of the login modal
-					$("#loginModal").remove();
+					$("#loginModal").modal("hide");
 					yada.loaderOff();
 					// window.location.reload(true); // true = skip cache // Non va bene perchè se è stata fatta una post, viene ripetuta!
 					yada.handlePostLoginHandler(responseHtml, responseText);
@@ -1573,12 +1576,6 @@
 		});
 		
 	}
-	
-	function closeLoginModalIfAny(jqXHR) {
-		if (jqXHR.getResponseHeader("Yada-Ajax-Just-LoggedIn")!=null) {
-			yada.reload();
-		}
-	};
 	
 	function removeHeadNodes(headNodes, $modalObject) {
 		$modalObject.on('hidden.bs.modal', function (e) {

@@ -1,14 +1,11 @@
 package net.yadaframework.security.web;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
@@ -24,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import net.yadaframework.components.YadaNotify;
+import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.components.YadaAuthenticationFailureHandler;
 import net.yadaframework.security.components.YadaAuthenticationSuccessHandler;
@@ -45,6 +43,7 @@ public class YadaLoginController {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
 	@Autowired private YadaNotify yadaNotify;
+	@Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaSession yadaSession;
 	@Autowired private YadaConfiguration yadaConfiguration;
 	@Autowired private YadaTokenHandler yadaTokenHandler;
@@ -52,6 +51,15 @@ public class YadaLoginController {
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	@Autowired private YadaAuthenticationFailureHandler failureHandler;
 	@Autowired protected YadaAuthenticationSuccessHandler successHandler;
+	
+	/**
+	 * This can be the success handler target url in order to close the login modal after successful login
+	 * @return
+	 */
+	@RequestMapping("/yada/closeModal")
+	public String closeModal() {
+		return YadaViews.AJAX_CLOSE_MODAL;
+	}
 	
 	/**
 	 * This method can be set as the default ajax login target in a Security Config, and will redirect to the targetUrl when specified.
@@ -68,24 +76,28 @@ public class YadaLoginController {
 		// Automatically add the language in the target url path when needed
 		if (yadaConfiguration.isLocalePathVariableEnabled()) {
 			Locale locale = LocaleContextHolder.getLocale();
-			if (locale!=null) {
-				String langPath = "/" + locale.getLanguage(); // e.g. "/en"
-				if(!targetUrl.startsWith(langPath)) {
-					targetUrl = langPath + targetUrl;
-				}
-			}
+			targetUrl = yadaWebUtil.enhanceUrl(targetUrl, locale);
+//			if (locale!=null) {
+//				String langPath = "/" + locale.getLanguage(); // e.g. "/en"
+//				if(!targetUrl.startsWith(langPath)) {
+//					targetUrl = langPath + targetUrl;
+//				}
+//			}
 		}
 		model.addAttribute("targetUrl", targetUrl);
 		return YadaViews.AJAX_REDIRECT;
 	}
 
 	@RequestMapping("/ajaxLoginForm")
+	@Deprecated // This should be application-specific
 	public String ajaxLoginForm(Model model) {
 		return "/modalLogin";
 	}
 
 	@RequestMapping("/ajaxLoginOk")
 	@ResponseBody
+	@Deprecated
+	// The "loginSuccess" return body causes a page reload. If a page reload is needed, do it in the login form successHandler.
 	public String ajaxLoginOk(Model model) {
 		return "loginSuccess";
 	}
@@ -168,6 +180,7 @@ public class YadaLoginController {
 	}
 
 	@RequestMapping("/loginModal")
+	@Deprecated // This should be application-specific
 	public String loginModal() {
 		return "/fragments/modalLogin";
 	}
