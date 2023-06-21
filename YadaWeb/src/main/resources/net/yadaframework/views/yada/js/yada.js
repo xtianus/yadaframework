@@ -1050,7 +1050,7 @@
 		});
 		var $modal = $('#yada-confirm .modal');
 		if ($modal.length==0) {
-			console.error("No confirm modal found: did you include it?");
+			console.error("[yada] No confirm modal found: did you include it?");
 		}
 		$modal.modal('show');
 		$modal.off('hidden.bs.modal').on('hidden.bs.modal', function (e) {

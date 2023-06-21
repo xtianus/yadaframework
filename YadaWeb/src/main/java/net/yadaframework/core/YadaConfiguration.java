@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
+import org.apache.commons.configuration2.builder.combined.CombinedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.LocaleUtils;
@@ -47,7 +48,7 @@ public abstract class YadaConfiguration {
 	private static Logger log = LoggerFactory.getLogger(YadaConfiguration.class);
 
 	protected ImmutableHierarchicalConfiguration configuration;
-	protected ReloadingCombinedConfigurationBuilder builder;
+	protected CombinedConfigurationBuilder builder;
 
 	// Cached values
 	// Questi valori li memorizzo perchè probabilmente verranno controllati
@@ -101,7 +102,34 @@ public abstract class YadaConfiguration {
 	private File tempFolder = null;
 	private String googleApiKey = null;
 
-
+	public int getTomcatHttpPort() {
+		return configuration.getInt("config/tomcat/ports/http", 8080);
+	}
+	
+	public int getTomcatHttpsPort() {
+		return configuration.getInt("config/tomcat/ports/https", 8443);
+	}
+	
+	public int getTomcatAjpPort() {
+		return configuration.getInt("config/tomcat/ports/ajp", 8009);
+	}
+	
+	public int getTomcatAjpRedirectPort() {
+		return configuration.getInt("config/tomcat/ports/ajpRedirect", 8443);
+	}
+	
+	public int getTomcatShutdownPort() {
+		return configuration.getInt("config/tomcat/ports/shutdown", 8005);
+	}
+	
+	public File getTomcatKeystoreFile() {
+		return new File(configuration.getString("config/tomcat/keystore/file", "/srv/devtomcatkeystore"));
+	}
+	
+	public String getTomcatKeystorePassword() {
+		return configuration.getString("config/tomcat/keystore/password", "changeit");
+	}
+	
 	/**
 	 * Google api key (for Maps etc) read from "security.properties"
 	 * @return
@@ -1446,7 +1474,7 @@ public abstract class YadaConfiguration {
 		return configuration.getLong(key, defaultValue);
 	}
 
-	public void setBuilder(ReloadingCombinedConfigurationBuilder builder) throws ConfigurationException {
+	public void setBuilder(CombinedConfigurationBuilder builder) throws ConfigurationException {
 		this.builder = builder;
 		this.configuration = ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration());
 	}
@@ -1457,8 +1485,10 @@ public abstract class YadaConfiguration {
 	 */
 	public void reloadIfNeeded() throws ConfigurationException {
 		// TODO Doesn't seem to work
-		builder.getReloadingController().checkForReloading(null);
-		this.configuration = ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration());
+		if (builder instanceof ReloadingCombinedConfigurationBuilder) {
+			((ReloadingCombinedConfigurationBuilder)builder).getReloadingController().checkForReloading(null);
+			this.configuration = ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration());
+		}
 	}
 
 	/**

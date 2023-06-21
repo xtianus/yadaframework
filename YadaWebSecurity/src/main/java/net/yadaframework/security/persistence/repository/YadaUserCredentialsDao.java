@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.util.StringUtils;
 
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.exceptions.YadaConfigurationException;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.YadaSql;
@@ -37,6 +38,7 @@ public class YadaUserCredentialsDao {
     @PersistenceContext private EntityManager em;
 
 	@Autowired private PasswordEncoder encoder;
+	@Autowired private YadaUtil yadaUtil;
 
 	/**
 	 * Change the password
@@ -80,9 +82,13 @@ public class YadaUserCredentialsDao {
     public <T extends YadaUserProfile> T create(Map<String, Object> userDefinition, Class<T> userProfileClass) {
 		// The map is a key-value pair of user attributes except "roles" which is a list of role ids
 		String email = (String) userDefinition.get("email");
+		if (email==null) {
+			throw new YadaConfigurationException("Configured users must have an <email>");
+		}
 		String password = (String) userDefinition.get("password");
-		if (email==null || password==null) {
-			throw new YadaConfigurationException("setup users must have <email> and <password> elements");
+		if (password==null) {
+			// When there is no password set, use a strong random password
+			password = yadaUtil.getRandomText(20); // Random password with 20 characters minimum
 		}
 		YadaUserCredentials existingUserCredentials = this.findFirstByUsername(email);
 		if (existingUserCredentials == null) {

@@ -1000,9 +1000,11 @@ public class YadaUtil {
 	/**
 	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity or normal java instance made with new.
 	 * Post processing (@PostConstruct etc) and initialization are also performed.
+	 * Beans from the WebApplicationContext like @Controller are not injected because they don't belong to the root Application Context used here.
+	 * If you need to do that, use {@link YadaWebUtil#autowireAndInitialize(Object)}
 	 * @param instance to autowire
 	 * @return the autowired/initialized bean instance, either the original or a wrapped one
-	 * @see {@link AutowireCapableBeanFactory#autowireBean(Object)}, {@link AutowireCapableBeanFactory#initializeBean(Object, String)}, {@link #autowire(Object)}
+	 * @see {@link YadaWebUtil#autowireAndInitialize(Object)}, {@link AutowireCapableBeanFactory#autowireBean(Object)}, {@link AutowireCapableBeanFactory#initializeBean(Object, String)}, {@link #autowire(Object)}
 	 */
 	public Object autowireAndInitialize(Object instance) {
 		autowireCapableBeanFactory.autowireBean(instance);

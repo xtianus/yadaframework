@@ -23,8 +23,7 @@ Example: <div th:replace="/yada/form/b5/boolean::field(fieldName='useGold',label
 - NO: help = testo per il pulsante di help (optional) Can be localised with: help=#{form.help.notifyCommentMyStory}
 
 */-->
-<body>
-<div th:fragment="field"> <!--/* Top-level div container is needed for fragment replacement */-->
+<body th:remove="tag">
 <!--/* The default id (inputId) is a sequence derived from the current URI, so that ajax-loaded modals get a different id from the
 	 * main page. This doesn't work when many page elements are ajax-loaded from the same url of course, in which
 	 * case you need to pass a specific id.
@@ -56,7 +55,7 @@ Example: <div th:replace="/yada/form/b5/boolean::field(fieldName='useGold',label
 				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
 				data-html="true"
 				th:attr="data-content=${help}">
-				<i class="fa fa-question-circle fa-lg"></i>
+				<i class="yadaIcon yadaIcon-help"></i>
 			</a>
 		</th:block>
 	</div>
@@ -76,7 +75,6 @@ Example: <div th:replace="/yada/form/b5/boolean::field(fieldName='useGold',label
 		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 	</div>
 	
-</div>    	
 </div>    	
 </body>
 </html>

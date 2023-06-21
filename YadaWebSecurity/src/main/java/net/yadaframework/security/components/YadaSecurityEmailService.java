@@ -112,9 +112,7 @@ public class YadaSecurityEmailService {
 			destinationUrl =  yadaRegistrationRequest.getDestinationUrl();
 		}
 
-		// In the dev environment we use the request to get the address, otherwise it must have been configured
-		String myServerAddress = config.isDevelopmentEnvironment() ? config.getWebappAddress(request) : config.getWebappAddress();
-		String fullLink = myServerAddress + destinationUrl + yadaTokenHandler.makeLink(yadaRegistrationRequest, null);
+		String fullLink = yadaWebUtil.getFullUrl(destinationUrl + yadaTokenHandler.makeLink(yadaRegistrationRequest, null), locale);
 
 		final Map<String, Object> templateParams = new HashMap<>();
 		templateParams.put("fullLink", fullLink);

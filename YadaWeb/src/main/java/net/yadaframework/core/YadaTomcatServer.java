@@ -16,9 +16,12 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
 import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
+import org.apache.commons.configuration2.builder.combined.CombinedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.coyote.ajp.AbstractAjpProtocol;
 import org.slf4j.Logger;
@@ -43,8 +46,8 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 public class YadaTomcatServer {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	private final String KEYSTOREFILE = "/srv/devtomcatkeystore"; // Needed for HTTPS - See comments below
-	private final String CONFIGFILE = "yadaTomcatServer.properties"; // Optional
+	// private final String KEYSTOREFILE = "/srv/devtomcatkeystore"; // Needed for HTTPS - See comments below
+	// private final String CONFIGFILE = "yadaTomcatServer.properties"; // Optional
 
     private Tomcat tomcat;
     private String acroenv;
@@ -83,14 +86,28 @@ public class YadaTomcatServer {
 		this();
 		
 		// Loading optional configuration
-		BasicConfigurationBuilder<PropertiesConfiguration> builder = new BasicConfigurationBuilder<PropertiesConfiguration>(PropertiesConfiguration.class);
-		Configuration tomconf = builder.getConfiguration(); // Default empty config
-		File configFile = new File(CONFIGFILE);
-		if (configFile.canRead()) {
-			log.warn("Loading Tomcat configuration from {}", configFile.getAbsolutePath());
-			Configurations configurations = new Configurations();
-			tomconf = configurations.properties(configFile);
+		YadaConfiguration config = new YadaConfiguration() {}; // Anonymous subclass just to instantiate abstract YadaConfiguration
+		try {
+			Parameters params = new Parameters();
+			CombinedConfigurationBuilder builder = new CombinedConfigurationBuilder()
+				.configure(
+					params.fileBased()
+						.setFile(new File("configuration.xml"))
+					);
+			config.setBuilder(builder);
+		} catch (Exception e) {
+			log.debug("Failed to load configuration.xml");
 		}
+		
+		// Old version was loading a specific config file from current dir
+		//		BasicConfigurationBuilder<PropertiesConfiguration> builder = new BasicConfigurationBuilder<PropertiesConfiguration>(PropertiesConfiguration.class);
+		//		Configuration tomconf = builder.getConfiguration(); // Default empty config
+		//		File configFile = new File(CONFIGFILE);
+		//		if (configFile.canRead()) {
+		//			log.warn("Loading Tomcat configuration from {}", configFile.getAbsolutePath());
+		//			Configurations configurations = new Configurations();
+		//			tomconf = configurations.properties(configFile);
+		//		}
 		
 		log.debug("Starting Tomcat server with args: {}", Arrays.asList(args));
 		if (args.length == 0 || args.length>4) {
@@ -108,7 +125,7 @@ public class YadaTomcatServer {
 				throw new YadaInvalidUsageException("The baseDir {} must exist and be writable", new File(baseDir));
 			}
 		}
-		this.configure(webappFolder, baseDir, dev, tomconf);
+		this.configure(webappFolder, baseDir, dev, config);
 	}
 
 	public void start() throws LifecycleException {
@@ -172,7 +189,7 @@ public class YadaTomcatServer {
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	protected void configure(String webappFolder, String baseDir, boolean dev, Configuration tomconf) throws ServletException, MalformedURLException, IOException {
+	protected void configure(String webappFolder, String baseDir, boolean dev, YadaConfiguration config) throws ServletException, MalformedURLException, IOException {
 		log.debug("webappFolder={}", webappFolder);
 		log.debug("baseDir={}", baseDir);
 		log.debug("dev={}", dev);
@@ -180,7 +197,7 @@ public class YadaTomcatServer {
 		if (baseDir!=null) {
 			tomcat.setBaseDir(baseDir);
 		}
-		tomcat.setPort(tomconf.getInt("port.http", 8080));
+		tomcat.setPort(config.getTomcatHttpPort());
 		tomcat.getConnector().setThrowOnFailure(true);
 		setCompressableMimeType(tomcat.getConnector(), null);
 		tomcat.setAddDefaultWebXmlToWebapp(false); // Use web.xml
@@ -200,20 +217,21 @@ public class YadaTomcatServer {
         Connector ajpConnector = new Connector("AJP/1.3");
         ((AbstractAjpProtocol) ajpConnector.getProtocolHandler()).setSecretRequired(false);
         ajpConnector.setScheme("ajp");
-        ajpConnector.setRedirectPort(tomconf.getInt("port.ajp.redirect", 8443));
+        ajpConnector.setRedirectPort(config.getTomcatAjpRedirectPort());
         // See https://tomcat.apache.org/tomcat-8.5-doc/config/ajp.html
         ((AbstractAjpProtocol) ajpConnector.getProtocolHandler()).setMaxConnections(8192);
         ((AbstractAjpProtocol) ajpConnector.getProtocolHandler()).setMaxThreads(200);
         // TODO verificare se sia necessario incrementare questo valore per postare immagini etc.
         // ajpConnector.setMaxPostSize(maxPostSize); 2097152 (2 megabytes) default
-        ajpConnector.setPort(tomconf.getInt("port.ajp", 8009));
+        ajpConnector.setPort(config.getTomcatAjpPort());
         ((AbstractAjpProtocol) ajpConnector.getProtocolHandler()).setAddress(InetAddress.getByAddress(new byte[] {0,0,0,0}));
         tomcat.getService().addConnector(ajpConnector);
 
         // HTTPS Connector
-        if (dev && new File(KEYSTOREFILE).canRead()) {
+        File keystoreFile = config.getTomcatKeystoreFile();
+        if (dev && keystoreFile.canRead()) {
 	        Connector httpsConnector = new Connector("HTTP/1.1");
-	        httpsConnector.setPort(tomconf.getInt("port.https", 8443));
+	        httpsConnector.setPort(config.getTomcatHttpsPort());
 	        httpsConnector.setSecure(true);
 	        httpsConnector.setScheme("https");
 	        httpsConnector.setProperty("SSLEnabled", "true");
@@ -224,8 +242,8 @@ public class YadaTomcatServer {
 	        // Export certificate with
 	        // keytool -export -noprompt -keystore /srv/devtomcatkeystore -alias tomcat -storepass changeit -file /tmp/tomcat.cer
 	        // and double click the file to import it in the browser
-	        httpsConnector.setProperty("keystoreFile", tomconf.getString("keystore.file", KEYSTOREFILE));
-	        httpsConnector.setProperty("keystorePass", tomconf.getString("keystore.password", "changeit"));
+	        httpsConnector.setProperty("keystoreFile", keystoreFile.getAbsolutePath());
+	        httpsConnector.setProperty("keystorePass", config.getTomcatKeystorePassword());
 	        tomcat.getService().addConnector(httpsConnector);
 	        log.debug("HTTPS Connector enabled");
         } else {
@@ -233,7 +251,7 @@ public class YadaTomcatServer {
         }
         
         // 
-		tomcat.getServer().setPort(tomconf.getInt("port.shutdown", 8005));
+		tomcat.getServer().setPort(config.getTomcatShutdownPort());
 		String shutdownCommand = acroenv+"down";
 		tomcat.getServer().setShutdown(shutdownCommand);
 		log.info("Shutdown port is {}, shutdown command is '{}'", tomcat.getServer().getPort(), shutdownCommand);

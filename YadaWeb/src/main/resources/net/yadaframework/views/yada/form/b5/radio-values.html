@@ -22,13 +22,12 @@ Example:
 <div th:replace="/yada/form/b5/radio-values::field(fieldName='type',values=${ {'notifyEventMilan','notifyEventOther','newsletterUnaTantum'} },labelPrefix='form.label.',helpPrefix='form.help.')"></div>
 
 */-->
-<body>
+<body th:remove="tag">
 <!--/* The default id (inputId) is a sequence derived from the current URI, so that ajax-loaded modals get a different id from the
 	 * main page. This doesn't work when many page elements are ajax-loaded from the same url of course, in which
 	 * case you need to pass a specific id.
 	 */--> 	
-<div th:fragment="field" 
-	class="form-group" th:with="
+<div class="form-group" th:with="
 		inputId=${id?:#ids.seq(@yadaWebUtil.getRequestMapping())}">
 	<label th:if="${label!=null || labelKey!=null}" class="form-check-label" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
 	<div class="form-check" th:each="value : ${values}"   th:with="hasError=${#fields.hasErrors('__${fieldName}__')}">
@@ -37,7 +36,7 @@ Example:
 		<span th:if="${hasError}" class="bi bi-x form-control-feedback" aria-hidden="true"></span>
 		<a th:if="${helpPrefix!=null}" class="yadaHelpButton" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="top" tabindex="-1"
 			th:attr="data-content=#{${helpPrefix+value}}">
-			<i class="fa fa-question-circle fa-lg"></i>
+			<i class="yadaIcon yadaIcon-help"></i>
 		</a>
 	</div>		
 </div>    	

@@ -51,15 +51,14 @@ Example:
 
 
 */-->
-<body>
-<div th:fragment="field"> <!--/* Top-level div container is needed for fragment replacement */-->
+<body th:remove="tag">
 <!--/* TODO see boolean.html for how to set a unique default id when fields in a modal have the same name as fields in the main page */-->
 <th:block th:with="tmp=${fieldName+'seqName'},seqName=${#strings.replace(#strings.replace(tmp,']',''),'[','')}">
 <input th:if="${#strings.equals(type,'hidden')}" th:field="*{{__${fieldName}__}}" th:disabled="${disabled}" th:type="hidden" th:id="${id}?:${#ids.seq(seqName)}" />
 <div th:if="${!#strings.equals(type,'hidden')}" class="mb-3"
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}">
 	<label th:if="${label!=null || labelKey!=null}" class="form-label" th:for="${id}?:${#ids.next(seqName)}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
-	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perchÃ© se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
+	<div th:classappend="${help!=null || addonRight!=null || addonLeft!=null}?:input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* il width serve perchÃ© se non c'è l'help il campo resta corto (ad esempio i campi password) */-->
 		<!--/* Can't use th:field="*{__${fieldName}__}" because somehow passwords remain blank when they already have a value */-->
 		<div th:if="${addonLeft!=null}" class="input-group-prepend">
 			<span class="input-group-text" th:text="${addonLeft}">$</span>
@@ -95,7 +94,7 @@ Example:
 				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
 				data-html="true"
 				th:attr="data-content=${help}">
-				<i class="fa fa-question-circle fa-lg"></i>
+				<i class="yadaIcon yadaIcon-help"></i>
 			</a>
 		</th:block>
 	</div>
@@ -142,7 +141,6 @@ Example:
 	</div>
 </div>    	
 </th:block>
-</div>
 </body>
 </html>
 		

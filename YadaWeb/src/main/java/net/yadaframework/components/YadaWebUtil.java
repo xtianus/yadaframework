@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -47,15 +48,19 @@ import org.jsoup.safety.Safelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.FrameworkServlet;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.AbstractDispatcherServletInitializer;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -82,7 +87,31 @@ public class YadaWebUtil {
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
 
-
+	/**
+	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity or normal java instance made with new.
+	 * Post processing (@PostConstruct etc) and initialization are also performed.
+	 * This version can inject beans from the WebApplicationContext like @Controllers. You may consider a class hierarchy redesign before using this method.
+	 * @param instance to autowire
+	 * @return the autowired/initialized bean instance, either the original or a wrapped one
+	 * @see {@link YadaUtil#autowireAndInitialize(Object)}, {@link AutowireCapableBeanFactory#autowireBean(Object)}, {@link AutowireCapableBeanFactory#initializeBean(Object, String)}, {@link #autowire(Object)}
+	 */
+	public Object autowireAndInitialize(Object instance) {
+		HttpServletRequest request = getCurrentRequest();
+		if (request!=null) {
+			log.debug("Using YadaWebUtil.autowireAndInitialize(): please use YadaUtil.autowireAndInitialize() instead "
+				+ "and, if the bean is not found there, you should consider a redesign. No technical problem in going ahead here though.");
+			String attrName = FrameworkServlet.SERVLET_CONTEXT_PREFIX + AbstractDispatcherServletInitializer.DEFAULT_SERVLET_NAME;
+			ServletContext servletContext = request.getServletContext();
+			WebApplicationContext webApplicationContext = (WebApplicationContext) servletContext.getAttribute(attrName);
+			// WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+			AutowireCapableBeanFactory autowireCapableBeanFactory = webApplicationContext.getAutowireCapableBeanFactory();
+			autowireCapableBeanFactory.autowireBean(instance);
+			return autowireCapableBeanFactory.initializeBean(instance, instance.getClass().getSimpleName());
+		}
+		log.error("No HttpServletRequest in current thread");
+		return null;
+	}
+	
 	public boolean isEmpty(YadaPageRows<?> yadaPageRows) {
 		return yadaPageRows==null || yadaPageRows.isEmpty();
 	}
@@ -657,15 +686,19 @@ public class YadaWebUtil {
 	}
 
 	/**
-	 * ATTENZIONE: non sempre va!
+	 * Returns the current request or null
 	 * @return
 	 */
 	public HttpServletRequest getCurrentRequest() {
-		return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+		ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		if (sra!=null) {
+			return sra.getRequest();
+		}
+		return null;
 	}
 
 	/**
-	 * Ritorna true se la request corrente è ajax
+	 * Returns true if the current request is an ajax request
 	 * @return
 	 */
 	public boolean isAjaxRequest() {
@@ -673,10 +706,13 @@ public class YadaWebUtil {
 	}
 
 	/**
-	 * Ritorna true se la request passata è ajax
+	 * Returns true if the request is an ajax request
 	 * @return
 	 */
 	public boolean isAjaxRequest(HttpServletRequest request) {
+		if (request==null) {
+			return false;
+		}
 		String ajaxHeader = request.getHeader("X-Requested-With");
 		return "XMLHttpRequest".equalsIgnoreCase(ajaxHeader);
 	}
