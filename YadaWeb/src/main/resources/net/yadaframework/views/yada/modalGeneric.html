@@ -8,17 +8,16 @@
 </head>
 <body>
 <!--/*
-	 * This is a generic template for a bootstrap modal with title and body, to be returned via ajax or included in page.
+	 * This is a generic template for a bootstrap modal with title and body, to be returned via ajax.
 	 * @param title modal-title text. Not used when header is specified
 	 * @param header optional custom modal-header
 	 * @param body modal-body
 	 * @param footer optional custom modal-footer
 	 * @param script optional script
 	 * @param extraDialogClasses any classes to be added to the modal-dialog
-	 * @param id optional modal id
  */-->
-<div th:fragment="fragment(title,header,body,footer,script,extraDialogClasses,id)" th:with="titleId='t'+${#strings.randomAlphanumeric(16)}"
-	class="modal fade" tabindex="-1" role="dialog" th:aria-labelledby="${titleId}" aria-hidden="true" th:id="${id?:#strings.randomAlphanumeric(16)}">
+<div th:fragment="fragment(title,header,body,footer,script,extraDialogClasses)" th:with="titleId='t'+${#strings.randomAlphanumeric(16)}"
+	class="modal fade" tabindex="-1" role="dialog" th:aria-labelledby="${titleId}" aria-hidden="true">
 	<div class="modal-dialog" th:classappend="${extraDialogClasses}" role="document">
     	<div class="modal-content">
     		<div th:replace="${header}">
