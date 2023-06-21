@@ -25,6 +25,7 @@
 	<option data-link="./forms/overview.html">Forms</option>
 	<option data-link="./ajax.html">Ajax</option>
 	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./security.html">Security</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
@@ -90,7 +91,7 @@ public class WebConfig extends YadaWebSecurityConfig {</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The required YadaWebSecurity entities must also be added to <code>persistence.xml</code>:</p>
+<p>The required YadaWebSecurity entities must also be added to <code>persistence.xml</code> in order to create the DB schema:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -171,6 +172,12 @@ limited access, a "TEACHER" could see the score editing form.
 It&#8217;s important not to change either the id or the key once the application goes to production because
 these values are stored in the database.</p>
 </div>
+<div class="listingblock todo">
+<div class="content">
+<pre>- configuration of login/logout/success/failure urls
+- configuration of endpoint protection</pre>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -215,7 +222,7 @@ public class Setup extends YadaUserSetup&lt;UserProfile&gt; {</code></pre>
 <div class="paragraph">
 <p>Just by doing this, the users defined in the configuration will be created, if not there already,
 at each application startup.
-This configuration in <code>conf.webapp.prod.xml</code> creates an "admin" user (but it doesn&#8217;t have to be just one):</p>
+This configuration in <code>conf.webapp.prod.xml</code> creates one "admin" user (but it doesn&#8217;t have to be just one):</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -285,18 +292,194 @@ an unsafe place to store the user passwords</p>
 <div class="sect1">
 <h2 id="_password_reset">Password Reset</h2>
 <div class="sectionbody">
-
+<div class="listingblock todo">
+<div class="content">
+<pre>- form to ask password reset
+- send password reset email
+- form to reset the password</pre>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_login_page">Login page</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>The login page can either be a full page or a modal, and must contain the login form.</p>
+</div>
+<div class="paragraph">
+<p>The login form must have a <code>username</code> and a <code>password</code> field. The form must be submitted
+to the configured <code>loginProcessingUrl</code> endpoint via ajax.</p>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>- failed attempts lockout message
+- login error message
+- password reset link
+- password reveal button</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The login page/modal can either be opened by clicking on a login link or by requesting a protected url: in the
+latter case the request (ajax or not) will be saved and replayed after successful login.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>A POST to a protected url that triggers the login process will be replayed as a GET (this is by
+Spring Security design) without the original payload. Never allow a post to a protected url unless the user is logged in already.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If the login form is not ajax, the submission triggers a full page load and, in case the saved request
+was ajax, the response of the ajax request is shown as a full page. This is why the login form must
+always be ajax.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The login link can either be ajax or normal:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Opening a login page with a normal request is trivial</p>
+</li>
+<li>
+<p>Opening a modal with a normal request requires landing on some page (usually the home) with a model
+parameter that triggers the opening of the embedded login modal</p>
+</li>
+<li>
+<p>Opening a login page with an ajax request requires that some element in the page (not the body) has
+the <code>yadafullPage</code> class.</p>
+</li>
+<li>
+<p>Opening a login modal with an ajax request requires an ajax login link and a controller that returns
+the login modal</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The latter case (ajax login link with modal) is the simplest and recommended one.</p>
+</div>
+<div class="paragraph">
+<p>The login link must be shown only when the
+user is not logged in and replaced with the logout link otherwise:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;header th:with="loggedIn=${@yadaSecurityUtil.loggedIn()}"&gt;
+	&lt;a th:unless="${loggedIn}" th:href="@{/loginForm}" class="yadaAjax"&gt;
+		Login
+	&lt;/a&gt;
+	&lt;a th:if="${loggedIn}" th:href="@{/logout}"&gt;
+		Logout
+	&lt;/a&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After successful login, the login modal should be closed and any dynamic parts of the page that differ
+when a user is logged in should be replaced with the correct version: for example the login link
+should become a logout link.
+The easiest way to do so is to reload the entire page, but this can only be done when there is no
+unsaved data that needs to be kept. The <code>yada.reload()</code> function should do the trick.
+Otherwise, some javascript should fetch the new page parts from the server and replace them
+at the correct position.
+In both cases this can be done in a yada:successHandler of the login form:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/loginPost}" yada:successHandler="postLogin" <i class="conum" data-value="1"></i><b>(1)</b>
+	class="yadaAjax" role="form" method="post" id="loginForm"&gt;
+...
+&lt;script th:inline="javascript"&gt;
+    function postLogin() {
+    	const headerUrl = /*[[@{/justTheHeader}]]*/ "unset";
+    	yada.ajax(headerUrl, null, function(responseText, $responseHtml) {
+    		$("header").replaceWith($("header", $responseHtml)); <i class="conum" data-value="2"></i><b>(2)</b>
+    		$("#myLoginModal").modal("hide"); <i class="conum" data-value="3"></i><b>(3)</b>
+    	});
+    }</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>postLogin will be called after successful form submission</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>the current page header is replaced by the header as seen by logged-in users</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>the login modal is closed</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Another option would be, after login, to redirect to some other page. This can be done by configuring the
+DefaultTargetUrlAjaxRequest with <code>"/yadaLoginSuccess?targetUrl=/myOtherUrl/"</code>.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>As said above, a public page should not contain a form that posts to a protected endpoint. Such form
+should be shown only to logged-in users. This can be done either by conditionally showing the form
+or by placing it on a modal that is opened by clicking on a protected link. For example,
+a "save icon" could be an ajax link that returns a protected modal containing the save form.
+By clicking on the save icon, the user would first trigger the login process then the save form would be shown
+in the modal to the now logged-in user.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Never open from a public page a modal containing a form to a protected page using javascript only because
+there won&#8217;t be a chance to trigger the login process.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 <div class="listingblock todo">
 <div class="content">
 <pre>- UserProfileDao
-- registration controller: registration, passwordReset, changePassword
+- registration controller: registration
 - checking session expiration
-- autologin</pre>
+- autologin
+- yadaLoginSuccess?targetUrl: why use it when you have a login successHandler that can do that?</pre>
 </div>
 </div>
 </div>
@@ -305,7 +488,7 @@ an unsafe place to store the user passwords</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.5<br>
-Last updated 2023-06-21 10:55:28 +0200
+Last updated 2023-06-21 22:54:49 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

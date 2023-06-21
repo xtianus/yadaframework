@@ -21,7 +21,7 @@ The `WebConfig` class must extend `YadaWebSecurityConfig` instead of `YadaWebCon
 public class WebConfig extends YadaWebSecurityConfig {
 ----
 
-The required YadaWebSecurity entities must also be added to `persistence.xml`:
+The required YadaWebSecurity entities must also be added to `persistence.xml` in order to create the DB schema:
 
 [source,xml]
 ----
@@ -75,6 +75,12 @@ limited access, a "TEACHER" could see the score editing form.
 It's important not to change either the id or the key once the application goes to production because 
 these values are stored in the database.
 
+[.todo]
+----
+- configuration of login/logout/success/failure urls
+- configuration of endpoint protection
+----
+
 == User Profile
 
 Every web application handles a specific kind of user with different attributes like name, address, age etc.
@@ -109,7 +115,7 @@ public class Setup extends YadaUserSetup<UserProfile> {
 
 Just by doing this, the users defined in the configuration will be created, if not there already,
 at each application startup.
-This configuration in `conf.webapp.prod.xml` creates an "admin" user (but it doesn't have to be just one):
+This configuration in `conf.webapp.prod.xml` creates one "admin" user (but it doesn't have to be just one):
 
 [source,xml]
 ----
@@ -156,17 +162,123 @@ an unsafe place to store the user passwords
 
 ==  Password Reset
 
- 
+[.todo]
+----
+- form to ask password reset
+- send password reset email
+- form to reset the password
+----
  
 ==  Login page
 
+The login page can either be a full page or a modal, and must contain the login form.
+
+The login form must have a `username` and a `password` field. The form must be submitted 
+to the configured `loginProcessingUrl` endpoint via ajax.
+
+[.todo]
+----
+- failed attempts lockout message
+- login error message
+- password reset link
+- password reveal button
+----
+
+The login page/modal can either be opened by clicking on a login link or by requesting a protected url: in the
+latter case the request (ajax or not) will be saved and replayed after successful login.
+
+[WARNING] 
+====
+A POST to a protected url that triggers the login process will be replayed as a GET (this is by
+Spring Security design) without the original payload. Never allow a post to a protected url unless the user is logged in already. 
+====
+
+[WARNING] 
+====
+If the login form is not ajax, the submission triggers a full page load and, in case the saved request
+was ajax, the response of the ajax request is shown as a full page. This is why the login form must
+always be ajax.
+====
+
+The login link can either be ajax or normal: 
+
+* Opening a login page with a normal request is trivial
+* Opening a modal with a normal request requires landing on some page (usually the home) with a model
+parameter that triggers the opening of the embedded login modal
+* Opening a login page with an ajax request requires that some element in the page (not the body) has 
+the `yadafullPage` class.
+* Opening a login modal with an ajax request requires an ajax login link and a controller that returns 
+the login modal
+
+The latter case (ajax login link with modal) is the simplest and recommended one.
+
+The login link must be shown only when the
+user is not logged in and replaced with the logout link otherwise:
+
+[source,html]
+----
+<header th:with="loggedIn=${@yadaSecurityUtil.loggedIn()}">
+	<a th:unless="${loggedIn}" th:href="@{/loginForm}" class="yadaAjax">
+		Login
+	</a>
+	<a th:if="${loggedIn}" th:href="@{/logout}">
+		Logout
+	</a>
+----
+
+After successful login, the login modal should be closed and any dynamic parts of the page that differ
+when a user is logged in should be replaced with the correct version: for example the login link 
+should become a logout link.
+The easiest way to do so is to reload the entire page, but this can only be done when there is no
+unsaved data that needs to be kept. The `yada.reload()` function should do the trick.
+Otherwise, some javascript should fetch the new page parts from the server and replace them 
+at the correct position.
+In both cases this can be done in a yada:successHandler of the login form:
+
+[source,html]
+----
+<form th:action="@{/loginPost}" yada:successHandler="postLogin" # <1>
+	class="yadaAjax" role="form" method="post" id="loginForm">
+...
+<script th:inline="javascript">
+    function postLogin() {
+    	const headerUrl = /*[[@{/justTheHeader}]]*/ "unset";
+    	yada.ajax(headerUrl, null, function(responseText, $responseHtml) {
+    		$("header").replaceWith($("header", $responseHtml)); # <2>
+    		$("#myLoginModal").modal("hide"); # <3>
+    	});
+    }
+----
+<1> postLogin will be called after successful form submission
+<2> the current page header is replaced by the header as seen by logged-in users
+<3> the login modal is closed
+ 
+Another option would be, after login, to redirect to some other page. This can be done by configuring the
+DefaultTargetUrlAjaxRequest with `"/yadaLoginSuccess?targetUrl=/myOtherUrl/"`.
+
+[TIP] 
+====
+As said above, a public page should not contain a form that posts to a protected endpoint. Such form
+should be shown only to logged-in users. This can be done either by conditionally showing the form
+or by placing it on a modal that is opened by clicking on a protected link. For example,
+a "save icon" could be an ajax link that returns a protected modal containing the save form.
+By clicking on the save icon, the user would first trigger the login process then the save form would be shown
+in the modal to the now logged-in user.
+====
+
+[WARNING] 
+====
+Never open from a public page a modal containing a form to a protected page using javascript only because
+there won't be a chance to trigger the login process.
+====
 
 [.todo]
 ----
 - UserProfileDao
-- registration controller: registration, passwordReset, changePassword
+- registration controller: registration
 - checking session expiration
 - autologin
+- yadaLoginSuccess?targetUrl: why use it when you have a login successHandler that can do that?
 ----
 
 

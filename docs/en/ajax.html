@@ -25,6 +25,7 @@
 	<option data-link="./forms/overview.html">Forms</option>
 	<option data-link="./ajax.html">Ajax</option>
 	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./security.html">Security</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
@@ -861,6 +862,24 @@ the classic <code>responseHtml.find('.parent .child')</code> or <code>$('.parent
 </tbody>
 </table>
 </div>
+<div class="sect3">
+<h4 id="_ajax_conditional_html">Ajax conditional HTML</h4>
+<div class="paragraph">
+<p>When returning from any ajax call the model attribute <code>yadaIsAjaxResponse</code>
+has the value <code>yadaIsAjaxResponse</code>. This can be used to conditionally show
+some section or to apply some style only when returning from ajax:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;span th:if="${yadaIsAjaxResponse}"&gt;Just returned from Ajax call!&lt;/span&gt;
+
+&lt;style&gt;
+	.yadaIsAjaxResponse { color: red; }
+&lt;/style&gt;
+&lt;div th:classappend="${yadaIsAjaxResponse}"&gt;This is red after Ajax&lt;/div&gt;</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -1312,6 +1331,12 @@ keystroke done within the timeout of 200ms will cancel the previous call. Exampl
 <p>When set on an ajax form, make the form ajax only if the clicked button also has the yadaAjax class.
 Otherwise the form will be sent with a normal non-ajax request.</p>
 </dd>
+<dt class="hdlist1">yadaIsAjaxResponse</dt>
+<dd>
+<p>This is the value of the model attribute added when returning to any ajax call.
+It can for example be used as a class name to apply a different style to page elements
+when they return from ajax. Example: <code>&lt;div th:classappend="${yadaIsAjaxResponse}"</code></p>
+</dd>
 </dl>
 </div>
 <div class="paragraph">
@@ -1323,7 +1348,7 @@ Otherwise the form will be sent with a normal non-ajax request.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.5<br>
-Last updated 2023-06-21 11:01:29 +0200
+Last updated 2023-06-21 12:16:54 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

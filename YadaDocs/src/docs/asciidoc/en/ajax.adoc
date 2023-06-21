@@ -493,7 +493,22 @@ a| `yada:cancelButton`
 a| (optional) text of the cancel button
 |===
 
+====  Ajax conditional HTML
 
+When returning from any ajax call the model attribute `yadaIsAjaxResponse`
+has the value `yadaIsAjaxResponse`. This can be used to conditionally show
+some section or to apply some style only when returning from ajax:
+
+[source,html]
+----
+<span th:if="${yadaIsAjaxResponse}">Just returned from Ajax call!</span>
+
+<style>
+	.yadaIsAjaxResponse { color: red; }
+</style>
+<div th:classappend="${yadaIsAjaxResponse}">This is red after Ajax</div>
+----
+ 
 ==  Ajax Forms
 
 See the  xref:forms/overview.adoc#Ajax Forms[Ajax Forms section] in the Forms chapter.
@@ -822,6 +837,11 @@ Change the standard behavior of the element so that it calls the server via ajax
 yadaAjaxButtonOnly:: 
 When set on an ajax form, make the form ajax only if the clicked button also has the yadaAjax class.
 Otherwise the form will be sent with a normal non-ajax request.
+
+yadaIsAjaxResponse:: 
+This is the value of the model attribute added when returning to any ajax call.
+It can for example be used as a class name to apply a different style to page elements
+when they return from ajax. Example: `<div th:classappend="${yadaIsAjaxResponse}"`
 
 
 TO BE CONTINUED
