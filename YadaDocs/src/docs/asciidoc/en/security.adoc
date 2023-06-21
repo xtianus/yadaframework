@@ -1,0 +1,173 @@
+=  Security
+:docinfo: shared
+
+Authentication and Authorization: create users, handle login, protect pages
+
+
+==  Description
+
+The Yada Framework uses Spring Security to implement authentication
+(identifying the current user) and authorization (limiting access to web pages 
+according to the user role). The YadaWebSecurity library must be added to the classpath
+in order for this to work.
+
+==  Setup
+
+The `WebConfig` class must extend `YadaWebSecurityConfig` instead of `YadaWebConfig`:
+
+[source,java]
+----
+@ComponentScan(basePackages = { "com.example.web" })
+public class WebConfig extends YadaWebSecurityConfig {
+----
+
+The required YadaWebSecurity entities must also be added to `persistence.xml`:
+
+[source,xml]
+----
+<persistence-unit name="yadaPersistenceUnit">
+	<class>net.yadaframework.security.persistence.entity.YadaSocialCredentials</class>
+	<class>net.yadaframework.security.persistence.entity.YadaUserCredentials</class>
+	<class>net.yadaframework.security.persistence.entity.YadaUserProfile</class>
+	<class>net.yadaframework.security.persistence.entity.YadaRegistrationRequest</class>
+	<class>net.yadaframework.security.persistence.entity.YadaAutoLoginToken</class>
+----
+
+Some security parameters must be configured in `conf.webapp.prod.xml`:
+
+[source,xml]
+----
+<config>
+	<security>
+		<sessionTimeoutMinutes>240</sessionTimeoutMinutes> # <1>
+		<passwordLength min='5' max='128' /> # <2>
+		<encodePassword>true</encodePassword> # <3>
+		<maxFailedAttempts>10</maxFailedAttempts> # <4>
+		<failedAttemptsLockoutMinutes>10</failedAttemptsLockoutMinutes> # <5>
+		<autologinExpirationHours>48</autologinExpirationHours> # <6>
+		<roles> # <7>
+			<role>
+				<id>8</id>
+				<key>ADMIN</key>
+			</role>
+			<role>
+				<id>2</id>
+				<key>USER</key>
+			</role>
+		</roles>
+	</security>
+----
+<1> this value must be the same used in the `web.xml` `<session-config><session-timeout>` tag and is for checking session expiration
+<2> values for password validation
+<3> when true, passwords are encrypted in the database
+<4> the number of consecutive failed login attempts before an account is locked out
+<5> the number of minutes to wait for a locked out account before a new login attempt can be made
+<6> the validity time of autologin links
+<7> list of roles that users can have
+
+The list of roles defines an id and a key for every role a user can have in the application.
+A user can have more than one role.
+Role ids are just integer numbers with no special meaning, but they must be unique.
+Role keys can be any word that reminds of the activity the user can perform on the site.
+In this example, "USER" is any user with no particular privileges, and "ADMIN" is a site administrator.
+Role names should be specific to the application domain. For example, a "MANAGER" could handle users, a "GUEST" could have
+limited access, a "TEACHER" could see the score editing form.
+It's important not to change either the id or the key once the application goes to production because 
+these values are stored in the database.
+
+== User Profile
+
+Every web application handles a specific kind of user with different attributes like name, address, age etc.
+All user attributes are known as a "user profile".
+The Yada Framework provides the `YadaUserProfile` class with basic attributes like `firstName` or `avatar` image.
+The web application must subclass it with its own `UserProfile` class in order to add application-specific 
+attributes:
+
+[source,java]
+----
+@Entity
+public class UserProfile extends YadaUserProfile {
+	@Column(length = 32)
+	String nickname; // This is an example of UserProfile customization
+----
+
+The user login name is always the email address. Together with the password it is stored in the `userCredentials`
+attribute of `YadaUserProfile`, of type `YadaUserCredentials`.
+
+==  Initial user
+
+Usually, in a web application, users either register themselves or are added by an administrator.
+In any case, there must be an initial user with administrator rights that is already in the database
+when the application starts for the first time.
+This can be implemented by subclassing `YadaUserSetup` in any bean, for example a "Setup" bean:
+
+[source,java]
+----
+@Component
+public class Setup extends YadaUserSetup<UserProfile> {
+----
+
+Just by doing this, the users defined in the configuration will be created, if not there already,
+at each application startup.
+This configuration in `conf.webapp.prod.xml` creates an "admin" user (but it doesn't have to be just one):
+
+[source,xml]
+----
+<config>
+	<setup>
+		<users>
+			<user>
+				<nickname>admin</nickname> <!-- This is an example of UserProfile customization -->
+				<email>admin@EXAMPLE.com</email>
+				<password>changeit</password>
+				<locale>en_US</locale>
+				<timezone>Europe/Rome</timezone>
+				<role>USER</role>
+				<role>ADMIN</role>
+			</user>
+		</users>
+	</setup>
+----
+
+The xml user definition can contain all attributes defined in the application-specific UserProfile class:
+they will be set using reflection.
+
+[TIP]
+====
+Do not configure a password for production users otherwise
+all developers having access to the sources will know the password. If you don't set a password,
+you will have to "reset" it the first time you want to log in.
+====
+
+To delete all users (for development test):
+
+[source,sql]
+----
+delete from YadaUserCredentials_roles;
+delete yup, yuc FROM YadaUserProfile yup join YadaUserCredentials yuc on yup.userCredentials_id = yuc.id;
+----
+
+[TIP]
+====
+You can create a "secret" production configuration with user setup information by editing the `configuration.xml` file
+and adding another `<xml>` entry that points to a local file not committed to git, but you would still have
+an unsafe place to store the user passwords
+====
+
+==  Password Reset
+
+ 
+ 
+==  Login page
+
+
+[.todo]
+----
+- UserProfileDao
+- registration controller: registration, passwordReset, changePassword
+- checking session expiration
+- autologin
+----
+
+
+

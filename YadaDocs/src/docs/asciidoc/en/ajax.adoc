@@ -143,6 +143,12 @@ This approach has the advantage that the `@RequestMapping` method does not need 
 so that the json could be conditionally returned (the `produces` attribute should
 be skipped too in this case).
 
+*Returning a notification (with data)*
+
+The ajax call can show a notification when going back to the browser.
+It can also return some key-value data together with the notification.
+See <<notificationModal.adoc#_ajax_request,Notification Modal: Ajax request>> for details.
+
 *Returning any MIME type*
 
 By setting the appropriate MediaType, the controller method can return any object, for example a PDF file:

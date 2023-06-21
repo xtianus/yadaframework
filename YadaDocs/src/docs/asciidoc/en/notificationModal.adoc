@@ -227,7 +227,7 @@ Replace /yada/modalNotify with YadaViews.AJAX_NOTIFY in the yadaResponseData exa
 
 
 You might want to return, together with a notification, some key-value pairs for use in a javascript handler
-defined with `yada:successHandler` (see xref:ajax.adoc#Postprocessing).
+defined with `yada:successHandler` (see <<ajax.adoc#_postprocessing,Postprocessing>>).
 
 You can achieve this by placing a Map called "resultMap" in the Model:
 

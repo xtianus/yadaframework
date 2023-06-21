@@ -62,6 +62,8 @@ that will show you how to quickly create a web application
 
 <<ajaxModal.adoc#,Ajax Modals>>:: Open a modal as a result of an ajax call
 
+<<security.adoc#,Security>>:: User accounts and protecting pages behind login
+
 <<datatables.adoc#,DataTables>>:: Effective handling of tabular data
 
 <<emails.adoc#,Sending Emails>>:: Templating applied to emails

@@ -1,12 +1,11 @@
 buildscript {
 	repositories {
 		mavenCentral()
-		mavenLocal()
 	}
 }
 
 plugins {
-    id 'org.asciidoctor.jvm.convert' version '3.1.0'
+    id 'org.asciidoctor.jvm.convert' version '3.+'
 }
 
 group = 'net.yadaframework'
@@ -42,7 +41,6 @@ compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 
 dependencies {
@@ -57,7 +55,7 @@ task listJars {
 jar {
     manifest {
         attributes("Implementation-Title": "YadaDocs",
-                   "Implementation-Version": version)
+                   "Implementation-Version": archiveVersion)
     }
 }
 

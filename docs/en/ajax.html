@@ -44,7 +44,7 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <div id="header">
 <h1>Ajax</h1>
 <div class="details">
-<span id="revnumber">version 0.7.3</span>
+<span id="revnumber">version 0.7.5</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -252,6 +252,14 @@ The template must have the following form (also in a fragment):</p>
 <p>This approach has the advantage that the <code>@RequestMapping</code> method does not need to return a <code>@ResponseBody</code>
 so that the json could be conditionally returned (the <code>produces</code> attribute should
 be skipped too in this case).</p>
+</div>
+<div class="paragraph">
+<p><strong>Returning a notification (with data)</strong></p>
+</div>
+<div class="paragraph">
+<p>The ajax call can show a notification when going back to the browser.
+It can also return some key-value data together with the notification.
+See <a href="notificationModal.html#_ajax_request">Notification Modal: Ajax request</a> for details.</p>
 </div>
 <div class="paragraph">
 <p><strong>Returning any MIME type</strong></p>
@@ -1314,8 +1322,8 @@ Otherwise the form will be sent with a normal non-ajax request.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.3<br>
-Last updated 2023-01-19 19:03:32 +0100
+Version 0.7.5<br>
+Last updated 2023-06-21 11:01:29 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
