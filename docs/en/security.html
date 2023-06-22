@@ -309,7 +309,7 @@ an unsafe place to store the user passwords</p>
 </div>
 <div class="paragraph">
 <p>The login form must have a <code>username</code> and a <code>password</code> field. The form must be submitted
-to the configured <code>loginProcessingUrl</code> endpoint via ajax.</p>
+to the configured <code>loginProcessingUrl</code> endpoint via ajax or not depending on how it was opened (see later).</p>
 </div>
 <div class="listingblock todo">
 <div class="content">
@@ -333,22 +333,6 @@ latter case the request (ajax or not) will be saved and replayed after successfu
 <div class="paragraph">
 <p>A POST to a protected url that triggers the login process will be replayed as a GET (this is by
 Spring Security design) without the original payload. Never allow a post to a protected url unless the user is logged in already.</p>
-</div>
-</td>
-</tr>
-</table>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>If the login form is not ajax, the submission triggers a full page load and, in case the saved request
-was ajax, the response of the ajax request is shown as a full page. This is why the login form must
-always be ajax.</p>
 </div>
 </td>
 </tr>
@@ -395,6 +379,21 @@ user is not logged in and replaced with the logout link otherwise:</p>
 </div>
 </div>
 <div class="paragraph">
+<p>The login form must post via ajax or not using the same method used to load it: if the modal
+containing it was loaded via ajax it must post via ajax, and vice versa.
+This is because if the login process is triggered by accessing a protected url in a normal request, the login form
+must use a normal POST otherwise the saved request would be redirected to via ajax and may not be shown correctly.
+If, on the contrary, the process is triggered when the initial request is ajax, the login form
+must use ajax to POST otherwise the saved request would be loaded non-ajax and shown as a full page.
+To achieve this, use the <code>yadaIsAjaxResponse</code> model attribute that is always present when returning from
+an ajax call:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/loginPost}" th:classappend="${yadaIsAjaxResponse}?yadaAjax" ... &gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p>After successful login, the login modal should be closed and any dynamic parts of the page that differ
 when a user is logged in should be replaced with the correct version: for example the login link
 should become a logout link.
@@ -407,7 +406,8 @@ In both cases this can be done in a yada:successHandler of the login form:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/loginPost}" yada:successHandler="postLogin" <i class="conum" data-value="1"></i><b>(1)</b>
-	class="yadaAjax" role="form" method="post" id="loginForm"&gt;
+	th:classappend="${yadaIsAjaxResponse}?yadaAjax"
+	role="form" method="post" id="loginForm"&gt;
 ...
 &lt;script th:inline="javascript"&gt;
     function postLogin() {
@@ -488,7 +488,7 @@ there won&#8217;t be a chance to trigger the login process.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.5<br>
-Last updated 2023-06-21 22:54:49 +0200
+Last updated 2023-06-22 13:59:14 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
