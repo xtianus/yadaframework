@@ -46,7 +46,7 @@ public class YadaUserProfile implements Serializable {
 	@Column(length = 64)
 	protected String lastName;
 
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
+	//@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@NotNull
 	@OneToOne(optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
 	protected YadaUserCredentials userCredentials;
