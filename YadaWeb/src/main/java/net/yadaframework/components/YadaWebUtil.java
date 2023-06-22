@@ -335,7 +335,7 @@ public class YadaWebUtil {
 	 * in the url (and any parameters at the end too).
 	 * @param targetUrl the redirect target, like "/some/place"
 	 * @param locale can be null if the locale is not in the path, but then why use this method?
-	 * @param params optional request parameters to be set on the url, in the form of comma-separated name,value pairs. E.g. id,123,name,"joe"
+	 * @param params optional request parameters to be set on the url, in the form of comma-separated name,value pairs. E.g. "id","123","name","joe"
 	 * 			Existing parameters are not replaced. Null values become empty strings. Null names are skipped with their values.
 	 * @return a url like "redirect:/en/some/place?par1=val1&par2=val2"
 	 * @throws YadaInvalidUsageException if path locale is configured and the url is absolute and the locale is null
