@@ -312,7 +312,8 @@ public class YadaRegistrationController {
 		}
 		yadaNotify.titleKey(redirectAttributes, locale, "yada.email.passwordrecover.title")
 			.ok()
-			.messageKey("yada.email.passwordrecover.message", yadaRegistrationRequest.getEmail())
+			.messageKey("yada.email.passwordrecover.message")
+			// .messageKey("yada.email.passwordrecover.message", yadaRegistrationRequest.getEmail())
 			.add();
 		String address = yadaConfiguration.getPasswordResetSent(locale);
 

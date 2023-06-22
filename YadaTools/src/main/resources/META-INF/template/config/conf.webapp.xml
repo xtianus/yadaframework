@@ -42,8 +42,8 @@
 			<host>smtp.EXAMPLE.com</host>
 			<port>587</port>
 			<protocol>smtp</protocol>
-			<username>EXAMPLE@EXAMPLE.com</username>
-			<password>EXAMPLE</password>
+			<username>${smtpserver_username}</username>
+			<password>${smtpserver_password}</password>
 			<!--  If set to true, and a message has some valid and some invalid addresses, send the message anyway, reporting the partial failure with a SendFailedException. If set to false (the default), the message is not sent to any of the recipients if there is an invalid recipient address.  -->
 			<properties>mail.smtp.sendpartial=true</properties> 
 			<properties>mail.smtp.auth=true</properties>
