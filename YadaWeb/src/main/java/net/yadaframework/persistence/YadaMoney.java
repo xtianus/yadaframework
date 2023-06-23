@@ -221,6 +221,18 @@ public class YadaMoney implements Comparable<YadaMoney> {
 		result.internalValue = (long) (this.internalValue / factor);
 		return result;
 	}
+	
+	/**
+	 * Return a new YadaMoney where the value is the multiplication of the current value by the argument.
+	 * The original object is not changed.
+	 * @param factor
+	 * @return a new instance of YadaMoney
+	 */
+	public YadaMoney getMultiply(double factor) {
+		YadaMoney result = new YadaMoney();
+		result.internalValue = (long) (this.internalValue * factor);
+		return result;
+	}
 
 	/**
 	 * Returns the value with N decimal places
@@ -247,13 +259,14 @@ public class YadaMoney implements Comparable<YadaMoney> {
 	@Override
 	@JsonProperty("value")
 	public String toString() {
-		// Decimal formats are generally not synchronized
-		Locale locale = LocaleContextHolder.getLocale();
-		NumberFormat formatter = NumberFormat.getNumberInstance(locale);
-		if (formatter instanceof DecimalFormat) {
-			((DecimalFormat) formatter).applyPattern("#0.00");
-		}
-		return formatter.format(getRoundValue());
+		return toString(LocaleContextHolder.getLocale());
+//		// Decimal formats are generally not synchronized
+//		Locale locale = LocaleContextHolder.getLocale();
+//		NumberFormat formatter = NumberFormat.getNumberInstance(locale);
+//		if (formatter instanceof DecimalFormat) {
+//			((DecimalFormat) formatter).applyPattern("#0.00");
+//		}
+//		return formatter.format(getRoundValue());
 	}
 
 	/**
@@ -269,7 +282,7 @@ public class YadaMoney implements Comparable<YadaMoney> {
 	public String toString(Locale locale) {
 		// Decimal formats are generally not synchronized
 		DecimalFormat formatter = (DecimalFormat) NumberFormat.getNumberInstance(locale);
-		formatter.applyPattern("#0.##");
+		formatter.applyPattern("0.00");
 		return formatter.format(getRoundValue());
 	}
 
