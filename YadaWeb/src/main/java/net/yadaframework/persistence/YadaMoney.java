@@ -32,6 +32,8 @@ public class YadaMoney implements Comparable<YadaMoney> {
 	private static final int multiplier = 10000;
 
 	private YadaUtil yadaUtil = new YadaUtil();
+	
+	public static final YadaMoney ZERO = new YadaMoney(0);
 
 	YadaMoney() {
 		this.internalValue = 0;
