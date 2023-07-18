@@ -7,7 +7,7 @@
 <!--/* Notification modal */-->
 <!--/* Do not add anything before "modal" and "yadaNotify" because yada.js relies on this sequence: body > .modal > .yadaNotify */-->
 <div class="s_modalNotify"> <!--/* Only seen when loaded via ajax */-->
-	<div th:replace="/yada/ajaxResponseData :: .yadaResponseData" th:if="${resultMap!=null}"></div>
+	<div th:replace="~{/yada/ajaxResponseData :: .yadaResponseData}" th:if="${resultMap!=null}"></div>
   <div th:fragment="modal" class="modal-dialog yadaNotify" th:classappend="${extraDialogClasses}"
   	th:with="iconName=${YADA_TOTSEVERITY=='ok'?'ok':YADA_TOTSEVERITY=='error'?'error':'warning'}">
 	<th:block th:fragment="modal-content">
