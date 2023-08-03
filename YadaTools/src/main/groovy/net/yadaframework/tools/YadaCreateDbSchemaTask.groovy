@@ -16,7 +16,8 @@ import org.gradle.api.tasks.TaskAction
 * @param update (true/false) set to true for the schema delta (might not be accurate)
 */
 class YadaCreateDbSchemaTask extends DefaultTask {
-	Map properties;
+	@Internal
+	Map properties; // Is this used?
 	def outputfilename = "generated.sql";
 	def update = false;
 	
