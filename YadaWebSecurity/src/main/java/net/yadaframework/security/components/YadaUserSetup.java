@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import net.yadaframework.components.YadaSetup;
+import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 
@@ -41,6 +42,7 @@ abstract public class YadaUserSetup<T extends YadaUserProfile> extends YadaSetup
 	private transient Logger log = LoggerFactory.getLogger(YadaUserSetup.class);
 
 	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
+	@Autowired private YadaConfiguration yadaConfiguration;
 	
 	@Override
 	protected void setupApplication() {
@@ -55,6 +57,9 @@ abstract public class YadaUserSetup<T extends YadaUserProfile> extends YadaSetup
 		//
 		for (Map<String, Object> userDefinition : userList) {
 			yadaUserCredentialsDao.create(userDefinition, userProfileClass);
+			if (yadaConfiguration.isDevelopmentEnvironment()) {
+				log.info("User \"{}\", password \"{}\"", userDefinition.get("email"), userDefinition.getOrDefault("password", "***"));
+			}
 		}
 	}
 
