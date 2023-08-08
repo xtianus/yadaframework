@@ -20,6 +20,7 @@ import org.springframework.context.annotation.ComponentScan;
 // import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 // import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.format.Formatter;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -203,17 +204,24 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		return cookieLocaleResolver;
 	}
 
+	/**
+	 * Register the configured DateFormatter or the default DefaultFormattingConversionService
+	 * @return
+	 */
 	@Bean
 	@Autowired // L'ho spostato qui per risolvere il problema "Requested bean is currently in creation"
-	// Questo registra un Date Formatter
-	public FormattingConversionService mvcConversionService(YadaDateFormatter yadaDateFormatter) {
-		// I should have used DefaultFormattingConversionService but the damage is done
-		FormattingConversionServiceFactoryBean result = new FormattingConversionServiceFactoryBean();
-		Set<Formatter<Date>> formatters = new HashSet<Formatter<Date>>();
-		formatters.add(yadaDateFormatter);
-		result.setFormatters(formatters);
-		result.afterPropertiesSet();
-		return result.getObject();
+	public FormattingConversionService mvcConversionService() {
+		Formatter<Date> formatter = config.getDateFormatter();
+		if (formatter!=null) {
+			// Configure like <dateFormatter>net.yadaframework.components.YadaDateFormatter</dateFormatter> 
+			FormattingConversionServiceFactoryBean result = new FormattingConversionServiceFactoryBean();
+			Set<Formatter<Date>> formatters = new HashSet<Formatter<Date>>();
+			formatters.add(formatter);
+			result.setFormatters(formatters);
+			result.afterPropertiesSet();
+			return result.getObject();
+		}
+		return new DefaultFormattingConversionService();
 	}
 	
 	/**

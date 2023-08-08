@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
  * La formattazione automatica della data usa il formato html5 "yyyy-MM-dd" indipendentemente dal locale, altrimenti la cosa non può funzionare.
  * Ho però aggiunto un metodo 
  */
+@Deprecated // Should use the @DateTimeFormat annotation instead
 @Component
 public class YadaDateFormatter implements Formatter<Date> {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
