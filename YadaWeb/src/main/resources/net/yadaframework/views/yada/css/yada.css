@@ -227,6 +227,26 @@ table.dataTable th.sorting_asc, table.dataTable th.sorting_desc {
 	margin-bottom: 10px;
 }
 
+.yadaNotify [role=tab] a {
+	color: black;
+	vertical-align: top;
+}
+
+.yadaNotify [role=tab] a span {
+    margin-left: 0.4rem;
+}
+
+.yadaNotify [role=tab] a:not(.collapsed) .bi-caret-down {
+	display: inline-block;
+	transform: rotate(180deg);
+	transition: transform 0.5s ease;
+} 
+.yadaNotify [role=tab] a.collapsed .bi-caret-down {
+	display: inline-block;
+	transform: rotate(0deg);
+	transition: transform 0.5s ease;
+}
+
 /***********************/
 /* BOOTSTRAP OVERRIDE  */
 /***********************/

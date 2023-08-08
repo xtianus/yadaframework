@@ -23,12 +23,13 @@
       <div class="modal-body">
       	<div class="" id="messageAccordion" role="tablist" aria-multiselectable="true">
 			<div class="" th:each="title,iterStat : ${YADA_NTITLE}">
-				<div class="" role="tab" th:id="|#heading${iterStat.index}|">
+				<div class="" role="tab" th:id="|heading${iterStat.index}|">
 					<h5>
-						<a data-bs-toggle="collapse" data-bs-parent="#messageAccordion" th:href="|#collapse${iterStat.index}|" 
+						<a data-bs-toggle="collapse" class="collapsed" data-bs-parent="#messageAccordion" th:href="|#collapse${iterStat.index}|" 
 						aria-expanded="true" th:attr="aria-controls=${'collapse' + iterStat.index}">
 							<i th:class="|yadaIcon yadaIcon-${iconName} ${YADA_SEVERITY.get(iterStat.index)}|"></i>
 							<span th:text="${title}">Collapsible Group Item #1</span>
+							<i class="bi bi-caret-down"></i>
 						</a>
 					</h5>
       			</div>
