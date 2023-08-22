@@ -801,6 +801,13 @@ The successHandler is not invoked if the call returns with a YadaNotify error, u
 successHandler.executeAnyway=true
 ----
 
+If you need to preserve the "this" context of the invoking function, remember to use the "bind" statement:
+
+[source,javascript]
+----
+yada.ajax(urlShowBom, formData, insertBom.bind(this), "POST");
+----
+
 
 ===  responseType
 

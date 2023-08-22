@@ -595,7 +595,7 @@ We want to keep things simple so we&#8217;re going to restructure the layout in 
 </table>
 </div>
 <div class="paragraph">
-<p>The following <code>fix.sh</code> bash script can be used in order to get rid of the <code>lib</code> subproject:</p>
+<p>The following <code>fixProject.sh</code> bash script can be used in order to get rid of the <code>lib</code> subproject:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -616,11 +616,12 @@ We want to keep things simple so we&#8217;re going to restructure the layout in 
 </div>
 </div>
 <div class="paragraph">
-<p>It should be run in the parent folder of the project passing the project folder itself as an argument:</p>
+<p>You can find a version of it in <code>YadaTools/scripts/fixProject.sh</code>.
+It should be run in the parent folder of the project passing the project folder itself as an argument:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="bash" class="language-bash hljs">./fix.sh MySiteProject</code></pre>
+<pre class="highlightjs highlight"><code data-lang="bash" class="language-bash hljs">fixProject.sh MySiteProject</code></pre>
 </div>
 </div>
 <div class="admonitionblock warning">
@@ -1274,7 +1275,7 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 <div id="footer">
 <div id="footer-text">
 Version 0.7.5<br>
-Last updated 2023-04-27 11:03:04 +0200
+Last updated 2023-08-22 18:01:36 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

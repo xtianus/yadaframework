@@ -316,7 +316,8 @@ to the configured <code>loginProcessingUrl</code> endpoint via ajax or not depen
 <pre>- failed attempts lockout message
 - login error message
 - password reset link
-- password reveal button</pre>
+- password reveal button
+- force password change after login</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -361,7 +362,52 @@ the login modal</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>The latter case (ajax login link with modal) is the simplest and recommended one.</p>
+<p>The login page/modal is automatically opened when a protected url is requested. The method used (ajax/normal)
+to open the login page/modal is the same of the initial request, that is saved for later.
+This means that the configured <code>.formLogin().loginPage</code> must handle both methods.
+This is an example where a normal request opens the home page and triggers the opening of the login modal
+by means of a <code>login</code> model attribute:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/loginForm")
+public String login(HttpServletRequest request, Model model, Locale locale) {
+	boolean loggedIn = yadaSecurityUtil.isLoggedIn();
+	if (!yadaWebUtil.isAjaxRequest()) {
+		// Normal request
+		if (!loggedIn) {
+			model.addAttribute("login", "login");
+		}
+		return home(request, model, locale);
+	} else {
+		// Ajax request
+		if (!loggedIn) {
+			return "/modalLogin";
+		} else {
+			return YadaViews.AJAX_SUCCESS; // Do nothing
+		}
+	}
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The login link must not point to the same value configured in <code>.formLogin().loginPage</code>.
+This is because if a saved request triggers the login process but the user cancels then later
+manually performs login, the old saved request would still be used resulting in the wrong page
+after login.
+The login link must perform a cleanup of the old request with <code>yadaSecurityUtil.clearAnySavedRequest()</code>
+before opening the login page/modal.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>The login link must be shown only when the
@@ -379,7 +425,7 @@ user is not logged in and replaced with the logout link otherwise:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The login form must post via ajax or not using the same method used to load it: if the modal
+<p>The login form must post using the same method (ajax or not) used to load it: if the modal
 containing it was loaded via ajax it must post via ajax, and vice versa.
 This is because if the login process is triggered by accessing a protected url in a normal request, the login form
 must use a normal POST otherwise the saved request would be redirected to via ajax and may not be shown correctly.
@@ -488,7 +534,7 @@ there won&#8217;t be a chance to trigger the login process.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.5<br>
-Last updated 2023-06-22 13:59:14 +0200
+Last updated 2023-06-22 19:27:01 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

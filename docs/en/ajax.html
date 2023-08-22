@@ -1279,6 +1279,14 @@ public String addUser(MultipartFile someBinaryArray, String someText, Model mode
 <pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">successHandler.executeAnyway=true</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>If you need to preserve the "this" context of the invoking function, remember to use the "bind" statement:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.ajax(urlShowBom, formData, insertBom.bind(this), "POST");</code></pre>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_responsetype">responseType</h3>
@@ -1348,7 +1356,7 @@ when they return from ajax. Example: <code>&lt;div th:classappend="${yadaIsAjaxR
 <div id="footer">
 <div id="footer-text">
 Version 0.7.5<br>
-Last updated 2023-06-21 12:16:54 +0200
+Last updated 2023-07-18 12:25:06 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

@@ -341,7 +341,7 @@ to structure https://github.com/eclipse/buildship/issues/1077#issuecomment-97024
 We want to keep things simple so we're going to restructure the layout in order to have a single project instead.
 ====
 
-The following `fix.sh` bash script can be used in order to get rid of the `lib` subproject:
+The following `fixProject.sh` bash script can be used in order to get rid of the `lib` subproject:
 
 [source,bash]
 ----
@@ -361,11 +361,12 @@ The following `fix.sh` bash script can be used in order to get rid of the `lib` 
 	rm -rf $projectFolder/src/test/java/*
 ----
 
+You can find a version of it in `YadaTools/scripts/fixProject.sh`.
 It should be run in the parent folder of the project passing the project folder itself as an argument:
 
 [source,bash]
 ----
-./fix.sh MySiteProject
+fixProject.sh MySiteProject
 ----
 
 [WARNING]
