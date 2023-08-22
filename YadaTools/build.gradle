@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.7.5'
+version = '0.7.4.1'
 
 apply plugin: 'groovy'
 // apply plugin: 'java-gradle-plugin'
@@ -21,8 +21,8 @@ java {
      //     languageVersion = JavaLanguageVersion.of(11) // >=11 because of org.hidetake.ssh
      // }
 	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
-	withSourcesJar()
-    withJavadocJar() // https://stackoverflow.com/a/75710366/587641
+	// withSourcesJar()
+    // withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
 
 eclipse {
@@ -97,12 +97,24 @@ javadoc {
     failOnError = false
 }
 
+task sourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
 publishing {
     publications {
         yadaToolsLibrary(MavenPublication) {
         	artifactId = 'yadatools'
             from components.java
 
+            artifact sourcesJar
+            artifact javadocJar
 			pom {
 			    name = 'YadaTools'
 			    description = 'Some useful tasks for the Yada Framework'
@@ -141,8 +153,8 @@ publishing {
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
             credentials(PasswordCredentials) {
-            	username = hasProperty('ossrhUsername')?ossrhUsername:''
-            	password = hasProperty('ossrhPassword')?ossrhPassword:''
+            	username = project.hasProperty('ossrhUsername')?ossrhUsername:'USERUNSET'
+            	password = project.hasProperty('ossrhPassword')?ossrhPassword:'PWDUNSET'
             }
         }
         // Creates task publishYadaToolsLibraryPublicationToLocalRepoRepository
