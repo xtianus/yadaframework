@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
@@ -926,6 +927,48 @@ public class YadaUtil {
 			}
 		}
 		return prefix;
+	}
+	
+	/**
+	 * Returns a file that doesn't already exist in the specified folder
+	 * with the specified leading characters (baseName) and optional extension.
+	 * The file will always have a number at the end that is higher than any other numbers on
+	 * similar files in the folder.
+	 * @param targetFolder
+	 * @param baseName
+	 * @param extensionNoDot
+	 * @param counterSeparator
+	 * @return a file with a name like baseName_0001 or baseName_0003.txt
+	 * @throws YadaInvalidUsageException when targetFolder is not a folder
+	 */
+	public File findAvailableNameHighest(File targetFolder, String baseName, String extensionNoDot, String counterSeparator) {
+		if (!targetFolder.isDirectory()) {
+            throw new YadaInvalidUsageException(targetFolder + " is not a directory.");
+        }
+
+        String regexPattern = "^" + Pattern.quote(baseName) + Pattern.quote(counterSeparator) + "(\\d{4})";
+        regexPattern += (extensionNoDot != null) ? "\\." + extensionNoDot + "$" : "$";
+        Pattern pattern = Pattern.compile(regexPattern);
+
+        File[] currentFiles = targetFolder.listFiles();
+        if (currentFiles==null) {
+        	throw new YadaSystemException("Can't read folder {}", targetFolder);
+        }
+        Optional<Integer> maxNumber = Arrays.stream(currentFiles)
+            .filter(file -> pattern.matcher(file.getName()).matches())
+            .map(file -> {
+				Matcher matcher = pattern.matcher(file.getName());
+				matcher.find();
+				return Integer.parseInt(matcher.group(1));
+            })
+            .max(Comparator.naturalOrder());
+
+        int nextNumber = maxNumber.map(n -> n + 1).orElse(1);
+        
+        String filename = (extensionNoDot != null) 
+            ? String.format("%s%s%04d.%s", baseName, counterSeparator, nextNumber, extensionNoDot)
+            : String.format("%s%s%04d", baseName, counterSeparator, nextNumber);
+		return new File(targetFolder, filename);
 	}
 
 	/**
