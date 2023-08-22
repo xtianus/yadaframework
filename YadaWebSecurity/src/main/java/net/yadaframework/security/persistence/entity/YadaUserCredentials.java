@@ -49,7 +49,7 @@ public class YadaUserCredentials implements Serializable {
 
 	// Non può essere NaturalId perchè sarebbe immutable
 	// @NaturalId
-	@JsonView(YadaJsonView.WithEagerAttributes.class)
+	// @JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Column(nullable=false, unique=true, length=128)
 	private String username; // uso sempre l'email
 

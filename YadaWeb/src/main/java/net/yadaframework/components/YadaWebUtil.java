@@ -14,6 +14,7 @@ import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -24,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -68,6 +70,7 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.exceptions.YadaSystemException;
 import net.yadaframework.web.YadaPageRequest;
 import net.yadaframework.web.YadaPageRows;
 
@@ -86,6 +89,38 @@ public class YadaWebUtil {
 	private static final String PATTERN_INVALID_SLUG = "[?%:,;=&!+~()@*$'\"\\s]";
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
+	
+	/**
+	 * Save to disk a base64 image received from javascript.
+	 * @param base64Image the image string in the format data:image/png;base64,xxxxxxxxx where image/png can be any image format and xxxxxxxxx is the encoded image
+	 * @param targetFileNoExtension the target file without extension: the extension is taken from base64Image
+	 * @throws YadaInvalidUsageException if the image can't be decoded
+	 * @throws YadaSystemException if saving fails
+	 * @return the saved file (with extension)
+	 */
+	public File saveBase64Image(String base64Image, File targetFileNoExtension) {
+		String extension;
+		byte[] decodedImg;
+		try {
+			String[] parts = base64Image.split(",");
+			extension = parts[0].split("/")[1].split(";")[0];
+			String imageString = parts[1];
+			decodedImg = Base64.getDecoder().decode(imageString.getBytes());
+		} catch (Exception e) {
+			throw new YadaInvalidUsageException("Can't save base64Image that starts with \"{}\" to {}", base64Image.substring(0, 30), targetFileNoExtension, e);
+		}
+		File parentFolder = targetFileNoExtension.getParentFile();
+		if (!parentFolder.exists()) {
+			parentFolder.mkdirs();
+        }
+        File targetFile = new File(parentFolder, targetFileNoExtension.getName() + "." + extension);
+        try (FileOutputStream fos = new FileOutputStream(targetFile)) {
+            fos.write(decodedImg);
+        } catch (IOException e) {
+            throw new YadaSystemException("Can't save base64Image to {}", targetFileNoExtension, e);
+        }
+        return targetFile;
+    }
 
 	/**
 	 * Perform autowiring of an instance that doesn't come from the Spring context, e.g. a JPA @Entity or normal java instance made with new.
@@ -335,7 +370,7 @@ public class YadaWebUtil {
 	 * in the url (and any parameters at the end too).
 	 * @param targetUrl the redirect target, like "/some/place"
 	 * @param locale can be null if the locale is not in the path, but then why use this method?
-	 * @param params optional request parameters to be set on the url, in the form of comma-separated name,value pairs. E.g. id,123,name,"joe"
+	 * @param params optional request parameters to be set on the url, in the form of comma-separated name,value pairs. E.g. "id","123","name","joe"
 	 * 			Existing parameters are not replaced. Null values become empty strings. Null names are skipped with their values.
 	 * @return a url like "redirect:/en/some/place?par1=val1&par2=val2"
 	 * @throws YadaInvalidUsageException if path locale is configured and the url is absolute and the locale is null

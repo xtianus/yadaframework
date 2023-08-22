@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+import org.springframework.format.Formatter;
 import org.vibur.dbcp.ViburDBCPDataSource;
 
 import net.yadaframework.exceptions.YadaConfigurationException;
@@ -101,6 +103,23 @@ public abstract class YadaConfiguration {
 	private File uploadsFolder = null;
 	private File tempFolder = null;
 	private String googleApiKey = null;
+	
+	/**
+	 * Returns the configured FormattingConversionService. Use <FormattingConversionService> in config.
+	 * Defaults to DefaultFormattingConversionService
+	 * @return
+	 */
+	public Formatter<Date> getDateFormatter() {
+		String dateFormatterClass = configuration.getString("config/dateFormatter", null);
+		try {
+			if (dateFormatterClass!=null) {
+				return (Formatter<Date>) Class.forName(dateFormatterClass).newInstance();
+			}
+		} catch (Exception e) {
+			log.error("Can't make instance of {} (ignored)", dateFormatterClass, e);
+		}
+		return null;
+	}
 
 	public int getTomcatHttpPort() {
 		return configuration.getInt("config/tomcat/ports/http", 8080);

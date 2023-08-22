@@ -239,7 +239,7 @@
 		    		var paramValue = paramObj.value;
 		    		extraParam[paramName] = paramValue;
 		    	}
-		    	var noLoader = $table.hasClass('noLoader');
+		    	var noLoader = $table.hasClass('noLoader') || $table.hasClass('yadaNoLoader');
 		    	yada.ajax(dataUrl, jQuery.param(data), callback, 'POST', null, noLoader);
 		    },
 		    language: {
@@ -374,13 +374,18 @@
 			var editButton = $table.parents('.yadaTableBlock').find('.yadaTableToolbar a.s_editButton');
 			editButton.click(function(e) {
 				e.preventDefault();
+				var id = yada.getHashValue($table.find("tbody [type='checkbox']:checked").parents('tr').attr('id'));
+				var idName = editDef.idName || "id";
+				if (editDef.noAjax==true) {
+					const targetUrl = yada.addOrUpdateUrlParameter(editDef.url, idName, id);
+					window.location.href = targetUrl;
+					return;
+				}
 				// The handlert enables ajax forms on the loaded response, and adds a handler to redraw the table on modal close
 				var handler = function(responseText, responseHtml) {
 					yada.datatableDrawOnModalClose(dataTable);
 					recursiveEnableAjaxForm(responseText, responseHtml);
 				};
-				var id = yada.getHashValue($table.find("tbody [type='checkbox']:checked").parents('tr').attr('id'));
-				var idName = editDef.idName || "id";
 				var requestData = {};
 				requestData[idName] = id;
 				var noLoader = editDef.noLoader || false;

@@ -25,7 +25,7 @@
 		<properties fileName="net.yadaframework.yadawebcommerce.properties" config-optional="true"/>
 
 		<!-- Personal configuration for developers -->
-		<xml config-name="localdev" config-at="config" fileName="/srv/ikl21dev/bin/conf.webapp.localdev.xml" 
+		<xml config-name="localdev" config-at="config" fileName="/srv/${acronym}dev/bin/conf.webapp.localdev.xml" 
 			reloadingRefreshDelay="4000" config-optional="true" config-reload="true">
 		</xml>
 

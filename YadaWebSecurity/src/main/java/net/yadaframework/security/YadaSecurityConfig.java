@@ -1,11 +1,16 @@
 package net.yadaframework.security;
 
+import java.io.IOException;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.annotation.Order;
 // import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -15,11 +20,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.components.YadaAuthenticationFailureHandler;
 import net.yadaframework.security.components.YadaAuthenticationSuccessHandler;
@@ -41,11 +49,14 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired private YadaUserDetailsService userDetailsService;
 	@Autowired private YadaConfiguration yadaConfiguration;
+	@Autowired private YadaWebUtil yadaWebUtil;
 
 	@Autowired protected YadaAuthenticationFailureHandler failureHandler;
 	@Autowired protected YadaAuthenticationSuccessHandler successHandler;
 	@Autowired protected YadaLogoutSuccessHandler logoutSuccessHandler;
 	@Autowired protected PasswordEncoder passwordEncoder;
+	
+	protected String defaultLoginUrl = "/login";
 
 	/**
 	 * Configures basic security settings. Must be overridden to configure url protections.
@@ -53,8 +64,12 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
 		failureHandler.setFailureUrlAjaxRequest("/ajaxLoginForm");
-		failureHandler.setFailureUrlNormalRequest("/login");
-		successHandler.setDefaultTargetUrlAjaxRequest("/ajaxLoginOk"); // Returns the string "loginSuccess"
+		failureHandler.setFailureUrlNormalRequest(defaultLoginUrl);
+		// The "/yadaLoginSuccess" target can be overridden to include the redirect to any target page.
+		// See YadaLoginController.yadaLoginSuccess()
+		successHandler.setDefaultTargetUrlAjaxRequest("/yadaLoginSuccess"); // Returns the string "success"
+		// The "/ajaxLoginOk" target has been removed because it caused a page reload after login
+		// successHandler.setDefaultTargetUrlAjaxRequest("/ajaxLoginOk"); // Returns the string "loginSuccess"
 		successHandler.setDefaultTargetUrlNormalRequest("/");
 		logoutSuccessHandler.setDefaultTargetUrl("/"); // language path will be added in the handler
 
@@ -70,10 +85,14 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 		    	// .invalidateHttpSession(false) // Lascio che la session si cancelli quando esco
 		    	.and()
 		    .formLogin()
-		        .loginPage("/login") // url del form di login (GET)
+		        .loginPage(defaultLoginUrl) // url del form di login (GET)
 		        .loginProcessingUrl("/loginPost") // url dove postare il form (POST)
 		        .failureHandler(failureHandler)
-		        .successHandler(successHandler);
+		        .successHandler(successHandler)
+				.and()
+			.exceptionHandling()
+				// This is needed to redirect to a language-specific login url
+				.authenticationEntryPoint(new CustomAuthenticationEntryPoint());
 	//        .defaultSuccessUrl("/");
 	//    	.and()
 	//    .apply(new SpringSocialConfigurer());        // .requireCsrfProtectionMatcher(new MyRequestMatcher());
@@ -94,6 +113,21 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 			http.authorizeRequests().filterSecurityInterceptorOncePerRequest(true);
 		}
 	}
+	
+	/**
+	 * Needed to redirect to a language-specific login url
+	 */
+    private class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+        @Override
+        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+        	String loginUrl = defaultLoginUrl;
+        	if (yadaConfiguration.isLocalePathVariableEnabled()) {
+        		Locale locale = LocaleContextHolder.getLocale();
+        		loginUrl = yadaWebUtil.enhanceUrl(loginUrl, locale);
+        	}
+            response.sendRedirect(loginUrl);
+        }
+    }
 
 	@Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
