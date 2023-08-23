@@ -42,8 +42,8 @@
 			<host>smtp.EXAMPLE.com</host>
 			<port>587</port>
 			<protocol>smtp</protocol>
-			<username>${smtpserver_username}</username>
-			<password>${smtpserver_password}</password>
+			<username>${"\$"}{smtpserver_username}</username>
+			<password>${"\$"}{smtpserver_password}</password>
 			<!--  If set to true, and a message has some valid and some invalid addresses, send the message anyway, reporting the partial failure with a SendFailedException. If set to false (the default), the message is not sent to any of the recipients if there is an invalid recipient address.  -->
 			<properties>mail.smtp.sendpartial=true</properties> 
 			<properties>mail.smtp.auth=true</properties>
@@ -65,7 +65,7 @@
 		<!-- Add any number of entityPackage tags here -->
 		<entityPackage>${basePackage}.persistence.entity</entityPackage>
 		<%}%>
-		<databaseMigrationAtStartup>false</databaseMigrationAtStartup>
+		<databaseMigrationAtStartup>true</databaseMigrationAtStartup>
 		<!-- Datasource for embedded Tomcat -->
 		<datasource>
 			<jdbcUrl>jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</jdbcUrl>
@@ -87,6 +87,34 @@
 		</datasource>
 	</database>
 
+	<setup>
+		<users>
+			<user>
+				<nickname>admin</nickname> <!-- This is an example of UserProfile customization -->
+				<email>admin@EXAMPLE.com</email>
+				<% if (env!="dev") { /* TODO remove the "dev" string and use envs[] */ %>
+				<!-- Do not specify passwords in committed config files like this one.
+				A random password will be generated and you'll need to use password recovery
+				to change it. Another option would be to manually add a new user config with password
+				directly to the copy of this file on the production/test server, then restart.
+				You can also add whole user configuration to $basePath/$acronym$env/bin/security.properties or just
+				store the passwords there then use variable interpolation here.
+				<password>myAppPassword</password>
+				-->
+				<%}%>
+				<% if (env=="dev") { /* TODO remove the "dev" string and use envs[] */ %>
+				<password>myAppPassword</password>
+				<%}%>
+				<locale>en_US</locale>
+				<timezone>Europe/Rome</timezone>
+				<role>USER</role>
+				<role>ADMIN</role>
+			</user>
+		</users>
+	</setup>
+
+	<% if (env=="prod") { /* TODO remove the "prod" string and use envs[prodIndex] */ %>	
+
 	<social>
 		<facebook>
 			<type>0</type>
@@ -97,20 +125,6 @@
 			<type>1</type>
 		</google>
 	</social>
-
-	<setup>
-		<users>
-			<user>
-				<nickname>admin</nickname> <!-- This is an example of UserProfile customization -->
-				<email>admin@EXAMPLE.com</email>
-				<password>myAppPassword</password>
-				<locale>en_US</locale>
-				<timezone>Europe/Rome</timezone>
-				<role>USER</role>
-				<role>ADMIN</role>
-			</user>
-		</users>
-	</setup>
 	
 	<security>
 		<!-- sessionTimeoutMinutes is used via javascript to check if the browser session is expired and show a warning modal -->
@@ -143,4 +157,5 @@
 			</role>
 		</roles>
 	</security>
+	<%}%>
 </config>

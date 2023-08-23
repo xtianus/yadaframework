@@ -46,7 +46,7 @@ class YadaProject extends DefaultTask {
 	protected final String CONFWEBAPPFILENAME = "conf.webapp.xml";
 	protected final String TOMCATCONTEXTFILENAME = "context.xml";
 	protected final String CREATEDBLINUX = "dropAndCreateDatabase.sh";
-	protected final String LOGTESTCONFIGFILENAME = "logback-test.xml";
+	protected final String LOGTESTCONFIGFILENAME = "logback-dev.xml";
 	protected final String LOGCONFIGFILENAME = "logback.xml";
 	
 	//

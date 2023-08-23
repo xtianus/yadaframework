@@ -60,7 +60,9 @@
       		 -->
 			<property name="hibernate.ejb.naming_strategy" value="org.hibernate.cfg.ImprovedNamingStrategy"/> <!-- Lowercase table names: https://www.petrikainulainen.net/programming/tips-and-tricks/implementing-a-custom-namingstrategy-with-hibernate/ -->
             <property name="hibernate.id.new_generator_mappings" value="true"/> <!-- Defaults to true in Hibernate 5 -->
+            <!--
             <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
+            -->
             <property name="hibernate.connection.username" value="${acronym}user$env"/>
             <property name="hibernate.connection.password" value="$dbpwd"/>
             <property name="hibernate.connection.url" value="jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"/>

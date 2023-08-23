@@ -1,7 +1,7 @@
 buildscript {
     repositories {
         mavenCentral()
-        mavenLocal()
+        // mavenLocal()
     }
     dependencies {
         classpath 'net.yadaframework:yadatools:+'
@@ -9,15 +9,27 @@ buildscript {
 }
 
 plugins {
-	id 'org.hidetake.ssh' version '2.10.1'
+	id 'application' // for the "run" task
+	id 'org.hidetake.ssh' version '2.11.2' // https://gradle-ssh-plugin.github.io
 	id 'com.meiuwa.gradle.sass' version "1.0.0"	// Only when using SASS !!! v2.0.0 may not work
+	id("com.github.node-gradle.node") version "3.5.1"
+	id 'maven-publish'
+	id 'signing'
 }
 
+group = 'com.EXAMPLE.abc' // CHANGE THIS !!!
+version = '0.1.0' // CHANGE THIS !!!
 ext.acronym = 'abc' // CHANGE THIS !!!
+
 apply plugin: 'war'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'net.yadaframework.tools'
-apply plugin: 'org.hidetake.ssh'        // https://gradle-ssh-plugin.github.io
+
+if (!project.hasProperty('env')) {
+	ext.env="envUnset"
+}
+
+def acroenv = "${acronym}${env}"
 
 def YadaWebLib = "$projectDir/../../yadaframework/YadaWeb";
 def YadaWebCmsLib = "$projectDir/../../yadaframework/YadaWebCMS";
@@ -29,16 +41,8 @@ sassCompile {
     output = file("src/main/webapp/res/css")
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
-    }
-}
-
 eclipse {
     jdt {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
         // https://stackoverflow.com/a/35302104/587641
         file {
                 File dir = file('.settings')
@@ -69,6 +73,9 @@ eclipse {
     autoBuildTasks sassCompile // Only when using SASS !!!
 }
 
+// This is to run outside Eclipse
+compileJava.dependsOn sassCompile // Only when using SASS !!!
+
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
@@ -78,7 +85,7 @@ tasks.withType(JavaCompile) {
 
 repositories {
     mavenCentral()
-    mavenLocal()
+    // mavenLocal()
 }
 
 dependencies {
@@ -93,9 +100,14 @@ dependencies {
 	// Your libs here:
 	// implementation 'org.springframework:spring-webmvc:5.3.8',
 
-    // Needed in Tomcat 8 at runtime
-    runtimeOnly 'commons-beanutils:commons-beanutils:1.9.4'
-    runtimeOnly 'commons-jxpath:commons-jxpath:1.3'
+    // Needed in Tomcat 8 server at runtime
+    // runtimeOnly 'commons-beanutils:commons-beanutils:1.9.4'
+    // runtimeOnly 'commons-jxpath:commons-jxpath:1.3'
+
+    // Needed in Tomcat 8 embedded at runtime
+    runtimeOnly 'org.apache.tomcat:tomcat-el-api:8.5.+'
+    runtimeOnly 'org.apache.tomcat:tomcat-jasper-el:8.5.+'
+    runtimeOnly 'org.apache.tomcat:tomcat-jasper:8.5.+'
 
     testImplementation 'junit:junit:4.13.+'
 }
@@ -120,15 +132,27 @@ dependencies {
     hibtools 'org.hibernate:hibernate-tools:5.+'
 }
 task dbSchema(dependsOn: [classes], type: net.yadaframework.tools.YadaCreateDbSchemaTask) {
-    inputs.files configurations.hibtools
+    inputs.files (configurations.hibtools, "$rootDir/src/main/resources/META-INF/persistence.xml") 
+    outputs.files "$rootDir/schema/${acronym}.sql"
     outputfilename = "${acronym}.sql"
 }
 
 sass {
-	properties = "$rootDir/sass.properties"
+	properties = "$projectDir/sass.properties"
     download {
 		version = "1.58.2"
-		output = "$rootDir/.sass"
+		output = "$projectDir/.sass"
     }
+}
+
+run {
+    args = ["$acroenv", "$webAppDir", "/srv/${acroenv}/tmp", "dev"]
+    mainClass = 'net.yadaframework.core.YadaTomcatServer' 
+//   debugOptions {
+//        enabled = true
+//        port = 5566
+//        server = true
+//        suspend = false
+//    }    
 }
 
