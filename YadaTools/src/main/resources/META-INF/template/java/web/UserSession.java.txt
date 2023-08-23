@@ -13,7 +13,7 @@ import net.yadaframework.security.web.YadaSession;
  */
 @Component
 @Scope(value="session", proxyMode=ScopedProxyMode.TARGET_CLASS) 
-public class ${acronym.capitalize()}Session extends YadaSession<UserProfile> {
+public class UserSession extends YadaSession<UserProfile> {
 	// Add any attributes that you want to keep for the duration of the user session
 
 }
