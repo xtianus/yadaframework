@@ -13,9 +13,11 @@ if (!project.hasProperty('repoPath')) {
 }
 
 java {
-	// toolchain {
-	// 	languageVersion = JavaLanguageVersion.of(8)
-	// }	
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(8)
+	}
 	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
 	withSourcesJar()
     withJavadocJar() // https://stackoverflow.com/a/75710366/587641
