@@ -239,7 +239,7 @@
 		    		var paramValue = paramObj.value;
 		    		extraParam[paramName] = paramValue;
 		    	}
-		    	var noLoader = $table.hasClass('noLoader');
+		    	var noLoader = $table.hasClass('noLoader') || $table.hasClass('yadaNoLoader');
 		    	yada.ajax(dataUrl, jQuery.param(data), callback, 'POST', null, noLoader);
 		    },
 		    language: {

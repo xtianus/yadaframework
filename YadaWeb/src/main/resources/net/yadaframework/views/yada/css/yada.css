@@ -130,8 +130,10 @@ a.yadaHelpButton:focus {
 	margin-top: 10px;
 }
 
-input.yadaReadonly {
+input.yadaReadonly, input.yadaReadonly:focus, input.yadaReadonly:hover {
 	border: none;
+	box-shadow: none;
+	cursor: default;
 }
 
 .yadaWidth80 input {

@@ -1,6 +1,7 @@
 package net.yadaframework.persistence;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -183,6 +184,18 @@ public class YadaDataTableDao {
 					field.setAccessible(true);
 					value = field.get(entity);
 					valueType = field.getType();
+					// If the value is null it might be a lazy attribute, so try the getter too
+					if (value==null) {
+						try {
+							String prefix = (valueType==boolean.class || valueType==Boolean.class)?"is":"get";
+							String getterName = prefix + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
+							Method getter = entity.getClass().getMethod(getterName);
+							getter.setAccessible(true);
+							value = getter.invoke(entity);
+						} catch (Exception e) {
+							log.debug("Getter invocation exception (ignored): {}", e.getMessage());
+						}
+					}
 				} else {
 					try {
 						// Not a field, but it could be a method
