@@ -54,6 +54,9 @@ public class YadaSql implements CloneableDeep {
 	protected boolean queryDone = false;
 	protected List<YadaSql> unions = new ArrayList<>();
 //	Map<String, String> aliasMap = new HashMap<>();
+	
+	// Must be lowercase:
+    static String[] joinTypes = { "inner join", "left outer join", "left join", "right outer join", "right join", "full outer join", "full join", "cross join", "self join", "natural join", "straight_join", "join" };
 
 	protected YadaSql() {
 	}
@@ -330,6 +333,44 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
+	
+	/**
+	 * Add every join contained in joinsToAdd, only if not already present in the query
+	 * @param joinsToAdd
+	 */
+	private void addMissingJoins(String joinsToAdd) {
+		String joinsToAddLower = joinsToAdd.toLowerCase();
+        for (String joinType : joinTypes) {
+            int lastIndex = 0;
+
+            // Test each type of "join" keywords
+            while (lastIndex != -1) {
+                lastIndex = joinsToAddLower.indexOf(joinType, lastIndex);
+
+                if (lastIndex != -1) {
+                	// Look for the next join to add, if any
+                    int endIndex = joinsToAddLower.length();
+                    if (joinsToAddLower.indexOf("join", lastIndex + joinType.length())>-1) {
+                    	for (String nextJoinType : joinTypes) {
+                    		int nextIndex = joinsToAddLower.indexOf(nextJoinType, lastIndex + joinType.length());
+                    		if (nextIndex != -1 && nextIndex < endIndex) {
+                    			endIndex = nextIndex;
+                    		}
+                    	}
+                    }
+
+                    // Extract the join to add
+                    String joinClause = joinsToAdd.substring(lastIndex, endIndex).trim();
+
+                    if (!joins.toString().matches(".*\\b" + java.util.regex.Pattern.quote(joinClause) + "\\b.*")) {
+                    	joins.append(joinClause).append(" ");
+                    }
+
+                    lastIndex = endIndex;
+                }
+            }
+        }		
+	}
 
 	/**
 	 * Adds a join condition if not already added (the join keyword is required).
@@ -340,9 +381,8 @@ public class YadaSql implements CloneableDeep {
 		// The "join" keyword is required
 		if (StringUtils.isNotEmpty(joinOn)) {
 			nowInHaving=false;
-			if (joins.indexOf(joinOn)<0) {
-				joins.append(joinOn).append(" ");
-			}
+			// Handle multiple joins
+			addMissingJoins(joinOn);
 		}
 		return this;
 	}
@@ -885,7 +925,8 @@ public class YadaSql implements CloneableDeep {
 	}
 
 	/**
-	 * Add all the joins, where, having, group, order statements and parameters of another YadaSql object
+	 * Add all the joins, where, having, group, order statements and parameters of another YadaSql object.
+	 * Joins are added only if not present already.
 	 * @param yadaSql the object to get items from, can be null to no nothing
 	 * @return
 	 */
