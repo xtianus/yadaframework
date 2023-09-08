@@ -22,7 +22,7 @@
     	<div class="modal-content">
     		<div th:replace="${header}">
 	    		<div class="modal-header">
-	    			<h4 class="modal-title" th:id="${titleId}"><i th:class="|yadaIcon yadaIcon-${iconName} ${YADA_TOTSEVERITY}|"></i><span th:replace="${title}"></span></h4>
+	    			<h4 class="modal-title" th:id="${titleId}"><span th:replace="${title}"></span></h4>
 	    			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 	   			</div>
     		</div>
