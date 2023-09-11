@@ -9,7 +9,7 @@
 <div class="s_modalNotify"> <!--/* Only seen when loaded via ajax */-->
 	<div th:replace="/yada/ajaxResponseData :: .yadaResponseData" th:if="${resultMap!=null}"></div>
 	<div th:fragment="modal" class="modal fade" role="dialog">
-	  <div class="modal-dialog yadaNotify" th:classappend="${extraDialogClasses}"
+	  <div th:fragment="modal-inner" class="modal-dialog yadaNotify" th:classappend="${extraDialogClasses}"
 	  	th:with="iconName=${YADA_TOTSEVERITY=='ok'?'ok':YADA_TOTSEVERITY=='error'?'error':'warning'}">
 
 		<!--/* Versione con tanti messaggi */-->
