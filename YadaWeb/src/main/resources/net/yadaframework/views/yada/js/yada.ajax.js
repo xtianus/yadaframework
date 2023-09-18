@@ -1475,7 +1475,7 @@
 					// Remove any currently downloaded modals (markerAjaxModal) if they are open and not sticky
 					const $existingModals = $(".modal.show."+markerAjaxModal+":not(."+yada.stickyModalMarker+")");
 					$existingModals.modal("hide"); // Remove the background too
-					$existingModals.remove();
+					// $existingModals.remove(); // This prevents removal of the modal background sometimes
 					
 					// modals are appended to the body
 					const $modalObject = $(responseHtml).find(".modal").first();
