@@ -1111,7 +1111,7 @@ public class YadaWebUtil {
 		if (reloadOnConfirm) {
 			model.addAttribute("reloadOnConfirm", true);
 		}
-		return "/yada/modalConfirm";
+		return "/yada/modalConfirmB4";
 	}
 
 	/**
