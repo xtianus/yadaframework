@@ -1774,7 +1774,7 @@ public class YadaUtil {
 			// Output and Error go together
 			PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream);
 			executor.setStreamHandler(streamHandler);
-			log.debug("Executing shell command: {}", StringUtils.join(commandLine, " "));
+			log.debug("Executing shell command: {} {}", command, StringUtils.join(args, " "));
 			int exitValue = executor.execute(commandLine);
 			if (exitValue!=0) {
 				log.error("Shell command exited with {}", exitValue);
@@ -1854,7 +1854,6 @@ public class YadaUtil {
 		&lt;arg>${FILENAMEOUT}&lt;/arg>
 	&lt;/imageConvert>
 	 * </pre>
-	 * Be aware that args can not contain "Commons Configuration variables" because they clash with placeholders as defined below.
 	 * See the yadaframework documentation for full syntax.
 	 * @param shellCommandKey xpath key of the shell command, e.g. "config/shell/cropImage"
 	 * @param substitutionMap optional key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
@@ -1865,17 +1864,27 @@ public class YadaUtil {
 	 */
 	public int shellExec(String shellCommandKey, Map substitutionMap, ByteArrayOutputStream outputStream) throws IOException {
 		String executable = getExecutable(shellCommandKey);
-		// Need to use getProperty() to avoid interpolation on ${} arguments
-		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
-		Object argsObject = config.getConfiguration().getProperty(shellCommandKey + "/arg");
-		List<String> args = new ArrayList<>();
-		if (argsObject!=null) {
-			if (argsObject instanceof List) {
-				args.addAll((Collection<? extends String>) argsObject);
-			} else {
-				args.add((String) argsObject);
-			}
-		}
+		// NO Need to use getProperty() to avoid interpolation on ${} arguments
+		List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
+		//		Object argsObject = config.getConfiguration().getProperty(shellCommandKey + "/arg");
+		//		List<String> args = new ArrayList<>();
+		//		if (argsObject!=null) {
+		//			if (argsObject instanceof List) {
+		//				args.addAll((Collection<? extends String>) argsObject);
+		//			} else {
+		//				args.add((String) argsObject);
+		//			}
+		//		}
+		//		List<String> interpolatedArgs = new ArrayList<>();
+		//		int pos=1;
+		//		for (String arg : args) {
+		//			String interpolatedArg = arg;
+		//			if (arg.contains("${")) {
+		//				interpolatedArg = config.getConfiguration().getString(shellCommandKey + "/arg[" + pos + "]");
+		//			}
+		//		    pos++;
+		//			interpolatedArgs.add(interpolatedArg);
+		//		}
 		Integer timeout = config.getInt(shellCommandKey + "/@timeoutseconds", -1);
 		return shellExec(executable, args, substitutionMap, outputStream, timeout);
 	}
