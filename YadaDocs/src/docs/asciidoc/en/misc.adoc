@@ -55,9 +55,11 @@ A different environment can have a specific configuration section with the same 
 
 [CAUTION]
 ====
-If you are used to Commons Configuration http://commons.apache.org/proper/commons-configuration/userguide/howto_basicfeatures.html#Variable_Interpolation[variable interpolation^], please note that it can't
-be used in <arg> values. This is because the syntax clashes with the https://commons.apache.org/proper/commons-exec/tutorial.html[substitution map^] of Apache
-Commons Exec.
+Be careful when using dynamic parameters because they are implemented by
+the https://commons.apache.org/proper/commons-exec/tutorial.html[substitution map^] of Apache
+Commons Exec that has the same syntax of 
+Commons Configuration http://commons.apache.org/proper/commons-configuration/userguide/howto_basicfeatures.html#Variable_Interpolation[variable interpolation^],
+so they will be substituted if they match any valid configuration tag (even though quite unlikely).
 ====
 
 The above configuration can be used with a code similar to the following:

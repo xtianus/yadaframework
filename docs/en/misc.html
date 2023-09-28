@@ -156,9 +156,11 @@ task that can be used in every environment and different OS:</p>
 </td>
 <td class="content">
 <div class="paragraph">
-<p>If you are used to Commons Configuration <a href="http://commons.apache.org/proper/commons-configuration/userguide/howto_basicfeatures.html#Variable_Interpolation" target="_blank" rel="noopener">variable interpolation</a>, please note that it can&#8217;t
-be used in &lt;arg&gt; values. This is because the syntax clashes with the <a href="https://commons.apache.org/proper/commons-exec/tutorial.html" target="_blank" rel="noopener">substitution map</a> of Apache
-Commons Exec.</p>
+<p>Be careful when using dynamic parameters because they are implemented by
+the <a href="https://commons.apache.org/proper/commons-exec/tutorial.html" target="_blank" rel="noopener">substitution map</a> of Apache
+Commons Exec that has the same syntax of
+Commons Configuration <a href="http://commons.apache.org/proper/commons-configuration/userguide/howto_basicfeatures.html#Variable_Interpolation" target="_blank" rel="noopener">variable interpolation</a>,
+so they will be substituted if they match any valid configuration tag (even though quite unlikely).</p>
 </div>
 </td>
 </tr>
@@ -224,7 +226,7 @@ userProfile.setTimezone(TimeZone.getTimeZone(formBean.getTimezoneId()));</code><
 <div id="footer">
 <div id="footer-text">
 Version 0.7.5<br>
-Last updated 2023-04-27 11:03:04 +0200
+Last updated 2023-09-28 16:37:01 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
