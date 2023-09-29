@@ -1390,7 +1390,9 @@
 				$('#yada-notification').on('shown.bs.modal', function (e) {
 					// Keep the loader open until the modal is fully shown, to prevent "flashing".
 					// This should become a configurable option maybe
-					yada.loaderOff();
+					if (!notification.hasClass("yadaLoaderKeep")) {
+    					yada.loaderOff();
+                    }
 				});
 				$('#yada-notification').modal('show');
 			}, 200);

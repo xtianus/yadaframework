@@ -13,9 +13,11 @@ import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.google.common.collect.Lists;
 
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
@@ -39,6 +43,7 @@ public class YadaNotifyData {
 	private MessageSource messageSource;
 	private Locale locale;
 	private YadaConfiguration configuration;
+	private Set<String> extraDialogClasses = new HashSet<>();
 
 	// Package visibility
 	YadaNotifyData(Model model, MessageSource messageSource, Locale locale, YadaConfiguration configuration) {
@@ -68,6 +73,25 @@ public class YadaNotifyData {
 		}
 		activateNormal();
 		return configuration.getNotifyModalView();
+	}
+	
+	/**
+	 * The notification modal does not turn off any existing loader
+	 * @return
+	 */
+	public YadaNotifyData keepLoader() {
+		return keepLoader(Boolean.TRUE);
+	}
+	
+	/**
+	 * The notification modal does not turn off any existing loader when keepLoader is true
+	 * @return
+	 */
+	public YadaNotifyData keepLoader(Boolean keepLoader) {
+		if (Boolean.TRUE.equals(keepLoader)) {
+			addClasses("yadaLoaderKeep");
+		}
+		return this;
 	}
 	
 	/**
@@ -132,11 +156,22 @@ public class YadaNotifyData {
 	 * Vertically center the modal (with Bootstrap 4)
 	 */
 	public YadaNotifyData center() {
-		if (model!=null) {
-			model.addAttribute("extraDialogClasses", "modal-dialog-centered");
-		} else {
-			redirectAttributes.addFlashAttribute("extraDialogClasses", "modal-dialog-centered");
-		}
+		extraDialogClasses.add("modal-dialog-centered");
+//		if (model!=null) {
+//			model.addAttribute("extraDialogClasses", "modal-dialog-centered");
+//		} else {
+//			redirectAttributes.addFlashAttribute("extraDialogClasses", "modal-dialog-centered");
+//		}
+		return this;
+	}
+	
+	/**
+	 * Add a space-separated list of classes to add to the notification .modal-dialog element
+	 * @param classes
+	 * @return
+	 */
+	public YadaNotifyData addClasses(String classes) {
+		extraDialogClasses.add(classes);
 		return this;
 	}
 
@@ -293,6 +328,7 @@ public class YadaNotifyData {
 		((List<String>)modelMap.get(KEY_NOTIFICATION_SEVERITY)).add(severity);
 		String newTotalSeverity = calcTotalSeverity(modelMap, severity);
 		redirectAttributes.addFlashAttribute(KEY_NOTIFICATION_TOTALSEVERITY, newTotalSeverity);
+		redirectAttributes.addFlashAttribute("extraDialogClasses", String.join(" ", extraDialogClasses));
 	}
 
 	private void activateNormal() {
@@ -316,6 +352,7 @@ public class YadaNotifyData {
 		((List<String>)modelMap.get(KEY_NOTIFICATION_SEVERITY)).add(severity);
 		String newTotalSeverity = calcTotalSeverity(modelMap, severity);
 		model.addAttribute(KEY_NOTIFICATION_TOTALSEVERITY, newTotalSeverity);
+		model.addAttribute("extraDialogClasses", String.join(" ", extraDialogClasses));
 	}
 
 	/**
