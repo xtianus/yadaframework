@@ -1476,9 +1476,12 @@
 					var stickyModal = $loadedModalDialog.hasClass(yada.stickyModalMarker);
 					
 					// Remove any currently downloaded modals (markerAjaxModal) if they are open and not sticky
-					const $existingModals = $(".modal.show."+markerAjaxModal+":not(."+yada.stickyModalMarker+")");
+					const $existingModals = $(".modal.show."+markerAjaxModal+" .modal-dialog:not(."+yada.stickyModalMarker+")");
 					$existingModals.modal("hide"); // Remove the background too
-					$existingModals.remove();
+					// $existingModals.remove(); // This prevents removal of the modal background sometimes
+					$existingModals.on('hidden.bs.modal', function (e) {
+						$existingModals.remove(); // Remove the existing modal after it's been closed
+					});
 					
 					// modals are appended to the body
 					const $modalObject = $(responseHtml).find(".modal").first();
@@ -1692,7 +1695,9 @@
 				$('#yada-notification').on('shown.bs.modal', function (e) {
 					// Keep the loader open until the modal is fully shown, to prevent "flashing".
 					// This should become a configurable option maybe
-					yada.loaderOff();
+					if (!notification.hasClass("yadaLoaderKeep")) {
+    					yada.loaderOff();
+                    }
 				});
 				$('#yada-notification').modal('show');
 			}, 200);

@@ -54,7 +54,7 @@ public class YadaSql implements CloneableDeep {
 	protected boolean queryDone = false;
 	protected List<YadaSql> unions = new ArrayList<>();
 //	Map<String, String> aliasMap = new HashMap<>();
-
+	
 	// Must be lowercase:
     static String[] joinTypes = { "inner join", "left outer join", "left join", "right outer join", "right join", "full outer join", "full join", "cross join", "self join", "natural join", "straight_join", "join" };
 
@@ -333,7 +333,7 @@ public class YadaSql implements CloneableDeep {
 		}
 		return this;
 	}
-
+	
 	/**
 	 * Add every join contained in joinsToAdd, only if not already present in the query
 	 * @param joinsToAdd
@@ -925,7 +925,8 @@ public class YadaSql implements CloneableDeep {
 	}
 
 	/**
-	 * Add all the joins, where, having, group, order statements and parameters of another YadaSql object
+	 * Add all the joins, where, having, group, order statements and parameters of another YadaSql object.
+	 * Joins are added only if not present already.
 	 * @param yadaSql the object to get items from, can be null to no nothing
 	 * @return
 	 */

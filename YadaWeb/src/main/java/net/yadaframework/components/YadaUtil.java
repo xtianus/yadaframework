@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.Stack;
@@ -1034,6 +1035,48 @@ public class YadaUtil {
 		}
 		return prefix;
 	}
+	
+	/**
+	 * Returns a file that doesn't already exist in the specified folder
+	 * with the specified leading characters (baseName) and optional extension.
+	 * The file will always have a number at the end that is higher than any other numbers on
+	 * similar files in the folder.
+	 * @param targetFolder
+	 * @param baseName
+	 * @param extensionNoDot
+	 * @param counterSeparator
+	 * @return a file with a name like baseName_0001 or baseName_0003.txt
+	 * @throws YadaInvalidUsageException when targetFolder is not a folder
+	 */
+	public File findAvailableNameHighest(File targetFolder, String baseName, String extensionNoDot, String counterSeparator) {
+		if (!targetFolder.isDirectory()) {
+            throw new YadaInvalidUsageException(targetFolder + " is not a directory.");
+        }
+
+        String regexPattern = "^" + Pattern.quote(baseName) + Pattern.quote(counterSeparator) + "(\\d{4})";
+        regexPattern += (extensionNoDot != null) ? "\\." + extensionNoDot + "$" : "$";
+        Pattern pattern = Pattern.compile(regexPattern);
+
+        File[] currentFiles = targetFolder.listFiles();
+        if (currentFiles==null) {
+        	throw new YadaSystemException("Can't read folder {}", targetFolder);
+        }
+        Optional<Integer> maxNumber = Arrays.stream(currentFiles)
+            .filter(file -> pattern.matcher(file.getName()).matches())
+            .map(file -> {
+				Matcher matcher = pattern.matcher(file.getName());
+				matcher.find();
+				return Integer.parseInt(matcher.group(1));
+            })
+            .max(Comparator.naturalOrder());
+
+        int nextNumber = maxNumber.map(n -> n + 1).orElse(1);
+        
+        String filename = (extensionNoDot != null) 
+            ? String.format("%s%s%04d.%s", baseName, counterSeparator, nextNumber, extensionNoDot)
+            : String.format("%s%s%04d", baseName, counterSeparator, nextNumber);
+		return new File(targetFolder, filename);
+	}
 
 	/**
 	 * Creates an empty file that doesn't already exist in the specified folder
@@ -1734,7 +1777,7 @@ public class YadaUtil {
 			// Output and Error go together
 			PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream);
 			executor.setStreamHandler(streamHandler);
-			log.debug("Executing shell command: {}", StringUtils.join(commandLine, " "));
+			log.debug("Executing shell command: {} {}", command, StringUtils.join(args, " "));
 			int exitValue = executor.execute(commandLine);
 			if (exitValue!=0) {
 				log.error("Shell command exited with {}", exitValue);
@@ -1814,7 +1857,6 @@ public class YadaUtil {
 		&lt;arg>${FILENAMEOUT}&lt;/arg>
 	&lt;/imageConvert>
 	 * </pre>
-	 * Be aware that args can not contain "Commons Configuration variables" because they clash with placeholders as defined below.
 	 * See the yadaframework documentation for full syntax.
 	 * @param shellCommandKey xpath key of the shell command, e.g. "config/shell/cropImage"
 	 * @param substitutionMap optional key-value of placeholders to replace in the parameters. A placeholder is like ${key}, a substitution
@@ -1825,17 +1867,27 @@ public class YadaUtil {
 	 */
 	public int shellExec(String shellCommandKey, Map substitutionMap, ByteArrayOutputStream outputStream) throws IOException {
 		String executable = getExecutable(shellCommandKey);
-		// Need to use getProperty() to avoid interpolation on ${} arguments
-		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
-		Object argsObject = config.getConfiguration().getProperty(shellCommandKey + "/arg");
-		List<String> args = new ArrayList<>();
-		if (argsObject!=null) {
-			if (argsObject instanceof List) {
-				args.addAll((Collection<? extends String>) argsObject);
-			} else {
-				args.add((String) argsObject);
-			}
-		}
+		// NO Need to use getProperty() to avoid interpolation on ${} arguments
+		List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
+		//		Object argsObject = config.getConfiguration().getProperty(shellCommandKey + "/arg");
+		//		List<String> args = new ArrayList<>();
+		//		if (argsObject!=null) {
+		//			if (argsObject instanceof List) {
+		//				args.addAll((Collection<? extends String>) argsObject);
+		//			} else {
+		//				args.add((String) argsObject);
+		//			}
+		//		}
+		//		List<String> interpolatedArgs = new ArrayList<>();
+		//		int pos=1;
+		//		for (String arg : args) {
+		//			String interpolatedArg = arg;
+		//			if (arg.contains("${")) {
+		//				interpolatedArg = config.getConfiguration().getString(shellCommandKey + "/arg[" + pos + "]");
+		//			}
+		//		    pos++;
+		//			interpolatedArgs.add(interpolatedArg);
+		//		}
 		Integer timeout = config.getInt(shellCommandKey + "/@timeoutseconds", -1);
 		return shellExec(executable, args, substitutionMap, outputStream, timeout);
 	}
