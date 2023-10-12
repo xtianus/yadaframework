@@ -140,9 +140,10 @@ class YadaInitTask extends YadaProject {
 		List webFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/web");
 		for (filename in webFiles) {
 			def target = filename-".txt";
-			if (target == "XXXSession.java") {
-				target = acronym.capitalize() + (target-"XXX");
-			}
+			// XXXSession.java has been renamed to UserSession.java for better code reuse
+			// if (target == "XXXSession.java") {
+			// 	target = acronym.capitalize() + (target-"XXX");
+			// }
 			processTemplate("java/web", filename, target, javaWebFolder);
 		}
 		List componentsFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/components");
