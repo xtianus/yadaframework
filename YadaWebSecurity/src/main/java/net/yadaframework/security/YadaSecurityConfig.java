@@ -116,7 +116,7 @@ public class YadaSecurityConfig {
 		.authorizeHttpRequests((authorize) -> authorize
 			// Replacement for filterSecurityInterceptorOncePerRequest(true)
 			.shouldFilterAllDispatcherTypes(true) // request,async,error,forward,include
-			.dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
+			.dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll() // ??????????????????????????????
 		);
 	}
 	
