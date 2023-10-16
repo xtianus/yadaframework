@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,7 +19,6 @@ import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,13 +38,11 @@ import net.yadaframework.security.components.YadaUserDetailsService;
  * Basic security configuration.
  * The application paths must be protected in an application-specific subclass of WebSecurityConfigurerAdapter
  */
+// @Configuration not needed because set in the subclass?
 @EnableWebSecurity
-//@Configuration not needed when using WebApplicationInitializer.java
-// Needed for Spring Data
-// @EnableJpaRepositories(basePackages = "net.yadaframework.security.persistence.repository")
 @ComponentScan(basePackages = { "net.yadaframework.security.components", "net.yadaframework.security.persistence.repository" })
 @Order(10) // Just in case there will be others
-public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
+public class YadaSecurityConfig {
 //	private Logger log = LoggerFactory.getLogger(YadaSecurityConfig.class);
 
 	@Autowired private YadaUserDetailsService userDetailsService;
@@ -61,8 +59,7 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 	/**
 	 * Configures basic security settings. Must be overridden to configure url protections.
 	 */
-	@Override
-	public void configure(HttpSecurity http) throws Exception {
+	protected void configure(HttpSecurity http) throws Exception {
 		failureHandler.setFailureUrlAjaxRequest("/ajaxLoginForm");
 		failureHandler.setFailureUrlNormalRequest(defaultLoginUrl);
 		// The "/yadaLoginSuccess" target can be overridden to include the redirect to any target page.
@@ -77,7 +74,13 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 			.headers().disable()
 			// http.antMatcher("/**/css/**").headers().disable();
 			.csrf().disable()
-	        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED).and()
+			.sessionManagement((sessions) -> sessions
+				.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+				// Use the legacy authentication strategy so we're sure it works
+				// TODO remove this line to use the new Spring 6 default
+				// See https://docs.spring.io/spring-security/reference/5.8/migration/servlet/session-management.html#_require_explicit_invocation_of_sessionauthenticationstrategy
+				.requireExplicitAuthenticationStrategy(false) 
+			)
 		    .logout()
 		    	.logoutUrl("/logout") // POST con il CSRF attivo, GET altrimenti
 		    	// .logoutSuccessUrl("/") // TODO rimanere nella pagina corrente se non è protetta!
@@ -107,11 +110,14 @@ public class YadaSecurityConfig extends WebSecurityConfigurerAdapter {
 		} else {
 			http.requestCache().requestCache(new HttpSessionRequestCache());
 		}
-
-		if (yadaConfiguration.isLocalePathVariableEnabled()) {
-			// Needed since we intercept FORWARDed requests because of the YadaLocalePathVariableFilter
-			http.authorizeRequests().filterSecurityInterceptorOncePerRequest(true);
-		}
+		// Forward requests should never be protected with Spring MVC: https://docs.spring.io/spring-security/reference/5.8/migration/servlet/authorization.html#_permit_forward_when_using_spring_mvc 
+		// This is especially the case when using YadaLocalePathVariableFilter.
+		http
+		.authorizeHttpRequests((authorize) -> authorize
+			// Replacement for filterSecurityInterceptorOncePerRequest(true)
+			.shouldFilterAllDispatcherTypes(true) // request,async,error,forward,include
+			.dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
+		);
 	}
 	
 	/**
