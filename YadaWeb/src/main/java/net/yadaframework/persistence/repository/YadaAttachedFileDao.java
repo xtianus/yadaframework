@@ -3,8 +3,8 @@ package net.yadaframework.persistence.repository;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +19,8 @@ import net.yadaframework.persistence.entity.YadaAttachedFile;
 @Transactional(readOnly = true)
 public class YadaAttachedFileDao {
 
-    @PersistenceContext private EntityManager em;
+    @PersistenceContext
+	private EntityManager em;
 
     /**
      * Delete a YadaAttachedFile and connected data, but not the file on disk. If there is a relationship between an Entity and the YadaAttachedFile,

@@ -1,19 +1,16 @@
 package net.yadaframework.security.persistence.entity;
 import java.io.Serializable;
-import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Version;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Version;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +31,7 @@ public class YadaSocialCredentials implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private Long id;
 	
 	@Column(nullable=false, unique=true, length=128)
@@ -45,7 +42,7 @@ public class YadaSocialCredentials implements Serializable {
 	
 	private int type; // Facebook, Google, LinkedIn, etc.
 	
-	@ManyToOne(fetch=FetchType.EAGER, optional=false)
+	@ManyToOne(fetch= FetchType.EAGER, optional=false)
 	private YadaUserCredentials yadaUserCredentials;
 
 	public Long getId() {

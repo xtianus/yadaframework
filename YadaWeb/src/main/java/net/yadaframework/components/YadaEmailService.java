@@ -12,10 +12,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.annotation.Resource;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -50,7 +50,8 @@ public class YadaEmailService {
 	@Autowired private JavaMailSender mailSender;
 	
 	// Using @Resource we don't need a Qualifier annotation
-	@Resource private SpringTemplateEngine emailTemplateEngine;
+	@Resource
+	private SpringTemplateEngine emailTemplateEngine;
     
     @Autowired private MessageSource messageSource;
     

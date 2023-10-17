@@ -2,13 +2,14 @@ package net.yadaframework.security;
 import java.io.IOException;
 import java.io.Writer;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,7 @@ import org.springframework.web.filter.GenericFilterBean;
  * Attenzione perchè allo stato attuale fa un touch sulla session ogni volta che viene chiamato e non so come evitarlo.
  *
  */
-public class CheckSessionFilter extends GenericFilterBean {
+public class CheckSessionFilter extends GenericFilterBean implements Filter {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	private final static String COMMAND = "/ajaxCheckSessionActive";
 

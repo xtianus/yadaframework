@@ -1,8 +1,8 @@
 package net.yadaframework.security.persistence.repository;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +14,8 @@ import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 @Transactional(readOnly = true) 
 public class YadaAutoLoginTokenDao {
 	
-	@PersistenceContext EntityManager em;
+	@PersistenceContext
+	EntityManager em;
 	
 	/**
 	 * Returns the list of objects associated with the YadaUserCredentials

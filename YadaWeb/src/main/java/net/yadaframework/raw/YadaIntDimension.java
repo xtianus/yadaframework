@@ -1,6 +1,6 @@
 package net.yadaframework.raw;
 
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 
 /**
  * Like java.awt.Dimension but with int values.

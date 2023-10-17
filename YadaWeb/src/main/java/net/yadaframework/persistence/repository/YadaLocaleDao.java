@@ -8,9 +8,8 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.Locale;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -33,7 +32,8 @@ public class YadaLocaleDao {
     @Autowired private YadaConfiguration config;
     @Autowired private JdbcTemplate jdbcTemplate;
 
-    @PersistenceContext private EntityManager em;
+    @PersistenceContext
+	private EntityManager em;
 
     /**
      * Finds all entities of the given type, then initializes all localized string attributes defined as Map&lt;Locale, String>

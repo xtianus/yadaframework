@@ -5,23 +5,20 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
-import javax.persistence.Version;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
+import jakarta.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.LocaleUtils;
 
-import com.fasterxml.jackson.annotation.JsonView;
-
 import net.yadaframework.persistence.entity.YadaAttachedFile;
-import net.yadaframework.web.YadaJsonView;
 
 @Entity
 // We keep it simple and use a discriminator for inheritance. It's very unlikely that someone might need a joined table with no other options
@@ -34,7 +31,7 @@ public class YadaUserProfile implements Serializable {
 	protected long version;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	protected Long id;
 
 	@Column(length = 32)

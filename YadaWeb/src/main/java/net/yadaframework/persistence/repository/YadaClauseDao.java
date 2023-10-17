@@ -3,8 +3,8 @@ package net.yadaframework.persistence.repository;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,8 @@ import net.yadaframework.persistence.entity.YadaClause;
 public class YadaClauseDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
-    @PersistenceContext EntityManager em;
+    @PersistenceContext
+	EntityManager em;
     
 	public List<YadaClause> findByName(String name) {
 		String sql = "select yc from YadaClause yc where yc.name = :name";

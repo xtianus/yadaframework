@@ -6,7 +6,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;

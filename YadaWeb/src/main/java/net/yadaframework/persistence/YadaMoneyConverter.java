@@ -1,6 +1,6 @@
 package net.yadaframework.persistence;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 /**
  * JPA converter between Object representation "YadaMoney" and DB column "Long"

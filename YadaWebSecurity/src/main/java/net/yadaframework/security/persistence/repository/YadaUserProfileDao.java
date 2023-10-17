@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TimeZone;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -26,7 +26,8 @@ import net.yadaframework.web.YadaPageRequest;
 @Transactional(readOnly = true)
 public class YadaUserProfileDao<T extends YadaUserProfile> {
 
-	@PersistenceContext EntityManager em;
+	@PersistenceContext
+	EntityManager em;
 
 	@Autowired YadaUtil yadaUtil;
 	@Autowired YadaConfiguration config;

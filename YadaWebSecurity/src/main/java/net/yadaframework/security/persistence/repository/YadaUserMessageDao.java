@@ -3,9 +3,9 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,8 @@ public class YadaUserMessageDao {
 
     @Autowired private YadaUtil yadaUtil;
 
-    @PersistenceContext EntityManager em;
+    @PersistenceContext
+	EntityManager em;
 
 	/**
 	 * Returns the most recent date of the message stack - which is the initial date if the message is not stackable

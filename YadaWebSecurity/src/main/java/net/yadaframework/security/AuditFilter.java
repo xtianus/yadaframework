@@ -1,25 +1,27 @@
 package net.yadaframework.security;
 
-import java.io.IOException;
-import java.util.Map;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.web.filter.OncePerRequestFilter;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaWebConfig;
+
+import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+
+import java.io.IOException;
+import java.util.Map;
 
 
 /**
@@ -28,7 +30,7 @@ import net.yadaframework.core.YadaWebConfig;
  * Stampa i parametri di get e post se il debug è attivo.
  * Scrive il tempo di risposta della action sul logger chiamato "actionDuration"
  */
-public class AuditFilter extends OncePerRequestFilter {
+public class AuditFilter extends OncePerRequestFilter implements Filter {
 	private final static Logger log = LoggerFactory.getLogger(AuditFilter.class);
 	private final static Logger filesLog = LoggerFactory.getLogger(AuditFilter.class.getName() + ".files");
 //	private final static Logger actionLog = LoggerFactory.getLogger("actionDuration");
@@ -46,7 +48,6 @@ public class AuditFilter extends OncePerRequestFilter {
 	 * request logging both before and after the request is processed.
 	 *
 	 * @see #beforeRequest
-	 * @see #afterRequest
 	 */
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -134,7 +135,6 @@ public class AuditFilter extends OncePerRequestFilter {
 
 	/**
 	 * Returns true if the request is for a file, not for a controller
-	 * @param requestUri
 	 * @return
 	 */
 	private boolean isFile(HttpServletRequest request) {
@@ -181,7 +181,7 @@ public class AuditFilter extends OncePerRequestFilter {
 						log.debug("** {} = {} **", paramName, paramString);
 					}
 					if (postDataMap.isEmpty()) {
-						if (org.apache.commons.fileupload.servlet.ServletFileUpload.isMultipartContent(request)) {
+						if (JakartaServletFileUpload.isMultipartContent(request)) {
 							log.debug("** multipart request");
 						} else if (request.getContentType().equals("application/json;charset=UTF-8")) {
 							log.debug("** json object");

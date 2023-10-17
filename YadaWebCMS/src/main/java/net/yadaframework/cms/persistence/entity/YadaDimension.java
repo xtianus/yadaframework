@@ -1,7 +1,7 @@
 package net.yadaframework.cms.persistence.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 
 /**
  * Entity for a product dimension

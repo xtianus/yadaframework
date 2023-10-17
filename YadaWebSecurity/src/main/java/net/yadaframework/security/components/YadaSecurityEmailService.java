@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,7 +30,8 @@ public class YadaSecurityEmailService {
 	private transient final Logger log = LoggerFactory.getLogger(getClass());
 
 	@Autowired private YadaConfiguration config;
-	@Resource private SpringTemplateEngine emailTemplateEngine;
+	@Resource
+	private SpringTemplateEngine emailTemplateEngine;
     @Autowired private YadaTokenHandler yadaTokenHandler;
     @Autowired private YadaWebUtil yadaWebUtil;
     @Autowired private YadaEmailService yadaEmailService;

@@ -6,7 +6,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.WebResourceRoot;

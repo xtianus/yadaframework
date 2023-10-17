@@ -1,8 +1,7 @@
 package net.yadaframework.cms.persistence.repository;
 
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class YadaWebCmsDao {
 	// private final transient Logger log = LoggerFactory.getLogger(getClass());
 
-    @PersistenceContext EntityManager em;
+    @PersistenceContext
+    EntityManager em;
 
     /**
      * Swaps the attributes of two entities. For example for swapping positions.

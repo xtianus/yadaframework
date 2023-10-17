@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,8 @@ import net.yadaframework.web.YadaPageRequest;
 public class YadaUserCredentialsDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
-    @PersistenceContext private EntityManager em;
+    @PersistenceContext
+	private EntityManager em;
 
 	@Autowired private PasswordEncoder encoder;
 	@Autowired private YadaUtil yadaUtil;

@@ -10,24 +10,24 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.Version;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -70,7 +70,7 @@ public class YadaUserMessage<YLE extends YadaLocalEnum<?>> implements Serializab
 	protected long version; // For optimistic locking
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	protected Long id;
 
 	protected int priority; // Priority or severity, 0 is lowest
@@ -108,7 +108,7 @@ public class YadaUserMessage<YLE extends YadaLocalEnum<?>> implements Serializab
 	protected YadaUserProfile recipient;
 
 	//@JsonView(YadaJsonView.WithLazyAttributes.class)
-	@OneToMany(cascade=CascadeType.ALL, orphanRemoval=true) // It was REMOVE - why?
+	@OneToMany(cascade= CascadeType.ALL, orphanRemoval=true) // It was REMOVE - why?
 	protected List<YadaAttachedFile> attachment = new ArrayList<>();
 
 	@Column(length=1024)

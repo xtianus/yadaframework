@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import jakarta.persistence.OptimisticLockException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +85,7 @@ public class YadaMiscController {
 				}
 				try {
 					yadaAttachedFile = yadaAttachedFileDao.save(yadaAttachedFile);
-				} catch (javax.persistence.OptimisticLockException e) {
+				} catch (OptimisticLockException e) {
 					throw new YadaInvalidUsageException("Concurrent modification on yadaAttachedFile. This happens if you set 'cascade=CascadeType.ALL' on the owning entity or if the yadaAttachedFile is merged after setting it on YadaCropImage", e);
 				}
 			} catch (IOException e) {

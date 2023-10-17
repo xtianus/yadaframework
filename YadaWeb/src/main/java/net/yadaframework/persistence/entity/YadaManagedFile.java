@@ -9,18 +9,18 @@ import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.Version;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.MapKeyColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,8 @@ import net.yadaframework.raw.YadaIntDimension;
 // @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaManagedFile implements CloneableDeep {
 	
-	@Transient @Autowired
+	@Transient
+	@Autowired
 	private YadaWebUtil yadaWebUtil;
 	@Transient @Autowired
 	private YadaUtil yadaUtil;
@@ -60,7 +61,7 @@ public class YadaManagedFile implements CloneableDeep {
 	protected long version;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	protected Long id;
 
 	/**
@@ -104,7 +105,7 @@ public class YadaManagedFile implements CloneableDeep {
 	/**
 	 * Linked to cropped images
 	 */
-	@OneToMany(cascade=CascadeType.REMOVE)
+	@OneToMany(cascade= CascadeType.REMOVE)
 	@MapKeyColumn(name="assetKey") // key
 	protected Map<String, YadaManagedFile> derivedAssets;
 	

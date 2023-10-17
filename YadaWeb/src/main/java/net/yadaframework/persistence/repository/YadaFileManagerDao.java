@@ -1,14 +1,13 @@
 package net.yadaframework.persistence.repository;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +30,8 @@ import net.yadaframework.raw.YadaIntDimension;
 public class YadaFileManagerDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
-    @PersistenceContext private EntityManager em;
+    @PersistenceContext
+	private EntityManager em;
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
 

@@ -4,24 +4,24 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.Version;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
 
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
@@ -40,7 +40,7 @@ public class YadaTicket implements Serializable {
 
 	//@JsonView(YadaJsonView.WithEagerAttributes.class)
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	protected Long id;
 
 	@Column(length=80)
@@ -64,7 +64,7 @@ public class YadaTicket implements Serializable {
 
 	@Column
 	//@JsonView(YadaJsonView.WithLazyAttributes.class)
-	@OneToMany(mappedBy="yadaTicket", cascade=CascadeType.ALL, orphanRemoval=true)
+	@OneToMany(mappedBy="yadaTicket", cascade= CascadeType.ALL, orphanRemoval=true)
 	protected List<YadaTicketMessage> messages;
 
 

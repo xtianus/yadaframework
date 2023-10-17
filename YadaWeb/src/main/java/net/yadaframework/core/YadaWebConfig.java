@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -25,8 +25,8 @@ import org.springframework.format.support.FormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.commons.YadaCommonsMultipartResolver;
+
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -74,16 +74,15 @@ public class YadaWebConfig implements WebMvcConfigurer {
     	// the content of the default Model should never be used if a controller method redirects
     	// http://www.logicbig.com/tutorials/spring-framework/spring-web-mvc/redirect-attributes/
        requestMappingHandlerAdapter.setIgnoreDefaultModelOnRedirect(true);
-    }
-
-	// This is only used when not using YadaWebSecurity
-	@Bean(name="multipartResolver")
-	public CommonsMultipartResolver multipartResolver() {
-		CommonsMultipartResolver filterMultipartResolver = new YadaCommonsMultipartResolver();
-		filterMultipartResolver.setMaxUploadSize(config.getMaxFileUploadSizeBytes());
-		// filterMultipartResolver.setResolveLazily(true);
-		return filterMultipartResolver;
 	}
+	// This is only used when not using YadaWebSecurity TODO:
+//	@Bean(name="multipartResolver")
+//	public CommonsMultipartResolver multipartResolver() {
+//		CommonsMultipartResolver filterMultipartResolver = new YadaCommonsMultipartResolver();
+//		filterMultipartResolver.setMaxUploadSize(config.getMaxFileUploadSizeBytes());
+//		// filterMultipartResolver.setResolveLazily(true);
+//		return filterMultipartResolver;
+//	}
 
 	/**
 	 * Return a string pattern to match urls that should not be localised when using a language path variable

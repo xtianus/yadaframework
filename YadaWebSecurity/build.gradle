@@ -13,8 +13,8 @@ if (!project.hasProperty('repoPath')) {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 	// toolchain {
 	// 	languageVersion = JavaLanguageVersion.of(8)
 	// }
@@ -50,17 +50,20 @@ repositories {
 dependencies {
 	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
 	
-	api 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5:3.1.0.RELEASE',
-		'org.springframework.security:spring-security-config:5.+'
-		
+	api 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.2.RELEASE'
+	implementation 'org.springframework.security:spring-security-config:6.1.4'
 
-    api 'org.springframework.security:spring-security-web:5.+',
-		'com.google.api-client:google-api-client-jackson2:2.+',
+    api 'com.google.api-client:google-api-client-jackson2:2.+',
 		'com.google.api-client:google-api-client-gson:2.+'
-		
+
+	implementation('org.springframework.security:spring-security-web:6.+')
+	implementation('org.springframework:spring-webmvc:6.+')
+
+	implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 	implementation project(':YadaWeb')
-	compileOnly 'org.apache.tomcat:tomcat-servlet-api:8.5.83'
-	compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:8.5.+'
+	implementation 'org.apache.tomcat:tomcat-servlet-api:10.1.14'
+	implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.14'
+	compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
     // testImplementation 'junit:junit:4.12'
 }

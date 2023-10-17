@@ -3,9 +3,10 @@ package net.yadaframework.core;
 import java.sql.SQLException;
 import java.util.List;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+
 import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
@@ -34,9 +35,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class YadaJpaConfig {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
-	@Autowired YadaConfiguration config;
-	
-	@Bean 
+	@Autowired
+	YadaConfiguration config;
+
+	@Bean
 	public NamedParameterJdbcTemplate namedParameterJdbcTemplate(DataSource dataSource) {
 		return new NamedParameterJdbcTemplate(dataSource);
 	}

@@ -5,8 +5,8 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,8 @@ import net.yadaframework.persistence.entity.YadaJobState;
 public class YadaJobSchedulerDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
-    @PersistenceContext private EntityManager em;
+    @PersistenceContext
+	private EntityManager em;
     
     @Autowired private YadaConfiguration config;
     @Autowired private YadaJobDao yadaJobDao;

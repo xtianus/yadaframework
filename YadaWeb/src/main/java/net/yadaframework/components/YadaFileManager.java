@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
@@ -27,6 +26,7 @@ import net.yadaframework.persistence.entity.YadaManagedFile;
 import net.yadaframework.persistence.repository.YadaAttachedFileDao;
 import net.yadaframework.persistence.repository.YadaFileManagerDao;
 import net.yadaframework.raw.YadaIntDimension;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The File Manager handles uploaded files. They are kept in a specific folder where they can be

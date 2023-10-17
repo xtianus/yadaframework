@@ -14,9 +14,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -42,7 +42,8 @@ public class YadaDataTableDao {
 	@Autowired MessageSource messageSource;
 	@Autowired YadaUtil yadaUtil;
 	
-    @PersistenceContext EntityManager em;
+    @PersistenceContext
+	EntityManager em;
 	
     /**
 	 * Returns a map with the result in the format needed by DataTables.

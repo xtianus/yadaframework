@@ -1,7 +1,7 @@
 package net.yadaframework.cms.persistence.repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,7 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true) 
 public class YadaProductDao {
 	
-    @PersistenceContext EntityManager em;
+    @PersistenceContext
+	EntityManager em;
 
 	/**
 	 * Remove the association of a gallery image from a product

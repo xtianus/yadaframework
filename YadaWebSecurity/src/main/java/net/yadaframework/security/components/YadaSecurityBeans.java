@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.commons.YadaCommonsMultipartResolver;
 
 import net.yadaframework.core.YadaConfiguration;
@@ -19,13 +18,13 @@ public class YadaSecurityBeans {
 	@Autowired private YadaConfiguration yadaConfiguration;
 
 	// This is only used by spring security filter configured in SecurityWebApplicationInitializer
-	@Bean(name="filterMultipartResolver")
-	CommonsMultipartResolver filterMultipartResolver() {
-		CommonsMultipartResolver filterMultipartResolver = new YadaCommonsMultipartResolver();
-		filterMultipartResolver.setMaxUploadSize(yadaConfiguration.getMaxFileUploadSizeBytes());
-		// filterMultipartResolver.setResolveLazily(true);
-		return filterMultipartResolver;
-	}
+//	TODO: @Bean(name="filterMultipartResolver")
+//	CommonsMultipartResolver filterMultipartResolver() {
+//		CommonsMultipartResolver filterMultipartResolver = new YadaCommonsMultipartResolver();
+//		filterMultipartResolver.setMaxUploadSize(yadaConfiguration.getMaxFileUploadSizeBytes());
+//		// filterMultipartResolver.setResolveLazily(true);
+//		return filterMultipartResolver;
+//	}
 
 	@Bean(name="passwordEncoder")
 	@Autowired PasswordEncoder passwordEncoder(YadaConfiguration yadaConfiguration) {

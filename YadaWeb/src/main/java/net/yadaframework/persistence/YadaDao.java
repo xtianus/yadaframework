@@ -1,7 +1,7 @@
 package net.yadaframework.persistence;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.slf4j.Logger;
@@ -22,7 +22,8 @@ import net.yadaframework.exceptions.YadaInvalidValueException;
 public class YadaDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
-    @PersistenceContext EntityManager em;
+    @PersistenceContext
+	EntityManager em;
 
     /**
      * Save any Entity, also new or detached ones.

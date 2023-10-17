@@ -6,22 +6,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.Version;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -44,7 +44,7 @@ public class YadaUserCredentials implements Serializable {
 	private long version;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private Long id;
 
 	// Non può essere NaturalId perchè sarebbe immutable
@@ -72,7 +72,7 @@ public class YadaUserCredentials implements Serializable {
 
 	private boolean enabled=false;
 
-	@ElementCollection(fetch=FetchType.EAGER)
+	@ElementCollection(fetch= FetchType.EAGER)
 	@Fetch(FetchMode.SUBSELECT) // Questo permette di fare una query sola invece di una per role
 	private List<Integer> roles;
 
@@ -88,7 +88,7 @@ public class YadaUserCredentials implements Serializable {
 	private Date lastSuccessfulLogin; // timestamp dell'ultimo login completato - settare con userCredentialsRepository.updateLoginTimestamp()
 
 	@JsonIgnore // Ignored because of lazy association
-	@OneToMany(fetch=FetchType.LAZY, cascade=CascadeType.ALL, mappedBy="yadaUserCredentials") // Non posso mettere orphanRemoval=true perchè prendo una eccezione: A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance
+	@OneToMany(fetch=FetchType.LAZY, cascade= CascadeType.ALL, mappedBy="yadaUserCredentials") // Non posso mettere orphanRemoval=true perchè prendo una eccezione: A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance
 	private List<YadaSocialCredentials> yadaSocialCredentialsList;
 
 //	@NotNull

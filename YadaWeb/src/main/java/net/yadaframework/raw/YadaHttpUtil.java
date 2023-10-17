@@ -9,20 +9,20 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.DeflaterInputStream;
 import java.util.zip.GZIPInputStream;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.Base64Utils;
 
 /**
  * Miscellaneous HTTP functions
@@ -78,7 +78,7 @@ public class YadaHttpUtil {
 				connection.setRequestProperty("User-Agent", userAgent);
 			}
 			if (username!=null && password !=null) {
-				String auth = "Basic " + Base64Utils.encodeToString((username + ":" + password).getBytes());
+				String auth = "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
 				connection.setRequestProperty("Proxy-Connection", "Keep-Alive");
 				connection.setRequestProperty("Proxy-Authorization", auth);
 			}

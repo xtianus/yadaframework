@@ -2,9 +2,8 @@ package net.yadaframework.security;
 
 import java.util.EnumSet;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.ServletContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 import org.springframework.web.filter.CharacterEncodingFilter;

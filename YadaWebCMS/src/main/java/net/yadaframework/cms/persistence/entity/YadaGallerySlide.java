@@ -6,24 +6,23 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MapKeyColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.PostPersist;
-import javax.persistence.Transient;
-import javax.persistence.Version;
-
-import org.springframework.web.multipart.MultipartFile;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.MapKeyColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Stores all the elements that can appear on a gallery slide: image, video, text...
@@ -36,7 +35,7 @@ public class YadaGallerySlide implements CloneableDeep {
 	private long version; // For optimistic locking
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private Long id;
 
 	private boolean slideEnabled = true;
@@ -102,10 +101,10 @@ public class YadaGallerySlide implements CloneableDeep {
 	// Transients for POST
 
 	@Transient
-	private  MultipartFile multipartImage;
+	private MultipartFile multipartImage;
 
 	@Transient
-	private  MultipartFile multipartVideo;
+	private MultipartFile multipartVideo;
 
 	/////////////////////////////////////////////////////////////
 

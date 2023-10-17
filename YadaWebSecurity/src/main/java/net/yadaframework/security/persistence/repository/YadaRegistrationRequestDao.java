@@ -3,8 +3,8 @@ package net.yadaframework.security.persistence.repository;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,8 @@ import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 @Transactional(readOnly = true) 
 public class YadaRegistrationRequestDao {
 	
-	@PersistenceContext EntityManager em;
+	@PersistenceContext
+	EntityManager em;
 
 	public List<YadaRegistrationRequest> findByIdAndTokenOrderByTimestampDesc(long id, long token) {
 		String sql = "from YadaRegistrationRequest where id=:id and token=:token order by timestamp desc";

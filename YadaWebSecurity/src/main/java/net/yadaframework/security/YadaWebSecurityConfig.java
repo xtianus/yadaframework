@@ -20,7 +20,7 @@ public class YadaWebSecurityConfig extends YadaWebConfig {
 
 	@Override
 	protected void addExtraDialect(SpringTemplateEngine engine) {
-		engine.addDialect(new org.thymeleaf.extras.springsecurity5.dialect.SpringSecurityDialect());
+		engine.addDialect(new org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect());
 	}
 	
 	@Override
