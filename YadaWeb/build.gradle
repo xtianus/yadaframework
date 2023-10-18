@@ -77,15 +77,13 @@ dependencies {
 	// Needed by Commons Configuration
     api 'commons-jxpath:commons-jxpath:1.+'
 
-	implementation('org.springframework:spring-webmvc:6.+')
-	implementation('org.springframework:spring-web:6.+')
-
-    api 'org.springframework:spring-context-support:6.0.13',
-		'org.springframework:spring-orm:6.0.13',
+    api 'org.springframework:spring-context-support:6.0.+',
+		'org.springframework:spring-orm:6.0.+',
+		'org.springframework:spring-webmvc:6.0.13',
 		// 'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
 		'org.hibernate.orm:hibernate-core:6.3.1.Final',
 		'org.hibernate.validator:hibernate-validator:8.0.1.Final',
-		'org.thymeleaf:thymeleaf-spring5:3.+',
+		'org.thymeleaf:thymeleaf-spring6:3.+',
 		'com.mysql:mysql-connector-j:8.1.+',
 		'commons-collections:commons-collections:3.+',
 		'org.apache.commons:commons-fileupload2-jakarta:2.0.0-M1',

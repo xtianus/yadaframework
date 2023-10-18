@@ -51,18 +51,18 @@ dependencies {
 	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
 	
 	api 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.2.RELEASE'
-	implementation 'org.springframework.security:spring-security-config:6.1.4'
+	implementation 'org.springframework.security:spring-security-config:6.1.+'
 
     api 'com.google.api-client:google-api-client-jackson2:2.+',
 		'com.google.api-client:google-api-client-gson:2.+'
 
-	implementation('org.springframework.security:spring-security-web:6.+')
-	implementation('org.springframework:spring-webmvc:6.+')
+	implementation('org.springframework.security:spring-security-web:6.1.+')
+	implementation('org.springframework:spring-webmvc:6.0.13')
 
 	implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 	implementation project(':YadaWeb')
-	implementation 'org.apache.tomcat:tomcat-servlet-api:10.1.14'
-	implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.14'
+	implementation 'org.apache.tomcat:tomcat-servlet-api:10.1.+'
+	implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.+'
 	compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
     // testImplementation 'junit:junit:4.12'
