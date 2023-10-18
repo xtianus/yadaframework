@@ -73,10 +73,10 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 	public Long findUserProfileIdByUsername(String username) {
 		String sql = "select up.id from YadaUserProfile up join YadaUserCredentials uc ON uc.id = up.userCredentials_id where uc.username=:username";
 		try {
-			return ((BigInteger)em.createNativeQuery(sql)
-				.setParameter("username", username)
-				.setMaxResults(1)
-				.getSingleResult()).longValue();
+			return (Long) em.createNativeQuery(sql)
+					.setParameter("username", username)
+					.setMaxResults(1)
+					.getSingleResult();
 		} catch (NonUniqueResultException | NoResultException e) {
 			return null; // Nothing found
 		}

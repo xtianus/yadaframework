@@ -74,13 +74,7 @@ public class YadaSecurityConfig {
 				.headers().disable()
 				// http.antMatcher("/**/css/**").headers().disable();
 				.csrf().disable()
-				.sessionManagement((sessions) -> sessions
-						.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-						// Use the legacy authentication strategy so we're sure it works
-						// TODO remove this line to use the new Spring 6 default
-						// See https://docs.spring.io/spring-security/reference/5.8/migration/servlet/session-management.html#_require_explicit_invocation_of_sessionauthenticationstrategy
-						.requireExplicitAuthenticationStrategy(false)
-				)
+				.sessionManagement((sessions) -> sessions.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 				.logout()
 				.logoutUrl("/logout") // POST con il CSRF attivo, GET altrimenti
 				// .logoutSuccessUrl("/") // TODO rimanere nella pagina corrente se non è protetta!

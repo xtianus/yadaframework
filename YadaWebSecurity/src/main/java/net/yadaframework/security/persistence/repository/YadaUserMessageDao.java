@@ -90,7 +90,7 @@ public class YadaUserMessageDao {
 			+ ") then 1 else 0 end";
     	Query nativeQuery = em.createNativeQuery(sql);
     	nativeQuery.setParameter("userProfileId", userProfile.getId());
-    	BigInteger singleResult = (BigInteger) nativeQuery.getSingleResult();
+		Long singleResult = (Long) nativeQuery.getSingleResult();
     	return singleResult.intValue()==1;
     }
 

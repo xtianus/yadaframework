@@ -46,9 +46,9 @@ public class YadaController {
     @RequestMapping("/yadaError")
     public String yadaError(HttpServletRequest request, RedirectAttributes redirectAttributes, Model model, Locale locale) {
     	// The original request has been lost already, but the status code is kept
-    	int errorCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
-        String errorMessage = (String) request.getAttribute("javax.servlet.error.message");
-        Exception exception = (Exception) request.getAttribute("javax.servlet.error.exception");
+    	int errorCode = (Integer) request.getAttribute("jakarta.servlet.error.status_code");
+    	String errorMessage = (String) request.getAttribute("jakarta.servlet.error.message");
+    	Exception exception = (Exception) request.getAttribute("jakarta.servlet.error.exception");
         if (StringUtils.isBlank(errorMessage) && exception!=null) {
         	errorMessage = exception.getMessage();
         }
