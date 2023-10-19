@@ -70,49 +70,45 @@ public class YadaSecurityConfig {
 		successHandler.setDefaultTargetUrlNormalRequest("/");
 		logoutSuccessHandler.setDefaultTargetUrl("/"); // language path will be added in the handler
 
-		http
-				.headers().disable()
-				// http.antMatcher("/**/css/**").headers().disable();
-				.csrf().disable()
-				.sessionManagement((sessions) -> sessions.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-				.logout()
-				.logoutUrl("/logout") // POST con il CSRF attivo, GET altrimenti
-				// .logoutSuccessUrl("/") // TODO rimanere nella pagina corrente se non è protetta!
-				.logoutSuccessHandler(logoutSuccessHandler)
-				// .invalidateHttpSession(false) // Lascio che la session si cancelli quando esco
-				.and()
-				.formLogin()
-				.loginPage(defaultLoginUrl) // url del form di login (GET)
-				.loginProcessingUrl("/loginPost") // url dove postare il form (POST)
-				.failureHandler(failureHandler)
-				.successHandler(successHandler)
-				.and()
-				.exceptionHandling()
-				// This is needed to redirect to a language-specific login url
-				.authenticationEntryPoint(new CustomAuthenticationEntryPoint());
-		//        .defaultSuccessUrl("/");
-		//    	.and()
-		//    .apply(new SpringSocialConfigurer());        // .requireCsrfProtectionMatcher(new MyRequestMatcher());
-		//	new NegatedRequestMatcher(new AntPathRequestMatcher("/ajaxStoryBunch", null)));
-
-		if (yadaConfiguration.isLocalePathVariableEnabled()) {
-			// Resetto la RequestCache in modo che salvi le request di qualunque tipo, anche ajax,
-			// altrimenti il meccanismo del redirect alla pagina di partenza non funziona con le chiamate ajax.
-			// Questo sarebbe il filtro impostato senza il reset, configurato in RequestCacheConfigurer:
-			// AndRequestMatcher [requestMatchers=[NegatedRequestMatcher [requestMatcher=Ant [pattern='/**/favicon.ico']], NegatedRequestMatcher [requestMatcher=MediaTypeRequestMatcher [contentNegotiationStrategy=org.springframework.web.accept.HeaderContentNegotiationStrategy@16f239b, matchingMediaTypes=[application/json], useEquals=false, ignoredMediaTypes=[*/*]]], NegatedRequestMatcher [requestMatcher=RequestHeaderRequestMatcher [expectedHeaderName=X-Requested-With, expectedHeaderValue=XMLHttpRequest]]]]
-			http.requestCache().requestCache(new YadaLocalePathRequestCache());
-		} else {
-			http.requestCache().requestCache(new HttpSessionRequestCache());
-		}
-		// Forward requests should never be protected with Spring MVC: https://docs.spring.io/spring-security/reference/5.8/migration/servlet/authorization.html#_permit_forward_when_using_spring_mvc
-		// This is especially the case when using YadaLocalePathVariableFilter.
-		http
-				.authorizeHttpRequests((authorize) -> authorize
-						// Replacement for filterSecurityInterceptorOncePerRequest(true)
-						.shouldFilterAllDispatcherTypes(true) // request,async,error,forward,include
-						.dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll() // ??????????????????????????????
-				);
+	    http
+	        .headers(headers -> headers.disable())
+	        .csrf(csrf -> csrf.disable())
+	        .sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+	        .logout(logout -> {
+	            logout
+	                .logoutUrl("/logout")
+	                .logoutSuccessHandler(logoutSuccessHandler);
+	            // .logoutSuccessUrl("/") // TODO rimanere nella pagina corrente se non è protetta!
+	            // .invalidateHttpSession(false) // Lascio che la session si cancelli quando esco
+	        })
+	        .formLogin(formLogin -> {
+	            formLogin
+	                .loginPage(defaultLoginUrl)
+	                .loginProcessingUrl("/loginPost")
+	                .failureHandler(failureHandler)
+	                .successHandler(successHandler);
+	        })
+	        .exceptionHandling(exceptionHandling -> {
+	            // This is needed to redirect to a language-specific login url
+	            exceptionHandling.authenticationEntryPoint(new CustomAuthenticationEntryPoint());
+	        })
+	        .requestCache(requestCache -> {
+	            if (yadaConfiguration.isLocalePathVariableEnabled()) {
+	                // Resetto la RequestCache in modo che salvi le request di qualunque tipo, anche ajax,
+	                // altrimenti il meccanismo del redirect alla pagina di partenza non funziona con le chiamate ajax.
+	                requestCache.requestCache(new YadaLocalePathRequestCache());
+	            } else {
+	                requestCache.requestCache(new HttpSessionRequestCache());
+	            }
+	        })
+	        .authorizeHttpRequests(authorize -> {
+	            // Forward requests should never be protected with Spring MVC: https://docs.spring.io/spring-security/reference/5.8/migration/servlet/authorization.html#_permit_forward_when_using_spring_mvc
+	            // This is especially the case when using YadaLocalePathVariableFilter.
+	            authorize
+	                .dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll();
+	        });
 	}
+
 
 	/**
 	 * Needed to redirect to a language-specific login url
