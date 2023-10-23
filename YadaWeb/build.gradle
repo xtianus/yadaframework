@@ -5,7 +5,7 @@ buildscript {
 	}
 	dependencies {
 		// Needed for test schema creation
-		classpath 'net.yadaframework:yadatools:0.6.9'
+		classpath 'net.yadaframework:yadatools:0.6.7.1'
 		// classpath 'kr.motd.gradle:sphinx-gradle-plugin:2.2.0'
 	}                    
 }
