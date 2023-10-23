@@ -3,6 +3,8 @@ package net.yadaframework.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.servlet.MultipartConfigElement;
+import jakarta.servlet.ServletRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
@@ -49,15 +51,9 @@ public abstract class YadaWebApplicationInitializer extends AbstractAnnotationCo
 		return securityProjectPresent;
 	}
 
-	// This implements servlet 3 file upload without commons fileupload but the configuration is not available here yet.
-	//	@Override
-	//    protected void customizeRegistration(ServletRegistration.Dynamic registration) {
-	//		MultipartConfigElement multipartConfigElement = new MultipartConfigElement(
-	//			config.getUploadTempFolder(),
-	//			config.getUploadMaxFileSizeBytes(),
-	//			config.getUploadMaxRequestSizeBytes(),
-	//			config.getUploadFileSizeThresholdBytes());
-	//        registration.setMultipartConfig(multipartConfigElement);
-	//    }
-
+	// Override this to set the multipart configuration
+	@Override
+	protected void customizeRegistration(ServletRegistration.Dynamic registration) {
+		registration.setMultipartConfig(new MultipartConfigElement(""));
+	}
 }

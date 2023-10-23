@@ -11,7 +11,6 @@ import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaWebConfig;
 
-import org.apache.commons.fileupload2.jakarta.JakartaServletFileUpload;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,7 +180,7 @@ public class AuditFilter extends OncePerRequestFilter implements Filter {
 						log.debug("** {} = {} **", paramName, paramString);
 					}
 					if (postDataMap.isEmpty()) {
-						if (JakartaServletFileUpload.isMultipartContent(request)) {
+						if (new StandardServletMultipartResolver().isMultipart(request)) {
 							log.debug("** multipart request");
 						} else if (request.getContentType().equals("application/json;charset=UTF-8")) {
 							log.debug("** json object");

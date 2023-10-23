@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.annotation.Order;
@@ -33,6 +34,8 @@ import net.yadaframework.security.components.YadaAuthenticationFailureHandler;
 import net.yadaframework.security.components.YadaAuthenticationSuccessHandler;
 import net.yadaframework.security.components.YadaLogoutSuccessHandler;
 import net.yadaframework.security.components.YadaUserDetailsService;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.YadaCommonsMultipartResolver;
 
 /**
  * Basic security configuration.
@@ -81,13 +84,11 @@ public class YadaSecurityConfig {
 	            // .logoutSuccessUrl("/") // TODO rimanere nella pagina corrente se non è protetta!
 	            // .invalidateHttpSession(false) // Lascio che la session si cancelli quando esco
 	        })
-	        .formLogin(formLogin -> {
-	            formLogin
-	                .loginPage(defaultLoginUrl)
-	                .loginProcessingUrl("/loginPost")
-	                .failureHandler(failureHandler)
-	                .successHandler(successHandler);
-	        })
+	        .formLogin(formLogin -> formLogin
+				.loginPage(defaultLoginUrl)
+				.loginProcessingUrl("/loginPost")
+				.failureHandler(failureHandler)
+				.successHandler(successHandler))
 	        .exceptionHandling(exceptionHandling -> {
 	            // This is needed to redirect to a language-specific login url
 	            exceptionHandling.authenticationEntryPoint(new CustomAuthenticationEntryPoint());
@@ -168,4 +169,8 @@ public class YadaSecurityConfig {
 		}
 	}
 
+	@Bean(name="filterMultipartResolver")
+	public MultipartResolver multipartResolver() {
+		return new YadaCommonsMultipartResolver();
+	}
 }

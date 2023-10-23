@@ -8,7 +8,7 @@ import java.util.Set;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
-
+import net.yadaframework.web.dialect.YadaDialect;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,16 +17,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-// import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
-// import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.format.Formatter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.multipart.commons.YadaCommonsMultipartResolver;
-
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -43,8 +39,6 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
-import net.yadaframework.components.YadaDateFormatter;
-import net.yadaframework.web.dialect.YadaDialect;
 
 
 //@Configuration not needed when using WebApplicationInitializer.java
@@ -75,14 +69,6 @@ public class YadaWebConfig implements WebMvcConfigurer {
     	// http://www.logicbig.com/tutorials/spring-framework/spring-web-mvc/redirect-attributes/
        requestMappingHandlerAdapter.setIgnoreDefaultModelOnRedirect(true);
 	}
-	// This is only used when not using YadaWebSecurity TODO:
-//	@Bean(name="multipartResolver")
-//	public CommonsMultipartResolver multipartResolver() {
-//		CommonsMultipartResolver filterMultipartResolver = new YadaCommonsMultipartResolver();
-//		filterMultipartResolver.setMaxUploadSize(config.getMaxFileUploadSizeBytes());
-//		// filterMultipartResolver.setResolveLazily(true);
-//		return filterMultipartResolver;
-//	}
 
 	/**
 	 * Return a string pattern to match urls that should not be localised when using a language path variable

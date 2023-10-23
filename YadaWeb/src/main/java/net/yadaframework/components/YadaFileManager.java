@@ -375,7 +375,7 @@ public class YadaFileManager {
 		String[] filenameParts = YadaUtil.splitFileNameAndExtension(targetName);
 		File targetFolder = config.getUploadsFolder();
 		// Useless: doesn't throw an exception when it fails: targetFolder.mkdirs();
-		File targetFile = YadaUtil.findAvailableName(targetFolder, filenameParts[0], filenameParts[1], COUNTER_SEPARATOR);
+		File targetFile = YadaUtil.findAvailableName(new File(targetFolder.getAbsolutePath()), filenameParts[0], filenameParts[1], COUNTER_SEPARATOR);
 		multipartFile.transferTo(targetFile);
 		//		try (InputStream inputStream = multipartFile.getInputStream(); OutputStream outputStream = new FileOutputStream(targetFile)) {
 		//			IOUtils.copy(inputStream, outputStream);
