@@ -12,12 +12,12 @@ public class TestYadaMoney {
 
 	@Test
 	public void testRounding() {
-		int toTest = 123456789;
+		double toTest = 12345.6789;
 		YadaMoney yadaMoney = new YadaMoney(toTest);
 		double pow = 1;
 		for (int i = 0; i < 5; i++) {
 			double value = yadaMoney.getRoundValue(i);
-			double check =  Math.round(toTest*pow/10000d)/pow;
+			double check =  Math.round(toTest*pow)/pow;
 			// System.out.println("value = " + value);
 			assertEquals(value, check, 0);
 			pow = pow * 10;
