@@ -58,19 +58,16 @@ public abstract class YadaWebApplicationInitializer extends AbstractAnnotationCo
 	// Override this to set the multipart configuration
 	@Override
 	protected void customizeRegistration(ServletRegistration.Dynamic registration) {
-		registration.setMultipartConfig(new MultipartConfigElement(""));
-	}
-
-	protected void registerMultipartConfig(ServletRegistration.Dynamic registration, YadaConfiguration config) {
 		try {
 			// The configuration must be loaded outside the @Bean lifecycle because servlet registration occurs prior to this
+			YadaConfiguration tempConfig = new YadaConfiguration(){};
 			Parameters params = new Parameters();
 			CombinedConfigurationBuilder builder = new CombinedConfigurationBuilder()
 					.configure(params.fileBased().setFile(new File("configuration.xml")));
-			config.setConfiguration(builder.getConfiguration());
+			tempConfig.setConfiguration(builder.getConfiguration());
 
-			registration.setMultipartConfig(new MultipartConfigElement(config.getUploadsFolder().getAbsolutePath(),
-					config.getMaxFileUploadSizeBytes(), config.getMaxFileUploadSizeBytes(), 0));
+			registration.setMultipartConfig(new MultipartConfigElement(tempConfig.getUploadsFolder().getAbsolutePath(),
+					tempConfig.getMaxFileUploadSizeBytes(), tempConfig.getMaxFileUploadSizeBytes(), 0));
 		} catch (ConfigurationException e) {
 			log.error("Cannot load configuration, default MultipartConfig will be used", e);
 			super.customizeRegistration(registration);

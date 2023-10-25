@@ -49,8 +49,4 @@ public class WebApplicationInitializer extends YadaWebApplicationInitializer {
 		return new String[] { "/" };
 	}
 
-	@Override
-	protected void customizeRegistration(ServletRegistration.Dynamic registration) {
-		super.registerMultipartConfig(registration, new ${acronym.capitalize()}Configuration());
-	}
 }
