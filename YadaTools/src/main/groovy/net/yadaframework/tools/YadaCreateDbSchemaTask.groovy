@@ -14,9 +14,11 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 
 /**
+* This is the legacy schema generator that used the Hibernate Tools And Task.
 * Docs: https://docs.jboss.org/tools/latest/en/hibernatetools/html/ant.html
 * @param outputfilename the name of the output file
 * @param update (true/false) set to true for the schema delta (might not be accurate)
+* @Deprecated
 */
 class YadaCreateDbSchemaTask extends DefaultTask {
 	// Map properties;

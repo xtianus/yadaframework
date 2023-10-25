@@ -111,17 +111,16 @@ yadaInit {
 }
 
 configurations {
-    hibtools {
-        extendsFrom configurations.implementation
-    }
+    generateSchema
 }
 dependencies {
-    hibtools files("$buildDir/classes/java/main") // Needed for yadaPersistenceUnit
-    hibtools 'org.hibernate:hibernate-tools:5.+'
+    generateSchema 'org.apache.logging.log4j:log4j-core:2.21.1'
 }
-task dbSchema(dependsOn: [classes], type: net.yadaframework.tools.YadaCreateDbSchemaTask) {
-    inputs.files configurations.hibtools
-    outputfilename = "${acronym}.sql"
+task dbSchema(dependsOn: [classes], type: JavaExec) {
+	inputs.files (configurations.generateSchema, "$rootDir/src/main/resources/META-INF/persistence.xml") 
+	outputs.files "$rootDir/schema/${acronym}.sql" // This must be the same name used in persistence.xml
+    classpath = configurations.generateSchema + sourceSets.main.runtimeClasspath
+    main = 'net.yadaframework.tools.YadaSchemaGenerator'
 }
 
 sass {

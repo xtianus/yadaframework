@@ -3,10 +3,10 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
              version="2.0">
              
-   <!-- This file is only needed to generate the db schema with the ant task -->
+   <!-- This file is only needed to generate the db schema -->
    
     <persistence-unit name="yadaPersistenceUnit">
-    	<!-- These are needed for Hibernate Tools -->
+    	<!-- These are needed for Hibernate Tools
     	<jar-file>file:../../yadaframework/YadaWeb/bin</jar-file>
     	<% out.print (yadaWebSecurityFound?"":"<!--"); %> 
     	<jar-file>file:../../yadaframework/YadaWebSecurity/bin</jar-file>
@@ -17,7 +17,8 @@
      	<% out.print (yadaWebCommerceFound?"":"<!--"); %> 
   	 	<jar-file>file:../../yadaframework/YadaWebCommerce/bin</jar-file>
      	<% out.print (yadaWebCommerceFound?"":"-->"); %>
-    	<!-- These are used for schema generation. You can remove the ones you don't need -->
+     	 -->
+    	<!-- These are used for schema generation. You can remove the ones you don't need
   		<class>net.yadaframework.persistence.entity.YadaAttachedFile</class>
   		<class>net.yadaframework.persistence.entity.YadaBrowserId</class>
   		<class>net.yadaframework.persistence.entity.YadaClause</class>
@@ -46,7 +47,8 @@
   		<class>net.yadaframework.commerce.persistence.entity.YadaCommerceArticle</class>
   		<class>net.yadaframework.commerce.persistence.entity.YadaTransaction</class>
       	<% out.print (yadaWebCommerceFound?"":"-->"); %>
- 	
+ 		 -->
+ 		 
       <properties>
       		<!-- 
 		     <property name="javax.persistence.schema-generation.database.action" value="none" />
@@ -58,14 +60,24 @@
 		     <property name="javax.persistence.schema-generation.scripts.drop-target" value="schema/${acronym}_drop.sql" />
 		     <property name="javax.persistence.schema-generation.connection" value="jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8"/>
       		 -->
+      		 
+		    <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+		    <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"/>
+		    <property name="javax.persistence.jdbc.user" value="${acronym}user$env"/>
+		    <property name="javax.persistence.jdbc.password" value="$dbpwd"/>
+            <property name="javax.persistence.schema-generation.scripts.action" value="create"/>
+			<property name="javax.persistence.schema-generation.scripts.create-target" value="schema/${acronym}.sql"/>
+      		 
 			<property name="hibernate.ejb.naming_strategy" value="org.hibernate.cfg.ImprovedNamingStrategy"/> <!-- Lowercase table names: https://www.petrikainulainen.net/programming/tips-and-tricks/implementing-a-custom-namingstrategy-with-hibernate/ -->
-            <property name="hibernate.id.new_generator_mappings" value="true"/> <!-- Defaults to true in Hibernate 5 -->
+      		 <!--
             <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
             <property name="hibernate.connection.username" value="${acronym}user$env"/>
             <property name="hibernate.connection.password" value="$dbpwd"/>
             <property name="hibernate.connection.url" value="jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"/>
-            <!-- InnoDB Dialect -->
+            -->
+            <!-- InnoDB Dialect 
          	<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
+            -->
          	<!-- MyISAM Dialect (no transactions)
          	<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>
          	 -->
