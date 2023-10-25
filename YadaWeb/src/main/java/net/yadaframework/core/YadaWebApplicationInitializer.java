@@ -1,10 +1,14 @@
 package net.yadaframework.core;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.servlet.MultipartConfigElement;
 import jakarta.servlet.ServletRegistration;
+import org.apache.commons.configuration2.builder.combined.CombinedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
@@ -55,5 +59,21 @@ public abstract class YadaWebApplicationInitializer extends AbstractAnnotationCo
 	@Override
 	protected void customizeRegistration(ServletRegistration.Dynamic registration) {
 		registration.setMultipartConfig(new MultipartConfigElement(""));
+	}
+
+	protected void registerMultipartConfig(ServletRegistration.Dynamic registration, YadaConfiguration config) {
+		try {
+			// The configuration must be loaded outside the @Bean lifecycle because servlet registration occurs prior to this
+			Parameters params = new Parameters();
+			CombinedConfigurationBuilder builder = new CombinedConfigurationBuilder()
+					.configure(params.fileBased().setFile(new File("configuration.xml")));
+			config.setConfiguration(builder.getConfiguration());
+
+			registration.setMultipartConfig(new MultipartConfigElement(config.getUploadsFolder().getAbsolutePath(),
+					config.getMaxFileUploadSizeBytes(), config.getMaxFileUploadSizeBytes(), 0));
+		} catch (ConfigurationException e) {
+			log.error("Cannot load configuration, default MultipartConfig will be used", e);
+			super.customizeRegistration(registration);
+		}
 	}
 }
