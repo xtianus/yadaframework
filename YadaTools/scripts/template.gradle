@@ -121,6 +121,9 @@ task dbSchema(dependsOn: [classes], type: JavaExec) {
 	outputs.files "$rootDir/schema/${acronym}.sql" // This must be the same name used in persistence.xml
     classpath = configurations.generateSchema + sourceSets.main.runtimeClasspath
     main = 'net.yadaframework.tools.YadaSchemaGenerator'
+    doFirst {
+        delete outputs.files
+    }
 }
 
 sass {
