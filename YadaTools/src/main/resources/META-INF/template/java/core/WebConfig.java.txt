@@ -2,7 +2,7 @@ package $basePackage.core;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.thymeleaf.spring5.SpringTemplateEngine;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import net.yadaframework.core.YadaLinkBuilder;
 import net.yadaframework.security.YadaWebSecurityConfig;
