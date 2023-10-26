@@ -405,12 +405,12 @@ input.yadaSwitch-round:checked ~ label:after {
 }
 
 .yadaIcon-edit:before {
-    content: "\F4CB";
+    content: "\F044";
     font-weight: 900;
 }
 
 .yadaIcon-delete:before {
-    content: "\F5DE";
+    content: "\F2ED";
 }
 
 .yadaIcon-clone:before {
