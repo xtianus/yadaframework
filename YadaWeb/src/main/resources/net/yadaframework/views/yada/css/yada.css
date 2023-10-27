@@ -418,7 +418,8 @@ input.yadaSwitch-round:checked ~ label:after {
 }
 
 .yadaIcon-add:before {
-    content: "\F4FD";
+    content: "\F067";
+    font-weight: 600;
 }
 
 .yadaIcon-help:before {
