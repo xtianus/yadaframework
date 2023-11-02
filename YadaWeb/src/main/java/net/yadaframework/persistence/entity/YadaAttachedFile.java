@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -622,4 +623,38 @@ public class YadaAttachedFile implements CloneableDeep {
 		this.metadata = metadata;
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(clientFilename, description, desktopImageDimension, filename, filenameDesktop,
+				filenameMobile, filenamePdf, forLocale, id, imageDimension, metadata, mobileImageDimension, modified,
+				pdfImageDimension, published, relativeFolderPath, sortOrder, title, uploadTimestamp);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		YadaAttachedFile other = (YadaAttachedFile) obj;
+		return Objects.equals(clientFilename, other.clientFilename) && Objects.equals(description, other.description)
+				&& Objects.equals(desktopImageDimension, other.desktopImageDimension)
+				&& Objects.equals(filename, other.filename) && Objects.equals(filenameDesktop, other.filenameDesktop)
+				&& Objects.equals(filenameMobile, other.filenameMobile)
+				&& Objects.equals(filenamePdf, other.filenamePdf) && Objects.equals(forLocale, other.forLocale)
+				&& Objects.equals(id, other.id) && Objects.equals(imageDimension, other.imageDimension)
+				&& Objects.equals(metadata, other.metadata)
+				&& Objects.equals(mobileImageDimension, other.mobileImageDimension)
+				&& Objects.equals(modified, other.modified)
+				&& Objects.equals(pdfImageDimension, other.pdfImageDimension) && published == other.published
+				&& Objects.equals(relativeFolderPath, other.relativeFolderPath) && sortOrder == other.sortOrder
+				&& Objects.equals(title, other.title) && Objects.equals(uploadTimestamp, other.uploadTimestamp);
+	}
+
+	
 }

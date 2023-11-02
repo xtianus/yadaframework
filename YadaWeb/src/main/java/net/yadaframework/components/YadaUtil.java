@@ -2465,7 +2465,15 @@ public class YadaUtil {
 									if (isType(value.getClass(), YadaAttachedFile.class)) {
 										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
 									}
+									int previousSize = targetCollection.size();
 									targetCollection.add(clonedValue);
+									if (previousSize==targetCollection.size()) {
+										// If the target collection didn't grow, it means that it is probably a Set and the element doesn't
+										// implement a unique hashCode function: it may be using the id field of an Entity for example, that is null now.
+										log.debug("It looks like you should implement a better .equals() and .hashCode() function in {}", value.getClass());
+										throw new YadaInvalidUsageException("Cloned collection not growing when cloning: "
+											+ "the {}.hashCode() function is returning {}", value.getClass(), clonedValue.hashCode());
+									}
 								} else {
 									targetCollection.add(value); // shallow
 								}
