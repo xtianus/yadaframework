@@ -91,6 +91,7 @@ import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
+import com.drew.metadata.gif.GifHeaderDirectory;
 
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.core.CloneableFiltered;
@@ -920,23 +921,37 @@ public class YadaUtil {
 			//	            	}
 			//	            }
 			//			}
+			boolean valid = false;
+			int orientation = 1; // Default when can't be retrieved
+			int width, height;
 			ExifIFD0Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-			int orientation = 1;
-			if (directory.containsTag(ExifIFD0Directory.TAG_ORIENTATION)) {
+			if (directory!=null && directory.containsTag(ExifIFD0Directory.TAG_ORIENTATION)) {
 				orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
 			}
 			ExifSubIFDDirectory directory2 = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
-			int width = directory2.getInt(ExifSubIFDDirectory.TAG_EXIF_IMAGE_WIDTH);
-			int height = directory2.getInt(ExifSubIFDDirectory.TAG_EXIF_IMAGE_HEIGHT);
-			if (orientation==6 || orientation==8) {
-				// Image is rotated 90° so dimensions must be swapped
-				return new YadaIntDimension(height, width);
+			if (directory2!=null) {
+				width = directory2.getInt(ExifSubIFDDirectory.TAG_EXIF_IMAGE_WIDTH);
+				height = directory2.getInt(ExifSubIFDDirectory.TAG_EXIF_IMAGE_HEIGHT);
+				valid = true;
+			} else {
+				// If there is no exif directory, look for info in the gif header
+				GifHeaderDirectory gifHeaderDirectory = metadata.getFirstDirectoryOfType(GifHeaderDirectory.class);
+				width = gifHeaderDirectory.getInt(GifHeaderDirectory.TAG_IMAGE_WIDTH);
+				height = gifHeaderDirectory.getInt(GifHeaderDirectory.TAG_IMAGE_HEIGHT);
+				valid = true;
 			}
-			return new YadaIntDimension(width, height);
+			if (valid) {
+				if (orientation==6 || orientation==8) {
+					// Image is rotated 90° so dimensions must be swapped
+					return new YadaIntDimension(height, width);
+				}
+				return new YadaIntDimension(width, height);
+			}
 		} catch (Exception e) {
-			log.debug("Error reading EXIF dimensions for {} - fallback to dumb version}", imageFile);
-			return getImageDimensionDumb(imageFile);
+			log.debug("Exception reading image dimensions for {}: {}}", imageFile, e.getMessage());
 		}
+		log.debug("Fallback to dumb version while reading image dimensions for {}", imageFile);
+		return getImageDimensionDumb(imageFile);
 	}
 
 	/**
@@ -2453,7 +2468,15 @@ public class YadaUtil {
 									if (isType(value.getClass(), YadaAttachedFile.class)) {
 										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
 									}
+									int previousSize = targetCollection.size();
 									targetCollection.add(clonedValue);
+									if (previousSize==targetCollection.size()) {
+										// If the target collection didn't grow, it means that it is probably a Set and the element doesn't
+										// implement a unique hashCode function: it may be using the id field of an Entity for example, that is null now.
+										log.debug("It looks like you should implement a better .equals() and .hashCode() function in {}", value.getClass());
+										throw new YadaInvalidUsageException("Cloned collection not growing when cloning: "
+											+ "the {}.hashCode() function is returning {}", value.getClass(), clonedValue.hashCode());
+									}
 								} else {
 									targetCollection.add(value); // shallow
 								}
