@@ -112,7 +112,7 @@
 			columnDef.push(
 				{	// Colonna dei checkbox
 					data: null,
-					name: 'seleziona', // Non usato
+					name: '_yadaSelectionColumn', // Non usato
 					orderable: false,
 					searchable: false,
 					render: function ( data, type, row ) {
@@ -176,7 +176,7 @@
 		columnDef.push({ 
 			data: null, 
 			className: 'yadaCommandButtonCell',
-			name: 'comandi',
+			name: '_yadaCommandColumn',
 			orderable: false,
 			searchable: false,
 			width: '50px',

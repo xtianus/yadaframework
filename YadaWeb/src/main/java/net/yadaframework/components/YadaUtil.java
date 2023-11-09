@@ -14,6 +14,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
@@ -66,6 +67,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
+import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.exec.CommandLine;
@@ -1274,6 +1276,16 @@ public class YadaUtil {
 			}
 		});
 	}
+	
+	/**
+	 * Returns a string representation of the object as Object.toString() does, even if toString() has been overridden
+	 * @param object
+	 * @return
+	 */
+	// Must be static to be used by getLocalValue()
+	public static String getObjectToString(Object object) {
+		return object.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(object));
+	}
 
 	/**
 	 * Returns the localized value from a map of Locale -> String.
@@ -1286,7 +1298,7 @@ public class YadaUtil {
 	public static String getLocalValue(Map<Locale, String> LocalizedValueMap) {
 		return YadaUtil.getLocalValue(LocalizedValueMap, LocaleContextHolder.getLocale());
 	}
-
+	
 	/**
 	 * Returns the localized value from a map of Locale -> String.
 	 * Used in entities with localized string attributes.
@@ -1305,7 +1317,7 @@ public class YadaUtil {
 			result = localizedValueMap.get(locale);
 		} catch (Exception e) {
 			// By default use a safe plain version of the toString() method
-			String localizedValueMapName = localizedValueMap.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(localizedValueMap));
+			String localizedValueMapName = getObjectToString(localizedValueMap);
 			try {
 				localizedValueMapName=localizedValueMap.toString();
 			} catch (Exception e1) {
@@ -2384,20 +2396,26 @@ public class YadaUtil {
 	 * @param yadaAttachedFileCloneSet holds all the cloned YadaAttachedFile objects for later copying files on disk
 	 */
 	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap, YadaAttachedFileCloneSet yadaAttachedFileCloneSet) {
-		log.debug("Cloning object {} of type {}", source, sourceClass);
+		log.debug("Cloning object {} of type {}", getObjectToString(source), sourceClass);
 		Field[] fields = sourceClass.getDeclaredFields();
 		// Excluded fields are totally ignored and will be either null or zero (or whatever the default is) in the target object
 		Field[] excludedFields = source.getExcludedFields(); // See CloneableFiltered.java
 		List<Field>filteredFields = excludedFields!=null? (List<Field>) Arrays.asList(excludedFields):new ArrayList<>();
 		for (int i = 0; i < fields.length; i++) {
 			Field field = fields[i];
-			log.debug("Copying field {}", field.getName());
 			field.setAccessible(true);
-			boolean copyNot = field.isAnnotationPresent(YadaCopyNot.class);
-			// "id" is forcefully ignored so that all JPA Entities get detached
-			if ("id".equals(field.getName()) || copyNot || filteredFields.contains(field)) {
+			// Do not copy a field annotated with @YadaCopyNot
+			boolean skipField = field.isAnnotationPresent(YadaCopyNot.class);
+			// Also don't copy a static or final field
+			int modifiers = field.getModifiers();
+			skipField |= Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers);
+			// Also don't copy id of entities
+			skipField |= "id".equals(field.getName()) && sourceClass.isAnnotationPresent(Entity.class);
+			if (skipField || filteredFields.contains(field)) {
+				log.debug("Skipping field {}", field.getName());
 				continue; // Skip the filtered fields
 			}
+			log.debug("Copying field {}", field.getName());
 			boolean copyShallow = field.isAnnotationPresent(YadaCopyShallow.class);
 			try {
 				// Retrieve public getter/setter methods
@@ -2521,31 +2539,34 @@ public class YadaUtil {
 							}
 //								targetMap.putAll(sourceMap);
 						} else {
-							// Non è una collection nè una mappa.
+							// No collection nor map
+							Object fieldSourceValueObject = setFieldDirectly ? field.get(source) : getter.invoke(source);
+							Object fieldTargetValueObject = setFieldDirectly ? field.get(target) : getter.invoke(target);
+							if (fieldSourceValueObject==null && fieldTargetValueObject==null) {
+								continue; // Prevent possible errors later
+							}
 							if (isType(fieldType, CloneableDeep.class)) {
-								// Siccome implementa CloneableDeep, lo duplico deep
-								CloneableFiltered fieldValue = setFieldDirectly ? (CloneableFiltered) field.get(source) : (CloneableFiltered) getter.invoke(source);
+								// Deep copy
+								CloneableFiltered fieldValue = (CloneableFiltered) fieldSourceValueObject;
 								Object clonedValue = YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep but detached
 								// For YadaAttachedFile objects, duplicate the file on disk too
 								if (isType(fieldType, YadaAttachedFile.class)) {
 									clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
 								}
 								copyValueShallow(setFieldDirectly, field, getter, setter, source, target, clonedValue);
-//								setter.invoke(target, YadaUtil.copyEntity(fieldValue)); // deep but detached
 							} else if (isType(fieldType, StringBuilder.class)) {
 								// String builder/buffer is cloned otherwise changes to the original object would be reflected in the new one
-								StringBuilder fieldValue = setFieldDirectly ? (StringBuilder) field.get(source) : (StringBuilder) getter.invoke(source);
+								StringBuilder fieldValue = (StringBuilder) fieldSourceValueObject;
 								StringBuilder fieldClone = new StringBuilder(fieldValue.toString());
 								copyProvidedValue(setFieldDirectly, field, getter, setter, fieldClone, target);
 							} else if (isType(fieldType, StringBuffer.class)) {
 								// String builder/buffer is cloned otherwise changes to the original object would be reflected in the new one
-								StringBuffer fieldValue = setFieldDirectly ? (StringBuffer) field.get(source) : (StringBuffer) getter.invoke(source);
+								StringBuffer fieldValue = (StringBuffer) fieldSourceValueObject;
 								StringBuffer fieldClone = new StringBuffer(fieldValue.toString());
 								copyProvidedValue(setFieldDirectly, field, getter, setter, fieldClone, target);
 							} else {
-								// E' un oggetto normale, per cui copio il riferimento
+								// Plain object, just copy the reference (no cloning)
 								copyValueShallow(setFieldDirectly, field, getter, setter, source, target);
-//								setter.invoke(target, getter.invoke(source)); // shallow
 							}
 						}
 					}
