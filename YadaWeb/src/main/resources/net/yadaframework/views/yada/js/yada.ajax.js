@@ -1437,10 +1437,7 @@
 					yada.loaderOff();
 					return;
 				}
-				// Per mostrare una notification al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify" 
-				// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
-				var notify=yada.handleNotify(responseHtml);
-				
+
 				// Always initialize all handlers on the returned content
 				yada.initHandlersOn(responseHtml);
 
@@ -1462,6 +1459,10 @@
 					yada.loaderOff();
 					return;
 				}
+
+				// Per mostrare una notification al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify"
+				// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
+				var notify=yada.handleNotify(responseHtml);
 				if (notify) {
 					return;
 				}
