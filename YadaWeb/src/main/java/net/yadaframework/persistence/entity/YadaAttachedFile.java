@@ -625,6 +625,12 @@ public class YadaAttachedFile implements CloneableDeep {
 
 	@Override
 	public int hashCode() {
+		if (id!=null) {
+			// Two entities with the same id are the same.
+			// This prevents lazy init exceptions too.
+			return id.hashCode();
+		}
+		// This is for when the object is not persisted yet
 		return Objects.hash(clientFilename, description, desktopImageDimension, filename, filenameDesktop,
 				filenameMobile, filenamePdf, forLocale, id, imageDimension, metadata, mobileImageDimension, modified,
 				pdfImageDimension, published, relativeFolderPath, sortOrder, title, uploadTimestamp);
@@ -642,6 +648,12 @@ public class YadaAttachedFile implements CloneableDeep {
 			return false;
 		}
 		YadaAttachedFile other = (YadaAttachedFile) obj;
+		if (id!=null) {
+			// Two entities with the same id are the same.
+			// This prevents lazy init exceptions too.
+			return id.equals(other.id);
+		}
+		// This is for when the object is not persisted yet
 		return Objects.equals(clientFilename, other.clientFilename) && Objects.equals(description, other.description)
 				&& Objects.equals(desktopImageDimension, other.desktopImageDimension)
 				&& Objects.equals(filename, other.filename) && Objects.equals(filenameDesktop, other.filenameDesktop)

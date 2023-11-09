@@ -127,18 +127,6 @@ public class YadaJobDao {
 		.setParameter("running", YadaJobState.RUNNING.toYadaPersistentEnum())
 		.query(em).executeUpdate();
 	}
-
-//  /**
-//  * TODO Change the state of all jobs in the group
-//  * @param jobGroup
-//  * @param fromState
-//  * @param toState
-//  */
-//	public void changeAllStates(String jobGroup, YadaJobState fromState, YadaJobState toState) {
-//		YadaSql.instance().set("set "); //////////////// TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//		
-//		
-//	}
 	
 	/**
 	 * Get the current job state from the database
