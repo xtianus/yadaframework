@@ -94,6 +94,7 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.gif.GifHeaderDirectory;
+import com.drew.metadata.jpeg.JpegDirectory;
 
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.core.CloneableFiltered;
@@ -924,7 +925,7 @@ public class YadaUtil {
 			//			}
 			boolean valid = false;
 			int orientation = 1; // Default when can't be retrieved
-			int width, height;
+			int width = -1, height = -1;
 			ExifIFD0Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
 			if (directory!=null && directory.containsTag(ExifIFD0Directory.TAG_ORIENTATION)) {
 				orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
@@ -937,9 +938,19 @@ public class YadaUtil {
 			} else {
 				// If there is no exif directory, look for info in the gif header
 				GifHeaderDirectory gifHeaderDirectory = metadata.getFirstDirectoryOfType(GifHeaderDirectory.class);
-				width = gifHeaderDirectory.getInt(GifHeaderDirectory.TAG_IMAGE_WIDTH);
-				height = gifHeaderDirectory.getInt(GifHeaderDirectory.TAG_IMAGE_HEIGHT);
-				valid = true;
+				if (gifHeaderDirectory!=null) {
+					width = gifHeaderDirectory.getInt(GifHeaderDirectory.TAG_IMAGE_WIDTH);
+					height = gifHeaderDirectory.getInt(GifHeaderDirectory.TAG_IMAGE_HEIGHT);
+					valid = true;
+				} else {
+					// Look for info in the jpeg header
+					JpegDirectory jpegDirectory = metadata.getFirstDirectoryOfType(JpegDirectory.class);
+					if (jpegDirectory!=null) {
+						width = jpegDirectory.getInt(JpegDirectory.TAG_IMAGE_WIDTH);
+						height = jpegDirectory.getInt(JpegDirectory.TAG_IMAGE_HEIGHT);
+						valid = true;
+					}
+				}
 			}
 			if (valid) {
 				if (orientation==6 || orientation==8) {

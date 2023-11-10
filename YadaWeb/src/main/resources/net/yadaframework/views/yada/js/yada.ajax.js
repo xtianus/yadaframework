@@ -1474,7 +1474,11 @@
 					var stickyModal = $loadedModalDialog.hasClass(yada.stickyModalMarker);
 					
 					// Remove any currently downloaded modals (markerAjaxModal) if they are open and not sticky
-					const $existingModals = $(".modal.show."+markerAjaxModal+":has(.modal-dialog:not(."+yada.stickyModalMarker+"))");
+					var $existingModals = $(".modal.show."+markerAjaxModal+":has(.modal-dialog:not(."+yada.stickyModalMarker+"))");
+					if ($existingModals.length==0) {
+						// Try Bootstrap 3 selector
+						$existingModals = $(".modal.in."+markerAjaxModal+":has(.modal-dialog:not(."+yada.stickyModalMarker+"))");
+					}
 					if ($existingModals.length>0) {
 						$existingModals.modal("hide"); // Remove the background too
 						// $existingModals.remove(); // This prevents removal of the modal background sometimes
