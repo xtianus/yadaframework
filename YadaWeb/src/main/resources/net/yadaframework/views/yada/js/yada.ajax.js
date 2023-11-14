@@ -1586,7 +1586,13 @@
 	
 	function closeLoginModalIfAny(jqXHR) {
 		if (jqXHR.getResponseHeader("Yada-Ajax-Just-LoggedIn")!=null) {
-			yada.reload();
+            // This is wrong because it reloads the page after an ajax login call
+            // and this is not always good.
+            // Probably it was implemented in order to refresh the page header after a login
+            // thus showing the user name or avatar.
+            // But we don't always want to lose the page state after a login
+            // so the reload must be implemented in a successHandler when needed.
+			// yada.reload();
 		}
 	};
 	
