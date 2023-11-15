@@ -3,12 +3,11 @@ package net.yadaframework.security.persistence.repository;
 import java.util.Date;
 import java.util.List;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import net.yadaframework.core.YadaRegistrationType;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 

@@ -2,6 +2,10 @@ package net.yadaframework.security;
 import java.io.IOException;
 import java.io.Writer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.filter.GenericFilterBean;
+
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,10 +14,6 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.filter.GenericFilterBean;
 
 /**
  * Questo filtro viene eseguito prima di qualunque cosa e, se la richiesta è COMMAND, ritorna "active" o "expired" riguardo la session.

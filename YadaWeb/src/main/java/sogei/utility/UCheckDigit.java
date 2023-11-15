@@ -1,6 +1,7 @@
 package sogei.utility;
 
- import java.util.*;
+ import java.util.Hashtable;
+import java.util.Vector;
 
  /**
  * Downloaded from http://www.agenziaentrate.gov.it/wps/content/Nsilib/Nsi/Home/CosaDeviFare/Richiedere/Codice+fiscale+e+tessera+sanitaria/Richiesta+TS_CF/SchedaI/Programma+correttezza+formale+CF/

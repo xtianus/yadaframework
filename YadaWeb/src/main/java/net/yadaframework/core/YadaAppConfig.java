@@ -6,7 +6,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
@@ -32,6 +31,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
+import jakarta.annotation.PostConstruct;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.web.dialect.YadaDialect;
 

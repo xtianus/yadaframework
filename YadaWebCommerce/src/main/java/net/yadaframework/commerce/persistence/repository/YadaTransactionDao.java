@@ -2,13 +2,12 @@ package net.yadaframework.commerce.persistence.repository;
 
 import java.util.List;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import net.yadaframework.commerce.persistence.entity.YadaOrder;
 import net.yadaframework.commerce.persistence.entity.YadaTransaction;
 import net.yadaframework.persistence.YadaMoney;

@@ -1,7 +1,6 @@
 package net.yadaframework.commerce.persistence.entity;
 
 import jakarta.persistence.Entity;
-
 import net.yadaframework.cms.persistence.entity.YadaArticle;
 
 @Entity

@@ -1,15 +1,7 @@
 package net.yadaframework.security;
 
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-
-import net.yadaframework.components.YadaUtil;
-import net.yadaframework.core.YadaConfiguration;
-import net.yadaframework.core.YadaWebConfig;
+import java.io.IOException;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,8 +11,15 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 
-import java.io.IOException;
-import java.util.Map;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import net.yadaframework.components.YadaUtil;
+import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.core.YadaWebConfig;
 
 
 /**

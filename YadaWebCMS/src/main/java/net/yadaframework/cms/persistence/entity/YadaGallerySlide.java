@@ -6,6 +6,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -18,11 +20,9 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
-
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Stores all the elements that can appear on a gallery slide: image, video, text...

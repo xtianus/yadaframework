@@ -1,5 +1,4 @@
 package net.yadaframework.persistence;
-import java.awt.print.Pageable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,13 +7,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import net.yadaframework.core.CloneableFiltered;
 import net.yadaframework.exceptions.InternalException;
 import net.yadaframework.web.YadaPageRequest;

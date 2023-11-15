@@ -2,14 +2,14 @@ package net.yadaframework.security;
 
 import java.util.EnumSet;
 
-import jakarta.servlet.DispatcherType;
-import jakarta.servlet.ServletContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.multipart.support.MultipartFilter;
 
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.ServletContext;
 import net.yadaframework.security.components.YadaAuthenticationSuccessFilter;
 
 @Order(1)

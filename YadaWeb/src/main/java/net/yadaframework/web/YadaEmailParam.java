@@ -3,9 +3,6 @@ import java.io.File;
 import java.util.Locale;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class YadaEmailParam {
 	/**
 	 * The email to show as sender: [ address, name ]. 

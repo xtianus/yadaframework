@@ -20,7 +20,6 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
-
 import net.yadaframework.commerce.exceptions.YadaCurrencyMismatchException;
 import net.yadaframework.commerce.persistence.repository.YadaTransactionDao;
 import net.yadaframework.persistence.YadaMoney;

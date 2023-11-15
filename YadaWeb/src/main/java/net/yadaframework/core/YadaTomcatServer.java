@@ -6,8 +6,6 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 
-import jakarta.servlet.ServletException;
-
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.connector.Connector;
@@ -15,18 +13,14 @@ import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
-import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
-import org.apache.commons.configuration2.PropertiesConfiguration;
-import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
 import org.apache.commons.configuration2.builder.combined.CombinedConfigurationBuilder;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.coyote.ajp.AbstractAjpProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.servlet.ServletException;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 /**

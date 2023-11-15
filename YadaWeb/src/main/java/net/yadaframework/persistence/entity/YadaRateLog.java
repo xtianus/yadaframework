@@ -1,5 +1,8 @@
 package net.yadaframework.persistence.entity;
 
+import java.io.Serializable;
+import java.util.Date;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,9 +12,6 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-
-import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Keeps a timestamped log of events for rate-limiting purposes

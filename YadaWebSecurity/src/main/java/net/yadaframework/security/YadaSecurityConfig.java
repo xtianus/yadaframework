@@ -4,11 +4,6 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import jakarta.servlet.DispatcherType;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -27,15 +22,19 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.YadaCommonsMultipartResolver;
 
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.components.YadaAuthenticationFailureHandler;
 import net.yadaframework.security.components.YadaAuthenticationSuccessHandler;
 import net.yadaframework.security.components.YadaLogoutSuccessHandler;
 import net.yadaframework.security.components.YadaUserDetailsService;
-import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.multipart.commons.YadaCommonsMultipartResolver;
 
 /**
  * Basic security configuration.

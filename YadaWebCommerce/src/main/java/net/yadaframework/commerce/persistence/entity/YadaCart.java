@@ -17,7 +17,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
-
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 
 @Entity

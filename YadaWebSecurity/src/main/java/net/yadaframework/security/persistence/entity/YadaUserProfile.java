@@ -5,6 +5,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
 
+import org.apache.commons.lang3.LocaleUtils;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,9 +17,6 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotNull;
-
-import org.apache.commons.lang3.LocaleUtils;
-
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 
 @Entity

@@ -1,8 +1,5 @@
 package net.yadaframework.web.flot;
 
-import java.util.ArrayList;
-
-
 /**
  * 
  */

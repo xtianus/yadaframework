@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +27,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
+import jakarta.servlet.http.HttpServletRequest;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.web.YadaViews;

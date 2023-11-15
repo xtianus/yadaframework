@@ -17,7 +17,6 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
-
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.persistence.YadaMoney;
 import net.yadaframework.persistence.YadaMoneyConverter;

@@ -3,12 +3,11 @@ package net.yadaframework.components;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import jakarta.annotation.PostConstruct;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.persistence.entity.YadaClause;
 import net.yadaframework.persistence.repository.YadaClauseDao;

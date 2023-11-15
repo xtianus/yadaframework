@@ -1,5 +1,8 @@
 package net.yadaframework.persistence.entity;
 
+import java.io.Serializable;
+import java.util.UUID;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -8,11 +11,8 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import jakarta.persistence.Version;
 import jakarta.persistence.UniqueConstraint;
-
-import java.io.Serializable;
-import java.util.UUID;
+import jakarta.persistence.Version;
 
 
 /**

@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import jakarta.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 
 import org.apache.commons.configuration2.ConfigurationUtils;
@@ -36,6 +35,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.format.Formatter;
 import org.vibur.dbcp.ViburDBCPDataSource;
 
+import jakarta.servlet.http.HttpServletRequest;
 import net.yadaframework.exceptions.YadaConfigurationException;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaInvalidValueException;
