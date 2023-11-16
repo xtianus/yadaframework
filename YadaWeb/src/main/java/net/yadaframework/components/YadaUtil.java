@@ -66,7 +66,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
-import javax.persistence.Entity;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -95,6 +94,7 @@ import com.drew.metadata.gif.GifHeaderDirectory;
 import com.drew.metadata.jpeg.JpegDirectory;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotNull;
 import net.yadaframework.core.CloneableDeep;
 import net.yadaframework.core.CloneableFiltered;
