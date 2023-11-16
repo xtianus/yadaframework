@@ -326,7 +326,11 @@ public class YadaGallerySlide implements CloneableDeep {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id);
+		if (id!=null) {
+			return Objects.hash(id);
+		} else {
+			return hashCodeInternal();
+		}
 	}
 
 	@Override
@@ -341,7 +345,40 @@ public class YadaGallerySlide implements CloneableDeep {
 			return false;
 		}
 		YadaGallerySlide other = (YadaGallerySlide) obj;
-		return Objects.equals(id, other.id);
+		if (id!=null) {
+			return Objects.equals(id, other.id);
+		} else {
+			return equalsInternal(other);
+		}
+	}
+
+	public int hashCodeInternal() {
+		return Objects.hash(data1, data2, data3, data4, data5, data6, flag1, flag2, id, image, 
+				pos, slideEnabled, text1, text2, text3, text4, text5local, text6local, text7local,
+				text8local, video);
+	}
+
+	public boolean equalsInternal(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		YadaGallerySlide other = (YadaGallerySlide) obj;
+		return Objects.equals(data1, other.data1) && Objects.equals(data2, other.data2)
+				&& Objects.equals(data3, other.data3) && Objects.equals(data4, other.data4)
+				&& Objects.equals(data5, other.data5) && Objects.equals(data6, other.data6) && flag1 == other.flag1
+				&& flag2 == other.flag2 && Objects.equals(id, other.id) && Objects.equals(image, other.image)
+				&& Objects.equals(pos, other.pos)
+				&& slideEnabled == other.slideEnabled && Objects.equals(text1, other.text1)
+				&& Objects.equals(text2, other.text2) && Objects.equals(text3, other.text3)
+				&& Objects.equals(text4, other.text4) && Objects.equals(text5local, other.text5local)
+				&& Objects.equals(text6local, other.text6local) && Objects.equals(text7local, other.text7local)
+				&& Objects.equals(text8local, other.text8local) && Objects.equals(video, other.video);
 	}
 
 }

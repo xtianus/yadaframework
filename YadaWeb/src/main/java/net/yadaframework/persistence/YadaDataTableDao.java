@@ -155,6 +155,9 @@ public class YadaDataTableDao {
 			Object value = "";
 			String[] parts = attributePath.split("\\.", 2);
 			String attributeName = parts[0];
+			if ("_yadaSelectionColumn".equals(attributeName) || "_yadaCommandColumn".equals(attributeName)) {
+				return;
+			}
 			if (entity instanceof java.util.Map) {
 				Map<Object,Object> mapEntity = (Map<Object,Object>) entity;
 				// The old version was generating a key from the String value, but needed to know how to do that,

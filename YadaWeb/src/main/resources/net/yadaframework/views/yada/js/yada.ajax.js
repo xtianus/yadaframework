@@ -1440,10 +1440,7 @@
 					yada.loaderOff();
 					return;
 				}
-				// Per mostrare una notification al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify" 
-				// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
-				var notify=yada.handleNotify(responseHtml);
-				
+
 				// Always initialize all handlers on the returned content
 				yada.initHandlersOn(responseHtml);
 
@@ -1465,6 +1462,10 @@
 					yada.loaderOff();
 					return;
 				}
+
+				// Per mostrare una notification al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify"
+				// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
+				var notify=yada.handleNotify(responseHtml);
 				if (notify) {
 					return;
 				}
@@ -1476,12 +1477,18 @@
 					var stickyModal = $loadedModalDialog.hasClass(yada.stickyModalMarker);
 					
 					// Remove any currently downloaded modals (markerAjaxModal) if they are open and not sticky
-					const $existingModals = $(".modal.show."+markerAjaxModal+" .modal-dialog:not(."+yada.stickyModalMarker+")");
-					$existingModals.modal("hide"); // Remove the background too
-					// $existingModals.remove(); // This prevents removal of the modal background sometimes
-					$existingModals.on('hidden.bs.modal', function (e) {
-						$existingModals.remove(); // Remove the existing modal after it's been closed
-					});
+					var $existingModals = $(".modal.show."+markerAjaxModal+":has(.modal-dialog:not(."+yada.stickyModalMarker+"))");
+					if ($existingModals.length==0) {
+						// Try Bootstrap 3 selector
+						$existingModals = $(".modal.in."+markerAjaxModal+":has(.modal-dialog:not(."+yada.stickyModalMarker+"))");
+					}
+					if ($existingModals.length>0) {
+						$existingModals.modal("hide"); // Remove the background too
+						// $existingModals.remove(); // This prevents removal of the modal background sometimes
+						$existingModals.on('hidden.bs.modal', function (e) {
+							$existingModals.remove(); // Remove the existing modal after it's been closed
+						});
+					}
 					
 					// modals are appended to the body
 					const $modalObject = $(responseHtml).find(".modal").first();
