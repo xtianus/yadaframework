@@ -348,7 +348,9 @@ public class YadaEmailService {
 		for (YadaEmailContent yadaEmailContent : yadaEmailContents) {
 			try {
 				MimeMessage mimeMessage = createMimeMessage(yadaEmailContent);
-				messageList.add(mimeMessage);
+				if (mimeMessage!=null) {
+					messageList.add(mimeMessage);
+				}
 			} catch (Exception e) {
 				result = false;
 				log.error("Error while creating batch email message to {} (ignored)", yadaEmailContent.to, e);
