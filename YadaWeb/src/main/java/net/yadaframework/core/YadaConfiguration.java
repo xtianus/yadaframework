@@ -103,6 +103,18 @@ public abstract class YadaConfiguration {
 	private File uploadsFolder = null;
 	private File tempFolder = null;
 	private String googleApiKey = null;
+	private Integer bootstrapVersion = null;
+	
+	/**
+	 * The configured bootstrap version may be used to return the correct html for modals etc.
+	 * @return the configured bootstrap version, defaults to 5
+	 */
+	public int getBootstrapVersion() {
+		if (bootstrapVersion==null) {
+			bootstrapVersion = configuration.getInt("config/bootstrapVersion", 5);
+		}
+		return bootstrapVersion;
+	}
 	
 	/**
 	 * Returns the configured FormattingConversionService. Use <FormattingConversionService> in config.
