@@ -8,13 +8,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 // import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -25,6 +25,9 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.vibur.dbcp.ViburDBCPDataSource;
+
+import net.yadaframework.components.YadaMariaDBServer;
 
 //@Configuration not needed when using WebApplicationInitializer.java
 @EnableTransactionManagement
@@ -35,7 +38,9 @@ public class YadaJpaConfig {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
 	@Autowired YadaConfiguration config;
-	
+	@Autowired YadaMariaDBServer yadaMariaDBServer;
+	private DataSource dataSource = null;
+
 	@Bean 
 	public NamedParameterJdbcTemplate namedParameterJdbcTemplate(DataSource dataSource) {
 		return new NamedParameterJdbcTemplate(dataSource);
@@ -55,7 +60,7 @@ public class YadaJpaConfig {
 	@Bean
 	public DataSource dataSource() throws SQLException {
 		// Configuration DataSource
-		DataSource result = config.getProgrammaticDatasource();
+		DataSource result = getProgrammaticDatasource();
 		if (result!=null) {
 			log.info("DataSource from configuration file (not JNDI)");
 			return result;
@@ -109,5 +114,55 @@ public class YadaJpaConfig {
 		return new HibernateExceptionTranslator();
 	}
 	
+	/**
+	 * Returns a DataSource that has NOT been configured on JNDI. Given that there is a configuration file for each environment, you
+	 * could have a programmatic datasource in development and a JNDI datasource in production, if needed.
+	 * This method should be overridden to set more parameters than currently implemented.
+	 * @return null if the DataSource is on JNDI (via context.xml), or a new Vibur DataSource otherwise
+	 */
+	public synchronized DataSource getProgrammaticDatasource() {
+		if (dataSource!=null) {
+			return dataSource; // Keep the instance in case it is called twice (it happened)
+		}
+		try {
+			Integer port = null;
+			if (config.isUseEmbeddedDatabase()) {
+				port = yadaMariaDBServer.getPort();
+			}
+			
+			ImmutableHierarchicalConfiguration datasourceConfig = config.getConfiguration().immutableConfigurationAt("config/database/datasource");
+			String jdbcUrl = datasourceConfig.getString("jdbcUrl");
+			if (port!=null && port>0) {
+				// Forcing localhost at a specific port when using embedded db
+				jdbcUrl = jdbcUrl.replaceAll("//[^:/]+(:\\d+)?/", "//localhost:" + port + "/");
+			}
+			
+			ViburDBCPDataSource ds = new ViburDBCPDataSource();
+			ds.setJdbcUrl(jdbcUrl);
+			ds.setUsername(datasourceConfig.getString("username"));
+			ds.setPassword(datasourceConfig.getString("password"));
+			ds.setName(datasourceConfig.getString("name")); // Pool name
+
+			ds.setPoolInitialSize(datasourceConfig.getInt("poolInitialSize"));
+			ds.setPoolMaxSize(datasourceConfig.getInt("poolMaxSize"));
+			ds.setPoolEnableConnectionTracking(datasourceConfig.getBoolean("poolEnableConnectionTracking"));
+
+			ds.setLogQueryExecutionLongerThanMs(datasourceConfig.getInt("logQueryExecutionLongerThanMs"));
+			ds.setLogStackTraceForLongQueryExecution(datasourceConfig.getBoolean("logStackTraceForLongQueryExecution"));
+			ds.setLogLargeResultSet(datasourceConfig.getLong("logLargeResultSet"));
+			ds.setLogStackTraceForLargeResultSet(datasourceConfig.getBoolean("logStackTraceForLargeResultSet"));
+			ds.setIncludeQueryParameters(datasourceConfig.getBoolean("includeQueryParameters"));
+
+			ds.setStatementCacheMaxSize(datasourceConfig.getInt("statementCacheMaxSize"));
+			// ds.setDriverClassName("com.mysql.cj.jdbc.Driver"); // Not needed
+
+			ds.start();
+			this.dataSource = ds;
+			return ds;
+		} catch (org.apache.commons.configuration2.ex.ConfigurationRuntimeException e) {
+			log.info("No datasource in application configuration - using JNDI");
+		}
+	    return null;
+	}
 	
 }
