@@ -75,14 +75,17 @@ dependencies {
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper-el:8.5.+'
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper:8.5.+'
     // For embedded mariadb
-    compileOnly 'ch.vorburger.mariaDB4j:mariaDB4j:3.+'
-	
+	compileOnly('ch.vorburger.mariaDB4j:mariaDB4j:3.+') {
+		// mariaDB4j pulls the latest version of spring core but this is never a good thing.
+        exclude group: 'org.springframework', module: 'spring-core'
+    }	
 	// Needed by Commons Configuration
     api 'commons-jxpath:commons-jxpath:1.+'
 	
     api 'org.springframework:spring-webmvc:5.+',
 		'org.springframework:spring-context-support:5.+',
 		'org.springframework:spring-orm:5.+',
+		'org.springframework:spring-core:5.+',
 		// 'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
         'org.hibernate:hibernate-entitymanager:5.6.15.Final',
 		'org.hibernate:hibernate-validator:5.4.3.Final',
