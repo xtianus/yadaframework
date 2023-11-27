@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 // import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -38,7 +39,7 @@ public class YadaJpaConfig {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
 	@Autowired YadaConfiguration config;
-	@Autowired YadaMariaDBServer yadaMariaDBServer;
+	@Autowired ApplicationContext applicationContext;
 	private DataSource dataSource = null;
 
 	@Bean 
@@ -127,7 +128,14 @@ public class YadaJpaConfig {
 		try {
 			Integer port = null;
 			if (config.isUseEmbeddedDatabase()) {
-				port = yadaMariaDBServer.getPort();
+				try {
+					// Only if the mariadb jar is in the classpath
+					Class<?> theClass = Class.forName("ch.vorburger.mariadb4j.DB");
+					YadaMariaDBServer yadaMariaDBServer = (YadaMariaDBServer) applicationContext.getBean("yadaMariaDBServer");
+					port = yadaMariaDBServer.getPort();
+				} catch (ClassNotFoundException e) {
+					log.error("No MariaDB in classpath while trying to use the embedded database (ignoring)");
+				}
 			}
 			
 			ImmutableHierarchicalConfiguration datasourceConfig = config.getConfiguration().immutableConfigurationAt("config/database/datasource");

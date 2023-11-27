@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import ch.vorburger.mariadb4j.DB;
@@ -22,6 +23,7 @@ import ch.vorburger.mariadb4j.DBConfigurationBuilder;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaSystemException;
 
+@Lazy // Create instance only when used
 @Component("yadaMariaDBServer")
 @DependsOn("config")
 public class YadaMariaDBServer {
