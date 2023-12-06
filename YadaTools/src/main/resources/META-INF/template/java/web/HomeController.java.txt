@@ -72,31 +72,29 @@ public class HomeController {
 		return login(request, model, locale);
 	}
 	
-	// The login page is the home page with an attribute set
-	@RequestMapping("/login")
-	public String login(HttpServletRequest request, Model model, Locale locale) {
-		if (config.isLocalePathVariableEnabled() && !YadaLocalePathChangeInterceptor.localePathRequested(request)) {
-			// Spring security redirects to /login without the language, so we need to redirect to the language version, for consistency.
-			// The "?redirected" param is needed to delete saved requests when manually clicking on the button that opens the login form
-			return yadaWebUtil.redirectString("/login", locale); // Moved temporarily
-		}
-		
+	/**
+	 * Normal request login page
+	 */
+	@RequestMapping(YadaSecurityConfig.DEFAULT_LOGIN_URL) // "/login"
+	public String login() {
 		boolean loggedIn = yadaSecurityUtil.isLoggedIn();
-		if (!yadaWebUtil.isAjaxRequest()) {
-			// Normal request
-			if (!loggedIn) {
-				model.addAttribute("login", "login");
-			}
-			return home(request, model, locale);
-		} else {
-			// Ajax request
-			if (!loggedIn) {
-				return "/modalLogin";
-			} else {
-				return YadaViews.AJAX_SUCCESS; // Do nothing
-			}
+		if (!loggedIn) {
+			model.addAttribute("login", "login");
 		}
+		return home(request, model, locale);
 	}
 	
+	/**
+	 * Ajax request login page (modal)
+	 */
+	@RequestMapping(YadaSecurityConfig.DEFAULT_LOGIN_URL_AJAX) // "/ajaxLogin"
+	public String loginAjax() {
+		boolean loggedIn = yadaSecurityUtil.isLoggedIn();
+		if (!loggedIn) {
+			return "/modalLogin";
+		} else {
+			return YadaViews.AJAX_SUCCESS; // Do nothing
+		}
+	}
 
 }
