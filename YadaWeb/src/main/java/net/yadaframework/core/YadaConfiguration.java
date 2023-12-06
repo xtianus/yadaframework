@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.sql.DataSource;
 
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
@@ -33,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.format.Formatter;
-import org.vibur.dbcp.ViburDBCPDataSource;
 
 import jakarta.servlet.http.HttpServletRequest;
 import net.yadaframework.exceptions.YadaConfigurationException;
@@ -99,10 +97,51 @@ public abstract class YadaConfiguration {
 	private String targetImageExtension=null;
 	private String preserveImageExtensions=null;
 	private String defaultNotifyModalView = null;
-	private DataSource dataSource = null;
 	private File uploadsFolder = null;
 	private File tempFolder = null;
 	private String googleApiKey = null;
+	private Integer bootstrapVersion = null;
+	
+	/**
+	 * @return true if the embedded db should be used instead of the external MySQL
+	 */
+	public boolean isUseEmbeddedDatabase() {
+		return configuration.getBoolean("config/database/embedded/@enabled", false);
+	}
+	
+	/**
+	 * @return the location of the data folder for the embedded database
+	 */
+	public String getEmbeddedDatabaseDataDir() {
+		return configuration.getString("config/database/embedded/datadir", "dbembedded");
+	}
+	
+	/**
+	 * Returns a pointer to the sql file configured for loading the embedded database at startup
+	 * @return the File to use for reading or null if the file is not configured or not readable
+	 */
+	public File getEmbeddedDatabaseSourceSql() {
+		String sourceSqlPath = configuration.getString("config/database/embedded/sourceSql", null);
+		if (sourceSqlPath!=null) {
+			File result = new File(sourceSqlPath);
+			if (result.canRead()) {
+				return result;
+			}
+		}
+		log.debug("No source sql to load at startup");
+		return null;
+	}
+	
+	/**
+	 * The configured bootstrap version may be used to return the correct html for modals etc.
+	 * @return the configured bootstrap version, defaults to 5
+	 */
+	public int getBootstrapVersion() {
+		if (bootstrapVersion==null) {
+			bootstrapVersion = configuration.getInt("config/bootstrapVersion", 5);
+		}
+		return bootstrapVersion;
+	}
 	
 	/**
 	 * Returns the configured FormattingConversionService. Use <FormattingConversionService> in config.
@@ -159,47 +198,6 @@ public abstract class YadaConfiguration {
 			googleApiKey = configuration.getString("google/api/key", "");
 		}
 		return googleApiKey;
-	}
-
-	/**
-	 * Returns a DataSource that has NOT been configured on JNDI. Given that there is a configuration file for each environment, you
-	 * could have a programmatic datasource in development and a JNDI datasource in production, if needed.
-	 * This method should be overridden to set more parameters than currently implemented.
-	 * @return null if the DataSource is on JNDI (via context.xml), or a new Vibur DataSource otherwise
-	 */
-	public synchronized DataSource getProgrammaticDatasource() {
-		if (dataSource!=null) {
-			return dataSource; // Keep the instance because the YadaJpaConfigdataSource() method is called twice
-		}
-		try {
-			ImmutableHierarchicalConfiguration datasourceConfig = configuration.immutableConfigurationAt("config/database/datasource");
-
-			ViburDBCPDataSource ds = new ViburDBCPDataSource();
-			ds.setJdbcUrl(datasourceConfig.getString("jdbcUrl"));
-			ds.setUsername(datasourceConfig.getString("username"));
-			ds.setPassword(datasourceConfig.getString("password"));
-			ds.setName(datasourceConfig.getString("name")); // Pool name
-
-			ds.setPoolInitialSize(datasourceConfig.getInt("poolInitialSize"));
-			ds.setPoolMaxSize(datasourceConfig.getInt("poolMaxSize"));
-			ds.setPoolEnableConnectionTracking(datasourceConfig.getBoolean("poolEnableConnectionTracking"));
-
-			ds.setLogQueryExecutionLongerThanMs(datasourceConfig.getInt("logQueryExecutionLongerThanMs"));
-			ds.setLogStackTraceForLongQueryExecution(datasourceConfig.getBoolean("logStackTraceForLongQueryExecution"));
-			ds.setLogLargeResultSet(datasourceConfig.getLong("logLargeResultSet"));
-			ds.setLogStackTraceForLargeResultSet(datasourceConfig.getBoolean("logStackTraceForLargeResultSet"));
-			ds.setIncludeQueryParameters(datasourceConfig.getBoolean("includeQueryParameters"));
-
-			ds.setStatementCacheMaxSize(datasourceConfig.getInt("statementCacheMaxSize"));
-			// ds.setDriverClassName("com.mysql.cj.jdbc.Driver"); // Not needed
-
-			ds.start();
-			this.dataSource = ds;
-			return ds;
-		} catch (org.apache.commons.configuration2.ex.ConfigurationRuntimeException e) {
-			log.info("No datasource in application configuration - using JNDI");
-		}
-	    return null;
 	}
 
 	/**

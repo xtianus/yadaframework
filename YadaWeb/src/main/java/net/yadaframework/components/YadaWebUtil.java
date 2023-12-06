@@ -1181,7 +1181,7 @@ public class YadaWebUtil {
 		if (reloadOnConfirm) {
 			model.addAttribute("reloadOnConfirm", true);
 		}
-		return "/yada/modalConfirmB4";
+		return "/yada/modalConfirmB" + config.getBootstrapVersion();
 	}
 
 	/**

@@ -48,7 +48,7 @@ public class YadaMoney implements Comparable<YadaMoney> {
 	}
 
 	/**
-	 * Convert a string with a decimal value that uses the comma separator of the specified locale
+	 * Convert a string with a decimal value that uses the decimal separator of the specified locale
 	 * @param amount the decimal value like "12,87"
 	 * @param locale the locale to parse the comma separator, like Locale.ITALY
 	 * @throws ParseException if the amount contains invalid characters

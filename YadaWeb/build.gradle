@@ -4,7 +4,7 @@ buildscript {
 	}
 	dependencies {
 		// Needed for test schema creation
-		classpath 'net.yadaframework:yadatools:0.7.2'
+		classpath 'net.yadaframework:yadatools:+'
 		// classpath 'kr.motd.gradle:sphinx-gradle-plugin:2.2.0'
 	}                    
 }
@@ -73,13 +73,18 @@ dependencies {
     // runtimeOnly 'org.apache.tomcat:tomcat-el-api:8.5.+'
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper-el:8.5.+'
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper:8.5.+'
-	
+    // For embedded mariadb
+	compileOnly('ch.vorburger.mariaDB4j:mariaDB4j:3.+') {
+		// mariaDB4j pulls the latest version of spring core but this is never a good thing.
+        exclude group: 'org.springframework', module: 'spring-core'
+    }	
 	// Needed by Commons Configuration
     api 'commons-jxpath:commons-jxpath:1.+'
 
     api 'org.springframework:spring-context-support:6.0.+',
 		'org.springframework:spring-orm:6.0.+',
-		'org.springframework:spring-webmvc:6.0.13',
+		'org.springframework:spring-webmvc:6.0.+',
+		'org.springframework:spring-core:6.0.+',
 		// 'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
 		'org.hibernate.orm:hibernate-core:6.3.1.Final',
 		'org.hibernate.validator:hibernate-validator:8.0.1.Final',
@@ -94,7 +99,7 @@ dependencies {
 		'com.fasterxml.jackson.core:jackson-databind:2.+',
 		'org.seleniumhq.selenium:selenium-java:4.13.0', // 4.13.0 is the last java 8 version
 		'com.drewnoakes:metadata-extractor:2.+',
-		'org.flywaydb:flyway-mysql:9.+',
+		'org.flywaydb:flyway-mysql:10.+',
 		'commons-beanutils:commons-beanutils:1.9.+'
 		
 	 // Connection pool for embedded Tomcat and programmatic datasource

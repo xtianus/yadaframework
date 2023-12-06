@@ -56,19 +56,25 @@ public class YadaSecurityConfig {
 	@Autowired protected YadaLogoutSuccessHandler logoutSuccessHandler;
 	@Autowired protected PasswordEncoder passwordEncoder;
 
-	protected String defaultLoginUrl = "/login";
+	// This should be used by any @RequestMapping that wants to open the login page/modal
+	public final static String DEFAULT_LOGIN_URL = "/login";
+	public final static String DEFAULT_LOGIN_URL_AJAX = "/ajaxLogin";
+	public final static String DEFAULT_LOGIN_POST = "/loginPost";
+	
+	// These can be overridden
+	protected String loginUrl = DEFAULT_LOGIN_URL;
+	protected String loginUrlAjax = DEFAULT_LOGIN_URL_AJAX;
+	protected String loginPost = DEFAULT_LOGIN_POST;
 
 	/**
 	 * Configures basic security settings. Must be overridden to configure url protections.
 	 */
 	protected void configure(HttpSecurity http) throws Exception {
-		failureHandler.setFailureUrlAjaxRequest("/ajaxLoginForm");
-		failureHandler.setFailureUrlNormalRequest(defaultLoginUrl);
+		failureHandler.setFailureUrlAjaxRequest(loginUrlAjax);
+		failureHandler.setFailureUrlNormalRequest(loginUrl);
 		// The "/yadaLoginSuccess" target can be overridden to include the redirect to any target page.
 		// See YadaLoginController.yadaLoginSuccess()
 		successHandler.setDefaultTargetUrlAjaxRequest("/yadaLoginSuccess"); // Returns the string "success"
-		// The "/ajaxLoginOk" target has been removed because it caused a page reload after login
-		// successHandler.setDefaultTargetUrlAjaxRequest("/ajaxLoginOk"); // Returns the string "loginSuccess"
 		successHandler.setDefaultTargetUrlNormalRequest("/");
 		logoutSuccessHandler.setDefaultTargetUrl("/"); // language path will be added in the handler
 
@@ -84,8 +90,8 @@ public class YadaSecurityConfig {
 	            // .invalidateHttpSession(false) // Lascio che la session si cancelli quando esco
 	        })
 	        .formLogin(formLogin -> formLogin
-				.loginPage(defaultLoginUrl)
-				.loginProcessingUrl("/loginPost")
+				.loginPage(loginUrl) // url of the login form (GET)
+				.loginProcessingUrl(loginPost) // url where the login form is sent (POST)
 				.failureHandler(failureHandler)
 				.successHandler(successHandler))
 	        .exceptionHandling(exceptionHandling -> {
@@ -111,20 +117,21 @@ public class YadaSecurityConfig {
 
 
 	/**
-	 * Needed to redirect to a language-specific login url
+	 * Needed to redirect to a language-specific login url when a protected page is requested
 	 */
-	private class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
-		@Override
-		public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-			String loginUrl = defaultLoginUrl;
-			if (yadaConfiguration.isLocalePathVariableEnabled()) {
-				Locale locale = LocaleContextHolder.getLocale();
-				loginUrl = yadaWebUtil.enhanceUrl(loginUrl, locale);
-			}
-			response.sendRedirect(loginUrl);
-		}
-	}
-
+    private class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+        @Override
+        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+        	boolean ajaxRequest = yadaWebUtil.isAjaxRequest(request);
+        	String fixedLoginUrl = ajaxRequest?loginUrlAjax:loginUrl;
+        	if (yadaConfiguration.isLocalePathVariableEnabled()) {
+        		Locale locale = LocaleContextHolder.getLocale();
+        		fixedLoginUrl = yadaWebUtil.enhanceUrl(fixedLoginUrl, locale);
+        	}
+            response.sendRedirect(fixedLoginUrl);
+        }
+    }
+    
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		// Uso un PostProcessor per chiamare setHideUserNotFoundExceptions
