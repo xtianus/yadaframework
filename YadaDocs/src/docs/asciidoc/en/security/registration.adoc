@@ -1,0 +1,99 @@
+=  User Registration
+:docinfo: shared
+
+Creating users with email validation
+
+==  Description
+Users can be created in three ways:
+
+* by adding user details in the configuration file
+* by implementing a user registration functionality used by admins
+* by allowing any user to self register
+
+Adding users via configuration has already been covered in <<overview.adoc#_root_user,Overview>>.
+
+If the user details have already been provided by some trusted means, an admin
+could input those details and create the user. The process may require the target
+user to click on a validation link in a confirmation email but this isn't strictly 
+required. Reading user details could be implemented via a protected form or a csv file upload.
+
+When users are free to register on their own, these elements should be provided:
+
+* a public registration form
+* a confirmation email with a secret confirmation link
+* a handler for the confirmation link where users are saved to database
+
+== Registration request
+If user registration requires clicking on a validation link from an email, the user
+information must be stored in the database for later. 
+The `YadaRegistrationRequest.java` class can be used for that. It can store some basic
+information like email and password and should be subclassed in order to store application-specific
+user information. An example implementation is provided in the application entity package
+and should be customised as needed.
+
+== Registration form
+A registration link should open a page/modal with a registration form.
+The form can use the `YadaRegistrationRequest` subclass (`MyRegistrationRequest` in the example) as a backing bean
+or the `UserProfile` directly if a confirmation email is not required.
+
+[source,java]
+----
+@RequestMapping("/registerPage")
+public String registerPage(MyRegistrationRequest myRegistrationRequest) {
+	return "/register";
+}
+----
+
+The registration form can use a hidden "antispam" field that would be filled by spam
+scripts only, so that the most basic spam attacks can be easily prevented. In the
+example implementation the field "username" must be left blank in order for registration
+to be successful. The real username is stored in the "email" field.  
+
+[source,html]
+----
+<form th:action="@{/signup}" th:object="${myRegistrationRequest}" role="form" method="post">
+	<fieldset>
+		<!--/* The username field is hidden and used to detect spam */-->
+		<label for="username" class="hidethis">Username</label> 
+		<input type="text" class="hidethis" id="username" name="username" th:field="*{username}">
+		<label for="email">E-Mail</label>
+		<input type="email" id="email" th:field="*{email}" required="required" autofocus="autofocus">
+		...
+----
+
+The controller that handles the registration form submission should perform some validation on the
+application-specific fields then call the `YadaRegistrationController.handleRegistrationRequest()` method
+to finalise the operation. A default implementation is provided in the `RegistrationController.java` class.
+
+The `handleRegistrationRequest()` method performs some simple validation on the email address syntax and 
+checks if the address has been blacklisted. Blacklisting is done by specifying regex patterns
+in the configuration as shown in this example:
+
+[source,xml]
+----
+	<email>
+		...
+		<blacklistPattern>.*invalid.*</blacklistPattern>
+		<blacklistPattern>.*@mailinator.com</blacklistPattern>
+	</email>
+----	
+
+It also checks if the user exists and the password is within the configured length.
+Validation error messages are internationalised with the following keys:
+
+[source,properties]
+----
+yada.form.registration.email.invalid = Invalid email address 
+yada.form.registration.username.exists = Email already registered
+yada.form.registration.password.length = The password must be between {0} and {1} characters long.
+yada.form.registration.email.failed = Sending the registration confirmation email has failed. Please try again later
+----
+
+If validation fails, the method returns false and sets the relevant flags on the BindingResult.
+
+== Confirmation email
+
+TO BE CONTINUED
+
+
+

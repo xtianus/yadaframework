@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.7.5'
+version = '0.7.6'
 
 apply plugin: 'java-library'
 apply plugin: 'eclipse-wtp'
@@ -17,8 +17,6 @@ apply plugin: 'eclipse-wtp'
 
 eclipse {
 	jdt {
-		// sourceCompatibility = 1.8
-		// targetCompatibility = 1.8
 		// https://stackoverflow.com/a/35302104/587641
 		file {
       		File dir = file('.settings')
@@ -60,13 +58,34 @@ jar {
 }
 
 // Set the yada version in the properties file
+// Not used for docs
 processResources {
 	doLast {
 		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadaweb.properties", token: '@YADA_VERSION@', value: version)
 	}
 }
 
+import java.nio.file.Files
+import java.nio.file.Paths
+
+task copyDocInfoHeader {
+    doLast {
+        def sourceFile = file('src/docs/asciidoc/common/docinfo-header.html')
+        def rootDir = file('src/docs/asciidoc')
+
+        Files.walk(Paths.get(rootDir.absolutePath))
+             .filter { Files.isDirectory(it) && !it.equals(rootDir.toPath()) && !it.equals(sourceFile.getParentFile().toPath()) }
+             .forEach { dir ->
+                 copy {
+                     from sourceFile
+                     into dir.toFile()
+                 }
+             }
+    }
+}
+
 asciidoctor {
+	dependsOn copyDocInfoHeader
 	// baseDirFollowsSourceDir()
 	// baseDirIsRootProjectDir()
 	// This is needed for docinfo to be found in the same subfolder of a source file
@@ -93,7 +112,6 @@ asciidoctor {
 		into '../'
 	}
 }
-
 
 
 

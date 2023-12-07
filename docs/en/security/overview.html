@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Security</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
+</head>
+<body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./security/overview.html">Security</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+</script>
+<div id="header">
+<h1>Security</h1>
+<div class="details">
+<span id="revnumber">version 0.7.6</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_subsections">Subsections</a></li>
+<li><a href="#_description">Description</a></li>
+<li><a href="#_setup">Setup</a></li>
+<li><a href="#_user_profile">User Profile</a></li>
+<li><a href="#_root_user">Root user</a></li>
+<li><a href="#_authorization">Authorization</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Authentication and Authorization: create users, handle login, protect pages</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_subsections">Subsections</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><a href="login.html">User Login</a></dt>
+<dd>
+<p>Login both with normal or ajax request</p>
+</dd>
+<dt class="hdlist1"><a href="registration.html">User Registration</a></dt>
+<dd>
+<p>Registering new users</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Yada Framework uses Spring Security to implement authentication
+(identifying the current user) and authorization (limiting access to web pages
+according to the user role). The YadaWebSecurity library must be added to the classpath
+in order for this to work.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_setup">Setup</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>WebConfig</code> class must extend <code>YadaWebSecurityConfig</code> instead of <code>YadaWebConfig</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@ComponentScan(basePackages = { "com.example.web" })
+public class WebConfig extends YadaWebSecurityConfig {</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The required YadaWebSecurity entities must also be added to <code>persistence.xml</code> in order to create the DB schema:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;persistence-unit name="yadaPersistenceUnit"&gt;
+	&lt;class&gt;net.yadaframework.security.persistence.entity.YadaSocialCredentials&lt;/class&gt;
+	&lt;class&gt;net.yadaframework.security.persistence.entity.YadaUserCredentials&lt;/class&gt;
+	&lt;class&gt;net.yadaframework.security.persistence.entity.YadaUserProfile&lt;/class&gt;
+	&lt;class&gt;net.yadaframework.security.persistence.entity.YadaRegistrationRequest&lt;/class&gt;
+	&lt;class&gt;net.yadaframework.security.persistence.entity.YadaAutoLoginToken&lt;/class&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Some security parameters must be configured in <code>conf.webapp.prod.xml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;config&gt;
+	&lt;security&gt;
+		&lt;sessionTimeoutMinutes&gt;240&lt;/sessionTimeoutMinutes&gt; <i class="conum" data-value="1"></i><b>(1)</b>
+		&lt;passwordLength min='5' max='128' /&gt; <i class="conum" data-value="2"></i><b>(2)</b>
+		&lt;encodePassword&gt;true&lt;/encodePassword&gt; <i class="conum" data-value="3"></i><b>(3)</b>
+		&lt;maxFailedAttempts&gt;10&lt;/maxFailedAttempts&gt; <i class="conum" data-value="4"></i><b>(4)</b>
+		&lt;failedAttemptsLockoutMinutes&gt;10&lt;/failedAttemptsLockoutMinutes&gt; <i class="conum" data-value="5"></i><b>(5)</b>
+		&lt;autologinExpirationHours&gt;48&lt;/autologinExpirationHours&gt; <i class="conum" data-value="6"></i><b>(6)</b>
+		&lt;roles&gt; <i class="conum" data-value="7"></i><b>(7)</b>
+			&lt;role&gt;
+				&lt;id&gt;8&lt;/id&gt;
+				&lt;key&gt;ADMIN&lt;/key&gt;
+			&lt;/role&gt;
+			&lt;role&gt;
+				&lt;id&gt;2&lt;/id&gt;
+				&lt;key&gt;USER&lt;/key&gt;
+			&lt;/role&gt;
+		&lt;/roles&gt;
+	&lt;/security&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>this value must be the same used in the <code>web.xml</code> <code>&lt;session-config&gt;&lt;session-timeout&gt;</code> tag and is for checking session expiration</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>values for password validation</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>when true, passwords are encrypted in the database</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>the number of consecutive failed login attempts before an account is locked out</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>the number of minutes to wait for a locked out account before a new login attempt can be made</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>the validity time of autologin links</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>list of roles that users can have</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The list of roles defines an id and a key for every role a user can have in the application.
+A user can have more than one role.
+Role ids are just integer numbers with no special meaning, but they must be unique.
+Role keys can be any word that reminds of the activity the user can perform on the site.
+In this example, "USER" is any user with no particular privileges, and "ADMIN" is a site administrator.
+Role names should be specific to the application domain. For example, a "MANAGER" could handle users, a "GUEST" could have
+limited access, a "TEACHER" could see the score editing form.
+It&#8217;s important not to change either the id or the key once the application goes to production because
+these values are stored in the database.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_user_profile">User Profile</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Every web application handles a specific kind of user with different attributes like name, address, age etc.
+All user attributes are known as a "user profile".
+The Yada Framework provides the <code>YadaUserProfile</code> class with basic attributes like <code>firstName</code> or <code>avatar</code> image.
+The web application must subclass it with its own <code>UserProfile</code> class in order to add application-specific
+attributes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Entity
+public class UserProfile extends YadaUserProfile {
+	@Column(length = 32)
+	String nickname; // This is an example of UserProfile customization</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The user login name is always the email address. Together with the password it is stored in the <code>userCredentials</code>
+attribute of <code>YadaUserProfile</code>, of type <code>YadaUserCredentials</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_root_user">Root user</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Usually, in a web application, users either register themselves or are added by an administrator.
+In any case, there must be an initial user with administrator rights that is already in the database
+when the application starts for the first time.
+This can be implemented by subclassing <code>YadaUserSetup</code> in any bean, for example a "Setup" bean:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Component
+public class Setup extends YadaUserSetup&lt;UserProfile&gt; {</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Just by doing this, the users defined in the configuration will be created, if not there already,
+at each application startup.
+This configuration in <code>conf.webapp.prod.xml</code> creates one "admin" user (but it doesn&#8217;t have to be just one):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;config&gt;
+	&lt;setup&gt;
+		&lt;users&gt;
+			&lt;user&gt;
+				&lt;nickname&gt;admin&lt;/nickname&gt; &lt;!-- This is an example of UserProfile customization --&gt;
+				&lt;email&gt;admin@EXAMPLE.com&lt;/email&gt;
+				&lt;password&gt;changeit&lt;/password&gt;
+				&lt;locale&gt;en_US&lt;/locale&gt;
+				&lt;timezone&gt;Europe/Rome&lt;/timezone&gt;
+				&lt;role&gt;USER&lt;/role&gt;
+				&lt;role&gt;ADMIN&lt;/role&gt;
+			&lt;/user&gt;
+		&lt;/users&gt;
+	&lt;/setup&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The xml user definition can contain all attributes defined in the application-specific UserProfile class:
+they will be set using reflection.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>When a &lt;password&gt; is not provided, the user will be created with a random password that can only be known if
+&lt;encodePassword&gt; is false by reading the database directly. When the password is encoded, the only
+way of performing login is by resetting the password using the password recovery procedure that must have
+been implemented.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Sensitive data like the password of a production user or of a email provider can be stored in a server-specific file that by
+default is located in <code>/srv/???/bin/security.properties</code>. This file can hold name=value pairs like a normal
+java properties file, and the values can be used via variable interpolation inside the xml configuration file.</p>
+</div>
+<div class="paragraph">
+<p>For example, if the security.properties file contains
+<code>rootuser_password = somesecret</code>
+then the <code>conf.webapp.prod.xml</code> file can have
+<code>&lt;password&gt;${rootuser_password}&lt;/password&gt;</code></p>
+</div>
+<div class="paragraph">
+<p>Do not use dots in variable names or interpolation won&#8217;t work.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To delete all users (for development test):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="sql" class="language-sql hljs">delete from YadaUserCredentials_roles;
+delete yup, yuc FROM YadaUserProfile yup join YadaUserCredentials yuc on yup.userCredentials_id = yuc.id;</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_authorization">Authorization</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>SecurityConfig</code> class is where the application endpoints are protected so that only specific roles can
+access specific pages.
+The default implementation allows users with "ADMIN" role to access the <code>/admin</code> path and with "USER" role
+to access the <code>/user</code> path. This can of course be changed as needed.</p>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>Multiple SecurityConfig</pre>
+</div>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>- UserProfileDao</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 0.7.6<br>
+Last updated 2023-12-07 16:29:12 +0100
+</div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>

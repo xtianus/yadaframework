@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>User Registration</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
+</head>
+<body class="article toc2 toc-left">
+<!-- When editing this file, you must copy it in all other folders (without change) -->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./security/overview.html">Security</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+</script>
+<div id="header">
+<h1>User Registration</h1>
+<div class="details">
+<span id="revnumber">version 0.7.6</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_description">Description</a></li>
+<li><a href="#_registration_request">Registration request</a></li>
+<li><a href="#_registration_form">Registration form</a></li>
+<li><a href="#_confirmation_email">Confirmation email</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Creating users with email validation</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Users can be created in three ways:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>by adding user details in the configuration file</p>
+</li>
+<li>
+<p>by implementing a user registration functionality used by admins</p>
+</li>
+<li>
+<p>by allowing any user to self register</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Adding users via configuration has already been covered in <a href="overview.html#_root_user">Overview</a>.</p>
+</div>
+<div class="paragraph">
+<p>If the user details have already been provided by some trusted means, an admin
+could input those details and create the user. The process may require the target
+user to click on a validation link in a confirmation email but this isn&#8217;t strictly
+required. Reading user details could be implemented via a protected form or a csv file upload.</p>
+</div>
+<div class="paragraph">
+<p>When users are free to register on their own, these elements should be provided:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a public registration form</p>
+</li>
+<li>
+<p>a confirmation email with a secret confirmation link</p>
+</li>
+<li>
+<p>a handler for the confirmation link where users are saved to database</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_registration_request">Registration request</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If user registration requires clicking on a validation link from an email, the user
+information must be stored in the database for later.
+The <code>YadaRegistrationRequest.java</code> class can be used for that. It can store some basic
+information like email and password and should be subclassed in order to store application-specific
+user information. An example implementation is provided in the application entity package
+and should be customised as needed.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_registration_form">Registration form</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A registration link should open a page/modal with a registration form.
+The form can use the <code>YadaRegistrationRequest</code> subclass (<code>MyRegistrationRequest</code> in the example) as a backing bean
+or the <code>UserProfile</code> directly if a confirmation email is not required.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/registerPage")
+public String registerPage(MyRegistrationRequest myRegistrationRequest) {
+	return "/register";
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The registration form can use a hidden "antispam" field that would be filled by spam
+scripts only, so that the most basic spam attacks can be easily prevented. In the
+example implementation the field "username" must be left blank in order for registration
+to be successful. The real username is stored in the "email" field.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/signup}" th:object="${myRegistrationRequest}" role="form" method="post"&gt;
+	&lt;fieldset&gt;
+		&lt;!--/* The username field is hidden and used to detect spam */--&gt;
+		&lt;label for="username" class="hidethis"&gt;Username&lt;/label&gt;
+		&lt;input type="text" class="hidethis" id="username" name="username" th:field="*{username}"&gt;
+		&lt;label for="email"&gt;E-Mail&lt;/label&gt;
+		&lt;input type="email" id="email" th:field="*{email}" required="required" autofocus="autofocus"&gt;
+		...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The controller that handles the registration form submission should perform some validation on the
+application-specific fields then call the <code>YadaRegistrationController.handleRegistrationRequest()</code> method
+to finalise the operation. A default implementation is provided in the <code>RegistrationController.java</code> class.</p>
+</div>
+<div class="paragraph">
+<p>The <code>handleRegistrationRequest()</code> method performs some simple validation on the email address syntax and
+checks if the address has been blacklisted. Blacklisting is done by specifying regex patterns
+in the configuration as shown in this example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">	&lt;email&gt;
+		...
+		&lt;blacklistPattern&gt;.*invalid.*&lt;/blacklistPattern&gt;
+		&lt;blacklistPattern&gt;.*@mailinator.com&lt;/blacklistPattern&gt;
+	&lt;/email&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It also checks if the user exists and the password is within the configured length.
+Validation error messages are internationalised with the following keys:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">yada.form.registration.email.invalid = Invalid email address
+yada.form.registration.username.exists = Email already registered
+yada.form.registration.password.length = The password must be between {0} and {1} characters long.
+yada.form.registration.email.failed = Sending the registration confirmation email has failed. Please try again later</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If validation fails, the method returns false and sets the relevant flags on the BindingResult.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_confirmation_email">Confirmation email</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>TO BE CONTINUED</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 0.7.6<br>
+Last updated 2023-12-07 23:18:13 +0100
+</div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>
