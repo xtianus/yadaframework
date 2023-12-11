@@ -1,0 +1,11 @@
+package $basePackage.web;
+
+import $basePackage.core.${acronym.capitalize()}Configuration;
+
+@Controller
+public class RegistrationController {
+	private Logger log = LoggerFactory.getLogger(this.getClass());
+	
+	// TODO
+	
+}
