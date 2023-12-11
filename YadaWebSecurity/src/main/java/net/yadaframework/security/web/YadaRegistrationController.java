@@ -190,6 +190,8 @@ public class YadaRegistrationController {
 		if (StringUtils.isBlank(email) || email.indexOf("@")<0 || email.indexOf(".")<0 || yadaConfiguration.emailBlacklisted(email)) {
 			bindingResult.rejectValue("email", "yada.form.registration.email.invalid");
 		} else {
+			// Even though there might exist case-sensitive email addresses, handling them is too painful
+			// so we just force people into using case-insensitive addresses for the sake of everyone.
 			email = email.toLowerCase(locale);
 			yadaRegistrationRequest.setEmail(email);
 		}

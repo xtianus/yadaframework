@@ -6,7 +6,6 @@ import java.util.TimeZone;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.validator.constraints.Email;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +22,6 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import net.yadaframework.core.YadaRegistrationType;
 import net.yadaframework.persistence.entity.YadaClause;
 
@@ -47,15 +44,15 @@ public class YadaRegistrationRequest implements Serializable {
 	@GeneratedValue(strategy= GenerationType.IDENTITY)
 	private Long id;
 
-	@NotNull(message="{validation.registration.email.missing}")
-	@Email(message="{validation.registration.email.invalid}")
-	@Size(min=6, max=64, message="La lunghezza dell''email deve essere compresa tra {min} e {max} caratteri")
-	// Non è NaturalId perchè posso avere una richiesta di cambio email e contemporaneamente una di cambio password
-	// @NaturalId
+	// Removing validation messages because validation is better handled before getting to the database
+	// @NotNull(message="{validation.registration.email.missing}")
+	// @Email(message="{validation.registration.email.invalid}")
+	// @Size(min=6, max=64, message="La lunghezza dell''email deve essere compresa tra {min} e {max} caratteri")
 	@Column(nullable=false, length=64)
 	private String email;
 
-	@NotNull(message="Specificare una password")
+	// Removing validation messages because validation is better handled before getting to the database
+	// @NotNull(message="Specificare una password")
 	// TODO parametrizzare questa validazione con i valori della configurazione (se si può)
 	// @Size(min=3, max=32, message="La lunghezza della password deve essere compresa tra {min} e {max} caratteri")
 	//
@@ -73,24 +70,20 @@ public class YadaRegistrationRequest implements Serializable {
 
 	private YadaRegistrationType registrationType;
 
-//	@Column(length=512)
-//	private String generic1; // Campo generico
-//	@Column(length=512)
-//	private String generic2; // Campo generico
-//	@Lob
-//	private String generic3; // Campo generico molto grande
+	@OneToOne
+	private YadaUserCredentials yadaUserCredentials; // Used for email change
 
 	@OneToOne
-	private YadaUserCredentials yadaUserCredentials; // Usato per il cambio di email
-
-	@OneToOne
+	@Deprecated // italian language; should have multiple values
 	private YadaClause trattamentoDati; // Usato per visualizzare la clausola nel form, e poi per sapere quale clausola è stata accettata in fase di creazione utente
 
 	// Browser timezone
 	@Column(length = 64)
+	@Deprecated // It is a mistake to save the timezone at registration time because it might be the administrator timezone
 	private TimeZone timezone;
 
 	@Transient
+	@Deprecated // italian language
 	private boolean trattamentoDatiAccepted=false; // usato nel form
 
 	/**
@@ -173,18 +166,22 @@ public class YadaRegistrationRequest implements Serializable {
 		this.registrationType = yadaRegistrationType;
 	}
 
+	@Deprecated
 	public YadaClause getTrattamentoDati() {
 		return trattamentoDati;
 	}
 
+	@Deprecated
 	public void setTrattamentoDati(YadaClause trattamentoDati) {
 		this.trattamentoDati = trattamentoDati;
 	}
 
+	@Deprecated
 	public boolean isTrattamentoDatiAccepted() {
 		return trattamentoDatiAccepted;
 	}
 
+	@Deprecated
 	public void setTrattamentoDatiAccepted(boolean trattamentoDatiAccepted) {
 		this.trattamentoDatiAccepted = trattamentoDatiAccepted;
 	}
@@ -209,6 +206,7 @@ public class YadaRegistrationRequest implements Serializable {
 		this.destinationUrl = destinationUrl;
 	}
 
+	@Deprecated // It is a mistake to save the timezone at registration time because it might be the administrator timezone
 	public TimeZone getTimezone() {
 		return timezone;
 	}
@@ -217,28 +215,5 @@ public class YadaRegistrationRequest implements Serializable {
 		this.timezone = timezone;
 	}
 
-//	public String getGeneric1() {
-//		return generic1;
-//	}
-//
-//	public void setGeneric1(String generic1) {
-//		this.generic1 = generic1;
-//	}
-//
-//	public String getGeneric2() {
-//		return generic2;
-//	}
-//
-//	public void setGeneric2(String generic2) {
-//		this.generic2 = generic2;
-//	}
-//
-//	public String getGeneric3() {
-//		return generic3;
-//	}
-//
-//	public void setGeneric3(String generic3) {
-//		this.generic3 = generic3;
-//	}
 
 }

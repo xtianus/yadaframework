@@ -447,9 +447,14 @@ public abstract class YadaConfiguration {
 	 * @return true for a blacklisted email address
 	 */
 	public boolean emailBlacklisted(String email) {
+		if (email==null) {
+			log.warn("Blacklisting null email address");
+			return true;
+		}
 		String[] patternStrings = configuration.getStringArray("config/email/blacklistPattern");
 		for (String patternString : patternStrings) {
-			if (email.toLowerCase().matches(patternString)) {
+			// (?i) is for case-insensitive match
+			if (email.matches("(?i)"+patternString)) {
 				log.warn("Email '{}' blacklisted by '{}'", email, patternString);
 				return true;
 			}
