@@ -12,7 +12,9 @@
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
-<!-- When editing this file, you must copy it in all other folders (without change) -->
+<!-- When editing this file, you must copy it in all other folders (without change).
+	 This is automatically done by the gradle "asciidoctor" task.
+-->
 
 <select id="navigator">
 	<option>Choose chapter...</option>
@@ -32,6 +34,8 @@
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
 </select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
 <script>
 document.querySelector("#navigator").addEventListener("change", function (event) {
 	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
@@ -40,6 +44,42 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 		document.location.href = link;
 	}
 });
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', function () {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+        });
+    });
+
+});
+
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;
+    	}
+    }
+};
 </script>
 <div id="header">
 <h1>Security</h1>
@@ -91,6 +131,18 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 (identifying the current user) and authorization (limiting access to web pages
 according to the user role). The YadaWebSecurity library must be added to the classpath
 in order for this to work.</p>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+Cross Site Request Forgery (CSRF) prevention is currently disabled by default
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -334,7 +386,7 @@ to access the <code>/user</code> path. This can of course be changed as needed.<
 <div id="footer">
 <div id="footer-text">
 Version 0.7.6<br>
-Last updated 2023-12-07 16:29:12 +0100
+Last updated 2023-12-14 15:24:53 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

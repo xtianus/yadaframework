@@ -51,15 +51,33 @@ to be successful. The real username is stored in the "email" field.
 
 [source,html]
 ----
-<form th:action="@{/signup}" th:object="${myRegistrationRequest}" role="form" method="post">
+<form th:action="@{/signup}" th:object="${myRegistrationRequest}" role="form" method="post" id="registrationForm">
 	<fieldset>
 		<!--/* The username field is hidden and used to detect spam */-->
 		<label for="username" class="hidethis">Username</label> 
 		<input type="text" class="hidethis" id="username" name="username" th:field="*{username}">
 		<label for="email">E-Mail</label>
 		<input type="email" id="email" th:field="*{email}" required="required" autofocus="autofocus">
+		<label for="password">Password</label>
+		<input type="password" th:field="*{password}" required="required">
+		<label for="confirmPassword">Confirm Password</label>
+		<input type="password" id="confirmPassword" name="confirmPassword">
 		...
 ----
+
+The password confirmation field (optional) can be enabled with
+
+[source,javascript]
+----
+<script>
+	yada.enablePasswordMatch($("#registrationForm"));
+</script>
+----
+
+This will apply the classes `yada-password-mismatch` and `has-error` (for Bootstrap 4) to the form
+when the input fields named "password" and "confirmPassword" don't match. In such case it will also
+disable the form submit button. The above classes can be used for example to make visible some predefined error
+or change the color of the labels. 
 
 The controller that handles the registration form submission should perform some validation on the
 application-specific fields then call the `YadaRegistrationController.handleRegistrationRequest()` method
@@ -92,8 +110,73 @@ yada.form.registration.email.failed = Sending the registration confirmation emai
 If validation fails, the method returns false and sets the relevant flags on the BindingResult.
 
 == Confirmation email
+The email sent to the user is `/src/main/resources/template/email/registrationConfirmation.html`.
+The default implementation should be customised to the application needs.
 
-TO BE CONTINUED
+For localisation purposes, the system will first check for an email file ending in `_<language>`
+like `registrationConfirmation_de.html`, then fall back to the plain version without language
+if that file is not found.
+This means that email messages can be localised by creating the locale-specific file for
+each supported language other than the default one.
+
+The subject for the email is defined by the message.properties key `email.subject.registrationConfirmation'.
+It will receive the email timestamp as parameter 0 (can be omitted). Example:
+
+
+[source,properties]
+----
+email.subject.registrationConfirmation = Registration ({0})
+----
+
+== Confirmation handler
+The default link in the confirmation email has the format `/registrationConfirmation/{token}` where
+`{token}` is a unique identifier saved in the database. This can be overridden with the 
+`config/security/registration/confirmationLink` configuration entry:
+
+[source,xml]
+----
+<security>
+	<registration>
+		<confirmationLink>/my/registrationAccept</confirmationLink>
+	</registration>
+----
+
+The controller that handles the confirmation request can conveniently invoke the
+`yadaRegistrationController.handleRegistrationConfirmation()` method and handle the
+result according to the application needs:
+
+[source,java]
+----
+	@RequestMapping("/registrationConfirmation/{token}")
+	public String registrationConfirmation(@PathVariable String token, Model model, Locale locale, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpSession session) {
+		YadaRegistrationOutcome<UserProfile> outcome = yadaRegistrationController.handleRegistrationConfirmation(token, new String[]{config.getRoleName(ROLE_USER_ID)}, locale, session, UserProfile.class);
+		switch (outcome.registrationStatus) {
+		case LINK_EXPIRED:
+			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.expired.title").error().messageKey("registration.confirmation.expired.message").add();
+			return yadaWebUtil.redirectString("/", locale);
+		case USER_EXISTS:
+			redirectAttributes.addAttribute("email", outcome.email);
+			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.existing.title").error().messageKey("registration.confirmation.existing.message", email).add();
+			return yadaWebUtil.redirectString("/passwordReset", locale);
+		case OK:
+			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.ok.title").ok().messageKey("registration.confirmation.ok.message", registrationRequest.getEmail()).add();
+			log.info("Registration of '{}' successful", outcome.email);
+			return yadaWebUtil.redirectString("/", locale);
+		case ERROR:
+		case REQUEST_INVALID:
+			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.error.title").error().messageKey("registration.confirmation.error.message").add();
+			return yadaWebUtil.redirectString("/", locale);
+		}
+		log.error("Invalid registration state - aborting");
+		throw new YadaInvalidUsageException("Invalid registration state");
+	}
+----
+
+
+
+
+
+
 
 
 

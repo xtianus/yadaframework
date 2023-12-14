@@ -12,7 +12,9 @@
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
-<!-- When editing this file, you must copy it in all other folders (without change) -->
+<!-- When editing this file, you must copy it in all other folders (without change).
+	 This is automatically done by the gradle "asciidoctor" task.
+-->
 
 <select id="navigator">
 	<option>Choose chapter...</option>
@@ -32,6 +34,8 @@
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
 </select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
 <script>
 document.querySelector("#navigator").addEventListener("change", function (event) {
 	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
@@ -40,6 +44,42 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 		document.location.href = link;
 	}
 });
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', function () {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+        });
+    });
+
+});
+
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;
+    	}
+    }
+};
 </script>
 <div id="header">
 <h1>User Registration</h1>
@@ -53,6 +93,7 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <li><a href="#_registration_request">Registration request</a></li>
 <li><a href="#_registration_form">Registration form</a></li>
 <li><a href="#_confirmation_email">Confirmation email</a></li>
+<li><a href="#_confirmation_handler">Confirmation handler</a></li>
 </ul>
 </div>
 </div>
@@ -147,15 +188,35 @@ to be successful. The real username is stored in the "email" field.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/signup}" th:object="${myRegistrationRequest}" role="form" method="post"&gt;
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/signup}" th:object="${myRegistrationRequest}" role="form" method="post" id="registrationForm"&gt;
 	&lt;fieldset&gt;
 		&lt;!--/* The username field is hidden and used to detect spam */--&gt;
 		&lt;label for="username" class="hidethis"&gt;Username&lt;/label&gt;
 		&lt;input type="text" class="hidethis" id="username" name="username" th:field="*{username}"&gt;
 		&lt;label for="email"&gt;E-Mail&lt;/label&gt;
 		&lt;input type="email" id="email" th:field="*{email}" required="required" autofocus="autofocus"&gt;
+		&lt;label for="password"&gt;Password&lt;/label&gt;
+		&lt;input type="password" th:field="*{password}" required="required"&gt;
+		&lt;label for="confirmPassword"&gt;Confirm Password&lt;/label&gt;
+		&lt;input type="password" id="confirmPassword" name="confirmPassword"&gt;
 		...</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>The password confirmation field (optional) can be enabled with</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">&lt;script&gt;
+	yada.enablePasswordMatch($("#registrationForm"));
+&lt;/script&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will apply the classes <code>yada-password-mismatch</code> and <code>has-error</code> (for Bootstrap 4) to the form
+when the input fields named "password" and "confirmPassword" don&#8217;t match. In such case it will also
+disable the form submit button. The above classes can be used for example to make visible some predefined error
+or change the color of the labels.</p>
 </div>
 <div class="paragraph">
 <p>The controller that handles the registration form submission should perform some validation on the
@@ -197,7 +258,74 @@ yada.form.registration.email.failed = Sending the registration confirmation emai
 <h2 id="_confirmation_email">Confirmation email</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>TO BE CONTINUED</p>
+<p>The email sent to the user is <code>/src/main/resources/template/email/registrationConfirmation.html</code>.
+The default implementation should be customised to the application needs.</p>
+</div>
+<div class="paragraph">
+<p>For localisation purposes, the system will first check for an email file ending in <code>_&lt;language&gt;</code>
+like <code>registrationConfirmation_de.html</code>, then fall back to the plain version without language
+if that file is not found.
+This means that email messages can be localised by creating the locale-specific file for
+each supported language other than the default one.</p>
+</div>
+<div class="paragraph">
+<p>The subject for the email is defined by the message.properties key `email.subject.registrationConfirmation'.
+It will receive the email timestamp as parameter 0 (can be omitted). Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">email.subject.registrationConfirmation = Registration ({0})</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_confirmation_handler">Confirmation handler</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The default link in the confirmation email has the format <code>/registrationConfirmation/{token}</code> where
+<code>{token}</code> is a unique identifier saved in the database. This can be overridden with the
+<code>config/security/registration/confirmationLink</code> configuration entry:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;security&gt;
+	&lt;registration&gt;
+		&lt;confirmationLink&gt;/my/registrationAccept&lt;/confirmationLink&gt;
+	&lt;/registration&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The controller that handles the confirmation request can conveniently invoke the
+<code>yadaRegistrationController.handleRegistrationConfirmation()</code> method and handle the
+result according to the application needs:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">	@RequestMapping("/registrationConfirmation/{token}")
+	public String registrationConfirmation(@PathVariable String token, Model model, Locale locale, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpSession session) {
+		YadaRegistrationOutcome&lt;UserProfile&gt; outcome = yadaRegistrationController.handleRegistrationConfirmation(token, new String[]{config.getRoleName(ROLE_USER_ID)}, locale, session, UserProfile.class);
+		switch (outcome.registrationStatus) {
+		case LINK_EXPIRED:
+			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.expired.title").error().messageKey("registration.confirmation.expired.message").add();
+			return yadaWebUtil.redirectString("/", locale);
+		case USER_EXISTS:
+			redirectAttributes.addAttribute("email", outcome.email);
+			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.existing.title").error().messageKey("registration.confirmation.existing.message", email).add();
+			return yadaWebUtil.redirectString("/passwordReset", locale);
+		case OK:
+			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.ok.title").ok().messageKey("registration.confirmation.ok.message", registrationRequest.getEmail()).add();
+			log.info("Registration of '{}' successful", outcome.email);
+			return yadaWebUtil.redirectString("/", locale);
+		case ERROR:
+		case REQUEST_INVALID:
+			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.error.title").error().messageKey("registration.confirmation.error.message").add();
+			return yadaWebUtil.redirectString("/", locale);
+		}
+		log.error("Invalid registration state - aborting");
+		throw new YadaInvalidUsageException("Invalid registration state");
+	}</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -205,7 +333,7 @@ yada.form.registration.email.failed = Sending the registration confirmation emai
 <div id="footer">
 <div id="footer-text">
 Version 0.7.6<br>
-Last updated 2023-12-07 23:18:13 +0100
+Last updated 2023-12-14 15:22:25 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

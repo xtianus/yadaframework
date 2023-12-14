@@ -16,6 +16,8 @@ The Yada Framework uses Spring Security to implement authentication
 according to the user role). The YadaWebSecurity library must be added to the classpath
 in order for this to work.
 
+CAUTION: Cross Site Request Forgery (CSRF) prevention is currently disabled by default
+
 ==  Setup
 
 The `WebConfig` class must extend `YadaWebSecurityConfig` instead of `YadaWebConfig`:
