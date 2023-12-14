@@ -5,6 +5,7 @@ import java.util.Locale;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -103,11 +104,19 @@ public class YadaRegistrationController {
 	 * To be called when the link in the registration confirmation email has been clicked.
 	 * It creates a YadaUserCredential instance with basic YadaUserProfile values which should be refined and saved by the caller
 	 * @param token
-	 * @param userRoles an array of configured roles, like <pre>new String[]{"USER"}</pre>
+	 * @param userRoles an array of configured roles, like <pre>new String[]{"USER"}</pre>. 
+	 * The role name must be exactly as configured in &lt;security>&lt;roles>&lt;role>&lt;key>
 	 * @param locale
 	 * @return a {@link YadaRegistrationOutcome}
 	 */
-	public <T extends YadaUserProfile> YadaRegistrationOutcome<T> handleRegistrationConfirmation(String token, String[] userRoles, Locale locale, Class<T> userProfileClass) {
+	public <T extends YadaUserProfile> YadaRegistrationOutcome<T> handleRegistrationConfirmation(String token, String[] userRoles, Locale locale, HttpSession session, Class<T> userProfileClass) {
+		// We invalidate the current session in case the registering user is already logged in for some reason
+		try {
+			session.invalidate();
+		} catch (Exception e) {
+			log.debug("Error invalidating session at user registration (ignored)", e);
+		}
+
 		YadaRegistrationOutcome<T> result = new YadaRegistrationOutcome<>();
 		long[] parts = yadaTokenHandler.parseLink(token);
 		try {
@@ -119,7 +128,7 @@ public class YadaRegistrationController {
 					return result;
 				}
 				YadaRegistrationRequest registrationRequest = registrationRequests.get(0);
-				String email = registrationRequest.getEmail().toLowerCase();
+				String email = registrationRequest.getEmail().toLowerCase(locale);
 				String destinationUrl = registrationRequest.getDestinationUrl();
 				result.email = email;
 				result.destinationUrl = destinationUrl;

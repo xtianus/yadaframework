@@ -447,16 +447,20 @@ public abstract class YadaConfiguration {
 	 * @return true for a blacklisted email address
 	 */
 	public boolean emailBlacklisted(String email) {
+		if (email==null) {
+			log.warn("Blacklisting null email address");
+			return true;
+		}
 		String[] patternStrings = configuration.getStringArray("config/email/blacklistPattern");
 		for (String patternString : patternStrings) {
-			if (email.toLowerCase().matches(patternString)) {
+			// (?i) is for case-insensitive match
+			if (email.matches("(?i)"+patternString)) {
 				log.warn("Email '{}' blacklisted by '{}'", email, patternString);
 				return true;
 			}
 		}
 		return false;
 	}
-
 
 	/**
 	 * True if during startup YadaAppConfig should run the FlyWay migrate operation
@@ -887,13 +891,24 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
-	 * Ritorna il nome del ruolo come usato in spring security, ovvero ROLE_USER
-	 * @param roleId
-	 * @return
+	 * Given a role id, returns the configured role name prefixed by "ROLE_", e.g. "ROLE_USER"
+	 * @param roleId e.g. 9
+	 * @return e.g. "ROLE_ADMIN"
+	 * @see #getRoleName(Integer)
 	 */
 	public String getRoleSpringName(Integer roleId) {
 		String roleKey = getRoleKey(roleId);
 		return "ROLE_" + roleKey;
+	}
+	
+	/**
+	 * Given a role id, returns the configured role name e.g. "USER".
+	 * Equivalent to {@link #getRoleKey(Integer)}.
+	 * @param roleId e.g. 9
+	 * @return e.g. "ADMIN"
+	 */
+	public String getRoleName(Integer roleId) {
+		return this.getRoleKey(roleId);
 	}
 
 	/**
@@ -937,7 +952,7 @@ public abstract class YadaConfiguration {
 		}
 		return id;
 	}
-
+	
 	/**
 	 * @param roleId e.g. 9
 	 * @return e.g. "ADMIN"

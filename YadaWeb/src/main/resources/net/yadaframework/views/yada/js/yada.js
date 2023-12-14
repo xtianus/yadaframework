@@ -1258,7 +1258,7 @@
         	if (v1!="" || v2!="") {
         		$oneForm.addClass('has-error');
         		$oneForm.addClass('yada-password-mismatch');
-        		$check.parent().append('<span class="bi bi-x form-control-feedback" aria-hidden="true"></span>');
+        		// $check.parent().append('<span class="bi bi-x form-control-feedback" aria-hidden="true"></span>');
         	}
         }
     }
@@ -1270,7 +1270,7 @@
         $submit.removeAttr("disabled");
         $oneForm.removeClass('has-error');
         $oneForm.removeClass('yada-password-mismatch');
-        $('span.form-control-feedback.bi-x', $check.parent()).remove();
+        // $('span.form-control-feedback.bi-x', $check.parent()).remove();
     }
 
 	/**
