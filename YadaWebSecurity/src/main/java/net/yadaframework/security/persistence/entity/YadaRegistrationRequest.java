@@ -69,9 +69,11 @@ public class YadaRegistrationRequest implements Serializable {
 
 	private long token;
 
-	// The destination url could be saved before sending the registration email, but it is usually better handled by the confirmation controller without this field
-	@Column(length=255)
-	private String destinationUrl;
+	// The destination url could be saved before sending the registration email, but it is usually better handled by the confirmation controller without this field.
+	// This is also used by the password recovery process to create the confirmation link, but it's not safe because its value could be injected from the FE.
+	// @Deprecated
+	// @Column(length=255)
+	// private String destinationUrl;
 
 	private YadaRegistrationType registrationType;
 
@@ -201,14 +203,6 @@ public class YadaRegistrationRequest implements Serializable {
 
 	public void setConfirmPassword(String confirm) {
 		this.confirmPassword = confirm;
-	}
-
-	public String getDestinationUrl() {
-		return destinationUrl;
-	}
-
-	public void setDestinationUrl(String destinationUrl) {
-		this.destinationUrl = destinationUrl;
 	}
 
 	@Deprecated // It is a mistake to save the timezone at registration time because it might be the administrator timezone
