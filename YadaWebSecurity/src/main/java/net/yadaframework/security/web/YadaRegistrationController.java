@@ -83,7 +83,8 @@ public class YadaRegistrationController {
 		 */
 		public String email;
 
-		public String destinationUrl;
+		// Probably useless
+		// public String destinationUrl;
 		
 		public YadaRegistrationRequest yadaRegistrationRequest;
 	}
