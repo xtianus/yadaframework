@@ -39,6 +39,26 @@ public class YadaUserCredentialsDao {
 
 	@Autowired private PasswordEncoder encoder;
 	@Autowired private YadaUtil yadaUtil;
+	
+	/**
+	 * Change a username
+	 * @param oldUsername
+	 * @param newUsername
+	 * @return true if successful, false if oldUsername not found
+	 */
+	@Transactional(readOnly = false)
+	public boolean changeUsername(String oldUsername, String newUsername) {
+		String sql = "update YadaUserCredentials e set e.username = :newUsername where e.username = :oldUsername";
+		int tot = em.createQuery(sql)
+			.setParameter("oldUsername", oldUsername)
+			.setParameter("newUsername", newUsername)
+			.executeUpdate();
+		if (tot>1) {
+			// This should never happen
+			log.error("More than one username {} found when updating to {} - (ignored)", oldUsername, newUsername);
+		}
+		return tot>0;
+	}
 
 	/**
 	 * Change the password

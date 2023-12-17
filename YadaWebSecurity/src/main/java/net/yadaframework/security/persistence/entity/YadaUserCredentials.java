@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import javax.persistence.CascadeType;
@@ -28,11 +29,9 @@ import org.hibernate.annotations.FetchMode;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import net.yadaframework.web.YadaJsonDateTimeShortSerializer;
-import net.yadaframework.web.YadaJsonView;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -182,7 +181,7 @@ public class YadaUserCredentials implements Serializable {
 	 * @param username
 	 */
 	public void setUsername(String username) {
-		this.username = username==null?null:username.trim().toLowerCase();
+		this.username = username==null?null:username.trim().toLowerCase(Locale.ROOT);
 	}
 
 	public String getPassword() {
