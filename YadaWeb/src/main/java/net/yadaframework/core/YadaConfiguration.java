@@ -101,7 +101,16 @@ public abstract class YadaConfiguration {
 	private File tempFolder = null;
 	private String googleApiKey = null;
 	private Integer bootstrapVersion = null;
-	
+
+	/**
+	 * Returns the configured timeout for asynchronous requests in seconds.
+	 * Equivalent to the Tomcat parameter asyncTimeout, but more effective (the application-defined parameter takes precedence).
+	 * @return the configured timeout in minutes or 0 for the default
+	 */
+	public int getAsyncTimeoutMinutes() {
+		return configuration.getInt("config/asyncTimeoutMinutes", 0);
+	}
+
 	/**
 	 * @return true if the embedded db should be used instead of the external MySQL
 	 */

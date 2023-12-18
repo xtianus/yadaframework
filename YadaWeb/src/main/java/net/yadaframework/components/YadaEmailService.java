@@ -111,23 +111,28 @@ public class YadaEmailService {
 	public boolean sendHtmlEmail(String[] toEmail, String replyTo, String emailName, Object[] subjectParams, Map<String, Object> templateParams, Map<String, String> inlineResources, Locale locale, boolean addTimestamp) {
 		return sendHtmlEmail(config.getEmailFrom(), toEmail, replyTo, emailName, subjectParams, templateParams, inlineResources, null, locale, addTimestamp);
 	}
-	
-    /**
-     * Invia una email usando un template thymeleaf.
-     * Il template è localizzato, per cui si può chiamare ad esempio <emailName>.html oppure <emailName>_de.html.
-     * Il subject è localizzato e parametrizzato, e la sua chiave è email.subject.<emailName>
-     * @param toEmail
-     * @param replyTo can be null
-     * @param emailName nome del template, ovvero del file html senza estensione e localizzazione _xx
-     * @param subjectParams Valori opzionali da inserire nella stringa localizzata da usare come subject, può essere null
-     * @param templateParams variabili da usare nel template, come fossero attributi del Model. Può essere null.
-     * @param inlineResources mappa chiave-valore di immagini inline di tipo "cid:". Il valore è un path relativo al context-path, come per esempio "/res/img/pippo.jpg"
-     * @param attachments mappa filename-File di file da inviare come attachment. Il filename deve avere la giusta estensione per avere il corretto mime type. 
-     * @param locale
-     * @param addTimestamp true to add a timestamp to the subject
-     * @return true se l'email è stata spedita
-     */
+
 	public boolean sendHtmlEmail(String[] fromEmail, String[] toEmail, String replyTo, String emailName, Object[] subjectParams, Map<String, Object> templateParams, Map<String, String> inlineResources, Map<String, File> attachments, Locale locale, boolean addTimestamp) {
+		return sendHtmlEmail(fromEmail, toEmail, replyTo, emailName, subjectParams, templateParams, inlineResources, attachments, locale, addTimestamp, false);
+	}
+
+	/**
+	 * Invia una email usando un template thymeleaf.
+	 * Il template è localizzato, per cui si può chiamare ad esempio <emailName>.html oppure <emailName>_de.html.
+	 * Il subject è localizzato e parametrizzato, e la sua chiave è email.subject.<emailName>
+	 * @param toEmail
+	 * @param replyTo can be null
+	 * @param emailName nome del template, ovvero del file html senza estensione e localizzazione _xx
+	 * @param subjectParams Valori opzionali da inserire nella stringa localizzata da usare come subject, può essere null
+	 * @param templateParams variabili da usare nel template, come fossero attributi del Model. Può essere null.
+	 * @param inlineResources mappa chiave-valore di immagini inline di tipo "cid:". Il valore è un path relativo al context-path, come per esempio "/res/img/pippo.jpg"
+	 * @param attachments mappa filename-File di file da inviare come attachment. Il filename deve avere la giusta estensione per avere il corretto mime type.
+	 * @param locale
+	 * @param addTimestamp true to add a timestamp to the subject
+	 * @param batch true to send the separate email to each recipient
+	 * @return true se l'email è stata spedita
+	 */
+	public boolean sendHtmlEmail(String[] fromEmail, String[] toEmail, String replyTo, String emailName, Object[] subjectParams, Map<String, Object> templateParams, Map<String, String> inlineResources, Map<String, File> attachments, Locale locale, boolean addTimestamp, boolean batch) {
 		YadaEmailParam yadaEmailParam = new YadaEmailParam();
 		yadaEmailParam.fromEmail = fromEmail;
 		yadaEmailParam.toEmail = toEmail;
@@ -139,7 +144,7 @@ public class YadaEmailService {
 		yadaEmailParam.attachments = attachments;
 		yadaEmailParam.locale = locale;
 		yadaEmailParam.addTimestamp = addTimestamp;
-		return sendHtmlEmail(yadaEmailParam);
+		return sendHtmlEmail(yadaEmailParam, batch);
 	}
 	
     /**
@@ -149,6 +154,10 @@ public class YadaEmailService {
      * @return true se l'email è stata spedita
      */
 	public boolean sendHtmlEmail(YadaEmailParam yadaEmailParam) {
+		return this.sendHtmlEmail(yadaEmailParam, false);
+	}
+
+	public boolean sendHtmlEmail(YadaEmailParam yadaEmailParam, boolean batch) {
 		String[] fromEmail = yadaEmailParam.fromEmail;
 		String[] toEmail = yadaEmailParam.toEmail;
 		String replyTo = yadaEmailParam.replyTo;
@@ -162,36 +171,20 @@ public class YadaEmailService {
 		//
 		final String emailTemplate = getMailTemplateFile(emailName, locale);
 		final String subject = messageSource.getMessage("email.subject." + emailName, subjectParams,  locale);
-//		String myServerAddress = yadaWebUtil.getWebappAddress(request);
-//		final WebContext ctx = new WebContext(request, response, servletContext, locale);
-		// Using Context instead of WebContext, we can't access WebContent files and can't use @{somelink}
-		final Context ctx = new Context(locale);
-		// This allows the use of @beans inside the email template
-		ctx.setVariable(ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME, new ThymeleafEvaluationContext(applicationContext, null));
-		// Non so come si registra un bean resolver dentro a ctx, quindi uso "config" invece di "@config"
-		// TODO This "config" bean is deprecated and should be removed one day
-		ctx.setVariable("config", config);
-		//
-		if (templateParams!=null) {
-			for (Entry<String, Object> entry : templateParams.entrySet()) {
-				ctx.setVariable(entry.getKey(), entry.getValue());
-			}
+		final String body = loadTemplate(locale, templateParams, emailTemplate);
+		YadaEmailContent ec = new YadaEmailContent();
+		ec.from = fromEmail!=null?fromEmail:config.getEmailFrom();
+		if (replyTo!=null) {
+			ec.replyTo = replyTo;
 		}
-//		ctx.setVariable("beans", new Beans(applicationContext)); // So I can use "beans.myBean" in the template (workaround for the missing "@myBean" support) 
-	    final String body = this.emailTemplateEngine.process("/" + YadaConstants.EMAIL_TEMPLATES_FOLDER + "/" + emailTemplate, ctx);
-	    YadaEmailContent ec = new YadaEmailContent();
-	    ec.from = fromEmail!=null?fromEmail:config.getEmailFrom();
-	    if (replyTo!=null) {
-	    	ec.replyTo = replyTo;
-	    }
-	    ec.to = toEmail;
-	    ec.subject = subject + (addTimestamp?" (" + timestamp(locale) +")":"");
-	    ec.body = body;
-	    ec.html = true;
-	    if (inlineResources!=null) {
-		    ec.inlineResourceIds = new String[inlineResources.size()];
-		    ec.inlineResources = new org.springframework.core.io.Resource[inlineResources.size()];
-		    int i=0;
+		ec.to = toEmail;
+		ec.subject = subject + (addTimestamp?" (" + timestamp(locale) +")":"");
+		ec.body = body;
+		ec.html = true;
+		if (inlineResources!=null) {
+			ec.inlineResourceIds = new String[inlineResources.size()];
+			ec.inlineResources = new org.springframework.core.io.Resource[inlineResources.size()];
+			int i=0;
 			for (Entry<String, String> entry : inlineResources.entrySet()) {
 				ec.inlineResourceIds[i] = entry.getKey();
 //				Must support fully qualified URLs, e.g. "file:C:/test.dat".
@@ -217,31 +210,84 @@ public class YadaEmailService {
 	    		ec.attachedFiles[i] = attachments.get(filename);
 	    		i++;
 			}
-	    }
-		return sendEmail(ec);
+		}
+
+		if (batch) {
+			List<YadaEmailContent> yadaEmailContents = new ArrayList<>();
+			for (String to : ec.to) {
+				yadaEmailContents.add(copyYadaEmailContent(ec, to));
+			}
+			return sendEmailBatch(yadaEmailContents);
+		} else {
+			return sendEmail(ec);
+		}
 	}
 
-    /**
-     * Dato un nome di template senza estensione, ne ritorna il nome completo di localizzazione.
-     * Per esempio "saluti" diventa "saluti_it" se esiste, altrimenti resta "saluti".
-     * Se il template non esiste, lancia InternalException
-     * @param templateNameNoHtml
-     * @param locale
-     * @return
-     */
-    private String getMailTemplateFile(String templateNameNoHtml, Locale locale) {
+	private YadaEmailContent copyYadaEmailContent(YadaEmailContent ec, String... to) {
+		YadaEmailContent newEc = new YadaEmailContent();
+		newEc.from = ec.from;
+		newEc.replyTo = ec.replyTo;
+		newEc.to = to;
+		newEc.cc = ec.cc;
+		newEc.bcc = ec.bcc;
+		newEc.subject = ec.subject;
+		newEc.body = ec.body;
+		newEc.html = ec.html;
+		newEc.inlineFiles = ec.inlineFiles;
+		newEc.inlineFileIds = ec.inlineFileIds;
+		newEc.inlineResources = ec.inlineResources;
+		newEc.inlineResourceIds = ec.inlineResourceIds;
+		newEc.attachedFiles = ec.attachedFiles;
+		newEc.attachedFilenames = ec.attachedFilenames;
+		return newEc;
+	}
+
+	public String loadTemplate(Locale locale, Map<String, Object> templateParams, String emailName) {
+		//		String myServerAddress = yadaWebUtil.getWebappAddress(request);
+//		final WebContext ctx = new WebContext(request, response, servletContext, locale);
+		// Using Context instead of WebContext, we can't access WebContent files and can't use @{somelink}
+		final Context ctx = new Context(locale);
+		// This allows the use of @beans inside the email template
+		ctx.setVariable(ThymeleafEvaluationContext.THYMELEAF_EVALUATION_CONTEXT_CONTEXT_VARIABLE_NAME, new ThymeleafEvaluationContext(applicationContext, null));
+		// Non so come si registra un bean resolver dentro a ctx, quindi uso "config" invece di "@config"
+		// TODO This "config" bean is deprecated and should be removed one day
+		ctx.setVariable("config", config);
+		//
+		if (templateParams !=null) {
+			for (Entry<String, Object> entry : templateParams.entrySet()) {
+				ctx.setVariable(entry.getKey(), entry.getValue());
+			}
+		}
+//		ctx.setVariable("beans", new Beans(applicationContext)); // So I can use "beans.myBean" in the template (workaround for the missing "@myBean" support)
+		final String body = this.emailTemplateEngine.process("/" + YadaConstants.EMAIL_TEMPLATES_FOLDER + "/" + emailName, ctx);
+		return body;
+	}
+
+	public String getTemplatePath(String templateName) {
+		return YadaConstants.EMAIL_TEMPLATES_PREFIX + "/" + YadaConstants.EMAIL_TEMPLATES_FOLDER + "/" + templateName;
+	}
+
+	/**
+	 * Dato un nome di template senza estensione, ne ritorna il nome completo di localizzazione.
+	 * Per esempio "saluti" diventa "saluti_it" se esiste, altrimenti resta "saluti".
+	 * Se il template non esiste, lancia InternalException
+	 * @param templateNameNoHtml
+	 * @param locale
+	 * @return
+	 */
+	public String getMailTemplateFile(String templateNameNoHtml, Locale locale) {
 //    	String base = "/WEB-INF/emailTemplates/";
-    	String prefix = templateNameNoHtml; // emailChange
-    	String languagePart = "_" + locale.getLanguage(); // _it
-    	String suffix = ".html";
-    	String filename = prefix + languagePart + suffix; // emailChange_it.html
-    	// TODO check if the / before filename is still needed
-		ClassPathResource classPathResource = new ClassPathResource(YadaConstants.EMAIL_TEMPLATES_PREFIX + "/" + YadaConstants.EMAIL_TEMPLATES_FOLDER + "/" + filename);
+		String prefix = templateNameNoHtml; // emailChange
+		String languagePart = "_" + locale.getLanguage(); // _it
+		String suffix = ".html";
+		String filename = prefix + languagePart + suffix; // emailChange_it.html
+		// TODO check if the / before filename is still needed
+		ClassPathResource classPathResource = new ClassPathResource(getTemplatePath(filename));
 		if (classPathResource.exists()) {
 			return prefix + languagePart;
 		}
 		filename = prefix + suffix; // emailChange.html
-		classPathResource = new ClassPathResource(YadaConstants.EMAIL_TEMPLATES_PREFIX + "/" + YadaConstants.EMAIL_TEMPLATES_FOLDER + "/" + filename);
+		classPathResource = new ClassPathResource(getTemplatePath(filename));
 		if (classPathResource.exists()) {
 			return prefix;
 		}
@@ -296,14 +342,15 @@ public class YadaEmailService {
 		return false;
 	}
 
-	// Non usato ancora
 	public boolean sendEmailBatch(List<YadaEmailContent> yadaEmailContents) {
 		boolean result = true;
 		List<MimeMessage> messageList = new ArrayList<MimeMessage>();
 		for (YadaEmailContent yadaEmailContent : yadaEmailContents) {
 			try {
 				MimeMessage mimeMessage = createMimeMessage(yadaEmailContent);
-				messageList.add(mimeMessage);
+				if (mimeMessage!=null) {
+					messageList.add(mimeMessage);
+				}
 			} catch (Exception e) {
 				result = false;
 				log.error("Error while creating batch email message to {} (ignored)", yadaEmailContent.to, e);
