@@ -28,6 +28,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.commons.YadaCommonsMultipartResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -52,9 +53,12 @@ import net.yadaframework.web.dialect.YadaDialect;
 @EnableAsync
 @ComponentScan(basePackages = { "net.yadaframework.web" })
 public class YadaWebConfig implements WebMvcConfigurer {
+	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	//	private final static long MB = 1024*1024;
 //	private final static long MAXFILESIZE = 10*MB;
-	private final transient Logger log = LoggerFactory.getLogger(getClass());
+	public final static int MILLIS_IN_SECOND = 1000;
+	public final static int SECONDS_IN_MINUTE = 60;
+	public final static int MILLIS_IN_MINUTE = SECONDS_IN_MINUTE*MILLIS_IN_SECOND;
 
 	// TODO put in configuration file
 	protected final static String STATIC_RESOURCES_FOLDER = "/res";
@@ -74,6 +78,14 @@ public class YadaWebConfig implements WebMvcConfigurer {
     	// http://www.logicbig.com/tutorials/spring-framework/spring-web-mvc/redirect-attributes/
        requestMappingHandlerAdapter.setIgnoreDefaultModelOnRedirect(true);
     }
+    
+	@Override
+	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+		int minutes = config.getAsyncTimeoutMinutes();
+		if (minutes>0) {
+			configurer.setDefaultTimeout(minutes*MILLIS_IN_MINUTE);
+		}
+	}
 
 	// This is only used when not using YadaWebSecurity
 	@Bean(name="multipartResolver")

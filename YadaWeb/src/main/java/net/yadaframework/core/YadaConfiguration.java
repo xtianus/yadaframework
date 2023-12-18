@@ -100,7 +100,15 @@ public abstract class YadaConfiguration {
 	private File uploadsFolder = null;
 	private File tempFolder = null;
 	private String googleApiKey = null;
-
+	
+	/**
+	 * Returns the configured timeout for asynchronous requests in seconds.
+	 * Equivalent to the Tomcat parameter asyncTimeout, but more effective (the application-defined parameter takes precedence).
+	 * @return the configured timeout in minutes or 0 for the default
+	 */
+	public int getAsyncTimeoutMinutes() {
+		return configuration.getInt("config/asyncTimeoutMinutes", 0);
+	}
 
 	/**
 	 * Google api key (for Maps etc) read from "security.properties"
