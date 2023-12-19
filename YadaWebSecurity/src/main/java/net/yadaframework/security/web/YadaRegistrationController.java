@@ -75,13 +75,13 @@ public class YadaRegistrationController {
 	 * The outcome of a registration. When successful, the userProfile field should be saved by the caller
 	 * @param <T> the subclass of YadaUserProfile
 	 */
-	public class YadaRegistrationOutcome<T extends YadaUserProfile> {
+	public class YadaRegistrationOutcome<T extends YadaUserProfile, R extends YadaRegistrationRequest> {
 		public YadaRegistrationStatus registrationStatus; // The outcome of the registration
 		public T userProfile; // The new user profile
 		public String email; // The user email, is null when the registration link is expired
 		// Deprecated for security reasons
 		// public String destinationUrl;
-		public YadaRegistrationRequest yadaRegistrationRequest;
+		public R yadaRegistrationRequest; // This can be a subclass with extra data
 	}
 	
 	public class YadaChangeUsernameOutcome {
@@ -114,7 +114,7 @@ public class YadaRegistrationController {
 	 * @param locale
 	 * @return a {@link YadaRegistrationOutcome}
 	 */
-	public <T extends YadaUserProfile> YadaRegistrationOutcome<T> handleRegistrationConfirmation(String token, String[] userRoles, Locale locale, HttpSession session, Class<T> userProfileClass) {
+	public <T extends YadaUserProfile, R extends YadaRegistrationRequest> YadaRegistrationOutcome<T, R> handleRegistrationConfirmation(String token, String[] userRoles, Locale locale, HttpSession session, Class<T> userProfileClass, Class<R> registrationRequestClass) {
 		// We invalidate the current session in case the registering user is already logged in for some reason
 		try {
 			session.invalidate();
@@ -122,22 +122,22 @@ public class YadaRegistrationController {
 			log.debug("Error invalidating session at user registration (ignored)", e);
 		}
 
-		YadaRegistrationOutcome<T> result = new YadaRegistrationOutcome<>();
+		YadaRegistrationOutcome<T, R> result = new YadaRegistrationOutcome<>();
 		long[] parts = yadaTokenHandler.parseLink(token);
 		try {
 			if (parts!=null) {
-				List<YadaRegistrationRequest> registrationRequests = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]);
+				List<R> registrationRequests = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1], registrationRequestClass);
 				if (registrationRequests.isEmpty()) {
 					log.warn("registrationRequests.isEmpty()");
 					result.registrationStatus = YadaRegistrationStatus.LINK_EXPIRED;
 					return result;
 				}
-				YadaRegistrationRequest registrationRequest = registrationRequests.get(0);
+				R registrationRequest = registrationRequests.get(0);
 				String email = registrationRequest.getEmail().toLowerCase(Locale.ROOT);
 				// String destinationUrl = registrationRequest.getDestinationUrl(); // This was a security issue
 				result.email = email;
 				// result.destinationUrl = destinationUrl;
-				result.yadaRegistrationRequest = registrationRequest;
+				result.yadaRegistrationRequest = registrationRequest; // This can be a subclass with extra data
 				YadaUserCredentials existing = yadaUserCredentialsDao.findFirstByUsername(email);
 				if (existing!=null) {
 					log.warn("Email '{}' already exists", email);
@@ -289,7 +289,7 @@ public class YadaRegistrationController {
 	public boolean passwordResetForm(String token, Model model, RedirectAttributes redirectAttributes) {
 		long[] parts = yadaTokenHandler.parseLink(token);
 		if (parts!=null) {
-			List<YadaRegistrationRequest> registrationRequests = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]);
+			List<YadaRegistrationRequest> registrationRequests = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1], YadaRegistrationRequest.class);
 			if (registrationRequests.isEmpty()) {
 				return false;
 			}
@@ -360,7 +360,7 @@ public class YadaRegistrationController {
 		try {
 			if (parts != null) {
 				List<YadaRegistrationRequest> registrationRequests = yadaRegistrationRequestDao
-						.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]);
+						.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1], YadaRegistrationRequest.class);
 				if (registrationRequests.isEmpty()) {
 					return result.setCode(YadaChangeUsernameResult.LINK_EXPIRED);
 				}

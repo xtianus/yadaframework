@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,17 +19,17 @@ public class YadaRegistrationRequestDao {
 	
 	@PersistenceContext EntityManager em;
 
-	public List<YadaRegistrationRequest> findByIdAndTokenOrderByTimestampDesc(long id, long token) {
-		String sql = "from YadaRegistrationRequest where id=:id and token=:token order by timestamp desc";
-		return em.createQuery(sql, YadaRegistrationRequest.class)
-				.setParameter("id", id)
-				.setParameter("token", token)
-				.getResultList();
+	public <R extends YadaRegistrationRequest> List<R> findByIdAndTokenOrderByTimestampDesc(long id, long token, Class<R> type) {
+		String sql = "from " + type.getSimpleName() + " where id=:id and token=:token order by timestamp desc";
+		return em.createQuery(sql, type)
+			.setParameter("id", id)
+			.setParameter("token", token)
+			.getResultList();
 	}
 
-	public List<YadaRegistrationRequest> findByEmailAndRegistrationType(String email, YadaRegistrationType registrationType) {
-		String sql = "from YadaRegistrationRequest where email=:email and registrationType=:registrationType";
-		return em.createQuery(sql, YadaRegistrationRequest.class)
+	public <R extends YadaRegistrationRequest> List<R> findByEmailAndRegistrationType(String email, YadaRegistrationType registrationType, Class<R> type) {
+		String sql = "from " + type.getSimpleName() + " where email=:email and registrationType=:registrationType";
+		return em.createQuery(sql, type)
 			.setParameter("email", email)
 			.setParameter("registrationType", registrationType)
 			.getResultList();

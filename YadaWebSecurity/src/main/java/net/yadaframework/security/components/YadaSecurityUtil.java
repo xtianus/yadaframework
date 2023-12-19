@@ -19,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
@@ -52,6 +53,13 @@ public class YadaSecurityUtil {
 	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired private YadaWebUtil yadaWebUtil;
 
+	/**
+	 * Logs out the currently logged-in user
+	 * @param request
+	 */
+	public void logout(HttpServletRequest request) {
+		new SecurityContextLogoutHandler().logout(request, null, null);
+	}
 
 	/**
 	 * Copy all not-null login error parameters to the Model
@@ -114,7 +122,7 @@ public class YadaSecurityUtil {
 		long[] parts = yadaTokenHandler.parseLink(yadaFormPasswordChange.getToken());
 		try {
 			if (parts!=null && parts.length==2) {
-				YadaRegistrationRequest registrationRequest = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1]).get(0);
+				YadaRegistrationRequest registrationRequest = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1], YadaRegistrationRequest.class).get(0);
 				if (registrationRequest==null) {
 					return false;
 				}
@@ -259,7 +267,7 @@ public class YadaSecurityUtil {
 				}
 			}
 			// Cancello la precedente richiesta di registrazione per lo stesso email e stesso tipo
-			List<YadaRegistrationRequest> ownRequests = yadaRegistrationRequestDao.findByEmailAndRegistrationType(registrationRequest.getEmail(), registrationRequest.getRegistrationType());
+			List<YadaRegistrationRequest> ownRequests = yadaRegistrationRequestDao.findByEmailAndRegistrationType(registrationRequest.getEmail(), registrationRequest.getRegistrationType(), YadaRegistrationRequest.class);
 			for (YadaRegistrationRequest deletable : ownRequests) {
 				if (deletable.getId()!=registrationRequest.getId()) {
 					yadaRegistrationRequestDao.delete(deletable);
