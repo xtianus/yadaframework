@@ -2465,8 +2465,19 @@ public class YadaUtil {
 							 || fieldType==Float.class
 							 || fieldType==Double.class
 							) {
+						Object[] clonedAncestor = new Object[]{}; 
+						if (copyShallow) {
+							// Check if the shallow value to copy has already been cloned, in which case we use the clone.
+							// This allows cloned children to attach to the cloned parent instead of the original parent.
+							// It works for parent of parent etc. at any level.
+							Object sourceFieldValue = setFieldDirectly ? field.get(source) : getter.invoke(source);
+							Object clonedFieldValue = alreadyCopiedMap.get(sourceFieldValue);
+							if (clonedFieldValue!=null) {
+								clonedAncestor = new Object[]{clonedFieldValue};
+							}
+						}
 						// Just copy
-						copyValueShallow(setFieldDirectly, field, getter, setter, source, target);
+						copyValueShallow(setFieldDirectly, field, getter, setter, source, target, clonedAncestor);
 //						setter.invoke(target, getter.invoke(source));
 					} else {
 						if (isType(fieldType, Collection.class)) {
