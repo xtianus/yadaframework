@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -712,8 +713,7 @@ public class YadaUtil {
 	 * @return
 	 */
 	public String relativize(File ancestorFolder, File descendantFolder) {
-		String segment = ancestorFolder.toPath().relativize(descendantFolder.toPath()).toString();
-		return segment.replaceAll("\\", "/");
+		return relativize(ancestorFolder.toPath(), descendantFolder.toPath());
 	}
 
 	/**
@@ -723,6 +723,12 @@ public class YadaUtil {
 	 * @return
 	 */
 	public String relativize(Path ancestorFolder, Path descendantFolder) {
+		// When on windows, if one path has a drive letter and the other doesn't, an exception would be thrown, so we fix that.
+		if (ancestorFolder.isAbsolute() && !descendantFolder.isAbsolute()) {
+			descendantFolder = Paths.get(ancestorFolder.getRoot().toString(), descendantFolder.toString());
+		} else if (!ancestorFolder.isAbsolute() && descendantFolder.isAbsolute()) {
+			ancestorFolder = Paths.get(descendantFolder.getRoot().toString(), ancestorFolder.toString());
+		}
 		String segment = ancestorFolder.relativize(descendantFolder).toString();
 		return segment.replaceAll("\\\\", "/");
 	}
@@ -2296,7 +2302,7 @@ public class YadaUtil {
 
 	public static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly) {
 		Map<CloneableFiltered, Object> alreadyCopiedMap = new HashMap<>();
-		return copyEntity(source, classObject, null, null, setFieldDirectly, alreadyCopiedMap, null);
+		return copyEntity(source, classObject, setFieldDirectly, alreadyCopiedMap, null);
 	}
 
 	/**
@@ -2312,10 +2318,10 @@ public class YadaUtil {
 	 */
 	public static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly, YadaAttachedFileCloneSet yadaAttachedFileCloneSet) {
 		Map<CloneableFiltered, Object> alreadyCopiedMap = new HashMap<>();
-		return copyEntity(source, classObject, null, null, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet);
+		return copyEntity(source, classObject, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet);
 	}
 
-	private static Object copyEntity(CloneableFiltered source, Class classObject, Object sourceParent, Object targetParent, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap, YadaAttachedFileCloneSet yadaAttachedFileCloneSet) {
+	private static Object copyEntity(CloneableFiltered source, Class classObject, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap, YadaAttachedFileCloneSet yadaAttachedFileCloneSet) {
 		if (source==null) {
 			return null;
 		}
@@ -2337,20 +2343,13 @@ public class YadaUtil {
 			if(target instanceof org.hibernate.proxy.HibernateProxy && classObject!=null) {
 				target = classObject.newInstance();
 			}
-			if (sourceParent == null) {
-				sourceParent = source;
-			}
-			if (targetParent == null) {
-				targetParent = target;
-			}
-			
+
 			alreadyCopiedMap.put(source, target); // Needed to avoid infinite recursion if a value holds a reference to the parent
-			copyFields(source, sourceClass, target, sourceParent, targetParent, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet);
+			copyFields(source, sourceClass, target, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet);
 			Class<?> superclass = sourceClass.getSuperclass();
 			while (superclass!=null && superclass!=Object.class) {
 				sourceClass = superclass;
-				copyFields(source, sourceClass, target, sourceParent, targetParent, setFieldDirectly, alreadyCopiedMap,
-						yadaAttachedFileCloneSet);
+				copyFields(source, sourceClass, target, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet);
 				superclass = sourceClass.getSuperclass();
 			}
 			return target;
@@ -2369,18 +2368,18 @@ public class YadaUtil {
 	 * @param setter
 	 * @param source object containing the value to copy
 	 * @param target object where to copy the value
-	 * @param args
+	 * @param args optional values to set on the target. When empty, the value is taken from the source.
 	 */
 	private static void copyValueShallow(boolean setFieldDirectly, Field field, Method getter, Method setter, Object source, Object target, Object... args) {
 		try {
 			if (setFieldDirectly) {
-				if (args == null || args.length == 0) {
+				if (args.length==0) {
 					field.set(target, field.get(source));
 				} else {
 					field.set(target, args);
 				}
 			} else {
-				if (args == null || args.length==0) {
+				if (args.length==0) {
 					setter.invoke(target, getter.invoke(source));
 				} else {
 					setter.invoke(target, args);
@@ -2416,7 +2415,7 @@ public class YadaUtil {
 	 * @param alreadyCopiedMap holds all already-cloned objects in order to avoid loops
 	 * @param yadaAttachedFileCloneSet holds all the cloned YadaAttachedFile objects for later copying files on disk
 	 */
-	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target, Object sourceParent, Object targetParent, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap, YadaAttachedFileCloneSet yadaAttachedFileCloneSet) {
+	private static void copyFields(CloneableFiltered source, Class<?> sourceClass, Object target, boolean setFieldDirectly, Map<CloneableFiltered, Object> alreadyCopiedMap, YadaAttachedFileCloneSet yadaAttachedFileCloneSet) {
 		log.debug("Cloning object {} of type {}", getObjectToString(source), sourceClass);
 		Field[] fields = sourceClass.getDeclaredFields();
 		// Excluded fields are totally ignored and will be either null or zero (or whatever the default is) in the target object
@@ -2475,17 +2474,19 @@ public class YadaUtil {
 							 || fieldType==Float.class
 							 || fieldType==Double.class
 							) {
-						// Just copy
-						Object[] values = null;
+						Object[] clonedAncestor = new Object[]{}; 
 						if (copyShallow) {
-							// If the field is a reference to the parent entity, replace it with the parent from the new entity
-							Object fieldSourceValueObject = setFieldDirectly ? field.get(source) : getter.invoke(source);
-							if (fieldSourceValueObject == sourceParent && targetParent != null) {
-								values = new Object[]{targetParent};
+							// Check if the shallow value to copy has already been cloned, in which case we use the clone.
+							// This allows cloned children to attach to the cloned parent instead of the original parent.
+							// It works for parent of parent etc. at any level.
+							Object sourceFieldValue = setFieldDirectly ? field.get(source) : getter.invoke(source);
+							Object clonedFieldValue = alreadyCopiedMap.get(sourceFieldValue);
+							if (clonedFieldValue!=null) {
+								clonedAncestor = new Object[]{clonedFieldValue};
 							}
 						}
-						copyValueShallow(setFieldDirectly, field, getter, setter, source, target, values);
-
+						// Just copy
+						copyValueShallow(setFieldDirectly, field, getter, setter, source, target, clonedAncestor);
 //						setter.invoke(target, getter.invoke(source));
 					} else {
 						if (isType(fieldType, Collection.class)) {
@@ -2524,7 +2525,7 @@ public class YadaUtil {
 							// per questi faccio la copia deep.
 							for (Object value : sourceCollection) {
 								if (isType(value.getClass(), CloneableDeep.class)) {
-									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, sourceParent, targetParent, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
+									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
 									// For YadaAttachedFile objects, duplicate the file on disk too
 									if (isType(value.getClass(), YadaAttachedFile.class)) {
 										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
@@ -2557,7 +2558,7 @@ public class YadaUtil {
 							for (Object key : sourceMap.keySet()) {
 								Object value = sourceMap.get(key);
 								if (isType(value.getClass(), CloneableDeep.class)) {
-									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null,  sourceParent, targetParent, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
+									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
 									// For YadaAttachedFile objects, duplicate the file on disk too
 									if (isType(value.getClass(), YadaAttachedFile.class)) {
 										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
@@ -2578,7 +2579,7 @@ public class YadaUtil {
 							if (isType(fieldType, CloneableDeep.class)) {
 								// Deep copy
 								CloneableFiltered fieldValue = (CloneableFiltered) fieldSourceValueObject;
-								Object clonedValue = YadaUtil.copyEntity(fieldValue, null, source, target, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep but detached
+								Object clonedValue = YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep but detached
 								// For YadaAttachedFile objects, duplicate the file on disk too
 								if (isType(fieldType, YadaAttachedFile.class)) {
 									clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
