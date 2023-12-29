@@ -395,12 +395,12 @@ input.yadaSwitch-round:checked ~ label:after {
 }
 
 .yadaIcon-down:before {
-    content: "\F128";
-    font-weight: 600;	
+    content: "\F078";
+    font-weight: 600;
 }
 
 .yadaIcon-up:before {
-    content: "\F148";
+    content: "\F077";
     font-weight: 600;	
 }
 
@@ -414,7 +414,7 @@ input.yadaSwitch-round:checked ~ label:after {
 }
 
 .yadaIcon-clone:before {
-    content: "\F3C2";
+    content: "\F24D";
 }
 
 .yadaIcon-add:before {
