@@ -105,7 +105,8 @@
 		    	defaultContent:'',
 		    	className: 'control',
 		    	orderable: false,
-				searchable: false
+				searchable: false,
+				visible: false
 		    }
 		];
 		if (!removeCheckbox) {
