@@ -17,6 +17,8 @@ if (!project.hasProperty('repoPath')) {
 }
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
      // toolchain {
      //     languageVersion = JavaLanguageVersion.of(11) // >=11 because of org.hidetake.ssh
      // }
@@ -48,7 +50,7 @@ repositories {
 
 dependencies {
 	implementation gradleApi(), localGroovy(),
-		'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final' 
+		'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.2.Final' 
 }
 
 /* TODO Da finire: lanciando da eclipse la console è nulla. Vedi http://stackoverflow.com/a/24360969/587641 

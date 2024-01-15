@@ -61,6 +61,12 @@ repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile) {
+    // Needed since Spring 6.1: 
+    // https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
+    options.compilerArgs.add("-parameters") 
+}
+
 dependencies {
 	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
 

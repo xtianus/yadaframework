@@ -15,6 +15,7 @@ import org.gradle.api.tasks.OutputFile
 
 /**
 * This is the legacy schema generator that used the Hibernate Tools And Task.
+* It has been replaced with YadaSchemaGenerator. See /YadaTools/scripts/template.gradle for new usage.
 * Docs: https://docs.jboss.org/tools/latest/en/hibernatetools/html/ant.html
 * @param outputfilename the name of the output file
 * @param update (true/false) set to true for the schema delta (might not be accurate)
