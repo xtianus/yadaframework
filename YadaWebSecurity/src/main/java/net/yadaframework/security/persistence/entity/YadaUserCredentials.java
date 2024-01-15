@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import org.hibernate.annotations.Fetch;
@@ -179,7 +180,7 @@ public class YadaUserCredentials implements Serializable {
 	 * @param username
 	 */
 	public void setUsername(String username) {
-		this.username = username==null?null:username.trim().toLowerCase();
+		this.username = username==null?null:username.trim().toLowerCase(Locale.ROOT);
 	}
 
 	public String getPassword() {

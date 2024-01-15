@@ -101,7 +101,16 @@ public abstract class YadaConfiguration {
 	private File tempFolder = null;
 	private String googleApiKey = null;
 	private Integer bootstrapVersion = null;
-	
+
+	/**
+	 * Returns the configured timeout for asynchronous requests in seconds.
+	 * Equivalent to the Tomcat parameter asyncTimeout, but more effective (the application-defined parameter takes precedence).
+	 * @return the configured timeout in minutes or 0 for the default
+	 */
+	public int getAsyncTimeoutMinutes() {
+		return configuration.getInt("config/asyncTimeoutMinutes", 0);
+	}
+
 	/**
 	 * @return true if the embedded db should be used instead of the external MySQL
 	 */
@@ -461,7 +470,6 @@ public abstract class YadaConfiguration {
 		}
 		return false;
 	}
-
 
 	/**
 	 * True if during startup YadaAppConfig should run the FlyWay migrate operation
@@ -892,13 +900,24 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
-	 * Ritorna il nome del ruolo come usato in spring security, ovvero ROLE_USER
-	 * @param roleId
-	 * @return
+	 * Given a role id, returns the configured role name prefixed by "ROLE_", e.g. "ROLE_USER"
+	 * @param roleId e.g. 9
+	 * @return e.g. "ROLE_ADMIN"
+	 * @see #getRoleName(Integer)
 	 */
 	public String getRoleSpringName(Integer roleId) {
 		String roleKey = getRoleKey(roleId);
 		return "ROLE_" + roleKey;
+	}
+	
+	/**
+	 * Given a role id, returns the configured role name e.g. "USER".
+	 * Equivalent to {@link #getRoleKey(Integer)}.
+	 * @param roleId e.g. 9
+	 * @return e.g. "ADMIN"
+	 */
+	public String getRoleName(Integer roleId) {
+		return this.getRoleKey(roleId);
 	}
 
 	/**
@@ -942,7 +961,7 @@ public abstract class YadaConfiguration {
 		}
 		return id;
 	}
-
+	
 	/**
 	 * @param roleId e.g. 9
 	 * @return e.g. "ADMIN"

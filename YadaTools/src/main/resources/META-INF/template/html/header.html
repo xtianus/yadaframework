@@ -11,7 +11,18 @@
 		<link rel="stylesheet" type="text/css" th:href="@{|/res/css/$acronym${"\$"}{@config.min}.css|}" />
 	</th:block>
 </head>
-<body>
+<body th:remove="tag">
+<script th:fragment="${acronym}ready">
+	window.${acronym} = window.${acronym} || {};
+	${acronym}.ready = ${acronym}.ready || function (fn) {
+		if (document.readyState != 'loading'){
+			fn();
+		} else {
+			document.addEventListener('DOMContentLoaded', fn);
+		}
+	}
+</script>
+
 <header>
 	<p>This is the header</p>
 </header>

@@ -32,7 +32,9 @@
 		  				<div class="form-group has-feedback" th:classappend="${passwordError!=null?'has-error':''}">
 		    				<label class="control-label" for="password">Password</label>
 		    				<div>
+		    					<!--/* Not needed if the confirmation message is shown before performing login  
 				 				<div th:if="${passwordChanged}" class="help-block alert alert-success">Your password has been changed succesfully. Please type the new password to log in</div>
+		    					*/-->
 		    					<div class="input-group">
 		    						<input type="password" name="password" class="form-control" id="password" placeholder="Password" required="required" th:value="${password}"/>
 		    						<span class="input-group-btn">

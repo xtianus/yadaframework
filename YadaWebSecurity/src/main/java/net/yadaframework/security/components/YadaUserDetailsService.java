@@ -127,6 +127,16 @@ public class YadaUserDetailsService implements UserDetailsService {
 		return auth;
 	}
 
+	/**
+	 * Change the old password with the new password, but only if the old password is valid.
+	 * If the change is successful, no exception is thrown.
+	 * @param username user that needs to change password
+	 * @param passwordTyped current password
+	 * @param newPassword new password
+	 * @throws UsernameNotFoundException if the username does not exist
+	 * @throws BadCredentialsException if the supplied password is not valid for the user
+	 * @throws InternalAuthenticationException in any other error occurs
+	 */
 	public void changePasswordIfAuthenticated(String username, String passwordTyped, String newPassword) throws UsernameNotFoundException, InternalAuthenticationException, BadCredentialsException {
 		// Prima controllo che username e password siano validi, poi setto la nuova password
 		try {
