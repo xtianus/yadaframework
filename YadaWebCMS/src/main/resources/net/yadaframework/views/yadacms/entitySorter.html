@@ -123,21 +123,21 @@ Example 3:
 						<!--/* Delete
 							* Do not be tempted to use yadaDeleteOnSuccess because you'd have to fix the command bar too (e.g. when you delete the last element) 
 						*/-->
-						<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .deleteForm" th:classappend="${@config.bootstrapVersion==3}?'pull-right':(${@config.bootstrapVersion==4}?'float-right':'float-end')" class="yadaDeletetButton">
+						<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .deleteForm" th:classappend="${@config.getForB3B4B5('pull-right','float-right','float-end')}" class="yadaDeletetButton">
 							<input type="hidden" th:name="${entityIdName}" th:value="${sorterEntity.id}">
 							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" class="yadaNoLoader" title="Delete">
 								<i class="yadaIcon yadaIcon-delete"></i>
 							</a>
 						</form>
 						<!--/* Clone */-->
-						<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .cloneForm" th:classappend="${@config.bootstrapVersion==3}?'pull-right':(${@config.bootstrapVersion==4}?'float-right':'float-end')" class="yadaClonetButton" >
+						<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .cloneForm" th:classappend="${@config.getForB3B4B5('pull-right','float-right','float-end')}" class="yadaClonetButton" >
 							<input type="hidden" th:name="${entityIdName}" th:value="${sorterEntity.id}">
 							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" title="Clone">
 								<i class="yadaIcon yadaIcon-clone"></i>
 							</a>
 						</form>
 						<!--/* Edit */-->
-						<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .editForm" th:classappend="${@config.bootstrapVersion==3}?'pull-right':(${@config.bootstrapVersion==4}?'float-right':'float-end')" class="yadaEditButton">
+						<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .editForm" th:classappend="${@config.getForB3B4B5('pull-right','float-right','float-end')}" class="yadaEditButton">
 							<input type="hidden" th:name="${entityIdName}" th:value="${sorterEntity.id}">
 							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" title="Edit">
 								<i class="yadaIcon yadaIcon-edit"></i>
