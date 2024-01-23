@@ -281,7 +281,7 @@ public abstract class YadaConfiguration {
 	 */
 	public String getNotifyModalView() {
 		if (defaultNotifyModalView==null) {
-			defaultNotifyModalView = configuration.getString("config/paths/notificationModalView", YadaViews.AJAX_NOTIFY);
+			defaultNotifyModalView = configuration.getString("config/paths/notificationModalView", isB4() ? YadaViews.AJAX_NOTIFY_B4 : YadaViews.AJAX_NOTIFY);
 		}
 		return defaultNotifyModalView;
 	}
