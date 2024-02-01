@@ -188,8 +188,8 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
-	 * Returns the configured FormattingConversionService. Use <FormattingConversionService> in config.
-	 * Defaults to DefaultFormattingConversionService
+	 * Returns the configured Date Formatter. Use like &lt;dateFormatter>net.yadaframework.components.YadaDateFormatter&lt;/dateFormatter> in config.
+	 * Defaults to DefaultFormattingConversionService when not configured.
 	 * @return
 	 */
 	public Formatter<Date> getDateFormatter() {

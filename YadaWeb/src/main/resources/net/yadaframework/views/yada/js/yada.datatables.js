@@ -439,10 +439,14 @@
 	};
 	
 	yada.datatableDrawOnModalClose = function(dataTable) {
-		$('.modal').on('hide.bs.modal', function (e) {
-			dataTable.draw(false);
-			// $('.modal').unbind('hide.bs.modal');
-		});
+		// At this time the modal has not been inserted in page yet, so we need to set the
+		// this handler after the current method ends. We do this with any timeout.
+		setTimeout(function() {
+			$('.modal.yadaAjaxModal').on('hide.bs.modal', function () {
+				dataTable.draw(false);
+				$('.modal.yadaAjaxModal').unbind('hide.bs.modal');
+			});
+		}, 0);
 	}
 	
 	function makeToolbarExtraButtons(extraButtons, dataTable, $table) {
