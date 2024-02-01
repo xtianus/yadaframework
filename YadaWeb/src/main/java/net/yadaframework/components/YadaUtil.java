@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -723,6 +724,12 @@ public class YadaUtil {
 	 * @return
 	 */
 	public String relativize(Path ancestorFolder, Path descendantFolder) {
+		// When on windows, if one path has a drive letter and the other doesn't, an exception would be thrown, so we fix that.
+		if (ancestorFolder.isAbsolute() && !descendantFolder.isAbsolute()) {
+			descendantFolder = Paths.get(ancestorFolder.getRoot().toString(), descendantFolder.toString());
+		} else if (!ancestorFolder.isAbsolute() && descendantFolder.isAbsolute()) {
+			ancestorFolder = Paths.get(descendantFolder.getRoot().toString(), ancestorFolder.toString());
+		}
 		String segment = ancestorFolder.relativize(descendantFolder).toString();
 		return segment.replaceAll("\\\\", "/");
 	}
@@ -2362,7 +2369,7 @@ public class YadaUtil {
 	 * @param setter
 	 * @param source object containing the value to copy
 	 * @param target object where to copy the value
-	 * @param args
+	 * @param args optional values to set on the target. When empty, the value is taken from the source.
 	 */
 	private static void copyValueShallow(boolean setFieldDirectly, Field field, Method getter, Method setter, Object source, Object target, Object... args) {
 		try {

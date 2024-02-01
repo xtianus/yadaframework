@@ -870,7 +870,7 @@ public class YadaWebUtil {
 	@Deprecated
 	public String modalError(String title, String message, Model model) {
 		notifyModal(title, message, VAL_NOTIFICATION_SEVERITY_ERROR, null, model);
-		return "/yada/modalNotify";
+		return config.getNotifyModalView();
 	}
 
 	/**
@@ -884,7 +884,7 @@ public class YadaWebUtil {
 	@Deprecated
 	public String modalInfo(String title, String message, Model model) {
 		notifyModal(title, message, VAL_NOTIFICATION_SEVERITY_INFO, null, model);
-		return "/yada/modalNotify";
+		return config.getNotifyModalView();
 	}
 
 	/**
@@ -898,7 +898,7 @@ public class YadaWebUtil {
 	@Deprecated
 	public String modalOk(String title, String message, Model model) {
 		notifyModal(title, message, VAL_NOTIFICATION_SEVERITY_OK, null, model);
-		return "/yada/modalNotify";
+		return config.getNotifyModalView();
 	}
 
 	/**

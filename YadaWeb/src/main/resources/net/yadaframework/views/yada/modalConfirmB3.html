@@ -11,14 +11,14 @@ or via ajax, in which case the Controller method has to return yadaWebUtil.modal
 
 In any case it has to be statically included in the hmtl with
 
-<th:block th:replace="~{/yada/modalConfirmB3 :: modalBlock}" id="yada-confirm"></div>
+<div th:replace="~{/yada/modalConfirmB3 :: modalBlock}"></div>
 
  */-->
 
 <div class="s_modalConfirm"> <!--/* Only seen when loaded via ajax */-->
-<th:block th:fragment="modalBlock">
+<div th:fragment="modalBlock" id="yada-confirm">
 	<div th:fragment="modalBlockInner" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-	    <div class="modal-dialog" th:classappend="${extraDialogClasses}">
+	    <div class="modal-dialog" th:classappend="${extraDialogClasses}" id="yada-confirm">
 	        <div class="modal-content">
 		      <div class="modal-header">
 		      	<span class="confirm-title"><!--/* Optional title */--></span>
@@ -52,7 +52,7 @@ In any case it has to be statically included in the hmtl with
 	        
 	    </div>
 	</div>
-</th:block>
+</div>
 </div>
 
 </body>

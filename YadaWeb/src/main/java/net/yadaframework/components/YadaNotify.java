@@ -283,7 +283,7 @@ public class YadaNotify {
 			return null;
 		}
 		activateNormal();
-		return "/yada/modalNotify";
+		return yadaConfiguration.getNotifyModalView();
 	}
 
 	/**

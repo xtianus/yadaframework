@@ -1699,7 +1699,7 @@
 			$('#yada-notification').append(notification);
 			// We need to show the modal after a delay or it won't show sometimes (!)
 			setTimeout(function() {
-				$('#yada-notification').on('shown.bs.modal', function (e) {
+				$('#yada-notification').on('show.bs.modal', function (e) {
 					// Keep the loader open until the modal is fully shown, to prevent "flashing".
 					// This should become a configurable option maybe
 					if (!notification.hasClass("yadaLoaderKeep")) {

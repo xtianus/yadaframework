@@ -105,7 +105,8 @@
 		    	defaultContent:'',
 		    	className: 'control',
 		    	orderable: false,
-				searchable: false
+				searchable: false,
+				visible: false
 		    }
 		];
 		if (!removeCheckbox) {
@@ -360,7 +361,7 @@
 			var addButton = $table.parents('.yadaTableBlock').find('.yadaTableToolbar a.s_addButton');
 			addButton.click(function(e) {
 				e.preventDefault();
-				// The handlert enables ajax forms on the loaded response, and adds a handler to redraw the table on modal close
+				// The handler enables ajax forms on the loaded response, and adds a handler to redraw the table on modal close
 				// Devo abilitare ajax ricorsivamente per quando il form ritorna con un errore di validazione
 				var handler = function(responseText, responseHtml) {
 					yada.datatableDrawOnModalClose(dataTable);
@@ -438,9 +439,9 @@
 	};
 	
 	yada.datatableDrawOnModalClose = function(dataTable) {
-		$('#ajaxModal').on('hide.bs.modal', function (e) {
+		$('.modal').on('hide.bs.modal', function (e) {
 			dataTable.draw(false);
-			$('#ajaxModal').unbind('hide.bs.modal');
+			// $('.modal').unbind('hide.bs.modal');
 		});
 	}
 	

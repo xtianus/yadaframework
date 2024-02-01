@@ -44,7 +44,7 @@ public class YadaMoney implements Comparable<YadaMoney> {
 	 * @param amount an amount of money with no decimals
 	 */
 	public YadaMoney(int amount) {
-		this.internalValue = amount * multiplier;
+		this((long) amount);
 	}
 
 	/**
