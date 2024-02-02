@@ -1403,8 +1403,11 @@
 				// The reason for stripping it is that "replaceWith" and other successHandler functions move the children from the
 				// added top <div> element, so it can't be returned anyway because it would be empty.
 				var responseHtml=$(yadaAjaxResponseHtmlRoot).html(responseTrimmed);
+				//
+				// Deprecated - to be removed:
 				// Check if we just did a login.
-				// A successful login can also return a redirect, which will skip the PostLoginHandler 
+				// A successful login can also return a redirect, which will skip the PostLoginHandler
+				// The "loginSuccess" string is not returned anymore.
 				if ("loginSuccess" == responseTrimmed) {
 					// @Deprecated. Should use the generic modal instead of the login modal
 					$("#loginModal").modal("hide");
@@ -1413,6 +1416,7 @@
 					yada.handlePostLoginHandler(responseHtml, responseText);
 					return;
 				}
+				//
 				if (openLoginModalIfPresent(responseHtml)) {
 					// @Deprecated. Should use the generic modal instead of the login modal
 					yada.loaderOff();
