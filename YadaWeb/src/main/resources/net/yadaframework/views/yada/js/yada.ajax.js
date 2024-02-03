@@ -293,7 +293,7 @@
 		}
 
 		$('[data-yadaTriggerInViewport]', $target).each(function() {
-			var fetchUrl = $(this).attr("data-yadaHref");
+			var fetchUrl = $(this).attr("data-yadaHref") || $(this).attr("href");
 			if (fetchUrl!=null) {
 				ajaxTriggerInViewportObserver.observe(this);
 				// console.log("Observing " + $(this).attr("data-yadahref"));
@@ -586,9 +586,15 @@
 			url = $element.attr('href');
 		}
 		if (url==null || url=='') {
-			console.log("No url for ajax call");
+			yada.log("No url for ajax call");
 			return false;
 		}
+		
+		// Execute submit handlers if any
+		if (!execSubmitHandlers($element)) {
+			return false;
+		}
+		
 		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
 		// Create data for submission
 		var data = [];
@@ -921,8 +927,12 @@
 		$form.removeClass(markerClass);
 	}
 	
+	/**
+	 * Execute any comma-separated list of sumbit handlers. Each can also be an inline function (with or without function(){} declaration).
+	 * Execution stops after the first handler that returns false.
+	 */
 	function execSubmitHandlers($element) {
-		// Invoke any submit handlers either on form or on submit button
+		// Invoke any submit handlers either on form, submit button or any ajax-enabled element
 		var submitHandlerNames = $element.attr("data-yadaSubmitHandler");
 		var submitHandlerNameArray = yada.listToArray(submitHandlerNames);
 		for (var z = 0; z < submitHandlerNameArray.length; z++) {
