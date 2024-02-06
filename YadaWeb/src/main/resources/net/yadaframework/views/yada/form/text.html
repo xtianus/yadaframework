@@ -114,9 +114,20 @@ Example:
             			toolbar: ['|']
             		},
             		mediaEmbed: {
-            			toolbar: ['|']
-            		}
-            	})
+						toolbar: ['|']
+					}
+				})
+				.then(editor => {
+					if (yada.ckeditRemoveTags) {
+						editor.plugins.get('Clipboard').on('inputTransformation', (evt, data) => {
+							const regex = /<[^>]+>/g;
+							const htmlData = data.dataTransfer.getData('text/plain');
+							if (regex.test(htmlData)) {
+								data.content = editor.data.processor.toView(htmlData.replace(regex, ''));
+							}
+						});
+					}
+				})
             	// Show all toolbar values with the following code:
             	// .then( editor => {
         		// 	console.log( 'Editor was initialized', editor );
