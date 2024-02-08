@@ -116,7 +116,15 @@ Example:
             			toolbar: ['|']
             		}
             	})
-            	// Show all toolbar values with the following code:
+				.then(editor => {
+					let pasteHandler = [[${pasteHandler}]];
+					if (pasteHandler) {
+						editor.plugins.get('Clipboard').on('inputTransformation', (evt, data) => {
+							window[pasteHandler](evt, data);
+						});
+					}
+				})
+				// Show all toolbar values with the following code:
             	// .then( editor => {
         		// 	console.log( 'Editor was initialized', editor );
         		// 	console.log(Array.from( editor.ui.componentFactory.names() ));

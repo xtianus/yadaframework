@@ -118,13 +118,10 @@ Example:
 					}
 				})
 				.then(editor => {
-					if (yada.ckeditRemoveTags) {
+					let pasteHandler = [[${pasteHandler}]];
+					if (pasteHandler) {
 						editor.plugins.get('Clipboard').on('inputTransformation', (evt, data) => {
-							const regex = /<[^>]+>/g;
-							const htmlData = data.dataTransfer.getData('text/plain');
-							if (regex.test(htmlData)) {
-								data.content = editor.data.processor.toView(htmlData.replace(regex, ''));
-							}
+							window[pasteHandler](evt, data);
 						});
 					}
 				})
