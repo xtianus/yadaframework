@@ -107,7 +107,7 @@ dependencies {
 		'com.fasterxml.jackson.core:jackson-databind:2.+',
 		'org.seleniumhq.selenium:selenium-java:4.13.0', // 4.13.0 is the last java 8 version
 		'com.drewnoakes:metadata-extractor:2.+',
-		'org.flywaydb:flyway-mysql:10.+',
+		'org.flywaydb:flyway-mysql:9.+', // 10 is compiled with jdk17
 		'commons-beanutils:commons-beanutils:1.9.+'
 		
 	 // Connection pool for embedded Tomcat and programmatic datasource

@@ -48,6 +48,7 @@ public interface YadaViews {
 	 */
 	String AJAX_NOTIFY = "/yada/modalNotify";
 	String AJAX_NOTIFY_B4 = "/yada/modalNotifyB4";
+	String AJAX_NOTIFY_B3 = "/yada/modalNotifyB3";
 
 	/**
 	 * Close any open modal

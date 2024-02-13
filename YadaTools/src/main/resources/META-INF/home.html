@@ -26,7 +26,7 @@
 	
 		// Error modal for unhandled exceptions
 		if (/*[[${yadaExceptionObject!=null}]]*/ "placeholder") {
-			const errorTitle = /*[[#{yada.error.http.other}]]*/ "placeholder";
+			const errorTitle = /*[[#{yada.error.http.otherTitle}]]*/ "placeholder";
 			const errorMessage = /*[[${@config.isDevelopmentEnvironment()} ? ${yadaExceptionMessage!=null?yadaExceptionMessage:'no message'} : #{yada.error.http.otherMessage}]]*/ "placeholder";
 			yada.showErrorModal(errorTitle, errorMessage);
 		}

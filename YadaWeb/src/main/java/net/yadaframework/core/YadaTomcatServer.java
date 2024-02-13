@@ -24,18 +24,8 @@ import jakarta.servlet.ServletException;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 /**
- * Tomcat Embedded. Use the args constructor to accept the provided configurator. To create a different configuration, extend this class.
+ * Tomcat Embedded. Default ports and other config params can be specified in the application configuration file.
  * HTTPS is only enabled in "dev mode".
- * Default ports and other config params can be changed by providing a "yadaTomcatServer.properties" file in the current working directory
- * with these optional parameters:
- * 	port.http = 8080
- * 	port.https = 8443
- * 	port.ajp = 8009
- * 	port.ajp.redirect = 8443
- * 	port.shutdown = 8005
- * 	keystore.file = /srv/devtomcatkeystore
- * 	keystore.password = changeit
- *
  */
 public class YadaTomcatServer {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -47,7 +37,7 @@ public class YadaTomcatServer {
     private String acroenv;
 
     /**
-     * Starts the standalone server on port 8080. All parameters can be specified in a file yadaTomcatServer.json found in the cwd
+     * Starts the standalone server on port 8080 by default. Different ports can be specified in the application configuration.
      * @param args
      *        - acronym+environment used for the shutdown command
      *        - relative path of the webapp folder in eclipse ("src/main/webapp"), or the full path elsewhere
@@ -62,7 +52,7 @@ public class YadaTomcatServer {
 	}
 
 	/**
-	 * Create an instance of the server for custom configuration
+	 * Create an instance of the server for custom configuration (need to subclass the configure() method and call it explicitly).
 	 */
 	public YadaTomcatServer() {
 		this.tomcat = new Tomcat();
@@ -79,7 +69,7 @@ public class YadaTomcatServer {
 	public YadaTomcatServer(String[] args) throws ServletException, MalformedURLException, IOException, ConfigurationException {
 		this();
 		
-		// Loading optional configuration
+		// Loading application configuration
 		YadaConfiguration config = new YadaConfiguration() {}; // Anonymous subclass just to instantiate abstract YadaConfiguration
 		try {
 			Parameters params = new Parameters();
@@ -92,16 +82,6 @@ public class YadaTomcatServer {
 		} catch (Exception e) {
 			log.debug("Failed to load configuration.xml");
 		}
-		
-		// Old version was loading a specific config file from current dir
-		//		BasicConfigurationBuilder<PropertiesConfiguration> builder = new BasicConfigurationBuilder<PropertiesConfiguration>(PropertiesConfiguration.class);
-		//		Configuration tomconf = builder.getConfiguration(); // Default empty config
-		//		File configFile = new File(CONFIGFILE);
-		//		if (configFile.canRead()) {
-		//			log.warn("Loading Tomcat configuration from {}", configFile.getAbsolutePath());
-		//			Configurations configurations = new Configurations();
-		//			tomconf = configurations.properties(configFile);
-		//		}
 		
 		log.debug("Starting Tomcat server with args: {}", Arrays.asList(args));
 		if (args.length == 0 || args.length>4) {

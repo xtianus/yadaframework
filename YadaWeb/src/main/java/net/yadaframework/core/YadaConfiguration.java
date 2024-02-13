@@ -188,8 +188,8 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
-	 * Returns the configured FormattingConversionService. Use <FormattingConversionService> in config.
-	 * Defaults to DefaultFormattingConversionService
+	 * Returns the configured Date Formatter. Use like &lt;dateFormatter>net.yadaframework.components.YadaDateFormatter&lt;/dateFormatter> in config.
+	 * Defaults to DefaultFormattingConversionService when not configured.
 	 * @return
 	 */
 	public Formatter<Date> getDateFormatter() {
@@ -281,7 +281,7 @@ public abstract class YadaConfiguration {
 	 */
 	public String getNotifyModalView() {
 		if (defaultNotifyModalView==null) {
-			defaultNotifyModalView = configuration.getString("config/paths/notificationModalView", isB4() ? YadaViews.AJAX_NOTIFY_B4 : YadaViews.AJAX_NOTIFY);
+			defaultNotifyModalView = configuration.getString("config/paths/notificationModalView", getForB3B4B5(YadaViews.AJAX_NOTIFY_B3, YadaViews.AJAX_NOTIFY_B4, YadaViews.AJAX_NOTIFY));
 		}
 		return defaultNotifyModalView;
 	}
