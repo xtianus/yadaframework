@@ -1391,7 +1391,25 @@
 					// Get the redirect url and remove any "redirect:" prefix from the url
 					var targetUrl = yada.getAfter(redirectObject.redirect, "redirect:");
 					if (redirectObject.newTab!="true") {
+						const currentServer = window.location.origin; // https://www.example.com:8080
+						const redirectServer = yada.getServerAddress(targetUrl);
+						const currentPathSearch = window.location.pathname + window.location.search;
+						const redirectPathSearch = yada.removeHash(targetUrl);
+						const currentHashValue = yada.getHashValue(window.location.hash); // '' or 'value'
+						const redirectHashValue = yada.getHashValue(targetUrl);
 						window.location.href=targetUrl;
+						// When only the #anchor changes between current and new url, browsers
+						// might not reload the page so we force a reload
+						if (currentServer==redirectServer || redirectServer=='') {
+							if (currentPathSearch==redirectPathSearch)	{
+								// Automatic reloading only happens when there are no hashes
+								// or when the current hash is removed.
+								// So we force a reload only when a hash is added/modified.
+								if (redirectHashValue!='') {
+									window.location.reload(true);
+								}
+							}					
+						}
 						return; // Needed to prevent flashing of the loader
 					} else {
 						yada.loaderOff();
