@@ -14,13 +14,23 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.TooManyFailedAttemptsException;
 import net.yadaframework.security.exceptions.InternalAuthenticationException;
@@ -35,6 +45,9 @@ public class YadaUserDetailsService implements UserDetailsService {
 	@Autowired PasswordEncoder encoder;
 	@Autowired YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired YadaConfiguration yadaConfiguration;
+	
+	private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
+	private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository(); 
 
 	/**
 	 * Change the roles of the currently authenticated user, but not on the database
@@ -104,6 +117,22 @@ public class YadaUserDetailsService implements UserDetailsService {
 	}
 
 	/**
+	 * Manual authentication for Spring Security 6.
+	 * You can also use the other methods without request/response but they are not standard anymore
+	 * @param userCredentials
+	 * @param request
+	 * @param response
+	 */
+	public void authenticateAs(YadaUserCredentials userCredentials, HttpServletRequest request, HttpServletResponse response) {
+		UserDetails userDetails = createUserDetails(userCredentials);
+		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+	    SecurityContext context = securityContextHolderStrategy.createEmptyContext();
+	    context.setAuthentication(auth); 
+	    securityContextHolderStrategy.setContext(context);
+	    securityContextRepository.saveContext(context, request, response); 		
+	}
+
+	/**
 	 * Authenticate the user without setting the lastSuccessfulLogin timestamp
 	 * @param userCredentials
 	 */
@@ -119,7 +148,16 @@ public class YadaUserDetailsService implements UserDetailsService {
 	public Authentication authenticateAs(YadaUserCredentials userCredentials, boolean setTimestamp) {
 		UserDetails userDetails = createUserDetails(userCredentials);
 		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-		SecurityContextHolder.getContext().setAuthentication(auth);
+		SecurityContext context = SecurityContextHolder.getContext();
+		context.setAuthentication(auth);
+		// Fix for authentication being ignored in Spring Security 6.2.0 because of requireExplicitAuthenticationStrategy(true)
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes instanceof ServletRequestAttributes) {
+            HttpServletRequest req = ((ServletRequestAttributes) requestAttributes).getRequest();
+            HttpSession session = req.getSession(true);
+            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+        }
+        //
 		if (setTimestamp) {
 			yadaUserCredentialsDao.updateLoginTimestamp(userCredentials.getUsername());
 			yadaUserCredentialsDao.resetFailedAttempts(userCredentials.getUsername());
