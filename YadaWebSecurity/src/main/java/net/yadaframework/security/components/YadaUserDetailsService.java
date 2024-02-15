@@ -117,25 +117,52 @@ public class YadaUserDetailsService implements UserDetailsService {
 	}
 
 	/**
-	 * Manual authentication for Spring Security 6.
-	 * You can also use the other methods without request/response but they are not standard anymore
+	 * Manual authentication for Spring Security 6 without setting the login timestamp.
 	 * @param userCredentials
 	 * @param request
 	 * @param response
 	 */
-	public void authenticateAs(YadaUserCredentials userCredentials, HttpServletRequest request, HttpServletResponse response) {
+	public Authentication authenticateAs(YadaUserCredentials userCredentials, HttpServletRequest request, HttpServletResponse response) {
+		if (request==null || response==null) {
+			log.warn("Using deprecated authentication method");
+			return authenticateAs(userCredentials, false);
+		}
+		return authenticateAs(userCredentials, false, request, response);
+	}
+	
+	/**
+	 * Manual authentication for Spring Security 6. Also sets the login timestamp and clears the failed attempts counter.
+	 * @param userCredentials
+	 * @param request
+	 * @param response
+	 * @param setTimestamp true to set the lastSuccessfulLogin timestamp
+	 */
+	public Authentication authenticateAs(YadaUserCredentials userCredentials, boolean setTimestamp, HttpServletRequest request, HttpServletResponse response) {
+		if (request==null || response==null) {
+			log.warn("Using deprecated authentication method");
+			return authenticateAs(userCredentials, setTimestamp);
+		}
 		UserDetails userDetails = createUserDetails(userCredentials);
 		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-	    SecurityContext context = securityContextHolderStrategy.createEmptyContext();
-	    context.setAuthentication(auth); 
-	    securityContextHolderStrategy.setContext(context);
-	    securityContextRepository.saveContext(context, request, response); 		
+		// Docs: https://docs.spring.io/spring-security/reference/servlet/authentication/session-management.html#store-authentication-manually
+		SecurityContext context = securityContextHolderStrategy.createEmptyContext();
+		context.setAuthentication(auth); 
+		securityContextHolderStrategy.setContext(context);
+		securityContextRepository.saveContext(context, request, response); 		
+        //
+		if (setTimestamp) {
+			yadaUserCredentialsDao.updateLoginTimestamp(userCredentials.getUsername());
+			yadaUserCredentialsDao.resetFailedAttempts(userCredentials.getUsername());
+		}
+		return auth;
 	}
 
 	/**
 	 * Authenticate the user without setting the lastSuccessfulLogin timestamp
 	 * @param userCredentials
+	 * @deprecated because for Spring 5
 	 */
+	@Deprecated
 	public Authentication authenticateAs(YadaUserCredentials userCredentials) {
 		return authenticateAs(userCredentials, true);
 	}
@@ -144,13 +171,15 @@ public class YadaUserDetailsService implements UserDetailsService {
 	 * Authenticate the user
 	 * @param userCredentials
 	 * @param setTimestamp true to set the lastSuccessfulLogin timestamp
+	 * @deprecated because for Spring 5
 	 */
+	@Deprecated
 	public Authentication authenticateAs(YadaUserCredentials userCredentials, boolean setTimestamp) {
 		UserDetails userDetails = createUserDetails(userCredentials);
 		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 		SecurityContext context = SecurityContextHolder.getContext();
 		context.setAuthentication(auth);
-		// Fix for authentication being ignored in Spring Security 6.2.0 because of requireExplicitAuthenticationStrategy(true)
+		// Fix for authentication being ignored in Spring Security 6.2.0 because of requireExplicitAuthenticationStrategy(true) by default
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (requestAttributes instanceof ServletRequestAttributes) {
             HttpServletRequest req = ((ServletRequestAttributes) requestAttributes).getRequest();

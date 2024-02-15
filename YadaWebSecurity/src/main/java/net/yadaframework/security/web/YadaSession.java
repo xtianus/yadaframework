@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.components.YadaSecurityUtil;
@@ -91,15 +93,24 @@ public class YadaSession<T extends YadaUserProfile> {
 	public boolean depersonify() {
 		return depersonate();
 	}
+	
+	/**
+	 * Terminates impersonation.
+	 * @return true if the impersonation was active, false if it was not active.
+	 */
+	@Deprecated
+	public boolean depersonate() {
+		return depersonate(null, null);
+	}
 
 	/**
 	 * Terminates impersonation.
 	 * @return true if the impersonation was active, false if it was not active.
 	 */
-	public boolean depersonate() {
+	public boolean depersonate(HttpServletRequest request, HttpServletResponse response) {
 		if (isImpersonationActive()) {
 			YadaUserCredentials originalCredentials = yadaUserCredentialsDao.findByUserProfileId(impersonatorUserId);
-			yadaUserDetailsService.authenticateAs(originalCredentials);
+			yadaUserDetailsService.authenticateAs(originalCredentials, request, response);
 			log.info("Impersonification by {} ended", originalCredentials);
 			clearCaches();
 			return true;
