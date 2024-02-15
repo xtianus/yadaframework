@@ -25,6 +25,12 @@ java {
     withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
 
+tasks.withType(JavaCompile).configureEach {
+    // Needed since Spring 6.1: 
+    // https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
+    options.compilerArgs.add("-parameters")
+}
+
 eclipse {
 	jdt {
 		// sourceCompatibility = 1.8

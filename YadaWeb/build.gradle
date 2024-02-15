@@ -61,10 +61,10 @@ repositories {
     mavenCentral()
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     // Needed since Spring 6.1: 
     // https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
-    options.compilerArgs.add("-parameters") 
+    options.compilerArgs.add("-parameters")
 }
 
 dependencies {
