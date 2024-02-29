@@ -178,12 +178,8 @@ to access the `/user` path. This can of course be changed as needed.
 
 [.todo]
 ----
-Multiple SecurityConfig
-----
-
-
-[.todo]
-----
+- Credentials expiration. See YadaAuthenticationFailureHandler.onAuthenticationFailure()
+- Multiple SecurityConfig
 - UserProfileDao
 ----
 

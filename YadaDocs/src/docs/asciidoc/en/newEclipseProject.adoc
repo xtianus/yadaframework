@@ -644,6 +644,14 @@ You can skip the "tst" and "prod" files until you're ready to deploy to a test/p
 ////
 
 ==  Database Setup
+
+[NOTE]
+====
+You can skip this section if you're not going to use a database (yet), but
+also Security will be disabled.
+Set <database enabled="false"> in the configuration.
+====
+
 The default database schema, user and password are found in `/src/main/resources/conf.webapp.dev.xml`, `/src/main/resources/META-INF/persistence.xml`, `/src/main/webapp/META-INF/context.xml` and
 `/env/dev/createDatabaseAndUser.bat`. If you want to change them, do so in all files.
 

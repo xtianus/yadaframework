@@ -90,13 +90,94 @@ The steps are as follows:
 ** Show any validation errors e.g. link expired or invalid
 * Update the user password
 
-[.todo]
+The link to the password reset page could call a "/passwordReset" endpoint passing any
+email address the user might have typed in the login user field. This is an example 
+implementation that uses javascript to copy the field value to the form behind the link:
+
+[source,html]
 ----
-Code examples:
-- form to ask password reset
-- send password reset email
-- form to reset the password
-See if YadaRegistrationController already has the code.
+<form th:action="@{/passwordReset}" role="form" method="post" id="pwdRecoverForm">
+	<input type="hidden" name="email" th:value="${username}" />
+	<a class="link link--black fs-6" href="#" th:text="#{view.link.forgotPassword}">Forgot my password</a>
+</form>
+<script>
+    $('#pwdRecoverForm a').click(function(e) {
+    	e.preventDefault();
+    	var email=$('#loginForm input[name="username"]').val();
+    	$('#pwdRecoverForm input[name="email"]').val(email);
+    	$('#pwdRecoverForm').submit();
+    	return false;
+    });
+</script> 
+----
+
+The controller can then open the page that contains the password reset form:
+
+[source,html]
+----
+@RequestMapping("/passwordReset")
+public String passwordReset(String email, YadaRegistrationRequest yadaRegistrationRequest) {
+	yadaRegistrationRequest.setEmail(email);
+	yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
+	return "/passwordReset";
+}
+----
+
+The password reset form only required field is the email address. It should also display
+any error messages:
+
+[source,html]
+----
+<form role="form" th:action="@{/yadaPasswordResetPost}" th:object="${yadaRegistrationRequest}" method="post">
+	<fieldset class="has-feedback">
+		<label for="email">E-Mail</label>
+		<div th:with="hasError=${#fields.hasErrors('email')}" >
+			<input type="email" id="email" name="email" th:value="*{email}" class="form-control" maxlength="64"
+				th:classappend="${hasError?'is-invalid':''}" required="required" autofocus="autofocus" />
+			<small th:each="err : ${#fields.errors('email')}" class="invalid-feedback" th:text="${err}">Error</small>
+		</div>
+	</fieldset>
+	<button class="btn btn-lg btn-primary w-100" type="submit">Reset Password</button>
+</form>
+----
+
+The default form handler is implemented in `YadaRegistrationController.java`.
+If the user does not exist, it returns an error, otherwise it sends a recovery email to the supplied address.
+
+The email template is in `/src/main/resources/template/email/passwordRecovery.html`.
+When the email can not be sent, an error is returned to the form, otherwise a successful notification
+is shown after redirection to the page configured with `config/security/passwordReset/passwordResetSent` (defaults to home).
+
+These are the localisation keys for the whole process:
+
+[source,properties]
+----
+yada.passwordrecover.username.notfound = ...
+email.subject.passwordRecovery = ...
+yada.email.send.failed = ...
+yada.email.passwordrecover.title = ...
+yada.email.passwordrecover.message =  ...
+----
+
+IMPORTANT: if you need higher security, do not acknowledge the validity of the supplied email address but just return the same message whether the email exists or not
+
+The recovery email contains a link to the "/passwordReset/{token}" handler.
+This handler is application-specific but can use the `yadaRegistrationController.passwordResetForm()` method
+to do all the needed work.
+
+[source,java]
+----
+@RequestMapping("/passwordReset/{token}")
+public String passwordResetPost(@PathVariable String token, Model model, HttpServletRequest request, RedirectAttributes redirectAttributes, Locale locale) {
+	// Everything is done in the yada class.
+	boolean done = yadaRegistrationController.passwordResetForm(token, model, redirectAttributes);
+	if (!done) {
+		yadaNotify.titleKey(redirectAttributes, locale, "pwdreset.invalidlink.title").error().messageKey("pwdreset.invalidlink.message").add();
+		return yadaWebUtil.redirectString("/passwordReset", locale); // Moved temporarily
+	}
+	// Don't do a redirect here because you'll lose the Model
+	return homeController.home(request, model, locale);
+}
 ----
 
 ==  Login page
@@ -215,6 +296,30 @@ in the modal to the now logged-in user.
 When using the previous tip, never open from a public page a modal containing a form to a protected page using javascript, because
 there won't be a chance to trigger the login process. Call the backend instead as explained.
 ====
+
+==  Credentials Change
+Logged-in users should have an option to change their password or even their email address.
+Changing password is straightforward while changing email address requires sending a confirmation
+email similar to the password recovery step.
+
+=== Change password
+
+TODO
+- see modalPasswordChange.html
+
+=== Change email
+A logged-in user can ask for it email to be changed. A form should be provided for this purpose in a
+protected user area. When the form is submitted, a confirmation email
+will be sent to the new email address, containing a confirmation link.
+When this link is clicked, the new old email address will be replaced
+with the new one. For extra security you may ask for confirmation by password
+after the confirmation link is clicked. The link controller should not be protected or the
+user might be confused about which email address to use for login.
+
+
+TODO
+
+
 
 [.todo]
 ----

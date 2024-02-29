@@ -159,7 +159,8 @@ required. Reading user details could be implemented via a protected form or a cs
 information must be stored in the database for later.
 The <code>YadaRegistrationRequest.java</code> class can be used for that. It can store some basic
 information like email and password and should be subclassed in order to store application-specific
-user information. An example implementation is provided in the application entity package
+user information like name and surname or a newsletter subscription flag.
+An example implementation is provided in the application entity package
 and should be customised as needed.</p>
 </div>
 </div>
@@ -311,10 +312,10 @@ result according to the application needs:</p>
 			return yadaWebUtil.redirectString("/", locale);
 		case USER_EXISTS:
 			redirectAttributes.addAttribute("email", outcome.email);
-			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.existing.title").error().messageKey("registration.confirmation.existing.message", email).add();
+			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.existing.title").error().messageKey("registration.confirmation.existing.message", outcome.email).add();
 			return yadaWebUtil.redirectString("/passwordReset", locale);
 		case OK:
-			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.ok.title").ok().messageKey("registration.confirmation.ok.message", registrationRequest.getEmail()).add();
+			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.ok.title").ok().messageKey("registration.confirmation.ok.message", outcome.email).add();
 			log.info("Registration of '{}' successful", outcome.email);
 			return yadaWebUtil.redirectString("/", locale);
 		case ERROR:
@@ -327,13 +328,20 @@ result according to the application needs:</p>
 	}</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>It is in this method that any application-specific data gathered from the registration form should be stored in the
+user profile.</p>
+</div>
+<div class="paragraph">
+<p>TODO: show the updated code</p>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.6<br>
-Last updated 2023-12-14 15:22:25 +0100
+Last updated 2023-12-18 15:10:49 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
