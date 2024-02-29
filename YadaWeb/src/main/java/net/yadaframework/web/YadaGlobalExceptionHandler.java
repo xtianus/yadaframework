@@ -60,6 +60,7 @@ public class YadaGlobalExceptionHandler {
         	// Otherwise forward to the configured error page (defaults to home)
         	modelAndView.setViewName("forward:" + config.getErrorPageForward());
         	modelAndView.addObject("yadaExceptionObject", e);
+        	modelAndView.addObject("yadaExceptionMessage", e.getMessage());
         	modelAndView.addObject("yadaExceptionUrl", request.getRequestURL());
         }
         return modelAndView;

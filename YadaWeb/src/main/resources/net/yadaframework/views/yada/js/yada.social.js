@@ -31,18 +31,10 @@
 	// - serverUrl = "/showFacebookConfirm"
 	// name, surname, email = non usati
 	function sendFacebookToServer(serverUrl, accessToken, name, surname, email) {
-		// TODO replace with yada.ajax and get rid of yada.handlePostLoginHandler
-		$.get(serverUrl, 
+		yada.ajax(serverUrl, 
 			{ accessToken: accessToken }, 
 			function(responseText, statusText) {
-				yada.loaderOff();
-				var responseHtml=$("<div>").html(responseText);
-				var modalShown = handleLoadedModal(responseHtml); // Il risultato è il modal di registrazione social, che viene mostrato
-				var callbackCalled = yada.callYadaCallbackIfPresent(responseHtml); // Qui succede il redirect
-				if (!modalShown && !callbackCalled) {
-					// Il risultato è il contenuto originariamente richiesto, che viene passato all'handler, oppure se non c'è l'handler si ricarica la pagina corrente
-					yada.handlePostLoginHandler(responseHtml, responseText);
-				}
+				window.location.href=window.location.href;
 			}
 		);
 	}
@@ -131,7 +123,7 @@
 		$('.facebookLoginButton').click(function(e) {
 			e.preventDefault();
 			yada.loaderOn();
-			$('#loginModal').modal('hide');
+			$('#loginModal').modal('hide'); // Deprecated
 			FB.login(function(response) {
 				yada.postLoginHandler = handler; // To be removed
 				facebookLoginResult(response, serverUrl);

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import net.yadaframework.components.YadaNotify;
 import net.yadaframework.components.YadaWebUtil;
@@ -102,7 +103,7 @@ public class YadaLoginController {
 	}
 
 	@RequestMapping("/autologin/{tokenLink}")
-	public String autologin(@PathVariable String tokenLink, String action, RedirectAttributes  redirectAttributes, HttpSession session, HttpServletRequest request) {
+	public String autologin(@PathVariable String tokenLink, String action, RedirectAttributes  redirectAttributes, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
 		try {
 			action = URLDecoder.decode(action, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
@@ -147,7 +148,7 @@ public class YadaLoginController {
 						yadaSession.clearCaches();
 						try {
 							// Need to call the login success handler to perform eventual login tasks
-							Authentication authentication = yadaUserDetailsService.authenticateAs(yadaUserCredentials);
+							Authentication authentication = yadaUserDetailsService.authenticateAs(yadaUserCredentials, request, response);
 							successHandler.onAuthenticationSuccessCustom(request, authentication);
 						} catch (Exception e) {
 							log.error("Auhtentication success handler failed on autologin (ignored)", e);

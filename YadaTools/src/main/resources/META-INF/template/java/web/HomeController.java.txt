@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import net.yadaframework.components.YadaNotify;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaLocalePathChangeInterceptor;
+import net.yadaframework.security.YadaSecurityConfig;
 import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.web.YadaViews;
 
@@ -64,19 +65,28 @@ public class HomeController {
 		return yadaWebUtil.redirectString("/", locale); // Moved temporarily
 	}
 
-	@RequestMapping("/loginForm")
-	public String loginForm(HttpServletRequest request, Model model, Locale locale) {
+	/**
+	 * This method should be called when the user clicks on a login link explicitly
+	 */
+	@RequestMapping("/openLogin")
+	public String openLogin(HttpServletRequest request, Model model, Locale locale) {
 		// When the user explicitly clicks on the login button, any previously saved request
 		// must be reset or he will end up in there after login
 		yadaSecurityUtil.clearAnySavedRequest();
+		if (yadaWebUtil.isAjaxRequest()) {
+			return loginAjax();
+		}
 		return login(request, model, locale);
 	}
 	
 	/**
-	 * Normal request login page
+	 * Normal request login page. Also called when a protected page is requested.
 	 */
 	@RequestMapping(YadaSecurityConfig.DEFAULT_LOGIN_URL) // "/login"
-	public String login() {
+	public String login(HttpServletRequest request, Model model, Locale locale) {
+		if (yadaWebUtil.isAjaxRequest()) {
+			return loginAjax();
+		}
 		boolean loggedIn = yadaSecurityUtil.isLoggedIn();
 		if (!loggedIn) {
 			model.addAttribute("login", "login");

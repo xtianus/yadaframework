@@ -42,7 +42,8 @@ Parameters:
 - autocomplete = the autocomplete value (optional)
 - oninput = function to call on the input event. It receives the 'input' event (optional)
 - ariaDescribedby = id for the aria-describedby attribute
-
+- pasteHandler =  function to call on paste (optional)
+- linkCustomClass = class to add to the link element (optional)
 
 Example:
 
@@ -116,7 +117,28 @@ Example:
             			toolbar: ['|']
             		}
             	})
-            	// Show all toolbar values with the following code:
+				.then(editor => {
+					let pasteHandler = [[${pasteHandler}]];
+					if (pasteHandler) {
+						editor.plugins.get('Clipboard').on('inputTransformation', (evt, data) => {
+							window[pasteHandler](evt, data);
+						});
+					}
+
+					let linkCustomClass = [[${linkCustomClass}]];
+					if (linkCustomClass) {
+						editor.conversion.for('downcast').attributeToElement({
+							model: 'linkHref',
+							view: (attributeValue, { writer }) => writer.createAttributeElement('a', {
+								class: linkCustomClass,
+								href: attributeValue,
+								target: "_blank"
+							}),
+							converterPriority: 'highest'
+						});
+					}
+				})
+				// Show all toolbar values with the following code:
             	// .then( editor => {
         		// 	console.log( 'Editor was initialized', editor );
         		// 	console.log(Array.from( editor.ui.componentFactory.names() ));

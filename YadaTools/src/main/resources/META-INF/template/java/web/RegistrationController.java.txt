@@ -1,0 +1,15 @@
+package $basePackage.web;
+
+import $basePackage.core.${acronym.capitalize()}Configuration;
+
+import org.springframework.stereotype.Controller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Controller
+public class RegistrationController {
+	private Logger log = LoggerFactory.getLogger(this.getClass());
+	
+	// TODO
+	
+}

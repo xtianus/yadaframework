@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.7.6'
+version = '0.7.7'
 
 if (!project.hasProperty('repoPath')) {
 	ext.repoPath="repoPathMissing"
@@ -21,6 +21,12 @@ java {
 	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
 	withSourcesJar()
     withJavadocJar() // https://stackoverflow.com/a/75710366/587641
+}
+
+tasks.withType(JavaCompile).configureEach {
+    // Needed since Spring 6.1: 
+    // https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
+    options.compilerArgs.add("-parameters")
 }
 
 eclipse {
@@ -55,9 +61,11 @@ dependencies {
 
 	api 'com.google.api-client:google-api-client-jackson2:2.+',
 			'com.google.api-client:google-api-client-gson:2.+',
-			'org.springframework.security:spring-security-web:6.1.+',
-			'org.springframework:spring-webmvc:6.0.13',
-			'org.springframework.security:spring-security-config:6.1.+'
+			// For Spring: 	using a specific version instead of the + wildcard to prevent side effects 
+			// 				in the application when new versions are made available 
+			'org.springframework:spring-webmvc:6.1.3',
+			'org.springframework.security:spring-security-web:6.2.0',
+			'org.springframework.security:spring-security-config:6.2.0'
 
 	implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 

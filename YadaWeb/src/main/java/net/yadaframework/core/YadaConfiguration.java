@@ -103,6 +103,31 @@ public abstract class YadaConfiguration {
 	private Integer bootstrapVersion = null;
 	
 	/**
+	 * Copy the already initialised configuration to a different instance
+	 * @param yadaConfiguration a subclass of YadaConfiguration
+	 */
+	public void copyTo(YadaConfiguration yadaConfiguration) {
+		yadaConfiguration.builder = this.builder;
+		yadaConfiguration.configuration = this.configuration;
+	}
+
+	/**
+	 * Returns the configured timeout for asynchronous requests in seconds.
+	 * Equivalent to the Tomcat parameter asyncTimeout, but more effective (the application-defined parameter takes precedence).
+	 * @return the configured timeout in minutes or 0 for the default
+	 */
+	public int getAsyncTimeoutMinutes() {
+		return configuration.getInt("config/asyncTimeoutMinutes", 0);
+	}
+
+	/**
+	 * @return true if the embedded db should be used instead of the external MySQL
+	 */
+	public boolean isDatabaseEnabled() {
+		return configuration.getBoolean("config/database/@enabled", true);
+	}
+	
+	/**
 	 * @return true if the embedded db should be used instead of the external MySQL
 	 */
 	public boolean isUseEmbeddedDatabase() {
@@ -133,6 +158,41 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
+	 * Given three strings (e.g. classes) returns the one that corresponds to the
+	 * configured Bootstrap version, from 3 to 5
+	 * @param classForB3
+	 * @param classForB4
+	 * @param classForB5
+	 * @return the argument that corresponds to the configured Bootstrap version, or the last one.
+	 */
+	public String getForB3B4B5(String classForB3, String classForB4, String classForB5) {
+		switch (getBootstrapVersion()) {
+			case 3: {
+				return classForB3;
+			}
+			case 4: {
+				return classForB4;
+			}
+			case 5: {
+				return classForB5;
+			}
+		}
+		return classForB5;
+	}
+	
+	public boolean isB5() {
+		return getBootstrapVersion()==5;
+	}
+	
+	public boolean isB4() {
+		return getBootstrapVersion()==4;
+	}
+	
+	public boolean isB3() {
+		return getBootstrapVersion()==3;
+	}
+	
+	/**
 	 * The configured bootstrap version may be used to return the correct html for modals etc.
 	 * @return the configured bootstrap version, defaults to 5
 	 */
@@ -144,8 +204,8 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
-	 * Returns the configured FormattingConversionService. Use <FormattingConversionService> in config.
-	 * Defaults to DefaultFormattingConversionService
+	 * Returns the configured Date Formatter. Use like &lt;dateFormatter>net.yadaframework.components.YadaDateFormatter&lt;/dateFormatter> in config.
+	 * Defaults to DefaultFormattingConversionService when not configured.
 	 * @return
 	 */
 	public Formatter<Date> getDateFormatter() {
@@ -237,7 +297,7 @@ public abstract class YadaConfiguration {
 	 */
 	public String getNotifyModalView() {
 		if (defaultNotifyModalView==null) {
-			defaultNotifyModalView = configuration.getString("config/paths/notificationModalView", YadaViews.AJAX_NOTIFY);
+			defaultNotifyModalView = configuration.getString("config/paths/notificationModalView", getForB3B4B5(YadaViews.AJAX_NOTIFY_B3, YadaViews.AJAX_NOTIFY_B4, YadaViews.AJAX_NOTIFY));
 		}
 		return defaultNotifyModalView;
 	}
@@ -447,16 +507,20 @@ public abstract class YadaConfiguration {
 	 * @return true for a blacklisted email address
 	 */
 	public boolean emailBlacklisted(String email) {
+		if (email==null) {
+			log.warn("Blacklisting null email address");
+			return true;
+		}
 		String[] patternStrings = configuration.getStringArray("config/email/blacklistPattern");
 		for (String patternString : patternStrings) {
-			if (email.toLowerCase().matches(patternString)) {
+			// (?i) is for case-insensitive match
+			if (email.matches("(?i)"+patternString)) {
 				log.warn("Email '{}' blacklisted by '{}'", email, patternString);
 				return true;
 			}
 		}
 		return false;
 	}
-
 
 	/**
 	 * True if during startup YadaAppConfig should run the FlyWay migrate operation
@@ -887,13 +951,24 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
-	 * Ritorna il nome del ruolo come usato in spring security, ovvero ROLE_USER
-	 * @param roleId
-	 * @return
+	 * Given a role id, returns the configured role name prefixed by "ROLE_", e.g. "ROLE_USER"
+	 * @param roleId e.g. 9
+	 * @return e.g. "ROLE_ADMIN"
+	 * @see #getRoleName(Integer)
 	 */
 	public String getRoleSpringName(Integer roleId) {
 		String roleKey = getRoleKey(roleId);
 		return "ROLE_" + roleKey;
+	}
+	
+	/**
+	 * Given a role id, returns the configured role name e.g. "USER".
+	 * Equivalent to {@link #getRoleKey(Integer)}.
+	 * @param roleId e.g. 9
+	 * @return e.g. "ADMIN"
+	 */
+	public String getRoleName(Integer roleId) {
+		return this.getRoleKey(roleId);
 	}
 
 	/**
@@ -937,7 +1012,7 @@ public abstract class YadaConfiguration {
 		}
 		return id;
 	}
-
+	
 	/**
 	 * @param roleId e.g. 9
 	 * @return e.g. "ADMIN"

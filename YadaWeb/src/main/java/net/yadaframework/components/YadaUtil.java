@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -712,8 +713,7 @@ public class YadaUtil {
 	 * @return
 	 */
 	public String relativize(File ancestorFolder, File descendantFolder) {
-		String segment = ancestorFolder.toPath().relativize(descendantFolder.toPath()).toString();
-		return segment.replaceAll("\\", "/");
+		return relativize(ancestorFolder.toPath(), descendantFolder.toPath());
 	}
 
 	/**
@@ -723,6 +723,12 @@ public class YadaUtil {
 	 * @return
 	 */
 	public String relativize(Path ancestorFolder, Path descendantFolder) {
+		// When on windows, if one path has a drive letter and the other doesn't, an exception would be thrown, so we fix that.
+		if (ancestorFolder.isAbsolute() && !descendantFolder.isAbsolute()) {
+			descendantFolder = Paths.get(ancestorFolder.getRoot().toString(), descendantFolder.toString());
+		} else if (!ancestorFolder.isAbsolute() && descendantFolder.isAbsolute()) {
+			ancestorFolder = Paths.get(descendantFolder.getRoot().toString(), ancestorFolder.toString());
+		}
 		String segment = ancestorFolder.relativize(descendantFolder).toString();
 		return segment.replaceAll("\\\\", "/");
 	}
@@ -2362,7 +2368,7 @@ public class YadaUtil {
 	 * @param setter
 	 * @param source object containing the value to copy
 	 * @param target object where to copy the value
-	 * @param args
+	 * @param args optional values to set on the target. When empty, the value is taken from the source.
 	 */
 	private static void copyValueShallow(boolean setFieldDirectly, Field field, Method getter, Method setter, Object source, Object target, Object... args) {
 		try {
@@ -2468,8 +2474,19 @@ public class YadaUtil {
 							 || fieldType==Float.class
 							 || fieldType==Double.class
 							) {
+						Object[] clonedAncestor = new Object[]{}; 
+						if (copyShallow) {
+							// Check if the shallow value to copy has already been cloned, in which case we use the clone.
+							// This allows cloned children to attach to the cloned parent instead of the original parent.
+							// It works for parent of parent etc. at any level.
+							Object sourceFieldValue = setFieldDirectly ? field.get(source) : getter.invoke(source);
+							Object clonedFieldValue = alreadyCopiedMap.get(sourceFieldValue);
+							if (clonedFieldValue!=null) {
+								clonedAncestor = new Object[]{clonedFieldValue};
+							}
+						}
 						// Just copy
-						copyValueShallow(setFieldDirectly, field, getter, setter, source, target);
+						copyValueShallow(setFieldDirectly, field, getter, setter, source, target, clonedAncestor);
 //						setter.invoke(target, getter.invoke(source));
 					} else {
 						if (isType(fieldType, Collection.class)) {

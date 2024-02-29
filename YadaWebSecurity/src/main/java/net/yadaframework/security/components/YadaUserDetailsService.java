@@ -14,13 +14,23 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.TooManyFailedAttemptsException;
 import net.yadaframework.security.exceptions.InternalAuthenticationException;
@@ -35,6 +45,9 @@ public class YadaUserDetailsService implements UserDetailsService {
 	@Autowired PasswordEncoder encoder;
 	@Autowired YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired YadaConfiguration yadaConfiguration;
+	
+	private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
+	private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository(); 
 
 	/**
 	 * Change the roles of the currently authenticated user, but not on the database
@@ -104,9 +117,52 @@ public class YadaUserDetailsService implements UserDetailsService {
 	}
 
 	/**
+	 * Manual authentication for Spring Security 6 without setting the login timestamp.
+	 * @param userCredentials
+	 * @param request
+	 * @param response
+	 */
+	public Authentication authenticateAs(YadaUserCredentials userCredentials, HttpServletRequest request, HttpServletResponse response) {
+		if (request==null || response==null) {
+			log.warn("Using deprecated authentication method");
+			return authenticateAs(userCredentials, false);
+		}
+		return authenticateAs(userCredentials, false, request, response);
+	}
+	
+	/**
+	 * Manual authentication for Spring Security 6. Also sets the login timestamp and clears the failed attempts counter.
+	 * @param userCredentials
+	 * @param request
+	 * @param response
+	 * @param setTimestamp true to set the lastSuccessfulLogin timestamp
+	 */
+	public Authentication authenticateAs(YadaUserCredentials userCredentials, boolean setTimestamp, HttpServletRequest request, HttpServletResponse response) {
+		if (request==null || response==null) {
+			log.warn("Using deprecated authentication method");
+			return authenticateAs(userCredentials, setTimestamp);
+		}
+		UserDetails userDetails = createUserDetails(userCredentials);
+		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+		// Docs: https://docs.spring.io/spring-security/reference/servlet/authentication/session-management.html#store-authentication-manually
+		SecurityContext context = securityContextHolderStrategy.createEmptyContext();
+		context.setAuthentication(auth); 
+		securityContextHolderStrategy.setContext(context);
+		securityContextRepository.saveContext(context, request, response); 		
+        //
+		if (setTimestamp) {
+			yadaUserCredentialsDao.updateLoginTimestamp(userCredentials.getUsername());
+			yadaUserCredentialsDao.resetFailedAttempts(userCredentials.getUsername());
+		}
+		return auth;
+	}
+
+	/**
 	 * Authenticate the user without setting the lastSuccessfulLogin timestamp
 	 * @param userCredentials
+	 * @deprecated because for Spring 5
 	 */
+	@Deprecated
 	public Authentication authenticateAs(YadaUserCredentials userCredentials) {
 		return authenticateAs(userCredentials, true);
 	}
@@ -115,11 +171,22 @@ public class YadaUserDetailsService implements UserDetailsService {
 	 * Authenticate the user
 	 * @param userCredentials
 	 * @param setTimestamp true to set the lastSuccessfulLogin timestamp
+	 * @deprecated because for Spring 5
 	 */
+	@Deprecated
 	public Authentication authenticateAs(YadaUserCredentials userCredentials, boolean setTimestamp) {
 		UserDetails userDetails = createUserDetails(userCredentials);
 		Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-		SecurityContextHolder.getContext().setAuthentication(auth);
+		SecurityContext context = SecurityContextHolder.getContext();
+		context.setAuthentication(auth);
+		// Fix for authentication being ignored in Spring Security 6.2.0 because of requireExplicitAuthenticationStrategy(true) by default
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes instanceof ServletRequestAttributes) {
+            HttpServletRequest req = ((ServletRequestAttributes) requestAttributes).getRequest();
+            HttpSession session = req.getSession(true);
+            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+        }
+        //
 		if (setTimestamp) {
 			yadaUserCredentialsDao.updateLoginTimestamp(userCredentials.getUsername());
 			yadaUserCredentialsDao.resetFailedAttempts(userCredentials.getUsername());
@@ -127,6 +194,16 @@ public class YadaUserDetailsService implements UserDetailsService {
 		return auth;
 	}
 
+	/**
+	 * Change the old password with the new password, but only if the old password is valid.
+	 * If the change is successful, no exception is thrown.
+	 * @param username user that needs to change password
+	 * @param passwordTyped current password
+	 * @param newPassword new password
+	 * @throws UsernameNotFoundException if the username does not exist
+	 * @throws BadCredentialsException if the supplied password is not valid for the user
+	 * @throws InternalAuthenticationException in any other error occurs
+	 */
 	public void changePasswordIfAuthenticated(String username, String passwordTyped, String newPassword) throws UsernameNotFoundException, InternalAuthenticationException, BadCredentialsException {
 		// Prima controllo che username e password siano validi, poi setto la nuova password
 		try {

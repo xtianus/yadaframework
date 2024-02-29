@@ -1,3 +1,4 @@
+<%/* Careful when editing xml templates because $ must be escaped with ${"\$"} unless it is a groovy variable */%>
 <config>
 	<info>
 		<env>$env</env>
@@ -11,7 +12,7 @@
 		<basePath>$basePath/$acronym$env</basePath>
 		<contentDir name="contents" url="/contents"></contentDir>
 	</paths>
-	<!-- Use when more than one application is running on the same server 
+	<!-- Define embedded tomcat parameters. Use when more than one application is running on the same server. 
 	<tomcat>
 		<ports>
 			<http></http>
@@ -42,8 +43,8 @@
 			<host>smtp.EXAMPLE.com</host>
 			<port>587</port>
 			<protocol>smtp</protocol>
-			<username>${smtpserver_username}</username>
-			<password>${smtpserver_password}</password>
+			<username>${"\$"}{smtpserver_username}</username>
+			<password>${"\$"}{smtpserver_password}</password>
 			<!--  If set to true, and a message has some valid and some invalid addresses, send the message anyway, reporting the partial failure with a SendFailedException. If set to false (the default), the message is not sent to any of the recipients if there is an invalid recipient address.  -->
 			<properties>mail.smtp.sendpartial=true</properties> 
 			<properties>mail.smtp.auth=true</properties>
@@ -58,7 +59,12 @@
 		<validEmail>EXAMPLE3@EXAMPLE.net</validEmail>
 	</email>
 
-	<database>
+	<database enabled="true">
+		<embedded enabled="false">
+			<datadir>$basePath/$acronym$env/embeddedDB</datadir>
+			<!-- Path of the sql file that will be loaded at startup -->
+			<sourceSql>$basePath/$acronym$env/source.sql</sourceSql>
+		</embedded>
 		<jndiname>java:comp/env/jdbc/${acronym}db$env</jndiname> <!-- Not used when <datasource> is defined -->
 		<showSql>false</showSql>
 		<% if (env=="prod") { /* TODO remove the "prod" string and use envs[prodIndex] */ %>

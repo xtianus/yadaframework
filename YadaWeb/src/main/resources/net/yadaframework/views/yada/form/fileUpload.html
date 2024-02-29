@@ -33,7 +33,7 @@ Example:
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? has-error">
 <th:block th:with="tmp=${fieldName+'seqName'},seqName=${#strings.replace(#strings.replace(tmp,']',''),'[','')}">
 	<label class="control-label" th:for="${#ids.next(seqName)}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
-	<a th:if="${help!=null}" class="yadaHelpButton" data-trigger="focus" th:id="|help${#ids.next(seqName)}|" data-toggle="popover" data-placement="top" tabindex="-1"
+	<a th:if="${help!=null}" class="yadaHelpButton yadaNoLoader" data-trigger="focus" th:id="|help${#ids.next(seqName)}|" data-toggle="popover" data-placement="top" tabindex="-1"
 		th:attr="data-content=${help},data-container=${'#help'+#ids.next(seqName)}">
 		<i class="yadaIcon yadaIcon-help"></i>
 	</a>

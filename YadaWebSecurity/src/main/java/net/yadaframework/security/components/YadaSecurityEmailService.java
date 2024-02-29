@@ -105,12 +105,12 @@ public class YadaSecurityEmailService {
 		final String[] toEmail = new String[] {yadaRegistrationRequest.getEmail()};
 		final String[] subjectParams = {yadaRegistrationRequest.getEmail()};
 
-		String destinationUrl = "/passwordReset/"; // Default
+		String destinationUrl = "/passwordReset/"; // TODO add to configuration
 
-		// Checking the destination url
-		if (StringUtils.isNotBlank(yadaRegistrationRequest.getDestinationUrl()))  {
-			destinationUrl =  yadaRegistrationRequest.getDestinationUrl();
-		}
+		// Checking the destination url  // This was a security issue
+		//		if (StringUtils.isNotBlank(yadaRegistrationRequest.getDestinationUrl()))  {
+		//			destinationUrl =  yadaRegistrationRequest.getDestinationUrl();
+		//		}
 
 		String fullLink = yadaWebUtil.getFullUrl(destinationUrl + yadaTokenHandler.makeLink(yadaRegistrationRequest, null), locale);
 

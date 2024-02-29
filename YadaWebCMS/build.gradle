@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.7.6'
+version = '0.7.7'
 
 if (!project.hasProperty('repoPath')) {
 	ext.repoPath="repoPathMissing"
@@ -21,6 +21,12 @@ java {
 	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
 	withSourcesJar()
     withJavadocJar() // https://stackoverflow.com/a/75710366/587641
+}
+
+tasks.withType(JavaCompile).configureEach {
+    // Needed since Spring 6.1: 
+    // https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
+    options.compilerArgs.add("-parameters")
 }
 
 eclipse {

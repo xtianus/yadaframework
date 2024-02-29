@@ -3,9 +3,9 @@ package $basePackage.core;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 
 import net.yadaframework.core.YadaAppConfig;
+import net.yadaframework.core.YadaConfiguration;
 
 //@Configuration not needed when using WebApplicationInitializer.java
 // WARNING: do not add the "web" package here ("$basePackage.web"), or Spring will fail to find the YadaWebSecurity controllers for autowiring
@@ -14,12 +14,18 @@ import net.yadaframework.core.YadaAppConfig;
 public class AppConfig extends YadaAppConfig {
 	
 	/**
-	 * Creo il bean "config" in modo da poterlo usare in pagina con @config.xy invece di @${acronym}Configuration.xy
+	 * Create a "config" bean
+	 * @return
+	 * @throws ConfigurationException
 	 */
 	@Bean
 	public ${acronym.capitalize()}Configuration config() throws ConfigurationException {
+		// Reuse the static configuration ensuring that it is loaded already
+		YadaConfiguration staticConfig = getStaticConfig();
 		${acronym.capitalize()}Configuration config = new ${acronym.capitalize()}Configuration();
-		super.makeCombinedConfiguration(config);
+		staticConfig.copyTo(config);
+		// Replace the static config so we have just one instance around
+		CONFIG = config;
 		return config;
 	}
 

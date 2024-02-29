@@ -930,6 +930,9 @@
 	 * @param $element (optional) a jQuery element that contains one or more popover anchors; null for <body>
 	 **/
 	yada.makeCustomPopover = function($element) {
+		if (typeof bootstrap != 'object' || typeof bootstrap.Popover != 'function' ) {
+			return yada.handleCustomPopoverB3($element); // Bootstrap 3
+		}
 		$element = $element || $('body');
 		$("[data-yadaPopover]", $element).not('.yadaPopovered').each(function(){
 			const trigger = this;
@@ -998,11 +1001,92 @@
 		}
 	}
 	
+	///////////////////////
+	/// Bootstrap 3 Popover
+	
 	// @Deprecated use yada.makeCustomPopover() instead
 	yada.handleCustomPopover = function($element) {
 		yada.log("yada.handleCustomPopover() is deprecated in favor of yada.makeCustomPopover()");
 		return yada.makeCustomPopover($element);
 	}
+	
+	yada.handleCustomPopoverB3 = function($element) {
+		if ($element==null) {
+			$element = $('body');
+		}
+		$("[data-yadaCustomPopoverId]", $element).not('.s_customPopovered').each(function(){
+			$(this).addClass('s_customPopovered');
+			var dataIdWithHash = yada.getIdWithHash(this, "data-yadaCustomPopoverId");
+			var dataTitle = $(this).attr("data-title"); // Optional
+			var hasTitle = $(this).attr("title")==null;
+			var dataId = yada.getHashValue(dataIdWithHash);
+			var shownFunction = null;
+			try {
+				shownFunction = eval(dataId+'Shown');
+			} catch (e) {
+			}
+			var hiddenFunction = null;
+			try {
+				hiddenFunction = eval(dataId+'Hidden');
+			} catch (e) {
+			}
+			var popoverId = yada.getRandomId("cp");
+			$(this).popover({
+				html : true,
+				title: function() {
+					var closeButton = '<button type="button" class="yadaclose" aria-hidden="true"><i class="fa fa-times fa-lg"></i></button>';
+					// Se è stato specificato data-title, si usa quello, altrimenti si prende il primo div.
+					var titleContent="<span>"+dataTitle+"</span>";
+					if (dataTitle==null) {
+						// Can't just return the div because it would be destroyed on close, so I need to clone it (with all events attached)
+						titleContent = $(dataIdWithHash).children("div:first").clone(true);
+					}
+					return $("<div class='"+dataId+"Title'>").append(closeButton).append(titleContent);
+				},
+				content: function() {
+					// E' sempre il secondo div
+					var contentDiv = $(dataIdWithHash).children("div").eq(1);
+					if (contentDiv.length==0) {
+						return "Internal Error: no popover definition found with id = " + dataId;
+					}
+					// Can't just return the contentDiv because it would be destroyed on close, so I need to clone it (with all events attached)
+					return $("<div class='"+dataId+"Content'>").append(contentDiv.clone(true));
+				},
+				template: '<div data-yadaid="'+popoverId+'" class="popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
+			});
+			$(this).on('shown.bs.popover', makePopoverShownHandler(popoverId, shownFunction));
+			$(this).on('hidden.bs.popover', makePopoverClosedHandler(popoverId, hiddenFunction));
+		});
+		
+		// Wrap the closure
+		function makePopoverShownHandler(divId, shownFunction) {
+			return function () {
+				var popoverButton = $(this);
+				var popoverDiv = $('[data-yadaid="'+divId+'"]');
+				$(".popover.in").not(popoverDiv).popover('hide'); // Chiudi tutti gli altri popover
+				// $("[data-yadaCustomPopoverId]").not(popoverButton).popover('hide'); // Chiudi tutti gli altri popover
+				popoverButton.tooltip('hide'); // Serve nel caso ci sia un tooltip sul pulsante
+				$("button.yadaclose", popoverDiv).click(function() {
+					$(popoverDiv).popover("hide");
+				});
+				if (typeof shownFunction == 'function') {
+					//var popoverId = $(popoverButton).attr('aria-describedby');
+					shownFunction(popoverButton, popoverDiv);
+				}
+			}
+		}
+		function makePopoverClosedHandler(divId, hiddenFunction) {
+			return function () {
+				if (typeof hiddenFunction == 'function') {
+					var popoverButton = $(this);
+					// var popoverId = $(popoverButton).attr('aria-describedby');
+					var popoverDiv = $('[data-yadaid="'+divId+'"]');
+					hiddenFunction(popoverButton, popoverDiv);
+				}
+			}
+		}
+	}
+		
 
 	///////////////////////////////////
 	/// Modal richiesta di conferma ///
@@ -1258,7 +1342,7 @@
         	if (v1!="" || v2!="") {
         		$oneForm.addClass('has-error');
         		$oneForm.addClass('yada-password-mismatch');
-        		$check.parent().append('<span class="bi bi-x form-control-feedback" aria-hidden="true"></span>');
+        		// $check.parent().append('<span class="bi bi-x form-control-feedback" aria-hidden="true"></span>');
         	}
         }
     }
@@ -1270,7 +1354,7 @@
         $submit.removeAttr("disabled");
         $oneForm.removeClass('has-error');
         $oneForm.removeClass('yada-password-mismatch');
-        $('span.form-control-feedback.bi-x', $check.parent()).remove();
+        // $('span.form-control-feedback.bi-x', $check.parent()).remove();
     }
 
 	/**

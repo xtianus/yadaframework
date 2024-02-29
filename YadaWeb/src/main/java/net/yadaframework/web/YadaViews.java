@@ -44,9 +44,11 @@ public interface YadaViews {
 	/**
 	 * Open a notification modal when returning from an ajax request.
 	 * The notification must have been saved using the YadaNotify API before returning.
-	 * This is the default modal. You can customize it with
+	 * This is the default modal. You can customize it with config/paths/notificationModalView
 	 */
 	String AJAX_NOTIFY = "/yada/modalNotify";
+	String AJAX_NOTIFY_B4 = "/yada/modalNotifyB4";
+	String AJAX_NOTIFY_B3 = "/yada/modalNotifyB3";
 
 	/**
 	 * Close any open modal

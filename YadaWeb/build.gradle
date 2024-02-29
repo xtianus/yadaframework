@@ -16,7 +16,7 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.7.6'
+version = '0.7.7'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -61,6 +61,12 @@ repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile).configureEach {
+    // Needed since Spring 6.1: 
+    // https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
+    options.compilerArgs.add("-parameters")
+}
+
 dependencies {
 	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
 
@@ -81,10 +87,12 @@ dependencies {
 	// Needed by Commons Configuration
     api 'commons-jxpath:commons-jxpath:1.+'
 
-    api 'org.springframework:spring-context-support:6.0.+',
-		'org.springframework:spring-orm:6.0.+',
-		'org.springframework:spring-webmvc:6.0.+',
-		'org.springframework:spring-core:6.0.+',
+	// For Spring: 	using a specific version instead of the + wildcard to prevent side effects 
+	// 				in the application when new versions are made available 
+    api 'org.springframework:spring-context-support:6.1.3',
+		'org.springframework:spring-orm:6.1.3',
+		'org.springframework:spring-webmvc:6.1.3',
+		'org.springframework:spring-core:6.1.3',
 		// 'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
 		'org.hibernate.orm:hibernate-core:6.3.1.Final',
 		'org.hibernate.validator:hibernate-validator:8.0.1.Final',
@@ -92,14 +100,15 @@ dependencies {
 		'com.mysql:mysql-connector-j:8.1.+',
 		'commons-collections:commons-collections:3.+',
 		'org.apache.commons:commons-exec:1.3',
-		'jakarta.mail:jakarta.mail-api:2.1.2',
+		// 'jakarta.mail:jakarta.mail-api:2.1.2',
+		'com.sun.mail:jakarta.mail:2.0.1', // The implementation is needed, not the api
 		'com.google.guava:guava:31.1-jre',
 		'org.jsoup:jsoup:1.+',
 		'ch.qos.logback:logback-classic:1.3.+',
 		'com.fasterxml.jackson.core:jackson-databind:2.+',
 		'org.seleniumhq.selenium:selenium-java:4.13.0', // 4.13.0 is the last java 8 version
 		'com.drewnoakes:metadata-extractor:2.+',
-		'org.flywaydb:flyway-mysql:10.+',
+		'org.flywaydb:flyway-mysql:9.+', // 10 is compiled with jdk17
 		'commons-beanutils:commons-beanutils:1.9.+'
 		
 	 // Connection pool for embedded Tomcat and programmatic datasource

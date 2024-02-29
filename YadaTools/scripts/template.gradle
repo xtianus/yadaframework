@@ -19,6 +19,9 @@ apply plugin: 'eclipse-wtp'
 apply plugin: 'net.yadaframework.tools'
 apply plugin: 'org.hidetake.ssh'        // https://gradle-ssh-plugin.github.io
 
+// CHANGE THIS !!!
+// If your project is in a subfolder of the git repo, this path must be corrected accordingly by adding more "../"
+// In such case, fix the settings.gradle file too
 def YadaWebLib = "$projectDir/../../yadaframework/YadaWeb";
 def YadaWebCmsLib = "$projectDir/../../yadaframework/YadaWebCMS";
 
@@ -30,15 +33,17 @@ sassCompile {
 }
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
-    }
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
 }
 
 eclipse {
     jdt {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+	    sourceCompatibility = JavaVersion.VERSION_17
+	    targetCompatibility = JavaVersion.VERSION_17
         // https://stackoverflow.com/a/35302104/587641
         file {
                 File dir = file('.settings')
@@ -76,9 +81,15 @@ tasks.withType(JavaCompile) {
 	options.encoding = 'UTF8'
 }
 
+tasks.withType(JavaCompile).configureEach {
+    // Needed since Spring 6.1: 
+    // https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
+    options.compilerArgs.add("-parameters")
+}
+
 repositories {
     mavenCentral()
-    mavenLocal()
+    // mavenLocal()
 }
 
 dependencies {
@@ -116,6 +127,7 @@ configurations {
 dependencies {
     generateSchema 'org.apache.logging.log4j:log4j-core:2.21.1'
 }
+
 task dbSchema(dependsOn: [classes], type: JavaExec) {
 	inputs.files (configurations.generateSchema, "$rootDir/src/main/resources/META-INF/persistence.xml") 
 	outputs.files "$rootDir/schema/${acronym}.sql" // This must be the same name used in persistence.xml
@@ -123,6 +135,16 @@ task dbSchema(dependsOn: [classes], type: JavaExec) {
     main = 'net.yadaframework.tools.YadaSchemaGenerator'
     doFirst {
         delete outputs.files
+		// Since recently, for autodiscovery of entities to work, 
+		// the compiled entities must be in the root folder of the META-INF/persistence.xml file
+		// so I copy the META-INF file there:
+        copy {
+     		from 'src/main/resources/META-INF'
+    		into 'build/classes/java/main/META-INF'
+        }
+    }
+    doLast {
+        delete "build/classes/java/main/META-INF"
     }
 }
 

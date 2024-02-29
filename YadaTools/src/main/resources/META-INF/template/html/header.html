@@ -8,10 +8,21 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1">
 		<link th:if="${"\$"}{@config.developmentEnvironment}" rel="stylesheet" type="text/css" th:href="@{/yadares/css/yada.css}" />
 	    <link th:if="${"\$"}{!@config.developmentEnvironment}" rel="stylesheet" type="text/css" th:href="@{/res/css/yada.min.css}" />
-		<link rel="stylesheet" type="text/css" th:href="@{|/res/css/$acronym${"\$"}{@config.min}.css|}" />
+		<link rel="stylesheet" type="text/css" th:href="@{/res/css/$acronym.min.css}" />
 	</th:block>
 </head>
-<body>
+<body th:remove="tag">
+<script th:fragment="${acronym}ready">
+	window.${acronym} = window.${acronym} || {};
+	${acronym}.ready = ${acronym}.ready || function (fn) {
+		if (document.readyState != 'loading'){
+			fn();
+		} else {
+			document.addEventListener('DOMContentLoaded', fn);
+		}
+	}
+</script>
+
 <header>
 	<p>This is the header</p>
 </header>

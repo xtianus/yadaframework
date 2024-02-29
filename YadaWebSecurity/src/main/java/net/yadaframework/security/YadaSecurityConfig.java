@@ -119,7 +119,7 @@ public class YadaSecurityConfig {
 	/**
 	 * Needed to redirect to a language-specific login url when a protected page is requested
 	 */
-    private class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+    public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
         @Override
         public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         	boolean ajaxRequest = yadaWebUtil.isAjaxRequest(request);

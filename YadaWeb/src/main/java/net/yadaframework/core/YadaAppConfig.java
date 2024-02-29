@@ -40,7 +40,10 @@ import net.yadaframework.web.dialect.YadaDialect;
 @EnableScheduling
 @EnableAsync
 public class YadaAppConfig {
-	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private final static Logger log = LoggerFactory.getLogger(YadaAppConfig.class);
+	
+	// Static instance of the configuration to use when the ApplicationContext is not (yet) available
+	protected static YadaConfiguration CONFIG = null;
 
 	@Autowired private YadaConfiguration config;
 	@Autowired protected DataSource dataSource;
@@ -67,6 +70,19 @@ public class YadaAppConfig {
 				.load();
 			flyway.migrate();
 		}
+	}
+	
+	public static YadaConfiguration getStaticConfig() {
+		if (CONFIG==null) {
+			try {
+				CONFIG = new YadaConfiguration() {}; // Anonymous subclass is needed because YadaConfiguration is abstract
+				makeCombinedConfiguration(CONFIG);
+				log.debug("Statically loaded configuration.xml");
+			} catch (Exception e) {
+				log.debug("Failed to statically load configuration.xml", e);
+			}
+		}
+		return CONFIG;
 	}
 
 	public ClassLoaderTemplateResolver emailTemplateResolver() {
@@ -167,7 +183,7 @@ public class YadaAppConfig {
 	 * @return
 	 * @throws ConfigurationException
 	 */
-	protected void makeCombinedConfiguration(YadaConfiguration yadaConfiguration) throws ConfigurationException {
+	protected static void makeCombinedConfiguration(YadaConfiguration yadaConfiguration) throws ConfigurationException {
 		Parameters params = new Parameters();
 		ReloadingCombinedConfigurationBuilder builder = new ReloadingCombinedConfigurationBuilder()
 			.configure(

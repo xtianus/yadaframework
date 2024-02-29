@@ -28,11 +28,12 @@ abstract public class YadaSetup {
 		List<Map<String, Object>> userList = yadaConfiguration.getSetupUsers();
 		setupUsers(userList);
 		
-		// Se nel database non ce ne sono, vengono create le clauses
-		if (yadaClauseDao.count()==0) {
-			List<YadaClause> yadaClauses = yadaConfiguration.getSetupClauses();
-			if (!yadaClauses.isEmpty()) {
-				yadaClauseDao.saveAll(yadaClauses);
+		if (yadaConfiguration.isDatabaseEnabled()) {
+			if (yadaClauseDao.count()==0) {
+				List<YadaClause> yadaClauses = yadaConfiguration.getSetupClauses();
+				if (!yadaClauses.isEmpty()) {
+					yadaClauseDao.saveAll(yadaClauses);
+				}
 			}
 		}
 		

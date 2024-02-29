@@ -293,7 +293,7 @@
 		}
 
 		$('[data-yadaTriggerInViewport]', $target).each(function() {
-			var fetchUrl = $(this).attr("data-yadaHref");
+			var fetchUrl = $(this).attr("data-yadaHref") || $(this).attr("href");
 			if (fetchUrl!=null) {
 				ajaxTriggerInViewportObserver.observe(this);
 				// console.log("Observing " + $(this).attr("data-yadahref"));
@@ -586,9 +586,15 @@
 			url = $element.attr('href');
 		}
 		if (url==null || url=='') {
-			console.log("No url for ajax call");
+			yada.log("No url for ajax call");
 			return false;
 		}
+		
+		// Execute submit handlers if any
+		if (!execSubmitHandlers($element)) {
+			return false;
+		}
+		
 		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
 		// Create data for submission
 		var data = [];
@@ -921,8 +927,12 @@
 		$form.removeClass(markerClass);
 	}
 	
+	/**
+	 * Execute any comma-separated list of sumbit handlers. Each can also be an inline function (with or without function(){} declaration).
+	 * Execution stops after the first handler that returns false.
+	 */
 	function execSubmitHandlers($element) {
-		// Invoke any submit handlers either on form or on submit button
+		// Invoke any submit handlers either on form, submit button or any ajax-enabled element
 		var submitHandlerNames = $element.attr("data-yadaSubmitHandler");
 		var submitHandlerNameArray = yada.listToArray(submitHandlerNames);
 		for (var z = 0; z < submitHandlerNameArray.length; z++) {
@@ -1381,7 +1391,25 @@
 					// Get the redirect url and remove any "redirect:" prefix from the url
 					var targetUrl = yada.getAfter(redirectObject.redirect, "redirect:");
 					if (redirectObject.newTab!="true") {
+						const currentServer = window.location.origin; // https://www.example.com:8080
+						const redirectServer = yada.getServerAddress(targetUrl);
+						const currentPathSearch = window.location.pathname + window.location.search;
+						const redirectPathSearch = yada.removeHash(targetUrl);
+						const currentHashValue = yada.getHashValue(window.location.hash); // '' or 'value'
+						const redirectHashValue = yada.getHashValue(targetUrl);
 						window.location.href=targetUrl;
+						// When only the #anchor changes between current and new url, browsers
+						// might not reload the page so we force a reload
+						if (currentServer==redirectServer || redirectServer=='') {
+							if (currentPathSearch==redirectPathSearch)	{
+								// Automatic reloading only happens when there are no hashes
+								// or when the current hash is removed.
+								// So we force a reload only when a hash is added/modified.
+								if (redirectHashValue!='') {
+									window.location.reload(true);
+								}
+							}					
+						}
 						return; // Needed to prevent flashing of the loader
 					} else {
 						yada.loaderOff();
@@ -1403,8 +1431,11 @@
 				// The reason for stripping it is that "replaceWith" and other successHandler functions move the children from the
 				// added top <div> element, so it can't be returned anyway because it would be empty.
 				var responseHtml=$(yadaAjaxResponseHtmlRoot).html(responseTrimmed);
+				//
+				// Deprecated - to be removed:
 				// Check if we just did a login.
-				// A successful login can also return a redirect, which will skip the PostLoginHandler 
+				// A successful login can also return a redirect, which will skip the PostLoginHandler
+				// The "loginSuccess" string is not returned anymore.
 				if ("loginSuccess" == responseTrimmed) {
 					// @Deprecated. Should use the generic modal instead of the login modal
 					$("#loginModal").modal("hide");
@@ -1413,6 +1444,7 @@
 					yada.handlePostLoginHandler(responseHtml, responseText);
 					return;
 				}
+				//
 				if (openLoginModalIfPresent(responseHtml)) {
 					// @Deprecated. Should use the generic modal instead of the login modal
 					yada.loaderOff();
@@ -1699,7 +1731,7 @@
 			$('#yada-notification').append(notification);
 			// We need to show the modal after a delay or it won't show sometimes (!)
 			setTimeout(function() {
-				$('#yada-notification').on('shown.bs.modal', function (e) {
+				$('#yada-notification').on('show.bs.modal', function (e) {
 					// Keep the loader open until the modal is fully shown, to prevent "flashing".
 					// This should become a configurable option maybe
 					if (!notification.hasClass("yadaLoaderKeep")) {
