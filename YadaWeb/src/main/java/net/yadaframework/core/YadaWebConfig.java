@@ -207,7 +207,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 	 * @return
 	 */
 	@Bean
-	@Autowired // L'ho spostato qui per risolvere il problema "Requested bean is currently in creation"
+	// @Autowired // L'ho spostato qui per risolvere il problema "Requested bean is currently in creation"
 	public FormattingConversionService mvcConversionService() {
 		Formatter<Date> formatter = config.getDateFormatter();
 		if (formatter!=null) {

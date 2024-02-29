@@ -1,6 +1,6 @@
-package net.ghezzi.rtl.persistence.entity;
+package $basePackage.persistence.entity;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 

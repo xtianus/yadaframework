@@ -7,7 +7,6 @@ import net.yadaframework.core.YadaConfiguration;
 
 // Use XPath
 public class ${acronym.capitalize()}Configuration extends YadaConfiguration {
-	private static final long serialVersionUID = 1L;
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
 	// Cached values

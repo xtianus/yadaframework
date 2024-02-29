@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import net.yadaframework.components.YadaSetup;
+import net.yadaframework.core.YadaAppConfig;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
@@ -52,13 +53,15 @@ abstract public class YadaUserSetup<T extends YadaUserProfile> extends YadaSetup
 
 	@Override
 	protected void setupUsers(List<Map<String, Object>> userList) {
-		// Retrieve the generics YadaUserProfile subclass: https://stackoverflow.com/a/75345/587641 
-		Class<T> userProfileClass = (Class<T>)((ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-		//
-		for (Map<String, Object> userDefinition : userList) {
-			yadaUserCredentialsDao.create(userDefinition, userProfileClass);
-			if (yadaConfiguration.isDevelopmentEnvironment()) {
-				log.info("User \"{}\", password \"{}\"", userDefinition.get("email"), userDefinition.getOrDefault("password", "***"));
+		if (YadaAppConfig.getStaticConfig().isDatabaseEnabled()) {
+			// Retrieve the generics YadaUserProfile subclass: https://stackoverflow.com/a/75345/587641 
+			Class<T> userProfileClass = (Class<T>)((ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+			//
+			for (Map<String, Object> userDefinition : userList) {
+				yadaUserCredentialsDao.create(userDefinition, userProfileClass);
+				if (yadaConfiguration.isDevelopmentEnvironment()) {
+					log.info("User \"{}\", password \"{}\"", userDefinition.get("email"), userDefinition.getOrDefault("password", "***"));
+				}
 			}
 		}
 	}

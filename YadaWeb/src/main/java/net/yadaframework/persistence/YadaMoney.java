@@ -31,7 +31,7 @@ public class YadaMoney implements Comparable<YadaMoney> {
 	private /*final*/ long internalValue; // Amount in 1/10000 of the currency
 	private static final int multiplier = 10000;
 
-	private YadaUtil yadaUtil = new YadaUtil();
+	private YadaUtil yadaUtil = YadaUtil.INSTANCE; // Needed because YadaMoney is not autowired
 	
 	public static final YadaMoney ZERO = new YadaMoney(0);
 

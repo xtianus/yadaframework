@@ -101,6 +101,15 @@ public abstract class YadaConfiguration {
 	private File tempFolder = null;
 	private String googleApiKey = null;
 	private Integer bootstrapVersion = null;
+	
+	/**
+	 * Copy the already initialised configuration to a different instance
+	 * @param yadaConfiguration a subclass of YadaConfiguration
+	 */
+	public void copyTo(YadaConfiguration yadaConfiguration) {
+		yadaConfiguration.builder = this.builder;
+		yadaConfiguration.configuration = this.configuration;
+	}
 
 	/**
 	 * Returns the configured timeout for asynchronous requests in seconds.
@@ -111,6 +120,13 @@ public abstract class YadaConfiguration {
 		return configuration.getInt("config/asyncTimeoutMinutes", 0);
 	}
 
+	/**
+	 * @return true if the embedded db should be used instead of the external MySQL
+	 */
+	public boolean isDatabaseEnabled() {
+		return configuration.getBoolean("config/database/@enabled", true);
+	}
+	
 	/**
 	 * @return true if the embedded db should be used instead of the external MySQL
 	 */

@@ -19,6 +19,9 @@ apply plugin: 'eclipse-wtp'
 apply plugin: 'net.yadaframework.tools'
 apply plugin: 'org.hidetake.ssh'        // https://gradle-ssh-plugin.github.io
 
+// CHANGE THIS !!!
+// If your project is in a subfolder of the git repo, this path must be corrected accordingly by adding more "../"
+// In such case, fix the settings.gradle file too
 def YadaWebLib = "$projectDir/../../yadaframework/YadaWeb";
 def YadaWebCmsLib = "$projectDir/../../yadaframework/YadaWebCMS";
 
@@ -78,7 +81,9 @@ tasks.withType(JavaCompile) {
 	options.encoding = 'UTF8'
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
+    // Needed since Spring 6.1: 
+    // https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
     options.compilerArgs.add("-parameters")
 }
 
@@ -123,7 +128,7 @@ dependencies {
     generateSchema 'org.apache.logging.log4j:log4j-core:2.21.1'
 }
 
-task dbSchema(dependsOn: [classes, copyMetaInf], type: JavaExec) {
+task dbSchema(dependsOn: [classes], type: JavaExec) {
 	inputs.files (configurations.generateSchema, "$rootDir/src/main/resources/META-INF/persistence.xml") 
 	outputs.files "$rootDir/schema/${acronym}.sql" // This must be the same name used in persistence.xml
     classpath = configurations.generateSchema + sourceSets.main.runtimeClasspath

@@ -1,7 +1,6 @@
 package net.yadaframework.tools
 
 import groovy.text.StreamingTemplateEngine
-
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Internal
 
@@ -28,10 +27,15 @@ class YadaInitTask extends YadaProject {
 		}
 		
 		// Check for Yada projects
-		// TODO this should check that the projects are actually in the dependencies, not just on the filesystem		
-		yadaWebSecurityFound=project.file("../../yadaframework/YadaWebSecurity").canRead();
-		yadaWebCmsFound=project.file("../../yadaframework/YadaWebCMS").canRead();
-		yadaWebCommerceFound=project.file("../../yadaframework/YadaWebCommerce").canRead();
+		yadaWebSecurityFound=libraryInClasspath("net.yadaframework.yadawebsecurity");
+		yadaWebSecurityFound|=libraryInClasspath("YadaWebSecurity");
+		yadaWebCmsFound=libraryInClasspath("net.yadaframework.yadawebcms");
+		yadaWebCmsFound|=libraryInClasspath("YadaWebCMS");
+		yadaWebCommerceFound=libraryInClasspath("net.yadaframework.yadawebcommerce");
+		yadaWebCommerceFound|=libraryInClasspath("YadaWebCommerce");
+		// yadaWebSecurityFound=project.file("../../yadaframework/YadaWebSecurity").canRead();
+		// yadaWebCmsFound=project.file("../../yadaframework/YadaWebCMS").canRead();
+		// yadaWebCommerceFound=project.file("../../yadaframework/YadaWebCommerce").canRead();
 		if (!yadaWebSecurityFound) { 
 			println "No YadaWebSecurity project in classpath - configuration skipped";
 		}
@@ -62,9 +66,11 @@ class YadaInitTask extends YadaProject {
 		File emailTemplateFolder = new File(resourcesSourceFolder, "$DESTEMAILTEMPLATEFOLDER");
 		File schemaFolder = project.file(schemaDirName);
 		File cssFolder = new File(resFolder, "css");
+		File jsFolder = new File(resFolder, "js");
 		File cssImagesFolder = new File(resFolder, "css/images");
 		File staticFolder = new File(webAppRootFolder, "static");
 		resFolder.mkdirs();
+		jsFolder.mkdirs();
 		staticFolder.mkdirs();
 		webinfFolder.mkdir();
 		messagesFolder.mkdir();
@@ -110,10 +116,9 @@ class YadaInitTask extends YadaProject {
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/example_gitignore", project.projectDir);
 		processTemplate(HTMLDIRNAME, "header.html", null, viewsFolder);
 		processTemplate(HTMLDIRNAME, "footer.html", null, viewsFolder);
-		// TODO copy template.css then rename it 
 		// yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/template.css", cssFolder);
-		// TODO process template.js 
-		// processTemplate(JSDIRNAME, "template.js", acronym+".js", jsFolder);
+		processTemplate(CSSDIRNAME, "template.scss", acronym+".scss", cssFolder);
+		processTemplate(JSDIRNAME, "template.js", acronym+".js", jsFolder);
 		//
 		// Environment configuration
 		//
@@ -188,6 +193,23 @@ class YadaInitTask extends YadaProject {
 			processTemplate(SCRIPTDIRNAME, CREATEDBLINUX, null, envFolderFile, env);
 			processTemplate(CONFIGURATIONDIRNAME, "robots.disallow.txt", "robots.txt", envFolderFile, env);
 		}
+	}
+	
+	boolean libraryInClasspath(String libraryName) {
+		// Check for normal library
+		boolean found = project.sourceSets.main.runtimeClasspath.find { it.name.contains(libraryName) };
+		if (!found) {
+			// Check for project dependency e.g. implementation project(':YadaWebSecurity')
+			found = project.configurations.implementation.allDependencies.any { dependency -> {
+					try {
+	        			return dependency.dependencyProject.name == libraryName;
+	        		} catch(Throwable t) {
+	        			return false;
+	        		}
+	        	}
+			}
+    	}
+		return found;
 	}
 	
 	/**

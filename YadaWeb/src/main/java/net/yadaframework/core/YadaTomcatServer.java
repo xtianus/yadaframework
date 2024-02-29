@@ -17,6 +17,9 @@ import org.apache.commons.configuration2.builder.combined.CombinedConfigurationB
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.coyote.ajp.AbstractAjpProtocol;
+import org.apache.coyote.http11.Http11NioProtocol;
+import org.apache.tomcat.util.net.SSLHostConfig;
+import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,20 +72,6 @@ public class YadaTomcatServer {
 	public YadaTomcatServer(String[] args) throws ServletException, MalformedURLException, IOException, ConfigurationException {
 		this();
 		
-		// Loading application configuration
-		YadaConfiguration config = new YadaConfiguration() {}; // Anonymous subclass just to instantiate abstract YadaConfiguration
-		try {
-			Parameters params = new Parameters();
-			CombinedConfigurationBuilder builder = new CombinedConfigurationBuilder()
-				.configure(
-					params.fileBased()
-						.setFile(new File("configuration.xml"))
-					);
-			config.setBuilder(builder);
-		} catch (Exception e) {
-			log.debug("Failed to load configuration.xml");
-		}
-		
 		log.debug("Starting Tomcat server with args: {}", Arrays.asList(args));
 		if (args.length == 0 || args.length>4) {
 			throw new YadaInvalidUsageException("Command line parameter missing. Usage: {} <acroenv> <webappFolder> [<baseDir> [dev]]", YadaTomcatServer.class.getName());
@@ -99,7 +88,7 @@ public class YadaTomcatServer {
 				throw new YadaInvalidUsageException("The baseDir {} must exist and be writable", new File(baseDir));
 			}
 		}
-		this.configure(webappFolder, baseDir, dev, config);
+		this.configure(webappFolder, baseDir, dev, YadaAppConfig.getStaticConfig());
 	}
 
 	public void start() throws LifecycleException {
@@ -204,21 +193,32 @@ public class YadaTomcatServer {
         // HTTPS Connector
         File keystoreFile = config.getTomcatKeystoreFile();
         if (dev && keystoreFile.canRead()) {
-	        Connector httpsConnector = new Connector("HTTP/1.1");
+	        Connector httpsConnector = new Connector(Http11NioProtocol.class.getName());
 	        httpsConnector.setPort(config.getTomcatHttpsPort());
 	        httpsConnector.setSecure(true);
 	        httpsConnector.setScheme("https");
-	        httpsConnector.setProperty("SSLEnabled", "true");
-	        httpsConnector.setProperty("clientAuth", "false");
-	        httpsConnector.setProperty("sslProtocol", "TLS");
+	        //
+	        Http11NioProtocol protocol = (Http11NioProtocol) httpsConnector.getProtocolHandler();
+	        SSLHostConfig sslHostConfig = new SSLHostConfig();
+	        sslHostConfig.setHostName("_default_");
+	        SSLHostConfigCertificate certificate = new SSLHostConfigCertificate(sslHostConfig, SSLHostConfigCertificate.Type.RSA);
 	        // Create keystore with
 	        // keytool -genkey -noprompt -alias tomcat -dname "CN=localhost, OU=Unknown, O=Unknown, L=Unknown, S=Unknown, C=Unknown" -keystore /srv/devtomcatkeystore -storepass changeit -keypass changeit -keyalg RSA
 	        // Export certificate with
 	        // keytool -export -noprompt -keystore /srv/devtomcatkeystore -alias tomcat -storepass changeit -file /tmp/tomcat.cer
 	        // and double click the file to import it in the browser
-	        httpsConnector.setProperty("keystoreFile", keystoreFile.getAbsolutePath());
-	        httpsConnector.setProperty("keystorePass", config.getTomcatKeystorePassword());
+	        certificate.setCertificateKeystoreFile(keystoreFile.getAbsolutePath());
+	        certificate.setCertificateKeystorePassword(config.getTomcatKeystorePassword());
+	        sslHostConfig.addCertificate(certificate);
+	        protocol.addSslHostConfig(sslHostConfig);
+	        //
+	        // httpsConnector.setProperty("SSLEnabled", "true");
+	        // httpsConnector.setProperty("clientAuth", "false");
+	        // httpsConnector.setProperty("sslProtocol", "TLS");
+	        // httpsConnector.setProperty("keystoreFile", keystoreFile.getAbsolutePath());
+	        // httpsConnector.setProperty("keystorePass", config.getTomcatKeystorePassword());
 	        tomcat.getService().addConnector(httpsConnector);
+	        tomcat.setConnector(httpsConnector);
 	        log.debug("HTTPS Connector enabled");
         } else {
         	log.debug("HTTPS Connector not enabled");

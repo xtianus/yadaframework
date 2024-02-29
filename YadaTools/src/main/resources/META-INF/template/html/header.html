@@ -8,7 +8,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1">
 		<link th:if="${"\$"}{@config.developmentEnvironment}" rel="stylesheet" type="text/css" th:href="@{/yadares/css/yada.css}" />
 	    <link th:if="${"\$"}{!@config.developmentEnvironment}" rel="stylesheet" type="text/css" th:href="@{/res/css/yada.min.css}" />
-		<link rel="stylesheet" type="text/css" th:href="@{|/res/css/$acronym${"\$"}{@config.min}.css|}" />
+		<link rel="stylesheet" type="text/css" th:href="@{/res/css/$acronym.min.css}" />
 	</th:block>
 </head>
 <body th:remove="tag">
