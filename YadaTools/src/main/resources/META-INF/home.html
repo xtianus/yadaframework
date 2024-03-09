@@ -7,14 +7,14 @@
 </head>
 <body>
 
-<th:block th:replace="~{/header :: body/header}"/>
+<th:block th:replace="~{/header :: body}"/>
 
 <main>
 	<h1>Home</h1>
 	<p>This is the home page</p>
 </main>
 
-<th:block th:include="~{/footer :: body}"/>
+<th:block th:replace="~{/footer :: body}"/>
 
 <th:block th:if="${login}!=null">
 	<div th:replace="/modalLogin :: #loginModal"></div>

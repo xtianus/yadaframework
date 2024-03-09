@@ -108,14 +108,14 @@ dependencies {
 		'com.fasterxml.jackson.core:jackson-databind:2.+',
 		'org.seleniumhq.selenium:selenium-java:4.13.0', // 4.13.0 is the last java 8 version
 		'com.drewnoakes:metadata-extractor:2.+',
-		'org.flywaydb:flyway-mysql:9.+', // 10 is compiled with jdk17
+		'org.flywaydb:flyway-mysql:10.+',
 		'commons-beanutils:commons-beanutils:1.9.+'
 		
 	 // Connection pool for embedded Tomcat and programmatic datasource
 	api 'org.vibur:vibur-dbcp:25.+'
 	runtimeOnly 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.+'
-	implementation 'org.apache.tomcat:tomcat-servlet-api:10.1.14'
-	compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:10.1.14'
+	implementation 'org.apache.tomcat:tomcat-servlet-api:10.1.19'
+	compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:10.1.19'
 	compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
 	// Needed to run in Tomcat

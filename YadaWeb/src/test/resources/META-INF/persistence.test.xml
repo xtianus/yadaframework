@@ -18,7 +18,7 @@
             <property name="hibernate.connection.username" value="yadatest"/>
             <property name="hibernate.connection.password" value="yadatest"/>
             <property name="hibernate.connection.url" value="jdbc:mysql://localhost/yadatestdb?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"/>
-         	<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
+         	<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
       </properties>
    		 
    </persistence-unit>
