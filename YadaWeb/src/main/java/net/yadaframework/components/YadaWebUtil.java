@@ -63,6 +63,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.yadaframework.core.YadaConfiguration;
@@ -89,6 +90,36 @@ public class YadaWebUtil {
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
 	
+	/**
+	 * Set a cookie
+	 * @param cookieName
+	 * @param cookieValue
+	 * @param expirationDays can be 0 to delete the cookie or <0 to persist until browser shutdown
+	 * @param response
+	 */
+	public void setCookie(String cookieName, String cookieValue, int expirationDays, HttpServletResponse response) {
+	    Cookie cookie = new Cookie(cookieName, cookieValue);
+	    cookie.setMaxAge(60*60*expirationDays);
+	    response.addCookie(cookie);
+	}
+	
+	/**
+	 * Returns the value of a cookie, null if not defined
+	 * @param request
+	 * @param cookieName
+	 */
+	public String getCookieValue(HttpServletRequest request, String cookieName) {
+	    Cookie[] cookies = request.getCookies();
+	    if (cookies != null) {
+	        for (Cookie cookie : cookies) {
+	            if (cookieName.equals(cookie.getName())) {
+	                return cookie.getValue();
+	            }
+	        }
+	    }
+	    return null;
+	}
+
 	/**
 	 * Save to disk a base64 image received from javascript.
 	 * @param base64Image the image string in the format data:image/png;base64,xxxxxxxxx where image/png can be any image format and xxxxxxxxx is the encoded image

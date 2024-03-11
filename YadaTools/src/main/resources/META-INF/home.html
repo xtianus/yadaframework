@@ -23,7 +23,7 @@
 <script type="text/javascript" th:inline="javascript">
 	//<![CDATA[
 	$(document).ready(function() {
-	
+		// In order to show errors as a homepage modal you need to remove <errorPageForward> from config
 		// Error modal for unhandled exceptions
 		if (/*[[${yadaExceptionObject!=null}]]*/ "placeholder") {
 			const errorTitle = /*[[#{yada.error.http.otherTitle}]]*/ "placeholder";
