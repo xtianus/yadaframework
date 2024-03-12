@@ -69,7 +69,14 @@ public class AuditFilter extends OncePerRequestFilter implements Filter {
 		if (!filesLog.isInfoEnabled() && isFile(request)) {
 			// If the logger is configured to skip files, continue and return.
 			// Example: <logger name="net.yadaframework.security.AuditFilter.files" level="ERROR"/>
-			filterChain.doFilter(request, response);
+			try {
+				filterChain.doFilter(request, response);
+			} catch (Exception e) {
+				// Log the file anyway in case of exception
+				String requestUri = request.getRequestURI();
+				log.error("Error loading {}: {}", requestUri, e.getMessage());
+				throw e;
+			}
 			return;
 		}
 		boolean isFirstRequest = !isAsyncDispatch(request);
