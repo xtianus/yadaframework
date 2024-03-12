@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.7.7.local'
+version = '0.7.7'
 
 apply plugin: 'groovy'
 // apply plugin: 'java-gradle-plugin'

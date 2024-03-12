@@ -1,6 +1,7 @@
 package $basePackage.persistence.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
 
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 
@@ -10,12 +11,9 @@ public class ${acronym.capitalize()}RegistrationRequest extends YadaRegistration
 
 	private String name;
 	private String surname;
-	private String username; // Used for antispam - the real username is the email field
 	
-	/**
-	 * Newsletter flag: null = "unknown" because we didn't ask the user to choose
-	 */
-	private Boolean newsletterFlag = null;
+	@Transient
+	private String username; // Used for antispam - the real username is the email field
 
 	public String getName() {
 		return name;
@@ -39,14 +37,6 @@ public class ${acronym.capitalize()}RegistrationRequest extends YadaRegistration
 
 	public void setUsername(String username) {
 		this.username = username;
-	}
-
-	public Boolean getNewsletterFlag() {
-		return newsletterFlag;
-	}
-
-	public void setNewsletterFlag(Boolean newsletterFlag) {
-		this.newsletterFlag = newsletterFlag;
 	}
 
 }

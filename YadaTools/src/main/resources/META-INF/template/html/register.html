@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<%/* Careful when editing html templates because $ must be escaped with ${"\$"} unless it is a groovy variable */%>
+<html th:lang="${"\$"}{#locale}" xmlns:th="http://www.thymeleaf.org" xmlns:yada="http://www.yadaframework.net">
+
+<head>
+	<th:block th:replace="~{/header :: head}" />
+</head>
+
+<body>
+
+	<th:block th:replace="~{/header :: body}" />
+
+	<main>
+		<form th:action="@{/signup}" th:object="${"\$"}{${acronym}RegistrationRequest}" role="form" class="login" method="post" id="registrationForm">
+			<fieldset>
+				<div class="personalData">
+					<label for="username" class="asdrg">Username</label> <!--/* The username field is hidden and used to detect spam */-->
+					<input type="text" class="asdrg" id="username" name="username" th:value="*{username}">
+					<label for="email">E-Mail</label>
+					<input type="email" th:field="*{email}" required="required" autofocus="autofocus" th:errorclass="fieldError">
+					<!--/* Span 2 columns */-->
+					<div class="errorRow" th:classappend="${"\$"}{#fields.hasErrors('email')}? fieldError">
+						<small th:each="err : ${"\$"}{#fields.errors('email')}" th:text="${"\$"}{err}">Error</small>
+					</div>
+					<label for="name" th:text="#{register.form.name}">Name</label>
+					<input type="text" th:field="*{name}" required="required">
+					<label for="surname" th:text="#{register.form.surname}">Surname</label>
+					<input type="text" th:field="*{surname}" required="required">
+					<label for="password">Password</label>
+					<input type="password" th:field="*{password}" required="required" th:errorclass="fieldError">
+					<!--/* Span 2 columns */-->
+					<div class="errorRow" th:classappend="${"\$"}{#fields.hasErrors('password')}? fieldError">
+						<small th:each="err : ${"\$"}{#fields.errors('password')}" th:text="${"\$"}{err}">Error</small>
+					</div>
+					<label for="confirmPassword" th:text="#{register.form.passwordConfirm}">Confirm Password</label>
+					<input type="password" id="confirmPassword" name="confirmPassword">
+					<!--/* Span 2 columns */-->
+					<small class="pwdMismatch" th:text="#{register.form.password.mismatch}">Password mismatch</small>
+				</div>
+				<div class="form-check clausola">
+					<input id="privacy" type="checkbox" th:field="*{privacy}" class="form-check-input" required>
+					<label for="privacy" th:utext="#{register.form.privacy}" class="form-check-label">I declare that I have read and understood the privacy policy...</label>
+				</div>
+				<div class="clausola">
+					<button type="submit" class="btn btn-danger" th:text="#{register.form.submit}">Create account</button>
+				</div>
+			</fieldset>
+		</form>
+	</main>
+
+	<th:block th:replace="~{/footer :: body}" />
+
+	<script th:inline="javascript">
+		yada.enablePasswordMatch(${"\$"}("#registrationForm"));
+		${acronym}.ready(yada.loaderOff);
+		${"\$"}("#registrationForm").submit(function(){yada.loaderOn();});
+	</script>
+
+</body>
+
+</html>

@@ -106,6 +106,7 @@ class YadaInitTask extends YadaProject {
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/info/ckeditor.howto.txt", resFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/info/static.txt", staticFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/messages/messages.properties", messagesFolder);
+		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/robots.txt", webAppRootFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/sitemap.xml", xmlFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/web.xml", webinfFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/build.properties", webinfFolder);
@@ -117,6 +118,8 @@ class YadaInitTask extends YadaProject {
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/example_gitignore", project.projectDir);
 		processTemplate(HTMLDIRNAME, "header.html", null, viewsFolder);
 		processTemplate(HTMLDIRNAME, "footer.html", null, viewsFolder);
+		processTemplate(HTMLDIRNAME, "passwordReset.html", null, viewsFolder);
+		processTemplate(HTMLDIRNAME, "register.html", null, viewsFolder);
 		// yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/template.css", cssFolder);
 		processTemplate(CSSDIRNAME, "template.scss", acronym+".scss", cssFolder);
 		processTemplate(JSDIRNAME, "template.js", acronym+".js", jsFolder);
