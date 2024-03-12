@@ -11,6 +11,7 @@
 		<serverAddress>http://$env.EXAMPLE.com/</serverAddress>
 		<basePath>$basePath/$acronym$env</basePath>
 		<contentDir name="contents" url="/contents"></contentDir>
+		<errorPageForward>/errorPage</errorPageForward>
 	</paths>
 	<!-- Define embedded tomcat parameters. Use when more than one application is running on the same server. 
 	<tomcat>

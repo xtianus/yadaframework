@@ -226,9 +226,6 @@ public class YadaWebConfig implements WebMvcConfigurer {
 	 * Tutti i file dentro a /res vengono indicati come cacheabili lato browser per 1 anno (tramite l'header expires).
 	 * Per evitare che nuove versioni non vengano mai prese, si usa il "trucco" di indicare il numero di build nell'url, così cambiando
 	 * la build cambia l'url e la cache del browser va in miss la prima volta.
-	 * Per sfruttare questo meccanismo bisogna usare lo YadaDialect con l'attributo yada:href, che si comporta come il th:href ma inserisce
-	 * il numero di build nell'url calcolata. Per esempio: yada:href="@{/res/img/favicon.ico}"
-	 * Stessa cosa per yada:src
 	 * I file dentro a /static, invece, non cambiano mai nemmeno alle nuove release (anche se in cache stanno solo 100 giorni). Però non è per questo che si usa static, ma per il fatto che dentro ai commenti condizionali
 	 * non si possono usare i tag thymeleaf, per cui ad esempio html5shiv.js viene messo in /static
 	 */
@@ -275,6 +272,9 @@ public class YadaWebConfig implements WebMvcConfigurer {
 
 		// robots.txt is usually added by the deploy script depending on the environment
 		registry.addResourceHandler("/robots.txt").addResourceLocations("/").setCachePeriod(86400); // 1 day cache period
+		// favicon.ico is requested by browsers from the root folder in some cases even if configured elsewhere in the html, 
+		// so better handle it to avoid an error in the log
+		registry.addResourceHandler("/favicon.ico").addResourceLocations("/").setCachePeriod(8640000); // 100 days cache period
 	}
 
 	//

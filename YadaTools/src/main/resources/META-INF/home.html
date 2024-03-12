@@ -7,14 +7,14 @@
 </head>
 <body>
 
-<th:block th:replace="~{/header :: body/header}"/>
+<th:block th:replace="~{/header :: body}"/>
 
 <main>
 	<h1>Home</h1>
 	<p>This is the home page</p>
 </main>
 
-<th:block th:include="~{/footer :: body}"/>
+<th:block th:replace="~{/footer :: body}"/>
 
 <th:block th:if="${login}!=null">
 	<div th:replace="/modalLogin :: #loginModal"></div>
@@ -23,7 +23,7 @@
 <script type="text/javascript" th:inline="javascript">
 	//<![CDATA[
 	$(document).ready(function() {
-	
+		// In order to show errors as a homepage modal you need to remove <errorPageForward> from config
 		// Error modal for unhandled exceptions
 		if (/*[[${yadaExceptionObject!=null}]]*/ "placeholder") {
 			const errorTitle = /*[[#{yada.error.http.otherTitle}]]*/ "placeholder";

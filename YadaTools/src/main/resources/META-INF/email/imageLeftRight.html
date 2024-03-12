@@ -33,7 +33,7 @@ Parameters:
  
   	<p style="clear: both; margin-bottom: 40px;"></p>
   	<p>
-     	<img th:if="${preview}" yada:src="@{/res/img/ldmlogo.h50.png}" />
+     	<img th:if="${preview}" th:src="@{/res/img/ldmlogo.h50.png}" />
      	<img th:unless="${preview}" src="cid:logosmall" />
   	</p>
   	<p style="margin-top: 10px;">Thank you, <br />
