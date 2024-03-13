@@ -9,13 +9,14 @@
 	// For a private property use "var xxx = "
 	// For a private function use "function xxx(..."
 	
-	
-	var markerAjaxButtonOnly = 'yadaAjaxButtonOnly';
-	var markerAjaxModal = 'yadaAjaxModal';
+	const markerAjaxButtonOnly = 'yadaAjaxButtonOnly';
+	const markerAjaxModal = 'yadaAjaxModal';
 	var clickedButton;
-	
+		
+	var ajaxCounter = 0; // Counter for the ajax call parallelism
+
 	// WARNING: if you change this, also change it in yada.js
-	var markerClass = 'yadaAjaxed'; // To prevent double submission
+	const markerClass = 'yadaAjaxed'; // To prevent double submission
 	
 	// Deprecated: these were once used when opening the login form via yada.openLoginModal and yada.openLoginModalAjax
 	yada.postLoginHandler = null; // Handler to run after login, if any
@@ -505,7 +506,9 @@
 						e.preventDefault(); // No submit, but exec other handlers
 						$form.data("yadaDoNotSubmitNow", false);
 						yada.log("Form submission prevented");
-						yada.loaderOff();
+						if (ajaxCounter<1) {
+							yada.loaderOff();
+						}
 						// return false;
 					}
 				});
@@ -1332,6 +1335,7 @@
 			xhrFields.responseType = responseType;
 		}
 		// Call the server
+		ajaxCounter++;
 		$.ajax({
 			type: method,
 			url: url,
@@ -1340,7 +1344,10 @@
 			contentType: contentType,
 			xhrFields: xhrFields,
 			error: function(jqXHR, textStatus, errorThrown ) { 
-				yada.loaderOff();
+				ajaxCounter--;
+				if (ajaxCounter<1) {
+					yada.loaderOff();
+				}
 				// textStatus is "error", "timeout", "abort", or"parsererror"
 				var responseText = jqXHR.responseText!= null ? jqXHR.responseText.trim() : jqXHR.responseText;
 				if (jqXHR.status==503 && responseText!=null && yada.startsWith(responseText, "<html")) {
@@ -1361,13 +1368,16 @@
 				}
 			},
 			success: function(responseText, statusText, jqXHR) {
+				ajaxCounter--;
 				var responseTrimmed = "";
 				var responseObject = null;
 				if (responseText instanceof Blob) {
 					var contentDisposition = jqXHR.getResponseHeader("Content-Disposition");
 					var filename = yada.getAfter(contentDisposition, "filename=");
 					yada.downloadBlob(responseText, filename);
-					yada.loaderOff();
+					if (ajaxCounter<1) {
+						yada.loaderOff(); // Hide the loader only if there are no other ajax calls running
+					}
 					return;
 				}
 				if (typeof responseText == "string") {
@@ -1379,7 +1389,9 @@
 					console.warn("Yada path detected in ajax result: you may need to remove @ResponseBody");
 				}
 				if (yada.showAjaxErrorIfPresent(responseTrimmed, statusText, responseObject)==true) {
-					yada.loaderOff();
+					if (ajaxCounter<1) {
+						yada.loaderOff();
+					}
 					return;
 				}
 				if ("reload" == responseTrimmed) {
@@ -1387,42 +1399,12 @@
 					return;
 				}
 				if (yada.startsWith(responseTrimmed, "{\"redirect\":")) {
-					var redirectObject = JSON.parse(responseTrimmed);
-					// Get the redirect url and remove any "redirect:" prefix from the url
-					var targetUrl = yada.getAfter(redirectObject.redirect, "redirect:");
-					if (redirectObject.newTab!="true") {
-						const currentServer = window.location.origin; // https://www.example.com:8080
-						const redirectServer = yada.getServerAddress(targetUrl);
-						const currentPathSearch = window.location.pathname + window.location.search;
-						const redirectPathSearch = yada.removeHash(targetUrl);
-						const currentHashValue = yada.getHashValue(window.location.hash); // '' or 'value'
-						const redirectHashValue = yada.getHashValue(targetUrl);
-						window.location.href=targetUrl;
-						// When only the #anchor changes between current and new url, browsers
-						// might not reload the page so we force a reload
-						if (currentServer==redirectServer || redirectServer=='') {
-							if (currentPathSearch==redirectPathSearch)	{
-								// Automatic reloading only happens when there are no hashes
-								// or when the current hash is removed.
-								// So we force a reload only when a hash is added/modified.
-								if (redirectHashValue!='') {
-									window.location.reload(true);
-								}
-							}					
-						}
-						return; // Needed to prevent flashing of the loader
-					} else {
-						yada.loaderOff();
-						var win = window.open(targetUrl, '_blank');
-						if (win) {
-						    //Browser has allowed it to be opened
-						    win.focus();
-						} else {
-						    //Browser has blocked it
-						    alert('Please allow popups for this website');
-						}
+					const newTab = ajaxRedirect(responseTrimmed);
+					if (!newTab) {
+						// Redirect didn't open a new tab, so no need to keep handling ajax for the current page
+						return;
 					}
-					// Keep going, there could be a handler
+					// The redirect opened a new tab so we need to keep handling the current one
 				}
 				// Putting the returned HTML inside a <div> so that $find() works when multiple root elements are returned. 
 				// - not sure it is a good idea but legacy code needs it now.
@@ -1432,44 +1414,16 @@
 				// added top <div> element, so it can't be returned anyway because it would be empty.
 				var responseHtml=$(yadaAjaxResponseHtmlRoot).html(responseTrimmed);
 				//
-				// Deprecated - to be removed:
-				// Check if we just did a login.
-				// A successful login can also return a redirect, which will skip the PostLoginHandler
-				// The "loginSuccess" string is not returned anymore.
-				if ("loginSuccess" == responseTrimmed) {
-					// @Deprecated. Should use the generic modal instead of the login modal
-					$("#loginModal").modal("hide");
-					yada.loaderOff();
-					// window.location.reload(true); // true = skip cache // Non va bene perchè se è stata fatta una post, viene ripetuta!
-					yada.handlePostLoginHandler(responseHtml, responseText);
+				const getOut = doDeprecatedStuff(responseTrimmed, responseHtml, responseText, url, data, successHandler, method);
+				if (getOut) {
 					return;
 				}
 				//
-				if (openLoginModalIfPresent(responseHtml)) {
-					// @Deprecated. Should use the generic modal instead of the login modal
-					yada.loaderOff();
-					return;
-				}
-				// Controllo se è stata ritornata la home con una richiesta di login
-				if ((typeof responseText == 'string' || responseText instanceof String) && responseText.indexOf('s_loginRequested') !== -1) {
-					// @Deprecated. Should use the generic modal instead of the login modal
-					yada.openLoginModal(url, data, successHandler, method); // E' necessario il login. Viene fatto, e poi eseguito l'handler.
-					yada.loaderOff();
-					return;
-				}
-				
-				// Gestisce la pwd scaduta
-				var pwdChange=$(responseHtml).find("body.yadaChangePassword");
-				if (pwdChange.length>0) {
-					$("#loginModal").remove();
-					showFullPage(responseText);
-					yada.loaderOff();
-					return;
-				}			
-				
 				// Se è stato ritornato un confirm, lo mostro e abilito l'esecuzione dell'ajax e dell'handler
 				if (yada.handleModalConfirm(responseHtml, url, data, successHandler, method)) {
-					yada.loaderOff();
+					if (ajaxCounter<1) {
+						yada.loaderOff();
+					}
 					return;
 				}
 
@@ -1491,7 +1445,9 @@
 				// const isFullPage = responseText.substring(0, 50).toLowerCase().indexOf("<!doctype") > -1;
 				if ($('.yadafullPage', responseHtml).length>0 || $('.s_fullPage', responseHtml).length>0) {
 					showFullPage(responseText);
-					yada.loaderOff();
+					if (ajaxCounter<1) {
+						yada.loaderOff();
+					}
 					return;
 				}
 
@@ -1504,90 +1460,7 @@
 				// Open any other modal, excluding any embedded confirm modal
 				var $loadedModalDialog=$(responseHtml).find(".modal > .modal-dialog").first();
 				if ($loadedModalDialog.length==1) {
-					$("#loginModal").remove(); // TODO still needed?
-					// A modal was returned. Is it a "sticky" modal?
-					var stickyModal = $loadedModalDialog.hasClass(yada.stickyModalMarker);
-					
-					// Remove any currently downloaded modals (markerAjaxModal) if they are open and not sticky
-					var $existingModals = $(".modal.show."+markerAjaxModal+":has(.modal-dialog:not(."+yada.stickyModalMarker+"))");
-					if ($existingModals.length==0) {
-						// Try Bootstrap 3 selector
-						$existingModals = $(".modal.in."+markerAjaxModal+":has(.modal-dialog:not(."+yada.stickyModalMarker+"))");
-					}
-					if ($existingModals.length>0) {
-						$existingModals.modal("hide"); // Remove the background too
-						// $existingModals.remove(); // This prevents removal of the modal background sometimes
-						$existingModals.on('hidden.bs.modal', function (e) {
-							$existingModals.remove(); // Remove the existing modal after it's been closed
-						});
-					}
-					
-					// modals are appended to the body
-					const $modalObject = $(responseHtml).find(".modal").first();
-					// Add the marker class 
-					$modalObject.addClass(markerAjaxModal);
-					if (stickyModal) {
-						// This container is needed to keep the scrollbar when a second modal is closed
-						var $container = $("<div class='modal-open'></div>");
-						$container.append($modalObject);
-						$("body").prepend($container);
-						$modalObject.on('hidden.bs.modal', function (e) {
-							$container.remove(); // Remove modal on close
-						});
-					} else {
-						$("body").prepend($modalObject);
-						$modalObject.on('hidden.bs.modal', function (e) {
-							$modalObject.remove(); // Remove modal on close
-						});
-					}
-					
-					// Adding the modal head elements to the main document
-					if (responseText.indexOf('<head>')>-1) {
-						var parser = new DOMParser();
-						var htmlDoc = parser.parseFromString(responseText, "text/html");
-						var headNodes = $(htmlDoc.head).children();
-						$("head").append(headNodes);
-						removeHeadNodes(headNodes, $modalObject) // Needed a closure for headNodes (?)
-					}
-					
-					// We need to show the modal after a delay or it won't show sometimes (!)
-					var modalIsHidden = !$modalObject.is(':visible');
-					if (modalIsHidden) {
-						setTimeout(function() {
-							$modalObject.modal('show');
-							if (stickyModal) {
-								// Need to fix the z-index to allow other modals to show on top and shade it
-								var $background = $(".modal-backdrop.fade.show").last();
-								var z = $background.css("z-index"); // 1040
-								$modalObject.css("z-index", z-1); // 1039, must be less than 1040 to be behind a future background
-								$background.css("z-index", z-2);
-							}
-							// The loader is removed after the modal is opened to prevent background flickering (if the loader background is not transparent)
-							$modalObject.on('shown.bs.modal', function (e) {
-								yada.loaderOff();
-							})
-						}, 100);
-					} else {
-						yada.loaderOff();
-					}
-					yada.initAjaxHandlersOn($modalObject);
-					// Scroll the modal to an optional anchor (delay was needed for it to work)
-					// or scroll back to top when it opens already scrolled (sometimes it happens)
-					setTimeout(function() {
-						var hashValue = window.location.hash; // #234
-						if (hashValue.length>1 && !isNaN(hashValue.substring(1))) {
-							try {
-								$modalObject.animate({
-									scrollTop: $(hashValue).offset().top
-								}, 1000);
-							} catch (e) {}
-						} else if ($modalObject.scrollTop()>0) {
-							// Scroll back to top when already scrolled
-							$modalObject.animate({
-								scrollTop: 0
-							}, 500);
-						}
-					}, 500);
+					handleAjaxLoadedModal($loadedModalDialog, responseHtml, responseText);
 					return;
 				}
 				
@@ -1595,13 +1468,10 @@
 				if (responseTrimmed == 'closeModal') {
 					$(".modal:visible").modal('hide');
 				}
-				yada.loaderOff();
-				// Otherwise it is a full page, that must be loaded in place of the current page
-				// WRONG: in questo modo anche le chiamate ajax che ritornano frammenti riscrivono la pagina intera.
-				// TODO aggiungere un qualcosa per indicare che la pagina va sovrascritta
-//				document.open();
-//				document.write(responseText);
-//				document.close();
+				if (ajaxCounter<1) {
+					yada.loaderOff();
+				}
+				// End of ajax success
 			},
 			timeout: yada.devMode?0:timeout,
 			traditional: true, // Serve per non avere id[] : '12' ma id : '12'
@@ -1618,7 +1488,194 @@
 		});
 		
 	}
-	
+
+	/**
+	 * Handles ajax redirects
+	 * @param {*} responseTrimmed 
+	 * @returns true if the redirect opened a new tab
+	 */
+	function ajaxRedirect(responseTrimmed) {
+		var redirectObject = JSON.parse(responseTrimmed);
+		// Get the redirect url and remove any "redirect:" prefix from the url
+		var targetUrl = yada.getAfter(redirectObject.redirect, "redirect:");
+		if (redirectObject.newTab!="true") {
+			const currentServer = window.location.origin; // https://www.example.com:8080
+			const redirectServer = yada.getServerAddress(targetUrl);
+			const currentPathSearch = window.location.pathname + window.location.search;
+			const redirectPathSearch = yada.removeHash(targetUrl);
+			const currentHashValue = yada.getHashValue(window.location.hash); // '' or 'value'
+			const redirectHashValue = yada.getHashValue(targetUrl);
+			window.location.href=targetUrl;
+			// When only the #anchor changes between current and new url, browsers
+			// might not reload the page so we force a reload
+			if (currentServer==redirectServer || redirectServer=='') {
+				if (currentPathSearch==redirectPathSearch)	{
+					// Automatic reloading only happens when there are no hashes
+					// or when the current hash is removed.
+					// So we force a reload only when a hash is added/modified.
+					if (redirectHashValue!='') {
+						window.location.reload(true);
+					}
+				}					
+			}
+			return false; // Needed to prevent flashing of the loader
+		} else {
+			if (ajaxCounter<1) {
+				yada.loaderOff();
+			}
+			var win = window.open(targetUrl, '_blank');
+			if (win) {
+				// Browser has allowed it to be opened
+				win.focus();
+			} else {
+				// Browser has blocked it
+				alert('Please allow popups for this website');
+			}
+		}
+		return true;
+	}
+
+	function handleAjaxLoadedModal($loadedModalDialog, responseHtml, responseText) {
+		$("#loginModal").remove(); // TODO still needed?
+		// A modal was returned. Is it a "sticky" modal?
+		var stickyModal = $loadedModalDialog.hasClass(yada.stickyModalMarker);
+		
+		// Remove any currently downloaded modals (markerAjaxModal) if they are open and not sticky
+		var $existingModals = $(".modal.show."+markerAjaxModal+":has(.modal-dialog:not(."+yada.stickyModalMarker+"))");
+		if ($existingModals.length==0) {
+			// Try Bootstrap 3 selector
+			$existingModals = $(".modal.in."+markerAjaxModal+":has(.modal-dialog:not(."+yada.stickyModalMarker+"))");
+		}
+		if ($existingModals.length>0) {
+			$existingModals.modal("hide"); // Remove the background too
+			// $existingModals.remove(); // This prevents removal of the modal background sometimes
+			$existingModals.on('hidden.bs.modal', function (e) {
+				$existingModals.remove(); // Remove the existing modal after it's been closed
+			});
+		}
+		
+		// modals are appended to the body
+		const $modalObject = $(responseHtml).find(".modal").first();
+		// Add the marker class 
+		$modalObject.addClass(markerAjaxModal);
+		if (stickyModal) {
+			// This container is needed to keep the scrollbar when a second modal is closed
+			var $container = $("<div class='modal-open'></div>");
+			$container.append($modalObject);
+			$("body").prepend($container);
+			$modalObject.on('hidden.bs.modal', function (e) {
+				$container.remove(); // Remove modal on close
+			});
+		} else {
+			$("body").prepend($modalObject);
+			$modalObject.on('hidden.bs.modal', function (e) {
+				$modalObject.remove(); // Remove modal on close
+			});
+		}
+		
+		// Adding the modal head elements to the main document
+		if (responseText.indexOf('<head>')>-1) {
+			var parser = new DOMParser();
+			var htmlDoc = parser.parseFromString(responseText, "text/html");
+			var headNodes = $(htmlDoc.head).children();
+			$("head").append(headNodes);
+			removeHeadNodes(headNodes, $modalObject) // Needed a closure for headNodes (?)
+		}
+		
+		// We need to show the modal after a delay or it won't show sometimes (!)
+		var modalIsHidden = !$modalObject.is(':visible');
+		if (modalIsHidden) {
+			setTimeout(function() {
+				$modalObject.modal('show');
+				if (stickyModal) {
+					// Need to fix the z-index to allow other modals to show on top and shade it
+					var $background = $(".modal-backdrop.fade.show").last();
+					var z = $background.css("z-index"); // 1040
+					$modalObject.css("z-index", z-1); // 1039, must be less than 1040 to be behind a future background
+					$background.css("z-index", z-2);
+				}
+				// The loader is removed after the modal is opened to prevent background flickering (if the loader background is not transparent)
+				$modalObject.on('shown.bs.modal', function (e) {
+					if (ajaxCounter<1) {
+						yada.loaderOff();
+					}
+				})
+			}, 100);
+		} else {
+			if (ajaxCounter<1) {
+				yada.loaderOff();
+			}
+		}
+		yada.initAjaxHandlersOn($modalObject);
+		// Scroll the modal to an optional anchor (delay was needed for it to work)
+		// or scroll back to top when it opens already scrolled (sometimes it happens)
+		setTimeout(function() {
+			var hashValue = window.location.hash; // #234
+			if (hashValue.length>1 && !isNaN(hashValue.substring(1))) {
+				try {
+					$modalObject.animate({
+						scrollTop: $(hashValue).offset().top
+					}, 1000);
+				} catch (e) {}
+			} else if ($modalObject.scrollTop()>0) {
+				// Scroll back to top when already scrolled
+				$modalObject.animate({
+					scrollTop: 0
+				}, 500);
+			}
+		}, 500);
+	}
+
+	/**
+	 * Performs some deprecated actions that should be removed one day
+	 * @param {*} responseTrimmed 
+	 * @param {*} responseHtml 
+	 * @param {*} responseText 
+	 * @param {*} url 
+	 * @param {*} data 
+	 * @param {*} successHandler 
+	 * @param {*} method 
+	 * @returns true if the ajax method should terminate
+	 */
+	function doDeprecatedStuff(responseTrimmed, responseHtml, responseText, url, data, successHandler, method) {
+		// Deprecated - to be removed:
+		// Check if we just did a login.
+		// A successful login can also return a redirect, which will skip the PostLoginHandler
+		// The "loginSuccess" string is not returned anymore.
+		if ("loginSuccess" == responseTrimmed) {
+			// @Deprecated. Should use the generic modal instead of the login modal
+			$("#loginModal").modal("hide");
+			yada.loaderOff();
+			// window.location.reload(true); // true = skip cache // Non va bene perchè se è stata fatta una post, viene ripetuta!
+			yada.handlePostLoginHandler(responseHtml, responseText);
+			return true;
+		}
+		//
+		if (openLoginModalIfPresent(responseHtml)) {
+			// @Deprecated. Should use the generic modal instead of the login modal
+			yada.loaderOff();
+			return true;
+		}
+		// Controllo se è stata ritornata la home con una richiesta di login
+		if ((typeof responseText == 'string' || responseText instanceof String) && responseText.indexOf('s_loginRequested') !== -1) {
+			// @Deprecated. Should use the generic modal instead of the login modal
+			yada.openLoginModal(url, data, successHandler, method); // E' necessario il login. Viene fatto, e poi eseguito l'handler.
+			yada.loaderOff();
+			return true;
+		}
+		
+		// Gestisce la pwd scaduta
+		var pwdChange=$(responseHtml).find("body.yadaChangePassword");
+		if (pwdChange.length>0) {
+			$("#loginModal").remove();
+			showFullPage(responseText);
+			yada.loaderOff();
+			return true;
+		}			
+
+		return false;
+	}
+
 	function removeHeadNodes(headNodes, $modalObject) {
 		$modalObject.on('hidden.bs.modal', function (e) {
 			if (headNodes!=null) {
@@ -1735,7 +1792,9 @@
 					// Keep the loader open until the modal is fully shown, to prevent "flashing".
 					// This should become a configurable option maybe
 					if (!notification.hasClass("yadaLoaderKeep")) {
-    					yada.loaderOff();
+						if (ajaxCounter<1) {
+							yada.loaderOff();
+						}
                     }
 				});
 				$('#yada-notification').modal('show');
