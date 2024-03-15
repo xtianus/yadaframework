@@ -43,6 +43,12 @@
 	 * - icon for the button, like '<i class="fa fa-power-off" aria-hidden="true"></i>'
 	 * - idName the name of the id request parameter (optional - defaults to "id")
 	 * - ajax (optional) false to make a normal page transition to the target link
+	 * - confirmTitle (optional)
+	 * - confirmOneMessage (optional)
+	 * - confirmNameColumn the index of the column holding the element name, will replace the {0} placeholder in the message
+	 * - confirmManyMessage (optional)
+	 * - confirmButtonText (optional)
+	 * - abortButtonText (optional)
 	 * @returns the DataTable object
 	 */
 	yada.dataTableCrud = function($table, dataUrl, dataAttributes, editDef, deleteDef, order, pageLength, languageUrl, extraButtons, removeCheckbox) {
@@ -479,10 +485,11 @@
 			var buttonUrl = extraButtonDef.url;
 			var ids = [];
 			var id = yada.getHashValue($(this).attr('href'));
+			var totElements = 1;
 			if (!isRowIcon) {
 				// Toolbar button
 				var $checks = $table.find("tbody [type='checkbox']:checked");
-				var totElements = $checks.length;
+				totElements = $checks.length;
 				ids = $checks.map(function() {
 					var id = $(this).parents('tr').attr('id');
 					if (id==null) {
@@ -528,7 +535,32 @@
 				yada.datatableDrawOnModalClose(dataTable);
 				recursiveEnableAjaxForm(responseText, responseHtml);
 			};
-			yada.ajax(buttonUrl, requestData, handler, null, null, noLoader);
+			if (extraButtonDef.confirm!=true) {
+				yada.ajax(buttonUrl, requestData, handler, null, null, noLoader);
+			} else {
+				// Confirm modal
+				const confirmTitle = extraButtonDef.confirmTitle || null;
+				var confirmMessage = null;
+				if (totElements<2) {
+					var rowIndex = dataTable.row(this.parentElement).index();
+					if (!isRowIcon) {
+						rowIndex = dataTable.row($table.find("tbody [type='checkbox']:checked").parent()).index();
+					}
+					var nameColumn = extraButtonDef.confirmNameColumn || 3; // We assume that column 1 is the select, column 2 is the id and column 3 is the name or similar
+					const rowName = dataTable.cell(rowIndex, nameColumn).data(); 
+					confirmMessage = extraButtonDef.confirmOneMessage || "Do you want to delete {0}?";
+					confirmMessage = confirmMessage.replace("{0}", rowName);
+				} else {
+					confirmMessage = extraButtonDef.confirmManyMessage || `Do you want to delete ${totElements} elements?`;
+				}
+				yada.confirm(confirmTitle, confirmMessage, function(result) {
+						if (result==true) {
+							yada.ajax(buttonUrl, requestData, handler, null, null, noLoader);
+						}
+					}, extraButtonDef.confirmButtonText, extraButtonDef.abortButtonText
+				);
+				
+			}			
 		});
 	}
 	
