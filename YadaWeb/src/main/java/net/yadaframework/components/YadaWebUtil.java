@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.file.Files;
@@ -57,6 +58,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.FrameworkServlet;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.AbstractDispatcherServletInitializer;
 import org.springframework.web.servlet.support.RequestContextUtils;
@@ -81,13 +84,46 @@ public class YadaWebUtil {
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private MessageSource messageSource;
-
+	
 	public final YadaPageRequest FIND_ONE = YadaPageRequest.of(0, 1);
 
 	// Characters that should never be found or placed in a slug
 	private static final String PATTERN_INVALID_SLUG = "[?%:,;=&!+~()@*$'\"\\s]";
 
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
+	
+	/**
+	 * Creates a dynamic @RequestMapping i.e. there's no need for it to be annotated and located in a controller instance.
+	 * Useful if the url can be user-defined via some cms for example.
+	 * @param newPath some url that the code will handle, like "/mypage"
+	 * @param controllerInstance the instance of a class that will handle the page. It can be a @Controller but it's not required.
+	 * @param methodName the name of the method that will handle the page. The method signature must be (Model, Locale).
+	 * @param requestMappingHandlerMapping retrieve this via autowiring because it can't be autowired in YadaWebUtil directly
+	 */
+	public void registerDynamicMapping(String newPath, Object controllerInstance, String methodName, RequestMappingHandlerMapping requestMappingHandlerMapping) {
+        try {
+            Method method = controllerInstance.getClass().getMethod(methodName, Model.class, Locale.class);
+
+            RequestMappingInfo requestMappingInfo = RequestMappingInfo
+                .paths(newPath)
+                // There could be many conditions here
+                // .methods(RequestMethod.GET)
+                // .produces(MediaType.APPLICATION_JSON_VALUE)
+                .build();
+            requestMappingHandlerMapping.registerMapping(requestMappingInfo, controllerInstance, method);
+        } catch (Exception e) {
+        	throw new YadaInvalidUsageException("Can't create dynamic mapping {} for {}.{}(model, locale)", newPath, controllerInstance.getClass(), methodName, e);
+        }
+	}
+	
+	/**
+	 * Returns the application-relative url of a file from the contents folder
+	 * @param someContentFile some file that is inside the contents folder at any depth
+	 * @return a string like "/contents/path/to/file.gif"
+	 */
+	public String getContentUrlRelative(File someContentFile) {
+		return "/" + config.getContentName() + "/" + yadaUtil.relativize(config.getContentsFolder(), someContentFile);
+	}
 	
 	/**
 	 * Save to disk a base64 image received from javascript.
