@@ -59,6 +59,8 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -145,6 +147,22 @@ public class YadaUtil {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
     }
+	
+	/**
+	 * Returns a list of files from a folder where the name contains the given string, sorted alphabetically
+	 * @param folderPath the folder where to looks for files, excluding subfolders.
+	 * @param contains a string that the name must contain, can be empty or null to accept any
+	 * @return a list of files, can be empty
+	 * @throws IOException
+	 */
+	public List<Path> getFilesInFolder(Path folderPath, String contains) throws IOException {
+		try (Stream<Path> paths = Files.list(folderPath)) {
+	        return paths.filter(Files::isRegularFile)
+	            .filter(path -> contains == null || path.getFileName().toString().contains(contains))
+	            .sorted(Comparator.comparing(Path::getFileName))
+	            .collect(Collectors.toList());
+		}
+	}
 	
 	/**
 	 * Returns a random string (currently an hex random number)
@@ -707,7 +725,7 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Finds the folder path between two folders. using forward (unix) slashes as a separator
+	 * Finds the path between two files or folders using forward (unix) slashes as a separator
 	 * @param ancestorFolder
 	 * @param descendantFolder
 	 * @return
@@ -717,19 +735,20 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Finds the folder path between two folders. using forward (unix) slashes as a separator
-	 * @param ancestorFolder
-	 * @param descendantFolder
-	 * @return
+	 * Finds the path between two files or folders using forward (unix) slashes as a separator.
+	 * It works even if the two arguments point to places in different trees.
+	 * @param ancestorPath the root path e.g. "/a/b"
+	 * @param descendantPath the final path e.g. "/a/b/c/the.gif"
+	 * @return the relative path from ancestorPath to descendantPath e.g. "c/the.gif"
 	 */
-	public String relativize(Path ancestorFolder, Path descendantFolder) {
+	public String relativize(Path ancestorPath, Path descendantPath) {
 		// When on windows, if one path has a drive letter and the other doesn't, an exception would be thrown, so we fix that.
-		if (ancestorFolder.isAbsolute() && !descendantFolder.isAbsolute()) {
-			descendantFolder = Paths.get(ancestorFolder.getRoot().toString(), descendantFolder.toString());
-		} else if (!ancestorFolder.isAbsolute() && descendantFolder.isAbsolute()) {
-			ancestorFolder = Paths.get(descendantFolder.getRoot().toString(), ancestorFolder.toString());
+		if (ancestorPath.isAbsolute() && !descendantPath.isAbsolute()) {
+			descendantPath = Paths.get(ancestorPath.getRoot().toString(), descendantPath.toString());
+		} else if (!ancestorPath.isAbsolute() && descendantPath.isAbsolute()) {
+			ancestorPath = Paths.get(descendantPath.getRoot().toString(), ancestorPath.toString());
 		}
-		String segment = ancestorFolder.relativize(descendantFolder).toString();
+		String segment = ancestorPath.relativize(descendantPath).toString();
 		return segment.replaceAll("\\\\", "/");
 	}
 

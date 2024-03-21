@@ -1,85 +1,72 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" 
-	xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	xmlns:yada="http://www.yadaframework.net"
-  	>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:yada="http://www.yadaframework.net">
 <!--/* 
-	DEPRECATED! Use a GenericModal instead.
-	Modal for login. Can be used as-is or customized.
-	TODO: i18n
- */-->
-<body>
-<div id="loginModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="loginModalTitle" aria-hidden="true">
-	<div id="loginModalDialog" class="modal-dialog">
-    	<div class="modal-content">
-    		<div class="modal-header">
-    			<h3 class="modal-title" id="loginModalTitle">Login</h3>
-    		</div>
-    		<div class="modal-body">
-				<form th:action="@{/loginPost}" role="form" method="post" id="loginForm">
-					<fieldset>
-						<div th:if="${lockoutMinutes}" class="alert alert-danger">Too many failed attempts: login disabled.<br/>Wait <span th:text="${lockoutMinutes}">5</span> minute<span th:text="${lockoutMinutes>1?'s':''}">s</span> and retry, or <a th:href="@{/passwordReset(email=${username})}">recover your password</a> in the meantime</div>
-						<div th:if="${loginError}" class="alert alert-danger">Can't login. Please try again later and contact us if the problem persists.</div>
-		  				<div class="form-group has-feedback" th:classappend="${usernameNotFound!=null || userDisabled!=null?'has-error':''}" >
-		    				<label class="control-label" for="username">E-Mail</label>
-		    				<div>
-		    					<input type="email" id="username" name="username" th:value="${username}" class="form-control" placeholder="E-Mail" required="required" autofocus="autofocus" />
-			    				<span th:if="${usernameNotFound}" class="help-block">User not found. Please check that the email is correct, or register</span>
-			    				<span th:if="${userDisabled}" class="help-block">User disabled. Please contact us to fix this issue.</span>
-		    				</div>
-		  				</div>
-		  				<div class="form-group has-feedback" th:classappend="${passwordError!=null?'has-error':''}">
-		    				<label class="control-label" for="password">Password</label>
-		    				<div>
-		    					<!--/* Not needed if the confirmation message is shown before performing login  
-				 				<div th:if="${passwordChanged}" class="help-block alert alert-success">Your password has been changed succesfully. Please type the new password to log in</div>
-		    					*/-->
-		    					<div class="input-group">
-		    						<input type="password" name="password" class="form-control" id="password" placeholder="Password" required="required" th:value="${password}"/>
-		    						<span class="input-group-btn">
-										<a class="btn  btn-secondary yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
-									</span>
-		    					</div>
-		    					<span th:if="${passwordError}" class="help-block">Invalid password. If you forgot it, <a th:href="@{/passwordReset(email=${username})}">click here</a>.</span>
-		    				</div>
-		  				</div>
-		  				<div class="form-group">
-		  					<button class="btn btn-primary" type="submit">Login</button>
-		  					<button type="button" class="btn  btn-secondary" data-dismiss="modal">Cancel</button>
-		  				</div>
-					</fieldset>
-				</form>
-				
-				<form th:action="@{/passwordReset}" class="s_showLoaderForm" role="form" method="post" id="pwdRecoverForm">
-					<input type="hidden" name="email" th:value="${username}" />
-					<p><a href="#" th:text="#{view.link.forgotPassword}">Forgot my password</a></p>
-				</form>
-				
-    		</div>
-    		<div class="modal-footer">
-    		</div>
+This is an example login modal for Bootstrap 5.
+It can also be included in page as a plain form if needed
+using <div th:replace="~{/modalLogin :: #loginForm}">Login form here</div>
+*/-->
+<body th:remove="tag">
+
+<div th:replace="~{/yada/modalGenericB5::fragment(~{::modalTitle},_,~{::modalBody},~{},~{::modalScript},'modal-lg','loginModal')}">
+
+	<div th:fragment="modalTitle">Login</div>
+
+	<th:block th:fragment="modalBody">
+		<div class="modal-body">
+			<form th:action="@{/loginPost}" role="form" method="post" id="loginForm">
+				<div class="mb-3">
+					<div th:if="${lockoutMinutes}" class="alert alert-danger" role="alert">Too many failed attempts: login disabled.<br/>
+						Wait <span th:text="${lockoutMinutes}">5</span> minute<span th:text="${lockoutMinutes>1?'s':''}">s</span> and retry, 
+						or <a th:href="@{/passwordReset(email=${username})}">recover your password</a> in the meantime</div>
+					<div th:if="${loginError}" class="alert alert-danger" role="alert">
+						Can't login. Please try again later and contact us if the problem persists.
+					</div>
+				</div>
+				<div class="mb-3">
+    				<label class="control-label" for="username">E-Mail</label>
+    				<div>
+    					<input type="email" id="username" name="username" th:value="${username}"
+    						th:classappend="${usernameNotFound!=null || userDisabled!=null}?is-invalid" 
+    						class="form-control" placeholder="E-Mail" required="required" autofocus="autofocus">
+	    				<span th:if="${usernameNotFound}" class="invalid-feedback">User not found. Please check that the email is correct, or register</span>
+	    				<span th:if="${userDisabled}" class="invalid-feedback">User disabled. Please contact us to fix this issue.</span>
+    				</div>
+  				</div>
+  				<div class="mb-3">
+    				<label class="control-label" for="password">Password</label>
+   					<div class="input-group">
+   						<input type="password" name="password" class="form-control" id="password" 
+   							th:classappend="${passwordError!=null}?is-invalid" 
+   							placeholder="Password" required="required" th:value="${password}">
+						<a class="btn yadaShowPassword" href="#" title="Show password">
+							<span class="yadaIcon yadaIcon-eye"></span>
+						</a>
+	   					<span th:if="${passwordError}" class="invalid-feedback">Invalid password. If you forgot it, <a th:href="@{/passwordReset(email=${username})}">click here</a>.</span>
+   					</div>
+  				</div>
+  				<div class="mb-3">
+  					<button type="submit" class="btn btn-primary">Login</button>
+  					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+  				</div>
+			</form>
+			
+			<form th:action="@{/passwordReset}" role="form" method="post" id="pwdRecoverForm">
+				<input type="hidden" name="email" th:value="${username}" />
+				<p><a href="#">Forgot my password</a></p>
+			</form>
 		</div>
-	<script type="text/javascript" th:inline="javascript">
-		//<![CDATA[
-		    yada.loaderOff();
-		    yada.enableShowPassword();
-		    $(document).ready(function() {
-			    yada.openLoginModal();
-		    });
-		    
-		    $('#pwdRecoverForm a').click(function(e) {
-		    	e.preventDefault();
-		    	var email=$('#loginForm input[name="username"]').val();
-		    	$('#pwdRecoverForm input[name="email"]').val(email);
-		    	$('#pwdRecoverForm').submit();
-		    	return false;
-		    });
-		    
-		//]]>
-		</script>
-	
-	</div>
+	</th:block>
+        
+	<script th:fragment="modalScript">
+	    $('#pwdRecoverForm a').click(function(e) {
+	    	e.preventDefault();
+	    	var email=$('#loginForm input[name="username"]').val();
+	    	$('#pwdRecoverForm input[name="email"]').val(email);
+	    	$('#pwdRecoverForm').submit();
+	    	return false;
+	    });
+	</script>
+
 </div>
 </body>
 </html>
