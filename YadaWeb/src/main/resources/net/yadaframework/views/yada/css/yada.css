@@ -398,27 +398,27 @@ input.yadaSwitch-round:checked ~ label:after {
 }
 
 .yadaIcon-down:before {
-    content: "\F078";
+    content: "\F128";
 }
 
 .yadaIcon-up:before {
-    content: "\F077";
+    content: "\F148";
 }
 
 .yadaIcon-edit:before {
-    content: "\F044";
+    content: "\F4CB";
 }
 
 .yadaIcon-delete:before {
-    content: "\F2ED";
+    content: "\F5DE";
 }
 
 .yadaIcon-clone:before {
-    content: "\F24D";
+    content: "\F3C2";
 }
 
 .yadaIcon-add:before {
-    content: "\F067";
+    content: "\F4FD";
 }
 
 .yadaIcon-help:before {
