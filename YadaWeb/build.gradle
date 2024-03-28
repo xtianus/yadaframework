@@ -94,7 +94,7 @@ dependencies {
 		'org.springframework:spring-webmvc:6.1.5',
 		'org.springframework:spring-core:6.1.5',
 		// 'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
-		'org.hibernate.orm:hibernate-core:6.3.1.Final',
+		'org.hibernate.orm:hibernate-core:6.4.4.Final',
 		'org.hibernate.validator:hibernate-validator:8.0.1.Final',
 		'org.thymeleaf:thymeleaf-spring6:3.+',
 		'com.mysql:mysql-connector-j:8.1.+',
