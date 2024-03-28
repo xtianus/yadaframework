@@ -37,10 +37,13 @@
       	<% out.print (yadaWebCommerceFound?"":"-->"); %>
  		 
       <properties>
+      		<!-- No need for database connection info when using the non-standard "hibernate.dialect"
             <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
 		    <property name="jakarta.persistence.jdbc.user" value="${acronym}user$env"/>
 		    <property name="jakarta.persistence.jdbc.password" value="$dbpwd"/>
 		    <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"/>
+		    -->
+		    <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
          	<property name="jakarta.persistence.schema-generation.scripts.action" value="create"/>
 			<property name="jakarta.persistence.schema-generation.scripts.create-target" value="schema/${acronym}.sql"/>
       		 
