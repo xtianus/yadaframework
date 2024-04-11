@@ -62,11 +62,22 @@ public class YadaNotify {
 	@Deprecated private Locale locale;
 
 	/**
+	 * Check that a Model was passed, not a RedirectAttributes, when a Model is expected.
+	 * @param model
+	 */
+	private void ensureModel(Model model) {
+		if (model instanceof RedirectAttributes) {
+			throw new YadaInvalidUsageException("Passing RedirectAttributes instead of Model");
+		}
+	}
+
+	/**
 	 * Initialise an empty instance
 	 * @param model
 	 * @return
 	 */
 	public YadaNotifyData empty(Model model) {
+		ensureModel(model);
 		return new YadaNotifyData(model, messageSource, null, yadaConfiguration);
 	}
 
@@ -86,6 +97,7 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData title(String title, Model model) {
+		ensureModel(model);
 		return new YadaNotifyData(model, messageSource, null, yadaConfiguration).setTitle(title);
 	}
 
@@ -96,6 +108,7 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData title(String title, Model model, Locale locale) {
+		ensureModel(model);
 		return new YadaNotifyData(model, messageSource, locale, yadaConfiguration).setTitle(title);
 	}
 
@@ -127,6 +140,7 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData titleKey(Model model, String ... titleKeyAndArgs) {
+		ensureModel(model);
 		return new YadaNotifyData(model, messageSource, null, yadaConfiguration).setTitleKey(titleKeyAndArgs);
 	}
 
@@ -138,6 +152,7 @@ public class YadaNotify {
 	 * @return
 	 */
 	public YadaNotifyData titleKey(Model model, Locale locale, String ... titleKeyAndArgs) {
+		ensureModel(model);
 		return new YadaNotifyData(model, messageSource, locale, yadaConfiguration).setTitleKey(titleKeyAndArgs);
 	}
 

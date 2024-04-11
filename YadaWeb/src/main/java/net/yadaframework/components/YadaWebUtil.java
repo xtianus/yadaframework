@@ -612,9 +612,12 @@ public class YadaWebUtil {
 	public String makeUrl(String[] segments, Map<String, String> requestParams, Boolean urlEncode) {
 		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < segments.length; i++) {
+			if (segments[i]==null) {
+				continue;
+			}
 			result.append(segments[i]);
 			// Add a separator when needed
-			if (i<segments.length-1 && !segments[i].endsWith("/") && !segments[i+1].startsWith("/")) {
+			if (i<segments.length-1 && !segments[i].endsWith("/") && segments[i+1]!=null && !segments[i+1].startsWith("/")) {
 				result.append("/");
 			}
 		}
