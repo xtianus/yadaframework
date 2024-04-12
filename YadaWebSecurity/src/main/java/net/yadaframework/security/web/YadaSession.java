@@ -82,7 +82,7 @@ public class YadaSession<T extends YadaUserProfile> {
 		YadaUserCredentials targetUserCredentials = yadaUserCredentialsDao.findByUserProfileId(targetUserProfileId);
 		yadaUserDetailsService.authenticateAs(targetUserCredentials, false);
 		loggedInUserProfileId = targetUserProfileId;
-		log.info("Impersonification by #{} as {} started", impersonatorUserId, targetUserCredentials);
+		log.info("Impersonation by #{} as #{} started", impersonatorUserId, targetUserCredentials.getId());
 	}
 
 	/**
@@ -107,15 +107,15 @@ public class YadaSession<T extends YadaUserProfile> {
 	 * Terminates impersonation.
 	 * @return true if the impersonation was active, false if it was not active.
 	 */
-	public boolean depersonate(HttpServletRequest request, HttpServletResponse response) {
+	public boolean depersonate(HttpServletRequest request, HttpServletResponse response) { // deIMpersonate?
 		if (isImpersonationActive()) {
 			YadaUserCredentials originalCredentials = yadaUserCredentialsDao.findByUserProfileId(impersonatorUserId);
 			yadaUserDetailsService.authenticateAs(originalCredentials, request, response);
-			log.info("Impersonification by {} ended", originalCredentials);
+			log.info("Impersonation by #{} ended", originalCredentials.getId());
 			clearCaches();
 			return true;
 		} else {
-			log.error("Depersonification failed because of null impersonificator or null original user");
+			log.error("Deimpersonation failed because of null impersonator or null original user");
 			return false;
 		}
 	}

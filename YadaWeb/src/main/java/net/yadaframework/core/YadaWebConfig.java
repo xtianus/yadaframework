@@ -275,6 +275,9 @@ public class YadaWebConfig implements WebMvcConfigurer {
 
 		// robots.txt is usually added by the deploy script depending on the environment
 		registry.addResourceHandler("/robots.txt").addResourceLocations("/").setCachePeriod(86400); // 1 day cache period
+		// favicon.ico is requested by browsers from the root folder in some cases even if configured elsewhere in the html, 
+		// so better handle it to avoid an error in the log
+		registry.addResourceHandler("/favicon.ico").addResourceLocations("/").setCachePeriod(8640000); // 100 days cache period
 	}
 
 	//
