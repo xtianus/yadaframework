@@ -59,7 +59,7 @@ public class YadaNotify {
 	@Deprecated private String title;
 	@Deprecated private String message;
 	@Deprecated private Locale locale;
-	
+
 	/**
 	 * Check that a Model was passed, not a RedirectAttributes, when a Model is expected.
 	 * @param model

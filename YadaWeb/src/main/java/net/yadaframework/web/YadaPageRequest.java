@@ -280,7 +280,7 @@ public class YadaPageRequest {
 	 * @see #getSize()
 	 */
 	public int getPageSize() {
-		return page;
+		return getSize();
 	}
 
 	/**

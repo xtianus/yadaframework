@@ -17,7 +17,7 @@
 <th:block th:replace="~{/footer :: body}"/>
 
 <th:block th:if="${login}!=null">
-	<div th:replace="/modalLogin :: #loginModal"></div>
+	<div th:replace="~{/modalLogin :: #loginModal}"></div>
 </th:block>
 
 <script type="text/javascript" th:inline="javascript">
