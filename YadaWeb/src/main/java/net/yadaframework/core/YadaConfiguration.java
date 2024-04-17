@@ -247,6 +247,16 @@ public abstract class YadaConfiguration {
 	public String getTomcatKeystorePassword() {
 		return configuration.getString("config/tomcat/keystore/password", "changeit");
 	}
+
+	/**
+	 * The maximum size in bytes of the POST which will be handled by 
+	 * the container FORM URL parameter parsing. The limit can be disabled 
+	 * by setting this attribute to a value less than zero. If not specified, 
+	 * this attribute is set to 2097152 (2 MiB).
+	 */
+	public int getTomcatMaxPostSize() {
+		return configuration.getInt("config/tomcat/maxPostSize", 2097152);
+	}
 	
 	/**
 	 * Google api key (for Maps etc) read from "security.properties"
