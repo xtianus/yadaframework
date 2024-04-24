@@ -51,7 +51,12 @@ public class YadaGlobalExceptionHandler {
         	log.info("Rethrowing @ResponseStatus exception: {}", e.toString());
             throw e;
         }
-        log.error("Unhandled exception shown to user", e);
+        if (e instanceof org.springframework.web.servlet.NoHandlerFoundException) {
+        	// Someone is using an unmapped url. Just log the url not the stacktrace.
+        	log.error("NoHandlerFoundException: {}", e.getMessage());
+        } else {
+        	log.error("Unhandled exception shown to user", e);
+        }
         if (yadaWebUtil.isAjaxRequest(request)) {
         	// If it was an ajax request, return an error object
         	modelAndView.setViewName("/yada/ajaxError");
