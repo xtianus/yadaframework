@@ -90,6 +90,16 @@ public class YadaEmailService {
 		return sendHtmlEmail(toEmail, emailName, subjectParams, templateParams, inlineResources, locale, true);
 	}
 
+	/**
+	 * @param toEmail
+	 * @param emailName
+	 * @param subjectParams
+	 * @param templateParams
+	 * @param inlineResources
+	 * @param locale
+	 * @param addTimestamp
+	 * @deprecated use {@link YadaEmailBuilder} for a cleaner api
+	 */
     public boolean sendHtmlEmail(String[] toEmail, String emailName, Object[] subjectParams, Map<String, Object> templateParams, Map<String, String> inlineResources, Locale locale, boolean addTimestamp) {
     	return sendHtmlEmail(toEmail, null, emailName, subjectParams, templateParams, inlineResources, locale, addTimestamp);
     }
@@ -107,11 +117,26 @@ public class YadaEmailService {
      * @param locale
      * @param addTimestamp true to add a timestamp to the subject
      * @return true se l'email è stata spedita
+     * @deprecated use {@link YadaEmailBuilder} for a cleaner api
      */
 	public boolean sendHtmlEmail(String[] toEmail, String replyTo, String emailName, Object[] subjectParams, Map<String, Object> templateParams, Map<String, String> inlineResources, Locale locale, boolean addTimestamp) {
 		return sendHtmlEmail(config.getEmailFrom(), toEmail, replyTo, emailName, subjectParams, templateParams, inlineResources, null, locale, addTimestamp);
 	}
 	
+	/**
+	 * 
+	 * @param fromEmail
+	 * @param toEmail
+	 * @param replyTo
+	 * @param emailName
+	 * @param subjectParams
+	 * @param templateParams
+	 * @param inlineResources
+	 * @param attachments
+	 * @param locale
+	 * @param addTimestamp
+	 * @deprecated use {@link YadaEmailBuilder} for a cleaner api
+	 */
 	public boolean sendHtmlEmail(String[] fromEmail, String[] toEmail, String replyTo, String emailName, Object[] subjectParams, Map<String, Object> templateParams, Map<String, String> inlineResources, Map<String, File> attachments, Locale locale, boolean addTimestamp) {
 		return sendHtmlEmail(fromEmail, toEmail, replyTo, emailName, subjectParams, templateParams, inlineResources, attachments, locale, addTimestamp, false);
 	}
@@ -131,6 +156,7 @@ public class YadaEmailService {
      * @param addTimestamp true to add a timestamp to the subject
 	 * @param batch true to send the separate email to each recipient
      * @return true se l'email è stata spedita
+     * @deprecated use {@link YadaEmailBuilder} for a cleaner api
      */
 	public boolean sendHtmlEmail(String[] fromEmail, String[] toEmail, String replyTo, String emailName, Object[] subjectParams, Map<String, Object> templateParams, Map<String, String> inlineResources, Map<String, File> attachments, Locale locale, boolean addTimestamp, boolean batch) {
 		YadaEmailParam yadaEmailParam = new YadaEmailParam();
@@ -152,11 +178,18 @@ public class YadaEmailService {
      * Il template è localizzato, per cui si può chiamare ad esempio <emailName>.html oppure <emailName>_de.html.
      * Il subject è localizzato e parametrizzato, e la sua chiave è email.subject.<emailName>
      * @return true se l'email è stata spedita
+     * @deprecated use {@link YadaEmailBuilder} for a cleaner api
      */
 	public boolean sendHtmlEmail(YadaEmailParam yadaEmailParam) {
 		return this.sendHtmlEmail(yadaEmailParam, false);
 	}
-
+	
+	/**
+	 * Send a HTML email. Better use {@link YadaEmailBuilder} for a cleaner api 
+	 * @param yadaEmailParam
+	 * @param batch
+	 * @return true if the email has been sent correctly.
+	 */
 	public boolean sendHtmlEmail(YadaEmailParam yadaEmailParam, boolean batch) {
 		String[] fromEmail = yadaEmailParam.fromEmail;
 		String[] toEmail = yadaEmailParam.toEmail;
@@ -219,8 +252,8 @@ public class YadaEmailService {
 			}
 			return sendEmailBatch(yadaEmailContents);
 		} else {
-		return sendEmail(ec);
-	}
+			return sendEmail(ec);
+		}
 	}
 
 	private YadaEmailContent copyYadaEmailContent(YadaEmailContent ec, String... to) {
@@ -306,7 +339,7 @@ public class YadaEmailService {
 	 * @param html
 	 * @param inlineFile
 	 * @param inlineFilename
-	 * @return
+	 * @return true if the email has been sent
 	 */
 	public boolean sendEmail(String[] from, String to, String replyTo, String cc, String bcc, String subject, String body, boolean html, File inlineFile, String inlineFilename) {
 		YadaEmailContent content = new YadaEmailContent();
@@ -349,7 +382,7 @@ public class YadaEmailService {
 			try {
 				MimeMessage mimeMessage = createMimeMessage(yadaEmailContent);
 				if (mimeMessage!=null) {
-				messageList.add(mimeMessage);
+					messageList.add(mimeMessage);
 				}
 			} catch (Exception e) {
 				result = false;
