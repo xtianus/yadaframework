@@ -52,14 +52,18 @@
 	z-index: 999999;    
 }
 
-.modal .btn-close, .popover .btn-close {
-	/* float: right; */
+.modal:not(.B5) .btn-close, .popover .btn-close {
     border: none;
     margin: 0;
     /* padding: 0; */
     /*opacity: .2;*/
     position: relative;
     bottom: 18px;
+}
+
+.modal.B5 .btn-close {
+    position: relative;
+    bottom: 10px;
 }
 
 .yadaResponseData {
@@ -394,31 +398,35 @@ input.yadaSwitch-round:checked ~ label:after {
 }
 
 .yadaIcon-down:before {
-    content: "\F078";
+    content: "\F128";
 }
 
 .yadaIcon-up:before {
-    content: "\F077";
+    content: "\F148";
 }
 
 .yadaIcon-edit:before {
-    content: "\F044";
+    content: "\F4CB";
 }
 
 .yadaIcon-delete:before {
-    content: "\F2ED";
+    content: "\F5DE";
 }
 
 .yadaIcon-clone:before {
-    content: "\F24D";
+    content: "\F3C2";
 }
 
 .yadaIcon-add:before {
-    content: "\F067";
+    content: "\F4FD";
 }
 
 .yadaIcon-help:before {
     content: "\F505";
+}
+
+.yadaIcon-eye:before {
+    content: "\F341";
 }
 
 /********************/

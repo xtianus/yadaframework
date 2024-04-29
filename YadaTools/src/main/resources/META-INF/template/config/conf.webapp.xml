@@ -10,12 +10,25 @@
 	<paths>
 		<serverAddress>http://$env.EXAMPLE.com/</serverAddress>
 		<basePath>$basePath/$acronym$env</basePath>
+		<!-- The name is the folder name inside basePath -->
+		<!-- The url can either be an absolute url like "/contents", or a full url like "http://cdn.com/some/contents" -->
 		<contentDir name="contents" url="/contents"></contentDir>
+		<uploadsDir>uploads</uploadsDir>
 		<errorPageForward>/errorPage</errorPageForward>
 	</paths>
-	<!-- Define embedded tomcat parameters. Use when more than one application is running on the same server. 
+	<!-- Sets the Spring max file and request size, except tomcat maxPostSize 
+		that should be set in server.xml or in the below 'maxPostSize' config when embedded -->
+	<maxFileUploadSizeBytes>4000000</maxFileUploadSizeBytes>
+	<!-- Need to set this when using StreamingResponseBody, 0 for default -->
+	<asyncTimeoutMinutes>0</asyncTimeoutMinutes>
+	<bootstrapVersion>5</bootstrapVersion>
+	
+	<!-- Define embedded tomcat parameters. 
+	Use when more than one application is running on the same server.
+		These values can also be set as env/system variables with the syntax "conf.tomcat.ports.http".  
 	<tomcat>
 		<ports>
+			<offset></offset> Quick way of specifying a different set of ports (remove this comment)
 			<http></http>
 			<https></https>
 			<ajp></ajp>
@@ -26,8 +39,10 @@
 			<file></file>
 			<password></password>
 		</keystore>
+		<maxPostSize>2097152</maxPostSize>
 	</tomcat>
 	-->
+	
 	<email>
 		<enabled>true</enabled>
 		<from>
@@ -119,6 +134,7 @@
 		</users>
 	</setup>
 	
+	<% if (env=="prod") { /* TODO remove the "prod" string and use envs[prodIndex] */ %>
 	<security>
 		<!-- sessionTimeoutMinutes is used via javascript to check if the browser session is expired and show a warning modal -->
 		<!-- WARNING: this value must be the same as the value of session-timeout in /src/main/webapp/WEB-INF/web.xml or the session might never expire -->
@@ -150,4 +166,5 @@
 			</role>
 		</roles>
 	</security>
+	<%}%>
 </config>

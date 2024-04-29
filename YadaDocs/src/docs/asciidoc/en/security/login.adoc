@@ -60,15 +60,23 @@ page after logout can also be configured this way. This is an example:
 [source,java]
 ----
 public class SecurityConfig extends YadaSecurityConfig {
-    @Override
-    public void configure(HttpSecurity http) throws Exception {
-    	super.configure(http);
+ 	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http.authorizeHttpRequests(authorize -> authorize
+			.requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
+			.requestMatchers(new AntPathRequestMatcher("/user/**")).hasRole("USER")
+		);
+		super.configure(http);
 		super.successHandler.setDefaultTargetUrlNormalRequest("/my/area");
 		super.successHandler.setDefaultTargetUrlAjaxRequest("/yadaLoginSuccess?targetUrl=/my/area");
 		super.logoutSuccessHandler.setDefaultTargetUrl("/my/area");
+		http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
+		return http.build();
+	}
+}
 ----
 
-The syntax "/yadaLoginSuccess?targetUrl=/my/area" ensures that after an ajax login request a full page at "/my/area" will be loaded. 
+The syntax `/yadaLoginSuccess?targetUrl=/my/area` ensures that after an ajax login request a full page at "/my/area" will be loaded. 
 
 [TIP]
 ====
@@ -187,11 +195,29 @@ The login page can either be a full page or a modal, and must contain the login 
 The login form must have a `username` and a `password` field. The form must be submitted 
 to the configured `loginProcessingUrl` endpoint (see `SecurityConfig.java`) via ajax or not depending on how it was opened (see later).
 
+An example login form/page can be found in the `modalLogin.html` file created during project initialization. It is a Bootstrap 5
+modal but it can also be embedded in a normal page by including the appropriate fragment,
+for example with
+
+[source,html]
+----
+<div th:replace="~{/modalLogin :: #loginForm}">Login form here</div>
+----
+
+The above file shows how to:
+
+- perform login
+- show a generic login error message
+- show a lockout message when the maximum number of login attempts has been tried
+- show an error message below username or password
+- reveal the typed password by clicking on a button 
+- provide a link to the password reset page
+
+The `<security>` section of the configuration file contains some useful parameters like
+the required password length or the number of attempts before the user is locked out.
+
 [.todo]
 ----
-- failed attempts lockout message
-- login error message
-- password reveal button
 - force password change after login
 ----
 

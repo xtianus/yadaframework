@@ -184,8 +184,7 @@ public class YadaTomcatServer {
         // See https://tomcat.apache.org/tomcat-8.5-doc/config/ajp.html
         ((AbstractAjpProtocol) ajpConnector.getProtocolHandler()).setMaxConnections(8192);
         ((AbstractAjpProtocol) ajpConnector.getProtocolHandler()).setMaxThreads(200);
-        // TODO verificare se sia necessario incrementare questo valore per postare immagini etc.
-        // ajpConnector.setMaxPostSize(maxPostSize); 2097152 (2 megabytes) default
+        ajpConnector.setMaxPostSize(config.getTomcatMaxPostSize());
         ajpConnector.setPort(config.getTomcatAjpPort());
         ((AbstractAjpProtocol) ajpConnector.getProtocolHandler()).setAddress(InetAddress.getByAddress(new byte[] {0,0,0,0}));
         tomcat.getService().addConnector(ajpConnector);
