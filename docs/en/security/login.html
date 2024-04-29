@@ -84,7 +84,7 @@ window.onscroll = function() {
 <div id="header">
 <h1>User Login</h1>
 <div class="details">
-<span id="revnumber">version 0.7.6</span>
+<span id="revnumber">version 0.7.7</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -214,16 +214,24 @@ page after logout can also be configured this way. This is an example:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public class SecurityConfig extends YadaSecurityConfig {
-    @Override
-    public void configure(HttpSecurity http) throws Exception {
-    	super.configure(http);
+ 	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http.authorizeHttpRequests(authorize -&gt; authorize
+			.requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
+			.requestMatchers(new AntPathRequestMatcher("/user/**")).hasRole("USER")
+		);
+		super.configure(http);
 		super.successHandler.setDefaultTargetUrlNormalRequest("/my/area");
 		super.successHandler.setDefaultTargetUrlAjaxRequest("/yadaLoginSuccess?targetUrl=/my/area");
-		super.logoutSuccessHandler.setDefaultTargetUrl("/my/area");</code></pre>
+		super.logoutSuccessHandler.setDefaultTargetUrl("/my/area");
+		http.authorizeHttpRequests(authorize -&gt; authorize.anyRequest().permitAll());
+		return http.build();
+	}
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The syntax "/yadaLoginSuccess?targetUrl=/my/area" ensures that after an ajax login request a full page at "/my/area" will be loaded.</p>
+<p>The syntax <code>/yadaLoginSuccess?targetUrl=/my/area</code> ensures that after an ajax login request a full page at "/my/area" will be loaded.</p>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -398,12 +406,48 @@ public String passwordResetPost(@PathVariable String token, Model model, HttpSer
 <p>The login form must have a <code>username</code> and a <code>password</code> field. The form must be submitted
 to the configured <code>loginProcessingUrl</code> endpoint (see <code>SecurityConfig.java</code>) via ajax or not depending on how it was opened (see later).</p>
 </div>
+<div class="paragraph">
+<p>An example login form/page can be found in the <code>modalLogin.html</code> file created during project initialization. It is a Bootstrap 5
+modal but it can also be embedded in a normal page by including the appropriate fragment,
+for example with</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:replace="~{/modalLogin :: #loginForm}"&gt;Login form here&lt;/div&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above file shows how to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>perform login</p>
+</li>
+<li>
+<p>show a generic login error message</p>
+</li>
+<li>
+<p>show a lockout message when the maximum number of login attempts has been tried</p>
+</li>
+<li>
+<p>show an error message below username or password</p>
+</li>
+<li>
+<p>reveal the typed password by clicking on a button</p>
+</li>
+<li>
+<p>provide a link to the password reset page</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The <code>&lt;security&gt;</code> section of the configuration file contains some useful parameters like
+the required password length or the number of attempts before the user is locked out.</p>
+</div>
 <div class="listingblock todo">
 <div class="content">
-<pre>- failed attempts lockout message
-- login error message
-- password reveal button
-- force password change after login</pre>
+<pre>- force password change after login</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -615,8 +659,8 @@ user might be confused about which email address to use for login.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.6<br>
-Last updated 2023-12-17 12:32:51 +0100
+Version 0.7.7<br>
+Last updated 2024-03-21 19:36:56 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

@@ -6,7 +6,7 @@
 ==  Introduction
 
 
-Unless there is a very good reason to do otherwise, every web application should be internationalized, or at least be
+Every web application should be internationalized, or at least be
 ready for it.
 Internationalization (i18n) means that the content of the site will change according to the  _locale_ of the user visiting it,
 where  _locale_ stands for "language and regional settings".
@@ -17,7 +17,7 @@ These are the aspects of i18n that should be considered:
 
 * search engine indexing
 
-* immutable text
+* static text
 
 * database text fields
 
@@ -170,9 +170,7 @@ like the following:
 </i18n>
 ----
 
-Note the use of the "default" attribute. This is *not* the locale that will be set when there is not a valid
-value in the request (you'd get a 404 HTTP error). This is actually the language to use for
-strings retrieved from the database (see <<Database fields>> below).
+Note the use of the "default" attribute, that selects the default language as explained later.
 
 Other than just the language, you can use a full locale code though this is rarely needed:
 
@@ -266,9 +264,17 @@ The default language redirect should be implemented in YadaLocalePathVariableFil
 The standard Thymeleaf `@{url}` syntax has been retrofitted to automatically handle language in the path:
 the current locale will be added at the start of every url, so `@{/home}` becomes `/de/home` for example.
 
+A language menu can be easily implemented with code like this:
+
+[source,html]
+----
+<select id="langmenu">
+      <option value="en" th:selected="${#locale.language=='en'}">EN</option>
+      <option value="it" th:selected="${#locale.language=='it'}">IT</option>
+</select>
+----
 
 ===  Javascript
-
 
 The language in the path variable can be changed via javascript using
 
@@ -277,8 +283,15 @@ The language in the path variable can be changed via javascript using
 yada.changeLanguagePathVariable(locale);
 ----
 
-where "locale" is the ISO2 locale code. This code could be called when choosing from a list of languages.
+where "locale" is the ISO2 locale code. This code could be called when choosing from the list of languages:
 
+[source,javascript]
+----
+$("#langmenu").change(function() {
+      var locale = $(this).val();
+      yada.changeLanguagePathVariable(locale);
+});
+----
 
 ==  Configuring "language request parameter"
 
@@ -353,9 +366,7 @@ In production, files are reloaded every 600 seconds (10 minutes) to pick up chan
 
 TIP: The Message Source configuration is implemented in YadaAppConfig.messageSource()
 
-
 ====  Usage with Thymeleaf
-
 
 The syntax to show a localized string in Thymeleaf is `#{<key>}`. Example:
 
@@ -366,7 +377,11 @@ The syntax to show a localized string in Thymeleaf is `#{<key>}`. Example:
 
 See the link:++https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#messages++[Thymeleaf docs] for more details.
 
+===  Emails
 
+Email templates can use the same message properties of HTML files, or be saved in separate files, one per language. 
+See <<emails.adoc#_internationalization,Internationalization>> in the email chapter.
+  
 ====  Usage in Java
 
 

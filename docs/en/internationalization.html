@@ -85,7 +85,7 @@ window.onscroll = function() {
 <div id="header">
 <h1>Internationalization</h1>
 <div class="details">
-<span id="revnumber">version 0.7.6</span>
+<span id="revnumber">version 0.7.7</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -117,6 +117,7 @@ window.onscroll = function() {
 <li><a href="#_coding_with_i18n_text">Coding with i18n text</a>
 <ul class="sectlevel2">
 <li><a href="#_static_text">Static text</a></li>
+<li><a href="#_emails">Emails</a></li>
 <li><a href="#_database_fields">Database fields</a></li>
 </ul>
 </li>
@@ -128,7 +129,7 @@ window.onscroll = function() {
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Unless there is a very good reason to do otherwise, every web application should be internationalized, or at least be
+<p>Every web application should be internationalized, or at least be
 ready for it.
 Internationalization (i18n) means that the content of the site will change according to the  <em>locale</em> of the user visiting it,
 where  <em>locale</em> stands for "language and regional settings".</p>
@@ -145,7 +146,7 @@ where  <em>locale</em> stands for "language and regional settings".</p>
 <p>search engine indexing</p>
 </li>
 <li>
-<p>immutable text</p>
+<p>static text</p>
 </li>
 <li>
 <p>database text fields</p>
@@ -368,9 +369,7 @@ like the following:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Note the use of the "default" attribute. This is <strong>not</strong> the locale that will be set when there is not a valid
-value in the request (you&#8217;d get a 404 HTTP error). This is actually the language to use for
-strings retrieved from the database (see <a href="#_database_fields">Database fields</a> below).</p>
+<p>Note the use of the "default" attribute, that selects the default language as explained later.</p>
 </div>
 <div class="paragraph">
 <p>Other than just the language, you can use a full locale code though this is rarely needed:</p>
@@ -467,6 +466,17 @@ public String home(Model model, HttpServletRequest request, Locale locale) {
 <p>The standard Thymeleaf <code>@{url}</code> syntax has been retrofitted to automatically handle language in the path:
 the current locale will be added at the start of every url, so <code>@{/home}</code> becomes <code>/de/home</code> for example.</p>
 </div>
+<div class="paragraph">
+<p>A language menu can be easily implemented with code like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;select id="langmenu"&gt;
+      &lt;option value="en" th:selected="${#locale.language=='en'}"&gt;EN&lt;/option&gt;
+      &lt;option value="it" th:selected="${#locale.language=='it'}"&gt;IT&lt;/option&gt;
+&lt;/select&gt;</code></pre>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_javascript">Javascript</h3>
@@ -479,7 +489,15 @@ the current locale will be added at the start of every url, so <code>@{/home}</c
 </div>
 </div>
 <div class="paragraph">
-<p>where "locale" is the ISO2 locale code. This code could be called when choosing from a list of languages.</p>
+<p>where "locale" is the ISO2 locale code. This code could be called when choosing from the list of languages:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">$("#langmenu").change(function() {
+      var locale = $(this).val();
+      yada.changeLanguagePathVariable(locale);
+});</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -594,6 +612,13 @@ The Message Source configuration is implemented in YadaAppConfig.messageSource()
 <div class="paragraph">
 <p>See the <a href="https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#messages">Thymeleaf docs</a> for more details.</p>
 </div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_emails">Emails</h3>
+<div class="paragraph">
+<p>Email templates can use the same message properties of HTML files, or be saved in separate files, one per language.
+See <a href="emails.html#_internationalization">Internationalization</a> in the email chapter.</p>
 </div>
 <div class="sect3">
 <h4 id="_usage_in_java">Usage in Java</h4>
@@ -728,8 +753,8 @@ not using FetchMode.SELECT may result in a cross join that loads a huge amount o
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.6<br>
-Last updated 2023-12-07 11:06:50 +0100
+Version 0.7.7<br>
+Last updated 2024-04-29 15:30:36 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
