@@ -64,7 +64,8 @@
     </div>
     
     <script th:if="${YADA_AUTOCLOSE!=null}" type="text/javascript" th:inline="javascript">
-    	window.setTimeout(function(){$('#yada-notification').modal('hide');}, [[${YADA_AUTOCLOSE}]])
+    	const autoclose = /*[[${YADA_AUTOCLOSE}]]*/ 0;
+    	window.setTimeout(function(){$('#yada-notification').modal('hide');}, autoclose);
     </script>
 
 	  <script th:if="${YADA_RELOADONCLOSE!=null}" type="text/javascript" th:inline="javascript">
@@ -76,7 +77,7 @@
 	  <script th:if="${YADA_RELOADONCLOSE==null and YADA_REDIRECT!=null}" type="text/javascript" th:inline="javascript">
 		$('#yada-notification').on('hidden.bs.modal', function (e) {
 			yada.loaderOn();
-			window.location.href=[[@{${YADA_REDIRECT}}]];
+			window.location.href=/*[[@{${YADA_REDIRECT}}]]*/ "unset";
 		});
 	  </script>
 	  <th:block th:if="${YADA_CALLSCRIPT!=null}">

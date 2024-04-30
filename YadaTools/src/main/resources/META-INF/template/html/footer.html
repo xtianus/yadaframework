@@ -25,7 +25,7 @@
 	</script>
 
 	<!--/* Notify modal */-->
-	<div th:insert="~{/yada/modalNotify :: modal-content}" class="modal fade" id="yada-notification" role="dialog"></div>
+	<div th:insert="~{${@yadaNotify.viewName} :: modal}" class="modal fade" id="yada-notification" role="dialog"></div>
 
 </body>
 </html>

@@ -46,7 +46,7 @@ public interface YadaViews {
 	 * The notification must have been saved using the YadaNotify API before returning.
 	 * This is the default modal. You can customize it with config/paths/notificationModalView
 	 */
-	String AJAX_NOTIFY = "/yada/modalNotify";
+	String AJAX_NOTIFY_B5 = "/yada/modalNotifyB5";
 	String AJAX_NOTIFY_B4 = "/yada/modalNotifyB4";
 	String AJAX_NOTIFY_B3 = "/yada/modalNotifyB3";
 

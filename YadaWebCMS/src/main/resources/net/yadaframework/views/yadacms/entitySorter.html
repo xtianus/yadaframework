@@ -148,7 +148,7 @@ Example 3:
 				</div>
 				
 				<div th:if="${@yadaWebUtil.AjaxRequest}" class="yadaResponseData">
-        			<div th:if="${YADA_NBODY}" th:include="/yada/modalNotify :: body" th:remove="tag"></div>
+        			<div th:if="${YADA_NBODY}" th:include="~{${@yadaNotify.viewName} :: body}" th:remove="tag"></div>
 				</div>
 				
 			</div>
