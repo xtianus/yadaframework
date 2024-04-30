@@ -87,7 +87,9 @@ public class YadaSecurityEmailService {
 		templateParams.put("email", yadaRegistrationRequest.getEmail());
 
 		Map<String, String> inlineResources = new HashMap<>();
-		inlineResources.put("logosmall", config.getEmailLogoImage());
+		if (StringUtils.isNotBlank(config.getEmailLogoImage())) {
+			inlineResources.put("logosmall", config.getEmailLogoImage());
+		}
 		return yadaEmailService.sendHtmlEmail(toEmail, emailName, subjectParams, templateParams, inlineResources, locale, false);
 	}
 
