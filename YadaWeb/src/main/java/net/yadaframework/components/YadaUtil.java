@@ -84,6 +84,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.stereotype.Component;
@@ -96,7 +98,6 @@ import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.gif.GifHeaderDirectory;
 import com.drew.metadata.jpeg.JpegDirectory;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotNull;
 import net.yadaframework.core.CloneableDeep;
@@ -142,7 +143,8 @@ public class YadaUtil {
 	 */
 	public final static YadaUtil INSTANCE = new YadaUtil();
 
-	@PostConstruct
+	// @PostConstruct
+	@EventListener(ContextRefreshedEvent.class) // Called after the context has been initialized
     public void init() {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
@@ -1094,6 +1096,7 @@ public class YadaUtil {
 	 * with the specified leading characters (baseName) and optional extension.
 	 * The file will always have a number at the end that is higher than any other numbers on
 	 * similar files in the folder.
+	 * Can be used to find both files and folders.
 	 * @param targetFolder
 	 * @param baseName
 	 * @param extensionNoDot
@@ -1609,7 +1612,7 @@ public class YadaUtil {
 		if (applicationContext!=null) {
 			return applicationContext.getBean(nameInApplicationContext, args);
 		}
-		log.debug("No applicationContext injected in getBean() yet - returning null");
+		log.debug("No applicationContext injected in getBean() yet - returning null for '{}'", nameInApplicationContext);
 		return null;
 	}
 
@@ -1642,6 +1645,32 @@ public class YadaUtil {
 	 */
 	public Date daysAgo(int days) {
 		return new Date(System.currentTimeMillis() - days*MILLIS_IN_DAY);
+	}
+	
+	/**
+	 * Delete all files in a folder that have the specified prefix
+	 * @param folder
+	 * @param prefix
+	 * @return true if all files have been deleted, false if at least one file has not been deleted
+	 */
+	public boolean deleteAll(File folder, String prefix) {
+		File[] files = folder.listFiles((dir1, name) -> (prefix == null || name.startsWith(prefix)));
+		if (files == null) {
+			throw new YadaInvalidUsageException("Not a folder or I/O error while deleting files in {}", folder);
+        }
+		boolean deletedAll = true;
+		for (File file : files) {
+            try {
+				if (!file.delete()) {
+					log.debug("File {} not deleted", file);
+					deletedAll = false;
+				}
+			} catch (Exception e) {
+				log.debug("File {} not deleted: " + e.getMessage(), file);
+				deletedAll = false;
+			}
+        }
+		return deletedAll;
 	}
 
 	/**

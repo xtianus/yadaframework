@@ -12,6 +12,7 @@ import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfi
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.migration.JavaMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,8 @@ public class YadaAppConfig {
 				// If the db is not empty and there is no metadata, add the metadata instead of failing, setting the version to 1
 				.baselineOnMigrate(true)
 				.table(config.flywayTableName())
+				// Add all Spring-instantiated JavaMigration beans
+			    .javaMigrations(applicationContext.getBeansOfType(JavaMigration.class).values().toArray(new JavaMigration[0]))
 				.load();
 			flyway.migrate();
 		}
