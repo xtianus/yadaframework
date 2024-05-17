@@ -2400,6 +2400,11 @@ public class YadaUtil {
 				copyFields(source, sourceClass, target, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet);
 				superclass = sourceClass.getSuperclass();
 			}
+			if (isType(sourceClass, YadaAttachedFile.class)) {
+				// Also copy files on disk for YadaAttachedFiles
+				target = yadaFileManager.duplicateFiles((YadaAttachedFile) target, yadaAttachedFileCloneSet);
+			}
+			
 			return target;
 		} catch (Exception e) {
 			String msg = "Can't duplicate object '" + source + "'";
@@ -2603,20 +2608,22 @@ public class YadaUtil {
 							}
 							// Faccio la copia shallow di tutti gli elementi che non implementano CloneableDeep;
 							// per questi faccio la copia deep.
-							for (Object key : sourceMap.keySet()) {
-								Object value = sourceMap.get(key);
-								if (isType(value.getClass(), CloneableDeep.class)) {
-									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
-									// For YadaAttachedFile objects, duplicate the file on disk too
-									if (isType(value.getClass(), YadaAttachedFile.class)) {
-										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
+							if (sourceMap!=null) {
+								for (Object key : sourceMap.keySet()) {
+									Object value = sourceMap.get(key);
+									if (isType(value.getClass(), CloneableDeep.class)) {
+										Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
+										// For YadaAttachedFile objects, duplicate the file on disk too
+										if (isType(value.getClass(), YadaAttachedFile.class)) {
+											clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
+										}
+										targetMap.put(key, clonedValue);
+									} else {
+										targetMap.put(key, value); // shallow
 									}
-									targetMap.put(key, clonedValue);
-								} else {
-									targetMap.put(key, value); // shallow
 								}
 							}
-//								targetMap.putAll(sourceMap);
+//							targetMap.putAll(sourceMap);
 						} else {
 							// No collection nor map
 							Object fieldSourceValueObject = setFieldDirectly ? field.get(source) : getter.invoke(source);
