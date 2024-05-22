@@ -183,6 +183,18 @@ public class YadaAttachedFile implements CloneableDeep {
 	}
 
 	/**
+	 * Ensures that the current entity is sorted before the parameter
+	 * @param toComeAfter the entity that must come after in an ascending sort order
+	 */
+	public void orderBefore(YadaAttachedFile toComeAfter) {
+		if (this.sortOrder > toComeAfter.sortOrder) {
+			long currentSortOrder = this.sortOrder;
+			this.sortOrder = toComeAfter.sortOrder;
+			toComeAfter.sortOrder = currentSortOrder;
+		}
+	}
+	
+	/**
 	 * Computes the file to create, given the parameters, and sets it.
 	 * @param namePrefix string to attach at the start of the filename, can be null
 	 * @param targetExtension the needed file extension without dot, can be null if no conversion has to be performed
