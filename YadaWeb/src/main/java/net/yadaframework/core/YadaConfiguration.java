@@ -603,8 +603,9 @@ public abstract class YadaConfiguration {
 
 	/**
 	 * Get the set of configured locales in no particular order.
-	 * @return
+	 * @deprecated because doesn't consider countries when configured
 	 */
+	@Deprecated
 	public Set<Locale> getLocaleSet() {
 		if (localeSet==null) {
 			getLocaleStrings(); // Init the set
@@ -614,8 +615,9 @@ public abstract class YadaConfiguration {
 
 	/**
 	 * Get a list of iso2 locales that the webapp can handle
-	 * @return
+	 * @deprecated because doesn't consider countries when configured
 	 */
+	@Deprecated
 	public List<String> getLocaleStrings() {
 		if (locales==null) {
 			locales = Arrays.asList(configuration.getStringArray("config/i18n/locale"));
@@ -634,7 +636,6 @@ public abstract class YadaConfiguration {
 	
 	/**
 	 * Returns the configured locales as objects, using countries if configured
-	 * @return
 	 */
 	public List<Locale> getLocales() {
 		if (localeObjects==null) {
