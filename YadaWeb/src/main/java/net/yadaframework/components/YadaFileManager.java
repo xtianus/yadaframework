@@ -349,18 +349,28 @@ public class YadaFileManager {
 		if (yadaAttachedFile==null) {
 			return null;
 		}
-		String imageName = yadaAttachedFile.getFilename();
-		if (imageName==null) {
+		String fileName = yadaAttachedFile.getFilename();
+		if (fileName==null) {
 			return null;
 		}
-		return computeUrl(yadaAttachedFile, imageName);
+		return computeUrl(yadaAttachedFile, fileName);
 	}
 
-	private String computeUrl(YadaAttachedFile yadaAttachedFile, String imageName) {
+	private String computeUrl(YadaAttachedFile yadaAttachedFile, String filename) {
+		return getFileUrl(yadaAttachedFile.getRelativeFolderPath(), filename);
+	}
+	
+	/**
+	 * Returns the url of a YadaAttachedFile that has the given attributes
+	 * @param relativeFolderPath
+	 * @param filename
+	 * @return The URL as a String
+	 */
+	public String getFileUrl(String relativeFolderPath, String filename) {
 		StringBuilder result = new StringBuilder(config.getContentUrl());
-		result.append(yadaAttachedFile.getRelativeFolderPath())
+		result.append(relativeFolderPath)
 		.append("/")
-		.append(imageName);
+		.append(filename);
 		return result.toString();
 	}
 
