@@ -875,12 +875,15 @@
 	 * @returns
 	 */
 	function showFeedbackIfNeeded($element) {
-		// TODO specify timeouts in the tag
-		// TODO specify icon in the tag
 		var showFeedback = $element.attr("data-yadaShowAjaxFeedback");
 		if (showFeedback!=undefined) {
-			$("#yadaAjaxFeedback").fadeIn(800, function() {
-				$("#yadaAjaxFeedback").fadeOut(400);
+			// Check if the HTML is in page already, else insert it
+			const $feedbackElement = $("#yadaAjaxFeedback");
+			if ($feedbackElement.length==0) {
+				$("body").append("<div id='yadaAjaxFeedback' class='yadaAjaxFeedbackOk'><span class='yadaIcon yadaIcon-ok'></span></div>");
+			}
+			$("#yadaAjaxFeedback").fadeIn(200, function() {
+				$("#yadaAjaxFeedback").fadeOut(800);
 			});
 		}
 	}
@@ -1614,7 +1617,8 @@
 				yada.loaderOff();
 			}
 		}
-		yada.initAjaxHandlersOn($modalObject);
+		// This should not be needed because handlers have already been initialized on all the returned html
+		// yada.initAjaxHandlersOn($modalObject);
 		// Scroll the modal to an optional anchor (delay was needed for it to work)
 		// or scroll back to top when it opens already scrolled (sometimes it happens)
 		setTimeout(function() {

@@ -25,7 +25,7 @@
     width: 100%;
     text-align: center;
     position: fixed;
-    color: green;
+    color: #00d900;
     display: none;
     z-index: 1000000;
     pointer-events: none;
