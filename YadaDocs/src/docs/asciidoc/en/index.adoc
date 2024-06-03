@@ -68,6 +68,8 @@ that will show you how to quickly create a web application
 
 <<emails.adoc#,Sending Emails>>:: Templating applied to emails
 
+<<confirmationModal.adoc#,Confirmation Modal>>:: Easily ask for confirmation
+
 <<notificationModal.adoc#,Notification Modal>>:: Quick messages to the user
 
 <<misc.adoc#,Miscellaneous>>:: Other features

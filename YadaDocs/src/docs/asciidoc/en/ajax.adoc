@@ -1,5 +1,6 @@
 =  Ajax
 :docinfo: shared
+:imagesdir: ../img/
 
 Easy ajax operations even without javascript
 
@@ -272,7 +273,7 @@ a| delete the target elements
 
 a| `data-yadaSuccessHandler`
 a| comma-separated list of function names or function body
-a| call the specified functions or execute the code
+a| call the specified functions or execute the code. The function is called in the context of the DOM element. It also receives the DOM element as a third parameter (see below)
 |===
 
 Yada-dialect variants:
@@ -406,7 +407,7 @@ public String someUrl(Model model) {
 
 ====  Calling some Handler
 
-The value of the yadaSuccessHandler attribute can either be a comma-separated list
+The value of the *yadaSuccessHandler* attribute can either be a comma-separated list
 of function names or bodies of a function.
 
 Examples:
@@ -464,8 +465,23 @@ the classic `responseHtml.find('.parent .child')` or `$('.parent .child', respon
 
 To open a modal returned by an ajax call, see xref:ajaxModal.adoc[Ajax Modal].
 
-====  Confirm Dialog
+====  Ajax conditional HTML
 
+When returning from any ajax call the model attribute `yadaIsAjaxResponse`
+has the value `yadaIsAjaxResponse`. This can be used to conditionally show
+some section or to apply some style only when returning from ajax:
+
+[source,html]
+----
+<span th:if="${yadaIsAjaxResponse}">Just returned from Ajax call!</span>
+
+<style>
+	.yadaIsAjaxResponse { color: red; }
+</style>
+<div th:classappend="${yadaIsAjaxResponse}">This is red after Ajax</div>
+----
+
+====  Confirm Dialog
 
 You can show a confirm dialog before the ajax call is made. The user will be shown a text message and an option to confirm or abort the call.
 
@@ -493,22 +509,6 @@ a| `yada:cancelButton`
 a| (optional) text of the cancel button
 |===
 
-====  Ajax conditional HTML
-
-When returning from any ajax call the model attribute `yadaIsAjaxResponse`
-has the value `yadaIsAjaxResponse`. This can be used to conditionally show
-some section or to apply some style only when returning from ajax:
-
-[source,html]
-----
-<span th:if="${yadaIsAjaxResponse}">Just returned from Ajax call!</span>
-
-<style>
-	.yadaIsAjaxResponse { color: red; }
-</style>
-<div th:classappend="${yadaIsAjaxResponse}">This is red after Ajax</div>
-----
- 
 ==  Ajax Forms
 
 See the  xref:forms/overview.adoc#Ajax Forms[Ajax Forms section] in the Forms chapter.
@@ -672,10 +672,45 @@ public String toggleBookLike(Long bookId, Boolean currentLike, Boolean yadaAjaxJ
 <3> toggle like when no login has just occurred
 
 
+==  Ajax feedback
 
+When returning from an ajax call it might be useful to show some kind of
+feedback to the user. The yada loader can be used to show that a call
+is being made but sometimes it is more appropriate to show some feedback
+when the ajax call has returned, especially when the call is fast and the loader
+might disappear too quickly.
+
+Such "ajax feedback" can be shown when returning from the ajax call by either
+using HTML attributes or calling a js method in the success handler.
+ 
+.data- attribute and tag for Ajax Feedback
+[cols="<33,<33,<33",options="header"]
+|===
+h| data
+a| tag
+a| description
+
+a| `data-yadaShowAjaxFeedback`
+a| `yada:showAjaxFeedback`
+a| enables the ajax feedback
+|===
+
+[source,javascript]
+----
+yada.showAjaxFeedback();
+----
+
+The default feedback shows a green checkmark in the center of the page using the
+yadaIcon-ok icon.
+This can be styled with the `yadaAjaxFeedbackOk` class and 
+the HTML changed by adding an element with `id="yadaAjaxFeedback"` that will be
+used in place of the default one.
+
+[.center]
+.Default Ajax Feedback
+image::ajaxFeedback.jpg[Default Ajax Feedback]
 
 ==  Ajax method
-
 
 You can call the low-level yada.ajax() method directly.
 

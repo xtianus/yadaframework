@@ -13,8 +13,9 @@
 
 </head>
 <body class="article toc2 toc-left">
-<!-- When editing this file, you must copy it in all other folders (without change).
-	 This is automatically done by the gradle "asciidoctor" task.
+<!--
+	Edit the /YadaDocs/src/docs/asciidoc/common/docinfo-header.html file
+	to change this menu.
 -->
 
 <select id="navigator">
@@ -30,6 +31,7 @@
 	<option data-link="./security/overview.html">Security</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./confirmationModal.html">Confirmation Modal</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
 	<option data-link="./misc.html">Miscellaneous</option>
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
@@ -139,30 +141,27 @@ window.onscroll = function() {
 <h2 id="_prerequisites">Prerequisites</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The HTML page must contain the following placeholder:</p>
+<p>The HTML page must contain the following code:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:include="/yada/modalNotify :: modal" class="modal fade" id="yada-notification" role="dialog"&gt;&lt;/div&gt;
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:insert="~{${@yadaNotify.viewName} :: modal}" class="modal fade" th:classappend="|B${@config.bootstrapVersion}|" id="yada-notification" role="dialog"&gt;&lt;/div&gt;
+
 &lt;script th:if="${YADA_NBODY!=null}" type="text/javascript"&gt;
 	$(document).ready(function() {
 		$('#yada-notification').modal('show');
 	});
-&lt;/script&gt;
-
-&lt;script type="text/javascript"&gt;
-        $('#yada-notification').on('hidden.bs.modal', function (e) {
-                $('#yada-notification .glyphicon').addClass("hidden");
-        });
 &lt;/script&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This is usually inserted in a common footer so that you don’t need to remember adding it to each page.</p>
+<p>This is usually inserted in a common footer so that you don’t need to remember adding it to each page.
+The <code>yadaInit</code> task
+already adds a version of the above code to <code>footer.html</code>.</p>
 </div>
 <div class="listingblock todo">
 <div class="content">
-<pre>make a dialect tag for this</pre>
+<pre>make a dialect tag for this?</pre>
 </div>
 </div>
 </div>
@@ -540,7 +539,7 @@ change it while preserving some key elements that are used as reference to add c
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2023-12-07 11:06:50 +0100
+Last updated 2024-04-30 12:39:53 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
