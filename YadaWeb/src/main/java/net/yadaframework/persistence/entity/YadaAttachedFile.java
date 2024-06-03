@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -180,6 +181,15 @@ public class YadaAttachedFile implements CloneableDeep {
 		if (sortOrder==-1 && id!=null) {
 			sortOrder = id;
 		}
+	}
+	
+	/**
+	 * Set the same title for all configured locales
+	 * @param uniqueTitle a single title for all locales
+	 */
+	public void setAllTitles(String uniqueTitle) {
+		this.title = new HashMap<>();
+        config.getLocales().forEach(a -> {title.put(a, uniqueTitle);});
 	}
 
 	/**
