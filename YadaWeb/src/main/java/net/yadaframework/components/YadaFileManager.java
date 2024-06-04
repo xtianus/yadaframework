@@ -254,7 +254,7 @@ public class YadaFileManager {
 	 * @param yadaAttachedFileId the attachment id
 	 * @see #deleteFileAttachment(YadaAttachedFile)
 	 */
-	@Deprecated // Removed in yada 0.7.0
+	@Deprecated // Removed in yada 0.7.0 because it uses a Spring Data api (?)
 	public void deleteFileAttachment(Long yadaAttachedFileId) {
 		deleteFileAttachment(yadaAttachedFileDao.findById(yadaAttachedFileId).orElse(null));
 	}
@@ -404,9 +404,15 @@ public class YadaFileManager {
 	 * @throws IOException
 	 */
 	public File uploadFile(MultipartFile multipartFile) throws IOException {
-		if (multipartFile==null || multipartFile.getSize()==0) {
-			log.debug("No file sent for upload of {}", multipartFile.getName());
+		if (multipartFile==null) {
+			log.debug("No file sent for upload");
 			return null;
+		}
+		if (log.isDebugEnabled()) {
+			if (multipartFile.getSize()==0) {
+				log.debug("Empty file sent for upload: {}", multipartFile.getName());
+				// We still upload it
+			}
 		}
 		File targetFile = uploadFileInternal(multipartFile);
 		return targetFile;

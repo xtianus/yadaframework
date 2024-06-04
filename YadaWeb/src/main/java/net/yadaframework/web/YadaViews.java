@@ -5,6 +5,10 @@ package net.yadaframework.web;
  *
  */
 public interface YadaViews {
+	/**
+	 * Empty HTML, useful sometimes for deletions
+	 */
+	String VIEW_EMPTY = "/yada/empty";
 
 	/**
 	 * Ajax method causes a browser redirect. Set the "targetUrl" attribute in the model.

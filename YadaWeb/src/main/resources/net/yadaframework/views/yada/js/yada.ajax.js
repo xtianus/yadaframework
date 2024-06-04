@@ -877,15 +877,22 @@
 	function showFeedbackIfNeeded($element) {
 		var showFeedback = $element.attr("data-yadaShowAjaxFeedback");
 		if (showFeedback!=undefined) {
-			// Check if the HTML is in page already, else insert it
-			const $feedbackElement = $("#yadaAjaxFeedback");
-			if ($feedbackElement.length==0) {
-				$("body").append("<div id='yadaAjaxFeedback' class='yadaAjaxFeedbackOk'><span class='yadaIcon yadaIcon-ok'></span></div>");
-			}
-			$("#yadaAjaxFeedback").fadeIn(200, function() {
-				$("#yadaAjaxFeedback").fadeOut(800);
-			});
+			yada.showAjaxFeedback();
 		}
+	}
+	
+	/**
+	 * Show a checkmark fading in and out, to be called in an ajax success handler when yada:showAjaxFeedback can't be used
+	 */
+	yada.showAjaxFeedback = function() {
+		// Check if the HTML is in page already, else insert it
+		const $feedbackElement = $("#yadaAjaxFeedback");
+		if ($feedbackElement.length==0) {
+			$("body").append("<div id='yadaAjaxFeedback' class='yadaAjaxFeedbackOk'><span class='yadaIcon yadaIcon-ok'></span></div>");
+		}
+		$("#yadaAjaxFeedback").fadeIn(200, function() {
+			$("#yadaAjaxFeedback").fadeOut(800);
+		});
 	}
 
 	/**
