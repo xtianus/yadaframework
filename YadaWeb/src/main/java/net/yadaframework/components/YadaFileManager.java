@@ -487,6 +487,24 @@ public class YadaFileManager {
 	 * @throws IOException
 	 */
 	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+		boolean needToDeleteOriginal =  config.isFileManagerDeletingUploads();
+		return attachReplace(needToDeleteOriginal, currentAttachedFile, managedFile, multipartFile, namePrefix, targetExtension, desktopWidth, mobileWidth);
+	}
+	
+	/**
+	 * Replace the file associated with the current attachment, only if a file was actually attached
+	 * @param move the managedFile is moved to the destination when true, otherwise the original is copied
+	 * and left unchanged.
+	 * @param currentAttachedFile an existing attachment, never null
+	 * @param managedFile the new file to set
+	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
+	 * @param targetExtension optional, to convert image file formats
+	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
+	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
+	 * @return YadaAttachedFile if the file has been replaced, null if managedFile is null
+	 * @throws IOException
+	 */	
+	public YadaAttachedFile attachReplace(boolean move, YadaAttachedFile currentAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
 		if (managedFile==null) {
 			return null;
 		}
@@ -499,7 +517,7 @@ public class YadaFileManager {
 		if (multipartFile!=null) {
 			clientFilename = multipartFile.getOriginalFilename();
 		}
-		return attach(currentAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
+		return attach(move, currentAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
 	}
 
 	/**
