@@ -41,6 +41,7 @@ public class YadaFileManager {
 	@Autowired private YadaAttachedFileDao yadaAttachedFileDao;
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
+	@Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaFileManagerDao yadaFileManagerDao;
 	
 	protected String COUNTER_SEPARATOR="_";
@@ -404,7 +405,7 @@ public class YadaFileManager {
 	 * @throws IOException
 	 */
 	public File uploadFile(MultipartFile multipartFile) throws IOException {
-		if (multipartFile==null) {
+		if (yadaWebUtil.isMultipartMissing(multipartFile)) {
 			log.debug("No file sent for upload");
 			return null;
 		}

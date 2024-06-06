@@ -93,6 +93,16 @@ public class YadaWebUtil {
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
 	
 	/**
+	 * Returns true if the MultipartFile has not been uploaded at all, not even an empty file
+	 * @param multipartFile
+	 */
+	public boolean isMultipartMissing(MultipartFile multipartFile) {
+		// It's not enough to check for null or isEmpty() or size() because an empty file wouldn't be accepted.
+		// The only condition when no file has been uploaded at all is that the original filename is missing.
+		return multipartFile==null || StringUtils.isEmpty(multipartFile.getOriginalFilename());
+	}
+	
+	/**
 	 * Creates a dynamic @RequestMapping i.e. there's no need for it to be annotated and located in a controller instance.
 	 * Useful if the url can be user-defined via some cms for example.
 	 * @param newPath some url that the code will handle, like "/mypage"
@@ -573,7 +583,7 @@ public class YadaWebUtil {
 	 * @throws IOException, IllegalStateException
 	 */
 	public File saveAttachment(MultipartFile attachment) throws IOException {
-		if (!attachment.isEmpty()) {
+		if (!isMultipartMissing(attachment)) {
 			File targetFile = File.createTempFile("upload-", null);
 			saveAttachment(attachment, targetFile);
 			return targetFile;
@@ -891,7 +901,7 @@ public class YadaWebUtil {
 	 */
 	public String getFileExtension(MultipartFile multipartFile) {
 		String result = null;
-		if (multipartFile!=null) {
+		if (!isMultipartMissing(multipartFile)) {
 			String originalName = multipartFile.getOriginalFilename();
 			result = yadaUtil.getFileExtension(originalName);
 		}
