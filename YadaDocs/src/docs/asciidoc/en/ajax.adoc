@@ -272,7 +272,7 @@ a| jQuery selector list (extended syntax)
 a| delete the target elements
 
 a| `data-yadaSuccessHandler`
-a| comma-separated list of function names or function body
+a| comma-separated list of function names, or function body, not both (e.g. "f1,f2" or "f1();f2();" not "f1(),f2")
 a| call the specified functions or execute the code. The function is called in the context of the DOM element. It also receives the DOM element as a third parameter (see below)
 |===
 
@@ -570,6 +570,78 @@ complete list of ajaxifyable elements. Is the yadaAjax class needed? Examples.
         showFeedbackIfNeeded
 
 ----
+
+==  Ajax upload by drag&drop
+
+Any element on page can be turned into a drop target for file upload operations using the following attributes:
+
+.file upload
+[cols="<33,<33,<33",options="header"]
+|===
+h| name
+a| value
+a| description
+
+a| `yada:dropUpload`
+a| URL
+a| sends dropped files to the server via ajax
+
+a| `yada:singleFileOnly`
+a| prevents uploading multiple files
+a| comma-separated title and error text to show in a notification modal when more than one file is dropped
+|===
+
+NOTE: The current implementation only sends files via ajax
+
+All other ajax-related functionality can be used, so for example the page can be updated with the result of the
+ajax call using `yada:updateOnSuccess`, or some function can be called using `yada:successHandler`.
+
+NOTE: A link can also be a drop target, but in case of ajax links any handler or update operation would apply
+to both clicking and dropping, which probably is not desirable; plain links (non-ajax) always work as expected 
+
+HTML example:
+
+[source,html]
+----
+<div class="yadaNoLoader" # <1>
+	yada:updateOnSuccess="yadaParents:.fileDetails" # <1>
+	yada:successHandler="yada.showAjaxFeedback" # <1>
+	yada:dropUpload="@{/uploadGalleryImage(productId=${product.id})}" # <2>
+	yada:singleFileOnly="Too many files,Drop a single file to fill the empty slot" # <3>
+	title="Drop image to upload">
+	<i class="fas fa-file-upload dropIcon"></i>
+</div>
+----
+<1> any ajax-related functionality applies
+<2> the endpoint can include request parameters as usual
+<3> in this example ony one file can be dropped
+
+While the files are being dragged over the drop area, the `yadaDropTarget` class is added to the element. This
+allows a visual feedback (not provided by default) for example by changing the border or the background color.
+
+The @Controller receives a `MultipartFile` or a `MultipartFile[]`: dropping a single file will match both signatures
+but dropping more than one would only match the latter, so choose accordingly to the use case, the latter being more versatile.
+Uploaded files can be handled as when <<forms/uploads.adoc#_java,using forms for upload>>:
+
+[source,java]
+----
+@RequestMapping("/uploadProductFiles")
+public String uploadProductFiles(Long productId, MultipartFile[] multipartFile, Model model, Locale locale) {
+	Product product = ...
+	for (int idx = 0; idx < multipartFile.length; idx++) {
+		MultipartFile multi = multipartFile[idx];
+		String clientFilename = multi.getOriginalFilename();
+		File managedFile = yadaFileManager.uploadFile(multi);
+		YadaAttachedFile newFile = yadaFileManager.attachNew(true, managedFile, clientFilename, "/productFiles", null, null, null, null);
+		newFile.setAllTitles(clientFilename);
+		newFile = yadaAttachedFileDao.save(newFile);
+		product.addFile(newFile);
+	}
+	... save product
+	return ...
+}
+----
+
 
 ==  Ajax async element load
 

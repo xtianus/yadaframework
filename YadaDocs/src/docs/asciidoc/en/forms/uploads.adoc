@@ -5,17 +5,18 @@
 Uploading files to the server, handling and linking them
 
 ==  Description
-File Upload is handled via https://commons.apache.org/proper/commons-fileupload/[Commons FileUpload^].
-We don't use the Servlet 3 API because, when we had to make a choice,
-we couldn't figure out how to set the file size limit via our configuration file.
+File Upload is handled via the standard Servlet API.
 
-Yada offers some utility classes to more easily handle files _after_ they have been uploaded:
+YadaFramework offers some utility classes to more easily handle files _after_ they have been uploaded:
 
 * storing files on disk
 * resizing images
 * assigning files to Entity objects
 * generating download links
 * managing the pool of uploaded files
+
+This section shows how to upload files via plain form submission (ajax or not).
+For a way to upload by dragging, see <<../ajax.adoc#_ajax_upload_by_dragdrop,Ajax upload by drag&drop>>.
 
 ==  Configuration
 ===  Maximum file size setting

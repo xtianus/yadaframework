@@ -107,6 +107,7 @@ window.onscroll = function() {
 <li><a href="#_ajax_on_checkbox">Ajax on checkbox</a></li>
 </ul>
 </li>
+<li><a href="#_ajax_upload_by_dragdrop">Ajax upload by drag&amp;drop</a></li>
 <li><a href="#_ajax_async_element_load">Ajax async element load</a></li>
 <li><a href="#_ajax_feedback">Ajax feedback</a></li>
 <li><a href="#_ajax_method">Ajax method</a>
@@ -500,7 +501,7 @@ The following <code>data-</code> attributes allow you to perform postprocessing 
 <p><code>data-yadaSuccessHandler</code></p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>comma-separated list of function names or function body</p>
+<p>comma-separated list of function names, or function body, not both (e.g. "f1,f2" or "f1();f2();" not "f1(),f2")</p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>call the specified functions or execute the code. The function is called in the context of the DOM element. It also receives the DOM element as a third parameter (see below)</p>
@@ -1016,6 +1017,141 @@ Changing a select or a checkbox sumbits the enclosing form: this should be made 
 </div>
 </div>
 <div class="sect1">
+<h2 id="_ajax_upload_by_dragdrop">Ajax upload by drag&amp;drop</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Any element on page can be turned into a drop target for file upload operations using the following attributes:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 3. file upload</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">name</th>
+<th class="tableblock halign-left valign-top">value</th>
+<th class="tableblock halign-left valign-top">description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>yada:dropUpload</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>URL</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>sends dropped files to the server via ajax</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>yada:singleFileOnly</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>prevents uploading multiple files</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>comma-separated title and error text to show in a notification modal when more than one file is dropped</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The current implementation only sends files via ajax
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>All other ajax-related functionality can be used, so for example the page can be updated with the result of the
+ajax call using <code>yada:updateOnSuccess</code>, or some function can be called using <code>yada:successHandler</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+A link can also be a drop target, but in case of ajax links any handler or update operation would apply
+to both clicking and dropping, which probably is not desirable; plain links (non-ajax) always work as expected
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>HTML example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div class="yadaNoLoader" <i class="conum" data-value="1"></i><b>(1)</b>
+	yada:updateOnSuccess="yadaParents:.fileDetails" <i class="conum" data-value="1"></i><b>(1)</b>
+	yada:successHandler="yada.showAjaxFeedback" <i class="conum" data-value="1"></i><b>(1)</b>
+	yada:dropUpload="@{/uploadGalleryImage(productId=${product.id})}" <i class="conum" data-value="2"></i><b>(2)</b>
+	yada:singleFileOnly="Too many files,Drop a single file to fill the empty slot" <i class="conum" data-value="3"></i><b>(3)</b>
+	title="Drop image to upload"&gt;
+	&lt;i class="fas fa-file-upload dropIcon"&gt;&lt;/i&gt;
+&lt;/div&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>any ajax-related functionality applies</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>the endpoint can include request parameters as usual</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>in this example ony one file can be dropped</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>While the files are being dragged over the drop area, the <code>yadaDropTarget</code> class is added to the element. This
+allows a visual feedback (not provided by default) for example by changing the border or the background color.</p>
+</div>
+<div class="paragraph">
+<p>The @Controller receives a <code>MultipartFile</code> or a <code>MultipartFile[]</code>: dropping a single file will match both signatures
+but dropping more than one would only match the latter, so choose accordingly to the use case, the latter being more versatile.
+Uploaded files can be handled as when <a href="forms/uploads.html#_java">using forms for upload</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/uploadProductFiles")
+public String uploadProductFiles(Long productId, MultipartFile[] multipartFile, Model model, Locale locale) {
+	Product product = ...
+	for (int idx = 0; idx &lt; multipartFile.length; idx++) {
+		MultipartFile multi = multipartFile[idx];
+		String clientFilename = multi.getOriginalFilename();
+		File managedFile = yadaFileManager.uploadFile(multi);
+		YadaAttachedFile newFile = yadaFileManager.attachNew(true, managedFile, clientFilename, "/productFiles", null, null, null, null);
+		newFile.setAllTitles(clientFilename);
+		newFile = yadaAttachedFileDao.save(newFile);
+		product.addFile(newFile);
+	}
+	... save product
+	return ...
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_ajax_async_element_load">Ajax async element load</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -1175,7 +1311,7 @@ might disappear too quickly.</p>
 using HTML attributes or calling a js method in the success handler.</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 3. data- attribute and tag for Ajax Feedback</caption>
+<caption class="title">Table 4. data- attribute and tag for Ajax Feedback</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -1461,7 +1597,7 @@ when they return from ajax. Example: <code>&lt;div th:classappend="${yadaIsAjaxR
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-06-03 15:07:04 +0200
+Last updated 2024-06-06 13:42:45 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

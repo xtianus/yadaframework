@@ -138,12 +138,10 @@ window.onscroll = function() {
 <h2 id="_description">Description</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>File Upload is handled via <a href="https://commons.apache.org/proper/commons-fileupload/" target="_blank" rel="noopener">Commons FileUpload</a>.
-We don&#8217;t use the Servlet 3 API because, when we had to make a choice,
-we couldn&#8217;t figure out how to set the file size limit via our configuration file.</p>
+<p>File Upload is handled via the standard Servlet API.</p>
 </div>
 <div class="paragraph">
-<p>Yada offers some utility classes to more easily handle files <em>after</em> they have been uploaded:</p>
+<p>YadaFramework offers some utility classes to more easily handle files <em>after</em> they have been uploaded:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -163,6 +161,10 @@ we couldn&#8217;t figure out how to set the file size limit via our configuratio
 <p>managing the pool of uploaded files</p>
 </li>
 </ul>
+</div>
+<div class="paragraph">
+<p>This section shows how to upload files via plain form submission (ajax or not).
+For a way to upload by dragging, see <a href="../ajax.html#_ajax_upload_by_dragdrop">Ajax upload by drag&amp;drop</a>.</p>
 </div>
 </div>
 </div>
@@ -1010,7 +1012,7 @@ This always happens in the following cases:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2023-12-07 11:06:50 +0100
+Last updated 2024-06-06 13:20:10 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
