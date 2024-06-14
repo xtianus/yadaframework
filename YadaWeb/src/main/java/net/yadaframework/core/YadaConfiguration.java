@@ -203,25 +203,35 @@ public abstract class YadaConfiguration {
 		}
 		return null;
 	}
+	
+	/**
+	 * Quick way to specify a new value for all embedded tomcat ports:
+	 * the offset will be added to the default value.
+	 * Some values may generate errors for overlapping ports e.g. an offset of 71 would set the AJP port 
+	 * to 8080 that may be already in use by the HTTP port of another instance with the offset at 0.
+	 */
+	public int getTomcatPortOffset() {
+		return configuration.getInt("config/tomcat/ports/offset", 0);
+	}
 
 	public int getTomcatHttpPort() {
-		return configuration.getInt("config/tomcat/ports/http", 8080);
+		return configuration.getInt("config/tomcat/ports/http", 8080) + getTomcatPortOffset();
 	}
 	
 	public int getTomcatHttpsPort() {
-		return configuration.getInt("config/tomcat/ports/https", 8443);
+		return configuration.getInt("config/tomcat/ports/https", 8443) + getTomcatPortOffset();
 	}
 	
 	public int getTomcatAjpPort() {
-		return configuration.getInt("config/tomcat/ports/ajp", 8009);
+		return configuration.getInt("config/tomcat/ports/ajp", 8009) + getTomcatPortOffset();
 	}
 	
 	public int getTomcatAjpRedirectPort() {
-		return configuration.getInt("config/tomcat/ports/ajpRedirect", 8443);
+		return configuration.getInt("config/tomcat/ports/ajpRedirect", 8443) + getTomcatPortOffset();
 	}
 	
 	public int getTomcatShutdownPort() {
-		return configuration.getInt("config/tomcat/ports/shutdown", 8005);
+		return configuration.getInt("config/tomcat/ports/shutdown", 8005) + getTomcatPortOffset();
 	}
 	
 	public File getTomcatKeystoreFile() {

@@ -11,9 +11,11 @@
 		<basePath>$basePath/$acronym$env</basePath>
 		<contentDir name="contents" url="/contents"></contentDir>
 	</paths>
-	<!-- Use when more than one application is running on the same server 
+	<!-- Use when more than one application is running on the same server.
+		These values can also be set as env/system variables with the syntax "conf.tomcat.ports.http". 
 	<tomcat>
 		<ports>
+			<offset></offset> Quick way of specifying a different set of ports (remove this comment)
 			<http></http>
 			<https></https>
 			<ajp></ajp>
