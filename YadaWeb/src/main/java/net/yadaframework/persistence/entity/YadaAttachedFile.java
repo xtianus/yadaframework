@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -181,7 +182,28 @@ public class YadaAttachedFile implements CloneableDeep {
 			sortOrder = id;
 		}
 	}
+	
+	/**
+	 * Set the same title for all configured locales
+	 * @param uniqueTitle a single title for all locales
+	 */
+	public void setAllTitles(String uniqueTitle) {
+		this.title = new HashMap<>();
+        config.getLocales().forEach(a -> {title.put(a, uniqueTitle);});
+	}
 
+	/**
+	 * Ensures that the current entity is sorted before the parameter
+	 * @param toComeAfter the entity that must come after in an ascending sort order
+	 */
+	public void orderBefore(YadaAttachedFile toComeAfter) {
+		if (this.sortOrder > toComeAfter.sortOrder) {
+			long currentSortOrder = this.sortOrder;
+			this.sortOrder = toComeAfter.sortOrder;
+			toComeAfter.sortOrder = currentSortOrder;
+		}
+	}
+	
 	/**
 	 * Computes the file to create, given the parameters, and sets it.
 	 * @param namePrefix string to attach at the start of the filename, can be null

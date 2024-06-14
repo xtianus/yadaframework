@@ -41,6 +41,7 @@ public class YadaFileManager {
 	@Autowired private YadaAttachedFileDao yadaAttachedFileDao;
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
+	@Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaFileManagerDao yadaFileManagerDao;
 	
 	protected String COUNTER_SEPARATOR="_";
@@ -254,7 +255,7 @@ public class YadaFileManager {
 	 * @param yadaAttachedFileId the attachment id
 	 * @see #deleteFileAttachment(YadaAttachedFile)
 	 */
-	@Deprecated // Removed in yada 0.7.0
+	@Deprecated // Removed in yada 0.7.0 because it uses a Spring Data api (?)
 	public void deleteFileAttachment(Long yadaAttachedFileId) {
 		deleteFileAttachment(yadaAttachedFileDao.findById(yadaAttachedFileId).orElse(null));
 	}
@@ -349,18 +350,28 @@ public class YadaFileManager {
 		if (yadaAttachedFile==null) {
 			return null;
 		}
-		String imageName = yadaAttachedFile.getFilename();
-		if (imageName==null) {
+		String fileName = yadaAttachedFile.getFilename();
+		if (fileName==null) {
 			return null;
 		}
-		return computeUrl(yadaAttachedFile, imageName);
+		return computeUrl(yadaAttachedFile, fileName);
 	}
 
-	private String computeUrl(YadaAttachedFile yadaAttachedFile, String imageName) {
+	private String computeUrl(YadaAttachedFile yadaAttachedFile, String filename) {
+		return getFileUrl(yadaAttachedFile.getRelativeFolderPath(), filename);
+	}
+	
+	/**
+	 * Returns the url of a YadaAttachedFile that has the given attributes
+	 * @param relativeFolderPath
+	 * @param filename
+	 * @return The URL as a String
+	 */
+	public String getFileUrl(String relativeFolderPath, String filename) {
 		StringBuilder result = new StringBuilder(config.getContentUrl());
-		result.append(yadaAttachedFile.getRelativeFolderPath())
+		result.append(relativeFolderPath)
 		.append("/")
-		.append(imageName);
+		.append(filename);
 		return result.toString();
 	}
 
@@ -394,9 +405,15 @@ public class YadaFileManager {
 	 * @throws IOException
 	 */
 	public File uploadFile(MultipartFile multipartFile) throws IOException {
-		if (multipartFile==null || multipartFile.getSize()==0) {
-			log.debug("No file sent for upload of {}", multipartFile.getName());
+		if (yadaWebUtil.isMultipartMissing(multipartFile)) {
+			log.debug("No file sent for upload");
 			return null;
+		}
+		if (log.isDebugEnabled()) {
+			if (multipartFile.getSize()==0) {
+				log.debug("Empty file sent for upload: {}", multipartFile.getName());
+				// We still upload it
+			}
 		}
 		File targetFile = uploadFileInternal(multipartFile);
 		return targetFile;
@@ -471,6 +488,24 @@ public class YadaFileManager {
 	 * @throws IOException
 	 */
 	public YadaAttachedFile attachReplace(YadaAttachedFile currentAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+		boolean needToDeleteOriginal =  config.isFileManagerDeletingUploads();
+		return attachReplace(needToDeleteOriginal, currentAttachedFile, managedFile, multipartFile, namePrefix, targetExtension, desktopWidth, mobileWidth);
+	}
+	
+	/**
+	 * Replace the file associated with the current attachment, only if a file was actually attached
+	 * @param move the managedFile is moved to the destination when true, otherwise the original is copied
+	 * and left unchanged.
+	 * @param currentAttachedFile an existing attachment, never null
+	 * @param managedFile the new file to set
+	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
+	 * @param targetExtension optional, to convert image file formats
+	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
+	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
+	 * @return YadaAttachedFile if the file has been replaced, null if managedFile is null
+	 * @throws IOException
+	 */	
+	public YadaAttachedFile attachReplace(boolean move, YadaAttachedFile currentAttachedFile, File managedFile, MultipartFile multipartFile, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
 		if (managedFile==null) {
 			return null;
 		}
@@ -483,7 +518,7 @@ public class YadaFileManager {
 		if (multipartFile!=null) {
 			clientFilename = multipartFile.getOriginalFilename();
 		}
-		return attach(currentAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
+		return attach(move, currentAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
 	}
 
 	/**

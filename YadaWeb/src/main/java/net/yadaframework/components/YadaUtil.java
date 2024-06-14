@@ -2580,9 +2580,9 @@ public class YadaUtil {
 								if (isType(value.getClass(), CloneableDeep.class)) {
 									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
 									// For YadaAttachedFile objects, duplicate the file on disk too
-									if (isType(value.getClass(), YadaAttachedFile.class)) {
-										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
-									}
+									// if (isType(value.getClass(), YadaAttachedFile.class)) {
+									// 	clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
+									// }
 									int previousSize = targetCollection.size();
 									targetCollection.add(clonedValue);
 									if (previousSize==targetCollection.size()) {
@@ -2614,9 +2614,9 @@ public class YadaUtil {
 									if (isType(value.getClass(), CloneableDeep.class)) {
 										Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
 										// For YadaAttachedFile objects, duplicate the file on disk too
-										if (isType(value.getClass(), YadaAttachedFile.class)) {
-											clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
-										}
+										// if (isType(value.getClass(), YadaAttachedFile.class)) {
+										// 	clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
+										// }
 										targetMap.put(key, clonedValue);
 									} else {
 										targetMap.put(key, value); // shallow
@@ -2636,9 +2636,9 @@ public class YadaUtil {
 								CloneableFiltered fieldValue = (CloneableFiltered) fieldSourceValueObject;
 								Object clonedValue = YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep but detached
 								// For YadaAttachedFile objects, duplicate the file on disk too
-								if (isType(fieldType, YadaAttachedFile.class)) {
-									clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
-								}
+								// if (isType(fieldType, YadaAttachedFile.class)) {
+								// 	clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
+								// }
 								copyValueShallow(setFieldDirectly, field, getter, setter, source, target, clonedValue);
 							} else if (isType(fieldType, StringBuilder.class)) {
 								// String builder/buffer is cloned otherwise changes to the original object would be reflected in the new one

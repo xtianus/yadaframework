@@ -104,6 +104,7 @@ public class YadaAttachedFileDao {
 	}
 
 	// Kept for compatibility with Spring Data Repository
+	@Deprecated // it is a Spring Data api
 	public Optional<YadaAttachedFile> findById(Long yadaAttachedFileId) {
 		YadaAttachedFile result = em.find(YadaAttachedFile.class, yadaAttachedFileId);
 		return  Optional.ofNullable(result);

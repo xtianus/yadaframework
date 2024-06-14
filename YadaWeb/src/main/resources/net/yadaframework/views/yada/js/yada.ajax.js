@@ -11,6 +11,7 @@
 	
 	const markerAjaxButtonOnly = 'yadaAjaxButtonOnly';
 	const markerAjaxModal = 'yadaAjaxModal';
+	const markerDropTarget = 'yadaDropTarget';
 	var clickedButton;
 		
 	var ajaxCounter = 0; // Counter for the ajax call parallelism
@@ -36,7 +37,8 @@
 		yada.enableAjaxForms(null, $element);
 		yada.enableAjaxLinks(null, $element);
 		yada.enableAjaxSelects(null, $element);
-		yada.enableAjaxCheckboxes(null, $element);
+		yada.enableAjaxCheckboxes(null, $element); // Maybe obsoleted by yada.enableAjaxInputs
+		yada.enableDropUpload(null, $element);
 		initObservers($element)
 		yada.enableAjaxInputs();
 	}
@@ -422,7 +424,7 @@
 	 * @param $link the jquery anchor or button (could be an array), e.g. $('.niceLink')
 	 * @param handler funzione chiamata in caso di successo e nessun yadaWebUtil.modalError()
 	 */
-	// Legacy version - see yada.enableAjaxLinks
+	// See yada.enableAjaxLinks
 	yada.enableAjaxLink = function($link, handler) {
 		// If array, recurse to unroll
 		if ($link.length>1) {
@@ -443,6 +445,84 @@
 		$link.removeClass('s_ajaxLink'); // Legacy
 		$link.not('.'+markerClass).addClass(markerClass);
 	};
+	
+	
+	function handleDragenterDragover(event) {
+        this.classList.add('yadaDragOver');
+        event.preventDefault();
+        event.stopPropagation();
+	}
+	
+	function handleDragleaveDragend(event) {
+        this.classList.remove('yadaDragOver');
+        event.preventDefault();
+        event.stopPropagation();
+	}
+
+	function handleDrop($dropTarget, handler, event) {
+        let files = event.originalEvent.dataTransfer.files;
+        if (files) {
+	        handleDroppedFiles(event, files, $dropTarget, handler);
+		}
+	}
+	
+	// Needed to remove the hanlder later
+	var handleDropProxy = null;
+	
+	/**
+	 * Enables file upload by drag&drop.
+	 */	
+	yada.enableDropUpload = function(handler, $element) {
+		if ($element==null || $element=="") {
+			$element = $('body');
+		}
+		// If array, recurse to unroll
+		if ($element.length>1) {
+			$element.each(function() {
+				yada.enableDropUpload(handler, $(this));
+			});
+			return;
+		}
+		$(`[data-yadaDropUpload]:not(.${markerDropTarget})`, $element).each(function() {
+			const $dropTarget = $(this);
+			$dropTarget.addClass(markerDropTarget);
+			const url = $dropTarget.data('yadadropupload');
+			if (url!=null) {
+				handleDropProxy = jQuery.proxy(handleDrop, null, $dropTarget, handler);
+			    $dropTarget.on('dragenter dragover', handleDragenterDragover);
+			    $dropTarget.on('dragleave dragend drop', handleDragleaveDragend); // Is "drop" needed here?
+			    $dropTarget.on('drop', handleDropProxy);
+			}
+		});
+	}
+	
+	function handleDroppedFiles(event, files, $dropTarget, handler) {
+    	const singleFileOnly = $dropTarget.attr("data-yadaSingleFileOnly"); // Title,message
+    	if (singleFileOnly!=null && files.length>1) {
+			if (singleFileOnly=="") {
+				singleFileOnly = "File Upload Error,Too many files";
+			}
+			const parts = singleFileOnly.split(',', 2);
+    		yada.showErrorModal(parts[0], parts[1]);
+    		return;
+    	}
+        return makeAjaxCall(event, $dropTarget, handler);
+	}
+
+	/**
+	 * Remove upload handlers and markers
+	 */
+	function disableDropUpload($element) {
+		$(`[data-yadaDropUpload].${markerDropTarget}`, $element).each(function() {
+			const $dropTarget = $(this);
+			$dropTarget.removeClass(markerDropTarget);
+		    $dropTarget.off('dragenter dragover', null, handleDragenterDragover);
+		    $dropTarget.off('dragleave dragend drop', null, handleDragleaveDragend); // Is "drop" needed here?
+		    if (handleDropProxy!=null) {
+			    $dropTarget.off('drop', null, handleDropProxy);
+			}
+		});
+	}
 	
 	/**
 	 * Returns true if the current input key is listed in the data-yadaAjaxTriggerKeys attibute.
@@ -583,16 +663,32 @@
 			}
 			if (handlerNames!=null) {
 				// Can be a comma-separated list of handlers, which are called in sequence
-				var handlerNameArray = yada.listToArray(handlerNames);
-				for (var i = 0; i < handlerNameArray.length; i++) {
-					yada.executeFunctionByName(handlerNameArray[i], $element, responseText, responseHtml, $element[0]);
-				}
+				yada.executeFunctionListByName(handlerNames, $element, responseText, responseHtml, $element[0]);
 			}
 			if (handler != null) {
 				handler(responseText, responseHtml, $element[0]);
 			}
 		}
-		var url = $element.attr('data-yadaHref');
+		
+		var data = [];
+		var multipart = false;
+		var method = null; // Defaults to GET
+		var url = null;
+		const droppedFiles = e?.originalEvent?.dataTransfer?.files;
+		if (droppedFiles) {
+			// File drop events use a specific URL that has priority
+			url = $element.attr('data-yadaDropUpload');
+			// Compile the data object
+	        multipart = true;
+	        data = new FormData();
+	        for (let i = 0; i < droppedFiles.length; i++) {
+	            let file = droppedFiles[i];
+	            data.append('multipartFile', file);
+	        }
+		}
+		if (url==null || url=='') {
+			url = $element.attr('data-yadaHref');
+		}
 		if (url==null || url=='') {
 			url = $element.attr('href');
 		}
@@ -608,9 +704,7 @@
 		
 		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
 		// Create data for submission
-		var data = [];
 		var value = [];
-		var multipart = false;
 		var noLoader = hasNoLoader($element);	
 		// In a select, set the data object to the selected option
 		if ($element.is("select")) {
@@ -648,6 +742,8 @@
 		}
 		if (!multipart) {
 			data = $.param(data);
+		} else {
+			method="POST";
 		}	
 		//
 		if (confirmText!=null && confirmText!="") {
@@ -657,11 +753,11 @@
 			var okShowsPreviousModal = $element.attr("data-yadaOkShowsPrevious")==null || $element.attr("data-yadaOkShowsPrevious")=="true";
 			yada.confirm(title, confirmText, function(result) {
 				if (result==true) {
-					yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, getTimeoutValue($element), noLoader);
+					yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), method, getTimeoutValue($element), noLoader);
 				}
 			}, okButton, cancelButton, okShowsPreviousModal);
 		} else {
-			yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), null, null, noLoader);
+			yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), method, null, noLoader);
 		}
 		return true; // Run other listeners
 	}
@@ -780,7 +876,7 @@
 	function appendOnSuccess($element, responseHtml) {
 		// If "yadaAppendOnSuccess" is set, append to its target; if it's empty, append to the original element.
 		// The target can be a parent when the css selector starts with parentSelector (currently "yadaParents:").
-		// The selector can be multiple, separated by comma. The appended HTML can be multiple, identified by yadaFragment
+		// The selector can be multiple, separated by comma. The appended HTML can be multiplmarkerDropTargetby yadaFragment
 		return postprocessOnSuccess($element, responseHtml, "data-yadaAppendOnSuccess", $.fn.append);
 	}
 	*/
@@ -796,6 +892,10 @@
 		// Clone so that the original responseHtml is not removed by appending.
 		// All handlers are also cloned.
 		var $replacement = responseHtml.children().clone(true, true); // Uso .children() per skippare il primo div inserito da yada.ajax()
+		// drop events are not cloned properly in jquery 3.7.1 so I reset and reapply the handlers
+		disableDropUpload($replacement);
+		yada.enableDropUpload(null, $replacement);
+		//
 		initObservers($replacement);
 		var $return = $replacement;
 		var selectors = selector.split(',');
@@ -875,14 +975,24 @@
 	 * @returns
 	 */
 	function showFeedbackIfNeeded($element) {
-		// TODO specify timeouts in the tag
-		// TODO specify icon in the tag
 		var showFeedback = $element.attr("data-yadaShowAjaxFeedback");
 		if (showFeedback!=undefined) {
-			$("#yadaAjaxFeedback").fadeIn(800, function() {
-				$("#yadaAjaxFeedback").fadeOut(400);
-			});
+			yada.showAjaxFeedback();
 		}
+	}
+	
+	/**
+	 * Show a checkmark fading in and out, to be called in an ajax success handler when yada:showAjaxFeedback can't be used
+	 */
+	yada.showAjaxFeedback = function() {
+		// Check if the HTML is in page already, else insert it
+		const $feedbackElement = $("#yadaAjaxFeedback");
+		if ($feedbackElement.length==0) {
+			$("body").append("<div id='yadaAjaxFeedback' class='yadaAjaxFeedbackOk'><span class='yadaIcon yadaIcon-ok'></span></div>");
+		}
+		$("#yadaAjaxFeedback").fadeIn(200, function() {
+			$("#yadaAjaxFeedback").fadeOut(800);
+		});
 	}
 
 	/**
@@ -945,12 +1055,9 @@
 	function execSubmitHandlers($element) {
 		// Invoke any submit handlers either on form, submit button or any ajax-enabled element
 		var submitHandlerNames = $element.attr("data-yadaSubmitHandler");
-		var submitHandlerNameArray = yada.listToArray(submitHandlerNames);
-		for (var z = 0; z < submitHandlerNameArray.length; z++) {
-			const result = yada.executeFunctionByName(submitHandlerNameArray[z], $element);
-			if (result==false) {
-				return false; // Do not send the form
-			}
+		const result = yada.executeFunctionListByName(submitHandlerNames, $element);
+		if (result!=true) {
+			return false; // Do not send the form
 		}
 		return true;
 	}
@@ -1211,17 +1318,11 @@
 				var runFormHandler = true;
 				if (buttonHandlerNames != null) {
 					// Can be a comma-separated list of handlers, which are called in sequence
-					var handlerNameArray = yada.listToArray(buttonHandlerNames);
-					for (var i = 0; i < handlerNameArray.length; i++) {
-						runFormHandler &= yada.executeFunctionByName(handlerNameArray[i], $form, responseText, responseHtml, this, localClickedButton);
-					}
+					runFormHandler &= yada.yada.executeFunctionListByName(buttonHandlerNames, $form, responseText, responseHtml, this, localClickedButton);
 				}
 				if (runFormHandler == true && formHandlerNames!=null) {
 					// Can be a comma-separated list of handlers, which are called in sequence
-					var handlerNameArray = yada.listToArray(formHandlerNames);
-					for (var i = 0; i < handlerNameArray.length; i++) {
-						yada.executeFunctionByName(handlerNameArray[i], $form, responseText, responseHtml, this, localClickedButton);
-					}
+					yada.executeFunctionListByName(formHandlerNames, $form, responseText, responseHtml, this, localClickedButton);
 				}
 				if (handler != null) {
 					handler(responseText, responseHtml, this, localClickedButton);
@@ -1614,7 +1715,8 @@
 				yada.loaderOff();
 			}
 		}
-		yada.initAjaxHandlersOn($modalObject);
+		// This should not be needed because handlers have already been initialized on all the returned html
+		// yada.initAjaxHandlersOn($modalObject);
 		// Scroll the modal to an optional anchor (delay was needed for it to work)
 		// or scroll back to top when it opens already scrolled (sometimes it happens)
 		setTimeout(function() {
