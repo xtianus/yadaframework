@@ -268,7 +268,7 @@ public class YadaRegistrationController {
 			model.addAttribute("fatalError", "fatalError");
 			yadaNotify.titleKey(model, locale, "yada.pwdreset.failed.title").error().messageKey("yada.pwdreset.failed.message").add();
 		}
-		return YadaViews.AJAX_NOTIFY;
+		return yadaNotify.getViewName();
 	}
 
 	/**

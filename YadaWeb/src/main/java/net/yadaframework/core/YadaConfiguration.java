@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.builder.combined.CombinedConfigurationBuilder;
@@ -317,7 +316,7 @@ public abstract class YadaConfiguration {
 	 */
 	public String getNotifyModalView() {
 		if (defaultNotifyModalView==null) {
-			defaultNotifyModalView = configuration.getString("config/paths/notificationModalView", getForB3B4B5(YadaViews.AJAX_NOTIFY_B3, YadaViews.AJAX_NOTIFY_B4, YadaViews.AJAX_NOTIFY));
+			defaultNotifyModalView = configuration.getString("config/paths/notificationModalView", getForB3B4B5(YadaViews.AJAX_NOTIFY_B3, YadaViews.AJAX_NOTIFY_B4, YadaViews.AJAX_NOTIFY_B5));
 		}
 		return defaultNotifyModalView;
 	}
@@ -1124,15 +1123,13 @@ public abstract class YadaConfiguration {
 
 	/**
 	 * Base folder for uploaded content
-	 * @return
 	 */
 	public File getContentsFolder() {
 		return new File(getContentPath());
 	}
 
 	/**
-	 * Path del filesystem in cui vengono memorizzati i "contenuti" caricati dall'utente, per esempio /srv/ldm/contents
-	 * @return
+	 * Base folder for uploaded content
 	 */
 	public String getContentPath() {
 		return getBasePathString() + "/" + getContentName();
@@ -1276,8 +1273,8 @@ public abstract class YadaConfiguration {
 	 * @return an array with email and personal name
 	 */
 	public String[] getEmailFrom() {
-		String address = configuration.getString("config/email/from/address");
-		String personal = configuration.getString("config/email/from/name");
+		String address = configuration.getString("config/email/from/address", null);
+		String personal = configuration.getString("config/email/from/name", null);
 		if (address!=null) {
 			return new String[] {address, personal};
 		} else {

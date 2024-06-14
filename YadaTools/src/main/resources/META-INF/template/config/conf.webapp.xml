@@ -134,6 +134,7 @@
 		</users>
 	</setup>
 	
+	<% if (env=="prod") { /* TODO remove the "prod" string and use envs[prodIndex] */ %>
 	<security>
 		<!-- sessionTimeoutMinutes is used via javascript to check if the browser session is expired and show a warning modal -->
 		<!-- WARNING: this value must be the same as the value of session-timeout in /src/main/webapp/WEB-INF/web.xml or the session might never expire -->
@@ -165,4 +166,5 @@
 			</role>
 		</roles>
 	</security>
+	<%}%>
 </config>

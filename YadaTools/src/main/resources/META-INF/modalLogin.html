@@ -13,7 +13,7 @@ using <div th:replace="~{/modalLogin :: #loginForm}">Login form here</div>
 
 	<th:block th:fragment="modalBody">
 		<div class="modal-body">
-			<form th:action="@{/loginPost}" role="form" method="post" id="loginForm">
+			<form th:action="@{/loginPost}" role="form" method="post" id="loginForm" th:classappend="${yadaIsAjaxResponse}?yadaAjax">
 				<div class="mb-3">
 					<div th:if="${lockoutMinutes}" class="alert alert-danger" role="alert">Too many failed attempts: login disabled.<br/>
 						Wait <span th:text="${lockoutMinutes}">5</span> minute<span th:text="${lockoutMinutes>1?'s':''}">s</span> and retry, 
