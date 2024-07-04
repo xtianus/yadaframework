@@ -1318,7 +1318,7 @@
 				var runFormHandler = true;
 				if (buttonHandlerNames != null) {
 					// Can be a comma-separated list of handlers, which are called in sequence
-					runFormHandler &= yada.yada.executeFunctionListByName(buttonHandlerNames, $form, responseText, responseHtml, this, localClickedButton);
+					runFormHandler &= yada.executeFunctionListByName(buttonHandlerNames, $form, responseText, responseHtml, this, localClickedButton);
 				}
 				if (runFormHandler == true && formHandlerNames!=null) {
 					// Can be a comma-separated list of handlers, which are called in sequence
