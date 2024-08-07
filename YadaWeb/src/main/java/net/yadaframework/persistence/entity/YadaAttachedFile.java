@@ -272,7 +272,7 @@ public class YadaAttachedFile implements CloneableDeep {
 		String origExtension = filenameParts[1]; // e.g. jpg or pdf
 		String anticache = String.format("%x", System.currentTimeMillis()); // To prevent cache issues when changing image file
 		String targetFilenamePrefix = StringUtils.trimToEmpty(namePrefix) + origFilename + COUNTER_SEPARATOR + this.id + COUNTER_SEPARATOR + anticache; // product_2631_38f74g
-		targetFilenamePrefix = YadaUtil.reduceToSafeFilename(targetFilenamePrefix, true);
+		targetFilenamePrefix = YadaUtil.INSTANCE.ensureSafeFilename(targetFilenamePrefix, true);
 		if (targetExtension==null) {
 			targetExtension = origExtension;
 		}

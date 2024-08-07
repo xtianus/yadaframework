@@ -27,6 +27,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DateFormat;
+import java.text.Normalizer;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
@@ -3305,7 +3306,10 @@ public class YadaUtil {
 	 * Converte anche a lowercase.
 	 * @param originalFilename
 	 * @return un filename safe, dove i caratteri speciali sono scomparsi
+	 * @deprecated Does not produce the same results of all OS
+	 * @see #ensureSafeFilename(String)
 	 */
+	@Deprecated // Does not produce the same results of all OS
 	public static String reduceToSafeFilename(String originalFilename) {
 		return reduceToSafeFilename(originalFilename, true);
 	}
@@ -3317,12 +3321,16 @@ public class YadaUtil {
 	 * @param originalFilename
 	 * @param toLowercase true for a lowercase name
 	 * @return un filename safe, dove i caratteri speciali sono scomparsi
+	 * @deprecated Does not produce the same results of all OS
+	 * @see #ensureSafeFilename(String, boolean)
 	 */
+	@Deprecated // Does not produce the same results of all OS
 	public static String reduceToSafeFilename(String originalFilename, boolean toLowercase) {
 		if (originalFilename==null) {
 			return "null";
 		}
 		// If the filename is a path, keep the last portion
+		// WARNING: this is wrong because different results are produced on different OS
 		int pos = originalFilename.indexOf(File.separatorChar);
 		if (pos>-1) {
 			try {
@@ -3367,4 +3375,35 @@ public class YadaUtil {
 	}
 
 
+	/**
+	 * Converts a candidate filename so that it is valid on all operating systems and browsers, if needed, and also to lowercase.
+	 * @param originalFilename the name to process
+	 * @return either the lowercase original string or something similar. It returns "noname" when the originalFilename is blank.
+	 */
+	public String ensureSafeFilename(String originalFilename) {
+		return ensureSafeFilename(originalFilename, true);
+	}
+	
+	/**
+	 * Converts a candidate filename so that it is valid on all operating systems and browsers, if needed.
+	 * @param originalFilename the name to process
+	 * @param toLowercase true to convert to lowercase
+	 * @return either the original string or something similar. It returns "noname" when the originalFilename is blank.
+	 */
+	public String ensureSafeFilename(String originalFilename, boolean toLowercase) {
+		if (StringUtils.isBlank(originalFilename)) {
+			return "noname";
+		}
+        // Normalize the filename to decompose characters using NFKD
+        String normalizedFilename = Normalizer.normalize(originalFilename, Normalizer.Form.NFKD);
+        // Remove diacritical marks (accents)
+        String withoutDiacritics = normalizedFilename.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        // Replace invalid characters with underscores
+        String safeFilename = withoutDiacritics.replaceAll("[^a-zA-Z0-9._-]", "_");
+        // Convert to lowercase if needed
+        if (toLowercase) {
+            safeFilename = safeFilename.toLowerCase();
+        }
+        return safeFilename;
+	}
 }
