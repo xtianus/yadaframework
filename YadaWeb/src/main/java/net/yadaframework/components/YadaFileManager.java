@@ -502,6 +502,7 @@ public class YadaFileManager {
 	 * @param currentAttachedFile an existing attachment, never null
 	 * @param managedFile the new file to set
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
+	 * @param namePrefix optional prefix to set before the original file name. Add a separator if you need one.
 	 * @param targetExtension optional, to convert image file formats
 	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
 	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
@@ -547,7 +548,7 @@ public class YadaFileManager {
 	 * @param managedFile an uploaded file, can be an image or not
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not set.
 	 * @param relativeFolderPath path of the target folder relative to the contents folder
-	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
+	 * @param namePrefix optional prefix to set before the original file name. Add a separator if you need one.
 	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
 	 * @throws IOException
 	 * @see {@link #attach(File, String, String, String, Integer, Integer)}
