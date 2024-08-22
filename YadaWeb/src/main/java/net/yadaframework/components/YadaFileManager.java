@@ -17,6 +17,7 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,7 +39,8 @@ import net.yadaframework.raw.YadaIntDimension;
 public class YadaFileManager {
 	private final transient Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Autowired private YadaAttachedFileDao yadaAttachedFileDao;
+    // Use @Lazy to resolve circular reference error
+	@Autowired @Lazy private YadaAttachedFileDao yadaAttachedFileDao;
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private YadaWebUtil yadaWebUtil;
