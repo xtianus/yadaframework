@@ -43,7 +43,8 @@ public class YadaFileManager {
 	@Autowired @Lazy private YadaAttachedFileDao yadaAttachedFileDao;
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
-	@Autowired private YadaWebUtil yadaWebUtil;
+	// Use @Lazy to resolve circular reference error
+	@Autowired @Lazy private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaFileManagerDao yadaFileManagerDao;
 	
 	protected String COUNTER_SEPARATOR="_";
