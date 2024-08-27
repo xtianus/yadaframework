@@ -566,8 +566,23 @@ quoting them in single quotes.</p>
 It is searched in all the document unless a special yada prefix is used (see below).
 If the selector list is empty, the target is the element itself.</p>
 </div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
 <div class="paragraph">
-<p>If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.</p>
+<p>Do not use an #id as selector.</p>
+</div>
+<div class="paragraph">
+<p>If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.
+But if you replace something by #id with something that doesn&#8217;t have the #id anymore, replacement will work only for the first call.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>Each selector can also have the following special prefixes:</p>
@@ -1161,6 +1176,22 @@ This is achieved using the same <code>yada:ajax</code> syntax seen above, with t
 any element (even a span) is tagged with <code>yada:triggerInViewport</code>, it behaves like a clicked anchor when it enters the
 viewport (or if it is there already on page load).</p>
 </div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>When implementing a long list of triggers that get replaced with actual content
+when entering the viewport, ensure that the triggers actually have some height
+or they&#8217;ll be triggered all at once</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>The following example shows an async "like button". On page load the state of the button is unknown so it shows
 as "not liked". As soon as it gets into view, an ajax call retrieves the real state of the button by querying the DB.</p>
@@ -1597,7 +1628,7 @@ when they return from ajax. Example: <code>&lt;div th:classappend="${yadaIsAjaxR
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-06-06 13:42:45 +0200
+Last updated 2024-08-22 15:55:56 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
