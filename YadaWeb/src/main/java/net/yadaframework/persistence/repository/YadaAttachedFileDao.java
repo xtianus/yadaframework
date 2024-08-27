@@ -3,11 +3,13 @@ package net.yadaframework.persistence.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import net.yadaframework.components.YadaFileManager;
 import net.yadaframework.persistence.YadaSql;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 
@@ -18,8 +20,21 @@ import net.yadaframework.persistence.entity.YadaAttachedFile;
 @Transactional(readOnly = true)
 public class YadaAttachedFileDao {
 
+    @Autowired private YadaFileManager yadaFileManager;
+	
     @PersistenceContext
 	private EntityManager em;
+
+	/**
+	 * Delete from db and disk
+	 * @param attachedFileId
+	 */
+    @Transactional(readOnly = false)
+    public void purgeYadaAttachedFile(Long attachedFileId) {
+		YadaAttachedFile yadaAttachedFile = find(attachedFileId);
+		yadaFileManager.deleteFileAttachment(yadaAttachedFile);
+		delete(yadaAttachedFile);
+	}
 
     /**
      * Delete a YadaAttachedFile and connected data, but not the file on disk. If there is a relationship between an Entity and the YadaAttachedFile,
@@ -104,6 +119,7 @@ public class YadaAttachedFileDao {
 	}
 
 	// Kept for compatibility with Spring Data Repository
+	@Deprecated // it is a Spring Data api
 	public Optional<YadaAttachedFile> findById(Long yadaAttachedFileId) {
 		YadaAttachedFile result = em.find(YadaAttachedFile.class, yadaAttachedFileId);
 		return  Optional.ofNullable(result);

@@ -27,6 +27,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DateFormat;
+import java.text.Normalizer;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
@@ -84,6 +85,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.stereotype.Component;
@@ -96,7 +99,6 @@ import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.gif.GifHeaderDirectory;
 import com.drew.metadata.jpeg.JpegDirectory;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotNull;
 import net.yadaframework.core.CloneableDeep;
@@ -142,7 +144,8 @@ public class YadaUtil {
 	 */
 	public final static YadaUtil INSTANCE = new YadaUtil();
 
-	@PostConstruct
+	// @PostConstruct
+	@EventListener(ContextRefreshedEvent.class) // Called after the context has been initialized
     public void init() {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
@@ -1094,6 +1097,7 @@ public class YadaUtil {
 	 * with the specified leading characters (baseName) and optional extension.
 	 * The file will always have a number at the end that is higher than any other numbers on
 	 * similar files in the folder.
+	 * Can be used to find both files and folders.
 	 * @param targetFolder
 	 * @param baseName
 	 * @param extensionNoDot
@@ -1609,7 +1613,7 @@ public class YadaUtil {
 		if (applicationContext!=null) {
 			return applicationContext.getBean(nameInApplicationContext, args);
 		}
-		log.debug("No applicationContext injected in getBean() yet - returning null");
+		log.debug("No applicationContext injected in getBean() yet - returning null for '{}'", nameInApplicationContext);
 		return null;
 	}
 
@@ -1642,6 +1646,32 @@ public class YadaUtil {
 	 */
 	public Date daysAgo(int days) {
 		return new Date(System.currentTimeMillis() - days*MILLIS_IN_DAY);
+	}
+	
+	/**
+	 * Delete all files in a folder that have the specified prefix
+	 * @param folder
+	 * @param prefix
+	 * @return true if all files have been deleted, false if at least one file has not been deleted
+	 */
+	public boolean deleteAll(File folder, String prefix) {
+		File[] files = folder.listFiles((dir1, name) -> (prefix == null || name.startsWith(prefix)));
+		if (files == null) {
+			throw new YadaInvalidUsageException("Not a folder or I/O error while deleting files in {}", folder);
+        }
+		boolean deletedAll = true;
+		for (File file : files) {
+            try {
+				if (!file.delete()) {
+					log.debug("File {} not deleted", file);
+					deletedAll = false;
+				}
+			} catch (Exception e) {
+				log.debug("File {} not deleted: " + e.getMessage(), file);
+				deletedAll = false;
+			}
+        }
+		return deletedAll;
 	}
 
 	/**
@@ -2371,6 +2401,11 @@ public class YadaUtil {
 				copyFields(source, sourceClass, target, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet);
 				superclass = sourceClass.getSuperclass();
 			}
+			if (isType(sourceClass, YadaAttachedFile.class)) {
+				// Also copy files on disk for YadaAttachedFiles
+				target = yadaFileManager.duplicateFiles((YadaAttachedFile) target, yadaAttachedFileCloneSet);
+			}
+			
 			return target;
 		} catch (Exception e) {
 			String msg = "Can't duplicate object '" + source + "'";
@@ -2546,9 +2581,9 @@ public class YadaUtil {
 								if (isType(value.getClass(), CloneableDeep.class)) {
 									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
 									// For YadaAttachedFile objects, duplicate the file on disk too
-									if (isType(value.getClass(), YadaAttachedFile.class)) {
-										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
-									}
+									// if (isType(value.getClass(), YadaAttachedFile.class)) {
+									// 	clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
+									// }
 									int previousSize = targetCollection.size();
 									targetCollection.add(clonedValue);
 									if (previousSize==targetCollection.size()) {
@@ -2574,20 +2609,22 @@ public class YadaUtil {
 							}
 							// Faccio la copia shallow di tutti gli elementi che non implementano CloneableDeep;
 							// per questi faccio la copia deep.
-							for (Object key : sourceMap.keySet()) {
-								Object value = sourceMap.get(key);
-								if (isType(value.getClass(), CloneableDeep.class)) {
-									Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
-									// For YadaAttachedFile objects, duplicate the file on disk too
-									if (isType(value.getClass(), YadaAttachedFile.class)) {
-										clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
+							if (sourceMap!=null) {
+								for (Object key : sourceMap.keySet()) {
+									Object value = sourceMap.get(key);
+									if (isType(value.getClass(), CloneableDeep.class)) {
+										Object clonedValue = YadaUtil.copyEntity((CloneableFiltered) value, null, false, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep
+										// For YadaAttachedFile objects, duplicate the file on disk too
+										// if (isType(value.getClass(), YadaAttachedFile.class)) {
+										// 	clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
+										// }
+										targetMap.put(key, clonedValue);
+									} else {
+										targetMap.put(key, value); // shallow
 									}
-									targetMap.put(key, clonedValue);
-								} else {
-									targetMap.put(key, value); // shallow
 								}
 							}
-//								targetMap.putAll(sourceMap);
+//							targetMap.putAll(sourceMap);
 						} else {
 							// No collection nor map
 							Object fieldSourceValueObject = setFieldDirectly ? field.get(source) : getter.invoke(source);
@@ -2600,9 +2637,9 @@ public class YadaUtil {
 								CloneableFiltered fieldValue = (CloneableFiltered) fieldSourceValueObject;
 								Object clonedValue = YadaUtil.copyEntity(fieldValue, null, setFieldDirectly, alreadyCopiedMap, yadaAttachedFileCloneSet); // deep but detached
 								// For YadaAttachedFile objects, duplicate the file on disk too
-								if (isType(fieldType, YadaAttachedFile.class)) {
-									clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
-								}
+								// if (isType(fieldType, YadaAttachedFile.class)) {
+								// 	clonedValue = yadaFileManager.duplicateFiles((YadaAttachedFile) clonedValue, yadaAttachedFileCloneSet);
+								// }
 								copyValueShallow(setFieldDirectly, field, getter, setter, source, target, clonedValue);
 							} else if (isType(fieldType, StringBuilder.class)) {
 								// String builder/buffer is cloned otherwise changes to the original object would be reflected in the new one
@@ -3269,7 +3306,10 @@ public class YadaUtil {
 	 * Converte anche a lowercase.
 	 * @param originalFilename
 	 * @return un filename safe, dove i caratteri speciali sono scomparsi
+	 * @deprecated Does not produce the same results of all OS
+	 * @see #ensureSafeFilename(String)
 	 */
+	@Deprecated // Does not produce the same results of all OS
 	public static String reduceToSafeFilename(String originalFilename) {
 		return reduceToSafeFilename(originalFilename, true);
 	}
@@ -3281,12 +3321,16 @@ public class YadaUtil {
 	 * @param originalFilename
 	 * @param toLowercase true for a lowercase name
 	 * @return un filename safe, dove i caratteri speciali sono scomparsi
+	 * @deprecated Does not produce the same results of all OS
+	 * @see #ensureSafeFilename(String, boolean)
 	 */
+	@Deprecated // Does not produce the same results of all OS
 	public static String reduceToSafeFilename(String originalFilename, boolean toLowercase) {
 		if (originalFilename==null) {
 			return "null";
 		}
 		// If the filename is a path, keep the last portion
+		// WARNING: this is wrong because different results are produced on different OS
 		int pos = originalFilename.indexOf(File.separatorChar);
 		if (pos>-1) {
 			try {
@@ -3331,4 +3375,35 @@ public class YadaUtil {
 	}
 
 
+	/**
+	 * Converts a candidate filename so that it is valid on all operating systems and browsers, if needed, and also to lowercase.
+	 * @param originalFilename the name to process
+	 * @return either the lowercase original string or something similar. It returns "noname" when the originalFilename is blank.
+	 */
+	public String ensureSafeFilename(String originalFilename) {
+		return ensureSafeFilename(originalFilename, true);
+	}
+	
+	/**
+	 * Converts a candidate filename so that it is valid on all operating systems and browsers, if needed.
+	 * @param originalFilename the name to process
+	 * @param toLowercase true to convert to lowercase
+	 * @return either the original string or something similar. It returns "noname" when the originalFilename is blank.
+	 */
+	public String ensureSafeFilename(String originalFilename, boolean toLowercase) {
+		if (StringUtils.isBlank(originalFilename)) {
+			return "noname";
+		}
+        // Normalize the filename to decompose characters using NFKD
+        String normalizedFilename = Normalizer.normalize(originalFilename, Normalizer.Form.NFKD);
+        // Remove diacritical marks (accents)
+        String withoutDiacritics = normalizedFilename.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        // Replace invalid characters with underscores
+        String safeFilename = withoutDiacritics.replaceAll("[^a-zA-Z0-9._-]", "_");
+        // Convert to lowercase if needed
+        if (toLowercase) {
+            safeFilename = safeFilename.toLowerCase();
+        }
+        return safeFilename;
+	}
 }

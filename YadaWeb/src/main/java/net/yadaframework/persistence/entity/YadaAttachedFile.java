@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -48,7 +49,7 @@ import net.yadaframework.raw.YadaIntDimension;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public class YadaAttachedFile implements CloneableDeep {
+public class YadaAttachedFile implements CloneableDeep, Comparable<YadaAttachedFile> {
 	private final transient Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public enum YadaAttachedFileType {
@@ -181,7 +182,28 @@ public class YadaAttachedFile implements CloneableDeep {
 			sortOrder = id;
 		}
 	}
+	
+	/**
+	 * Set the same title for all configured locales
+	 * @param uniqueTitle a single title for all locales
+	 */
+	public void setAllTitles(String uniqueTitle) {
+		this.title = new HashMap<>();
+        config.getLocales().forEach(a -> {title.put(a, uniqueTitle);});
+	}
 
+	/**
+	 * Ensures that the current entity is sorted before the parameter
+	 * @param toComeAfter the entity that must come after in an ascending sort order
+	 */
+	public void orderBefore(YadaAttachedFile toComeAfter) {
+		if (this.sortOrder > toComeAfter.sortOrder) {
+			long currentSortOrder = this.sortOrder;
+			this.sortOrder = toComeAfter.sortOrder;
+			toComeAfter.sortOrder = currentSortOrder;
+		}
+	}
+	
 	/**
 	 * Computes the file to create, given the parameters, and sets it.
 	 * @param namePrefix string to attach at the start of the filename, can be null
@@ -250,7 +272,7 @@ public class YadaAttachedFile implements CloneableDeep {
 		String origExtension = filenameParts[1]; // e.g. jpg or pdf
 		String anticache = String.format("%x", System.currentTimeMillis()); // To prevent cache issues when changing image file
 		String targetFilenamePrefix = StringUtils.trimToEmpty(namePrefix) + origFilename + COUNTER_SEPARATOR + this.id + COUNTER_SEPARATOR + anticache; // product_2631_38f74g
-		targetFilenamePrefix = YadaUtil.reduceToSafeFilename(targetFilenamePrefix, true);
+		targetFilenamePrefix = YadaUtil.INSTANCE.ensureSafeFilename(targetFilenamePrefix, true);
 		if (targetExtension==null) {
 			targetExtension = origExtension;
 		}
@@ -667,5 +689,12 @@ public class YadaAttachedFile implements CloneableDeep {
 				&& Objects.equals(title, other.title) && Objects.equals(uploadTimestamp, other.uploadTimestamp);
 	}
 
+	/**
+	 * This is useful to sort instances in a TreeSet based on sortOrder
+	 */
+    @Override
+    public int compareTo(YadaAttachedFile other) {
+        return Long.compare(this.sortOrder, other.sortOrder);
+    }
 	
 }

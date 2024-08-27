@@ -123,7 +123,41 @@
 			setTimeout(function(){ $(".loader").hide(); }, 200-elapsedMillis);
 		}
 	};
+
 	
+	/**
+	 * Execute a comma-separated list of function names or an inline function (a function body).
+	 * Each function is called only if the previous one didn't return null.
+	 * See https://stackoverflow.com/a/359910/587641
+	 * @param functionList comma-separated list of function names, in the window scope, that can have namespaces like "mylib.myfunc".
+	 *			It can also be an inline function (with or without function(){} declaration).
+	 * @param thisObject the object that will become the this object in the called function
+	 * Any number of arguments can be passed to the function
+	 * @return the functions return value in "and" (with null being true), or null if there was no function/body in the list.
+	 */
+	 yada.executeFunctionListByName = function(functionList, thisObject /*, optional args are also taken */) {
+		var args = Array.prototype.slice.call(arguments, 2); // creates a new array containing all arguments starting from the third one
+		var result = true;
+		// Try the case where there's a list of function names
+		var functionArray = yada.listToArray(functionList); // Split at comma followed by any spaces
+		for (var i = 0; i < functionArray.length; i++) {
+			const functionResult = yada.executeFunctionByName(functionArray[i], thisObject, ...args);
+			if (functionResult==null) {
+				result = null;
+				break;
+			}
+			result &&= functionResult;
+		}
+		if (result==null && functionArray.length>1) {
+			// Could be a function body containing a comma, so try the whole string
+			 result = yada.executeFunctionByName(functionList, thisObject, ...args);
+		}
+		if (result==null) {
+			yada.log("Invalid function list: " + functionList);
+		}
+		return result;
+	}
+		
 	/**
 	 * Execute function by name. Also execute an inline function (a function body).
 	 * See https://stackoverflow.com/a/359910/587641
@@ -131,10 +165,11 @@
 	 *			It can also be an inline function (with or without function(){} declaration).
 	 * @param thisObject the object that will become the this object in the called function
 	 * Any number of arguments can be passed to the function
+	 * @return the function return value (with null converted to true), or null in case of error calling the function (e.g. function not found or invalid function body)
 	 */
 	 yada.executeFunctionByName = function(functionName, thisObject /*, args */) {
 		var context = window; // The functionName is always searched in the current window
-		var args = Array.prototype.slice.call(arguments, 2);
+		var args = Array.prototype.slice.call(arguments, 2); // creates a new array containing all arguments starting from the third one
 		var namespaces = functionName.split(".");
 		var func = namespaces.pop();
 		for(var i = 0; i < namespaces.length && context!=null; i++) {
@@ -146,18 +181,19 @@
 			try {
 				var functionBody = functionName.trim();
 				// Strip any "function(){xxx}" declaration
-				if (yada.startsWith(functionName, "function")) {
+				if (yada.startsWith(functionName, "function(")) {
 					functionBody = functionName.replace(new RegExp("(?:function\\s*\\(\\)\\s*{)?([^}]+)}?"), "$1");
 				}
-				const theFunction = new Function('responseText', 'responseHtml', 'link', functionBody);
-				return theFunction.apply(thisObject, args);
+				functionObject = new Function('responseText', 'responseHtml', 'link', functionBody); // Throws error when not a function body
 			} catch (error) {
-				console.error(error);
+				// console.error(error);
+				// yada.log("Function '" + func + "' not found (ignored)");
+				return null;
 			}
-			yada.log("Function '" + func + "' not found (ignored)");
-			return true; // so that other handlers can be called
 		}
-		return functionObject.apply(thisObject, args);
+		const returnValue = functionObject?.apply(thisObject, args);
+		// null is converted to true (e.g. "keep going")
+		return returnValue ?? true;
 	}
 	
 	/**
@@ -538,7 +574,7 @@
 	}
 	
 	/**
-	 * Transform links into confirm links: all anchors with a "data-yadaConfirm" attribute that don't have a class of "yadaAjax" 
+	 * Transform links/forms into confirm links/forms: all anchors/forms with a "data-yadaConfirm" attribute that don't have a class of "yadaAjax" 
 	 * will show a confirm box before submission. If yadaAjax is present, see "yada.ajax.js"
 	 */
 	yada.enableConfirmLinks = function($element) {
@@ -547,31 +583,45 @@
 		}
 		var markerClass = 's_dataConfirmed';
 		// For the ajax version see yada.ajax.js
-		$('a[data-yadaConfirm], a[data-confirm]', $element.parent()).not('.'+markerClass).not('.yadaAjax').not('.yadaAjaxed').each(function() {
-			$(this).click(function(e) {
-				var $link = $(this);
-				e.preventDefault();
-				var href = $link.attr("href");
-				var confirmText = $link.attr("data-yadaConfirm") || $link.attr("data-confirm");
-				if (confirmText!=null) {
-					var title = $link.attr("data-yadaTitle");
-					var okButton = $link.attr("data-yadaOkButton") || $link.attr("data-okButton") || yada.messages.confirmButtons.ok;
-					var cancelButton = $link.attr("data-yadaCancelButton") || $link.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
-					var okShowsPreviousModal = $link.attr("data-yadaOkShowsPrevious")==null || $link.attr("data-yadaOkShowsPrevious")=="true";
-					yada.confirm(title, confirmText, function(result) {
-						if (result==true) {
-							yada.loaderOn();
-							window.location.replace(href);
-						}
-					}, okButton, cancelButton, okShowsPreviousModal);
-				} else {
-					yada.loaderOn();
-					window.location.replace(href);
-				}
-			});
+		$('a[data-yadaConfirm], a[data-confirm], form[data-yadaConfirm]', $element.parent()).not('.'+markerClass).not('.yadaAjax').not('.yadaAjaxed').each(function() {
+			if ($(this).is('a')) {
+				$(this).click(handleConfirmation);
+			} else if ($(this).is('form')) {
+				$(this).submit(handleConfirmation);
+			}
 			$(this).addClass(markerClass);
 		});
 	};
+	
+	function handleConfirmation(e) {
+		var $element = $(e.target);
+		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
+		if (confirmText!=null) {
+			e.preventDefault();
+			var title = $element.attr("data-yadaTitle");
+			var okButton = $element.attr("data-yadaOkButton") || $element.attr("data-okButton") || yada.messages.confirmButtons.ok;
+			var cancelButton = $element.attr("data-yadaCancelButton") || $element.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
+			var okShowsPreviousModal = $element.attr("data-yadaOkShowsPrevious")==null || $element.attr("data-yadaOkShowsPrevious")=="true";
+			yada.confirm(title, confirmText, function(result) {
+				if (result==true) {
+					// yada.loaderOn();
+					if ($element.is('a')) {
+						var href = $element.attr("href");
+						if (href) {
+							window.location.href = href;
+						}
+					} else {
+						$element.off('submit', handleConfirmation);
+						$element.submit();
+					}
+				}
+			}, okButton, cancelButton, okShowsPreviousModal);
+		// } else {
+		// 	yada.loaderOn();
+		// 	window.location.replace(href);
+		}
+
+	}
 	
 
 	////////////////////

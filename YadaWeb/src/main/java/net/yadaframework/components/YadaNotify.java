@@ -596,12 +596,12 @@ public class YadaNotify {
 	}
 
 	/**
-	 * Return the view name for the notification modal. To be used only when adding many messages and the last
-	 * message is not at the method end.
+	 * Return the view name for the notification modal. Can be used when adding many messages and the last
+	 * message is not at the method end. Also used in html to get the correct modal.
 	 * @return
 	 */
 	public String getViewName() {
-		return YadaViews.AJAX_NOTIFY;
+		return yadaConfiguration.getForB3B4B5(YadaViews.AJAX_NOTIFY_B3, YadaViews.AJAX_NOTIFY_B4, YadaViews.AJAX_NOTIFY_B5);
 	}
 
 }
