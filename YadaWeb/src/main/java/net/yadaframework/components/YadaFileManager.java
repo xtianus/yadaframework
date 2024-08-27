@@ -114,10 +114,11 @@ public class YadaFileManager {
 //	}
 
 	/**
+	 * You don't usually need to call this method but {@link YadaUtil#copyEntity(net.yadaframework.core.CloneableFiltered)} instead.<br>
 	 * Makes a copy of just the filesystem files. New names are generated from the old ones by appending an incremental number.
 	 * The input YadaAttachedFile is updated with the new names. The old files are not deleted.
 	 * This method is used by YadaUtil.copyEntity() when a field is a YadaAttachedFile so that files are copied too.
-	 * @param yadaAttachedFile a copy of some other YadaAttachedFile that will be left unchanged
+	 * @param yadaAttachedFileCopy a copy of some other YadaAttachedFile that will be left unchanged
 	 * @param yadaAttachedFileCloneSet when not null, all files are copied to a temp folder. 
 	 * 	      This is useful when the final path depends on the id
 	 * 		  of a cloned object so it can't be determined during cloning.
@@ -126,60 +127,60 @@ public class YadaFileManager {
 	 * @throws IOException
 	 * @see {@link YadaUtil#copyEntity(net.yadaframework.core.CloneableFiltered)}
 	 */
-	public YadaAttachedFile duplicateFiles(YadaAttachedFile yadaAttachedFile, YadaAttachedFileCloneSet yadaAttachedFileCloneSet) throws IOException {
-		if (yadaAttachedFile==null) {
+	public YadaAttachedFile duplicateFiles(YadaAttachedFile yadaAttachedFileCopy, YadaAttachedFileCloneSet yadaAttachedFileCloneSet) throws IOException {
+		if (yadaAttachedFileCopy==null) {
 			return null;
 		}
-		File sourceFileMobile = getAbsoluteMobileFile(yadaAttachedFile);
-		File sourceFileDesktop = getAbsoluteDesktopFile(yadaAttachedFile);
-		File sourceFilePdf = getAbsolutePdfFile(yadaAttachedFile);
-		File sourceFile = getAbsoluteFile(yadaAttachedFile);
+		File sourceFileMobile = getAbsoluteMobileFile(yadaAttachedFileCopy);
+		File sourceFileDesktop = getAbsoluteDesktopFile(yadaAttachedFileCopy);
+		File sourceFilePdf = getAbsolutePdfFile(yadaAttachedFileCopy);
+		File sourceFile = getAbsoluteFile(yadaAttachedFileCopy);
 		// Sometimes sourceFileDesktop and sourceFile have the same value: don't copy the file twice!
 		boolean deskSameAsDefault = sourceFileDesktop!=null && sourceFile!=null && 
 			sourceFileDesktop.getAbsolutePath().equals(sourceFile.getAbsolutePath());
 		
 		if (yadaAttachedFileCloneSet!=null) {
-			yadaAttachedFileCloneSet.handle(yadaAttachedFile); // Moved to temp folder
+			yadaAttachedFileCloneSet.handle(yadaAttachedFileCopy); // Moved to temp folder
 		}
 		
 		if (sourceFileMobile!=null) {
-			File targetFileMobile = getAbsoluteMobileFile(yadaAttachedFile);
+			File targetFileMobile = getAbsoluteMobileFile(yadaAttachedFileCopy);
 			targetFileMobile = YadaUtil.findAvailableName(targetFileMobile, null);
 			try (InputStream inputStream = new FileInputStream(sourceFileMobile); OutputStream outputStream = new FileOutputStream(targetFileMobile)) {
 				IOUtils.copy(inputStream, outputStream);
 			}
-			yadaAttachedFile.setFilenameMobile(targetFileMobile.getName());
+			yadaAttachedFileCopy.setFilenameMobile(targetFileMobile.getName());
 		}
 		File targetFileDesktop = null;
 		if (sourceFileDesktop!=null) {
-			targetFileDesktop = getAbsoluteDesktopFile(yadaAttachedFile);
+			targetFileDesktop = getAbsoluteDesktopFile(yadaAttachedFileCopy);
 			targetFileDesktop = YadaUtil.findAvailableName(targetFileDesktop, null);
 			try (InputStream inputStream = new FileInputStream(sourceFileDesktop); OutputStream outputStream = new FileOutputStream(targetFileDesktop)) {
 				IOUtils.copy(inputStream, outputStream);
 			}
-			yadaAttachedFile.setFilenameDesktop(targetFileDesktop.getName());
+			yadaAttachedFileCopy.setFilenameDesktop(targetFileDesktop.getName());
 		}
 		if (sourceFilePdf!=null) {
-			File targetFilePdf = getAbsolutePdfFile(yadaAttachedFile);
+			File targetFilePdf = getAbsolutePdfFile(yadaAttachedFileCopy);
 			targetFilePdf = YadaUtil.findAvailableName(targetFilePdf, null);
 			try (InputStream inputStream = new FileInputStream(sourceFilePdf); OutputStream outputStream = new FileOutputStream(targetFilePdf)) {
 				IOUtils.copy(inputStream, outputStream);
 			}
-			yadaAttachedFile.setFilenamePdf(targetFilePdf.getName());
+			yadaAttachedFileCopy.setFilenamePdf(targetFilePdf.getName());
 		}
 		if (sourceFile!=null && !deskSameAsDefault) {
-			File targetFile = getAbsoluteFile(yadaAttachedFile);
+			File targetFile = getAbsoluteFile(yadaAttachedFileCopy);
 			targetFile = YadaUtil.findAvailableName(targetFile, null);
 			try (InputStream inputStream = new FileInputStream(sourceFile); OutputStream outputStream = new FileOutputStream(targetFile)) {
 				IOUtils.copy(inputStream, outputStream);
 			}
-			yadaAttachedFile.setFilename(targetFile.getName());
+			yadaAttachedFileCopy.setFilename(targetFile.getName());
 		}
 		if (deskSameAsDefault && targetFileDesktop!=null) {
 			// Default file is the same as desktop file
-			yadaAttachedFile.setFilename(targetFileDesktop.getName());
+			yadaAttachedFileCopy.setFilename(targetFileDesktop.getName());
 		}
-		return yadaAttachedFileDao.save(yadaAttachedFile);
+		return yadaAttachedFileDao.save(yadaAttachedFileCopy);
 	}
 
 	/**
@@ -593,6 +594,26 @@ public class YadaFileManager {
 	 * @see {@link #attach(File, String, String, String)}
 	 */
 	public YadaAttachedFile attachNew(File managedFile, String clientFilename, String relativeFolderPath, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+		boolean needToDeleteOriginal =  config.isFileManagerDeletingUploads();
+		return attachNew(needToDeleteOriginal, managedFile, clientFilename, relativeFolderPath, namePrefix, targetExtension, desktopWidth, mobileWidth);
+	}
+		
+	/**
+	 * Copies (and resizes) a managed file to the destination folder, creating a database association to assign to an Entity.
+	 * The name of the file is in the format [basename]managedFileName_id.ext
+	 * @param move true if the original file has to be deleted (moved when not transformed), false to keep it there 
+	 * @param managedFile an uploaded file, can be an image or not. When null, nothing is done.
+	 * @param clientFilename the original client filename. If null, the client filename is not changed.
+	 * @param relativeFolderPath path of the target folder relative to the contents folder, starting with a slash /
+	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
+	 * @param targetExtension optional, to convert image file formats
+	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
+	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
+	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
+	 * @throws IOException
+	 * @see {@link #attach(File, String, String, String)}
+	 */
+	public YadaAttachedFile attachNew(boolean move, File managedFile, String clientFilename, String relativeFolderPath, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
 		if (managedFile==null) {
 			return null;
 		}
@@ -607,9 +628,9 @@ public class YadaFileManager {
 		yadaAttachedFile = yadaAttachedFileDao.save(yadaAttachedFile); // Get the id
 		File targetFolder = new File(config.getContentPath(), relativeFolderPath);
 		targetFolder.mkdirs();
-		return attach(yadaAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
+		return attach(move, yadaAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
 	}
-
+	
 	/**
 	 * Performs file copy and (for images) resize to different versions.
 	 * The managedFile is moved to the destination when config.isFileManagerDeletingUploads() is true, otherwise the original is copied
@@ -625,6 +646,26 @@ public class YadaFileManager {
 	 * @throws IOException
 	 */
 	private YadaAttachedFile attach(YadaAttachedFile yadaAttachedFile, File managedFile, String clientFilename, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
+		boolean needToDeleteOriginal =  config.isFileManagerDeletingUploads();
+		return attach(needToDeleteOriginal, yadaAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
+	}	
+
+	/**
+	 * Performs file copy and (for images) resize to different versions.
+	 * The managedFile is moved to the destination when config.isFileManagerDeletingUploads() is true, otherwise the original is copied
+	 * and left unchanged.
+	 * @param move true if the original file has to be deleted (moved when not transformed), false to keep it there 
+	 * @param yadaAttachedFile object to fill with values
+	 * @param managedFile some file to attach or replace, can be an image or not. When null, nothing is done.
+	 * @param clientFilename the client filename. If null, the client filename is not changed.
+	 * @param namePrefix prefix to attach before the original file name to make the target name. Add a separator (like a dash) if you need one. Can be null.
+	 * @param targetExtension optional, to convert image file formats
+	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
+	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
+	 * @return
+	 * @throws IOException
+	 */
+	public YadaAttachedFile attach(boolean move, YadaAttachedFile yadaAttachedFile, File managedFile, String clientFilename, String namePrefix, String targetExtension, Integer desktopWidth, Integer mobileWidth) throws IOException {
 		//
 		yadaAttachedFile.setUploadTimestamp(new Date());
 		if (clientFilename!=null) {
@@ -636,15 +677,14 @@ public class YadaFileManager {
 		}
 		YadaIntDimension dimension = yadaUtil.getImageDimension(managedFile);
 		yadaAttachedFile.setImageDimension(dimension);
-		boolean imageExtensionChanged = origExtension==null || targetExtension.compareToIgnoreCase(origExtension)!=0;
+		boolean imageExtensionChanged = (origExtension==null && targetExtension!=null) || (targetExtension!=null && targetExtension.compareToIgnoreCase(origExtension)!=0);
 		boolean requiresTransofmation = imageExtensionChanged || desktopWidth!=null || mobileWidth!=null;
-		boolean needToDeleteOriginal =  config.isFileManagerDeletingUploads();
 		//
 		// If the file does not need resizing, there is just one default filename like "product-mydoc_2631.pdf"
 		if (!requiresTransofmation) {
 			File targetFile = yadaAttachedFile.calcAndSetTargetFile(namePrefix, targetExtension, null, YadaAttachedFile.YadaAttachedFileType.DEFAULT);
 			// File targetFile = new File(targetFolder, targetFilenamePrefix + "." + targetExtension);
-			if (needToDeleteOriginal) {
+			if (move) {
 				// Just move the old file to the new destination
 				Files.move(managedFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			} else {
@@ -668,7 +708,7 @@ public class YadaFileManager {
 				targetFile = yadaAttachedFile.calcAndSetTargetFile(namePrefix, targetExtension, mobileWidth, YadaAttachedFile.YadaAttachedFileType.MOBILE);
 				resizeAndConvertImageAsNeeded(managedFile, targetFile, mobileWidth);
 			}
-			if (needToDeleteOriginal) {
+			if (move) {
 				log.debug("Deleting original file {}", managedFile.getAbsolutePath());
 				managedFile.delete();
 			}

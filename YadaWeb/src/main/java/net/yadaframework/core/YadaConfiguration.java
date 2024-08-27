@@ -1124,15 +1124,13 @@ public abstract class YadaConfiguration {
 
 	/**
 	 * Base folder for uploaded content
-	 * @return
 	 */
 	public File getContentsFolder() {
 		return new File(getContentPath());
 	}
 
 	/**
-	 * Path del filesystem in cui vengono memorizzati i "contenuti" caricati dall'utente, per esempio /srv/ldm/contents
-	 * @return
+	 * Base folder for uploaded content
 	 */
 	public String getContentPath() {
 		return getBasePathString() + "/" + getContentName();

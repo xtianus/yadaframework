@@ -200,6 +200,14 @@
 		}
 		return false;
 	}
+	
+	/**
+	 * Returns true if a node has been removed from the DOM
+	 * @param $someNode a jquery HTML element
+	 */
+	function isRemoved($someNode) {
+		return $someNode.closest("html").length==0;
+	}
 
 	// Al ritorno di un post di login, mostra eventuali notify ed esegue l'eventuale handler, oppure ricarica la pagina corrente se l'handler non c'è.
 	// @Deprecated. Should use the generic modal instead of the login modal
@@ -1797,8 +1805,13 @@
 		var $modalConfirm=$(responseHtml).find(".s_modalConfirm .modal");
 		if ($modalConfirm.length>0) {
 			// Close all non-sticky modals
-			var $currentModals = $(".modal:not(."+yada.stickyModalMarker+"):visible");			
-			// var $currentModals = $(".modal:visible").filter(function(){return $(".yadaStickyModal", this).length==0});			
+			const $currentModals = $(".modal:not(."+yada.stickyModalMarker+"):visible");			
+			// If the modal has been loaded via yada.ajax, on hide it will be removed
+			// so we clone the content in order to keep the event handlers.
+			// Don't find just the ajaxModals or we would complicate the restore section later.
+			const clonedModalContentArray = $currentModals.map(function() {
+				return $(this).find('.modal-content').first().clone(true, true); 
+			}).get();  
 			$currentModals.modal('hide'); // Hide any modal that might be already open
 			if ($("#yada-confirm .modal").length==0) {
 				console.error("[yada] No confirm modal found: did you include it?");
@@ -1825,9 +1838,15 @@
 			});
 			$("#yada-confirm .cancelButton").click(function() {
 				$('#yada-confirm .modal').one('hidden.bs.modal', function (e) {
-					$currentModals.modal('show');
-					// TODO restore handlers because they are lost on hide
-					// Useless:: yada.initHandlersOn($currentModals);
+					// $currentModals.modal('show');
+					$currentModals.each(function(index) {
+    					if (isRemoved($(this))) {
+							// The modal was removed with all the nested handlers, so I replace the
+							// content with the cloned one to restore the handlers.
+							$('.modal-content', this).replaceWith(clonedModalContentArray[index]);
+    					}
+    					$(this).modal('show');
+					});
 					$('#yada-confirm .modal').off('hidden.bs.modal'); // Useless?
 				});
 				// $("#yada-confirm .modal").modal('hide');
