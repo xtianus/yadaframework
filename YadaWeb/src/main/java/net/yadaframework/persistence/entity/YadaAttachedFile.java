@@ -49,7 +49,7 @@ import net.yadaframework.raw.YadaIntDimension;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public class YadaAttachedFile implements CloneableDeep {
+public class YadaAttachedFile implements CloneableDeep, Comparable<YadaAttachedFile> {
 	private final transient Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public enum YadaAttachedFileType {
@@ -272,7 +272,7 @@ public class YadaAttachedFile implements CloneableDeep {
 		String origExtension = filenameParts[1]; // e.g. jpg or pdf
 		String anticache = String.format("%x", System.currentTimeMillis()); // To prevent cache issues when changing image file
 		String targetFilenamePrefix = StringUtils.trimToEmpty(namePrefix) + origFilename + COUNTER_SEPARATOR + this.id + COUNTER_SEPARATOR + anticache; // product_2631_38f74g
-		targetFilenamePrefix = YadaUtil.reduceToSafeFilename(targetFilenamePrefix, true);
+		targetFilenamePrefix = YadaUtil.INSTANCE.ensureSafeFilename(targetFilenamePrefix, true);
 		if (targetExtension==null) {
 			targetExtension = origExtension;
 		}
@@ -689,5 +689,12 @@ public class YadaAttachedFile implements CloneableDeep {
 				&& Objects.equals(title, other.title) && Objects.equals(uploadTimestamp, other.uploadTimestamp);
 	}
 
+	/**
+	 * This is useful to sort instances in a TreeSet based on sortOrder
+	 */
+    @Override
+    public int compareTo(YadaAttachedFile other) {
+        return Long.compare(this.sortOrder, other.sortOrder);
+    }
 	
 }

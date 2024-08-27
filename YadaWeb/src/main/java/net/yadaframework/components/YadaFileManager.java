@@ -17,6 +17,7 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,10 +39,12 @@ import net.yadaframework.raw.YadaIntDimension;
 public class YadaFileManager {
 	private final transient Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Autowired private YadaAttachedFileDao yadaAttachedFileDao;
+    // Use @Lazy to resolve circular reference error
+	@Autowired @Lazy private YadaAttachedFileDao yadaAttachedFileDao;
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
-	@Autowired private YadaWebUtil yadaWebUtil;
+	// Use @Lazy to resolve circular reference error
+	@Autowired @Lazy private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaFileManagerDao yadaFileManagerDao;
 	
 	protected String COUNTER_SEPARATOR="_";
@@ -499,6 +502,7 @@ public class YadaFileManager {
 	 * @param currentAttachedFile an existing attachment, never null
 	 * @param managedFile the new file to set
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not changed.
+	 * @param namePrefix optional prefix to set before the original file name. Add a separator if you need one.
 	 * @param targetExtension optional, to convert image file formats
 	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
 	 * @param mobileWidth optional width for mobile images - when null, the mobile file is the same as the desktop
@@ -544,7 +548,7 @@ public class YadaFileManager {
 	 * @param managedFile an uploaded file, can be an image or not
 	 * @param multipartFile the original uploaded file, to get the client filename. If null, the client filename is not set.
 	 * @param relativeFolderPath path of the target folder relative to the contents folder
-	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
+	 * @param namePrefix optional prefix to set before the original file name. Add a separator if you need one.
 	 * @return YadaAttachedFile if the file is uploaded, null if no file was sent by the user
 	 * @throws IOException
 	 * @see {@link #attach(File, String, String, String, Integer, Integer)}

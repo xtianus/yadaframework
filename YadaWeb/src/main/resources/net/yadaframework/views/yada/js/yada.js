@@ -574,7 +574,7 @@
 	}
 	
 	/**
-	 * Transform links into confirm links: all anchors with a "data-yadaConfirm" attribute that don't have a class of "yadaAjax" 
+	 * Transform links/forms into confirm links/forms: all anchors/forms with a "data-yadaConfirm" attribute that don't have a class of "yadaAjax" 
 	 * will show a confirm box before submission. If yadaAjax is present, see "yada.ajax.js"
 	 */
 	yada.enableConfirmLinks = function($element) {
@@ -583,31 +583,45 @@
 		}
 		var markerClass = 's_dataConfirmed';
 		// For the ajax version see yada.ajax.js
-		$('a[data-yadaConfirm], a[data-confirm]', $element.parent()).not('.'+markerClass).not('.yadaAjax').not('.yadaAjaxed').each(function() {
-			$(this).click(function(e) {
-				var $link = $(this);
-				e.preventDefault();
-				var href = $link.attr("href");
-				var confirmText = $link.attr("data-yadaConfirm") || $link.attr("data-confirm");
-				if (confirmText!=null) {
-					var title = $link.attr("data-yadaTitle");
-					var okButton = $link.attr("data-yadaOkButton") || $link.attr("data-okButton") || yada.messages.confirmButtons.ok;
-					var cancelButton = $link.attr("data-yadaCancelButton") || $link.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
-					var okShowsPreviousModal = $link.attr("data-yadaOkShowsPrevious")==null || $link.attr("data-yadaOkShowsPrevious")=="true";
-					yada.confirm(title, confirmText, function(result) {
-						if (result==true) {
-							yada.loaderOn();
-							window.location.replace(href);
-						}
-					}, okButton, cancelButton, okShowsPreviousModal);
-				} else {
-					yada.loaderOn();
-					window.location.replace(href);
-				}
-			});
+		$('a[data-yadaConfirm], a[data-confirm], form[data-yadaConfirm]', $element.parent()).not('.'+markerClass).not('.yadaAjax').not('.yadaAjaxed').each(function() {
+			if ($(this).is('a')) {
+				$(this).click(handleConfirmation);
+			} else if ($(this).is('form')) {
+				$(this).submit(handleConfirmation);
+			}
 			$(this).addClass(markerClass);
 		});
 	};
+	
+	function handleConfirmation(e) {
+		var $element = $(e.target);
+		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
+		if (confirmText!=null) {
+			e.preventDefault();
+			var title = $element.attr("data-yadaTitle");
+			var okButton = $element.attr("data-yadaOkButton") || $element.attr("data-okButton") || yada.messages.confirmButtons.ok;
+			var cancelButton = $element.attr("data-yadaCancelButton") || $element.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
+			var okShowsPreviousModal = $element.attr("data-yadaOkShowsPrevious")==null || $element.attr("data-yadaOkShowsPrevious")=="true";
+			yada.confirm(title, confirmText, function(result) {
+				if (result==true) {
+					// yada.loaderOn();
+					if ($element.is('a')) {
+						var href = $element.attr("href");
+						if (href) {
+							window.location.href = href;
+						}
+					} else {
+						$element.off('submit', handleConfirmation);
+						$element.submit();
+					}
+				}
+			}, okButton, cancelButton, okShowsPreviousModal);
+		// } else {
+		// 	yada.loaderOn();
+		// 	window.location.replace(href);
+		}
+
+	}
 	
 
 	////////////////////
