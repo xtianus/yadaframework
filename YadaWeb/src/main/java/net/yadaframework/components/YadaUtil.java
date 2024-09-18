@@ -2893,6 +2893,19 @@ public class YadaUtil {
 		calendar.set(Calendar.MILLISECOND, 0);
 		return calendar;
 	}
+	
+	/**
+	 * Rounds forward the calendar to the end of the day at 23:59:59.999
+	 * @param calendar the calendar to change: the parameter will be modified by this method
+	 * @return the input calendar modified.
+	 */
+	public static Calendar roundForwardToAlmostMidnight(Calendar calendar) {
+		calendar.set(Calendar.HOUR_OF_DAY, 23);
+		calendar.set(Calendar.MINUTE, 59);
+		calendar.set(Calendar.SECOND, 59);
+		calendar.set(Calendar.MILLISECOND, 999);
+		return calendar;
+	}
 
 	/**
 	 * Returns the last midnight
@@ -3179,14 +3192,6 @@ public class YadaUtil {
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static Calendar roundForwardToAlmostMidnight(Calendar calendar) {
-		calendar.set(Calendar.HOUR_OF_DAY, 23);
-		calendar.set(Calendar.MINUTE, 59);
-		calendar.set(Calendar.SECOND, 59);
-		calendar.set(Calendar.MILLISECOND, 999);
-		return calendar;
-	}
 
 	public static Calendar roundBackToLastMonthStart(Calendar calendar) {
 		calendar.add(Calendar.MONTH, -1);
