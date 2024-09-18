@@ -1,6 +1,6 @@
 =  Internationalization
 :docinfo: shared
-
+:imagesdir: ../img/
 
 
 ==  Introduction
@@ -14,36 +14,24 @@ where  _locale_ stands for "language and regional settings".
 These are the aspects of i18n that should be considered:
 
 * language user choice
-
 * search engine indexing
-
 * static text
-
 * database text fields
-
+* date and time
 * enum values
 
-
-
-
 ===  Language user choice
-
 
 Browsers send the user system language to the server at each request. Actually, some browsers allow users to
 override the system language. Still, that's a very inconvenient way to choose language.
 You should also give the user a way to choose a different language for your site using something like a dropdown menu.
 
-
 ===  Search engine indexing
-
 
 The chosen language should be reflected in the url for a number of reasons:
 
 * better search engine indexing
-
 * bookmarking
-
-
 
 One way to put the language in the url would be to
 add a request parameter like `?lang=fr`; another option is to add the language code in the servlet path,
@@ -51,19 +39,13 @@ like `example.com/fr/home`. The Yada Framework supports both.
 
 You can also use a full Locale code instead of the language code, like fr_CA for french in Canada.
 
-
 ===  Immutable (static) text
-
-
 A typical web page usually shows some text that is statically typed, i.e. not added via a CMS backend but
 typed directly into the HTML code. This may be a title, a menu entry, an image caption, or a description.
 All this statically typed text can't be used in a i18n application: the text must change according to the
 user language.
 
-
 ===  Database text fields
-
-
 Traditional applications with just one language store a Java String attribute into a single table column in the database.
 With i18n applications, where a Java attribute can have as many values as the languages that are allowed,
 the single-column approach can't work anymore. There are many solutions to this problem. The Yada
@@ -92,6 +74,15 @@ For example, consider a Product with a non-localized "name" and a localized "des
 |2   |Grande palla gonfiabile   |it_IT   
 |===
 
+=== Date and time
+Date and time are represented differently in different regions, for example by writing the day before the month
+or the opposite.
+
+Most importantly, every user lives in a specific time zone in the world, e.g. "Europe/Rome" or "Asia/Tokyo",
+and a time like "2024-09-19@11:37" is a different moment in different time zones.
+This means that the code should take the time zone of the user into consideration when receiving, showing or using
+a date/time value. 
+This also applies to scheduled tasks that must run at a specific time of day if the time has an impact on the user.
 
 ===  Enum values
 
@@ -131,7 +122,6 @@ http://www.example.com/it/myHome
 
 ===  Java code
 
-
 If your project does not use YadaSecurity, change `WebApplicationInitializer` in order to add a servlet filter:
 
 [source,java]
@@ -153,7 +143,6 @@ The "language in the path" functionality is implemented in YadaLocalePathVariabl
 ====
 
 ===  Application configuration
-
 
 Edit the conf.webapp.prod.xml configuration file (were 'prod' is the environment code for "production") adding a section
 like the following:
@@ -355,12 +344,8 @@ files.total = There {0,choice,0#are no files|1#is one file|1<are {0,number,integ
 In particular:
 
 * {0} and {1} are ways of passing parameters
-
 * when a parameter is specified, a single quote must be escaped by another single quote
-
 * there's a powerful way of specifying variations like singular/plural (choice format)
-
-
 
 In production, files are reloaded every 600 seconds (10 minutes) to pick up changes.
 
@@ -383,7 +368,6 @@ Email templates can use the same message properties of HTML files, or be saved i
 See <<emails.adoc#_internationalization,Internationalization>> in the email chapter.
   
 ====  Usage in Java
-
 
 To get the localized text in java you first autowire a MessageSource bean, then use the getMessage() method:
 
@@ -491,6 +475,63 @@ private Map<Locale, String> description = new HashMap<>();
 
 WARNING: not using FetchMode.SELECT may result in a cross join that loads a huge amount of values into memory, possibly causing an OutOfMemory exception!
 
+==  Considering the user time zone
+
+=== Setting the user time zone
+The user time zone is automatically retrieved on page load by `yada.js` to what the browser reports
+and sent to the server once per session. The server stores this value in the user session with the
+`YadaConstants.SESSION_USER_TIMEZONE` key. This session attribute is read after user authentication
+and stored in the database in the YadaUserProfile table under the `timezone` column. This value will
+then be available to the application via `YadaUserProfile.getTimezone()`.
+
+The application should offer users to change their time zone manually. In such case, the code setting 
+the time zone should also set the `YadaUserProfile.timezoneSetByUser` flag in order to stop the 
+above automatic change at each login:
+
+[.center]
+.User Time Zone Form
+image::timezone-form.jpg[User time zone form]
+
+[source,java]
+----
+if (!userProfileForm.getTimezone().equals(userProfile.getTimezone().getID())) {
+	// If the timezone is different from before, set the flag
+	userProfile.setTimezoneSetByUser(true);
+}
+userProfile.setTimezone(TimeZone.getTimeZone(userProfileForm.getTimezone()));
+----
+
+The time zone should also be set on user registration. When receiving the registration request
+in the `"/signup"` controller, the automatically retrieved time zone should be set in the `YadaRegistrationRequest`:
+
+[source,java]
+----
+TimeZone userTimezone = null;
+HttpSession session = request.getSession(false);
+if (session!=null) {
+	userTimezone = (TimeZone) session.getAttribute(YadaConstants.SESSION_USER_TIMEZONE);
+}
+yadaRegistrationRequest.setTimezone(userTimezone);
+----
+
+When creating the new user after confirmation, the user time zone should be set in the user profile:
+
+[source,java]
+----
+TimeZone userTimezone = registrationRequest.getTimezone();
+if (userTimezone==null) {
+	userTimezone = TimeZone.getTimeZone("Europe/Rome"); // Default
+}
+userProfile.setTimezone(userTimezone);
+----
+
+
+=== Working with date and time
+
+[.todo]
+----
+TO BE CONTINUED...
+----
 
 
 

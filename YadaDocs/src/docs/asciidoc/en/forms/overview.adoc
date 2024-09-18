@@ -192,6 +192,33 @@ returned html:
 <form class="yadaAjax" action="/subscribe" yada:updateOnSuccess="#someSection">
 ----
 
+=== Validation in a modal
+
+When an ajax form is inside a modal, the outcome of the submission could be a 
+validation error on some fields, a confirmation message or the closing of the modal. These outcomes
+can be achieved by the same controller method by returning different results:
+
+- to show a validation error, return the full modal with the form
+- to show a confirmation message, return a notification
+- to close the modal, return `YadaViews.AJAX_CLOSE_MODAL`
+
+There's no need to set a `yada:updateOnSuccess=""` on the form because, whenever a modal is
+returned from the backend, the current open modal is closed (unless sticky).
+
+The closing and opening of the modals in case of validation errors is clearly visible.
+To avoid that, not the full modal but only the form part should be returned so that
+the modal stays open, and the form must be annotated with `yada:updateOnSuccess=""`.
+
+Examples:
+[source,java]
+----
+return "/someModalWithForm";
+
+return yadaNotify.title("Lorem", model).ok().message("Ipsum").add();
+
+return YadaViews.AJAX_CLOSE_MODAL;
+----
+
 ==  Form groups
 
 Multiple forms scattered around the page can be submitted together if they belong to the same "Form Group":

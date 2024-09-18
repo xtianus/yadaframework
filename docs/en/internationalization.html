@@ -98,6 +98,7 @@ window.onscroll = function() {
 <li><a href="#_search_engine_indexing">Search engine indexing</a></li>
 <li><a href="#_immutable_static_text">Immutable (static) text</a></li>
 <li><a href="#_database_text_fields">Database text fields</a></li>
+<li><a href="#_date_and_time">Date and time</a></li>
 <li><a href="#_enum_values">Enum values</a></li>
 </ul>
 </li>
@@ -121,6 +122,12 @@ window.onscroll = function() {
 <li><a href="#_static_text">Static text</a></li>
 <li><a href="#_emails">Emails</a></li>
 <li><a href="#_database_fields">Database fields</a></li>
+</ul>
+</li>
+<li><a href="#_considering_the_user_time_zone">Considering the user time zone</a>
+<ul class="sectlevel2">
+<li><a href="#_setting_the_user_time_zone">Setting the user time zone</a></li>
+<li><a href="#_working_with_date_and_time">Working with date and time</a></li>
 </ul>
 </li>
 </ul>
@@ -152,6 +159,9 @@ where  <em>locale</em> stands for "language and regional settings".</p>
 </li>
 <li>
 <p>database text fields</p>
+</li>
+<li>
+<p>date and time</p>
 </li>
 <li>
 <p>enum values</p>
@@ -271,6 +281,20 @@ for a single instance in a single language.</p>
 </tr>
 </tbody>
 </table>
+</div>
+<div class="sect2">
+<h3 id="_date_and_time">Date and time</h3>
+<div class="paragraph">
+<p>Date and time are represented differently in different regions, for example by writing the day before the month
+or the opposite.</p>
+</div>
+<div class="paragraph">
+<p>Most importantly, every user lives in a specific time zone in the world, e.g. "Europe/Rome" or "Asia/Tokyo",
+and a time like "2024-09-19@11:37" is a different moment in different time zones.
+This means that the code should take the time zone of the user into consideration when receiving, showing or using
+a date/time value.
+This also applies to scheduled tasks that must run at a specific time of day if the time has an impact on the user.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_enum_values">Enum values</h3>
@@ -752,11 +776,80 @@ not using FetchMode.SELECT may result in a cross join that loads a huge amount o
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_considering_the_user_time_zone">Considering the user time zone</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_setting_the_user_time_zone">Setting the user time zone</h3>
+<div class="paragraph">
+<p>The user time zone is automatically retrieved on page load by <code>yada.js</code> to what the browser reports
+and sent to the server once per session. The server stores this value in the user session with the
+<code>YadaConstants.SESSION_USER_TIMEZONE</code> key. This session attribute is read after user authentication
+and stored in the database in the YadaUserProfile table under the <code>timezone</code> column. This value will
+then be available to the application via <code>YadaUserProfile.getTimezone()</code>.</p>
+</div>
+<div class="paragraph">
+<p>The application should offer users to change their time zone manually. In such case, the code setting
+the time zone should also set the <code>YadaUserProfile.timezoneSetByUser</code> flag in order to stop the
+above automatic change at each login:</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../img/timezone-form.jpg" alt="User time zone form">
+</div>
+<div class="title">Figure 1. User Time Zone Form</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">if (!userProfileForm.getTimezone().equals(userProfile.getTimezone().getID())) {
+	// If the timezone is different from before, set the flag
+	userProfile.setTimezoneSetByUser(true);
+}
+userProfile.setTimezone(TimeZone.getTimeZone(userProfileForm.getTimezone()));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The time zone should also be set on user registration. When receiving the registration request
+in the <code>"/signup"</code> controller the automatically retrieved time zone should be set in the <code>YadaRegistrationRequest</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">TimeZone userTimezone = null;
+HttpSession session = request.getSession(false);
+if (session!=null) {
+	userTimezone = (TimeZone) session.getAttribute(YadaConstants.SESSION_USER_TIMEZONE);
+}
+yadaRegistrationRequest.setTimezone(userTimezone);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When creating the new user after confirmation, the user time zone should be set in the user profile:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">TimeZone userTimezone = registrationRequest.getTimezone();
+if (userTimezone==null) {
+	userTimezone = TimeZone.getTimeZone("Europe/Rome"); // Default
+}
+userProfile.setTimezone(userTimezone);</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_working_with_date_and_time">Working with date and time</h3>
+<div class="listingblock todo">
+<div class="content">
+<pre>TO BE CONTINUED...</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-04-29 15:30:36 +0200
+Last updated 2024-09-18 13:33:40 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
