@@ -53,10 +53,10 @@ dependencies {
 		'ch.qos.logback:logback-classic:1.2.11',
 		'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
 		'org.apache.commons:commons-lang3:3.7',
-		'com.google.api-client:google-api-client:1.24.+'
+		'com.google.api-client:google-api-client:1.24.2'
 		;
 		
-
+		
     // testImplementation 'junit:junit:4.12'
 }
 
