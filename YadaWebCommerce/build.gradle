@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.7.7'
+version = '0.7.7.R1'
 
 apply plugin: 'eclipse-wtp'
 
