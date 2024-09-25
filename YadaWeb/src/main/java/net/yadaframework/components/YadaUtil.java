@@ -32,6 +32,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -320,6 +321,33 @@ public class YadaUtil {
 			}
     	});
 		return result;
+	}
+
+	/**
+	 * Returns a list of days between two dates included. Days are at midnight in the system timezone.
+	 * @param fromInclusive start day, the time is ignored
+	 * @param toInclusive end day, the time is ignored
+	 */
+	public List<LocalDate> getDays(Date fromInclusive, Date toInclusive) {
+	    LocalDate start = fromInclusive.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	    LocalDate end = toInclusive.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	    return getDays(start, end);
+	}
+	
+	/**
+	 * Returns a list of days between two dates included.
+	 * @param fromInclusive start day, the time is ignored
+	 * @param toInclusive end day, the time is ignored
+	 */
+	public List<LocalDate> getDays(LocalDate fromInclusive, LocalDate toInclusive) {
+	    List<LocalDate> days = new ArrayList<>();
+	    LocalDate currentDate = fromInclusive;
+	    while (!currentDate.isAfter(toInclusive)) {
+	        days.add(currentDate);
+	        currentDate = currentDate.plusDays(1);
+	    }
+	    
+	    return days;		
 	}
 
 	/**

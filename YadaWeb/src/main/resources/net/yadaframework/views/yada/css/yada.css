@@ -29,6 +29,7 @@
     display: none;
     z-index: 1000000;
     pointer-events: none;
+    font-size: 100px;
 }
 
 .yadaAjaxDisabled {
