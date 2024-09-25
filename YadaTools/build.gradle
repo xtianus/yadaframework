@@ -149,6 +149,7 @@ publishing {
         }
     }
     repositories {
+    	// Creates task publishYadaToolsLibraryPublicationToLocalRepoRepository
         maven {
         	name "PublicRepo"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
@@ -173,6 +174,13 @@ tasks.getByName("publishYadaToolsLibraryPublicationToLocalRepoRepository") {
 		":YadaWebCMS:publishYadaWebCMSLibraryPublicationToLocalRepoRepository",
 		":YadaWebCommerce:publishYadaWebCommerceLibraryPublicationToLocalRepoRepository",
 		":YadaWebSecurity:publishYadaWebSecurityLibraryPublicationToLocalRepoRepository"
+}
+
+tasks.getByName("publishYadaToolsLibraryPublicationToPublicRepoRepository") { 
+	it.dependsOn ':YadaWeb:publishYadaWebLibraryPublicationToPublicRepoRepository',
+		":YadaWebCMS:publishYadaWebCMSLibraryPublicationToPublicRepoRepository",
+		":YadaWebCommerce:publishYadaWebCommerceLibraryPublicationToPublicRepoRepository",
+		":YadaWebSecurity:publishYadaWebSecurityLibraryPublicationToPublicRepoRepository"
 }
 
 signing {

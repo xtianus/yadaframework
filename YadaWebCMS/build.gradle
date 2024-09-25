@@ -141,13 +141,15 @@ publishing {
         }
     }
     repositories {
+    	// Creates task publishYadaWebCMSLibraryPublicationToPublicRepoRepository
         maven {
+        	name "PublicRepo"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
 			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 			credentials(PasswordCredentials) {
-				username = hasProperty('ossrhUsername')?ossrhUsername:''
-				password = hasProperty('ossrhPassword')?ossrhPassword:''
+            	username = project.hasProperty('ossrhUsername')?ossrhUsername:'USERUNSET'
+            	password = project.hasProperty('ossrhPassword')?ossrhPassword:'PWDUNSET'
 			}
         }
          // Creates task publishYadaWebCMSLibraryPublicationToLocalRepoRepository
