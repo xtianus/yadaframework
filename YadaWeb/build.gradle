@@ -26,7 +26,7 @@ java {
 	// }
 	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
 	withSourcesJar()
-    withJavadocJar() // https://stackoverflow.com/a/75710366/587641
+    // withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
 
 if (!project.hasProperty('repoPath')) {
@@ -198,6 +198,19 @@ publishing {
         	artifactId = 'yadaweb'
             from components.java
             
+            // This tries to fix a publish error
+            artifact(jar) {
+                classifier = ''
+            }
+            
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+            }
 			pom {
 			    name = 'YadaWeb'
 			    description = 'Some useful tasks for the Yada Framework'
