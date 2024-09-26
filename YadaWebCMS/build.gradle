@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.7.7'
+version = '0.7.7.R2'
 
 if (!project.hasProperty('repoPath')) {
 	ext.repoPath="repoPathMissing"
