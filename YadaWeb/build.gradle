@@ -26,7 +26,7 @@ java {
 	// }
 	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
 	withSourcesJar()
-    // withJavadocJar() // https://stackoverflow.com/a/75710366/587641
+    withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
 
 if (!project.hasProperty('repoPath')) {
@@ -197,11 +197,6 @@ publishing {
         yadaWebLibrary(MavenPublication) {
         	artifactId = 'yadaweb'
             from components.java
-            
-            // This tries to fix a publish error
-            artifact(jar) {
-                classifier = ''
-            }
             
             versionMapping {
                 usage('java-api') {
