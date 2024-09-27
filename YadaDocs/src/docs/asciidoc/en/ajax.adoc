@@ -801,7 +801,7 @@ You can call the low-level yada.ajax() method directly.
 
 [source,javascript]
 ----
-yada.ajax(url, data, successHandler, method, timeout, hideLoader, asJson, responseType)
+yada.ajax(url, data, successHandler, method, timeout, loaderOption, asJson, responseType)
 ----
 
 
@@ -816,8 +816,8 @@ method::
 (optional) either "GET" (default) or "POST"
 timeout:: 
 (optional) milliseconds timeout, null for default (set by the browser)
-hideLoader:: 
-(optional) true for not showing the spinning loader (shown by default)
+loaderOption:: 
+(optional) controls the display of a loader image (e.g. spinning wheel)
 asJson:: 
 (optional) true to send the data object as json without splitting the attributes into request parameters
 responseType:: 
@@ -928,10 +928,7 @@ If you need to preserve the "this" context of the invoking function, remember to
 yada.ajax(urlShowBom, formData, insertBom.bind(this), "POST");
 ----
 
-
-===  responseType
-
-
+=== responseType
 The response type of an ajax call is set automatically unless specified in this field. A useful value is "blob"
 for downloading a file on the client computer.
 See <<Returning from the backend>> for an example on how to send a PDF file from the server.
@@ -940,6 +937,28 @@ See <<Returning from the backend>> for an example on how to send a PDF file from
 ----
 yada.ajax("/catalog", null, null, null, null, null, null, "blob");
 ----
+
+=== loaderOption
+By default, when an ajax request is made a "page loader" is shown i.e. the `.loader` element is made visible.
+To prevent the loader from showing, the `loaderOption` must be `true`.
+
+Since Yada 0.7.6 a new type of loader can be started instead: the "element loader". This is like the "page loader"
+but limited to some page elements. For example, when clicking on a button a loader may appear
+just on that button or on some target div. For the element loader to show, the loaderOption must be either:
+
+- a string with a css selector
+- a DOM element
+- a JQuery object
+
+It must point to the element or elements that should be covered with a loader.
+
+The HTML of the loader is automatically added and removed. 
+By default it shows a spinning wheel but can be customised with the
+classes `yadaElementLoaderOverlay` and `yadaElementLoaderIcon`. See `yada.css` for the default settings.
+
+WARNING: The ajax method forces the targeted elements to a "relative" position when "static" or not positioned.
+This should not affect the layout. If it does, the element loader should target some specifically 
+added element or be removed.
 
 == Utilities
 === dequeueFunctionCall

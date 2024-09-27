@@ -116,6 +116,7 @@ window.onscroll = function() {
 <li><a href="#_data">data</a></li>
 <li><a href="#_successhandler">successHandler</a></li>
 <li><a href="#_responsetype">responseType</a></li>
+<li><a href="#_loaderoption">loaderOption</a></li>
 </ul>
 </li>
 <li><a href="#_utilities">Utilities</a>
@@ -1397,7 +1398,7 @@ used in place of the default one.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.ajax(url, data, successHandler, method, timeout, hideLoader, asJson, responseType)</code></pre>
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.ajax(url, data, successHandler, method, timeout, loaderOption, asJson, responseType)</code></pre>
 </div>
 </div>
 <div class="dlist">
@@ -1422,9 +1423,9 @@ used in place of the default one.</p>
 <dd>
 <p>(optional) milliseconds timeout, null for default (set by the browser)</p>
 </dd>
-<dt class="hdlist1">hideLoader</dt>
+<dt class="hdlist1">loaderOption</dt>
 <dd>
-<p>(optional) true for not showing the spinning loader (shown by default)</p>
+<p>(optional) controls the display of a loader image (e.g. spinning wheel)</p>
 </dd>
 <dt class="hdlist1">asJson</dt>
 <dd>
@@ -1573,6 +1574,53 @@ See <a href="#_returning_from_the_backend">Returning from the backend</a> for an
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_loaderoption">loaderOption</h3>
+<div class="paragraph">
+<p>By default, when an ajax request is made a "page loader" is shown i.e. the <code>.loader</code> element is made visible.
+To prevent the loader from showing, the <code>loaderOption</code> must be <code>true</code>.</p>
+</div>
+<div class="paragraph">
+<p>Since Yada 0.7.6 a new type of loader can be started instead: the "element loader". This is like the "page loader"
+but limited to some page elements. For example, when clicking on a button a loader may appear
+just on that button or on some target div. For the element loader to show, the loaderOption must be either:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a string with a css selector</p>
+</li>
+<li>
+<p>a DOM element</p>
+</li>
+<li>
+<p>a JQuery object</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>It must point to the element or elements that should be covered with a loader.</p>
+</div>
+<div class="paragraph">
+<p>The HTML of the loader is automatically added and removed.
+By default it shows a spinning wheel but can be customised with the
+classes <code>yadaElementLoaderOverlay</code> and <code>yadaElementLoaderIcon</code>. See <code>yada.css</code> for the default settings.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+The ajax method forces the targeted elements to a "relative" position when "static" or not positioned.
+This should not affect the layout. If it does, the element loader should target some specifically
+added element or be removed.
+</td>
+</tr>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1628,7 +1676,7 @@ when they return from ajax. Example: <code>&lt;div th:classappend="${yadaIsAjaxR
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-08-27 21:46:41 +0200
+Last updated 2024-09-27 16:05:25 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
