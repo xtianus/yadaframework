@@ -213,7 +213,14 @@ the forms in the group is sent together with any url parameters:</p>
 </dd>
 <dt class="hdlist1">disable the loader</dt>
 <dd>
-<p>The loader is started by default. To disable it, add the <code>yadaNoLoader</code> class.</p>
+<p>The page loader is started by default. To disable it, add the <code>yadaNoLoader</code> class.</p>
+</dd>
+<dt class="hdlist1">show an element loader</dt>
+<dd>
+<p>Instead of showing a full page loader, the ajax call can show a small loader
+inside any page element when the <code>yada:ajaxElementLoader</code> attribute is used on the
+triggering element. The value is a CSS selector and can use the <a href="#extendedSelectors">extended syntax</a>.
+See <a href="#_loaderoption">loaderOption</a> for some more details.</p>
 </dd>
 </dl>
 </div>
@@ -588,7 +595,8 @@ But if you replace something by #id with something that doesn&#8217;t have the #
 <div class="paragraph">
 <p>Each selector can also have the following special prefixes:</p>
 </div>
-<table class="tableblock frame-all grid-all stretch">
+<table id="extendedSelectors" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. Extended selectors</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 66.6667%;">
@@ -879,7 +887,7 @@ some section or to apply some style only when returning from ajax:</p>
 <p>You can show a confirm dialog before the ajax call is made. The user will be shown a text message and an option to confirm or abort the call.</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 2. data- attributes and tags for Confirm Dialog</caption>
+<caption class="title">Table 3. data- attributes and tags for Confirm Dialog</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -1039,7 +1047,7 @@ Changing a select or a checkbox sumbits the enclosing form: this should be made 
 <p>Any element on page can be turned into a drop target for file upload operations using the following attributes:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 3. file upload</caption>
+<caption class="title">Table 4. file upload</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -1343,7 +1351,7 @@ might disappear too quickly.</p>
 using HTML attributes or calling a js method in the success handler.</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 4. data- attribute and tag for Ajax Feedback</caption>
+<caption class="title">Table 5. data- attribute and tag for Ajax Feedback</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -1676,7 +1684,7 @@ when they return from ajax. Example: <code>&lt;div th:classappend="${yadaIsAjaxR
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-09-27 16:05:25 +0200
+Last updated 2024-09-27 19:21:46 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

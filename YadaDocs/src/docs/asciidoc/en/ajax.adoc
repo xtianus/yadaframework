@@ -68,10 +68,14 @@ The class `yadaAjaxDisabled` disables the link. Can also be used on any other el
 
 disable the loader::
 
-The loader is started by default. To disable it, add the `yadaNoLoader` class.
+The page loader is started by default. To disable it, add the `yadaNoLoader` class.
 
+show an element loader::
 
-
+Instead of showing a full page loader, the ajax call can show a small loader
+inside any page element when the `yada:ajaxElementLoader` attribute is used on the
+triggering element. The value is a CSS selector that can use the <<extendedSelectors,extended syntax>>. 
+See <<loaderOption>> for some more details.
 
 
 ===  Returning from the backend
@@ -321,6 +325,10 @@ But if you replace something by #id with something that doesn't have the #id any
 ====
 
 Each selector can also have the following special prefixes:
+
+[[extendedSelectors]]
+
+.Extended selectors
 [cols="<25,<50",options="header"]
 |===
 h| name
