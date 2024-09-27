@@ -70,22 +70,22 @@ tasks.withType(JavaCompile).configureEach {
 dependencies {
 	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
 
-	api 'org.apache.commons:commons-configuration2:2.+'
+	api 'org.apache.commons:commons-configuration2:2.11.0'
 	
 	// Fixes commons-text:1.9 CVE-2022-42889 caused by commons-configuration2:2.8.0
-	api 'org.apache.commons:commons-text:1.+'
+	api 'org.apache.commons:commons-text:1.12.0'
 	
 	// For embedded Tomcat ONLY - add these to your project
     // runtimeOnly 'org.apache.tomcat:tomcat-el-api:8.5.+'
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper-el:8.5.+'
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper:8.5.+'
     // For embedded mariadb
-	compileOnly('ch.vorburger.mariaDB4j:mariaDB4j:3.+') {
+	compileOnly('ch.vorburger.mariaDB4j:mariaDB4j:3.1.0') {
 		// mariaDB4j pulls the latest version of spring core but this is never a good thing.
         exclude group: 'org.springframework', module: 'spring-core'
     }	
 	// Needed by Commons Configuration
-    api 'commons-jxpath:commons-jxpath:1.+'
+    api 'commons-jxpath:commons-jxpath:1.3'
 
 	// For Spring: 	using a specific version instead of the + wildcard to prevent side effects 
 	// 				in the application when new versions are made available 
@@ -96,36 +96,34 @@ dependencies {
 		// 'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
 		'org.hibernate.orm:hibernate-core:6.4.4.Final',
 		'org.hibernate.validator:hibernate-validator:8.0.1.Final',
-		'org.thymeleaf:thymeleaf-spring6:3.+',
-		'com.mysql:mysql-connector-j:8.1.+',
-		'commons-collections:commons-collections:3.+',
+		'org.thymeleaf:thymeleaf-spring6:3.1.2.RELEASE',
+		'com.mysql:mysql-connector-j:8.1.0',
+		'commons-collections:commons-collections:3.2.2',
 		'org.apache.commons:commons-exec:1.3',
 		// 'jakarta.mail:jakarta.mail-api:2.1.2',
 		'com.sun.mail:jakarta.mail:2.0.1', // The implementation is needed, not the api
 		'com.google.guava:guava:31.1-jre',
-		'org.jsoup:jsoup:1.+',
-		'ch.qos.logback:logback-classic:1.3.+',
-		'com.fasterxml.jackson.core:jackson-databind:2.+',
-		'com.drewnoakes:metadata-extractor:2.+',
-		'org.flywaydb:flyway-mysql:10.+',
-		'commons-beanutils:commons-beanutils:1.9.+'
+		'org.jsoup:jsoup:1.18.1',
+		'ch.qos.logback:logback-classic:1.3.14',
+		'com.fasterxml.jackson.core:jackson-databind:2.17.2',
+		'com.drewnoakes:metadata-extractor:2.19.0',
+		'org.flywaydb:flyway-mysql:10.18.1',
+		'commons-beanutils:commons-beanutils:1.9.4'
 		
 	 // Connection pool for embedded Tomcat and programmatic datasource
-	api 'org.vibur:vibur-dbcp:25.+'
-	runtimeOnly 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.+'
+	api 'org.vibur:vibur-dbcp:25.0'
+	runtimeOnly 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.2'
 	implementation 'org.apache.tomcat:tomcat-servlet-api:10.1.19'
 	compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:10.1.19'
 	compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
-	compileOnly 'org.seleniumhq.selenium:selenium-java:4.+' // 4.13.0 is the last java 8 version
+	compileOnly 'org.seleniumhq.selenium:selenium-java:4.13.0' // 4.13.0 is the last java 8 version
 
 	// Needed to run in Tomcat
 	// runtime 'commons-jxpath:commons-jxpath:1.3'
 
-	testImplementation 'junit:junit:4.+',
-	 	'org.springframework:spring-test:4.3.+'
+	testImplementation 'junit:junit:4.13.2',
+	 	'org.springframework:spring-test:4.3.30.RELEASE'
 	
-	// testRuntimeOnly 'commons-beanutils:commons-beanutils:1.9.+',
-	// 	'commons-jxpath:commons-jxpath:1.3'
 		
 }
 
@@ -200,6 +198,14 @@ publishing {
         	artifactId = 'yadaweb'
             from components.java
             
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+            }
 			pom {
 			    name = 'YadaWeb'
 			    description = 'Some useful tasks for the Yada Framework'
@@ -232,14 +238,15 @@ publishing {
         }
     }
     repositories {
+    	// Creates task publishYadaWebCMSLibraryPublicationToPublicRepoRepository
         maven {
         	name "PublicRepo"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
             credentials(PasswordCredentials) {
-            	username = hasProperty('ossrhUsername')?ossrhUsername:''
-            	password = hasProperty('ossrhPassword')?ossrhPassword:''
+            	username = project.hasProperty('ossrhUsername')?ossrhUsername:'USERUNSET'
+            	password = project.hasProperty('ossrhPassword')?ossrhPassword:'PWDUNSET'
             }
         }
         // Creates task publishYadaWebLibraryPublicationToLocalRepoRepository
@@ -251,3 +258,6 @@ publishing {
     }    
 }
 
+signing {
+    sign publishing.publications.yadaWebLibrary
+}

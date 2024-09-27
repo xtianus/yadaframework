@@ -59,8 +59,8 @@ dependencies {
 
 	api 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.2.RELEASE'
 
-	api 'com.google.api-client:google-api-client-jackson2:2.+',
-			'com.google.api-client:google-api-client-gson:2.+',
+	api 'com.google.api-client:google-api-client-jackson2:2.7.0',
+			'com.google.api-client:google-api-client-gson:2.7.0',
 			// For Spring: 	using a specific version instead of the + wildcard to prevent side effects 
 			// 				in the application when new versions are made available 
 			// 'org.springframework:spring-webmvc:6.1.5',
@@ -69,8 +69,8 @@ dependencies {
 
 	implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
-	compileOnly 'org.apache.tomcat:tomcat-servlet-api:10.1.+',
-			'org.apache.tomcat.embed:tomcat-embed-core:10.1.+',
+	compileOnly 'org.apache.tomcat:tomcat-servlet-api:10.1.30',
+			'org.apache.tomcat.embed:tomcat-embed-core:10.1.30',
 			'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
 	// testImplementation 'junit:junit:4.12'
@@ -150,13 +150,15 @@ publishing {
         }
     }
     repositories {
+    	// Creates task publishYadaWebSecurityLibraryPublicationToPublicRepoRepository
         maven {
+        	name "PublicRepo"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
             credentials(PasswordCredentials) {
-            	username = hasProperty('ossrhUsername')?ossrhUsername:''
-            	password = hasProperty('ossrhPassword')?ossrhPassword:''
+             	username = project.hasProperty('ossrhUsername')?ossrhUsername:'USERUNSET'
+            	password = project.hasProperty('ossrhPassword')?ossrhPassword:'PWDUNSET'
             }
             // url = "file://${buildDir}/repotest"
         }

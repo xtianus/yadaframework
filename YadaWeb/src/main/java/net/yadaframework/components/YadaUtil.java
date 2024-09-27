@@ -32,6 +32,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -320,6 +321,33 @@ public class YadaUtil {
 			}
     	});
 		return result;
+	}
+
+	/**
+	 * Returns a list of days between two dates included. Days are at midnight in the system timezone.
+	 * @param fromInclusive start day, the time is ignored
+	 * @param toInclusive end day, the time is ignored
+	 */
+	public List<LocalDate> getDays(Date fromInclusive, Date toInclusive) {
+	    LocalDate start = fromInclusive.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	    LocalDate end = toInclusive.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	    return getDays(start, end);
+	}
+	
+	/**
+	 * Returns a list of days between two dates included.
+	 * @param fromInclusive start day, the time is ignored
+	 * @param toInclusive end day, the time is ignored
+	 */
+	public List<LocalDate> getDays(LocalDate fromInclusive, LocalDate toInclusive) {
+	    List<LocalDate> days = new ArrayList<>();
+	    LocalDate currentDate = fromInclusive;
+	    while (!currentDate.isAfter(toInclusive)) {
+	        days.add(currentDate);
+	        currentDate = currentDate.plusDays(1);
+	    }
+	    
+	    return days;		
 	}
 
 	/**
@@ -2893,6 +2921,19 @@ public class YadaUtil {
 		calendar.set(Calendar.MILLISECOND, 0);
 		return calendar;
 	}
+	
+	/**
+	 * Rounds forward the calendar to the end of the day at 23:59:59.999
+	 * @param calendar the calendar to change: the parameter will be modified by this method
+	 * @return the input calendar modified.
+	 */
+	public static Calendar roundForwardToAlmostMidnight(Calendar calendar) {
+		calendar.set(Calendar.HOUR_OF_DAY, 23);
+		calendar.set(Calendar.MINUTE, 59);
+		calendar.set(Calendar.SECOND, 59);
+		calendar.set(Calendar.MILLISECOND, 999);
+		return calendar;
+	}
 
 	/**
 	 * Returns the last midnight
@@ -3179,14 +3220,6 @@ public class YadaUtil {
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static Calendar roundForwardToAlmostMidnight(Calendar calendar) {
-		calendar.set(Calendar.HOUR_OF_DAY, 23);
-		calendar.set(Calendar.MINUTE, 59);
-		calendar.set(Calendar.SECOND, 59);
-		calendar.set(Calendar.MILLISECOND, 999);
-		return calendar;
-	}
 
 	public static Calendar roundBackToLastMonthStart(Calendar calendar) {
 		calendar.add(Calendar.MONTH, -1);

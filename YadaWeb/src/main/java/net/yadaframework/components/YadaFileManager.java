@@ -386,7 +386,7 @@ public class YadaFileManager {
 	 */
 	private File uploadFileInternal(MultipartFile multipartFile) throws IOException {
 		String originalFilename = multipartFile.getOriginalFilename();
-		String targetName = YadaUtil.reduceToSafeFilename(originalFilename);
+		String targetName = yadaUtil.ensureSafeFilename(originalFilename);
 		String[] filenameParts = YadaUtil.splitFileNameAndExtension(targetName);
 		File targetFolder = config.getUploadsFolder();
 		// Useless: doesn't throw an exception when it fails: targetFolder.mkdirs();

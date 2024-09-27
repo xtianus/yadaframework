@@ -100,6 +100,7 @@ public class YadaEmailService {
 	 * @param addTimestamp
 	 * @deprecated use {@link YadaEmailBuilder} for a cleaner api
 	 */
+	@Deprecated
     public boolean sendHtmlEmail(String[] toEmail, String emailName, Object[] subjectParams, Map<String, Object> templateParams, Map<String, String> inlineResources, Locale locale, boolean addTimestamp) {
     	return sendHtmlEmail(toEmail, null, emailName, subjectParams, templateParams, inlineResources, locale, addTimestamp);
     }
@@ -119,6 +120,7 @@ public class YadaEmailService {
      * @return true se l'email è stata spedita
      * @deprecated use {@link YadaEmailBuilder} for a cleaner api
      */
+	@Deprecated
 	public boolean sendHtmlEmail(String[] toEmail, String replyTo, String emailName, Object[] subjectParams, Map<String, Object> templateParams, Map<String, String> inlineResources, Locale locale, boolean addTimestamp) {
 		return sendHtmlEmail(config.getEmailFrom(), toEmail, replyTo, emailName, subjectParams, templateParams, inlineResources, null, locale, addTimestamp);
 	}
@@ -137,6 +139,7 @@ public class YadaEmailService {
 	 * @param addTimestamp
 	 * @deprecated use {@link YadaEmailBuilder} for a cleaner api
 	 */
+	@Deprecated
 	public boolean sendHtmlEmail(String[] fromEmail, String[] toEmail, String replyTo, String emailName, Object[] subjectParams, Map<String, Object> templateParams, Map<String, String> inlineResources, Map<String, File> attachments, Locale locale, boolean addTimestamp) {
 		return sendHtmlEmail(fromEmail, toEmail, replyTo, emailName, subjectParams, templateParams, inlineResources, attachments, locale, addTimestamp, false);
 	}
@@ -158,6 +161,7 @@ public class YadaEmailService {
      * @return true se l'email è stata spedita
      * @deprecated use {@link YadaEmailBuilder} for a cleaner api
      */
+	@Deprecated
 	public boolean sendHtmlEmail(String[] fromEmail, String[] toEmail, String replyTo, String emailName, Object[] subjectParams, Map<String, Object> templateParams, Map<String, String> inlineResources, Map<String, File> attachments, Locale locale, boolean addTimestamp, boolean batch) {
 		YadaEmailParam yadaEmailParam = new YadaEmailParam();
 		yadaEmailParam.fromEmail = fromEmail;
@@ -180,6 +184,7 @@ public class YadaEmailService {
      * @return true se l'email è stata spedita
      * @deprecated use {@link YadaEmailBuilder} for a cleaner api
      */
+	@Deprecated
 	public boolean sendHtmlEmail(YadaEmailParam yadaEmailParam) {
 		return this.sendHtmlEmail(yadaEmailParam, false);
 	}
