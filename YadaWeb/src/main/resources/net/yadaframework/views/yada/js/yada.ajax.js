@@ -1410,11 +1410,13 @@
 	 * @param successHandler(responseText, responseHtml);) funzione chiamata in caso di successo e nessun yadaWebUtil.modalError(). Viene chiamata anche in caso di errore se il suo flag executeAnyway è true
 	 * @param method "POST" per il post oppure null o "GET" per il get
 	 * @param timeout milliseconds timeout, null for default (set by the browser)
-	 * @param hideLoader true for not showing the loader
+	 * @param loader	false or missing = show the "yadaLoader" (page loader), 
+	 * 					true = hides the loader,
+	 * 					<cssselector>, jquery object or DOM object = show "element loader" on element 
 	 * @param asJson true to send a JSON.stringify(data) with "application/json;charset=UTF-8"
 	 * @param responseType set the response type, for example "blob" for downloading binary data (e.g. a pdf file)
 	 */
-	yada.ajax = function(url, data, successHandler, method, timeout, hideLoader, asJson, responseType) {
+	yada.ajax = function(url, data, successHandler, method, timeout, loaderOption, asJson, responseType) {
 		if (successHandler=="GET" || successHandler=="POST") {
 			console.error("YadaError: you are forgetting the successHandler in the yada.ajax call; use null for no handler.")
 			return;
@@ -1434,11 +1436,37 @@
 		} else {
 			contentType = data instanceof FormData ? false : contentType;
 		}
-		if (hideLoader==true) {
+		
+		// Handle loader parameter
+		var $elementLoader;
+		var $elementLoaderContainer;
+		const elementLoaderHtml = '<div class="yadaElementLoaderOverlay"><div class="yadaElementLoaderIcon"></div></div>';
+		const elementLoaderSelector = yada.getRandomId("yadaElementLoaderSelector");
+		if (loaderOption===true) {
+			// Hide the page loader (do not show)
 			yada.loaderOff();
-		} else {
+		} else if (loaderOption === undefined || loaderOption === null || loaderOption === false) {
+			// Show the page loader
 			yada.loaderOn();
+		} else if (typeof loaderOption === 'string') {
+			$elementLoaderContainer = $(loaderOption); // Get jquery object using selector
+		} else if (loaderOption instanceof HTMLElement) {
+			$elementLoaderContainer = $(loaderOption); // Convert element to jquery object
+		} else if (loaderOption instanceof jQuery) {
+			$elementLoaderContainer = loaderOption;
 		}
+		// Show "element loader"
+		if ($elementLoaderContainer) {
+			$elementLoaderContainer.each(function() {
+				// The loader needs a non-static positioning
+			    if ($(this).css('position') === 'static') {
+			        $(this).css('position', 'relative');
+			    }
+			});
+			$elementLoader = $(elementLoaderHtml).addClass(elementLoaderSelector);
+			$elementLoaderContainer.append($elementLoader);
+		}
+
 		var xhrFields = {};
 		if (responseType!=null) {
 			xhrFields.responseType = responseType;
@@ -1453,6 +1481,7 @@
 			contentType: contentType,
 			xhrFields: xhrFields,
 			error: function(jqXHR, textStatus, errorThrown ) { 
+				$elementLoader?.remove(elementLoaderSelector);
 				ajaxCounter--;
 				if (ajaxCounter<1) {
 					yada.loaderOff();
@@ -1477,6 +1506,7 @@
 				}
 			},
 			success: function(responseText, statusText, jqXHR) {
+				$elementLoader?.remove(elementLoaderSelector);
 				ajaxCounter--;
 				var responseTrimmed = "";
 				var responseObject = null;
