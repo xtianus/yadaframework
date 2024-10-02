@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Embedded Database</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
+</head>
+<body class="article toc2 toc-left">
+<!--
+	WARNING !!!!!
+	Edit the /YadaDocs/src/docs/asciidoc/common/docinfo-header.html file
+	to change this menu.
+-->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/overview.html">Databases</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./security/overview.html">Security</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./confirmationModal.html">Confirmation Modal</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.style.position = 'relative';
+        header.addEventListener('click', function(e) {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+            navigator.clipboard.writeText(url);
+        });
+        header.addEventListener('mouseenter', function() {
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-clone';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.style.position = 'absolute';
+            icon.style.right = '30px';
+            icon.style.top = '50%';
+            icon.style.transform = 'translateY(-50%)';
+            icon.style.fontSize = '18px';
+            icon.style.color = 'gray';
+            header.appendChild(icon);
+        });
+        header.addEventListener('mouseleave', function() {
+            const icon = header.querySelector('.fa-clone');
+            if (icon) {
+            	header.removeChild(icon);
+            }
+        });
+    });
+});
+
+function showCopy(e) {
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-clone';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.style.position = 'absolute';
+    icon.style.left = e.pageX + 'px';
+    icon.style.top = e.pageY + 'px';
+    icon.style.zIndex = 1000;
+    icon.style.fontSize = '24px';
+    document.body.appendChild(icon);
+    setTimeout(function() {
+        document.body.removeChild(icon);
+    }, 1000); // 1 second delay
+}
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;
+    	}
+    }
+};
+</script>
+<div id="header">
+<h1>Embedded Database</h1>
+<div class="details">
+<span id="revnumber">version 0.7.7</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">Introduction</a></li>
+<li><a href="#_mariadb">MariaDB</a></li>
+<li><a href="#_configuration">Configuration</a></li>
+<li><a href="#_start_and_stop">Start and Stop</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Forget about the database</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Installing and setting up a full MySQL Server instance might be complicated for a
+developer, even more so if the wrong MySQL Server version is already
+installed on the computer. Recurring to containers could be a solution but requires
+some work too.</p>
+</div>
+<div class="paragraph">
+<p>The Yada Framework can be configured to install and run a MariaDB embedded database
+at startup so that nothing needs to be done on the host computer.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_mariadb">MariaDB</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://mariadb.org/" target="_blank" rel="noopener">MariaDB</a> is a fork of MySQL Server and is 100% compatible with it.
+The <a href="https://github.com/vorburger/MariaDB4j" target="_blank" rel="noopener">MariaDB4j</a> open source project provides a
+way to embed the MariaDB server in a Java application.
+What it does at runtime is to unpack a small version of the MariaDB binaries on some
+specified folder then run the process on a chosen port. That&#8217;s all is needed to replace
+MySQL Server.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuration">Configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Assuming that a database connection to MySQL has already been configured, changing it to
+point to the embedded database is straightforward:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>add the required dependency to the <code>build.gradle</code> file:</p>
+<div class="literalblock">
+<div class="content">
+<pre>implementation('ch.vorburger.mariaDB4j:mariaDB4j:3.+') {
+       exclude group: 'org.springframework', module: 'spring-core'
+   }</pre>
+</div>
+</div>
+</li>
+<li>
+<p>enable the embedded database in <code>conf.webapp.dev.xml</code>:</p>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;database enabled="true"&gt;
+	&lt;embedded enabled="true"&gt;</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>With this minimal configuration, at server startup the MariaDB instance will be installed when missing,
+started when not running and finally connected to in place of MySQL.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p><code>spring-core</code> is excluded because <code>mariaDB4j</code> has a dependency to the latest version and this may
+not be what the application needs</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The full configuration for the embedded database is shown below with default values:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;embedded enabled="true" port="63306"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
+	&lt;baseDir&gt;${config/paths/basePath}/embeddedDB/MariaDB&lt;/baseDir&gt; <i class="conum" data-value="2"></i><b>(2)</b>
+	&lt;datadir&gt;${config/paths/basePath}/embeddedDB/data&lt;/datadir&gt; <i class="conum" data-value="3"></i><b>(3)</b>
+	&lt;tmpDir&gt;${config/paths/basePath}/embeddedDB/tmp&lt;/tmpDir&gt; <i class="conum" data-value="4"></i><b>(4)</b>
+	&lt;sourceSql&gt;${config/paths/basePath}/embeddedDB/source.sql&lt;/sourceSql&gt; <i class="conum" data-value="5"></i><b>(5)</b>
+&lt;/embedded&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Ports below 1024 require root privilege, above 65535 are invalid</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>MariaDB binaries are saved here</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Database data is stored here</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Temp folder used by the database</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>sql to run when first creating the database. There is no default value here.</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>In the above example the database configuration is set in <code>conf.webapp.dev.xml</code> so that
+the embedded version is only used in development. It would even be possible to configure it
+on a per-user basis by adding the required lines in the private <code>conf.webapp.localdev.xml</code> file
+that can be stored in the ${config/paths/basePath}/bin folder and has precedence over the former:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&lt;config&gt;
+	&lt;database enabled="true"&gt;
+		&lt;embedded enabled="true"&gt;
+		&lt;/embedded&gt;
+	&lt;/database&gt;
+&lt;/config&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>With this configuration each developer can choose to enable or disable the embedded database, or
+which port and folders to use for it.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_start_and_stop">Start and Stop</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The MariaDB process starts the first time that the application server starts. It usually
+survives application server stops and is already available at the next app start: when not, it is started
+automatically again. So it is almost transparent to the developer.</p>
+</div>
+<div class="paragraph">
+<p>The embedded DB can also be used with any database IDE
+(like MySQL Workbench) as long as the <code>mariadbd</code> process is running. The database can be dropped and
+recreated with the usual means (<code>drop database</code> etc.) but in case a quick wipe is required, the whole data
+folder can be deleted before starting the application server. The database
+process must be killed first though because it might be locking some files preventing deletion.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 0.7.7<br>
+Last updated 2024-10-02 19:41:52 +0200
+</div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>

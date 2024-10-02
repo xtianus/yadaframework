@@ -77,9 +77,7 @@ inside any page element when the `yada:ajaxElementLoader` attribute is used on t
 triggering element. The value is a CSS selector that can use the <<extendedSelectors,extended syntax>>. 
 See <<loaderOption>> for some more details.
 
-
 ===  Returning from the backend
-
 
 Controllers can return a standard thymeleaf view (html/xml), some JSON data or any other MIME type like a PDF or an excel file content.
 The resulting objects will be passed to any "successHandler" javascript method (see below)

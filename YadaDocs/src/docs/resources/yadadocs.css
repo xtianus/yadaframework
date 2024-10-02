@@ -97,6 +97,9 @@ code {
 }
 
 #navigator {
+	position: fixed;
+    background-color: white;
+    z-index: 999;	
 	font-size: 1.7em;
 	border: thin solid #dedede;
     color: #7a2518;
@@ -116,4 +119,8 @@ code {
     right: 20px;
     display: none;
     z-index: 9;
+}
+
+#header>h1:first-child {
+	margin-top: 3.5rem;
 }
