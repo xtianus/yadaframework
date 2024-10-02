@@ -167,7 +167,8 @@
 							$('select option[value="'+selectedOption+'"]', $targetSelectContainer).prop('selected', true);
 						}
 						$('select', $targetSelectContainer).prop('disabled', false);
-					});
+					},
+					null, null, getLoaderOption($(this)) /*, asJson, responseType */);
 				}
 			}
 		});
@@ -276,6 +277,9 @@
 		return false;
 	}	
 	
+	/**
+	 * Returns true if the page loader has been disabled on the element
+	 */
 	function hasNoLoader($element) {
 		return $element.hasClass("noLoader") || $element.hasClass("noloader") || $element.hasClass("yadaNoLoader") || $element.hasClass("yadaNoloader") || $element.hasClass("yadanoloader");
 	}
@@ -705,7 +709,6 @@
 		var confirmText = $element.attr("data-yadaConfirm") || $element.attr("data-confirm");
 		// Create data for submission
 		var value = [];
-		var noLoader = hasNoLoader($element);	
 		// In a select, set the data object to the selected option
 		if ($element.is("select")) {
 			$("option:selected", $element).each(function(){ // Could be a multiselect!
@@ -753,11 +756,11 @@
 			var okShowsPreviousModal = $element.attr("data-yadaOkShowsPrevious")==null || $element.attr("data-yadaOkShowsPrevious")=="true";
 			yada.confirm(title, confirmText, function(result) {
 				if (result==true) {
-					yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), method, getTimeoutValue($element), noLoader);
+					yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), method, getTimeoutValue($element), getLoaderOption($element));
 				}
 			}, okButton, cancelButton, okShowsPreviousModal);
 		} else {
-			yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), method, null, noLoader);
+			yada.ajax(url, data, joinedHandler==null?joinedHandler:joinedHandler.bind($element), method, null, getLoaderOption($element));
 		}
 		return true; // Run other listeners
 	}
@@ -812,55 +815,6 @@
 		// The selector can be multiple, separated by comma. The replacement can be multiple, identified by yadaFragment
 		// return postprocessOnSuccess($element, responseHtml, "data-yadaUpdateOnSuccess", $.fn.replaceWith);
 		return postprocessOnSuccess($element, responseHtml, "data-yadaUpdateOnSuccess", $.fn.replaceWith);
-		/*
-		var updateSelector = $element.attr("data-yadaUpdateOnSuccess");
-		if (updateSelector == null) {
-			return responseHtml;
-		}
-		// Clone so that the original responseHtml is not removed by replaceWith.
-		// All handlers are also cloned.
-		var $replacement = responseHtml.children().clone(true, true); // Uso .children() per skippare il primo div inserito da yada.ajax()
-		var $return = $replacement;
-		var selectors = updateSelector.split(',');
-		var $replacementArray = null;
-		if (selectors.length>1) {
-			// yadaFragment is used only when there is more than one selector, otherwise the whole result is used for replacement
-			$replacementArray = $(".yadaFragment", responseHtml);
-			if ($replacementArray.length==0) {
-				$replacementArray = $("._yadaReplacement_", responseHtml); // Legacy
-			}
-		}
-		if ($replacementArray!=null && $replacementArray.length>1) {
-			$return = [];
-		}
-		var fragmentCount = 0;
-		var focused = false;
-		for (var count=0; count<selectors.length; count++) {
-			var selector = selectors[count];
-			if ($replacementArray!=null && $replacementArray.length>0) {
-				// Clone so that the original responseHtml is not removed by replaceWith.
-				// All handlers are also cloned.
-				$replacement = $replacementArray.eq(fragmentCount).clone(true, true);
-				if (count==0 && $replacementArray.length==1) {
-					$return = $replacement;
-				} else {
-					$return.push($replacement);
-	}
-				// When there are more selectors than fragments, fragments are cycled from the first one
-				fragmentCount = (fragmentCount+1) % $replacementArray.length;
-			}
-			yada.extendedSelect($element, selector).replaceWith($replacement);
-			if (!focused) {
-				// Focus on the first result element with data-yadaAjaxResultFocus
-				const $toFocus = $("[data-yadaAjaxResultFocus]:not([readonly]):not([disabled])", $replacement);
-				if ($toFocus.length>0) {
-					$toFocus.get(0).focus();
-					focused=true;
-				}
-			}
-		}
-		return $return;
-		*/
 	}
 	
 	/**
@@ -1225,7 +1179,7 @@
 				}
 			}
 			e.preventDefault(); // From now on the form can only be ajax-submitted
-			var noLoader = hasNoLoader($form);
+			var loaderOption = getLoaderOption($form); // null only if the form has no loader option set
 			var action = $(this).attr('action');
 			// Check if it must be a multipart formdata
 			var multipart = $form.attr("enctype")=="multipart/form-data";
@@ -1281,8 +1235,8 @@
 				if (buttonAction!=null) {
 					action = buttonAction;
 				}
-				// Either the form or the button can have a noLoader flag
-				noLoader |= hasNoLoader($(clickedButton));
+				// Either the form or the button can have a loaderOptions, the button has precedence
+				loaderOption = getLoaderOption($(clickedButton)) ?? loaderOption;
 				// Pagination history
 				buttonHistoryAttribute = handlePaginationHistoryAttribute($(clickedButton), $(clickedButton).closest("form"));
 			}
@@ -1339,7 +1293,7 @@
 				handlePaginationHistoryAttribute($form, $form);
 			}
 			
-			yada.ajax(action, data, joinedHandler.bind(this), method, getTimeoutValue($form), noLoader);
+			yada.ajax(action, data, joinedHandler.bind(this), method, getTimeoutValue($form), loaderOption);
 			clickedButton = null;
 			return false; // Important so that the form is not submitted by the browser too
 		}) // submit()
@@ -1401,6 +1355,22 @@
 	}
 	
 	/**
+	 * Returns the jquery element pointed to by the extended selector set on the data-yadaAjaxElementLoader attribute,
+	 * or the page loader option when the previous is not set.
+	 * @return null unless a loader option is set somehow
+	 */
+	function getLoaderOption($element) {
+		// When the element loader attribute exists, use the selected element as loaderOption even if the selector matches nothing.
+		// When the element loader attribute does not exist, use the page loader as option.
+		const ajaxElementLoaderSelector = $element.attr("data-yadaAjaxElementLoader");
+		if (ajaxElementLoaderSelector!=null) {
+			return yada.extendedSelect($element, ajaxElementLoaderSelector); // Element loader option
+		} else {
+			return hasNoLoader($element) || null; // Page loader option: true or null
+		}
+	}
+	
+	/**
 	 * Esegue una get/post ajax passando data (stringa od oggetto). Gestisce il caso che sia necessario il login.
 	 * Il metodo chiamato lato java può ritornare un notify chiamando yadaWebUtil.modalOk() o anche yadaWebUtil.modalError() etc.
 	 * In caso di notify di un errore, l'handler non viene chiamato.
@@ -1438,10 +1408,9 @@
 		}
 		
 		// Handle loader parameter
-		var $elementLoader;
-		var $elementLoaderContainer;
-		const elementLoaderHtml = '<div class="yadaElementLoaderOverlay"><div class="yadaElementLoaderIcon"></div></div>';
-		const elementLoaderSelector = yada.getRandomId("yadaElementLoaderSelector");
+		const elementLoaderClass = "yadaElementLoaderOverlay";
+		const elementLoaderHtml = `<div class="${elementLoaderClass}"><div class="yadaElementLoaderIcon"></div></div>`;
+		var $elementLoaderContainers;
 		if (loaderOption===true) {
 			// Hide the page loader (do not show)
 			yada.loaderOff();
@@ -1449,23 +1418,20 @@
 			// Show the page loader
 			yada.loaderOn();
 		} else if (typeof loaderOption === 'string') {
-			$elementLoaderContainer = $(loaderOption); // Get jquery object using selector
+			$elementLoaderContainers = $(loaderOption); // Get jquery object using selector
 		} else if (loaderOption instanceof HTMLElement) {
-			$elementLoaderContainer = $(loaderOption); // Convert element to jquery object
+			$elementLoaderContainers = $(loaderOption); // Convert element to jquery object
 		} else if (loaderOption instanceof jQuery) {
-			$elementLoaderContainer = loaderOption;
+			$elementLoaderContainers = loaderOption;
 		}
 		// Show "element loader"
-		if ($elementLoaderContainer) {
-			$elementLoaderContainer.each(function() {
-				// The loader needs a non-static positioning
-			    if ($(this).css('position') === 'static') {
-			        $(this).css('position', 'relative');
-			    }
-			});
-			$elementLoader = $(elementLoaderHtml).addClass(elementLoaderSelector);
-			$elementLoaderContainer.append($elementLoader);
-		}
+		$elementLoaderContainers?.each(function() {
+			// The loader needs a non-static positioning
+		    if ($(this).css('position') === 'static') {
+		        $(this).css('position', 'relative');
+		    }
+		});
+		$elementLoaderContainers?.append($(elementLoaderHtml));
 
 		var xhrFields = {};
 		if (responseType!=null) {
@@ -1481,7 +1447,7 @@
 			contentType: contentType,
 			xhrFields: xhrFields,
 			error: function(jqXHR, textStatus, errorThrown ) { 
-				$elementLoader?.remove(elementLoaderSelector);
+				$(`.${elementLoaderClass}`, $elementLoaderContainers).remove();
 				ajaxCounter--;
 				if (ajaxCounter<1) {
 					yada.loaderOff();
@@ -1506,7 +1472,7 @@
 				}
 			},
 			success: function(responseText, statusText, jqXHR) {
-				$elementLoader?.remove(elementLoaderSelector);
+				$(`.${elementLoaderClass}`, $elementLoaderContainers).remove();
 				ajaxCounter--;
 				var responseTrimmed = "";
 				var responseObject = null;
@@ -1864,7 +1830,7 @@
 					}
 					data.yadaconfirmed=true;
 				}
-				yada.ajax(url, data, successHandler, type);
+				yada.ajax(url, data, successHandler, type); // TODO loaderOption
 			});
 			$("#yada-confirm .cancelButton").click(function() {
 				$('#yada-confirm .modal').one('hidden.bs.modal', function (e) {
