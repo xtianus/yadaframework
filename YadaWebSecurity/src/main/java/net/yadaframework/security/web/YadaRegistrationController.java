@@ -234,8 +234,12 @@ public class YadaRegistrationController {
 		yadaRegistrationRequest = yadaRegistrationRequestDao.save(yadaRegistrationRequest); // To get id and token
 		boolean emailSent = yadaSecurityEmailService.sendRegistrationConfirmation(yadaRegistrationRequest, null, request, locale);
 		if (!emailSent) {
-			yadaRegistrationRequestDao.delete(yadaRegistrationRequest);
 			log.debug("Registration mail not sent to {}", email);
+			if (!yadaConfiguration.isDevelopmentEnvironment()) {
+				yadaRegistrationRequestDao.delete(yadaRegistrationRequest);
+			} else {
+				log.debug("Registration request still valid in development: copy&paste the registration url");
+			}
 			bindingResult.rejectValue("email", "yada.form.registration.email.failed");
 			return false;
 		}
