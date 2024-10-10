@@ -19,7 +19,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
+import java.util.stream.Collectors;
 
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
@@ -66,8 +66,10 @@ public abstract class YadaConfiguration {
 	private Boolean development = null;
 	private Boolean beta = null;
 	private Boolean alpha = null;
-	private Map<Integer, String> roleIdToKeyMap = null;
-	private Map<String, Integer> roleKeyToIdMap = null;
+	private Map<Integer, String> roleIdToKeyMap = null; // role id integer --> role key string
+	private Map<String, Integer> roleKeyToIdMap = null; // role key string --> role id integer
+	private Map<String, Set<String>> roleKeyToRoleChange = null; // role key string --> list of role key strings
+	private Map<Integer, Set<Integer>> roleIdToRoleChange = null; // role id integer --> list of role id integers
 	private Object roleMapMonitor = new Object();
 	private String googleClientId = null;
 	private String googleSecret = null;
@@ -961,7 +963,9 @@ public abstract class YadaConfiguration {
 	 * Equivalent to {@link #getRoleKey(Integer)}.
 	 * @param roleId e.g. 9
 	 * @return e.g. "ADMIN"
+	 * @deprecated use {@link #getRoleKey(Integer)} instead
 	 */
+	@Deprecated // because "role name" is not the correct terminology
 	public String getRoleName(Integer roleId) {
 		return this.getRoleKey(roleId);
 	}
@@ -1020,6 +1024,36 @@ public abstract class YadaConfiguration {
 		}
 		return key;
 	}
+	
+	/**
+	 * Returns true if a user with roles actingRoleIds can change the role targetRoleId on a user
+	 * @param actingRoleIds list of roles of the current user
+	 * @param targetRoleId the role that the current user wants to set or clear
+	 * @return true if any of the actingRoleIds can set or clear the targetRoleId
+	 */
+	public boolean rolesCanChangeRole(List<Integer> actingRoleIds, Integer targetRoleId) {
+		for (Integer actingRoleId : actingRoleIds) {
+			Set<Integer> canChangeIds = roleIdToRoleChange.get(actingRoleId);
+			if (canChangeIds.contains(targetRoleId)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if a user with role actingRole can change the role targetRole on a user
+	 * @param actingRoleKey the role of the current user, any case
+	 * @param targetRoleKey the role that the current user wants to set or clear, any case
+	 * @return true if the actingRole can set or clear the targetRole
+	 */
+	public boolean roleCanChangeRole(String actingRoleKey, String targetRoleKey) {
+		Set<String> canChange = roleKeyToRoleChange.get(actingRoleKey.toUpperCase());
+		if (canChange!=null) {
+			return canChange.contains(targetRoleKey.toUpperCase());
+		}
+		return false;
+	}
 
 	private void ensureRoleMaps() {
 		synchronized (roleMapMonitor) {
@@ -1028,22 +1062,36 @@ public abstract class YadaConfiguration {
 			}
 			roleIdToKeyMap = new HashMap<>();
 			roleKeyToIdMap = new HashMap<>();
+			roleKeyToRoleChange = new HashMap<>();
+			roleIdToRoleChange = new HashMap<>();
 			for (ImmutableHierarchicalConfiguration sub : configuration.immutableConfigurationsAt("config/security/roles/role")) {
 				Integer id = sub.getInteger("id", null);
 				String key = sub.getString("key", null);
-				// Controllo che non ci sia duplicazione di id
-				if (id==null || roleIdToKeyMap.get(id)!=null) {
-					throw new YadaInternalException("Invalid role configuration in conf.webapp.xml");
+				if (id==null || key==null) {
+					throw new YadaInternalException("Missing role id or key in configuration file", id);
 				}
-				// Controllo che non ci sia duplicazione di key
-				if (key==null || roleKeyToIdMap.get(key)!=null) {
-					throw new YadaInternalException("Invalid role configuration in conf.webapp.xml");
+				if (roleIdToKeyMap.get(id)!=null) {
+					throw new YadaInternalException("Duplicated role id {} in configuration file", id);
+				}
+				if (roleKeyToIdMap.get(key)!=null) {
+					throw new YadaInternalException("Invalid role key {} in configuration file", key);
 				}
 				roleIdToKeyMap.put(id, key.toUpperCase());
 				roleKeyToIdMap.put(key.toUpperCase(), id);
 			}
+			for (ImmutableHierarchicalConfiguration sub : configuration.immutableConfigurationsAt("config/security/roles/role")) {
+				Integer id = sub.getInteger("id", null); // Never null here because of previous check
+				String key = sub.getString("key", null); // Never null here because of previous check
+				Set<String> handlesKeys = new HashSet<>(sub.getList(String.class, "handles", Collections.emptyList()))
+					.stream().map(String::toUpperCase).collect(Collectors.toSet());
+				Set<Integer> handlesIds = handlesKeys.stream().map(handlesKey -> roleKeyToIdMap.get(handlesKey.toUpperCase())).collect(Collectors.toSet());
+				roleKeyToRoleChange.put(key.toUpperCase(), handlesKeys);
+				roleIdToRoleChange.put(id, handlesIds);
+			}
 			roleIdToKeyMap = Collections.unmodifiableMap(roleIdToKeyMap);
 			roleKeyToIdMap = Collections.unmodifiableMap(roleKeyToIdMap);
+			roleKeyToRoleChange = Collections.unmodifiableMap(roleKeyToRoleChange); // All strings
+			roleIdToRoleChange = Collections.unmodifiableMap(roleIdToRoleChange); // All integers
 		}
 	}
 

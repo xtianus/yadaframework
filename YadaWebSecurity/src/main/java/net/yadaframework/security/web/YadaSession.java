@@ -1,6 +1,8 @@
 package net.yadaframework.security.web;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +51,8 @@ public class YadaSession<T extends YadaUserProfile> {
 	}
 
 	public void clearCaches() {
+		clearUserProfileCache();
 		impersonatorUserId = null;
-		loggedInUserProfileId = null;
 		impersonatedUserId = null;
 	}
 
@@ -113,6 +115,7 @@ public class YadaSession<T extends YadaUserProfile> {
 			yadaUserDetailsService.authenticateAs(originalCredentials, request, response);
 			log.info("Impersonation by #{} ended", originalCredentials.getId());
 			clearCaches();
+			loggedInUserProfileId = impersonatorUserId;
 			return true;
 		} else {
 			log.error("Deimpersonation failed because of null impersonator or null original user");
@@ -121,26 +124,47 @@ public class YadaSession<T extends YadaUserProfile> {
 	}
 
 	/**
-	 * Check if the current user has the role "ADMIN"
-	 * @return
+	 * Check if the current logged in user (if any) has the specified role
+	 * @param roleString the role name, case insensitive, e.g. "MANAGER" or "admin"
+	 * @return true if there is a logged in user with the specified role name
 	 */
-	public boolean isAdmin() {
-		Long idToCheck = getCurrentUserProfileId();
-		if (idToCheck!=null) {
-			return yadaUserProfileDao.findRoleIds(idToCheck).contains(config.getRoleId("ADMIN"));
+	public boolean isCurrentRole(String roleString) {
+		List<Integer> roles = getLoggedInUserRoles();
+		if (roles!=null) {
+			Long idToCheck = getCurrentUserProfileId();
+			if (idToCheck!=null) {
+				return roles.contains(config.getRoleId(roleString));
+			}
 		}
 		return false;
 	}
 
 	/**
-	 * Check if the argument userProfile is the same as the currently logged-in one
-	 * @param someUserProfile
+	 * Check if the current user has the role "ADMIN"
 	 * @return
 	 */
+	public boolean isAdmin() {
+		return isCurrentRole("ADMIN");
+	}
+
+	/**
+	 * Check if the argument userProfile is the same as the currently logged-in one
+	 * @param someUserProfile
+	 * @deprecated use {@link #isLoggedInUser(YadaUserProfile)} instead
+	 */
+	@Deprecated
 	public boolean isLoggedUser(T someUserProfile) {
+		return isLoggedInUser(someUserProfile);
+	}
+	
+	/**
+	 * Check if the argument userProfile is the same as the currently logged-in one
+	 * @param someUserProfile
+	 */
+	public boolean isLoggedInUser(T someUserProfile) {
 		return someUserProfile!=null &&
-			someUserProfile.getId()!=null &&
-			someUserProfile.getId().equals(loggedInUserProfileId);
+				someUserProfile.getId()!=null &&
+				someUserProfile.getId().equals(getCurrentUserProfileId());
 	}
 
 	/**
@@ -148,6 +172,20 @@ public class YadaSession<T extends YadaUserProfile> {
 	 */
 	public boolean isLoggedIn() {
 		return yadaSecurityUtil.isLoggedIn();
+	}
+	
+	/**
+	 * @return Returns the numeric roles that the currently logged in user has, or null when not logged in
+	 */
+	public List<Integer> getLoggedInUserRoles() {
+		return isLoggedIn() ? getCurrentUserProfile().getUserCredentials().getRoles() : null;
+	}
+	
+	/**
+	 * @return Returns the sorted role names that the currently logged in user has, or null when not logged in
+	 */
+	public List<String> getLoggedInUserRoleKeys() {
+		return isLoggedIn() ? getLoggedInUserRoles().stream().map(config::getRoleKey).sorted().collect(Collectors.toList()) : null;
 	}
 
 	/**

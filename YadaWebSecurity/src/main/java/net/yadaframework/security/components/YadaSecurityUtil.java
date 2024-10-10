@@ -276,6 +276,10 @@ public class YadaSecurityUtil {
 		}
 	}
 
+	/**
+	 * Returns Spring-formatted roles, like "ROLE_USER" i.e. prefixed by "ROLE_"
+	 * @return
+	 */
 	public Set<String> getCurrentRoles() {
 		Set<String> roles = new HashSet<>();
 		try {

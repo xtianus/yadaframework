@@ -72,7 +72,7 @@ public class YadaUserCredentials implements Serializable {
 
 	@ElementCollection(fetch= FetchType.EAGER)
 	@Fetch(FetchMode.SUBSELECT) // Questo permette di fare una query sola invece di una per role
-	private List<Integer> roles;
+	private List<Integer> roles; // TODO this should be a Set to avoid duplications
 
 	private int failedAttempts; // Fallimenti di login consecutivi. Viene modificato direttamente nel db da UserCredentialsRepository.resetFailedAttempts()
 
@@ -88,14 +88,7 @@ public class YadaUserCredentials implements Serializable {
 	@JsonIgnore // Ignored because of lazy association
 	@OneToMany(fetch=FetchType.LAZY, cascade= CascadeType.ALL, mappedBy="yadaUserCredentials") // Non posso mettere orphanRemoval=true perchè prendo una eccezione: A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance
 	private List<YadaSocialCredentials> yadaSocialCredentialsList;
-
-//	@NotNull
-//	@OneToOne(cascade = CascadeType.ALL, optional=false)
-//	@MapsId // UserProfile condivide l'id
-//	@OneToOne(cascade = CascadeType.ALL)
-//    @MapsId("id")
-//    private UserProfile userProfile = new UserProfile();
-
+	
 	@PrePersist
 	void setDefaults() {
 		creationDate = new Date();
@@ -114,7 +107,7 @@ public class YadaUserCredentials implements Serializable {
 //		}
 //		return null;
 //	}
-
+	
 	/**
 	 * Setta un unico ruolo cancellando quelli eventualmente presenti
 	 * @param role
