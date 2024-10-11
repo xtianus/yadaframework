@@ -82,8 +82,7 @@ TODO
 ==  Entity Backing Beans
 
 
-When the form contains most of the fields that are defined in an existing @Entity it makes sense to use that @Entity as a backing bean.
-Some may argue that exposing database classes on the front-end layer would compromise layer isolation, but we never experienced anything bad by doing this.
+When the form contains most of the fields that are defined in an existing @Entity it makes sense to use that @Entity as a backing bean, although some may argue that exposing database classes on the front-end layer would compromise layer isolation.
 
 The general idea is that Spring can create an instance of a new @Entity or read it from the database before setting form values on it. The @Controller
 method handling the form will receive a ready-populated @Entity where any database value has been overwritten by the form value.
@@ -133,12 +132,11 @@ public class BookController {
                 bookRepository.save(book);
 ----
 
-[.todo]
-----
-test that the above code works
-----
-
 It's always better to use a specific name for the @Entity id, like `bookId` and not just `id`, so that you can handle different @Entity instances in the same @Controller.
+
+Validation can be performed as usual, checking the values already stored in the entity bean, as long as it's done before saving.
+
+
 
 == Ajax Forms
 

@@ -255,8 +255,7 @@ public class BookController {
 <h2 id="_entity_backing_beans">Entity Backing Beans</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When the form contains most of the fields that are defined in an existing @Entity it makes sense to use that @Entity as a backing bean.
-Some may argue that exposing database classes on the front-end layer would compromise layer isolation, but we never experienced anything bad by doing this.</p>
+<p>When the form contains most of the fields that are defined in an existing @Entity it makes sense to use that @Entity as a backing bean, although some may argue that exposing database classes on the front-end layer would compromise layer isolation.</p>
 </div>
 <div class="paragraph">
 <p>The general idea is that Spring can create an instance of a new @Entity or read it from the database before setting form values on it. The @Controller
@@ -308,13 +307,11 @@ public class BookController {
                 bookRepository.save(book);</code></pre>
 </div>
 </div>
-<div class="listingblock todo">
-<div class="content">
-<pre>test that the above code works</pre>
-</div>
-</div>
 <div class="paragraph">
 <p>It&#8217;s always better to use a specific name for the @Entity id, like <code>bookId</code> and not just <code>id</code>, so that you can handle different @Entity instances in the same @Controller.</p>
+</div>
+<div class="paragraph">
+<p>Validation can be performed as usual, checking the values already stored in the entity bean, as long as it&#8217;s done before saving.</p>
 </div>
 </div>
 </div>
@@ -538,7 +535,7 @@ The use of <code>yada:formGroup</code> has the following advantages:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-09-27 16:11:22 +0200
+Last updated 2024-10-11 11:44:42 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
