@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+		<meta charset="UTF-8"/>
+    </head>
+    <body>
+ 	   <strong>E-Mail change - EXAMPLE PROJECT</strong>
+    	<p>Dear user,<br/><br/>you are receiving this email because someone asked to change the email address on the site 
+    	www.EXAMPLE.com</p>
+    
+    	<p>Click here to confirm the change:</p>
+    	<p><a th:text="${fullLink}" th:href="${fullLink}" href="#">Change email</a></p>
+    
+    	<p>If you didn't send the request, delete this email and take the chance to visit our site: <a href="http://www.example.com">EXAMPLE SITE</a></p>
+     	<br />
+     	<p>
+        	<img th:src="'cid:logosmall'" />
+     	</p>
+	  	<p style="margin-top: 10px;">Thank you, <br />
+	     	<a href="http://www.example.com/"><em>EXAMPLESITE</em></a>
+	  	</p>
+    </body>
+</html>

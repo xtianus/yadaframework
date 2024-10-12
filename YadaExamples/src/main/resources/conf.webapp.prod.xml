@@ -1,0 +1,153 @@
+
+<config>
+	<info>
+		<env>prod</env>
+		<appName>YadaExamples</appName>
+		<version>0.1 alpha EXAMPLE</version>
+		<build>${build}</build>
+		<date>@@RELEASEDATE_PLACEHOLDER@@</date> <!-- Injected by gradle -->
+	</info>
+	<paths>
+		<serverAddress>http://prod.EXAMPLE.com/</serverAddress>
+		<basePath>/srv/yexprod</basePath>
+		<contentDir name="contents" url="/contents"></contentDir>
+		<errorPageForward>/errorPage</errorPageForward>
+	</paths>
+	<!-- Define embedded tomcat parameters. Use when more than one application is running on the same server. 
+	<tomcat>
+		<ports>
+			<http></http>
+			<https></https>
+			<ajp></ajp>
+			<ajpRedirect></ajpRedirect>
+			<shutdown></shutdown>
+		</ports>
+		<keystore>
+			<file></file>
+			<password></password>
+		</keystore>
+	</tomcat>
+	-->
+	<email>
+		<enabled>true</enabled>
+		<from>
+			<address>noreply@EXAMPLE.com</address>
+			<name>EXAMPLE SENDER</name>
+		</from>
+		
+		<support>
+			<!-- Addresses to which a support request is sent -->
+			<to>admin@EXAMPLE.com</to>
+		</support>
+		<logoImage>template/email/logo50.png</logoImage>
+		<smtpserver>
+			<host>smtp.EXAMPLE.com</host>
+			<port>587</port>
+			<protocol>smtp</protocol>
+			<username>${smtpserver_username}</username>
+			<password>${smtpserver_password}</password>
+			<!--  If set to true, and a message has some valid and some invalid addresses, send the message anyway, reporting the partial failure with a SendFailedException. If set to false (the default), the message is not sent to any of the recipients if there is an invalid recipient address.  -->
+			<properties>mail.smtp.sendpartial=true</properties> 
+			<properties>mail.smtp.auth=true</properties>
+			<properties>mail.smtp.starttls.enable=true</properties>
+			<properties>mail.smtp.quitwait=false</properties>
+			<!-- Set this option to your mail server if you trust it and don't care checking the certificate validity, e.g. it is on your localhost -->
+			<properties>mail.smtp.ssl.trust=smtp.EXAMPLE.com</properties>
+		</smtpserver>
+		<!-- Remove this list to enable email to everyone -->
+		<validEmail>EXAMPLE@EXAMPLE.com</validEmail>
+		<validEmail>EXAMPLE2@EXAMPLE.com</validEmail>
+		<validEmail>EXAMPLE3@EXAMPLE.net</validEmail>
+	</email>
+
+	<database enabled="true">
+		<embedded enabled="false">
+			<datadir>/srv/yexprod/embeddedDB</datadir>
+			<!-- Path of the sql file that will be loaded at startup -->
+			<sourceSql>/srv/yexprod/source.sql</sourceSql>
+		</embedded>
+		<jndiname>java:comp/env/jdbc/yexdbprod</jndiname> <!-- Not used when <datasource> is defined -->
+		<showSql>false</showSql>
+		
+		<!-- Add any number of entityPackage tags here -->
+		<entityPackage>net.yadaframework.example.persistence.entity</entityPackage>
+		
+		<databaseMigrationAtStartup>false</databaseMigrationAtStartup>
+		<!-- Datasource for embedded Tomcat -->
+		<datasource>
+			<jdbcUrl>jdbc:mysql://localhost/yexdbprod?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</jdbcUrl>
+			<username>yexuserprod</username>
+			<password>qwe</password>
+			
+			<name>yexprodpool</name>
+			<poolInitialSize>10</poolInitialSize>	
+			<poolMaxSize>100</poolMaxSize>
+			<poolEnableConnectionTracking>true</poolEnableConnectionTracking>
+			
+			<logQueryExecutionLongerThanMs>2000</logQueryExecutionLongerThanMs>
+			<logStackTraceForLongQueryExecution>true</logStackTraceForLongQueryExecution>
+			<logLargeResultSet>500</logLargeResultSet> <!-- ResultSets with length greater than or equal to this limit are logged -->
+			<logStackTraceForLargeResultSet>true</logStackTraceForLargeResultSet>
+			<includeQueryParameters>true</includeQueryParameters>
+			
+			<statementCacheMaxSize>200</statementCacheMaxSize>
+		</datasource>
+	</database>
+
+	<social>
+		<facebook>
+			<type>0</type>
+			<appId>EXAMPLE</appId>
+			<secret>EXAMPLE</secret>
+		</facebook>
+		<google>
+			<type>1</type>
+		</google>
+	</social>
+
+	<setup>
+		<users>
+			<user>
+				<nickname>admin</nickname> <!-- This is an example of UserProfile customization -->
+				<email>admin@EXAMPLE.com</email>
+				<password>myAppPassword</password>
+				<locale>en_US</locale>
+				<timezone>Europe/Rome</timezone>
+				<role>USER</role>
+				<role>ADMIN</role>
+			</user>
+		</users>
+	</setup>
+	
+	<security>
+		<!-- sessionTimeoutMinutes is used via javascript to check if the browser session is expired and show a warning modal -->
+		<!-- WARNING: this value must be the same as the value of session-timeout in /src/main/webapp/WEB-INF/web.xml or the session might never expire -->
+		<sessionTimeoutMinutes>240</sessionTimeoutMinutes>
+		<passwordLength min='5' max='128' />
+		<encodePassword>true</encodePassword>
+		<maxFailedAttempts>10</maxFailedAttempts>
+		<failedAttemptsLockoutMinutes>10</failedAttemptsLockoutMinutes>
+		<autologinExpirationHours>48</autologinExpirationHours>
+		<roles>
+			<!-- ATTENZIONE: l'ID e la KEY vanno stabiliti all'inizio e MAI PIU' CAMBIATI perchè vanno nel DB.
+					Sono stati scelti valori non consecutivi per le ID in modo da poter eventualmente inserire valori in mezzo, 
+					anche se ciò non ha effettivamente senso ma non si sa mai che si voglia un giorno ordinare in base all'ID. -->
+			<role>
+				<id>8</id>
+				<key>ADMIN</key>
+				<!-- ATTENZIONE: non usare name e description come fatti qui, ma metterli in messages.properties
+				<name>Admin</name>
+				<description>Gestione infrastruttura tecnica</description>
+				 -->
+			</role>
+			<role>
+				<id>2</id>
+				<key>USER</key>
+				<!-- 
+				<name>Utente Verificato</name>
+				<description>Utente la cui email è stata verificata</description>
+				 -->
+			</role>
+		</roles>
+	</security>
+</config>

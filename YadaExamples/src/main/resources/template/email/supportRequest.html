@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+		<meta charset="UTF-8"/>
+    </head>
+    <body>
+ 	   <strong>Support Request - EXAMPLE SITE</strong>
+ 	   <p>Sender: <span th:text="${username}"></span></p>
+ 	   <p>Client IP: <span th:text="${clientIp}"></span></p>
+ 	   <p>Browser User-Agent: <span th:text="${userAgent}"></span></p>
+       <p th:text="${supportRequest}"></p>
+       
+     	<br />
+     	<p>
+        	<img th:src="'cid:logosmall'" />
+     	</p>
+	  	<p style="margin-top: 10px;">Thank you, <br />
+	     	<a href="http://www.example.com/"><em>EXAMPLESITE</em></a>
+	  	</p>
+    </body>
+</html>

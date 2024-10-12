@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:yada="http://www.yadaframework.net">
+<head>
+	<th:block th:fragment="headFragment">
+		<meta charset="UTF-8"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1">
+		<link th:if="${@config.developmentEnvironment}" rel="stylesheet" type="text/css" th:href="@{/yadares/css/yada.css}" />
+	    <link th:if="${!@config.developmentEnvironment}" rel="stylesheet" type="text/css" th:href="@{/res/css/yada.min.css}" />
+		<link rel="stylesheet" type="text/css" th:href="@{/res/css/yex.min.css}" />
+	</th:block>
+</head>
+<body th:remove="tag">
+<script th:fragment="yexready">
+	window.yex = window.yex || {};
+	yex.ready = yex.ready || function (fn) {
+		if (document.readyState != 'loading'){
+			fn();
+		} else {
+			document.addEventListener('DOMContentLoaded', fn);
+		}
+	}
+</script>
+
+<header>
+	<p>This is the header</p>
+</header>
+</body>
+</html>
