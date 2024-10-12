@@ -72,7 +72,7 @@
 		<!-- Remove this list to enable email to everyone -->
 		<validEmail>EXAMPLE@EXAMPLE.com</validEmail>
 		<validEmail>EXAMPLE2@EXAMPLE.com</validEmail>
-		<validEmail>EXAMPLE3@EXAMPLE.net</validEmail>
+		<validEmail>EXAMPLE3@EXAMPLE.com</validEmail>
 	</email>
 
 	<database enabled="true">
@@ -109,17 +109,6 @@
 		</datasource>
 	</database>
 
-	<social>
-		<facebook>
-			<type>0</type>
-			<appId>EXAMPLE</appId>
-			<secret>EXAMPLE</secret>
-		</facebook>
-		<google>
-			<type>1</type>
-		</google>
-	</social>
-
 	<setup>
 		<users>
 			<user>
@@ -145,24 +134,16 @@
 		<failedAttemptsLockoutMinutes>10</failedAttemptsLockoutMinutes>
 		<autologinExpirationHours>48</autologinExpirationHours>
 		<roles>
-			<!-- ATTENZIONE: l'ID e la KEY vanno stabiliti all'inizio e MAI PIU' CAMBIATI perchè vanno nel DB.
-					Sono stati scelti valori non consecutivi per le ID in modo da poter eventualmente inserire valori in mezzo, 
-					anche se ciò non ha effettivamente senso ma non si sa mai che si voglia un giorno ordinare in base all'ID. -->
+			<!-- ATTENTION: the ID and the KEY must be set at the start and NEVER CHANGED again because they go into the DB.
+					Non-consecutive values have been chosen for the IDs to eventually allow insertion of values in between,
+					even though this doesn't actually make sense, but you never know if one day you want to sort by ID. -->
 			<role>
 				<id>8</id>
 				<key>ADMIN</key>
-				<!-- ATTENZIONE: non usare name e description come fatti qui, ma metterli in messages.properties
-				<name>Admin</name>
-				<description>Gestione infrastruttura tecnica</description>
-				 -->
 			</role>
 			<role>
 				<id>2</id>
 				<key>USER</key>
-				<!-- 
-				<name>Utente Verificato</name>
-				<description>Utente la cui email è stata verificata</description>
-				 -->
 			</role>
 		</roles>
 	</security>

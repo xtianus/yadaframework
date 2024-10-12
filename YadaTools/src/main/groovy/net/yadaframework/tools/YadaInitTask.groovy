@@ -89,6 +89,7 @@ class YadaInitTask extends YadaProject {
 		File javaComponentsFolder = new File(basePackageFolder, "components");
 		File javaPersistenceFolder = new File(basePackageFolder, "persistence");
 		File javaEntityFolder = new File(javaPersistenceFolder, "entity");
+		File javaRepositoryFolder = new File(javaPersistenceFolder, "repository")
 		javaWebFolder.mkdir();
 		javaCoreFolder.mkdir();
 		javaComponentsFolder.mkdir();
@@ -168,10 +169,11 @@ class YadaInitTask extends YadaProject {
 			}
 			processTemplate("java/persistence/entity", filename, target, javaEntityFolder);
 		}
-		// List repositoryFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/persistence/repository");
-		// for (filename in repositoryFiles) {
-		// 	processTemplate("java/persistence/repository", filename, filename-".txt", new File(javaPersistenceFolder, "repository"));
-		// }
+		List repositoryFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/persistence/repository");
+		for (filename in repositoryFiles) {
+			def target = filename-".txt"; // Remove the .txt
+			processTemplate("java/persistence/repository", filename, target, javaRepositoryFolder);
+		}
 	}
 
 	private copyEnvFiles(env, File envFolderFile, File resourcesSourceFolder, File webAppRootFolder) {
