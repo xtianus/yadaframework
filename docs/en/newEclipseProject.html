@@ -467,7 +467,23 @@ you from adding a Tomcat server later.</p>
 </div>
 <div class="paragraph">
 <p>From the "Window &gt; Preferences &gt; Gradle" dialog set the "Java home" entry to your JDK installation,
-which would be <code>C:\Local\jdk8</code> if you followed the instructions above. This is very important. Failing to do so may result in a "java facet" mismatch error on compilation.</p>
+which would be <code>C:\Local\jdk17</code> if you followed the instructions above.</p>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+<div class="title">Setting Gradle Java Home</div>
+<div class="paragraph">
+<p>When the Gradle Java Home is not set, Eclipse will run Gradle with the java version used to run itself
+and this may cause all sort of errors like "java facet mismatch" or "supplied phased action failed".</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>Set the editors file encoding to UTF-8, at least "General &gt; Workspace &gt; Text file encoding" and "Web &gt; CSS Files &gt; Encoding":</p>
@@ -1164,13 +1180,14 @@ then in the "Common" tab choose "Save as &gt; Shared file" and type "\MySiteProj
 </div>
 <div class="paragraph">
 <p>You can now run the schema creation task with a press of a button.
-If all goes well, the output will be written to the <code>/schema</code> folder (you might need to refresh it in Eclipse with F5).
-To load the schema into the database, use the <code>/env/dev/dropAndCreateDatabase.bat</code>
-script (or an equivalent linux/mac version).</p>
+You may get some compilation errors that need to be fixed before trying the generation again.
+If the schema generator can&#8217;t connect to the database check that all configuration files listed above (<code>persistence.xml</code> etc.) have the correct DB login credentials.</p>
 </div>
 <div class="paragraph">
-<p>You may get some compilation errors that need to be fixed before trying the generation again.
-If the schema generator can&#8217;t connect to the database check that all configuration files listed above (<code>persistence.xml</code> etc.) have the correct DB login credentials.</p>
+<p>If all goes well, the output will be written to the <code>/schema</code> folder (you might need to refresh it in Eclipse with F5).
+To load the schema into the database you may use the <code>/env/dev/dropAndCreateDatabase.bat</code>
+script (or an equivalent linux/mac version) but it is more convenient to have the schema loaded
+by Flyway at first application run: just copy it in the <code>/src/main/resources/database</code> folder with a name like <code>V001__baseline</code>.</p>
 </div>
 </div>
 </div>
@@ -1367,7 +1384,7 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-09-27 16:11:23 +0200
+Last updated 2024-10-12 21:19:11 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

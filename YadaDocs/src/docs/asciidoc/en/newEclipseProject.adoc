@@ -213,7 +213,14 @@ Update your installation with "Help > Check for Updates" and follow the instruct
 you from adding a Tomcat server later.
 
 From the "Window > Preferences > Gradle" dialog set the "Java home" entry to your JDK installation,
-which would be `C:\Local\jdk8` if you followed the instructions above. This is very important. Failing to do so may result in a "java facet" mismatch error on compilation. 
+which would be `C:\Local\jdk17` if you followed the instructions above. 
+
+[CAUTION]
+.Setting Gradle Java Home
+====
+When the Gradle Java Home is not set, Eclipse will run Gradle with the java version used to run itself
+and this may cause all sort of errors like "java facet mismatch" or "supplied phased action failed". 
+====
 
 Set the editors file encoding to UTF-8, at least "General > Workspace > Text file encoding" and "Web > CSS Files > Encoding":
 
@@ -692,12 +699,13 @@ then in the "Common" tab choose "Save as > Shared file" and type "\MySiteProject
 image::newEclipseProject/dbSchemaTask.jpg[Run Configuration for schema creation]
 
 You can now run the schema creation task with a press of a button.
-If all goes well, the output will be written to the `/schema` folder (you might need to refresh it in Eclipse with F5).
-To load the schema into the database, use the `/env/dev/dropAndCreateDatabase.bat` 
-script (or an equivalent linux/mac version).
-
 You may get some compilation errors that need to be fixed before trying the generation again.
 If the schema generator can't connect to the database check that all configuration files listed above (`persistence.xml` etc.) have the correct DB login credentials.
+
+If all goes well, the output will be written to the `/schema` folder (you might need to refresh it in Eclipse with F5).
+To load the schema into the database you may use the `/env/dev/dropAndCreateDatabase.bat` 
+script (or an equivalent linux/mac version) but it is more convenient to have the schema loaded
+by Flyway at first application run: just copy it in the `/src/main/resources/database` folder with a name like `V001__baseline`.
 
 == Tomcat server
 This section is about setting up a standalone Tomcat server that can be controlled from Eclipse. 
