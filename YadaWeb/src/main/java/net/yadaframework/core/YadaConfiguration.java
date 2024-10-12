@@ -105,6 +105,15 @@ public abstract class YadaConfiguration {
 	private Integer bootstrapVersion = null;
 
 	/**
+	 * Copy the already initialised configuration to a different instance
+	 * @param yadaConfiguration a subclass of YadaConfiguration
+	 */
+	public void copyTo(YadaConfiguration yadaConfiguration) {
+		yadaConfiguration.builder = this.builder;
+		yadaConfiguration.configuration = this.configuration;
+	}
+
+	/**
 	 * Returns the configured timeout for asynchronous requests in seconds.
 	 * Equivalent to the Tomcat parameter asyncTimeout, but more effective (the application-defined parameter takes precedence).
 	 * @return the configured timeout in minutes or 0 for the default
@@ -113,6 +122,13 @@ public abstract class YadaConfiguration {
 		return configuration.getInt("config/asyncTimeoutMinutes", 0);
 	}
 
+	/**
+	 * @return true if the embedded db should be used instead of the external MySQL
+	 */
+	public boolean isDatabaseEnabled() {
+		return configuration.getBoolean("config/database/@enabled", true);
+	}
+	
 	/**
 	 * @return true if the embedded db should be used instead of the external MySQL
 	 */
@@ -242,6 +258,16 @@ public abstract class YadaConfiguration {
 	
 	public String getTomcatKeystorePassword() {
 		return configuration.getString("config/tomcat/keystore/password", "changeit");
+	}
+	
+	/**
+	 * The maximum size in bytes of the POST which will be handled by 
+	 * the container FORM URL parameter parsing. The limit can be disabled 
+	 * by setting this attribute to a value less than zero. If not specified, 
+	 * this attribute is set to 2097152 (2 MiB).
+	 */
+	public int getTomcatMaxPostSize() {
+		return configuration.getInt("config/tomcat/maxPostSize", 2097152);
 	}
 	
 	/**
@@ -1297,8 +1323,8 @@ public abstract class YadaConfiguration {
 	 * @return an array with email and personal name
 	 */
 	public String[] getEmailFrom() {
-		String address = configuration.getString("config/email/from/address");
-		String personal = configuration.getString("config/email/from/name");
+		String address = configuration.getString("config/email/from/address", null);
+		String personal = configuration.getString("config/email/from/name", null);
 		if (address!=null) {
 			return new String[] {address, personal};
 		} else {
