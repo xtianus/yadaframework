@@ -9,8 +9,10 @@ buildscript {
 }
 
 plugins {
+    id 'application' // for the "run" task
 	id 'org.hidetake.ssh' version '2.10.1'
 	id 'com.meiuwa.gradle.sass' version "1.0.0"	// Only when using SASS !!! v2.0.0 may not work
+	id("com.github.node-gradle.node") version "3.5.1"
 }
 
 ext.acronym = 'yex'
@@ -19,8 +21,25 @@ apply plugin: 'eclipse-wtp'
 apply plugin: 'net.yadaframework.tools'
 apply plugin: 'org.hidetake.ssh'        // https://gradle-ssh-plugin.github.io
 
+// Reading the gradle.local.properties file
+def yadaSourceRepoPath = null;
+def yadaProjects = null;
+Properties localProps = new Properties()
+File localPropsFile = file('gradle.local.properties')
+if(localPropsFile.exists()) {
+    localPropsFile.withInputStream { 
+        localProps.load(it) 
+    }
+    yadaSourceRepoPath = localProps.getProperty('yadaSourceRepoPath')
+    yadaProjects = localProps.getProperty('yadaProjects')
+}
+
 def YadaWebLib = "$projectDir/../YadaWeb";
 def YadaWebCmsLib = "$projectDir/../YadaWebCMS";
+
+if (!project.hasProperty('env')) {
+	ext.env="envUnset"
+}
 
 sassCompile {
     source = project.files(fileTree("src/main/webapp/res/css"), fileTree("$YadaWebLib/src/main/resources/net/yadaframework/views/yada/css"), fileTree("$YadaWebCmsLib/src/main/resources/net/yadaframework/views/yada/css")) 
@@ -93,6 +112,8 @@ dependencies {
 	implementation	 project(':YadaWebSecurity')
 	implementation	 project(':YadaWebCMS')	
 	implementation	 project(':YadaWebCommerce')
+
+	implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.14'
 
 }
 

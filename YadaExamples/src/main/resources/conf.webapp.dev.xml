@@ -3,7 +3,7 @@
 	<info>
 		<env>dev</env>
 		<appName>YadaExamples</appName>
-		<version>0.1 alpha EXAMPLE</version>
+		<version>0.1 alpha</version>
 		<build>${build}</build>
 		<date>@@RELEASEDATE_PLACEHOLDER@@</date> <!-- Injected by gradle -->
 	</info>
@@ -69,7 +69,6 @@
 		<jndiname>java:comp/env/jdbc/yexdbdev</jndiname> <!-- Not used when <datasource> is defined -->
 		<showSql>false</showSql>
 		
-		<databaseMigrationAtStartup>false</databaseMigrationAtStartup>
 		<!-- Datasource for embedded Tomcat -->
 		<datasource>
 			<jdbcUrl>jdbc:mysql://localhost/yexdbdev?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</jdbcUrl>
@@ -91,22 +90,11 @@
 		</datasource>
 	</database>
 
-	<social>
-		<facebook>
-			<type>0</type>
-			<appId>EXAMPLE</appId>
-			<secret>EXAMPLE</secret>
-		</facebook>
-		<google>
-			<type>1</type>
-		</google>
-	</social>
-
 	<setup>
 		<users>
 			<user>
 				<nickname>admin</nickname> <!-- This is an example of UserProfile customization -->
-				<email>admin@EXAMPLE.com</email>
+				<email>admin@example.com</email>
 				<password>myAppPassword</password>
 				<locale>en_US</locale>
 				<timezone>Europe/Rome</timezone>

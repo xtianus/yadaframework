@@ -69,7 +69,6 @@
 		<jndiname>java:comp/env/jdbc/yexdbtst</jndiname> <!-- Not used when <datasource> is defined -->
 		<showSql>false</showSql>
 		
-		<databaseMigrationAtStartup>false</databaseMigrationAtStartup>
 		<!-- Datasource for embedded Tomcat -->
 		<datasource>
 			<jdbcUrl>jdbc:mysql://localhost/yexdbtst?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</jdbcUrl>
