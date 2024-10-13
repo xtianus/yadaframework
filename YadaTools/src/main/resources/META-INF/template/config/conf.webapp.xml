@@ -87,7 +87,7 @@
 		<!-- Add any number of entityPackage tags here -->
 		<entityPackage>${basePackage}.persistence.entity</entityPackage>
 		<%}%>
-		<databaseMigrationAtStartup>false</databaseMigrationAtStartup>
+		<databaseMigrationAtStartup>true</databaseMigrationAtStartup>
 		<!-- Datasource for embedded Tomcat -->
 		<datasource>
 			<jdbcUrl>jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</jdbcUrl>
