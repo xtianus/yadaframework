@@ -5,16 +5,17 @@
 		<appName>$projectName</appName>
 		<version>0.1 alpha EXAMPLE</version>
 		<build>${"\$"}{build}</build>
-		<date>@@RELEASEDATE_PLACEHOLDER@@</date> <!-- Injected by gradle -->
 	</info>
 	<paths>
 		<serverAddress>http://$env.EXAMPLE.com/</serverAddress>
 		<basePath>$basePath/$acronym$env</basePath>
+		<% if (env=="prod") { /* TODO remove the "prod" string and use envs[prodIndex] */ %>
 		<!-- The name is the folder name inside basePath -->
 		<!-- The url can either be an absolute url like "/contents", or a full url like "http://cdn.com/some/contents" -->
 		<contentDir name="contents" url="/contents"></contentDir>
 		<uploadsDir>uploads</uploadsDir>
 		<errorPageForward>/errorPage</errorPageForward>
+		<%}%>
 	</paths>
 	<!-- Sets the Spring max file and request size, except tomcat maxPostSize 
 		that should be set in server.xml or in the below 'maxPostSize' config when embedded -->
@@ -45,6 +46,7 @@
 	
 	<email>
 		<enabled>true</enabled>
+		<% if (env=="prod") { /* TODO remove the "prod" string and use envs[prodIndex] */ %>
 		<from>
 			<address>noreply@EXAMPLE.com</address>
 			<name>EXAMPLE SENDER</name>
@@ -69,8 +71,9 @@
 			<!-- Set this option to your mail server if you trust it and don't care checking the certificate validity, e.g. it is on your localhost -->
 			<properties>mail.smtp.ssl.trust=smtp.EXAMPLE.com</properties>
 		</smtpserver>
+		<%}%>
 		<!-- Remove this list to enable email to everyone -->
-		<validEmail>EXAMPLE@EXAMPLE.com</validEmail>
+		<validEmail>EXAMPLE1@EXAMPLE.com</validEmail>
 		<validEmail>EXAMPLE2@EXAMPLE.com</validEmail>
 		<validEmail>EXAMPLE3@EXAMPLE.com</validEmail>
 	</email>

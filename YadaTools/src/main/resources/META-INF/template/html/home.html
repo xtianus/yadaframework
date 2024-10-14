@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html th:lang="${#locale.language}"
+<%/* Careful when editing html templates because $ must be escaped with ${"\$"} unless it is a groovy variable */%>
+<html th:lang="${"\$"}{#locale.language}"
 	xmlns:th="http://www.thymeleaf.org" 
 	xmlns:yada="http://www.yadaframework.net">
 <head>
@@ -16,24 +17,24 @@
 
 <th:block th:replace="~{/footer :: body}"/>
 
-<th:block th:if="${login}!=null">
+<th:block th:if="${"\$"}{login}!=null">
 	<div th:replace="~{/modalLogin :: #loginModal}"></div>
 </th:block>
 
 <script type="text/javascript" th:inline="javascript">
 	//<![CDATA[
-	$(document).ready(function() {
+	${acronym}.ready(function() {
 		// In order to show errors as a homepage modal you need to remove <errorPageForward> from config
 		// Error modal for unhandled exceptions
-		if (/*[[${yadaExceptionObject!=null}]]*/ "placeholder") {
+		if (/*[[${"\$"}{yadaExceptionObject!=null}]]*/ "placeholder") {
 			const errorTitle = /*[[#{yada.error.http.otherTitle}]]*/ "placeholder";
-			const errorMessage = /*[[${@config.isDevelopmentEnvironment()} ? ${yadaExceptionMessage!=null?yadaExceptionMessage:'no message'} : #{yada.error.http.otherMessage}]]*/ "placeholder";
+			const errorMessage = /*[[${"\$"}{@config.isDevelopmentEnvironment()} ? ${"\$"}{yadaExceptionMessage!=null?yadaExceptionMessage:'no message'} : #{yada.error.http.otherMessage}]]*/ "placeholder";
 			yada.showErrorModal(errorTitle, errorMessage);
 		}
 		
 		// HTTP Error modal
-		if (/*[[${yadaHttpStatus!=null}]]*/ "placeholder") {
-			yada.showErrorModal(/*[[${#messages.msg('yada.error.http.title', yadaHttpStatus)}]]*/ "placeholder", /*[[#{|yada.error.http.${yadaHttpStatus}|}]]*/ "placeholder");
+		if (/*[[${"\$"}{yadaHttpStatus!=null}]]*/ "placeholder") {
+			yada.showErrorModal(/*[[${"\$"}{#messages.msg('yada.error.http.title', yadaHttpStatus)}]]*/ "placeholder", /*[[#{|yada.error.http.${"\$"}{yadaHttpStatus}|}]]*/ "placeholder");
 		}
 	});
 	

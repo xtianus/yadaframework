@@ -4,9 +4,11 @@
 /bin/
 /.settings/
 /.classpath
-/.gitattributes
 /.project
 **/res/css/*.min.*
 **/res/js/*.min.*
-
 !gradle-wrapper.jar
+/tmp/
+/gradle.local.properties
+/gradle.local.properties.disabled
+/known_hosts

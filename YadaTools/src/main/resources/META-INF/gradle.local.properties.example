@@ -1,0 +1,7 @@
+# This file contains properties available locally to the developer.
+# To use this file, rename it to "gradle.local.properties" and ensure that it's added to .gitignore
+#
+# Specify the location of the Yada repository and the name of the Yada projects you need to add to the classpath
+# This will make so that the Yada source files are used instead of the compiled jars
+yadaSourceRepoPath = /../../yadaframework
+yadaProjects = YadaWeb,YadaWebCMS,YadaWebSecurity,YadaWebCommerce
