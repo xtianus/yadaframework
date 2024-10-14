@@ -25,17 +25,18 @@ yex.ready(function(){
 	var usersTable;
 	let language = /*[[${#locale.language}]]*/ "placehoder";
 	let tablePageLoadUrl = /*[[@{/dashboard/user/userProfileTablePage}]]*/ "placehoder";
-	let userEditUrl = /*[[@{/dashboard/ajaxEditUserProfileForm}]]*/ "placehoder";
-	let userDeleteUrl = /*[[@{/dashboard/ajaxDeleteUserProfile}]]*/ "placehoder";
-	let userImpersonateUrl = /*[[@{/dashboard/impersonate}]]*/ "placehoder";
+	let userEditUrl = /*[[@{/dashboard/user/ajaxEditUserProfileForm}]]*/ "placehoder";
+	let userDeleteUrl = /*[[@{/dashboard/user/ajaxDeleteUserProfile}]]*/ "placehoder";
+	let userImpersonateUrl = /*[[@{/dashboard/user/impersonate}]]*/ "placehoder";
 	let languageFileUrl;
 	if (language === 'en') {
 	    languageFileUrl = /*[[@{/static/datatables-1.13.4/i18n/en-gb.json}]]*/ "placehoder";
 	} else {
 	    languageFileUrl = `/*[[@{/static/datatables-1.13.4/i18n/${language}_${language}.json}]]*/ "placehoder"`;
 	}	
-	let impersonateButtonTitle = "Impersonate";
-	let deleteButtonTitle = "Delete";
+	let impersonateButtonTitle = /*[[#{button.impersonate}]]*/ "placehoder";
+	let editButtonTitle = /*[[#{button.edit}]]*/ "placehoder";
+	let deleteButtonTitle = /*[[#{button.delete}]]*/ "placehoder";
 	let deleteConfirmationMessage = "Do you want to delete the selected user?";
 	let deleteConfirmationManyMessage = 'Do you want to delete the selected users?';
 	let deleteConfirmationButton = "Delete";
@@ -52,7 +53,7 @@ yex.ready(function(){
    		 ],
    		{
    			"url": userEditUrl,
-   			"title": 'Edit',
+   			"title": editButtonTitle,
    			"idName": "userProfileId"
    		},
    		{

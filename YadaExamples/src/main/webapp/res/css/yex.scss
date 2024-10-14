@@ -1,3 +1,10 @@
+@import './_variables.scss';
+@import './_bootstrapFix.scss';
+
+html {
+	font-size: $font-size-base;
+}
+
 header, footer {
 	height: 50px;
     background-color: #f1f1f1;

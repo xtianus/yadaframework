@@ -93,6 +93,15 @@ public class YadaWebUtil {
 	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
 	
 	/**
+	 * Check if an object holds a thymeleaf fragment instance. To be used in Thymeleaf templates.
+	 * @param someObject
+	 * @return true if the parameter is a fragment
+	 */
+	public boolean isFragment(Object someObject) {
+		return someObject instanceof org.thymeleaf.standard.expression.Fragment;
+	}
+	
+	/**
 	 * Returns true if the MultipartFile has not been uploaded at all, not even an empty file
 	 * @param multipartFile
 	 */

@@ -19,6 +19,10 @@ public class UserProfile extends YadaUserProfile {
 	@Column(length = 32)
 	String nickname; // This is an example of UserProfile customization
 
+	// Used in the edit form
+	@Transient
+	private boolean inviteEmail = false;
+
 	/**
 	 * Used by DataTables
 	 */
@@ -77,5 +81,14 @@ public class UserProfile extends YadaUserProfile {
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
 	}
-	
+
+	@Transient
+	public boolean isInviteEmail() {
+		return inviteEmail;
+	}
+
+	public void setInviteEmail(boolean inviteEmail) {
+		this.inviteEmail = inviteEmail;
+	}
+
 }

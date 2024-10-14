@@ -1,0 +1,9 @@
+$c-error: red; // Color for error messages
+
+$font-size-base: 16px;
+
+// Fix for grid/flex blowout https://css-tricks.com/you-want-minmax10px-1fr-not-1fr/
+// Usage: fr(auto) fr(1fr)
+@function fr($size) {
+	@return minmax(10px, $size);
+}
