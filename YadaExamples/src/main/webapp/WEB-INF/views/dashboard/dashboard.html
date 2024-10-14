@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+	xmlns:th="http://www.thymeleaf.org" 
+	xmlns:yada="http://www.yadaframework.net">
+<head>
+	<th:block th:replace="~{/header :: headFragment}"/>
+	<link rel="stylesheet" type="text/css" th:href="@{/static/datatables-1.13.4/datatables.min.css}"/>
+</head>
+<body>
+
+<th:block th:replace="~{/header :: body}"/>
+
+<main class="container">
+<h1>Dashboard</h1>
+<ul>
+	<li><a th:href="@{/}">Home</a></li>
+	<li th:replace="~{/home :: dashboardLinks}"></li>
+</ul>
+</main>
+
+<th:block th:replace="~{/footer :: body}"/>
+
+<script th:src="@{/static/datatables-1.13.4/datatables.min.js}"></script>
+
+</body>
+</html>

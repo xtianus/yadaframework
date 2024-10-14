@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://yada.yodadog.net" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<meta charset="utf-8" />
+</head>
+<body>
+<!--/* Notification modal */-->
+<!--/* Do not add anything before "modal" and "yadaNotify" because yada.js relies on this sequence: body > .modal > .yadaNotify */-->
+<div class="s_modalNotify"> <!--/* Only seen when loaded via ajax */-->
+	<div th:replace="~{/yada/ajaxResponseData :: .yadaResponseData}" th:if="${resultMap!=null}"></div>
+  <div th:fragment="modal" class="modal-dialog yadaNotify" th:classappend="${extraDialogClasses}"
+  	th:with="iconName=${YADA_TOTSEVERITY=='ok'?'ok':YADA_TOTSEVERITY=='error'?'error':'warning'}">
+	<th:block th:fragment="modal-content">
+	<!--/* Versione con tanti messaggi */-->
+    <div class="modal-content" th:if="${YADA_NTITLE!=null and YADA_NTITLE.size()>1}">
+      <div class="modal-header">
+        <h4>
+        	<i th:class="|yadaIcon yadaIcon-${iconName} ${YADA_TOTSEVERITY}|"></i>
+	        <span class="modal-title"></span>
+        </h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      	<div class="" id="messageAccordion" role="tablist" aria-multiselectable="true">
+			<div class="" th:each="title,iterStat : ${YADA_NTITLE}">
+				<div class="" role="tab" th:id="|heading${iterStat.index}|">
+					<h5>
+						<a data-bs-toggle="collapse" class="collapsed" data-bs-parent="#messageAccordion" th:href="|#collapse${iterStat.index}|" 
+						aria-expanded="true" th:attr="aria-controls=${'collapse' + iterStat.index}">
+							<i th:class="|yadaIcon yadaIcon-${iconName} ${YADA_SEVERITY.get(iterStat.index)}|"></i>
+							<span th:text="${title}">Collapsible Group Item #1</span>
+							<i class="bi bi-caret-down"></i>
+						</a>
+					</h5>
+      			</div>
+				<div th:id="|collapse${iterStat.index}|" class="collapse in" role="tabpanel" th:attr="aria-labelledby=${'heading' + iterStat.index}">
+					<div class="notifyMessage" th:utext="${YADA_NBODY.get(iterStat.index)}">
+						Anim pariatur cliche reprehenderit
+					</div>
+				</div>
+			</div>	  
+		</div>    	
+      </div>
+      <div class="modal-footer" th:if="${YADA_AUTOCLOSE==null}">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{yada.view.modal.button.close}">Close</button>
+      </div>
+    </div>
+
+	<!--/* Versione con un solo messaggio */-->
+    <div class="modal-content" th:if="${YADA_NTITLE==null or YADA_NTITLE.size()==1}">
+      <div class="modal-header">
+        <h4>
+        	<i th:class="|yadaIcon yadaIcon-${iconName} ${YADA_TOTSEVERITY}|"></i>
+	        <span th:text="${YADA_NTITLE!=null?YADA_NTITLE.get(0):''}" class="modal-title">Modal title</span>
+        </h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p th:utext="${YADA_NBODY!=null?YADA_NBODY.get(0):''}">Message body here</p>
+      </div>
+      <div class="modal-footer" th:if="${YADA_AUTOCLOSE==null}">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{yada.view.modal.button.close}">Close</button>
+      </div>
+    </div>
+    
+    <script th:if="${YADA_AUTOCLOSE!=null}" type="text/javascript" th:inline="javascript">
+    	const autoclose = /*[[${YADA_AUTOCLOSE}]]*/ 0;
+    	window.setTimeout(function(){$('#yada-notification').modal('hide');}, autoclose);
+    </script>
+
+	  <script th:if="${YADA_RELOADONCLOSE!=null}" type="text/javascript" th:inline="javascript">
+		$('#yada-notification').on('hidden.bs.modal', function (e) {
+			yada.loaderOn();
+			window.location.reload(true);
+		});
+	  </script>
+	  <script th:if="${YADA_RELOADONCLOSE==null and YADA_REDIRECT!=null}" type="text/javascript" th:inline="javascript">
+		$('#yada-notification').on('hidden.bs.modal', function (e) {
+			yada.loaderOn();
+			window.location.href=/*[[@{${YADA_REDIRECT}}]]*/ "unset";
+		});
+	  </script>
+	  <th:block th:if="${YADA_CALLSCRIPT!=null}">
+		<th:block th:each="scriptId : ${YADA_CALLSCRIPT}">
+			<!--/* Potrebbero esserci pezzi di html a loro volta inclusi oltre che a javascript */-->
+			<div th:replace="/script :: '#'+${scriptId}"></div>
+	  	</th:block>
+	  </th:block>
+  	</th:block> <!--/* /.modal-content */-->
+  </div> <!--/* /.modal-dialog */-->
+	  
+</div>
+</body>
+</html>

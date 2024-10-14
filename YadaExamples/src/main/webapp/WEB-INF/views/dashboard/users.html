@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+	xmlns:th="http://www.thymeleaf.org" 
+	xmlns:yada="http://www.yadaframework.net">
+<head>
+	<th:block th:replace="~{/header :: headFragment}"/>
+</head>
+<body>
+
+<th:block th:replace="~{/header :: body}"/>
+
+<main class="container">
+	<h1>Users</h1>
+</main>
+
+<th:block th:replace="~{/footer :: body}"/>
+
+</body>
+</html>

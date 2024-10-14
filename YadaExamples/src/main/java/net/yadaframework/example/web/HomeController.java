@@ -32,6 +32,17 @@ public class HomeController {
 	@Autowired private YadaSecurityUtil yadaSecurityUtil;
 	@Autowired private YadaNotify yadaNotify;
 	@Autowired private YexConfiguration config;
+	
+	@RequestMapping("/datatables")
+	public String datatables(Model model, Locale locale) {
+		return "/datatables";
+	}
+	
+	@RequestMapping("/datatablesLegacy")
+	public String datatablesLegacy(Model model, Locale locale) {
+		return "/datatablesLegacy";
+	}
+	
 
 	/**
 	 * Called after session timeout

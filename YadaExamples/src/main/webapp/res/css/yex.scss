@@ -4,5 +4,40 @@ header, footer {
 }
 
 main {
-	height: 300px;
+	min-height: 300px;
+}
+
+///////////////////////
+// Yada v0.7.6 icon fix
+//
+.yadaIcon-edit:before {
+    content: "\F4CB";
+}
+
+.yadaIcon-down:before {
+    content: "\F128";
+}
+
+.yadaIcon-up:before {
+    content: "\F148";
+}
+
+.yadaIcon-edit:before {
+    content: "\F4CB";
+}
+
+.yadaIcon-delete:before {
+    content: "\F5DE";
+}
+
+.yadaIcon-clone:before {
+    content: "\F3C2";
+}
+
+.yadaIcon-add:before {
+    content: "\F4FD";
+}
+
+.yadaIcon-eye:before {
+    content: "\F341";
 }

@@ -52,7 +52,7 @@
 	z-index: 999999;    
 }
 
-.modal .btn-close, .popover .btn-close {
+.modal:not(.B5) .btn-close, .popover .btn-close {
 	/* float: right; */
     border: none;
     margin: 0;
@@ -60,6 +60,11 @@
     /*opacity: .2;*/
     position: relative;
     bottom: 18px;
+}
+
+.modal.B5 .btn-close {
+    position: relative;
+    bottom: 10px;
 }
 
 .yadaResponseData {
