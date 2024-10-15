@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -26,10 +27,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.components.YadaWebUtil;
+import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
+import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.security.persistence.repository.YadaRegistrationRequestDao;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
+import net.yadaframework.security.web.YadaSession;
 import net.yadaframework.web.form.YadaFormPasswordChange;
 
 @Component
@@ -51,7 +55,37 @@ public class YadaSecurityUtil {
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired private YadaWebUtil yadaWebUtil;
+	@Autowired private YadaConfiguration config;
 
+	/**
+	 * Returns true if the given user can change the role targetRoleId on users, based on its own roles
+	 * @param actingUser the user that wants to change a role
+	 * @param targetRoleId the role that the user wants to change
+	 * @return true if actingUser can set or clear the targetRoleId on users, as configured by &lt;handles>
+	 */
+	public boolean userCanChangeRole(YadaUserProfile actingUser, Integer targetRoleId) {
+		List<Integer> actingRoleIds = actingUser.getUserCredentials().getRoles();
+		Map<Integer, Set<Integer>> roleIdToRoleChange = config.getRoleIdToRoleChange();
+		for (Integer actingRoleId : actingRoleIds) {
+			Set<Integer> canChangeIds = roleIdToRoleChange.get(actingRoleId);
+			if (canChangeIds.contains(targetRoleId)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if the given user can change the role targetRoleId on users, based on its own roles
+	 * @param actingUser the user that wants to change a role
+	 * @param targetRoleKey the role that the current user wants to change, any case
+	 * @return true if actingUser can set or clear the targetRoleId on users, as configured by &lt;handles>
+	 */
+	public boolean userCanChangeRole(YadaUserProfile actingUser, String targetRoleKey) {
+		Integer targetRoleId = config.getRoleId(targetRoleKey);
+		return userCanChangeRole(actingUser, targetRoleId);
+	}	
+	
 	/**
 	 * Logs out the currently logged-in user
 	 * @param request
@@ -228,7 +262,7 @@ public class YadaSecurityUtil {
 	}
 
 	/**
-	 * Ritorna uno o l'altro parametro a seconda che l'utente corrente sia autenticato o meno
+	 * Ritorna uno o l'altro parametro a seconda che l'utente corrente sia autenticato o meno.
 	 * @param anonymousValue
 	 * @param authenticatedValue
 	 * @return
@@ -299,9 +333,12 @@ public class YadaSecurityUtil {
 	}
 
 	/**
-	 * Controlla se l'utente attuale possiede il ruolo specificato. Case Sensitive!
-	 * @param roleToCheck nel formato senza ROLE_ iniziale
-	 * @return
+	 * Check if the current user has the provided role, case sensitive.
+	 * This method finds roles in the current SecurityContextHolder and never goes
+	 * to database so it may be better than {@link YadaSession#isCurrentRole(String)}
+	 * for time-critical use cases
+	 * @param roleToCheck without "ROLE_" prefix
+	 * @see {@link YadaSession#isCurrentRole(String)} 
 	 */
 	public boolean hasCurrentRole(String roleToCheck) {
 		Set<String> roles = getCurrentRoles();
@@ -309,13 +346,38 @@ public class YadaSecurityUtil {
 	}
 
 	/**
-	 * Controlla se l'utente attuale possiede almeno un ruolo tra quelli specificati. Case Sensitive!
-	 * @param roleToCheck array di ruoli nel formato senza ROLE_ iniziale
-	 * @return
+	 * Check if the current user has any of the provided roles, case sensitive.
+	 * This method finds roles in the current SecurityContextHolder and never goes
+	 * to database but if an instance of the current YadaUserProfile is available,
+	 * the {@link YadaUserProfile#hasAnyRole(Integer...)} method may be faster.
+	 * @param rolesToCheck without "ROLE_" prefix
+	 * @see {@link YadaUserProfile#hasAnyRole(Integer...)}
+	 * @see #hasAnyRole(String...)
+	 * @deprecated use {@link #hasAnyRole(String...)} instead
 	 */
+	@Deprecated // Better use hasAnyRole which is better named and faster
 	public boolean hasCurrentRole(String[] rolesToCheck) {
 		Set<String> currentRoles = getCurrentRoles();
 		Set<String> requiredRoles = new HashSet<>(Arrays.asList(rolesToCheck));
 		return CollectionUtils.containsAny(currentRoles, requiredRoles);
+	}
+	
+	/**
+	 * Check if the current user has any of the provided roles, case sensitive.
+	 * This method finds roles in the current SecurityContextHolder and never goes
+	 * to database but if an instance of the current YadaUserProfile is available,
+	 * the {@link YadaUserProfile#hasAnyRole(Integer...)} method may be faster.
+	 * @param rolesToCheck without "ROLE_" prefix
+	 * @see {@link YadaUserProfile#hasAnyRole(Integer...)}
+	 */
+	public boolean hasAnyRole(String ... rolesToCheck) {
+		Set<String> currentRoles = getCurrentRoles();
+		for (String roleToCheck : rolesToCheck) {
+			if (currentRoles.contains(roleToCheck)) {
+				return true;
+			}
+		}
+		return false;
+		
 	}
 }

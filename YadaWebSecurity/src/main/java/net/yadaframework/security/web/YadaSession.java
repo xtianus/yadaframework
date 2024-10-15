@@ -124,9 +124,13 @@ public class YadaSession<T extends YadaUserProfile> {
 	}
 
 	/**
-	 * Check if the current logged in user (if any) has the specified role
+	 * Check if the current logged in user (if any) has the specified role.
+	 * This method must load the current user profile from database when not already
+	 * cached in the user session, so it might be slower than {@link YadaSecurityUtil#hasCurrentRole(String)}
+	 * for time-critical use cases. 
 	 * @param roleString the role name, case insensitive, e.g. "MANAGER" or "admin"
 	 * @return true if there is a logged in user with the specified role name
+	 * @see {@link YadaSecurityUtil#hasCurrentRole(String)}
 	 */
 	public boolean isCurrentRole(String roleString) {
 		List<Integer> roles = getLoggedInUserRoles();
