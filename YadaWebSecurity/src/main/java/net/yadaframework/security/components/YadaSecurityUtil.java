@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
 
+import jakarta.persistence.Transient;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import net.yadaframework.components.YadaUtil;
@@ -58,6 +59,34 @@ public class YadaSecurityUtil {
 	@Autowired private YadaConfiguration config;
 
 	/**
+	 * Ensures that roles set on some target user can be set by the current user.
+	 * Permissions to change roles are specified in the &lt;role>&lt;handles> configuration parameter.
+	 * @param actingUser the user that wants to change roles on some user
+	 * @param rolesBefore the roles that the target user had before they were modified
+	 * @param rolesAfter the roles that the target user should have after modification. On exit, the roles that can't be changed are reset to the value in rolesBefore
+	 * @return the roles that the actingUser can't change
+	 */
+	public Set<Integer> setRolesWhenAllowed(YadaUserProfile actingUser, List<Integer> rolesBefore, List<Integer> rolesAfter) {
+		Set<Integer> forbiddenRoles = new HashSet<Integer>();
+		List<Integer> allRoleIds = config.getRoleIds();
+		for (Integer roleId : allRoleIds) {
+			boolean hadRoleBefore = rolesBefore.contains(roleId);
+			boolean hasRoleAfter = rolesAfter.contains(roleId);
+			boolean roleChanged = hadRoleBefore!=hasRoleAfter;
+			if (roleChanged && !userCanChangeRole(actingUser, roleId)) {
+				// The current user can't edit this role, so reset it
+				forbiddenRoles.add(roleId);
+				if (hadRoleBefore) {
+					rolesAfter.add(roleId);
+				} else {
+					rolesAfter.remove(roleId);
+				}
+			}
+		}
+		return forbiddenRoles;
+	}
+
+	/**
 	 * Returns true if the given user can change the role targetRoleId on users, based on its own roles
 	 * @param actingUser the user that wants to change a role
 	 * @param targetRoleId the role that the user wants to change
@@ -85,6 +114,26 @@ public class YadaSecurityUtil {
 		Integer targetRoleId = config.getRoleId(targetRoleKey);
 		return userCanChangeRole(actingUser, targetRoleId);
 	}	
+	
+	/**
+	 * Check if the roles of the actingUser allow it to change the targetUser based on its roles, as configured by &lt;handles>
+	 * A target user can be changed only when its roles can all be changed by any of the roles of the acting user.
+	 * @param actingUser
+	 * @param targetUser
+	 * @return true if actingUser can edit targetUser, false otherwise
+	 */
+	public boolean userCanEditUser(YadaUserProfile actingUser, YadaUserProfile targetUser) {
+		List<Integer> actingRoleIds = actingUser.getUserCredentials().getRoles();
+		List<Integer> targetRoleIds = targetUser.getUserCredentials().getRoles();
+		Map<Integer, Set<Integer>> roleIdToRoleChange = config.getRoleIdToRoleChange();
+		for (Integer actingRoleId : actingRoleIds) {
+			Set<Integer> canChangeIds = roleIdToRoleChange.get(actingRoleId);
+			if (canChangeIds.containsAll(targetRoleIds)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	/**
 	 * Logs out the currently logged-in user

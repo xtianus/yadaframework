@@ -72,8 +72,7 @@ public class YadaUserDetailsService implements UserDetailsService {
 		try {
 			yadaUserCredentials = yadaUserCredentialsDao.findFirstByUsername(username);
 			if (yadaUserCredentials!=null) {
-				// BFA prevention: dopo N tentativi sbagliati consecutivi, blocco l'accesso per tot minuti
-				// Il modo in cui è fatto è ridicolo perchè resetta il conto solo se sbaglio dopo che è passato il timeout...!
+				// BFA prevention: after some login failures, block login for a configured timeout
 				int maxFailed = yadaConfiguration.getMaxPasswordFailedAttempts();
 				int lockMillis = yadaConfiguration.getPasswordFailedAttemptsLockoutMinutes()*60000;
 				Date lastFailedTimestamp = yadaUserCredentials.getLastFailedAttempt();
@@ -81,6 +80,7 @@ public class YadaUserDetailsService implements UserDetailsService {
 					if (System.currentTimeMillis()-lastFailedTimestamp.getTime()<lockMillis) {
 						lockout = true;
 					} else {
+						// After the timeout, login can be tried again
 						yadaUserCredentialsDao.resetFailedAttempts(username);
 					}
 				}
