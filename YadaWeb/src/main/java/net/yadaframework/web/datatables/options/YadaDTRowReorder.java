@@ -13,7 +13,7 @@ class YadaDTRowReorder extends YadaFluentBase<YadaDataTableOptions> {
     private String selector;
     private Boolean snapX;
 
-    public YadaDTRowReorder(YadaDataTableOptions parent) {
+    YadaDTRowReorder(YadaDataTableOptions parent) {
         super(parent);
     }
 

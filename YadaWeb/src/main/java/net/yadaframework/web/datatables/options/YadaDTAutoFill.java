@@ -12,7 +12,7 @@ class YadaDTAutoFill extends YadaFluentBase<YadaDataTableOptions> {
     private Boolean enable;
     private Boolean update;
 
-    public YadaDTAutoFill(YadaDataTableOptions parent) {
+    YadaDTAutoFill(YadaDataTableOptions parent) {
         super(parent);
     }
 

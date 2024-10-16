@@ -12,7 +12,7 @@ class YadaDTColReorder extends YadaFluentBase<YadaDataTableOptions> {
     private Boolean enable;
     private Integer fixedColumnsLeft;
 
-    public YadaDTColReorder(YadaDataTableOptions parent) {
+    YadaDTColReorder(YadaDataTableOptions parent) {
         super(parent);
     }
 

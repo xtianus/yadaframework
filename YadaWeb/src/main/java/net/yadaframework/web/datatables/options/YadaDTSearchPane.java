@@ -16,7 +16,7 @@ class YadaDTSearchPane extends YadaFluentBase<YadaDTSearchPanes> {
     private String header;
     private List<YadaDTSearchPaneOption> options;
 
-    public YadaDTSearchPane(YadaDTSearchPanes parent) {
+    YadaDTSearchPane(YadaDTSearchPanes parent) {
         super(parent);
     }
 

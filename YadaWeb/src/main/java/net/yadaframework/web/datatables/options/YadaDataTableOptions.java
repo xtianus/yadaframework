@@ -3,13 +3,16 @@ package net.yadaframework.web.datatables.options;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.yadaframework.core.YadaFluentBase;
+import net.yadaframework.web.datatables.YadaDataTable;
+
 /**
  * Class representing options for configuring DataTables.
  * 
  * @see <a href="https://datatables.net/reference/option/">DataTables Reference</a>
  */
-public class YadaDataTableOptions {
-    private String dataTableExtErrMode;
+public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
+	private String dataTableExtErrMode;
     private YadaDTAjax ajax;
     private YadaDTAutoFill autoFill;
     private Boolean autoWidth;
@@ -55,7 +58,7 @@ public class YadaDataTableOptions {
     private String preDrawCallback;
     private Boolean processing;
     private String renderer;
-    private Boolean responsive;
+    private Boolean responsive = Boolean.TRUE; // Defaults to responsive
     private YadaDTResponsiveDetails responsiveDetails;
     private Boolean retrieve;
     private String rowCallback;
@@ -83,6 +86,598 @@ public class YadaDataTableOptions {
     private String stateSaveParams;
     private Integer tabIndex;
 
+    public YadaDataTableOptions(YadaDataTable parent) {
+ 		super(parent);
+ 	}
+
+    /**
+     * Sets the `dataTableExtErrMode` option.
+     * 
+     * @param dataTableExtErrMode the error mode for the DataTable
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/">dataTableExtErrMode</a>
+     */
+    public YadaDataTableOptions dataTableExtErrMode(String dataTableExtErrMode) {
+        this.dataTableExtErrMode = dataTableExtErrMode;
+        return this;
+    }
+
+    /**
+     * Sets the `autoWidth` option.
+     * 
+     * @param autoWidth enable or disable automatic column width calculation
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/autoWidth">autoWidth</a>
+     */
+    public YadaDataTableOptions autoWidth(Boolean autoWidth) {
+        this.autoWidth = autoWidth;
+        return this;
+    }
+
+    /**
+     * Sets the `buttonSearchBuilder` option.
+     * 
+     * @param buttonSearchBuilder the text for the SearchBuilder button
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/searchBuilder.button">buttonSearchBuilder</a>
+     */
+    public YadaDataTableOptions buttonSearchBuilder(String buttonSearchBuilder) {
+        this.buttonSearchBuilder = buttonSearchBuilder;
+        return this;
+    }
+
+    /**
+     * Sets the `buttonSearchPanes` option.
+     * 
+     * @param buttonSearchPanes the text for the SearchPanes button
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/searchPanes.button">buttonSearchPanes</a>
+     */
+    public YadaDataTableOptions buttonSearchPanes(String buttonSearchPanes) {
+        this.buttonSearchPanes = buttonSearchPanes;
+        return this;
+    }
+
+    /**
+     * Sets the `caption` option.
+     * 
+     * @param caption the table caption
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/caption">caption</a>
+     */
+    public YadaDataTableOptions caption(String caption) {
+        this.caption = caption;
+        return this;
+    }
+
+    /**
+     * Sets the `createdRow` option.
+     * 
+     * @param createdRow a callback function to manipulate the row after it has been created
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/createdRow">createdRow</a>
+     */
+    public YadaDataTableOptions createdRow(String createdRow) {
+        this.createdRow = createdRow;
+        return this;
+    }
+
+    /**
+     * Sets the `deferLoading` option.
+     * 
+     * @param deferLoading enable or disable deferred loading of data
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/deferLoading">deferLoading</a>
+     */
+    public YadaDataTableOptions deferLoading(Boolean deferLoading) {
+        this.deferLoading = deferLoading;
+        return this;
+    }
+
+    /**
+     * Sets the `deferRender` option.
+     * 
+     * @param deferRender enable or disable deferred rendering of rows
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/deferRender">deferRender</a>
+     */
+    public YadaDataTableOptions deferRender(Boolean deferRender) {
+        this.deferRender = deferRender;
+        return this;
+    }
+
+    /**
+     * Sets the `destroy` option.
+     * 
+     * @param destroy enable or disable DataTables destruction before reinitialization
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/destroy">destroy</a>
+     */
+    public YadaDataTableOptions destroy(Boolean destroy) {
+        this.destroy = destroy;
+        return this;
+    }
+
+    /**
+     * Sets the `detectType` option.
+     * 
+     * @param detectType the detection type for DataTable columns
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/typeDetection">detectType</a>
+     */
+    public YadaDataTableOptions detectType(String detectType) {
+        this.detectType = detectType;
+        return this;
+    }
+
+    /**
+     * Sets the `displayStart` option.
+     * 
+     * @param displayStart the initial page to be displayed
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/displayStart">displayStart</a>
+     */
+    public YadaDataTableOptions displayStart(Integer displayStart) {
+        this.displayStart = displayStart;
+        return this;
+    }
+
+    /**
+     * Sets the `dom` option.
+     * 
+     * @param dom define the table control elements to display
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/dom">dom</a>
+     */
+    public YadaDataTableOptions dom(String dom) {
+        this.dom = dom;
+        return this;
+    }
+
+    /**
+     * Sets the `drawCallback` option.
+     * 
+     * @param drawCallback a callback function to execute on each draw event
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/drawCallback">drawCallback</a>
+     */
+    public YadaDataTableOptions drawCallback(String drawCallback) {
+        this.drawCallback = drawCallback;
+        return this;
+    }
+
+    /**
+     * Sets the `footerCallback` option.
+     * 
+     * @param footerCallback a callback function to manipulate the table footer
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/footerCallback">footerCallback</a>
+     */
+    public YadaDataTableOptions footerCallback(String footerCallback) {
+        this.footerCallback = footerCallback;
+        return this;
+    }
+
+    /**
+     * Sets the `formatNumber` option.
+     * 
+     * @param formatNumber define the number format to use for DataTables
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/formatNumber">formatNumber</a>
+     */
+    public YadaDataTableOptions formatNumber(String formatNumber) {
+        this.formatNumber = formatNumber;
+        return this;
+    }
+
+    /**
+     * Sets the `headerCallback` option.
+     * 
+     * @param headerCallback a callback function to manipulate the table header
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/headerCallback">headerCallback</a>
+     */
+    public YadaDataTableOptions headerCallback(String headerCallback) {
+        this.headerCallback = headerCallback;
+        return this;
+    }
+
+    /**
+     * Sets the `info` option.
+     * 
+     * @param info enable or disable the table information display
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/info">info</a>
+     */
+    public YadaDataTableOptions info(Boolean info) {
+        this.info = info;
+        return this;
+    }
+
+    /**
+     * Sets the `infoCallback` option.
+     * 
+     * @param infoCallback a callback function to customize the table information display
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/infoCallback">infoCallback</a>
+     */
+    public YadaDataTableOptions infoCallback(String infoCallback) {
+        this.infoCallback = infoCallback;
+        return this;
+    }
+
+    /**
+     * Sets the `initComplete` option.
+     * 
+     * @param initComplete a callback function executed when the table initialization is complete
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/initComplete">initComplete</a>
+     */
+    public YadaDataTableOptions initComplete(String initComplete) {
+        this.initComplete = initComplete;
+        return this;
+    }
+
+    /**
+     * Sets the `layout` option.
+     * 
+     * @param layout the layout for the table
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/layout">layout</a>
+     */
+    public YadaDataTableOptions layout(String layout) {
+        this.layout = layout;
+        return this;
+    }
+
+    /**
+     * Sets the `lengthChange` option.
+     * 
+     * @param lengthChange enable or disable the ability for the end user to change the page length
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/lengthChange">lengthChange</a>
+     */
+    public YadaDataTableOptions lengthChange(Boolean lengthChange) {
+        this.lengthChange = lengthChange;
+        return this;
+    }
+
+    /**
+     * Sets the `orderCellsTop` option.
+     * 
+     * @param orderCellsTop control if ordering cells appear at the top of the table
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/orderCellsTop">orderCellsTop</a>
+     */
+    public YadaDataTableOptions orderCellsTop(Boolean orderCellsTop) {
+        this.orderCellsTop = orderCellsTop;
+        return this;
+    }
+
+    /**
+     * Sets the `orderClasses` option.
+     * 
+     * @param orderClasses enable or disable the addition of ordering classes to the columns
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/orderClasses">orderClasses</a>
+     */
+    public YadaDataTableOptions orderClasses(Boolean orderClasses) {
+        this.orderClasses = orderClasses;
+        return this;
+    }
+
+    /**
+     * Sets the `orderDescReverse` option.
+     * 
+     * @param orderDescReverse enable or disable the reverse of default descending order
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/orderDescReverse">orderDescReverse</a>
+     */
+    public YadaDataTableOptions orderDescReverse(Boolean orderDescReverse) {
+        this.orderDescReverse = orderDescReverse;
+        return this;
+    }
+
+    /**
+     * Sets the `orderMulti` option.
+     * 
+     * @param orderMulti enable or disable multiple column ordering
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/orderMulti">orderMulti</a>
+     */
+    public YadaDataTableOptions orderMulti(Boolean orderMulti) {
+        this.orderMulti = orderMulti;
+        return this;
+    }
+
+    /**
+     * Sets the `ordering` option.
+     * 
+     * @param ordering enable or disable table column ordering
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/ordering">ordering</a>
+     */
+    public YadaDataTableOptions ordering(Boolean ordering) {
+        this.ordering = ordering;
+        return this;
+    }
+
+    /**
+     * Sets the `pageLength` option.
+     * 
+     * @param pageLength the number of rows per page
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/pageLength">pageLength</a>
+     */
+    public YadaDataTableOptions pageLength(Integer pageLength) {
+        this.pageLength = pageLength;
+        return this;
+    }
+
+    /**
+     * Sets the `paging` option.
+     * 
+     * @param paging enable or disable pagination
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/paging">paging</a>
+     */
+    public YadaDataTableOptions paging(Boolean paging) {
+        this.paging = paging;
+        return this;
+    }
+
+    /**
+     * Sets the `pagingType` option.
+     * 
+     * @param pagingType define the pagination button style
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/pagingType">pagingType</a>
+     */
+    public YadaDataTableOptions pagingType(String pagingType) {
+        this.pagingType = pagingType;
+        return this;
+    }
+
+    /**
+     * Sets the `preDrawCallback` option.
+     * 
+     * @param preDrawCallback a callback function before the table is redrawn
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/preDrawCallback">preDrawCallback</a>
+     */
+    public YadaDataTableOptions preDrawCallback(String preDrawCallback) {
+        this.preDrawCallback = preDrawCallback;
+        return this;
+    }
+
+    /**
+     * Sets the `processing` option.
+     * 
+     * @param processing enable or disable the display of a 'processing' indicator
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/processing">processing</a>
+     */
+    public YadaDataTableOptions processing(Boolean processing) {
+        this.processing = processing;
+        return this;
+    }
+
+    /**
+     * Sets the `renderer` option.
+     * 
+     * @param renderer define the renderer for table elements
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/renderer">renderer</a>
+     */
+    public YadaDataTableOptions renderer(String renderer) {
+        this.renderer = renderer;
+        return this;
+    }
+
+    /**
+     * Sets the `responsive` option.
+     * 
+     * @param responsive enable or disable DataTables responsive behavior
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/responsive">responsive</a>
+     */
+    public YadaDataTableOptions responsive(Boolean responsive) {
+        this.responsive = responsive;
+        return this;
+    }
+
+    /**
+     * Sets the `retrieve` option.
+     * 
+     * @param retrieve enable or disable DataTables instance retrieval
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/retrieve">retrieve</a>
+     */
+    public YadaDataTableOptions retrieve(Boolean retrieve) {
+        this.retrieve = retrieve;
+        return this;
+    }
+
+    /**
+     * Sets the `rowCallback` option.
+     * 
+     * @param rowCallback a callback function to manipulate a row
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/rowCallback">rowCallback</a>
+     */
+    public YadaDataTableOptions rowCallback(String rowCallback) {
+        this.rowCallback = rowCallback;
+        return this;
+    }
+
+    /**
+     * Sets the `rowId` option.
+     * 
+     * @param rowId define the row ID field
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/rowId">rowId</a>
+     */
+    public YadaDataTableOptions rowId(String rowId) {
+        this.rowId = rowId;
+        return this;
+    }
+
+    /**
+     * Sets the `scrollCollapse` option.
+     * 
+     * @param scrollCollapse enable or disable scrolling collapse behavior
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/scrollCollapse">scrollCollapse</a>
+     */
+    public YadaDataTableOptions scrollCollapse(Boolean scrollCollapse) {
+        this.scrollCollapse = scrollCollapse;
+        return this;
+    }
+
+    /**
+     * Sets the `scrollX` option.
+     * 
+     * @param scrollX enable or disable horizontal scrolling
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/scrollX">scrollX</a>
+     */
+    public YadaDataTableOptions scrollX(Boolean scrollX) {
+        this.scrollX = scrollX;
+        return this;
+    }
+
+    /**
+     * Sets the `scrollY` option.
+     * 
+     * @param scrollY define the table's vertical scroll height
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/scrollY">scrollY</a>
+     */
+    public YadaDataTableOptions scrollY(Boolean scrollY) {
+        this.scrollY = scrollY;
+        return this;
+    }
+
+    /**
+     * Sets the `searching` option.
+     * 
+     * @param searching enable or disable DataTables' search feature
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/searching">searching</a>
+     */
+    public YadaDataTableOptions searching(Boolean searching) {
+        this.searching = searching;
+        return this;
+    }
+
+    /**
+     * Sets the `serverSide` option.
+     * 
+     * @param serverSide enable or disable server-side processing mode
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/serverSide">serverSide</a>
+     */
+    public YadaDataTableOptions serverSide(Boolean serverSide) {
+        this.serverSide = serverSide;
+        return this;
+    }
+
+    /**
+     * Sets the `stateDuration` option.
+     * 
+     * @param stateDuration the duration for which the saved state is retained
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/stateDuration">stateDuration</a>
+     */
+    public YadaDataTableOptions stateDuration(Integer stateDuration) {
+        this.stateDuration = stateDuration;
+        return this;
+    }
+
+    /**
+     * Sets the `stateLoadCallback` option.
+     * 
+     * @param stateLoadCallback a callback function to load the state of the table
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/stateLoadCallback">stateLoadCallback</a>
+     */
+    public YadaDataTableOptions stateLoadCallback(String stateLoadCallback) {
+        this.stateLoadCallback = stateLoadCallback;
+        return this;
+    }
+
+    /**
+     * Sets the `stateLoadParams` option.
+     * 
+     * @param stateLoadParams a callback function to modify the loaded state
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/stateLoadParams">stateLoadParams</a>
+     */
+    public YadaDataTableOptions stateLoadParams(String stateLoadParams) {
+        this.stateLoadParams = stateLoadParams;
+        return this;
+    }
+
+    /**
+     * Sets the `stateLoaded` option.
+     * 
+     * @param stateLoaded a callback function when the state is loaded
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/stateLoaded">stateLoaded</a>
+     */
+    public YadaDataTableOptions stateLoaded(String stateLoaded) {
+        this.stateLoaded = stateLoaded;
+        return this;
+    }
+
+    /**
+     * Sets the `stateSave` option.
+     * 
+     * @param stateSave enable or disable table state saving
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/stateSave">stateSave</a>
+     */
+    public YadaDataTableOptions stateSave(Boolean stateSave) {
+        this.stateSave = stateSave;
+        return this;
+    }
+
+    /**
+     * Sets the `stateSaveCallback` option.
+     * 
+     * @param stateSaveCallback a callback function to save the state of the table
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/stateSaveCallback">stateSaveCallback</a>
+     */
+    public YadaDataTableOptions stateSaveCallback(String stateSaveCallback) {
+        this.stateSaveCallback = stateSaveCallback;
+        return this;
+    }
+
+    /**
+     * Sets the `stateSaveParams` option.
+     * 
+     * @param stateSaveParams a callback function to modify the saved state
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/stateSaveParams">stateSaveParams</a>
+     */
+    public YadaDataTableOptions stateSaveParams(String stateSaveParams) {
+        this.stateSaveParams = stateSaveParams;
+        return this;
+    }
+
+    /**
+     * Sets the `tabIndex` option.
+     * 
+     * @param tabIndex define the tab index of the table
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/tabIndex">tabIndex</a>
+     */
+    public YadaDataTableOptions tabIndex(Integer tabIndex) {
+        this.tabIndex = tabIndex;
+        return this;
+    }    
+    
     /**
      * @return The DataTables error mode.
      * @see <a href="https://datatables.net/reference/option/">DataTables Reference</a>

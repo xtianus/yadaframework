@@ -12,7 +12,7 @@ class YadaDTColumnSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
     private Boolean show;
     private Boolean threshold;
 
-    public YadaDTColumnSearchPanes(YadaDataTableOptions parent) {
+    YadaDTColumnSearchPanes(YadaDataTableOptions parent) {
         super(parent);
     }
 

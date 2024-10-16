@@ -12,7 +12,7 @@ class YadaDTRowGroup extends YadaFluentBase<YadaDataTableOptions> {
     private Boolean dataSrc;
     private Boolean startRender;
 
-    public YadaDTRowGroup(YadaDataTableOptions parent) {
+    YadaDTRowGroup(YadaDataTableOptions parent) {
         super(parent);
     }
 

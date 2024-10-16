@@ -12,7 +12,7 @@ class YadaDTLanguageAria extends YadaFluentBase<YadaDTLanguage> {
     private String sortAscending;
     private String sortDescending;
 
-    public YadaDTLanguageAria(YadaDTLanguage parent) {
+    YadaDTLanguageAria(YadaDTLanguage parent) {
         super(parent);
     }
 

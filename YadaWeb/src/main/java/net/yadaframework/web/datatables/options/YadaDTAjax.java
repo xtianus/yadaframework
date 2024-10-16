@@ -12,7 +12,7 @@ class YadaDTAjax extends YadaFluentBase<YadaDataTableOptions> {
     private String url;
     private String dataSrc;
 
-    public YadaDTAjax(YadaDataTableOptions parent) {
+    YadaDTAjax(YadaDataTableOptions parent) {
         super(parent);
     }
 

@@ -12,7 +12,7 @@ class YadaDTFixedHeader extends YadaFluentBase<YadaDataTableOptions> {
     private Boolean header;
     private Boolean footer;
 
-    public YadaDTFixedHeader(YadaDataTableOptions parent) {
+    YadaDTFixedHeader(YadaDataTableOptions parent) {
         super(parent);
     }
 

@@ -13,7 +13,7 @@ class YadaDTSearch extends YadaFluentBase<YadaDataTableOptions> {
     private Boolean smart;
     private Boolean caseInsensitive;
     
-    public YadaDTSearch(YadaDataTableOptions parent) {
+    YadaDTSearch(YadaDataTableOptions parent) {
         super(parent);
     }
 

@@ -12,7 +12,7 @@ class YadaDTSearchPaneOption extends YadaFluentBase<YadaDTSearchPane> {
     private String label;
     private String value;
 
-    public YadaDTSearchPaneOption(YadaDTSearchPane parent) {
+    YadaDTSearchPaneOption(YadaDTSearchPane parent) {
         super(parent);
     }
 

@@ -12,7 +12,7 @@ class YadaDTLanguage extends YadaFluentBase<YadaDataTableOptions> {
     private String emptyTable;
     private String zeroRecords;
 
-    public YadaDTLanguage(YadaDataTableOptions parent) {
+    YadaDTLanguage(YadaDataTableOptions parent) {
         super(parent);
     }
 

@@ -18,7 +18,7 @@ class YadaDTSelect extends YadaFluentBase<YadaDataTableOptions> {
     private String style;
     private Boolean toggleable;
 
-    public YadaDTSelect(YadaDataTableOptions parent) {
+    YadaDTSelect(YadaDataTableOptions parent) {
         super(parent);
     }
 

@@ -12,7 +12,7 @@ class YadaDTButton extends YadaFluentBase<YadaDataTableOptions> {
     private String text;
     private String action;
 
-    public YadaDTButton(YadaDataTableOptions parent) {
+    YadaDTButton(YadaDataTableOptions parent) {
         super(parent);
     }
 

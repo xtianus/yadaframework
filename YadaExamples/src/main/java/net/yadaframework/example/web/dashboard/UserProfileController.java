@@ -37,6 +37,8 @@ import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 import net.yadaframework.web.YadaDatatablesRequest;
 import net.yadaframework.web.YadaViews;
+import net.yadaframework.web.datatables.YadaDataTable;
+import net.yadaframework.web.datatables.YadaDataTableFactory;
 
 @Controller
 @RequestMapping("/dashboard/user")
@@ -53,6 +55,7 @@ public class UserProfileController {
 	@Autowired private YexEmailService yexEmailService;
 	@Autowired private UserSession userSession;
 	@Autowired private YadaSecurityUtil yadaSecurityUtil;
+	@Autowired private YadaDataTableFactory yadaDataTableFactory;
 
 	@ModelAttribute("userProfile")
 	public UserProfile addUserProfile(@RequestParam(value="userProfileId", required=false) Long id) {
@@ -199,7 +202,12 @@ public class UserProfileController {
 	}
 	
 	@RequestMapping("")
-	public String users() {
+	public String users(Locale locale) {
+		YadaDataTable yadaDataTable = yadaDataTableFactory.create("userTable", locale);
+		yadaDataTable.commands()
+			.add("Add User").delete("Delete User").edit("Edit User").back()
+			;
+		
 		return "/dashboard/users";
 	}
 	

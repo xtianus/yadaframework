@@ -12,7 +12,7 @@ class YadaDTKeys extends YadaFluentBase<YadaDataTableOptions> {
     private Boolean clipboard;
     private Boolean columns;
 
-    public YadaDTKeys(YadaDataTableOptions parent) {
+    YadaDTKeys(YadaDataTableOptions parent) {
         super(parent);
     }
 

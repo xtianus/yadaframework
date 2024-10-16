@@ -12,7 +12,7 @@ class YadaDTResponsiveDetails extends YadaFluentBase<YadaDataTableOptions> {
     private Boolean type;
     private String renderer;
 
-    public YadaDTResponsiveDetails(YadaDataTableOptions parent) {
+    YadaDTResponsiveDetails(YadaDataTableOptions parent) {
         super(parent);
     }
 

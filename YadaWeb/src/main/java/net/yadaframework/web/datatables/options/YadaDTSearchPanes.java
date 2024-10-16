@@ -30,7 +30,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
     private Integer viewCount;
     private Integer viewTotal;
 
-    public YadaDTSearchPanes(YadaDataTableOptions parent) {
+    YadaDTSearchPanes(YadaDataTableOptions parent) {
         super(parent);
     }
 

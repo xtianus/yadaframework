@@ -9,7 +9,7 @@ class YadaDTSearchCol extends YadaFluentBase<YadaDataTableOptions> {
     private String column;
     private String search;
 
-    public YadaDTSearchCol(YadaDataTableOptions parent) {
+    YadaDTSearchCol(YadaDataTableOptions parent) {
         super(parent);
     }
 

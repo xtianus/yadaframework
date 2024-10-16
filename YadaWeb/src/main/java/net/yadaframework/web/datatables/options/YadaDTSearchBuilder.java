@@ -22,7 +22,7 @@ class YadaDTSearchBuilder extends YadaFluentBase<YadaDataTableOptions> {
     private String logic;
     private Boolean preDefined;
 
-    public YadaDTSearchBuilder(YadaDataTableOptions parent) {
+    YadaDTSearchBuilder(YadaDataTableOptions parent) {
         super(parent);
     }
 

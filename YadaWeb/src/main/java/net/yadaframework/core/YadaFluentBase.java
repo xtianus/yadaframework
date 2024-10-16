@@ -12,7 +12,7 @@ public abstract class YadaFluentBase<T> {
     }
 
     // Method to return to parent for fluent chaining
-    public T end() {
+    public T back() {
         return parent;
     }
 }

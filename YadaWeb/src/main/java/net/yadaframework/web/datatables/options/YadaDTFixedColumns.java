@@ -12,7 +12,7 @@ class YadaDTFixedColumns extends YadaFluentBase<YadaDataTableOptions> {
     private Boolean leftColumns;
     private Boolean rightColumns;
 
-    public YadaDTFixedColumns(YadaDataTableOptions parent) {
+    YadaDTFixedColumns(YadaDataTableOptions parent) {
         super(parent);
     }
 

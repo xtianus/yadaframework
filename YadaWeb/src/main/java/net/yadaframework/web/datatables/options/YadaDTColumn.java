@@ -12,7 +12,7 @@ class YadaDTColumn extends YadaFluentBase<YadaDataTableOptions> {
     private String title;
     private String data;
 
-    public YadaDTColumn(YadaDataTableOptions parent) {
+    YadaDTColumn(YadaDataTableOptions parent) {
         super(parent);
     }
 

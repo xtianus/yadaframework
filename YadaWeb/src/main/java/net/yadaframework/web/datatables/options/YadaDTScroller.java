@@ -13,7 +13,7 @@ class YadaDTScroller extends YadaFluentBase<YadaDataTableOptions> {
     private Integer displayBuffer;
     private Integer boundaryScale;
     
-    public YadaDTScroller(YadaDataTableOptions parent) {
+    YadaDTScroller(YadaDataTableOptions parent) {
         super(parent);
     }
 

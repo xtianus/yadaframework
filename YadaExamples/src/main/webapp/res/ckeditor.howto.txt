@@ -1,9 +1,0 @@
-
-Per aggiornare ckeditor, aprire il file "build-config.js" e prelevare la url che dice 
-"Visit online builder to build CKEditor, starting with the same setup as before".
-Metterla nel browser e modificare i parametri come serve.
-Quindi salvare una nuova versione.
-La vecchia versione può essere tutta cancellata incluso "config.js" e sostituita con quella nuova.
-Non fare modifiche su nessun file, nemmeno "config.js". La configurazione va messa nel javascript quando si crea l'editor.
-
-Xtian

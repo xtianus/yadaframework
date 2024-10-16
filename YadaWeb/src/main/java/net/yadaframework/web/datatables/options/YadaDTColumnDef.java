@@ -12,7 +12,7 @@ class YadaDTColumnDef extends YadaFluentBase<YadaDataTableOptions> {
     private Integer targets;
     private Boolean visible;
 
-    public YadaDTColumnDef(YadaDataTableOptions parent) {
+    YadaDTColumnDef(YadaDataTableOptions parent) {
         super(parent);
     }
 
