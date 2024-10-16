@@ -31,9 +31,11 @@
 	<option data-link="./security/overview.html">Security</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./json.html">Read and Write JSON</option>
 	<option data-link="./confirmationModal.html">Confirmation Modal</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
 	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./staging.html">Staging Docs</option>
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
 </select>
@@ -128,7 +130,13 @@ window.onscroll = function() {
 <li><a href="#_description">Description</a></li>
 <li><a href="#_setup">Setup</a></li>
 <li><a href="#_password_reset">Password Reset</a></li>
-<li><a href="#_login_page">Login page</a></li>
+<li><a href="#_login_process">Login Process</a>
+<ul class="sectlevel2">
+<li><a href="#_login_post">Login POST</a></li>
+<li><a href="#_login_success">Login Success</a></li>
+<li><a href="#_login_failure">Login Failure</a></li>
+</ul>
+</li>
 <li><a href="#_credentials_change">Credentials Change</a>
 <ul class="sectlevel2">
 <li><a href="#_change_password">Change password</a></li>
@@ -433,7 +441,7 @@ public String passwordResetPost(@PathVariable String token, Model model, HttpSer
 </div>
 </div>
 <div class="sect1">
-<h2 id="_login_page">Login page</h2>
+<h2 id="_login_process">Login Process</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>The login page can either be a full page or a modal, and must contain the login form.</p>
@@ -649,6 +657,121 @@ there won&#8217;t be a chance to trigger the login process. Call the backend ins
 </tr>
 </table>
 </div>
+<div class="sect2">
+<h3 id="_login_post">Login POST</h3>
+<div class="paragraph">
+<p>The login POST is handled by <code>YadaUserDetailsService.loadUserByUsername()</code>. Check the source
+code to see what happens.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_login_success">Login Success</h3>
+<div class="paragraph">
+<p>When the provided credentials are valid and the user is not forbidden from entering, execution
+goes through <code>YadaAuthenticationFailureHandler</code> that performs some tasks like setting
+the user login timestamp, resetting the failed attempts counter, setting the user timezone
+and fixing the saved url (if any) by adding the language path (if configured).</p>
+</div>
+<div class="paragraph">
+<p>In case the saved request was ajax, the <code>YadaAuthenticationSuccessHandler.AJAX_LOGGEDIN_PARAM</code> is
+added to it. The name of the request parameter is <code>yadaAjaxJustLoggedIn</code> and can be used in a
+@Controller. See <a href="../ajax.html#loginRedirects">the ajax documentation</a> for an example.
+The <code>YadaAuthenticationSuccessHandler.AJAX_LOGGEDIN_HEADER</code> header is also set on the response and can
+eventually be used in javascript.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_login_failure">Login Failure</h3>
+<div class="paragraph">
+<p>When the login POST can&#8217;t authenticate the user or throws an exception,
+execution goes through <code>YadaAuthenticationFailureHandler</code> that sets the following request attributes:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>username</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name typed in the login form, this is always set</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>loginErrorFlag</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">generic login error, this is always set</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">passwordError</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">login failed for a wrong password</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">userDisabled</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">user is disabled regardless of password</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">credentialsExpiredException</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">password is expired regardless of what password is used. Execution is forwarded to <code>"/pwdChange"</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">lockoutMinutes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">long</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">the number of minutes before a locked account is allowed again</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">usernameNotFound, password</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean, string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">user not found in database, value of password typed</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">loginError</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">login failed for some other reason</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The "boolean" values actually have the value of their name, e.g. <code>?loginErrorFlag=loginErrorFlag</code></p>
+</div>
+<div class="paragraph">
+<p>The <strong>first two</strong> parameters are always set, the others are mutually exclusive but one
+is always provided.
+When the reason for failure is not <code>credentialsExpiredException</code>, execution is forwarded to the
+endpoint set in <code>YadaSecurityConfig</code>, which is by default the @Controller that opens the login page. This page can then use
+the above request attributes to display the appropriate message, for example using them
+in a conditional expression in HTML:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">th:if="${loginErrorFlag!=null}"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>credentialsExpiredException</code> flag is set if the user entered valid credentials but
+its <code>YadaUserCredentials.changePassword</code> flag is true, which can happen if a password
+reset has been forced by an administrator via a dashboard. In such case, execution
+is forwarded to <code>"/pwdChange"</code> where different steps can be taken, usually showing
+the login form. As the originating request is still active, any request parameter can
+be used, for example "username":</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Autowired RegistrationController registrationController;
+
+@RequestMapping("/pwdChange")
+public String pwdChange(String username, Model model, Locale locale) {
+	// The user is not logged in yet, and we open the password reset page
+	YadaRegistrationRequest yadaRegistrationRequest = new YadaRegistrationRequest();
+	return registrationController.passwordReset(username, yadaRegistrationRequest);
+}</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -696,7 +819,7 @@ user might be confused about which email address to use for login.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 19:40:44 +0200
+Last updated 2024-10-16 18:03:18 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

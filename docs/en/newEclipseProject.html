@@ -32,9 +32,11 @@
 	<option data-link="./security/overview.html">Security</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./json.html">Read and Write JSON</option>
 	<option data-link="./confirmationModal.html">Confirmation Modal</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
 	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./staging.html">Staging Docs</option>
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
 </select>
@@ -1187,7 +1189,7 @@ If the schema generator can&#8217;t connect to the database check that all confi
 <p>If all goes well, the output will be written to the <code>/schema</code> folder (you might need to refresh it in Eclipse with F5).
 To load the schema into the database you may use the <code>/env/dev/dropAndCreateDatabase.bat</code>
 script (or an equivalent linux/mac version) but it is more convenient to have the schema loaded
-by Flyway at first application run: just copy it in the <code>/src/main/resources/database</code> folder with a name like <code>V001__baseline</code>.</p>
+by Flyway at first application run: just copy it in the <code>/src/main/resources/database</code> folder with a name like <code>V001__baseline.sql</code>.</p>
 </div>
 </div>
 </div>
@@ -1384,7 +1386,7 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 21:19:11 +0200
+Last updated 2024-10-12 21:27:53 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

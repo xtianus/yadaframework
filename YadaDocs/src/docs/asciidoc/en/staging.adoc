@@ -1,0 +1,117 @@
+=  Staging
+:docinfo: shared
+
+Documentation bits waiting to be moved to the proper section
+
+== Error Handling
+[cols="1,1"]
+|===
+h|Scope
+|Configuration, HTML page
+h|Language
+|XML, HTML
+|===
+
+An error can be generated either outside the application (e.g. an endpoint doesn't exist,
+a thymeleaf template is not found) or
+inside the application via an Exception. 
+The first kind of error is handled by providing an error page in the `web.xml` file. The default
+target is `/yadaError`. 
+
+[source,XML]
+----
+<error-page>
+	<location>/yadaError</location>
+</error-page>
+----
+
+The second kind of error is handled by `YadaGlobalExceptionHandler`.
+
+These are two very distinct types or errors but the user
+doesn't need to be aware of the difference.
+For both kinds of errors, an ajax request results in the contents of `ajaxError.html`;
+for normal requests, the error details are set in some model attributes,
+then execution is forwarded to the `@RequestMapping` configured with `<errorPageForward>`.
+By default the target is the home page, where an error modal is shown.
+To show a dedicated error page, a skeleton of which can be found in `errorPage.html`,
+configure it as shown here: 
+
+[source,XML]
+----
+<paths>
+	<errorPageForward>/errorPage</errorPageForward>
+</paths>
+----
+
+TIP: A dedicated error page is generally more robust because it better handles errors generated in
+the home page itself
+
+NOTE: The global exception handler does not process exceptions annotated with `@ResponseStatus` so
+that Spring can handle them as expected
+
+== Favicon
+[cols="1,1"]
+|===
+h|Scope
+|HTML page
+h|Language
+|HTML
+|===
+Browsers load the "/favicon.ico" url by default when nothing else has been 
+specified in the HTML page or even when loading non-HTML pages, where the favicon location can't be
+specified. It is therefore important to provide a valid response when this happens.
+The "/favicon.ico" URL is handled by Yada Framework as long as a `favicon.ico` file is provided
+in the `webapp` folder.
+
+Other versions of the favicon can be specified in the header. It is good practice to put them in
+a versioned folder so that it will be easier to bypass the browser cache in case the icons will be 
+changed at a later date. The skeleton application has the following line in the header:
+
+[source,HTML]
+----
+<link rel="icon" type="image/x-icon" th:href="@{/static/favicons-1.0/favicon.ico}">
+----
+
+== document ready
+[cols="1,1"]
+|===
+h|Scope
+|HTML page
+h|Language
+|javascript
+|===
+
+Executing some javascript after the document has been fully loaded requires some lines of code that
+check the state of the document and register an event handler. This has already been implemented
+and inserted in the `header.html` file by the <<newEclipseProject#_code_generation_just_a_bit,yadaInit>> task 
+used to create the initial project skeleton.
+Example:
+
+[source,javascript]
+----
+<script th:fragment="yexready">
+	window.yex = window.yex || {};
+	yex.ready = yex.ready || function (fn) {
+		if (document.readyState != 'loading'){
+			fn();
+		} else {
+			document.addEventListener('DOMContentLoaded', fn);
+		}
+	}
+</script>
+----
+
+This can be used anywhere in all site pages that include it:
+
+[source,javascript]
+----
+<script>
+	yex.ready(function(){
+		// do something on the fully loaded page
+	});
+</script>
+----
+
+
+
+

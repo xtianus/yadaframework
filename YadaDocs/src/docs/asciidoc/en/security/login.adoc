@@ -188,7 +188,7 @@ public String passwordResetPost(@PathVariable String token, Model model, HttpSer
 }
 ----
 
-==  Login page
+==  Login Process
 
 The login page can either be a full page or a modal, and must contain the login form.
 
@@ -323,6 +323,96 @@ When using the previous tip, never open from a public page a modal containing a 
 there won't be a chance to trigger the login process. Call the backend instead as explained.
 ====
 
+
+=== Login POST
+The login POST is handled by `YadaUserDetailsService.loadUserByUsername()`. Check the source
+code to see what happens.
+
+=== Login Success
+When the provided credentials are valid and the user is not forbidden from entering, execution
+goes through `YadaAuthenticationFailureHandler` that performs some tasks like setting
+the user login timestamp, resetting the failed attempts counter, setting the user timezone
+and fixing the saved url (if any) by adding the language path (if configured).
+
+In case the saved request was ajax, the `YadaAuthenticationSuccessHandler.AJAX_LOGGEDIN_PARAM` is
+added to it. The name of the request parameter is `yadaAjaxJustLoggedIn` and can be used in a
+@Controller. See <<../ajax.adoc#loginRedirects,the ajax documentation>> for an example.
+The `YadaAuthenticationSuccessHandler.AJAX_LOGGEDIN_HEADER` header is also set on the response and can
+eventually be used in javascript.  	  
+
+=== Login Failure
+When the login POST can't authenticate the user or throws an exception, 
+execution goes through `YadaAuthenticationFailureHandler` that sets the following request attributes:
+
+[cols="1,1,1"]
+|===
+|*username*
+|string
+|name typed in the login form, this is always set
+
+|*loginErrorFlag*
+|boolean
+|generic login error, this is always set
+
+|passwordError
+|boolean
+|login failed for a wrong password
+
+|userDisabled
+|boolean
+|user is disabled regardless of password
+
+|credentialsExpiredException
+|boolean
+|password is expired regardless of what password is used. Execution is forwarded to `"/pwdChange"`
+
+|lockoutMinutes
+|long
+|the number of minutes before a locked account is allowed again
+
+|usernameNotFound, password
+|boolean, string
+|user not found in database, value of password typed
+
+|loginError
+|boolean
+|login failed for some other reason
+|===
+
+The "boolean" values actually have the value of their name, e.g. `?loginErrorFlag=loginErrorFlag`
+
+The *first two* parameters are always set, the others are mutually exclusive but one
+is always provided.
+When the reason for failure is not `credentialsExpiredException`, execution is forwarded to the
+endpoint set in `YadaSecurityConfig`, which is by default the @Controller that opens the login page. This page can then use
+the above request attributes to display the appropriate message, for example using them
+in a conditional expression in HTML:
+
+[source,html]
+----
+th:if="${loginErrorFlag!=null}"
+----
+
+The `credentialsExpiredException` flag is set if the user entered valid credentials but
+its `YadaUserCredentials.changePassword` flag is true, which can happen if a password
+reset has been forced by an administrator via a dashboard. In such case, execution
+is forwarded to `"/pwdChange"` where different steps can be taken, usually showing
+the login form. As the originating request is still active, any request parameter can
+be used, for example "username":
+
+[source,java]
+----
+
+@Autowired RegistrationController registrationController;
+
+@RequestMapping("/pwdChange")
+public String pwdChange(String username, Model model, Locale locale) {
+	// The user is not logged in yet, and we open the password reset page
+	YadaRegistrationRequest yadaRegistrationRequest = new YadaRegistrationRequest();
+	return registrationController.passwordReset(username, yadaRegistrationRequest);
+}
+----
+
 ==  Credentials Change
 Logged-in users should have an option to change their password or even their email address.
 Changing password is straightforward while changing email address requires sending a confirmation
@@ -344,7 +434,6 @@ user might be confused about which email address to use for login.
 
 
 TODO
-
 
 
 [.todo]

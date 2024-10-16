@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Staging</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="../yadadocs.css" />
+
+</head>
+<body class="article toc2 toc-left">
+<!--
+	WARNING !!!!!
+	Edit the /YadaDocs/src/docs/asciidoc/common/docinfo-header.html file
+	to change this menu.
+-->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/overview.html">Databases</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./security/overview.html">Security</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./json.html">Read and Write JSON</option>
+	<option data-link="./confirmationModal.html">Confirmation Modal</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./staging.html">Staging Docs</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.style.position = 'relative';
+        header.addEventListener('click', function(e) {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+            navigator.clipboard.writeText(url);
+        });
+        header.addEventListener('mouseenter', function() {
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-clone';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.style.position = 'absolute';
+            icon.style.right = '30px';
+            icon.style.top = '50%';
+            icon.style.transform = 'translateY(-50%)';
+            icon.style.fontSize = '18px';
+            icon.style.color = 'gray';
+            header.appendChild(icon);
+        });
+        header.addEventListener('mouseleave', function() {
+            const icon = header.querySelector('.fa-clone');
+            if (icon) {
+            	header.removeChild(icon);
+            }
+        });
+    });
+});
+
+function showCopy(e) {
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-clone';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.style.position = 'absolute';
+    icon.style.left = e.pageX + 'px';
+    icon.style.top = e.pageY + 'px';
+    icon.style.zIndex = 1000;
+    icon.style.fontSize = '24px';
+    document.body.appendChild(icon);
+    setTimeout(function() {
+        document.body.removeChild(icon);
+    }, 1000); // 1 second delay
+}
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;
+    	}
+    }
+};
+</script>
+<div id="header">
+<h1>Staging</h1>
+<div class="details">
+<span id="revnumber">version 0.7.7</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_error_handling">Error Handling</a></li>
+<li><a href="#_favicon">Favicon</a></li>
+<li><a href="#_document_ready">document ready</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Documentation bits waiting to be moved to the proper section</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_error_handling">Error Handling</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Scope</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Configuration, HTML page</p></td>
+</tr>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Language</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">XML, HTML</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>An error can be generated either outside the application (e.g. an endpoint doesn&#8217;t exist,
+a thymeleaf template is not found) or
+inside the application via an Exception.
+The first kind of error is handled by providing an error page in the <code>web.xml</code> file. The default
+target is <code>/yadaError</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="XML" class="language-XML hljs">&lt;error-page&gt;
+	&lt;location&gt;/yadaError&lt;/location&gt;
+&lt;/error-page&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The second kind of error is handled by <code>YadaGlobalExceptionHandler</code>.</p>
+</div>
+<div class="paragraph">
+<p>These are two very distinct types or errors but the user
+doesn&#8217;t need to be aware of the difference.
+For both kinds of errors, an ajax request results in the contents of <code>ajaxError.html</code>;
+for normal requests, the error details are set in some model attributes,
+then execution is forwarded to the <code>@RequestMapping</code> configured with <code>&lt;errorPageForward&gt;</code>.
+By default the target is the home page, where an error modal is shown.
+To show a dedicated error page, a skeleton of which can be found in <code>errorPage.html</code>,
+configure it as shown here:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="XML" class="language-XML hljs">&lt;paths&gt;
+	&lt;errorPageForward&gt;/errorPage&lt;/errorPageForward&gt;
+&lt;/paths&gt;</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+A dedicated error page is generally more robust because it better handles errors generated in
+the home page itself
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The global exception handler does not process exceptions annotated with <code>@ResponseStatus</code> so
+that Spring can handle them as expected
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_favicon">Favicon</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Scope</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HTML page</p></td>
+</tr>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Language</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HTML</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Browsers load the "/favicon.ico" url by default when nothing else has been
+specified in the HTML page or even when loading non-HTML pages, where the favicon location can&#8217;t be
+specified. It is therefore important to provide a valid response when this happens.
+The "/favicon.ico" URL is handled by Yada Framework as long as a <code>favicon.ico</code> file is provided
+in the <code>webapp</code> folder.</p>
+</div>
+<div class="paragraph">
+<p>Other versions of the favicon can be specified in the header. It is good practice to put them in
+a versioned folder so that it will be easier to bypass the browser cache in case the icons will be
+changed at a later date. The skeleton application has the following line in the header:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="HTML" class="language-HTML hljs">&lt;link rel="icon" type="image/x-icon" th:href="@{/static/favicons-1.0/favicon.ico}"&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_document_ready">document ready</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Scope</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HTML page</p></td>
+</tr>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Language</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">javascript</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Executing some javascript after the document has been fully loaded requires some lines of code that
+check the state of the document and register an event handler. This has already been implemented
+and inserted in the <code>header.html</code> file by the <a href="newEclipseProject.html#_code_generation_just_a_bit">yadaInit</a> task
+used to create the initial project skeleton.
+Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">&lt;script th:fragment="yexready"&gt;
+	window.yex = window.yex || {};
+	yex.ready = yex.ready || function (fn) {
+		if (document.readyState != 'loading'){
+			fn();
+		} else {
+			document.addEventListener('DOMContentLoaded', fn);
+		}
+	}
+&lt;/script&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This can be used anywhere in all site pages that include it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">&lt;script&gt;
+	yex.ready(function(){
+		// do something on the fully loaded page
+	});
+&lt;/script&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 0.7.7<br>
+Last updated 2024-10-14 15:48:49 +0200
+</div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>

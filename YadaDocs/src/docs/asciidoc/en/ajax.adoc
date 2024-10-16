@@ -733,6 +733,7 @@ button fragment again:
 </a>
 ----
 
+[[loginRedirects]]
 Another step would be to take care of "login redirects": when a logged out user clicks on the
 like button a login modal would be triggered if the url is protected (as it should) and the
 Controller, called after login with a redirect to the original url, wouldn't know the

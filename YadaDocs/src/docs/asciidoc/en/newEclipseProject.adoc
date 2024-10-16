@@ -705,7 +705,7 @@ If the schema generator can't connect to the database check that all configurati
 If all goes well, the output will be written to the `/schema` folder (you might need to refresh it in Eclipse with F5).
 To load the schema into the database you may use the `/env/dev/dropAndCreateDatabase.bat` 
 script (or an equivalent linux/mac version) but it is more convenient to have the schema loaded
-by Flyway at first application run: just copy it in the `/src/main/resources/database` folder with a name like `V001__baseline`.
+by Flyway at first application run: just copy it in the `/src/main/resources/database` folder with a name like `V001__baseline.sql`.
 
 == Tomcat server
 This section is about setting up a standalone Tomcat server that can be controlled from Eclipse. 
