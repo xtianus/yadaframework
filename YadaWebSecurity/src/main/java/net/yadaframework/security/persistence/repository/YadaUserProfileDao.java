@@ -186,6 +186,16 @@ public class YadaUserProfileDao<T extends YadaUserProfile> {
 		return em.merge(entity);
 	}
 
+	/**
+	 * Find a user profile
+	 * @param userProfileId
+	 * @return YadaUserProfile (subclass) instance or null
+	 */
+	public T find(long userProfileId) {
+		T userProfile = (T) em.find(YadaUserProfile.class, userProfileId);
+		return userProfile;
+	}
+
 	// Signature kept for legacy Spring Data Repository compatibility
 	public Optional<T> findById(Long entityId) {
 		// Class<T> returnTypeClass = (Class<T>) yadaUtil.findGenericClass(this); // Returns the class that extends YadaUserProfile e.g. UserProfile.class

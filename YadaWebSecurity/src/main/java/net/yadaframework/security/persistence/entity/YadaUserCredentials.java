@@ -30,6 +30,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
+import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.web.YadaJsonDateTimeShortSerializer;
 
 @Entity
@@ -109,10 +110,22 @@ public class YadaUserCredentials implements Serializable {
 //	}
 	
 	/**
-	 * Setta un unico ruolo cancellando quelli eventualmente presenti
+	 * Set one role removing any other roles
 	 * @param role
 	 */
 	@Transient
+	public void setOnlyRole(Integer role) {
+		roles = new ArrayList<Integer>();
+		roles.add(role);
+	}
+	
+	/**
+	 * Set one role removing any other roles
+	 * @param role
+	 * @deprecated @see #setOnlyRole(Integer)
+	 */
+	@Transient
+	@Deprecated // The name is misleading
 	public void setRole(Integer role) {
 		roles = new ArrayList<Integer>();
 		roles.add(role);
@@ -127,28 +140,46 @@ public class YadaUserCredentials implements Serializable {
 	}
 
 	/**
-	 * Add all roles if not already present
+	 * Add all roles if not already present. Same as {@link #addRoles(Integer[])}
 	 * @param roles
 	 */
 	@Transient
-	public void addRoles(Integer[] roles) {
+	public void ensureRoles(Integer[] roles) {
 		for (Integer role : roles) {
 			addRole(role);
 		}
 	}
+	
+	/**
+	 * Add all roles if not already present. Same as {@link #ensureRoles(Integer[])}
+	 * @param roles
+	 */
+	@Transient
+	public void addRoles(Integer[] roles) {
+		ensureRoles(roles);
+	}
 
 	/**
-	 * Add a role if not already present
+	 * Add a role if not already present. Same as {@link #addRole(Integer)}
 	 * @param role
 	 */
 	@Transient
-	public void addRole(Integer role) {
+	public void ensureRole(Integer role) {
 		if (roles==null) {
 			roles = new ArrayList<Integer>();
 		}
 		if (!hasRole(role)) {
 			roles.add(role);
 		}
+	}
+	
+	/**
+	 * Add a role if not already present. Same as {@link #ensureRole(Integer)}
+	 * @param role
+	 */
+	@Transient
+	public void addRole(Integer role) {
+		ensureRole(role);
 	}
 
 	/**
@@ -181,9 +212,13 @@ public class YadaUserCredentials implements Serializable {
 	}
 
 	/**
-	 * Sets the password and its timestamp then clears the "password change needed" flag
+	 * Sets the password and its timestamp then clears the failed attempts and the "changePassword" flag
 	 * @param password
+	 * @param encoder the password encoder, or null for cleartext passwords
+	 * @deprecated because it arbitrarily clears the changePassword flag
+	 * @see YadaSecurityUtil#changePassword(YadaUserProfile, String)
 	 */
+	@Deprecated
 	public void changePassword(String password, PasswordEncoder encoder) {
 		if (encoder!=null) {
 			password=encoder.encode(password);

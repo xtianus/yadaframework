@@ -96,6 +96,7 @@ public class YadaUserProfile implements Serializable {
 	 * @return true if the user has any of the specified roles
 	 */
 	public boolean hasAnyRole(Integer ... roleId) {
+		// slower: return CollectionUtils.containsAny(userCredentials.getRoles(), Arrays.asList(roleId));
 		for (Integer role : roleId) {
 			if (userCredentials.hasRole(role)) {
 				return true;

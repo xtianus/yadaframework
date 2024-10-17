@@ -26,7 +26,6 @@ import net.yadaframework.security.YadaWrappedSavedRequest;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 import net.yadaframework.security.persistence.repository.YadaUserProfileDao;
 
-// Si può inserire il codice da eseguire dopo un login che ha avuto successo
 @Component
 @Scope("prototype") // In case you have more than one YadaSecurityConfig bean
 public class YadaAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
