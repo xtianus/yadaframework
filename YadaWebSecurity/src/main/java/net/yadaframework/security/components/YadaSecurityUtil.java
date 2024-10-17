@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
@@ -57,7 +58,44 @@ public class YadaSecurityUtil {
 	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaConfiguration config;
+	@Autowired private PasswordEncoder passwordEncoder;
+	
+	/**
+	 * Check if a user has been suspended for excess of login failures
+	 * @param yadaUserProfile
+	 * @return true if the user is locked out
+	 */
+	public boolean isLockedOut(YadaUserProfile yadaUserProfile) {
+		YadaUserCredentials userCredentials = yadaUserProfile.getUserCredentials();
+		int maxFailed = config.getMaxPasswordFailedAttempts();
+		int lockMillis = config.getPasswordFailedAttemptsLockoutMinutes()*60000;
+		int failedAttempts = userCredentials.getFailedAttempts();
+		Date lastFailedTimestamp = userCredentials.getLastFailedAttempt();
+		return failedAttempts>maxFailed && lastFailedTimestamp!=null && System.currentTimeMillis()-lastFailedTimestamp.getTime()<lockMillis;
+	}
 
+	/**
+	 * Set a new password using the configured encoder. Also sets the password timestamp and clears the failed attempts.
+	 * The "force password change" flag is not cleared for the use case of a user being forced to set
+	 * a new password after first login with a provided password.
+	 * The password encoder is configured with &lt;encodePassword>true&lt;/encodePassword>
+	 * <br>
+	 * The userProfile is not saved.
+	 * @param userProfile
+	 * @param newPassword
+	 */
+	public void changePassword(YadaUserProfile userProfile, String newPassword) {
+		YadaUserCredentials userCredentials = userProfile.getUserCredentials();
+		if (passwordEncoder!=null) {
+			newPassword=passwordEncoder.encode(newPassword);
+		}
+		userCredentials.setPassword(newPassword);
+		userCredentials.setPasswordDate(new Date());
+		// NO changePassword = false;
+		userCredentials.setFailedAttempts(0);
+		userCredentials.setLastFailedAttempt(null);
+	}
+	
 	/**
 	 * Ensures that roles set on some target user can be set by the current user.
 	 * Permissions to change roles are specified in the &lt;role>&lt;handles> configuration parameter.

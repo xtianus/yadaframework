@@ -76,12 +76,14 @@ public class YadaUserDetailsService implements UserDetailsService {
 				int maxFailed = yadaConfiguration.getMaxPasswordFailedAttempts();
 				int lockMillis = yadaConfiguration.getPasswordFailedAttemptsLockoutMinutes()*60000;
 				Date lastFailedTimestamp = yadaUserCredentials.getLastFailedAttempt();
-				if (yadaUserCredentials.getFailedAttempts()>=maxFailed && lastFailedTimestamp!=null) {
-					if (System.currentTimeMillis()-lastFailedTimestamp.getTime()<lockMillis) {
+				if (yadaUserCredentials.getFailedAttempts()>maxFailed && lastFailedTimestamp!=null) {
+					if (System.currentTimeMillis()-lastFailedTimestamp.getTime() < lockMillis) {
 						lockout = true;
 					} else {
 						// After the timeout, login can be tried again
 						yadaUserCredentialsDao.resetFailedAttempts(username);
+						yadaUserCredentials.setFailedAttempts(0);
+						yadaUserCredentials.setLastFailedAttempt(null);
 					}
 				}
 				if (!lockout) {
