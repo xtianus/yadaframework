@@ -130,13 +130,14 @@ public class YadaDialectUtil {
 	}
 
 	/**
-	 * Retrieves a map of attributes from the custom tag, where all HTML attributes are kept as they are (NO: and thymeleaf
+	 * Retrieves a map of HTML attributes from the custom tag, where all HTML attributes are kept as they are (NO: and thymeleaf
 	 * th: attributes are converted to HTML attributes when possible). The map is then converted to a comma-separated string
+	 * of name=value attributes
 	 * @param customTag
 	 * @param context
-	 * @return a comma-separated string of name=value attributes to be used in th:attr
+	 * @return a comma-separated string of name=value HTML attributes to be later used in th:attr
 	 */
-	public String getConvertedCustomTagAttributeString(IOpenElementTag customTag, ITemplateContext context, String...ignoreAttributes) {
+	public String getConvertedHTMLCustomTagAttributeString(IOpenElementTag customTag, ITemplateContext context, String...ignoreAttributes) {
 		// First, get all HTML attributes
 		Set<String> ignore = new HashSet<String>();
 		for (int i=0; i<ignoreAttributes.length; i++) {
@@ -167,7 +168,7 @@ public class YadaDialectUtil {
 				!ignore.contains(attributeName)) {
 				if ("type".equalsIgnoreCase(attributeName) && "number".equalsIgnoreCase(attributeValue)) {
 					// The "type='number'" attribute must be removed from the output tag because it is handled in a custom way
-					continue;
+					continue; // TODO shouldn't this logic be removed or moved outside? 
 				}
 				// Convert null to name
 				if (attributeValue==null) {

@@ -23,7 +23,7 @@ class YadaDTAutoFill extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/autoFill.enable">enable</a>
      */
-    public YadaDTAutoFill enable(Boolean enable) {
+    public YadaDTAutoFill dtEnable(Boolean enable) {
         this.enable = enable;
         return this;
     }
@@ -44,7 +44,7 @@ class YadaDTAutoFill extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/autoFill.update">update</a>
      */
-    public YadaDTAutoFill update(Boolean update) {
+    public YadaDTAutoFill dtUpdate(Boolean update) {
         this.update = update;
         return this;
     }

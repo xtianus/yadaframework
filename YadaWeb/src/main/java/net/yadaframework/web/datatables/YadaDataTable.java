@@ -1,24 +1,25 @@
 package net.yadaframework.web.datatables;
 
-import java.util.List;
 import java.util.Locale;
 
 import org.springframework.context.MessageSource;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.web.datatables.config.YadaDataTableCommands;
+import net.yadaframework.web.datatables.config.YadaDataTableHTML;
 import net.yadaframework.web.datatables.options.YadaDataTableOptions;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class YadaDataTable {
 	private MessageSource messageSource;
 	private Locale locale;
 
 	private String id;
-	private YadaDataTableCommands yadaDataTableCommands;
-	
-	private String classes;
-	private List<String> columns;
-	private boolean disableCheckbox;
-	private YadaDataTableOptions jsoptions;
+	private YadaDataTableHTML yadaDataTableHTML;	
+	@JsonProperty private YadaDataTableOptions options = new YadaDataTableOptions(this);
 	
 	// Package visibility
 	YadaDataTable(String id, MessageSource messageSource, Locale locale) {
@@ -28,34 +29,19 @@ public class YadaDataTable {
 	}
 	
 	/**
-	 * Adds the add/edit/delete commands to the table
+	 * Set the HTML table structure
 	 */
-	public YadaDataTableCommands commands() {
-        if (this.yadaDataTableCommands == null) {
-            this.yadaDataTableCommands = new YadaDataTableCommands(this, messageSource, locale);
-        }
-    	return this.yadaDataTableCommands;
+	public YadaDataTableHTML dtHTML() {
+		yadaDataTableHTML = YadaUtil.lazyUnsafeInit(yadaDataTableHTML, () -> new YadaDataTableHTML(this, options, messageSource, locale));
+    	return yadaDataTableHTML;
+	}
+	
+	public YadaDataTableOptions dtOptions() {
+		return options;
 	}
 
-    public YadaDataTable classes(String classes) {
-        this.classes = classes;
-        return this;
-    }
-
-    public YadaDataTable columns(List<String> columns) {
-        this.columns = columns;
-        return this;
-    }
-
-    public YadaDataTable disableCheckbox(boolean disableCheckbox) {
-        this.disableCheckbox = disableCheckbox;
-        return this;
-    }
-
-    public YadaDataTableOptions jsoptions() {
-        if (this.jsoptions == null) {
-            this.jsoptions = new YadaDataTableOptions(this);
-        }
-    	return this.jsoptions;
-    }	
+	public String getId() {
+		return id;
+	}
+	
 }

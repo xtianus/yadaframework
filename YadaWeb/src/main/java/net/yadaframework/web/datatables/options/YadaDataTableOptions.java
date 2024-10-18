@@ -3,6 +3,9 @@ package net.yadaframework.web.datatables.options;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.web.datatables.YadaDataTable;
 
@@ -11,6 +14,7 @@ import net.yadaframework.web.datatables.YadaDataTable;
  * 
  * @see <a href="https://datatables.net/reference/option/">DataTables Reference</a>
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
 	private String dataTableExtErrMode;
     private YadaDTAjax ajax;
@@ -22,7 +26,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
     private String caption;
     private YadaDTColReorder colReorder;
     private List<YadaDTColumnDef> columnDefs;
-    private List<YadaDTColumn> columns;
+    private List<YadaDTColumns> columns;
     private String createdRow;
     private Object data;
     private Boolean deferLoading;
@@ -58,8 +62,10 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
     private String preDrawCallback;
     private Boolean processing;
     private String renderer;
-    private Boolean responsive = Boolean.TRUE; // Defaults to responsive
-    private YadaDTResponsiveDetails responsiveDetails;
+    // can be either a boolean or an object
+    private Boolean responsive;
+    private YadaDTResponsive yadaDTResponsive;
+    //
     private Boolean retrieve;
     private String rowCallback;
     private YadaDTRowGroup rowGroup;
@@ -97,7 +103,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/">dataTableExtErrMode</a>
      */
-    public YadaDataTableOptions dataTableExtErrMode(String dataTableExtErrMode) {
+    public YadaDataTableOptions dtDataTableExtErrMode(String dataTableExtErrMode) {
         this.dataTableExtErrMode = dataTableExtErrMode;
         return this;
     }
@@ -109,7 +115,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/autoWidth">autoWidth</a>
      */
-    public YadaDataTableOptions autoWidth(Boolean autoWidth) {
+    public YadaDataTableOptions dtAutoWidth(Boolean autoWidth) {
         this.autoWidth = autoWidth;
         return this;
     }
@@ -121,7 +127,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchBuilder.button">buttonSearchBuilder</a>
      */
-    public YadaDataTableOptions buttonSearchBuilder(String buttonSearchBuilder) {
+    public YadaDataTableOptions dtButtonSearchBuilder(String buttonSearchBuilder) {
         this.buttonSearchBuilder = buttonSearchBuilder;
         return this;
     }
@@ -133,7 +139,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.button">buttonSearchPanes</a>
      */
-    public YadaDataTableOptions buttonSearchPanes(String buttonSearchPanes) {
+    public YadaDataTableOptions dtButtonSearchPanes(String buttonSearchPanes) {
         this.buttonSearchPanes = buttonSearchPanes;
         return this;
     }
@@ -145,7 +151,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/caption">caption</a>
      */
-    public YadaDataTableOptions caption(String caption) {
+    public YadaDataTableOptions dtCaption(String caption) {
         this.caption = caption;
         return this;
     }
@@ -157,7 +163,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/createdRow">createdRow</a>
      */
-    public YadaDataTableOptions createdRow(String createdRow) {
+    public YadaDataTableOptions dtCreatedRow(String createdRow) {
         this.createdRow = createdRow;
         return this;
     }
@@ -169,7 +175,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/deferLoading">deferLoading</a>
      */
-    public YadaDataTableOptions deferLoading(Boolean deferLoading) {
+    public YadaDataTableOptions dtDeferLoading(Boolean deferLoading) {
         this.deferLoading = deferLoading;
         return this;
     }
@@ -181,7 +187,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/deferRender">deferRender</a>
      */
-    public YadaDataTableOptions deferRender(Boolean deferRender) {
+    public YadaDataTableOptions dtDeferRender(Boolean deferRender) {
         this.deferRender = deferRender;
         return this;
     }
@@ -193,7 +199,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/destroy">destroy</a>
      */
-    public YadaDataTableOptions destroy(Boolean destroy) {
+    public YadaDataTableOptions dtDestroy(Boolean destroy) {
         this.destroy = destroy;
         return this;
     }
@@ -205,7 +211,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/typeDetection">detectType</a>
      */
-    public YadaDataTableOptions detectType(String detectType) {
+    public YadaDataTableOptions dtDetectType(String detectType) {
         this.detectType = detectType;
         return this;
     }
@@ -217,7 +223,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/displayStart">displayStart</a>
      */
-    public YadaDataTableOptions displayStart(Integer displayStart) {
+    public YadaDataTableOptions dtDisplayStart(Integer displayStart) {
         this.displayStart = displayStart;
         return this;
     }
@@ -229,7 +235,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/dom">dom</a>
      */
-    public YadaDataTableOptions dom(String dom) {
+    public YadaDataTableOptions dtDom(String dom) {
         this.dom = dom;
         return this;
     }
@@ -241,7 +247,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/drawCallback">drawCallback</a>
      */
-    public YadaDataTableOptions drawCallback(String drawCallback) {
+    public YadaDataTableOptions dtDrawCallback(String drawCallback) {
         this.drawCallback = drawCallback;
         return this;
     }
@@ -253,7 +259,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/footerCallback">footerCallback</a>
      */
-    public YadaDataTableOptions footerCallback(String footerCallback) {
+    public YadaDataTableOptions dtFooterCallback(String footerCallback) {
         this.footerCallback = footerCallback;
         return this;
     }
@@ -265,7 +271,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/formatNumber">formatNumber</a>
      */
-    public YadaDataTableOptions formatNumber(String formatNumber) {
+    public YadaDataTableOptions dtFormatNumber(String formatNumber) {
         this.formatNumber = formatNumber;
         return this;
     }
@@ -277,7 +283,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/headerCallback">headerCallback</a>
      */
-    public YadaDataTableOptions headerCallback(String headerCallback) {
+    public YadaDataTableOptions dtHeaderCallback(String headerCallback) {
         this.headerCallback = headerCallback;
         return this;
     }
@@ -289,7 +295,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/info">info</a>
      */
-    public YadaDataTableOptions info(Boolean info) {
+    public YadaDataTableOptions dtInfo(Boolean info) {
         this.info = info;
         return this;
     }
@@ -301,7 +307,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/infoCallback">infoCallback</a>
      */
-    public YadaDataTableOptions infoCallback(String infoCallback) {
+    public YadaDataTableOptions dtInfoCallback(String infoCallback) {
         this.infoCallback = infoCallback;
         return this;
     }
@@ -313,7 +319,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/initComplete">initComplete</a>
      */
-    public YadaDataTableOptions initComplete(String initComplete) {
+    public YadaDataTableOptions dtInitComplete(String initComplete) {
         this.initComplete = initComplete;
         return this;
     }
@@ -325,7 +331,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/layout">layout</a>
      */
-    public YadaDataTableOptions layout(String layout) {
+    public YadaDataTableOptions dtLayout(String layout) {
         this.layout = layout;
         return this;
     }
@@ -337,7 +343,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/lengthChange">lengthChange</a>
      */
-    public YadaDataTableOptions lengthChange(Boolean lengthChange) {
+    public YadaDataTableOptions dtLengthChange(Boolean lengthChange) {
         this.lengthChange = lengthChange;
         return this;
     }
@@ -349,7 +355,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/orderCellsTop">orderCellsTop</a>
      */
-    public YadaDataTableOptions orderCellsTop(Boolean orderCellsTop) {
+    public YadaDataTableOptions dtOrderCellsTop(Boolean orderCellsTop) {
         this.orderCellsTop = orderCellsTop;
         return this;
     }
@@ -361,7 +367,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/orderClasses">orderClasses</a>
      */
-    public YadaDataTableOptions orderClasses(Boolean orderClasses) {
+    public YadaDataTableOptions dtOrderClasses(Boolean orderClasses) {
         this.orderClasses = orderClasses;
         return this;
     }
@@ -373,7 +379,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/orderDescReverse">orderDescReverse</a>
      */
-    public YadaDataTableOptions orderDescReverse(Boolean orderDescReverse) {
+    public YadaDataTableOptions dtOrderDescReverse(Boolean orderDescReverse) {
         this.orderDescReverse = orderDescReverse;
         return this;
     }
@@ -385,7 +391,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/orderMulti">orderMulti</a>
      */
-    public YadaDataTableOptions orderMulti(Boolean orderMulti) {
+    public YadaDataTableOptions dtOrderMulti(Boolean orderMulti) {
         this.orderMulti = orderMulti;
         return this;
     }
@@ -397,7 +403,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/ordering">ordering</a>
      */
-    public YadaDataTableOptions ordering(Boolean ordering) {
+    public YadaDataTableOptions dtOrdering(Boolean ordering) {
         this.ordering = ordering;
         return this;
     }
@@ -409,7 +415,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/pageLength">pageLength</a>
      */
-    public YadaDataTableOptions pageLength(Integer pageLength) {
+    public YadaDataTableOptions dtPageLength(Integer pageLength) {
         this.pageLength = pageLength;
         return this;
     }
@@ -421,7 +427,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/paging">paging</a>
      */
-    public YadaDataTableOptions paging(Boolean paging) {
+    public YadaDataTableOptions dtPaging(Boolean paging) {
         this.paging = paging;
         return this;
     }
@@ -433,7 +439,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/pagingType">pagingType</a>
      */
-    public YadaDataTableOptions pagingType(String pagingType) {
+    public YadaDataTableOptions dtPagingType(String pagingType) {
         this.pagingType = pagingType;
         return this;
     }
@@ -445,7 +451,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/preDrawCallback">preDrawCallback</a>
      */
-    public YadaDataTableOptions preDrawCallback(String preDrawCallback) {
+    public YadaDataTableOptions dtPreDrawCallback(String preDrawCallback) {
         this.preDrawCallback = preDrawCallback;
         return this;
     }
@@ -457,7 +463,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/processing">processing</a>
      */
-    public YadaDataTableOptions processing(Boolean processing) {
+    public YadaDataTableOptions dtProcessing(Boolean processing) {
         this.processing = processing;
         return this;
     }
@@ -469,20 +475,8 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/renderer">renderer</a>
      */
-    public YadaDataTableOptions renderer(String renderer) {
+    public YadaDataTableOptions dtRenderer(String renderer) {
         this.renderer = renderer;
-        return this;
-    }
-
-    /**
-     * Sets the `responsive` option.
-     * 
-     * @param responsive enable or disable DataTables responsive behavior
-     * @return this instance for method chaining
-     * @see <a href="https://datatables.net/reference/option/responsive">responsive</a>
-     */
-    public YadaDataTableOptions responsive(Boolean responsive) {
-        this.responsive = responsive;
         return this;
     }
 
@@ -493,7 +487,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/retrieve">retrieve</a>
      */
-    public YadaDataTableOptions retrieve(Boolean retrieve) {
+    public YadaDataTableOptions dtRetrieve(Boolean retrieve) {
         this.retrieve = retrieve;
         return this;
     }
@@ -505,7 +499,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/rowCallback">rowCallback</a>
      */
-    public YadaDataTableOptions rowCallback(String rowCallback) {
+    public YadaDataTableOptions dtRowCallback(String rowCallback) {
         this.rowCallback = rowCallback;
         return this;
     }
@@ -517,7 +511,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/rowId">rowId</a>
      */
-    public YadaDataTableOptions rowId(String rowId) {
+    public YadaDataTableOptions dtRowId(String rowId) {
         this.rowId = rowId;
         return this;
     }
@@ -529,7 +523,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/scrollCollapse">scrollCollapse</a>
      */
-    public YadaDataTableOptions scrollCollapse(Boolean scrollCollapse) {
+    public YadaDataTableOptions dtScrollCollapse(Boolean scrollCollapse) {
         this.scrollCollapse = scrollCollapse;
         return this;
     }
@@ -541,7 +535,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/scrollX">scrollX</a>
      */
-    public YadaDataTableOptions scrollX(Boolean scrollX) {
+    public YadaDataTableOptions dtScrollX(Boolean scrollX) {
         this.scrollX = scrollX;
         return this;
     }
@@ -553,7 +547,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/scrollY">scrollY</a>
      */
-    public YadaDataTableOptions scrollY(Boolean scrollY) {
+    public YadaDataTableOptions dtScrollY(Boolean scrollY) {
         this.scrollY = scrollY;
         return this;
     }
@@ -565,7 +559,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searching">searching</a>
      */
-    public YadaDataTableOptions searching(Boolean searching) {
+    public YadaDataTableOptions dtSearching(Boolean searching) {
         this.searching = searching;
         return this;
     }
@@ -577,7 +571,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/serverSide">serverSide</a>
      */
-    public YadaDataTableOptions serverSide(Boolean serverSide) {
+    public YadaDataTableOptions dtServerSide(Boolean serverSide) {
         this.serverSide = serverSide;
         return this;
     }
@@ -589,7 +583,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/stateDuration">stateDuration</a>
      */
-    public YadaDataTableOptions stateDuration(Integer stateDuration) {
+    public YadaDataTableOptions dtStateDuration(Integer stateDuration) {
         this.stateDuration = stateDuration;
         return this;
     }
@@ -601,7 +595,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/stateLoadCallback">stateLoadCallback</a>
      */
-    public YadaDataTableOptions stateLoadCallback(String stateLoadCallback) {
+    public YadaDataTableOptions dtStateLoadCallback(String stateLoadCallback) {
         this.stateLoadCallback = stateLoadCallback;
         return this;
     }
@@ -613,7 +607,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/stateLoadParams">stateLoadParams</a>
      */
-    public YadaDataTableOptions stateLoadParams(String stateLoadParams) {
+    public YadaDataTableOptions dtStateLoadParams(String stateLoadParams) {
         this.stateLoadParams = stateLoadParams;
         return this;
     }
@@ -625,7 +619,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/stateLoaded">stateLoaded</a>
      */
-    public YadaDataTableOptions stateLoaded(String stateLoaded) {
+    public YadaDataTableOptions dtStateLoaded(String stateLoaded) {
         this.stateLoaded = stateLoaded;
         return this;
     }
@@ -637,7 +631,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/stateSave">stateSave</a>
      */
-    public YadaDataTableOptions stateSave(Boolean stateSave) {
+    public YadaDataTableOptions dtStateSave(Boolean stateSave) {
         this.stateSave = stateSave;
         return this;
     }
@@ -649,7 +643,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/stateSaveCallback">stateSaveCallback</a>
      */
-    public YadaDataTableOptions stateSaveCallback(String stateSaveCallback) {
+    public YadaDataTableOptions dtStateSaveCallback(String stateSaveCallback) {
         this.stateSaveCallback = stateSaveCallback;
         return this;
     }
@@ -661,7 +655,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/stateSaveParams">stateSaveParams</a>
      */
-    public YadaDataTableOptions stateSaveParams(String stateSaveParams) {
+    public YadaDataTableOptions dtStateSaveParams(String stateSaveParams) {
         this.stateSaveParams = stateSaveParams;
         return this;
     }
@@ -673,7 +667,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/tabIndex">tabIndex</a>
      */
-    public YadaDataTableOptions tabIndex(Integer tabIndex) {
+    public YadaDataTableOptions dtTabIndex(Integer tabIndex) {
         this.tabIndex = tabIndex;
         return this;
     }    
@@ -967,14 +961,6 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * @return Whether responsive behavior is enabled.
-     * @see <a href="https://datatables.net/reference/option/responsive">DataTables responsive option</a>
-     */
-    public Boolean getResponsive() {
-        return responsive;
-    }
-
-    /**
      * @return Whether the table data should be retrieved.
      * @see <a href="https://datatables.net/reference/option/retrieve">DataTables retrieve option</a>
      */
@@ -1115,7 +1101,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The ajax configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/ajax">DataTables ajax option</a>
      */
-    public YadaDTAjax ajax() {
+    public YadaDTAjax dtAjax() {
         if (this.ajax == null) {
             this.ajax = new YadaDTAjax(this);
         }
@@ -1126,7 +1112,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The autoFill configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/autoFill">DataTables autoFill option</a>
      */
-    public YadaDTAutoFill autoFill() {
+    public YadaDTAutoFill dtAutoFill() {
         if (this.autoFill == null) {
             this.autoFill = new YadaDTAutoFill(this);
         }
@@ -1137,7 +1123,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The buttons configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/buttons">DataTables buttons option</a>
      */
-    public YadaDTButtons buttons() {
+    public YadaDTButtons dtButtons() {
         if (this.buttons == null) {
             this.buttons = new YadaDTButtons(this);
         }
@@ -1148,7 +1134,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The colReorder configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/colReorder">DataTables colReorder option</a>
      */
-    public YadaDTColReorder colReorder() {
+    public YadaDTColReorder dtColReorder() {
         if (this.colReorder == null) {
             this.colReorder = new YadaDTColReorder(this);
         }
@@ -1159,7 +1145,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The fixedColumns configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/fixedColumns">DataTables fixedColumns option</a>
      */
-    public YadaDTFixedColumns fixedColumns() {
+    public YadaDTFixedColumns dtFixedColumns() {
         if (this.fixedColumns == null) {
             this.fixedColumns = new YadaDTFixedColumns(this);
         }
@@ -1170,7 +1156,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The fixedHeader configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/fixedHeader">DataTables fixedHeader option</a>
      */
-    public YadaDTFixedHeader fixedHeader() {
+    public YadaDTFixedHeader dtFixedHeader() {
         if (this.fixedHeader == null) {
             this.fixedHeader = new YadaDTFixedHeader(this);
         }
@@ -1181,7 +1167,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The keys configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/keys">DataTables keys option</a>
      */
-    public YadaDTKeys keys() {
+    public YadaDTKeys dtKeys() {
         if (this.keys == null) {
             this.keys = new YadaDTKeys(this);
         }
@@ -1192,7 +1178,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The language configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/language">DataTables language option</a>
      */
-    public YadaDTLanguage language() {
+    public YadaDTLanguage dtLanguage() {
         if (this.language == null) {
             this.language = new YadaDTLanguage(this);
         }
@@ -1200,21 +1186,10 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * @return The responsiveDetails configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/responsive">DataTables responsive option</a>
-     */
-    public YadaDTResponsiveDetails responsiveDetails() {
-        if (this.responsiveDetails == null) {
-            this.responsiveDetails = new YadaDTResponsiveDetails(this);
-        }
-        return this.responsiveDetails;
-    }
-
-    /**
      * @return The rowGroup configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/rowGroup">DataTables rowGroup option</a>
      */
-    public YadaDTRowGroup rowGroup() {
+    public YadaDTRowGroup dtRowGroup() {
         if (this.rowGroup == null) {
             this.rowGroup = new YadaDTRowGroup(this);
         }
@@ -1225,7 +1200,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The rowReorder configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/rowReorder">DataTables rowReorder option</a>
      */
-    public YadaDTRowReorder rowReorder() {
+    public YadaDTRowReorder dtRowReorder() {
         if (this.rowReorder == null) {
             this.rowReorder = new YadaDTRowReorder(this);
         }
@@ -1236,7 +1211,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The scroller configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/scroller">DataTables scroller option</a>
      */
-    public YadaDTScroller scroller() {
+    public YadaDTScroller dtScroller() {
         if (this.scroller == null) {
             this.scroller = new YadaDTScroller(this);
         }
@@ -1247,7 +1222,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The search configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/search">DataTables search option</a>
      */
-    public YadaDTSearch search() {
+    public YadaDTSearch dtSearch() {
         if (this.search == null) {
             this.search = new YadaDTSearch(this);
         }
@@ -1258,7 +1233,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The searchBuilder configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/searchBuilder">DataTables searchBuilder option</a>
      */
-    public YadaDTSearchBuilder searchBuilder() {
+    public YadaDTSearchBuilder dtSearchBuilder() {
         if (this.searchBuilder == null) {
             this.searchBuilder = new YadaDTSearchBuilder(this);
         }
@@ -1269,7 +1244,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The searchPanes configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/searchPanes">DataTables searchPanes option</a>
      */
-    public YadaDTSearchPanes searchPanes() {
+    public YadaDTSearchPanes dtSearchPanes() {
         if (this.searchPanes == null) {
             this.searchPanes = new YadaDTSearchPanes(this);
         }
@@ -1280,7 +1255,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The select configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/select">DataTables select option</a>
      */
-    public YadaDTSelect select() {
+    public YadaDTSelect dtSelect() {
         if (this.select == null) {
             this.select = new YadaDTSelect(this);
         }
@@ -1291,7 +1266,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return A new column definition for DataTables.
      * @see <a href="https://datatables.net/reference/option/columnDefs">DataTables columnDefs option</a>
      */
-    public YadaDTColumnDef columnDefs() {
+    public YadaDTColumnDef dtColumnDefs() {
         if (this.columnDefs == null) {
             this.columnDefs = new ArrayList<>();
         }
@@ -1304,11 +1279,11 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return A new column configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/columns">DataTables columns option</a>
      */
-    public YadaDTColumn columns() {
+    public YadaDTColumns dtColumns() {
         if (this.columns == null) {
             this.columns = new ArrayList<>();
         }
-        YadaDTColumn newColumn = new YadaDTColumn(this);
+        YadaDTColumns newColumn = new YadaDTColumns(this);
         this.columns.add(newColumn);
         return newColumn;
     }
@@ -1317,7 +1292,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return A new search column configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/searchCols">DataTables searchCols option</a>
      */
-    public YadaDTSearchCol searchCols() {
+    public YadaDTSearchCol dtSearchCols() {
         if (this.searchCols == null) {
             this.searchCols = new ArrayList<>();
         }
@@ -1325,4 +1300,36 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
         this.searchCols.add(newSearchCol);
         return newSearchCol;
     }
+    
+    /**
+     * Sets the responsive option as a boolean, determining if the table should adapt for different screen sizes.
+     * 
+     * @param responsive Boolean flag to enable or disable responsive behavior
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/responsive">DataTables responsive Reference</a>
+     */
+    public YadaDataTableOptions dtResponsive(Boolean responsive) {
+        this.responsive = responsive;
+        return this;
+    }
+
+    /**
+     * Provides access to the responsive configuration options for DataTables.
+     * 
+     * @return the instance of YadaDTResponsive for further configuration
+     * @see <a href="https://datatables.net/reference/option/responsive">DataTables responsive Reference</a>
+     */
+    public YadaDTResponsive dtResponsive() {
+    	this.yadaDTResponsive = YadaUtil.lazyUnsafeInit(this.yadaDTResponsive, () -> new YadaDTResponsive(this));
+        return this.yadaDTResponsive;
+    }
+
+    /**
+     * @return either a boolean or a full object.
+     * @see <a href="https://datatables.net/reference/option/responsive">DataTables responsive option</a>
+     */
+    public Object getResponsive() {
+        return yadaDTResponsive != null ? yadaDTResponsive : responsive;
+    }
+
 }

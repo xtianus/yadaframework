@@ -8,6 +8,7 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/columnDefs">ColumnDefs</a>
  */
+@Deprecated // Not needed when all columns must be set anyway
 class YadaDTColumnDef extends YadaFluentBase<YadaDataTableOptions> {
     private Integer targets;
     private Boolean visible;

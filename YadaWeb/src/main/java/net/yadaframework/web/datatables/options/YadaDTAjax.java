@@ -23,7 +23,7 @@ class YadaDTAjax extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/ajax.url">url</a>
      */
-    public YadaDTAjax url(String url) {
+    public YadaDTAjax dtUrl(String url) {
         this.url = url;
         return this;
     }
@@ -44,7 +44,7 @@ class YadaDTAjax extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/ajax.dataSrc">dataSrc</a>
      */
-    public YadaDTAjax dataSrc(String dataSrc) {
+    public YadaDTAjax dtDataSrc(String dataSrc) {
         this.dataSrc = dataSrc;
         return this;
     }

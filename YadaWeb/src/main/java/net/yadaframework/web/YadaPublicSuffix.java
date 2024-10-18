@@ -10,11 +10,11 @@ import net.yadaframework.exceptions.InternalException;
 
 /**
  * Parser for https://publicsuffix.org list of domain names
- * @author xtian
- *
+ * @see https://github.com/whois-server-list/public-suffix-list for another implementation
  */
 public class YadaPublicSuffix {
 	// 5 livelli: da "com" a "s3.cn-north-1.amazonaws.com.cn"
+	// TODO rewrite with YadaLookupTableFive
 	private Map<String, Map<String, Map<String, Map<String, Map<String, String>>>>> topLevel = null;
 	
 	/**

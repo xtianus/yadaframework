@@ -169,7 +169,7 @@ public class YadaTextareaTagProcessor extends AbstractElementModelProcessor {
 	private String processInputTag(IOpenElementTag sourceTag, ITemplateContext context, IElementModelStructureHandler structureHandler) {
         // Convert all attributes of the source tag
         Map<String, String> inputSourceAttributes = sourceTag.getAttributeMap();
-        String targetAttributesString = yadaDialectUtil.getConvertedCustomTagAttributeString(sourceTag, context);
+        String targetAttributesString = yadaDialectUtil.getConvertedHTMLCustomTagAttributeString(sourceTag, context);
         // Handle "yada:" attributes
         for (Map.Entry<String,String> sourceAttribute : inputSourceAttributes.entrySet()) {
 			String attributeName = sourceAttribute.getKey();

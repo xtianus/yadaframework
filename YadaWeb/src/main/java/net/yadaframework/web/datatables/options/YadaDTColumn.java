@@ -8,6 +8,7 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/columns">Columns</a>
  */
+@Deprecated // Deletable
 class YadaDTColumn extends YadaFluentBase<YadaDataTableOptions> {
     private String title;
     private String data;

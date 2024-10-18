@@ -19,6 +19,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.configuration2.ConfigurationUtils;
@@ -95,7 +96,7 @@ public abstract class YadaConfiguration {
 	private Boolean localePathVariableEnabled = null;
 	private Locale defaultLocale = null;
 	private boolean defaultLocaleChecked = false;
-	private Map<String, SortedSet<Entry<Integer,String>>> localSetCache = new HashMap<>(); // Deprecated
+	private Map<String, SortedSet<Entry<Integer,String>>> localSetCache = new ConcurrentHashMap<>(); // Deprecated
 	private String targetImageExtension=null;
 	private String preserveImageExtensions=null;
 	private String defaultNotifyModalView = null;

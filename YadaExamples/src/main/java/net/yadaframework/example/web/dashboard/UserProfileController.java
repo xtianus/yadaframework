@@ -202,12 +202,17 @@ public class UserProfileController {
 	}
 	
 	@RequestMapping("")
-	public String users(Locale locale) {
-		YadaDataTable yadaDataTable = yadaDataTableFactory.create("userTable", locale);
-		yadaDataTable.commands()
-			.add("Add User").delete("Delete User").edit("Edit User").back()
-			;
-		
+	public String users(Model model, Locale locale) {
+		YadaDataTable yadaDataTable = yadaDataTableFactory.getInstance("userTable", locale, table -> {
+			// table.commands().add("Add User").delete("Delete User").edit("Edit User").back();
+			table
+				.dtHTML()
+					.dtColumn("ID").dtColumn("Enabled").dtColumn("Nickname").dtColumn("Email").dtColumn("Last Login")
+					.dtButtonAdd().dtButtonDelete().dtButtonEdit()
+					.dtCssClasses("yadaNoLoader").back()
+				.dtOptions();
+		});
+		model.addAttribute("dataTable", yadaDataTable);
 		return "/dashboard/users";
 	}
 	

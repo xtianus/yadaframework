@@ -11,6 +11,13 @@
 
 <main class="container">
 	<h1>Users</h1>
+	
+	<yada:datatable yada:definition="${dataTable}"></yada:datatable>
+	
+	<script th:inline="javascript">
+    	var jsonData = /*[[${yadaDataTable}]]*/ "dummy";
+	</script>
+	
 </main>
 
 <th:block th:replace="~{/footer :: body}"/>

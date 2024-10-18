@@ -15,4 +15,5 @@ public abstract class YadaFluentBase<T> {
     public T back() {
         return parent;
     }
+    
 }

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://www.yadaframework.net" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
+
+<!--/*
+Template for <yada:datatable> resulting HTML.
+It is used internally by the yada dialect processor to render the <yada:datatable> tag but could be included directly in a HTML template if needed.
+*/-->
+
+<body th:remove="tag">
+
+<table th:id="${yadaDataTable.id}" class="table" th:classappend="${yadaDataTable.classes}?:'table-striped no-wrap'">
+	<thead>
+		<tr>
+			<th></th> 
+			<th th:if="${!(false==checkbox)}" class="yadaCheckInCell all"><input type="checkbox" class="s_columnSelector" title="All/None" /></th>
+			<th th:each="column : ${columns}" th:text="${column}">Name</th>
+			<th class="all" th:text="${commandsColumnText}?:#{column.commands}">Commands</th>
+		</tr>
+	</thead>
+	<tfoot>
+		<tr>
+			<td></td> 
+			<td th:if="${!(false==checkbox)}"></td> 
+			<td th:each="column : ${columns}"></td>
+			<td></td>
+		</tr>
+	</tfoot>
+</table>
+	
+</body>

@@ -28,12 +28,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,7 +90,7 @@ public class YadaWebUtil {
 	// Characters that should never be found or placed in a slug
 	private static final String PATTERN_INVALID_SLUG = "[?%:,;=&!+~()@*$'\"\\s]";
 
-	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
+	private Map<String, List<?>> sortedLocalEnumCache = new ConcurrentHashMap<>();
 	
 	/**
 	 * Check if an object holds a thymeleaf fragment instance. To be used in Thymeleaf templates.
