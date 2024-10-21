@@ -338,14 +338,20 @@ Example:
 ----
 validation.empty = This value can't be empty
 validation.password.length = Password can''t be shorter than {0} characters and longer than {1}
-files.total = There {0,choice,0#are no files|1#is one file|1<are {0,number,integer} files}.
+wait.time = Wait {0} {0, choice, 0#minutes|1#minute|1<minutes} and retry
+files.total = There {0, choice, 0#are no files|1#is one file|1<are {0,number,integer} files}.
 ----
 
 In particular:
 
-* {0} and {1} are ways of passing parameters
-* when a parameter is specified, a single quote must be escaped by another single quote
-* there's a powerful way of specifying variations like singular/plural (choice format)
+* `{0}`, `{1}` ... are ways of passing parameters (there can be any)
+* when a parameter is specified, any single quote must be escaped by another single quote
+* there's a powerful way of specifying variations like singular/plural (choice format): 
+** `|` separates choices
+** `\#` is an exact match, so `1#` means "when 1 equals the parameter"
+** `<` is "less than" where the subject is the number, so `<1` means "when 1 is less than the parameter"
+** `>` is "greater than" where the subject is the number, so `>1` means "when 1 is greater than the parameter"
+** each choice can contain text and/or parameters like `{1}` or `{2,number,integer}`
 
 In production, files are reloaded every 600 seconds (10 minutes) to pick up changes.
 

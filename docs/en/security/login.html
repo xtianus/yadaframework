@@ -711,12 +711,12 @@ execution goes through <code>YadaAuthenticationFailureHandler</code> that sets t
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">userDisabled</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">user is disabled regardless of password</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">user is disabled regardless of password. This happens when <code>YadaUserCredentials.enabled</code> is false.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">credentialsExpiredException</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">password is expired regardless of what password is used. Execution is forwarded to <code>"/pwdChange"</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">password is expired regardless of what password is used. This happens when <code>YadaUserCredentials.changePassword</code> is true. Execution is forwarded to <code>"/pwdChange"</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">lockoutMinutes</p></td>
@@ -819,7 +819,7 @@ user might be confused about which email address to use for login.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-16 18:03:18 +0200
+Last updated 2024-10-17 14:36:17 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

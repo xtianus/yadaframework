@@ -45,7 +45,7 @@ Java https://eclipse-ee4j.github.io/jakartaee-tutorial/dukes-bookstore.html["Duk
 The tutorial sections are shown using this visual style.
 --
 
-[.note]
+[NOTE]
 ====
 What follows is a partial list of chapters with a brief explanation. The most
 updated index is in the dropdown at the top of each page.

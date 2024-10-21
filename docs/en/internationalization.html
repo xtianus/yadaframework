@@ -627,7 +627,8 @@ is shown as text.</p>
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">validation.empty = This value can't be empty
 validation.password.length = Password can''t be shorter than {0} characters and longer than {1}
-files.total = There {0,choice,0#are no files|1#is one file|1&lt;are {0,number,integer} files}.</code></pre>
+wait.time = Wait {0} {0, choice, 0#minutes|1#minute|1&lt;minutes} and retry
+files.total = There {0, choice, 0#are no files|1#is one file|1&lt;are {0,number,integer} files}.</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -636,13 +637,32 @@ files.total = There {0,choice,0#are no files|1#is one file|1&lt;are {0,number,in
 <div class="ulist">
 <ul>
 <li>
-<p>{0} and {1} are ways of passing parameters</p>
+<p><code>{0}</code>, <code>{1}</code> &#8230;&#8203; are ways of passing parameters (there can be any)</p>
 </li>
 <li>
-<p>when a parameter is specified, a single quote must be escaped by another single quote</p>
+<p>when a parameter is specified, any single quote must be escaped by another single quote</p>
 </li>
 <li>
-<p>there&#8217;s a powerful way of specifying variations like singular/plural (choice format)</p>
+<p>there&#8217;s a powerful way of specifying variations like singular/plural (choice format):</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>|</code> separates choices</p>
+</li>
+<li>
+<p><code>#</code> is an exact match, so <code>1#</code> means "when 1 equals the parameter"</p>
+</li>
+<li>
+<p><code>&lt;</code> is "less than" where the subject is the number, so <code>&lt;1</code> means "when 1 is less than the parameter"</p>
+</li>
+<li>
+<p><code>&gt;</code> is "greater than" where the subject is the number, so <code>&gt;1</code> means "when 1 is greater than the parameter"</p>
+</li>
+<li>
+<p>each choice can contain text and/or parameters like <code>{1}</code> or <code>{2,number,integer}</code></p>
+</li>
+</ul>
+</div>
 </li>
 </ul>
 </div>
@@ -885,7 +905,7 @@ userProfile.setTimezone(userTimezone);</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 19:40:44 +0200
+Last updated 2024-10-17 12:22:56 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

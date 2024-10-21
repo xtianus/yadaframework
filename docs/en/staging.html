@@ -128,6 +128,8 @@ window.onscroll = function() {
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
+<li><a href="#_lazy_initialization_of_class_attributes">Lazy Initialization of class attributes</a></li>
+<li><a href="#_lookup_tables">Lookup Tables</a></li>
 <li><a href="#_error_handling">Error Handling</a></li>
 <li><a href="#_favicon">Favicon</a></li>
 <li><a href="#_document_ready">document ready</a></li>
@@ -139,6 +141,242 @@ window.onscroll = function() {
 <div class="sectionbody">
 <div class="paragraph">
 <p>Documentation bits waiting to be moved to the proper section</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_lazy_initialization_of_class_attributes">Lazy Initialization of class attributes</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Scope</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Backend</p></td>
+</tr>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Language</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Java</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>A common pattern in methods is to check for some attribute to be null and make an
+instance otherwise, before using it.
+Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="Java" class="language-Java hljs">public void addToMyList(String data) {
+	if (this.myList == null) {
+		this.myList = new ArrayList();
+	}
+	this.myList.add(data);
+}
+
+public MyThing getMyThing(String somethingToSet) {
+	if (this.myThing == null) {
+		this.myThing = new MyThing();
+	}
+	this.myThing.setSomething(somethingToSet);
+	return this.myThing;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This can be made more compact by using <code>YadaUtil.lazyUnsafeInit()</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="Java" class="language-Java hljs">public void addToMyList(String data) {
+	this.myList = YadaUtil.lazyUnsafeInit(this.myList); <i class="conum" data-value="1"></i><b>(1)</b>
+	this.myList.add(data);
+}
+
+public MyThing getMyThing(String somethingToSet) {
+	this.myThing = YadaUtil.lazyUnsafeInit(this.myThing, MyThing::new); <i class="conum" data-value="2"></i><b>(2)</b>
+	this.myThing.setSomething(somethingToSet);
+	return this.myThing;
+}
+
+public MyThing getMyThing(String somethingToSet) {
+	this.myThing = YadaUtil.lazyUnsafeInit(this.myThing, () -&gt; new MyThing(this)); <i class="conum" data-value="3"></i><b>(3)</b>
+	this.myThing.setSomething(somethingToSet);
+	return this.myThing;
+}
+
+public void addToMyList(String data) {
+	this.myList = YadaUtil.lazyUnsafeInit(this.myList, ArrayList::new); <i class="conum" data-value="4"></i><b>(4)</b>
+	this.myList.add(data);
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Initializing a list with a simple api</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Initializing an object with a constructor without arguments</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Initializing an object with a constructor with arguments</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Initializing an object with a constructor with arguments</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+In a multithreaded scenario there may be race conditions with unpredictable results. This is why the method is called "lazyUnsafeInit".
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>There are of course no race conditions if the attribute owner instance is itself guaranteed to ever be
+used by one thread only, for example when the owner instance is created
+inside some method (i.e. is not a singleton),
+because each thread will have its own stack and its own instance of local variables.</p>
+</div>
+<div class="paragraph">
+<p>Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="Java" class="language-Java hljs">public class MyOwner {
+	public SomeAttribute someAttribute;
+}
+
+public class MyProcessor {
+	MyOwner mySingletonOwner = new MyOwner();
+
+	public SomeAttribute process() {
+		// THREAD SAFE
+		MyOwner myOwner = new MyOwner();
+		myOwner.someAttribute = YadaUtil.lazyUnsafeInit(myOwner.someAttribute, SomeAttribute::new); <i class="conum" data-value="1"></i><b>(1)</b>
+		// NOT THREAD SAFE
+		mySingletonOwner.someAttribute = YadaUtil.lazyUnsafeInit(myOwner.someAttribute, SomeAttribute::new); <i class="conum" data-value="2"></i><b>(2)</b>
+		return mySingletonOwner.someAttribute; <i class="conum" data-value="3"></i><b>(3)</b>
+	}
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>This is always going to work properly because each thread entering the process() method has its own instance of MyOwner</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This is prone to race conditions if two threads enter the process() method because they would
+operate on the same instance of MyOwner but probably with their own copy of mySingletonOwner.someAttribute</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>This is	going to be a problem later in the execution if each thread has its own copy of mySingletonOwner.someAttribute</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In a multithreaded scenario, lazy initialization involves the use of volatile attributes and synchronization, so better
+avoid it when possible.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_lookup_tables">Lookup Tables</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Scope</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Backend</p></td>
+</tr>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Language</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Java</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>A lookup table holds a value indexed by some other values. It is a generalisation
+of a Map where a single key indexes a value: in a lookup table the key can be a collection of many values.
+A simple implementation would be to concatenate the many keys into a single string to be
+used as a key in a Map, or to use some key object that holds many values.</p>
+</div>
+<div class="paragraph">
+<p>A much better solution is to use the YadaLookupTable class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="Java" class="language-Java hljs">YadaLookupTable&lt;Integer, String&gt; lookupTable = new YadaLookupTable&lt;&gt;();
+lookupTable.put("value1", 1, 2, 3);
+lookupTable.put("value2", 1, 2, 4);
+...
+lookupTable.get(1, 2, 3); // "value1"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The keys must all be of the same type, that can be different from the type of the value.
+In order to overcome this limitation, just use "Object" so that keys can be of mixed types.</p>
+</div>
+<div class="paragraph">
+<p>For a better control on the key types, four other classes are provided:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">YadaLookupTableThree</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lookup table with 3 columns: two keys as index for one value</p></td>
+</tr>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">YadaLookupTableFour</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lookup table with 4 columns: three keys as index for one value</p></td>
+</tr>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">YadaLookupTableFive</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lookup table with 5 columns: four keys as index for one value</p></td>
+</tr>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">YadaLookupTableSix</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Lookup table with 6 columns: five keys as index for one value</p></td>
+</tr>
+</tbody>
+</table>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="Java" class="language-Java hljs">YadaLookupTableThree&lt;Locale, Integer, String&gt; lookupTable = new YadaLookupTableThree&lt;&gt;();
+lookupTable.put(Locale.EN, 1, "Hello");
+lookupTable.put(Locale.IT, 1, "Ciao");
+...
+lookupTable.get(Locale.EN, 1); // "Hello"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>All implementations are efficient and thread safe.</p>
 </div>
 </div>
 </div>
@@ -319,7 +557,7 @@ Example:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-14 15:48:49 +0200
+Last updated 2024-10-18 15:35:14 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

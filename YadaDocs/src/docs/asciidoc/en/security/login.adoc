@@ -360,11 +360,11 @@ execution goes through `YadaAuthenticationFailureHandler` that sets the followin
 
 |userDisabled
 |boolean
-|user is disabled regardless of password
+|user is disabled regardless of password. This happens when `YadaUserCredentials.enabled` is false.
 
 |credentialsExpiredException
 |boolean
-|password is expired regardless of what password is used. Execution is forwarded to `"/pwdChange"`
+|password is expired regardless of what password is used. This happens when `YadaUserCredentials.changePassword` is true. Execution is forwarded to `"/pwdChange"`
 
 |lockoutMinutes
 |long
