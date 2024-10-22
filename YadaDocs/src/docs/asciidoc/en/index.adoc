@@ -1,6 +1,8 @@
 =  Yada Framework
 :docinfo: shared
 
+NOTE: Chat with this documentation in the https://chatgpt.com/g/g-IZTpvHTYM-yada-framework-manual[Yada Framework Manual^] custom GPT.
+
 ==  General Principles
 
 Git repository: https://github.com/xtianus/yadaframework

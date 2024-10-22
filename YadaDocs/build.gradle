@@ -6,6 +6,7 @@ buildscript {
 
 plugins {
     id 'org.asciidoctor.jvm.convert' version '3.+'
+    id 'org.asciidoctor.jvm.pdf' version '3.+'
 }
 
 group = 'net.yadaframework'
@@ -31,6 +32,12 @@ eclipse {
 	classpath {
         downloadJavadoc = true
         downloadSources = true
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -113,6 +120,35 @@ asciidoctor {
 	}
 }
 
+// Create one pdf for each .adoc file.
+// TODO make a master adoc with includes for all other files so that a single PDF can be created.
+//      Check into using a glob expression for including all files. This may require using an external
+//		command to process the input because the current version of asciidoctorj doesn't understand glob patterns maybe.
+asciidoctorPdf {
+	dependsOn copyDocInfoHeader
+	baseDirFollowsSourceFile();
+	languages 'en'
+	outputDir file('../docs')
+	attributes(
+		// Override imagesdir for PDF generation
+		'imagesdir': "$projectDir/src/docs/resources/img"
+    )
+	options doctype: 'book', safe: 'unsafe'
+}
 
+// This task concatenates all .adoc files into a single txt file that has been fed to ChatGPT: https://chatgpt.com/g/g-IZTpvHTYM-yada-framework-manual
+task concatAdocFiles {
+    doLast {
+        def startFolder = file('src/docs/asciidoc/en')
+        def outputFile = file("../docs/alltext.txt")
 
+        outputFile.withWriter { writer ->
+            startFolder.eachFileRecurse { file ->
+                if (file.name.endsWith('.adoc')) {
+                    writer << file.text << '\n'
+                }
+            }
+        }
+    }
+}
 
