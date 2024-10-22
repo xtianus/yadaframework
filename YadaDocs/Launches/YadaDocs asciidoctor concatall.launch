@@ -15,7 +15,7 @@
     <booleanAttribute key="show_console_view" value="true"/>
     <booleanAttribute key="show_execution_view" value="false"/>
     <listAttribute key="tasks">
-        <listEntry value="concatAdocFiles"/>
+        <listEntry value="concatAll"/>
     </listAttribute>
     <stringAttribute key="working_dir" value="${workspace_loc:/YadaDocs}"/>
 </launchConfiguration>
