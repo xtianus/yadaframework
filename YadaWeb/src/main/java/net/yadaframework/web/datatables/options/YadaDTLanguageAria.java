@@ -23,7 +23,7 @@ class YadaDTLanguageAria extends YadaFluentBase<YadaDTLanguage> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/language.aria.sortAscending">sortAscending</a>
      */
-    public YadaDTLanguageAria sortAscending(String sortAscending) {
+    public YadaDTLanguageAria dtSortAscending(String sortAscending) {
         this.sortAscending = sortAscending;
         return this;
     }
@@ -44,7 +44,7 @@ class YadaDTLanguageAria extends YadaFluentBase<YadaDTLanguage> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/language.aria.sortDescending">sortDescending</a>
      */
-    public YadaDTLanguageAria sortDescending(String sortDescending) {
+    public YadaDTLanguageAria dtSortDescending(String sortDescending) {
         this.sortDescending = sortDescending;
         return this;
     }

@@ -11,23 +11,47 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 
 <body th:remove="tag">
 
-<table th:id="${yadaDataTable.id}" class="table" th:classappend="${yadaDataTable.classes}?:'table-striped no-wrap'">
-	<thead>
-		<tr>
-			<th></th> 
-			<th th:if="${!(false==checkbox)}" class="yadaCheckInCell all"><input type="checkbox" class="s_columnSelector" title="All/None" /></th>
-			<th th:each="column : ${columns}" th:text="${column}">Name</th>
-			<th class="all" th:text="${commandsColumnText}?:#{column.commands}">Commands</th>
-		</tr>
-	</thead>
-	<tfoot>
-		<tr>
-			<td></td> 
-			<td th:if="${!(false==checkbox)}"></td> 
-			<td th:each="column : ${columns}"></td>
-			<td></td>
-		</tr>
-	</tfoot>
-</table>
+<div class="yadaDataTableBlock" th:with="html=${yadaDataTable.HTML}">
+
+	<table th:id="${yadaDataTable.id}" class="table" th:classappend="${html.cssClasses}?:'table-striped no-wrap'">
+		<thead>
+			<tr>
+				<th th:if="${html.selectCheckbox}">
+					<input type="checkbox" class="yada_columnSelector" th:title="#{${html.selectCheckboxTitle}}">
+				</th>
+				<th th:each="column : ${html.columns}" th:text="#{${column.headerText}}">Name</th>
+				<th th:if="${html.commandsTitle}" th:text="#{${html.commandsTitle}}">Commands</th>
+			</tr>
+		</thead>
+		<tfoot th:if="${html.showFooter}">
+			<tr>
+				<td th:if="${html.selectCheckbox}"></td> <!-- /* Empty for select column */-->
+				<th th:each="column : ${html.columns}"></th>
+				<td th:if="${html.commandsTitle}"></td> <!-- /* Empty for command column */-->
+			</tr>
+		</tfoot>
+	</table>
+
+	<!--/* Toolbar */-->
+	<div th:with="buttonSequence=${yadaDataTable.id+@yadaWebUtil.randomId6+'-button'}">
+		<th:block th:each="button : ${html.buttons}">
+			<a class="btn btn-primary" th:id="${#ids.seq(buttonSequence)}"
+				th:href="__${button.url?:'javascript:void(0);'}__"
+				th:class="|${button.ajax?'yadaAjax':''} ${button.toolbarCssClass?:''}|">
+				<th:block th:if="${button.icon!=null}" th:utext="${button.icon}"><i class="bi bi-pencil"></i></th:block>
+				<span th:text="${button.text}">Add</span>
+			</a>
+			<script th:inline="javascript">
+				yada.ready(() => {
+					const buttonId = /*[[${#ids.prev(buttonSequence)}]]*/ "dummy";
+					const buttonData = /*[[${button}]]*/ "dummy";
+					const dataTableId = /*[[${yadaDataTable.id}]]*/ "dummy";
+					yada.dtMakeButtonHandler(buttonId, buttonData, dataTableId);
+				});
+			</script>
+		</th:block>
+	</div>
+
+</div>
 	
 </body>

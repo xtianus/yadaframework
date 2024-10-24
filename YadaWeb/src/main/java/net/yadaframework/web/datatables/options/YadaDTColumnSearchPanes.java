@@ -23,7 +23,7 @@ class YadaDTColumnSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/columns.searchPanes.show">show</a>
      */
-    public YadaDTColumnSearchPanes show(Boolean show) {
+    public YadaDTColumnSearchPanes dtShow(Boolean show) {
         this.show = show;
         return this;
     }
@@ -44,7 +44,7 @@ class YadaDTColumnSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/columns.searchPanes.threshold">threshold</a>
      */
-    public YadaDTColumnSearchPanes threshold(Boolean threshold) {
+    public YadaDTColumnSearchPanes dtThreshold(Boolean threshold) {
         this.threshold = threshold;
         return this;
     }

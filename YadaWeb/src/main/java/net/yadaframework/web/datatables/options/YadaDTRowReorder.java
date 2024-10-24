@@ -24,7 +24,7 @@ class YadaDTRowReorder extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/rowReorder.editor">editor</a>
      */
-    public YadaDTRowReorder editor(Boolean editor) {
+    public YadaDTRowReorder dtEditor(Boolean editor) {
         this.editor = editor;
         return this;
     }
@@ -45,7 +45,7 @@ class YadaDTRowReorder extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/rowReorder.selector">selector</a>
      */
-    public YadaDTRowReorder selector(String selector) {
+    public YadaDTRowReorder dtSelector(String selector) {
         this.selector = selector;
         return this;
     }
@@ -66,7 +66,7 @@ class YadaDTRowReorder extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/rowReorder.snapX">snapX</a>
      */
-    public YadaDTRowReorder snapX(Boolean snapX) {
+    public YadaDTRowReorder dtSnapX(Boolean snapX) {
         this.snapX = snapX;
         return this;
     }

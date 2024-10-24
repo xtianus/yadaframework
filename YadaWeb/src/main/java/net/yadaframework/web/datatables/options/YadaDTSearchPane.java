@@ -27,7 +27,7 @@ class YadaDTSearchPane extends YadaFluentBase<YadaDTSearchPanes> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.panes.className">className</a>
      */
-    public YadaDTSearchPane className(String className) {
+    public YadaDTSearchPane dtClassName(String className) {
         this.className = className;
         return this;
     }
@@ -69,7 +69,7 @@ class YadaDTSearchPane extends YadaFluentBase<YadaDTSearchPanes> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.panes.header">header</a>
      */
-    public YadaDTSearchPane header(String header) {
+    public YadaDTSearchPane dtHeader(String header) {
         this.header = header;
         return this;
     }
@@ -90,7 +90,7 @@ class YadaDTSearchPane extends YadaFluentBase<YadaDTSearchPanes> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.panes.options">options</a>
      */
-    public YadaDTSearchPane options(List<YadaDTSearchPaneOption> options) {
+    public YadaDTSearchPane dtOptions(List<YadaDTSearchPaneOption> options) {
         this.options = options;
         return this;
     }
@@ -109,7 +109,7 @@ class YadaDTSearchPane extends YadaFluentBase<YadaDTSearchPanes> {
      * 
      * @return a new YadaDTSearchPaneOption instance
      */
-    public YadaDTSearchPaneOption options() {
+    public YadaDTSearchPaneOption dtOptions() {
         if (this.options == null) {
             this.options = new ArrayList<>();
         }

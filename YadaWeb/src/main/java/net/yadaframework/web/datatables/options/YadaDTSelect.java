@@ -29,7 +29,7 @@ class YadaDTSelect extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/select.blurable">blurable</a>
      */
-    public YadaDTSelect blurable(Boolean blurable) {
+    public YadaDTSelect dtBlurable(Boolean blurable) {
         this.blurable = blurable;
         return this;
     }
@@ -50,7 +50,7 @@ class YadaDTSelect extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/select.className">className</a>
      */
-    public YadaDTSelect className(String className) {
+    public YadaDTSelect dtClassName(String className) {
         this.className = className;
         return this;
     }
@@ -71,7 +71,7 @@ class YadaDTSelect extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/select.headerCheckbox">headerCheckbox</a>
      */
-    public YadaDTSelect headerCheckbox(Boolean headerCheckbox) {
+    public YadaDTSelect dtHeaderCheckbox(Boolean headerCheckbox) {
         this.headerCheckbox = headerCheckbox;
         return this;
     }
@@ -92,7 +92,7 @@ class YadaDTSelect extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/select.info">info</a>
      */
-    public YadaDTSelect info(String info) {
+    public YadaDTSelect dtInfo(String info) {
         this.info = info;
         return this;
     }
@@ -113,7 +113,7 @@ class YadaDTSelect extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/select.items">items</a>
      */
-    public YadaDTSelect items(String items) {
+    public YadaDTSelect dtItems(String items) {
         this.items = items;
         return this;
     }
@@ -134,7 +134,7 @@ class YadaDTSelect extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/select.selectable">selectable</a>
      */
-    public YadaDTSelect selectable(Boolean selectable) {
+    public YadaDTSelect dtSelectable(Boolean selectable) {
         this.selectable = selectable;
         return this;
     }
@@ -155,7 +155,7 @@ class YadaDTSelect extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/select.selector">selector</a>
      */
-    public YadaDTSelect selector(String selector) {
+    public YadaDTSelect dtSelector(String selector) {
         this.selector = selector;
         return this;
     }
@@ -176,7 +176,7 @@ class YadaDTSelect extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/select.style">style</a>
      */
-    public YadaDTSelect style(String style) {
+    public YadaDTSelect dtStyle(String style) {
         this.style = style;
         return this;
     }
@@ -197,7 +197,7 @@ class YadaDTSelect extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/select.toggleable">toggleable</a>
      */
-    public YadaDTSelect toggleable(Boolean toggleable) {
+    public YadaDTSelect dtToggleable(Boolean toggleable) {
         this.toggleable = toggleable;
         return this;
     }

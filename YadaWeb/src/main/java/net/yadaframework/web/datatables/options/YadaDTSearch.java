@@ -24,7 +24,7 @@ class YadaDTSearch extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/search.regex">regex</a>
      */
-    public YadaDTSearch regex(String regex) {
+    public YadaDTSearch dtRegex(String regex) {
         this.regex = regex;
         return this;
     }
@@ -45,7 +45,7 @@ class YadaDTSearch extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/search.smart">smart</a>
      */
-    public YadaDTSearch smart(Boolean smart) {
+    public YadaDTSearch dtSmart(Boolean smart) {
         this.smart = smart;
         return this;
     }
@@ -66,7 +66,7 @@ class YadaDTSearch extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/search.caseInsensitive">caseInsensitive</a>
      */
-    public YadaDTSearch caseInsensitive(Boolean caseInsensitive) {
+    public YadaDTSearch dtCaseInsensitive(Boolean caseInsensitive) {
         this.caseInsensitive = caseInsensitive;
         return this;
     }

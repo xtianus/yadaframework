@@ -20,7 +20,7 @@ class YadaDTSearchCol extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/columns.searchable">column</a>
      */
-    public YadaDTSearchCol column(String column) {
+    public YadaDTSearchCol dtColumn(String column) {
         this.column = column;
         return this;
     }
@@ -41,7 +41,7 @@ class YadaDTSearchCol extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/columns.search">search</a>
      */
-    public YadaDTSearchCol search(String search) {
+    public YadaDTSearchCol dtSearch(String search) {
         this.search = search;
         return this;
     }

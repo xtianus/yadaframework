@@ -24,7 +24,7 @@ class YadaDTColumnDef extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/columnDefs.targets">targets</a>
      */
-    public YadaDTColumnDef targets(Integer targets) {
+    public YadaDTColumnDef dtTargets(Integer targets) {
         this.targets = targets;
         return this;
     }
@@ -45,7 +45,7 @@ class YadaDTColumnDef extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/columnDefs.visible">visible</a>
      */
-    public YadaDTColumnDef visible(Boolean visible) {
+    public YadaDTColumnDef dtVisible(Boolean visible) {
         this.visible = visible;
         return this;
     }

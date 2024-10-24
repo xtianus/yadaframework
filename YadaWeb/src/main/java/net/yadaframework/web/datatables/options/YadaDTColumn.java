@@ -24,7 +24,7 @@ class YadaDTColumn extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/columns.title">title</a>
      */
-    public YadaDTColumn title(String title) {
+    public YadaDTColumn dtTitle(String title) {
         this.title = title;
         return this;
     }
@@ -45,7 +45,7 @@ class YadaDTColumn extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/columns.data">data</a>
      */
-    public YadaDTColumn data(String data) {
+    public YadaDTColumn dtData(String data) {
         this.data = data;
         return this;
     }

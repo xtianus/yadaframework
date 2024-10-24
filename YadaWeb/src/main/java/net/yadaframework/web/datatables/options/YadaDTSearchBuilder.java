@@ -33,7 +33,7 @@ class YadaDTSearchBuilder extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchBuilder.columns">columns</a>
      */
-    public YadaDTSearchBuilder columns(List<Integer> columns) {
+    public YadaDTSearchBuilder dtColumns(List<Integer> columns) {
         this.columns = columns;
         return this;
     }
@@ -44,7 +44,7 @@ class YadaDTSearchBuilder extends YadaFluentBase<YadaDataTableOptions> {
      * @param column column index
      * @return this instance for method chaining
      */
-    public YadaDTSearchBuilder columns(Integer column) {
+    public YadaDTSearchBuilder dtColumns(Integer column) {
         if (this.columns == null) {
             this.columns = new ArrayList<>();
         }
@@ -68,7 +68,7 @@ class YadaDTSearchBuilder extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchBuilder.conditions">conditions</a>
      */
-    public YadaDTSearchBuilder conditions(String conditions) {
+    public YadaDTSearchBuilder dtConditions(String conditions) {
         this.conditions = conditions;
         return this;
     }
@@ -89,7 +89,7 @@ class YadaDTSearchBuilder extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchBuilder.depthLimit">depthLimit</a>
      */
-    public YadaDTSearchBuilder depthLimit(Integer depthLimit) {
+    public YadaDTSearchBuilder dtDepthLimit(Integer depthLimit) {
         this.depthLimit = depthLimit;
         return this;
     }
@@ -110,7 +110,7 @@ class YadaDTSearchBuilder extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchBuilder.enterSearch">enterSearch</a>
      */
-    public YadaDTSearchBuilder enterSearch(Boolean enterSearch) {
+    public YadaDTSearchBuilder dtEnterSearch(Boolean enterSearch) {
         this.enterSearch = enterSearch;
         return this;
     }
@@ -131,7 +131,7 @@ class YadaDTSearchBuilder extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchBuilder.filterChanged">filterChanged</a>
      */
-    public YadaDTSearchBuilder filterChanged(Boolean filterChanged) {
+    public YadaDTSearchBuilder dtFilterChanged(Boolean filterChanged) {
         this.filterChanged = filterChanged;
         return this;
     }
@@ -152,7 +152,7 @@ class YadaDTSearchBuilder extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchBuilder.greyscale">greyscale</a>
      */
-    public YadaDTSearchBuilder greyscale(Boolean greyscale) {
+    public YadaDTSearchBuilder dtGreyscale(Boolean greyscale) {
         this.greyscale = greyscale;
         return this;
     }
@@ -173,7 +173,7 @@ class YadaDTSearchBuilder extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchBuilder.liveSearch">liveSearch</a>
      */
-    public YadaDTSearchBuilder liveSearch(Boolean liveSearch) {
+    public YadaDTSearchBuilder dtLiveSearch(Boolean liveSearch) {
         this.liveSearch = liveSearch;
         return this;
     }
@@ -194,7 +194,7 @@ class YadaDTSearchBuilder extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchBuilder.logic">logic</a>
      */
-    public YadaDTSearchBuilder logic(String logic) {
+    public YadaDTSearchBuilder dtLogic(String logic) {
         this.logic = logic;
         return this;
     }
@@ -215,7 +215,7 @@ class YadaDTSearchBuilder extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchBuilder.preDefined">preDefined</a>
      */
-    public YadaDTSearchBuilder preDefined(Boolean preDefined) {
+    public YadaDTSearchBuilder dtPreDefined(Boolean preDefined) {
         this.preDefined = preDefined;
         return this;
     }

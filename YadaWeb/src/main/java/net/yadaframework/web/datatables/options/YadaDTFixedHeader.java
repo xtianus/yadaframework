@@ -23,7 +23,7 @@ class YadaDTFixedHeader extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/fixedHeader.header">header</a>
      */
-    public YadaDTFixedHeader header(Boolean header) {
+    public YadaDTFixedHeader dtHeader(Boolean header) {
         this.header = header;
         return this;
     }
@@ -44,7 +44,7 @@ class YadaDTFixedHeader extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/fixedHeader.footer">footer</a>
      */
-    public YadaDTFixedHeader footer(Boolean footer) {
+    public YadaDTFixedHeader dtFooter(Boolean footer) {
         this.footer = footer;
         return this;
     }

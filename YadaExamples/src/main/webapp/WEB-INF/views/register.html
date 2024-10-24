@@ -56,7 +56,7 @@
 
 	<script th:inline="javascript">
 		yada.enablePasswordMatch($("#registrationForm"));
-		yex.ready(yada.loaderOff);
+		yada.ready(yada.loaderOff);
 		$("#registrationForm").submit(function(){yada.loaderOn();});
 	</script>
 

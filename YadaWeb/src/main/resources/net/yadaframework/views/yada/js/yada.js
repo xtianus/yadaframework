@@ -1017,6 +1017,7 @@
 				})
 				
 				// Replace some listeners with improved ones
+				// ! Not sure what this is for !
 				const yadaEventListeners = getYadaEventHandlers($trigger);
 				const insertedListener = yadaEventListeners['inserted.bs.popover']?.handler;
 				const shownListener = yadaEventListeners['shown.bs.popover']?.handler;

@@ -23,7 +23,7 @@ class YadaDTButton extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/buttons.text">text</a>
      */
-    public YadaDTButton text(String text) {
+    public YadaDTButton dtText(String text) {
         this.text = text;
         return this;
     }
@@ -44,7 +44,7 @@ class YadaDTButton extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/buttons.action">action</a>
      */
-    public YadaDTButton action(String action) {
+    public YadaDTButton dtAction(String action) {
         this.action = action;
         return this;
     }

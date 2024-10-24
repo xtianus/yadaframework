@@ -12,9 +12,9 @@
 	</th:block>
 </head>
 <body th:remove="tag">
-<script th:fragment="${acronym}ready">
-	window.${acronym} = window.${acronym} || {};
-	${acronym}.ready = ${acronym}.ready || function (fn) {
+<script th:fragment="yadaReady">
+	window.yada = window.yada || {};
+	yada.ready = yada.ready || function (fn) {
 		if (document.readyState != 'loading'){
 			fn();
 		} else {

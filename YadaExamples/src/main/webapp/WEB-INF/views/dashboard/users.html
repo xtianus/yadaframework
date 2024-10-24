@@ -12,10 +12,11 @@
 <main class="container">
 	<h1>Users</h1>
 	
-	<yada:datatable yada:definition="${dataTable}"></yada:datatable>
+	<yada:datatable id="userTable" yada:definition="${dataTable}">
+	</yada:datatable>
 	
 	<script th:inline="javascript">
-    	var jsonData = /*[[${yadaDataTable}]]*/ "dummy";
+		var jsonData = /*[[${yadaDataTable}]]*/ "dummy";
 	</script>
 	
 </main>

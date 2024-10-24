@@ -23,7 +23,7 @@ class YadaDTRowGroup extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/rowGroup.dataSrc">dataSrc</a>
      */
-    public YadaDTRowGroup dataSrc(Boolean dataSrc) {
+    public YadaDTRowGroup dtDataSrc(Boolean dataSrc) {
         this.dataSrc = dataSrc;
         return this;
     }
@@ -44,7 +44,7 @@ class YadaDTRowGroup extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/rowGroup.startRender">startRender</a>
      */
-    public YadaDTRowGroup startRender(Boolean startRender) {
+    public YadaDTRowGroup dtStartRender(Boolean startRender) {
         this.startRender = startRender;
         return this;
     }

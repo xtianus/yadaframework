@@ -17,7 +17,7 @@ public class YadaLookupTable<K, V> {
 
     /**
      * Add a new row to the table using variable-length keys.
-     * Note that the value comes before the keys.
+     * Note that the value comes before the keys. No parameter can be null.
      * @param value The value to insert.
      * @param keys  The keys to use for indexing, provided as varargs.
      */

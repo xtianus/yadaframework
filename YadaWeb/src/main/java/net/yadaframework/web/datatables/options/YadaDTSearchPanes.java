@@ -41,7 +41,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.cascadePanes">cascadePanes</a>
      */
-    public YadaDTSearchPanes cascadePanes(Boolean cascadePanes) {
+    public YadaDTSearchPanes dtCascadePanes(Boolean cascadePanes) {
         this.cascadePanes = cascadePanes;
         return this;
     }
@@ -62,7 +62,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.clear">clear</a>
      */
-    public YadaDTSearchPanes clear(String clear) {
+    public YadaDTSearchPanes dtClear(String clear) {
         this.clear = clear;
         return this;
     }
@@ -83,7 +83,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.collapse">collapse</a>
      */
-    public YadaDTSearchPanes collapse(Boolean collapse) {
+    public YadaDTSearchPanes dtCollapse(Boolean collapse) {
         this.collapse = collapse;
         return this;
     }
@@ -104,7 +104,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.columns">columns</a>
      */
-    public YadaDTSearchPanes columns(List<Integer> columns) {
+    public YadaDTSearchPanes dtColumns(List<Integer> columns) {
         this.columns = columns;
         return this;
     }
@@ -115,7 +115,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @param column a column index
      * @return this instance for method chaining
      */
-    public YadaDTSearchPanes columns(Integer column) {
+    public YadaDTSearchPanes dtColumns(Integer column) {
         if (this.columns == null) {
             this.columns = new ArrayList<>();
         }
@@ -139,7 +139,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.controls">controls</a>
      */
-    public YadaDTSearchPanes controls(Boolean controls) {
+    public YadaDTSearchPanes dtControls(Boolean controls) {
         this.controls = controls;
         return this;
     }
@@ -181,7 +181,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.emptyMessage">emptyMessage</a>
      */
-    public YadaDTSearchPanes emptyMessage(String emptyMessage) {
+    public YadaDTSearchPanes dtEmptyMessage(String emptyMessage) {
         this.emptyMessage = emptyMessage;
         return this;
     }
@@ -202,7 +202,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.filterChanged">filterChanged</a>
      */
-    public YadaDTSearchPanes filterChanged(Boolean filterChanged) {
+    public YadaDTSearchPanes dtFilterChanged(Boolean filterChanged) {
         this.filterChanged = filterChanged;
         return this;
     }
@@ -223,7 +223,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.hideCount">hideCount</a>
      */
-    public YadaDTSearchPanes hideCount(Boolean hideCount) {
+    public YadaDTSearchPanes dtHideCount(Boolean hideCount) {
         this.hideCount = hideCount;
         return this;
     }
@@ -244,7 +244,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.initCollapsed">initCollapsed</a>
      */
-    public YadaDTSearchPanes initCollapsed(Boolean initCollapsed) {
+    public YadaDTSearchPanes dtInitCollapsed(Boolean initCollapsed) {
         this.initCollapsed = initCollapsed;
         return this;
     }
@@ -265,7 +265,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.layout">layout</a>
      */
-    public YadaDTSearchPanes layout(String layout) {
+    public YadaDTSearchPanes dtLayout(String layout) {
         this.layout = layout;
         return this;
     }
@@ -286,7 +286,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.order">order</a>
      */
-    public YadaDTSearchPanes order(Boolean order) {
+    public YadaDTSearchPanes dtOrder(Boolean order) {
         this.order = order;
         return this;
     }
@@ -307,7 +307,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.orderable">orderable</a>
      */
-    public YadaDTSearchPanes orderable(Boolean orderable) {
+    public YadaDTSearchPanes dtOrderable(Boolean orderable) {
         this.orderable = orderable;
         return this;
     }
@@ -328,7 +328,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.panes">panes</a>
      */
-    public YadaDTSearchPanes panes(List<YadaDTSearchPane> panes) {
+    public YadaDTSearchPanes dtPanes(List<YadaDTSearchPane> panes) {
         this.panes = panes;
         return this;
     }
@@ -338,7 +338,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return a new YadaDTSearchPane instance
      */
-    public YadaDTSearchPane panes() {
+    public YadaDTSearchPane dtPanes() {
         if (this.panes == null) {
             this.panes = new ArrayList<>();
         }
@@ -363,7 +363,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.preSelect">preSelect</a>
      */
-    public YadaDTSearchPanes preSelect(Integer preSelect) {
+    public YadaDTSearchPanes dtPreSelect(Integer preSelect) {
         this.preSelect = preSelect;
         return this;
     }
@@ -384,7 +384,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.threshold">threshold</a>
      */
-    public YadaDTSearchPanes threshold(Integer threshold) {
+    public YadaDTSearchPanes dtThreshold(Integer threshold) {
         this.threshold = threshold;
         return this;
     }
@@ -405,7 +405,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.viewCount">viewCount</a>
      */
-    public YadaDTSearchPanes viewCount(Integer viewCount) {
+    public YadaDTSearchPanes dtViewCount(Integer viewCount) {
         this.viewCount = viewCount;
         return this;
     }
@@ -426,7 +426,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.viewTotal">viewTotal</a>
      */
-    public YadaDTSearchPanes viewTotal(Integer viewTotal) {
+    public YadaDTSearchPanes dtViewTotal(Integer viewTotal) {
         this.viewTotal = viewTotal;
         return this;
     }

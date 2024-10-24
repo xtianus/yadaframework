@@ -23,7 +23,7 @@ class YadaDTKeys extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/keys.clipboard">clipboard</a>
      */
-    public YadaDTKeys clipboard(Boolean clipboard) {
+    public YadaDTKeys dtClipboard(Boolean clipboard) {
         this.clipboard = clipboard;
         return this;
     }
@@ -44,7 +44,7 @@ class YadaDTKeys extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/keys.columns">columns</a>
      */
-    public YadaDTKeys columns(Boolean columns) {
+    public YadaDTKeys dtColumns(Boolean columns) {
         this.columns = columns;
         return this;
     }

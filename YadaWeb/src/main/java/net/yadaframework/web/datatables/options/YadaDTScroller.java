@@ -24,7 +24,7 @@ class YadaDTScroller extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/scroller.loadingIndicator">loadingIndicator</a>
      */
-    public YadaDTScroller loadingIndicator(Boolean loadingIndicator) {
+    public YadaDTScroller dtLoadingIndicator(Boolean loadingIndicator) {
         this.loadingIndicator = loadingIndicator;
         return this;
     }
@@ -45,7 +45,7 @@ class YadaDTScroller extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/scroller.displayBuffer">displayBuffer</a>
      */
-    public YadaDTScroller displayBuffer(Integer displayBuffer) {
+    public YadaDTScroller dtDisplayBuffer(Integer displayBuffer) {
         this.displayBuffer = displayBuffer;
         return this;
     }
@@ -66,7 +66,7 @@ class YadaDTScroller extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/scroller.boundaryScale">boundaryScale</a>
      */
-    public YadaDTScroller boundaryScale(Integer boundaryScale) {
+    public YadaDTScroller dtBoundaryScale(Integer boundaryScale) {
         this.boundaryScale = boundaryScale;
         return this;
     }

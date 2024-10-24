@@ -10,12 +10,12 @@ public class YadaDTOptionSearchBuilder extends YadaFluentBase<YadaDTColumns> {
 		super(parent);
 	}
 	
-    public YadaDTOptionSearchBuilder defaultCondition(Integer defaultCondition) {
+    public YadaDTOptionSearchBuilder dtDefaultCondition(Integer defaultCondition) {
         this.defaultCondition = defaultCondition;
         return this;
     }
     
-    public YadaDTOptionSearchBuilder orthogonal(Object orthogonal) {
+    public YadaDTOptionSearchBuilder dtOrthogonal(Object orthogonal) {
     	this.orthogonal = orthogonal;
     	return this;
     }

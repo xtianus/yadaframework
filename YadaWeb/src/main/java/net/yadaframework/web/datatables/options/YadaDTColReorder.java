@@ -23,7 +23,7 @@ class YadaDTColReorder extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/colReorder.enable">enable</a>
      */
-    public YadaDTColReorder enable(Boolean enable) {
+    public YadaDTColReorder dtEnable(Boolean enable) {
         this.enable = enable;
         return this;
     }
@@ -44,7 +44,7 @@ class YadaDTColReorder extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/colReorder.fixedColumnsLeft">fixedColumnsLeft</a>
      */
-    public YadaDTColReorder fixedColumnsLeft(Integer fixedColumnsLeft) {
+    public YadaDTColReorder dtFixedColumnsLeft(Integer fixedColumnsLeft) {
         this.fixedColumnsLeft = fixedColumnsLeft;
         return this;
     }

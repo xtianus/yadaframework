@@ -216,9 +216,24 @@ public class YadaUtil {
 	}
 	
 	/**
+	 * Returns a random string of the given length with characters in the range "A".."Z", "a".."z", "0".."9" 
+	 * @param length the exact length of the string
+	 * @return a random string
+	 */
+	public String getRandomString(int length) {
+		final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		StringBuilder id = new StringBuilder(length);
+		for (int i = 0; i < length; i++) {
+			id.append(CHARACTERS.charAt(secureRandom.nextInt(CHARACTERS.length())));
+		}
+		return id.toString();
+	}
+	
+	/**
 	 * Returns a random string (currently an hex random number)
 	 * @param minlen minimum length of the string. The maximum length is random.
-	 * @return
+	 * @return a random string
+	 * @see #getRandomString(int)
 	 */
 	public String getRandomText(int minlen) {
 		int random = getRandom(0, Integer.MAX_VALUE);

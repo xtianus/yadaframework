@@ -11,8 +11,15 @@ public abstract class YadaFluentBase<T> {
         this.parent = parent;
     }
 
+    /**
+     * Subclasses should throw YadaInvalidUsageException if they have any validation errors.
+     */
+    protected void validate() {
+    }
+
     // Method to return to parent for fluent chaining
     public T back() {
+    	validate();
         return parent;
     }
     

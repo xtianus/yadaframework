@@ -93,6 +93,24 @@ public class YadaWebUtil {
 	private Map<String, List<?>> sortedLocalEnumCache = new ConcurrentHashMap<>();
 	
 	/**
+	 * Convenience method for generating a random id of 6 characters to be used in pages with "@yadaWebUtil.randomId6"
+	 * @see YadaUtil#getRandomString(length)
+	 * @return a random string of 6 characters
+	 */
+	public String getRandomId6() {
+		return yadaUtil.getRandomString(6);
+	}
+	
+	/**
+	 * Convenience method for generating a random id of 12 characters to be used in pages with "@yadaWebUtil.randomId12"
+	 * @see YadaUtil#getRandomString(length)
+	 * @return a random string of 12 characters
+	 */
+	public String getRandomId12() {
+		return yadaUtil.getRandomString(12);
+	}
+
+	/**
 	 * Check if an object holds a thymeleaf fragment instance. To be used in Thymeleaf templates.
 	 * @param someObject
 	 * @return true if the parameter is a fragment

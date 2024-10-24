@@ -23,7 +23,7 @@ class YadaDTLanguage extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/language.emptyTable">emptyTable</a>
      */
-    public YadaDTLanguage emptyTable(String emptyTable) {
+    public YadaDTLanguage dtEmptyTable(String emptyTable) {
         this.emptyTable = emptyTable;
         return this;
     }
@@ -44,7 +44,7 @@ class YadaDTLanguage extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/language.zeroRecords">zeroRecords</a>
      */
-    public YadaDTLanguage zeroRecords(String zeroRecords) {
+    public YadaDTLanguage dtZeroRecords(String zeroRecords) {
         this.zeroRecords = zeroRecords;
         return this;
     }

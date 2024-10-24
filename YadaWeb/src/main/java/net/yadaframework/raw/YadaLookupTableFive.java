@@ -17,7 +17,7 @@ public class YadaLookupTableFive<K1, K2, K3, K4, V> {
 	Map<K1, YadaLookupTableFour<K2, K3, K4, V>> col1 = new ConcurrentHashMap<>();
 
 	/**
-	 * Add a new row to the table. Any value can be null.
+	 * Add a new row to the table. No parameter can be null.
 	 */
 	public void put(K1 key1, K2 key2, K3 key3, K4 key4, V value) {
         // Ensure the YadaLookupTableThree is present for key1 in a thread-safe manner
@@ -30,7 +30,7 @@ public class YadaLookupTableFive<K1, K2, K3, K4, V> {
 	 * @param key2 can be null
 	 * @param key3 can be null
 	 * @param key4 can be null
-	 * @return the value of column 5, or null
+	 * @return the value of column 5, or null if not found.
 	 */
 	public V get(K1 key1, K2 key2, K3 key3, K4 key4) {
 		YadaLookupTableFour<K2, K3, K4, V> col2 = col1.get(key1);

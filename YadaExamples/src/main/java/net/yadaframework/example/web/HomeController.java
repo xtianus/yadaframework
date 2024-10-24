@@ -1,28 +1,26 @@
 package net.yadaframework.example.web;
 
-import java.util.List;
-import java.util.Locale;
+import static net.yadaframework.components.YadaUtil.messageSource;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
+import jakarta.servlet.http.HttpServletRequest;
 import net.yadaframework.components.YadaNotify;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaLocalePathChangeInterceptor;
+import net.yadaframework.example.core.YexConfiguration;
 import net.yadaframework.security.YadaSecurityConfig;
 import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.web.YadaViews;
-
-import net.yadaframework.example.core.YexConfiguration;
-
-import static net.yadaframework.components.YadaUtil.messageSource;
 
 @Controller
 public class HomeController {
@@ -32,6 +30,12 @@ public class HomeController {
 	@Autowired private YadaSecurityUtil yadaSecurityUtil;
 	@Autowired private YadaNotify yadaNotify;
 	@Autowired private YexConfiguration config;
+	
+	@RequestMapping("/errorPage")
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public String errorPage(Model model, Locale locale) {
+		return "/errorPage";
+	}
 	
 	@RequestMapping("/datatables")
 	public String datatables(Model model, Locale locale) {

@@ -23,7 +23,7 @@ class YadaDTFixedColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/fixedColumns.leftColumns">leftColumns</a>
      */
-    public YadaDTFixedColumns leftColumns(Boolean leftColumns) {
+    public YadaDTFixedColumns dtLeftColumns(Boolean leftColumns) {
         this.leftColumns = leftColumns;
         return this;
     }
@@ -44,7 +44,7 @@ class YadaDTFixedColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/fixedColumns.rightColumns">rightColumns</a>
      */
-    public YadaDTFixedColumns rightColumns(Boolean rightColumns) {
+    public YadaDTFixedColumns dtRightColumns(Boolean rightColumns) {
         this.rightColumns = rightColumns;
         return this;
     }

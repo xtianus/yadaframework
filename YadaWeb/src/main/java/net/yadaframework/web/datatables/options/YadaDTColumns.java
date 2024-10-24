@@ -148,7 +148,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return Whether the column is orderable.
      * @see <a href="https://datatables.net/reference/option/columns.orderable">DataTables Reference: columns.orderable</a>
      */
-    public boolean isOrderable() {
+    public boolean dtIsOrderable() {
         return orderable;
     }
 
@@ -188,7 +188,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return Whether the column is searchable.
      * @see <a href="https://datatables.net/reference/option/columns.searchable">DataTables Reference: columns.searchable</a>
      */
-    public boolean isSearchable() {
+    public boolean dtIsSearchable() {
         return searchable;
     }
 
@@ -212,7 +212,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return Whether the column is visible.
      * @see <a href="https://datatables.net/reference/option/columns.visible">DataTables Reference: columns.visible</a>
      */
-    public boolean isVisible() {
+    public boolean dtIsVisible() {
         return visible;
     }
 
@@ -230,7 +230,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.ariaTitle">DataTables Reference: columns.ariaTitle</a>
      */
-    public YadaDTColumns ariaTitle(String ariaTitle) {
+    public YadaDTColumns dtAriaTitle(String ariaTitle) {
         this.ariaTitle = ariaTitle;
         return this;
     }
@@ -240,7 +240,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.cellType">DataTables Reference: columns.cellType</a>
      */
-    public YadaDTColumns cellType(String cellType) {
+    public YadaDTColumns dtCellType(String cellType) {
         this.cellType = cellType;
         return this;
     }
@@ -250,7 +250,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.className">DataTables Reference: columns.className</a>
      */
-    public YadaDTColumns className(String className) {
+    public YadaDTColumns dtClassName(String className) {
         this.className = className;
         return this;
     }
@@ -260,7 +260,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.contentPadding">DataTables Reference: columns.contentPadding</a>
      */
-    public YadaDTColumns contentPadding(String contentPadding) {
+    public YadaDTColumns dtContentPadding(String contentPadding) {
         this.contentPadding = contentPadding;
         return this;
     }
@@ -270,7 +270,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.createdCell">DataTables Reference: columns.createdCell</a>
      */
-    public YadaDTColumns createdCell(String createdCell) {
+    public YadaDTColumns dtCreatedCell(String createdCell) {
         this.createdCell = createdCell;
         return this;
     }
@@ -280,7 +280,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.data">DataTables Reference: columns.data</a>
      */
-    public YadaDTColumns data(String data) {
+    public YadaDTColumns dtData(String data) {
         this.data = data;
         return this;
     }
@@ -290,7 +290,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.defaultContent">DataTables Reference: columns.defaultContent</a>
      */
-    public YadaDTColumns defaultContent(String defaultContent) {
+    public YadaDTColumns dtDefaultContent(String defaultContent) {
         this.defaultContent = defaultContent;
         return this;
     }
@@ -300,7 +300,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.editField">DataTables Reference: columns.editField</a>
      */
-    public YadaDTColumns editField(String editField) {
+    public YadaDTColumns dtEditField(String editField) {
         this.editField = editField;
         return this;
     }
@@ -310,7 +310,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.footer">DataTables Reference: columns.footer</a>
      */
-    public YadaDTColumns footer(String footer) {
+    public YadaDTColumns dtFooter(String footer) {
         this.footer = footer;
         return this;
     }
@@ -320,7 +320,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.name">DataTables Reference: columns.name</a>
      */
-    public YadaDTColumns name(String name) {
+    public YadaDTColumns dtName(String name) {
         this.name = name;
         return this;
     }
@@ -330,7 +330,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.orderData">DataTables Reference: columns.orderData</a>
      */
-    public YadaDTColumns orderData(Integer orderData) {
+    public YadaDTColumns dtOrderData(Integer orderData) {
         this.orderData.add(orderData);
         return this;
     }
@@ -340,7 +340,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.orderDataType">DataTables Reference: columns.orderDataType</a>
      */
-    public YadaDTColumns orderDataType(String orderDataType) {
+    public YadaDTColumns dtOrderDataType(String orderDataType) {
         this.orderDataType = orderDataType;
         return this;
     }
@@ -350,7 +350,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.orderSequence">DataTables Reference: columns.orderSequence</a>
      */
-    public YadaDTColumns orderSequence(String orderSequence) {
+    public YadaDTColumns dtOrderSequence(String orderSequence) {
         if (this.orderSequence == null) {
             this.orderSequence = new ArrayList<>();
         }
@@ -363,7 +363,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.orderable">DataTables Reference: columns.orderable</a>
      */
-    public YadaDTColumns orderable(boolean orderable) {
+    public YadaDTColumns dtOrderable(boolean orderable) {
         this.orderable = orderable;
         return this;
     }
@@ -373,7 +373,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.render">DataTables Reference: columns.render</a>
      */
-    public YadaDTColumns render(String render) {
+    public YadaDTColumns dtRender(String render) {
         this.render = render;
         return this;
     }
@@ -383,7 +383,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.responsivePriority">DataTables Reference: columns.responsivePriority</a>
      */
-    public YadaDTColumns responsivePriority(int responsivePriority) {
+    public YadaDTColumns dtResponsivePriority(int responsivePriority) {
         this.responsivePriority = responsivePriority;
         return this;
     }
@@ -392,7 +392,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return The search builder instance for configuring search options for the column.
      * @see <a href="https://datatables.net/reference/option/columns.searchBuilder">DataTables Reference: columns.searchBuilder</a>
      */
-    public YadaDTOptionSearchBuilder searchBuilder() {
+    public YadaDTOptionSearchBuilder dtSearchBuilder() {
         if (this.searchBuilder == null) {
             this.searchBuilder = new YadaDTOptionSearchBuilder(this);
         }
@@ -404,7 +404,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.searchPanes">DataTables Reference: columns.searchPanes</a>
      */
-    public YadaDTColumns searchPanes(String searchPanes) {
+    public YadaDTColumns dtSearchPanes(String searchPanes) {
         this.searchPanes = searchPanes;
         return this;
     }
@@ -414,7 +414,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.searchable">DataTables Reference: columns.searchable</a>
      */
-    public YadaDTColumns searchable(boolean searchable) {
+    public YadaDTColumns dtSearchable(boolean searchable) {
         this.searchable = searchable;
         return this;
     }
@@ -424,7 +424,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.title">DataTables Reference: columns.title</a>
      */
-    public YadaDTColumns title(String title) {
+    public YadaDTColumns dtTitle(String title) {
         this.title = title;
         return this;
     }
@@ -434,7 +434,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.type">DataTables Reference: columns.type</a>
      */
-    public YadaDTColumns type(String type) {
+    public YadaDTColumns dtType(String type) {
         this.type = type;
         return this;
     }
@@ -444,7 +444,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.visible">DataTables Reference: columns.visible</a>
      */
-    public YadaDTColumns visible(boolean visible) {
+    public YadaDTColumns dtVisible(boolean visible) {
         this.visible = visible;
         return this;
     }
@@ -454,7 +454,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.width">DataTables Reference: columns.width</a>
      */
-    public YadaDTColumns width(String width) {
+    public YadaDTColumns dtWidth(String width) {
         this.width = width;
         return this;
     }
@@ -464,7 +464,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.searchBuilderTitle">DataTables Reference: columns.searchBuilderTitle</a>
      */
-    public YadaDTColumns searchBuilderTitle(String searchBuilderTitle) {
+    public YadaDTColumns dtSearchBuilderTitle(String searchBuilderTitle) {
     	this.searchBuilderTitle = searchBuilderTitle;
     	return this;
     }
@@ -474,7 +474,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDataTableOptions> {
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.searchBuilderType">DataTables Reference: columns.searchBuilderType</a>
      */
-    public YadaDTColumns searchBuilderType(String searchBuilderType) {
+    public YadaDTColumns dtSearchBuilderType(String searchBuilderType) {
     	this.searchBuilderType = searchBuilderType;
     	return this;
     }

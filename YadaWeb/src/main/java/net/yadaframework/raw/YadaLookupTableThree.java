@@ -15,7 +15,7 @@ public class YadaLookupTableThree<K1, K2, V> {
 	Map<K1, Map<K2, V>> col1 = new ConcurrentHashMap<>();
 
 	/**
-	 * Add a new row to the table. Any value can be null.
+	 * Add a new row to the table. No parameter can be null.
 	 */
 	public void put(K1 key1, K2 key2, V value) {
 		col1.computeIfAbsent(key1, k -> new ConcurrentHashMap<>()).put(key2, value);
@@ -25,7 +25,7 @@ public class YadaLookupTableThree<K1, K2, V> {
 	 * Get the value of the last column given the first ones
 	 * @param key1 can be null
 	 * @param key2 can be null
-	 * @return the value of column 3, or null
+	 * @return the value of column 3, or null if not found.
 	 */
 	public V get(K1 key1, K2 key2) {
 		Map<K2, V> col2 = col1.get(key1);

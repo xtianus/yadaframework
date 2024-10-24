@@ -86,7 +86,8 @@ public class YadaDataTableTagProcessor extends AbstractElementModelProcessor {
 	}
 
 	private boolean processTag(IOpenElementTag sourceTag, ITemplateContext context, IElementModelStructureHandler structureHandler) {
-        // Convert all attributes of the source tag
+        // Convert all attributes of the source tag.
+		// Currently only "yada:definition" is supported
         Map<String, String> inputSourceAttributes = sourceTag.getAttributeMap();
         for (Map.Entry<String,String> sourceAttribute : inputSourceAttributes.entrySet()) {
 			String attributeName = sourceAttribute.getKey();
