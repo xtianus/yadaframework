@@ -58,7 +58,7 @@ public class YadaSecurityUtil {
 	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaConfiguration config;
-	@Autowired private PasswordEncoder passwordEncoder;
+	@Autowired private PasswordEncoder passwordEncoder; // Null when encoding not configured
 	
 	/**
 	 * Check if a user has been suspended for excess of login failures
@@ -232,36 +232,57 @@ public class YadaSecurityUtil {
 		// http://stackoverflow.com/a/8448493/587641
 		return RandomStringUtils.random(length, 0, 0, true, true, null, secureRandom);
 	}
-
+	
 	/**
 	 * Change the user password and log in
 	 * @param yadaFormPasswordChange
-	 * @return
+	 * @return true if password changed and user logged in
 	 */
 	public boolean performPasswordChange(YadaFormPasswordChange yadaFormPasswordChange) {
+		int outcome = performPasswordChange(yadaFormPasswordChange, null);
+		return outcome == 0;
+	}
+
+	/**
+	 * Change the user password and log in after eventually checking that the password is actually different from the previous one
+	 * @param yadaFormPasswordChange
+	 * @param forceDifferentPassword set to true to force a different password
+	 * @return the outcome: 0 = ok, 1 = invalid token, 2 = same password as before, 3 = generic error
+	 */
+	public int performPasswordChange(YadaFormPasswordChange yadaFormPasswordChange, Boolean forceDifferentPassword) {
 		long[] parts = yadaTokenHandler.parseLink(yadaFormPasswordChange.getToken());
 		try {
 			if (parts!=null && parts.length==2) {
+				// The token must be valid to get a registrationRequest from DB
 				YadaRegistrationRequest registrationRequest = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1], YadaRegistrationRequest.class).get(0);
 				if (registrationRequest==null) {
-					return false;
+					return 1; // Invalid token
 				}
 				String username = registrationRequest.getEmail();
 				YadaUserCredentials yadaUserCredentials = yadaUserCredentialsDao.findFirstByUsername(StringUtils.trimToEmpty(username).toLowerCase());
 				if (yadaUserCredentials!=null) {
+					//
+					if (Boolean.TRUE.equals(forceDifferentPassword)) {
+						String newPassword = yadaFormPasswordChange.getPassword();
+						if (yadaUserDetailsService.passwordMatch(newPassword, yadaUserCredentials)) {
+							log.debug("Password for user {} not changed because same as old one", username);
+							return 2; // Same password as before
+						}
+					}
+					//
 					yadaUserCredentials = yadaUserCredentialsDao.changePassword(yadaUserCredentials, yadaFormPasswordChange.getPassword());
 					yadaRegistrationRequestDao.delete(registrationRequest);
 					if (yadaUserCredentials.isEnabled()) {
 						yadaUserDetailsService.authenticateAs(yadaUserCredentials);
 					}
 					log.info("PASSWORD CHANGE for user='{}'", username);
-					return true;
+					return 0; // OK
 				}
 			}
 		} catch (Exception e) {
 			log.info("Password change failed", e);
 		}
-		return false;
+		return 3; // Generic error
 	}
 
 	/**

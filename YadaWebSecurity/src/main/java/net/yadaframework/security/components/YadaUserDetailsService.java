@@ -231,10 +231,10 @@ public class YadaUserDetailsService implements UserDetailsService {
 	}
 
 	/**
-	 * Ritorna true se la password passata è valida per l'utente
-	 * @param passwordTyped
-	 * @param yadaUserCredentials
-	 * @return
+	 * Check if some string matches the user password
+	 * @param passwordTyped the string to check
+	 * @param yadaUserCredentials credentials of the user
+	 * @return true if passwordTyped is the user password
 	 */
 	public boolean passwordMatch(String passwordTyped, YadaUserCredentials yadaUserCredentials) {
 		boolean pwdMatch=false;
