@@ -8,11 +8,11 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/rowGroup">RowGroup</a>
  */
-class YadaDTRowGroup extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTRowGroup extends YadaFluentBase<YadaDTOptions> {
     private Boolean dataSrc;
     private Boolean startRender;
 
-    YadaDTRowGroup(YadaDataTableOptions parent) {
+    YadaDTRowGroup(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -63,7 +63,7 @@ class YadaDTRowGroup extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

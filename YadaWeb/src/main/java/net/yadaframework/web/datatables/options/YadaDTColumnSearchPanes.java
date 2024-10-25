@@ -8,11 +8,11 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/columns.searchPanes">ColumnSearchPanes</a>
  */
-class YadaDTColumnSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTColumnSearchPanes extends YadaFluentBase<YadaDTOptions> {
     private Boolean show;
     private Boolean threshold;
 
-    YadaDTColumnSearchPanes(YadaDataTableOptions parent) {
+    YadaDTColumnSearchPanes(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -63,7 +63,7 @@ class YadaDTColumnSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

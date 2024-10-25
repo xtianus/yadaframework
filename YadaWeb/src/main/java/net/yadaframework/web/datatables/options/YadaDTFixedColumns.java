@@ -8,11 +8,11 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/fixedColumns">FixedColumns</a>
  */
-class YadaDTFixedColumns extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTFixedColumns extends YadaFluentBase<YadaDTOptions> {
     private Boolean leftColumns;
     private Boolean rightColumns;
 
-    YadaDTFixedColumns(YadaDataTableOptions parent) {
+    YadaDTFixedColumns(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -63,7 +63,7 @@ class YadaDTFixedColumns extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

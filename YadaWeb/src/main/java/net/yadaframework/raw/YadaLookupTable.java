@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @see {@link YadaLookupTableFive} to use four keys of different type
  * @see {@link YadaLookupTableSix} to use five keys of different type
  */
+// NEVER TESTED
 public class YadaLookupTable<K, V> {
     private final Map<Object, Object> table = new ConcurrentHashMap<>();
 

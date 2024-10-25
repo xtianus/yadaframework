@@ -8,11 +8,11 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/fixedHeader">FixedHeader</a>
  */
-class YadaDTFixedHeader extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTFixedHeader extends YadaFluentBase<YadaDTOptions> {
     private Boolean header;
     private Boolean footer;
 
-    YadaDTFixedHeader(YadaDataTableOptions parent) {
+    YadaDTFixedHeader(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -63,7 +63,7 @@ class YadaDTFixedHeader extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

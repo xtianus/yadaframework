@@ -11,7 +11,7 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/searchBuilder">SearchBuilder</a>
  */
-class YadaDTSearchBuilder extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTSearchBuilder extends YadaFluentBase<YadaDTOptions> {
     private List<Integer> columns;
     private String conditions;
     private Integer depthLimit;
@@ -22,7 +22,7 @@ class YadaDTSearchBuilder extends YadaFluentBase<YadaDataTableOptions> {
     private String logic;
     private Boolean preDefined;
 
-    YadaDTSearchBuilder(YadaDataTableOptions parent) {
+    YadaDTSearchBuilder(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -234,7 +234,7 @@ class YadaDTSearchBuilder extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

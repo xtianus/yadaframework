@@ -8,11 +8,11 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/autoFill">AutoFill</a>
  */
-class YadaDTAutoFill extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTAutoFill extends YadaFluentBase<YadaDTOptions> {
     private Boolean enable;
     private Boolean update;
 
-    YadaDTAutoFill(YadaDataTableOptions parent) {
+    YadaDTAutoFill(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -63,7 +63,7 @@ class YadaDTAutoFill extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

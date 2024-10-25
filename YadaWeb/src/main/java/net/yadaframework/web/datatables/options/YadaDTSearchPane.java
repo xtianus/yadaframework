@@ -10,7 +10,7 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/searchPanes.panes">SearchPanes panes</a>
  */
-class YadaDTSearchPane extends YadaFluentBase<YadaDTSearchPanes> {
+public class YadaDTSearchPane extends YadaFluentBase<YadaDTSearchPanes> {
     private String className;
     private String dtOpts;
     private String header;

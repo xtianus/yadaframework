@@ -8,11 +8,11 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/ajax">Ajax</a>
  */
-class YadaDTAjax extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTAjax extends YadaFluentBase<YadaDTOptions> {
     private String url;
     private String dataSrc;
 
-    YadaDTAjax(YadaDataTableOptions parent) {
+    YadaDTAjax(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -63,7 +63,7 @@ class YadaDTAjax extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

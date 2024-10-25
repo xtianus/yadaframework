@@ -7,7 +7,7 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/select">Select</a>
  */
-class YadaDTSelect extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTSelect extends YadaFluentBase<YadaDTOptions> {
     private Boolean blurable;
     private String className;
     private Boolean headerCheckbox;
@@ -18,7 +18,7 @@ class YadaDTSelect extends YadaFluentBase<YadaDataTableOptions> {
     private String style;
     private Boolean toggleable;
 
-    YadaDTSelect(YadaDataTableOptions parent) {
+    YadaDTSelect(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -216,7 +216,7 @@ class YadaDTSelect extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

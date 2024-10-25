@@ -35,4 +35,11 @@ public class YadaLookupTableThree<K1, K2, V> {
 		return null;
 	}
 	
+	/**
+	 * Clear the table
+	 */
+	public void clear() {
+		col1.clear();
+	}
+	
 }

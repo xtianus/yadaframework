@@ -8,12 +8,12 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/search">Search</a>
  */
-class YadaDTSearch extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTSearch extends YadaFluentBase<YadaDTOptions> {
     private String regex;
     private Boolean smart;
     private Boolean caseInsensitive;
     
-    YadaDTSearch(YadaDataTableOptions parent) {
+    YadaDTSearch(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -85,7 +85,7 @@ class YadaDTSearch extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

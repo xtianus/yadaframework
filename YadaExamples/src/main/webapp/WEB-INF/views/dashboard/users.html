@@ -23,5 +23,7 @@
 
 <th:block th:replace="~{/footer :: body}"/>
 
+<script th:if="${@config.developmentEnvironment}" th:src="@{/yadares/js/yada.datatables.js}"></script>
+
 </body>
 </html>

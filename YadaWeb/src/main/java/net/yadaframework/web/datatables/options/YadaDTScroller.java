@@ -8,12 +8,12 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/scroller">Scroller</a>
  */
-class YadaDTScroller extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTScroller extends YadaFluentBase<YadaDTOptions> {
     private Boolean loadingIndicator;
     private Integer displayBuffer;
     private Integer boundaryScale;
     
-    YadaDTScroller(YadaDataTableOptions parent) {
+    YadaDTScroller(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -85,7 +85,7 @@ class YadaDTScroller extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

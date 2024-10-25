@@ -8,12 +8,12 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/rowReorder">RowReorder</a>
  */
-class YadaDTRowReorder extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTRowReorder extends YadaFluentBase<YadaDTOptions> {
     private Boolean editor;
     private String selector;
     private Boolean snapX;
 
-    YadaDTRowReorder(YadaDataTableOptions parent) {
+    YadaDTRowReorder(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -85,7 +85,7 @@ class YadaDTRowReorder extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

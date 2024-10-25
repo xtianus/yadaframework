@@ -38,4 +38,12 @@ public class YadaLookupTableFour<K1, K2, K3, V> {
         }
         return null;
     }
+    
+	/**
+	 * Clear the table
+	 */
+	public void clear() {
+		// No need to clear the inner tables because they become unreferenced
+		col1.clear();
+	}
 }

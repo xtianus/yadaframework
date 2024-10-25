@@ -5,11 +5,11 @@ import net.yadaframework.core.YadaFluentBase;
 /**
  * Represents a search column in DataTables.
  */
-class YadaDTSearchCol extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTSearchCol extends YadaFluentBase<YadaDTOptions> {
     private String column;
     private String search;
 
-    YadaDTSearchCol(YadaDataTableOptions parent) {
+    YadaDTSearchCol(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -60,7 +60,7 @@ class YadaDTSearchCol extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

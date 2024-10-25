@@ -8,11 +8,11 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/buttons">Buttons</a>
  */
-class YadaDTButtons extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTButtons extends YadaFluentBase<YadaDTOptions> {
     private Boolean dom;
     private String button;
 
-    YadaDTButtons(YadaDataTableOptions parent) {
+    YadaDTButtons(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -63,7 +63,7 @@ class YadaDTButtons extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

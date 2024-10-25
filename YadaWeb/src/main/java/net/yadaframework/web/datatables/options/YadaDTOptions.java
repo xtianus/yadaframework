@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaFluentBase;
@@ -14,85 +15,86 @@ import net.yadaframework.web.datatables.YadaDataTable;
  * 
  * @see <a href="https://datatables.net/reference/option/">DataTables Reference</a>
  */
+@SuppressWarnings("unused")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
-	private String dataTableExtErrMode;
-    private YadaDTAjax ajax;
-    private YadaDTAutoFill autoFill;
-    private Boolean autoWidth;
-    private String buttonSearchBuilder;
-    private String buttonSearchPanes;
-    private YadaDTButtons buttons;
-    private String caption;
-    private YadaDTColReorder colReorder;
-    private List<YadaDTColumnDef> columnDefs;
-    private List<YadaDTColumns> columns;
-    private String createdRow;
-    private Object data;
-    private Boolean deferLoading;
-    private Boolean deferRender;
-    private Boolean destroy;
-    private String detectType;
-    private Integer displayStart;
-    private String dom;
-    private String drawCallback;
-    private YadaDTFixedColumns fixedColumns;
-    private YadaDTFixedHeader fixedHeader;
-    private String footerCallback;
-    private String formatNumber;
-    private String headerCallback;
-    private Boolean info;
-    private String infoCallback;
-    private String initComplete;
-    private YadaDTKeys keys;
-    private YadaDTLanguage language;
-    private String layout;
-    private Boolean lengthChange;
-    private List<Object> lengthMenu;
-    private List<Object> order;
-    private Boolean orderCellsTop;
-    private Boolean orderClasses;
-    private Boolean orderDescReverse;
-    private Object orderFixed;
-    private Boolean orderMulti;
-    private Boolean ordering;
-    private Integer pageLength;
-    private Boolean paging;
-    private String pagingType;
-    private String preDrawCallback;
-    private Boolean processing;
-    private String renderer;
+public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
+    protected String dataTableExtErrMode;
+    protected YadaDTAjax ajax;
+    protected YadaDTAutoFill autoFill;
+    protected Boolean autoWidth;
+    protected String buttonSearchBuilder;
+    protected String buttonSearchPanes;
+    protected YadaDTButtons buttons;
+    protected String caption;
+    protected YadaDTColReorder colReorder;
+    protected List<YadaDTColumnDef> columnDefs;
+    protected List<YadaDTColumns> columns;
+    protected String createdRow;
+    protected Object data;
+    protected Boolean deferLoading;
+    protected Boolean deferRender;
+    protected Boolean destroy;
+    protected String detectType;
+    protected Integer displayStart;
+    protected String dom;
+    protected String drawCallback;
+    protected YadaDTFixedColumns fixedColumns;
+    protected YadaDTFixedHeader fixedHeader;
+    protected String footerCallback;
+    protected String formatNumber;
+    protected String headerCallback;
+    protected Boolean info;
+    protected String infoCallback;
+    protected String initComplete;
+    protected YadaDTKeys keys;
+    protected YadaDTLanguage language;
+    protected String layout;
+    protected Boolean lengthChange;
+    protected List<Object> lengthMenu;
+    protected List<Object> order;
+    protected Boolean orderCellsTop;
+    protected Boolean orderClasses;
+    protected Boolean orderDescReverse;
+    protected Object orderFixed;
+    protected Boolean orderMulti;
+    protected String ordering;
+    protected Integer pageLength;
+    protected Boolean paging;
+    protected String pagingType;
+    protected String preDrawCallback;
+    protected Boolean processing;
+    protected String renderer;
     // can be either a boolean or an object
-    private Boolean responsive;
-    private YadaDTResponsive yadaDTResponsive;
+    protected Boolean responsive;
+    protected YadaDTResponsive yadaDTResponsive;
     //
-    private Boolean retrieve;
-    private String rowCallback;
-    private YadaDTRowGroup rowGroup;
-    private String rowId;
-    private YadaDTRowReorder rowReorder;
-    private Boolean scrollCollapse;
-    private Boolean scrollX;
-    private Boolean scrollY;
-    private YadaDTScroller scroller;
-    private YadaDTSearch search;
-    private YadaDTSearchBuilder searchBuilder;
-    private List<YadaDTSearchCol> searchCols;
-    private Integer searchDelay;
-    private YadaDTSearchPanes searchPanes;
-    private Boolean searching;
-    private YadaDTSelect select;
-    private Boolean serverSide;
-    private Integer stateDuration;
-    private String stateLoadCallback;
-    private String stateLoadParams;
-    private String stateLoaded;
-    private Boolean stateSave;
-    private String stateSaveCallback;
-    private String stateSaveParams;
-    private Integer tabIndex;
+    protected Boolean retrieve;
+    protected String rowCallback;
+    protected YadaDTRowGroup rowGroup;
+    protected String rowId;
+    protected YadaDTRowReorder rowReorder;
+    protected Boolean scrollCollapse;
+    protected Boolean scrollX;
+    protected Boolean scrollY;
+    protected YadaDTScroller scroller;
+    protected YadaDTSearch search;
+    protected YadaDTSearchBuilder searchBuilder;
+    protected List<YadaDTSearchCol> searchCols;
+    protected Integer searchDelay;
+    protected YadaDTSearchPanes searchPanes;
+    protected Boolean searching;
+    protected YadaDTSelect select;
+    protected Boolean serverSide;
+    protected Integer stateDuration;
+    protected String stateLoadCallback;
+    protected String stateLoadParams;
+    protected String stateLoaded;
+    protected Boolean stateSave;
+    protected String stateSaveCallback;
+    protected String stateSaveParams;
+    protected Integer tabIndex;
 
-    public YadaDataTableOptions(YadaDataTable parent) {
+    public YadaDTOptions(YadaDataTable parent) {
  		super(parent);
  	}
 
@@ -103,7 +105,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/">dataTableExtErrMode</a>
      */
-    public YadaDataTableOptions dtDataTableExtErrMode(String dataTableExtErrMode) {
+    public YadaDTOptions dtDataTableExtErrMode(String dataTableExtErrMode) {
         this.dataTableExtErrMode = dataTableExtErrMode;
         return this;
     }
@@ -115,7 +117,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/autoWidth">autoWidth</a>
      */
-    public YadaDataTableOptions dtAutoWidth(Boolean autoWidth) {
+    public YadaDTOptions dtAutoWidth(Boolean autoWidth) {
         this.autoWidth = autoWidth;
         return this;
     }
@@ -127,7 +129,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchBuilder.button">buttonSearchBuilder</a>
      */
-    public YadaDataTableOptions dtButtonSearchBuilder(String buttonSearchBuilder) {
+    public YadaDTOptions dtButtonSearchBuilder(String buttonSearchBuilder) {
         this.buttonSearchBuilder = buttonSearchBuilder;
         return this;
     }
@@ -139,7 +141,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searchPanes.button">buttonSearchPanes</a>
      */
-    public YadaDataTableOptions dtButtonSearchPanes(String buttonSearchPanes) {
+    public YadaDTOptions dtButtonSearchPanes(String buttonSearchPanes) {
         this.buttonSearchPanes = buttonSearchPanes;
         return this;
     }
@@ -151,7 +153,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/caption">caption</a>
      */
-    public YadaDataTableOptions dtCaption(String caption) {
+    public YadaDTOptions dtCaption(String caption) {
         this.caption = caption;
         return this;
     }
@@ -163,7 +165,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/createdRow">createdRow</a>
      */
-    public YadaDataTableOptions dtCreatedRow(String createdRow) {
+    public YadaDTOptions dtCreatedRow(String createdRow) {
         this.createdRow = createdRow;
         return this;
     }
@@ -175,7 +177,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/deferLoading">deferLoading</a>
      */
-    public YadaDataTableOptions dtDeferLoading(Boolean deferLoading) {
+    public YadaDTOptions dtDeferLoading(Boolean deferLoading) {
         this.deferLoading = deferLoading;
         return this;
     }
@@ -187,7 +189,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/deferRender">deferRender</a>
      */
-    public YadaDataTableOptions dtDeferRender(Boolean deferRender) {
+    public YadaDTOptions dtDeferRender(Boolean deferRender) {
         this.deferRender = deferRender;
         return this;
     }
@@ -199,7 +201,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/destroy">destroy</a>
      */
-    public YadaDataTableOptions dtDestroy(Boolean destroy) {
+    public YadaDTOptions dtDestroy(Boolean destroy) {
         this.destroy = destroy;
         return this;
     }
@@ -211,7 +213,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/typeDetection">detectType</a>
      */
-    public YadaDataTableOptions dtDetectType(String detectType) {
+    public YadaDTOptions dtDetectType(String detectType) {
         this.detectType = detectType;
         return this;
     }
@@ -223,7 +225,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/displayStart">displayStart</a>
      */
-    public YadaDataTableOptions dtDisplayStart(Integer displayStart) {
+    public YadaDTOptions dtDisplayStart(Integer displayStart) {
         this.displayStart = displayStart;
         return this;
     }
@@ -235,7 +237,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/dom">dom</a>
      */
-    public YadaDataTableOptions dtDom(String dom) {
+    public YadaDTOptions dtDom(String dom) {
         this.dom = dom;
         return this;
     }
@@ -247,7 +249,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/drawCallback">drawCallback</a>
      */
-    public YadaDataTableOptions dtDrawCallback(String drawCallback) {
+    public YadaDTOptions dtDrawCallback(String drawCallback) {
         this.drawCallback = drawCallback;
         return this;
     }
@@ -259,7 +261,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/footerCallback">footerCallback</a>
      */
-    public YadaDataTableOptions dtFooterCallback(String footerCallback) {
+    public YadaDTOptions dtFooterCallback(String footerCallback) {
         this.footerCallback = footerCallback;
         return this;
     }
@@ -271,7 +273,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/formatNumber">formatNumber</a>
      */
-    public YadaDataTableOptions dtFormatNumber(String formatNumber) {
+    public YadaDTOptions dtFormatNumber(String formatNumber) {
         this.formatNumber = formatNumber;
         return this;
     }
@@ -283,7 +285,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/headerCallback">headerCallback</a>
      */
-    public YadaDataTableOptions dtHeaderCallback(String headerCallback) {
+    public YadaDTOptions dtHeaderCallback(String headerCallback) {
         this.headerCallback = headerCallback;
         return this;
     }
@@ -295,7 +297,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/info">info</a>
      */
-    public YadaDataTableOptions dtInfo(Boolean info) {
+    public YadaDTOptions dtInfo(Boolean info) {
         this.info = info;
         return this;
     }
@@ -307,7 +309,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/infoCallback">infoCallback</a>
      */
-    public YadaDataTableOptions dtInfoCallback(String infoCallback) {
+    public YadaDTOptions dtInfoCallback(String infoCallback) {
         this.infoCallback = infoCallback;
         return this;
     }
@@ -319,7 +321,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/initComplete">initComplete</a>
      */
-    public YadaDataTableOptions dtInitComplete(String initComplete) {
+    public YadaDTOptions dtInitComplete(String initComplete) {
         this.initComplete = initComplete;
         return this;
     }
@@ -331,7 +333,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/layout">layout</a>
      */
-    public YadaDataTableOptions dtLayout(String layout) {
+    public YadaDTOptions dtLayout(String layout) {
         this.layout = layout;
         return this;
     }
@@ -343,7 +345,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/lengthChange">lengthChange</a>
      */
-    public YadaDataTableOptions dtLengthChange(Boolean lengthChange) {
+    public YadaDTOptions dtLengthChange(Boolean lengthChange) {
         this.lengthChange = lengthChange;
         return this;
     }
@@ -355,7 +357,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/orderCellsTop">orderCellsTop</a>
      */
-    public YadaDataTableOptions dtOrderCellsTop(Boolean orderCellsTop) {
+    public YadaDTOptions dtOrderCellsTop(Boolean orderCellsTop) {
         this.orderCellsTop = orderCellsTop;
         return this;
     }
@@ -367,7 +369,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/orderClasses">orderClasses</a>
      */
-    public YadaDataTableOptions dtOrderClasses(Boolean orderClasses) {
+    public YadaDTOptions dtOrderClasses(Boolean orderClasses) {
         this.orderClasses = orderClasses;
         return this;
     }
@@ -379,7 +381,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/orderDescReverse">orderDescReverse</a>
      */
-    public YadaDataTableOptions dtOrderDescReverse(Boolean orderDescReverse) {
+    public YadaDTOptions dtOrderDescReverse(Boolean orderDescReverse) {
         this.orderDescReverse = orderDescReverse;
         return this;
     }
@@ -391,7 +393,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/orderMulti">orderMulti</a>
      */
-    public YadaDataTableOptions dtOrderMulti(Boolean orderMulti) {
+    public YadaDTOptions dtOrderMulti(Boolean orderMulti) {
         this.orderMulti = orderMulti;
         return this;
     }
@@ -399,23 +401,23 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
     /**
      * Sets the `ordering` option.
      * 
-     * @param ordering enable or disable table column ordering
+     * @param ordering define the initial sorting of the table
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/ordering">ordering</a>
      */
-    public YadaDataTableOptions dtOrdering(Boolean ordering) {
+    public YadaDTOptions dtOrdering(String ordering) {
         this.ordering = ordering;
         return this;
     }
 
     /**
-     * Sets the `pageLength` option.
+     * Sets the `pageLength` option that tells how many rows should be visible.
      * 
      * @param pageLength the number of rows per page
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/pageLength">pageLength</a>
      */
-    public YadaDataTableOptions dtPageLength(Integer pageLength) {
+    public YadaDTOptions dtPageLength(Integer pageLength) {
         this.pageLength = pageLength;
         return this;
     }
@@ -427,7 +429,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/paging">paging</a>
      */
-    public YadaDataTableOptions dtPaging(Boolean paging) {
+    public YadaDTOptions dtPaging(Boolean paging) {
         this.paging = paging;
         return this;
     }
@@ -439,7 +441,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/pagingType">pagingType</a>
      */
-    public YadaDataTableOptions dtPagingType(String pagingType) {
+    public YadaDTOptions dtPagingType(String pagingType) {
         this.pagingType = pagingType;
         return this;
     }
@@ -451,7 +453,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/preDrawCallback">preDrawCallback</a>
      */
-    public YadaDataTableOptions dtPreDrawCallback(String preDrawCallback) {
+    public YadaDTOptions dtPreDrawCallback(String preDrawCallback) {
         this.preDrawCallback = preDrawCallback;
         return this;
     }
@@ -463,7 +465,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/processing">processing</a>
      */
-    public YadaDataTableOptions dtProcessing(Boolean processing) {
+    public YadaDTOptions dtProcessing(Boolean processing) {
         this.processing = processing;
         return this;
     }
@@ -475,7 +477,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/renderer">renderer</a>
      */
-    public YadaDataTableOptions dtRenderer(String renderer) {
+    public YadaDTOptions dtRenderer(String renderer) {
         this.renderer = renderer;
         return this;
     }
@@ -487,7 +489,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/retrieve">retrieve</a>
      */
-    public YadaDataTableOptions dtRetrieve(Boolean retrieve) {
+    public YadaDTOptions dtRetrieve(Boolean retrieve) {
         this.retrieve = retrieve;
         return this;
     }
@@ -499,7 +501,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/rowCallback">rowCallback</a>
      */
-    public YadaDataTableOptions dtRowCallback(String rowCallback) {
+    public YadaDTOptions dtRowCallback(String rowCallback) {
         this.rowCallback = rowCallback;
         return this;
     }
@@ -511,7 +513,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/rowId">rowId</a>
      */
-    public YadaDataTableOptions dtRowId(String rowId) {
+    public YadaDTOptions dtRowId(String rowId) {
         this.rowId = rowId;
         return this;
     }
@@ -523,7 +525,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/scrollCollapse">scrollCollapse</a>
      */
-    public YadaDataTableOptions dtScrollCollapse(Boolean scrollCollapse) {
+    public YadaDTOptions dtScrollCollapse(Boolean scrollCollapse) {
         this.scrollCollapse = scrollCollapse;
         return this;
     }
@@ -535,7 +537,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/scrollX">scrollX</a>
      */
-    public YadaDataTableOptions dtScrollX(Boolean scrollX) {
+    public YadaDTOptions dtScrollX(Boolean scrollX) {
         this.scrollX = scrollX;
         return this;
     }
@@ -547,7 +549,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/scrollY">scrollY</a>
      */
-    public YadaDataTableOptions dtScrollY(Boolean scrollY) {
+    public YadaDTOptions dtScrollY(Boolean scrollY) {
         this.scrollY = scrollY;
         return this;
     }
@@ -559,7 +561,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searching">searching</a>
      */
-    public YadaDataTableOptions dtSearching(Boolean searching) {
+    public YadaDTOptions dtSearching(Boolean searching) {
         this.searching = searching;
         return this;
     }
@@ -571,7 +573,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/serverSide">serverSide</a>
      */
-    public YadaDataTableOptions dtServerSide(Boolean serverSide) {
+    public YadaDTOptions dtServerSide(Boolean serverSide) {
         this.serverSide = serverSide;
         return this;
     }
@@ -583,7 +585,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/stateDuration">stateDuration</a>
      */
-    public YadaDataTableOptions dtStateDuration(Integer stateDuration) {
+    public YadaDTOptions dtStateDuration(Integer stateDuration) {
         this.stateDuration = stateDuration;
         return this;
     }
@@ -595,7 +597,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/stateLoadCallback">stateLoadCallback</a>
      */
-    public YadaDataTableOptions dtStateLoadCallback(String stateLoadCallback) {
+    public YadaDTOptions dtStateLoadCallback(String stateLoadCallback) {
         this.stateLoadCallback = stateLoadCallback;
         return this;
     }
@@ -607,7 +609,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/stateLoadParams">stateLoadParams</a>
      */
-    public YadaDataTableOptions dtStateLoadParams(String stateLoadParams) {
+    public YadaDTOptions dtStateLoadParams(String stateLoadParams) {
         this.stateLoadParams = stateLoadParams;
         return this;
     }
@@ -619,7 +621,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/stateLoaded">stateLoaded</a>
      */
-    public YadaDataTableOptions dtStateLoaded(String stateLoaded) {
+    public YadaDTOptions dtStateLoaded(String stateLoaded) {
         this.stateLoaded = stateLoaded;
         return this;
     }
@@ -631,7 +633,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/stateSave">stateSave</a>
      */
-    public YadaDataTableOptions dtStateSave(Boolean stateSave) {
+    public YadaDTOptions dtStateSave(Boolean stateSave) {
         this.stateSave = stateSave;
         return this;
     }
@@ -643,7 +645,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/stateSaveCallback">stateSaveCallback</a>
      */
-    public YadaDataTableOptions dtStateSaveCallback(String stateSaveCallback) {
+    public YadaDTOptions dtStateSaveCallback(String stateSaveCallback) {
         this.stateSaveCallback = stateSaveCallback;
         return this;
     }
@@ -655,7 +657,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/stateSaveParams">stateSaveParams</a>
      */
-    public YadaDataTableOptions dtStateSaveParams(String stateSaveParams) {
+    public YadaDTOptions dtStateSaveParams(String stateSaveParams) {
         this.stateSaveParams = stateSaveParams;
         return this;
     }
@@ -667,441 +669,443 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/tabIndex">tabIndex</a>
      */
-    public YadaDataTableOptions dtTabIndex(Integer tabIndex) {
+    public YadaDTOptions dtTabIndex(Integer tabIndex) {
         this.tabIndex = tabIndex;
         return this;
     }    
     
-    /**
-     * @return The DataTables error mode.
-     * @see <a href="https://datatables.net/reference/option/">DataTables Reference</a>
-     */
-    public String getDataTableExtErrMode() {
-        return dataTableExtErrMode;
-    }
-
-    /**
-     * @return Whether the table should automatically adjust column widths.
-     * @see <a href="https://datatables.net/reference/option/autoWidth">DataTables autoWidth option</a>
-     */
-    public Boolean getAutoWidth() {
-        return autoWidth;
-    }
-
-    /**
-     * @return The configuration for SearchBuilder button.
-     * @see <a href="https://datatables.net/reference/option/buttons">DataTables buttons option</a>
-     */
-    public String getButtonSearchBuilder() {
-        return buttonSearchBuilder;
-    }
-
-    /**
-     * @return The configuration for SearchPanes button.
-     * @see <a href="https://datatables.net/reference/option/buttons">DataTables buttons option</a>
-     */
-    public String getButtonSearchPanes() {
-        return buttonSearchPanes;
-    }
-
-    /**
-     * @return The caption text for the table.
-     * @see <a href="https://datatables.net/reference/option/caption">DataTables caption option</a>
-     */
-    public String getCaption() {
-        return caption;
-    }
-
-    /**
-     * @return Callback that can be used to manipulate the created row.
-     * @see <a href="https://datatables.net/reference/option/createdRow">DataTables createdRow option</a>
-     */
-    public String getCreatedRow() {
-        return createdRow;
-    }
-
-    /**
-     * @return Data to be displayed in the table.
-     * @see <a href="https://datatables.net/reference/option/data">DataTables data option</a>
-     */
-    public Object getData() {
-        return data;
-    }
-
-    /**
-     * @return Whether deferred loading of data is enabled.
-     * @see <a href="https://datatables.net/reference/option/deferLoading">DataTables deferLoading option</a>
-     */
-    public Boolean getDeferLoading() {
-        return deferLoading;
-    }
-
-    /**
-     * @return Whether deferred rendering is enabled.
-     * @see <a href="https://datatables.net/reference/option/deferRender">DataTables deferRender option</a>
-     */
-    public Boolean getDeferRender() {
-        return deferRender;
-    }
-
-    /**
-     * @return Whether the table should be destroyed when reinitialized.
-     * @see <a href="https://datatables.net/reference/option/destroy">DataTables destroy option</a>
-     */
-    public Boolean getDestroy() {
-        return destroy;
-    }
-
-    /**
-     * @return The type detection options.
-     * @see <a href="https://datatables.net/reference/option/detectType">DataTables detectType option</a>
-     */
-    public String getDetectType() {
-        return detectType;
-    }
-
-    /**
-     * @return The display start point of the table.
-     * @see <a href="https://datatables.net/reference/option/displayStart">DataTables displayStart option</a>
-     */
-    public Integer getDisplayStart() {
-        return displayStart;
-    }
-
-    /**
-     * @return The DataTables DOM positioning control.
-     * @see <a href="https://datatables.net/reference/option/dom">DataTables dom option</a>
-     */
-    public String getDom() {
-        return dom;
-    }
-
-    /**
-     * @return Callback function that is called every time DataTables performs a draw.
-     * @see <a href="https://datatables.net/reference/option/drawCallback">DataTables drawCallback option</a>
-     */
-    public String getDrawCallback() {
-        return drawCallback;
-    }
-
-    /**
-     * @return Callback function for when the footer is drawn.
-     * @see <a href="https://datatables.net/reference/option/footerCallback">DataTables footerCallback option</a>
-     */
-    public String getFooterCallback() {
-        return footerCallback;
-    }
-
-    /**
-     * @return Number formatting string.
-     * @see <a href="https://datatables.net/reference/option/formatNumber">DataTables formatNumber option</a>
-     */
-    public String getFormatNumber() {
-        return formatNumber;
-    }
-
-    /**
-     * @return Callback function for when the header is drawn.
-     * @see <a href="https://datatables.net/reference/option/headerCallback">DataTables headerCallback option</a>
-     */
-    public String getHeaderCallback() {
-        return headerCallback;
-    }
-
-    /**
-     * @return Whether the table information summary is shown.
-     * @see <a href="https://datatables.net/reference/option/info">DataTables info option</a>
-     */
-    public Boolean getInfo() {
-        return info;
-    }
-
-    /**
-     * @return Callback function for modifying the information summary.
-     * @see <a href="https://datatables.net/reference/option/infoCallback">DataTables infoCallback option</a>
-     */
-    public String getInfoCallback() {
-        return infoCallback;
-    }
-
-    /**
-     * @return Callback function that is called when initialisation is complete.
-     * @see <a href="https://datatables.net/reference/option/initComplete">DataTables initComplete option</a>
-     */
-    public String getInitComplete() {
-        return initComplete;
-    }
-
-    /**
-     * @return Layout control for DataTables elements.
-     * @see <a href="https://datatables.net/reference/option/layout">DataTables layout option</a>
-     */
-    public String getLayout() {
-        return layout;
-    }
-
-    /**
-     * @return Whether the length change control is enabled.
-     * @see <a href="https://datatables.net/reference/option/lengthChange">DataTables lengthChange option</a>
-     */
-    public Boolean getLengthChange() {
-        return lengthChange;
-    }
-
-    /**
-     * @return Length menu options.
-     * @see <a href="https://datatables.net/reference/option/lengthMenu">DataTables lengthMenu option</a>
-     */
-    public List<Object> getLengthMenu() {
-        return lengthMenu;
-    }
-
-    /**
-     * @return Ordering options for the table.
-     * @see <a href="https://datatables.net/reference/option/order">DataTables order option</a>
-     */
-    public List<Object> getOrder() {
-        return order;
-    }
-
-    /**
-     * @return Whether the cells in the header should be ordered top to bottom.
-     * @see <a href="https://datatables.net/reference/option/orderCellsTop">DataTables orderCellsTop option</a>
-     */
-    public Boolean getOrderCellsTop() {
-        return orderCellsTop;
-    }
-
-    /**
-     * @return Whether classes should be added to columns during ordering.
-     * @see <a href="https://datatables.net/reference/option/orderClasses">DataTables orderClasses option</a>
-     */
-    public Boolean getOrderClasses() {
-        return orderClasses;
-    }
-
-    /**
-     * @return Whether ordering direction is reversed for full numbers.
-     * @see <a href="https://datatables.net/reference/option/orderDesc">DataTables orderDescReverse option</a>
-     */
-    public Boolean getOrderDescReverse() {
-        return orderDescReverse;
-    }
-
-    /**
-     * @return Fixed ordering definition that is applied.
-     * @see <a href="https://datatables.net/reference/option/orderFixed">DataTables orderFixed option</a>
-     */
-    public Object getOrderFixed() {
-        return orderFixed;
-    }
-
-    /**
-     * @return Whether multiple column ordering is enabled.
-     * @see <a href="https://datatables.net/reference/option/orderMulti">DataTables orderMulti option</a>
-     */
-    public Boolean getOrderMulti() {
-        return orderMulti;
-    }
-
-    /**
-     * @return Whether ordering is enabled.
-     * @see <a href="https://datatables.net/reference/option/ordering">DataTables ordering option</a>
-     */
-    public Boolean getOrdering() {
-        return ordering;
-    }
-
-    /**
-     * @return Number of rows to display on a single page.
-     * @see <a href="https://datatables.net/reference/option/pageLength">DataTables pageLength option</a>
-     */
-    public Integer getPageLength() {
-        return pageLength;
-    }
-
-    /**
-     * @return Whether paging is enabled for the table.
-     * @see <a href="https://datatables.net/reference/option/paging">DataTables paging option</a>
-     */
-    public Boolean getPaging() {
-        return paging;
-    }
-
-    /**
-     * @return The type of pagination control to be used.
-     * @see <a href="https://datatables.net/reference/option/pagingType">DataTables pagingType option</a>
-     */
-    public String getPagingType() {
-        return pagingType;
-    }
-
-    /**
-     * @return Callback function that is called just before the table is drawn.
-     * @see <a href="https://datatables.net/reference/option/preDrawCallback">DataTables preDrawCallback option</a>
-     */
-    public String getPreDrawCallback() {
-        return preDrawCallback;
-    }
-
-    /**
-     * @return Whether processing indicator should be shown.
-     * @see <a href="https://datatables.net/reference/option/processing">DataTables processing option</a>
-     */
-    public Boolean getProcessing() {
-        return processing;
-    }
-
-    /**
-     * @return Renderer to use for the table.
-     * @see <a href="https://datatables.net/reference/option/renderer">DataTables renderer option</a>
-     */
-    public String getRenderer() {
-        return renderer;
-    }
-
-    /**
-     * @return Whether the table data should be retrieved.
-     * @see <a href="https://datatables.net/reference/option/retrieve">DataTables retrieve option</a>
-     */
-    public Boolean getRetrieve() {
-        return retrieve;
-    }
-
-    /**
-     * @return Callback function for each row that is created.
-     * @see <a href="https://datatables.net/reference/option/rowCallback">DataTables rowCallback option</a>
-     */
-    public String getRowCallback() {
-        return rowCallback;
-    }
-
-    /**
-     * @return Id to be assigned to each row.
-     * @see <a href="https://datatables.net/reference/option/rowId">DataTables rowId option</a>
-     */
-    public String getRowId() {
-        return rowId;
-    }
-
-    /**
-     * @return Whether collapsing of the table when scrolling is enabled.
-     * @see <a href="https://datatables.net/reference/option/scrollCollapse">DataTables scrollCollapse option</a>
-     */
-    public Boolean getScrollCollapse() {
-        return scrollCollapse;
-    }
-
-    /**
-     * @return Whether horizontal scrolling is enabled.
-     * @see <a href="https://datatables.net/reference/option/scrollX">DataTables scrollX option</a>
-     */
-    public Boolean getScrollX() {
-        return scrollX;
-    }
-
-    /**
-     * @return Whether vertical scrolling is enabled.
-     * @see <a href="https://datatables.net/reference/option/scrollY">DataTables scrollY option</a>
-     */
-    public Boolean getScrollY() {
-        return scrollY;
-    }
-
-    /**
-     * @return Delay between keypress and search action in milliseconds.
-     * @see <a href="https://datatables.net/reference/option/searchDelay">DataTables searchDelay option</a>
-     */
-    public Integer getSearchDelay() {
-        return searchDelay;
-    }
-
-    /**
-     * @return Whether the table should be searchable.
-     * @see <a href="https://datatables.net/reference/option/searching">DataTables searching option</a>
-     */
-    public Boolean getSearching() {
-        return searching;
-    }
-
-    /**
-     * @return Whether server-side processing is enabled.
-     * @see <a href="https://datatables.net/reference/option/serverSide">DataTables serverSide option</a>
-     */
-    public Boolean getServerSide() {
-        return serverSide;
-    }
-
-    /**
-     * @return Duration for which the state should be saved in local storage.
-     * @see <a href="https://datatables.net/reference/option/stateDuration">DataTables stateDuration option</a>
-     */
-    public Integer getStateDuration() {
-        return stateDuration;
-    }
-
-    /**
-     * @return Callback function for loading the state.
-     * @see <a href="https://datatables.net/reference/option/stateLoadCallback">DataTables stateLoadCallback option</a>
-     */
-    public String getStateLoadCallback() {
-        return stateLoadCallback;
-    }
-
-    /**
-     * @return Parameters to be loaded for state saving.
-     * @see <a href="https://datatables.net/reference/option/stateLoadParams">DataTables stateLoadParams option</a>
-     */
-    public String getStateLoadParams() {
-        return stateLoadParams;
-    }
-
-    /**
-     * @return Callback function called after the state is loaded.
-     * @see <a href="https://datatables.net/reference/option/stateLoaded">DataTables stateLoaded option</a>
-     */
-    public String getStateLoaded() {
-        return stateLoaded;
-    }
-
-    /**
-     * @return Whether the table state should be saved.
-     * @see <a href="https://datatables.net/reference/option/stateSave">DataTables stateSave option</a>
-     */
-    public Boolean getStateSave() {
-        return stateSave;
-    }
-
-    /**
-     * @return Callback function for saving the state.
-     * @see <a href="https://datatables.net/reference/option/stateSaveCallback">DataTables stateSaveCallback option</a>
-     */
-    public String getStateSaveCallback() {
-        return stateSaveCallback;
-    }
-
-    /**
-     * @return Parameters to be saved for state saving.
-     * @see <a href="https://datatables.net/reference/option/stateSaveParams">DataTables stateSaveParams option</a>
-     */
-    public String getStateSaveParams() {
-        return stateSaveParams;
-    }
-
-    /**
-     * @return Tab index for navigation.
-     * @see <a href="https://datatables.net/reference/option/tabIndex">DataTables tabIndex option</a>
-     */
-    public Integer getTabIndex() {
-        return tabIndex;
-    }
+// Getters removed to simplify fluent interface during autocompletion
+    
+//    /**
+//     * @return The DataTables error mode.
+//     * @see <a href="https://datatables.net/reference/option/">DataTables Reference</a>
+//     */
+//    public String getDataTableExtErrMode() {
+//        return dataTableExtErrMode;
+//    }
+//
+//    /**
+//     * @return Whether the table should automatically adjust column widths.
+//     * @see <a href="https://datatables.net/reference/option/autoWidth">DataTables autoWidth option</a>
+//     */
+//    public Boolean getAutoWidth() {
+//        return autoWidth;
+//    }
+//
+//    /**
+//     * @return The configuration for SearchBuilder button.
+//     * @see <a href="https://datatables.net/reference/option/buttons">DataTables buttons option</a>
+//     */
+//    public String getButtonSearchBuilder() {
+//        return buttonSearchBuilder;
+//    }
+//
+//    /**
+//     * @return The configuration for SearchPanes button.
+//     * @see <a href="https://datatables.net/reference/option/buttons">DataTables buttons option</a>
+//     */
+//    public String getButtonSearchPanes() {
+//        return buttonSearchPanes;
+//    }
+//
+//    /**
+//     * @return The caption text for the table.
+//     * @see <a href="https://datatables.net/reference/option/caption">DataTables caption option</a>
+//     */
+//    public String getCaption() {
+//        return caption;
+//    }
+//
+//    /**
+//     * @return Callback that can be used to manipulate the created row.
+//     * @see <a href="https://datatables.net/reference/option/createdRow">DataTables createdRow option</a>
+//     */
+//    public String getCreatedRow() {
+//        return createdRow;
+//    }
+//
+//    /**
+//     * @return Data to be displayed in the table.
+//     * @see <a href="https://datatables.net/reference/option/data">DataTables data option</a>
+//     */
+//    public Object getData() {
+//        return data;
+//    }
+//
+//    /**
+//     * @return Whether deferred loading of data is enabled.
+//     * @see <a href="https://datatables.net/reference/option/deferLoading">DataTables deferLoading option</a>
+//     */
+//    public Boolean getDeferLoading() {
+//        return deferLoading;
+//    }
+//
+//    /**
+//     * @return Whether deferred rendering is enabled.
+//     * @see <a href="https://datatables.net/reference/option/deferRender">DataTables deferRender option</a>
+//     */
+//    public Boolean getDeferRender() {
+//        return deferRender;
+//    }
+//
+//    /**
+//     * @return Whether the table should be destroyed when reinitialized.
+//     * @see <a href="https://datatables.net/reference/option/destroy">DataTables destroy option</a>
+//     */
+//    public Boolean getDestroy() {
+//        return destroy;
+//    }
+//
+//    /**
+//     * @return The type detection options.
+//     * @see <a href="https://datatables.net/reference/option/detectType">DataTables detectType option</a>
+//     */
+//    public String getDetectType() {
+//        return detectType;
+//    }
+//
+//    /**
+//     * @return The display start point of the table.
+//     * @see <a href="https://datatables.net/reference/option/displayStart">DataTables displayStart option</a>
+//     */
+//    public Integer getDisplayStart() {
+//        return displayStart;
+//    }
+//
+//    /**
+//     * @return The DataTables DOM positioning control.
+//     * @see <a href="https://datatables.net/reference/option/dom">DataTables dom option</a>
+//     */
+//    public String getDom() {
+//        return dom;
+//    }
+//
+//    /**
+//     * @return Callback function that is called every time DataTables performs a draw.
+//     * @see <a href="https://datatables.net/reference/option/drawCallback">DataTables drawCallback option</a>
+//     */
+//    public String getDrawCallback() {
+//        return drawCallback;
+//    }
+//
+//    /**
+//     * @return Callback function for when the footer is drawn.
+//     * @see <a href="https://datatables.net/reference/option/footerCallback">DataTables footerCallback option</a>
+//     */
+//    public String getFooterCallback() {
+//        return footerCallback;
+//    }
+//
+//    /**
+//     * @return Number formatting string.
+//     * @see <a href="https://datatables.net/reference/option/formatNumber">DataTables formatNumber option</a>
+//     */
+//    public String getFormatNumber() {
+//        return formatNumber;
+//    }
+//
+//    /**
+//     * @return Callback function for when the header is drawn.
+//     * @see <a href="https://datatables.net/reference/option/headerCallback">DataTables headerCallback option</a>
+//     */
+//    public String getHeaderCallback() {
+//        return headerCallback;
+//    }
+//
+//    /**
+//     * @return Whether the table information summary is shown.
+//     * @see <a href="https://datatables.net/reference/option/info">DataTables info option</a>
+//     */
+//    public Boolean getInfo() {
+//        return info;
+//    }
+//
+//    /**
+//     * @return Callback function for modifying the information summary.
+//     * @see <a href="https://datatables.net/reference/option/infoCallback">DataTables infoCallback option</a>
+//     */
+//    public String getInfoCallback() {
+//        return infoCallback;
+//    }
+//
+//    /**
+//     * @return Callback function that is called when initialisation is complete.
+//     * @see <a href="https://datatables.net/reference/option/initComplete">DataTables initComplete option</a>
+//     */
+//    public String getInitComplete() {
+//        return initComplete;
+//    }
+//
+//    /**
+//     * @return Layout control for DataTables elements.
+//     * @see <a href="https://datatables.net/reference/option/layout">DataTables layout option</a>
+//     */
+//    public String getLayout() {
+//        return layout;
+//    }
+//
+//    /**
+//     * @return Whether the length change control is enabled.
+//     * @see <a href="https://datatables.net/reference/option/lengthChange">DataTables lengthChange option</a>
+//     */
+//    public Boolean getLengthChange() {
+//        return lengthChange;
+//    }
+//
+//    /**
+//     * @return Length menu options.
+//     * @see <a href="https://datatables.net/reference/option/lengthMenu">DataTables lengthMenu option</a>
+//     */
+//    public List<Object> getLengthMenu() {
+//        return lengthMenu;
+//    }
+//
+//    /**
+//     * @return Ordering options for the table.
+//     * @see <a href="https://datatables.net/reference/option/order">DataTables order option</a>
+//     */
+//    public List<Object> getOrder() {
+//        return order;
+//    }
+//
+//    /**
+//     * @return Whether the cells in the header should be ordered top to bottom.
+//     * @see <a href="https://datatables.net/reference/option/orderCellsTop">DataTables orderCellsTop option</a>
+//     */
+//    public Boolean getOrderCellsTop() {
+//        return orderCellsTop;
+//    }
+//
+//    /**
+//     * @return Whether classes should be added to columns during ordering.
+//     * @see <a href="https://datatables.net/reference/option/orderClasses">DataTables orderClasses option</a>
+//     */
+//    public Boolean getOrderClasses() {
+//        return orderClasses;
+//    }
+//
+//    /**
+//     * @return Whether ordering direction is reversed for full numbers.
+//     * @see <a href="https://datatables.net/reference/option/orderDesc">DataTables orderDescReverse option</a>
+//     */
+//    public Boolean getOrderDescReverse() {
+//        return orderDescReverse;
+//    }
+//
+//    /**
+//     * @return Fixed ordering definition that is applied.
+//     * @see <a href="https://datatables.net/reference/option/orderFixed">DataTables orderFixed option</a>
+//     */
+//    public Object getOrderFixed() {
+//        return orderFixed;
+//    }
+//
+//    /**
+//     * @return Whether multiple column ordering is enabled.
+//     * @see <a href="https://datatables.net/reference/option/orderMulti">DataTables orderMulti option</a>
+//     */
+//    public Boolean getOrderMulti() {
+//        return orderMulti;
+//    }
+//
+//    /**
+//     * @return the ordering option.
+//     * @see <a href="https://datatables.net/reference/option/ordering">DataTables ordering option</a>
+//     */
+//    public String getOrdering() {
+//        return ordering;
+//    }
+//
+//    /**
+//     * @return Number of rows to display on a single page.
+//     * @see <a href="https://datatables.net/reference/option/pageLength">DataTables pageLength option</a>
+//     */
+//    public Integer getPageLength() {
+//        return pageLength;
+//    }
+//
+//    /**
+//     * @return Whether paging is enabled for the table.
+//     * @see <a href="https://datatables.net/reference/option/paging">DataTables paging option</a>
+//     */
+//    public Boolean getPaging() {
+//        return paging;
+//    }
+//
+//    /**
+//     * @return The type of pagination control to be used.
+//     * @see <a href="https://datatables.net/reference/option/pagingType">DataTables pagingType option</a>
+//     */
+//    public String getPagingType() {
+//        return pagingType;
+//    }
+//
+//    /**
+//     * @return Callback function that is called just before the table is drawn.
+//     * @see <a href="https://datatables.net/reference/option/preDrawCallback">DataTables preDrawCallback option</a>
+//     */
+//    public String getPreDrawCallback() {
+//        return preDrawCallback;
+//    }
+//
+//    /**
+//     * @return Whether processing indicator should be shown.
+//     * @see <a href="https://datatables.net/reference/option/processing">DataTables processing option</a>
+//     */
+//    public Boolean getProcessing() {
+//        return processing;
+//    }
+//
+//    /**
+//     * @return Renderer to use for the table.
+//     * @see <a href="https://datatables.net/reference/option/renderer">DataTables renderer option</a>
+//     */
+//    public String getRenderer() {
+//        return renderer;
+//    }
+//
+//    /**
+//     * @return Whether the table data should be retrieved.
+//     * @see <a href="https://datatables.net/reference/option/retrieve">DataTables retrieve option</a>
+//     */
+//    public Boolean getRetrieve() {
+//        return retrieve;
+//    }
+//
+//    /**
+//     * @return Callback function for each row that is created.
+//     * @see <a href="https://datatables.net/reference/option/rowCallback">DataTables rowCallback option</a>
+//     */
+//    public String getRowCallback() {
+//        return rowCallback;
+//    }
+//
+//    /**
+//     * @return Id to be assigned to each row.
+//     * @see <a href="https://datatables.net/reference/option/rowId">DataTables rowId option</a>
+//     */
+//    public String getRowId() {
+//        return rowId;
+//    }
+//
+//    /**
+//     * @return Whether collapsing of the table when scrolling is enabled.
+//     * @see <a href="https://datatables.net/reference/option/scrollCollapse">DataTables scrollCollapse option</a>
+//     */
+//    public Boolean getScrollCollapse() {
+//        return scrollCollapse;
+//    }
+//
+//    /**
+//     * @return Whether horizontal scrolling is enabled.
+//     * @see <a href="https://datatables.net/reference/option/scrollX">DataTables scrollX option</a>
+//     */
+//    public Boolean getScrollX() {
+//        return scrollX;
+//    }
+//
+//    /**
+//     * @return Whether vertical scrolling is enabled.
+//     * @see <a href="https://datatables.net/reference/option/scrollY">DataTables scrollY option</a>
+//     */
+//    public Boolean getScrollY() {
+//        return scrollY;
+//    }
+//
+//    /**
+//     * @return Delay between keypress and search action in milliseconds.
+//     * @see <a href="https://datatables.net/reference/option/searchDelay">DataTables searchDelay option</a>
+//     */
+//    public Integer getSearchDelay() {
+//        return searchDelay;
+//    }
+//
+//    /**
+//     * @return Whether the table should be searchable.
+//     * @see <a href="https://datatables.net/reference/option/searching">DataTables searching option</a>
+//     */
+//    public Boolean getSearching() {
+//        return searching;
+//    }
+//
+//    /**
+//     * @return Whether server-side processing is enabled.
+//     * @see <a href="https://datatables.net/reference/option/serverSide">DataTables serverSide option</a>
+//     */
+//    public Boolean getServerSide() {
+//        return serverSide;
+//    }
+//
+//    /**
+//     * @return Duration for which the state should be saved in local storage.
+//     * @see <a href="https://datatables.net/reference/option/stateDuration">DataTables stateDuration option</a>
+//     */
+//    public Integer getStateDuration() {
+//        return stateDuration;
+//    }
+//
+//    /**
+//     * @return Callback function for loading the state.
+//     * @see <a href="https://datatables.net/reference/option/stateLoadCallback">DataTables stateLoadCallback option</a>
+//     */
+//    public String getStateLoadCallback() {
+//        return stateLoadCallback;
+//    }
+//
+//    /**
+//     * @return Parameters to be loaded for state saving.
+//     * @see <a href="https://datatables.net/reference/option/stateLoadParams">DataTables stateLoadParams option</a>
+//     */
+//    public String getStateLoadParams() {
+//        return stateLoadParams;
+//    }
+//
+//    /**
+//     * @return Callback function called after the state is loaded.
+//     * @see <a href="https://datatables.net/reference/option/stateLoaded">DataTables stateLoaded option</a>
+//     */
+//    public String getStateLoaded() {
+//        return stateLoaded;
+//    }
+//
+//    /**
+//     * @return Whether the table state should be saved.
+//     * @see <a href="https://datatables.net/reference/option/stateSave">DataTables stateSave option</a>
+//     */
+//    public Boolean getStateSave() {
+//        return stateSave;
+//    }
+//
+//    /**
+//     * @return Callback function for saving the state.
+//     * @see <a href="https://datatables.net/reference/option/stateSaveCallback">DataTables stateSaveCallback option</a>
+//     */
+//    public String getStateSaveCallback() {
+//        return stateSaveCallback;
+//    }
+//
+//    /**
+//     * @return Parameters to be saved for state saving.
+//     * @see <a href="https://datatables.net/reference/option/stateSaveParams">DataTables stateSaveParams option</a>
+//     */
+//    public String getStateSaveParams() {
+//        return stateSaveParams;
+//    }
+//
+//    /**
+//     * @return Tab index for navigation.
+//     * @see <a href="https://datatables.net/reference/option/tabIndex">DataTables tabIndex option</a>
+//     */
+//    public Integer getTabIndex() {
+//        return tabIndex;
+//    }
 
     // Fluent methods for nested options
     /**
      * @return The ajax configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/ajax">DataTables ajax option</a>
      */
-    public YadaDTAjax dtAjax() {
+    public YadaDTAjax dtAjaxObj() {
         if (this.ajax == null) {
             this.ajax = new YadaDTAjax(this);
         }
@@ -1112,7 +1116,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The autoFill configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/autoFill">DataTables autoFill option</a>
      */
-    public YadaDTAutoFill dtAutoFill() {
+    public YadaDTAutoFill dtAutoFillObj() {
         if (this.autoFill == null) {
             this.autoFill = new YadaDTAutoFill(this);
         }
@@ -1123,7 +1127,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The buttons configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/buttons">DataTables buttons option</a>
      */
-    public YadaDTButtons dtButtons() {
+    public YadaDTButtons dtButtonsObj() {
         if (this.buttons == null) {
             this.buttons = new YadaDTButtons(this);
         }
@@ -1134,7 +1138,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The colReorder configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/colReorder">DataTables colReorder option</a>
      */
-    public YadaDTColReorder dtColReorder() {
+    public YadaDTColReorder dtColReorderObj() {
         if (this.colReorder == null) {
             this.colReorder = new YadaDTColReorder(this);
         }
@@ -1145,7 +1149,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The fixedColumns configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/fixedColumns">DataTables fixedColumns option</a>
      */
-    public YadaDTFixedColumns dtFixedColumns() {
+    public YadaDTFixedColumns dtFixedColumnsObj() {
         if (this.fixedColumns == null) {
             this.fixedColumns = new YadaDTFixedColumns(this);
         }
@@ -1156,7 +1160,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The fixedHeader configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/fixedHeader">DataTables fixedHeader option</a>
      */
-    public YadaDTFixedHeader dtFixedHeader() {
+    public YadaDTFixedHeader dtFixedHeaderObj() {
         if (this.fixedHeader == null) {
             this.fixedHeader = new YadaDTFixedHeader(this);
         }
@@ -1167,7 +1171,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The keys configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/keys">DataTables keys option</a>
      */
-    public YadaDTKeys dtKeys() {
+    public YadaDTKeys dtKeysObj() {
         if (this.keys == null) {
             this.keys = new YadaDTKeys(this);
         }
@@ -1178,7 +1182,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The language configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/language">DataTables language option</a>
      */
-    public YadaDTLanguage dtLanguage() {
+    public YadaDTLanguage dtLanguageObj() {
         if (this.language == null) {
             this.language = new YadaDTLanguage(this);
         }
@@ -1189,7 +1193,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The rowGroup configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/rowGroup">DataTables rowGroup option</a>
      */
-    public YadaDTRowGroup dtRowGroup() {
+    public YadaDTRowGroup dtRowGroupObj() {
         if (this.rowGroup == null) {
             this.rowGroup = new YadaDTRowGroup(this);
         }
@@ -1200,7 +1204,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The rowReorder configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/rowReorder">DataTables rowReorder option</a>
      */
-    public YadaDTRowReorder dtRowReorder() {
+    public YadaDTRowReorder dtRowReorderObj() {
         if (this.rowReorder == null) {
             this.rowReorder = new YadaDTRowReorder(this);
         }
@@ -1211,7 +1215,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The scroller configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/scroller">DataTables scroller option</a>
      */
-    public YadaDTScroller dtScroller() {
+    public YadaDTScroller dtScrollerObj() {
         if (this.scroller == null) {
             this.scroller = new YadaDTScroller(this);
         }
@@ -1222,7 +1226,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The search configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/search">DataTables search option</a>
      */
-    public YadaDTSearch dtSearch() {
+    public YadaDTSearch dtSearchObj() {
         if (this.search == null) {
             this.search = new YadaDTSearch(this);
         }
@@ -1233,7 +1237,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The searchBuilder configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/searchBuilder">DataTables searchBuilder option</a>
      */
-    public YadaDTSearchBuilder dtSearchBuilder() {
+    public YadaDTSearchBuilder dtSearchBuilderObj() {
         if (this.searchBuilder == null) {
             this.searchBuilder = new YadaDTSearchBuilder(this);
         }
@@ -1244,7 +1248,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The searchPanes configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/searchPanes">DataTables searchPanes option</a>
      */
-    public YadaDTSearchPanes dtSearchPanes() {
+    public YadaDTSearchPanes dtSearchPanesObj() {
         if (this.searchPanes == null) {
             this.searchPanes = new YadaDTSearchPanes(this);
         }
@@ -1255,7 +1259,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return The select configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/select">DataTables select option</a>
      */
-    public YadaDTSelect dtSelect() {
+    public YadaDTSelect dtSelectObj() {
         if (this.select == null) {
             this.select = new YadaDTSelect(this);
         }
@@ -1266,7 +1270,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return A new column definition for DataTables.
      * @see <a href="https://datatables.net/reference/option/columnDefs">DataTables columnDefs option</a>
      */
-    public YadaDTColumnDef dtColumnDefs() {
+    public YadaDTColumnDef dtColumnDefsObj() {
         if (this.columnDefs == null) {
             this.columnDefs = new ArrayList<>();
         }
@@ -1279,7 +1283,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return A new column configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/columns">DataTables columns option</a>
      */
-    public YadaDTColumns dtColumns() {
+    public YadaDTColumns dtColumnsObj() {
         if (this.columns == null) {
             this.columns = new ArrayList<>();
         }
@@ -1292,7 +1296,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return A new search column configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/searchCols">DataTables searchCols option</a>
      */
-    public YadaDTSearchCol dtSearchCols() {
+    public YadaDTSearchCol dtSearchColsObj() {
         if (this.searchCols == null) {
             this.searchCols = new ArrayList<>();
         }
@@ -1308,7 +1312,7 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/responsive">DataTables responsive Reference</a>
      */
-    public YadaDataTableOptions dtResponsive(Boolean responsive) {
+    public YadaDTOptions dtResponsive(Boolean responsive) {
         this.responsive = responsive;
         return this;
     }
@@ -1319,17 +1323,10 @@ public class YadaDataTableOptions extends YadaFluentBase<YadaDataTable> {
      * @return the instance of YadaDTResponsive for further configuration
      * @see <a href="https://datatables.net/reference/option/responsive">DataTables responsive Reference</a>
      */
-    public YadaDTResponsive dtResponsive() {
+    public YadaDTResponsive dtResponsiveObj() {
     	this.yadaDTResponsive = YadaUtil.lazyUnsafeInit(this.yadaDTResponsive, () -> new YadaDTResponsive(this));
         return this.yadaDTResponsive;
     }
 
-    /**
-     * @return either a boolean or a full object.
-     * @see <a href="https://datatables.net/reference/option/responsive">DataTables responsive option</a>
-     */
-    public Object getResponsive() {
-        return yadaDTResponsive != null ? yadaDTResponsive : responsive;
-    }
 
 }

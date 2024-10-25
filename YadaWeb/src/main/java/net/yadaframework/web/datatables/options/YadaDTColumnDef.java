@@ -9,11 +9,11 @@ import net.yadaframework.core.YadaFluentBase;
  * @see <a href="https://datatables.net/reference/option/columnDefs">ColumnDefs</a>
  */
 @Deprecated // Not needed when all columns must be set anyway
-class YadaDTColumnDef extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTColumnDef extends YadaFluentBase<YadaDTOptions> {
     private Integer targets;
     private Boolean visible;
 
-    YadaDTColumnDef(YadaDataTableOptions parent) {
+    YadaDTColumnDef(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -64,7 +64,7 @@ class YadaDTColumnDef extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

@@ -75,7 +75,11 @@ public class YadaAppConfig {
 		}
 	}
 
-	public static YadaConfiguration getStaticConfig() {
+	/**
+	 * Initialize and return a static instance of YadaConfiguration for internal use.
+	 * @see YadaUtil.getBean() for an application access to the "config" bean instance.
+	 */
+	public static synchronized YadaConfiguration getStaticConfig() {
 		if (CONFIG==null) {
 			try {
 				CONFIG = new YadaConfiguration() {}; // Anonymous subclass is needed because YadaConfiguration is abstract

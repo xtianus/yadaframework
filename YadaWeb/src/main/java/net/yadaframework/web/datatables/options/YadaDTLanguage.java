@@ -8,11 +8,11 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/language">Language</a>
  */
-class YadaDTLanguage extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTLanguage extends YadaFluentBase<YadaDTOptions> {
     private String emptyTable;
     private String zeroRecords;
 
-    YadaDTLanguage(YadaDataTableOptions parent) {
+    YadaDTLanguage(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -63,7 +63,7 @@ class YadaDTLanguage extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

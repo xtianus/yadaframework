@@ -8,20 +8,23 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import net.yadaframework.components.YadaUtil;
+import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
-	@JsonIgnore private YadaConfiguration config;
+	@JsonIgnore private YadaConfiguration config = (YadaConfiguration) YadaUtil.getBean("config");
+	@JsonIgnore private YadaWebUtil yadaWebUtil = YadaWebUtil.INSTANCE;
 	
 	private String url; // URL to be called when the button is clicked, it can be a thymeleaf expression and will be inserted in a @{} when missing
     private String handler; // javascript function to be called when the button is clicked, will receive the row data as a parameter (see details)
     private String text; // Tooltip text for the command icon and text for the toolbar button
     private String icon; // HTML content for the button's icon
     private boolean global = false; // True for a button that is always enabled regardless of row selection, for example an Add button. Global buttons are not shown in the command column.
-    private String toolbarCssClass; // CSS class to be applied to the button
+    private String toolbarCssClass = "btn btn-default"; // CSS class to be applied to the button
     private String idName = "id"; // Name of the ID request parameter (optional, default is "id")
     private boolean ajax = true; // Boolean to indicate if the button should use an AJAX request
     private boolean pageLoader = true; // Boolean to control whether the page loader should be shown or not
@@ -31,9 +34,8 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
     private String showCommand; // Function that determines whether to show the button icon for each row
     private Set<Integer> roles = new HashSet<>(); // Roles that can access the button
     
-    public YadaDataTableButton(String text, YadaDataTableHTML parent, YadaConfiguration config) {
+    public YadaDataTableButton(String text, YadaDataTableHTML parent) {
 		super(parent);
-		this.config = config;
 		this.text = text;
 	}
 
@@ -42,7 +44,7 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
      * NOte: a backend call will always be able to trigger a confirmation dialog regardless of this setting.
      * @return this instance for method chaining
      */
-    public YadaDataTableConfirmDialog dtConfirmDialog() {
+    public YadaDataTableConfirmDialog dtConfirmDialogObj() {
     	if (yadaDataTableConfirmDialog != null) {
 			throw new YadaInvalidUsageException("dtConfirmDialog can only be called once per button");
 		}
@@ -51,12 +53,13 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
     }
     
 	/**
-	 * CSS class to be applied to the button in the toolbar
+	 * CSS class to be applied to the button in the toolbar, for example 'btn-primary'.
+	 * The 'btn' class is added automatically.
 	 * @param cssClass
 	 * @return this instance for method chaining
 	 */
 	public YadaDataTableButton dtToolbarCssClass(String cssClass) {
-		this.toolbarCssClass = toolbarCssClass;
+		this.toolbarCssClass = cssClass;
 		return this;
 	}
     
@@ -97,10 +100,7 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
     	if (this.handler!=null) {
     		throw new YadaInvalidUsageException("Cannot set url and function at the same time");
     	}
-    	if (!url.startsWith("@{")) {
-			url = "@{" + url + "}";
-		}
-    	this.url = url;
+    	this.url = yadaWebUtil.ensureThymeleafUrl(url);
     	return this;
     }
     
@@ -215,10 +215,6 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 
 	public boolean isGlobal() {
 		return global;
-	}
-
-	public YadaConfiguration getConfig() {
-		return config;
 	}
 
 	public String getUrl() {

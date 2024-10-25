@@ -10,7 +10,7 @@ import net.yadaframework.core.YadaFluentBase;
  *
  * @see <a href="https://datatables.net/reference/option/searchPanes">SearchPanes</a>
  */
-class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTSearchPanes extends YadaFluentBase<YadaDTOptions> {
     private Boolean cascadePanes;
     private String clear;
     private Boolean collapse;
@@ -30,7 +30,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
     private Integer viewCount;
     private Integer viewTotal;
 
-    YadaDTSearchPanes(YadaDataTableOptions parent) {
+    YadaDTSearchPanes(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -445,7 +445,7 @@ class YadaDTSearchPanes extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

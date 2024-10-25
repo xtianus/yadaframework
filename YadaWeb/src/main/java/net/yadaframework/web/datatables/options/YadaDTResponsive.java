@@ -10,13 +10,13 @@ import net.yadaframework.core.YadaFluentBase;
  * @see <a href="https://datatables.net/reference/option/responsive">DataTables Responsive Reference</a>
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class YadaDTResponsive extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTResponsive extends YadaFluentBase<YadaDTOptions> {
     private String breakpoints;
     private String orthogonal;
     private Boolean details;
     private YadaDTResponsiveDetails yadaDTResponsiveDetails;
 
-    public YadaDTResponsive(YadaDataTableOptions parent) {
+    public YadaDTResponsive(YadaDTOptions parent) {
         super(parent);
     }
 

@@ -8,7 +8,7 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/language.aria">Language Aria</a>
  */
-class YadaDTLanguageAria extends YadaFluentBase<YadaDTLanguage> {
+public class YadaDTLanguageAria extends YadaFluentBase<YadaDTLanguage> {
     private String sortAscending;
     private String sortDescending;
 

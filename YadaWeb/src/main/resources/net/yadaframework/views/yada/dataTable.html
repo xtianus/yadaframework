@@ -33,16 +33,16 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 	</table>
 
 	<!--/* Toolbar */-->
-	<div th:with="buttonSequence=${yadaDataTable.id+@yadaWebUtil.randomId6+'-button'}">
+	<div th:with="buttonSequence=${yadaDataTable.id+'-'+@yadaWebUtil.randomId6+'-button-'}">
 		<th:block th:each="button : ${html.buttons}">
-			<a class="btn btn-primary" th:id="${#ids.seq(buttonSequence)}"
+			<a class="btn" th:id="${#ids.seq(buttonSequence)}"
 				th:href="__${button.url?:'javascript:void(0);'}__"
-				th:class="|${button.ajax?'yadaAjax':''} ${button.toolbarCssClass?:''}|">
+				th:classappend="|${button.ajax?'yadaAjax':''} ${button.toolbarCssClass?:''}|">
 				<th:block th:if="${button.icon!=null}" th:utext="${button.icon}"><i class="bi bi-pencil"></i></th:block>
 				<span th:text="${button.text}">Add</span>
 			</a>
 			<script th:inline="javascript">
-				yada.ready(() => {
+				yada.ready(function(){
 					const buttonId = /*[[${#ids.prev(buttonSequence)}]]*/ "dummy";
 					const buttonData = /*[[${button}]]*/ "dummy";
 					const dataTableId = /*[[${yadaDataTable.id}]]*/ "dummy";
@@ -51,6 +51,17 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 			</script>
 		</th:block>
 	</div>
+	
+	<!--/* Initialization code */-->
+	<script th:inline="javascript">
+		yada.ready(function(){
+			const dataTableId = /*[[${yadaDataTable.id}]]*/ "dummy";
+			const dataTableJson = /*[[${yadaDataTable}]]*/ "dummy";
+			const userLanguage = /*[[${#locale.language}]]*/ "dummy";
+			window[dataTableId] = yada.dataTable(dataTableJson, userLanguage);
+		});
+	
+	</script>
 
 </div>
 	

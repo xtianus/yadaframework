@@ -9,11 +9,11 @@ import net.yadaframework.core.YadaFluentBase;
  * @see <a href="https://datatables.net/reference/option/columns">Columns</a>
  */
 @Deprecated // Deletable
-class YadaDTColumn extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTColumn extends YadaFluentBase<YadaDTOptions> {
     private String title;
     private String data;
 
-    YadaDTColumn(YadaDataTableOptions parent) {
+    YadaDTColumn(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -64,7 +64,7 @@ class YadaDTColumn extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

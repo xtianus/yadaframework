@@ -76,6 +76,9 @@ import net.yadaframework.exceptions.YadaSystemException;
 import net.yadaframework.web.YadaPageRequest;
 import net.yadaframework.web.YadaPageRows;
 
+/**
+ * Utility methods to be used for web development
+ */
 @Lazy // Lazy because used in YadaCmsConfiguration, and it woud give a circular refecence exception otherwise
 @Service
 public class YadaWebUtil {
@@ -84,6 +87,12 @@ public class YadaWebUtil {
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private MessageSource messageSource;
+	
+	/**
+	 * Instance to be used when autowiring is not available
+	 */
+	public final static YadaWebUtil INSTANCE = new YadaWebUtil();
+
 	
 	public final YadaPageRequest FIND_ONE = YadaPageRequest.of(0, 1);
 
@@ -1274,6 +1283,17 @@ public class YadaWebUtil {
 		}
 		Map<String, Object> modelMap = model.asMap();
 		((List<String>)modelMap.get(KEY_NOTIFICATION_CALLSCRIPT)).add(scriptId);
+	}
+	
+	/**
+	 * Encloses the string in a thymeleaf url operator when missing
+	 * @param url some url
+	 */
+	public String ensureThymeleafUrl(String url) {
+    	if (!url.startsWith("@{")) {
+			url = "@{" + url + "}";
+		}
+		return url;
 	}
 
 }

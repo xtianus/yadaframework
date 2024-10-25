@@ -203,16 +203,22 @@ public class UserProfileController {
 	
 	@RequestMapping("")
 	public String users(Model model, Locale locale) {
-		YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", locale, table -> {
-			table
-				.dtHTML()
-					.dtCssClasses("yadaNoLoader")
-					.dtColumn("ID").dtColumn("Enabled").dtColumn("Nickname").dtColumn("Email", "email").dtColumn("Last Login")
-					.dtColumnCheckbox("select.allnone")
-					.dtColumnCommands("Commands")
-					.dtButton("Add").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-plus'></i>").dtGlobal().dtRole("ADMIN").back()
-					.dtButton("Edit").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId")
-					.dtConfirmDialog()
+		// YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", locale, table -> {
+		YadaDataTable table = new YadaDataTable("userTable", "/dashboard/user/userProfileTablePage");
+		table
+			.dtLanguageObj("/static/datatables-2.1.8/i18n").back()
+			.dtHTMLObj()
+				.dtCssClasses("yadaNoLoader")
+				.dtColumnObj("ID").back()
+				.dtColumnObj("Enabled").back()
+				.dtColumnObj("Nickname").back()
+				.dtColumnObj("Email").dtName("email").dtOrderAsc(0).back()
+				.dtColumnObj("Last Login").dtOrderDesc(1).back()
+				.dtColumnCheckbox("select.allnone")
+				.dtColumnCommands("Commands")
+				.dtButtonObj("Add").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-plus'></i>").dtGlobal().dtRole("ADMIN").back()
+				.dtButtonObj("Edit").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId")
+					.dtConfirmDialogObj()
 						.dtTitle("Edit User")
 						.dtMessageSingular("Are you sure you want to edit user '{0}'?")
 						.dtMessagePlural("Are you sure you want to edit {0} users?")
@@ -221,10 +227,12 @@ public class UserProfileController {
 						.back()
 					.back()
 				.back()
-				.dtOptions()
-					.dtPaging(false);
-		});
-		model.addAttribute("dataTable", yadaDataTable);
+			.dtOptionsObj()
+				.dtResponsive(true)
+				.dtPageLength(10)
+				.dtPaging(false);
+		// });
+		model.addAttribute("dataTable", table);
 		return "/dashboard/users";
 	}
 	

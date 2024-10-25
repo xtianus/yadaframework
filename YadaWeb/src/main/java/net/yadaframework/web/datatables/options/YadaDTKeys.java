@@ -8,11 +8,11 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/keys">Keys</a>
  */
-class YadaDTKeys extends YadaFluentBase<YadaDataTableOptions> {
+public class YadaDTKeys extends YadaFluentBase<YadaDTOptions> {
     private Boolean clipboard;
     private Boolean columns;
 
-    YadaDTKeys(YadaDataTableOptions parent) {
+    YadaDTKeys(YadaDTOptions parent) {
         super(parent);
     }
 
@@ -63,7 +63,7 @@ class YadaDTKeys extends YadaFluentBase<YadaDataTableOptions> {
      * 
      * @return the parent DataTable options
      */
-    public YadaDataTableOptions parent() {
+    public YadaDTOptions parent() {
         return super.parent;
     }
 }

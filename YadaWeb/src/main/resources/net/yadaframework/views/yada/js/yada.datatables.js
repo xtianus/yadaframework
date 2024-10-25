@@ -3,12 +3,44 @@
 //////////////////
 
 (function( yada ) {
-	"use strict";
-	
 	// Namespace trick explained here: http://stackoverflow.com/a/5947280/587641
 	// For a public property or function, use "yada.xxx = ..."
 	// For a private property use "var xxx = "
 	// For a private function use "function xxx(..."
+
+	"use strict";
+	yada.dataTable = function(dataTableJson, userLanguage) {
+		const tableId = dataTableJson.id;
+
+		const dataTable = $("#" + tableId).DataTable( {
+	        responsive: true,
+	        pageLength: pageLength,
+			orderMulti: order.length>1,
+			order: order,
+			columns: columnDef,					
+		    serverSide: true,
+		    ajax: function(data, callback, settings) {
+		    	// Need to add any extra parameter if a form is present
+		    	var addedData = $("form.yada_dataTables_"+tableId).serializeArray();
+		    	var extraParam = data['extraParam']={};
+		    	var i=0;
+		    	for (i=0; i<addedData.length; i++) {
+		    		var paramObj = addedData[i];
+		    		var paramName = paramObj.name;
+		    		var paramValue = paramObj.value;
+		    		extraParam[paramName] = paramValue;
+		    	}
+		    	var noLoader = $table.hasClass('noLoader') || $table.hasClass('yadaNoLoader');
+		    	yada.ajax(dataUrl, jQuery.param(data), callback, 'POST', null, noLoader);
+		    },
+		    language: {
+		    	url: languageUrl
+		    }
+		});		
+		
+		
+	}
+	
 
 	yada.dtMakeButtonHandler = function(buttonId, buttonData, dataTableId) {
 		const $button = $("#"+buttonId);
@@ -19,7 +51,7 @@
 			var isRowIcon = $(this).hasClass("yadaRowCommandButton");
 			var buttonUrl = buttonData.url;
 			var ids = [];
-			var id = yada.getHashValue($(this).attr('href'));
+			var id = yada.getHashValue($(this).attr('href')); // This has a value when isRowIcon
 			var totElements = 1;
 			if (!isRowIcon) {
 				// Toolbar button
