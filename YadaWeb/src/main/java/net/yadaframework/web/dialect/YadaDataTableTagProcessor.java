@@ -95,13 +95,17 @@ public class YadaDataTableTagProcessor extends AbstractElementModelProcessor {
 			if (attributeName.startsWith(YadaDialectUtil.YADA_PREFIX_WITHCOLUMN)) {
 				String yadaAttributeName = yadaDialectUtil.removePrefix(attributeName, dialectPrefix);
 				switch (yadaAttributeName) {
-				case "definition":
+				case "configuration":
 					YadaDataTable yadaDataTable = yadaDialectUtil.parseExpression(attributeValue, context, YadaDataTable.class);
 					structureHandler.setLocalVariable("yadaDataTable", yadaDataTable);
 					if (yadaDataTable==null) {
-						log.error("Missing yada:definition object in Model for yada:" + TAG_NAME);
+						log.error("Missing yada:configuration object in Model for yada:" + TAG_NAME);
 						return false;
 					}
+					break;
+				case "preprocessor":
+					String handler = yadaDialectUtil.parseExpression(attributeValue, context, String.class);
+					structureHandler.setLocalVariable("preprocessor", handler);
 					break;
 				}
 			}

@@ -203,36 +203,37 @@ public class UserProfileController {
 	
 	@RequestMapping("")
 	public String users(Model model, Locale locale) {
-		// YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", locale, table -> {
-		YadaDataTable table = new YadaDataTable("userTable", "/dashboard/user/userProfileTablePage");
-		table
-			.dtLanguageObj("/static/datatables-2.1.8/i18n").back()
-			.dtHTMLObj()
-				.dtCssClasses("yadaNoLoader")
-				.dtColumnObj("ID").back()
-				.dtColumnObj("Enabled").back()
-				.dtColumnObj("Nickname").back()
-				.dtColumnObj("Email").dtName("email").dtOrderAsc(0).back()
-				.dtColumnObj("Last Login").dtOrderDesc(1).back()
-				.dtColumnCheckbox("select.allnone")
-				.dtColumnCommands("Commands")
-				.dtButtonObj("Add").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-plus'></i>").dtGlobal().dtRole("ADMIN").back()
-				.dtButtonObj("Edit").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId")
-					.dtConfirmDialogObj()
-						.dtTitle("Edit User")
-						.dtMessageSingular("Are you sure you want to edit user '{0}'?")
-						.dtMessagePlural("Are you sure you want to edit {0} users?")
-						.dtConfirmButton("Confirm").dtAbortButton("Cancel")
-						.dtPlaceholderColumnName("email")
+		YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", locale, table -> {
+			table
+				//.dtLanguageObj("/static/datatables-2.1.8/i18n").back()
+				.dtAjaxUrl("/dashboard/user/userProfileTablePage")
+				.dtHTMLObj()
+					.dtCssClasses("yadaNoLoader")
+					.dtColumnObj("ID", "id").back()
+					// Example: .dtColumnObj("Title", "title."+locale.getLanguage()).back()
+					.dtColumnObj("Enabled", "userCredentials.enabled").back()
+					.dtColumnObj("Nickname", "userCredentials.nickname").back()
+					.dtColumnObj("Email", "userCredentials.username").dtName("email").dtOrderAsc(0).back()
+					.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin").dtOrderDesc(1).back()
+					.dtColumnCheckbox("select.allnone")
+					.dtColumnCommands("Commands")
+					.dtButtonObj("Add").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-plus'></i>").dtGlobal().dtRole("ADMIN").back()
+					.dtButtonObj("Edit").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId")
+						.dtConfirmDialogObj()
+							.dtTitle("Edit User")
+							.dtMessageSingular("Are you sure you want to edit user '{0}'?")
+							.dtMessagePlural("Are you sure you want to edit {0} users?")
+							.dtConfirmButton("Confirm").dtAbortButton("Cancel")
+							.dtPlaceholderColumnName("email")
+							.back()
 						.back()
 					.back()
-				.back()
-			.dtOptionsObj()
-				.dtResponsive(true)
-				.dtPageLength(10)
-				.dtPaging(false);
-		// });
-		model.addAttribute("dataTable", table);
+				.dtOptionsObj()
+					.dtResponsive(true)
+					.dtPageLength(10)
+					.dtPaging(false);
+		});
+		model.addAttribute("yadaDataTable", yadaDataTable);
 		return "/dashboard/users";
 	}
 	

@@ -3,45 +3,20 @@
 //////////////////
 
 (function( yada ) {
+	"use strict";
 	// Namespace trick explained here: http://stackoverflow.com/a/5947280/587641
 	// For a public property or function, use "yada.xxx = ..."
 	// For a private property use "var xxx = "
 	// For a private function use "function xxx(..."
 
-	"use strict";
 	yada.dataTable = function(dataTableJson, userLanguage) {
 		const tableId = dataTableJson.id;
-
-		const dataTable = $("#" + tableId).DataTable( {
-	        responsive: true,
-	        pageLength: pageLength,
-			orderMulti: order.length>1,
-			order: order,
-			columns: columnDef,					
-		    serverSide: true,
-		    ajax: function(data, callback, settings) {
-		    	// Need to add any extra parameter if a form is present
-		    	var addedData = $("form.yada_dataTables_"+tableId).serializeArray();
-		    	var extraParam = data['extraParam']={};
-		    	var i=0;
-		    	for (i=0; i<addedData.length; i++) {
-		    		var paramObj = addedData[i];
-		    		var paramName = paramObj.name;
-		    		var paramValue = paramObj.value;
-		    		extraParam[paramName] = paramValue;
-		    	}
-		    	var noLoader = $table.hasClass('noLoader') || $table.hasClass('yadaNoLoader');
-		    	yada.ajax(dataUrl, jQuery.param(data), callback, 'POST', null, noLoader);
-		    },
-		    language: {
-		    	url: languageUrl
-		    }
-		});		
-		
-		
+		const dataTable = $("#" + tableId).DataTable(dataTableJson.options);		
+		return dataTable;
 	}
 	
 
+	// TODO chiamare da yada.dataTable non da fuori se si riesce
 	yada.dtMakeButtonHandler = function(buttonId, buttonData, dataTableId) {
 		const $button = $("#"+buttonId);
 		$button.click(function(e) {
@@ -131,7 +106,73 @@
 		});
 	}
 
+	/**
+	 * Internal use
+	 */
+	yada.dtCommandRender =  function( data, type, row ) {
+    	var rowId = yada.getHashValue(data.DT_RowId);
+        if ( type === 'display' ) {
+        	var buttons = '';
+        	for (var i=0; extraButtons!=null && i<extraButtons.length; i++) {
+        		var displayIconOnRow = extraButtons[i].showRowIcon;
+        		if (displayIconOnRow==null) {
+        			displayIconOnRow = extraButtons[i].noRowIcon; // Fallback to deprecated attribute
+        		}
+        		if (typeof displayIconOnRow == "function") {
+        			displayIconOnRow = displayIconOnRow(data, row);
+        		}
+        		if (displayIconOnRow==null) {
+        			displayIconOnRow = true;
+        		}
+        		if (displayIconOnRow!=null && extraButtons[i].noRowIcon != null && extraButtons[i].showRowIcon == null) {
+        			displayIconOnRow = !displayIconOnRow; // Invert the logic
+        		}
+        		if (displayIconOnRow) {
+	        		buttons +=
+	        			'<a class="yadaTableExtraButton' + i + ' yadaRowCommandButton" href="#' +
+	        			rowId + '" title="' + extraButtons[i].title + '">' + extraButtons[i].icon + '</a>';
+        		} else if (displayIconOnRow=="disabled") {
+        			buttons += '<span class="yadaTableExtraButton' + i + ' yadaRowCommandButton disabled" ' + 'title="' + extraButtons[i].title + '"' + '>' + extraButtons[i].icon + '</span>';
+        		} else {
+        			// No button
+        		}
+        	}
+        	if (editDef!=null) {
+        		buttons +=
+        			'<a class="s_editRow yadaRowCommandButton" href="#'+rowId+'" title="'+editDef.title+'"><i class="yadaIcon yadaIcon-edit"></i></a>';
+        	}
+        	if (deleteDef!=null) {
+        		buttons +=
+        			'<a class="s_deleteRow yadaRowCommandButton" href="#'+rowId+'" title="'+deleteDef.title+'"><i class="yadaIcon yadaIcon-delete"></i></a>';
+        	}
+        	return buttons;
+        }
+        return data;
+    }
+					
+	yada.dtCheckboxRender = function( data, type, row ) {
+		if ( type === 'display' ) {
+			return '<input type="checkbox" class="yadaCheckInCell s_rowSelector"/>';
+		}
+		return data;
+	}
 	
+	// Call the backend via ajax
+	yada.dtAjaxCaller = function(data, callback, settings, ajaxUrl) {
+    	// Add any extra parameter when a form is present
+    	var addedData = $("form.yada_dataTables_"+tableId).serializeArray();
+    	var extraParam = data['extraParam']={};
+    	var i=0;
+    	for (i=0; i<addedData.length; i++) {
+    		var paramObj = addedData[i];
+    		var paramName = paramObj.name;
+    		var paramValue = paramObj.value;
+    		extraParam[paramName] = paramValue;
+    	}
+    	var noLoader = $table.hasClass('yadaNoLoader');
+    	yada.ajax(ajaxUrl, jQuery.param(data), callback, 'POST', null, noLoader);
+    }
+					
 }( window.yada = window.yada || {} ));
 
 

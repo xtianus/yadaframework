@@ -4,6 +4,7 @@
 	xmlns:yada="http://www.yadaframework.net">
 <head>
 	<th:block th:replace="~{/header :: headFragment}"/>
+	<link rel="stylesheet" type="text/css" th:href="@{/static/datatables-2.1.8/datatables.min.css}"/>
 </head>
 <body>
 
@@ -12,17 +13,21 @@
 <main class="container">
 	<h1>Users</h1>
 	
-	<yada:datatable id="userTable" yada:definition="${dataTable}">
+	<yada:datatable id="userTable" yada:configuration="${yadaDataTable}" yada:preprocessor="configHandler">
 	</yada:datatable>
-	
-	<script th:inline="javascript">
-		var jsonData = /*[[${yadaDataTable}]]*/ "dummy";
-	</script>
 	
 </main>
 
+<script>
+function configHandler(dataTableJson) {
+	dataTableJson.options.responsive = true; // Just an example
+	console.log("Config handler called for " + dataTableJson.id);
+}
+</script>
+
 <th:block th:replace="~{/footer :: body}"/>
 
+<script th:src="@{/static/datatables-2.1.8/datatables.min.js}"></script>
 <script th:if="${@config.developmentEnvironment}" th:src="@{/yadares/js/yada.datatables.js}"></script>
 
 </body>

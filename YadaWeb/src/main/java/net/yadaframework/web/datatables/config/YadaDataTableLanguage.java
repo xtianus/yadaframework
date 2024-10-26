@@ -10,6 +10,9 @@ import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.web.datatables.YadaDataTable;
 
+// Class not needed: 
+// as we now have the Locale in the table, the table is locale-specific so the full url of the language file can be set on the instance, no need to have them all
+@Deprecated 
 public class YadaDataTableLanguage extends YadaFluentBase<YadaDataTable> {
 	private String languageBaseUrl = "https://cdn.datatables.net/plug-ins/2.1.8/i18n/";
 	private Map<String, String> languageMap = new HashMap<>();

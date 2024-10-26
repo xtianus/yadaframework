@@ -23,6 +23,7 @@ public class YadaDatatablesColumn extends HashMap<String, Object> {
 	 * Returns the column data if any, the column name otherwise.
 	 * @return data or name or null
 	 */
+	// Never used
 	public String getDataOrName() {
 		String result = StringUtils.trimToNull(getData());
 		if (result==null) {

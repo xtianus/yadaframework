@@ -8,6 +8,7 @@ import net.yadaframework.core.YadaFluentBase;
  * 
  * @see <a href="https://datatables.net/reference/option/ajax">Ajax</a>
  */
+@Deprecated // Ajax is automatically set in Yada
 public class YadaDTAjax extends YadaFluentBase<YadaDTOptions> {
     private String url;
     private String dataSrc;

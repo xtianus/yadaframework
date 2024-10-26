@@ -1,9 +1,9 @@
-package net.yadaframework.web.datatables.options.proxy;
+package net.yadaframework.web.datatables.proxy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.yadaframework.web.datatables.YadaDataTable;
-import net.yadaframework.web.datatables.options.YadaDTAjax;
 import net.yadaframework.web.datatables.options.YadaDTAutoFill;
 import net.yadaframework.web.datatables.options.YadaDTButtons;
 import net.yadaframework.web.datatables.options.YadaDTColReorder;
@@ -13,6 +13,7 @@ import net.yadaframework.web.datatables.options.YadaDTFixedColumns;
 import net.yadaframework.web.datatables.options.YadaDTFixedHeader;
 import net.yadaframework.web.datatables.options.YadaDTKeys;
 import net.yadaframework.web.datatables.options.YadaDTLanguage;
+import net.yadaframework.web.datatables.options.YadaDTOptions;
 import net.yadaframework.web.datatables.options.YadaDTResponsive;
 import net.yadaframework.web.datatables.options.YadaDTRowGroup;
 import net.yadaframework.web.datatables.options.YadaDTRowReorder;
@@ -22,15 +23,14 @@ import net.yadaframework.web.datatables.options.YadaDTSearchBuilder;
 import net.yadaframework.web.datatables.options.YadaDTSearchCol;
 import net.yadaframework.web.datatables.options.YadaDTSearchPanes;
 import net.yadaframework.web.datatables.options.YadaDTSelect;
-import net.yadaframework.web.datatables.options.YadaDTOptions;
 
 /**
- * This class implements the needed methods for <b>internal use</b> 
- * so that the fluent interface is not polluted by them.
+ * This class implements the methods needed for <b>internal use</b> 
+ * so that they don't pollute the fluent interface.
  */
-public class YadaDataTableOptionsProxy extends YadaDTOptions {
+public class YadaDTOptionsProxy extends YadaDTOptions {
 
-	public YadaDataTableOptionsProxy(YadaDataTable parent) {
+	public YadaDTOptionsProxy(YadaDataTable parent) {
 		super(parent);
 	}
 	
@@ -40,8 +40,11 @@ public class YadaDataTableOptionsProxy extends YadaDTOptions {
 	 * @return the new column
 	 */
 	public YadaDTColumns addNewColumn(int pos) {
+        if (columns == null) {
+            columns = new ArrayList<>();
+        }
 		YadaDTColumns newColumn = new YadaDTColumns(this);
-		this.columns.add(pos, newColumn);
+		columns.add(pos, newColumn);
 		return newColumn;
 	}
 	
@@ -56,10 +59,6 @@ public class YadaDataTableOptionsProxy extends YadaDTOptions {
 	
 	public String getDataTableExtErrMode() {
 		return dataTableExtErrMode;
-	}
-
-	public YadaDTAjax getAjax() {
-		return ajax;
 	}
 
 	public YadaDTAutoFill getAutoFill() {

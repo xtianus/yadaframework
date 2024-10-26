@@ -201,7 +201,7 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
     }
 
 	@Override
-	protected void validate() {
+	public YadaDataTableHTML back() {
 		// When the button is not global, there must be an icon
 		if (!global && StringUtils.isBlank(icon)) {
 			throw new YadaInvalidUsageException("Button '{}' needs an icon to be shown in the command column", text);
@@ -211,6 +211,7 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 				throw new YadaInvalidUsageException("windowName must be set if windowFeatures is set");
 			}
 		}
+		return super.back();
 	}
 
 	public boolean isGlobal() {

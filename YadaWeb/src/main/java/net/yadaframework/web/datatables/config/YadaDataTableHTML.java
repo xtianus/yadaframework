@@ -5,28 +5,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.web.datatables.YadaDataTable;
 import net.yadaframework.web.datatables.options.YadaDTColumns;
-import net.yadaframework.web.datatables.options.proxy.YadaDataTableOptionsProxy;
+import net.yadaframework.web.datatables.proxy.YadaDTOptionsProxy;
 
 // This class is not serialized as json
 public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 
-	private String cssClasses;
-	private String selectCheckboxTitle; // When null, no select checkbox in first row
+	protected String cssClasses;
+	protected String selectCheckboxTitle; // When null, no select checkbox in first row
 	// private List<String> columnTitles = new ArrayList<String>();
-	private String commandsTitle;
-	private Boolean showFooter = false;
-	private List<YadaDataTableButton> buttons = new ArrayList<>();
+	protected String commandsTitle;
+	protected Boolean showFooter = false;
+	protected List<YadaDataTableButton> buttons = new ArrayList<>();
 
 	// Package visible
-	List<YadaDataTableColumn> columns = new ArrayList<>();
-	Map<Integer, YadaDataTableColumn> orderingMap = new TreeMap<>(); // order precedence --> column
-	YadaDataTableOptionsProxy options;
+	protected List<YadaDataTableColumn> columns = new ArrayList<>();
+	@JsonIgnore protected Map<Integer, YadaDataTableColumn> orderingMap = new TreeMap<>(); // order precedence --> column
+	@JsonIgnore protected YadaDTOptionsProxy options;
 	
-	public YadaDataTableHTML(YadaDataTable parent, YadaDataTableOptionsProxy options) {
+	@JsonIgnore protected boolean backCalled = false;
+	
+	public YadaDataTableHTML(YadaDataTable parent, YadaDTOptionsProxy options) {
 		super(parent);
 		this.options = options;
 	}
@@ -34,10 +38,17 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 	/**
 	 * Add a new column to the table. Order is preserved.
 	 * @param headerText the text to show in the header for this column, can be null 
+	 * @param data the json path of the result in the ajax response, for example "id" or "useCredentials.username".<br>
+	 * 		It can eventually be localized to access localized strings using e.g. <pre>"title."+locale.getLanguage()</pre>
+	 * 		for a title in the current user locale.<br>
+	 * 		Can also be a javascript function provided on page if the value is like "someFunction()".
+	 * 		In that case the function signature should be <pre>function(data, type, row, meta)</pre>
+	 * 		Remember in such case to set a name on the column with {@link YadaDataTableColumn#dtName(String)} for database operations.
+	 * 		@see <a href="https://datatables.net/reference/option/columns.data">DataTables Reference: columns.data</a> 
 	 * @return column instance for method chaining
 	 */
-	public YadaDataTableColumn dtColumnObj(String headerText) {
-		YadaDataTableColumn column = new YadaDataTableColumn(headerText, this);
+	public YadaDataTableColumn dtColumnObj(String headerText, String data) {
+		YadaDataTableColumn column = new YadaDataTableColumn(headerText, data, this);
 		this.columns.add(column);
 		return column;
 	}
@@ -91,41 +102,14 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 		this.cssClasses = cssClasses;
 		return this;
 	}
-	
-	public boolean isCommandsTitle() {
-		return commandsTitle!=null;
-	}
-	
-	public boolean isSelectCheckbox() {
+
+	// This is private not to pollute the fluent interface
+	private boolean isSelectCheckbox() {
 		return selectCheckboxTitle!=null;
-	}
-	
-	public String getSelectCheckboxTitle() {
-		return selectCheckboxTitle;
-	}
-
-	public List<YadaDataTableColumn> getColumns() {
-		return columns;
-	}
-
-	public String getCssClasses() {
-		return cssClasses;
-	}
-
-	public String getCommandsTitle() {
-		return commandsTitle;
-	}
-	
-	public Boolean isShowFooter() {
-		return showFooter;
-	}
-
-	public List<YadaDataTableButton> getButtons() {
-		return buttons;
 	}
 
 	@Override
-	protected void validate() {
+	public YadaDataTable back() {
 		//
 		// Validation
 		//
@@ -154,29 +138,25 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 			}
 			options.dtOrdering(makeOrderingOptions());
 		}
-		// Column for checkboxes
+		// Column for checkboxes. Plain columns have already been defined in options
 		if (isSelectCheckbox()) {
 			YadaDTColumns newColumn = options.addNewColumn(0);
 			newColumn.dtOrderable(false).dtSearchable(false);
-			// ||||||||||||||||||| aggiungere definitzione della colonna e inserirla in options.columns all'inizio della List
-			//	columnDef.push(
-			//			{	// Colonna dei checkbox
-			//				data: null,
-			//				name: '_yadaSelectionColumn', // Non usato
-			//				orderable: false,
-			//				searchable: false,
-			//				render: function ( data, type, row ) {
-			//					if ( type === 'display' ) {
-			//						return '<input type="checkbox" class="yadaCheckInCell s_rowSelector"/>';
-			//					}
-			//					return data;
-			//				},
-			//				width: "50px",
-			//				className: "yadaCheckInCell"
-			//			}	                   
-		
-		
+			newColumn.dtRender("yada.dtCheckboxRender()").dtWidth("50px").dtClassName("yadaCheckInCell");
 		}
+		// Last column for commands
+		options.dtColumnsObj()
+			.dtClassName("yadaCommandButtonCell")
+			.dtName("_yadaCommandColumn")
+			.dtOrderable(false).dtSearchable(false)
+			.dtWidth("50px")
+			.dtRender("yada.dtCommandRender()");
+		// Ajax options
+		// As the docs don't say if this would work, the ajax function is added in the thymeleaf template
+		// options.dtAjaxUrl("yada.dtAjaxCaller()");
+		
+		backCalled = true;
+		return super.back();
 	}
 
 	private void setColumnPositions() {
@@ -218,4 +198,5 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 		return result.toString();
 	}
 
+	
 }

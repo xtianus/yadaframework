@@ -55,8 +55,21 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 	<!--/* Initialization code */-->
 	<script th:inline="javascript">
 		yada.ready(function(){
-			const dataTableId = /*[[${yadaDataTable.id}]]*/ "dummy";
 			const dataTableJson = /*[[${yadaDataTable}]]*/ "dummy";
+			const ajaxUrl = /*[[@{__${yadaDataTable.ajaxUrl}__}]]*/ "dummy";
+			dataTableJson.options.ajax = function(data, callback, settings){
+				debugger;
+				yada.dtAjaxCaller(data, callback, settings, ajaxUrl);
+			}
+			dataTableJson.options.ajax = ajaxUrl;
+			// Preprocessor can override, add, delete configured options
+			const preprocessorName = /*[[${preprocessor}]]*/ ""; // Becomes 'null' when missing
+			const preprocessor = window[preprocessorName];
+			if (typeof preprocessor === "function") {
+			    preprocessor(dataTableJson);
+			}
+			const dataTableId = dataTableJson.id;
+			// TODO remove userLanguage
 			const userLanguage = /*[[${#locale.language}]]*/ "dummy";
 			window[dataTableId] = yada.dataTable(dataTableJson, userLanguage);
 		});

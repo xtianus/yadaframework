@@ -1,13 +1,14 @@
-package net.yadaframework.web.datatables.options.proxy;
+package net.yadaframework.web.datatables.proxy;
 
 import java.util.List;
 
 import net.yadaframework.web.datatables.options.YadaDTColumns;
+import net.yadaframework.web.datatables.options.YadaDTOptionSearchBuilder;
 import net.yadaframework.web.datatables.options.YadaDTOptions;
 
 /**
- * This class implements the needed methods for <b>internal use</b> 
- * so that the fluent interface is not polluted by them.
+ * This class implements the methods needed for <b>internal use</b> 
+ * so that they don't pollute the fluent interface.
  */
 public class YadaDTColumnsProxy extends YadaDTColumns {
 
@@ -120,4 +121,74 @@ public class YadaDTColumnsProxy extends YadaDTColumns {
         return orderSequence;
     }
 
+    /**
+     * @return The search builder title for the column.
+     * @see <a href="https://datatables.net/reference/option/columns.searchBuilderTitle">DataTables Reference: columns.searchBuilderTitle</a>
+     */
+    public String getSearchBuilderTitle() {
+        return searchBuilderTitle;
+    }
+
+    /**
+     * @return The search builder type for the column.
+     * @see <a href="https://datatables.net/reference/option/columns.searchBuilderType">DataTables Reference: columns.searchBuilderType</a>
+     */
+    public String getSearchBuilderType() {
+        return searchBuilderType;
+    }
+    
+    /**
+     * @return The width of the column.
+     * @see <a href="https://datatables.net/reference/option/columns.width">DataTables Reference: columns.width</a>
+     */
+    public String getWidth() {
+        return width;
+    }
+
+    /**
+     * @return The title for the column.
+     * @see <a href="https://datatables.net/reference/option/columns.title">DataTables Reference: columns.title</a>
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * @return The type of the column's data.
+     * @see <a href="https://datatables.net/reference/option/columns.type">DataTables Reference: columns.type</a>
+     */
+    public String getType() {
+        return type;
+    }
+    /**
+     * @return The rendering function for the column's data.
+     * @see <a href="https://datatables.net/reference/option/columns.render">DataTables Reference: columns.render</a>
+     */
+    public String getRender() {
+        return render;
+    }
+
+    /**
+     * @return The responsive priority for the column.
+     * @see <a href="https://datatables.net/reference/option/columns.responsivePriority">DataTables Reference: columns.responsivePriority</a>
+     */
+    public Integer getResponsivePriority() {
+        return responsivePriority;
+    }
+
+    /**
+     * @return The search builder options for the column.
+     * @see <a href="https://datatables.net/reference/option/columns.searchBuilder">DataTables Reference: columns.searchBuilder</a>
+     */
+    public YadaDTOptionSearchBuilder getSearchBuilder() {
+        return searchBuilder;
+    }
+
+    /**
+     * @return The search panes configuration for the column.
+     * @see <a href="https://datatables.net/reference/option/columns.searchPanes">DataTables Reference: columns.searchPanes</a>
+     */
+    public String getSearchPanes() {
+        return searchPanes;
+    }    
 }

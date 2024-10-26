@@ -5,22 +5,32 @@ import org.apache.commons.lang3.StringUtils;
 import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.web.datatables.options.YadaDTColumns;
+import net.yadaframework.web.datatables.proxy.YadaDTColumnsProxy;
 
+/**
+ * Configuration for a column of a DataTables table.
+ * @see YadaDTColumns for DataTables column options
+ */
 public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 	private String headerText;
 	private String name; // ID for this column
-	private YadaDTColumns yadaDTColumns;
+	private YadaDTColumnsProxy yadaDTColumns;
 	
 	// Package visibility
 	int positionInTable;
 	Boolean orderAsc; // false for desc
 
-	public YadaDataTableColumn(String headerText, YadaDataTableHTML parent) {
+	/**
+	 * Make a new column configuration
+	 * @param headerText the column title
+	 * @param data the json path of the result in the ajax response. See {@link YadaDataTableHTML#dtColumnObj}
+	 * @param parent
+	 */
+	public YadaDataTableColumn(String headerText, String data, YadaDataTableHTML parent) {
 		super(parent);
 		this.headerText = StringUtils.trimToEmpty(headerText);
-		yadaDTColumns = parent.options.dtColumnsObj();
-		yadaDTColumns.dtOrderable(true);
-		yadaDTColumns.dtSearchable(true);
+		yadaDTColumns = (YadaDTColumnsProxy) parent.options.dtColumnsObj();
+		yadaDTColumns.dtOrderable(true).dtSearchable(true).dtData(data);
 	}
 	
 	/**
@@ -42,9 +52,12 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 	}
 	
 	/**
-	 * Set a name on this column for cross reference.
+	 * Set a name on this column for database operations and cross reference.
+	 * Examples: "id", "useCredentials.username"
+	 * When unset, the "data" option value is used.
 	 * @param name the name of the column, can be null, must be unique otherwise
-	 * @return
+	 * @return this instance for method chaining
+	 * @see YadaDataTableConfirmDialog#dtPlaceholderColumnName(String...)
 	 */
 	public YadaDataTableColumn dtName(String name) {
 		this.name = name;
@@ -59,16 +72,6 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 	// Package visibility
 	String getName() {
 		return name;
-	}
-
-	@Override
-	protected void validate() {
-		if (this.name!=null) {
-			boolean duplicateName = parent.columns.stream().anyMatch(column -> column!=this && name.equals(column.getName()));
-			if (duplicateName) {
-				throw new YadaInvalidUsageException("Duplicate column name: '{}'", name);
-			}
-		}
 	}
 
 	/**
@@ -126,4 +129,21 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 	void setPositionInTable(int position) {
 		this.positionInTable = position;
 	}
+
+	@Override
+	public YadaDataTableHTML back() {
+		// When name is not set, use data
+		if (this.name==null) {
+			this.name = this.yadaDTColumns.getData();
+		}
+		// Check that name has not been repeated
+		if (this.name!=null) {
+			boolean duplicateName = parent.columns.stream().anyMatch(column -> column!=this && name.equals(column.getName()));
+			if (duplicateName) {
+				throw new YadaInvalidUsageException("Duplicate column name: '{}'", name);
+			}
+		}
+		return super.back();
+	}
+	
 }

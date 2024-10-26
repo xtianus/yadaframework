@@ -7,6 +7,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import net.yadaframework.core.YadaFluentBase;
 
+/**
+ * Defines a column in DataTables.
+ * @see <a href="https://datatables.net/reference/option/columns">DataTables Reference: columns</a>
+ */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
     protected String ariaTitle;
@@ -39,69 +43,21 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
         super(parent);
     }
 
-    /**
-     * @return Whether the column is orderable.
-     * @see <a href="https://datatables.net/reference/option/columns.orderable">DataTables Reference: columns.orderable</a>
-     */
-    public boolean dtIsOrderable() {
-        return orderable;
-    }
+//    /**
+//     * @return Whether the column is orderable.
+//     * @see <a href="https://datatables.net/reference/option/columns.orderable">DataTables Reference: columns.orderable</a>
+//     */
+//    public boolean dtIsOrderable() {
+//        return orderable;
+//    }
 
-    /**
-     * @return The rendering function for the column's data.
-     * @see <a href="https://datatables.net/reference/option/columns.render">DataTables Reference: columns.render</a>
-     */
-    public String getRender() {
-        return render;
-    }
-
-    /**
-     * @return The responsive priority for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.responsivePriority">DataTables Reference: columns.responsivePriority</a>
-     */
-    public Integer getResponsivePriority() {
-        return responsivePriority;
-    }
-
-    /**
-     * @return The search builder options for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.searchBuilder">DataTables Reference: columns.searchBuilder</a>
-     */
-    public YadaDTOptionSearchBuilder getSearchBuilder() {
-        return searchBuilder;
-    }
-
-    /**
-     * @return The search panes configuration for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.searchPanes">DataTables Reference: columns.searchPanes</a>
-     */
-    public String getSearchPanes() {
-        return searchPanes;
-    }
-
-    /**
-     * @return Whether the column is searchable.
-     * @see <a href="https://datatables.net/reference/option/columns.searchable">DataTables Reference: columns.searchable</a>
-     */
-    public boolean dtIsSearchable() {
-        return searchable;
-    }
-
-    /**
-     * @return The title for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.title">DataTables Reference: columns.title</a>
-     */
-    public String getTitle() {
-        return title;
-    }
-
-    /**
-     * @return The type of the column's data.
-     * @see <a href="https://datatables.net/reference/option/columns.type">DataTables Reference: columns.type</a>
-     */
-    public String getType() {
-        return type;
-    }
+//    /**
+//     * @return Whether the column is searchable.
+//     * @see <a href="https://datatables.net/reference/option/columns.searchable">DataTables Reference: columns.searchable</a>
+//     */
+//    public boolean dtIsSearchable() {
+//        return searchable;
+//    }
 
     /**
      * @return Whether the column is visible.
@@ -109,14 +65,6 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
      */
     public boolean dtIsVisible() {
         return visible;
-    }
-
-    /**
-     * @return The width of the column.
-     * @see <a href="https://datatables.net/reference/option/columns.width">DataTables Reference: columns.width</a>
-     */
-    public String getWidth() {
-        return width;
     }
 
     // Fluent Setters
@@ -374,19 +322,5 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
     	return this;
     }
 
-    /**
-     * @return The search builder title for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.searchBuilderTitle">DataTables Reference: columns.searchBuilderTitle</a>
-     */
-    public String getSearchBuilderTitle() {
-        return searchBuilderTitle;
-    }
 
-    /**
-     * @return The search builder type for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.searchBuilderType">DataTables Reference: columns.searchBuilderType</a>
-     */
-    public String getSearchBuilderType() {
-        return searchBuilderType;
-    }
 }

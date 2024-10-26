@@ -31,7 +31,7 @@ public class YadaDataTableConfirmDialog extends YadaFluentBase<YadaDataTableButt
 	 * Set the columns that hold the value for the placeholders
 	 * @param columnName array of column names that refer to columns that hold the value for the placeholders in all the texts. Example: "id", "name"
 	 * @return this instance for method chaining
-     * @see YadaDataTableHTML#dtColumn(String, String)
+     * @see YadaDataTableColumn#dtName(String)
 	 */
 	public YadaDataTableConfirmDialog dtPlaceholderColumnName(String ... columnName) {
 		if (columnName.length > 0) {
