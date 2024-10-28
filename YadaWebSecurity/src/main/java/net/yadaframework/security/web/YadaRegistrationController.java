@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import net.yadaframework.components.YadaNotify;
+import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaRegistrationType;
 import net.yadaframework.exceptions.YadaInternalException;
@@ -34,7 +35,6 @@ import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.security.persistence.repository.YadaRegistrationRequestDao;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 import net.yadaframework.security.persistence.repository.YadaUserProfileDao;
-import net.yadaframework.web.YadaViews;
 import net.yadaframework.web.form.YadaFormPasswordChange;
 
 @Controller
@@ -50,6 +50,7 @@ public class YadaRegistrationController {
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	@Autowired private YadaConfiguration yadaConfiguration;
 	@Autowired private YadaNotify yadaNotify;
+	@Autowired private YadaWebUtil yadaWebUtil;
 
 	// For some reason, autowiring of the "passwordEncoder" created by YadaSecurityConfig doesn't work: bean is not found
 	/*@Autowired */ private PasswordEncoder passwordEncoder = null;
@@ -234,8 +235,12 @@ public class YadaRegistrationController {
 		yadaRegistrationRequest = yadaRegistrationRequestDao.save(yadaRegistrationRequest); // To get id and token
 		boolean emailSent = yadaSecurityEmailService.sendRegistrationConfirmation(yadaRegistrationRequest, null, request, locale);
 		if (!emailSent) {
-			yadaRegistrationRequestDao.delete(yadaRegistrationRequest);
 			log.debug("Registration mail not sent to {}", email);
+			if (!yadaConfiguration.isDevelopmentEnvironment()) {
+				yadaRegistrationRequestDao.delete(yadaRegistrationRequest);
+			} else {
+				log.debug("Registration request still valid in development: copy&paste the registration url");
+			}
 			bindingResult.rejectValue("email", "yada.form.registration.email.failed");
 			return false;
 		}
@@ -315,6 +320,8 @@ public class YadaRegistrationController {
 	 */
 	@RequestMapping("/yadaPasswordResetPost")
 	public String yadaPasswordResetPost(YadaRegistrationRequest yadaRegistrationRequest, BindingResult bindingResult, Locale locale, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) {
+		boolean emailSent = false;
+		String targetView = yadaConfiguration.getPasswordResetSent(locale);
 		// TODO view-related code should be moved to the application controller
 		if (yadaRegistrationRequest==null || yadaRegistrationRequest.getEmail()==null) {
 			return "redirect:/passwordReset";
@@ -322,30 +329,28 @@ public class YadaRegistrationController {
 		// Check if a user actually exists
 		String email = yadaRegistrationRequest.getEmail();
 		YadaUserCredentials existing = yadaUserCredentialsDao.findFirstByUsername(StringUtils.trimToEmpty(email).toLowerCase(Locale.ROOT));
-		if (existing==null) {
-			bindingResult.rejectValue("email", "yada.passwordrecover.username.notfound");
-			return "/passwordReset";
+		if (existing!=null) {
+			yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
+			// Pulisco le vecchie richieste
+			yadaSecurityUtil.registrationRequestCleanup(yadaRegistrationRequest);
+			yadaRegistrationRequest.setPassword("fakefake"); // La metto solo per evitare un errore di validazione al save
+			yadaRegistrationRequest = yadaRegistrationRequestDao.save(yadaRegistrationRequest); // Save here to get id and token
+			emailSent = yadaSecurityEmailService.sendPasswordRecovery(yadaRegistrationRequest, request, locale);
+			if (!emailSent) {
+				yadaRegistrationRequestDao.delete(yadaRegistrationRequest);
+				log.debug("Sending email to {} failed while resetting password", yadaRegistrationRequest.getEmail());
+				yadaNotify.titleKey(redirectAttributes, locale, "yada.email.passwordrecover.title")
+				.ok().messageKey("yada.email.send.failed").add();				
+			}
 		}
-		yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
-		// Pulisco le vecchie richieste
-		yadaSecurityUtil.registrationRequestCleanup(yadaRegistrationRequest);
-		// yadaRegistrationRequest.setPassword("fakefake"); // La metto solo per evitare un errore di validazione al save
-		yadaRegistrationRequest = yadaRegistrationRequestDao.save(yadaRegistrationRequest); // Save here to get id and token
-		boolean emailSent = yadaSecurityEmailService.sendPasswordRecovery(yadaRegistrationRequest, request, locale);
-		if (!emailSent) {
-			yadaRegistrationRequestDao.delete(yadaRegistrationRequest);
-			log.debug("Sending email to {} failed while resetting password", yadaRegistrationRequest.getEmail());
-			bindingResult.rejectValue("email", "yada.email.send.failed");
-			return "/passwordReset";
-		}
-		yadaNotify.titleKey(redirectAttributes, locale, "yada.email.passwordrecover.title")
-			.ok()
-			.messageKey("yada.email.passwordrecover.message")
+		if (emailSent || existing==null) {
+			yadaNotify.titleKey(redirectAttributes, locale, "yada.email.passwordrecover.title")
+			.ok().messageKey("yada.email.passwordrecover.message")
 			// .messageKey("yada.email.passwordrecover.message", yadaRegistrationRequest.getEmail())
 			.add();
-		String address = yadaConfiguration.getPasswordResetSent(locale);
+		}
 
-        return "redirect:" + address;
+        return yadaWebUtil.redirectString(targetView, locale);
 	}
 	
 	/**

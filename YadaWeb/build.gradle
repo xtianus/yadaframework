@@ -11,8 +11,9 @@ buildscript {
 
 plugins {
 	id 'java-library'
-	id 'eclipse-wtp'
 	id 'maven-publish'
+	id 'signing'
+	id 'eclipse-wtp'
 }
 
 group = 'net.yadaframework'

@@ -1,7 +1,62 @@
 =  Json
 :docinfo: shared
 
-Download and upload json data
+Work with json data
+
+== JSON in the HTML
+The easiest way to use json on the page is to have a Java class automatically
+serialized by Thymeleaf in a `<script>` tag:
+
+[source,html]
+----
+<script th:inline="javascript">
+	const myJson = /*[[${myObject}]]*/ ""; #<1>
+</script>
+----
+<1> The Thymeleaf code is inside comments so that the file can be validated as javascript 
+by the editor, but this is optional.
+
+The instance named "myObject" will be recursively converted to json for any getter
+it has, provided that the attribute type can itself be converted.
+
+To ignore an attribute use `@JsonIgnore`
+
+To ignore empty or null attributes use `@JsonInclude(JsonInclude.Include.NON_EMPTY)`
+
+To serialize an attribute that doesn't have a getter, prefix it with `@JsonProperty`
+
+Example:
+
+[source,java]
+----
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public class Product {
+	@JsonIgnore private User user;
+	@JsonProperty private String color = "red";
+	public User getUser() {
+		return user;
+	}
+	// No getter
+	// public String getColor() {
+	//	return color;
+	//}
+}
+
+...
+
+Product product = new ...
+model.addAttribute("myObject", product);
+
+----
+
+The outcome of the previous example would be:
+
+[source,html]
+----
+<script th:inline="javascript">
+	const myJson = { "color" : "red" }
+</script>
+----
 
 == Download json
 

@@ -89,6 +89,7 @@ class YadaInitTask extends YadaProject {
 		File javaComponentsFolder = new File(basePackageFolder, "components");
 		File javaPersistenceFolder = new File(basePackageFolder, "persistence");
 		File javaEntityFolder = new File(javaPersistenceFolder, "entity");
+		File javaRepositoryFolder = new File(javaPersistenceFolder, "repository")
 		javaWebFolder.mkdir();
 		javaCoreFolder.mkdir();
 		javaComponentsFolder.mkdir();
@@ -110,12 +111,15 @@ class YadaInitTask extends YadaProject {
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/sitemap.xml", xmlFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/web.xml", webinfFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/build.properties", webinfFolder);
-		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/home.html", viewsFolder);
+//		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/home.html", viewsFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/errorPage.html", viewsFolder);
 //		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/header.html", viewsFolder);
 //		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/footer.html", viewsFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/modalLogin.html", viewsFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/example_gitignore", project.projectDir);
+		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/gradle.local.properties.example", project.projectDir);
+		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/.gitattributes", project.projectDir);
+		processTemplate(HTMLDIRNAME, "home.html", null, viewsFolder);
 		processTemplate(HTMLDIRNAME, "header.html", null, viewsFolder);
 		processTemplate(HTMLDIRNAME, "footer.html", null, viewsFolder);
 		processTemplate(HTMLDIRNAME, "passwordReset.html", null, viewsFolder);
@@ -168,10 +172,11 @@ class YadaInitTask extends YadaProject {
 			}
 			processTemplate("java/persistence/entity", filename, target, javaEntityFolder);
 		}
-		// List repositoryFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/persistence/repository");
-		// for (filename in repositoryFiles) {
-		// 	processTemplate("java/persistence/repository", filename, filename-".txt", new File(javaPersistenceFolder, "repository"));
-		// }
+		List repositoryFiles = yadaToolsUtil.listFilesInClasspathFolder("$RESOURCECONFIGROOT/$TEMPLATEDIRNAME/java/persistence/repository");
+		for (filename in repositoryFiles) {
+			def target = filename-".txt"; // Remove the .txt
+			processTemplate("java/persistence/repository", filename, target, javaRepositoryFolder);
+		}
 	}
 
 	private copyEnvFiles(env, File envFolderFile, File resourcesSourceFolder, File webAppRootFolder) {

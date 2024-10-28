@@ -86,28 +86,34 @@ public class YadaSession<T extends YadaUserProfile> {
 	}
 
 	/**
-	 * Use depersonate() instead.
-	 * @return
+	 * @deprecated Use {@link #deimpersonate()} instead.
 	 */
-	@Deprecated // Use depersonate()
+	@Deprecated
 	public boolean depersonify() {
 		return depersonate();
+	}
+	
+	/**
+	 * @deprecated Use {@link #deimpersonate()} instead.
+	 */
+	@Deprecated
+	public boolean depersonate() {
+		return deimpersonate(null, null);
+	}
+
+	/**
+	 * @deprecated Use {@link #deimpersonate(HttpServletRequest, HttpServletResponse) instead
+	 */
+	@Deprecated
+	public boolean depersonate(HttpServletRequest request, HttpServletResponse response) {
+		return deimpersonate(request, response);
 	}
 	
 	/**
 	 * Terminates impersonation.
 	 * @return true if the impersonation was active, false if it was not active.
 	 */
-	@Deprecated
-	public boolean depersonate() {
-		return depersonate(null, null);
-	}
-
-	/**
-	 * Terminates impersonation.
-	 * @return true if the impersonation was active, false if it was not active.
-	 */
-	public boolean depersonate(HttpServletRequest request, HttpServletResponse response) { // deIMpersonate?
+	public boolean deimpersonate(HttpServletRequest request, HttpServletResponse response) {
 		if (isImpersonationActive()) {
 			YadaUserCredentials originalCredentials = yadaUserCredentialsDao.findByUserProfileId(impersonatorUserId);
 			yadaUserDetailsService.authenticateAs(originalCredentials, request, response);

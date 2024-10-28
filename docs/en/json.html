@@ -128,6 +128,7 @@ window.onscroll = function() {
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
+<li><a href="#_json_in_the_html">JSON in the HTML</a></li>
 <li><a href="#_download_json">Download json</a></li>
 <li><a href="#_upload_json">Upload json</a></li>
 </ul>
@@ -137,7 +138,79 @@ window.onscroll = function() {
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Download and upload json data</p>
+<p>Work with json data</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_json_in_the_html">JSON in the HTML</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The easiest way to use json on the page is to have a Java class automatically
+serialized by Thymeleaf in a <code>&lt;script&gt;</code> tag:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;script th:inline="javascript"&gt;
+	const myJson = /*[[${myObject}]]*/ ""; <i class="conum" data-value="1"></i><b>(1)</b>
+&lt;/script&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The Thymeleaf code is inside comments so that the file can be validated as javascript
+by the editor, but this is optional.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The instance named "myObject" will be recursively converted to json for any getter
+it has, provided that the attribute type can itself be converted.</p>
+</div>
+<div class="paragraph">
+<p>To ignore an attribute use <code>@JsonIgnore</code></p>
+</div>
+<div class="paragraph">
+<p>To ignore empty or null attributes use <code>@JsonInclude(JsonInclude.Include.NON_EMPTY)</code></p>
+</div>
+<div class="paragraph">
+<p>To serialize an attribute that doesn&#8217;t have a getter, prefix it with <code>@JsonProperty</code></p>
+</div>
+<div class="paragraph">
+<p>Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public class Product {
+	@JsonIgnore private User user;
+	@JsonProperty private String color = "red";
+	public User getUser() {
+		return user;
+	}
+	// No getter
+	// public String getColor() {
+	//	return color;
+	//}
+}
+
+...
+
+Product product = new ...
+model.addAttribute("myObject", product);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The outcome of the previous example would be:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;script th:inline="javascript"&gt;
+	const myJson = { "color" : "red" }
+&lt;/script&gt;</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -190,7 +263,7 @@ window.onscroll = function() {
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 19:40:44 +0200
+Last updated 2024-10-26 15:38:30 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

@@ -120,7 +120,7 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
-	 * @return true if the embedded db should be used instead of the external MySQL
+	 * @return true if the database has been enabled
 	 */
 	public boolean isDatabaseEnabled() {
 		return configuration.getBoolean("config/database/@enabled", true);
@@ -134,10 +134,31 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
-	 * @return the location of the data folder for the embedded database
+	 * @return the port for the embedded database, defaults to 53306
+	 */
+	public int getEmbeddedDatabasePort() {
+		return configuration.getInt("config/database/embedded/@port", 63306);
+	}
+	
+	/**
+	 * @return the absolute location of the root folder for the embedded database
+	 */
+	public String getEmbeddedDatabaseBaseDir() {
+		return configuration.getString("config/database/embedded/baseDir", getBasePathString() + "/embeddedDB/MariaDB");
+	}
+	
+	/**
+	 * @return the absolute location of the data folder for the embedded database
 	 */
 	public String getEmbeddedDatabaseDataDir() {
-		return configuration.getString("config/database/embedded/datadir", "dbembedded");
+		return configuration.getString("config/database/embedded/datadir", getBasePathString() + "/embeddedDB/data");
+	}
+	
+	/**
+	 * @return the absolute location of the tmp folder for the embedded database
+	 */
+	public String getEmbeddedDatabaseTmpDir() {
+		return configuration.getString("config/database/embedded/tmpDir", getBasePathString() + "/embeddedDB/tmp");
 	}
 	
 	/**

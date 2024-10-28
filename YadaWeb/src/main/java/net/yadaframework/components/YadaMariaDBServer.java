@@ -42,25 +42,50 @@ public class YadaMariaDBServer {
 				log.debug("Embedded database is disabled - using installed MySQL");
 				return;
 			}
-			String embeddedDatabaseDataDir = config.getEmbeddedDatabaseDataDir();
-			File embeddedDatabaseDataDirFile = new File(embeddedDatabaseDataDir);
+			port = config.getEmbeddedDatabasePort();
+			String baseDir = config.getEmbeddedDatabaseBaseDir();
+			String dataDir = config.getEmbeddedDatabaseDataDir();
+			String tmpDir = config.getEmbeddedDatabaseTmpDir();
+			File embeddedDatabaseDataDirFile = new File(dataDir);
 			embeddedDatabaseDataDirFile.mkdirs();
-			if (!embeddedDatabaseDataDirFile.canWrite()) {
+			if (!embeddedDatabaseDataDirFile.isDirectory() || !embeddedDatabaseDataDirFile.canWrite()) {
 				throw new YadaSystemException("Can't write embedded database to folder {}", embeddedDatabaseDataDirFile);
 			}
 			DBConfigurationBuilder configBuilder = DBConfigurationBuilder.newBuilder();
-			configBuilder.setPort(0); // Set to 0 for automatic port selection
-			configBuilder.setDataDir(embeddedDatabaseDataDir);
-			db = DB.newEmbeddedDB(configBuilder.build());
-			db.start();
-			port = configBuilder.getPort();
-			log.info("Using embedded MariaDB on localhost:{} with folder {}", port, embeddedDatabaseDataDirFile.getAbsolutePath());
-			log.info("You can login as root with empty password");
+			configBuilder.setBaseDir(baseDir);
+			configBuilder.setDataDir(dataDir);
+			configBuilder.setTmpDir(tmpDir);
+			configBuilder.setPort(port);
+			// If the base folder is empty install the db, otherwise open it
+			String[] filesInBaseDir = new File(baseDir).list();
+			boolean install = filesInBaseDir == null || filesInBaseDir.length == 0; // No files
+			if (install) {
+				db = DB.newEmbeddedDB(configBuilder.build());
+				log.info("Installing new database in {}", baseDir);
+				db.start();
+			} else {
+				db = YadaMariaDB.openEmbeddedDB(configBuilder.build());
+				// Check if database process is running already
+				try {
+					Connection connection = openConnection();
+					connection.close();
+					// Yes it's running.
+					log.debug("Attaching to running database instance");
+				} catch (Exception e) {
+					// Not running so start it
+					log.debug("Starting database process");
+					db.start();
+				}
+			}
+			//
+			log.info("Using embedded MariaDB on localhost:{} with data folder {}", port, embeddedDatabaseDataDirFile.getAbsolutePath());
+			log.info("Database login as root with empty password");
 			// Initialize database when not done already
 			ImmutableHierarchicalConfiguration datasourceConfig = config.getConfiguration().immutableConfigurationAt("config/database/datasource");
 			String configuredJdbcUrl = datasourceConfig.getString("jdbcUrl");
 			Connection connection = ensureSchema(configuredJdbcUrl);
 			if (connection!=null) {
+				// Schema has been created
 				// String configuredUser = datasourceConfig.getString("username");
 				// String configuredPassword = datasourceConfig.getString("password");
 				// createUser(configuredUser, configuredPassword, connection);
@@ -106,10 +131,8 @@ public class YadaMariaDBServer {
 		if (matcher.find()) {
 			configuredSchemaName = matcher.group(1);
 		}
+		Connection connection = openConnection();
 		// Creating schema
-		String jdbcUrl = db.getConfiguration().getURL("test"); // Connects to the default schema
-		jdbcUrl = jdbcUrl.replaceAll("^jdbc:mariadb:", "jdbc:mysql:"); // Use mysql driver
-		Connection connection = DriverManager.getConnection(jdbcUrl, "root", ""); // Connecting with default root privileges
 		try (Statement stmt = connection.createStatement()) {		    
 		    stmt.executeUpdate("CREATE DATABASE " + configuredSchemaName);
 		    log.debug("Database schema {} created", configuredSchemaName);
@@ -118,6 +141,13 @@ public class YadaMariaDBServer {
 			connection.close();
 			return null;
 		}
+		return connection;
+	}
+	
+	private Connection openConnection() throws SQLException {
+		String jdbcUrl = db.getConfiguration().getURL("");
+		jdbcUrl = jdbcUrl.replaceAll("^jdbc:mariadb:", "jdbc:mysql:"); // Use mysql driver
+		Connection connection = DriverManager.getConnection(jdbcUrl, "root", ""); // Connecting with default root privileges
 		return connection;
 	}
 	

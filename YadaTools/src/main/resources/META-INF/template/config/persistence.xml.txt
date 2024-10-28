@@ -33,6 +33,8 @@
   		<class>net.yadaframework.commerce.persistence.entity.YadaCart</class>
   		<class>net.yadaframework.commerce.persistence.entity.YadaCartItem</class>
   		<class>net.yadaframework.commerce.persistence.entity.YadaCommerceArticle</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaOrder</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaOrderItem</class>
   		<class>net.yadaframework.commerce.persistence.entity.YadaTransaction</class>
       	<% out.print (yadaWebCommerceFound?"":"-->"); %>
  		 
@@ -42,8 +44,8 @@
 		    <property name="jakarta.persistence.jdbc.user" value="${acronym}user$env"/>
 		    <property name="jakarta.persistence.jdbc.password" value="$dbpwd"/>
 		    <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"/>
-		    -->
 		    <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
+ 		    -->
          	<property name="jakarta.persistence.schema-generation.scripts.action" value="create"/>
 			<property name="jakarta.persistence.schema-generation.scripts.create-target" value="schema/${acronym}.sql"/>
       		 

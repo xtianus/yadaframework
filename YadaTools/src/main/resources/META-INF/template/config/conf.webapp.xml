@@ -5,16 +5,17 @@
 		<appName>$projectName</appName>
 		<version>0.1 alpha EXAMPLE</version>
 		<build>${"\$"}{build}</build>
-		<date>@@RELEASEDATE_PLACEHOLDER@@</date> <!-- Injected by gradle -->
 	</info>
 	<paths>
 		<serverAddress>http://$env.EXAMPLE.com/</serverAddress>
 		<basePath>$basePath/$acronym$env</basePath>
+		<% if (env=="prod") { /* TODO remove the "prod" string and use envs[prodIndex] */ %>
 		<!-- The name is the folder name inside basePath -->
 		<!-- The url can either be an absolute url like "/contents", or a full url like "http://cdn.com/some/contents" -->
 		<contentDir name="contents" url="/contents"></contentDir>
 		<uploadsDir>uploads</uploadsDir>
 		<errorPageForward>/errorPage</errorPageForward>
+		<%}%>
 	</paths>
 	<!-- Sets the Spring max file and request size, except tomcat maxPostSize 
 		that should be set in server.xml or in the below 'maxPostSize' config when embedded -->
@@ -45,6 +46,7 @@
 	
 	<email>
 		<enabled>true</enabled>
+		<% if (env=="prod") { /* TODO remove the "prod" string and use envs[prodIndex] */ %>
 		<from>
 			<address>noreply@EXAMPLE.com</address>
 			<name>EXAMPLE SENDER</name>
@@ -69,10 +71,11 @@
 			<!-- Set this option to your mail server if you trust it and don't care checking the certificate validity, e.g. it is on your localhost -->
 			<properties>mail.smtp.ssl.trust=smtp.EXAMPLE.com</properties>
 		</smtpserver>
+		<%}%>
 		<!-- Remove this list to enable email to everyone -->
-		<validEmail>EXAMPLE@EXAMPLE.com</validEmail>
+		<validEmail>EXAMPLE1@EXAMPLE.com</validEmail>
 		<validEmail>EXAMPLE2@EXAMPLE.com</validEmail>
-		<validEmail>EXAMPLE3@EXAMPLE.net</validEmail>
+		<validEmail>EXAMPLE3@EXAMPLE.com</validEmail>
 	</email>
 
 	<database enabled="true">
@@ -87,7 +90,7 @@
 		<!-- Add any number of entityPackage tags here -->
 		<entityPackage>${basePackage}.persistence.entity</entityPackage>
 		<%}%>
-		<databaseMigrationAtStartup>false</databaseMigrationAtStartup>
+		<databaseMigrationAtStartup>true</databaseMigrationAtStartup>
 		<!-- Datasource for embedded Tomcat -->
 		<datasource>
 			<jdbcUrl>jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</jdbcUrl>
@@ -108,17 +111,6 @@
 			<statementCacheMaxSize>200</statementCacheMaxSize>
 		</datasource>
 	</database>
-
-	<social>
-		<facebook>
-			<type>0</type>
-			<appId>EXAMPLE</appId>
-			<secret>EXAMPLE</secret>
-		</facebook>
-		<google>
-			<type>1</type>
-		</google>
-	</social>
 
 	<setup>
 		<users>
@@ -145,24 +137,16 @@
 		<failedAttemptsLockoutMinutes>10</failedAttemptsLockoutMinutes>
 		<autologinExpirationHours>48</autologinExpirationHours>
 		<roles>
-			<!-- ATTENZIONE: l'ID e la KEY vanno stabiliti all'inizio e MAI PIU' CAMBIATI perchè vanno nel DB.
-					Sono stati scelti valori non consecutivi per le ID in modo da poter eventualmente inserire valori in mezzo, 
-					anche se ciò non ha effettivamente senso ma non si sa mai che si voglia un giorno ordinare in base all'ID. -->
+			<!-- ATTENTION: the ID and the KEY must be set at the start and NEVER CHANGED again because they go into the DB.
+					Non-consecutive values have been chosen for the IDs to eventually allow insertion of values in between,
+					even though this doesn't actually make sense, but you never know if one day you want to sort by ID. -->
 			<role>
 				<id>8</id>
 				<key>ADMIN</key>
-				<!-- ATTENZIONE: non usare name e description come fatti qui, ma metterli in messages.properties
-				<name>Admin</name>
-				<description>Gestione infrastruttura tecnica</description>
-				 -->
 			</role>
 			<role>
 				<id>2</id>
 				<key>USER</key>
-				<!-- 
-				<name>Utente Verificato</name>
-				<description>Utente la cui email è stata verificata</description>
-				 -->
 			</role>
 		</roles>
 	</security>

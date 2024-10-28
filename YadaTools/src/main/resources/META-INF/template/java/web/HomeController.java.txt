@@ -106,5 +106,15 @@ public class HomeController {
 			return YadaViews.AJAX_SUCCESS; // Do nothing
 		}
 	}
+	
+	/**
+	 * Open errorPage.html in case of exception, only when configured with 
+	 * &lt;errorPageForward>/errorPage&lt;/errorPageForward>
+	 */
+	@RequestMapping("/errorPage")
+	public String errorPage(Model model, Locale locale) {
+		return "/errorPage";
+	}
+	
 
 }
