@@ -135,10 +135,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	public boolean isCurrentRole(String roleString) {
 		List<Integer> roles = getLoggedInUserRoles();
 		if (roles!=null) {
-			Long idToCheck = getCurrentUserProfileId();
-			if (idToCheck!=null) {
-				return roles.contains(config.getRoleId(roleString));
-			}
+			return roles.contains(config.getRoleId(roleString));
 		}
 		return false;
 	}
