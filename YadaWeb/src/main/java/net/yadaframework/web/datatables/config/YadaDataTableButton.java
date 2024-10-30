@@ -14,7 +14,7 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 	@JsonIgnore private YadaConfiguration config = (YadaConfiguration) YadaUtil.getBean("config");
 	@JsonIgnore private YadaWebUtil yadaWebUtil = YadaWebUtil.INSTANCE;

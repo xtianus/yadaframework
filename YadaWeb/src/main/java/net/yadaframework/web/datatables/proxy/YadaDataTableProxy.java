@@ -2,7 +2,10 @@ package net.yadaframework.web.datatables.proxy;
 
 import java.util.Locale;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import net.yadaframework.web.datatables.YadaDataTable;
+import net.yadaframework.web.datatables.YadaDataTableConfigurer;
 import net.yadaframework.web.datatables.config.YadaDataTableHTML;
 import net.yadaframework.web.datatables.options.YadaDTOptions;
 
@@ -16,6 +19,21 @@ public class YadaDataTableProxy extends YadaDataTable {
 		super(id, locale);
 	}
 	
+	/**
+	 * Set the configurer used to create this instance, for internal use.
+	 * @param configurer
+	 */
+	public void setConfigurer(YadaDataTableConfigurer configurer) {
+		this.configurer = configurer;
+	}
+
+	/**
+	 * Gets the configurer used to create this instance, for internal use.
+	 */
+	public Object getConfigurer() {
+		return configurer;
+	}
+
 	public YadaDTOptions getOptions() {
 		// We use the trick of using the first getter to make sure that prepareConfiguration() is called before serialization
 		prepareConfiguration();
@@ -26,6 +44,7 @@ public class YadaDataTableProxy extends YadaDataTable {
 		return id;
 	}
 	
+	@JsonIgnore
 	public YadaDataTableHTML getHTML() {
 		return yadaDataTableHTML;
 	}

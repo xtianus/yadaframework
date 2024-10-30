@@ -9,7 +9,7 @@ import net.yadaframework.core.YadaFluentBase;
  *
  * @see <a href="https://datatables.net/reference/option/responsive">DataTables Responsive Reference</a>
  */
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDTResponsive extends YadaFluentBase<YadaDTOptions> {
     private String breakpoints;
     private String orthogonal;

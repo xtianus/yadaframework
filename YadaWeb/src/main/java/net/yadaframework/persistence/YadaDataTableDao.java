@@ -379,7 +379,11 @@ public class YadaDataTableDao {
 		yadaSql.setParameter("globalSearchNumber", globalSearchNumber);
 
     	Query query = yadaSql.query(em);
-		query.setMaxResults(yadaDatatablesRequest.getLength());
+    	// Set the page size. When paging is disabled on the FE, limit is -1
+    	int limit = yadaDatatablesRequest.getLength();
+    	if (limit>-1) {
+	    	query.setMaxResults(limit);
+    	}
 		query.setFirstResult(yadaDatatablesRequest.getStart());
     	@SuppressWarnings("unchecked")
 		List<targetClass> result = query.getResultList();

@@ -181,13 +181,11 @@ public class UserProfileController {
 		return "redirect:/";
 	}
 
-	// Impersonamento
 	@RequestMapping(value="/impersonate")
 	public String impersonate(String id, RedirectAttributes redirectAttributes, Locale locale){
 		return impersonate(Long.parseLong(id), redirectAttributes, locale);
 	}
 
-	// Impersonamento
 	@RequestMapping("/impersonate/{id}")
 	public String impersonate(@PathVariable long id, RedirectAttributes redirectAttributes, Locale locale) {
 		UserProfile theUser = userProfileDao.find(id);
@@ -210,28 +208,29 @@ public class UserProfileController {
 				.dtHTMLObj()
 					.dtCssClasses("yadaNoLoader")
 					.dtColumnObj("ID", "id").back()
-					// Example: .dtColumnObj("Title", "title."+locale.getLanguage()).back()
+					// Example of localized text: .dtColumnObj("Title", "title."+locale.getLanguage()).back()
 					.dtColumnObj("Enabled", "userCredentials.enabled").back()
 					.dtColumnObj("Nickname", "userCredentials.nickname").back()
-					.dtColumnObj("Email", "userCredentials.username").dtName("email").dtOrderAsc(0).back()
-					.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin").dtOrderDesc(1).back()
+					.dtColumnObj("Email", "userCredentials.username").dtName("userCredentials.username").dtOrderAsc().back()
+					.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin")/*.dtOrderDesc(1)*/.back()
 					.dtColumnCheckbox("select.allnone")
-					.dtColumnCommands("Commands")
+					// .dtColumnCommands("Commands")
 					.dtButtonObj("Add").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-plus'></i>").dtGlobal().dtRole("ADMIN").back()
-					.dtButtonObj("Edit").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId")
-						.dtConfirmDialogObj()
-							.dtTitle("Edit User")
-							.dtMessageSingular("Are you sure you want to edit user '{0}'?")
-							.dtMessagePlural("Are you sure you want to edit {0} users?")
-							.dtConfirmButton("Confirm").dtAbortButton("Cancel")
-							.dtPlaceholderColumnName("email")
-							.back()
-						.back()
+//					.dtButtonObj("Edit").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId")
+//						.dtConfirmDialogObj()
+//							.dtTitle("Edit User")
+//							.dtMessageSingular("Are you sure you want to edit user '{0}'?")
+//							.dtMessagePlural("Are you sure you want to edit {0} users?")
+//							.dtConfirmButton("Confirm").dtAbortButton("Cancel")
+//							.dtPlaceholderColumnName("email")
+//							.back()
+//						.back()
 					.back()
 				.dtOptionsObj()
 					.dtResponsive(true)
 					.dtPageLength(10)
-					.dtPaging(false);
+					.dtColumnDefsObj().dtTargetsName("userCredentials.username").dtAriaTitle("This is the user email").back()
+					;
 		});
 		model.addAttribute("yadaDataTable", yadaDataTable);
 		return "/dashboard/users";

@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDataTableConfirmDialog extends YadaFluentBase<YadaDataTableButton> {
     private String confirmTitle; // Title for the confirmation dialog
     private String confirmOneMessage; // Message for confirming a single action

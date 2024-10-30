@@ -11,27 +11,28 @@ import net.yadaframework.core.YadaFluentBase;
  * Defines a column in DataTables.
  * @see <a href="https://datatables.net/reference/option/columns">DataTables Reference: columns</a>
  */
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
     protected String ariaTitle;
     protected String cellType;
     protected String className;
     protected String contentPadding;
     protected String createdCell;
+    // data can be "null" in the json
     protected String data;
     protected String defaultContent;
     protected String editField;
     protected String footer;
     protected String name;
-    protected boolean orderable;
-    protected List<Integer> orderData = new ArrayList<Integer>();
+    protected Boolean orderable;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY) protected List<Integer> orderData = new ArrayList<Integer>();
     protected String orderDataType;
     protected List<String> orderSequence;
     protected String render;
-    protected boolean searchable;
+    protected Boolean searchable;
     protected String title;
     protected String type;
-    protected boolean visible;
+    protected Boolean visible;
     protected String width;
     protected Integer responsivePriority;
     protected YadaDTOptionSearchBuilder searchBuilder;
@@ -59,13 +60,13 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
 //        return searchable;
 //    }
 
-    /**
-     * @return Whether the column is visible.
-     * @see <a href="https://datatables.net/reference/option/columns.visible">DataTables Reference: columns.visible</a>
-     */
-    public boolean dtIsVisible() {
-        return visible;
-    }
+//    /**
+//     * @return Whether the column is visible.
+//     * @see <a href="https://datatables.net/reference/option/columns.visible">DataTables Reference: columns.visible</a>
+//     */
+//    public boolean dtIsVisible() {
+//        return visible;
+//    }
 
     // Fluent Setters
     /**
@@ -321,6 +322,5 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
     	this.searchBuilderType = searchBuilderType;
     	return this;
     }
-
 
 }

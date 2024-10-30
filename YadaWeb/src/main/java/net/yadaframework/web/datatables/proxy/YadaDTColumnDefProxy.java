@@ -2,9 +2,7 @@ package net.yadaframework.web.datatables.proxy;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
-import net.yadaframework.web.datatables.options.YadaDTColumns;
+import net.yadaframework.web.datatables.options.YadaDTColumnDef;
 import net.yadaframework.web.datatables.options.YadaDTOptionSearchBuilder;
 import net.yadaframework.web.datatables.options.YadaDTOptions;
 
@@ -12,27 +10,18 @@ import net.yadaframework.web.datatables.options.YadaDTOptions;
  * This class implements the methods needed for <b>internal use</b> 
  * so that they don't pollute the fluent interface.
  */
-public class YadaDTColumnsProxy extends YadaDTColumns {
+public class YadaDTColumnDefProxy extends YadaDTColumnDef {
 
-	public YadaDTColumnsProxy(YadaDTOptions parent) {
+	public YadaDTColumnDefProxy(YadaDTOptions parent) {
 		super(parent);
 	}
 	
-	// Used by YadaDataTableColumn
-	public YadaDTOptions getParent() {
-		return parent;
+	public Object getTargets() {
+		return stringTarget != null ? stringTarget : intTarget;
 	}
 	
-    /**
-     * @return The data source for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.data">DataTables Reference: columns.data</a>
-     */
-	// data can be null in the json
-    @JsonInclude(JsonInclude.Include.ALWAYS) 
-    public String getData() {
-        return data;
-    }
-
+	// Note: "data" can't be returned when null otherwise it overwrites the column definition with null
+	
     // Getters
     /**
      * @return The ARIA label for the column for accessibility purposes.

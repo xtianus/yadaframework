@@ -1,11 +1,9 @@
 package net.yadaframework.web.datatables.proxy;
 
 import java.util.List;
-import java.util.Map;
 
 import net.yadaframework.web.datatables.YadaDataTable;
 import net.yadaframework.web.datatables.config.YadaDataTableButton;
-import net.yadaframework.web.datatables.config.YadaDataTableColumn;
 import net.yadaframework.web.datatables.config.YadaDataTableHTML;
 
 /**
@@ -37,7 +35,7 @@ public class YadaDataTableHTMLProxy extends YadaDataTableHTML {
 		return selectCheckboxTitle;
 	}
 
-	public List<YadaDataTableColumn> getColumns() {
+	public List<YadaDataTableColumnProxy> getColumns() {
 		return columns;
 	}
 

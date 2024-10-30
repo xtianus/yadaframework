@@ -25,7 +25,7 @@ public class YadaDataTableFactory {
 	// private Map<String, YadaDataTable> instancePool = new ConcurrentHashMap<>(); // id --> instance
 	
 	// id --> (locale --> instance)
-	private YadaLookupTableThree<String, Locale, YadaDataTable> instancePool = new YadaLookupTableThree<String, Locale, YadaDataTable>();
+	private YadaLookupTableThree<String, Locale, YadaDataTableProxy> instancePool = new YadaLookupTableThree<String, Locale, YadaDataTableProxy>();
 	
 	/**
 	 * Get or create a YadaDataTable instance identified by id.
@@ -43,11 +43,22 @@ public class YadaDataTableFactory {
 				locale = Locale.getDefault(); // Fall back to platform default
 			}
 		}
-		YadaDataTable result = instancePool.get(id, locale);
+		YadaDataTableProxy result = instancePool.get(id, locale);
+		
+		// This is useful when the configurer is edited while the server is running and we don't want to restart to get the new singleton
+		if (config.isDevelopmentEnvironment() && result!=null) {
+			// Check that the configurer has not been changed in the meantime
+			if (configurer.hashCode() != result.getConfigurer().hashCode()) {
+				log.warn("YadaDataTableConfigurer has changed for id '{}' locale '{}'", id, locale);
+				result = null; // The configurer has changed so create a new singleton
+			}
+		}
+		
 		if (result==null) {
 			log.debug("Creating new YadaDataTable instance for id '{}' locale '{}'", id, locale);
 			result = new YadaDataTableProxy(id, locale);
 			configurer.configure(result);
+			result.setConfigurer(configurer); // Used in development to check for changes
 			instancePool.put(id, locale, result);
 		}
 		return result;

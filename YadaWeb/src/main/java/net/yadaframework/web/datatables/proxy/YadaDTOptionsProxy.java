@@ -14,6 +14,7 @@ import net.yadaframework.web.datatables.options.YadaDTFixedHeader;
 import net.yadaframework.web.datatables.options.YadaDTKeys;
 import net.yadaframework.web.datatables.options.YadaDTLanguage;
 import net.yadaframework.web.datatables.options.YadaDTOptions;
+import net.yadaframework.web.datatables.options.YadaDTOrder;
 import net.yadaframework.web.datatables.options.YadaDTResponsive;
 import net.yadaframework.web.datatables.options.YadaDTRowGroup;
 import net.yadaframework.web.datatables.options.YadaDTRowReorder;
@@ -43,7 +44,7 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
         if (columns == null) {
             columns = new ArrayList<>();
         }
-		YadaDTColumns newColumn = new YadaDTColumns(this);
+		YadaDTColumns newColumn = new YadaDTColumnsProxy(this);
 		columns.add(pos, newColumn);
 		return newColumn;
 	}
@@ -185,7 +186,7 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
 		return lengthMenu;
 	}
 
-	public List<Object> getOrder() {
+	public List<YadaDTOrder> getOrder() {
 		return order;
 	}
 
@@ -209,7 +210,7 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
 		return orderMulti;
 	}
 
-	public String getOrdering() {
+	public Boolean getOrdering() {
 		return ordering;
 	}
 

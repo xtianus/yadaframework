@@ -6,19 +6,19 @@ import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.web.datatables.options.YadaDTColumns;
 import net.yadaframework.web.datatables.proxy.YadaDTColumnsProxy;
+import net.yadaframework.web.datatables.proxy.YadaDataTableHTMLProxy;
 
 /**
  * Configuration for a column of a DataTables table.
  * @see YadaDTColumns for DataTables column options
  */
 public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
-	private String headerText;
-	private String name; // ID for this column
-	private YadaDTColumnsProxy yadaDTColumns;
+	private static final String DEFAULT_CONTENT = "---"; // Default column content when no data is received from BE, it prevents a popup error by DataTables
+	protected String headerText;
+	protected YadaDTColumnsProxy yadaDTColumns;
 	
-	// Package visibility
-	int positionInTable;
-	Boolean orderAsc; // false for desc
+	protected int positionInTable;
+	protected Boolean orderAsc; // false for desc
 
 	/**
 	 * Make a new column configuration
@@ -26,12 +26,24 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 	 * @param data the json path of the result in the ajax response. See {@link YadaDataTableHTML#dtColumnObj}
 	 * @param parent
 	 */
-	public YadaDataTableColumn(String headerText, String data, YadaDataTableHTML parent) {
+	protected YadaDataTableColumn(String headerText, String data, YadaDataTableHTML parent) {
 		super(parent);
 		this.headerText = StringUtils.trimToEmpty(headerText);
+// I wanted to expose the DataTables Options but it's too much effort to implement (needs a wrapper that overrides the parent)		
+//		// Create a new columns option with a normal YadaDTOptions parent
+//		YadaDTColumnsProxy yadaDTColumnsProxy = (YadaDTColumnsProxy) parent.options.dtColumnsObj();
+//		// Set it inside a wrapper with an overridden parent
+//		// so that the parent returns YadaDataTableHTML instead of YadaDTOptions when used in YadaDataTableColumn
+//		yadaDTColumns = new YadaDTColumnsWrapper(yadaDTColumnsProxy, (YadaDataTableHTMLProxy)parent);
 		yadaDTColumns = (YadaDTColumnsProxy) parent.options.dtColumnsObj();
 		yadaDTColumns.dtOrderable(true).dtSearchable(true).dtData(data);
+		
 	}
+	
+// I wanted to expose the DataTables Options but it's too much effort to implement (needs a wrapper that overrides the parent)
+//	public YadaDTColumnsWrapper dt() {
+//		return yadaDTColumns;
+//	}
 	
 	/**
 	 * Makes the column not orderable
@@ -53,6 +65,7 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 	
 	/**
 	 * Set a name on this column for database operations and cross reference.
+	 * Be careful that it matches the Entity attribute name when "data" is not a function. 
 	 * Examples: "id", "useCredentials.username"
 	 * When unset, the "data" option value is used.
 	 * @param name the name of the column, can be null, must be unique otherwise
@@ -60,18 +73,8 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 	 * @see YadaDataTableConfirmDialog#dtPlaceholderColumnName(String...)
 	 */
 	public YadaDataTableColumn dtName(String name) {
-		this.name = name;
 		yadaDTColumns.dtName(name);
 		return this;
-	}
-
-	public String getHeaderText() {
-		return headerText;
-	}
-
-	// Package visibility
-	String getName() {
-		return name;
 	}
 
 	/**
@@ -80,6 +83,7 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 	 * @see YadaDataTableColumn#dtOrderAsc(int) for multiple column sorting
 	 */
 	public YadaDataTableColumn dtOrderAsc() {
+		// dtOrderData is set by YadaDataTableHTML
 		orderAsc = true;
 		addOrder(0); 
 		return this;
@@ -124,24 +128,31 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 		}
 		parent.orderingMap.put(precedence, this); 
 	}
-
-	// Package visibility
-	void setPositionInTable(int position) {
-		this.positionInTable = position;
+	
+	protected String getName() {
+		return yadaDTColumns.getName();
+	}
+	
+	private String getData() {
+		return yadaDTColumns.getData();
 	}
 
 	@Override
 	public YadaDataTableHTML back() {
-		// When name is not set, use data
-		if (this.name==null) {
-			this.name = this.yadaDTColumns.getData();
-		}
 		// Check that name has not been repeated
-		if (this.name!=null) {
-			boolean duplicateName = parent.columns.stream().anyMatch(column -> column!=this && name.equals(column.getName()));
+		if (getName()!=null) {
+			boolean duplicateName = parent.columns.stream().anyMatch(column -> column!=this && this.getName().equals(column.getName()));
 			if (duplicateName) {
-				throw new YadaInvalidUsageException("Duplicate column name: '{}'", name);
+				throw new YadaInvalidUsageException("Duplicate column name: '{}'", getName());
 			}
+		}
+		// When name is not set, use data
+		if (getName()==null) {
+			this.dtName(getData());
+		}
+		// Set the default content
+		if (this.yadaDTColumns.getDefaultContent()==null) {
+			this.yadaDTColumns.dtDefaultContent(DEFAULT_CONTENT);
 		}
 		return super.back();
 	}

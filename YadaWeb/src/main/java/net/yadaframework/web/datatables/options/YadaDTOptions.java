@@ -6,9 +6,10 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import net.yadaframework.components.YadaUtil;
-import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaFluentBase;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.web.datatables.YadaDataTable;
+import net.yadaframework.web.datatables.proxy.YadaDTColumnDefProxy;
 import net.yadaframework.web.datatables.proxy.YadaDTColumnsProxy;
 
 /**
@@ -17,7 +18,7 @@ import net.yadaframework.web.datatables.proxy.YadaDTColumnsProxy;
  * @see <a href="https://datatables.net/reference/option/">DataTables Reference</a>
  */
 @SuppressWarnings("unused")
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     protected String dataTableExtErrMode;
     // There is no ajax option because it does not make sense in Yada Framework.
@@ -55,13 +56,13 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     protected String layout;
     protected Boolean lengthChange;
     protected List<Object> lengthMenu;
-    protected List<Object> order;
+    protected List<YadaDTOrder> order;
     protected Boolean orderCellsTop;
     protected Boolean orderClasses;
     protected Boolean orderDescReverse;
     protected Object orderFixed;
     protected Boolean orderMulti;
-    protected String ordering;
+    protected Boolean ordering;
     protected Integer pageLength;
     protected Boolean paging;
     protected String pagingType;
@@ -428,14 +429,30 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     /**
      * Sets the `ordering` option.
      * 
-     * @param ordering define the initial sorting of the table
+     * @param ordering false to disable the initial sorting of the table
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/ordering">ordering</a>
      */
-    public YadaDTOptions dtOrdering(String ordering) {
+    public YadaDTOptions dtOrdering(boolean ordering) {
         this.ordering = ordering;
         return this;
     }
+    
+    /**
+     * Sets the `order` option. Can be called multiple times to set multiple orders.
+     * @param idx column index
+     * @param dir "asc" or "desc"
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/type/DataTables.Order">order</a>
+     */
+    public YadaDTOptions dtOrder(int idx, String dir) {
+        if (this.order == null) {
+            this.order = new ArrayList<>();
+        }
+        YadaDTOrder orderObj = new YadaDTOrder(idx, dir);
+        this.order.add(orderObj);
+        return this;
+	}
 
     /**
      * Sets the `pageLength` option that tells how many rows should be visible.
@@ -446,6 +463,10 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
      */
     public YadaDTOptions dtPageLength(Integer pageLength) {
         this.pageLength = pageLength;
+        if (pageLength != null && Boolean.FALSE.equals(this.paging)) {
+        	throw new YadaInvalidUsageException("pageLength must be null when paging is false");
+        }
+        dtPaging(Boolean.TRUE); // Force paging, just to be safe
         return this;
     }
 
@@ -458,6 +479,9 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
      */
     public YadaDTOptions dtPaging(Boolean paging) {
         this.paging = paging;
+        if (Boolean.FALSE.equals(paging) && this.pageLength != null) {
+	        throw new YadaInvalidUsageException("paging must be true when pageLength is not null");
+        }
         return this;
     }
 
@@ -867,7 +891,7 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
         if (this.columnDefs == null) {
             this.columnDefs = new ArrayList<>();
         }
-        YadaDTColumnDef newColumnDef = new YadaDTColumnDef(this);
+        YadaDTColumnDef newColumnDef = new YadaDTColumnDefProxy(this);
         this.columnDefs.add(newColumnDef);
         return newColumnDef;
     }

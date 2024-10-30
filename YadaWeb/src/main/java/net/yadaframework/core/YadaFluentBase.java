@@ -1,11 +1,13 @@
 package net.yadaframework.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Base class for fluent interface implementations that allows nesting
  * @param <T>
  */
 public abstract class YadaFluentBase<T> {
-	protected final T parent;
+	@JsonIgnore protected final T parent;
 
     public YadaFluentBase(T parent) {
         this.parent = parent;

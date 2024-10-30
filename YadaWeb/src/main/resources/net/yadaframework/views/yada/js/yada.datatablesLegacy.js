@@ -105,6 +105,7 @@
 		if (totColumns!=neededColumns) {
 			yada.showErrorModal("Internal Error", "Table '" + $table[0].id + "' has " + totColumns + " columns but " + neededColumns + " where expected - (ignored)");
 		}
+		// Hidden "control" column (what for?)
 		var columnDef = [
 		    {
 		    	data: null,

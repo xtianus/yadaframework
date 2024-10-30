@@ -11,7 +11,7 @@
 	<h1>Application Error</h1>
 	<br>
 	<div th:if="${yadaHttpStatus!=null}">[[${yadaHttpStatus}]]: [[${yadaHttpMessage}]]</div>
-	<div th:if="${yadaExceptionMessage!=null}">[[${yadaExceptionMessage}]] for URL [[${yadaExceptionUrl}]]</div>
+	<div th:if="${yadaExceptionMessage!=null}">[[${yadaExceptionMessage}]], at [[${yadaExceptionUrl}]]</div>
 	<br>
 	<a th:href="@{/}">Home</a>
 </main>

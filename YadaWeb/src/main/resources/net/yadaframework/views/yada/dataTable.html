@@ -16,11 +16,11 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 	<table th:id="${yadaDataTable.id}" class="table" th:classappend="${html.cssClasses}?:'table-striped no-wrap'">
 		<thead>
 			<tr>
-				<th th:if="${html.selectCheckbox}">
-					<input type="checkbox" class="yada_columnSelector" th:title="#{${html.selectCheckboxTitle}}">
+				<th th:if="${html.selectCheckbox}" th:with="title=${html.selectCheckboxTitle}">
+					<input type="checkbox" class="yada_columnSelector" th:title="title?#{title}">
 				</th>
 				<th th:each="column : ${html.columns}" th:text="#{${column.headerText}}">Name</th>
-				<th th:if="${html.commandsTitle}" th:text="#{${html.commandsTitle}}">Commands</th>
+				<th th:if="${!#strings.isEmpty(html.commandsTitle)}" th:with="title=${html.commandsTitle}" th:text="title?#{title}">Commands</th>
 			</tr>
 		</thead>
 		<tfoot th:if="${html.showFooter}">
@@ -55,23 +55,22 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 	<!--/* Initialization code */-->
 	<script th:inline="javascript">
 		yada.ready(function(){
-			const dataTableJson = /*[[${yadaDataTable}]]*/ "dummy";
+			const dataTableId = /*[[${yadaDataTable.id}]]*/ "dummy";
+			const dataTableOptionsJson = /*[[${yadaDataTable.options}]]*/ "dummy";
 			const ajaxUrl = /*[[@{__${yadaDataTable.ajaxUrl}__}]]*/ "dummy";
-			dataTableJson.options.ajax = function(data, callback, settings){
-				debugger;
-				yada.dtAjaxCaller(data, callback, settings, ajaxUrl);
+			dataTableOptionsJson.ajax = function(data, callback, settings){
+				yada.dtAjaxCaller(data, callback, settings, dataTableId, ajaxUrl);
 			}
-			dataTableJson.options.ajax = ajaxUrl;
 			// Preprocessor can override, add, delete configured options
 			const preprocessorName = /*[[${preprocessor}]]*/ ""; // Becomes 'null' when missing
 			const preprocessor = window[preprocessorName];
 			if (typeof preprocessor === "function") {
-			    preprocessor(dataTableJson);
+			    preprocessor(dataTableOptionsJson);
 			}
-			const dataTableId = dataTableJson.id;
 			// TODO remove userLanguage
+			debugger;
 			const userLanguage = /*[[${#locale.language}]]*/ "dummy";
-			window[dataTableId] = yada.dataTable(dataTableJson, userLanguage);
+			window[dataTableId] = yada.dataTable(dataTableId, dataTableOptionsJson);
 		});
 	
 	</script>

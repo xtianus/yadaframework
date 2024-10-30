@@ -10,24 +10,27 @@
 
 <th:block th:replace="~{/header :: body}"/>
 
+<a th:href="@{/dashboard}">Back to Dashboard</a>
+<br>
+
 <main class="container">
 	<h1>Users</h1>
 	
-	<yada:datatable id="userTable" yada:configuration="${yadaDataTable}" yada:preprocessor="configHandler">
+	<yada:datatable id="userTable" yada:configuration="${yadaDataTable}" yada:preprocessor="userTablePreprocessor">
 	</yada:datatable>
 	
 </main>
 
 <script>
-function configHandler(dataTableJson) {
-	dataTableJson.options.responsive = true; // Just an example
-	console.log("Config handler called for " + dataTableJson.id);
+function userTablePreprocessor(dataTableOptionsJson) {
+	dataTableOptionsJson.responsive = true; // Just an example
+	console.log("Config handler called ");
 }
 </script>
 
 <th:block th:replace="~{/footer :: body}"/>
 
-<script th:src="@{/static/datatables-2.1.8/datatables.min.js}"></script>
+<script th:src="@{|/static/datatables-2.1.8/datatables${@config.min}.js|}"></script>
 <script th:if="${@config.developmentEnvironment}" th:src="@{/yadares/js/yada.datatables.js}"></script>
 
 </body>

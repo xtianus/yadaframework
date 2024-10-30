@@ -1,70 +1,84 @@
 
 package net.yadaframework.web.datatables.options;
 
-import net.yadaframework.core.YadaFluentBase;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 /**
  * Represents column definition configuration for DataTables.
  * 
  * @see <a href="https://datatables.net/reference/option/columnDefs">ColumnDefs</a>
  */
-@Deprecated // Not needed when all columns must be set anyway
-public class YadaDTColumnDef extends YadaFluentBase<YadaDTOptions> {
-    private Integer targets;
-    private Boolean visible;
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class YadaDTColumnDef extends YadaDTColumns {
+    protected String stringTarget;
+    protected int[] intTarget;
 
-    YadaDTColumnDef(YadaDTOptions parent) {
+    protected YadaDTColumnDef(YadaDTOptions parent) {
         super(parent);
     }
 
     /**
-     * Set the target column index for the column definition.
+     * Set the target for the column definition.
      * 
-     * @param targets the target column index
+     * @param columnIndex the target column or an array of target columns:
+	       <ul>
+	       <li>0 or a positive integer - column index counting from the left</li>
+		   <li>a negative integer - column index counting from the right</li>
+	       </ul>
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/columnDefs.targets">targets</a>
      */
-    public YadaDTColumnDef dtTargets(Integer targets) {
-        this.targets = targets;
+    public YadaDTColumnDef dtTargets(int ... columnIndex) {
+    	if (stringTarget != null || intTarget != null) {
+	    	throw new YadaInvalidUsageException("Cannot set targets more than once");
+    	}
+        this.intTarget = columnIndex;
         return this;
     }
-
+    
     /**
-     * Get the target column index for the column definition.
+     * Set the target for the column definition.
      * 
-     * @return the target column index
-     */
-    public Integer getTargets() {
-        return targets;
-    }
-
-    /**
-     * Set whether the column is visible.
-     * 
-     * @param visible if true, the column is visible
+     * @param cssSelector a CSS selector - columns that match the selector will be used
      * @return this instance for method chaining
-     * @see <a href="https://datatables.net/reference/option/columnDefs.visible">visible</a>
+     * @see <a href="https://datatables.net/reference/option/columnDefs.targets">targets</a>
      */
-    public YadaDTColumnDef dtVisible(Boolean visible) {
-        this.visible = visible;
-        return this;
+    public YadaDTColumnDef dtTargetsCss(String cssSelector) {
+    	if (stringTarget != null || intTarget != null) {
+	    	throw new YadaInvalidUsageException("Cannot set targets more than once");
+    	}
+    	this.stringTarget = cssSelector;
+    	return this;
     }
-
+    
     /**
-     * Get whether the column is visible.
+     * Set the target for the column definition.
      * 
-     * @return true if the column is visible
+     * @param columnName the name of the column, without ":name" at the end
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/columnDefs.targets">targets</a>
      */
-    public Boolean getVisible() {
-        return visible;
+    public YadaDTColumnDef dtTargetsName(String columnName) {
+    	if (stringTarget != null || intTarget != null) {
+	    	throw new YadaInvalidUsageException("Cannot set targets more than once");
+    	}
+    	this.stringTarget = columnName + ":name";
+    	return this;
     }
-
+    
     /**
-     * Get the parent DataTable options.
-     * 
-     * @return the parent DataTable options
+     * Target all columns.
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/columnDefs.targets">targets</a>
      */
-    public YadaDTOptions parent() {
-        return super.parent;
+    public YadaDTColumnDef dtTargetsAll() {
+    	if (stringTarget != null || intTarget != null) {
+	    	throw new YadaInvalidUsageException("Cannot set targets more than once");
+    	}
+    	this.stringTarget = "_all";
+    	return this;
     }
+    
 }

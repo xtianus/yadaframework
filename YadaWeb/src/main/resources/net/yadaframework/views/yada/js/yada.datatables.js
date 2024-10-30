@@ -9,9 +9,8 @@
 	// For a private property use "var xxx = "
 	// For a private function use "function xxx(..."
 
-	yada.dataTable = function(dataTableJson, userLanguage) {
-		const tableId = dataTableJson.id;
-		const dataTable = $("#" + tableId).DataTable(dataTableJson.options);		
+	yada.dataTable = function(dataTableId, dataTableOptionsJson) {
+		const dataTable = $("#" + dataTableId).DataTable(dataTableOptionsJson);		
 		return dataTable;
 	}
 	
@@ -110,6 +109,7 @@
 	 * Internal use
 	 */
 	yada.dtCommandRender =  function( data, type, row ) {
+		debugger;
     	var rowId = yada.getHashValue(data.DT_RowId);
         if ( type === 'display' ) {
         	var buttons = '';
@@ -151,6 +151,7 @@
     }
 					
 	yada.dtCheckboxRender = function( data, type, row ) {
+			debugger;
 		if ( type === 'display' ) {
 			return '<input type="checkbox" class="yadaCheckInCell s_rowSelector"/>';
 		}
@@ -158,9 +159,9 @@
 	}
 	
 	// Call the backend via ajax
-	yada.dtAjaxCaller = function(data, callback, settings, ajaxUrl) {
+	yada.dtAjaxCaller = function(data, callback, settings, dataTableId, ajaxUrl) {
     	// Add any extra parameter when a form is present
-    	var addedData = $("form.yada_dataTables_"+tableId).serializeArray();
+    	var addedData = $("form.yada_dataTables_"+dataTableId).serializeArray();
     	var extraParam = data['extraParam']={};
     	var i=0;
     	for (i=0; i<addedData.length; i++) {
@@ -169,7 +170,7 @@
     		var paramValue = paramObj.value;
     		extraParam[paramName] = paramValue;
     	}
-    	var noLoader = $table.hasClass('yadaNoLoader');
+    	var noLoader = $("#"+dataTableId).hasClass('yadaNoLoader');
     	yada.ajax(ajaxUrl, jQuery.param(data), callback, 'POST', null, noLoader);
     }
 					

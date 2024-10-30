@@ -59,9 +59,9 @@ public class YadaController {
         }
         String isAjaxString = yadaWebUtil.isAjaxRequest(request)?" (ajax)":"";
         if (exception==null) {
-        	log.error("Error (HTTP {} '{}') shown to user for {} {}", errorCode, errorMessage, isAjaxString, requestUri);
+        	log.error("Error (HTTP {} '{}') shown to user for {}, at {}", errorCode, errorMessage, isAjaxString, requestUri);
         } else {
-        	log.error("Error (HTTP {} '{}') shown to user for {} {}", errorCode, errorMessage, isAjaxString, requestUri, exception);
+        	log.error("Error (HTTP {} '{}') shown to user for {}, at {}", errorCode, errorMessage, isAjaxString, requestUri, exception);
         }
         model.addAttribute(YadaConstants.REQUEST_HASERROR_FLAG, "true");
         // If it was an ajax request, return an error object

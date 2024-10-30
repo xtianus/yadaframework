@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import net.yadaframework.core.YadaFluentBase;
@@ -12,9 +15,11 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.web.datatables.YadaDataTable;
 import net.yadaframework.web.datatables.options.YadaDTColumns;
 import net.yadaframework.web.datatables.proxy.YadaDTOptionsProxy;
+import net.yadaframework.web.datatables.proxy.YadaDataTableColumnProxy;
 
 // This class is not serialized as json
 public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
+	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	protected String cssClasses;
 	protected String selectCheckboxTitle; // When null, no select checkbox in first row
@@ -23,8 +28,7 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 	protected Boolean showFooter = false;
 	protected List<YadaDataTableButton> buttons = new ArrayList<>();
 
-	// Package visible
-	protected List<YadaDataTableColumn> columns = new ArrayList<>();
+	@JsonIgnore protected List<YadaDataTableColumnProxy> columns = new ArrayList<>();
 	@JsonIgnore protected Map<Integer, YadaDataTableColumn> orderingMap = new TreeMap<>(); // order precedence --> column
 	@JsonIgnore protected YadaDTOptionsProxy options;
 	
@@ -48,7 +52,7 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 	 * @return column instance for method chaining
 	 */
 	public YadaDataTableColumn dtColumnObj(String headerText, String data) {
-		YadaDataTableColumn column = new YadaDataTableColumn(headerText, data, this);
+		YadaDataTableColumnProxy column = new YadaDataTableColumnProxy(headerText, data, this);
 		this.columns.add(column);
 		return column;
 	}
@@ -118,12 +122,15 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 		if (commandsTitle != null && !hasCommand) {
 			throw new YadaInvalidUsageException("Commands column is added but there are only global buttons");
 		}
-		// When the commands column is not set but it should, add it with an empty title
-		if (commandsTitle == null && hasCommand) {
-			dtColumnCommands("");
-		}
+// Not sure it's correct to force the command column when there is a non-global button		
+//		// When the commands column is not set but it should, add it with an empty title
+//		if (commandsTitle == null && hasCommand) {
+//			log.debug("Commands column forced because of non-global button");
+//			dtColumnCommands("");
+//		}
 		// When there is no selectCheckbox column, but there is a least one non-global button, add the column
 		if (!isSelectCheckbox() && hasCommand) {
+			log.warn("Checkbox column forced because of non-global button. Use dtColumnCheckbox() to add it explicitly");
 			dtColumnCheckbox("");
 		}
 		//
@@ -131,26 +138,24 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 		//
 		setColumnPositions();
 		// Set the ordering options
-		if (!orderingMap.isEmpty()) {
-			boolean multipleOrdering = orderingMap.size() > 1;
-			if (multipleOrdering) {
-				options.dtOrderMulti(true);
-			}
-			options.dtOrdering(makeOrderingOptions());
-		}
+		makeOrderingOptions();
 		// Column for checkboxes. Plain columns have already been defined in options
 		if (isSelectCheckbox()) {
 			YadaDTColumns newColumn = options.addNewColumn(0);
-			newColumn.dtOrderable(false).dtSearchable(false);
-			newColumn.dtRender("yada.dtCheckboxRender()").dtWidth("50px").dtClassName("yadaCheckInCell");
+			newColumn.dtData(null).dtOrderable(false).dtSearchable(false).dtDefaultContent("");
+			// NOTE: can't use a "myFunction()" in the dtRender because that function must be defined on the table row (i.e. on the data source)
+			//       and we can't do that.
+			// newColumn.dtRender("yada.dtCheckboxRender()").dtWidth("50px").dtClassName("yadaCheckInCell");
+			newColumn.dtRender("yadaPlaceholder:yada.dtCheckboxRender").dtWidth("50px").dtClassName("yadaCheckInCell");
 		}
 		// Last column for commands
-		options.dtColumnsObj()
-			.dtClassName("yadaCommandButtonCell")
-			.dtName("_yadaCommandColumn")
-			.dtOrderable(false).dtSearchable(false)
-			.dtWidth("50px")
-			.dtRender("yada.dtCommandRender()");
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! if commandsTitle
+//		options.dtColumnsObj()
+//			.dtClassName("yadaCommandButtonCell")
+//			.dtName("_yadaCommandColumn")
+//			.dtOrderable(false).dtSearchable(false)
+//			.dtWidth("50px")
+//			.dtRender("yada.dtCommandRender()");
 		// Ajax options
 		// As the docs don't say if this would work, the ajax function is added in the thymeleaf template
 		// options.dtAjaxUrl("yada.dtAjaxCaller()");
@@ -158,10 +163,10 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 		backCalled = true;
 		return super.back();
 	}
-
+	
 	private void setColumnPositions() {
 		int position = isSelectCheckbox() ? 1 : 0;
-		for (YadaDataTableColumn column : columns) {
+		for (YadaDataTableColumnProxy column : columns) {
 			column.setPositionInTable(position++);
 		}
 	}
@@ -182,20 +187,22 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 //		return columns.get(position);
 //	}
 
-	private String makeOrderingOptions() {
+	private void makeOrderingOptions() {
 		// Example:
 		//	[
 		//	    { idx: 1, 'asc' },
 		//	    { idx: 2, 'desc' }
 		//	]
-		StringBuilder result = new StringBuilder();
-		result.append("[");
-		for (YadaDataTableColumn column : orderingMap.values()) {
-			String direction = Boolean.FALSE.equals(column.orderAsc) ? "desc" : "asc";
-			result.append(String.format("{ idx: %d, '%s' }", column.positionInTable, direction));
+		if (orderingMap.isEmpty()) {
+			return;
 		}
-		result.append("]");
-		return result.toString();
+		int totColumns = 0;
+		for (YadaDataTableColumn column : orderingMap.values()) {
+			totColumns++;
+			String direction = Boolean.FALSE.equals(column.orderAsc) ? "desc" : "asc";
+			options.dtOrder(column.positionInTable, direction);
+		}
+		options.dtOrderMulti(totColumns>1);
 	}
 
 	
