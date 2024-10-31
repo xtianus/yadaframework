@@ -211,12 +211,12 @@ public class UserProfileController {
 					// Example of localized text: .dtColumnObj("Title", "title."+locale.getLanguage()).back()
 					.dtColumnObj("Enabled", "userCredentials.enabled").back()
 					.dtColumnObj("Nickname", "userCredentials.nickname").back()
-					.dtColumnObj("Email", "userCredentials.username").dtName("userCredentials.username").dtOrderAsc().back()
-					.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin")/*.dtOrderDesc(1)*/.back()
+					.dtColumnObj("Email", "userCredentials.username").dtName("userCredentials.username").dtOrderAsc(0).back()
+					.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin").dtOrderDesc(1).back()
 					.dtColumnCheckbox("select.allnone")
-					// .dtColumnCommands("Commands")
+					.dtColumnCommands("Commands")
 					.dtButtonObj("Add").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-plus'></i>").dtGlobal().dtRole("ADMIN").back()
-//					.dtButtonObj("Edit").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId")
+					.dtButtonObj("Edit").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId")
 //						.dtConfirmDialogObj()
 //							.dtTitle("Edit User")
 //							.dtMessageSingular("Are you sure you want to edit user '{0}'?")
@@ -224,13 +224,14 @@ public class UserProfileController {
 //							.dtConfirmButton("Confirm").dtAbortButton("Cancel")
 //							.dtPlaceholderColumnName("email")
 //							.back()
-//						.back()
+						.back()
 					.back()
 				.dtOptionsObj()
 					.dtResponsive(true)
 					.dtPageLength(10)
 					.dtColumnDefsObj().dtTargetsName("userCredentials.username").dtAriaTitle("This is the user email").back()
-					;
+					.dtColumnDefsObj().dtTargetsName("userCredentials.lastSuccessfulLogin").dtAriaTitle("This is when the user last logged in").back()
+				;
 		});
 		model.addAttribute("yadaDataTable", yadaDataTable);
 		return "/dashboard/users";

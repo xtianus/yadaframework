@@ -146,19 +146,17 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 			// NOTE: can't use a "myFunction()" in the dtRender because that function must be defined on the table row (i.e. on the data source)
 			//       and we can't do that.
 			// newColumn.dtRender("yada.dtCheckboxRender()").dtWidth("50px").dtClassName("yadaCheckInCell");
-			newColumn.dtRender("yadaPlaceholder:yada.dtCheckboxRender").dtWidth("50px").dtClassName("yadaCheckInCell");
+			newColumn.dtRender("yada.dtCheckboxRender").dtWidth("50px").dtClassName("yadaCheckInCell");
 		}
 		// Last column for commands
-		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! if commandsTitle
-//		options.dtColumnsObj()
-//			.dtClassName("yadaCommandButtonCell")
-//			.dtName("_yadaCommandColumn")
-//			.dtOrderable(false).dtSearchable(false)
-//			.dtWidth("50px")
-//			.dtRender("yada.dtCommandRender()");
-		// Ajax options
-		// As the docs don't say if this would work, the ajax function is added in the thymeleaf template
-		// options.dtAjaxUrl("yada.dtAjaxCaller()");
+		if (commandsTitle!=null) {
+			options.dtColumnsObj()
+			.dtClassName("yadaCommandButtonCell")
+			.dtName("_yadaCommandColumn")
+			.dtOrderable(false).dtSearchable(false)
+			.dtWidth("50px")
+			.dtRender("yada.dtCommandRender");
+		}
 		
 		backCalled = true;
 		return super.back();

@@ -151,7 +151,6 @@
     }
 					
 	yada.dtCheckboxRender = function( data, type, row ) {
-			debugger;
 		if ( type === 'display' ) {
 			return '<input type="checkbox" class="yadaCheckInCell s_rowSelector"/>';
 		}
@@ -163,14 +162,15 @@
     	// Add any extra parameter when a form is present
     	var addedData = $("form.yada_dataTables_"+dataTableId).serializeArray();
     	var extraParam = data['extraParam']={};
-    	var i=0;
-    	for (i=0; i<addedData.length; i++) {
-    		var paramObj = addedData[i];
-    		var paramName = paramObj.name;
-    		var paramValue = paramObj.value;
-    		extraParam[paramName] = paramValue;
-    	}
-    	var noLoader = $("#"+dataTableId).hasClass('yadaNoLoader');
+		addedData.forEach(paramObj => {
+	        const paramName = paramObj.name;
+	        const paramValue = paramObj.value;
+	        if (!extraParam[paramName]) {
+	            extraParam[paramName] = [];
+	        }
+	        extraParam[paramName].push(paramValue);
+	    });
+	    const noLoader = $("#"+dataTableId).hasClass('yadaNoLoader');
     	yada.ajax(ajaxUrl, jQuery.param(data), callback, 'POST', null, noLoader);
     }
 					

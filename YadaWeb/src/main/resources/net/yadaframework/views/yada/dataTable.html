@@ -68,7 +68,6 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 			    preprocessor(dataTableOptionsJson);
 			}
 			// TODO remove userLanguage
-			debugger;
 			const userLanguage = /*[[${#locale.language}]]*/ "dummy";
 			window[dataTableId] = yada.dataTable(dataTableId, dataTableOptionsJson);
 		});

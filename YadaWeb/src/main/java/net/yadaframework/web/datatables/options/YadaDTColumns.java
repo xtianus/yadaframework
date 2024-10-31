@@ -2,10 +2,14 @@ package net.yadaframework.web.datatables.options;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import net.yadaframework.core.YadaFluentBase;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.raw.YadaRawStringSerializer;
 
 /**
  * Defines a column in DataTables.
@@ -13,22 +17,26 @@ import net.yadaframework.core.YadaFluentBase;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
+	private static final Pattern SAFE_JS_FUNCTION_NAME = Pattern.compile("^[a-zA-Z0-9_\\-\\.]+$");
+	
     protected String ariaTitle;
     protected String cellType;
     protected String className;
     protected String contentPadding;
     protected String createdCell;
-    // data can be "null" in the json
+    // data can be "null" in the json (annotation on the getter because it should not be null in a YadaDTColumnDef)
     protected String data;
     protected String defaultContent;
     protected String editField;
     protected String footer;
     protected String name;
     protected Boolean orderable;
-    @JsonInclude(JsonInclude.Include.NON_EMPTY) protected List<Integer> orderData = new ArrayList<Integer>();
+    @JsonInclude(JsonInclude.Include.NON_EMPTY) 
+    protected List<Integer> orderData = new ArrayList<Integer>();
     protected String orderDataType;
     protected List<String> orderSequence;
-    protected String render;
+    @JsonSerialize(using = YadaRawStringSerializer.class)
+    protected String render; // Must be a js function
     protected Boolean searchable;
     protected String title;
     protected String type;
@@ -213,12 +221,15 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
     }
 
     /**
-     * @param render The rendering function for the column's data.
+     * @param renderFunction The rendering function for the column's data, with no parentheses.
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.render">DataTables Reference: columns.render</a>
      */
-    public YadaDTColumns dtRender(String render) {
-        this.render = render;
+    public YadaDTColumns dtRender(String renderFunction) {
+    	if (!SAFE_JS_FUNCTION_NAME.matcher(renderFunction).matches()) {
+    		throw new YadaInvalidUsageException("Invalid javascript function name '{}'", renderFunction);
+    	}
+        this.render = renderFunction;
         return this;
     }
 

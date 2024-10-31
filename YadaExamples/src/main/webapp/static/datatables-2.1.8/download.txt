@@ -1,0 +1,4 @@
+https://datatables.net/download/index
+
+Step 1 - Styling: Bootstrap 5
+Step 2 - Packages: DataTables, Extensions: Responsive
