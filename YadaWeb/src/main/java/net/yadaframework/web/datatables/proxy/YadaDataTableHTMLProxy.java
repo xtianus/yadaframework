@@ -51,7 +51,7 @@ public class YadaDataTableHTMLProxy extends YadaDataTableHTML {
 		return showFooter;
 	}
 
-	public List<YadaDataTableButton> getButtons() {
+	public List<YadaDataTableButtonProxy> getButtons() {
 		return buttons;
 	}
 

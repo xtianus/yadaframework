@@ -16,15 +16,30 @@
 <main class="container">
 	<h1>Users</h1>
 	
-	<yada:datatable id="userTable" yada:configuration="${yadaDataTable}" yada:preprocessor="userTablePreprocessor">
+	<yada:datatable 
+		yada:configuration="${yadaDataTable}" 
+		yada:preprocessor="userTablePreprocessor"
+		yada:postprocessor="userTablePostprocessor">
 	</yada:datatable>
 	
 </main>
 
 <script>
+
+function disableCommandIcon(data, row) {
+	console.log("disableCommandIcon called");
+	let result = "disabled"; // Could be calculated on a row by row basis
+	return result;
+}
+
 function userTablePreprocessor(dataTableOptionsJson) {
 	dataTableOptionsJson.responsive = true; // Just an example
-	console.log("Config handler called ");
+	console.log("Config preprocessor called ");
+}
+
+function userTablePostprocessor(dataTableApi, dataTableOptionsJson) {
+	dataTableApi.page.len(25).draw(); // Just an example
+	console.log("API postprocessor called ");
 }
 </script>
 

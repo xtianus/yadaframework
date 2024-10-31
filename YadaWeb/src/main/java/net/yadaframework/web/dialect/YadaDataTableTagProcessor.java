@@ -88,6 +88,7 @@ public class YadaDataTableTagProcessor extends AbstractElementModelProcessor {
 	private boolean processTag(IOpenElementTag sourceTag, ITemplateContext context, IElementModelStructureHandler structureHandler) {
         // Convert all attributes of the source tag.
 		// Currently only "yada:definition" is supported
+		String handler;
         Map<String, String> inputSourceAttributes = sourceTag.getAttributeMap();
         for (Map.Entry<String,String> sourceAttribute : inputSourceAttributes.entrySet()) {
 			String attributeName = sourceAttribute.getKey();
@@ -104,8 +105,12 @@ public class YadaDataTableTagProcessor extends AbstractElementModelProcessor {
 					}
 					break;
 				case "preprocessor":
-					String handler = yadaDialectUtil.parseExpression(attributeValue, context, String.class);
+					handler = yadaDialectUtil.parseExpression(attributeValue, context, String.class);
 					structureHandler.setLocalVariable("preprocessor", handler);
+					break;
+				case "postprocessor":
+					handler = yadaDialectUtil.parseExpression(attributeValue, context, String.class);
+					structureHandler.setLocalVariable("postprocessor", handler);
 					break;
 				}
 			}
@@ -114,7 +119,7 @@ public class YadaDataTableTagProcessor extends AbstractElementModelProcessor {
         // This is for using HTML attributes but we don't need them yet
         //String targetAttributesString = yadaDialectUtil.getConvertedHTMLCustomTagAttributeString(sourceTag, context);
         // structureHandler.setLocalVariable("targetAttributesString", targetAttributesString);
-        structureHandler.setLocalVariable(TAG_NAME, inputSourceAttributes); // So I can do like ${dataTable.id} to get the original id attribute and so on
+        structureHandler.setLocalVariable("_"+TAG_NAME+"_", inputSourceAttributes); // So I can do like ${_dataTable_.id} to get the original id attribute and so on
         return true;
 	}	
 

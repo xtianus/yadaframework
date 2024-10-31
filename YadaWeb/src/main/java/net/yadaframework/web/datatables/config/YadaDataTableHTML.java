@@ -9,24 +9,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.persistence.YadaDataTableDao;
 import net.yadaframework.web.datatables.YadaDataTable;
 import net.yadaframework.web.datatables.options.YadaDTColumns;
 import net.yadaframework.web.datatables.proxy.YadaDTOptionsProxy;
+import net.yadaframework.web.datatables.proxy.YadaDataTableButtonProxy;
 import net.yadaframework.web.datatables.proxy.YadaDataTableColumnProxy;
 
-// This class is not serialized as json
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
-	protected String cssClasses;
-	protected String selectCheckboxTitle; // When null, no select checkbox in first row
+	// Only the buttons array is currently used on the HTML side
+	protected List<YadaDataTableButtonProxy> buttons = new ArrayList<>();
+
+	@JsonIgnore protected String cssClasses;
+	@JsonIgnore protected String selectCheckboxTitle; // When null, no select checkbox in first row
 	// private List<String> columnTitles = new ArrayList<String>();
-	protected String commandsTitle;
-	protected Boolean showFooter = false;
-	protected List<YadaDataTableButton> buttons = new ArrayList<>();
+	@JsonIgnore protected String commandsTitle;
+	@JsonIgnore protected Boolean showFooter = false;
 
 	@JsonIgnore protected List<YadaDataTableColumnProxy> columns = new ArrayList<>();
 	@JsonIgnore protected Map<Integer, YadaDataTableColumn> orderingMap = new TreeMap<>(); // order precedence --> column
@@ -63,7 +68,7 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 	 * @param text Tooltip text for the command icon and text for the toolbar button. Can be a message key.
 	 */
 	public YadaDataTableButton dtButtonObj(String text) {
-		YadaDataTableButton button = new YadaDataTableButton(text, this);
+		YadaDataTableButtonProxy button = new YadaDataTableButtonProxy(text, this);
 		this.buttons.add(button);
 		return button;
 	}
@@ -152,7 +157,7 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 		if (commandsTitle!=null) {
 			options.dtColumnsObj()
 			.dtClassName("yadaCommandButtonCell")
-			.dtName("_yadaCommandColumn")
+			.dtName(YadaDataTableDao.COLUMN_COMMAND)
 			.dtOrderable(false).dtSearchable(false)
 			.dtWidth("50px")
 			.dtRender("yada.dtCommandRender");

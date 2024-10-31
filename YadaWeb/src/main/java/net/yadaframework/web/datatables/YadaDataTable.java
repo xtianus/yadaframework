@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.web.datatables.config.YadaDataTableHTML;
@@ -19,19 +20,18 @@ import net.yadaframework.web.datatables.proxy.YadaDataTableHTMLProxy;
 // because there are too many configuration options and parameters to be remembered.
 // The drawback is that I can't use thymeleaf features nicely and the user needs to type some HTML in the java code.
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 // Uses @JsonPropertyOrder to ensure that prepareConfiguration() is called before serialization. 
-// DO NOT move the "id" property from the first position!
-// "options" is the only needed json property
-// @JsonPropertyOrder({ "options" })
+// DO NOT move the "html" property from the first position!
+@JsonPropertyOrder({ "html", "options" })
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDataTable {
 	@JsonIgnore private YadaWebUtil yadaWebUtil = YadaWebUtil.INSTANCE;
 	@JsonIgnore private Locale locale;
 	@JsonIgnore protected YadaDataTableConfigurer configurer; // Need a reference to check for changes in development
-	@JsonIgnore protected YadaDataTableHTMLProxy yadaDataTableHTML;
-	@JsonIgnore protected String id;
-	@JsonIgnore protected String ajaxUrl;
 	
+	protected String id;
+	protected String ajaxUrl;
+	protected YadaDataTableHTMLProxy yadaDataTableHTML;
 	protected YadaDTOptionsProxy options = new YadaDTOptionsProxy(this);
 	
 	/**

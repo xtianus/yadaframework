@@ -35,8 +35,6 @@ public class YadaDataTableProxy extends YadaDataTable {
 	}
 
 	public YadaDTOptions getOptions() {
-		// We use the trick of using the first getter to make sure that prepareConfiguration() is called before serialization
-		prepareConfiguration();
 		return options;
 	}
 	
@@ -44,8 +42,9 @@ public class YadaDataTableProxy extends YadaDataTable {
 		return id;
 	}
 	
-	@JsonIgnore
-	public YadaDataTableHTML getHTML() {
+	public YadaDataTableHTML getHtml() {
+		// We use the trick of using the first getter to make sure that prepareConfiguration() is called before serialization
+		prepareConfiguration();
 		return yadaDataTableHTML;
 	}
 	

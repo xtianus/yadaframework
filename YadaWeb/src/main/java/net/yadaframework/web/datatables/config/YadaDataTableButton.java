@@ -7,34 +7,37 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.web.YadaJsonRawStringSerializer;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 	@JsonIgnore private YadaConfiguration config = (YadaConfiguration) YadaUtil.getBean("config");
 	@JsonIgnore private YadaWebUtil yadaWebUtil = YadaWebUtil.INSTANCE;
 	
-	private String url; // URL to be called when the button is clicked, it can be a thymeleaf expression and will be inserted in a @{} when missing
-    private String handler; // javascript function to be called when the button is clicked, will receive the row data as a parameter (see details)
-    private String text; // Tooltip text for the command icon and text for the toolbar button
-    private String icon; // HTML content for the button's icon
-    private boolean global = false; // True for a button that is always enabled regardless of row selection, for example an Add button. Global buttons are not shown in the command column.
-    private String toolbarCssClass = "btn btn-default"; // CSS class to be applied to the button
-    private String idName = "id"; // Name of the ID request parameter (optional, default is "id")
-    private boolean ajax = true; // Boolean to indicate if the button should use an AJAX request
-    private boolean pageLoader = true; // Boolean to control whether the page loader should be shown or not
-    private YadaDataTableConfirmDialog yadaDataTableConfirmDialog;
-    private String windowTarget; // Name of the window for opening the URL in a new window.
-    private String windowFeatures; // Features of the window when opened
-    private String showCommand; // Function that determines whether to show the button icon for each row
-    private Set<Integer> roles = new HashSet<>(); // Roles that can access the button
+	protected String url; // URL to be called when the button is clicked, it can be a thymeleaf expression and will be inserted in a @{} when missing
+	protected String handler; // javascript function to be called when the button is clicked, will receive the row data as a parameter (see details)
+	protected String text; // Tooltip text for the command icon and text for the toolbar button
+	protected String icon; // HTML content for the button's icon
+	protected boolean global = false; // True for a button that is always enabled regardless of row selection, for example an Add button. Global buttons are not shown in the command column.
+	protected String toolbarCssClass = "btn btn-default"; // CSS class to be applied to the button
+	protected String idName = "id"; // Name of the ID request parameter (optional, default is "id")
+	protected boolean ajax = true; // Boolean to indicate if the button should use an AJAX request
+	protected boolean pageLoader = true; // Boolean to control whether the page loader should be shown or not
+	protected YadaDataTableConfirmDialog yadaDataTableConfirmDialog;
+	protected String windowTarget; // Name of the window for opening the URL in a new window.
+	protected String windowFeatures; // Features of the window when opened
+	@JsonSerialize(using = YadaJsonRawStringSerializer.class)
+	protected String showCommandIcon; // Function that determines whether to show the button icon for each row
+	protected Set<Integer> roles = new HashSet<>(); // Roles that can access the button
     
-    public YadaDataTableButton(String text, YadaDataTableHTML parent) {
+	protected YadaDataTableButton(String text, YadaDataTableHTML parent) {
 		super(parent);
 		this.text = text;
 	}
@@ -108,11 +111,11 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
      * Set for a button that is always enabled regardless of row selection, for example an Add button.
      * Global buttons are not shown in the command column.
      * @return this instance for method chaining
-     * @throws YadaInvalidUsageException when both showCommand and global are set
+     * @throws YadaInvalidUsageException when both showCommandIcon and global are set
      */
     public YadaDataTableButton dtGlobal() {
-    	if (showCommand!=null) {
-	    	throw new YadaInvalidUsageException("Cannot set showCommand and global at the same time");
+    	if (showCommandIcon!=null) {
+	    	throw new YadaInvalidUsageException("Cannot set showCommandIcon and global at the same time");
     	}
         this.global = true;
         return this;
@@ -174,17 +177,18 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
     
     /**
      * Javascript function that determines whether to show the button icon for each row.
-     * It receives the row data as a parameter. 
+     * It receives the "data" and "row" parameters as for the render functions (no "type" or "meta" though). 
+     * It must return true/false to show/hide the icon or "disabled" to show it disabled.
      * @see <a href="https://datatables.net/reference/api/row().data()">DataTables row().data() API</a> 
-     * @throws YadaInvalidUsageException when both showCommand and global are set
-     * @param showCommand
+     * @throws YadaInvalidUsageException when both showCommandIcon and global are set
+     * @param function some javascript function that returns true or false or "disabled".
      * @return this instance for method chaining
      */
-    public YadaDataTableButton dtShowCommand(String showCommand) {
+    public YadaDataTableButton dtShowCommandIcon(String function) {
     	if (global) {
-	    	throw new YadaInvalidUsageException("Cannot set showCommand and global at the same time");
+	    	throw new YadaInvalidUsageException("Cannot set showCommandIcon and global at the same time");
     	}
-        this.showCommand = showCommand;
+        this.showCommandIcon = function;
         return this;
     }
     
@@ -214,59 +218,4 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 		return super.back();
 	}
 
-	public boolean isGlobal() {
-		return global;
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public String getHandler() {
-		return handler;
-	}
-
-	public String getText() {
-		return text;
-	}
-
-	public String getIcon() {
-		return icon;
-	}
-
-	public String getToolbarCssClass() {
-		return toolbarCssClass;
-	}
-
-	public String getIdName() {
-		return idName;
-	}
-
-	public boolean isAjax() {
-		return ajax;
-	}
-
-	public boolean isPageLoader() {
-		return pageLoader;
-	}
-
-	public String getWindowTarget() {
-		return windowTarget;
-	}
-
-	public String getWindowFeatures() {
-		return windowFeatures;
-	}
-
-	public String getShowCommand() {
-		return showCommand;
-	}
-
-	public Set<Integer> getRoles() {
-		return roles;
-	}
-
-	public YadaDataTableConfirmDialog getConfirmDialog() {
-		return yadaDataTableConfirmDialog;
-	}
 }

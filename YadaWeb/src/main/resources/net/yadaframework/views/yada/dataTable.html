@@ -11,7 +11,7 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 
 <body th:remove="tag">
 
-<div class="yadaDataTableBlock" th:with="html=${yadaDataTable.HTML}">
+<div class="yadaDataTableBlock" th:with="html=${yadaDataTable.html}">
 
 	<table th:id="${yadaDataTable.id}" class="table" th:classappend="${html.cssClasses}?:'table-striped no-wrap'">
 		<thead>
@@ -55,21 +55,16 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 	<!--/* Initialization code */-->
 	<script th:inline="javascript">
 		yada.ready(function(){
-			const dataTableId = /*[[${yadaDataTable.id}]]*/ "dummy";
-			const dataTableOptionsJson = /*[[${yadaDataTable.options}]]*/ "dummy";
+			const dataTableJson = /*[[${yadaDataTable}]]*/ "dummy";
+			// Using the preprocessor so that any thymeleaf instructions are processed correctly
 			const ajaxUrl = /*[[@{__${yadaDataTable.ajaxUrl}__}]]*/ "dummy";
-			dataTableOptionsJson.ajax = function(data, callback, settings){
-				yada.dtAjaxCaller(data, callback, settings, dataTableId, ajaxUrl);
-			}
-			// Preprocessor can override, add, delete configured options
-			const preprocessorName = /*[[${preprocessor}]]*/ ""; // Becomes 'null' when missing
-			const preprocessor = window[preprocessorName];
-			if (typeof preprocessor === "function") {
-			    preprocessor(dataTableOptionsJson);
-			}
+			const commandColumnName = /*[[${T(net.yadaframework.persistence.YadaDataTableDao).COLUMN_COMMAND}]]*/ "dummy";
+			const preprocessorName = /*[[${preprocessor}]]*/ "dummy"; // Becomes 'null' when missing
+			const postprocessorName = /*[[${postprocessor}]]*/ "dummy"; // Becomes 'null' when missing
+			
 			// TODO remove userLanguage
 			const userLanguage = /*[[${#locale.language}]]*/ "dummy";
-			window[dataTableId] = yada.dataTable(dataTableId, dataTableOptionsJson);
+			yada.dataTable(dataTableJson, ajaxUrl, commandColumnName, preprocessorName, postprocessorName);
 		});
 	
 	</script>

@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
-import net.yadaframework.raw.YadaRawStringSerializer;
+import net.yadaframework.web.YadaJsonRawStringSerializer;
 
 /**
  * Defines a column in DataTables.
@@ -35,7 +35,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
     protected List<Integer> orderData = new ArrayList<Integer>();
     protected String orderDataType;
     protected List<String> orderSequence;
-    @JsonSerialize(using = YadaRawStringSerializer.class)
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String render; // Must be a js function
     protected Boolean searchable;
     protected String title;

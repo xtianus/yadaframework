@@ -38,6 +38,9 @@ import net.yadaframework.web.YadaDatatablesRequest;
 public class YadaDataTableDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
+	public static final String COLUMN_SELECTION = "_yadaSelectionColumn";
+	public static final String COLUMN_COMMAND = "_yadaCommandColumn";
+
 	@Autowired MessageSource messageSource;
 	@Autowired YadaUtil yadaUtil;
 	
@@ -127,13 +130,13 @@ public class YadaDataTableDao {
 				}
 			}
 			// Add DT_RowClass
-			addAttributeValue(entity, entityJson, "DT_RowClass");
+			addAttributeValue(entity, entityJson, "DT_RowClass"); // Add this class to the tr node
 			// Add DT_RowId for DataTables id
-			// TODO when on a single page there are multiple tables with the same object, the ids are not unique.
-			// We should prefix them with the table id, if any.
+			String dataTableId = yadaDatatablesRequest.getDataTableId();
 			try {
 				Long id = (Long) idField.get(entity);
-				entityJson.put("DT_RowId", entityClass.getSimpleName()+"#"+id);
+				String rowId = dataTableId+"_"+entityClass.getSimpleName()+"_"+id; // "UserTable_UserProfile_22"
+				entityJson.put("DT_RowId", rowId);
 			} catch (Exception e) {
 				log.error("Failed to set DT_RowId for entity {} (ignored)", entity);
 			}
@@ -155,7 +158,7 @@ public class YadaDataTableDao {
 			Object value = "";
 			String[] parts = attributePath.split("\\.", 2);
 			String attributeName = parts[0];
-			if ("_yadaSelectionColumn".equals(attributeName) || "_yadaCommandColumn".equals(attributeName)) {
+			if (COLUMN_SELECTION.equals(attributeName) || COLUMN_COMMAND.equals(attributeName)) {
 				return;
 			}
 			if (entity instanceof java.util.Map) {

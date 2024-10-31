@@ -8,10 +8,44 @@
 	// For a public property or function, use "yada.xxx = ..."
 	// For a private property use "var xxx = "
 	// For a private function use "function xxx(..."
+		
+	const CLASS_COMMANDBUTTON = "yadaRowCommandButton";
 
-	yada.dataTable = function(dataTableId, dataTableOptionsJson) {
-		const dataTable = $("#" + dataTableId).DataTable(dataTableOptionsJson);		
-		return dataTable;
+	/**
+	 * Initialize the datatable (internal use)
+	 */
+	yada.dataTable = function(dataTableJson, ajaxUrl, commandColumnName, preprocessorName, postprocessorName) {
+		const dataTableId = dataTableJson.id;
+		const dataTableHtml = dataTableJson.html;
+		const dataTableOptions = dataTableJson.options;
+		// Set our ajax method
+		dataTableOptions.ajax = function(data, callback, settings) {
+			ajaxCaller(data, callback, settings, dataTableId, ajaxUrl);
+		}
+		// Make a closure on the commands column to access buttons
+		const commandColumn = dataTableOptions.columns.find(col => col.name === commandColumnName);
+		if (commandColumn) {
+			const originalRender = commandColumn.render;
+			commandColumn.render = function(data, type, row, meta) {
+				return originalRender(data, type, row, meta, dataTableHtml);
+			}
+		}
+
+		// Preprocessor can override, add, delete configured options
+		const preprocessor = window[preprocessorName];
+		if (typeof preprocessor === "function") {
+		    preprocessor(dataTableOptions);
+		}
+		
+		const dataTableApi = $("#" + dataTableId).DataTable(dataTableOptions);	
+		
+		// Postprocessor can operate on the created table
+		const postprocessor = window[postprocessorName];
+		if (typeof postprocessor === "function") {
+		    postprocessor(dataTableApi, dataTableOptions);
+		}
+			
+		return dataTableApi;
 	}
 	
 
@@ -22,7 +56,7 @@
 			e.preventDefault();
 			const dataTableObject = window[dataTableId];
 			const $table = $("#" + dataTableId);
-			var isRowIcon = $(this).hasClass("yadaRowCommandButton");
+			var isRowIcon = $(this).hasClass(CLASS_COMMANDBUTTON);
 			var buttonUrl = buttonData.url;
 			var ids = [];
 			var id = yada.getHashValue($(this).attr('href')); // This has a value when isRowIcon
@@ -32,11 +66,11 @@
 				var $checks = $table.find("tbody [type='checkbox']:checked");
 				totElements = $checks.length;
 				ids = $checks.map(function() {
-					var id = $(this).parents('tr').attr('id');
-					if (id==null) {
-						alert('Internal Error-ID missing in row: did you forget "DT_RowId" in the Model?');
+					const rowId = $(this).parents('tr').attr('id'); // "UserTable_UserProfile_22"
+					if (rowId==null) {
+						alert('Internal Error: ID missing in row. "DT_RowId" might not have been set on the backend');
 					}
-					return yada.getHashValue(id);
+					return dtRowIdToEntityId(rowId);
 				}).get();
 			} else {
 				ids = [id];
@@ -106,50 +140,35 @@
 	}
 
 	/**
-	 * Internal use
+	 * Rendere the commands column (internal use)
 	 */
-	yada.dtCommandRender =  function( data, type, row ) {
-		debugger;
-    	var rowId = yada.getHashValue(data.DT_RowId);
+	yada.dtCommandRender =  function(data, type, row, meta, dataTableHtmlJson) {
         if ( type === 'display' ) {
-        	var buttons = '';
-        	for (var i=0; extraButtons!=null && i<extraButtons.length; i++) {
-        		var displayIconOnRow = extraButtons[i].showRowIcon;
-        		if (displayIconOnRow==null) {
-        			displayIconOnRow = extraButtons[i].noRowIcon; // Fallback to deprecated attribute
+	    	const entityId = dtRowIdToEntityId(data.DT_RowId); // 22
+			const yadaButtons = dataTableHtmlJson.buttons;
+			let displayIconOnRow = true;
+        	let buttonsHtml = '';
+			yadaButtons.filter(button => !button.global).forEach(button => {
+				const showCommandIconFunction = button.showCommandIcon;
+        		if (typeof showCommandIconFunction == "function") {
+        			displayIconOnRow = showCommandIconFunction(data, row);
         		}
-        		if (typeof displayIconOnRow == "function") {
-        			displayIconOnRow = displayIconOnRow(data, row);
-        		}
-        		if (displayIconOnRow==null) {
-        			displayIconOnRow = true;
-        		}
-        		if (displayIconOnRow!=null && extraButtons[i].noRowIcon != null && extraButtons[i].showRowIcon == null) {
-        			displayIconOnRow = !displayIconOnRow; // Invert the logic
-        		}
-        		if (displayIconOnRow) {
-	        		buttons +=
-	        			'<a class="yadaTableExtraButton' + i + ' yadaRowCommandButton" href="#' +
-	        			rowId + '" title="' + extraButtons[i].title + '">' + extraButtons[i].icon + '</a>';
+        		if (displayIconOnRow==true) {
+	        		buttonsHtml += `<a class="${CLASS_COMMANDBUTTON}" href="#${entityId}" title="${button.text}">${button.icon}</a>`;
         		} else if (displayIconOnRow=="disabled") {
-        			buttons += '<span class="yadaTableExtraButton' + i + ' yadaRowCommandButton disabled" ' + 'title="' + extraButtons[i].title + '"' + '>' + extraButtons[i].icon + '</span>';
+	        		buttonsHtml += `<span class="${CLASS_COMMANDBUTTON} disabled" title="${button.text}">${button.icon}</span>`;
         		} else {
         			// No button
         		}
-        	}
-        	if (editDef!=null) {
-        		buttons +=
-        			'<a class="s_editRow yadaRowCommandButton" href="#'+rowId+'" title="'+editDef.title+'"><i class="yadaIcon yadaIcon-edit"></i></a>';
-        	}
-        	if (deleteDef!=null) {
-        		buttons +=
-        			'<a class="s_deleteRow yadaRowCommandButton" href="#'+rowId+'" title="'+deleteDef.title+'"><i class="yadaIcon yadaIcon-delete"></i></a>';
-        	}
-        	return buttons;
+        	});
+        	return buttonsHtml;
         }
         return data;
     }
-					
+
+	/**
+	 * Render the checkbox column (internal use)
+	 */
 	yada.dtCheckboxRender = function( data, type, row ) {
 		if ( type === 'display' ) {
 			return '<input type="checkbox" class="yadaCheckInCell s_rowSelector"/>';
@@ -157,8 +176,11 @@
 		return data;
 	}
 	
-	// Call the backend via ajax
-	yada.dtAjaxCaller = function(data, callback, settings, dataTableId, ajaxUrl) {
+	/**
+	 * Call the backend via ajax (internal use)
+	 */
+	function ajaxCaller(data, callback, settings, dataTableId, ajaxUrl) {
+		data['dataTableId'] = dataTableId;
     	// Add any extra parameter when a form is present
     	var addedData = $("form.yada_dataTables_"+dataTableId).serializeArray();
     	var extraParam = data['extraParam']={};
@@ -173,6 +195,15 @@
 	    const noLoader = $("#"+dataTableId).hasClass('yadaNoLoader');
     	yada.ajax(ajaxUrl, jQuery.param(data), callback, 'POST', null, noLoader);
     }
+
+	/**
+	 * Convert the row id as assigned to DT_RowId into an entity id number.
+	 * @param dtRowId the full value of DT_RowId e.g. "UserTable_UserProfile_22"
+	 * @return the number following the last underscor, which is the entity id, e.g. 22
+	 */	
+	function dtRowIdToEntityId(dtRowId) {
+		return dtRowId.match(/_(\d+)$/)[1];
+	}
 					
 }( window.yada = window.yada || {} ));
 
