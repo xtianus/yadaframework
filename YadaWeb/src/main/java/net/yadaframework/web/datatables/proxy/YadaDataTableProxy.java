@@ -51,4 +51,12 @@ public class YadaDataTableProxy extends YadaDataTable {
 	public String getAjaxUrl() {
 		return ajaxUrl;
 	}
+	
+	public String getLanguageUrl() {
+		String languageUrl = null;
+		if (yadaDataTableLanguage != null) {
+			languageUrl = yadaDataTableLanguage.getLanguageUrl(locale.getLanguage());
+		}
+		return languageUrl;
+	}
 }

@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.web.YadaJsonRawStringSerializer;
 import net.yadaframework.web.datatables.YadaDataTable;
 import net.yadaframework.web.datatables.proxy.YadaDTColumnDefProxy;
 import net.yadaframework.web.datatables.proxy.YadaDTColumnsProxy;
@@ -42,17 +44,23 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     protected String detectType;
     protected Integer displayStart;
     protected String dom;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String drawCallback;
     protected YadaDTFixedColumns fixedColumns;
     protected YadaDTFixedHeader fixedHeader;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String footerCallback;
     protected String formatNumber;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String headerCallback;
     protected Boolean info;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String infoCallback;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String initComplete;
     protected YadaDTKeys keys;
-    protected YadaDTLanguage language;
+    // Not used because urls must be processed by thymeleaf
+    // protected YadaDTLanguage language;
     protected String layout;
     protected Boolean lengthChange;
     protected List<Object> lengthMenu;
@@ -66,14 +74,17 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     protected Integer pageLength;
     protected Boolean paging;
     protected String pagingType;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String preDrawCallback;
     protected Boolean processing;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String renderer;
     // can be either a boolean or an object
     protected Boolean responsive;
     protected YadaDTResponsive yadaDTResponsive;
     //
     protected Boolean retrieve;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String rowCallback;
     protected YadaDTRowGroup rowGroup;
     protected String rowId;
@@ -91,10 +102,12 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     protected YadaDTSelect select;
     protected Boolean serverSide = true; // default to server-side processing
     protected Integer stateDuration;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String stateLoadCallback;
     protected String stateLoadParams;
     protected String stateLoaded;
     protected Boolean stateSave;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String stateSaveCallback;
     protected String stateSaveParams;
     protected Integer tabIndex;
@@ -795,16 +808,16 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
         return this.keys;
     }
 
-    /**
-     * @return The language configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/language">DataTables language option</a>
-     */
-    public YadaDTLanguage dtLanguageObj() {
-        if (this.language == null) {
-            this.language = new YadaDTLanguage(this);
-        }
-        return this.language;
-    }
+//    /**
+//     * @return The language configuration for DataTables.
+//     * @see <a href="https://datatables.net/reference/option/language">DataTables language option</a>
+//     */
+//    public YadaDTLanguage dtLanguageObj() {
+//        if (this.language == null) {
+//            this.language = new YadaDTLanguage(this);
+//        }
+//        return this.language;
+//    }
 
     /**
      * @return The rowGroup configuration for DataTables.

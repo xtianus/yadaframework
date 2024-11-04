@@ -14,13 +14,17 @@
 	/**
 	 * Initialize the datatable (internal use)
 	 */
-	yada.dataTable = function(dataTableJson, ajaxUrl, commandColumnName, preprocessorName, postprocessorName) {
+	yada.dataTable = function(dataTableJson, ajaxUrl, languageUrl, commandColumnName, preprocessorName, postprocessorName) {
 		const dataTableId = dataTableJson.id;
 		const dataTableHtml = dataTableJson.html;
 		const dataTableOptions = dataTableJson.options;
 		// Set our ajax method
 		dataTableOptions.ajax = function(data, callback, settings) {
 			ajaxCaller(data, callback, settings, dataTableId, ajaxUrl);
+		}
+		// Set the language
+		if (languageUrl!=null) {
+			dataTableOptions.language = { url: languageUrl};
 		}
 		// Make a closure on the commands column to access buttons
 		const commandColumn = dataTableOptions.columns.find(col => col.name === commandColumnName);
@@ -37,17 +41,47 @@
 		    preprocessor(dataTableOptions);
 		}
 		
-		const dataTableApi = $("#" + dataTableId).DataTable(dataTableOptions);	
+		const dataTableApi = $("#" + dataTableId).DataTable(dataTableOptions);
+		
+		// After the table is drawn, define the command button handlers
+		dataTableApi.on('draw', function () {
+			dtMakeEventHandlers(dataTableJson);
+		});		
 		
 		// Postprocessor can operate on the created table
 		const postprocessor = window[postprocessorName];
 		if (typeof postprocessor === "function") {
 		    postprocessor(dataTableApi, dataTableOptions);
 		}
-			
+		
 		return dataTableApi;
 	}
 	
+	/**
+	 * Intenral function to make the command button event handlers once the table has been drawn
+	 */
+	function dtMakeEventHandlers(dataTableJson) {
+		const thisTable = this; // DOM table
+		const yadaButtons = dataTableJson.html.buttons;
+		yadaButtons.forEach(button => {
+			const buttonType = button.type;
+			const $buttonsSameType = $(`[data-buttontype="${buttonType}"]`, thisTable);
+			$buttonsSameType.click(function(e){
+				e.preventDefault();
+				const $a = $(e.currentTarget);
+				const href = $a.attr('href');
+				const idName = $a.attr('data-idname') || "id";
+				const id = yada.getHashValue(href);
+				const requestData = {};
+				requestData[idName] = id;
+				// Qui devo gestire sia ajax che non, incluso il windowTarget che prima era solo nei toolbar buttons.
+				// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				console.log(requestData)
+				
+			});
+		});
+		
+	}
 
 	// TODO chiamare da yada.dataTable non da fuori se si riesce
 	yada.dtMakeButtonHandler = function(buttonId, buttonData, dataTableId) {
@@ -154,7 +188,9 @@
         			displayIconOnRow = showCommandIconFunction(data, row);
         		}
         		if (displayIconOnRow==true) {
-	        		buttonsHtml += `<a class="${CLASS_COMMANDBUTTON}" href="#${entityId}" title="${button.text}">${button.icon}</a>`;
+					// !!!!!!!!!!!!!!!! mettere yada:confirm !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	        		buttonsHtml += `<a class="${CLASS_COMMANDBUTTON}" href="#${entityId}" data-buttontype="${button.type}"
+					title="${button.text}">${button.icon}</a>`;
         		} else if (displayIconOnRow=="disabled") {
 	        		buttonsHtml += `<span class="${CLASS_COMMANDBUTTON} disabled" title="${button.text}">${button.icon}</span>`;
         		} else {
@@ -165,6 +201,7 @@
         }
         return data;
     }
+	
 
 	/**
 	 * Render the checkbox column (internal use)

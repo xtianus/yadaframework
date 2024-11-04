@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import net.yadaframework.components.YadaUtil;
@@ -20,6 +21,9 @@ import net.yadaframework.web.YadaJsonRawStringSerializer;
 public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 	@JsonIgnore private YadaConfiguration config = (YadaConfiguration) YadaUtil.getBean("config");
 	@JsonIgnore private YadaWebUtil yadaWebUtil = YadaWebUtil.INSTANCE;
+	@JsonIgnore private YadaUtil yadaUtil = YadaUtil.INSTANCE;
+	
+	@JsonProperty protected String type; // unique identifier for the button in the table row
 	
 	protected String url; // URL to be called when the button is clicked, it can be a thymeleaf expression and will be inserted in a @{} when missing
 	protected String handler; // javascript function to be called when the button is clicked, will receive the row data as a parameter (see details)
@@ -30,7 +34,7 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 	protected String idName = "id"; // Name of the ID request parameter (optional, default is "id")
 	protected boolean ajax = true; // Boolean to indicate if the button should use an AJAX request
 	protected boolean pageLoader = true; // Boolean to control whether the page loader should be shown or not
-	protected YadaDataTableConfirmDialog yadaDataTableConfirmDialog;
+	@JsonProperty protected YadaDataTableConfirmDialog yadaDataTableConfirmDialog;
 	protected String windowTarget; // Name of the window for opening the URL in a new window.
 	protected String windowFeatures; // Features of the window when opened
 	@JsonSerialize(using = YadaJsonRawStringSerializer.class)
@@ -40,6 +44,7 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 	protected YadaDataTableButton(String text, YadaDataTableHTML parent) {
 		super(parent);
 		this.text = text;
+		this.type = "yada" + yadaUtil.getRandomString(8);
 	}
 
     /**

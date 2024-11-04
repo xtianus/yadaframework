@@ -8,9 +8,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.web.datatables.config.YadaDataTableHTML;
+import net.yadaframework.web.datatables.config.YadaDataTableLanguage;
 import net.yadaframework.web.datatables.options.YadaDTOptions;
 import net.yadaframework.web.datatables.proxy.YadaDTOptionsProxy;
 import net.yadaframework.web.datatables.proxy.YadaDataTableHTMLProxy;
+import net.yadaframework.web.datatables.proxy.YadaDataTableLanguageProxy;
 
 /**
  * Class representing a DataTable.
@@ -26,8 +28,9 @@ import net.yadaframework.web.datatables.proxy.YadaDataTableHTMLProxy;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDataTable {
 	@JsonIgnore private YadaWebUtil yadaWebUtil = YadaWebUtil.INSTANCE;
-	@JsonIgnore private Locale locale;
+	@JsonIgnore protected Locale locale;
 	@JsonIgnore protected YadaDataTableConfigurer configurer; // Need a reference to check for changes in development
+	@JsonIgnore protected YadaDataTableLanguageProxy yadaDataTableLanguage; 
 	
 	protected String id;
 	protected String ajaxUrl;
@@ -53,20 +56,21 @@ public class YadaDataTable {
 		yadaDataTableHTML.prepareConfiguration();
 	}
 
-//	/**
-//	 * Set i18n options. Default is American English.
-//	 * @param languageBaseUrl the URL of the root folder for the DataTable i18n translations. 
-//	 * 			Can be a CDN or a local folder e.g. "/static/datatables-2.1.8/i18n" depending on where the sources have been saved.
-//	 * @return an instance of YadaDataTableLanguage for method chaining
-//	 */
-//	@Deprecated // As we now have the Locale in the table, the table is locale-specific so the full url can be set.
-//	public YadaDataTableLanguage dtLanguageObj(String languageBaseUrl) {
-//		this.yadaDataTableLanguage = new YadaDataTableLanguage(languageBaseUrl, this);
-//		return this.yadaDataTableLanguage;
-//	}
+	/**
+	 * Set the base url where language files are located. It can be the official DataTables URL or a local endpoint.
+	 * @param languageBaseUrl the URL of the root folder for the DataTable i18n translations. 
+	 * 			Can be a CDN or a local folder e.g. "/static/datatables-2.1.8/i18n" depending on where the sources have been saved.
+	 * 			It can contain Thymeleaf expressions.
+	 * 			When null or empty, the default value is used: https://cdn.datatables.net/plug-ins/2.1.8/i18n/
+	 * @return an instance of YadaDataTableLanguage for method chaining
+	 */
+	public YadaDataTableLanguage dtLanguageObj(String languageBaseUrl) {
+		this.yadaDataTableLanguage = new YadaDataTableLanguageProxy(languageBaseUrl, this);
+		return this.yadaDataTableLanguage;
+	}
 	
 	/**
-	 * The URL where data is fetched from (without language in the path). Can contain thymeleaf expressions.
+	 * Set the URL where data is fetched from (without language in the path). Can contain Thymeleaf expressions.
 	 * @param ajaxUrl
 	 * @return this instance for method chaining
 	 */
@@ -85,5 +89,5 @@ public class YadaDataTable {
 	public YadaDTOptions dtOptionsObj() {
 		return options;
 	}
-
+	
 }

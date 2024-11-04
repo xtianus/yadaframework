@@ -37,12 +37,14 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 		<th:block th:each="button : ${html.buttons}">
 			<a class="btn" th:id="${#ids.seq(buttonSequence)}"
 				th:href="__${button.url?:'javascript:void(0);'}__"
-				th:classappend="|${button.ajax?'yadaAjax':''} ${button.toolbarCssClass?:''}|">
+				th:data-idname="${button.idName}"
+				th:classappend="|${button.ajax?'yadaAjax':''} ${button.toolbarCssClass?:''} ${button.pageLoader?'':'yadaNoLoader'}|">
 				<th:block th:if="${button.icon!=null}" th:utext="${button.icon}"><i class="bi bi-pencil"></i></th:block>
 				<span th:text="${button.text}">Add</span>
 			</a>
 			<script th:inline="javascript">
 				yada.ready(function(){
+					// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Spostare!!!!!!!!!!!!!!!!!!!!!!
 					const buttonId = /*[[${#ids.prev(buttonSequence)}]]*/ "dummy";
 					const buttonData = /*[[${button}]]*/ "dummy";
 					const dataTableId = /*[[${yadaDataTable.id}]]*/ "dummy";
@@ -54,19 +56,24 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 	
 	<!--/* Initialization code */-->
 	<script th:inline="javascript">
+	 	/*<![CDATA[*/	
 		yada.ready(function(){
 			const dataTableJson = /*[[${yadaDataTable}]]*/ "dummy";
 			// Using the preprocessor so that any thymeleaf instructions are processed correctly
-			const ajaxUrl = /*[[@{__${yadaDataTable.ajaxUrl}__}]]*/ "dummy";
+			const ajaxUrl = /*[[__${yadaDataTable.ajaxUrl}__]]*/ "dummy";
+			const languageUrl = /*[[__${yadaDataTable.languageUrl}__]]*/ "dummy";
+			// Also fix the button urls
+			/*[# th:each="button : ${yadaDataTable.html.buttons}"]*/
+    			dataTableJson.html.buttons.filter(b => b.type==/*[[${button.type}]]*/).forEach(b => b.url = /*[[__${button.url}__]]*/ "dummy"); 
+   			/*[/]*/
+			
 			const commandColumnName = /*[[${T(net.yadaframework.persistence.YadaDataTableDao).COLUMN_COMMAND}]]*/ "dummy";
 			const preprocessorName = /*[[${preprocessor}]]*/ "dummy"; // Becomes 'null' when missing
 			const postprocessorName = /*[[${postprocessor}]]*/ "dummy"; // Becomes 'null' when missing
 			
-			// TODO remove userLanguage
-			const userLanguage = /*[[${#locale.language}]]*/ "dummy";
-			yada.dataTable(dataTableJson, ajaxUrl, commandColumnName, preprocessorName, postprocessorName);
+			yada.dataTable(dataTableJson, ajaxUrl, languageUrl, commandColumnName, preprocessorName, postprocessorName);
 		});
-	
+		/*]]>*/
 	</script>
 
 </div>

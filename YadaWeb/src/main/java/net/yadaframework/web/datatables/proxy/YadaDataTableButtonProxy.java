@@ -19,6 +19,10 @@ public class YadaDataTableButtonProxy extends YadaDataTableButton {
 		super(text, parent);
 	}
 	
+	public String getType() {
+		return type;
+	}
+	
 	public boolean isGlobal() {
 		return global;
 	}

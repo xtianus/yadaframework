@@ -170,9 +170,9 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
 		return keys;
 	}
 
-	public YadaDTLanguage getLanguage() {
-		return language;
-	}
+//	public YadaDTLanguage getLanguage() {
+//		return language;
+//	}
 
 	public String getLayout() {
 		return layout;
