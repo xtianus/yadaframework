@@ -348,7 +348,6 @@
 		return yada.getUrlParameter(url, param) !=null;
 	};
 	
-	
 	/**
 	 * Rimuove dalla url il parametro di request indicato e la ritorna (non funziona se il parametro è senza valore)
 	 * @param url
@@ -386,6 +385,17 @@
 		}
 		return url;
 	};
+	
+	/**
+	 * Add all the key-values to the url as parameters even if already present
+	 */
+	yada.addUrlParameters = function(url, keyValue) {
+		let params = new URLSearchParams(url.includes('?') ? url.split('?')[1] : '');
+		  $.each(keyValue, function(key, value) {
+		      params.append(key, value);
+		  });
+		  return url.split('?')[0] + '?' + params.toString();		
+	}
 	
 	/**
 	 * Aggiunge un parametro di request alla url, anche se già presente. La url può anche essere solo la location.search e può essere vuota.
@@ -1732,6 +1742,15 @@
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * Returns the value of some field that is at the path specified, inside the rootObject.
+	 * @param rootObject the object that contains some (nested) fields to be accessed
+	 * @param path the path of the field, can be simple like "id" or nested like "user.credentials.id"
+	 */
+	yada.getValue = function(rootObject, path) {
+	    return path.split('.').reduce((acc, part) => acc && acc[part], rootObject);
 	}
 		
 }( window.yada = window.yada || {} ));

@@ -216,7 +216,7 @@ public class UserProfileController {
 					.dtColumnCheckbox("select.allnone")
 					.dtColumnCommands("Commands")
 					.dtButtonObj("Add").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-plus'></i>").dtGlobal().dtRole("ADMIN").back()
-					.dtButtonObj("Edit").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId")
+					.dtButtonObj("Edit").dtUrl("@{/user/addOrEdit}").dtElementLoader("#userTable").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId")
 						.dtConfirmDialogObj()
 							.dtTitle("Edit User")
 							.dtMessageSingular("Are you sure you want to edit user '{0}'?")

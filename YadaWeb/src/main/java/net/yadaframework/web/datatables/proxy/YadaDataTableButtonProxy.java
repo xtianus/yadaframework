@@ -19,6 +19,10 @@ public class YadaDataTableButtonProxy extends YadaDataTableButton {
 		super(text, parent);
 	}
 	
+	public String getElementLoader() {
+		return elementLoader;
+	}
+	
 	public String getType() {
 		return type;
 	}
@@ -31,8 +35,8 @@ public class YadaDataTableButtonProxy extends YadaDataTableButton {
 		return url;
 	}
 
-	public String getHandler() {
-		return handler;
+	public String getUrlProvider() {
+		return urlProvider;
 	}
 
 	public String getText() {
@@ -55,8 +59,8 @@ public class YadaDataTableButtonProxy extends YadaDataTableButton {
 		return ajax;
 	}
 
-	public boolean isPageLoader() {
-		return pageLoader;
+	public Boolean isHidePageLoader() {
+		return hidePageLoader;
 	}
 
 	public String getWindowTarget() {

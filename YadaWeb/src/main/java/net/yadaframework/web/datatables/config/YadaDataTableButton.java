@@ -26,15 +26,16 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 	@JsonProperty protected String type; // unique identifier for the button in the table row
 	
 	protected String url; // URL to be called when the button is clicked, it can be a thymeleaf expression and will be inserted in a @{} when missing
-	protected String handler; // javascript function to be called when the button is clicked, will receive the row data as a parameter (see details)
+	protected String urlProvider; // javascript function that can return a computed url
 	protected String text; // Tooltip text for the command icon and text for the toolbar button
 	protected String icon; // HTML content for the button's icon
 	protected boolean global = false; // True for a button that is always enabled regardless of row selection, for example an Add button. Global buttons are not shown in the command column.
 	protected String toolbarCssClass = "btn btn-default"; // CSS class to be applied to the button
 	protected String idName = "id"; // Name of the ID request parameter (optional, default is "id")
 	protected boolean ajax = true; // Boolean to indicate if the button should use an AJAX request
-	protected boolean pageLoader = true; // Boolean to control whether the page loader should be shown or not
-	@JsonProperty protected YadaDataTableConfirmDialog yadaDataTableConfirmDialog;
+	protected Boolean hidePageLoader; // Boolean to control whether the page loader should be shown or not
+	protected String elementLoader; // CSS selector for the element that will be hidden by the loader
+	protected YadaDataTableConfirmDialog yadaDataTableConfirmDialog;
 	protected String windowTarget; // Name of the window for opening the URL in a new window.
 	protected String windowFeatures; // Features of the window when opened
 	@JsonSerialize(using = YadaJsonRawStringSerializer.class)
@@ -82,31 +83,34 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 	}
     
     /**
-     * javascript function to be called when the button is clicked.
+     * javascript function to be called when the button is clicked in order to compute the target URL for the button action.
+     * 
      * When the row icon is clicked, it will receive the row data as a parameter. 
-     * When the toolbar button is clicked, it will receive an array of selected rows as a parameter.
-     * @param url
+     * When the toolbar button is clicked, it will receive the array of selected ids and the datatable api object as parameters.
+     * 
+     * The function should return the target URL or null to prevent any further action.
+     * @param function the name of the js function that must be visible in page
      * @see <a href="https://datatables.net/reference/api/row().data()">DataTables row().data() API</a> 
-     * @throws YadaInvalidUsageException when both url and function are set
+     * @throws YadaInvalidUsageException when both url and urlProvider are set
      * @return this instance for method chaining
      */
-    public YadaDataTableButton dtHandler(String handler) {
+    public YadaDataTableButton dtUrlProvider(String function) {
     	if (this.url!=null) {
-	    	throw new YadaInvalidUsageException("Cannot set url and function at the same time");
+	    	throw new YadaInvalidUsageException("Cannot set url and urlProvider at the same time");
     	}
-		this.handler = handler;
+		this.urlProvider = function;
 		return this;
 	}
     
     /**
      * URL to be called when the button is clicked, it can be a thymeleaf expression and will be inserted in a @{} when missing
      * @param url
-     * @throws YadaInvalidUsageException when both url and function are set
+     * @throws YadaInvalidUsageException when both url and urlProvider are set
      * @return this instance for method chaining
      */
     public YadaDataTableButton dtUrl(String url) {
-    	if (this.handler!=null) {
-    		throw new YadaInvalidUsageException("Cannot set url and function at the same time");
+    	if (this.urlProvider!=null) {
+    		throw new YadaInvalidUsageException("Cannot set url and urlProvider at the same time");
     	}
     	this.url = yadaWebUtil.ensureThymeleafUrl(url);
     	return this;
@@ -152,9 +156,25 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
      * Do not show the page loader when the button is clicked
      * @return this instance for method chaining
      */
-    public YadaDataTableButton dtNoPageLoader() {
-        this.pageLoader = false;
+    public YadaDataTableButton dtHidePageLoader() {
+    	if (elementLoader!=null) {
+	    	throw new YadaInvalidUsageException("Cannot set hidePageLoader and elementLoader at the same time");
+    	}
+        this.hidePageLoader = true;
         return this;
+    }
+    
+    /**
+     * Show the loader on the selected element
+     * @param cssSelector a CSS selector for the element that will be hidden by the loader
+     * @return this instance for method chaining
+     */
+    public YadaDataTableButton dtElementLoader(String cssSelector) {
+    	if (hidePageLoader!=null) {
+	    	throw new YadaInvalidUsageException("Cannot set hidePageLoader and elementLoader at the same time");
+    	}
+    	this.elementLoader = cssSelector;
+    	return this;
     }
     
     /**

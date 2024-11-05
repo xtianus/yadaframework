@@ -8,18 +8,19 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDataTableConfirmDialog extends YadaFluentBase<YadaDataTableButton> {
-    private String confirmTitle; // Title for the confirmation dialog
-    private String confirmOneMessage; // Message for confirming a single action
-    private String confirmManyMessage; // Message for confirming multiple actions
-    private String confirmButtonText; // Text for the confirmation button
-    private String abortButtonText; // Text for the cancel button
-    private List<String>columnNames; // Column names that refer to the columns that hold the value for the placeholders in all the texts
+    @JsonProperty private String confirmTitle; // Title for the confirmation dialog
+    @JsonProperty private String confirmOneMessage; // Message for confirming a single action
+    @JsonProperty private String confirmManyMessage; // Message for confirming multiple actions
+    @JsonProperty private String confirmButtonText; // Text for the confirmation button
+    @JsonProperty private String abortButtonText; // Text for the cancel button
+    @JsonProperty private List<String> columnNames; // Column names that refer to the columns that hold the value for the placeholders in all the texts
     private YadaDataTableHTML yadaDataTableHTML;
 	
 	public YadaDataTableConfirmDialog(YadaDataTableButton parent, YadaDataTableHTML yadaDataTableHTML) {
@@ -67,7 +68,7 @@ public class YadaDataTableConfirmDialog extends YadaFluentBase<YadaDataTableButt
 	}
 	
 	/**
-	 * Set the message for the confirmation dialog when multiple elements are selected
+	 * Set the message for the confirmation dialog when multiple elements are selected.
 	 * @param confirmManyMessage the message, can be null or have many placeholders like {0}, {1}, {2} etc.
 	 * 		The {0} placeholder will be replaced with the number of selected rows while the others are shifted one place
 	 * @return this instance for method chaining

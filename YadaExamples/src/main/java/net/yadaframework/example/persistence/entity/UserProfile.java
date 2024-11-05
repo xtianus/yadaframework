@@ -23,14 +23,6 @@ public class UserProfile extends YadaUserProfile {
 	@Transient
 	private boolean inviteEmail = false;
 
-	/**
-	 * Used by DataTables
-	 */
-	@JsonProperty("DT_RowId")
-	public String getDT_RowId() {
-		return this.getClass().getSimpleName() + "#" + this.id; // UserProfile#142
-	}
-
 	@Transient
 	public String getUserId() {
 		return String.format("U%04d", id);

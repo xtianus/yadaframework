@@ -132,14 +132,14 @@ public abstract class YadaJob implements Callable<Void> {
 	@Transient
 	public ListenableFuture<Void> yadaInternalJobHandle;
 
-	/**
-	 * Needed for DataTables integration
-	 */
-	@Transient
-	@JsonProperty("DT_RowId")
-	public String getDT_RowId() {
-		return this.getClass().getSimpleName()+"#"+this.id; // YadaJob#142
-	}
+//	/**
+//	 * Needed for DataTables integration
+//	 */
+//	@Transient
+//	@JsonProperty("DT_RowId")
+//	public String getDT_RowId() {
+//		return this.getClass().getSimpleName()+"#"+this.id; // YadaJob#142
+//	}
 
 	/**
 	 * Returns the plain enum of the job state

@@ -10,6 +10,31 @@
 	// For a private function use "function xxx(..."
 		
 	const CLASS_COMMANDBUTTON = "yadaRowCommandButton";
+	
+	/**
+	 * Formats a string replacing {0} placeholders with the value in the cell named after 
+	 * the value found in columnNames at the corresponding position.
+	 * @param message the string with placeholders, e.g. "Product {0} color {1}"
+	 * @param columnNames an array with the names of the columns that hold the value to replace, e.g. ["product.name", "product.color"]
+	 * @param row the current row 
+	 * @param firstValue when specified, this is the value for {0} while all other placeholders take values from the columns
+	 */
+	function formatMessage(message, columnNames, row, firstValue) {
+		if (message==null || message=="" || (columnNames==null && firstValue==null)) {
+			return message;
+		}
+		if (firstValue) {
+			message = message.replace("{0}", firstValue);
+		}
+		let offset = firstValue?1:0;
+	    columnNames.forEach((colName, index) => {
+	        const placeholder = `{${index+offset}}`;
+	        const value = yada.getValue(row, colName) || "";
+	        message = message.replace(placeholder, value);
+	    });
+	    return message;
+	}
+
 
 	/**
 	 * Initialize the datatable (internal use)
@@ -41,11 +66,12 @@
 		    preprocessor(dataTableOptions);
 		}
 		
-		const dataTableApi = $("#" + dataTableId).DataTable(dataTableOptions);
+		const $table = $("#" + dataTableId);
+		const dataTableApi = $table.DataTable(dataTableOptions);
 		
 		// After the table is drawn, define the command button handlers
 		dataTableApi.on('draw', function () {
-			dtMakeEventHandlers(dataTableJson);
+			makeAllButtonHandlers(dataTableJson, $table, dataTableApi);
 		});		
 		
 		// Postprocessor can operate on the created table
@@ -58,119 +84,113 @@
 	}
 	
 	/**
-	 * Intenral function to make the command button event handlers once the table has been drawn
+	 * Make the button event handlers once the table has been drawn, both command buttons and toolbar buttons.
 	 */
-	function dtMakeEventHandlers(dataTableJson) {
-		const thisTable = this; // DOM table
+	function makeAllButtonHandlers(dataTableJson, $table, dataTableApi) {
+		// const thisTable = this; // DOM table
 		const yadaButtons = dataTableJson.html.buttons;
 		yadaButtons.forEach(button => {
 			const buttonType = button.type;
-			const $buttonsSameType = $(`[data-buttontype="${buttonType}"]`, thisTable);
-			$buttonsSameType.click(function(e){
-				e.preventDefault();
-				const $a = $(e.currentTarget);
-				const href = $a.attr('href');
-				const idName = $a.attr('data-idname') || "id";
-				const id = yada.getHashValue(href);
-				const requestData = {};
-				requestData[idName] = id;
-				// Qui devo gestire sia ajax che non, incluso il windowTarget che prima era solo nei toolbar buttons.
-				// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				console.log(requestData)
-				
-			});
+			const $buttonsSameType = $(`[data-buttontype="${buttonType}"]`);
+			makeButtonHandler($buttonsSameType, button, $table, dataTableApi)
 		});
-		
 	}
-
-	// TODO chiamare da yada.dataTable non da fuori se si riesce
-	yada.dtMakeButtonHandler = function(buttonId, buttonData, dataTableId) {
-		const $button = $("#"+buttonId);
-		$button.click(function(e) {
+	
+	/**
+	 * Create the click handlers for command buttons and toolbar buttons
+	 * @param $buttons jquery list of buttons if the same type. Will contain both command and toolbar buttons.
+	 * @param buttonConf the json configuration common to all the buttons of the same type
+	 */
+	function makeButtonHandler($buttons, buttonConf, $table, dataTableApi) {
+		$buttons.click(function(e){
 			e.preventDefault();
-			const dataTableObject = window[dataTableId];
-			const $table = $("#" + dataTableId);
-			var isRowIcon = $(this).hasClass(CLASS_COMMANDBUTTON);
-			var buttonUrl = buttonData.url;
-			var ids = [];
-			var id = yada.getHashValue($(this).attr('href')); // This has a value when isRowIcon
-			var totElements = 1;
-			if (!isRowIcon) {
-				// Toolbar button
-				var $checks = $table.find("tbody [type='checkbox']:checked");
-				totElements = $checks.length;
+			const $anchor = $(e.currentTarget);
+			const totRows = 1;
+			const ajax = buttonConf.ajax; // true, false
+			const hidePageLoader = buttonConf.hidePageLoader; // true, false
+			const elementLoader = buttonConf.elementLoader; // #someCssSelector
+			let actualLoader = elementLoader!=null?$(elementLoader):[];
+			if (actualLoader.length==0) {
+				actualLoader = hidePageLoader;
+			}
+			const roles = buttonConf.roles; // [1, 8]
+			let url = buttonConf.url;
+			const idName = $anchor.attr('data-idname') || "id"; // "id" is the default when data-idname is missing or empty
+			const requestData = {};
+			//
+			let ids = [];
+			const isRowIcon = $anchor.hasClass(CLASS_COMMANDBUTTON);
+			if (isRowIcon) {
+				// Command button specific code
+				const id = rowIdToEntityId($anchor.parents('tr').attr('id'));
+				ids = [id];
+			} else {
+				// Toolbar button specific code
+				const $checks = $table.find("tbody [type='checkbox']:checked");
+				totRows = $checks.length;
 				ids = $checks.map(function() {
 					const rowId = $(this).parents('tr').attr('id'); // "UserTable_UserProfile_22"
 					if (rowId==null) {
-						alert('Internal Error: ID missing in row. "DT_RowId" might not have been set on the backend');
+						yada.log('Internal Error: ID missing in row. "DT_RowId" might not have been set on the backend. This happens if an Entity does not have an id field.');
 					}
-					return dtRowIdToEntityId(rowId);
+					return rowIdToEntityId(rowId);
 				}).get();
-			} else {
-				ids = [id];
 			}
-			var noLoader = buttonData.noLoader || false;
-			if (typeof buttonData.url == "function") {
-				if (isRowIcon) {
-					// Row button
-					var rowData = dataTableObject.row(this.parentElement).data();
-					buttonUrl = buttonUrl(rowData);
-				} else {
-					// Toolbar button
-					// TODO to be tested
-					var rowData = dataTableObject.rows();
-					buttonUrl = buttonUrl(rowData, ids);
-				}
-			}
-			var idName = buttonData.idName==null ? "id" : buttonData.idName;
-			var param = (ids.length>1?ids:ids[0]); // Either send one id or all of them
-			if (buttonData.ajax === false) {
-				if (typeof buttonData.url != "function") {
-					buttonUrl = yada.addOrUpdateUrlParameter(buttonUrl, idName, param);
-				}
-				if (buttonData.windowName!=null) {
-					window.open(buttonUrl, buttonData.windowName, buttonData.windowFeatures);
-				} else {
-					window.location.replace(buttonUrl);
-				}
-				return;
-			}
-			var requestData = {};
-			if (idName!="") {
-				requestData[idName] = param;
-			}
-			var handler = function(responseText, responseHtml) {
-				dataTableObject.draw(false); // Always reload table content on return from ajax call (there could be no modal)
-				yada.datatableDrawOnModalClose(dataTableObject);
-				recursiveEnableAjaxForm(responseText, responseHtml);
-			};
-			if (buttonData.confirm!=true) {
-				yada.ajax(buttonUrl, requestData, handler, null, null, noLoader);
-			} else {
-				// Confirm modal
-				const confirmTitle = buttonData.confirmTitle || null;
-				var confirmMessage = null;
-				if (totElements<2) {
-					var rowIndex = dataTableObject.row(this.parentElement).index();
-					if (!isRowIcon) {
-						rowIndex = dataTableObject.row($table.find("tbody [type='checkbox']:checked").parent()).index();
+			
+			// urlProvider
+			if (buttonConf.urlProvider) {
+				const urlProvider = window[buttonConf.urlProvider];
+				if (typeof urlProvider == "function") {
+					if (isRowIcon) {
+						// Row button sends one row
+						var rowData = dataTableApi.row($anchor.parentElement).data();
+						url = urlProvider(rowData);
+					} else {
+						// Toolbar button sends all rows
+						url = urlProvider(ids, dataTableApi);
 					}
-					var nameColumn = buttonData.confirmNameColumn || 3; // We assume that column 1 is the select, column 2 is the id and column 3 is the name or similar
-					const rowName = dataTableObject.cell(rowIndex, nameColumn).data(); 
-					confirmMessage = buttonData.confirmOneMessage || "Do you want to delete {0}?";
-					confirmMessage = confirmMessage.replace("{0}", rowName);
-				} else {
-					confirmMessage = buttonData.confirmManyMessage || `Do you want to delete ${totElements} elements?`;
+					if (url==null) {
+						return; // The urlProvider chose to stop execution 
+					}
 				}
-				yada.confirm(confirmTitle, confirmMessage, function(result) {
-						if (result==true) {
-							yada.ajax(buttonUrl, requestData, handler, null, null, noLoader);
-						}
-					}, buttonData.confirmButtonText, buttonData.abortButtonText
-				);
-				
-			}			
+			}
+
+			requestData[idName] = ids;
+			
+			// Confirmation modal
+			const confirmDialog = buttonConf.confirmDialog;
+			const columnNames = confirmDialog?.columnNames;
+			const confirmTitle = formatMessage(confirmDialog?.confirmTitle, columnNames, row);
+			const confirmOneMessage = formatMessage(confirmDialog?.confirmOneMessage, columnNames, row);
+			const confirmManyMessage = formatMessage(confirmDialog?.confirmManyMessage, columnNames, row, totRows);
+			const confirmButtonText = formatMessage(confirmDialog?.confirmButtonText, columnNames, row);
+			const abortButtonText = formatMessage(confirmDialog?.abortButtonText, columnNames, row);
+
+			// Make request			
+			if (confirmDialog) {
+				yada.confirm(confirmTitle, totRows==1?confirmOneMessage:confirmManyMessage, function(confirmed) {
+					if (confirmed==true) {
+						dtDoButtonCall(href, requestData, ajax, actualLoader, buttonConf, dataTableApi);
+					}
+				}, confirmButtonText, abortButtonText);
+			} else {
+				dtDoButtonCall(href, requestData, ajax, actualLoader, buttonConf, dataTableApi);
+			}
 		});
+	}
+	
+	function dtDoButtonCall(url, requestData, ajax, loader, buttonConf, dataTableApi) {
+		if (ajax) {
+			yada.ajax(url, requestData, ()=>dataTableApi.draw(false), null, null, loader);
+		} else {
+			url = yada.addUrlParameters(url, requestData);
+			if (buttonConf.windowTarget) {
+				window.open(url, buttonData.windowName, buttonData.windowFeatures);
+			} else {
+				window.location.href = url;
+			}
+			return;
+		}
 	}
 
 	/**
@@ -178,7 +198,7 @@
 	 */
 	yada.dtCommandRender =  function(data, type, row, meta, dataTableHtmlJson) {
         if ( type === 'display' ) {
-	    	const entityId = dtRowIdToEntityId(data.DT_RowId); // 22
+	    	// const entityId = rowIdToEntityId(data.DT_RowId); // 22
 			const yadaButtons = dataTableHtmlJson.buttons;
 			let displayIconOnRow = true;
         	let buttonsHtml = '';
@@ -188,8 +208,8 @@
         			displayIconOnRow = showCommandIconFunction(data, row);
         		}
         		if (displayIconOnRow==true) {
-					// !!!!!!!!!!!!!!!! mettere yada:confirm !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	        		buttonsHtml += `<a class="${CLASS_COMMANDBUTTON}" href="#${entityId}" data-buttontype="${button.type}"
+	        		buttonsHtml += `<a class="${CLASS_COMMANDBUTTON}" href="javascript:void(0)" data-buttontype="${button.type}"
+					data-idname="${button.idName}"
 					title="${button.text}">${button.icon}</a>`;
         		} else if (displayIconOnRow=="disabled") {
 	        		buttonsHtml += `<span class="${CLASS_COMMANDBUTTON} disabled" title="${button.text}">${button.icon}</span>`;
@@ -238,7 +258,7 @@
 	 * @param dtRowId the full value of DT_RowId e.g. "UserTable_UserProfile_22"
 	 * @return the number following the last underscor, which is the entity id, e.g. 22
 	 */	
-	function dtRowIdToEntityId(dtRowId) {
+	function rowIdToEntityId(dtRowId) {
 		return dtRowId.match(/_(\d+)$/)[1];
 	}
 					
