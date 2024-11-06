@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+	xmlns:th="http://www.thymeleaf.org" 
+	xmlns:yada="http://www.yadaframework.net">
+<head>
+	<title>Error</title>
+</head>
+<body>
+
+<main class="container yadaFullPage">
+	<h1>Application Error</h1>
+	<br>
+	<div th:if="${yadaHttpStatus!=null}">[[${yadaHttpStatus}]]: [[${yadaHttpMessage}]]</div>
+	<div th:if="${yadaExceptionMessage!=null}">[[${yadaExceptionMessage}]], at [[${yadaExceptionUrl}]]</div>
+	<br>
+	<a th:href="@{/}">Home</a>
+</main>
+
+</body>
+</html>

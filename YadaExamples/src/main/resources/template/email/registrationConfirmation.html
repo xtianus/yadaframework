@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+ 		<meta charset="UTF-8"/>
+    </head>
+    <body>
+ 	   <strong>Sign-up Confirmation - EXAMPLE SITE</strong>
+    	<p>Dear user,<br/><br/> we received a sign-up request on our site for your email address.</p>
+    
+    	<p>Click on the link below to confirm the request:</p>
+    	<p><a th:text="${fullLink}" th:href="${fullLink}" href="#">Sign-up confirmation</a></p>
+    
+    	<p>If you didn't send the request, delete this email and take the chance to visit our site: <a href="http://www.example.com">EXAMPLE SITE</a></p>
+     	<br />
+     	<p>
+        	<img th:src="'cid:logosmall'" />
+     	</p>
+ 	  	<p style="margin-top: 10px;">Thank you, <br />
+	     	<a href="http://www.example.com/"><em>EXAMPLESITE</em></a>
+	  	</p>
+    </body>
+</html>

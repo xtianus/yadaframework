@@ -8,7 +8,7 @@ A checkbox for boolean elements.
 
 Parameters:
 - fieldName = name of the field holding the value
-- id = id of the field holding the value (optional)
+- id = id of the field holding the value (optional). Please note that even if not set it could take the value of an enclosing modalGeneric
 - switch = true to render as a switch, otherwise render as a standard checkbox
 - labelKey = key in messages.properties for the label text
 - label = label to use, if not using a labelKey
@@ -27,10 +27,11 @@ Note: you can't set a default value using thymeleaf, must do it in the controlle
 <!--/* The default id (inputId) is a sequence derived from the current URI, so that ajax-loaded modals get a different id from the
 	 * main page. This doesn't work when many page elements are ajax-loaded from the same url of course, in which
 	 * case you need to pass a specific id.
+	 * Had to check for isFragment because id is never null when the form is inside a modalGeneric.
 	 */--> 
 <div class="form-group" 
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}, 
-		inputId=${id?:#ids.seq(@yadaWebUtil.getRequestMapping())}">
+		inputId=${id==null || @yadaWebUtil.isFragment(id) ? #ids.seq(@yadaWebUtil.getRequestMapping()) : id}">
 	<div class="checkbox">
 		<label th:if="${switch==null or switch!=true}" class="control-label" th:id="${inputId}+'label'">
 			<input type="checkbox" th:field="*{__${fieldName}__}" th:required="${required}" th:disabled="${disabled}" 

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+	xmlns:th="http://www.thymeleaf.org" 
+	xmlns:yada="http://www.yadaframework.net">
+<head>
+	<th:block th:replace="~{/header :: headFragment}"/>
+</head>
+<body>
+
+<th:block th:replace="~{/header :: body}"/>
+
+<main class="container">
+	<h1>Examples</h1>
+	<ul>
+		<li><a th:href="@{/dashboard}">Dashboard</a></li>
+		<th:block th:fragment="dashboardLinks">
+			<li><a th:href="@{/dashboard/user}">DataTables</a></li>
+			<li><a th:href="@{/dashboard/user/legacy}">DataTables legacy</a></li>
+		</th:block>
+	</ul>
+</main>
+
+<th:block th:replace="~{/footer :: body}"/>
+
+<th:block th:if="${login}!=null">
+	<div th:replace="/modalLogin :: #loginModal"></div>
+</th:block>
+
+<script type="text/javascript" th:inline="javascript">
+	//<![CDATA[
+	 yada.ready(function() {
+		// In order to show errors as a homepage modal you need to remove <errorPageForward> from config
+		// Error modal for unhandled exceptions
+		if (/*[[${yadaExceptionObject!=null}]]*/ "placeholder") {
+			const errorTitle = /*[[#{yada.error.http.otherTitle}]]*/ "placeholder";
+			const errorMessage = /*[[${@config.isDevelopmentEnvironment()} ? ${yadaExceptionMessage!=null?yadaExceptionMessage:'no message'} : #{yada.error.http.otherMessage}]]*/ "placeholder";
+			yada.showErrorModal(errorTitle, errorMessage);
+		}
+		
+		// HTTP Error modal
+		if (/*[[${yadaHttpStatus!=null}]]*/ "placeholder") {
+			yada.showErrorModal(/*[[${#messages.msg('yada.error.http.title', yadaHttpStatus)}]]*/ "placeholder", /*[[#{|yada.error.http.${yadaHttpStatus}|}]]*/ "placeholder");
+		}
+	});
+	
+	//]]>
+
+</script>
+
+</body>
+</html>

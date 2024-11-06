@@ -59,6 +59,7 @@ import java.util.Stack;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -144,12 +145,59 @@ public class YadaUtil {
 	 * Instance to be used when autowiring is not available
 	 */
 	public final static YadaUtil INSTANCE = new YadaUtil();
+	
+	private static final Object lazyInitLock = new Object();
 
 	// @PostConstruct
 	@EventListener(ContextRefreshedEvent.class) // Called after the context has been initialized
     public void init() {
 		defaultLocale = config.getDefaultLocale();
 		yadaFileManager = getBean(YadaFileManager.class);
+    }
+	
+	/**
+	 * Utility method for lazy initialization of any object type. Not thread safe.
+	 * Example: <pre>
+	 * private MyThing myThing;
+	 * ...
+	 * this.myThing = YadaUtil.lazyUnsafeInit(this.myThing, MyThing::new);
+	 * return this.myThing;
+	 * ...
+	 * this.myThing = YadaUtil.lazyUnsafeInit(this.myThing, () -> new MyThing(value));
+	 * </pre>
+	 * @param instance    The instance to check and initialize if null.
+	 * @param initializer A {@link Supplier} that provides a new instance if the current one is null.
+	 * @param <T>         The type of the instance.
+	 * @return The initialized instance.
+	 * @see YadaUtil#lazyVolatileInit(List)
+	 */
+	// This is safe only if the instance is held on a local variable in a method, not if it's a singleton
+	public static <T> T lazyUnsafeInit(T instance, Supplier<T> initializer) {
+        if (instance == null) {
+        	instance = initializer.get();
+        }
+        return instance;
+    }
+    
+	/**
+	 * Utility method for lazy initialization of ArrayLists. Not thread safe.
+	 * Example: <pre>
+	 * private List someList;
+	 * ...
+	 * this.someList = YadaUtil.lazyUnsafeInit(this.someList);
+	 * return this.someList;
+	 * </pre>
+	 * @param <T>
+	 * @param list a list or null
+	 * @return a new ArrayList when list is null, otherwise list
+	 * @see YadaUtil#lazyUnsafeInit(Object, Supplier) to initialize other object types
+	 */
+	// This is safe only if the instance is held on a local variable in a method, not if it's a singleton
+	public static <T> List<T> lazyUnsafeInit(List<T> list) {
+        if (list == null) {
+        	list = new ArrayList<>();
+        }
+        return list;
     }
 	
 	/**
@@ -169,9 +217,24 @@ public class YadaUtil {
 	}
 	
 	/**
+	 * Returns a random string of the given length with characters in the range "A".."Z", "a".."z", "0".."9" 
+	 * @param length the exact length of the string
+	 * @return a random string
+	 */
+	public String getRandomString(int length) {
+		final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		StringBuilder id = new StringBuilder(length);
+		for (int i = 0; i < length; i++) {
+			id.append(CHARACTERS.charAt(secureRandom.nextInt(CHARACTERS.length())));
+		}
+		return id.toString();
+	}
+	
+	/**
 	 * Returns a random string (currently an hex random number)
 	 * @param minlen minimum length of the string. The maximum length is random.
-	 * @return
+	 * @return a random string
+	 * @see #getRandomString(int)
 	 */
 	public String getRandomText(int minlen) {
 		int random = getRandom(0, Integer.MAX_VALUE);

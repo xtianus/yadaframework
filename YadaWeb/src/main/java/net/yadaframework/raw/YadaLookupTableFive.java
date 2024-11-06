@@ -1,7 +1,7 @@
 package net.yadaframework.raw;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Implements a table with five columns: four keys and one value. The purpose is to return the fifth value given the first four ones.
@@ -11,20 +11,17 @@ import java.util.Map;
  * @param <K3> the type of column 3
  * @param <K4> the type of column 4
  * @param <V> the type of the value
+ * @see {@link YadaLookupTable} for any number of keys
  */
 public class YadaLookupTableFive<K1, K2, K3, K4, V> {
-	Map<K1, YadaLookupTableFour<K2, K3, K4, V>> col1 = new HashMap<>();
+	Map<K1, YadaLookupTableFour<K2, K3, K4, V>> col1 = new ConcurrentHashMap<>();
 
 	/**
-	 * Add a new row to the table. Any value can be null.
+	 * Add a new row to the table. No parameter can be null.
 	 */
 	public void put(K1 key1, K2 key2, K3 key3, K4 key4, V value) {
-		YadaLookupTableFour<K2, K3, K4, V> col2 = col1.get(key1);
-		if (col2==null) {
-			col2 = new YadaLookupTableFour<>();
-			col1.put(key1, col2);
-		}
-		col2.put(key2, key3, key4, value);
+        // Ensure the YadaLookupTableThree is present for key1 in a thread-safe manner
+        col1.computeIfAbsent(key1, k -> new YadaLookupTableFour<>()).put(key2, key3, key4, value);
 	}
 	
 	/**
@@ -33,7 +30,7 @@ public class YadaLookupTableFive<K1, K2, K3, K4, V> {
 	 * @param key2 can be null
 	 * @param key3 can be null
 	 * @param key4 can be null
-	 * @return the value of column 5, or null
+	 * @return the value of column 5, or null if not found.
 	 */
 	public V get(K1 key1, K2 key2, K3 key3, K4 key4) {
 		YadaLookupTableFour<K2, K3, K4, V> col2 = col1.get(key1);
@@ -42,5 +39,12 @@ public class YadaLookupTableFive<K1, K2, K3, K4, V> {
 		}
 		return null;
 	}
-	
+    
+	/**
+	 * Clear the table
+	 */
+	public void clear() {
+		// No need to clear the inner tables because they become unreferenced
+		col1.clear();
+	}	
 }

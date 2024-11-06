@@ -1,0 +1,11 @@
+/.gradle/
+/build/
+/bin/
+/.gitattributes
+/.settings/
+/.classpath
+/.project
+!gradle-wrapper.jar
+/.sass/
+**/res/css/*.min.*
+**/res/js/*.min.*

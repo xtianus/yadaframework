@@ -38,6 +38,9 @@ import net.yadaframework.web.YadaDatatablesRequest;
 public class YadaDataTableDao {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
+	public static final String COLUMN_SELECTION = "_yadaSelectionColumn";
+	public static final String COLUMN_COMMAND = "_yadaCommandColumn";
+
 	@Autowired MessageSource messageSource;
 	@Autowired YadaUtil yadaUtil;
 	
@@ -127,13 +130,13 @@ public class YadaDataTableDao {
 				}
 			}
 			// Add DT_RowClass
-			addAttributeValue(entity, entityJson, "DT_RowClass");
+			addAttributeValue(entity, entityJson, "DT_RowClass"); // Add this class to the tr node
 			// Add DT_RowId for DataTables id
-			// TODO when on a single page there are multiple tables with the same object, the ids are not unique.
-			// We should prefix them with the table id, if any.
+			String dataTableId = yadaDatatablesRequest.getDataTableId();
 			try {
 				Long id = (Long) idField.get(entity);
-				entityJson.put("DT_RowId", entityClass.getSimpleName()+"#"+id);
+				String rowId = dataTableId+"_"+entityClass.getSimpleName()+"_"+id; // "UserTable_UserProfile_22"
+				entityJson.put("DT_RowId", rowId);
 			} catch (Exception e) {
 				log.error("Failed to set DT_RowId for entity {} (ignored)", entity);
 			}
@@ -155,7 +158,7 @@ public class YadaDataTableDao {
 			Object value = "";
 			String[] parts = attributePath.split("\\.", 2);
 			String attributeName = parts[0];
-			if ("_yadaSelectionColumn".equals(attributeName) || "_yadaCommandColumn".equals(attributeName)) {
+			if (COLUMN_SELECTION.equals(attributeName) || COLUMN_COMMAND.equals(attributeName)) {
 				return;
 			}
 			if (entity instanceof java.util.Map) {
@@ -271,7 +274,7 @@ public class YadaDataTableDao {
 		YadaSql searchSql = YadaSql.instance();
 		
 		yadaSql.selectFrom("select distinct e from "+targetClass.getSimpleName()+" e");
-		countSql.selectFrom("select count(distinct e.id) from "+targetClass.getSimpleName()+" e");
+		countSql.selectFromReplace("select count(distinct e.id) from "+targetClass.getSimpleName()+" e");
 		
 		// Searching
 		List<YadaDatatablesColumn> yadaDatatablesColumns = yadaDatatablesRequest.getColumns();
@@ -379,10 +382,15 @@ public class YadaDataTableDao {
 		yadaSql.setParameter("globalSearchNumber", globalSearchNumber);
 
     	Query query = yadaSql.query(em);
-		query.setMaxResults(yadaDatatablesRequest.getLength());
+    	// Set the page size. When paging is disabled on the FE, limit is -1
+    	int limit = yadaDatatablesRequest.getLength();
+    	if (limit>-1) {
+	    	query.setMaxResults(limit);
+    	}
 		query.setFirstResult(yadaDatatablesRequest.getStart());
     	@SuppressWarnings("unchecked")
 		List<targetClass> result = query.getResultList();
+		// TODO sort using an outer query instead of this trick
 		if (needsExtraction) {
 			// When doing an "order by" on a joined column we add the column to the select clause to prevent the "ORDER BY clause is not in SELECT list" error.
 			// This means that the result now is a list of Object[] where only the first element is what we need.

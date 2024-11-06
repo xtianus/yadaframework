@@ -68,7 +68,7 @@ public class YadaInputCounterTagProcessor extends AbstractElementModelProcessor 
         
         // Add the replacement tag
         Map<String, String> divAttributes = new HashMap<>();
-        divAttributes.put("th:replace", "/yada/formfields/inputCounter::field");
+        divAttributes.put("th:replace", "~{/yada/formfields/inputCounter::field}");
         final IModelFactory modelFactory = context.getModelFactory();
         IOpenElementTag replacementTagOpen = modelFactory.createOpenElementTag("div", divAttributes, AttributeValueQuotes.DOUBLE, false);
         ICloseElementTag replacementTagClose = modelFactory.createCloseElementTag("div");
@@ -80,8 +80,8 @@ public class YadaInputCounterTagProcessor extends AbstractElementModelProcessor 
 	private void processTag(IOpenElementTag sourceTag, ITemplateContext context, IElementModelStructureHandler structureHandler) {
         // Convert all attributes of the source tag
         Map<String, String> inputSourceAttributes = sourceTag.getAttributeMap();
-        String targetAttributesString = yadaDialectUtil.getConvertedCustomTagAttributeString(sourceTag, context);
-        structureHandler.setLocalVariable(TAG_NAME, inputSourceAttributes); // So I can do like ${input.id} to get the original id attribute and so on
+        String targetAttributesString = yadaDialectUtil.getConvertedHTMLCustomTagAttributeString(sourceTag, context);
+        structureHandler.setLocalVariable(TAG_NAME, inputSourceAttributes); // So I can do like ${inputCounter.id} to get the original id attribute and so on
         structureHandler.setLocalVariable("targetAttributesString", targetAttributesString);
 	}
 

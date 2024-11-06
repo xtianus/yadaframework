@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://www.yadaframework.net" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
+
+<!--/*
+Template for <yada:datatable> resulting HTML.
+It is used internally by the yada dialect processor to render the <yada:datatable> tag but could be included directly in a HTML template if needed.
+*/-->
+
+<body th:remove="tag">
+
+<div class="yadaDataTableBlock" th:with="html=${yadaDataTable.html}">
+
+	<table th:id="${yadaDataTable.id}" class="table" th:classappend="${html.cssClasses}?:'table-striped no-wrap'">
+		<thead>
+			<tr>
+				<th th:if="${html.selectCheckbox}" th:with="title=${html.selectCheckboxTitle}">
+					<input type="checkbox" class="yada_columnSelector" th:title="title?#{title}">
+				</th>
+				<th th:each="column : ${html.columns}" th:text="#{${column.headerText}}">Name</th>
+				<th th:if="${!#strings.isEmpty(html.commandsTitle)}" th:with="title=${html.commandsTitle}" th:text="title?#{title}">Commands</th>
+			</tr>
+		</thead>
+		<tfoot th:if="${html.showFooter}">
+			<tr>
+				<td th:if="${html.selectCheckbox}"></td> <!-- /* Empty for select column */-->
+				<th th:each="column : ${html.columns}"></th>
+				<td th:if="${html.commandsTitle}"></td> <!-- /* Empty for command column */-->
+			</tr>
+		</tfoot>
+	</table>
+
+	<!--/* Toolbar */-->
+	<div th:with="buttonSequence=${yadaDataTable.id+'-'+@yadaWebUtil.randomId6+'-button-'}">
+		<th:block th:each="button : ${html.buttons}">
+			<a class="btn" th:id="${#ids.seq(buttonSequence)}"
+				href="javascript:void(0)"
+				th:data-idname="${button.idName}"
+				th:data-buttontype="${buttonType}"
+				th:classappend="|${button.ajax?'yadaAjax':''} ${button.toolbarCssClass?:''}|">
+				<th:block th:if="${button.icon!=null}" th:utext="${button.icon}"><i class="bi bi-pencil"></i></th:block>
+				<span th:text="${button.text}">Add</span>
+			</a>
+		</th:block>
+	</div>
+	
+	<!--/* Initialization code */-->
+	<script th:inline="javascript">
+	 	/*<![CDATA[*/	
+		yada.ready(function(){
+			const dataTableJson = /*[[${yadaDataTable}]]*/ "dummy";
+			// Using the preprocessor so that any thymeleaf instructions are processed correctly
+			const ajaxUrl = /*[[__${yadaDataTable.ajaxUrl}__]]*/ "dummy";
+			const languageUrl = /*[[__${yadaDataTable.languageUrl}__]]*/ "dummy";
+			// Also fix the button urls
+			/*[# th:each="button : ${yadaDataTable.html.buttons}"]*/
+    			dataTableJson.html.buttons.filter(b => b.type==/*[[${button.type}]]*/).forEach(b => b.url = /*[[__${button.url}__]]*/ "dummy"); 
+   			/*[/]*/
+			
+			const commandColumnName = /*[[${T(net.yadaframework.persistence.YadaDataTableDao).COLUMN_COMMAND}]]*/ "dummy";
+			const preprocessorName = /*[[${preprocessor}]]*/ "dummy"; // Becomes 'null' when missing
+			const postprocessorName = /*[[${postprocessor}]]*/ "dummy"; // Becomes 'null' when missing
+			
+			yada.dataTable(dataTableJson, ajaxUrl, languageUrl, commandColumnName, preprocessorName, postprocessorName);
+		});
+		/*]]>*/
+	</script>
+
+</div>
+	
+</body>

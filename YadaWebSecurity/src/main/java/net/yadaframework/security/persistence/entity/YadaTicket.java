@@ -84,15 +84,12 @@ public class YadaTicket implements Serializable {
 //	@OneToOne(cascade=CascadeType.REMOVE, orphanRemoval=true)
 //	protected YadaAttachedFile attachment;
 
-	/***********************************************************************/
-	/* Id for DataTables                                                   */
-
-	@Transient
-	//@JsonView(YadaJsonView.WithEagerAttributes.class)
-	@JsonProperty("DT_RowId")
-	public String getDT_RowId() {
-		return this.getClass().getSimpleName()+"#"+this.id; // YadaProduct#142
-	}
+//	@Transient
+//	//@JsonView(YadaJsonView.WithEagerAttributes.class)
+//	@JsonProperty("DT_RowId")
+//	public String getDT_RowId() {
+//		return this.getClass().getSimpleName()+"#"+this.id; // YadaProduct#142
+//	}
 
 	@Transient
 	@JsonProperty

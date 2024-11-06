@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:th="http://www.thymeleaf.org"> 
+  <url th:each="url : ${urls}">
+	<loc th:text="${@yadaWebUtil.getWebappAddress(#httpServletRequest) + url}">http://path/to/page</loc>
+	<changefreq>daily</changefreq>
+  </url>
+  <!-- Add any other dynamic pages here 
+  <url th:each="id : ${ids}">
+	<loc th:text="${@yadaWebUtil.getWebappAddress(#httpServletRequest) + '/racconti/' + id}">http://path/to/story</loc>
+	<changefreq>monthly</changefreq>
+  </url>
+  -->
+</urlset>

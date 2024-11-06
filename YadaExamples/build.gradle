@@ -1,0 +1,164 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath 'net.yadaframework:yadatools:+'
+    }
+}
+
+plugins {
+    id 'application' // for the "run" task
+	id 'org.hidetake.ssh' version '2.10.1'
+	id 'com.meiuwa.gradle.sass' version "1.0.0"	// Only when using SASS !!! v2.0.0 may not work
+	id("com.github.node-gradle.node") version "3.5.1"
+}
+
+ext.acronym = 'yex'
+apply plugin: 'war'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'net.yadaframework.tools'
+apply plugin: 'org.hidetake.ssh'        // https://gradle-ssh-plugin.github.io
+
+// Reading the gradle.local.properties file
+def yadaSourceRepoPath = null;
+def yadaProjects = null;
+Properties localProps = new Properties()
+File localPropsFile = file('gradle.local.properties')
+if(localPropsFile.exists()) {
+    localPropsFile.withInputStream { 
+        localProps.load(it) 
+    }
+    yadaSourceRepoPath = localProps.getProperty('yadaSourceRepoPath')
+    yadaProjects = localProps.getProperty('yadaProjects')
+}
+
+def YadaWebLib = "$projectDir/../YadaWeb";
+def YadaWebCmsLib = "$projectDir/../YadaWebCMS";
+
+if (!project.hasProperty('env')) {
+	ext.env="envUnset"
+}
+
+sassCompile {
+    source = project.files(fileTree("src/main/webapp/res/css"), fileTree("$YadaWebLib/src/main/resources/net/yadaframework/views/yada/css"), fileTree("$YadaWebCmsLib/src/main/resources/net/yadaframework/views/yada/css")) 
+    include("**/*.sass", "**/*.scss", "**/*.css")
+    exclude("**/*.min.*", "**/_*.sass", "**/_*.scss")
+    output = file("src/main/webapp/res/css")
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+eclipse {
+    jdt {
+	    sourceCompatibility = JavaVersion.VERSION_17
+	    targetCompatibility = JavaVersion.VERSION_17
+        // https://stackoverflow.com/a/35302104/587641
+        file {
+                File dir = file('.settings')
+                dir.mkdirs()
+                File f = file('.settings/org.eclipse.core.resources.prefs')
+            if (!f.exists()) {
+                    f.write('eclipse.preferences.version=1\n')
+                    f.append('encoding/<project>=utf-8')
+                }
+            }
+    }
+    wtp {
+        component {
+        	contextPath = '/'
+        }
+        // This section edits the file "/.settings/org.eclipse.wst.common.project.facet.core.xml"
+        // removing the facet of jst.web version 2.4 and adding version 3.1.
+        // One day this will not be needed anymore, but until then...
+        facet {
+        	facet name: 'jst.web', version: '3.1'
+        	def oldJstWebFacet = facets.findAll {
+            	it.name == 'jst.web' && it.version == '2.4'
+            }
+            facets.removeAll(oldJstWebFacet)
+        }
+    }
+	// https://blog.gradle.org/buildship-sync-task-exec
+    autoBuildTasks sassCompile // Only when using SASS !!!
+}
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF8'
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs.add("-parameters")
+}
+
+repositories {
+    mavenCentral()
+    // mavenLocal()
+}
+
+dependencies {
+
+	implementation	 project(':YadaWeb')
+	implementation	 project(':YadaWebSecurity')
+	implementation	 project(':YadaWebCMS')	
+	implementation	 project(':YadaWebCommerce')
+
+	implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.14'
+
+}
+
+yadaInit {
+    projectName = rootProject.name
+    acronym = project.acronym
+    basePackage = 'net.yadaframework.example'
+    dbPasswords = ['dev': 'qwe', 'tst': 'qwe', 'prod': 'qwe']
+    envs=['dev', 'tst', 'prod']
+        // See YadaTools/src/main/groovy/net/yadaframework/tools/YadaProject.groovy
+        // for more configuration options
+}
+
+configurations {
+    generateSchema
+}
+dependencies {
+    generateSchema 'org.apache.logging.log4j:log4j-core:2.21.1'
+}
+
+task dbSchema(dependsOn: [classes], type: JavaExec) {
+	inputs.files (configurations.generateSchema, "$rootDir/src/main/resources/META-INF/persistence.xml") 
+	outputs.files "$rootDir/schema/${acronym}.sql" // This must be the same name used in persistence.xml
+    classpath = configurations.generateSchema + sourceSets.main.runtimeClasspath
+    main = 'net.yadaframework.tools.YadaSchemaGenerator'
+    doFirst {
+        delete outputs.files
+		// Since recently, for autodiscovery of entities to work, 
+		// the compiled entities must be in the root folder of the META-INF/persistence.xml file
+		// so I copy the META-INF file there:
+        copy {
+     		from 'src/main/resources/META-INF'
+    		into 'build/classes/java/main/META-INF'
+        }
+    }
+    doLast {
+        delete "build/classes/java/main/META-INF"
+    }
+}
+
+sass {
+	properties = "$rootDir/sass.properties"
+    download {
+		version = "1.58.2"
+		output = "$rootDir/.sass"
+    }
+}
+

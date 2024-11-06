@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Use the allowLinking="true" attribute in the Context tag to allow symlinks in folders -->
+<Context override="true">
+<Manager pathname="" /> <!-- Disable session persistence -->
+
+<JarScanner>
+	<!-- skip tag/annotation jar scanning: https://tomcat.apache.org/tomcat-8.0-doc/config/jar-scan-filter.html -->
+   	<!-- "main" is needed when running tomcat embedded in Eclipse in order to use the Yada projects -->
+    <JarScanFilter
+    	defaultPluggabilityScan="true" pluggabilityScan="main,Yada*,yada*,spring*" pluggabilitySkip="*"
+    	defaultTldScan="false" tldScan="" tldSkip="*" />
+</JarScanner>
+
+<!-- 
+http://commons.apache.org/proper/commons-dbcp/configuration.html
+initialSize: The initial number of connections that are created when the pool is started.
+maxTotal: The maximum number of active connections that can be allocated from this pool at the same time, or negative for no limit.
+maxIdle: The maximum number of connections that can remain idle in the pool, without extra ones being released, or negative for no limit.
+minIdle: The minimum number of connections that can remain idle in the pool, without extra ones being created, or zero to create none.
+maxWaitMillis: The maximum number of milliseconds that the pool will wait (when there are no available connections) for a connection to be returned before throwing an exception, or -1 to wait indefinitely.
+validationQuery: The SQL query that will be used to validate connections from this pool before returning them to the caller.
+validationQueryTimeout: The timeout in seconds before connection validation queries fail.
+testOnBorrow: The indication of whether objects will be validated before being borrowed from the pool.
+maxConnLifetimeMillis: The maximum lifetime in milliseconds of a connection. After this time is exceeded the connection will fail the next activation, passivation or validation test. A value of zero or less means the connection has an infinite lifetime.
+-->
+
+<!-- Datasource for Tomcat server - JNDI version
+<Resource name="jdbc/yexdbdev" 
+	type="javax.sql.DataSource"
+	factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+	logAbandoned="true"
+	initialSize="3"
+	maxTotal="20"
+	maxIdle="5"
+	minIdle="2"
+	maxWaitMillis="20000"
+	validationQuery="Select 1"
+	validationQueryTimeout="30"
+	testOnBorrow="true"
+	maxConnLifetimeMillis="3600000"
+	jdbcInterceptors="SlowQueryReport(threshold=2000)"
+	auth="Container" 
+	driverClassName="com.mysql.jdbc.Driver"
+	username="yexuserdev"
+	password="qwe"
+	url="jdbc:mysql://localhost/yexdbdev?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false"
+/>
+-->
+</Context>

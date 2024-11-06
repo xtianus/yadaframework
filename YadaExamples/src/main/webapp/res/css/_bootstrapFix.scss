@@ -1,0 +1,65 @@
+// Fix for Bootstrap classes
+
+// This one breaks the layout with validated input groups (e.g. password)
+// .form-control {
+// 	height: 34px;
+// }
+
+.modal-header {
+	align-items: flex-start;
+}
+
+.btn-secondary {
+	background-color: white;
+	color: black;
+}
+
+.invalid-feedback {
+	margin: -5px 0 10px 0;
+}
+
+modal-content.card, .resetPassword .card {
+    border-radius: 0.3rem;
+    width: 460px;
+
+    &-header {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1rem;
+        margin: 0;
+        background: none;
+        border: 0;
+    }
+
+    &-body {
+        padding-left: 60px;
+        padding-right: 60px;
+    }
+
+    &-title {
+        text-align: center;
+        text-align: center;
+        font-weight: 600;
+        margin: 0 auto;
+    }
+
+    &-footer {
+        padding: 1rem 1rem;
+        background: none;
+        border: 0;
+    }
+}
+
+.invalid-feedback {
+	color: $c-error;
+	a, a:hover, a:visited {
+		color: $c-error !important;
+	}
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+

@@ -28,12 +28,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,6 +77,9 @@ import net.yadaframework.exceptions.YadaSystemException;
 import net.yadaframework.web.YadaPageRequest;
 import net.yadaframework.web.YadaPageRows;
 
+/**
+ * Utility methods to be used for web development
+ */
 @Lazy // Lazy because used in YadaCmsConfiguration, and it woud give a circular refecence exception otherwise
 @Service
 public class YadaWebUtil {
@@ -86,12 +89,45 @@ public class YadaWebUtil {
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private MessageSource messageSource;
 	
+	/**
+	 * Instance to be used when autowiring is not available
+	 */
+	public final static YadaWebUtil INSTANCE = new YadaWebUtil();
+
+	
 	public final YadaPageRequest FIND_ONE = YadaPageRequest.of(0, 1);
 
 	// Characters that should never be found or placed in a slug
 	private static final String PATTERN_INVALID_SLUG = "[?%:,;=&!+~()@*$'\"\\s]";
 
-	private Map<String, List<?>> sortedLocalEnumCache = new HashMap<>();
+	private Map<String, List<?>> sortedLocalEnumCache = new ConcurrentHashMap<>();
+	
+	/**
+	 * Convenience method for generating a random id of 6 characters to be used in pages with "@yadaWebUtil.randomId6"
+	 * @see YadaUtil#getRandomString(length)
+	 * @return a random string of 6 characters
+	 */
+	public String getRandomId6() {
+		return yadaUtil.getRandomString(6);
+	}
+	
+	/**
+	 * Convenience method for generating a random id of 12 characters to be used in pages with "@yadaWebUtil.randomId12"
+	 * @see YadaUtil#getRandomString(length)
+	 * @return a random string of 12 characters
+	 */
+	public String getRandomId12() {
+		return yadaUtil.getRandomString(12);
+	}
+
+	/**
+	 * Check if an object holds a thymeleaf fragment instance. To be used in Thymeleaf templates.
+	 * @param someObject
+	 * @return true if the parameter is a fragment
+	 */
+	public boolean isFragment(Object someObject) {
+		return someObject instanceof org.thymeleaf.standard.expression.Fragment;
+	}
 	
 	/**
 	 * Returns true if the MultipartFile has not been uploaded at all, not even an empty file
@@ -1278,6 +1314,17 @@ public class YadaWebUtil {
 		}
 		Map<String, Object> modelMap = model.asMap();
 		((List<String>)modelMap.get(KEY_NOTIFICATION_CALLSCRIPT)).add(scriptId);
+	}
+	
+	/**
+	 * Encloses the string in a thymeleaf url operator when missing
+	 * @param url some url
+	 */
+	public String ensureThymeleafUrl(String url) {
+    	if (!url.startsWith("@{")) {
+			url = "@{" + url + "}";
+		}
+		return url;
 	}
 
 }

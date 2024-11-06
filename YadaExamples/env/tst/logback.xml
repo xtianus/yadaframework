@@ -1,0 +1,57 @@
+<configuration scan="true" scanPeriod="30 seconds" debug="false">
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>/srv/yextst/logs/site.log</file>
+	 	<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+	    	<fileNamePattern>/srv/yextst/logs/site.%i.log</fileNamePattern>
+			<minIndex>1</minIndex>
+			<maxIndex>9</maxIndex>
+	    </rollingPolicy>
+    	<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+      		<maxFileSize>20MB</maxFileSize>
+    	</triggeringPolicy>
+		<encoder>
+			<pattern>%d %-5level :%X{session}:%X{remoteIp}:%X{username} [%thread] %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="SEC" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>/srv/yextst/logs/sec.log</file>
+	 	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+	    	<fileNamePattern>/srv/yextst/logs/sec.%d.log</fileNamePattern>
+			<maxHistory>7</maxHistory>
+	    </rollingPolicy>
+		<encoder>
+			<pattern>%d :%X{session}:%X{remoteIp}:%X{username} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<!-- Log an exception when the max file upload limit is reached (in debug) -->
+    <logger name="org.springframework.web.multipart.commons.YadaCommonsMultipartResolver" level="DEBUG"/>
+
+    <logger name="org.springframework.web.multipart.commons.CommonsFileUploadSupport" level="DEBUG"/>
+    <logger name="org.thymeleaf.TemplateEngine.CONFIG" level="INFO"/>
+    <logger name="org.apache.commons.configuration.DefaultConfigurationBuilder" level="ERROR"/>
+    <logger name="net.yodadog.yada.security.CheckSessionFilter" level="DEBUG"/>
+    
+    <logger name="net.yadaframework.security.AuditFilter" level="INFO"/>
+    <logger name="net.yadaframework.security.AuditFilter.files" level="ERROR"/> <!-- Remove or set to INFO to show files -->
+    
+    <!-- To hide WARN: bad write method arg count: public final void org.apache.commons.configuration2.AbstractConfiguration.setProperty -->
+    <logger name="org.apache.commons.beanutils.FluentPropertyBeanIntrospector" level="ERROR"/> 
+    
+    <logger name="org.vibur.dbcp" level="info"/>
+    
+<!-- 
+    <logger name="com" level="WARN"/>
+    <logger name="freemarker" level="WARN"/>
+    <logger name="mobi.ldm.web.gestione" level="debug"/>
+ -->
+    <logger name="security" level="INFO">
+		<appender-ref ref="SEC" />
+    </logger>
+	<root level="INFO">
+		<appender-ref ref="FILE" />
+	</root>
+</configuration>

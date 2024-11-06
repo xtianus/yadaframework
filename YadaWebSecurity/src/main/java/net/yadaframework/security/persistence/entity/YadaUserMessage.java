@@ -220,15 +220,12 @@ public class YadaUserMessage<YLE extends YadaLocalEnum<?>> implements Serializab
 		this.type = localEnum.toYadaPersistentEnum();
 	}
 
-	/***********************************************************************/
-	/* DataTables                                                          */
-
-	@Transient
-	@JsonProperty("DT_RowId")
-	@Deprecated // can be removed now that it is added automatically by YadaDataTableDao
-	public String getDT_RowId() {
-		return this.getClass().getSimpleName()+"#"+this.id; // YadaUserMessage#142
-	}
+//	@Transient
+//	@JsonProperty("DT_RowId")
+//	@Deprecated // can be removed now that it is added automatically by YadaDataTableDao
+//	public String getDT_RowId() {
+//		return this.getClass().getSimpleName()+"#"+this.id; // YadaUserMessage#142
+//	}
 
 	@Transient
 	@JsonProperty

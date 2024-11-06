@@ -209,10 +209,20 @@ public class YadaInputTagProcessor extends AbstractElementModelProcessor {
 		return existing + key + "='" + value + "'";
 	}
 
+	/**
+	 * Processes yada:input attributes like yada:validationError and the plain HTML attributes.
+	 * Every unprocessed yada attribute becomes a Model attribute for the template, with the name yada&lt;lowercaseattribute>.
+	 * Every plain HTML attribute is put in a yadaInput Map in the Model, e.g. ${yadaInput.id} retrieves the id attribute.
+	 * @param sourceTag
+	 * @param context
+	 * @param structureHandler
+	 * @param inputEnum
+	 * @return
+	 */
 	private String processInputTag(IOpenElementTag sourceTag, ITemplateContext context, IElementModelStructureHandler structureHandler, boolean inputEnum) {
         // Convert all attributes of the source tag
         Map<String, String> inputSourceAttributes = sourceTag.getAttributeMap();
-        String targetAttributesString = yadaDialectUtil.getConvertedCustomTagAttributeString(sourceTag, context, inputEnum?"value":null);
+        String targetAttributesString = yadaDialectUtil.getConvertedHTMLCustomTagAttributeString(sourceTag, context, inputEnum?"value":null);
         // Handle "yada:" attributes
         for (Map.Entry<String,String> sourceAttribute : inputSourceAttributes.entrySet()) {
 			String attributeName = sourceAttribute.getKey();

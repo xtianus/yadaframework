@@ -10,17 +10,17 @@
 <!--/*
 	 * This is a generic template for a bootstrap 5 modal with title and body, to be returned via ajax or included in page.
 	 * The modalOptions map can be defined before fragment inclusion to provide additional configuration. The only current valid value is modalOptions=${ {databsbackdrop:'static'} } (keep the spaces).
-	 * In a future version, the 'modalOptions' map will become a fragment parameter replacing 'extraDialogClasses' and 'id'.  
+	 * In a future version, the 'modalOptions' map will become a fragment parameter replacing 'extraDialogClasses' and 'idModal'.  
 	 * @param title modal-title text. Not used when header is specified
-	 * @param header optional custom modal-header. Use ~{} when not needed or _ for the default implementation
+	 * @param header optional custom modal-header. Use ~{} when not needed or _ for the default
 	 * @param body modal-body
-	 * @param footer optional custom modal-footer
+	 * @param footer optional custom modal-footer. Use ~{} when not needed or _ for the default
 	 * @param script optional script
 	 * @param extraDialogClasses any classes to be added to the modal-dialog
-	 * @param id optional modal id. Use ~{} when not needed
+	 * @param idModal optional modal id. Use ~{} when not needed
  */-->
-<div th:fragment="fragment(title,header,body,footer,script,extraDialogClasses,id)" th:with="titleId='t'+${#strings.randomAlphanumeric(16)}"
-	class="modal fade B5" tabindex="-1" role="dialog" th:aria-labelledby="${titleId}" aria-hidden="true" th:id="${id?:#strings.randomAlphanumeric(16)}" th:data-bs-backdrop="${modalOptions!=null?modalOptions['databsbackdrop']:''}">
+<div th:fragment="fragment(title,header,body,footer,script,extraDialogClasses,idModal)" th:with="titleId='t'+${#strings.randomAlphanumeric(16)}"
+	class="modal fade B5" tabindex="-1" role="dialog" th:aria-labelledby="${titleId}" aria-hidden="true" th:id="${idModal?:#strings.randomAlphanumeric(16)}" th:data-bs-backdrop="${modalOptions!=null?modalOptions['databsbackdrop']:''}">
 	<div class="modal-dialog" th:classappend="${extraDialogClasses}" role="document">
     	<div class="modal-content card">
     		<th:block th:replace="${header}">

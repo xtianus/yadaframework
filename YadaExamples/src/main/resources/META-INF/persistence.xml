@@ -1,0 +1,55 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+             
+   <!-- This file is only needed to generate the db schema -->
+   
+    <persistence-unit name="yadaPersistenceUnit">
+    	<!-- These are used for schema generation. You can remove the ones you don't need but
+    		 you will get a schema generation error if some needed class is missing -->
+  		<class>net.yadaframework.persistence.entity.YadaAttachedFile</class>
+  		<class>net.yadaframework.persistence.entity.YadaBrowserId</class>
+  		<class>net.yadaframework.persistence.entity.YadaClause</class>
+  		<class>net.yadaframework.persistence.entity.YadaJob</class>
+  		<class>net.yadaframework.persistence.entity.YadaPersistentEnum</class>
+     	 
+  		<class>net.yadaframework.security.persistence.entity.YadaUserCredentials</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaUserProfile</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaRegistrationRequest</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaSocialCredentials</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaAutoLoginToken</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaTicket</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaTicketMessage</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaUserMessage</class>
+  		<class>net.yadaframework.security.persistence.entity.YadaCommentMessage</class>
+     	
+     	 
+  		<class>net.yadaframework.cms.persistence.entity.YadaArticle</class>
+  		<class>net.yadaframework.cms.persistence.entity.YadaProduct</class>
+       	
+     	 
+  		<class>net.yadaframework.commerce.persistence.entity.YadaAddress</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaCart</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaCartItem</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaCommerceArticle</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaOrder</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaOrderItem</class>
+  		<class>net.yadaframework.commerce.persistence.entity.YadaTransaction</class>
+      	
+ 		 
+      <properties>
+            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+		    <property name="jakarta.persistence.jdbc.user" value="yexuserdev"/>
+		    <property name="jakarta.persistence.jdbc.password" value="qwe"/>
+		    <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost/yexdbdev?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true"/>
+         	<property name="jakarta.persistence.schema-generation.scripts.action" value="create"/>
+			<property name="jakarta.persistence.schema-generation.scripts.create-target" value="schema/yex.sql"/>
+      		 
+      		<!-- ??? -->
+			<property name="hibernate.ejb.naming_strategy" value="org.hibernate.cfg.ImprovedNamingStrategy"/> <!-- Lowercase table names: https://www.petrikainulainen.net/programming/tips-and-tricks/implementing-a-custom-namingstrategy-with-hibernate/ -->
+
+      </properties>
+   		 
+   </persistence-unit>
+</persistence>

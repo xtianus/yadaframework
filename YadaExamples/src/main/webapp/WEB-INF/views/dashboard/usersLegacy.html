@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+	xmlns:th="http://www.thymeleaf.org" 
+	xmlns:yada="http://www.yadaframework.net">
+<head>
+	<th:block th:replace="~{/header :: headFragment}"/>
+	<link rel="stylesheet" type="text/css" th:href="@{/static/datatables-2.1.8/datatables.min.css}"/>
+	
+</head>
+<body>
+
+<th:block th:replace="~{/header :: body}"/>
+<a th:href="@{/dashboard}">Back to Dashboard</a>
+<br>
+
+<main class="container">
+<h1>Users (Legacy)</h1>
+<div th:replace="~{/yada/dataTableCrud :: body (tableId='usersTable',columns=${ {'ID', 'Enabled', 'Nickname','Email','Last Login'} }, classes='yadaNoLoader')}"></div>
+</main>
+
+<th:block th:replace="~{/footer :: body}"/>
+
+<script th:src="@{/static/datatables-2.1.8/datatables.min.js}"></script>
+<script th:if="${@config.developmentEnvironment}" th:src="@{/yadares/js/yada.datatablesLegacy.js}"></script>
+
+
+<script th:inline="javascript">
+yada.ready(function(){
+	var usersTable;
+	let language = /*[[${#locale.language}]]*/ "placehoder";
+	let tablePageLoadUrl = /*[[@{/dashboard/user/userProfileTablePage}]]*/ "placehoder";
+	let userEditUrl = /*[[@{/dashboard/user/ajaxEditUserProfileForm}]]*/ "placehoder";
+	let userDeleteUrl = /*[[@{/dashboard/user/ajaxDeleteUserProfile}]]*/ "placehoder";
+	let userImpersonateUrl = /*[[@{/dashboard/user/impersonate}]]*/ "placehoder";
+	let languageFileUrl;
+	if (language === 'en') {
+	    languageFileUrl = /*[[@{/static/datatables-1.13.4/i18n/en-gb.json}]]*/ "placehoder";
+	} else {
+	    languageFileUrl = `/*[[@{/static/datatables-1.13.4/i18n/${language}_${language}.json}]]*/ "placehoder"`;
+	}	
+	let impersonateButtonTitle = /*[[#{button.impersonate}]]*/ "placehoder";
+	let editButtonTitle = /*[[#{button.edit}]]*/ "placehoder";
+	let deleteButtonTitle = /*[[#{button.delete}]]*/ "placehoder";
+	let deleteConfirmationMessage = "Do you want to delete the selected user?";
+	let deleteConfirmationManyMessage = 'Do you want to delete the selected users?';
+	let deleteConfirmationButton = "Delete";
+	let deleteAbortButton = "Cancel";
+	
+	// Add the table to the yex namespace so I can reload it later
+   	yex.usersTable = yada.dataTableCrud($('#usersTable'), 
+   		tablePageLoadUrl, 
+   		['id',
+   		 'userCredentials.enabled',
+   		 'userCredentials.nickname',
+   		 'userCredentials.username',
+   		 'userCredentials.lastSuccessfulLogin'
+   		 ],
+   		{
+   			"url": userEditUrl,
+   			"title": editButtonTitle,
+   			"idName": "userProfileId"
+   		},
+   		{
+		"url": userDeleteUrl,
+   			"title": deleteButtonTitle,
+   			"nameColumn": 3,
+   			"toolbarPosition": 3, // zero-based
+   			"confirmOneMessage": deleteConfirmationMessage,
+   			"confirmManyMessage": deleteConfirmationManyMessage,
+   			"confirmButtonText": deleteConfirmationButton,
+   			"abortButtonText": deleteAbortButton
+       	},
+   		[ [ 2, 'desc' ] ], 
+   		10,
+   		languageFileUrl,
+   		[
+   			{
+				"url": userImpersonateUrl, 
+				"title": impersonateButtonTitle,
+				"icon": '<i class="bi bi-mortarboard-fill"></i>',
+				"idName": "id",
+				"toolbarText": impersonateButtonTitle,
+				"toolbarClass": "s_singlerowButton", // s_singlerowButton or s_multirowButton or both
+				"toolbarPosition": 1, // zero-based
+				"ajax": false
+   			}
+		]
+    );
+	
+});
+
+</script>
+
+</body>
+</html>

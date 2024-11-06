@@ -17,6 +17,9 @@ public class YadaDatatablesRequest {
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
+	// The datatable id
+	String dataTableId;
+	
 	// Draw counter. This is used by DataTables to ensure that the Ajax returns from server-side processing requests are drawn in sequence by DataTables 
 	int draw;
 	// Paging first record indicator. This is the start point in the current data set (0 index based - i.e. 0 is the first record).
@@ -149,6 +152,20 @@ public class YadaDatatablesRequest {
 
 	public void setExtraJsonAttributes(List<String> extraJsonAttributes) {
 		this.extraJsonAttributes = extraJsonAttributes;
+	}
+
+	/**
+	 * @return the dataTableId
+	 */
+	public String getDataTableId() {
+		return dataTableId;
+	}
+
+	/**
+	 * @param dataTableId the dataTableId to set
+	 */
+	public void setDataTableId(String dataTableId) {
+		this.dataTableId = dataTableId;
 	}
 	
 }

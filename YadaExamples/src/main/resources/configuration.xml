@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<header>
+		<result>
+			<expressionEngine config-class="org.apache.commons.configuration2.tree.xpath.XPathExpressionEngine"/>
+		</result>
+	</header>
+	<override> <!-- Top files overwrite bottom files -->
+		<!-- reloadingRefreshDelay is in millisecondi: 20000 = 20 seconds -->
+		<system/>
+		<env/>
+		<!-- security.properties contains sensitive values that should not be pushed to git -->
+		
+		<properties fileName="/srv/yexdev/bin/security.properties" config-optional="true"/>
+		
+		<properties fileName="/srv/yextst/bin/security.properties" config-optional="true"/>
+		
+		<properties fileName="/srv/yexprod/bin/security.properties" config-optional="true"/>
+		
+		<!-- build.properties is in WEB-INF, which is the parent folder of the execution context -->
+		<properties fileName="../build.properties" config-optional="true"/>
+		<properties fileName="net.yadaframework.yadaweb.properties"/>
+		<properties fileName="net.yadaframework.yadawebsecurity.properties" config-optional="true"/>
+		<properties fileName="net.yadaframework.yadawebcms.properties" config-optional="true"/>
+		<properties fileName="net.yadaframework.yadawebcommerce.properties" config-optional="true"/>
+
+		<!-- Personal configuration for developers -->
+		<xml config-name="localdev" config-at="config" fileName="/srv/yexdev/bin/conf.webapp.localdev.xml" 
+			reloadingRefreshDelay="4000" config-optional="true" config-reload="true">
+		</xml>
+
+		
+		<xml config-name="dev" config-at="config" fileName="conf.webapp.dev.xml" 
+			reloadingRefreshDelay="4000" config-optional="true" config-reload="true">
+		</xml>
+		
+		<xml config-name="tst" config-at="config" fileName="conf.webapp.tst.xml" 
+			reloadingRefreshDelay="4000" config-optional="true" config-reload="true">
+		</xml>
+		
+		<xml config-name="prod" config-at="config" fileName="conf.webapp.prod.xml" 
+			reloadingRefreshDelay="4000" config-optional="true" config-reload="true">
+		</xml>
+		
+	</override>
+</configuration>

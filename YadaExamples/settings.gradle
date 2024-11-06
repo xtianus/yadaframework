@@ -1,0 +1,11 @@
+rootProject.name = 'YadaExamples'
+
+include 'YadaWeb'
+project(':YadaWeb').projectDir = "../YadaWeb" as File
+include 'YadaWebSecurity'
+project(':YadaWebSecurity').projectDir = "../YadaWebSecurity" as File
+include 'YadaWebCMS'
+project(':YadaWebCMS').projectDir = "../YadaWebCMS" as File
+include 'YadaWebCommerce'
+project(':YadaWebCommerce').projectDir = "../YadaWebCommerce" as File
+

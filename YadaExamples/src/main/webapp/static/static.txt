@@ -1,0 +1,1 @@
+Put here all files that either never change or have a version number in the name, so that they can be cached forever.

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<!--/*
+This is a template for a 2-section email: the first section with a left image and text on the right, the second section the opposite.
+Only the first text is required.
+Parameters:
+- preview = true if the template is shown in the browser, falste if it is sent via email
+- title = title
+- text1 = first text
+- text2 = second text (optional)
+- image1Url = url of first image, for preview (optional)
+- image2Url = url of second image, for preview (optional)
+- image1Filename = first image filename, for email embedding (e.g. asdasd.jpg)
+- image2Filename = second image filename, for email embedding (e.g. slkefu.jpg)
+*/-->
+<html 
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:yada="http://yada.yodadog.net"
+>
+<head>
+	<meta charset="UTF-8"/>
+</head>
+<body>
+	<img th:if="${!#strings.isEmpty(image1Filename)}" 
+		th:src="${preview}?@{${image1Url}}:'cid:image1'" 
+		style="max-width: 30%; float: left; margin-right: 15px; margin-bottom: 15px;"/>
+	<h1 th:if="${!#strings.isEmpty(title)}" th:text="${title}">This is your newsletter</h1>
+	<p th:if="${!#strings.isEmpty(text1)}" th:utext="${text1}"></p>
+	<p th:if="${!#strings.isEmpty(text2)}" style="clear: both;"></p>
+	<img th:if="${!#strings.isEmpty(image2Filename)}" 
+		th:src="${preview}?@{${image2Url}}:'cid:image2'" 
+		style="max-width: 30%; float: right;"/>
+	<p th:if="${!#strings.isEmpty(text2)}" th:utext="${text2}" ></p>
+ 
+  	<p style="clear: both; margin-bottom: 40px;"></p>
+  	<p>
+     	<img th:if="${preview}" th:src="@{/res/img/ldmlogo.h50.png}" />
+     	<img th:unless="${preview}" src="cid:logosmall" />
+  	</p>
+  	<p style="margin-top: 10px;">Thank you, <br />
+     	<a href="http://www.example.com/"><em>EXAMPLESITE</em></a>
+  	</p>
+  	<p style="margin-top: 30px;" th:utext="${footer}">Footer Here</p>
+</body>
+</html>

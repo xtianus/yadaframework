@@ -54,6 +54,7 @@ public class YadaDialect extends AbstractProcessorDialect {
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "cancelButton", "data-yadaCancelButton", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "okShowsPrevious", "data-yadaOkShowsPrevious", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "hash", "data-yadaHash", config));
+        processors.add(new YadaDataTableTagProcessor(dialectPrefix, config));	// yada:dataTable
         processors.add(new YadaNewlineTextAttrProcessor(dialectPrefix, false)); // unewlinetext
         processors.add(new YadaNewlineTextAttrProcessor(dialectPrefix, true));	// newlinetext
         processors.add(new YadaBrOnFirstSpaceAttrProcessor(dialectPrefix, false));	// ubrspace

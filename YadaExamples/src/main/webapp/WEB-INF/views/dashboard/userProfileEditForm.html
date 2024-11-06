@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+	xmlns:yada="http://www.yadaframework.net"
+	>
+<body th:with="newUser=${userProfile.id==null}">
+
+<div th:replace="~{/yada/modalGenericB5::fragment(~{::title},_,~{::content},~{},_,'',~{})}">
+
+<div th:fragment="title">
+	<span th:text="${newUser?'Add User':'Edit User &quot;'+userProfile+'&quot;'}">Edit user XXX</span>
+	<a th:if="${userProfile.id!=null}" class="yadaShowLoader s_tooltip yadaAjax" th:href="@{/dashboard/user/impersonate(id=${userProfile.id})}" title="Impersonate" style="margin-left: 15px;">
+		<i class="bi bi-mortarboard-fill"></i>
+	</a> 
+</div>
+<div th:fragment="content">
+	<div class="modal-body">
+		<div th:replace="~{/yada/feedbackMessages :: div}"></div>
+		<form name="userForm" yada:successhandler="yex.usersTable?.ajax.reload()" 
+			th:action="@{/dashboard/user/ajaxAddOrUpdateUserProfile}" th:object="${userProfile}" class="yadaAjax" th:classappend="${#fields.hasErrors('*')}? has-error" method="post" role="form">
+			<fieldset>
+				<input type="hidden" name="userProfileId" th:value="*{id}" th:unless="${newUser}">
+				<div th:unless="${newUser}">ID: [[*{id}]]</div>
+				<div th:replace="~{/yada/form/b5/boolean :: body (fieldName='userCredentials.enabled',labelKey='form.label.enabled',switch=true)}"></div>
+				<div th:replace="~{/yada/form/b5/text :: body (fieldName='userCredentials.username',labelKey='form.label.email',type='email',required=true)}"></div>
+				<div th:replace="~{/yada/form/b5/checklist :: body (fieldName='userCredentials.roles',options=${@config.roleIds},labelKey='form.label.roles',textKey='role.name.')}"></div>
+				<!--/* <div th:replace="/yada/form/boolean(fieldName='emailInvalid',labelKey='form.label.emailInvalid')"></div>  */-->
+				<th:block th:unless="${newUser}">
+					<div th:replace="~{/yada/form/b5/text :: body (fieldName='userCredentials.creationDate',labelKey='form.label.creationDate',type='datetime-local',disabled=true)}"></div>
+				</th:block>
+				<div class="card mb-3">
+		  			<div class="card-body">
+						<div th:replace="~{/yada/form/b5/boolean :: body (fieldName='userCredentials.changePassword',labelKey='form.label.changePassword')}"></div>
+						<th:block th:unless="${newUser}">
+							<div th:replace="~{/yada/form/b5/text :: body (fieldName='userCredentials.lastSuccessfulLogin',labelKey='form.label.lastSuccessfulLogin',disabled=true,type=*{userCredentials?.lastSuccessfulLogin==null?'text':'datetime-local'})}"></div>
+							<div th:replace="~{/yada/form/b5/text :: body (fieldName='userCredentials.failedAttempts',labelKey='form.label.failedAttempts')}"></div>
+						</th:block>
+						<div th:replace="~{/yada/form/b5/text :: body (fieldName='userCredentials.newPassword',labelKey='form.label.newPassword')}"></div>
+					</div>
+				</div>
+				<th:block th:if="${newUser}">
+					<div th:replace="~{/yada/form/b5/boolean :: body (fieldName='inviteEmail',label='Send invitation email')}"></div>
+				</th:block>
+		
+				<div class="form-group">
+					<button class="btn btn-success" type="submit" name="Save"><span class="glyphicon glyphicon-ok"></span> Confirm</button>
+					<button class="btn btn-default" type="button" name="Cancel" data-bs-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Close</button>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+</div>
+
+
+</div>
+
+</body>
+</html>

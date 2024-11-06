@@ -4,12 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
@@ -29,7 +31,8 @@ public class YadaGlobalExceptionHandler {
 	private final static int LOOPCOUNTER_MAX=2;
 
 	@ExceptionHandler(value = Exception.class)
-	public ModelAndView globalErrorHandler(HttpServletRequest request, Exception e) throws Exception {
+	public ModelAndView globalErrorHandler(HttpServletRequest request, HttpServletResponse response, Exception e) throws Exception {
+		response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.addObject(YadaConstants.REQUEST_HASERROR_FLAG, "true");
 		// Count the times we get here, to avoid looping in case of repeating errors on forward

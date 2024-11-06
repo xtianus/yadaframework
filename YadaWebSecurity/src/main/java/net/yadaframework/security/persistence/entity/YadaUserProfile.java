@@ -14,9 +14,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotNull;
+import net.yadaframework.components.YadaUtil;
+import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 
 @Entity
@@ -24,6 +27,9 @@ import net.yadaframework.persistence.entity.YadaAttachedFile;
 // @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaUserProfile implements Serializable {
 	private static final long serialVersionUID = 1L;
+	
+	@Transient
+	YadaConfiguration config;
 
 	// For optimistic locking
 	@Version
@@ -63,7 +69,42 @@ public class YadaUserProfile implements Serializable {
 //	@JsonIgnore
 //	@OneToMany(mappedBy="owner", cascade=CascadeType.ALL)
 //	protected List<YadaTicket> tickets;
+	
+	@PostLoad
+	private void init() {
+		config=(YadaConfiguration) YadaUtil.getBean("config");
+	}
 
+	/**
+	 * Check if the user has any of the specified roles
+	 * @param roleKey the role name as configured, case insensitive, e.g. "MANAGER" or "admin"
+	 * @return true if the user has any of the specified roles
+	 */
+	@Transient
+	public boolean hasAnyRole(String ... roleKey) {
+		for (String role : roleKey) {
+			if (userCredentials.hasRole(config.getRoleId(role))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Check if the user has any of the specified roles
+	 * @param roleId the role ids
+	 * @return true if the user has any of the specified roles
+	 */
+	public boolean hasAnyRole(Integer ... roleId) {
+		// slower: return CollectionUtils.containsAny(userCredentials.getRoles(), Arrays.asList(roleId));
+		for (Integer role : roleId) {
+			if (userCredentials.hasRole(role)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public Long getId() {
 		return id;
 	}
