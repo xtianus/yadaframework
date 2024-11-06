@@ -16,7 +16,7 @@
 	 * the value found in columnNames at the corresponding position.
 	 * @param message the string with placeholders, e.g. "Product {0} color {1}"
 	 * @param columnNames an array with the names of the columns that hold the value to replace, e.g. ["product.name", "product.color"]
-	 * @param row the current row 
+	 * @param row the current row data
 	 * @param firstValue when specified, this is the value for {0} while all other placeholders take values from the columns
 	 */
 	function formatMessage(message, columnNames, row, firstValue) {
@@ -119,11 +119,13 @@
 			const requestData = {};
 			//
 			let ids = [];
+			let $elementInRow = null;
 			const isRowIcon = $anchor.hasClass(CLASS_COMMANDBUTTON);
 			if (isRowIcon) {
 				// Command button specific code
 				const id = rowIdToEntityId($anchor.parents('tr').attr('id'));
 				ids = [id];
+				$elementInRow = $anchor;
 			} else {
 				// Toolbar button specific code
 				const $checks = $table.find("tbody [type='checkbox']:checked");
@@ -135,7 +137,14 @@
 					}
 					return rowIdToEntityId(rowId);
 				}).get();
+				if (totRows==1) {
+					$elementInRow = $checks.first();
+				}
 			}
+			
+			// rowData is the datatables data of the row when the command button is clicked
+			// or there is one row selected when the toolbar button is clicked
+			const rowData = dataTableApi.row($elementInRow?.parents('tr')).data();
 			
 			// urlProvider
 			if (buttonConf.urlProvider) {
@@ -143,10 +152,10 @@
 				if (typeof urlProvider == "function") {
 					if (isRowIcon) {
 						// Row button sends one row
-						var rowData = dataTableApi.row($anchor.parentElement).data();
+						// const rowData = dataTableApi.row($anchor.parentElement).data();
 						url = urlProvider(rowData);
 					} else {
-						// Toolbar button sends all rows
+						// Toolbar button sends all table
 						url = urlProvider(ids, dataTableApi);
 					}
 					if (url==null) {
@@ -160,11 +169,11 @@
 			// Confirmation modal
 			const confirmDialog = buttonConf.confirmDialog;
 			const columnNames = confirmDialog?.columnNames;
-			const confirmTitle = formatMessage(confirmDialog?.confirmTitle, columnNames, row);
-			const confirmOneMessage = formatMessage(confirmDialog?.confirmOneMessage, columnNames, row);
-			const confirmManyMessage = formatMessage(confirmDialog?.confirmManyMessage, columnNames, row, totRows);
-			const confirmButtonText = formatMessage(confirmDialog?.confirmButtonText, columnNames, row);
-			const abortButtonText = formatMessage(confirmDialog?.abortButtonText, columnNames, row);
+			const confirmTitle = formatMessage(confirmDialog?.confirmTitle, columnNames, rowData);
+			const confirmOneMessage = formatMessage(confirmDialog?.confirmOneMessage, columnNames, rowData);
+			const confirmManyMessage = formatMessage(confirmDialog?.confirmManyMessage, columnNames, rowData, totRows);
+			const confirmButtonText = formatMessage(confirmDialog?.confirmButtonText, columnNames, rowData);
+			const abortButtonText = formatMessage(confirmDialog?.abortButtonText, columnNames, rowData);
 
 			// Make request			
 			if (confirmDialog) {
