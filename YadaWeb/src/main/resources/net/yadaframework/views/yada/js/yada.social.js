@@ -34,7 +34,7 @@
 		yada.ajax(serverUrl, 
 			{ accessToken: accessToken }, 
 			function(responseText, statusText) {
-				window.location.href=window.location.href;
+				// Nothing to do
 			}
 		);
 	}

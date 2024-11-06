@@ -274,7 +274,7 @@ public class YadaDataTableDao {
 		YadaSql searchSql = YadaSql.instance();
 		
 		yadaSql.selectFrom("select distinct e from "+targetClass.getSimpleName()+" e");
-		countSql.selectFrom("select count(distinct e.id) from "+targetClass.getSimpleName()+" e");
+		countSql.selectFromReplace("select count(distinct e.id) from "+targetClass.getSimpleName()+" e");
 		
 		// Searching
 		List<YadaDatatablesColumn> yadaDatatablesColumns = yadaDatatablesRequest.getColumns();
@@ -390,6 +390,7 @@ public class YadaDataTableDao {
 		query.setFirstResult(yadaDatatablesRequest.getStart());
     	@SuppressWarnings("unchecked")
 		List<targetClass> result = query.getResultList();
+		// TODO sort using an outer query instead of this trick
 		if (needsExtraction) {
 			// When doing an "order by" on a joined column we add the column to the select clause to prevent the "ORDER BY clause is not in SELECT list" error.
 			// This means that the result now is a list of Object[] where only the first element is what we need.
