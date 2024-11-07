@@ -240,6 +240,7 @@
 		    	// Need to add any extra parameter if a form is present
 		    	var addedData = $("form.yada_dataTables_"+tableId).serializeArray();
 		    	var extraParam = data['extraParam']={};
+				data.legacy=true; // pre yada 0.7.7
 		    	var i=0;
 		    	for (i=0; i<addedData.length; i++) {
 		    		var paramObj = addedData[i];

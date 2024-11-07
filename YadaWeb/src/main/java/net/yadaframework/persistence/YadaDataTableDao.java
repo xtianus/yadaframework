@@ -129,14 +129,18 @@ public class YadaDataTableDao {
 					addAttributeValue(entity, entityJson, attributePath);
 				}
 			}
-			// Add DT_RowClass
-			addAttributeValue(entity, entityJson, "DT_RowClass"); // Add this class to the tr node
+			// Add DT_RowClass to the value returned by getDT_RowClass() if any
+			addAttributeValue(entity, entityJson, "DT_RowClass"); // See YadaUserMessage for an example
 			// Add DT_RowId for DataTables id
 			String dataTableId = yadaDatatablesRequest.getDataTableId();
 			try {
 				Long id = (Long) idField.get(entity);
-				String rowId = dataTableId+"_"+entityClass.getSimpleName()+"_"+id; // "UserTable_UserProfile_22"
-				entityJson.put("DT_RowId", rowId);
+				if (yadaDatatablesRequest.isLegacy()) {
+					entityJson.put("DT_RowId", entityClass.getSimpleName()+"#"+id); // UserProfile#22
+				} else {
+					String rowId = dataTableId+"_"+entityClass.getSimpleName()+"_"+id; // "UserTable_UserProfile_22"
+					entityJson.put("DT_RowId", rowId);
+				}
 			} catch (Exception e) {
 				log.error("Failed to set DT_RowId for entity {} (ignored)", entity);
 			}

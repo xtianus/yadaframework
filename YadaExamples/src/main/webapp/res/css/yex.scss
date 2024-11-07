@@ -6,13 +6,38 @@ html {
 }
 
 header, footer {
-	height: 50px;
     background-color: #f1f1f1;
+}
+
+footer {
+	margin-top: 50px;
+	height: 50px;
 }
 
 main {
 	min-height: 300px;
 }
+
+tr.userProfileAdmin td:not(.yadaCommandButtonCell) {
+	color: red;
+}
+.yadaRowCommandButton {
+	&:not(.disabled) {
+		i {
+			color: black;
+		}
+	}
+	&.disabled {
+		i {
+			color: #ccc;
+		}
+	}
+}
+
+.yadaDataTableBlock .disabled {
+	cursor: no-drop;
+}
+
 
 ///////////////////////
 // Yada v0.7.6 icon fix

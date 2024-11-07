@@ -55,6 +55,13 @@ public interface YadaViews {
 	String AJAX_NOTIFY_B3 = "/yada/modalNotifyB3";
 
 	/**
+	 * Open a confirm modal.
+	 */
+	String CONFIRM_B5 = "/yada/modalConfirmB5";
+	String CONFIRM_B4 = "/yada/modalConfirmB4";
+	String CONFIRM_B3 = "/yada/modalConfirmB3";
+
+	/**
 	 * Close any open modal
 	 */
 	String AJAX_CLOSE_MODAL = "/yada/ajaxCloseModal";

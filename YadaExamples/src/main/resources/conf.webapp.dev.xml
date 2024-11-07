@@ -89,20 +89,6 @@
 		</datasource>
 	</database>
 
-	<setup>
-		<users>
-			<user>
-				<nickname>admin</nickname> <!-- This is an example of UserProfile customization -->
-				<email>admin@example.com</email>
-				<password>myAppPassword</password>
-				<locale>en_US</locale>
-				<timezone>Europe/Rome</timezone>
-				<role>USER</role>
-				<role>ADMIN</role>
-			</user>
-		</users>
-	</setup>
-	
 	<security>
 		<!-- sessionTimeoutMinutes is used via javascript to check if the browser session is expired and show a warning modal -->
 		<!-- WARNING: this value must be the same as the value of session-timeout in /src/main/webapp/WEB-INF/web.xml or the session might never expire -->
@@ -112,26 +98,5 @@
 		<maxFailedAttempts>10</maxFailedAttempts>
 		<failedAttemptsLockoutMinutes>10</failedAttemptsLockoutMinutes>
 		<autologinExpirationHours>48</autologinExpirationHours>
-		<roles>
-			<!-- ATTENZIONE: l'ID e la KEY vanno stabiliti all'inizio e MAI PIU' CAMBIATI perchè vanno nel DB.
-					Sono stati scelti valori non consecutivi per le ID in modo da poter eventualmente inserire valori in mezzo, 
-					anche se ciò non ha effettivamente senso ma non si sa mai che si voglia un giorno ordinare in base all'ID. -->
-			<role>
-				<id>8</id>
-				<key>ADMIN</key>
-				<!-- ATTENZIONE: non usare name e description come fatti qui, ma metterli in messages.properties
-				<name>Admin</name>
-				<description>Gestione infrastruttura tecnica</description>
-				 -->
-			</role>
-			<role>
-				<id>2</id>
-				<key>USER</key>
-				<!-- 
-				<name>Utente Verificato</name>
-				<description>Utente la cui email è stata verificata</description>
-				 -->
-			</role>
-		</roles>
 	</security>
 </config>

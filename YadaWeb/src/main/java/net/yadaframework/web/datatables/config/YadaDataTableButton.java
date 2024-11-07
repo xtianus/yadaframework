@@ -30,6 +30,7 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 	protected String text; // Tooltip text for the command icon and text for the toolbar button
 	protected String icon; // HTML content for the button's icon
 	protected boolean global = false; // True for a button that is always enabled regardless of row selection, for example an Add button. Global buttons are not shown in the command column.
+	protected boolean multiRow = false; // True for a toolbar button that is enabled also when multiple rows are selected
 	protected String toolbarCssClass = "btn btn-default"; // CSS class to be applied to the button
 	protected String idName = "id"; // Name of the ID request parameter (optional, default is "id")
 	protected boolean ajax = true; // Boolean to indicate if the button should use an AJAX request
@@ -59,6 +60,16 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 		}
     	this.yadaDataTableConfirmDialog = new YadaDataTableConfirmDialog(this, parent);
         return yadaDataTableConfirmDialog;
+    }
+    
+    /**
+     * Enable the toolbar button when one or many rows are selected.
+     * The default is for the toolbar button to be enabled only when one row is selected.
+     * @return this instance for method chaining
+     */
+    public YadaDataTableButton dtMultiRow() {
+    	this.multiRow = true;
+		return this;
     }
     
 	/**
@@ -204,6 +215,7 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
      * Javascript function that determines whether to show the button icon for each row.
      * It receives the "data" and "row" parameters as for the render functions (no "type" or "meta" though). 
      * It must return true/false to show/hide the icon or "disabled" to show it disabled.
+     * These buttons are not shown in the toolbar.
      * @see <a href="https://datatables.net/reference/api/row().data()">DataTables row().data() API</a> 
      * @throws YadaInvalidUsageException when both showCommandIcon and global are set
      * @param function some javascript function that returns true or false or "disabled".

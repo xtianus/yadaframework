@@ -17,7 +17,7 @@
     			<h3 class="modal-title" id="loginModalTitle">Login</h3>
     		</div>
     		<div class="modal-body">
-				<form th:action="@{/loginPost}" role="form" method="post" id="loginForm">
+				<form th:action="@{/loginPost}" th:classappend="${yadaIsAjaxResponse}?yadaAjax" role="form" method="post">
 					<fieldset>
 						<div th:if="${lockoutMinutes}" class="alert alert-danger">Too many failed attempts: login disabled.<br/>Wait <span th:text="${lockoutMinutes}">5</span> minute<span th:text="${lockoutMinutes>1?'s':''}">s</span> and retry, or <a th:href="@{/passwordReset(email=${username})}">recover your password</a> in the meantime</div>
 						<div th:if="${loginError}" class="alert alert-danger">Can't login. Please try again later and contact us if the problem persists.</div>
@@ -38,7 +38,7 @@
 		    					<div class="input-group">
 		    						<input type="password" name="password" class="form-control" id="password" placeholder="Password" required="required" th:value="${password}"/>
 		    						<span class="input-group-btn">
-										<a class="btn  btn-secondary yadaShowPassword" href="#" title="Show password"><span class="glyphicon glyphicon-eye-open"></span></a>
+										<a class="btn  btn-secondary yadaShowPassword" href="#" title="Show password"><i class="bi bi-eye"></i></a>
 									</span>
 		    					</div>
 		    					<span th:if="${passwordError}" class="help-block">Invalid password. If you forgot it, <a th:href="@{/passwordReset(email=${username})}">click here</a>.</span>

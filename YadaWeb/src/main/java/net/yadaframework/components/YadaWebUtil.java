@@ -76,6 +76,7 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.exceptions.YadaSystemException;
 import net.yadaframework.web.YadaPageRequest;
 import net.yadaframework.web.YadaPageRows;
+import net.yadaframework.web.YadaViews;
 
 /**
  * Utility methods to be used for web development
@@ -1297,7 +1298,7 @@ public class YadaWebUtil {
 		if (reloadOnConfirm) {
 			model.addAttribute("reloadOnConfirm", true);
 		}
-		return "/yada/modalConfirmB" + config.getBootstrapVersion();
+		return getModalConfirmViewName();
 	}
 
 	/**
@@ -1315,6 +1316,15 @@ public class YadaWebUtil {
 		Map<String, Object> modelMap = model.asMap();
 		((List<String>)modelMap.get(KEY_NOTIFICATION_CALLSCRIPT)).add(scriptId);
 	}
+	
+	/**
+	 * Return the view name for the confirmation modal. Used in html to get the correct modal.
+	 * @return something like "/yada/modalConfirmB5" depending on the current bootstrap version
+	 */
+	public String getModalConfirmViewName() {
+		return config.getForB3B4B5(YadaViews.CONFIRM_B3, YadaViews.CONFIRM_B4, YadaViews.CONFIRM_B5);
+	}
+	
 	
 	/**
 	 * Encloses the string in a thymeleaf url operator when missing

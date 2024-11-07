@@ -178,6 +178,7 @@
 	function openLoginModalIfPresent(responseHtml) {
 		var loadedLoginModal=$(responseHtml).find("#loginModal");
 		if (loadedLoginModal.length>0) {
+			yada.log("Deprecated openLoginModalIfPresent called: 'loginModal' id should not be used")
 			var currentLoginModal = $('#loginModal.in');
 			if (currentLoginModal.length>0) {
 				// The login modal is already open: just update the content

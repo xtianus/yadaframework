@@ -41,7 +41,7 @@ import net.yadaframework.web.datatables.YadaDataTable;
 import net.yadaframework.web.datatables.YadaDataTableFactory;
 
 @Controller
-@RequestMapping("/dashboard/user")
+@RequestMapping("/dashboard")
 public class UserProfileController {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 	
@@ -84,7 +84,7 @@ public class UserProfileController {
 		return toEdit;
 	}
 	
-	@RequestMapping(value="/ajaxAddOrUpdateUserProfile", params={"yadaconfirmed"})
+	@RequestMapping(value="/userwrite/ajaxAddOrUpdateUserProfile")
 	public String ajaxAddOrUpdateUserProfileConfirmed(UserProfile userProfile, BindingResult userProfileBinding, Model model) {
 		boolean inviteEmail = userProfile.isInviteEmail(); // Save it before is overwritten
 		ValidationUtils.rejectIfEmptyOrWhitespace(userProfileBinding, "userCredentials.username", "validation.value.empty");
@@ -118,8 +118,7 @@ public class UserProfileController {
 				}
 			}
 			
-			yadaNotify.title("Salvataggio completato", model).ok().message("Utente " + userProfile.getEmail() + " memorizzato").add();
-			return YadaViews.AJAX_NOTIFY;
+			return yadaNotify.title("Salvataggio completato", model).ok().message("Utente " + userProfile.getEmail() + " memorizzato").add();
 		}
 		return ajaxEditUserProfileForm(userProfile);
 	}
@@ -134,7 +133,7 @@ public class UserProfileController {
 		userSession.clearCaches();
 	}
 
-	@RequestMapping("/ajaxDeleteUserProfile")
+	@RequestMapping("/userwrite/ajaxDeleteUserProfile")
 	public String ajaxDeleteUserProfile(Long[] id, Model model) {
 		// Extra security by checking isManager
 		if (userSession.isAdmin() && id!=null && id.length>0) {
@@ -151,15 +150,15 @@ public class UserProfileController {
 		} else {
 			yadaNotify.title("Cancellazione Fallita", model).message("Errore interno").error().add();
 		}
-		return YadaViews.AJAX_NOTIFY;
+		return yadaNotify.getViewName();
 	}
 
-	@RequestMapping("/ajaxEditUserProfileForm")
+	@RequestMapping("/userwrite/ajaxEditUserProfileForm")
 	public String ajaxEditUserProfileForm(UserProfile userProfile) {
 		return "/dashboard/userProfileEditForm";
 	}
 	
-	@RequestMapping(value ="/userProfileTablePage", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value ="/user/userProfileTablePage", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public Map<String, Object> userProfileTablePage(YadaDatatablesRequest yadaDatatablesRequest, Locale locale) {
 //		boolean usersSuspended = yadaDatatablesRequest.getExtraParam().get("usersSuspendedSet")!=null;
 		YadaSql yadaSql = yadaDatatablesRequest.getYadaSql();
@@ -175,18 +174,18 @@ public class UserProfileController {
 		return result;
 	}
 	
-	@RequestMapping(value="/deimpersonate")
+	@RequestMapping(value="/user/deimpersonate")
 	public String deimpersonate(RedirectAttributes redirectAttributes){
 		userSession.depersonate();
 		return "redirect:/";
 	}
 
-	@RequestMapping(value="/impersonate")
+	@RequestMapping(value="/user/impersonate")
 	public String impersonate(String id, RedirectAttributes redirectAttributes, Locale locale){
 		return impersonate(Long.parseLong(id), redirectAttributes, locale);
 	}
 
-	@RequestMapping("/impersonate/{id}")
+	@RequestMapping("/user/impersonate/{id}")
 	public String impersonate(@PathVariable long id, RedirectAttributes redirectAttributes, Locale locale) {
 		UserProfile theUser = userProfileDao.find(id);
 		if (theUser==null) {
@@ -199,7 +198,7 @@ public class UserProfileController {
 		return yadaWebUtil.redirectString("/", locale);
 	}
 	
-	@RequestMapping("")
+	@RequestMapping("/user")
 	public String users(Model model, Locale locale) {
 		YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", locale, table -> {
 			table
@@ -210,23 +209,26 @@ public class UserProfileController {
 					.dtColumnObj("ID", "id").back()
 					// Example of localized text: .dtColumnObj("Title", "title."+locale.getLanguage()).back()
 					.dtColumnObj("Enabled", "userCredentials.enabled").back()
-					.dtColumnObj("Nickname", "userCredentials.nickname").back()
+					.dtColumnObj("Nickname", "nickname").back()
 					.dtColumnObj("Email", "userCredentials.username").dtName("userCredentials.username").dtOrderAsc(0).back()
 					.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin").dtOrderDesc(1).back()
-					.dtColumnCheckbox("select.allnone")
+					.dtColumnCheckbox("select.allnone") 
 					.dtColumnCommands("Commands")
-					.dtButtonObj("Add").dtUrl("@{/user/addOrEdit}").dtIcon("<i class='bi bi-plus'></i>").dtGlobal().dtRole("ADMIN").back()
-					.dtButtonObj("Edit").dtUrl("@{/user/addOrEdit}").dtElementLoader("#userTable").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId")
+					.dtButtonObj("button.add").dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}").dtGlobal().dtIcon("<i class='bi bi-plus-square'></i>").dtToolbarCssClass("btn-success").dtRole("ADMIN").back()
+					.dtButtonObj("button.impersonate").dtUrl("@{/dashboard/user/impersonate}").dtIcon("<i class='bi bi-mortarboard'></i>").dtRole("ADMIN").back()
+					.dtButtonObj("button.edit").dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}").dtElementLoader("#userTable").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId").back()
+					.dtButtonObj("Disabled").dtUrl("@{/dashboard/user/dummy}").dtIcon("<i class='bi bi-0-circle'></i>").dtShowCommandIcon("disableCommandIcon").back()
+					.dtButtonObj("button.delete").dtUrl("@{/dashboard/userwrite/ajaxDeleteUserProfile}").dtIcon("<i class='bi bi-trash'></i>")
+						.dtIdName("userProfileId").dtRole("ADMIN").dtMultiRow().dtToolbarCssClass("btn-danger")
 						.dtConfirmDialogObj()
-							.dtTitle("Edit User")
-							.dtMessageSingular("Are you sure you want to edit user '{0}'?")
-							.dtMessagePlural("Are you sure you want to edit {0} users?")
+							.dtTitle("Delete User")
+							.dtMessageSingular("Are you sure you want to delete user '{0}'?")
+							.dtMessagePlural("Are you sure you want to delete {0} users?")
 							.dtConfirmButton("Confirm").dtAbortButton("Cancel")
 							.dtPlaceholderColumnName("userCredentials.username")
 							.back()
 						.back()
-						.dtButtonObj("Dummy").dtUrl("@{/user/dummy}").dtIcon("<i class='bi bi-0-circle'></i>").dtShowCommandIcon("disableCommandIcon").back()
-					 .back()
+					.back()
 				.dtOptionsObj()
 					// wrong: .dtLanguageObj().dtUrl("/static/datatables-2.1.8/i18n/" + locale.getLanguage() + ".json").back()
 					.dtResponsive(true)
@@ -239,7 +241,7 @@ public class UserProfileController {
 		return "/dashboard/users";
 	}
 	
-	@RequestMapping("/legacy")
+	@RequestMapping("/user/legacy")
 	public String legacy() {
 		return "/dashboard/usersLegacy";
 	}

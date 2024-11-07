@@ -179,7 +179,7 @@ table.dataTable .yadaCheckInCell {
 	padding-right: 0;
 }
 
-.yadaTableToolbar {
+.yadaDataTableToolbar, .yadaTableToolbar {
 	margin-top: 15px;
 }
 
@@ -187,10 +187,6 @@ table.dataTable .yadaRowCommandButton {
 	margin-right: 10px;
 	font-size: 20px;
   	vertical-align: top;
-}
-
-table.dataTable .yadaRowCommandButton.disabled {
-	cursor: no-drop;
 }
 
 table.dataTable .yadaCommandButtonCell {

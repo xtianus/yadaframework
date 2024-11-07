@@ -38,6 +38,7 @@
 
 	/**
 	 * Initialize the datatable (internal use)
+	 * Used by the yada:datatable tag
 	 */
 	yada.dataTable = function(dataTableJson, ajaxUrl, languageUrl, commandColumnName, preprocessorName, postprocessorName) {
 		const dataTableId = dataTableJson.id;
@@ -69,9 +70,10 @@
 		const $table = $("#" + dataTableId);
 		const dataTableApi = $table.DataTable(dataTableOptions);
 		
-		// After the table is drawn, define the command button handlers
+		// Each time the table is drawn, define the command/toolbar button handlers
 		dataTableApi.on('draw', function () {
 			makeAllButtonHandlers(dataTableJson, $table, dataTableApi);
+			prepareCheckboxes($table);
 		});		
 		
 		// Postprocessor can operate on the created table
@@ -79,15 +81,30 @@
 		if (typeof postprocessor === "function") {
 		    postprocessor(dataTableApi, dataTableOptions);
 		}
-		
 		return dataTableApi;
+	}
+	
+	function prepareCheckboxes($table) {
+		// Select/deselect all
+		$('.yada_selectAllNone', $table).change(function() {
+			var checked = $(this).prop('checked');
+			$("td input.yada_rowSelector[type='checkbox']", $table).prop('checked', checked).change();
+		});
+		
+		// Selecting at least one row will enable toolbar buttons
+		$('.yada_rowSelector', $table).change(function() {
+			const totChecked = $('.yada_rowSelector:checked').length;
+			const $singleRowButtons = $table.closest('.yadaDataTableBlock').find('.yadaDataTableToolbar a:not(.yada_multirow):not(.yada_global)');
+			const $multiRowButtons = $table.closest('.yadaDataTableBlock').find('.yadaDataTableToolbar a.yada_multirow:not(.yada_global)');
+			$singleRowButtons.toggleClass('disabled', totChecked !== 1).attr("disabled", totChecked !== 1);
+			$multiRowButtons.toggleClass('disabled', totChecked < 1).attr("disabled", totChecked < 1);
+		});
 	}
 	
 	/**
 	 * Make the button event handlers once the table has been drawn, both command buttons and toolbar buttons.
 	 */
 	function makeAllButtonHandlers(dataTableJson, $table, dataTableApi) {
-		// const thisTable = this; // DOM table
 		const yadaButtons = dataTableJson.html.buttons;
 		yadaButtons.forEach(button => {
 			const buttonType = button.type;
@@ -102,11 +119,15 @@
 	 * @param buttonConf the json configuration common to all the buttons of the same type
 	 */
 	function makeButtonHandler($buttons, buttonConf, $table, dataTableApi) {
-		$buttons.click(function(e){
+		// The flag prevents attaching the click handler multiple times
+		const flag = "yadaDtMakeButtonHandler";
+		$buttons.filter((_, el)=>!$(el).data(flag)).click(function(e){
+			$(this).data(flag, true);
 			e.preventDefault();
 			const $anchor = $(e.currentTarget);
-			const totRows = 1;
+			let totRows = 1;
 			const ajax = buttonConf.ajax; // true, false
+			const global = buttonConf.global; // true, false
 			const hidePageLoader = buttonConf.hidePageLoader; // true, false
 			const elementLoader = buttonConf.elementLoader; // #someCssSelector
 			let actualLoader = elementLoader!=null?$(elementLoader):[];
@@ -126,7 +147,7 @@
 				const id = rowIdToEntityId($anchor.parents('tr').attr('id'));
 				ids = [id];
 				$elementInRow = $anchor;
-			} else {
+			} else if(!global) {
 				// Toolbar button specific code
 				const $checks = $table.find("tbody [type='checkbox']:checked");
 				totRows = $checks.length;
@@ -179,11 +200,11 @@
 			if (confirmDialog) {
 				yada.confirm(confirmTitle, totRows==1?confirmOneMessage:confirmManyMessage, function(confirmed) {
 					if (confirmed==true) {
-						dtDoButtonCall(href, requestData, ajax, actualLoader, buttonConf, dataTableApi);
+						dtDoButtonCall(url, requestData, ajax, actualLoader, buttonConf, dataTableApi);
 					}
 				}, confirmButtonText, abortButtonText);
 			} else {
-				dtDoButtonCall(href, requestData, ajax, actualLoader, buttonConf, dataTableApi);
+				dtDoButtonCall(url, requestData, ajax, actualLoader, buttonConf, dataTableApi);
 			}
 		});
 	}
@@ -203,15 +224,15 @@
 	}
 
 	/**
-	 * Rendere the commands column (internal use)
+	 * Rendere the commands column
 	 */
 	yada.dtCommandRender =  function(data, type, row, meta, dataTableHtmlJson) {
         if ( type === 'display' ) {
 	    	// const entityId = rowIdToEntityId(data.DT_RowId); // 22
 			const yadaButtons = dataTableHtmlJson.buttons;
-			let displayIconOnRow = true;
         	let buttonsHtml = '';
 			yadaButtons.filter(button => !button.global).forEach(button => {
+				let displayIconOnRow = true;
 				const showCommandIconFunction = button.showCommandIcon;
         		if (typeof showCommandIconFunction == "function") {
         			displayIconOnRow = showCommandIconFunction(data, row);
@@ -233,17 +254,17 @@
 	
 
 	/**
-	 * Render the checkbox column (internal use)
+	 * Render the checkbox column
 	 */
 	yada.dtCheckboxRender = function( data, type, row ) {
 		if ( type === 'display' ) {
-			return '<input type="checkbox" class="yadaCheckInCell s_rowSelector"/>';
+			return '<input type="checkbox" class="yadaCheckInCell yada_rowSelector"/>';
 		}
 		return data;
 	}
 	
 	/**
-	 * Call the backend via ajax (internal use)
+	 * Call the backend via ajax
 	 */
 	function ajaxCaller(data, callback, settings, dataTableId, ajaxUrl) {
 		data['dataTableId'] = dataTableId;

@@ -19,6 +19,12 @@ public class YadaDataTableButtonProxy extends YadaDataTableButton {
 		super(text, parent);
 	}
 	
+	
+	
+	public boolean isMultiRow() {
+		return multiRow;
+	}
+	
 	public String getElementLoader() {
 		return elementLoader;
 	}
@@ -71,7 +77,7 @@ public class YadaDataTableButtonProxy extends YadaDataTableButton {
 		return windowFeatures;
 	}
 
-	public String getShowCommand() {
+	public String getShowCommandIcon() {
 		return showCommandIcon;
 	}
 

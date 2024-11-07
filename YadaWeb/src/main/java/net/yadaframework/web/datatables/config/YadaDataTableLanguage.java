@@ -18,8 +18,8 @@ public class YadaDataTableLanguage extends YadaFluentBase<YadaDataTable> {
 		if (StringUtils.isEmpty(languageBaseUrl)) {
 			languageBaseUrl = "https://cdn.datatables.net/plug-ins/2.1.8/i18n/";
 		}
-		languageBaseUrl = StringUtils.appendIfMissing(languageBaseUrl, "/");
-		this.languageBaseUrl = YadaWebUtil.INSTANCE.ensureThymeleafUrl(languageBaseUrl);
+		languageBaseUrl = languageBaseUrl.replaceAll("^@\\{|\\}$", ""); // Strip any enclosing @{}
+		this.languageBaseUrl = StringUtils.appendIfMissing(languageBaseUrl, "/");
 		// Add default translations
 		languageMap.put("it", "it-IT.json");
 		languageMap.put("de", "de-DE.json");

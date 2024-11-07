@@ -28,9 +28,11 @@ public class SecurityConfig extends YadaSecurityConfig {
 		//		** matches zero or more 'directories' in a path
 		//	Patterns which end with /** (and have no other wildcards) are optimized by using a substring match
         http.authorizeHttpRequests(authorize -> authorize
-        				.requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
-        				.requestMatchers(new AntPathRequestMatcher("/user/**")).hasRole("USER")
-        		);
+    		.requestMatchers(new AntPathRequestMatcher("/dashboard/userwrite/**")).hasRole("ADMIN")
+    		.requestMatchers(new AntPathRequestMatcher("/dashboard/user/**")).hasAnyRole("SUPERVISOR", "ADMIN")
+			.requestMatchers(new AntPathRequestMatcher("/dashboard/**")).hasAnyRole("SUPERVISOR", "ADMIN")
+			.requestMatchers(new AntPathRequestMatcher("/my/**")).hasAnyRole("USER")
+		);
 
         super.configure(http);
 

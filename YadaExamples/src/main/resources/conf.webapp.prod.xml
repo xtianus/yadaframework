@@ -13,6 +13,7 @@
 		<contentDir name="contents" url="/contents"></contentDir>
 		<errorPageForward>/errorPage</errorPageForward>
 	</paths>
+	<bootstrapVersion>5</bootstrapVersion>
 	<i18n localePathVariable="true">
       <locale default="true">en</locale>
       <locale>it</locale>
@@ -105,12 +106,29 @@
 		<users>
 			<user>
 				<nickname>admin</nickname> <!-- This is an example of UserProfile customization -->
-				<email>admin@EXAMPLE.com</email>
-				<password>myAppPassword</password>
+				<email>admin@example.com</email>
+				<password>admin@example.com</password>
 				<locale>en_US</locale>
 				<timezone>Europe/Rome</timezone>
 				<role>USER</role>
 				<role>ADMIN</role>
+			</user>
+			<user>
+				<nickname>user</nickname> <!-- This is an example of UserProfile customization -->
+				<email>user@example.com</email>
+				<password>user@example.com</password>
+				<locale>en_US</locale>
+				<timezone>Europe/Rome</timezone>
+				<role>USER</role>
+			</user>
+			<user>
+				<nickname>readonly</nickname> <!-- This is an example of UserProfile customization -->
+				<email>readonly@example.com</email>
+				<password>readonly@example.com</password>
+				<locale>en_US</locale>
+				<timezone>Europe/Rome</timezone>
+				<role>USER</role>
+				<role>SUPERVISOR</role>
 			</user>
 		</users>
 	</setup>
@@ -131,18 +149,14 @@
 			<role>
 				<id>8</id>
 				<key>ADMIN</key>
-				<!-- ATTENZIONE: non usare name e description come fatti qui, ma metterli in messages.properties
-				<name>Admin</name>
-				<description>Gestione infrastruttura tecnica</description>
-				 -->
+			</role>
+			<role>
+				<id>4</id>
+				<key>SUPERVISOR</key>
 			</role>
 			<role>
 				<id>2</id>
 				<key>USER</key>
-				<!-- 
-				<name>Utente Verificato</name>
-				<description>Utente la cui email è stata verificata</description>
-				 -->
 			</role>
 		</roles>
 	</security>

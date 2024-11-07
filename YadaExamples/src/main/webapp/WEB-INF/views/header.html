@@ -28,8 +28,21 @@
 	}
 </script>
 
-<header>
-	<p>This is the header</p>
+<header th:with="loggedIn=${@yadaSecurityUtil.loggedIn()}">
+	<div class="container">
+		<a th:href="@{/}">Home</a> - <a th:href="@{/dashboard}">Dashboard</a>
+	
+		<div class="float-end">
+			<a th:unless="${loggedIn}" th:href="@{/openLogin}" class="yadaAjax">
+				Login
+			</a>
+			<span th:if="${loggedIn}">[[${@userSession.currentUserProfile.nickname}]] - </span>
+			<a th:if="${loggedIn}" th:href="@{/logout}">
+				Logout
+			</a>
+		</div>
+	</div>
+	
 </header>
 </body>
 </html>

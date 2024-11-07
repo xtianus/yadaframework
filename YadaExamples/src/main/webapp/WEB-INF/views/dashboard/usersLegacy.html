@@ -10,7 +10,6 @@
 <body>
 
 <th:block th:replace="~{/header :: body}"/>
-<a th:href="@{/dashboard}">Back to Dashboard</a>
 <br>
 
 <main class="container">
@@ -34,9 +33,9 @@ yada.ready(function(){
 	let userImpersonateUrl = /*[[@{/dashboard/user/impersonate}]]*/ "placehoder";
 	let languageFileUrl;
 	if (language === 'en') {
-	    languageFileUrl = /*[[@{/static/datatables-1.13.4/i18n/en-gb.json}]]*/ "placehoder";
+	    languageFileUrl = /*[[@{/static/datatables-2.1.8/i18n/en-gb.json}]]*/ "placehoder";
 	} else {
-	    languageFileUrl = `/*[[@{/static/datatables-1.13.4/i18n/${language}_${language}.json}]]*/ "placehoder"`;
+	    languageFileUrl = /*[[@{|/static/datatables-2.1.8/i18n/${#locale.language}-${#locale.language.toUpperCase()}.json|}]]*/ "placehoder";
 	}	
 	let impersonateButtonTitle = /*[[#{button.impersonate}]]*/ "placehoder";
 	let editButtonTitle = /*[[#{button.edit}]]*/ "placehoder";
@@ -51,7 +50,7 @@ yada.ready(function(){
    		tablePageLoadUrl, 
    		['id',
    		 'userCredentials.enabled',
-   		 'userCredentials.nickname',
+   		 'nickname',
    		 'userCredentials.username',
    		 'userCredentials.lastSuccessfulLogin'
    		 ],

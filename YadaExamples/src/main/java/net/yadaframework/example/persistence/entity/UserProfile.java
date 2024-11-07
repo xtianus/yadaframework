@@ -19,6 +19,20 @@ public class UserProfile extends YadaUserProfile {
 	@Column(length = 32)
 	String nickname; // This is an example of UserProfile customization
 
+	/**
+	 * Used in Datatables to define the row class.
+	 * @See {@link https://datatables.net/manual/server-side}
+	 */
+	@Transient
+	@JsonProperty("DT_RowClass")
+	public String getDT_RowClass() {
+		// Set a specific class on admins
+		if (hasAnyRole("ADMIN")) {
+			return "userProfileAdmin";
+		}
+		return null;
+	}
+
 	// Used in the edit form
 	@Transient
 	private boolean inviteEmail = false;

@@ -17,6 +17,8 @@ public class YadaDatatablesRequest {
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	
+	boolean legacy = false; // For backwards compatibility with Yada 0.7.6
+	
 	// The datatable id
 	String dataTableId;
 	
@@ -166,6 +168,20 @@ public class YadaDatatablesRequest {
 	 */
 	public void setDataTableId(String dataTableId) {
 		this.dataTableId = dataTableId;
+	}
+
+	/**
+	 * @return the legacy
+	 */
+	public boolean isLegacy() {
+		return legacy;
+	}
+
+	/**
+	 * @param legacy the legacy to set
+	 */
+	public void setLegacy(boolean legacy) {
+		this.legacy = legacy;
 	}
 	
 }
