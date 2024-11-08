@@ -23,6 +23,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import net.yadaframework.components.YadaNotify;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.example.components.YexEmailService;
@@ -36,7 +37,6 @@ import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 import net.yadaframework.web.YadaDatatablesRequest;
-import net.yadaframework.web.YadaViews;
 import net.yadaframework.web.datatables.YadaDataTable;
 import net.yadaframework.web.datatables.YadaDataTableFactory;
 
@@ -112,13 +112,12 @@ public class UserProfileController {
 				Locale locale = userProfile.getLocale();
 				boolean invited = yexEmailService.sendInvitation(userProfile, newPassword, request, locale);
 				if (!invited) {
-					yadaNotify.title("Email non inviata", model).error().message("Errore durante l'invio della email di invito").add();
+					yadaNotify.titleKey(model, "user.invitation.error.title").error().messageKey("user.invitation.error.message").add();
 				} else {
-					yadaNotify.title("Email inviata", model).ok().message("Email di invito inviata con successo").add();
+					yadaNotify.titleKey(model, "user.invitation.ok.title").ok().messageKey("user.invitation.ok.message").add();
 				}
 			}
-			
-			return yadaNotify.title("Salvataggio completato", model).ok().message("Utente " + userProfile.getEmail() + " memorizzato").add();
+			return yadaNotify.titleKey(model, "user.addedit.ok.title").ok().messageKey("user.addedit.ok.message", userProfile.getEmail()).add();
 		}
 		return ajaxEditUserProfileForm(userProfile);
 	}
@@ -138,17 +137,18 @@ public class UserProfileController {
 		// Extra security by checking isManager
 		if (userSession.isAdmin() && id!=null && id.length>0) {
 			for (Long userProfileId : id) {
+				String userProfileIdString = userProfileId!=null?userProfileId.toString():"null";
 				try {
 					UserProfile userProfile = userProfileDao.find(userProfileId);
 					deleteUserProfile(userProfile);
-					yadaNotify.title("Cancellazione Eseguita", model).message("Utente \"{}\" eliminato", userProfile.getEmail()).ok().add();
+					yadaNotify.titleKey(model, "user.delete.ok.title").messageKey("user.delete.ok.message", userProfile.getEmail()).ok().add();
 				} catch (Exception e) {
-					log.error("Delete dell'utente {} fallito", userProfileId, e);
-					yadaNotify.title("Cancellazione Fallita", model).message("L'eliminazione non può essere completata").error().add();
+					log.error("Failed to delete user {}", userProfileId, e);
+					yadaNotify.titleKey(model, "user.delete.error.title").messageKey("user.delete.error.message", userProfileIdString).error().add();
 				}
 			}
 		} else {
-			yadaNotify.title("Cancellazione Fallita", model).message("Errore interno").error().add();
+			yadaNotify.titleKey(model, "user.delete.error.title").messageKey("user.delete.internalError.message").error().add();
 		}
 		return yadaNotify.getViewName();
 	}
@@ -175,24 +175,27 @@ public class UserProfileController {
 	}
 	
 	@RequestMapping(value="/user/deimpersonate")
-	public String deimpersonate(RedirectAttributes redirectAttributes){
-		userSession.depersonate();
-		return "redirect:/";
+	public String deimpersonate(RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response, Locale locale) {
+		String previousLocation = userSession.deimpersonate(request, response);
+		if (previousLocation==null) {
+			previousLocation = "/";
+		}
+		return yadaWebUtil.redirectString(previousLocation, locale);
 	}
 
 	@RequestMapping(value="/user/impersonate")
-	public String impersonate(String id, RedirectAttributes redirectAttributes, Locale locale){
-		return impersonate(Long.parseLong(id), redirectAttributes, locale);
+	public String impersonate(String id, @RequestParam(name = "currentLocation", required = false) String currentLocation, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response, Locale locale){
+		return impersonate(Long.parseLong(id), currentLocation, redirectAttributes, request, response, locale);
 	}
 
 	@RequestMapping("/user/impersonate/{id}")
-	public String impersonate(@PathVariable long id, RedirectAttributes redirectAttributes, Locale locale) {
+	public String impersonate(@PathVariable long id, @RequestParam(name = "currentLocation", required = false) String currentLocation, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response, Locale locale) {
 		UserProfile theUser = userProfileDao.find(id);
 		if (theUser==null) {
-			yadaNotify.title("Impersonation failed", redirectAttributes).error().message("L'utente che vuoi impersonare non esiste").add();
+			yadaNotify.titleKey(redirectAttributes, "user.impersonate.error.title").error().messageKey("user.impersonate.error.message").add();
 		} else {
-			userSession.impersonate(theUser.getId());
-			yadaNotify.title("Impersonation On", redirectAttributes).ok().message("Stai operando come " + theUser.getEmail()).add();
+			userSession.impersonate(theUser.getId(), currentLocation, request, response);
+			yadaNotify.titleKey(redirectAttributes, "user.impersonate.ok.title").ok().messageKey("user.impersonate.ok.message", theUser.getEmail()).add();
 		}
 		// model.addAttribute(YadaViews.AJAX_REDIRECT_URL, "/user/dashboard");
 		return yadaWebUtil.redirectString("/", locale);
@@ -208,23 +211,23 @@ public class UserProfileController {
 					.dtCssClasses("yadaNoLoader")
 					.dtColumnObj("ID", "id").back()
 					// Example of localized text: .dtColumnObj("Title", "title."+locale.getLanguage()).back()
-					.dtColumnObj("Enabled", "userCredentials.enabled").back()
+					.dtColumnObj("column.enabled", "userCredentials.enabled").back()
 					.dtColumnObj("Nickname", "nickname").back()
 					.dtColumnObj("Email", "userCredentials.username").dtName("userCredentials.username").dtOrderAsc(0).back()
 					.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin").dtOrderDesc(1).back()
 					.dtColumnCheckbox("select.allnone") 
-					.dtColumnCommands("Commands")
+					.dtColumnCommands("column.commands")
 					.dtButtonObj("button.add").dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}").dtGlobal().dtIcon("<i class='bi bi-plus-square'></i>").dtToolbarCssClass("btn-success").dtRole("ADMIN").back()
-					.dtButtonObj("button.impersonate").dtUrl("@{/dashboard/user/impersonate}").dtIcon("<i class='bi bi-mortarboard'></i>").dtRole("ADMIN").back()
-					.dtButtonObj("button.edit").dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}").dtElementLoader("#userTable").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId").back()
+					.dtButtonObj("button.impersonate").dtUrlProvider("impersonate").dtNoAjax().dtIcon("<i class='bi bi-mortarboard'></i>").dtRole("ADMIN").dtRole("supervisor").back()
+					.dtButtonObj("button.edit").dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}").dtElementLoader("#userTable").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId").dtRole("ADMIN").back()
 					.dtButtonObj("Disabled").dtUrl("@{/dashboard/user/dummy}").dtIcon("<i class='bi bi-0-circle'></i>").dtShowCommandIcon("disableCommandIcon").back()
 					.dtButtonObj("button.delete").dtUrl("@{/dashboard/userwrite/ajaxDeleteUserProfile}").dtIcon("<i class='bi bi-trash'></i>")
 						.dtIdName("userProfileId").dtRole("ADMIN").dtMultiRow().dtToolbarCssClass("btn-danger")
 						.dtConfirmDialogObj()
 							.dtTitle("Delete User")
-							.dtMessageSingular("Are you sure you want to delete user '{0}'?")
-							.dtMessagePlural("Are you sure you want to delete {0} users?")
-							.dtConfirmButton("Confirm").dtAbortButton("Cancel")
+							.dtMessageSingular("usertable.delete.confirm.singular")
+							.dtMessagePlural("usertable.delete.confirm.plural")
+							.dtConfirmButton("button.confirm").dtAbortButton("modal.confirm.cancel")
 							.dtPlaceholderColumnName("userCredentials.username")
 							.back()
 						.back()
@@ -234,7 +237,7 @@ public class UserProfileController {
 					.dtResponsive(true)
 					.dtPageLength(10)
 					.dtColumnDefsObj().dtTargetsName("userCredentials.username").dtAriaTitle("This is the user email").back()
-					.dtColumnDefsObj().dtTargetsName("userCredentials.lastSuccessfulLogin").dtAriaTitle("This is when the user last logged in").back()
+					.dtColumnDefsObj().dtTargetsName("userCredentials.lastSuccessfulLogin").dtAriaTitle("usertable.aria.lastlogin").back()
 				;
 		});
 		model.addAttribute("yadaDataTable", yadaDataTable);

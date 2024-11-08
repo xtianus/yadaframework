@@ -16,6 +16,7 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.web.YadaJsonRawStringSerializer;
+import net.yadaframework.web.datatables.proxy.YadaDataTableConfirmDialogProxy;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
@@ -41,7 +42,7 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 	protected String windowFeatures; // Features of the window when opened
 	@JsonSerialize(using = YadaJsonRawStringSerializer.class)
 	protected String showCommandIcon; // Function that determines whether to show the button icon for each row
-	protected Set<Integer> roles = new HashSet<>(); // Roles that can access the button
+	protected Set<Integer> roles; // Roles that can access the button
     
 	protected YadaDataTableButton(String text, YadaDataTableHTML parent) {
 		super(parent);
@@ -58,7 +59,7 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
     	if (yadaDataTableConfirmDialog != null) {
 			throw new YadaInvalidUsageException("dtConfirmDialog can only be called once per button");
 		}
-    	this.yadaDataTableConfirmDialog = new YadaDataTableConfirmDialog(this, parent);
+    	this.yadaDataTableConfirmDialog = new YadaDataTableConfirmDialogProxy(this, parent);
         return yadaDataTableConfirmDialog;
     }
     
@@ -97,7 +98,7 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
      * javascript function to be called when the button is clicked in order to compute the target URL for the button action.
      * 
      * When the row icon is clicked, it will receive the row data as a parameter. 
-     * When the toolbar button is clicked, it will receive the array of selected ids and the datatable api object as parameters.
+     * When the toolbar button is clicked, it will receive the datatable api object and the array of selected ids as parameters.
      * 
      * The function should return the target URL or null to prevent any further action.
      * @param function the name of the js function that must be visible in page
@@ -236,6 +237,9 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
      * @return this instance for method chaining
      */
     public YadaDataTableButton dtRole(String roleKey) {
+    	if (this.roles==null) {
+    		this.roles = new HashSet<>();
+    	}
     	Integer roleId = config.getRoleId(roleKey); // Already throws exception if not found
         this.roles.add(roleId);
         return this;

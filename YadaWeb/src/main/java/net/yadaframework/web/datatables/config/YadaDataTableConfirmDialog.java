@@ -15,15 +15,15 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDataTableConfirmDialog extends YadaFluentBase<YadaDataTableButton> {
-    @JsonProperty private String confirmTitle; // Title for the confirmation dialog
-    @JsonProperty private String confirmOneMessage; // Message for confirming a single action
-    @JsonProperty private String confirmManyMessage; // Message for confirming multiple actions
-    @JsonProperty private String confirmButtonText; // Text for the confirmation button
-    @JsonProperty private String abortButtonText; // Text for the cancel button
+    @JsonProperty protected String confirmTitle; // Title for the confirmation dialog
+    @JsonProperty protected String confirmOneMessage; // Message for confirming a single action
+    @JsonProperty protected String confirmManyMessage; // Message for confirming multiple actions
+    @JsonProperty protected String confirmButtonText; // Text for the confirmation button
+    @JsonProperty protected String abortButtonText; // Text for the cancel button
     @JsonProperty private List<String> columnNames; // Column names that refer to the columns that hold the value for the placeholders in all the texts
     private YadaDataTableHTML yadaDataTableHTML;
 	
-	public YadaDataTableConfirmDialog(YadaDataTableButton parent, YadaDataTableHTML yadaDataTableHTML) {
+    protected YadaDataTableConfirmDialog(YadaDataTableButton parent, YadaDataTableHTML yadaDataTableHTML) {
 		super(parent);
 		this.yadaDataTableHTML = yadaDataTableHTML;
 	}

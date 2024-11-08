@@ -18,6 +18,7 @@ import net.yadaframework.components.YadaNotify;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaLocalePathChangeInterceptor;
 import net.yadaframework.example.core.YexConfiguration;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.security.YadaSecurityConfig;
 import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.web.YadaViews;
@@ -67,6 +68,12 @@ public class HomeController {
 		// You get here either when the url is just "/" or when it is "en/" with localepath configured.
 		// We need to insert the locale path when missing
 		// NOTE: any 404 NOT FOUND error opens the home page and gets here too.
+		if (yadaWebUtil.isAjaxRequest(request) ) {
+			// We get to the home in an ajax request maybe after a redirect form an ajax call.
+			// To solve this, the original request should be made not ajax.
+			// If not possible, add the yadafullPage class to any HTML element other than <body> so that the page is shown.
+			throw new YadaInvalidUsageException("Loading the home page from an AJAX request is probably a mistake");
+		}
 		if (!config.isLocalePathVariableEnabled() 
 			|| YadaLocalePathChangeInterceptor.localePathRequested(request) 
 			|| yadaWebUtil.isErrorPage(request)

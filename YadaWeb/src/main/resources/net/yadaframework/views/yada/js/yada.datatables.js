@@ -40,7 +40,7 @@
 	 * Initialize the datatable (internal use)
 	 * Used by the yada:datatable tag
 	 */
-	yada.dataTable = function(dataTableJson, ajaxUrl, languageUrl, commandColumnName, preprocessorName, postprocessorName) {
+	yada.dataTable = function(dataTableJson, ajaxUrl, languageUrl, commandColumnName, preprocessorName, postprocessorName, currentUserRoles) {
 		const dataTableId = dataTableJson.id;
 		const dataTableHtml = dataTableJson.html;
 		const dataTableOptions = dataTableJson.options;
@@ -57,7 +57,7 @@
 		if (commandColumn) {
 			const originalRender = commandColumn.render;
 			commandColumn.render = function(data, type, row, meta) {
-				return originalRender(data, type, row, meta, dataTableHtml);
+				return originalRender(data, type, row, meta, dataTableHtml, currentUserRoles);
 			}
 		}
 
@@ -69,6 +69,7 @@
 		
 		const $table = $("#" + dataTableId);
 		const dataTableApi = $table.DataTable(dataTableOptions);
+		$table.data("yadaDataTableApi", dataTableApi); // Make the created datatable API an attribute of the DOM object
 		
 		// Each time the table is drawn, define the command/toolbar button handlers
 		dataTableApi.on('draw', function () {
@@ -177,7 +178,7 @@
 						url = urlProvider(rowData);
 					} else {
 						// Toolbar button sends all table
-						url = urlProvider(ids, dataTableApi);
+						url = urlProvider(dataTableApi, ids);
 					}
 					if (url==null) {
 						return; // The urlProvider chose to stop execution 
@@ -226,15 +227,16 @@
 	/**
 	 * Rendere the commands column
 	 */
-	yada.dtCommandRender =  function(data, type, row, meta, dataTableHtmlJson) {
+	yada.dtCommandRender =  function(data, type, row, meta, dataTableHtmlJson, currentUserRoles) {
         if ( type === 'display' ) {
 	    	// const entityId = rowIdToEntityId(data.DT_RowId); // 22
 			const yadaButtons = dataTableHtmlJson.buttons;
         	let buttonsHtml = '';
 			yadaButtons.filter(button => !button.global).forEach(button => {
-				let displayIconOnRow = true;
+				// The button is shown only if the current user roles contain one of the roles for the button
+				let displayIconOnRow = !Array.isArray(button.roles) || button.roles.some(role => currentUserRoles.includes(role));
 				const showCommandIconFunction = button.showCommandIcon;
-        		if (typeof showCommandIconFunction == "function") {
+        		if (displayIconOnRow==true && typeof showCommandIconFunction == "function") {
         			displayIconOnRow = showCommandIconFunction(data, row);
         		}
         		if (displayIconOnRow==true) {

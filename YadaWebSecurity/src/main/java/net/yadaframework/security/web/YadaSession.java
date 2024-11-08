@@ -43,6 +43,7 @@ public class YadaSession<T extends YadaUserProfile> {
 	protected Long impersonatorUserId = null;
 	protected Long impersonatedUserId = null;
 	protected Long loggedInUserProfileId = null; // id of the current logged in user, be it "real" or "impersonated"
+	protected String impersonationStartingLocation = null;
 
 	protected YadaCropQueue cropQueue; // Crop images
 
@@ -54,6 +55,7 @@ public class YadaSession<T extends YadaUserProfile> {
 		clearUserProfileCache();
 		impersonatorUserId = null;
 		impersonatedUserId = null;
+		impersonationStartingLocation = null;
 	}
 
 	@Deprecated // use isImpersonationActive()
@@ -79,11 +81,20 @@ public class YadaSession<T extends YadaUserProfile> {
 	 * @param targetUserProfileId
 	 */
 	public void impersonate(Long targetUserProfileId) {
+		impersonate(targetUserProfileId, null, null, null);
+	}
+	
+	/**
+	 * Assume the identity of the given user
+	 * @param targetUserProfileId
+	 */
+	public void impersonate(Long targetUserProfileId, String currentLocation, HttpServletRequest request, HttpServletResponse response) {
 		impersonatorUserId = getCurrentUserProfileId();
 		impersonatedUserId = targetUserProfileId;
 		YadaUserCredentials targetUserCredentials = yadaUserCredentialsDao.findByUserProfileId(targetUserProfileId);
-		yadaUserDetailsService.authenticateAs(targetUserCredentials, false);
+		yadaUserDetailsService.authenticateAs(targetUserCredentials, false, request, response);
 		loggedInUserProfileId = targetUserProfileId;
+		impersonationStartingLocation = currentLocation;
 		log.info("Impersonation by #{} as #{} started", impersonatorUserId, targetUserCredentials.getId());
 	}
 
@@ -100,7 +111,8 @@ public class YadaSession<T extends YadaUserProfile> {
 	 */
 	@Deprecated
 	public boolean depersonate() {
-		return deimpersonate(null, null);
+		deimpersonate(null, null);
+		return true; 
 	}
 
 	/**
@@ -108,25 +120,27 @@ public class YadaSession<T extends YadaUserProfile> {
 	 */
 	@Deprecated
 	public boolean depersonate(HttpServletRequest request, HttpServletResponse response) {
-		return deimpersonate(request, response);
+		deimpersonate(request, response);
+		return true; 
 	}
 	
 	/**
 	 * Terminates impersonation.
-	 * @return true if the impersonation was active, false if it was not active.
+	 * @return the browser location where impersonation was started, if saved, null otherwise.
 	 */
-	public boolean deimpersonate(HttpServletRequest request, HttpServletResponse response) {
+	public String deimpersonate(HttpServletRequest request, HttpServletResponse response) {
+		String result = null;
 		if (isImpersonationActive()) {
+			result = impersonationStartingLocation;
 			YadaUserCredentials originalCredentials = yadaUserCredentialsDao.findByUserProfileId(impersonatorUserId);
 			yadaUserDetailsService.authenticateAs(originalCredentials, request, response);
 			log.info("Impersonation by #{} ended", originalCredentials.getId());
 			clearCaches();
 			loggedInUserProfileId = impersonatorUserId;
-			return true;
 		} else {
 			log.error("Deimpersonation failed because of null impersonator or null original user");
-			return false;
 		}
+		return result;
 	}
 
 	/**

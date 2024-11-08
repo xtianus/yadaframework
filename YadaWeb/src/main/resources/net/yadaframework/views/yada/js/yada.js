@@ -1752,6 +1752,11 @@
 	yada.getValue = function(rootObject, path) {
 	    return path.split('.').reduce((acc, part) => acc && acc[part], rootObject);
 	}
+	
+	yada.impersonate = function(url, userId) {
+		const impersonateUrl = yada.addUrlParameters(url, {id: userId, currentLocation: window.location.href});
+		window.location.href = impersonateUrl;
+	}
 		
 }( window.yada = window.yada || {} ));
 

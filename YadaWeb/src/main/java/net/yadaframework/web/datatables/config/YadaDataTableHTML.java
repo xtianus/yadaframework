@@ -39,7 +39,7 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 	
 	@JsonIgnore protected boolean backCalled = false;
 	
-	public YadaDataTableHTML(YadaDataTable parent, YadaDTOptionsProxy options) {
+	protected YadaDataTableHTML(YadaDataTable parent, YadaDTOptionsProxy options) {
 		super(parent);
 		this.options = options;
 	}

@@ -27,7 +27,7 @@ public class UserProfile extends YadaUserProfile {
 	@JsonProperty("DT_RowClass")
 	public String getDT_RowClass() {
 		// Set a specific class on admins
-		if (hasAnyRole("ADMIN")) {
+		if (hasAnyRoleKey("ADMIN")) {
 			return "userProfileAdmin";
 		}
 		return null;

@@ -17,10 +17,10 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 		<thead>
 			<tr>
 				<th th:if="${html.selectCheckbox}" th:with="title=${html.selectCheckboxTitle}">
-					<input type="checkbox" class="yada_selectAllNone" th:title="title?#{title}">
+					<input type="checkbox" class="yada_selectAllNone" th:title="${title}?#{${title}}">
 				</th>
 				<th th:each="column : ${html.columns}" th:text="#{${column.headerText}}">Name</th>
-				<th th:if="${!#strings.isEmpty(html.commandsTitle)}" th:with="title=${html.commandsTitle}" th:text="title?#{title}">Commands</th>
+				<th th:if="${!#strings.isEmpty(html.commandsTitle)}" th:with="title=${html.commandsTitle}" th:text="${title}?#{${title}}">Commands</th>
 			</tr>
 		</thead>
 		<tfoot th:if="${html.showFooter}">
@@ -34,9 +34,9 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 
 	<!--/* Toolbar */-->
 	<div class="yadaDataTableToolbar">
-		<th:block th:each="button : ${html.buttons}">
+		<th:block th:each="button : ${html.buttons}" th:with="hasRole = ${button.roles==null || @userSession.currentUserProfile.hasAnyRoleId(button.roles)}">
 			<a class="btn"
-				th:if="${button.showCommandIcon==null}"
+				th:if="${button.showCommandIcon==null && hasRole}"
 				href="javascript:void(0)"
 				th:data-idname="${button.idName}"
 				th:data-buttontype="${button.type}"
@@ -56,16 +56,29 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 			// Using the preprocessor so that any thymeleaf instructions are processed correctly
 			const ajaxUrl = /*[[__${yadaDataTable.ajaxUrl}__]]*/ "dummy";
 			const languageUrl = /*[[__${yadaDataTable.languageUrl}__]]*/ "dummy";
-			// Also fix the button urls
+			// Fix button urls and localized confirm messages
+			let type, url;
 			/*[# th:each="button : ${yadaDataTable.html.buttons}"]*/
-    			dataTableJson.html.buttons.filter(b => b.type==/*[[${button.type}]]*/).forEach(b => b.url = /*[[__${button.url}__]]*/ "dummy"); 
+				buttonType = /*[[${button.type}]]*/ "dummy"; 					
+    			dataTableJson.html.buttons.filter(b => b.type==buttonType).forEach(function(b) {
+   					b.url = /*[[__${button.url}__]]*/ "dummy";
+   					/*[# th:if="${button.confirmDialog!=null}"]*/
+   					b.confirmDialog.confirmTitle = /*[[#{${button.confirmDialog.confirmTitle}}]]*/ "dummy";
+   					b.confirmDialog.confirmOneMessage = /*[[#{${button.confirmDialog.confirmOneMessage}}]]*/ "dummy";
+   					b.confirmDialog.confirmManyMessage = /*[[#{${button.confirmDialog.confirmManyMessage}}]]*/ "dummy";
+   					b.confirmDialog.confirmButtonText = /*[[#{${button.confirmDialog.confirmButtonText}}]]*/ "dummy";
+   					b.confirmDialog.abortButtonText = /*[[#{${button.confirmDialog.abortButtonText}}]]*/ "dummy";
+		   			/*[/]*/
+    			}); 
    			/*[/]*/
 			
 			const commandColumnName = /*[[${T(net.yadaframework.persistence.YadaDataTableDao).COLUMN_COMMAND}]]*/ "dummy";
 			const preprocessorName = /*[[${preprocessor}]]*/ "dummy"; // Becomes 'null' when missing
 			const postprocessorName = /*[[${postprocessor}]]*/ "dummy"; // Becomes 'null' when missing
 			
-			yada.dataTable(dataTableJson, ajaxUrl, languageUrl, commandColumnName, preprocessorName, postprocessorName);
+			const currentUserRoles = /*[[${@userSession.LoggedInUserRoles}]]*/ "dummy";
+			
+			yada.dataTable(dataTableJson, ajaxUrl, languageUrl, commandColumnName, preprocessorName, postprocessorName, currentUserRoles);
 		});
 		/*]]>*/
 	</script>

@@ -23,7 +23,19 @@
 	
 </main>
 
-<script>
+<script th:inline="javascript">
+
+function impersonate(rowOrApi, idsOptional) {
+	const url = /*[[@{/dashboard/user/impersonate}]]*/ "dummy";
+	if (idsOptional?.length > 0) {
+		// Toolbar button
+		yada.impersonate(url, idsOptional[0]);
+	} else {
+		// Command button
+		const id = rowOrApi.id;
+		yada.impersonate(url, id);
+	}
+}
 
 function disableCommandIcon(data, row) {
 	console.log("disableCommandIcon called");

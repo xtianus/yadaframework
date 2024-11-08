@@ -173,7 +173,8 @@ public class YadaUserDetailsService implements UserDetailsService {
 	 * Authenticate the user
 	 * @param userCredentials
 	 * @param setTimestamp true to set the lastSuccessfulLogin timestamp
-	 * @deprecated because for Spring 5
+	 * @deprecated because for Spring 5 we need Request and Response
+	 * @see #authenticateAs(YadaUserCredentials, boolean, HttpServletRequest, HttpServletResponse)
 	 */
 	@Deprecated
 	public Authentication authenticateAs(YadaUserCredentials userCredentials, boolean setTimestamp) {

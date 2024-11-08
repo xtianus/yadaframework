@@ -13,7 +13,7 @@ public class YadaDataTableLanguage extends YadaFluentBase<YadaDataTable> {
 	protected String languageBaseUrl = "https://cdn.datatables.net/plug-ins/2.1.8/i18n/";
 	protected Map<String, String> languageMap = new HashMap<>();
 	
-	public YadaDataTableLanguage(String languageBaseUrl, YadaDataTable parent) {
+	protected YadaDataTableLanguage(String languageBaseUrl, YadaDataTable parent) {
 		super(parent);
 		if (StringUtils.isEmpty(languageBaseUrl)) {
 			languageBaseUrl = "https://cdn.datatables.net/plug-ins/2.1.8/i18n/";

@@ -29,6 +29,13 @@
 </script>
 
 <header th:with="loggedIn=${@yadaSecurityUtil.loggedIn()}">
+	<div th:if="${@userSession.impersonationActive}" class="yadaImpersonationBanner">
+		<a th:href="@{/dashboard/user/deimpersonate}">
+			<span>Impersonating <strong th:text="${@userSession.currentUserProfile.userCredentials.username}">John Doe</strong></span>
+		    <button type="button" class="btn-close" aria-label="Close Impersonation"></button>
+		</a>
+	</div>
+
 	<div class="container">
 		<a th:href="@{/}">Home</a> - <a th:href="@{/dashboard}">Dashboard</a>
 	
@@ -36,7 +43,7 @@
 			<a th:unless="${loggedIn}" th:href="@{/openLogin}" class="yadaAjax">
 				Login
 			</a>
-			<span th:if="${loggedIn}">[[${@userSession.currentUserProfile.nickname}]] - </span>
+			<span th:if="${loggedIn}">[[${@yadaSecurityUtil.username}]] - </span>
 			<a th:if="${loggedIn}" th:href="@{/logout}">
 				Logout
 			</a>

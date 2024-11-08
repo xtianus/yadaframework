@@ -15,8 +15,8 @@
 <div th:fragment="content">
 	<div class="modal-body">
 		<div th:replace="~{/yada/feedbackMessages :: div}"></div>
-		<form name="userForm" yada:successhandler="yex.usersTable?.ajax.reload()" 
-			th:action="@{/dashboard/user/ajaxAddOrUpdateUserProfile}" th:object="${userProfile}" class="yadaAjax" th:classappend="${#fields.hasErrors('*')}? has-error" method="post" role="form">
+		<form name="userForm" yada:successhandler="$('#userTable').data('yadaDataTableApi').ajax.reload(null, false)" 
+			th:action="@{/dashboard/userwrite/ajaxAddOrUpdateUserProfile}" th:object="${userProfile}" class="yadaAjax" th:classappend="${#fields.hasErrors('*')}? has-error" method="post" role="form">
 			<fieldset>
 				<input type="hidden" name="userProfileId" th:value="*{id}" th:unless="${newUser}">
 				<div th:unless="${newUser}">ID: [[*{id}]]</div>
@@ -38,12 +38,12 @@
 					</div>
 				</div>
 				<th:block th:if="${newUser}">
-					<div th:replace="~{/yada/form/b5/boolean :: body (fieldName='inviteEmail',label='Send invitation email')}"></div>
+					<div th:replace="~{/yada/form/b5/boolean :: body (fieldName='inviteEmail',labelKey='form.label.invitation')}"></div>
 				</th:block>
 		
 				<div class="form-group">
-					<button class="btn btn-success" type="submit" name="Save"><span class="glyphicon glyphicon-ok"></span> Confirm</button>
-					<button class="btn btn-default" type="button" name="Cancel" data-bs-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Close</button>
+					<button class="btn btn-success" type="submit" name="Save"><span class="glyphicon glyphicon-ok"></span> [[#{button.confirm}]]</button>
+					<button class="btn btn-default" type="button" name="Cancel" data-bs-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> [[#{button.close}]]</button>
 				</div>
 			</fieldset>
 		</form>

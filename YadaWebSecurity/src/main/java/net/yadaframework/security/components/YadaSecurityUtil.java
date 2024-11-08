@@ -457,9 +457,9 @@ public class YadaSecurityUtil {
 	 * Check if the current user has any of the provided roles, case sensitive.
 	 * This method finds roles in the current SecurityContextHolder and never goes
 	 * to database but if an instance of the current YadaUserProfile is available,
-	 * the {@link YadaUserProfile#hasAnyRole(Integer...)} method may be faster.
+	 * the {@link YadaUserProfile#hasAnyRoleId(Integer...)} method may be faster.
 	 * @param rolesToCheck without "ROLE_" prefix
-	 * @see {@link YadaUserProfile#hasAnyRole(Integer...)}
+	 * @see {@link YadaUserProfile#hasAnyRoleId(Integer...)}
 	 * @see #hasAnyRole(String...)
 	 * @deprecated use {@link #hasAnyRole(String...)} instead
 	 */
@@ -474,9 +474,9 @@ public class YadaSecurityUtil {
 	 * Check if the current user has any of the provided roles, case sensitive.
 	 * This method finds roles in the current SecurityContextHolder and never goes
 	 * to database but if an instance of the current YadaUserProfile is available,
-	 * the {@link YadaUserProfile#hasAnyRole(Integer...)} method may be faster.
+	 * the {@link YadaUserProfile#hasAnyRoleId(Integer...)} method may be faster.
 	 * @param rolesToCheck without "ROLE_" prefix
-	 * @see {@link YadaUserProfile#hasAnyRole(Integer...)}
+	 * @see {@link YadaUserProfile#hasAnyRoleId(Integer...)}
 	 */
 	public boolean hasAnyRole(String ... rolesToCheck) {
 		Set<String> currentRoles = getCurrentRoles();

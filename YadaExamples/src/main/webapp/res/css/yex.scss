@@ -7,6 +7,7 @@ html {
 
 header, footer {
     background-color: #f1f1f1;
+	padding-top: 10px;
 }
 
 footer {
@@ -36,6 +37,28 @@ tr.userProfileAdmin td:not(.yadaCommandButtonCell) {
 
 .yadaDataTableBlock .disabled {
 	cursor: no-drop;
+}
+
+.yadaImpersonationBanner {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	padding: 0 5px;
+	height: 13px;
+	z-index: 9999;
+	background-color: yellow;
+	font-size: 12px;
+	text-align: center;
+	a, a:hover, a:visited {
+	    color: black !important;
+	    position: relative;
+	    top: -3px;
+		text-decoration: none;
+		button {
+			float: right;
+		}
+	}
 }
 
 
