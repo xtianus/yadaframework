@@ -148,6 +148,7 @@ public class UserProfileController {
 				}
 			}
 		} else {
+			log.error("Id missing or current user role not admin");
 			yadaNotify.titleKey(model, "user.delete.error.title").messageKey("user.delete.internalError.message").error().add();
 		}
 		return yadaNotify.getViewName();
@@ -217,12 +218,12 @@ public class UserProfileController {
 					.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin").dtOrderDesc(1).back()
 					.dtColumnCheckbox("select.allnone") 
 					.dtColumnCommands("column.commands")
+					.dtButtonObj("Disabled").dtUrl("@{/dashboard/user/dummy}").dtIcon("<i class='bi bi-0-circle'></i>").dtShowCommandIcon("disableCommandIcon").back()
 					.dtButtonObj("button.add").dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}").dtGlobal().dtIcon("<i class='bi bi-plus-square'></i>").dtToolbarCssClass("btn-success").dtRole("ADMIN").back()
 					.dtButtonObj("button.impersonate").dtUrlProvider("impersonate").dtNoAjax().dtIcon("<i class='bi bi-mortarboard'></i>").dtRole("ADMIN").dtRole("supervisor").back()
 					.dtButtonObj("button.edit").dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}").dtElementLoader("#userTable").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId").dtRole("ADMIN").back()
-					.dtButtonObj("Disabled").dtUrl("@{/dashboard/user/dummy}").dtIcon("<i class='bi bi-0-circle'></i>").dtShowCommandIcon("disableCommandIcon").back()
 					.dtButtonObj("button.delete").dtUrl("@{/dashboard/userwrite/ajaxDeleteUserProfile}").dtIcon("<i class='bi bi-trash'></i>")
-						.dtIdName("userProfileId").dtRole("ADMIN").dtMultiRow().dtToolbarCssClass("btn-danger")
+						.dtRole("ADMIN").dtMultiRow().dtToolbarCssClass("btn-danger")
 						.dtConfirmDialogObj()
 							.dtTitle("Delete User")
 							.dtMessageSingular("usertable.delete.confirm.singular")
@@ -231,6 +232,7 @@ public class UserProfileController {
 							.dtPlaceholderColumnName("userCredentials.username")
 							.back()
 						.back()
+					//.dtFooter()
 					.back()
 				.dtOptionsObj()
 					// wrong: .dtLanguageObj().dtUrl("/static/datatables-2.1.8/i18n/" + locale.getLanguage() + ".json").back()
@@ -240,7 +242,7 @@ public class UserProfileController {
 					.dtColumnDefsObj().dtTargetsName("userCredentials.lastSuccessfulLogin").dtAriaTitle("usertable.aria.lastlogin").back()
 				;
 		});
-		model.addAttribute("yadaDataTable", yadaDataTable);
+		model.addAttribute("userTableAttribute", yadaDataTable);
 		return "/dashboard/users";
 	}
 	

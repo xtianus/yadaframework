@@ -14,9 +14,18 @@
 
 <main class="container">
 	<h1>Users</h1>
-	
+	<p>This is an example of user administration table. Relevant functionality:</p>
+	<ul>
+		<li>Different user roles see different buttons</li>
+		<li>Impersonation url is computed via javascript</li>
+		<li>The Edit button starts a loader overlay on the table only</li>
+		<li>The "Dummy" <i class='bi bi-0-circle'></i> button is enabled via javascript on some rows</li>
+		<li>The Delete button opens a confirmation dialog</li>
+		<li>Some "native" datatables options are set in Java</li>
+	</ul>
+	<br>
 	<yada:datatable 
-		yada:configuration="${yadaDataTable}" 
+		yada:configuration="${userTableAttribute}" 
 		yada:preprocessor="userTablePreprocessor"
 		yada:postprocessor="userTablePostprocessor">
 	</yada:datatable>
@@ -37,18 +46,20 @@ function impersonate(rowOrApi, idsOptional) {
 	}
 }
 
-function disableCommandIcon(data, row) {
+function disableCommandIcon(data, row, meta, dataTableJson, currentUserRoles) {
 	console.log("disableCommandIcon called");
-	let result = "disabled"; // Could be calculated on a row by row basis
-	return result;
+	if (meta.row % 2 === 0) {
+		return "disabled";
+	}
+	return true;
 }
 
-function userTablePreprocessor(dataTableOptionsJson) {
-	dataTableOptionsJson.responsive = true; // Just an example
+function userTablePreprocessor(dataTableJson) {
+	dataTableJson.options.responsive = true; // Just an example
 	console.log("Config preprocessor called ");
 }
 
-function userTablePostprocessor(dataTableApi, dataTableOptionsJson) {
+function userTablePostprocessor(dataTableApi, dataTableJson) {
 	dataTableApi.page.len(25).draw(); // Just an example
 	console.log("API postprocessor called ");
 }

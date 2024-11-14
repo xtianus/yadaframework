@@ -28,7 +28,7 @@ public class YadaDataTableHTMLProxy extends YadaDataTableHTML {
 	}
 	
 	public boolean isSelectCheckbox() {
-		return selectCheckboxTitle!=null;
+		return super.isSelectCheckbox();
 	}
 	
 	public String getSelectCheckboxTitle() {

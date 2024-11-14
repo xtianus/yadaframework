@@ -10,31 +10,6 @@
 	// For a private function use "function xxx(..."
 		
 	const CLASS_COMMANDBUTTON = "yadaRowCommandButton";
-	
-	/**
-	 * Formats a string replacing {0} placeholders with the value in the cell named after 
-	 * the value found in columnNames at the corresponding position.
-	 * @param message the string with placeholders, e.g. "Product {0} color {1}"
-	 * @param columnNames an array with the names of the columns that hold the value to replace, e.g. ["product.name", "product.color"]
-	 * @param row the current row data
-	 * @param firstValue when specified, this is the value for {0} while all other placeholders take values from the columns
-	 */
-	function formatMessage(message, columnNames, row, firstValue) {
-		if (message==null || message=="" || (columnNames==null && firstValue==null)) {
-			return message;
-		}
-		if (firstValue) {
-			message = message.replace("{0}", firstValue);
-		}
-		let offset = firstValue?1:0;
-	    columnNames.forEach((colName, index) => {
-	        const placeholder = `{${index+offset}}`;
-	        const value = yada.getValue(row, colName) || "";
-	        message = message.replace(placeholder, value);
-	    });
-	    return message;
-	}
-
 
 	/**
 	 * Initialize the datatable (internal use)
@@ -57,14 +32,14 @@
 		if (commandColumn) {
 			const originalRender = commandColumn.render;
 			commandColumn.render = function(data, type, row, meta) {
-				return originalRender(data, type, row, meta, dataTableHtml, currentUserRoles);
+				return originalRender(data, type, row, meta, dataTableJson, currentUserRoles);
 			}
 		}
 
 		// Preprocessor can override, add, delete configured options
 		const preprocessor = window[preprocessorName];
 		if (typeof preprocessor === "function") {
-		    preprocessor(dataTableOptions);
+		    preprocessor(dataTableJson);
 		}
 		
 		const $table = $("#" + dataTableId);
@@ -80,7 +55,7 @@
 		// Postprocessor can operate on the created table
 		const postprocessor = window[postprocessorName];
 		if (typeof postprocessor === "function") {
-		    postprocessor(dataTableApi, dataTableOptions);
+		    postprocessor(dataTableApi, dataTableJson);
 		}
 		return dataTableApi;
 	}
@@ -227,17 +202,17 @@
 	/**
 	 * Rendere the commands column
 	 */
-	yada.dtCommandRender =  function(data, type, row, meta, dataTableHtmlJson, currentUserRoles) {
+	yada.dtCommandRender =  function(data, type, row, meta, dataTableJson, currentUserRoles) {
         if ( type === 'display' ) {
 	    	// const entityId = rowIdToEntityId(data.DT_RowId); // 22
-			const yadaButtons = dataTableHtmlJson.buttons;
+			const yadaButtons = dataTableJson.html.buttons;
         	let buttonsHtml = '';
 			yadaButtons.filter(button => !button.global).forEach(button => {
 				// The button is shown only if the current user roles contain one of the roles for the button
 				let displayIconOnRow = !Array.isArray(button.roles) || button.roles.some(role => currentUserRoles.includes(role));
 				const showCommandIconFunction = button.showCommandIcon;
         		if (displayIconOnRow==true && typeof showCommandIconFunction == "function") {
-        			displayIconOnRow = showCommandIconFunction(data, row);
+        			displayIconOnRow = showCommandIconFunction(data, row, meta, dataTableJson, currentUserRoles);
         		}
         		if (displayIconOnRow==true) {
 	        		buttonsHtml += `<a class="${CLASS_COMMANDBUTTON}" href="javascript:void(0)" data-buttontype="${button.type}"
@@ -284,6 +259,30 @@
 	    const noLoader = $("#"+dataTableId).hasClass('yadaNoLoader');
     	yada.ajax(ajaxUrl, jQuery.param(data), callback, 'POST', null, noLoader);
     }
+
+	/**
+	 * Formats a string replacing {0} placeholders with the value in the cell named after 
+	 * the value found in columnNames at the corresponding position.
+	 * @param message the string with placeholders, e.g. "Product {0} color {1}"
+	 * @param columnNames an array with the names of the columns that hold the value to replace, e.g. ["product.name", "product.color"]
+	 * @param row the current row data
+	 * @param firstValue when specified, this is the value for {0} while all other placeholders take values from the columns
+	 */
+	function formatMessage(message, columnNames, row, firstValue) {
+		if (message==null || message=="" || (columnNames==null && firstValue==null)) {
+			return message;
+		}
+		if (firstValue) {
+			message = message.replace("{0}", firstValue);
+		}
+		let offset = firstValue?1:0;
+	    columnNames.forEach((colName, index) => {
+	        const placeholder = `{${index+offset}}`;
+	        const value = yada.getValue(row, colName) || "";
+	        message = message.replace(placeholder, value);
+	    });
+	    return message;
+	}
 
 	/**
 	 * Convert the row id as assigned to DT_RowId into an entity id number.

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:yada="http://www.yadaframework.net" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
+	<meta charset="UTF-8">
 </head>
 
 <!--/*
@@ -17,7 +17,7 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 		<thead>
 			<tr>
 				<th th:if="${html.selectCheckbox}" th:with="title=${html.selectCheckboxTitle}">
-					<input type="checkbox" class="yada_selectAllNone" th:title="${title}?#{${title}}">
+					<input type="checkbox" class="yada_selectAllNone" th:title="${title!=''}?#{${title}}">
 				</th>
 				<th th:each="column : ${html.columns}" th:text="#{${column.headerText}}">Name</th>
 				<th th:if="${!#strings.isEmpty(html.commandsTitle)}" th:with="title=${html.commandsTitle}" th:text="${title}?#{${title}}">Commands</th>
@@ -25,9 +25,9 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 		</thead>
 		<tfoot th:if="${html.showFooter}">
 			<tr>
-				<td th:if="${html.selectCheckbox}"></td> <!-- /* Empty for select column */-->
-				<th th:each="column : ${html.columns}"></th>
-				<td th:if="${html.commandsTitle}"></td> <!-- /* Empty for command column */-->
+				<th th:if="${html.selectCheckbox}"></th> <!-- /* Empty for select column */-->
+				<th th:each="column : ${html.columns}" th:text="#{${column.headerText}}">Name</th>
+				<th th:if="${html.commandsTitle}"></th> <!-- /* Empty for command column */-->
 			</tr>
 		</tfoot>
 	</table>
@@ -36,7 +36,7 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 	<div class="yadaDataTableToolbar">
 		<th:block th:each="button : ${html.buttons}" th:with="hasRole = ${button.roles==null || @userSession.currentUserProfile.hasAnyRoleId(button.roles)}">
 			<a class="btn"
-				th:if="${button.showCommandIcon==null && hasRole}"
+				th:if="${button.showCommandIcon==null && hasRole && (html.selectCheckbox || button.global)}"
 				href="javascript:void(0)"
 				th:data-idname="${button.idName}"
 				th:data-buttontype="${button.type}"
@@ -57,7 +57,7 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 			const ajaxUrl = /*[[__${yadaDataTable.ajaxUrl}__]]*/ "dummy";
 			const languageUrl = /*[[__${yadaDataTable.languageUrl}__]]*/ "dummy";
 			// Fix button urls and localized confirm messages
-			let type, url;
+			let buttonType;
 			/*[# th:each="button : ${yadaDataTable.html.buttons}"]*/
 				buttonType = /*[[${button.type}]]*/ "dummy"; 					
     			dataTableJson.html.buttons.filter(b => b.type==buttonType).forEach(function(b) {

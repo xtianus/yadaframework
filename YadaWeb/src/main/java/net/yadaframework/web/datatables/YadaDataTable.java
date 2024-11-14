@@ -55,7 +55,7 @@ public class YadaDataTable {
 	protected void prepareConfiguration() {
 		yadaDataTableHTML.prepareConfiguration();
 	}
-
+	
 	/**
 	 * Set the base url where language files are located. It can be the official DataTables URL or a local endpoint.
 	 * @param languageBaseUrl the URL of the root folder for the DataTable i18n translations. 

@@ -214,7 +214,7 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
     
     /**
      * Javascript function that determines whether to show the button icon for each row.
-     * It receives the "data" and "row" parameters as for the render functions (no "type" or "meta" though). 
+     * It receives the "data", "row" and "meta" parameters as for the render functions, and also dataTableJson and currentUserRoles. 
      * It must return true/false to show/hide the icon or "disabled" to show it disabled.
      * These buttons are not shown in the toolbar.
      * @see <a href="https://datatables.net/reference/api/row().data()">DataTables row().data() API</a> 

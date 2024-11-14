@@ -112,8 +112,8 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 		return this;
 	}
 
-	// This is private not to pollute the fluent interface
-	private boolean isSelectCheckbox() {
+	// This is protected not to pollute the fluent interface
+	protected boolean isSelectCheckbox() {
 		return selectCheckboxTitle!=null;
 	}
 
@@ -133,11 +133,11 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 //			log.debug("Commands column forced because of non-global button");
 //			dtColumnCommands("");
 //		}
-		// When there is no selectCheckbox column, but there is a least one non-global button, add the column
-		if (!isSelectCheckbox() && hasCommand) {
-			log.warn("Checkbox column forced because of non-global button. Use dtColumnCheckbox() to add it explicitly");
-			dtColumnCheckbox("");
-		}
+//		// When there is no selectCheckbox column, but there is a least one non-global button, add the column
+//		if (!isSelectCheckbox() && hasCommand) {
+//			log.warn("Checkbox column forced because of non-global button. Use dtColumnCheckbox() to add it explicitly");
+//			dtColumnCheckbox("");
+//		}
 		//
 		// Configuration
 		//
