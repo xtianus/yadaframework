@@ -837,7 +837,7 @@
 				if (typeof value != 'object') {
 					template = template.replace(new RegExp(placeholder, 'g'), value);
 				} else {
-					for (var i=0; i<value.length; i++) {
+					for (var i=0; i<value?.length; i++) {
 						if (i<value.length-1) {
 							template = template.replace(new RegExp(placeholder, 'g'), value[i]+"${"+name+"}");
 						} else {
