@@ -17,7 +17,7 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 	protected String headerText;
 	protected YadaDTColumnsProxy yadaDTColumns;
 	
-	protected int positionInTable;
+	protected int positionInTable; // Internal use
 	protected Boolean orderAsc; // false for desc
 
 	/**
@@ -40,11 +40,23 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 		
 	}
 	
-// I wanted to expose the DataTables Options but it's too much effort to implement (needs a wrapper that overrides the parent)
+// I wanted to expose the DataTables Options but it's too much effort to implement: needs a wrapper that overrides the parent
+// otherwise the parent is YadaDTOptions and not YadaDataTableHTML. Didn't find a way to fix this.
 //	public YadaDTColumnsWrapper dt() {
 //		return yadaDTColumns;
 //	}
 	
+	/**
+	 * css classes to set on the cell.
+	 * @param cssClasses space-separated css classes
+	 * @return this instance for method chaining
+	 * @see <a href="https://datatables.net/reference/option/columns.className">DataTables Reference: columns.className</
+	 */
+	public YadaDataTableColumn dtCssClasses(String cssClasses) {
+		yadaDTColumns.dtClassName(cssClasses);
+		return this;
+	}
+
 	/**
 	 * Makes the column not orderable
 	 * @return this instance for method chaining
@@ -119,6 +131,21 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 	public YadaDataTableColumn dtOrderDesc(int precedence) {
 		orderAsc = false;
 		addOrder(precedence); 
+		return this;
+	}
+	
+	/**
+     * In a responsive table control the order in which columns are hidden.
+     * Responsive will automatically remove columns from the right-hand-side 
+     * of the table when a table is too wide for a given display, unless this value is set.
+     * @param responsivePriority The priority is an integer value where lower numbers
+     * 			are given a higher priority (i.e. a column with priority 2 will be 
+     * 			hidden before a column with priority 1). The default is 10000.  
+     * @return This instance for method chaining.
+     * @see <a href="https://datatables.net/reference/option/columns.responsivePriority">DataTables Reference: columns.responsivePriority</a>
+	 */
+	public YadaDataTableColumn dtResponsivePriority(int responsivePriority) {
+		yadaDTColumns.dtResponsivePriority(responsivePriority);
 		return this;
 	}
 	

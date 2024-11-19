@@ -235,7 +235,8 @@
 	 */
 	yada.dtCheckboxRender = function( data, type, row ) {
 		if ( type === 'display' ) {
-			return '<input type="checkbox" class="yadaCheckInCell yada_rowSelector"/>';
+			// event.stopPropagation() is needed to avoid the row selection event
+			return '<input type="checkbox" class="yada_rowSelector" onclick="event.stopPropagation()"/>';
 		}
 		return data;
 	}

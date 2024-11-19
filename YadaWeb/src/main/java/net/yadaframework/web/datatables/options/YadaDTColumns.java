@@ -43,10 +43,6 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
     protected Boolean visible;
     protected String width;
     protected Integer responsivePriority;
-    protected YadaDTOptionSearchBuilder searchBuilder;
-    protected String searchBuilderTitle;
-    protected String searchBuilderType;
-    protected String searchPanes;
 
     public YadaDTColumns(YadaDTOptions parent) {
         super(parent);
@@ -234,33 +230,17 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
     }
 
     /**
-     * @param responsivePriority The responsive priority for the column.
+     * In a responsive table control the order in which columns are hidden.
+     * Responsive will automatically remove columns from the right-hand-side 
+     * of the table when a table is too wide for a given display, unless this value is set.
+     * @param responsivePriority The priority is an integer value where lower numbers
+     * 			are given a higher priority (i.e. a column with priority 2 will be 
+     * 			hidden before a column with priority 1). The default is 10000.  
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.responsivePriority">DataTables Reference: columns.responsivePriority</a>
      */
     public YadaDTColumns dtResponsivePriority(int responsivePriority) {
         this.responsivePriority = responsivePriority;
-        return this;
-    }
-
-    /**
-     * @return The search builder instance for configuring search options for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.searchBuilder">DataTables Reference: columns.searchBuilder</a>
-     */
-    public YadaDTOptionSearchBuilder dtSearchBuilder() {
-        if (this.searchBuilder == null) {
-            this.searchBuilder = new YadaDTOptionSearchBuilder(this);
-        }
-        return this.searchBuilder;
-    }
-
-    /**
-     * @param searchPanes The search panes configuration for the column.
-     * @return This instance for method chaining.
-     * @see <a href="https://datatables.net/reference/option/columns.searchPanes">DataTables Reference: columns.searchPanes</a>
-     */
-    public YadaDTColumns dtSearchPanes(String searchPanes) {
-        this.searchPanes = searchPanes;
         return this;
     }
 
@@ -313,25 +293,4 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
         this.width = width;
         return this;
     }
-    
-    /**
-     * @param searchBuilderTitle The search builder title for the column.
-     * @return This instance for method chaining.
-     * @see <a href="https://datatables.net/reference/option/columns.searchBuilderTitle">DataTables Reference: columns.searchBuilderTitle</a>
-     */
-    public YadaDTColumns dtSearchBuilderTitle(String searchBuilderTitle) {
-    	this.searchBuilderTitle = searchBuilderTitle;
-    	return this;
-    }
-    
-    /**
-     * @param searchBuilderType The search builder type for the column.
-     * @return This instance for method chaining.
-     * @see <a href="https://datatables.net/reference/option/columns.searchBuilderType">DataTables Reference: columns.searchBuilderType</a>
-     */
-    public YadaDTColumns dtSearchBuilderType(String searchBuilderType) {
-    	this.searchBuilderType = searchBuilderType;
-    	return this;
-    }
-
 }

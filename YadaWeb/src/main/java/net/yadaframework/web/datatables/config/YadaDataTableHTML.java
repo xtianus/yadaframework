@@ -31,6 +31,7 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 	@JsonIgnore protected String selectCheckboxTitle; // When null, no select checkbox in first row
 	// private List<String> columnTitles = new ArrayList<String>();
 	@JsonIgnore protected String commandsTitle;
+	@JsonIgnore private Integer commandsTitleResponsivePriority;
 	@JsonIgnore protected Boolean showFooter = false;
 
 	@JsonIgnore protected List<YadaDataTableColumnProxy> columns = new ArrayList<>();
@@ -103,8 +104,19 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 	}
 	
 	/**
+	 * Adds the rightmost column with command icons
+	 * @param title
+	 * @return this instance for method chaining
+	 */
+	public YadaDataTableHTML dtColumnCommands(String title, int responsivePriority) {
+		dtColumnCommands(title);
+		this.commandsTitleResponsivePriority = responsivePriority;
+		return this;
+	}
+	
+	/**
 	 * Set the css classes to set on the table tag. Defaults to 'table-striped no-wrap'
-	 * @param cssClasses
+	 * @param cssClasses space-separated css classes
 	 * @return this instance for method chaining
 	 */
 	public YadaDataTableHTML dtCssClasses(String cssClasses) {
@@ -148,6 +160,7 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 		if (isSelectCheckbox()) {
 			YadaDTColumns newColumn = options.addNewColumn(0);
 			newColumn.dtData(null).dtOrderable(false).dtSearchable(false).dtDefaultContent("");
+			newColumn.dtResponsivePriority(1); // Always show the checkbox column (unless some other column is 0)
 			// NOTE: can't use a "myFunction()" in the dtRender because that function must be defined on the table row (i.e. on the data source)
 			//       and we can't do that.
 			// newColumn.dtRender("yada.dtCheckboxRender()").dtWidth("50px").dtClassName("yadaCheckInCell");
@@ -155,12 +168,15 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 		}
 		// Last column for commands
 		if (commandsTitle!=null) {
-			options.dtColumnsObj()
+			YadaDTColumns commandsColumn = options.dtColumnsObj()
 			.dtClassName("yadaCommandButtonCell")
 			.dtName(YadaDataTableDao.COLUMN_COMMAND)
 			.dtOrderable(false).dtSearchable(false)
 			.dtWidth("50px")
 			.dtRender("yada.dtCommandRender");
+			if (commandsTitleResponsivePriority != null) {
+				commandsColumn.dtResponsivePriority(commandsTitleResponsivePriority);
+			}
 		}
 		
 		backCalled = true;
@@ -205,7 +221,7 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 			String direction = Boolean.FALSE.equals(column.orderAsc) ? "desc" : "asc";
 			options.dtOrder(column.positionInTable, direction);
 		}
-		options.dtOrderMulti(totColumns>1);
+		options.setOrderMulti(totColumns>1);
 	}
 
 	

@@ -12,8 +12,9 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDTColumnDef extends YadaDTColumns {
-    protected String stringTarget;
-    protected int[] intTarget;
+    // protected String stringTarget;
+    // protected int[] intTarget;
+    protected Object targets;
 
     protected YadaDTColumnDef(YadaDTOptions parent) {
         super(parent);
@@ -31,10 +32,10 @@ public class YadaDTColumnDef extends YadaDTColumns {
      * @see <a href="https://datatables.net/reference/option/columnDefs.targets">targets</a>
      */
     public YadaDTColumnDef dtTargets(int ... columnIndex) {
-    	if (stringTarget != null || intTarget != null) {
+    	if (targets != null) {
 	    	throw new YadaInvalidUsageException("Cannot set targets more than once");
     	}
-        this.intTarget = columnIndex;
+        this.targets = columnIndex;
         return this;
     }
     
@@ -46,10 +47,10 @@ public class YadaDTColumnDef extends YadaDTColumns {
      * @see <a href="https://datatables.net/reference/option/columnDefs.targets">targets</a>
      */
     public YadaDTColumnDef dtTargetsCss(String cssSelector) {
-    	if (stringTarget != null || intTarget != null) {
+    	if (targets != null) {
 	    	throw new YadaInvalidUsageException("Cannot set targets more than once");
     	}
-    	this.stringTarget = cssSelector;
+    	this.targets = cssSelector;
     	return this;
     }
     
@@ -61,10 +62,10 @@ public class YadaDTColumnDef extends YadaDTColumns {
      * @see <a href="https://datatables.net/reference/option/columnDefs.targets">targets</a>
      */
     public YadaDTColumnDef dtTargetsName(String columnName) {
-    	if (stringTarget != null || intTarget != null) {
+    	if (targets != null) {
 	    	throw new YadaInvalidUsageException("Cannot set targets more than once");
     	}
-    	this.stringTarget = columnName + ":name";
+    	this.targets = columnName + ":name";
     	return this;
     }
     
@@ -74,10 +75,10 @@ public class YadaDTColumnDef extends YadaDTColumns {
      * @see <a href="https://datatables.net/reference/option/columnDefs.targets">targets</a>
      */
     public YadaDTColumnDef dtTargetsAll() {
-    	if (stringTarget != null || intTarget != null) {
+    	if (targets != null) {
 	    	throw new YadaInvalidUsageException("Cannot set targets more than once");
     	}
-    	this.stringTarget = "_all";
+    	this.targets = "_all";
     	return this;
     }
     

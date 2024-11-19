@@ -11,6 +11,7 @@ import net.yadaframework.core.YadaFluentBase;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.web.YadaJsonRawStringSerializer;
 import net.yadaframework.web.datatables.YadaDataTable;
+import net.yadaframework.web.datatables.config.YadaDataTableColumn;
 import net.yadaframework.web.datatables.proxy.YadaDTColumnDefProxy;
 import net.yadaframework.web.datatables.proxy.YadaDTColumnsProxy;
 
@@ -27,53 +28,48 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     // It can still be custonmized in a yada:preprocessor if needed.
     // protected String ajax;
     // protected YadaDTAjax yadaDTAjax;
-    protected YadaDTAutoFill autoFill;
     protected Boolean autoWidth;
-    protected String buttonSearchBuilder;
-    protected String buttonSearchPanes;
-    protected YadaDTButtons buttons;
     protected String caption;
-    protected YadaDTColReorder colReorder;
     protected List<YadaDTColumnDef> columnDefs;
     protected List<YadaDTColumns> columns;
-    protected String createdRow;
-    protected Object data;
-    protected Boolean deferLoading;
+    // The YadaJsonRawStringSerializer must be used so that the js function is not quoted
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
+    protected String createdRow; // function
+    protected List<Object> data;
+    protected Object deferLoading; // Either integer or array of 2 integers
     protected Boolean deferRender;
     protected Boolean destroy;
-    protected String detectType;
+    protected Boolean typeDetect;
     protected Integer displayStart;
-    protected String dom;
+    // "dom" is deprecated
+    // protected String dom;
     @JsonSerialize(using = YadaJsonRawStringSerializer.class)
-    protected String drawCallback;
-    protected YadaDTFixedColumns fixedColumns;
-    protected YadaDTFixedHeader fixedHeader;
+    protected String drawCallback; // function
     @JsonSerialize(using = YadaJsonRawStringSerializer.class)
-    protected String footerCallback;
-    protected String formatNumber;
+    protected String footerCallback; // function
     @JsonSerialize(using = YadaJsonRawStringSerializer.class)
-    protected String headerCallback;
+    protected String formatNumber; // function
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
+    protected String headerCallback; // function
     protected Boolean info;
     @JsonSerialize(using = YadaJsonRawStringSerializer.class)
-    protected String infoCallback;
+    protected String infoCallback; // function
     @JsonSerialize(using = YadaJsonRawStringSerializer.class)
-    protected String initComplete;
-    protected YadaDTKeys keys;
+    protected String initComplete; // function
     // Not used because urls must be processed by thymeleaf
     // protected YadaDTLanguage language;
-    protected String layout;
+    // This should cope with all possible values but it's not implemented yet
+    protected Object layout; // Fluent api not implemented yet.
     protected Boolean lengthChange;
-    protected List<Object> lengthMenu;
+    protected int[] lengthMenu;
     protected List<YadaDTOrder> order;
-    protected Boolean orderCellsTop;
     protected Boolean orderClasses;
     protected Boolean orderDescReverse;
-    protected Object orderFixed;
+    protected Object orderFixed; // Fluent api not implemented yet.
     protected Boolean orderMulti;
     protected Boolean ordering;
     protected Integer pageLength;
     protected Boolean paging;
-    protected String pagingType;
     @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String preDrawCallback;
     protected Boolean processing;
@@ -139,6 +135,19 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
 //        return this;
 //    }
     
+	/**
+	 * Sets the `data` option.
+	 * This is normally not used as data is fetched from the server in Yada Framework.
+	 * 
+	 * @param data the data to display in the table. Each object of the list must be serializable by Jackson
+	 * @return this instance for method chaining
+	 * @see <a href="https://datatables.net/reference/option/data">data</a>
+	 */
+    public YadaDTOptions dtData(List<Object> data) {
+	    this.data = data;
+	    return this;
+    }
+    
     /**
      * Sets the `dataTableExtErrMode` option.
      * 
@@ -152,38 +161,13 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * Sets the `autoWidth` option.
+     * Disable automatic column width calculation as an optimisation.
      * 
-     * @param autoWidth enable or disable automatic column width calculation
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/autoWidth">autoWidth</a>
      */
-    public YadaDTOptions dtAutoWidth(Boolean autoWidth) {
-        this.autoWidth = autoWidth;
-        return this;
-    }
-
-    /**
-     * Sets the `buttonSearchBuilder` option.
-     * 
-     * @param buttonSearchBuilder the text for the SearchBuilder button
-     * @return this instance for method chaining
-     * @see <a href="https://datatables.net/reference/option/searchBuilder.button">buttonSearchBuilder</a>
-     */
-    public YadaDTOptions dtButtonSearchBuilder(String buttonSearchBuilder) {
-        this.buttonSearchBuilder = buttonSearchBuilder;
-        return this;
-    }
-
-    /**
-     * Sets the `buttonSearchPanes` option.
-     * 
-     * @param buttonSearchPanes the text for the SearchPanes button
-     * @return this instance for method chaining
-     * @see <a href="https://datatables.net/reference/option/searchPanes.button">buttonSearchPanes</a>
-     */
-    public YadaDTOptions dtButtonSearchPanes(String buttonSearchPanes) {
-        this.buttonSearchPanes = buttonSearchPanes;
+    public YadaDTOptions dtAutoWidthOff() {
+        this.autoWidth = false;
         return this;
     }
 
@@ -212,50 +196,68 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * Sets the `deferLoading` option.
+     * Enables deferred loading, and instructs DataTables as to how many items are in the full data set
      * 
-     * @param deferLoading enable or disable deferred loading of data
+     * @param totItems items in the full data set
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/deferLoading">deferLoading</a>
+     * @see dtDeferLoading(int, int)
      */
-    public YadaDTOptions dtDeferLoading(Boolean deferLoading) {
-        this.deferLoading = deferLoading;
+    public YadaDTOptions dtDeferLoading(int totItems) {
+        this.deferLoading = totItems;
         return this;
+    }
+    
+    /**
+     * Enables deferred loading, where the first data index tells DataTables how many rows are in 
+     * the filtered result set, and the second how many in the full data set without filtering applied.
+     * 
+     * @param filteredItems items in the filtered data set
+     * @param totItems items in the full data set
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/deferLoading">deferLoading</a>
+     * @see dtDeferLoading(int)
+     */
+    public YadaDTOptions dtDeferLoading(int filteredItems, int totItems) {
+    	this.deferLoading = totItems;
+    	return this;
     }
 
     /**
-     * Sets the `deferRender` option.
+     * Do not wait to create HTML elements when they are needed	for display.
+     * The only reason to use this option is if you must have all DOM elements available, 
+     * even those currently not in the document.
      * 
-     * @param deferRender enable or disable deferred rendering of rows
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/deferRender">deferRender</a>
      */
-    public YadaDTOptions dtDeferRender(Boolean deferRender) {
-        this.deferRender = deferRender;
+    public YadaDTOptions dtDeferRenderOff() {
+        this.deferRender = false;
         return this;
     }
 
     /**
-     * Sets the `destroy` option.
+     * Initialise a new DataTable as usual, but if there is an existing DataTable 
+     * which matches the selector, it will be destroyed and replaced with the new table.
      * 
-     * @param destroy enable or disable DataTables destruction before reinitialization
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/destroy">destroy</a>
      */
-    public YadaDTOptions dtDestroy(Boolean destroy) {
-        this.destroy = destroy;
+    public YadaDTOptions dtDestroy() {
+        this.destroy = true;
         return this;
     }
 
     /**
-     * Sets the `detectType` option.
+     * Disable the auto type detection that DataTables performs.
+     * This might be useful if you are using server-side processing where data can change between 
+     * pages and the client-side is unable to automatically reliably determine a column's data type.
      * 
-     * @param detectType the detection type for DataTable columns
      * @return this instance for method chaining
-     * @see <a href="https://datatables.net/reference/option/typeDetection">detectType</a>
+     * @see <a href="https://datatables.net/reference/option/typeDetection">typeDetect</a>
      */
-    public YadaDTOptions dtDetectType(String detectType) {
-        this.detectType = detectType;
+    public YadaDTOptions dtTypeDetectOff() {
+        this.typeDetect = false;
         return this;
     }
 
@@ -268,18 +270,6 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
      */
     public YadaDTOptions dtDisplayStart(Integer displayStart) {
         this.displayStart = displayStart;
-        return this;
-    }
-
-    /**
-     * Sets the `dom` option.
-     * 
-     * @param dom define the table control elements to display
-     * @return this instance for method chaining
-     * @see <a href="https://datatables.net/reference/option/dom">dom</a>
-     */
-    public YadaDTOptions dtDom(String dom) {
-        this.dom = dom;
         return this;
     }
 
@@ -332,14 +322,14 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * Sets the `info` option.
+     * Disables showing details about the table including information about 
+     * filtered data if that action is being performed.
      * 
-     * @param info enable or disable the table information display
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/info">info</a>
      */
-    public YadaDTOptions dtInfo(Boolean info) {
-        this.info = info;
+    public YadaDTOptions dtInfoOff() {
+        this.info = false;
         return this;
     }
 
@@ -369,6 +359,7 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
 
     /**
      * Sets the `layout` option.
+     * Fluent api not implemented yet.
      * 
      * @param layout the layout for the table
      * @return this instance for method chaining
@@ -380,82 +371,94 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * Sets the `lengthChange` option.
+     * Disables user's ability to change the paging display length of the table.
      * 
-     * @param lengthChange enable or disable the ability for the end user to change the page length
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/lengthChange">lengthChange</a>
      */
-    public YadaDTOptions dtLengthChange(Boolean lengthChange) {
-        this.lengthChange = lengthChange;
+    public YadaDTOptions dtLengthChangeOff() {
+        this.lengthChange = false;
         return this;
     }
+    
+	/**
+	 * Sets the `lengthMenu` option.
+	 * 
+	 * @param lengthChoice the list of page length options to show the user, like 10, 25, 50, 100
+	 * @return this instance for method chaining
+	 * @see <a href="https://datatables.net/reference/option/lengthMenu">lengthMenu</a>
+	 */
+	public YadaDTOptions dtLengthMenu(int ... lengthChoice) {
+		this.lengthMenu = lengthChoice;
+		return this;
+	}
 
     /**
-     * Sets the `orderCellsTop` option.
-     * 
-     * @param orderCellsTop control if ordering cells appear at the top of the table
-     * @return this instance for method chaining
-     * @see <a href="https://datatables.net/reference/option/orderCellsTop">orderCellsTop</a>
-     */
-    public YadaDTOptions dtOrderCellsTop(Boolean orderCellsTop) {
-        this.orderCellsTop = orderCellsTop;
-        return this;
-    }
-
-    /**
-     * Sets the `orderClasses` option.
+     * Disable the addition of ordering classes to the columns
+     * when performance is an issue.
      * 
      * @param orderClasses enable or disable the addition of ordering classes to the columns
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/orderClasses">orderClasses</a>
      */
-    public YadaDTOptions dtOrderClasses(Boolean orderClasses) {
-        this.orderClasses = orderClasses;
+    public YadaDTOptions dtOrderClassesOff() {
+        this.orderClasses = false;
         return this;
     }
 
     /**
-     * Sets the `orderDescReverse` option.
+     * Disable the default reverse.
      * 
-     * @param orderDescReverse enable or disable the reverse of default descending order
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/orderDescReverse">orderDescReverse</a>
      */
-    public YadaDTOptions dtOrderDescReverse(Boolean orderDescReverse) {
-        this.orderDescReverse = orderDescReverse;
+    public YadaDTOptions dtOrderDescReverseOff() {
+        this.orderDescReverse = false;
         return this;
     }
+    
+	/**
+	 * Sets the `orderFixed` option. Fluent api not implemented yet.
+	 * 
+	 * @param orderFixed define fixed ordering of columns
+	 * @return this instance for method chaining
+	 * @see <a href="https://datatables.net/reference/option/orderFixed">orderFixed</a>
+	 */
+	public YadaDTOptions dtOrderFixed(Object orderFixed) {
+		this.orderFixed = orderFixed;
+		return this;
+	}
 
     /**
-     * Sets the `orderMulti` option.
+     * Disables multiple column ordering ability
      * 
-     * @param orderMulti enable or disable multiple column ordering
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/orderMulti">orderMulti</a>
      */
-    public YadaDTOptions dtOrderMulti(Boolean orderMulti) {
-        this.orderMulti = orderMulti;
+    public YadaDTOptions dtOrderMultiOff() {
+        this.orderMulti = false;
         return this;
     }
 
     /**
-     * Sets the `ordering` option.
+     * Disables ordering (sorting) abilities
      * 
-     * @param ordering false to disable the initial sorting of the table
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/ordering">ordering</a>
      */
-    public YadaDTOptions dtOrdering(boolean ordering) {
-        this.ordering = ordering;
+    public YadaDTOptions dtOrderingOff() {
+        this.ordering = false;
         return this;
     }
     
     /**
      * Sets the `order` option. Can be called multiple times to set multiple orders.
+     * There should be no need to use this directly because this functionality is implemented by 
+     * the dtColumnObj() fluent interface.
      * @param idx column index
      * @param dir "asc" or "desc"
      * @return this instance for method chaining
+     * @see YadaDataTableColumn#dtOrderAsc() 
      * @see <a href="https://datatables.net/reference/type/DataTables.Order">order</a>
      */
     public YadaDTOptions dtOrder(int idx, String dir) {
@@ -475,38 +478,24 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
      * @see <a href="https://datatables.net/reference/option/pageLength">pageLength</a>
      */
     public YadaDTOptions dtPageLength(Integer pageLength) {
-        this.pageLength = pageLength;
         if (pageLength != null && Boolean.FALSE.equals(this.paging)) {
         	throw new YadaInvalidUsageException("pageLength must be null when paging is false");
         }
-        dtPaging(Boolean.TRUE); // Force paging, just to be safe
+        this.pageLength = pageLength;
         return this;
     }
 
     /**
-     * Sets the `paging` option.
+     * Disable table pagination.
      * 
-     * @param paging enable or disable pagination
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/paging">paging</a>
      */
-    public YadaDTOptions dtPaging(Boolean paging) {
-        this.paging = paging;
-        if (Boolean.FALSE.equals(paging) && this.pageLength != null) {
-	        throw new YadaInvalidUsageException("paging must be true when pageLength is not null");
+    public YadaDTOptions dtPagingOff() {
+        if (this.pageLength != null) {
+	        throw new YadaInvalidUsageException("paging can't be disabled when pageLength is not null");
         }
-        return this;
-    }
-
-    /**
-     * Sets the `pagingType` option.
-     * 
-     * @param pagingType define the pagination button style
-     * @return this instance for method chaining
-     * @see <a href="https://datatables.net/reference/option/pagingType">pagingType</a>
-     */
-    public YadaDTOptions dtPagingType(String pagingType) {
-        this.pagingType = pagingType;
+        this.paging = false;
         return this;
     }
 
@@ -523,14 +512,15 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * Sets the `processing` option.
+     * Enable the display of a 'processing' indicator when the table is being processed (e.g. a sort) 
+     * for server-side processing. This is particularly useful for tables with large amounts of data where it 
+     * can take a noticeable amount of time to sort the entries.
      * 
-     * @param processing enable or disable the display of a 'processing' indicator
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/processing">processing</a>
      */
-    public YadaDTOptions dtProcessing(Boolean processing) {
-        this.processing = processing;
+    public YadaDTOptions dtProcessingOn() {
+        this.processing = true;
         return this;
     }
 
@@ -743,90 +733,11 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
 	//
 
     /**
-     * @return The autoFill configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/autoFill">DataTables autoFill option</a>
-     */
-    public YadaDTAutoFill dtAutoFillObj() {
-        if (this.autoFill == null) {
-            this.autoFill = new YadaDTAutoFill(this);
-        }
-        return this.autoFill;
-    }
-
-    /**
-     * @return The buttons configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/buttons">DataTables buttons option</a>
-     */
-    public YadaDTButtons dtButtonsObj() {
-        if (this.buttons == null) {
-            this.buttons = new YadaDTButtons(this);
-        }
-        return this.buttons;
-    }
-
-    /**
-     * @return The colReorder configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/colReorder">DataTables colReorder option</a>
-     */
-    public YadaDTColReorder dtColReorderObj() {
-        if (this.colReorder == null) {
-            this.colReorder = new YadaDTColReorder(this);
-        }
-        return this.colReorder;
-    }
-
-    /**
-     * @return The fixedColumns configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/fixedColumns">DataTables fixedColumns option</a>
-     */
-    public YadaDTFixedColumns dtFixedColumnsObj() {
-        if (this.fixedColumns == null) {
-            this.fixedColumns = new YadaDTFixedColumns(this);
-        }
-        return this.fixedColumns;
-    }
-
-    /**
-     * @return The fixedHeader configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/fixedHeader">DataTables fixedHeader option</a>
-     */
-    public YadaDTFixedHeader dtFixedHeaderObj() {
-        if (this.fixedHeader == null) {
-            this.fixedHeader = new YadaDTFixedHeader(this);
-        }
-        return this.fixedHeader;
-    }
-
-    /**
-     * @return The keys configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/keys">DataTables keys option</a>
-     */
-    public YadaDTKeys dtKeysObj() {
-        if (this.keys == null) {
-            this.keys = new YadaDTKeys(this);
-        }
-        return this.keys;
-    }
-
-//    /**
-//     * @return The language configuration for DataTables.
-//     * @see <a href="https://datatables.net/reference/option/language">DataTables language option</a>
-//     */
-//    public YadaDTLanguage dtLanguageObj() {
-//        if (this.language == null) {
-//            this.language = new YadaDTLanguage(this);
-//        }
-//        return this.language;
-//    }
-
-    /**
      * @return The rowGroup configuration for DataTables.
      * @see <a href="https://datatables.net/reference/option/rowGroup">DataTables rowGroup option</a>
      */
     public YadaDTRowGroup dtRowGroupObj() {
-        if (this.rowGroup == null) {
-            this.rowGroup = new YadaDTRowGroup(this);
-        }
+    	this.rowGroup = YadaUtil.lazyUnsafeInit(this.rowGroup, () -> new YadaDTRowGroup(this));
         return this.rowGroup;
     }
 
@@ -835,9 +746,7 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
      * @see <a href="https://datatables.net/reference/option/rowReorder">DataTables rowReorder option</a>
      */
     public YadaDTRowReorder dtRowReorderObj() {
-        if (this.rowReorder == null) {
-            this.rowReorder = new YadaDTRowReorder(this);
-        }
+    	this.rowReorder = YadaUtil.lazyUnsafeInit(this.rowReorder, () -> new YadaDTRowReorder(this));
         return this.rowReorder;
     }
 
@@ -846,9 +755,7 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
      * @see <a href="https://datatables.net/reference/option/scroller">DataTables scroller option</a>
      */
     public YadaDTScroller dtScrollerObj() {
-        if (this.scroller == null) {
-            this.scroller = new YadaDTScroller(this);
-        }
+    	this.scroller = YadaUtil.lazyUnsafeInit(this.scroller, () -> new YadaDTScroller(this));
         return this.scroller;
     }
 
@@ -857,9 +764,7 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
      * @see <a href="https://datatables.net/reference/option/search">DataTables search option</a>
      */
     public YadaDTSearch dtSearchObj() {
-        if (this.search == null) {
-            this.search = new YadaDTSearch(this);
-        }
+    	this.search = YadaUtil.lazyUnsafeInit(this.search, () -> new YadaDTSearch(this));
         return this.search;
     }
 
@@ -868,9 +773,7 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
      * @see <a href="https://datatables.net/reference/option/searchBuilder">DataTables searchBuilder option</a>
      */
     public YadaDTSearchBuilder dtSearchBuilderObj() {
-        if (this.searchBuilder == null) {
-            this.searchBuilder = new YadaDTSearchBuilder(this);
-        }
+    	this.searchBuilder = YadaUtil.lazyUnsafeInit(this.searchBuilder, () -> new YadaDTSearchBuilder(this));
         return this.searchBuilder;
     }
 
@@ -879,9 +782,7 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
      * @see <a href="https://datatables.net/reference/option/searchPanes">DataTables searchPanes option</a>
      */
     public YadaDTSearchPanes dtSearchPanesObj() {
-        if (this.searchPanes == null) {
-            this.searchPanes = new YadaDTSearchPanes(this);
-        }
+    	this.searchPanes = YadaUtil.lazyUnsafeInit(this.searchPanes, () -> new YadaDTSearchPanes(this));
         return this.searchPanes;
     }
 
@@ -890,9 +791,7 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
      * @see <a href="https://datatables.net/reference/option/select">DataTables select option</a>
      */
     public YadaDTSelect dtSelectObj() {
-        if (this.select == null) {
-            this.select = new YadaDTSelect(this);
-        }
+    	this.select = YadaUtil.lazyUnsafeInit(this.select, () -> new YadaDTSelect(this));
         return this.select;
     }
 
@@ -901,9 +800,7 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
      * @see <a href="https://datatables.net/reference/option/columnDefs">DataTables columnDefs option</a>
      */
     public YadaDTColumnDef dtColumnDefsObj() {
-        if (this.columnDefs == null) {
-            this.columnDefs = new ArrayList<>();
-        }
+    	this.columnDefs = YadaUtil.lazyUnsafeInit(this.columnDefs);
         YadaDTColumnDef newColumnDef = new YadaDTColumnDefProxy(this);
         this.columnDefs.add(newColumnDef);
         return newColumnDef;
@@ -914,9 +811,7 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
      * @see <a href="https://datatables.net/reference/option/columns">DataTables columns option</a>
      */
     public YadaDTColumns dtColumnsObj() {
-        if (this.columns == null) {
-            this.columns = new ArrayList<>();
-        }
+    	this.columns = YadaUtil.lazyUnsafeInit(this.columns);
         YadaDTColumns newColumn = new YadaDTColumnsProxy(this);
         this.columns.add(newColumn);
         return newColumn;
@@ -927,33 +822,31 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
      * @see <a href="https://datatables.net/reference/option/searchCols">DataTables searchCols option</a>
      */
     public YadaDTSearchCol dtSearchColsObj() {
-        if (this.searchCols == null) {
-            this.searchCols = new ArrayList<>();
-        }
+    	this.searchCols = YadaUtil.lazyUnsafeInit(this.searchCols);
         YadaDTSearchCol newSearchCol = new YadaDTSearchCol(this);
         this.searchCols.add(newSearchCol);
         return newSearchCol;
     }
     
     /**
-     * Sets the responsive option as a boolean, determining if the table should adapt for different screen sizes.
+     * Sets the responsive option so that the table will adapt for different screen sizes.
      * 
-     * @param responsive Boolean flag to enable or disable responsive behavior
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/responsive">DataTables responsive Reference</a>
      */
-    public YadaDTOptions dtResponsive(Boolean responsive) {
-        this.responsive = responsive;
+    public YadaDTOptions dtResponsiveOn() {
+        this.responsive = true;
         return this;
     }
 
     /**
-     * Provides access to the responsive configuration options for DataTables.
+     * Turns on responsive behaviour and provides access to the responsive configuration options for DataTables.
      * 
      * @return the instance of YadaDTResponsive for further configuration
      * @see <a href="https://datatables.net/reference/option/responsive">DataTables responsive Reference</a>
      */
     public YadaDTResponsive dtResponsiveObj() {
+    	dtResponsiveOn();
     	this.yadaDTResponsive = YadaUtil.lazyUnsafeInit(this.yadaDTResponsive, () -> new YadaDTResponsive(this));
         return this.yadaDTResponsive;
     }

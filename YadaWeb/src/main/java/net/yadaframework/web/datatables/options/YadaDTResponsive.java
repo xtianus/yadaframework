@@ -1,7 +1,12 @@
 package net.yadaframework.web.datatables.options;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaFluentBase;
 
 /**
@@ -11,10 +16,9 @@ import net.yadaframework.core.YadaFluentBase;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDTResponsive extends YadaFluentBase<YadaDTOptions> {
-    private String breakpoints;
-    private String orthogonal;
-    private Boolean details;
-    private YadaDTResponsiveDetails yadaDTResponsiveDetails;
+	@JsonProperty private List<YadaDTBreakpoint> breakpoints;
+	@JsonProperty private Object details;
+	@JsonProperty private String orthogonal;
 
     public YadaDTResponsive(YadaDTOptions parent) {
         super(parent);
@@ -22,21 +26,33 @@ public class YadaDTResponsive extends YadaFluentBase<YadaDTOptions> {
 
     // Fluent Setters prefixed with "dt"
     /**
-     * Sets the breakpoints at which the table will change its size for responsive behavior.
-     * 
-     * @param breakpoints Breakpoints configuration
-     * @return this instance for method chaining
+     * Add one breakpoint at which the table will change its size for responsive behavior.
+     * Should normally be called multiple times.
+     * @return A new breakpoint definition. 
      * @see <a href="https://datatables.net/reference/option/responsive.breakpoints">DataTables breakpoints Reference</a>
      */
-    public YadaDTResponsive dtBreakpoints(String breakpoints) {
-        this.breakpoints = breakpoints;
-        return this;
+    public YadaDTBreakpoint dtBreakpointsObj() {
+    	this.breakpoints = YadaUtil.lazyUnsafeInit(this.breakpoints);
+        YadaDTBreakpoint newBreakpoint = new YadaDTBreakpoint(this);
+        this.breakpoints.add(newBreakpoint);
+        return newBreakpoint;
     }
 
     /**
-     * Sets the orthogonal data request for responsive handling.
+     * Disable the child rows completely (columns will simply be removed 
+     * and their content not be accessible other than through the DataTables API).
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/responsive.details">DataTables details Reference</a>
+     */
+    public YadaDTResponsive dtDetailsFalse() {
+    	this.details = false;
+    	return this;
+    }
+
+    /**
+     * Set the orthogonal data request type for the hidden information display.
      * 
-     * @param orthogonal Orthogonal data configuration
+     * @param orthogonal Orthogonal data configuration, e.g. "responsive"
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/responsive.orthogonal">DataTables orthogonal Reference</a>
      */
@@ -45,44 +61,15 @@ public class YadaDTResponsive extends YadaFluentBase<YadaDTOptions> {
         return this;
     }
 
-    // Getters
-    public String getBreakpoints() {
-        return breakpoints;
-    }
-
-    public Object getDetails() {
-        return details;
-    }
-
-    public String getOrthogonal() {
-        return orthogonal;
-    }
-    
-
     /**
-     * Sets the details option for child row display control when the table is responsive.
+     * Enable and configure the child rows shown by Responsive for collapsed tables.
      * 
-     * @param details Details configuration
-     * @return this instance for method chaining
+     * @return the instance of YadaDTResponsiveDetails for further configuration
      * @see <a href="https://datatables.net/reference/option/responsive.details">DataTables details Reference</a>
      */
-    public YadaDTResponsiveDetails dtDetails() {
-        if (this.yadaDTResponsiveDetails == null) {
-            this.yadaDTResponsiveDetails = new YadaDTResponsiveDetails(this);
-        }
-        return this.yadaDTResponsiveDetails;
-    }
-
-    /**
-     * Sets the details option for child row display control when the table is responsive.
-     * 
-     * @param details Details configuration
-     * @return this instance for method chaining
-     * @see <a href="https://datatables.net/reference/option/responsive.details">DataTables details Reference</a>
-     */
-    public YadaDTResponsive dtDetails(Boolean details) {
-        this.details = details;
-        return this;
+    public YadaDTResponsiveDetails dtDetailsObj() {
+    	this.details = YadaUtil.lazyUnsafeInit(this.details, () -> new YadaDTResponsiveDetails(this));
+        return (YadaDTResponsiveDetails) this.details;
     }
     
 }

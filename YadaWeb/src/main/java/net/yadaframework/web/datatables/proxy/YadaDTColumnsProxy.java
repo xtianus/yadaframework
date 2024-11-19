@@ -131,22 +131,6 @@ public class YadaDTColumnsProxy extends YadaDTColumns {
     }
 
     /**
-     * @return The search builder title for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.searchBuilderTitle">DataTables Reference: columns.searchBuilderTitle</a>
-     */
-    public String getSearchBuilderTitle() {
-        return searchBuilderTitle;
-    }
-
-    /**
-     * @return The search builder type for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.searchBuilderType">DataTables Reference: columns.searchBuilderType</a>
-     */
-    public String getSearchBuilderType() {
-        return searchBuilderType;
-    }
-    
-    /**
      * @return The width of the column.
      * @see <a href="https://datatables.net/reference/option/columns.width">DataTables Reference: columns.width</a>
      */
@@ -183,22 +167,6 @@ public class YadaDTColumnsProxy extends YadaDTColumns {
      */
     public Integer getResponsivePriority() {
         return responsivePriority;
-    }
-
-    /**
-     * @return The search builder options for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.searchBuilder">DataTables Reference: columns.searchBuilder</a>
-     */
-    public YadaDTOptionSearchBuilder getSearchBuilder() {
-        return searchBuilder;
-    }
-
-    /**
-     * @return The search panes configuration for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.searchPanes">DataTables Reference: columns.searchPanes</a>
-     */
-    public String getSearchPanes() {
-        return searchPanes;
     }
 
 	public Boolean isOrderable() {

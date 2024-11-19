@@ -30,6 +30,7 @@ public class YadaDataTableLanguage extends YadaFluentBase<YadaDataTable> {
 	/**
 	 * Add a language definition. Default values for it, de, es and fr are already set.
 	 * See <a href="https://datatables.net/plug-ins/i18n/">Internationalisation plug-ins</a> for a list of available translations.
+	 * The language must also be enabled in the application configuration under the &lt;i18n> tag.
 	 * @param language the language ISO2 code like "pt" as used by Java Locale.
 	 * @param jsonFile the JSON file name to use in the language url, e.g. "pt-PT.json", can be found from the DataTables site.
 	 * @return an instance of YadaDataTableLanguage for method chaining

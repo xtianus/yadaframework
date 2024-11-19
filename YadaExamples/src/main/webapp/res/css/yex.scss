@@ -19,6 +19,10 @@ main {
 	min-height: 300px;
 }
 
+.nowrap {
+	white-space: nowrap;
+}
+
 tr.userProfileAdmin td:not(.yadaCommandButtonCell) {
 	color: red;
 }

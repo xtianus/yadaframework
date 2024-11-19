@@ -17,7 +17,7 @@ public class YadaDTColumnDefProxy extends YadaDTColumnDef {
 	}
 	
 	public Object getTargets() {
-		return stringTarget != null ? stringTarget : intTarget;
+		return targets;
 	}
 	
 	// Note: "data" can't be returned when null otherwise it overwrites the column definition with null
@@ -120,22 +120,6 @@ public class YadaDTColumnDefProxy extends YadaDTColumnDef {
     }
 
     /**
-     * @return The search builder title for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.searchBuilderTitle">DataTables Reference: columns.searchBuilderTitle</a>
-     */
-    public String getSearchBuilderTitle() {
-        return searchBuilderTitle;
-    }
-
-    /**
-     * @return The search builder type for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.searchBuilderType">DataTables Reference: columns.searchBuilderType</a>
-     */
-    public String getSearchBuilderType() {
-        return searchBuilderType;
-    }
-    
-    /**
      * @return The width of the column.
      * @see <a href="https://datatables.net/reference/option/columns.width">DataTables Reference: columns.width</a>
      */
@@ -172,22 +156,6 @@ public class YadaDTColumnDefProxy extends YadaDTColumnDef {
      */
     public Integer getResponsivePriority() {
         return responsivePriority;
-    }
-
-    /**
-     * @return The search builder options for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.searchBuilder">DataTables Reference: columns.searchBuilder</a>
-     */
-    public YadaDTOptionSearchBuilder getSearchBuilder() {
-        return searchBuilder;
-    }
-
-    /**
-     * @return The search panes configuration for the column.
-     * @see <a href="https://datatables.net/reference/option/columns.searchPanes">DataTables Reference: columns.searchPanes</a>
-     */
-    public String getSearchPanes() {
-        return searchPanes;
     }
 
 	public Boolean isOrderable() {

@@ -4,15 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.yadaframework.web.datatables.YadaDataTable;
-import net.yadaframework.web.datatables.options.YadaDTAutoFill;
-import net.yadaframework.web.datatables.options.YadaDTButtons;
-import net.yadaframework.web.datatables.options.YadaDTColReorder;
 import net.yadaframework.web.datatables.options.YadaDTColumnDef;
 import net.yadaframework.web.datatables.options.YadaDTColumns;
-import net.yadaframework.web.datatables.options.YadaDTFixedColumns;
-import net.yadaframework.web.datatables.options.YadaDTFixedHeader;
-import net.yadaframework.web.datatables.options.YadaDTKeys;
-import net.yadaframework.web.datatables.options.YadaDTLanguage;
 import net.yadaframework.web.datatables.options.YadaDTOptions;
 import net.yadaframework.web.datatables.options.YadaDTOrder;
 import net.yadaframework.web.datatables.options.YadaDTResponsive;
@@ -57,37 +50,16 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
 		return yadaDTResponsive != null ? yadaDTResponsive : responsive;
 	}
 	
-	
 	public String getDataTableExtErrMode() {
 		return dataTableExtErrMode;
-	}
-
-	public YadaDTAutoFill getAutoFill() {
-		return autoFill;
 	}
 
 	public Boolean getAutoWidth() {
 		return autoWidth;
 	}
 
-	public String getButtonSearchBuilder() {
-		return buttonSearchBuilder;
-	}
-
-	public String getButtonSearchPanes() {
-		return buttonSearchPanes;
-	}
-
-	public YadaDTButtons getButtons() {
-		return buttons;
-	}
-
 	public String getCaption() {
 		return caption;
-	}
-
-	public YadaDTColReorder getColReorder() {
-		return colReorder;
 	}
 
 	public List<YadaDTColumnDef> getColumnDefs() {
@@ -106,7 +78,7 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
 		return data;
 	}
 
-	public Boolean getDeferLoading() {
+	public Object getDeferLoading() {
 		return deferLoading;
 	}
 
@@ -118,28 +90,16 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
 		return destroy;
 	}
 
-	public String getDetectType() {
-		return detectType;
+	public Boolean getTypeDetect() {
+		return typeDetect;
 	}
 
 	public Integer getDisplayStart() {
 		return displayStart;
 	}
 
-	public String getDom() {
-		return dom;
-	}
-
 	public String getDrawCallback() {
 		return drawCallback;
-	}
-
-	public YadaDTFixedColumns getFixedColumns() {
-		return fixedColumns;
-	}
-
-	public YadaDTFixedHeader getFixedHeader() {
-		return fixedHeader;
 	}
 
 	public String getFooterCallback() {
@@ -166,15 +126,7 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
 		return initComplete;
 	}
 
-	public YadaDTKeys getKeys() {
-		return keys;
-	}
-
-//	public YadaDTLanguage getLanguage() {
-//		return language;
-//	}
-
-	public String getLayout() {
+	public Object getLayout() {
 		return layout;
 	}
 
@@ -182,16 +134,12 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
 		return lengthChange;
 	}
 
-	public List<Object> getLengthMenu() {
+	public int[] getLengthMenu() {
 		return lengthMenu;
 	}
 
 	public List<YadaDTOrder> getOrder() {
 		return order;
-	}
-
-	public Boolean getOrderCellsTop() {
-		return orderCellsTop;
 	}
 
 	public Boolean getOrderClasses() {
@@ -222,10 +170,6 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
 		return paging;
 	}
 
-	public String getPagingType() {
-		return pagingType;
-	}
-
 	public String getPreDrawCallback() {
 		return preDrawCallback;
 	}
@@ -238,9 +182,9 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
 		return renderer;
 	}
 
-	public YadaDTResponsive getYadaDTResponsive() {
-		return yadaDTResponsive;
-	}
+//	public YadaDTResponsive getYadaDTResponsive() {
+//		return yadaDTResponsive;
+//	}
 
 	public Boolean getRetrieve() {
 		return retrieve;
@@ -340,6 +284,15 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
 
 	public Integer getTabIndex() {
 		return tabIndex;
+	}
+
+    /**
+     * Enable/disable multiple column ordering ability
+     * This has been added for internal use only.
+     * @see <a href="https://datatables.net/reference/option/orderMulti">orderMulti</a>
+     */
+	public void setOrderMulti(boolean multi) {
+		orderMulti = multi;
 	}
 	
 
