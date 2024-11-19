@@ -5,7 +5,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import net.yadaframework.web.datatables.options.YadaDTColumns;
-import net.yadaframework.web.datatables.options.YadaDTOptionSearchBuilder;
 import net.yadaframework.web.datatables.options.YadaDTOptions;
 
 /**
@@ -29,7 +28,7 @@ public class YadaDTColumnsProxy extends YadaDTColumns {
      */
 	// data can be null in the json
     @JsonInclude(JsonInclude.Include.ALWAYS) 
-    public String getData() {
+    public Object getData() {
         return data;
     }
 
@@ -80,14 +79,6 @@ public class YadaDTColumnsProxy extends YadaDTColumns {
      */
     public String getDefaultContent() {
         return defaultContent;
-    }
-
-    /**
-     * @return The field to be edited in Editor for this column.
-     * @see <a href="https://datatables.net/reference/option/columns.editField">DataTables Reference: columns.editField</a>
-     */
-    public String getEditField() {
-        return editField;
     }
 
     /**
@@ -146,13 +137,6 @@ public class YadaDTColumnsProxy extends YadaDTColumns {
         return title;
     }
 
-    /**
-     * @return The type of the column's data.
-     * @see <a href="https://datatables.net/reference/option/columns.type">DataTables Reference: columns.type</a>
-     */
-    public String getType() {
-        return type;
-    }
     /**
      * @return The rendering function for the column's data.
      * @see <a href="https://datatables.net/reference/option/columns.render">DataTables Reference: columns.render</a>

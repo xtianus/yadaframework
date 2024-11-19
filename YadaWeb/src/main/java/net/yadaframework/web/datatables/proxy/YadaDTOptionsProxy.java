@@ -8,15 +8,6 @@ import net.yadaframework.web.datatables.options.YadaDTColumnDef;
 import net.yadaframework.web.datatables.options.YadaDTColumns;
 import net.yadaframework.web.datatables.options.YadaDTOptions;
 import net.yadaframework.web.datatables.options.YadaDTOrder;
-import net.yadaframework.web.datatables.options.YadaDTResponsive;
-import net.yadaframework.web.datatables.options.YadaDTRowGroup;
-import net.yadaframework.web.datatables.options.YadaDTRowReorder;
-import net.yadaframework.web.datatables.options.YadaDTScroller;
-import net.yadaframework.web.datatables.options.YadaDTSearch;
-import net.yadaframework.web.datatables.options.YadaDTSearchBuilder;
-import net.yadaframework.web.datatables.options.YadaDTSearchCol;
-import net.yadaframework.web.datatables.options.YadaDTSearchPanes;
-import net.yadaframework.web.datatables.options.YadaDTSelect;
 
 /**
  * This class implements the methods needed for <b>internal use</b> 
@@ -186,24 +177,12 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
 //		return yadaDTResponsive;
 //	}
 
-	public Boolean getRetrieve() {
-		return retrieve;
-	}
-
 	public String getRowCallback() {
 		return rowCallback;
 	}
 
-	public YadaDTRowGroup getRowGroup() {
-		return rowGroup;
-	}
-
 	public String getRowId() {
 		return rowId;
-	}
-
-	public YadaDTRowReorder getRowReorder() {
-		return rowReorder;
 	}
 
 	public Boolean getScrollCollapse() {
@@ -214,40 +193,12 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
 		return scrollX;
 	}
 
-	public Boolean getScrollY() {
-		return scrollY;
-	}
-
-	public YadaDTScroller getScroller() {
-		return scroller;
-	}
-
-	public YadaDTSearch getSearch() {
-		return search;
-	}
-
-	public YadaDTSearchBuilder getSearchBuilder() {
-		return searchBuilder;
-	}
-
-	public List<YadaDTSearchCol> getSearchCols() {
-		return searchCols;
-	}
-
 	public Integer getSearchDelay() {
 		return searchDelay;
 	}
 
-	public YadaDTSearchPanes getSearchPanes() {
-		return searchPanes;
-	}
-
 	public Boolean getSearching() {
 		return searching;
-	}
-
-	public YadaDTSelect getSelect() {
-		return select;
 	}
 
 	public Boolean getServerSide() {

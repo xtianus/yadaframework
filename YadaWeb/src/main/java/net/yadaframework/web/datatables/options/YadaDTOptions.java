@@ -78,33 +78,32 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     // can be either a boolean or an object
     protected Boolean responsive;
     protected YadaDTResponsive yadaDTResponsive;
-    //
-    protected Boolean retrieve;
+    // There is no use case for setting retrieve on the backend
+    // because the initialized DataTable object is available as $table.data("yadaDataTableApi");
+    // protected Boolean retrieve;
     @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String rowCallback;
-    protected YadaDTRowGroup rowGroup;
     protected String rowId;
-    protected YadaDTRowReorder rowReorder;
     protected Boolean scrollCollapse;
     protected Boolean scrollX;
-    protected Boolean scrollY;
-    protected YadaDTScroller scroller;
-    protected YadaDTSearch search;
-    protected YadaDTSearchBuilder searchBuilder;
-    protected List<YadaDTSearchCol> searchCols;
+    protected String scrollY;
+    // Search is client side so useless here
+    // protected YadaDTSearchOptions search;
+    // protected List<YadaDTSearchCol> searchCols;
     protected Integer searchDelay;
-    protected YadaDTSearchPanes searchPanes;
     protected Boolean searching;
-    protected YadaDTSelect select;
     protected Boolean serverSide = true; // default to server-side processing
     protected Integer stateDuration;
     @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String stateLoadCallback;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String stateLoadParams;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String stateLoaded;
     protected Boolean stateSave;
     @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String stateSaveCallback;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String stateSaveParams;
     protected Integer tabIndex;
     
@@ -537,19 +536,8 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * Sets the `retrieve` option.
-     * 
-     * @param retrieve enable or disable DataTables instance retrieval
-     * @return this instance for method chaining
-     * @see <a href="https://datatables.net/reference/option/retrieve">retrieve</a>
-     */
-    public YadaDTOptions dtRetrieve(Boolean retrieve) {
-        this.retrieve = retrieve;
-        return this;
-    }
-
-    /**
-     * Sets the `rowCallback` option.
+     * This callback allows you to 'post process' each row after it have been generated 
+     * for each table draw, but before it is rendered into the document.
      * 
      * @param rowCallback a callback function to manipulate a row
      * @return this instance for method chaining
@@ -561,7 +549,9 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * Sets the `rowId` option.
+     * DataTables will attempt to automatically read an id value from the data 
+     * source for each row using the property defined by this option. 
+     * By default it is DT_RowId but can be set to any other name.
      * 
      * @param rowId define the row ID field
      * @return this instance for method chaining
@@ -573,70 +563,84 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * Sets the `scrollCollapse` option.
+     * Allow the table to reduce in height when a limited number of rows are shown.
      * 
-     * @param scrollCollapse enable or disable scrolling collapse behavior
      * @return this instance for method chaining
+     * @see #dtScrollY(String)
      * @see <a href="https://datatables.net/reference/option/scrollCollapse">scrollCollapse</a>
      */
-    public YadaDTOptions dtScrollCollapse(Boolean scrollCollapse) {
-        this.scrollCollapse = scrollCollapse;
+    public YadaDTOptions dtScrollCollapseOn() {
+        this.scrollCollapse = true;
         return this;
     }
 
     /**
-     * Sets the `scrollX` option.
+     * Enable horizontal scrolling. 
      * 
-     * @param scrollX enable or disable horizontal scrolling
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/scrollX">scrollX</a>
      */
-    public YadaDTOptions dtScrollX(Boolean scrollX) {
-        this.scrollX = scrollX;
+    public YadaDTOptions dtScrollXOn() {
+        this.scrollX = true;
         return this;
     }
 
     /**
-     * Sets the `scrollY` option.
+     * Enable vertical scrolling. Vertical scrolling will constrain the DataTable to the given height.
      * 
-     * @param scrollY define the table's vertical scroll height
+     * @param cssHeight define the table's vertical scroll height as a CSS string, e.g. "200px"
      * @return this instance for method chaining
+     * @see #dtScrollCollapseOn()
      * @see <a href="https://datatables.net/reference/option/scrollY">scrollY</a>
      */
-    public YadaDTOptions dtScrollY(Boolean scrollY) {
-        this.scrollY = scrollY;
+    public YadaDTOptions dtScrollY(String cssHeight) {
+        this.scrollY = cssHeight;
         return this;
     }
+    
+	/**
+	 * Set a delay for search operations.
+	 * This can be of particular use when using server-side processing 
+	 * and you don't want every keystroke to trigger an Ajax request for data.
+	 * 
+	 * @param searchDelay the delay in milliseconds before a search is performed
+	 * @return this instance for method chaining
+	 * @see <a href="https://datatables.net/reference/option/searchDelay">searchDelay</a>
+	 */
+	public YadaDTOptions dtSearchDelay(Integer searchDelayMillis) {
+        this.searchDelay = searchDelayMillis;
+        return this;
+	}
 
     /**
-     * Sets the `searching` option.
+     * Disable searching abilities in DataTables.
      * 
-     * @param searching enable or disable DataTables' search feature
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/searching">searching</a>
      */
-    public YadaDTOptions dtSearching(Boolean searching) {
-        this.searching = searching;
+    public YadaDTOptions dtSearchingOff() {
+        this.searching = false;
         return this;
     }
 
     /**
-     * Sets the `serverSide` option.
+     * Disable server-side processing. This will prevent DataTables from making an Ajax request for data. 
      * 
-     * @param serverSide enable or disable server-side processing mode
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/serverSide">serverSide</a>
      */
-    public YadaDTOptions dtServerSide(Boolean serverSide) {
-        this.serverSide = serverSide;
+    public YadaDTOptions dtServerSideOff() {
+        this.serverSide = false;
         return this;
     }
 
     /**
-     * Sets the `stateDuration` option.
+     * Duration for which the saved state information is considered valid. 
+     * After this period has elapsed the state will be returned to the default.
      * 
      * @param stateDuration the duration for which the saved state is retained
      * @return this instance for method chaining
+     * @see #dtStateSaveOn()
      * @see <a href="https://datatables.net/reference/option/stateDuration">stateDuration</a>
      */
     public YadaDTOptions dtStateDuration(Integer stateDuration) {
@@ -645,10 +649,11 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * Sets the `stateLoadCallback` option.
+     * Callback that defines where and how a saved state should be loaded.
      * 
      * @param stateLoadCallback a callback function to load the state of the table
      * @return this instance for method chaining
+     * @see #dtStateSaveOn()
      * @see <a href="https://datatables.net/reference/option/stateLoadCallback">stateLoadCallback</a>
      */
     public YadaDTOptions dtStateLoadCallback(String stateLoadCallback) {
@@ -657,10 +662,11 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * Sets the `stateLoadParams` option.
+     * Callback which allows modification of the saved state prior to loading that state.
      * 
      * @param stateLoadParams a callback function to modify the loaded state
      * @return this instance for method chaining
+     * @see #dtStateSaveOn()
      * @see <a href="https://datatables.net/reference/option/stateLoadParams">stateLoadParams</a>
      */
     public YadaDTOptions dtStateLoadParams(String stateLoadParams) {
@@ -669,10 +675,12 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * Sets the `stateLoaded` option.
+     * Callback that is fired once the state has been loaded 
+     * and the saved data manipulated.
      * 
      * @param stateLoaded a callback function when the state is loaded
      * @return this instance for method chaining
+     * @see #dtStateSaveOn()
      * @see <a href="https://datatables.net/reference/option/stateLoaded">stateLoaded</a>
      */
     public YadaDTOptions dtStateLoaded(String stateLoaded) {
@@ -681,22 +689,25 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * Sets the `stateSave` option.
+     * Enable state saving such as pagination position, display length, filtering and sorting.
+     * When this initialisation option is active and the end user reloads the page the table's 
+     * state will be altered to match what they had previously set up.
      * 
-     * @param stateSave enable or disable table state saving
      * @return this instance for method chaining
+     * @see #dtStateDuration(Integer)
      * @see <a href="https://datatables.net/reference/option/stateSave">stateSave</a>
      */
-    public YadaDTOptions dtStateSave(Boolean stateSave) {
-        this.stateSave = stateSave;
+    public YadaDTOptions dtStateSaveOn() {
+        this.stateSave = true;
         return this;
     }
 
     /**
-     * Sets the `stateSaveCallback` option.
+     * Callback that defines how the table state is stored and where.
      * 
      * @param stateSaveCallback a callback function to save the state of the table
      * @return this instance for method chaining
+     * @see #dtStateSaveOn()
      * @see <a href="https://datatables.net/reference/option/stateSaveCallback">stateSaveCallback</a>
      */
     public YadaDTOptions dtStateSaveCallback(String stateSaveCallback) {
@@ -705,10 +716,12 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * Sets the `stateSaveParams` option.
+     * Callback which allows modification of the parameters to be saved for 
+     * the DataTables state saving prior to the data actually being saved.
      * 
      * @param stateSaveParams a callback function to modify the saved state
      * @return this instance for method chaining
+     * @see #dtStateSaveOn()
      * @see <a href="https://datatables.net/reference/option/stateSaveParams">stateSaveParams</a>
      */
     public YadaDTOptions dtStateSaveParams(String stateSaveParams) {
@@ -717,9 +730,9 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     }
 
     /**
-     * Sets the `tabIndex` option.
+     * Sets the `tabIndex` overrule option.
      * 
-     * @param tabIndex define the tab index of the table
+     * @param tabIndex define the tab index of the table, default is 0 and -1 disables tabbing
      * @return this instance for method chaining
      * @see <a href="https://datatables.net/reference/option/tabIndex">tabIndex</a>
      */
@@ -731,69 +744,6 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     //
     // Fluent interface for nested objects
 	//
-
-    /**
-     * @return The rowGroup configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/rowGroup">DataTables rowGroup option</a>
-     */
-    public YadaDTRowGroup dtRowGroupObj() {
-    	this.rowGroup = YadaUtil.lazyUnsafeInit(this.rowGroup, () -> new YadaDTRowGroup(this));
-        return this.rowGroup;
-    }
-
-    /**
-     * @return The rowReorder configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/rowReorder">DataTables rowReorder option</a>
-     */
-    public YadaDTRowReorder dtRowReorderObj() {
-    	this.rowReorder = YadaUtil.lazyUnsafeInit(this.rowReorder, () -> new YadaDTRowReorder(this));
-        return this.rowReorder;
-    }
-
-    /**
-     * @return The scroller configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/scroller">DataTables scroller option</a>
-     */
-    public YadaDTScroller dtScrollerObj() {
-    	this.scroller = YadaUtil.lazyUnsafeInit(this.scroller, () -> new YadaDTScroller(this));
-        return this.scroller;
-    }
-
-    /**
-     * @return The search configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/search">DataTables search option</a>
-     */
-    public YadaDTSearch dtSearchObj() {
-    	this.search = YadaUtil.lazyUnsafeInit(this.search, () -> new YadaDTSearch(this));
-        return this.search;
-    }
-
-    /**
-     * @return The searchBuilder configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/searchBuilder">DataTables searchBuilder option</a>
-     */
-    public YadaDTSearchBuilder dtSearchBuilderObj() {
-    	this.searchBuilder = YadaUtil.lazyUnsafeInit(this.searchBuilder, () -> new YadaDTSearchBuilder(this));
-        return this.searchBuilder;
-    }
-
-    /**
-     * @return The searchPanes configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/searchPanes">DataTables searchPanes option</a>
-     */
-    public YadaDTSearchPanes dtSearchPanesObj() {
-    	this.searchPanes = YadaUtil.lazyUnsafeInit(this.searchPanes, () -> new YadaDTSearchPanes(this));
-        return this.searchPanes;
-    }
-
-    /**
-     * @return The select configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/select">DataTables select option</a>
-     */
-    public YadaDTSelect dtSelectObj() {
-    	this.select = YadaUtil.lazyUnsafeInit(this.select, () -> new YadaDTSelect(this));
-        return this.select;
-    }
 
     /**
      * @return A new column definition for DataTables.
@@ -815,17 +765,6 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
         YadaDTColumns newColumn = new YadaDTColumnsProxy(this);
         this.columns.add(newColumn);
         return newColumn;
-    }
-
-    /**
-     * @return A new search column configuration for DataTables.
-     * @see <a href="https://datatables.net/reference/option/searchCols">DataTables searchCols option</a>
-     */
-    public YadaDTSearchCol dtSearchColsObj() {
-    	this.searchCols = YadaUtil.lazyUnsafeInit(this.searchCols);
-        YadaDTSearchCol newSearchCol = new YadaDTSearchCol(this);
-        this.searchCols.add(newSearchCol);
-        return newSearchCol;
     }
     
     /**

@@ -229,18 +229,6 @@
         return data;
     }
 	
-
-	/**
-	 * Render the checkbox column
-	 */
-	yada.dtCheckboxRender = function( data, type, row ) {
-		if ( type === 'display' ) {
-			// event.stopPropagation() is needed to avoid the row selection event
-			return '<input type="checkbox" class="yada_rowSelector" onclick="event.stopPropagation()"/>';
-		}
-		return data;
-	}
-	
 	/**
 	 * Call the backend via ajax
 	 */

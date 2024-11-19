@@ -159,19 +159,17 @@ public class YadaDataTableHTML extends YadaFluentBase<YadaDataTable> {
 		// Column for checkboxes. Plain columns have already been defined in options
 		if (isSelectCheckbox()) {
 			YadaDTColumns newColumn = options.addNewColumn(0);
-			newColumn.dtData(null).dtOrderable(false).dtSearchable(false).dtDefaultContent("");
-			newColumn.dtResponsivePriority(1); // Always show the checkbox column (unless some other column is 0)
-			// NOTE: can't use a "myFunction()" in the dtRender because that function must be defined on the table row (i.e. on the data source)
-			//       and we can't do that.
-			// newColumn.dtRender("yada.dtCheckboxRender()").dtWidth("50px").dtClassName("yadaCheckInCell");
-			newColumn.dtRender("yada.dtCheckboxRender").dtWidth("50px").dtClassName("yadaCheckInCell");
+			String checkboxHtml = "<input type='checkbox' class='yada_rowSelector' onclick='event.stopPropagation()'>";
+			newColumn.dtDefaultContent(checkboxHtml).dtDataNull().dtOrderableOff().dtSearchableOff()
+				.dtResponsivePriority(1) // Always show the checkbox column (unless some other column is 0)
+				.dtWidth("50px").dtClassName("yadaCheckInCell");
 		}
 		// Last column for commands
 		if (commandsTitle!=null) {
 			YadaDTColumns commandsColumn = options.dtColumnsObj()
 			.dtClassName("yadaCommandButtonCell")
 			.dtName(YadaDataTableDao.COLUMN_COMMAND)
-			.dtOrderable(false).dtSearchable(false)
+			.dtOrderableOff().dtSearchableOff()
 			.dtWidth("50px")
 			.dtRender("yada.dtCommandRender");
 			if (commandsTitleResponsivePriority != null) {

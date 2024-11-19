@@ -3,7 +3,6 @@ package net.yadaframework.web.datatables.proxy;
 import java.util.List;
 
 import net.yadaframework.web.datatables.options.YadaDTColumnDef;
-import net.yadaframework.web.datatables.options.YadaDTOptionSearchBuilder;
 import net.yadaframework.web.datatables.options.YadaDTOptions;
 
 /**
@@ -72,14 +71,6 @@ public class YadaDTColumnDefProxy extends YadaDTColumnDef {
     }
 
     /**
-     * @return The field to be edited in Editor for this column.
-     * @see <a href="https://datatables.net/reference/option/columns.editField">DataTables Reference: columns.editField</a>
-     */
-    public String getEditField() {
-        return editField;
-    }
-
-    /**
      * @return The content for the footer of the column.
      * @see <a href="https://datatables.net/reference/option/columns.footer">DataTables Reference: columns.footer</a>
      */
@@ -135,13 +126,6 @@ public class YadaDTColumnDefProxy extends YadaDTColumnDef {
         return title;
     }
 
-    /**
-     * @return The type of the column's data.
-     * @see <a href="https://datatables.net/reference/option/columns.type">DataTables Reference: columns.type</a>
-     */
-    public String getType() {
-        return type;
-    }
     /**
      * @return The rendering function for the column's data.
      * @see <a href="https://datatables.net/reference/option/columns.render">DataTables Reference: columns.render</a>

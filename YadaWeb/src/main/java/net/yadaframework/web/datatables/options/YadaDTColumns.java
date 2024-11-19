@@ -23,23 +23,25 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
     protected String cellType;
     protected String className;
     protected String contentPadding;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String createdCell;
     // data can be "null" in the json (annotation on the getter because it should not be null in a YadaDTColumnDef)
-    protected String data;
+    protected Object data;
+    @JsonSerialize(using = YadaJsonRawStringSerializer.class)
+    protected String dataFunction;
     protected String defaultContent;
-    protected String editField;
     protected String footer;
     protected String name;
     protected Boolean orderable;
     @JsonInclude(JsonInclude.Include.NON_EMPTY) 
     protected List<Integer> orderData = new ArrayList<Integer>();
-    protected String orderDataType;
+    protected String orderDataType; // Don't think this is useful
     protected List<String> orderSequence;
     @JsonSerialize(using = YadaJsonRawStringSerializer.class)
     protected String render; // Must be a js function
     protected Boolean searchable;
     protected String title;
-    protected String type;
+    // protected String type; // Client side searching/sorting only, so useless in Yada Framework
     protected Boolean visible;
     protected String width;
     protected Integer responsivePriority;
@@ -122,34 +124,79 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
         this.createdCell = createdCell;
         return this;
     }
-
+    
     /**
-     * @param data The data source for the column.
+     * Use the original data source for the row rather than plucking data directly from it. 
      * @return This instance for method chaining.
+     * @see #dtData(String)
      * @see <a href="https://datatables.net/reference/option/columns.data">DataTables Reference: columns.data</a>
      */
-    public YadaDTColumns dtData(String data) {
-        this.data = data;
+    public YadaDTColumns dtDataNull() {
+    	if (this.dataFunction!=null) {
+    		throw new YadaInvalidUsageException("Cannot set both data and dataFunction");
+    	}
+        this.data = null;
         return this;
+    }
+    
+
+    /**
+     * This property can be used to read and write data to and from any data source property.
+     * @param index Treated as an array index for the data source. 
+     * 			This is the default that DataTables uses (incrementally increased for each column).
+     * @return This instance for method chaining.
+     * @see #dtData(String)
+     * @see <a href="https://datatables.net/reference/option/columns.data">DataTables Reference: columns.data</a>
+     */
+    public YadaDTColumns dtData(Integer index) {
+    	if (this.dataFunction!=null) {
+    		throw new YadaInvalidUsageException("Cannot set both data and dataFunction");
+    	}
+        this.data = index;
+        return this;
+    }
+    
+    /**
+     * This property can be used to read and write data to and from any data source property.
+     * Set to null to use the original data source for the row
+     * @param path The data source for the column, eventually as an array notation
+     * @return This instance for method chaining.
+     * @see #dtDataFunction(String)
+     * @see <a href="https://datatables.net/reference/option/columns.data">DataTables Reference: columns.data</a>
+     */
+    public YadaDTColumns dtData(String path) {
+    	if (this.dataFunction!=null) {
+    		throw new YadaInvalidUsageException("Cannot set both data and dataFunction");
+    	}
+    	this.data = path;
+    	return this;
+    }
+    
+    /**
+     * This property can be used to read and write data to and from any data source property.
+     * @param function The function given will be executed whenever DataTables needs to set 
+     * 	or get the data for a cell in the column.
+     * @return This instance for method chaining.
+     * @see #dtData(String)
+     * @see <a href="https://datatables.net/reference/option/columns.data">DataTables Reference: columns.data</a>
+     */
+    public YadaDTColumns dtDataFunction(String function) {
+    	if (this.data!=null) {
+    		// Can't tell if data has been specifically set to null though, which should not be allowed
+    		throw new YadaInvalidUsageException("Cannot set both data and dataFunction");
+    	}
+    	this.dataFunction = function;
+    	return this;
     }
 
     /**
-     * @param defaultContent The default content for the column if the data source is null.
+     * Static content in a column or default content when the data source is null.
+     * @param htmlContent The default content for the column if the data source is null.
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.defaultContent">DataTables Reference: columns.defaultContent</a>
      */
-    public YadaDTColumns dtDefaultContent(String defaultContent) {
-        this.defaultContent = defaultContent;
-        return this;
-    }
-
-    /**
-     * @param editField The field to be edited in Editor for this column.
-     * @return This instance for method chaining.
-     * @see <a href="https://datatables.net/reference/option/columns.editField">DataTables Reference: columns.editField</a>
-     */
-    public YadaDTColumns dtEditField(String editField) {
-        this.editField = editField;
+    public YadaDTColumns dtDefaultContent(String htmlContent) {
+        this.defaultContent = htmlContent;
         return this;
     }
 
@@ -164,6 +211,7 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
     }
 
     /**
+     * Set a descriptive name for a column.
      * @param name The name for the column.
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.name">DataTables Reference: columns.name</a>
@@ -207,12 +255,12 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
     }
 
     /**
-     * @param orderable Whether the column is orderable.
+     * Disable ordering for the column.
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.orderable">DataTables Reference: columns.orderable</a>
      */
-    public YadaDTColumns dtOrderable(boolean orderable) {
-        this.orderable = orderable;
+    public YadaDTColumns dtOrderableOff() {
+        this.orderable = false;
         return this;
     }
 
@@ -245,12 +293,12 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
     }
 
     /**
-     * @param searchable Whether the column is searchable.
+     * Disables searching for this column.
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.searchable">DataTables Reference: columns.searchable</a>
      */
-    public YadaDTColumns dtSearchable(boolean searchable) {
-        this.searchable = searchable;
+    public YadaDTColumns dtSearchableOff() {
+        this.searchable = false;
         return this;
     }
 
@@ -265,22 +313,12 @@ public class YadaDTColumns extends YadaFluentBase<YadaDTOptions> {
     }
 
     /**
-     * @param type The type of the column's data.
-     * @return This instance for method chaining.
-     * @see <a href="https://datatables.net/reference/option/columns.type">DataTables Reference: columns.type</a>
-     */
-    public YadaDTColumns dtType(String type) {
-        this.type = type;
-        return this;
-    }
-
-    /**
-     * @param visible Whether the column is visible.
+     * Sets a column as not visible.
      * @return This instance for method chaining.
      * @see <a href="https://datatables.net/reference/option/columns.visible">DataTables Reference: columns.visible</a>
      */
-    public YadaDTColumns dtVisible(boolean visible) {
-        this.visible = visible;
+    public YadaDTColumns dtVisibleOff() {
+        this.visible = false;
         return this;
     }
 

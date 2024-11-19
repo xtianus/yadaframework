@@ -36,7 +36,7 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 //		// so that the parent returns YadaDataTableHTML instead of YadaDTOptions when used in YadaDataTableColumn
 //		yadaDTColumns = new YadaDTColumnsWrapper(yadaDTColumnsProxy, (YadaDataTableHTMLProxy)parent);
 		yadaDTColumns = (YadaDTColumnsProxy) parent.options.dtColumnsObj();
-		yadaDTColumns.dtOrderable(true).dtSearchable(true).dtData(data);
+		yadaDTColumns.dtData(data);
 		
 	}
 	
@@ -61,8 +61,8 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 	 * Makes the column not orderable
 	 * @return this instance for method chaining
 	 */
-	public YadaDataTableColumn dtNotOrderable() {
-		yadaDTColumns.dtOrderable(false);
+	public YadaDataTableColumn dtOrderableOff() {
+		yadaDTColumns.dtOrderableOff();
 		return this;
 	}
 	
@@ -70,8 +70,8 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 	 * Makes the column not searchable
 	 * @return this instance for method chaining
 	 */
-	public YadaDataTableColumn dtNotSearchable() {
-		yadaDTColumns.dtSearchable(false);
+	public YadaDataTableColumn dtSearchableOff() {
+		yadaDTColumns.dtSearchableOff();
 		return this;
 	}
 	
@@ -160,7 +160,7 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 		return yadaDTColumns.getName();
 	}
 	
-	private String getData() {
+	private Object getData() {
 		return yadaDTColumns.getData();
 	}
 
@@ -175,7 +175,10 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 		}
 		// When name is not set, use data
 		if (getName()==null) {
-			this.dtName(getData());
+			Object data = getData();
+			if (data instanceof String dataString) {
+				this.dtName(dataString);
+			}
 		}
 		// Set the default content
 		if (this.yadaDTColumns.getDefaultContent()==null) {
