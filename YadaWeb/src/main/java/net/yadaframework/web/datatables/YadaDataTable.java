@@ -23,8 +23,8 @@ import net.yadaframework.web.datatables.proxy.YadaDataTableLanguageProxy;
 // The drawback is that I can't use thymeleaf features nicely and the user needs to type some HTML in the java code.
 
 // Uses @JsonPropertyOrder to ensure that prepareConfiguration() is called before serialization. 
-// DO NOT move the "html" property from the first position!
-@JsonPropertyOrder({ "html", "options" })
+// DO NOT move the "structure" property from the first position!
+@JsonPropertyOrder({ "structure", "options" })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class YadaDataTable {
 	@JsonIgnore private YadaWebUtil yadaWebUtil = YadaWebUtil.INSTANCE;
@@ -82,7 +82,7 @@ public class YadaDataTable {
 	/**
 	 * Set the HTML table structure
 	 */
-	public YadaDataTableHTML dtHTMLObj() {
+	public YadaDataTableHTML dtStructureObj() {
     	return yadaDataTableHTML;
 	}
 	

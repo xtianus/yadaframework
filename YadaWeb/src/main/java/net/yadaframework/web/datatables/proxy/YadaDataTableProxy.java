@@ -42,7 +42,7 @@ public class YadaDataTableProxy extends YadaDataTable {
 		return id;
 	}
 	
-	public YadaDataTableHTML getHtml() {
+	public YadaDataTableHTML getStructure() {
 		// We use the trick of using the first getter to make sure that prepareConfiguration() is called before serialization
 		prepareConfiguration();
 		return yadaDataTableHTML;

@@ -11,32 +11,32 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 
 <body th:remove="tag">
 
-<div class="yadaDataTableBlock" th:with="html=${yadaDataTable.html}">
+<div class="yadaDataTableBlock" th:with="structure=${yadaDataTable.structure}">
 
-	<table th:id="${yadaDataTable.id}" class="table" th:classappend="${html.cssClasses}?:'table-striped no-wrap'">
+	<table th:id="${yadaDataTable.id}" class="table" th:classappend="${structure.cssClasses}?:'table-striped no-wrap'">
 		<thead>
 			<tr>
-				<th th:if="${html.selectCheckbox}" th:with="title=${html.selectCheckboxTitle}">
+				<th th:if="${structure.selectCheckbox}" th:with="title=${structure.selectCheckboxTitle}">
 					<input type="checkbox" class="yada_selectAllNone" th:title="${title!=''}?#{${title}}">
 				</th>
-				<th th:each="column : ${html.columns}" th:text="#{${column.headerText}}">Name</th>
-				<th th:if="${!#strings.isEmpty(html.commandsTitle)}" th:with="title=${html.commandsTitle}" th:text="${title}?#{${title}}">Commands</th>
+				<th th:each="column : ${structure.columns}" th:text="#{${column.headerText}}">Name</th>
+				<th th:if="${!#strings.isEmpty(structure.commandsTitle)}" th:with="title=${structure.commandsTitle}" th:text="${title}?#{${title}}">Commands</th>
 			</tr>
 		</thead>
-		<tfoot th:if="${html.showFooter}">
+		<tfoot th:if="${structure.showFooter}">
 			<tr>
-				<th th:if="${html.selectCheckbox}"></th> <!-- /* Empty for select column */-->
-				<th th:each="column : ${html.columns}" th:text="#{${column.headerText}}">Name</th>
-				<th th:if="${html.commandsTitle}"></th> <!-- /* Empty for command column */-->
+				<th th:if="${structure.selectCheckbox}"></th> <!-- /* Empty for select column */-->
+				<th th:each="column : ${structure.columns}" th:text="#{${column.headerText}}">Name</th>
+				<th th:if="${structure.commandsTitle}"></th> <!-- /* Empty for command column */-->
 			</tr>
 		</tfoot>
 	</table>
 
 	<!--/* Toolbar */-->
 	<div class="yadaDataTableToolbar">
-		<th:block th:each="button : ${html.buttons}" th:with="hasRole = ${button.roles==null || @userSession.currentUserProfile.hasAnyRoleId(button.roles)}">
+		<th:block th:each="button : ${structure.buttons}" th:with="hasRole = ${button.roles==null || @userSession.currentUserProfile.hasAnyRoleId(button.roles)}">
 			<a class="btn"
-				th:if="${button.showCommandIcon==null && hasRole && (html.selectCheckbox || button.global)}"
+				th:if="${button.showCommandIcon==null && hasRole && (structure.selectCheckbox || button.global)}"
 				href="javascript:void(0)"
 				th:data-idname="${button.idName}"
 				th:data-buttontype="${button.type}"
@@ -58,9 +58,9 @@ It is used internally by the yada dialect processor to render the <yada:datatabl
 			const languageUrl = /*[[__${yadaDataTable.languageUrl}__]]*/ "dummy";
 			// Fix button urls and localized confirm messages
 			let buttonType;
-			/*[# th:each="button : ${yadaDataTable.html.buttons}"]*/
+			/*[# th:each="button : ${yadaDataTable.structure.buttons}"]*/
 				buttonType = /*[[${button.type}]]*/ "dummy"; 					
-    			dataTableJson.html.buttons.filter(b => b.type==buttonType).forEach(function(b) {
+    			dataTableJson.structure.buttons.filter(b => b.type==buttonType).forEach(function(b) {
    					b.url = /*[[__${button.url}__]]*/ "dummy";
    					/*[# th:if="${button.confirmDialog!=null}"]*/
    					b.confirmDialog.confirmTitle = /*[[#{${button.confirmDialog.confirmTitle}}]]*/ "dummy";

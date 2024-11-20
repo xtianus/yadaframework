@@ -204,11 +204,21 @@ public class UserProfileController {
 	
 	@RequestMapping("/user")
 	public String users(Model model, Locale locale) {
+		YadaDataTable basicTable = yadaDataTableFactory.getSingleton("basicTable", null, table -> {
+			table
+				.dtAjaxUrl("/dashboard/user/userProfileTablePage")
+				.dtStructureObj()
+					.dtColumnObj("Email", "userCredentials.username").back()
+					.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin").back()
+				.back();
+		});
+		model.addAttribute("basicTable", basicTable);
+		
 		YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", locale, table -> {
 			table
 				.dtAjaxUrl("/dashboard/user/userProfileTablePage")
 				.dtLanguageObj("/static/datatables-2.1.8/i18n/").dsAddLanguage("pt", "pt-PT.json").back()
-				.dtHTMLObj()
+				.dtStructureObj()
 					.dtCssClasses("yadaNoLoader")
 					.dtColumnObj("ID", "id").dtResponsivePriority(80).back()
 					// Example of localized text: .dtColumnObj("Title", "title."+locale.getLanguage()).back()

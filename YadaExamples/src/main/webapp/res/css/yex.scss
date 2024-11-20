@@ -19,11 +19,20 @@ main {
 	min-height: 300px;
 }
 
+hr {
+	margin-top: 50px;
+	margin-bottom: 10px;
+}
+
 .nowrap {
 	white-space: nowrap;
 }
 
-tr.userProfileAdmin td:not(.yadaCommandButtonCell) {
+.description {
+     font-size: 0.9rem;	
+}
+
+#userTable tr.userProfileAdmin td:not(.yadaCommandButtonCell) {
 	color: red;
 }
 .yadaRowCommandButton {

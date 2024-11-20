@@ -17,7 +17,6 @@
 	 */
 	yada.dataTable = function(dataTableJson, ajaxUrl, languageUrl, commandColumnName, preprocessorName, postprocessorName, currentUserRoles) {
 		const dataTableId = dataTableJson.id;
-		const dataTableHtml = dataTableJson.html;
 		const dataTableOptions = dataTableJson.options;
 		// Set our ajax method
 		dataTableOptions.ajax = function(data, callback, settings) {
@@ -81,7 +80,7 @@
 	 * Make the button event handlers once the table has been drawn, both command buttons and toolbar buttons.
 	 */
 	function makeAllButtonHandlers(dataTableJson, $table, dataTableApi) {
-		const yadaButtons = dataTableJson.html.buttons;
+		const yadaButtons = dataTableJson.structure.buttons;
 		yadaButtons.forEach(button => {
 			const buttonType = button.type;
 			const $buttonsSameType = $(`[data-buttontype="${buttonType}"]`);
@@ -205,7 +204,7 @@
 	yada.dtCommandRender =  function(data, type, row, meta, dataTableJson, currentUserRoles) {
         if ( type === 'display' ) {
 	    	// const entityId = rowIdToEntityId(data.DT_RowId); // 22
-			const yadaButtons = dataTableJson.html.buttons;
+			const yadaButtons = dataTableJson.structure.buttons;
         	let buttonsHtml = '';
 			yadaButtons.filter(button => !button.global).forEach(button => {
 				// The button is shown only if the current user roles contain one of the roles for the button
