@@ -184,7 +184,7 @@ window.onscroll = function() {
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:insert="~{${@yadaNotify.viewName} :: modal}" class="modal fade" th:classappend="|B${@config.bootstrapVersion}|" id="yada-notification" role="dialog"&gt;&lt;/div&gt;
 
 &lt;script th:if="${YADA_NBODY!=null}" type="text/javascript"&gt;
-	$(document).ready(function() {
+	yada.ready(function() {
 		$('#yada-notification').modal('show');
 	});
 &lt;/script&gt;</code></pre>
@@ -575,7 +575,7 @@ change it while preserving some key elements that are used as reference to add c
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 19:40:44 +0200
+Last updated 2024-11-06 18:51:42 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

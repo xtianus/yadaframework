@@ -591,7 +591,7 @@ In both cases this can be done in a yada:successHandler of the login form:</p>
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/loginPost}" yada:successHandler="postLogin" <i class="conum" data-value="1"></i><b>(1)</b>
 	th:classappend="${yadaIsAjaxResponse}?yadaAjax"
-	role="form" method="post" id="loginForm"&gt;
+	role="form" method="post"&gt;
 ...
 &lt;script th:inline="javascript"&gt;
     function postLogin() {
@@ -819,7 +819,7 @@ user might be confused about which email address to use for login.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-17 14:36:17 +0200
+Last updated 2024-11-07 18:09:11 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

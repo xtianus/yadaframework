@@ -289,7 +289,7 @@ In both cases this can be done in a yada:successHandler of the login form:
 ----
 <form th:action="@{/loginPost}" yada:successHandler="postLogin" # <1>
 	th:classappend="${yadaIsAjaxResponse}?yadaAjax" 
-	role="form" method="post" id="loginForm">
+	role="form" method="post">
 ...
 <script th:inline="javascript">
     function postLogin() {

@@ -91,35 +91,6 @@ task copyDocInfoHeader {
     }
 }
 
-asciidoctor {
-	dependsOn copyDocInfoHeader
-	// baseDirFollowsSourceDir()
-	// baseDirIsRootProjectDir()
-	// This is needed for docinfo to be found in the same subfolder of a source file
-	// and we need a different docinfo in each subfolder in order to reference the relative yadadocs.css file
-	baseDirFollowsSourceFile();
-	asciidoctorj {
-		// attribute 'docinfo', 'shared-head'
-		//attribute 'stylesheet', '../../../resources/yadadocs.css'
-		attribute 'toc', 'left'
-		attribute 'source-highlighter', 'highlightjs'
-		// Can't use a common path because it won't work with files in subfolders.
-		// Must be set in the doc header:
-		// attribute 'highlightjsdir', '../highlight'
-		// attribute 'docinfo', 'shared'
-		attribute 'icons', 'font'
-		attribute 'linkcss', 'linkcss'
-	}
-	languages 'en'
-	outputDir file('../docs')
-
-	resources {
-		from('src/docs/resources') {
-		}
-		into '../'
-	}
-}
-
 // Create one pdf for each .adoc file.
 // TODO make a master adoc with includes for all other files so that a single PDF can be created.
 //      Check into using a glob expression for including all files. This may require using an external
@@ -208,3 +179,33 @@ task concatAll {
         println 'All concatenation tasks are complete. Feed the output to ChatGPT.'
     }
 }
+
+asciidoctor {
+	dependsOn copyDocInfoHeader, concatAll
+	// baseDirFollowsSourceDir()
+	// baseDirIsRootProjectDir()
+	// This is needed for docinfo to be found in the same subfolder of a source file
+	// and we need a different docinfo in each subfolder in order to reference the relative yadadocs.css file
+	baseDirFollowsSourceFile();
+	asciidoctorj {
+		// attribute 'docinfo', 'shared-head'
+		//attribute 'stylesheet', '../../../resources/yadadocs.css'
+		attribute 'toc', 'left'
+		attribute 'source-highlighter', 'highlightjs'
+		// Can't use a common path because it won't work with files in subfolders.
+		// Must be set in the doc header:
+		// attribute 'highlightjsdir', '../highlight'
+		// attribute 'docinfo', 'shared'
+		attribute 'icons', 'font'
+		attribute 'linkcss', 'linkcss'
+	}
+	languages 'en'
+	outputDir file('../docs')
+
+	resources {
+		from('src/docs/resources') {
+		}
+		into '../'
+	}
+}
+

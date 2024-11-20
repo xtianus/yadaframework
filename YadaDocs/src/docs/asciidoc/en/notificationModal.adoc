@@ -27,7 +27,7 @@ The HTML page must contain the following code:
 <div th:insert="~{${@yadaNotify.viewName} :: modal}" class="modal fade" th:classappend="|B${@config.bootstrapVersion}|" id="yada-notification" role="dialog"></div>
 
 <script th:if="${YADA_NBODY!=null}" type="text/javascript">
-	$(document).ready(function() {
+	yada.ready(function() {
 		$('#yada-notification').modal('show');
 	});
 </script>

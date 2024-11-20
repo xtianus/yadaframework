@@ -27,7 +27,7 @@ in yada depending on the Bootstrap in use, but it can be any modal with `id="yad
 
 [source,html]
 ----
-<div th:insert="/yada/modalConfirmB5 :: modalBlock" id="yada-confirm"></div>
+<div th:insert="~{${@yadaWebUtil.modalConfirmViewName} :: modalBlock}" id="yada-confirm"></div>
 ----
 
 This is usually inserted in a common footer so that you don’t need to remember adding it to each page. 

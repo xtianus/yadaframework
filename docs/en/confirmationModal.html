@@ -179,7 +179,7 @@ in yada depending on the Bootstrap in use, but it can be any modal with <code>id
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:insert="/yada/modalConfirmB5 :: modalBlock" id="yada-confirm"&gt;&lt;/div&gt;</code></pre>
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:insert="~{${@yadaWebUtil.modalConfirmViewName} :: modalBlock}" id="yada-confirm"&gt;&lt;/div&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -353,7 +353,7 @@ public String deleteProductConfirmed(Long id, Model model) {
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 19:40:44 +0200
+Last updated 2024-11-06 19:10:26 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
