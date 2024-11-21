@@ -27,11 +27,11 @@ public class YadaLookupTableSix<K1, K2, K3, K4, K5, V> {
 	
 	/**
 	 * Get the value of the last column given the first ones
-	 * @param key1 can be null
-	 * @param key2 can be null
-	 * @param key3 can be null
-	 * @param key4 can be null
-	 * @param key5 can be null
+	 * @param key1 value of the first column
+	 * @param key2 value of the second column
+     * @param key3 value of the third column
+	 * @param key4 value of the fourth column
+	 * @param key5 value of the fifth column
 	 * @return the value of column 6, or null if not found.
 	 */
 	public V get(K1 key1, K2 key2, K3 key3, K4 key4, K5 key5) {
@@ -40,6 +40,15 @@ public class YadaLookupTableSix<K1, K2, K3, K4, K5, V> {
 			return col2.get(key2, key3, key4, key5);
 		}
 		return null;
+	}
+	   
+	/**
+	 * Get a table of all the rows that match the first column value, excluding the first column.
+	 * @param key1 the value of the first column
+	 * @return a table of the following columns for the given value of the first column, or null if not found.
+	 */
+	public YadaLookupTableFive<K2, K3, K4, K5, V> getSubtable(K1 key1) {
+		return col1.get(key1);
 	}
     
 	/**

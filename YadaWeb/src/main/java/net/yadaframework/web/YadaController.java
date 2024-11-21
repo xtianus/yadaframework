@@ -1,7 +1,9 @@
 package net.yadaframework.web;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.StringUtils;
@@ -9,24 +11,66 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import net.yadaframework.components.YadaDataTableFactory;
+import net.yadaframework.components.YadaSecurityUtilStub;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.persistence.YadaDataTableDao;
+import net.yadaframework.web.datatables.proxy.YadaDataTableProxy;
 
 @Controller
 public class YadaController {
-	private final Logger log = LoggerFactory.getLogger(YadaController.class);
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaWebUtil yadaWebUtil;
+	@Autowired private YadaDataTableDao yadaDataTableDao;
+	@Autowired private YadaDataTableFactory yadaDataTableFactory;
+	// Need to use the stub to avoid circular dependency with YadaWebSecurity
+	@Autowired private YadaSecurityUtilStub yadaSecurityUtil;
+
+	/**
+	 * Get the data for a datatable.
+	 * This method is called automatically when a YadaDataTable doesn't have an ajaxUrl set.
+	 * @param yadaDatatablesRequest the request parameters sent by DataTables
+	 * @param locale the locale to use for localized values
+	 * @return one page of data
+	 * @throws AccessDeniedException when there is a security violation
+	 */
+	// The mapping must match YadaDataTable.prepareConfiguration()
+	@RequestMapping(value ="/yadaDataTableData", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public Map<String, Object> yadaDataTableData(YadaDatatablesRequest yadaDatatablesRequest, HttpServletRequest request, Locale locale) throws AccessDeniedException {
+		String dataTableId = yadaDatatablesRequest.getDataTableId();
+		if (dataTableId == null) {
+			throw new YadaInvalidUsageException("Missing dataTableId in request");
+		}
+		YadaDataTableProxy yadaDataTable = yadaDataTableFactory.getSingleton(dataTableId, locale); // throws YadaInvalidUsageException if not found
+		String securityAsPath = yadaDataTable.getSecurityAsPath();
+		Class entityClass = yadaDataTable.getEntityClass();
+		if (entityClass == null) {
+			log.error("Entity class not found for dataTableId '{}'", dataTableId);
+			throw new YadaInvalidUsageException("Entity class must be set in dataTableId '{}'", dataTableId);
+		}
+		if (securityAsPath!=null) {
+			boolean allowed = yadaSecurityUtil.checkUrlAccess(request, securityAsPath);
+			if (!allowed) {
+				throw new AccessDeniedException("Access is denied to data for table '"+dataTableId+"' because path '"+ securityAsPath + "' is forbidden to current user by configuration");
+			}
+		}
+		return yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, entityClass, locale);
+	}
 
 	/**
 	 * Set the user timezone. Called by yada.js at each new browser session

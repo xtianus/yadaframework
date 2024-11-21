@@ -4,7 +4,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Lookup table with any number of keys. The key and the value can be of a specified type.
+ * Lookup table with any number of keys of the same checked type or any unchecked types. 
+ * The keys and the value can be of a different type.
  * @param <K> the type of the keys, can be Object for no type checking (i.e. to use any different objects types as keys)
  * @param <V> the type of the value, can be Object to store any different object types in different rows
  * @see {@link YadaLookupTableThree} to use two keys of different type

@@ -26,11 +26,14 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import net.yadaframework.components.YadaDataTableFactory;
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
 import net.yadaframework.web.YadaDatatablesColumn;
 import net.yadaframework.web.YadaDatatablesOrder;
 import net.yadaframework.web.YadaDatatablesRequest;
+import net.yadaframework.web.datatables.proxy.YadaDataTableProxy;
 
 @Repository
 @Transactional(readOnly = true) 
@@ -72,14 +75,14 @@ public class YadaDataTableDao {
 		}
 		return json;
 	}
- 
+	
 	/**
 	 * Returns a map with the result in the format needed by DataTables.
 	 * Only requested values are returned in the map. There is no need to call a json converter because everything is a map already.
-	 * @param yadaDatatablesRequest
-	 * @param entityClass
-	 * @param locale
-	 * @return
+	 * @param yadaDatatablesRequest the request parameters sent by DataTables
+	 * @param entityClass the entity class to fetch from the database
+	 * @param locale the locale to use for localized values
+	 * @return one page of data
 	 */
 	public <entityClass> Map<String, Object> getConvertedJsonPage(YadaDatatablesRequest yadaDatatablesRequest, Class<?> entityClass, Locale locale) {
 		Map<String, Object> json = new HashMap<String, Object>();

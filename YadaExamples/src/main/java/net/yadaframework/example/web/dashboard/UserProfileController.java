@@ -24,6 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import net.yadaframework.components.YadaDataTableFactory;
 import net.yadaframework.components.YadaNotify;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.example.components.YexEmailService;
@@ -38,7 +39,6 @@ import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 import net.yadaframework.web.YadaDatatablesRequest;
 import net.yadaframework.web.datatables.YadaDataTable;
-import net.yadaframework.web.datatables.YadaDataTableFactory;
 
 @Controller
 @RequestMapping("/dashboard")
@@ -204,9 +204,11 @@ public class UserProfileController {
 	
 	@RequestMapping("/user")
 	public String users(Model model, Locale locale) {
-		YadaDataTable basicTable = yadaDataTableFactory.getSingleton("basicTable", null, table -> {
+		//////////////////////////////
+		// Basic example with defaults
+		YadaDataTable basicTable = yadaDataTableFactory.getSingleton("basicTable", table -> {
 			table
-				.dtAjaxUrl("/dashboard/user/userProfileTablePage")
+				.dtEntityClass(UserProfile.class)
 				.dtStructureObj()
 					.dtColumnObj("Email", "userCredentials.username").back()
 					.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin").back()
@@ -214,8 +216,11 @@ public class UserProfileController {
 		});
 		model.addAttribute("basicTable", basicTable);
 		
+		///////////////////
+		// Advanced example
 		YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", locale, table -> {
 			table
+				.dtEntityClass(UserProfile.class)
 				.dtAjaxUrl("/dashboard/user/userProfileTablePage")
 				.dtLanguageObj("/static/datatables-2.1.8/i18n/").dsAddLanguage("pt", "pt-PT.json").back()
 				.dtStructureObj()

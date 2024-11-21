@@ -26,9 +26,9 @@ public class YadaLookupTableFour<K1, K2, K3, V> {
 
     /**
      * Get the value of the last column given the first ones
-     * @param key1 can be null
-     * @param key2 can be null
-     * @param key3 can be null
+	 * @param key1 value of the first column
+	 * @param key2 value of the second column
+     * @param key3 value of the third column
      * @return the value of column 4, or null if not found.
      */
     public V get(K1 key1, K2 key2, K3 key3) {
@@ -38,6 +38,15 @@ public class YadaLookupTableFour<K1, K2, K3, V> {
         }
         return null;
     }
+    
+	/**
+	 * Get a table of all the rows that match the first column value, excluding the first column.
+	 * @param key1 the value of the first column
+	 * @return a table of the following columns for the given value of the first column, or null if not found.
+	 */
+	public YadaLookupTableThree<K2, K3, V> getSubtable(K1 key1) {
+		return col1.get(key1);
+	}
     
 	/**
 	 * Clear the table

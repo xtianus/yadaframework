@@ -2,8 +2,11 @@ package net.yadaframework.web.datatables.proxy;
 
 import java.util.Locale;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import jakarta.servlet.http.HttpServletRequest;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.web.datatables.YadaDataTable;
 import net.yadaframework.web.datatables.YadaDataTableConfigurer;
 import net.yadaframework.web.datatables.config.YadaDataTableHTML;
@@ -17,6 +20,14 @@ public class YadaDataTableProxy extends YadaDataTable {
 
 	public YadaDataTableProxy(String id, Locale locale) {
 		super(id, locale);
+	}
+	
+	public String getSecurityAsPath() {
+		return securityAsPath;
+	}
+	
+	public void setSecurityAsPath(String securityAsPath) {
+		this.securityAsPath = securityAsPath;
 	}
 	
 	/**
@@ -58,5 +69,9 @@ public class YadaDataTableProxy extends YadaDataTable {
 			languageUrl = yadaDataTableLanguage.getLanguageUrl(locale.getLanguage());
 		}
 		return languageUrl;
+	}
+
+	public Class getEntityClass() {
+		return entityClass;
 	}
 }

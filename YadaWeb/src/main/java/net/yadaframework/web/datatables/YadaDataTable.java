@@ -2,11 +2,19 @@ package net.yadaframework.web.datatables;
 
 import java.util.Locale;
 
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import jakarta.servlet.http.HttpServletRequest;
+import net.yadaframework.components.YadaDataTableFactory;
 import net.yadaframework.components.YadaWebUtil;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.persistence.YadaDataTableDao;
+import net.yadaframework.web.YadaDatatablesRequest;
 import net.yadaframework.web.datatables.config.YadaDataTableHTML;
 import net.yadaframework.web.datatables.config.YadaDataTableLanguage;
 import net.yadaframework.web.datatables.options.YadaDTOptions;
@@ -31,6 +39,8 @@ public class YadaDataTable {
 	@JsonIgnore protected Locale locale;
 	@JsonIgnore protected YadaDataTableConfigurer configurer; // Need a reference to check for changes in development
 	@JsonIgnore protected YadaDataTableLanguageProxy yadaDataTableLanguage; 
+	@JsonIgnore protected Class entityClass; // Used to fetch data from DB 
+	@JsonIgnore protected String securityAsPath; // Path to check for user authorisation 
 	
 	protected String id;
 	protected String ajaxUrl;
@@ -54,6 +64,14 @@ public class YadaDataTable {
 
 	protected void prepareConfiguration() {
 		yadaDataTableHTML.prepareConfiguration();
+		if (ajaxUrl == null && entityClass==null) {
+			throw new YadaInvalidUsageException("Either ajaxUrl or entityClass must be set for table '{}'", id);
+		}
+		// When the ajaxUrl is not set, we use the default url with the table id
+		if (ajaxUrl == null) {
+			// This must match the YadaController.yadaDataTableData() mapping
+			ajaxUrl = yadaWebUtil.ensureThymeleafUrl("/yadaDataTableData");
+		}
 	}
 	
 	/**
@@ -71,13 +89,47 @@ public class YadaDataTable {
 	
 	/**
 	 * Set the URL where data is fetched from (without language in the path). Can contain Thymeleaf expressions.
-	 * @param ajaxUrl
+	 * Only to be used when the default handling is not enough.
+	 * @param ajaxUrl the URL where data is fetched from
 	 * @return this instance for method chaining
 	 */
 	public YadaDataTable dtAjaxUrl(String ajaxUrl) {
 		this.ajaxUrl = yadaWebUtil.ensureThymeleafUrl(ajaxUrl);
 		return this;
 	}
+	
+	/**
+	 * Set the entity class that will be used to fetch data from the database.
+	 * Needs to be set when using yadaDataTableDao.getConvertedJsonPage() or an exception will be thrown
+	 * by the ajax call.
+	 * @param entityClass the entity
+	 * @return this instance for method chaining
+	 * @see YadaDataTableDao#getConvertedJsonPage(YadaDatatablesRequest, Class)
+	 */
+	public YadaDataTable dtEntityClass(Class entityClass) {
+		this.entityClass = entityClass;
+		// The entityClass is set only when the default YadaController is called, in which case
+		// we need to enforce the same authorization as the current page for the ajax call.
+		try {
+			HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+			securityAsPath = request.getServletPath();
+		} catch (Exception e) {
+			throw new YadaInvalidUsageException("dtEntityClass() must be called in a web request", e);
+		}
+		return this;
+	}
+
+//	/**
+//	 * Set the path to check for user authorisation when downloading the table data.
+//	 * This should be a path that has been configured in SecurityConfig.
+//	 * 
+//	 * @param path the path to check for user authorisation
+//	 * @return this instance for method chaining
+//	 */
+//	public YadaDataTable dtSecurityAs(String path) {
+//		this.securityAsPath = path;
+//		return this;
+//	}
 	
 	/**
 	 * Set the HTML table structure

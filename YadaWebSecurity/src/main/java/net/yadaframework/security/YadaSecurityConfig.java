@@ -11,6 +11,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.annotation.Order;
 // import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,6 +20,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -178,5 +182,14 @@ public class YadaSecurityConfig {
 	@Bean(name="filterMultipartResolver")
 	public MultipartResolver multipartResolver() {
 		return new YadaCommonsMultipartResolver();
+	}
+	
+	@Bean
+	public AuthorizationManager<HttpServletRequest> authorizationManager(SecurityFilterChain filterChain) {
+		AuthorizationFilter filter = (AuthorizationFilter) filterChain.getFilters().stream()
+			.filter(f -> f instanceof AuthorizationFilter).findFirst()
+			.orElseThrow(() -> new IllegalStateException("No AuthorizationFilter found"));
+
+		return filter.getAuthorizationManager();
 	}
 }

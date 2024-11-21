@@ -13,19 +13,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
 
-import jakarta.persistence.Transient;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpSession;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.components.YadaWebUtil;
@@ -40,14 +44,14 @@ import net.yadaframework.web.form.YadaFormPasswordChange;
 
 @Component
 public class YadaSecurityUtil {
-	private final transient Logger log = LoggerFactory.getLogger(this.getClass());
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
 	private Date lastOldCleanup = null; // Data dell'ultimo cleanup, ne viene fatto uno al giorno
 	private Object lastOldCleanupMonitor = new Object();
 
-	private final static int MAX_AGE_DAY=20; // Tempo dopo il quale una richiesta viene cancellata
-	private final static long MILLIS_IN_DAY = 24*60*60*1000; // Millesimi di secondo in un giorno
-	private final static String SAVED_REQUEST = "SPRING_SECURITY_SAVED_REQUEST"; // copiato da org.springframework.security.web.savedrequest.HttpSessionRequestCache
+	private static final int MAX_AGE_DAY=20; // Tempo dopo il quale una richiesta viene cancellata
+	private static final long MILLIS_IN_DAY = 24*60*60*1000; // Millesimi di secondo in un giorno
+	private static final String SAVED_REQUEST = "SPRING_SECURITY_SAVED_REQUEST"; // copiato da org.springframework.security.web.savedrequest.HttpSessionRequestCache
 
 	private SecureRandom secureRandom = new SecureRandom();
 
@@ -59,7 +63,62 @@ public class YadaSecurityUtil {
 	@Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaConfiguration config;
 	@Autowired private PasswordEncoder passwordEncoder; // Null when encoding not configured
-	
+	@Autowired private AuthorizationManager<HttpServletRequest> authorizationManager;
+
+	 /**
+     * Checks if the current user has access to the specified path
+     * @param request The current HttpServletRequest
+     * @param path The path to check access for, e.g. "/dashboard"
+     * @return true if access is granted, false otherwise
+     */
+    public boolean checkUrlAccess(HttpServletRequest request, String path) {
+    	String normalizedPath = normalizePath(path);
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null) {
+                log.debug("No authentication found in context");
+                return false;
+            }
+            HttpServletRequest modifiedRequest = new HttpServletRequestWrapper(request) {
+                @Override
+                public String getRequestURI() {
+                    return normalizedPath; 
+                }
+                @Override
+                public String getServletPath() {
+                    return normalizedPath;
+                }
+            };
+            AuthorizationDecision decision = authorizationManager.check(() -> authentication, modifiedRequest);
+            if (decision == null) {
+                log.debug("No security constraints found for path: {}", normalizedPath);
+                return true; // No security constraints = permitted
+            }
+            boolean granted = decision.isGranted();
+            if (granted) {
+                log.debug("Access granted to path: {} for user: {}", normalizedPath, authentication.getName());
+            } else {
+                log.debug("Access denied to path: {} for user: {}", normalizedPath, authentication.getName());
+            }
+            return granted;
+        } catch (Exception e) {
+            log.error("Error checking URL access for path: {}", normalizedPath, e);
+            return false;
+        }
+    }
+    
+    private String normalizePath(String path) {
+        String normalized = path.startsWith("/") ? path : "/" + path;
+        int queryIndex = normalized.indexOf('?');
+        if (queryIndex != -1) {
+            normalized = normalized.substring(0, queryIndex);
+        }
+        while (normalized.length() > 1 && normalized.endsWith("/")) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+        return normalized;
+    }   
+    
 	/**
 	 * Check if a user has been suspended for excess of login failures
 	 * @param yadaUserProfile
