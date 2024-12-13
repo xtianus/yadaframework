@@ -64,7 +64,11 @@ public class AntIncrementBuild {
 			} catch (Exception e) {
 				return 1;
 			}
-			Files.move(newFile.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			// For some reason I started to get "The process cannot access the file because it is being used by another process" 
+			// when moving the file so I try to copy it first then delete the tmp one
+			// Files.move(newFile.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(newFile.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			newFile.delete();
 //			newFile.renameTo(configFile);
 			return 0;
 		} catch (Exception e) {
