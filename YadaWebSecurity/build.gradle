@@ -59,8 +59,8 @@ dependencies {
 
 	api 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.2.RELEASE'
 
-	api 'com.google.api-client:google-api-client-jackson2:2.+',
-			'com.google.api-client:google-api-client-gson:2.+',
+	api 'com.google.api-client:google-api-client-jackson2:2.7.1',
+			'com.google.api-client:google-api-client-gson:2.7.1',
 			// For Spring: 	using a specific version instead of the + wildcard to prevent side effects 
 			// 				in the application when new versions are made available 
 			// 'org.springframework:spring-webmvc:6.1.5',
@@ -69,8 +69,8 @@ dependencies {
 
 	implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
-	compileOnly 'org.apache.tomcat:tomcat-servlet-api:10.1.+',
-			'org.apache.tomcat.embed:tomcat-embed-core:10.1.+',
+	compileOnly 'org.apache.tomcat:tomcat-servlet-api:10.1.34',
+			'org.apache.tomcat.embed:tomcat-embed-core:10.1.34',
 			'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
 	// testImplementation 'junit:junit:4.12'
