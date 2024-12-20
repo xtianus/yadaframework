@@ -289,11 +289,13 @@
 	 * When the funcion takes too long to execute, the timeout is increased so that less calls are performed.
 	 * Useful when making ajax calls.
 	 * A small delay must be tolerated.
-	 * @param domElement any dom element on which a flag can be set. Must be the same for repeated calls.
+	 * When calls keep repeating within the timeout, no call is ever made.
+	 * @param domElement any dom element on which a flag can be set that will be bound to the function. Must be the same for repeated calls.
 	 * @param functionToCall any function (can be an inline function)
 	 */
 	yada.dequeueFunctionCall = function(domElement, functionToCall) {
-		// TODO see https://css-tricks.com/debouncing-throttling-explained-examples/#aa-debounce
+		// TODO see https://css-tricks.com/debouncing-throttling-explained-examples/#aa-debounce for ideas
+		// TODO set a timeout after which the next call is made anyway
 		var callTimeout = 200;
 		if (domElement.yadaDequeueFunctionCallRunning!=null) {
 			// Ajax call still running, so delay a bit longer before the next one
@@ -306,6 +308,52 @@
 			domElement.yadaDequeueFunctionCallRunning = null; // This may clear some other's call flag but don't care
 		}, callTimeout);
 	}
+
+	// Maps to store dequeue function states and timeouts
+	const dequeueFunctionData = new Map();
+
+	/**
+	 * When a function can be called repeatedly but only the last call is useful, previous
+	 * calls can be cancelled by next ones if within a given timeout.
+	 * A small delay must be tolerated.
+	 * When calls keep repeating within the timeout, no call is ever made.
+	 * @param {string} key - A unique identifier for this function call instance
+	 * @param {function} functionToCall - The function to call
+	 * @param {number} [delay=200] - The delay in milliseconds before the function is called
+	 */
+		 
+	yada.dequeueFunctionCallByKey = function(key, functionToCall, delay = 200) {
+		if (typeof functionToCall !== 'function') {
+			throw new Error("functionToCall must be a valid function.");
+		}
+		// Get or initialize data for this key
+		let data = dequeueFunctionData.get(key);
+		if (!data) {
+			data = { timeoutHandler: null, isRunning: false };
+			dequeueFunctionData.set(key, data);
+		}
+
+		// If the function is currently running, do nothing
+		if (data.isRunning) {
+			return;
+		}
+
+		// Clear any existing timeout for the key
+		if (data.timeoutHandler) {
+			clearTimeout(data.timeoutHandler);
+		}
+
+		// Set a new timeout for the key
+		data.timeoutHandler = setTimeout(() => {
+			data.isRunning = true; // Mark as running
+			try {
+				functionToCall(); // Execute the function
+			} finally {
+				data.isRunning = false; // Reset after execution
+				dequeueFunctionData.delete(key); // Cleanup
+			}
+		}, delay);
+	};
 
 	/**
 	 * Allow only certain characters to be typed into an input field based on a regexp
