@@ -23,6 +23,10 @@
 			"title": "Authorization Error",
 			"message": "You don't have permission to access the requested page"
 	}; 
+	yada.messages.notfoundError = { // Set it via thymeleaf
+			"title": "Not Found",
+			"message": "The page you requested was not found on the server"
+	}; 
 	yada.messages.serverError = { // Set it via thymeleaf
 			"title": "Server Error",
 			"message": "Something is wrong - please try again later"

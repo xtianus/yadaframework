@@ -1447,18 +1447,20 @@
 			contentType: contentType,
 			xhrFields: xhrFields,
 			error: function(jqXHR, textStatus, errorThrown ) { 
+				// textStatus is "error", "timeout", "abort", or"parsererror"
 				$(`.${elementLoaderClass}`, $elementLoaderContainers).remove();
 				ajaxCounter--;
 				if (ajaxCounter<1) {
 					yada.loaderOff();
 				}
-				// textStatus is "error", "timeout", "abort", or"parsererror"
 				var responseText = jqXHR.responseText!= null ? jqXHR.responseText.trim() : jqXHR.responseText;
 				if (jqXHR.status==503 && responseText!=null && yada.startsWith(responseText, "<html")) {
 					showFullPage(responseText);
 					return;
 				}
-				if (textStatus==="timeout") {
+				if (jqXHR.status==404) {
+					yada.showErrorModal(yada.messages.notfoundError.title, yada.messages.notfoundError.message);
+				} else if (textStatus==="timeout") {
 					yada.showErrorModal(yada.messages.connectionError.title, yada.messages.connectionError.message);
 				} else if (errorThrown==="Forbidden") {
 					yada.showErrorModal(yada.messages.forbiddenError.title, yada.messages.forbiddenError.message);
