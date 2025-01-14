@@ -839,6 +839,10 @@
 	 * This function performs either an update or an append (or more in the future) depending on the parameters.
 	*/
 	function postprocessOnSuccess($element, responseHtml, attributeName, jqueryFunction) {
+		if (isNotification(responseHtml)) {
+			// Do not process notification modals
+			return responseHtml;
+		}
 		var selector = $element.attr(attributeName);
 		if (selector == null) {
 			return responseHtml;
@@ -1893,14 +1897,22 @@
 	yada.isNotifyError = function(responseHtml) {
 		return $('.yadaNotify span.glyphicon.error', responseHtml).not('.hidden').length>0;
 	}
+
+	/**
+	 * Returns true if the response contains a notification modal
+	 */
+	function isNotification(responseHtml) {
+		// The notification modal is marked with the class yadaNotify
+		return /class=["'][^"']*yadaNotify[^"']*["']/.test(responseHtml);
+	}
 	
 	// Se un ritorno da una chiamata ajax ha un notify, lo mostra.
 	// Per mostrare un notify al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify" 
 	// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
 	// Ritorna true se la notify è stata mostrata.
 	yada.handleNotify = function(responseHtml) {
-		var notification=$(responseHtml).find(".yadaNotify");
-		if (notification.length==1) {
+		// var notification=$(responseHtml).find(".yadaNotify");
+		if (isNotification(responseHtml)) {
 			// Mostro la notification
 			$('.modal:visible').modal('hide'); // Close any current modals
 			$('#yada-notification').children().remove();

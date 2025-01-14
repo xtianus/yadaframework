@@ -281,7 +281,7 @@ public class YadaWebUtil {
 	 * @param sourceUrl a full or relative url. Can also be just the query string starting with "?"
 	 * @param paramName the name of the parameter, not urlencoded
 	 * @param paramValue the value of the parameter, not urlencoded. Can be null to only have the paramName in the url
-	 * @return
+	 * @return the original url with the parameter added or updated
 	 */
 	// Not tested yet
 	public String addOrUpdateUrlParameter(String sourceUrl, String paramName, String paramValue) {
@@ -306,6 +306,9 @@ public class YadaWebUtil {
 			for (int i = 0; i < params.length; i++) {
 				String[] parts = params[i].split("=");
 				String name = parts[0];
+				if (name.length() == 0) {
+					continue;
+				}
 				if (name.equals(encodedParamName)) {
 					result.append(encodedParamName).append(equalsAndValue);
 					found = true;
