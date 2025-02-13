@@ -325,7 +325,7 @@
 	 * @param {function} functionToCall - The function to call
 	 * @param {number} [delay=200] - The delay in milliseconds before the function is called
 	 */
-		 
+	// TODO add a timeout after which the next call is made anyway	 
 	yada.dequeueFunctionCallByKey = function(key, functionToCall, delay = 200) {
 		if (typeof functionToCall !== 'function') {
 			throw new Error("functionToCall must be a valid function.");
@@ -338,9 +338,10 @@
 		}
 
 		// If the function is currently running, do nothing
-		if (data.isRunning) {
-			return;
-		}
+		// This is wrong because we miss the last call!
+		// if (data.isRunning) {
+		// 	return;
+		// }
 
 		// Clear any existing timeout for the key
 		if (data.timeoutHandler) {
@@ -349,11 +350,11 @@
 
 		// Set a new timeout for the key
 		data.timeoutHandler = setTimeout(() => {
-			data.isRunning = true; // Mark as running
+			// data.isRunning = true; // Mark as running
 			try {
 				functionToCall(); // Execute the function
 			} finally {
-				data.isRunning = false; // Reset after execution
+				// data.isRunning = false; // Reset after execution
 				dequeueFunctionData.delete(key); // Cleanup
 			}
 		}, delay);
