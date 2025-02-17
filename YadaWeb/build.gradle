@@ -19,14 +19,14 @@ group = 'net.yadaframework'
 version = '0.7.6'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 	// toolchain {
 	// 	languageVersion = JavaLanguageVersion.of(8)
 	// }
 	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
 	withSourcesJar()
-    withJavadocJar() // https://stackoverflow.com/a/75710366/587641
+	withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
 
 if (!project.hasProperty('repoPath')) {
@@ -39,32 +39,32 @@ eclipse {
 		// targetCompatibility = 1.8
 		// https://stackoverflow.com/a/35302104/587641
 		file {
-      		File dir = file('.settings')
-      		dir.mkdirs()
-      		File f = file('.settings/org.eclipse.core.resources.prefs')
-      		if (!f.exists()) {
-      			f.write('eclipse.preferences.version=1\n')
-      			f.append('encoding/<project>=utf-8')
-      		}
-    	}
+	  		File dir = file('.settings')
+	  		dir.mkdirs()
+	  		File f = file('.settings/org.eclipse.core.resources.prefs')
+	  		if (!f.exists()) {
+	  			f.write('eclipse.preferences.version=1\n')
+	  			f.append('encoding/<project>=utf-8')
+	  		}
+		}
 	}
 	classpath {
-        downloadJavadoc = true
-        downloadSources = true
-    }
+		downloadJavadoc = true
+		downloadSources = true
+	}
 }
 
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 tasks.withType(JavaCompile).configureEach {
-    // Needed since Spring 6.1: 
-    // https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
-    options.compilerArgs.add("-parameters")
+	// Needed since Spring 6.1: 
+	// https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
+	options.compilerArgs.add("-parameters")
 }
 
 dependencies {
@@ -76,20 +76,20 @@ dependencies {
 	api 'org.apache.commons:commons-text:1.12.0'
 	
 	// For embedded Tomcat ONLY - add these to your project
-    // runtimeOnly 'org.apache.tomcat:tomcat-el-api:8.5.+'
-    // runtimeOnly 'org.apache.tomcat:tomcat-jasper-el:8.5.+'
-    // runtimeOnly 'org.apache.tomcat:tomcat-jasper:8.5.+'
-    // For embedded mariadb
+	// runtimeOnly 'org.apache.tomcat:tomcat-el-api:8.5.+'
+	// runtimeOnly 'org.apache.tomcat:tomcat-jasper-el:8.5.+'
+	// runtimeOnly 'org.apache.tomcat:tomcat-jasper:8.5.+'
+	// For embedded mariadb
 	compileOnly('ch.vorburger.mariaDB4j:mariaDB4j:3.1.0') {
 		// mariaDB4j pulls the latest version of spring core but this is never a good thing.
-        exclude group: 'org.springframework', module: 'spring-core'
-    }	
+		exclude group: 'org.springframework', module: 'spring-core'
+	}	
 	// Needed by Commons Configuration
-    api 'commons-jxpath:commons-jxpath:1.3'
+	api 'commons-jxpath:commons-jxpath:1.3'
 
 	// For Spring: 	using a specific version instead of the + wildcard to prevent side effects 
 	// 				in the application when new versions are made available 
-    api 'org.springframework:spring-context-support:6.1.5',
+	api 'org.springframework:spring-context-support:6.1.5',
 		'org.springframework:spring-orm:6.1.5',
 		'org.springframework:spring-webmvc:6.1.5',
 		'org.springframework:spring-core:6.1.5',
@@ -121,10 +121,14 @@ dependencies {
 	// Needed to run in Tomcat
 	// runtime 'commons-jxpath:commons-jxpath:1.3'
 
-	testImplementation 'junit:junit:4.13.2'
-	
-	// testRuntimeOnly 'commons-beanutils:commons-beanutils:1.9.+',
-	// 	'commons-jxpath:commons-jxpath:1.3'
+	testImplementation platform('org.junit:junit-bom:5.9.2')
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation 'org.junit.platform:junit-platform-launcher'
+	testRuntimeOnly 'org.junit.platform:junit-platform-engine'
+	testImplementation 'org.mockito:mockito-core:5.3.1'
+	testImplementation 'org.mockito:mockito-junit-jupiter:5.3.1'
+	testImplementation 'org.springframework:spring-test:6.1.3'
+	testImplementation 'javax.servlet:javax.servlet-api:4.0.1'
 		
 }
 
@@ -135,10 +139,9 @@ task listJars {
 }
 
 jar {
-    manifest {
-        attributes("Implementation-Title": "YadaWeb",
-                   "Implementation-Version": archiveVersion)
-    }
+	manifest {
+		attributes("Implementation-Title": "YadaWeb", "Implementation-Version": archiveVersion)
+	}
 }
 
 // Set the yada version in the properties file
@@ -149,10 +152,10 @@ processResources {
 }
 
 javadoc {
-    options.encoding = 'UTF-8'
-    options.docEncoding = 'UTF-8'
-    options.charSet = 'UTF-8'
-    failOnError = false
+	options.encoding = 'UTF-8'
+	options.docEncoding = 'UTF-8'
+	options.charSet = 'UTF-8'
+	failOnError = false
 }
 
 // http://stackoverflow.com/a/27853822/587641
@@ -193,60 +196,67 @@ task testDbSchema(dependsOn: [testClasses], type: net.yadaframework.tools.YadaCr
 	}
 }
 
-publishing {
-    publications {
-        yadaWebLibrary(MavenPublication) {
-        	artifactId = 'yadaweb'
-            from components.java
-            
-			pom {
-			    name = 'YadaWeb'
-			    description = 'Some useful tasks for the Yada Framework'
-			    url = 'https://yadaframework.net/en/index.html'
-			    inceptionYear = '2014'
-			    packaging = 'jar'
-			    licenses {
-			        license {
-			            name = 'MIT License'
-			            url = 'https://en.wikipedia.org/wiki/MIT_License'
-			        }
-			    }
-			    developers {
-			        developer {
-			            id = 'xtianus'
-			            name = 'Studio Ghezzi'
-			            email = 'studio@ghezzi.net'
-			        }
-			    }
-			    organization {
-			    	name = 'Studio Ghezzi'
-			    	url = 'https://studio.ghezzi.net/'
-			    }
-			    scm {
-			        connection = 'scm:git:git@github.com:xtianus/yadaframework.git'
-			        developerConnection = 'scm:git:git@github.com:xtianus/yadaframework.git'
-			        url = 'https://github.com/xtianus/yadaframework'
-			    }
-			}
-        }
-    }
-    repositories {
-        maven {
-        	name "PublicRepo"
-            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-            credentials(PasswordCredentials) {
-            	username = hasProperty('ossrhUsername')?ossrhUsername:''
-            	password = hasProperty('ossrhPassword')?ossrhPassword:''
-            }
-        }
-        // Creates task publishYadaWebLibraryPublicationToLocalRepoRepository
-        maven {
-        	name "LocalRepo"
-        	// repoPath must be passed when invoking gradle using -P
-        	url = "file://${repoPath}"
-    	}
-    }    
+test {
+	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
+		showStandardStreams = true
+	}
 }
 
+publishing {
+	publications {
+		yadaWebLibrary(MavenPublication) {
+			artifactId = 'yadaweb'
+			from components.java
+			
+			pom {
+				name = 'YadaWeb'
+				description = 'Some useful tasks for the Yada Framework'
+				url = 'https://yadaframework.net/en/index.html'
+				inceptionYear = '2014'
+				packaging = 'jar'
+				licenses {
+					license {
+						name = 'MIT License'
+						url = 'https://en.wikipedia.org/wiki/MIT_License'
+					}
+				}
+				developers {
+					developer {
+						id = 'xtianus'
+						name = 'Studio Ghezzi'
+						email = 'studio@ghezzi.net'
+					}
+				}
+				organization {
+					name = 'Studio Ghezzi'
+					url = 'https://studio.ghezzi.net/'
+				}
+				scm {
+					connection = 'scm:git:git@github.com:xtianus/yadaframework.git'
+					developerConnection = 'scm:git:git@github.com:xtianus/yadaframework.git'
+					url = 'https://github.com/xtianus/yadaframework'
+				}
+			}
+		}
+	}
+	repositories {
+		maven {
+			name "PublicRepo"
+			def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+			def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+			credentials(PasswordCredentials) {
+				username = hasProperty('ossrhUsername')?ossrhUsername:''
+				password = hasProperty('ossrhPassword')?ossrhPassword:''
+			}
+		}
+		// Creates task publishYadaWebLibraryPublicationToLocalRepoRepository
+		maven {
+			name "LocalRepo"
+			// repoPath must be passed when invoking gradle using -P
+			url = "file://${repoPath}"
+		}
+	}    
+}

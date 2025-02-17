@@ -448,14 +448,14 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Given a json stored as a map, returns the String value at the specified key, with optional nesting.
-	 * Non need for this method if the objectPath is a simple key: just use the Map get(key) method.
+	 * Given a json stored as a map, returns the value at the specified key, with optional nesting.
+	 * No need for this method if the objectPath is a simple key: just use the Map get(key) method.
 	 * @param jsonSource
 	 * @param objectPath the path of the attribute, using dot notation and arrays. E.g. "order.amount[2].currency"
 	 * @return
 	 */
-	public String getJsonAttribute(Map<String, Object> jsonSource, String objectPath) {
-		return (String) getJsonPath(jsonSource, objectPath);
+	public Object getJsonAttribute(Map<String, Object> jsonSource, String objectPath) {
+		return getJsonPath(jsonSource, objectPath);
 	}
 
 	/**
@@ -477,12 +477,20 @@ public class YadaUtil {
 	 * @param value the value to store, can also be a "json object"
 	 */
 	public void setJsonAttribute(Map<String, Object> jsonObject, String path, Object value) {
-		boolean isString = value instanceof String;
-		boolean isJsonObject = value instanceof Map;
-		if (!isString && !isJsonObject) {
-			value = String.valueOf(value);
-//			throw new YadaInvalidValueException("\"value\" must be either a string or a map");
+		// Convert number types to their proper class
+		if (value instanceof Number) {
+			if (value instanceof Integer || value.toString().indexOf('.') == -1) {
+				value = ((Number)value).intValue();
+			} else {
+				value = ((Number)value).doubleValue();
+			}
 		}
+// 		boolean isString = value instanceof String;
+// 		boolean isJsonObject = value instanceof Map;
+// 		if (!isString && !isJsonObject) {
+// 			value = String.valueOf(value);
+// //			throw new YadaInvalidValueException("\"value\" must be either a string or a map");
+// 		}
 		setJsonAttributeRecurse(jsonObject, path, value);
 	}
 
@@ -491,6 +499,7 @@ public class YadaUtil {
 			return jsonObject; // makeJsonObject called
 		}
 		String[] parts = path.split("\\.", 2); // {"a", "b[2].c"}
+		boolean lastSegment = (parts.length==1);
 		String segment = parts[0]; // "a", "b[2]", "c"
 		int index = -1;
 		if (segment.endsWith("]")) {
@@ -503,10 +512,11 @@ public class YadaUtil {
 			} catch (NumberFormatException e) {
 				log.debug("Invalid index '{}' in segment '{}' (ignored)", indexString, segment);
 			}
-		}
-		boolean lastSegment = (parts.length==1);
-		if (lastSegment && value!=null) {
-			return jsonObject.put(segment, value);
+		} else {
+			// Not an array
+			if (lastSegment && value!=null) {
+				return jsonObject.put(segment, value);
+			}
 		}
 		Object currentObject = jsonObject.get(segment); // Either Object, List or Null
 		if (currentObject==null) {
@@ -525,6 +535,10 @@ public class YadaUtil {
 			for (int k = currentList.size(); k <= index; k++) {
 				// Add missing cells if any
 				currentList.add(makeJsonObject());
+			}
+			if (lastSegment) {
+				currentList.set(index, value);
+				return currentList;
 			}
 			currentObject = currentList.get(index);
 		}
@@ -1198,6 +1212,7 @@ public class YadaUtil {
 	 * It must be called in a transaction.
 	 * @param fetchedEntity object fetched from database that may contain localized strings
 	 * @param targetClass type of fetchedEntity element
+	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
 	 */
 	public static <targetClass> void prefetchLocalizedStrings(targetClass fetchedEntity, Class<?> targetClass, String...attributes) {
 		if (fetchedEntity!=null) {
@@ -1968,6 +1983,7 @@ public class YadaUtil {
 	public int shellExec(String shellCommandKey, Map substitutionMap, ByteArrayOutputStream outputStream) throws IOException {
 		String executable = getExecutable(shellCommandKey);
 		// NO Need to use getProperty() to avoid interpolation on ${} arguments
+		// List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
 		List<String> args = config.getConfiguration().getList(String.class, shellCommandKey + "/arg", null);
 		//		Object argsObject = config.getConfiguration().getProperty(shellCommandKey + "/arg");
 		//		List<String> args = new ArrayList<>();
@@ -2601,6 +2617,7 @@ public class YadaUtil {
 						} else if (isType(fieldType, Map.class)) {
 							Map sourceMap = setFieldDirectly ? (Map) field.get(source) : (Map) getter.invoke(source);
 							Map targetMap = setFieldDirectly ? (Map) field.get(target) : (Map) getter.invoke(target);
+
 							if (targetMap==null) {
 								// Se il costruttore non istanzia la mappa, ne creo una arbitrariamente di tipo HashMap
 								targetMap = new HashMap();
