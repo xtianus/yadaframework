@@ -459,11 +459,11 @@ public class YadaUtil {
 	}
 
 	/**
-	 * Creates an empty json object at the given path
+	 * Creates an empty json object at the given path, if missing.
 	 * @param parentObject the json object containing the new object
 	 * @param path where the object should be created, using dot notation and arrays. E.g. "order.amount[2].currency".
 	 * Any missing array cells are also created with an empty object as needed.
-	 * @return
+	 * @return the created object
 	 */
 	public Map<String, Object> makeJsonObject(Map<String, Object> parentObject, String path) {
 		return (Map<String, Object>) setJsonAttributeRecurse(parentObject, path, null);
@@ -494,6 +494,13 @@ public class YadaUtil {
 		setJsonAttributeRecurse(jsonObject, path, value);
 	}
 
+	/**
+	 * Sets the value on the json object passed, at the specified path.
+	 * @param jsonObject
+	 * @param path
+	 * @param value
+	 * @return the object on which the value was set
+	 */
 	private Object setJsonAttributeRecurse(Map<String, Object> jsonObject, String path, Object value) {
 		if (path.length()==0 && value==null) {
 			return jsonObject; // makeJsonObject called
@@ -515,7 +522,8 @@ public class YadaUtil {
 		} else {
 			// Not an array
 			if (lastSegment && value!=null) {
-				return jsonObject.put(segment, value);
+				jsonObject.put(segment, value);
+				return jsonObject;
 			}
 		}
 		Object currentObject = jsonObject.get(segment); // Either Object, List or Null
@@ -536,11 +544,14 @@ public class YadaUtil {
 				// Add missing cells if any
 				currentList.add(makeJsonObject());
 			}
-			if (lastSegment) {
-				currentList.set(index, value);
-				return currentList;
-			}
 			currentObject = currentList.get(index);
+			if (lastSegment) {
+				if (value != null) {
+					currentList.set(index, value); // somearray[n] = value makes sense only if value is a json object
+					return value;
+				}
+				return currentObject;
+			}
 		}
 		int dotPos = path.indexOf(".");
 		String remainingPath = dotPos > -1 ? path.substring(dotPos+1) : "";

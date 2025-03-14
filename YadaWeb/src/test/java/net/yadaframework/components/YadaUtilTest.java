@@ -120,6 +120,39 @@ class YadaUtilTest {
             assertTrue(settings.isEmpty());
         }
 
+        @Test
+        void makeJsonObject_WithArrayPath_ReturnsMapFromArray() {
+        	 Map<String, Object> test = yadaUtil.makeJsonObject(yadaUtil.makeJsonObject(), "configurations[1]");
+        	
+            // Create a parent object with a configurations array
+            yadaUtil.setJsonAttribute(jsonObject, "configurations[0].name", "Config1");
+            yadaUtil.setJsonAttribute(jsonObject, "configurations[1].name", "Config2");
+            
+            // Test that nothing was added as it was there already
+            Map<String, Object> cell1 = yadaUtil.makeJsonObject(jsonObject, "configurations[1]");
+            assertNotNull(cell1);
+            assertTrue(cell1 instanceof Map);
+            //assertEquals("Config2", ((Map)((List<Object>)cell1.get("configurations")).get(1)).get("name"));
+            assertEquals("Config2", cell1.get("name"));
+            
+            // Test making a new object in a new array index
+            Map<String, Object> cell2 = yadaUtil.makeJsonObject(jsonObject, "configurations[2]");
+            assertNotNull(cell2);
+            assertTrue(cell2 instanceof Map);
+            assertTrue(cell2.isEmpty());
+            
+            // Verify we can add properties to the new config
+            yadaUtil.setJsonAttribute(jsonObject, "configurations[2].name", "Config3");
+            assertEquals("Config3", yadaUtil.getJsonAttribute(jsonObject, "configurations[2].name"));
+            
+            // Verify all objects in array
+            List<Object> configurations = yadaUtil.getJsonArray(jsonObject, "configurations");
+            assertEquals(3, configurations.size());
+            assertEquals("Config1", ((Map<String,Object>)configurations.get(0)).get("name"));
+            assertEquals("Config2", ((Map<String,Object>)configurations.get(1)).get("name"));
+            assertEquals("Config3", ((Map<String,Object>)configurations.get(2)).get("name"));
+        }
+
         // Edge Cases
         @Test
         void setJsonAttribute_NonStringValue_ConvertsToString() {
