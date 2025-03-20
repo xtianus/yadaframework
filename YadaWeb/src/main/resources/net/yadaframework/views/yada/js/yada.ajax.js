@@ -1648,9 +1648,6 @@
 
 	function handleAjaxLoadedModal($loadedModalDialog, responseHtml, responseText) {
 		$("#loginModal").remove(); // TODO still needed?
-		// A modal was returned. Is it a "sticky" modal?
-		var stickyModal = $loadedModalDialog.hasClass(yada.stickyModalMarker);
-		
 		// Remove any currently downloaded modals (markerAjaxModal) if they are open and not sticky
 		var $existingModals = $(".modal.show."+markerAjaxModal+":has(.modal-dialog:not(."+yada.stickyModalMarker+"))");
 		if ($existingModals.length==0) {
@@ -1662,9 +1659,17 @@
 			// $existingModals.remove(); // This prevents removal of the modal background sometimes
 			$existingModals.on('hidden.bs.modal', function (e) {
 				$existingModals.remove(); // Remove the existing modal after it's been closed
+				showNewModal($loadedModalDialog, responseHtml, responseText);
 			});
+		} else {
+			showNewModal($loadedModalDialog, responseHtml, responseText);
 		}
-		
+
+	}
+	
+	function showNewModal($loadedModalDialog, responseHtml, responseText) {
+		// A modal was returned. Is it a "sticky" modal?
+		var stickyModal = $loadedModalDialog.hasClass(yada.stickyModalMarker);
 		// modals are appended to the body
 		const $modalObject = $(responseHtml).find(".modal").first();
 		// Add the marker class 
@@ -1683,7 +1688,7 @@
 				$modalObject.remove(); // Remove modal on close
 			});
 		}
-		
+
 		// Adding the modal head elements to the main document
 		if (responseText.indexOf('<head>')>-1) {
 			var parser = new DOMParser();
@@ -1692,7 +1697,7 @@
 			$("head").append(headNodes);
 			removeHeadNodes(headNodes, $modalObject) // Needed a closure for headNodes (?)
 		}
-		
+
 		// We need to show the modal after a delay or it won't show sometimes (!)
 		var modalIsHidden = !$modalObject.is(':visible');
 		if (modalIsHidden) {
@@ -1735,7 +1740,7 @@
 					scrollTop: 0
 				}, 500);
 			}
-		}, 500);
+		}, 500);		
 	}
 
 	/**
