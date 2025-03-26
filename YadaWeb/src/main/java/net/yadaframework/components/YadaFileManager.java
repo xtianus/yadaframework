@@ -583,7 +583,7 @@ public class YadaFileManager {
 	 * Copies (and resizes) a managed file to the destination folder, creating a database association to assign to an Entity.
 	 * The name of the file is in the format [basename]managedFileName_id.ext
 	 * @param managedFile an uploaded file, can be an image or not. When null, nothing is done.
-	 * @param clientFilename the original client filename. If null, the client filename is not changed.
+	 * @param clientFilename the original client filename with extension. If null, the client filename is not changed.
 	 * @param relativeFolderPath path of the target folder relative to the contents folder, starting with a slash /
 	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
 	 * @param targetExtension optional, to convert image file formats
@@ -603,7 +603,7 @@ public class YadaFileManager {
 	 * The name of the file is in the format [basename]managedFileName_id.ext
 	 * @param move true if the original file has to be deleted (moved when not transformed), false to keep it there 
 	 * @param managedFile an uploaded file, can be an image or not. When null, nothing is done.
-	 * @param clientFilename the original client filename. If null, the client filename is not changed.
+	 * @param clientFilename the original client filename with extension. If null, the client filename is not changed.
 	 * @param relativeFolderPath path of the target folder relative to the contents folder, starting with a slash /
 	 * @param namePrefix prefix to attach before the original file name. Add a separator if you need one. Can be null.
 	 * @param targetExtension optional, to convert image file formats
@@ -637,7 +637,7 @@ public class YadaFileManager {
 	 * and left unchanged.
 	 * @param yadaAttachedFile object to fill with values
 	 * @param managedFile some file to attach or replace, can be an image or not. When null, nothing is done.
-	 * @param clientFilename the client filename. If null, the client filename is not changed.
+	 * @param clientFilename the client filename with extension. If null, the client filename is not changed.
 	 * @param namePrefix prefix to attach before the original file name to make the target name. Add a separator (like a dash) if you need one. Can be null.
 	 * @param targetExtension optional, to convert image file formats
 	 * @param desktopWidth optional width for desktop images - when null, the image is not resized
@@ -657,7 +657,7 @@ public class YadaFileManager {
 	 * @param move true if the original file has to be deleted (moved when not transformed), false to keep it there 
 	 * @param yadaAttachedFile object to fill with values
 	 * @param managedFile some file to attach or replace, can be an image or not. When null, nothing is done.
-	 * @param clientFilename the client filename. If null, the client filename is not changed.
+	 * @param clientFilename the client filename with extension. If null, the client filename is not changed.
 	 * @param namePrefix prefix to attach before the original file name to make the target name. Add a separator (like a dash) if you need one. Can be null.
 	 * @param targetExtension optional, to convert image file formats
 	 * @param desktopWidth optional width for desktop images - when null, the image is not resized

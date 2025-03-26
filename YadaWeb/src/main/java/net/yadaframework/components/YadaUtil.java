@@ -3428,6 +3428,12 @@ public class YadaUtil {
         String withoutDiacritics = normalizedFilename.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
         // Replace invalid characters with underscores
         String safeFilename = withoutDiacritics.replaceAll("[^a-zA-Z0-9._-]", "_");
+		// Remove consecutive underscores
+        safeFilename = safeFilename.replaceAll("__+", "_");
+		// Remove leading and trailing underscores
+        safeFilename = safeFilename.replaceAll("^[_]+", "").replaceAll("[_]+$", "");
+		// Remove underscore when followed by punctuation and preceded by any letter or digit
+        safeFilename = safeFilename.replaceAll("([a-zA-Z0-9])_([\\p{Punct}])", "$1$2");
         // Convert to lowercase if needed
         if (toLowercase) {
             safeFilename = safeFilename.toLowerCase();
