@@ -436,7 +436,7 @@ The success handlers are called in sequence and should have the following signat
 
 [source,javascript]
 ----
-function someHandler(responseText, responseHtml, link) {
+function someHandler(responseText, responseHtml, domElement) {
 ----
 
 responseText:: 
@@ -445,12 +445,12 @@ either the unparsed text received from the ajax call, or a json object if the re
 responseHtml:: 
 the ajax response converted to jQuery html objects
 
-link:: 
-the original anchor object (DOM, not jQuery). Could also be a form or anything else, not just a "link".
+domElement:: 
+the original anchor/form object (DOM, not jQuery) that triggered the ajax call.
 
-The `link` argument is also the same as the current `this` context.
+The `domElement` argument is also the same as the current `this` context.
 
-When using function bodies, the above three arguments are valid objects. 
+When using function bodies, the above three arguments are valid objects and can be used. 
 
 [NOTE]
 ====
@@ -913,7 +913,7 @@ The success handler is called when the server returns without errors:
 
 [source,javascript]
 ----
-successHandler(responseText, $responseHtml)
+successHandler(responseText, $responseHtml, domElement)
 ----
 
 responseText:: 
@@ -934,6 +934,11 @@ If you need to preserve the "this" context of the invoking function, remember to
 ----
 yada.ajax(urlShowBom, formData, insertBom.bind(this), "POST");
 ----
+
+NOTE: you can't use `bind` in the function specified with `yada:successHandler` where the context is always the triggering DOM element
+
+domElement:: 
+the dom element that triggered the ajax call, it is also the current context (`this`).
 
 === responseType
 The response type of an ajax call is set automatically unless specified in this field. A useful value is "blob"

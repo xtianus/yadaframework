@@ -131,7 +131,11 @@ window.onscroll = function() {
 <li><a href="#_description">Description</a></li>
 <li><a href="#_plain_forms">Plain Forms</a></li>
 <li><a href="#_form_backing_beans">Form Backing Beans</a></li>
-<li><a href="#_entity_backing_beans">Entity Backing Beans</a></li>
+<li><a href="#_entity_backing_beans">Entity Backing Beans</a>
+<ul class="sectlevel2">
+<li><a href="#_relink_the_binding_result">Relink the Binding Result</a></li>
+</ul>
+</li>
 <li><a href="#_ajax_forms">Ajax Forms</a>
 <ul class="sectlevel2">
 <li><a href="#_postprocessing">Postprocessing</a></li>
@@ -315,6 +319,64 @@ public class BookController {
 <div class="paragraph">
 <p>Validation can be performed as usual, checking the values already stored in the entity bean, as long as it&#8217;s done before saving.</p>
 </div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="title">Validation errors not showing?</div>
+<div class="paragraph">
+<p>You can&#8217;t replace the existing model attribute with a new one having the same name, else all
+validation errors will be lost.
+So be careful for example when doing em.merge(book) because you get a new book instance and
+by setting it in the model with the same name as before unlinks the BindingResult instance.
+One solution is to avoid using merge (e.g. read the needed data with a query and set it to the instance);
+another solution is to relink the binding result</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_relink_the_binding_result">Relink the Binding Result</h3>
+<div class="paragraph">
+<p>A common pattern for validation is to receive a backing bean on the Controller, reject the
+invalid fields using the associated BindingResult, then return the bean to show error
+messages on the page.
+This pattern breaks if the original backing bean is replaced with a new instance, for example
+because the page needs some data that wasn&#8217;t sent with the form so a merge is performed on the bean.
+If the merge can&#8217;t be avoided, a call to YadaWebUtil.relinkBindingResult() fixes the problem
+by adding to the Model a new BindingResult that is the copy of the original one (all validation
+errors are preserved) but associated to the new instance of the bean.
+So the relinkBindingResult() method should be called after the new bean instance has been fetched:
+if validation has already been performed, any error will be copied over; if validation has not
+yet been performed, the returned BindingResult should be used for validating fields on the new
+instance.</p>
+</div>
+<div class="paragraph">
+<p>Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/editBook")
+public String editBook(Book book, BindingResult bindingResult, Model model) {
+    if (book.titleIsEmpty()) {
+	    // Reject the submission if title is empty
+    	bindingResult.rejectValue("title", "validation.value.empty");
+    	// We need to load the authors collection from DB because it is lazy
+    	book = bookDao.initializeAuthors(book); // New instance returned here
+    	// The Binding Result is reassigned to the new instance
+    	yadaWebUtil.relinkBindingResult(bindingResult, book, model);
+    	// Return the submitted form, that will correctly show validation errors
+    	model.addAttribute("book", book);
+    	return "/bookForm";
+	}
+	...</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -423,6 +485,26 @@ return yadaNotify.title("Lorem", model).ok().message("Ipsum").add();
 
 return YadaViews.AJAX_CLOSE_MODAL;</code></pre>
 </div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="title">Validation errors not showing?</div>
+<div class="paragraph">
+<p>You can&#8217;t replace the existing model attribute with a new one having the same name, else all
+validation errors will be lost.
+So be careful for example when doing em.merge(book) because you get a new book instance and
+by setting it in the model with the same name as before unlinks the BindingResult instance.
+One solution is to avoid using merge (e.g. read the needed data with a query and set it to the instance);
+another solution is to relink the binding result</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -537,7 +619,7 @@ The use of <code>yada:formGroup</code> has the following advantages:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 19:40:44 +0200
+Last updated 2025-04-18 15:31:37 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

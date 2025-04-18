@@ -105,11 +105,6 @@ The instance is a singleton identified by a unique id and is produced by `yadaDa
 This ensures that the table configuration code is run only once for all HTTP requests
 and that the same configuration can be used in the ajax handler that loads the table data.
 
-[.todo]
-----
-The current implementation of the ajax handler does not use the table configuration
-----
-
 To create or get an instance the syntax is as follows:
 
 [source,java]
@@ -117,11 +112,11 @@ To create or get an instance the syntax is as follows:
 YadaDataTable myDataTable = yadaDataTableFactory.getSingleton("myTableId", locale, ...);
 ----
 
-The locale is needed to load the i18n file and can be set to null to use the default locale
+The locale is needed to load the i18n file and can be omitted or set to null to use the default locale
 that is either set in the application XML configuration or taken from the platform.
 In a multilanguage application it should be taken from a parameter in the @Controller @RequestMapping.
 
-The table configuration is added as a lambda after the locale parameter:
+The table configuration is added as a lambda after the locale parameter and uses the fluent iterface:
 
 [source,java]
 ----
@@ -135,42 +130,54 @@ YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", loc
 NOTE: Using the lambda ensures that the configuration code is run just once.
 
 All methods of the fluent interface have the "dt" prefix. This makes IDE suggestions
-more focused on the useful methods during autocompletion.
+more focused on the useful methods during autocompletion:
+
+[.center]
+.Method Autocompletion
+image::datatables.completion.jpg[Method Autocompletion]
 
 When a configuration option has many parameters, the corresponding
 method name has the "Obj" suffix because a new object is returned to provide the new
 configuration methods. 
 To "exit" from the current object, the `back()` method must be called.
 
-[.center]
-.Method Autocompletion
-image::datatables.completion.jpg[Method Autocompletion]
-
-The most basic table configuration requires the setting of the ajax endpoint
-for data retrieval and of the column definitions, i.e. name and data source.
-This is shown in the following example:
-
+=== Basic Configuration
+The most basic table configuration, that can be used to show data taken from an @Entity,
+only requires the entity class and fields:
+ 
 [source,java]
 ----
 @RequestMapping("/user")
 public String users(Model model) {
-	YadaDataTable basicTable = yadaDataTableFactory.getSingleton("basicTable", null, table -> {
+	YadaDataTable basicTable = yadaDataTableFactory.getSingleton("basicTable", table -> {
 		table
-			.dtAjaxUrl("/dashboard/user/userProfileTablePage")
+			.dtEntityClass(UserProfile.class) # <1>
 			.dtStructureObj()
-				.dtColumnObj("Email", "userCredentials.username").back()
-				.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin").back()
+				.dtColumnObj("Email", "userCredentials.username").back() # <2>
+				.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin").back() # <2>
 			.back();
 	});
 	model.addAttribute("basicTable", basicTable);
 	return "/dashboard/users";
 }
 ----
+<1> Provide the class of the entity that holds data
+<2> Provide the column names and the path of the properties that hold the value to show
 
 [.center]
 .Basic Usage
 image::datatables.basicuser.jpg[Basic Usage]
 
+TIP: the endpoint is implemented in `YadaController.yadaDataTableData()` 
+
+Data retrieval will be automatic and will have the same security restrictions of the page where
+the table is shown, which is "/dashboard/user" in the example.
+
+TIP: security is implemented in SecurityConfig if the application is secured 
+
+=== Advanced Configuration
+In more advanced scenarios the ajax endpoint returning data can be customized with `dtAjaxUrl()`.
+This is an alternative approach to `dtEntityClass()` and using both will result in error. 
 The argument of `dtAjaxUrl()` is the url for the ajax call that retrieves data
 from the backend. It can contain any Thymeleaf expression and will be included
 in a standard URL expression like `@{/myUrl}` when not already provided.
@@ -188,6 +195,30 @@ like https://datatables.net/reference/option/retrieve[retrieve,window=_blank].
 
 TIP: anything that can't be done in Java can be done in javascript using pre- and post- processors.
 
+== Java Ajax Endpoint
+The Yada Framework implementation of DataTables assumes that data is fetched via ajax from the server,
+therefore the https://datatables.net/reference/option/ajax[ajax option,window=_blank] is forced to be active.
+
+The ajax endpoint is set via `.dtAjaxUrl()` on the YadaDataTable object as explained before. The
+@Controller should query the database, performing searching and sorting, and return a JSON
+file with the resulting data for the current page.
+
+When the table shows data from @Entity objects, most of that code is already provided.
+
+[source,java]
+----
+@RequestMapping(value ="/user/userProfileTablePage", produces = MediaType.APPLICATION_JSON_VALUE)
+@ResponseBody public Map<String, Object> userProfileTablePage(YadaDatatablesRequest yadaDatatablesRequest, Locale locale) { # <1>
+	Map<String, Object> result = yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale);	# <2>
+	return result;	# <3>
+}
+----
+<1> YadaDatatablesRequest is initialized with the metadata sent by DataTables, like the current page number, the value paths and the search/sort options
+<2> yadaDataTableDao.getConvertedJsonPage() receives the request data and the @Entity class to perform all needed operations
+<3> The result is a "map tree" (i.e. nested maps) that is automatically converted to json
+
+Using a custom endpoint for table data allows to manipulate both the query and the result, for example
+by adding conditions or creating values not directly found on the entity: 
 
 
 
@@ -195,7 +226,7 @@ TIP: anything that can't be done in Java can be done in javascript using pre- an
 
 [.todo]
 ----
-ajax endpoint
+ajax endpoint with manipulation of query and result
 
 toolbar, command bar, select column 
 
@@ -206,6 +237,8 @@ full example
 reference
 
 pre- and post- processors
+
+i18n is automatic by using keys instead of words
 
 ----
 

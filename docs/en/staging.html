@@ -459,6 +459,20 @@ that Spring can handle them as expected
 </tr>
 </table>
 </div>
+<div class="paragraph">
+<p>A very quick way to respond to a request with some HTTP error code (e.g. 404 "NOT FOUND") is to
+throw a <code>RuntimeException</code> annotated with <code>@ResponseStatus</code>. For example <code>YadaHttpNotFoundException</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="Java" class="language-Java hljs">@ResponseStatus(value=HttpStatus.NOT_FOUND)  // 404
+public class YadaHttpNotFoundException extends RuntimeException {
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>TODO: implement other HTTP error exceptions</p>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -557,7 +571,7 @@ Example:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-18 15:35:14 +0200
+Last updated 2024-12-17 09:48:30 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

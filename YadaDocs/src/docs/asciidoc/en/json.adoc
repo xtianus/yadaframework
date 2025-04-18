@@ -60,11 +60,41 @@ The outcome of the previous example would be:
 
 == Download json
 
-Soon in this section:
+When the frontend makes an ajax call and expects a json result, the above
+approach could be used by returning a view that embeds the java object
+automatically converted to json by Thymeleaf:
 
-- creating a json response with @ResponseBody public Map<String, Object>
-- creating a json response with <th:block th:inline="text">
+[.todo]
+----
+Creating a json response with <th:block th:inline="text">
+----
+
+A quicker approach is to
+return the json directly using `@ResponseBody` and `MediaType.APPLICATION_JSON_VALUE`:
+any resulting `Map<String, Object>` would be converted to a json object where
+map keys are the json attributes:
+
+[source,java]
+----
+@RequestMapping(value ="/somedata", produces = MediaType.APPLICATION_JSON_VALUE)
+@ResponseBody public Map<String, Object> getSomeData() {
+	Map<String, Object> data = new HashMap<>();
+	data.put("name1", "value1");
+	data.put("name2", "value2");
+	return result;
+}
+----
+
+The value of the Map can itself be a Map in order to create nested objects.
+
+
+[.todo]
+----
+
 - creating a json object with yadaUtil.makeJsonObject()
+- returning all the Model?
+
+----
 
 == Upload json
 

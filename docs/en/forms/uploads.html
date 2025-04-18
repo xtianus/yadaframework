@@ -398,16 +398,16 @@ Use YadaAttachedFile to easily handle file attachments:</p>
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Entity
 public class Product {
-    @OneToOne(cascade=CascadeType.PERSIST)
+    @OneToOne
     protected YadaAttachedFile icon;
 
-    @OneToOne(cascade=CascadeType.PERSIST)
+    @OneToOne
     protected YadaAttachedFile specSheet;</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>After doing this you can make use of the functionality of YadaFileManager explained below.
-You shouldn&#8217;t use any <code>cascade</code> different from PERSIST or <code>orphanRemoval</code> annotations:</p>
+You shouldn&#8217;t use any <code>cascade</code> type or <code>orphanRemoval</code> annotations:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -418,9 +418,34 @@ You shouldn&#8217;t use any <code>cascade</code> different from PERSIST or <code
 <p>cascade <code>REMOVE</code> or <code>orphanRemoval=true</code> wouldn&#8217;t delete the file on disk</p>
 </li>
 <li>
-<p>cascade <code>PERSIST</code> is needed when cloning the parent object (<code>Product</code> in the example above)</p>
+<p>cascade <code>PERSIST</code> would generate a "detached entity passed to persist" exception when the YadaAttachedFile
+is first loaded with YadaFileManager (see later) then added to an Entity (<code>Product</code>) that is later persisted.
+The cascade <code>PERSIST</code> would be useful though when cloning the parent Entity (<code>Product</code>) with <code>YadaUtil.copyEntity()</code>
+because, in that case, saving the clone would also save all its YadaAttachedFile attributes.</p>
 </li>
 </ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you intend to clone your Entity at some point, you can choose to use cascade <code>PERSIST</code> to save the clone in
+one go but in all other use cases, when creating an Entity instance after a file upload, you will have to merge
+the YadaAttachedFile attributes before the persist operation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">product.setIcon(em.merge(product.getIcon()));
+em.persist(product);</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>The YadaAttachedFile class stores some file-related information that you might want to keep:</p>
@@ -640,6 +665,18 @@ yadaFileManager.duplicateFiles(clone.getIcon());</code></pre>
 </div>
 <div class="paragraph">
 <p>This is <strong>not needed</strong> if the copy is done with <code>YadaUtil.copyEntity()</code> because the file on disk is also copied automatically.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+if the YadaAttachedFile attributes of the Entity don&#8217;t have a cascade <code>PERSIST</code>, each such attribute of the clone will have to be persisted individually
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect3">
@@ -1048,7 +1085,7 @@ This always happens in the following cases:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 19:40:44 +0200
+Last updated 2025-03-11 11:49:41 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

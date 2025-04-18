@@ -218,20 +218,40 @@ model.addAttribute("myObject", product);</code></pre>
 <h2 id="_download_json">Download json</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Soon in this section:</p>
+<p>When the frontend makes an ajax call and expects a json result, the above
+approach could be used by returning a view that embeds the java object
+automatically converted to json by Thymeleaf:</p>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p>creating a json response with @ResponseBody public Map&lt;String, Object&gt;</p>
-</li>
-<li>
-<p>creating a json response with &lt;th:block th:inline="text"&gt;</p>
-</li>
-<li>
-<p>creating a json object with yadaUtil.makeJsonObject()</p>
-</li>
-</ul>
+<div class="listingblock todo">
+<div class="content">
+<pre>Creating a json response with &lt;th:block th:inline="text"&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A quicker approach is to
+return the json directly using <code>@ResponseBody</code> and <code>MediaType.APPLICATION_JSON_VALUE</code>:
+any resulting <code>Map&lt;String, Object&gt;</code> would be converted to a json object where
+map keys are the json attributes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping(value ="/somedata", produces = MediaType.APPLICATION_JSON_VALUE)
+@ResponseBody public Map&lt;String, Object&gt; getSomeData() {
+	Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();
+	data.put("name1", "value1");
+	data.put("name2", "value2");
+	return result;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The value of the Map can itself be a Map in order to create nested objects.</p>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>- creating a json object with yadaUtil.makeJsonObject()
+- returning all the Model?</pre>
+</div>
 </div>
 </div>
 </div>
@@ -263,7 +283,7 @@ model.addAttribute("myObject", product);</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-26 15:38:30 +0200
+Last updated 2024-11-20 18:46:13 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

@@ -201,6 +201,18 @@ the home page itself
 NOTE: The global exception handler does not process exceptions annotated with `@ResponseStatus` so
 that Spring can handle them as expected
 
+A very quick way to respond to a request with some HTTP error code (e.g. 404 "NOT FOUND") is to
+throw a `RuntimeException` annotated with `@ResponseStatus`. For example `YadaHttpNotFoundException`:
+
+[source,Java]
+----
+@ResponseStatus(value=HttpStatus.NOT_FOUND)  // 404
+public class YadaHttpNotFoundException extends RuntimeException {
+}
+----
+
+TODO: implement other HTTP error exceptions
+
 == Favicon
 [cols="1,1"]
 |===

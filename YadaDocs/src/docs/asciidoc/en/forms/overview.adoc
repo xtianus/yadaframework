@@ -136,7 +136,50 @@ It's always better to use a specific name for the @Entity id, like `bookId` and 
 
 Validation can be performed as usual, checking the values already stored in the entity bean, as long as it's done before saving.
 
+[WARNING] 
+.Validation errors not showing?
+==== 
+You can't replace the existing model attribute with a new one having the same name, else all
+validation errors will be lost.
+So be careful for example when doing em.merge(book) because you get a new book instance and
+by setting it in the model with the same name as before unlinks the BindingResult instance.
+One solution is to avoid using merge (e.g. read the needed data with a query and set it to the instance);
+another solution is to relink the binding result
+====
 
+=== Relink the Binding Result
+A common pattern for validation is to receive a backing bean on the Controller, reject the
+invalid fields using the associated BindingResult, then return the bean to show error
+messages on the page.
+This pattern breaks if the original backing bean is replaced with a new instance, for example
+because the page needs some data that wasn't sent with the form so a merge is performed on the bean.
+If the merge can't be avoided, a call to YadaWebUtil.relinkBindingResult() fixes the problem
+by adding to the Model a new BindingResult that is the copy of the original one (all validation
+errors are preserved) but associated to the new instance of the bean.
+So the relinkBindingResult() method should be called after the new bean instance has been fetched:
+if validation has already been performed, any error will be copied over; if validation has not
+yet been performed, the returned BindingResult should be used for validating fields on the new
+instance.
+
+Example:
+
+[source,java]
+----
+@RequestMapping("/editBook")
+public String editBook(Book book, BindingResult bindingResult, Model model) {
+    if (book.titleIsEmpty()) {
+	    // Reject the submission if title is empty
+    	bindingResult.rejectValue("title", "validation.value.empty");
+    	// We need to load the authors collection from DB because it is lazy
+    	book = bookDao.initializeAuthors(book); // New instance returned here
+    	// The Binding Result is reassigned to the new instance
+    	yadaWebUtil.relinkBindingResult(bindingResult, book, model);
+    	// Return the submitted form, that will correctly show validation errors
+    	model.addAttribute("book", book);
+    	return "/bookForm";
+	}
+	...
+----
 
 == Ajax Forms
 
@@ -216,6 +259,17 @@ return yadaNotify.title("Lorem", model).ok().message("Ipsum").add();
 
 return YadaViews.AJAX_CLOSE_MODAL;
 ----
+
+[WARNING] 
+.Validation errors not showing?
+==== 
+You can't replace the existing model attribute with a new one having the same name, else all
+validation errors will be lost.
+So be careful for example when doing em.merge(book) because you get a new book instance and
+by setting it in the model with the same name as before unlinks the BindingResult instance.
+One solution is to avoid using merge (e.g. read the needed data with a query and set it to the instance);
+another solution is to relink the binding result
+====
 
 ==  Form groups
 

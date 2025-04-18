@@ -827,7 +827,7 @@ yada:successHandler="alert(responseText), alert('hello'), link.reset()"</code></
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">function someHandler(responseText, responseHtml, link) {</code></pre>
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">function someHandler(responseText, responseHtml, domElement) {</code></pre>
 </div>
 </div>
 <div class="dlist">
@@ -840,17 +840,17 @@ yada:successHandler="alert(responseText), alert('hello'), link.reset()"</code></
 <dd>
 <p>the ajax response converted to jQuery html objects</p>
 </dd>
-<dt class="hdlist1">link</dt>
+<dt class="hdlist1">domElement</dt>
 <dd>
-<p>the original anchor object (DOM, not jQuery). Could also be a form or anything else, not just a "link".</p>
+<p>the original anchor/form object (DOM, not jQuery) that triggered the ajax call.</p>
 </dd>
 </dl>
 </div>
 <div class="paragraph">
-<p>The <code>link</code> argument is also the same as the current <code>this</code> context.</p>
+<p>The <code>domElement</code> argument is also the same as the current <code>this</code> context.</p>
 </div>
 <div class="paragraph">
-<p>When using function bodies, the above three arguments are valid objects.</p>
+<p>When using function bodies, the above three arguments are valid objects and can be used.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -1573,7 +1573,7 @@ public String addUser(MultipartFile someBinaryArray, String someText, Model mode
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">successHandler(responseText, $responseHtml)</code></pre>
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">successHandler(responseText, $responseHtml, domElement)</code></pre>
 </div>
 </div>
 <div class="dlist">
@@ -1603,6 +1603,26 @@ public String addUser(MultipartFile someBinaryArray, String someText, Model mode
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.ajax(urlShowBom, formData, insertBom.bind(this), "POST");</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+you can&#8217;t use <code>bind</code> in the function specified with <code>yada:successHandler</code> where the context is always the triggering DOM element
+</td>
+</tr>
+</table>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">domElement</dt>
+<dd>
+<p>the dom element that triggered the ajax call, it is also the current context (<code>this</code>).</p>
+</dd>
+</dl>
 </div>
 </div>
 <div class="sect2">
@@ -1720,7 +1740,7 @@ when they return from ajax. Example: <code>&lt;div th:classappend="${yadaIsAjaxR
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-16 13:31:56 +0200
+Last updated 2025-01-26 19:23:48 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
