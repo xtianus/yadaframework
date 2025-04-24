@@ -1,0 +1,41 @@
+<!-- Initialize localized messages for error handling and confirmations.
+	 This file is needed to replace the default javascript messages (always in english) with properly localized ones.
+	 Can be included before or after yada.js regardless.
+	 Example: <th:block th:insert="~{/yada/messagesProperties :: messagesProperties}"></th:block> -->
+
+<script th:fragment="messagesProperties" th:inline="javascript">
+/*<![CDATA[*/
+
+window.yada = window.yada || {};
+yada.messages = yada.messages || {};
+
+yada.messages.connectionError = {
+	title:   "[[#{yadajs.connection.error.title}]]",
+	message: "[[#{yadajs.connection.error.message}]]"
+};
+yada.messages.forbiddenError = {
+	title:   "[[#{yadajs.forbidden.error.title}]]",
+	message: "[[#{yadajs.forbidden.error.message}]]"
+};
+yada.messages.notfoundError = {
+	title:   "[[#{yadajs.notfound.error.title}]]",
+	message: "[[#{yadajs.notfound.error.message}]]"
+};
+yada.messages.serverError = {
+	title:   "[[#{yadajs.server.error.title}]]",
+	message: "[[#{yadajs.server.error.message}]]"
+};
+yada.messages.confirmButtons = {
+	ok:     "[[#{yadajs.confirm.ok}]]",
+	cancel: "[[#{yadajs.confirm.cancel}]]"
+};
+yada.messages.singleFileOnly = {
+	title: "[[#{yadajs.singleFileOnly.error.title}]]",
+	message: "[[#{yadajs.singleFileOnly.error.message}]]"
+};
+yada.messages.uploadAccept = {
+	title: "[[#{yadajs.uploadAccept.error.title}]]",
+	message: "[[#{yadajs.uploadAccept.error.message}]]"
+};
+/*]]>*/
+</script>

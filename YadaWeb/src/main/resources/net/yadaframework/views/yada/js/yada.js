@@ -14,28 +14,38 @@
 	yada.baseUrl = null;	// Set it via thymeleaf
 	yada.resourceDir = null; // Set it via thymeleaf
 	var loaderStart = 0;
-	yada.messages = {};
-	yada.messages.connectionError = { // Set it via thymeleaf
+	
+	// Localized messages can be set by including /yada/messagesProperties.html in the page
+	yada.messages = yada.messages || {};
+	yada.messages.connectionError = yada.messages.connectionError || { // Set it via thymeleaf
 		"title": "Connection Error",
 		"message": "Failed to contact server - please try again later"
 	}; 
-	yada.messages.forbiddenError = { // Set it via thymeleaf
+	yada.messages.forbiddenError = yada.messages.forbiddenError || { // Set it via thymeleaf
 			"title": "Authorization Error",
 			"message": "You don't have permission to access the requested page"
 	}; 
-	yada.messages.notfoundError = { // Set it via thymeleaf
+	yada.messages.notfoundError = yada.messages.notfoundError || { // Set it via thymeleaf
 			"title": "Not Found",
 			"message": "The page you requested was not found on the server"
 	}; 
-	yada.messages.serverError = { // Set it via thymeleaf
+	yada.messages.serverError = yada.messages.serverError || { // Set it via thymeleaf
 			"title": "Server Error",
 			"message": "Something is wrong - please try again later"
 	}; 
-	yada.messages.confirmButtons = { // Set it via thymeleaf
+	yada.messages.confirmButtons = yada.messages.confirmButtons || { // Set it via thymeleaf
 			"ok": "Ok",
 			"cancel": "Cancel"
 	}; 
-	
+	yada.messages.singleFileOnly = yada.messages.singleFileOnly || { // Set it via thymeleaf
+			"title": "File Upload Error",
+			"message": "Only one file can be uploaded at a time"
+	}; 
+	yada.messages.uploadAccept = yada.messages.uploadAccept || { // Set it via thymeleaf
+			"title": "File Upload Error",
+			"message": "Invalid file type"
+	}; 
+
 	var siteMatcher=RegExp("(?:http.?://)?([^/:]*).*"); // Extract the server name from a url like "http://www.aaa.com/xxx" or "www.aaa.com"
 	
 	const findSelector = "yadaFind:"; // Used to indicate that a CSS selector should be searched in the children using find()

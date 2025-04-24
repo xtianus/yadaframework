@@ -452,21 +452,21 @@
 	
 	
 	function handleDragenterDragover(event) {
-        this.classList.add('yadaDragOver');
-        event.preventDefault();
-        event.stopPropagation();
+		this.classList.add('yadaDragOver');
+		event.preventDefault();
+		event.stopPropagation();
 	}
 	
 	function handleDragleaveDragend(event) {
-        this.classList.remove('yadaDragOver');
-        event.preventDefault();
-        event.stopPropagation();
+		this.classList.remove('yadaDragOver');
+		event.preventDefault();
+		event.stopPropagation();
 	}
 
 	function handleDrop($dropTarget, handler, event) {
-        let files = event.originalEvent.dataTransfer.files;
-        if (files) {
-	        handleDroppedFiles(event, files, $dropTarget, handler);
+		let files = event.originalEvent.dataTransfer.files;
+		if (files) {
+			handleDroppedFiles(event, files, $dropTarget, handler);
 		}
 	}
 	
@@ -493,24 +493,43 @@
 			const url = $dropTarget.data('yadadropupload');
 			if (url!=null) {
 				handleDropProxy = jQuery.proxy(handleDrop, null, $dropTarget, handler);
-			    $dropTarget.on('dragenter dragover', handleDragenterDragover);
-			    $dropTarget.on('dragleave dragend drop', handleDragleaveDragend); // Is "drop" needed here?
-			    $dropTarget.on('drop', handleDropProxy);
+				$dropTarget.on('dragenter dragover', handleDragenterDragover);
+				$dropTarget.on('dragleave dragend drop', handleDragleaveDragend); // Is "drop" needed here?
+				$dropTarget.on('drop', handleDropProxy);
 			}
 		});
 	}
 	
 	function handleDroppedFiles(event, files, $dropTarget, handler) {
-    	const singleFileOnly = $dropTarget.attr("data-yadaSingleFileOnly"); // Title,message
-    	if (singleFileOnly!=null && files.length>1) {
-			if (singleFileOnly=="") {
-				singleFileOnly = "File Upload Error,Too many files";
+		const singleFileOnly = $dropTarget.attr("data-yadaSingleFileOnly");
+		if (singleFileOnly!=null && files.length>1) {
+			yada.showErrorModal(yada.messages.singleFileOnly.title, yada.messages.singleFileOnly.message);
+			return;
+		}
+		// Enforce accept filter if provided
+		const accept = $dropTarget.attr("data-yadaDropUploadAccept");
+		if (accept!=null && accept!="") {
+			const patterns = accept.split(/\s*,\s*/);
+			for (let file of files) {
+				const name = file.name.toLowerCase();
+				const type = (file.type||"").toLowerCase();
+				const valid = patterns.some(pattern => {
+					pattern = pattern.trim().toLowerCase();
+					if (pattern.startsWith(".")) {
+						return name.endsWith(pattern);
+					} else if (pattern.endsWith("/*")) {
+						return type.startsWith(pattern.slice(0, -1));
+					} else {
+						return type===pattern;
+					}
+				});
+				if (!valid) {
+					yada.showErrorModal(yada.messages.uploadAccept.title, yada.messages.uploadAccept.message);
+					return;
+				}
 			}
-			const parts = singleFileOnly.split(',', 2);
-    		yada.showErrorModal(parts[0], parts[1]);
-    		return;
-    	}
-        return makeAjaxCall(event, $dropTarget, handler);
+		}
+		return makeAjaxCall(event, $dropTarget, handler);
 	}
 
 	/**
@@ -520,10 +539,10 @@
 		$(`[data-yadaDropUpload].${markerDropTarget}`, $element).each(function() {
 			const $dropTarget = $(this);
 			$dropTarget.removeClass(markerDropTarget);
-		    $dropTarget.off('dragenter dragover', null, handleDragenterDragover);
-		    $dropTarget.off('dragleave dragend drop', null, handleDragleaveDragend); // Is "drop" needed here?
-		    if (handleDropProxy!=null) {
-			    $dropTarget.off('drop', null, handleDropProxy);
+			$dropTarget.off('dragenter dragover', null, handleDragenterDragover);
+			$dropTarget.off('dragleave dragend drop', null, handleDragleaveDragend); // Is "drop" needed here?
+			if (handleDropProxy!=null) {
+				$dropTarget.off('drop', null, handleDropProxy);
 			}
 		});
 	}
@@ -683,12 +702,12 @@
 			// File drop events use a specific URL that has priority
 			url = $element.attr('data-yadaDropUpload');
 			// Compile the data object
-	        multipart = true;
-	        data = new FormData();
-	        for (let i = 0; i < droppedFiles.length; i++) {
-	            let file = droppedFiles[i];
-	            data.append('multipartFile', file);
-	        }
+			multipart = true;
+			data = new FormData();
+			for (let i = 0; i < droppedFiles.length; i++) {
+				let file = droppedFiles[i];
+				data.append('multipartFile', file);
+			}
 		}
 		if (url==null || url=='') {
 			url = $element.attr('data-yadaHref');
@@ -1037,8 +1056,8 @@
 		}
 		Object.keys(mergeFrom).forEach(function(name) {
   			const value = mergeFrom[name];
-	    	if (multipart) {
-		        data.set(name, value); // Add data with no duplicates, overwriting previous
+			if (multipart) {
+				data.set(name, value); // Add data with no duplicates, overwriting previous
 			} else {
 				// Add data with no duplicates, overwriting previous
 				const obj = {};
@@ -1072,14 +1091,14 @@
 					//	}
 					var iterator = eachFormdata.entries();
 					var iterElem = iterator.next();
-				    while ( ! iterElem.done ) {
-				    	var pair = iterElem.value;
-				    	// const newData = {};
-				    	// newData[pair[0]] = pair[1];
-				    	// data = mergeData(data, newData); // Add data with no duplicates, keeping first value
-				        data.set(pair[0], pair[1]); // Add data with no duplicates, overwriting previous
-				        iterElem = iterator.next();
-				    }
+					while ( ! iterElem.done ) {
+						var pair = iterElem.value;
+						// const newData = {};
+						// newData[pair[0]] = pair[1];
+						// data = mergeData(data, newData); // Add data with no duplicates, keeping first value
+						data.set(pair[0], pair[1]); // Add data with no duplicates, overwriting previous
+						iterElem = iterator.next();
+					}
 				} else {
 					// mergeData(data, $eachForm.serializeArray()); // Add data with no duplicates, keeping first value
 					$.extend(true, data, $eachForm.serializeArray()); // Add data with no duplicates, overwriting previous
@@ -1130,14 +1149,14 @@
 						var title = $button.attr("data-yadaTitle");
 						var okButton = $button.attr("data-yadaOkButton") || $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
 						var cancelButton = $button.attr("data-yadaCancelButton") || $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
-		    			yada.confirm(title, confirmText, function(result) {
-		    				if (result==true) {
-		    					$thisForm[0]['yadaConfirmed']=true;
-		    					$thisForm.submit();
-		    				}
-		    			}, okButton, cancelButton);
-		    			return false;
-		    		};
+						yada.confirm(title, confirmText, function(result) {
+							if (result==true) {
+								$thisForm[0]['yadaConfirmed']=true;
+								$thisForm.submit();
+							}
+						}, okButton, cancelButton);
+						return false;
+					};
 				});
 			}
 		});
@@ -1208,11 +1227,11 @@
 					//	}
 					var iterator = childFormData.entries();
 					var iterElem = iterator.next();
-				    while ( ! iterElem.done ) {
-				    	var pair = iterElem.value;
-				        data.append(pair[0], pair[1]);
-				        iterElem = iterator.next();
-				    }
+					while ( ! iterElem.done ) {
+						var pair = iterElem.value;
+						data.append(pair[0], pair[1]);
+						iterElem = iterator.next();
+					}
 				} else {
 					$.merge(data, $childForm.serializeArray());
 				}
@@ -1303,29 +1322,29 @@
 		}) // submit()
 		
 		// Set the confirm handlers on form buttons
-	    $form.not('.'+markerClass).find("button[type='submit']").each(function() {
-	    	var $button = $(this);
-	    	var confirmText = $button.attr("data-yadaConfirm") || $button.attr("data-confirm");
-	    	if (confirmText!=null && confirmText!="") {
-	    		var title = $button.attr("data-yadaTitle");
-	    		var okButton = $button.attr("data-yadaOkButton") || $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
-	    		var cancelButton = $button.attr("data-yadaCancelButton") || $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
-	    		$button.click(function() {
-	    			$button = $(this); // Needed otherwise $button could be stale (from a previous ajax replacement) 
-	    			yada.confirm(title, confirmText, function(result) {
-	    				if (result==true) {
-	    					$button.off("click");
-	    					$button.click();
-	    					// No $form.submit(); because of the button name that has to be preserved (see clickedButton above)
-	    					// TODO/BUG if the submit button contains an <input>, that value will not be included in $(form).serializeArray() and will not be sent
-	    					// This only happens when the form is sent with $button.click(): its value is sent correctly when no confirm dialog is used.
-	    					// The workaround is to set the value of <input> on the submit button itself using name= and value= attributes
-	    				}
-	    			}, okButton, cancelButton);
-	    			return false; // Stop form submission
-	    		});
-	    	}
-	    });
+		$form.not('.'+markerClass).find("button[type='submit']").each(function() {
+			var $button = $(this);
+			var confirmText = $button.attr("data-yadaConfirm") || $button.attr("data-confirm");
+			if (confirmText!=null && confirmText!="") {
+				var title = $button.attr("data-yadaTitle");
+				var okButton = $button.attr("data-yadaOkButton") || $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
+				var cancelButton = $button.attr("data-yadaCancelButton") || $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
+				$button.click(function() {
+					$button = $(this); // Needed otherwise $button could be stale (from a previous ajax replacement) 
+					yada.confirm(title, confirmText, function(result) {
+						if (result==true) {
+							$button.off("click");
+							$button.click();
+							// No $form.submit(); because of the button name that has to be preserved (see clickedButton above)
+							// TODO/BUG if the submit button contains an <input>, that value will not be included in $(form).serializeArray() and will not be sent
+							// This only happens when the form is sent with $button.click(): its value is sent correctly when no confirm dialog is used.
+							// The workaround is to set the value of <input> on the submit button itself using name= and value= attributes
+						}
+					}, okButton, cancelButton);
+					return false; // Stop form submission
+				});
+			}
+		});
 		$form.not('.'+markerClass).addClass(markerClass);
 	};
 	
@@ -1431,9 +1450,9 @@
 		// Show "element loader"
 		$elementLoaderContainers?.each(function() {
 			// The loader needs a non-static positioning
-		    if ($(this).css('position') === 'static') {
-		        $(this).css('position', 'relative');
-		    }
+			if ($(this).css('position') === 'static') {
+				$(this).css('position', 'relative');
+			}
 		});
 		$elementLoaderContainers?.append($(elementLoaderHtml));
 
@@ -1847,12 +1866,12 @@
 				$('#yada-confirm .modal').one('hidden.bs.modal', function (e) {
 					// $currentModals.modal('show');
 					$currentModals.each(function(index) {
-    					if (isRemoved($(this))) {
+						if (isRemoved($(this))) {
 							// The modal was removed with all the nested handlers, so I replace the
 							// content with the cloned one to restore the handlers.
 							$('.modal-content', this).replaceWith(clonedModalContentArray[index]);
-    					}
-    					$(this).modal('show');
+						}
+						$(this).modal('show');
 					});
 					$('#yada-confirm .modal').off('hidden.bs.modal'); // Useless?
 				});
@@ -1931,7 +1950,7 @@
 						if (ajaxCounter<1) {
 							yada.loaderOff();
 						}
-                    }
+					}
 				});
 				$('#yada-notification').modal('show');
 			}, 200);
