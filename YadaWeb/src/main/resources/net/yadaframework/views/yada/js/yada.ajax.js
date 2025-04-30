@@ -501,6 +501,10 @@
 	}
 	
 	function handleDroppedFiles(event, files, $dropTarget, handler) {
+		// Do nothing if no file has been dropped
+		if (files==null || files.length==0) {
+			return;
+		}
 		const singleFileOnly = $dropTarget.attr("data-yadaSingleFileOnly");
 		if (singleFileOnly!=null && files.length>1) {
 			yada.showErrorModal(yada.messages.singleFileOnly.title, yada.messages.singleFileOnly.message);
