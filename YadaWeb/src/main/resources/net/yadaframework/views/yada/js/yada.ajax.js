@@ -454,13 +454,15 @@
 	function handleDragenterDragover(event) {
 		this.classList.add('yadaDragOver');
 		event.preventDefault();
-		event.stopPropagation();
+		// Allow propagation to other handlers
+		// event.stopPropagation();
 	}
 	
 	function handleDragleaveDragend(event) {
 		this.classList.remove('yadaDragOver');
 		event.preventDefault();
-		event.stopPropagation();
+		// Allow propagation to other handlers
+		// event.stopPropagation();
 	}
 
 	function handleDrop($dropTarget, handler, event) {
