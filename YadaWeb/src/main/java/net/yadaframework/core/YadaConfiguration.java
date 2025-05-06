@@ -1654,4 +1654,16 @@ public abstract class YadaConfiguration {
 		return this.configuration.getInt("config/yada/jobScheduler/jobCacheSize", 500);
 	}
 
+	/**
+	 * There can be more than one "messages.properties" file for i18n, for example to split by concern e.g. "errors", "countries", etc.
+	 * @return
+	 */
+	public String[] getMessageSourceBasenames() {
+		String[] basenames = this.configuration.getStringArray("config/i18n/messageSource/basename");
+		if (basenames == null || basenames.length == 0) {
+			return new String[] {"messages"};
+		}
+		return basenames;
+	}
+
 }
