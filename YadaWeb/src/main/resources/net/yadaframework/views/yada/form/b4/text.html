@@ -47,8 +47,8 @@ Parameters:
 
 Example:
 
-<div th:replace="/yada/form/b4/text::field(fieldName='subject',maxlength=64,required=true,labelKey='form.label.subject')"></div>
-<div th:replace="/yada/form/b4/text::field(fieldName='id',type='hidden')"></div>
+<div th:replace="~{/yada/form/b4/text::body(fieldName='subject',maxlength=64,required=true,labelKey='form.label.subject')}"></div>
+<div th:replace="~{/yada/form/b4/text::body(fieldName='id',type='hidden')}"></div>
 
 
 */-->

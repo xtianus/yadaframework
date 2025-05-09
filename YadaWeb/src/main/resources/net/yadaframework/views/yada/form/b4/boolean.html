@@ -17,7 +17,7 @@ Parameters:
 - disabled = true for a disabled checkbox (optional)
 - toggle = css selector of an element to toggle (optional)
 
-Example: <div th:replace="/yada/form/b4/boolean::field(fieldName='useGold',label='Use Gold',help='Enable the use of gold to complete building')"></div>
+Example: <div th:replace="~{/yada/form/b4/boolean::body(fieldName='useGold',label='Use Gold',help='Enable the use of gold to complete building')}"></div>
 Note: you can't set a default value using thymeleaf, must do it in the controller.
 */-->
 <body th:remove="tag">
@@ -27,14 +27,14 @@ Note: you can't set a default value using thymeleaf, must do it in the controlle
 	<div class="checkbox">
 		<label th:if="${switch==null or switch!=true}" class="control-label" th:id="${inputId}+'label'">
 			<input type="checkbox" th:field="*{__${fieldName}__}" th:required="${required}" th:disabled="${disabled}" 
-				th:classappend="${hasError}? is-invalid"
+				th:classappend="${hasError}? is-invalid" value="true"
 				th:id="${inputId}" th:attr="aria-describedby=${inputId}+'label'"/>
 			<span th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Subscribe</span> 
 		</label>
 		<th:block th:if="${switch==true}">
 			<span>
 				<input type="checkbox" th:field="*{__${fieldName}__}" th:disabled="${disabled}" 
-					th:classappend="${hasError}? is-invalid"
+					th:classappend="${hasError}? is-invalid" value="true"
 					class="yadaSwitch yadaSwitch-round" th:id="${inputId}"/>
 				<label th:for="${inputId}"></label>
 			</span>
@@ -44,8 +44,8 @@ Note: you can't set a default value using thymeleaf, must do it in the controlle
 		</th:block>
 	
 		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
-			<a th:if="${help!=null}" class="yadaHelpButton" data-trigger="focus" data-container="body" 
-				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
+			<a th:if="${help!=null}" class="yadaHelpButton yadaNoLoader" data-trigger="focus" data-container="body" 
+				data-toggle="popover" data-placement="top" tabindex="-1"
 				data-html="true"
 				th:attr="data-content=${help}">
 				<i class="yadaIcon yadaIcon-help"></i>
