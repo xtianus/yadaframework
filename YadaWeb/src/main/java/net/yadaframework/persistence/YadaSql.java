@@ -914,7 +914,7 @@ public class YadaSql implements CloneableDeep {
 	}
 
 	/**
-	 * To be used before calling query() or nativeQuery()
+	 * To be used before calling query() or nativeQuery(). It is ok to set a parameter that is not used in the query.
 	 * @param name the parameter name, without the initial :
 	 * @param value the parameter value
 	 * @return

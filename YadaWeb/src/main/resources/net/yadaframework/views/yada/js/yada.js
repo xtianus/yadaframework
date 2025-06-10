@@ -1798,15 +1798,15 @@
 
 	/**
 	 * Copy text to clipboard, usually after a click on an element (icon)
-	 * @param elementId the id of the element that contains text to copy
+	 * @param extendedSelector the CSS selector eventually with a yada prefix
 	 * @param event the event that triggered the copy (usually a click event)
 	 * @param showFeedback whether to show a feedback message
 	 */
-	yada.copyToClipboard = function(elementId, event, showFeedback) {
+	yada.copyToClipboard = function(extendedSelector, event, showFeedback) {
 		event.stopPropagation(); // Stop event propagation to prevent collapse toggling and other unwanted behavior
-		const element = document.getElementById(elementId);
+		const element = yada.extendedSelect($(event.target), extendedSelector)[0];
 		if (!element) {
-			yada.log('Element with id ' + elementId + ' not found');
+			yada.log('Element with selector "' + extendedSelector + '" not found');
 			return;
 		}
 		const text = element.textContent;
@@ -1823,39 +1823,39 @@
 		} else {
 			copyUsingFallback();
 		}
+	}
 		
-		// Fallback approach using document.execCommand
-		function copyUsingFallback() {
-			try {
-				// Create a temporary textarea
-				const textArea = document.createElement('textarea');
-				textArea.value = text;
-				textArea.style.position = 'fixed';  // Avoid scrolling to bottom
-				textArea.style.top = '0';
-				textArea.style.left = '0';
-				textArea.style.width = '2em';
-				textArea.style.height = '2em';
-				textArea.style.padding = '0';
-				textArea.style.border = 'none';
-				textArea.style.outline = 'none';
-				textArea.style.boxShadow = 'none';
-				textArea.style.background = 'transparent';
-				
-				document.body.appendChild(textArea);
-				textArea.focus();
-				textArea.select();
-				
-				const successful = document.execCommand('copy'); // Deprecated but ok in this context (older browsers)
-				document.body.removeChild(textArea);
-				
-				if (successful && showFeedback) {
-					yada.showAjaxFeedback();
-				} else if (!successful) {
-					yada.log('Could not copy text using execCommand');
-				}
-			} catch (err) {
-				yada.log('Could not copy text using fallback method: ' + err);
+	// Fallback approach using document.execCommand
+	function copyUsingFallback() {
+		try {
+			// Create a temporary textarea
+			const textArea = document.createElement('textarea');
+			textArea.value = text;
+			textArea.style.position = 'fixed';  // Avoid scrolling to bottom
+			textArea.style.top = '0';
+			textArea.style.left = '0';
+			textArea.style.width = '2em';
+			textArea.style.height = '2em';
+			textArea.style.padding = '0';
+			textArea.style.border = 'none';
+			textArea.style.outline = 'none';
+			textArea.style.boxShadow = 'none';
+			textArea.style.background = 'transparent';
+			
+			document.body.appendChild(textArea);
+			textArea.focus();
+			textArea.select();
+			
+			const successful = document.execCommand('copy'); // Deprecated but ok in this context (older browsers)
+			document.body.removeChild(textArea);
+			
+			if (successful && showFeedback) {
+				yada.showAjaxFeedback();
+			} else if (!successful) {
+				yada.log('Could not copy text using execCommand');
 			}
+		} catch (err) {
+			yada.log('Could not copy text using fallback method: ' + err);
 		}
 	}
 		
