@@ -51,16 +51,16 @@ dependencies {
 	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
 	
 	api 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5:3.1.0.RELEASE',
-		'org.springframework.security:spring-security-config:5.+'
+		'org.springframework.security:spring-security-config:5.8.16'
 		
 
-    api 'org.springframework.security:spring-security-web:5.+',
-		'com.google.api-client:google-api-client-jackson2:2.+',
-		'com.google.api-client:google-api-client-gson:2.+'
+    api 'org.springframework.security:spring-security-web:5.8.16',
+		'com.google.api-client:google-api-client-jackson2:2.8.0',
+		'com.google.api-client:google-api-client-gson:2.8.0'
 		
 	implementation project(':YadaWeb')
-	compileOnly 'org.apache.tomcat:tomcat-servlet-api:8.5.83'
-	compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:8.5.+'
+	compileOnly 'org.apache.tomcat:tomcat-servlet-api:8.5.100'
+	compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:8.5.100'
 
     // testImplementation 'junit:junit:4.12'
 }

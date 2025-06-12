@@ -64,56 +64,58 @@ repositories {
 dependencies {
 	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
 
-	api 'org.apache.commons:commons-configuration2:2.+'
+	api 'org.apache.commons:commons-configuration2:2.12.0'
 	
 	// Fixes commons-text:1.9 CVE-2022-42889 caused by commons-configuration2:2.8.0
-	api 'org.apache.commons:commons-text:1.+'
+	api 'org.apache.commons:commons-text:1.13.1'
 	
-    compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:8.5.+'
+    compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:8.5.100'
 	// For embedded Tomcat ONLY - add these to your project
     // runtimeOnly 'org.apache.tomcat:tomcat-el-api:8.5.+'
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper-el:8.5.+'
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper:8.5.+'
     // For embedded mariadb
-	compileOnly('ch.vorburger.mariaDB4j:mariaDB4j:3.+') {
+	compileOnly('ch.vorburger.mariaDB4j:mariaDB4j:3.2.0') {
 		// mariaDB4j pulls the latest version of spring core but this is never a good thing.
         exclude group: 'org.springframework', module: 'spring-core'
     }	
 	// Needed by Commons Configuration
-    api 'commons-jxpath:commons-jxpath:1.+'
+    api 'commons-jxpath:commons-jxpath:1.4.0'
 	
-    api 'org.springframework:spring-webmvc:5.+',
-		'org.springframework:spring-context-support:5.+',
-		'org.springframework:spring-orm:5.+',
-		'org.springframework:spring-core:5.+',
+    api 'org.springframework:spring-webmvc:5.3.39',
+		'org.springframework:spring-context-support:5.3.39',
+		'org.springframework:spring-orm:5.3.39',
+		'org.springframework:spring-core:5.3.39',
 		// 'org.springframework.social:spring-social-facebook:2.0.3.RELEASE',
         'org.hibernate:hibernate-entitymanager:5.6.15.Final',
 		'org.hibernate:hibernate-validator:5.4.3.Final',
-		'org.thymeleaf:thymeleaf-spring5:3.+',
-		'com.mysql:mysql-connector-j:8.1.+',
-		'commons-collections:commons-collections:3.+',
-		'org.apache.tomcat:tomcat-servlet-api:8.5.+',
+		'org.thymeleaf:thymeleaf-spring5:3.1.3.RELEASE',
+		'com.mysql:mysql-connector-j:8.1.0',
+		'commons-collections:commons-collections:3.2.2',
+		'org.apache.tomcat:tomcat-servlet-api:8.5.100',
 		'commons-fileupload:commons-fileupload:1.5',
 		'org.apache.commons:commons-exec:1.3',
-		'com.sun.mail:javax.mail:1.+',
+		'com.sun.mail:javax.mail:1.6.2',
 		'com.google.guava:guava:31.1-jre',
-		'org.jsoup:jsoup:1.+',
-		'ch.qos.logback:logback-classic:1.3.+',
-		'com.fasterxml.jackson.core:jackson-databind:2.+',
+		'org.jsoup:jsoup:1.20.1',
+		'ch.qos.logback:logback-classic:1.5.18',
+		'com.fasterxml.jackson.core:jackson-databind:2.19.0',
 		'org.seleniumhq.selenium:selenium-java:4.13.0', // 4.13.0 is the last java 8 version
-		'com.drewnoakes:metadata-extractor:2.+',
-		'org.flywaydb:flyway-mysql:9.+', // 10 is compiled with jdk17
-		'commons-beanutils:commons-beanutils:1.9.+'
+		'com.drewnoakes:metadata-extractor:2.19.0',
+		'org.flywaydb:flyway-mysql:9.22.3', // 10 is compiled with jdk17
+		'commons-beanutils:commons-beanutils:1.11.0'
+		
+	implementation 'org.slf4j:slf4j-api:2.0.17'
 		
 	 // Connection pool for embedded Tomcat and programmatic datasource
-	api 'org.vibur:vibur-dbcp:25.+'
-	runtimeOnly 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.+'
+	api 'org.vibur:vibur-dbcp:25.0'
+	runtimeOnly 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.2'
 	
 	// Needed to run in Tomcat
 	// runtime 'commons-jxpath:commons-jxpath:1.3'
 
-	testImplementation 'junit:junit:4.+',
-	 	'org.springframework:spring-test:4.3.+'
+	testImplementation 'junit:junit:4.13.2',
+	 	'org.springframework:spring-test:5.3.39'
 	
 	// testRuntimeOnly 'commons-beanutils:commons-beanutils:1.9.+',
 	// 	'commons-jxpath:commons-jxpath:1.3'
