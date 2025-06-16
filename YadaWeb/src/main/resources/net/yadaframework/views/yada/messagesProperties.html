@@ -9,69 +9,72 @@
 
 window.yada = window.yada || {};
 yada.messages = yada.messages || {};
-let title, message;
 
-title = /*[[ ${@messageSource.getMessage('yadajs.connection.error.title', null, "", #locale)} ]]*/ null;
-message = /*[[ ${@messageSource.getMessage('yadajs.connection.error.message', null, "", #locale)} ]]*/ null;
-if (title!="" && message!="") {
-	yada.messages.connectionError = {
-		title:   title,
-		message: message
-	};
-}
-
-title = /*[[ ${@messageSource.getMessage('yadajs.forbidden.error.title', null, "", #locale)} ]]*/ null;
-message = /*[[ ${@messageSource.getMessage('yadajs.forbidden.error.message', null, "", #locale)} ]]*/ null;
-if (title!="" && message!="") {
-    yada.messages.forbiddenError = {
-        title:   title,
-        message: message
-    };
-}
-
-title = /*[[ ${@messageSource.getMessage('yadajs.notfound.error.title', null, "", #locale)} ]]*/ null;
-message = /*[[ ${@messageSource.getMessage('yadajs.notfound.error.message', null, "", #locale)} ]]*/ null;
-if (title!="" && message!="") {
-	yada.messages.notfoundError = {
-		title:   title,
-		message: message
-	};
-}
-
-title = /*[[ ${@messageSource.getMessage('yadajs.server.error.title', null, "", #locale)} ]]*/ null;
-message = /*[[ ${@messageSource.getMessage('yadajs.server.error.message', null, "", #locale)} ]]*/ null;
-if (title!="" && message!="") {
-	yada.messages.serverError = {
-		title:   title,
-		message: message
-	};
-}
-
-title = /*[[ ${@messageSource.getMessage('yadajs.confirm.ok', null, "", #locale)} ]]*/ null;
-message = /*[[ ${@messageSource.getMessage('yadajs.confirm.cancel', null, "", #locale)} ]]*/ null;
-if (title!="" && message!="") {
-	yada.messages.confirmButtons = {
-		ok:     title,
-		cancel: message
-	};
-}
-
-title = /*[[ ${@messageSource.getMessage('yadajs.singleFileOnly.error.title', null, "", #locale)} ]]*/ null;
-message = /*[[ ${@messageSource.getMessage('yadajs.singleFileOnly.error.message', null, "", #locale)} ]]*/ null;
-if (title!="" && message!="") {
-	yada.messages.singleFileOnly = {
-		title:   title,
-		message: message
-	};
-}
-
-title = /*[[ ${@messageSource.getMessage('yadajs.uploadAccept.error.title', null, "", #locale)} ]]*/ null;
-message = /*[[ ${@messageSource.getMessage('yadajs.uploadAccept.error.message', null, "", #locale)} ]]*/ null;
-if (title!="" && message!="") {
-	yada.messages.uploadAccept = {
-		title:   title,
-		message: message
-	};
+{
+	let title, message;
+	
+	title = /*[[ ${@messageSource.getMessage('yadajs.connection.error.title', null, "", #locale)} ]]*/ null;
+	message = /*[[ ${@messageSource.getMessage('yadajs.connection.error.message', null, "", #locale)} ]]*/ null;
+	if (title!="" && message!="") {
+		yada.messages.connectionError = {
+			title:   title,
+			message: message
+		};
+	}
+	
+	title = /*[[ ${@messageSource.getMessage('yadajs.forbidden.error.title', null, "", #locale)} ]]*/ null;
+	message = /*[[ ${@messageSource.getMessage('yadajs.forbidden.error.message', null, "", #locale)} ]]*/ null;
+	if (title!="" && message!="") {
+	    yada.messages.forbiddenError = {
+	        title:   title,
+	        message: message
+	    };
+	}
+	
+	title = /*[[ ${@messageSource.getMessage('yadajs.notfound.error.title', null, "", #locale)} ]]*/ null;
+	message = /*[[ ${@messageSource.getMessage('yadajs.notfound.error.message', null, "", #locale)} ]]*/ null;
+	if (title!="" && message!="") {
+		yada.messages.notfoundError = {
+			title:   title,
+			message: message
+		};
+	}
+	
+	title = /*[[ ${@messageSource.getMessage('yadajs.server.error.title', null, "", #locale)} ]]*/ null;
+	message = /*[[ ${@messageSource.getMessage('yadajs.server.error.message', null, "", #locale)} ]]*/ null;
+	if (title!="" && message!="") {
+		yada.messages.serverError = {
+			title:   title,
+			message: message
+		};
+	}
+	
+	title = /*[[ ${@messageSource.getMessage('yadajs.confirm.ok', null, "", #locale)} ]]*/ null;
+	message = /*[[ ${@messageSource.getMessage('yadajs.confirm.cancel', null, "", #locale)} ]]*/ null;
+	if (title!="" && message!="") {
+		yada.messages.confirmButtons = {
+			ok:     title,
+			cancel: message
+		};
+	}
+	
+	title = /*[[ ${@messageSource.getMessage('yadajs.singleFileOnly.error.title', null, "", #locale)} ]]*/ null;
+	message = /*[[ ${@messageSource.getMessage('yadajs.singleFileOnly.error.message', null, "", #locale)} ]]*/ null;
+	if (title!="" && message!="") {
+		yada.messages.singleFileOnly = {
+			title:   title,
+			message: message
+		};
+	}
+	
+	title = /*[[ ${@messageSource.getMessage('yadajs.uploadAccept.error.title', null, "", #locale)} ]]*/ null;
+	message = /*[[ ${@messageSource.getMessage('yadajs.uploadAccept.error.message', null, "", #locale)} ]]*/ null;
+	if (title!="" && message!="") {
+		yada.messages.uploadAccept = {
+			title:   title,
+			message: message
+		};
+	}
 }
 /*]]>*/
 </script>
