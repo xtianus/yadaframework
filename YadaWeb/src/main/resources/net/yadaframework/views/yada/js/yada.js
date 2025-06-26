@@ -80,9 +80,11 @@
 		yada.enableHashing($element);
 	}
 	
-	yada.loaderOn = function() {
-		loaderStart = Date.now();
-		$(".loader").show();
+	yada.loaderOn = function(e) {
+		if (e.target.tagName !== "A" || e.target.target !== "_new") {
+			loaderStart = Date.now();
+			$(".loader").show();
+		}
 	};
 	
 	yada.loaderOff = function() {
