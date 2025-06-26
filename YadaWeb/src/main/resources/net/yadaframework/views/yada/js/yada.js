@@ -81,7 +81,7 @@
 	}
 	
 	yada.loaderOn = function(e) {
-		if (e.target.tagName !== "A" || e.target.target !== "_new") {
+		if (e==null || e.target==null || e.target.tagName !== "A" || e.target.target !== "_new") {
 			loaderStart = Date.now();
 			$(".loader").show();
 		}
