@@ -703,16 +703,21 @@
 		var multipart = false;
 		var method = null; // Defaults to GET
 		var url = null;
+		var paramName = 'multipartFile';
 		const droppedFiles = e?.originalEvent?.dataTransfer?.files;
 		if (droppedFiles) {
 			// File drop events use a specific URL that has priority
 			url = $element.attr('data-yadaDropUpload');
+			const paramNameAttr = $element.attr('data-yadaDropUploadParamName');
+			if (paramNameAttr!=null && paramNameAttr!="") {
+                paramName = paramNameAttr; // Use the specified parameter name
+			}
 			// Compile the data object
 			multipart = true;
 			data = new FormData();
 			for (let i = 0; i < droppedFiles.length; i++) {
 				let file = droppedFiles[i];
-				data.append('multipartFile', file);
+				data.append(paramName, file);
 			}
 		}
 		if (url==null || url=='') {
