@@ -91,6 +91,26 @@ This also applies to scheduled tasks that must run at a specific time of day if 
 TO BE CONTINUED...
 ----
 
+==  General language configuration
+The application becomes multilanguage by means of the `<i18n>` configuration section. In its simplest version,
+it only lists the available languages:
+
+[source,xml]
+----
+<i18n>
+	<locale>en</locale>
+	<locale>ar</locale>
+	<locale>de</locale>
+	<locale>fr</locale>
+</i18n>
+----
+
+The above configuration should be placed in a file like `conf.webapp.prod.xml` (were 'prod' is the environment code for "production").
+
+A `messages.properties` file must contain all the translations for what is considered the default language, because there
+is where the value is searched when a language-specific key is not found elsewhere. All other translations should be
+placed in a specific file as explained <<statici18ntext,later>>.
+
 ==  Initial language choice
 When a user loads the site for the first time, the initial language will be chosen from the
 `accept-language` header sent by the browser. This is implemented in Spring's `CookieLocaleResolver`
@@ -144,22 +164,19 @@ The "language in the path" functionality is implemented in YadaLocalePathVariabl
 
 ===  Application configuration
 
-Edit the conf.webapp.prod.xml configuration file (were 'prod' is the environment code for "production") adding a section
-like the following:
+Language in the path is enabled with the "localePathVariable" attribute:
 
 [source,xml]
 ----
 <i18n localePathVariable="true">
-      <locale>it</locale>
       <locale default="true">en</locale>
+      <locale>it</locale>
       <locale>de</locale>
       <locale>es</locale>
       <locale>fr</locale>
       <locale>ru</locale>
 </i18n>
 ----
-
-Note the use of the "default" attribute, that selects the default language as explained later.
 
 Other than just the language, you can use a full locale code though this is rarely needed:
 
@@ -192,13 +209,7 @@ use just the language code in the url but receive a full Locale in the java @Con
 
 
 ==  Using "language in the path"
-
-
-
 ===  Java
-
-
-
 ====  Language on redirect
 
 
@@ -305,6 +316,7 @@ Check that this stil works and what it does. I think YadaWebUtil.enhanceUrl() do
 
 
 
+[[statici18ntext]]
 ===  Static text
 
 
@@ -356,6 +368,55 @@ In particular:
 In production, files are reloaded every 600 seconds (10 minutes) to pick up changes.
 
 TIP: The Message Source configuration is implemented in YadaAppConfig.messageSource()
+
+When the application grows, it may be convenient to split the message.properties files into more manageable units. For example,
+a `countries.properties` fileset might contain the translations for all the country names of the world. Any number of such units
+can be configured with the `<basename>` tag:
+
+[source,xml]
+----
+<i18n localePathVariable="true">
+	<messageSource>
+		<basename>messages</basename>
+		<basename>countries</basename>
+		<basename>somethingelse</basename>
+	</messageSource>
+	<locale default="true">en</locale>
+	<locale>it</locale>
+----
+
+The properties files would be:
+
+[source,properties]
+----
+messages.properties
+messages_it.properties
+countries.properties
+countries_it.properties
+somethingelse.properties
+somethingelse_it.properties
+----
+
+==== Yada static text
+The Yada Framework javascript may show the user some error messages, in english by default.
+In order to localize these messages, each page should include the `/yada/messagesProperties.html` file anywhere with
+something like 
+
+[source,html]
+----
+<th:block th:insert="~{/yada/messagesProperties :: messagesProperties}"></th:block>
+----
+
+The proper keys must be added to the message.properties files of course. The name of such keys can be
+found in the `/yada/messagesProperties.html` file. Esample:
+
+[source,properties]
+----
+yadajs.connection.error.title = Errore di connessione 
+yadajs.connection.error.message = Impossibile connettersi al server
+yadajs.forbidden.error.title = Errore di sicurezza
+yadajs.forbidden.error.message = La risorsa richiesta è vietata
+----
 
 ====  Usage with Thymeleaf
 

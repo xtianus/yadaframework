@@ -128,6 +128,7 @@ window.onscroll = function() {
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
+<li><a href="#_copy_to_clipboard">Copy to clipboard</a></li>
 <li><a href="#_lazy_initialization_of_class_attributes">Lazy Initialization of class attributes</a></li>
 <li><a href="#_lookup_tables">Lookup Tables</a></li>
 <li><a href="#_error_handling">Error Handling</a></li>
@@ -141,6 +142,59 @@ window.onscroll = function() {
 <div class="sectionbody">
 <div class="paragraph">
 <p>Documentation bits waiting to be moved to the proper section</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_copy_to_clipboard">Copy to clipboard</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Scope</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HTML page</p></td>
+</tr>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Language</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Javascript</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The <code>yada.copyToClipboard(extendedSelector, event, showFeedback)</code> method copies the content of some page element to the clipboard.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">extendedSelector</dt>
+<dd>
+<p>the CSS selector eventually with a yada prefix</p>
+</dd>
+<dt class="hdlist1">event</dt>
+<dd>
+<p>the event that triggered the copy (usually a click event). Propagation of this event will be stopped.
+The event is also used to properly convert any yada prefix on the CSS selector</p>
+</dd>
+<dt class="hdlist1">showFeedback</dt>
+<dd>
+<p>whether to show a <a href="ajax.html#_ajax_feedback">feedback message</a></p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>The following example is a "clone" icon that copies the content of an element with a specific id:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="HTML" class="language-HTML hljs">&lt;a href="javascript:void(0);"
+	th:onclick="|yada.copyToClipboard('#pub-${publication.id}', event, true)|"
+	title="Copy to clipboard"&gt;
+	&lt;i class="fa fa-clone" aria-hidden="true"&gt;&lt;/i&gt;
+&lt;/a&gt;</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -571,7 +625,7 @@ Example:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-12-17 09:48:30 +0100
+Last updated 2025-07-29 17:43:23 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

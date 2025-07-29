@@ -138,6 +138,7 @@ window.onscroll = function() {
 <li><a href="#_enum_values">Enum values</a></li>
 </ul>
 </li>
+<li><a href="#_general_language_configuration">General language configuration</a></li>
 <li><a href="#_initial_language_choice">Initial language choice</a></li>
 <li><a href="#_configuring_language_in_the_path">Configuring "language in the path"</a>
 <ul class="sectlevel2">
@@ -155,7 +156,7 @@ window.onscroll = function() {
 <li><a href="#_configuring_language_request_parameter">Configuring "language request parameter"</a></li>
 <li><a href="#_coding_with_i18n_text">Coding with i18n text</a>
 <ul class="sectlevel2">
-<li><a href="#_static_text">Static text</a></li>
+<li><a href="#statici18ntext">Static text</a></li>
 <li><a href="#_emails">Emails</a></li>
 <li><a href="#_database_fields">Database fields</a></li>
 </ul>
@@ -343,6 +344,33 @@ This also applies to scheduled tasks that must run at a specific time of day if 
 </div>
 </div>
 <div class="sect1">
+<h2 id="_general_language_configuration">General language configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The application becomes multilanguage by means of the <code>&lt;i18n&gt;</code> configuration section. In its simplest version,
+it only lists the available languages:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;i18n&gt;
+	&lt;locale&gt;en&lt;/locale&gt;
+	&lt;locale&gt;ar&lt;/locale&gt;
+	&lt;locale&gt;de&lt;/locale&gt;
+	&lt;locale&gt;fr&lt;/locale&gt;
+&lt;/i18n&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above configuration should be placed in a file like <code>conf.webapp.prod.xml</code> (were 'prod' is the environment code for "production").</p>
+</div>
+<div class="paragraph">
+<p>A <code>messages.properties</code> file must contain all the translations for what is considered the default language, because there
+is where the value is searched when a language-specific key is not found elsewhere. All other translations should be
+placed in a specific file as explained <a href="#statici18ntext">later</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_initial_language_choice">Initial language choice</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -415,23 +443,19 @@ already done in <code>net.yadaframework.security.SecurityWebApplicationInitializ
 <div class="sect2">
 <h3 id="_application_configuration">Application configuration</h3>
 <div class="paragraph">
-<p>Edit the conf.webapp.prod.xml configuration file (were 'prod' is the environment code for "production") adding a section
-like the following:</p>
+<p>Language in the path is enabled with the "localePathVariable" attribute:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;i18n localePathVariable="true"&gt;
-      &lt;locale&gt;it&lt;/locale&gt;
       &lt;locale default="true"&gt;en&lt;/locale&gt;
+      &lt;locale&gt;it&lt;/locale&gt;
       &lt;locale&gt;de&lt;/locale&gt;
       &lt;locale&gt;es&lt;/locale&gt;
       &lt;locale&gt;fr&lt;/locale&gt;
       &lt;locale&gt;ru&lt;/locale&gt;
 &lt;/i18n&gt;</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>Note the use of the "default" attribute, that selects the default language as explained later.</p>
 </div>
 <div class="paragraph">
 <p>Other than just the language, you can use a full locale code though this is rarely needed:</p>
@@ -590,7 +614,7 @@ The application configuration is the same but you need to set localePathVariable
 <h2 id="_coding_with_i18n_text">Coding with i18n text</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_static_text">Static text</h3>
+<h3 id="statici18ntext">Static text</h3>
 <div class="paragraph">
 <p>To implement localized static text just use the standard <a href="https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/core.html#context-functionality-messagesource">Spring "MessageSource"</a> concept: store all text in different
 <code>message.properties</code> files, indexed by a key.</p>
@@ -680,6 +704,61 @@ The Message Source configuration is implemented in YadaAppConfig.messageSource()
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>When the application grows, it may be convenient to split the message.properties files into more manageable units. For example,
+a <code>countries.properties</code> fileset might contain the translations for all the country names of the world. Any number of such units
+can be configured with the <code>&lt;basename&gt;</code> tag:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;i18n localePathVariable="true"&gt;
+	&lt;messageSource&gt;
+		&lt;basename&gt;messages&lt;/basename&gt;
+		&lt;basename&gt;countries&lt;/basename&gt;
+		&lt;basename&gt;somethingelse&lt;/basename&gt;
+	&lt;/messageSource&gt;
+	&lt;locale default="true"&gt;en&lt;/locale&gt;
+	&lt;locale&gt;it&lt;/locale&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The properties files would be:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">messages.properties
+messages_it.properties
+countries.properties
+countries_it.properties
+somethingelse.properties
+somethingelse_it.properties</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_yada_static_text">Yada static text</h4>
+<div class="paragraph">
+<p>The Yada Framework javascript may show the user some error messages, in english by default.
+In order to localize these messages, each page should include the <code>/yada/messagesProperties.html</code> file anywhere with
+something like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;th:block th:insert="~{/yada/messagesProperties :: messagesProperties}"&gt;&lt;/th:block&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The proper keys must be added to the message.properties files of course. The name of such keys can be
+found in the <code>/yada/messagesProperties.html</code> file. Esample:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">yadajs.connection.error.title = Errore di connessione
+yadajs.connection.error.message = Impossibile connettersi al server
+yadajs.forbidden.error.title = Errore di sicurezza
+yadajs.forbidden.error.message = La risorsa richiesta è vietata</code></pre>
+</div>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_usage_with_thymeleaf">Usage with Thymeleaf</h4>
@@ -905,7 +984,7 @@ userProfile.setTimezone(userTimezone);</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-17 12:22:56 +0200
+Last updated 2025-07-29 17:31:52 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

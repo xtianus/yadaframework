@@ -3,6 +3,39 @@
 
 Documentation bits waiting to be moved to the proper section
 
+
+== Copy to clipboard
+[cols="1,1"]
+|===
+h|Scope
+|HTML page
+h|Language
+|Javascript
+|===
+
+The `yada.copyToClipboard(extendedSelector, event, showFeedback)` method copies the content of some page element to the clipboard.
+
+extendedSelector:: 
+the CSS selector eventually with a yada prefix
+event::
+the event that triggered the copy (usually a click event). Propagation of this event will be stopped.
+The event is also used to properly convert any yada prefix on the CSS selector
+showFeedback::
+whether to show a <<ajax.adoc#_ajax_feedback,feedback message>>
+
+The following example is a "clone" icon that copies the content of an element with a specific id:
+
+[source,HTML]
+----
+<a href="javascript:void(0);"
+	th:onclick="|yada.copyToClipboard('#pub-${publication.id}', event, true)|"
+	title="Copy to clipboard">
+	<i class="fa fa-clone" aria-hidden="true"></i>
+</a>
+----
+
+
+
 == Lazy Initialization of class attributes
 [cols="1,1"]
 |===

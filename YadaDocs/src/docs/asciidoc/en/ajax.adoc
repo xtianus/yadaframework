@@ -599,8 +599,17 @@ a| URL
 a| sends dropped files to the server via ajax
 
 a| `yada:singleFileOnly`
-a| prevents uploading multiple files
-a| comma-separated title and error text to show in a notification modal when more than one file is dropped
+a| empty
+a| (optional) prevents uploading multiple files: an error message is shown using title and message from the following message.properties keys: `yadajs.uploadAccept.error.title`, `yadajs.uploadAccept.error.message`
+
+a| `yada:dropUploadAccept`
+a| mime type or extension
+a| (optional) specify which file types should be handled. Example: "application/json", "image/*", ".jpg"
+
+a| `yada:dropUploadParamName`
+a| string
+a| (optional) specify the name of the request parameter that will contain the MultipartFile. Defaults to "multipartFile"
+
 |===
 
 NOTE: The current implementation only sends files via ajax
@@ -619,7 +628,8 @@ HTML example:
 	yada:updateOnSuccess="yadaParents:.fileDetails" # <1>
 	yada:successHandler="yada.showAjaxFeedback" # <1>
 	yada:dropUpload="@{/uploadGalleryImage(productId=${product.id})}" # <2>
-	yada:singleFileOnly="Too many files,Drop a single file to fill the empty slot" # <3>
+	yada:singleFileOnly # <3>
+	yada:dropUploadAccept="image/*" # <4>
 	title="Drop image to upload">
 	<i class="fas fa-file-upload dropIcon"></i>
 </div>
@@ -627,11 +637,18 @@ HTML example:
 <1> any ajax-related functionality applies
 <2> the endpoint can include request parameters as usual
 <3> in this example ony one file can be dropped
+<4> files that are not images will be ignored. The value can also be a specific mime type or an extension like ".jpg"
+
+[.todo]
+----
+Currently `yada:singleFileOnly` does not accept a value but only uses the predefined message.properties keys. 
+This should be changed so that the attribute value has precedence over the key, when specified. It should contain a comma-separated title and error text. 
+----
 
 While the files are being dragged over the drop area, the `yadaDropTarget` class is added to the element. This
 allows a visual feedback (not provided by default) for example by changing the border or the background color.
 
-The @Controller receives a `MultipartFile` or a `MultipartFile[]`: dropping a single file will match both signatures
+The @Controller receives a `MultipartFile` or a `MultipartFile[]` with a default name of "multipartFile": dropping a single file will match both signatures
 but dropping more than one would only match the latter, so choose accordingly to the use case, the latter being more versatile.
 Uploaded files can be handled as when <<forms/uploads.adoc#_java,using forms for upload>>:
 

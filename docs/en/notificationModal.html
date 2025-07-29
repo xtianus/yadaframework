@@ -352,19 +352,30 @@ public String dashboard(RedirectAttributes redirectAttributes) {
 <h4 id="_returning_from_the_controller">Returning from the Controller</h4>
 <div class="paragraph">
 <p>Ajax requests work roughly the same as normal requests.
-The notification will be shown only if the result contains the "/yada/modalNotify" modal.
-This can be done in one of the following alternative ways:</p>
+The notification will be shown only if the result contains the notify modal.
+You can either return the correct HTML directly or use one of the provided methods that return
+the correct modal for the Bootstrap version in use:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">return "/yada/modalNotify";
-return YadaViews.AJAX_NOTIFY;
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">return "/yada/modalNotifyB3.html"; // for Bootstrap 3
+return YadaViews.AJAX_NOTIFY_B3; // for Bootstrap 3
+// These return the correct modal for the configured version of Bootstrap:
+return config.getNotifyModalView();
 return yadaNotify.title("Login success", model).ok().message("You have been logged in").add();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The first version should of course be avoided for future compatibility.
-The last version is very convenient when returning a message at the end of the @RequestMapping method.</p>
+<p>The last version is very convenient when returning a message at the end of the @RequestMapping method.
+The notification modal HTML can be customised with a specific HTML file, in which case the
+"config/paths/notificationModalView" entry should point to such HTML file for all of the above to work:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;config&gt;
+    &lt;paths&gt;
+        &lt;notificationModalView&gt;/myModalNotify&lt;/notificationModalView&gt;</code></pre>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -575,7 +586,7 @@ change it while preserving some key elements that are used as reference to add c
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-11-06 18:51:42 +0100
+Last updated 2025-05-09 14:17:36 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

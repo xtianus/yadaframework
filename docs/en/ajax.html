@@ -1113,10 +1113,32 @@ Changing a select or a checkbox sumbits the enclosing form: this should be made 
 <p><code>yada:singleFileOnly</code></p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>prevents uploading multiple files</p>
+<p>empty</p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>comma-separated title and error text to show in a notification modal when more than one file is dropped</p>
+<p>(optional) prevents uploading multiple files: an error message is shown using title and message from the following message.properties keys: <code>yadajs.uploadAccept.error.title</code>, <code>yadajs.uploadAccept.error.message</code></p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>yada:dropUploadAccept</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>mime type or extension</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>(optional) specify which file types should be handled. Example: "application/json", "image/*", ".jpg"</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>yada:dropUploadParamName</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>(optional) specify the name of the request parameter that will contain the MultipartFile. Defaults to "multipartFile"</p>
 </div></div></td>
 </tr>
 </tbody>
@@ -1159,7 +1181,8 @@ to both clicking and dropping, which probably is not desirable; plain links (non
 	yada:updateOnSuccess="yadaParents:.fileDetails" <i class="conum" data-value="1"></i><b>(1)</b>
 	yada:successHandler="yada.showAjaxFeedback" <i class="conum" data-value="1"></i><b>(1)</b>
 	yada:dropUpload="@{/uploadGalleryImage(productId=${product.id})}" <i class="conum" data-value="2"></i><b>(2)</b>
-	yada:singleFileOnly="Too many files,Drop a single file to fill the empty slot" <i class="conum" data-value="3"></i><b>(3)</b>
+	yada:singleFileOnly <i class="conum" data-value="3"></i><b>(3)</b>
+	yada:dropUploadAccept="image/*" <i class="conum" data-value="4"></i><b>(4)</b>
 	title="Drop image to upload"&gt;
 	&lt;i class="fas fa-file-upload dropIcon"&gt;&lt;/i&gt;
 &lt;/div&gt;</code></pre>
@@ -1179,14 +1202,24 @@ to both clicking and dropping, which probably is not desirable; plain links (non
 <td><i class="conum" data-value="3"></i><b>3</b></td>
 <td>in this example ony one file can be dropped</td>
 </tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>files that are not images will be ignored. The value can also be a specific mime type or an extension like ".jpg"</td>
+</tr>
 </table>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>Currently `yada:singleFileOnly` does not accept a value but only uses the predefined message.properties keys.
+This should be changed so that the attribute value has precedence over the key, when specified. It should contain a comma-separated title and error text.</pre>
+</div>
 </div>
 <div class="paragraph">
 <p>While the files are being dragged over the drop area, the <code>yadaDropTarget</code> class is added to the element. This
 allows a visual feedback (not provided by default) for example by changing the border or the background color.</p>
 </div>
 <div class="paragraph">
-<p>The @Controller receives a <code>MultipartFile</code> or a <code>MultipartFile[]</code>: dropping a single file will match both signatures
+<p>The @Controller receives a <code>MultipartFile</code> or a <code>MultipartFile[]</code> with a default name of "multipartFile": dropping a single file will match both signatures
 but dropping more than one would only match the latter, so choose accordingly to the use case, the latter being more versatile.
 Uploaded files can be handled as when <a href="forms/uploads.html#_java">using forms for upload</a>:</p>
 </div>
@@ -1740,7 +1773,7 @@ when they return from ajax. Example: <code>&lt;div th:classappend="${yadaIsAjaxR
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2025-01-26 19:23:48 +0100
+Last updated 2025-07-29 17:03:21 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

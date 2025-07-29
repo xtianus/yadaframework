@@ -16,7 +16,7 @@ HTML files that can be included in the Thymeleaf templates with the standard syn
 
 [source,html]
 ----
-<div th:replace="~{/yada/form/text::field(fieldName='subject',maxlength=64,required=true,labelKey='form.label.subject')}"></div>
+<div th:replace="~{/yada/form/text::body(fieldName='subject',maxlength=64,required=true,labelKey='form.label.subject')}"></div>
 ----
 
 Parameters can be specified, as usual, either on the replace directive itself or by creating variables on some parent element using `th:with`.

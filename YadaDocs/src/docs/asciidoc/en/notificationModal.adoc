@@ -178,22 +178,31 @@ Please note that the `redirectOnClose()` url does not need to have the language 
 
 
 Ajax requests work roughly the same as normal requests.
-The notification will be shown only if the result contains the "/yada/modalNotify" modal.
-This can be done in one of the following alternative ways:
+The notification will be shown only if the result contains the notify modal.
+You can either return the correct HTML directly or use one of the provided methods that return
+the correct modal for the Bootstrap version in use:
 
 [source,java]
 ----
-return "/yada/modalNotify";
-return YadaViews.AJAX_NOTIFY;
+return "/yada/modalNotifyB3.html"; // for Bootstrap 3
+return YadaViews.AJAX_NOTIFY_B3; // for Bootstrap 3
+// These return the correct modal for the configured version of Bootstrap:
+return config.getNotifyModalView();
 return yadaNotify.title("Login success", model).ok().message("You have been logged in").add();
 ----
 
-The first version should of course be avoided for future compatibility.
 The last version is very convenient when returning a message at the end of the @RequestMapping method.
+The notification modal HTML can be customised with a specific HTML file, in which case the 
+"config/paths/notificationModalView" entry should point to such HTML file for all of the above to work:
 
+[source,xml]
+----
+<config>
+    <paths>
+        <notificationModalView>/myModalNotify</notificationModalView>
+----
 
 ====  Returning additional HTML
-
 
 The problem with the above approach is that you might want to also return some other HTML,
 for example the original form with validation errors, or something to insert in the page.
