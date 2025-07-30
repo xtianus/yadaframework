@@ -235,20 +235,21 @@
 			order: order,
 			columns: columnDef,					
 		    serverSide: true,
-		    ajax: function(data, callback, settings) {
-		    	// Need to add any extra parameter if a form is present
-		    	var addedData = $("form.yada_dataTables_"+tableId).serializeArray();
-		    	var extraParam = data['extraParam']={};
-		    	var i=0;
-		    	for (i=0; i<addedData.length; i++) {
-		    		var paramObj = addedData[i];
-		    		var paramName = paramObj.name;
-		    		var paramValue = paramObj.value;
-		    		extraParam[paramName] = paramValue;
-		    	}
-		    	var noLoader = $table.hasClass('noLoader') || $table.hasClass('yadaNoLoader');
-		    	yada.ajax(dataUrl, jQuery.param(data), callback, 'POST', null, noLoader);
-		    },
+		    ajax: 			function(data, callback, settings) {
+			    // Need to add any extra parameter if a form is present
+			    const addedData = $("form.yada_dataTables_" + tableId).serializeArray();
+			    let extraParam = data['extraParam'] = {};
+			    addedData.forEach(paramObj => {
+			        const paramName = paramObj.name;
+			        const paramValue = paramObj.value;
+			        if (!extraParam[paramName]) {
+			            extraParam[paramName] = [];
+			        }
+			        extraParam[paramName].push(paramValue);
+			    });
+			    const noLoader = $table.hasClass('noLoader') || $table.hasClass('yadaNoLoader');
+			    yada.ajax(dataUrl, jQuery.param(data), callback, 'POST', null, noLoader);
+			},
 		    language: {
 		    	url: languageUrl
 		    }

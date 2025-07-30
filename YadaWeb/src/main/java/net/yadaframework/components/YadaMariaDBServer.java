@@ -46,18 +46,19 @@ public class YadaMariaDBServer {
 			String baseDir = config.getEmbeddedDatabaseBaseDir();
 			String dataDir = config.getEmbeddedDatabaseDataDir();
 			String tmpDir = config.getEmbeddedDatabaseTmpDir();
+			File baseDirFile = new File(baseDir);
 			File embeddedDatabaseDataDirFile = new File(dataDir);
 			embeddedDatabaseDataDirFile.mkdirs();
 			if (!embeddedDatabaseDataDirFile.isDirectory() || !embeddedDatabaseDataDirFile.canWrite()) {
 				throw new YadaSystemException("Can't write embedded database to folder {}", embeddedDatabaseDataDirFile);
 			}
 			DBConfigurationBuilder configBuilder = DBConfigurationBuilder.newBuilder();
-			configBuilder.setBaseDir(baseDir);
-			configBuilder.setDataDir(dataDir);
+			configBuilder.setBaseDir(baseDirFile);
+			configBuilder.setDataDir(embeddedDatabaseDataDirFile);
 			configBuilder.setTmpDir(tmpDir);
 			configBuilder.setPort(port);
 			// If the base folder is empty install the db, otherwise open it
-			String[] filesInBaseDir = new File(baseDir).list();
+			String[] filesInBaseDir = baseDirFile.list();
 			boolean install = filesInBaseDir == null || filesInBaseDir.length == 0; // No files
 			if (install) {
 				db = DB.newEmbeddedDB(configBuilder.build());

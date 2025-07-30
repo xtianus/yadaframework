@@ -30,6 +30,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
+import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.web.YadaJsonDateTimeShortSerializer;
 
 @Entity
@@ -72,7 +73,7 @@ public class YadaUserCredentials implements Serializable {
 
 	@ElementCollection(fetch= FetchType.EAGER)
 	@Fetch(FetchMode.SUBSELECT) // Questo permette di fare una query sola invece di una per role
-	private List<Integer> roles;
+	private List<Integer> roles; // TODO this should be a Set to avoid duplications
 
 	private int failedAttempts; // Fallimenti di login consecutivi. Viene modificato direttamente nel db da UserCredentialsRepository.resetFailedAttempts()
 
@@ -88,14 +89,7 @@ public class YadaUserCredentials implements Serializable {
 	@JsonIgnore // Ignored because of lazy association
 	@OneToMany(fetch=FetchType.LAZY, cascade= CascadeType.ALL, mappedBy="yadaUserCredentials") // Non posso mettere orphanRemoval=true perchè prendo una eccezione: A collection with cascade="all-delete-orphan" was no longer referenced by the owning entity instance
 	private List<YadaSocialCredentials> yadaSocialCredentialsList;
-
-//	@NotNull
-//	@OneToOne(cascade = CascadeType.ALL, optional=false)
-//	@MapsId // UserProfile condivide l'id
-//	@OneToOne(cascade = CascadeType.ALL)
-//    @MapsId("id")
-//    private UserProfile userProfile = new UserProfile();
-
+	
 	@PrePersist
 	void setDefaults() {
 		creationDate = new Date();
@@ -114,12 +108,24 @@ public class YadaUserCredentials implements Serializable {
 //		}
 //		return null;
 //	}
-
+	
 	/**
-	 * Setta un unico ruolo cancellando quelli eventualmente presenti
+	 * Set one role removing any other roles
 	 * @param role
 	 */
 	@Transient
+	public void setOnlyRole(Integer role) {
+		roles = new ArrayList<Integer>();
+		roles.add(role);
+	}
+	
+	/**
+	 * Set one role removing any other roles
+	 * @param role
+	 * @deprecated @see #setOnlyRole(Integer)
+	 */
+	@Transient
+	@Deprecated // The name is misleading
 	public void setRole(Integer role) {
 		roles = new ArrayList<Integer>();
 		roles.add(role);
@@ -134,28 +140,46 @@ public class YadaUserCredentials implements Serializable {
 	}
 
 	/**
-	 * Add all roles if not already present
+	 * Add all roles if not already present. Same as {@link #addRoles(Integer[])}
 	 * @param roles
 	 */
 	@Transient
-	public void addRoles(Integer[] roles) {
+	public void ensureRoles(Integer[] roles) {
 		for (Integer role : roles) {
 			addRole(role);
 		}
 	}
+	
+	/**
+	 * Add all roles if not already present. Same as {@link #ensureRoles(Integer[])}
+	 * @param roles
+	 */
+	@Transient
+	public void addRoles(Integer[] roles) {
+		ensureRoles(roles);
+	}
 
 	/**
-	 * Add a role if not already present
+	 * Add a role if not already present. Same as {@link #addRole(Integer)}
 	 * @param role
 	 */
 	@Transient
-	public void addRole(Integer role) {
+	public void ensureRole(Integer role) {
 		if (roles==null) {
 			roles = new ArrayList<Integer>();
 		}
 		if (!hasRole(role)) {
 			roles.add(role);
 		}
+	}
+	
+	/**
+	 * Add a role if not already present. Same as {@link #ensureRole(Integer)}
+	 * @param role
+	 */
+	@Transient
+	public void addRole(Integer role) {
+		ensureRole(role);
 	}
 
 	/**
@@ -188,9 +212,13 @@ public class YadaUserCredentials implements Serializable {
 	}
 
 	/**
-	 * Sets the password and its timestamp then clears the "password change needed" flag
+	 * Sets the password and its timestamp then clears the failed attempts and the "changePassword" flag
 	 * @param password
+	 * @param encoder the password encoder, or null for cleartext passwords
+	 * @deprecated because it arbitrarily clears the changePassword flag
+	 * @see YadaSecurityUtil#changePassword(YadaUserProfile, String)
 	 */
+	@Deprecated
 	public void changePassword(String password, PasswordEncoder encoder) {
 		if (encoder!=null) {
 			password=encoder.encode(password);

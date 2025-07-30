@@ -4,7 +4,7 @@ buildscript {
 	}
 	dependencies {
 		// Needed for test schema creation
-		classpath 'net.yadaframework:yadatools:+'
+		classpath 'net.yadaframework:yadatools:0.7.7.R4'
 		// classpath 'kr.motd.gradle:sphinx-gradle-plugin:2.2.0'
 	}                    
 }
@@ -20,14 +20,14 @@ group = 'net.yadaframework'
 version = '0.7.7'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 	// toolchain {
 	// 	languageVersion = JavaLanguageVersion.of(8)
 	// }
 	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
 	withSourcesJar()
-    withJavadocJar() // https://stackoverflow.com/a/75710366/587641
+	withJavadocJar() // https://stackoverflow.com/a/75710366/587641
 }
 
 if (!project.hasProperty('repoPath')) {
@@ -40,57 +40,57 @@ eclipse {
 		// targetCompatibility = 1.8
 		// https://stackoverflow.com/a/35302104/587641
 		file {
-      		File dir = file('.settings')
-      		dir.mkdirs()
-      		File f = file('.settings/org.eclipse.core.resources.prefs')
-      		if (!f.exists()) {
-      			f.write('eclipse.preferences.version=1\n')
-      			f.append('encoding/<project>=utf-8')
-      		}
-    	}
+	  		File dir = file('.settings')
+	  		dir.mkdirs()
+	  		File f = file('.settings/org.eclipse.core.resources.prefs')
+	  		if (!f.exists()) {
+	  			f.write('eclipse.preferences.version=1\n')
+	  			f.append('encoding/<project>=utf-8')
+	  		}
+		}
 	}
 	classpath {
-        downloadJavadoc = true
-        downloadSources = true
-    }
+		downloadJavadoc = true
+		downloadSources = true
+	}
 }
 
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 tasks.withType(JavaCompile).configureEach {
-    // Needed since Spring 6.1: 
-    // https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
-    options.compilerArgs.add("-parameters")
+	// Needed since Spring 6.1: 
+	// https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
+	options.compilerArgs.add("-parameters")
 }
 
 dependencies {
 	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
 
-	api 'org.apache.commons:commons-configuration2:2.11.0'
+	api 'org.apache.commons:commons-configuration2:2.12.0'
 	
 	// Fixes commons-text:1.9 CVE-2022-42889 caused by commons-configuration2:2.8.0
-	api 'org.apache.commons:commons-text:1.12.0'
+	api 'org.apache.commons:commons-text:1.13.1'
 	
 	// For embedded Tomcat ONLY - add these to your project
     // runtimeOnly 'org.apache.tomcat:tomcat-el-api:8.5.+'
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper-el:8.5.+'
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper:8.5.+'
     // For embedded mariadb
-	compileOnly('ch.vorburger.mariaDB4j:mariaDB4j:3.1.0') {
+	compileOnly('ch.vorburger.mariaDB4j:mariaDB4j:3.2.0') {
 		// mariaDB4j pulls the latest version of spring core but this is never a good thing.
-        exclude group: 'org.springframework', module: 'spring-core'
-    }	
+		exclude group: 'org.springframework', module: 'spring-core'
+	}	
 	// Needed by Commons Configuration
-    api 'commons-jxpath:commons-jxpath:1.3'
+    api 'commons-jxpath:commons-jxpath:1.4.0'
 
 	// For Spring: 	using a specific version instead of the + wildcard to prevent side effects 
 	// 				in the application when new versions are made available 
-    api 'org.springframework:spring-context-support:6.1.5',
+	api 'org.springframework:spring-context-support:6.1.5',
 		'org.springframework:spring-orm:6.1.5',
 		'org.springframework:spring-webmvc:6.1.5',
 		'org.springframework:spring-core:6.1.5',
@@ -98,18 +98,18 @@ dependencies {
 		'org.hibernate.orm:hibernate-core:6.4.4.Final',
 		'org.hibernate.validator:hibernate-validator:8.0.1.Final',
 		'org.thymeleaf:thymeleaf-spring6:3.1.2.RELEASE',
-		'com.mysql:mysql-connector-j:8.1.0',
+		'com.mysql:mysql-connector-j:8.4.0',
 		'commons-collections:commons-collections:3.2.2',
 		'org.apache.commons:commons-exec:1.3',
 		// 'jakarta.mail:jakarta.mail-api:2.1.2',
 		'com.sun.mail:jakarta.mail:2.0.1', // The implementation is needed, not the api
 		'com.google.guava:guava:31.1-jre',
-		'org.jsoup:jsoup:1.18.1',
-		'ch.qos.logback:logback-classic:1.3.14',
-		'com.fasterxml.jackson.core:jackson-databind:2.17.2',
+		'org.jsoup:jsoup:1.20.1',
+		'ch.qos.logback:logback-classic:1.5.18',
+		'com.fasterxml.jackson.core:jackson-databind:2.19.0',
 		'com.drewnoakes:metadata-extractor:2.19.0',
 		'org.flywaydb:flyway-mysql:10.18.1',
-		'commons-beanutils:commons-beanutils:1.9.4'
+		'commons-beanutils:commons-beanutils:1.11.0'
 		
 	 // Connection pool for embedded Tomcat and programmatic datasource
 	api 'org.vibur:vibur-dbcp:25.0'
@@ -122,8 +122,14 @@ dependencies {
 	// Needed to run in Tomcat
 	// runtime 'commons-jxpath:commons-jxpath:1.3'
 
-	testImplementation 'junit:junit:4.13.2',
-	 	'org.springframework:spring-test:4.3.30.RELEASE'
+	testImplementation platform('org.junit:junit-bom:5.9.2')
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation 'org.junit.platform:junit-platform-launcher'
+	testRuntimeOnly 'org.junit.platform:junit-platform-engine'
+	testImplementation 'org.mockito:mockito-core:5.3.1'
+	testImplementation 'org.mockito:mockito-junit-jupiter:5.3.1'
+	testImplementation 'org.springframework:spring-test:6.1.3'
+	testImplementation 'javax.servlet:javax.servlet-api:4.0.1'
 	
 		
 }
@@ -135,10 +141,9 @@ task listJars {
 }
 
 jar {
-    manifest {
-        attributes("Implementation-Title": "YadaWeb",
-                   "Implementation-Version": archiveVersion)
-    }
+	manifest {
+		attributes("Implementation-Title": "YadaWeb", "Implementation-Version": archiveVersion)
+	}
 }
 
 // Set the yada version in the properties file
@@ -149,10 +154,10 @@ processResources {
 }
 
 javadoc {
-    options.encoding = 'UTF-8'
-    options.docEncoding = 'UTF-8'
-    options.charSet = 'UTF-8'
-    failOnError = false
+	options.encoding = 'UTF-8'
+	options.docEncoding = 'UTF-8'
+	options.charSet = 'UTF-8'
+	failOnError = false
 }
 
 // http://stackoverflow.com/a/27853822/587641
@@ -190,6 +195,14 @@ task testDbSchema(dependsOn: [testClasses], type: net.yadaframework.tools.YadaCr
 	}
 	doLast { 
 		delete "$buildDir/classes/java/test/META-INF/persistence.xml"
+	}
+}
+
+test {
+	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
+		showStandardStreams = true
 	}
 }
 

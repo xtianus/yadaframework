@@ -14,24 +14,38 @@
 	yada.baseUrl = null;	// Set it via thymeleaf
 	yada.resourceDir = null; // Set it via thymeleaf
 	var loaderStart = 0;
-	yada.messages = {};
-	yada.messages.connectionError = { // Set it via thymeleaf
+	
+	// Localized messages can be set by including /yada/messagesProperties.html in the page
+	yada.messages = yada.messages || {};
+	yada.messages.connectionError = yada.messages.connectionError || { // Set it via thymeleaf
 		"title": "Connection Error",
 		"message": "Failed to contact server - please try again later"
 	}; 
-	yada.messages.forbiddenError = { // Set it via thymeleaf
+	yada.messages.forbiddenError = yada.messages.forbiddenError || { // Set it via thymeleaf
 			"title": "Authorization Error",
 			"message": "You don't have permission to access the requested page"
 	}; 
-	yada.messages.serverError = { // Set it via thymeleaf
+	yada.messages.notfoundError = yada.messages.notfoundError || { // Set it via thymeleaf
+			"title": "Not Found",
+			"message": "The page you requested was not found on the server"
+	}; 
+	yada.messages.serverError = yada.messages.serverError || { // Set it via thymeleaf
 			"title": "Server Error",
 			"message": "Something is wrong - please try again later"
 	}; 
-	yada.messages.confirmButtons = { // Set it via thymeleaf
+	yada.messages.confirmButtons = yada.messages.confirmButtons || { // Set it via thymeleaf
 			"ok": "Ok",
 			"cancel": "Cancel"
 	}; 
-	
+	yada.messages.singleFileOnly = yada.messages.singleFileOnly || { // Set it via thymeleaf
+			"title": "File Upload Error",
+			"message": "Only one file can be uploaded at a time"
+	}; 
+	yada.messages.uploadAccept = yada.messages.uploadAccept || { // Set it via thymeleaf
+			"title": "File Upload Error",
+			"message": "Invalid file type"
+	}; 
+
 	var siteMatcher=RegExp("(?:http.?://)?([^/:]*).*"); // Extract the server name from a url like "http://www.aaa.com/xxx" or "www.aaa.com"
 	
 	const findSelector = "yadaFind:"; // Used to indicate that a CSS selector should be searched in the children using find()
@@ -109,9 +123,11 @@
 		}
 	}
 	
-	yada.loaderOn = function() {
-		loaderStart = Date.now();
-		$(".loader").show();
+	yada.loaderOn = function(e) {
+		if (e==null || e.target==null || e.target.tagName !== "A" || e.target.target !== "_new") {
+			loaderStart = Date.now();
+			$(".loader").show();
+		}
 	};
 	
 	yada.loaderOff = function() {
@@ -289,11 +305,13 @@
 	 * When the funcion takes too long to execute, the timeout is increased so that less calls are performed.
 	 * Useful when making ajax calls.
 	 * A small delay must be tolerated.
-	 * @param domElement any dom element on which a flag can be set. Must be the same for repeated calls.
+	 * When calls keep repeating within the timeout, no call is ever made.
+	 * @param domElement any dom element on which a flag can be set that will be bound to the function. Must be the same for repeated calls.
 	 * @param functionToCall any function (can be an inline function)
 	 */
 	yada.dequeueFunctionCall = function(domElement, functionToCall) {
-		// TODO see https://css-tricks.com/debouncing-throttling-explained-examples/#aa-debounce
+		// TODO see https://css-tricks.com/debouncing-throttling-explained-examples/#aa-debounce for ideas
+		// TODO set a timeout after which the next call is made anyway
 		var callTimeout = 200;
 		if (domElement.yadaDequeueFunctionCallRunning!=null) {
 			// Ajax call still running, so delay a bit longer before the next one
@@ -306,6 +324,53 @@
 			domElement.yadaDequeueFunctionCallRunning = null; // This may clear some other's call flag but don't care
 		}, callTimeout);
 	}
+
+	// Maps to store dequeue function states and timeouts
+	const dequeueFunctionData = new Map();
+
+	/**
+	 * When a function can be called repeatedly but only the last call is useful, previous
+	 * calls can be cancelled by next ones if within a given timeout.
+	 * A small delay must be tolerated.
+	 * When calls keep repeating within the timeout, no call is ever made.
+	 * @param {string} key - A unique identifier for this function call instance
+	 * @param {function} functionToCall - The function to call
+	 * @param {number} [delay=200] - The delay in milliseconds before the function is called
+	 */
+	// TODO add a timeout after which the next call is made anyway	 
+	yada.dequeueFunctionCallByKey = function(key, functionToCall, delay = 200) {
+		if (typeof functionToCall !== 'function') {
+			throw new Error("functionToCall must be a valid function.");
+		}
+		// Get or initialize data for this key
+		let data = dequeueFunctionData.get(key);
+		if (!data) {
+			data = { timeoutHandler: null, isRunning: false };
+			dequeueFunctionData.set(key, data);
+		}
+
+		// If the function is currently running, do nothing
+		// This is wrong because we miss the last call!
+		// if (data.isRunning) {
+		// 	return;
+		// }
+
+		// Clear any existing timeout for the key
+		if (data.timeoutHandler) {
+			clearTimeout(data.timeoutHandler);
+		}
+
+		// Set a new timeout for the key
+		data.timeoutHandler = setTimeout(() => {
+			// data.isRunning = true; // Mark as running
+			try {
+				functionToCall(); // Execute the function
+			} finally {
+				// data.isRunning = false; // Reset after execution
+				dequeueFunctionData.delete(key); // Cleanup
+			}
+		}, delay);
+	};
 
 	/**
 	 * Allow only certain characters to be typed into an input field based on a regexp
@@ -837,7 +902,7 @@
 				if (typeof value != 'object') {
 					template = template.replace(new RegExp(placeholder, 'g'), value);
 				} else {
-					for (var i=0; i<value.length; i++) {
+					for (var i=0; i<value?.length; i++) {
 						if (i<value.length-1) {
 							template = template.replace(new RegExp(placeholder, 'g'), value[i]+"${"+name+"}");
 						} else {
@@ -1184,7 +1249,7 @@
 		});
 		var $modal = $('#yada-confirm .modal');
 		if ($modal.length==0) {
-			console.error("[yada] No confirm modal found: did you include it?");
+			yada.log("No confirm modal found: did you include it?");
 		}
 		$modal.modal('show');
 		$modal.off('hidden.bs.modal').on('hidden.bs.modal', function (e) {
@@ -1731,6 +1796,69 @@
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Copy text to clipboard, usually after a click on an element (icon)
+	 * @param extendedSelector the CSS selector eventually with a yada prefix
+	 * @param event the event that triggered the copy (usually a click event)
+	 * @param showFeedback whether to show a feedback message
+	 */
+	yada.copyToClipboard = function(extendedSelector, event, showFeedback) {
+		event.stopPropagation(); // Stop event propagation to prevent collapse toggling and other unwanted behavior
+		const element = yada.extendedSelect($(event.target), extendedSelector)[0];
+		if (!element) {
+			yada.log('Element with selector "' + extendedSelector + '" not found');
+			return;
+		}
+		const text = element.textContent;
+		
+		// Modern clipboard API (not available in all browsers or in non-secure contexts)
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(text).then(function() {
+				if (showFeedback) {
+					yada.showAjaxFeedback();
+				}
+			}).catch(function(err) {
+				copyUsingFallback();
+			});
+		} else {
+			copyUsingFallback();
+		}
+	}
+		
+	// Fallback approach using document.execCommand
+	function copyUsingFallback() {
+		try {
+			// Create a temporary textarea
+			const textArea = document.createElement('textarea');
+			textArea.value = text;
+			textArea.style.position = 'fixed';  // Avoid scrolling to bottom
+			textArea.style.top = '0';
+			textArea.style.left = '0';
+			textArea.style.width = '2em';
+			textArea.style.height = '2em';
+			textArea.style.padding = '0';
+			textArea.style.border = 'none';
+			textArea.style.outline = 'none';
+			textArea.style.boxShadow = 'none';
+			textArea.style.background = 'transparent';
+			
+			document.body.appendChild(textArea);
+			textArea.focus();
+			textArea.select();
+			
+			const successful = document.execCommand('copy'); // Deprecated but ok in this context (older browsers)
+			document.body.removeChild(textArea);
+			
+			if (successful && showFeedback) {
+				yada.showAjaxFeedback();
+			} else if (!successful) {
+				yada.log('Could not copy text using execCommand');
+			}
+		} catch (err) {
+			yada.log('Could not copy text using fallback method: ' + err);
+		}
 	}
 		
 }( window.yada = window.yada || {} ));

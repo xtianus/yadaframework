@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -271,7 +272,7 @@ public class YadaDataTableDao {
 		YadaSql searchSql = YadaSql.instance();
 		
 		yadaSql.selectFrom("select distinct e from "+targetClass.getSimpleName()+" e");
-		countSql.selectFrom("select count(distinct e.id) from "+targetClass.getSimpleName()+" e");
+		countSql.selectFromReplace("select count(distinct e.id) from "+targetClass.getSimpleName()+" e");
 		
 		// Searching
 		List<YadaDatatablesColumn> yadaDatatablesColumns = yadaDatatablesRequest.getColumns();
@@ -353,6 +354,8 @@ public class YadaDataTableDao {
 		}
 		// Sorting
 		boolean needsExtraction = false;
+		// If targetClass has an id attribute, add it to the "order by" clause for deterministic pagination
+		boolean needsOrderById = Arrays.stream(targetClass.getDeclaredFields()).anyMatch(field -> field.getName().equalsIgnoreCase("id"));
 		List<YadaDatatablesOrder> orderList = yadaDatatablesRequest.getOrder();
 		if (orderList!=null) {
 			for (YadaDatatablesOrder yadaDatatablesOrder : orderList) {
@@ -361,6 +364,9 @@ public class YadaDataTableDao {
 					YadaDatatablesColumn yadaDatatablesColumn = yadaDatatablesColumns.get(columnIndex);
 					if (yadaDatatablesColumn.isOrderable()) {
 						String attributeName = yadaDatatablesColumn.getNameOrData();
+						if ("id".equalsIgnoreCase(attributeName)) {
+							needsOrderById = false; // No need to add it twice
+						}
 						if (attributeName!=null) {
 							// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
 							String sortColumn = addLeftJoins(attributeName, yadaSql, targetClass);
@@ -375,6 +381,10 @@ public class YadaDataTableDao {
 				}
 			}
 		}
+		// Always order by id (too) to have deterministic pagination
+		if (needsOrderById) {
+			yadaSql.orderBy("e.id"); // No need to specify the direction
+		}
 		yadaSql.setParameter("globalSearchString", "%"+globalSearchString+"%");
 		yadaSql.setParameter("globalSearchNumber", globalSearchNumber);
 
@@ -383,6 +393,7 @@ public class YadaDataTableDao {
 		query.setFirstResult(yadaDatatablesRequest.getStart());
     	@SuppressWarnings("unchecked")
 		List<targetClass> result = query.getResultList();
+		// TODO sort using an outer query instead of this trick
 		if (needsExtraction) {
 			// When doing an "order by" on a joined column we add the column to the select clause to prevent the "ORDER BY clause is not in SELECT list" error.
 			// This means that the result now is a list of Object[] where only the first element is what we need.
