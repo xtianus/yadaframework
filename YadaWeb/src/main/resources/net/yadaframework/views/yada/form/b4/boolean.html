@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://www.yadaframework.net" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
+<!--/* [Bootstrap 4 version]
+A checkbox for boolean elements.
+
+Parameters:
+- fieldName = name of the field holding the value
+- id = id of the field holding the value (optional)
+- switch = true to render as a switch, otherwise render as a standard checkbox
+- labelKey = key in messages.properties for the label text
+- label = label to use, if not using a labelKey
+- help = testo per il pulsante di help, se non c'è helpKey (optional)
+- helpKey = chiave del testo per il pulsante di help (optional)
+- disabled = true for a disabled checkbox (optional)
+- toggle = css selector of an element to toggle (optional)
+
+Example: <div th:replace="~{/yada/form/b4/boolean::body(fieldName='useGold',label='Use Gold',help='Enable the use of gold to complete building')}"></div>
+Note: you can't set a default value using thymeleaf, must do it in the controller.
+*/-->
+<body th:remove="tag">
+<div class="form-group" 
+	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}, 
+		inputId=${id?:#ids.seq(@yadaWebUtil.getRequestMapping())}">
+	<div class="checkbox">
+		<label th:if="${switch==null or switch!=true}" class="control-label" th:id="${inputId}+'label'">
+			<input type="checkbox" th:field="*{__${fieldName}__}" th:required="${required}" th:disabled="${disabled}" 
+				th:classappend="${hasError}? is-invalid" value="true"
+				th:id="${inputId}" th:attr="aria-describedby=${inputId}+'label'"/>
+			<span th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Subscribe</span> 
+		</label>
+		<th:block th:if="${switch==true}">
+			<span>
+				<input type="checkbox" th:field="*{__${fieldName}__}" th:disabled="${disabled}" 
+					th:classappend="${hasError}? is-invalid" value="true"
+					class="yadaSwitch yadaSwitch-round" th:id="${inputId}"/>
+				<label th:for="${inputId}"></label>
+			</span>
+			<label class="yadaSwitchLabel" th:for="${inputId}" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">
+				Subscribe
+			</label>
+		</th:block>
+	
+		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
+			<a th:if="${help!=null}" class="yadaHelpButton yadaNoLoader" data-trigger="focus" data-container="body" 
+				data-toggle="popover" data-placement="top" tabindex="-1"
+				data-html="true"
+				th:attr="data-content=${help}">
+				<i class="yadaIcon yadaIcon-help"></i>
+			</a>
+		</th:block>
+	</div>
+	
+	<script th:if="${toggle!=null}" type="text/javascript" th:inline="javascript">
+          $([[${'#'+inputId}]]).change(function() {
+        	  if (this.checked) {
+        		  $([[${toggle}]]).slideDown();
+        	  } else {
+        		  $([[${toggle}]]).slideUp();
+        	  }
+          });
+	</script>         
+	
+	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
+		<span th:text="${err}">Error Text</span>
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+</div>    	
+</body>
+</html>

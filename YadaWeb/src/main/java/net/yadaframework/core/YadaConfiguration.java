@@ -19,6 +19,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
@@ -65,8 +66,10 @@ public abstract class YadaConfiguration {
 	private Boolean development = null;
 	private Boolean beta = null;
 	private Boolean alpha = null;
-	private Map<Integer, String> roleIdToKeyMap = null;
-	private Map<String, Integer> roleKeyToIdMap = null;
+	private Map<Integer, String> roleIdToKeyMap = null; // role id integer --> role key string
+	private Map<String, Integer> roleKeyToIdMap = null; // role key string --> role id integer
+//	private Map<String, Set<String>> roleKeyToRoleChange = null; // role key string --> list of role key strings
+	private Map<Integer, Set<Integer>> roleIdToRoleChange = null; // role id integer --> list of role id integers
 	private Object roleMapMonitor = new Object();
 	private String googleClientId = null;
 	private String googleSecret = null;
@@ -1007,7 +1010,9 @@ public abstract class YadaConfiguration {
 	 * Equivalent to {@link #getRoleKey(Integer)}.
 	 * @param roleId e.g. 9
 	 * @return e.g. "ADMIN"
+	 * @deprecated use {@link #getRoleKey(Integer)} instead
 	 */
+	@Deprecated // because "role name" is not the correct terminology
 	public String getRoleName(Integer roleId) {
 		return this.getRoleKey(roleId);
 	}
@@ -1067,29 +1072,59 @@ public abstract class YadaConfiguration {
 		return key;
 	}
 
+//	/**
+//	 * @return a map acting role --> roles that can be changed, as role keys. Configured by &lt;handles>
+//	 */
+//	public Map<String, Set<String>> getRoleKeyToRoleChange() {
+//		ensureRoleMaps();
+//		return roleKeyToRoleChange;
+//	}
+	
+	/**
+	 * @return a map acting role --> roles that can be changed, as role ids. Configured by &lt;handles>
+	 */
+	public Map<Integer, Set<Integer>> getRoleIdToRoleChange() {
+		ensureRoleMaps();
+		return roleIdToRoleChange;
+	}
+
 	private void ensureRoleMaps() {
 		synchronized (roleMapMonitor) {
 			if (roleIdToKeyMap!=null) {
 				return;
 			}
-			roleIdToKeyMap = new HashMap<>();
-			roleKeyToIdMap = new HashMap<>();
+			Map<Integer, String> newRoleIdToKeyMap = new HashMap<>();
+			Map<String, Integer> newRoleKeyToIdMap = new HashMap<>();
+//			Map<String, Set<String>> newRoleKeyToRoleChange = new HashMap<>();
+			Map<Integer, Set<Integer>> newRoleIdToRoleChange = new HashMap<>();
 			for (ImmutableHierarchicalConfiguration sub : configuration.immutableConfigurationsAt("config/security/roles/role")) {
 				Integer id = sub.getInteger("id", null);
 				String key = sub.getString("key", null);
-				// Controllo che non ci sia duplicazione di id
-				if (id==null || roleIdToKeyMap.get(id)!=null) {
-					throw new YadaInternalException("Invalid role configuration in conf.webapp.xml");
+				if (id==null || key==null) {
+					throw new YadaInternalException("Missing role id or key in configuration file", id);
 				}
-				// Controllo che non ci sia duplicazione di key
-				if (key==null || roleKeyToIdMap.get(key)!=null) {
-					throw new YadaInternalException("Invalid role configuration in conf.webapp.xml");
+				if (newRoleIdToKeyMap.get(id)!=null) {
+					throw new YadaInternalException("Duplicated role id {} in configuration file", id);
 				}
-				roleIdToKeyMap.put(id, key.toUpperCase());
-				roleKeyToIdMap.put(key.toUpperCase(), id);
+				if (newRoleKeyToIdMap.get(key)!=null) {
+					throw new YadaInternalException("Invalid role key {} in configuration file", key);
+				}
+				newRoleIdToKeyMap.put(id, key.toUpperCase());
+				newRoleKeyToIdMap.put(key.toUpperCase(), id);
+				}
+			for (ImmutableHierarchicalConfiguration sub : configuration.immutableConfigurationsAt("config/security/roles/role")) {
+				Integer id = sub.getInteger("id", null); // Never null here because of previous check
+				String key = sub.getString("key", null); // Never null here because of previous check
+				Set<String> handlesKeys = new HashSet<>(sub.getList(String.class, "handles", Collections.emptyList()))
+					.stream().map(String::toUpperCase).collect(Collectors.toSet());
+				Set<Integer> handlesIds = handlesKeys.stream().map(handlesKey -> newRoleKeyToIdMap.get(handlesKey.toUpperCase())).collect(Collectors.toSet());
+//				newRoleKeyToRoleChange.put(key.toUpperCase(), handlesKeys);
+				newRoleIdToRoleChange.put(id, handlesIds);
 			}
-			roleIdToKeyMap = Collections.unmodifiableMap(roleIdToKeyMap);
-			roleKeyToIdMap = Collections.unmodifiableMap(roleKeyToIdMap);
+			roleIdToKeyMap = Collections.unmodifiableMap(newRoleIdToKeyMap);
+			roleKeyToIdMap = Collections.unmodifiableMap(newRoleKeyToIdMap);
+//			roleKeyToRoleChange = Collections.unmodifiableMap(newRoleKeyToRoleChange); // All strings
+			roleIdToRoleChange = Collections.unmodifiableMap(newRoleIdToRoleChange); // All integers
 		}
 	}
 
@@ -1664,6 +1699,18 @@ public abstract class YadaConfiguration {
 	 */
 	public int getYadaJobSchedulerCacheSize() {
 		return this.configuration.getInt("config/yada/jobScheduler/jobCacheSize", 500);
+	}
+
+	/**
+	 * There can be more than one "messages.properties" file for i18n, for example to split by concern e.g. "errors", "countries", etc.
+	 * @return
+	 */
+	public String[] getMessageSourceBasenames() {
+		String[] basenames = this.configuration.getStringArray("config/i18n/messageSource/basename");
+		if (basenames == null || basenames.length == 0) {
+			return new String[] {"messages"};
+		}
+		return basenames;
 	}
 
 }

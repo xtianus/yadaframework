@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -16,20 +17,25 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
 
+import jakarta.persistence.Transient;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.components.YadaWebUtil;
+import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
+import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.security.persistence.repository.YadaRegistrationRequestDao;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
+import net.yadaframework.security.web.YadaSession;
 import net.yadaframework.web.form.YadaFormPasswordChange;
 
 @Component
@@ -51,7 +57,122 @@ public class YadaSecurityUtil {
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired private YadaWebUtil yadaWebUtil;
+	@Autowired private YadaConfiguration config;
+	@Autowired private PasswordEncoder passwordEncoder; // Null when encoding not configured
+	
+	/**
+	 * Check if a user has been suspended for excess of login failures
+	 * @param yadaUserProfile
+	 * @return true if the user is locked out
+	 */
+	public boolean isLockedOut(YadaUserProfile yadaUserProfile) {
+		YadaUserCredentials userCredentials = yadaUserProfile.getUserCredentials();
+		int maxFailed = config.getMaxPasswordFailedAttempts();
+		int lockMillis = config.getPasswordFailedAttemptsLockoutMinutes()*60000;
+		int failedAttempts = userCredentials.getFailedAttempts();
+		Date lastFailedTimestamp = userCredentials.getLastFailedAttempt();
+		return failedAttempts>maxFailed && lastFailedTimestamp!=null && System.currentTimeMillis()-lastFailedTimestamp.getTime()<lockMillis;
+	}
 
+	/**
+	 * Set a new password using the configured encoder. Also sets the password timestamp and clears the failed attempts.
+	 * The "force password change" flag is not cleared for the use case of a user being forced to set
+	 * a new password after first login with a provided password.
+	 * The password encoder is configured with &lt;encodePassword>true&lt;/encodePassword>
+	 * <br>
+	 * The userProfile is not saved.
+	 * @param userProfile
+	 * @param newPassword
+	 */
+	public void changePassword(YadaUserProfile userProfile, String newPassword) {
+		YadaUserCredentials userCredentials = userProfile.getUserCredentials();
+		if (passwordEncoder!=null) {
+			newPassword=passwordEncoder.encode(newPassword);
+		}
+		userCredentials.setPassword(newPassword);
+		userCredentials.setPasswordDate(new Date());
+		// NO changePassword = false;
+		userCredentials.setFailedAttempts(0);
+		userCredentials.setLastFailedAttempt(null);
+	}
+	
+	/**
+	 * Ensures that roles set on some target user can be set by the current user.
+	 * Permissions to change roles are specified in the &lt;role>&lt;handles> configuration parameter.
+	 * @param actingUser the user that wants to change roles on some user
+	 * @param rolesBefore the roles that the target user had before they were modified
+	 * @param rolesAfter the roles that the target user should have after modification. On exit, the roles that can't be changed are reset to the value in rolesBefore
+	 * @return the roles that the actingUser can't change
+	 */
+	public Set<Integer> setRolesWhenAllowed(YadaUserProfile actingUser, List<Integer> rolesBefore, List<Integer> rolesAfter) {
+		Set<Integer> forbiddenRoles = new HashSet<Integer>();
+		List<Integer> allRoleIds = config.getRoleIds();
+		for (Integer roleId : allRoleIds) {
+			boolean hadRoleBefore = rolesBefore.contains(roleId);
+			boolean hasRoleAfter = rolesAfter.contains(roleId);
+			boolean roleChanged = hadRoleBefore!=hasRoleAfter;
+			if (roleChanged && !userCanChangeRole(actingUser, roleId)) {
+				// The current user can't edit this role, so reset it
+				forbiddenRoles.add(roleId);
+				if (hadRoleBefore) {
+					rolesAfter.add(roleId);
+				} else {
+					rolesAfter.remove(roleId);
+				}
+			}
+		}
+		return forbiddenRoles;
+	}
+
+	/**
+	 * Returns true if the given user can change the role targetRoleId on users, based on its own roles
+	 * @param actingUser the user that wants to change a role
+	 * @param targetRoleId the role that the user wants to change
+	 * @return true if actingUser can set or clear the targetRoleId on users, as configured by &lt;handles>
+	 */
+	public boolean userCanChangeRole(YadaUserProfile actingUser, Integer targetRoleId) {
+		List<Integer> actingRoleIds = actingUser.getUserCredentials().getRoles();
+		Map<Integer, Set<Integer>> roleIdToRoleChange = config.getRoleIdToRoleChange();
+		for (Integer actingRoleId : actingRoleIds) {
+			Set<Integer> canChangeIds = roleIdToRoleChange.get(actingRoleId);
+			if (canChangeIds.contains(targetRoleId)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if the given user can change the role targetRoleId on users, based on its own roles
+	 * @param actingUser the user that wants to change a role
+	 * @param targetRoleKey the role that the current user wants to change, any case
+	 * @return true if actingUser can set or clear the targetRoleId on users, as configured by &lt;handles>
+	 */
+	public boolean userCanChangeRole(YadaUserProfile actingUser, String targetRoleKey) {
+		Integer targetRoleId = config.getRoleId(targetRoleKey);
+		return userCanChangeRole(actingUser, targetRoleId);
+	}	
+	
+	/**
+	 * Check if the roles of the actingUser allow it to change the targetUser based on its roles, as configured by &lt;handles>
+	 * A target user can be changed only when its roles can all be changed by any of the roles of the acting user.
+	 * @param actingUser
+	 * @param targetUser
+	 * @return true if actingUser can edit targetUser, false otherwise
+	 */
+	public boolean userCanEditUser(YadaUserProfile actingUser, YadaUserProfile targetUser) {
+		List<Integer> actingRoleIds = actingUser.getUserCredentials().getRoles();
+		List<Integer> targetRoleIds = targetUser.getUserCredentials().getRoles();
+		Map<Integer, Set<Integer>> roleIdToRoleChange = config.getRoleIdToRoleChange();
+		for (Integer actingRoleId : actingRoleIds) {
+			Set<Integer> canChangeIds = roleIdToRoleChange.get(actingRoleId);
+			if (canChangeIds.containsAll(targetRoleIds)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * Logs out the currently logged-in user
 	 * @param request
@@ -111,36 +232,57 @@ public class YadaSecurityUtil {
 		// http://stackoverflow.com/a/8448493/587641
 		return RandomStringUtils.random(length, 0, 0, true, true, null, secureRandom);
 	}
-
+	
 	/**
 	 * Change the user password and log in
 	 * @param yadaFormPasswordChange
-	 * @return
+	 * @return true if password changed and user logged in
 	 */
 	public boolean performPasswordChange(YadaFormPasswordChange yadaFormPasswordChange) {
+		int outcome = performPasswordChange(yadaFormPasswordChange, null);
+		return outcome == 0;
+	}
+
+	/**
+	 * Change the user password and log in after eventually checking that the password is actually different from the previous one
+	 * @param yadaFormPasswordChange
+	 * @param forceDifferentPassword set to true to force a different password
+	 * @return the outcome: 0 = ok, 1 = invalid token, 2 = same password as before, 3 = generic error
+	 */
+	public int performPasswordChange(YadaFormPasswordChange yadaFormPasswordChange, Boolean forceDifferentPassword) {
 		long[] parts = yadaTokenHandler.parseLink(yadaFormPasswordChange.getToken());
 		try {
 			if (parts!=null && parts.length==2) {
+				// The token must be valid to get a registrationRequest from DB
 				YadaRegistrationRequest registrationRequest = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1], YadaRegistrationRequest.class).get(0);
 				if (registrationRequest==null) {
-					return false;
+					return 1; // Invalid token
 				}
 				String username = registrationRequest.getEmail();
 				YadaUserCredentials yadaUserCredentials = yadaUserCredentialsDao.findFirstByUsername(StringUtils.trimToEmpty(username).toLowerCase());
 				if (yadaUserCredentials!=null) {
+					//
+					if (Boolean.TRUE.equals(forceDifferentPassword)) {
+						String newPassword = yadaFormPasswordChange.getPassword();
+						if (yadaUserDetailsService.passwordMatch(newPassword, yadaUserCredentials)) {
+							log.debug("Password for user {} not changed because same as old one", username);
+							return 2; // Same password as before
+						}
+					}
+					//
 					yadaUserCredentials = yadaUserCredentialsDao.changePassword(yadaUserCredentials, yadaFormPasswordChange.getPassword());
 					yadaRegistrationRequestDao.delete(registrationRequest);
 					if (yadaUserCredentials.isEnabled()) {
 						yadaUserDetailsService.authenticateAs(yadaUserCredentials);
 					}
 					log.info("PASSWORD CHANGE for user='{}'", username);
-					return true;
+					return 0; // OK
 				}
 			}
 		} catch (Exception e) {
 			log.info("Password change failed", e);
 		}
-		return false;
+		return 3; // Generic error
 	}
 
 	/**
@@ -228,7 +370,7 @@ public class YadaSecurityUtil {
 	}
 
 	/**
-	 * Ritorna uno o l'altro parametro a seconda che l'utente corrente sia autenticato o meno
+	 * Ritorna uno o l'altro parametro a seconda che l'utente corrente sia autenticato o meno.
 	 * @param anonymousValue
 	 * @param authenticatedValue
 	 * @return
@@ -276,6 +418,10 @@ public class YadaSecurityUtil {
 		}
 	}
 
+	/**
+	 * Returns Spring-formatted roles, like "ROLE_USER" i.e. prefixed by "ROLE_"
+	 * @return
+	 */
 	public Set<String> getCurrentRoles() {
 		Set<String> roles = new HashSet<>();
 		try {
@@ -295,9 +441,12 @@ public class YadaSecurityUtil {
 	}
 
 	/**
-	 * Controlla se l'utente attuale possiede il ruolo specificato. Case Sensitive!
-	 * @param roleToCheck nel formato senza ROLE_ iniziale
-	 * @return
+	 * Check if the current user has the provided role, case sensitive.
+	 * This method finds roles in the current SecurityContextHolder and never goes
+	 * to database so it may be better than {@link YadaSession#isCurrentRole(String)}
+	 * for time-critical use cases
+	 * @param roleToCheck without "ROLE_" prefix
+	 * @see {@link YadaSession#isCurrentRole(String)} 
 	 */
 	public boolean hasCurrentRole(String roleToCheck) {
 		Set<String> roles = getCurrentRoles();
@@ -305,13 +454,38 @@ public class YadaSecurityUtil {
 	}
 
 	/**
-	 * Controlla se l'utente attuale possiede almeno un ruolo tra quelli specificati. Case Sensitive!
-	 * @param roleToCheck array di ruoli nel formato senza ROLE_ iniziale
-	 * @return
+	 * Check if the current user has any of the provided roles, case sensitive.
+	 * This method finds roles in the current SecurityContextHolder and never goes
+	 * to database but if an instance of the current YadaUserProfile is available,
+	 * the {@link YadaUserProfile#hasAnyRole(Integer...)} method may be faster.
+	 * @param rolesToCheck without "ROLE_" prefix
+	 * @see {@link YadaUserProfile#hasAnyRole(Integer...)}
+	 * @see #hasAnyRole(String...)
+	 * @deprecated use {@link #hasAnyRole(String...)} instead
 	 */
+	@Deprecated // Better use hasAnyRole which is better named and faster
 	public boolean hasCurrentRole(String[] rolesToCheck) {
 		Set<String> currentRoles = getCurrentRoles();
 		Set<String> requiredRoles = new HashSet<>(Arrays.asList(rolesToCheck));
 		return CollectionUtils.containsAny(currentRoles, requiredRoles);
+	}
+	
+	/**
+	 * Check if the current user has any of the provided roles, case sensitive.
+	 * This method finds roles in the current SecurityContextHolder and never goes
+	 * to database but if an instance of the current YadaUserProfile is available,
+	 * the {@link YadaUserProfile#hasAnyRole(Integer...)} method may be faster.
+	 * @param rolesToCheck without "ROLE_" prefix
+	 * @see {@link YadaUserProfile#hasAnyRole(Integer...)}
+	 */
+	public boolean hasAnyRole(String ... rolesToCheck) {
+		Set<String> currentRoles = getCurrentRoles();
+		for (String roleToCheck : rolesToCheck) {
+			if (currentRoles.contains(roleToCheck)) {
+				return true;
+			}
+		}
+		return false;
+		
 	}
 }

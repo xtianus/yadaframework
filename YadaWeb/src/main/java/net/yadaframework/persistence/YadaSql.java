@@ -266,12 +266,19 @@ public class YadaSql implements CloneableDeep {
 			return appendQuery(selectFrom);
 		}
 		// The selectFrom is already in the query, so add the new one before the from
+		// but strip any existing "select"
+		selectFrom = selectFrom.replaceFirst("(?i)^select\\s+", "");
 		int pos = queryBuffer.indexOf("from");
 		int pos2 = this.selectFrom.indexOf("from");
-		queryBuffer.insert(pos, ", " + selectFrom + " ");
+		if (pos>-1) { // if there is a "from" already
+			queryBuffer.insert(pos, ", " + selectFrom + " ");
+			pos = queryBuffer.indexOf("from"); // new position of "from"
+			this.selectFrom = queryBuffer.substring(0, pos) + this.selectFrom.substring(pos2);
+		} else {
+			queryBuffer.append(", " + selectFrom + " ");
+			this.selectFrom = queryBuffer.toString();
+		}
 		lastSkipped = false;
-		pos = queryBuffer.indexOf("from"); // new position of "from"
-		this.selectFrom = queryBuffer.substring(0, pos) + this.selectFrom.substring(pos2);
 		return this;
 	}
 
@@ -907,7 +914,7 @@ public class YadaSql implements CloneableDeep {
 	}
 
 	/**
-	 * To be used before calling query() or nativeQuery()
+	 * To be used before calling query() or nativeQuery(). It is ok to set a parameter that is not used in the query.
 	 * @param name the parameter name, without the initial :
 	 * @param value the parameter value
 	 * @return

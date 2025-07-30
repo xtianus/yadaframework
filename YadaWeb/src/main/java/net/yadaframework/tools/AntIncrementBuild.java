@@ -44,9 +44,9 @@ public class AntIncrementBuild {
 	private int execute() {
 		try {
 			File newFile = new File(configFile.getAbsolutePath()+".tmp");
-			BufferedReader reader = new BufferedReader(new FileReader(configFile));
-			BufferedWriter writer = new BufferedWriter(new FileWriter(newFile));
-			try {
+			
+			try(BufferedReader reader = new BufferedReader(new FileReader(configFile));
+				BufferedWriter writer = new BufferedWriter(new FileWriter(newFile));) {
 				String line = reader.readLine();
 				while (line!=null) {
 					String origLine = line;
@@ -62,13 +62,13 @@ public class AntIncrementBuild {
 					line = reader.readLine();
 				}
 			} catch (Exception e) {
-				writer.close();
-				reader.close();
 				return 1;
 			}
-			writer.close();
-			reader.close();
-			Files.move(newFile.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			// For some reason I started to get "The process cannot access the file because it is being used by another process" 
+			// when moving the file so I try to copy it first then delete the tmp one
+			// Files.move(newFile.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(newFile.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			newFile.delete();
 //			newFile.renameTo(configFile);
 			return 0;
 		} catch (Exception e) {
