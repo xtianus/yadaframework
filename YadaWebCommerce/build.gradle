@@ -45,6 +45,12 @@ dependencies {
 	testImplementation 'junit:junit:4.12'
 }
 
+configurations.all {
+	resolutionStrategy {
+		force 'com.google.code.gson:gson:2.8.5' // force 2.8.5 because 2.8.6 uses java 9
+	}
+}
+
 jar {
     manifest {
         attributes("Implementation-Title": "YadaWebCommerce",

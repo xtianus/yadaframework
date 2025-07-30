@@ -40,13 +40,19 @@ dependencies {
 		'org.springframework:spring-webmvc:5.3.18',
 		'org.springframework:spring-orm:5.3.18',
 		'org.hibernate:hibernate-entitymanager:5.5.0.Final',
-        'com.fasterxml.jackson.core:jackson-annotations:2.12.+',
-        'com.fasterxml.jackson.core:jackson-core:2.12.+',
+        'com.fasterxml.jackson.core:jackson-annotations:2.12.7',
+        'com.fasterxml.jackson.core:jackson-core:2.12.7',
 		// 'com.fasterxml.jackson.core:jackson-databind:2.10.+',
 		'org.apache.commons:commons-io:1.3.2'
 		
 		
 	testImplementation 'junit:junit:4.12'
+}
+
+configurations.all {
+	resolutionStrategy {
+		force 'com.google.code.gson:gson:2.8.5' // force 2.8.5 because 2.8.6 uses java 9
+	}
 }
 
 jar {
