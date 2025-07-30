@@ -70,22 +70,22 @@ tasks.withType(JavaCompile).configureEach {
 dependencies {
 	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
 
-	api 'org.apache.commons:commons-configuration2:2.11.0'
+	api 'org.apache.commons:commons-configuration2:2.12.0'
 	
 	// Fixes commons-text:1.9 CVE-2022-42889 caused by commons-configuration2:2.8.0
-	api 'org.apache.commons:commons-text:1.12.0'
+	api 'org.apache.commons:commons-text:1.13.1'
 	
 	// For embedded Tomcat ONLY - add these to your project
 	// runtimeOnly 'org.apache.tomcat:tomcat-el-api:8.5.+'
 	// runtimeOnly 'org.apache.tomcat:tomcat-jasper-el:8.5.+'
 	// runtimeOnly 'org.apache.tomcat:tomcat-jasper:8.5.+'
 	// For embedded mariadb
-	compileOnly('ch.vorburger.mariaDB4j:mariaDB4j:3.1.0') {
+	compileOnly('ch.vorburger.mariaDB4j:mariaDB4j:3.2.0') {
 		// mariaDB4j pulls the latest version of spring core but this is never a good thing.
 		exclude group: 'org.springframework', module: 'spring-core'
 	}	
 	// Needed by Commons Configuration
-	api 'commons-jxpath:commons-jxpath:1.3'
+	api 'commons-jxpath:commons-jxpath:1.4.0'
 
 	// For Spring: 	using a specific version instead of the + wildcard to prevent side effects 
 	// 				in the application when new versions are made available 
@@ -99,17 +99,18 @@ dependencies {
 		'org.thymeleaf:thymeleaf-spring6:3.1.2.RELEASE',
 		'com.mysql:mysql-connector-j:8.4.0',
 		'commons-collections:commons-collections:3.2.2',
+		'commons-fileupload:commons-fileupload:1.5',
 		'org.apache.commons:commons-exec:1.3',
 		// 'jakarta.mail:jakarta.mail-api:2.1.2',
 		'com.sun.mail:jakarta.mail:2.0.1', // The implementation is needed, not the api
 		'com.google.guava:guava:31.1-jre',
-		'org.jsoup:jsoup:1.18.3',
-		'ch.qos.logback:logback-classic:1.5.12',
-		'com.fasterxml.jackson.core:jackson-databind:2.18.2',
+		'org.jsoup:jsoup:1.20.1',
+		'ch.qos.logback:logback-classic:1.5.18',
+		'com.fasterxml.jackson.core:jackson-databind:2.19.0',
 		'org.seleniumhq.selenium:selenium-java:4.13.0', // 4.13.0 is the last java 8 version
 		'com.drewnoakes:metadata-extractor:2.19.0',
 		'org.flywaydb:flyway-mysql:9.22.3', // 10 is compiled with jdk17
-		'commons-beanutils:commons-beanutils:1.9.4'
+		'commons-beanutils:commons-beanutils:1.11.0'
 		
 	 // Connection pool for embedded Tomcat and programmatic datasource
 	api 'org.vibur:vibur-dbcp:25.0'

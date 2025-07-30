@@ -50,7 +50,7 @@ public class YadaMariaDBServer {
 			}
 			DBConfigurationBuilder configBuilder = DBConfigurationBuilder.newBuilder();
 			configBuilder.setPort(0); // Set to 0 for automatic port selection
-			configBuilder.setDataDir(embeddedDatabaseDataDir);
+			configBuilder.setDataDir(embeddedDatabaseDataDirFile);
 			db = DB.newEmbeddedDB(configBuilder.build());
 			db.start();
 			port = configBuilder.getPort();
