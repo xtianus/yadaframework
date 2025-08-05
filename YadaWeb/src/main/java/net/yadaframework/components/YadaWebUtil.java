@@ -180,51 +180,6 @@ public class YadaWebUtil {
 	}
 	
 	/**
-	 * Checks if a global error with the given code already exists in the binding result.
-	 * Useful to avoid adding the same error multiple times.
-	 * @param binding The binding result to check
-	 * @param errorCode The error code to look for
-	 * @return true if an error with the given code already exists
-	 */
-	public boolean hasGlobalError(BindingResult binding, String errorCode) {
-	    for (ObjectError error : binding.getGlobalErrors()) {
-	        if (errorCode.equals(error.getCode())) {
-	            return true;
-	        }
-	    }
-	    return false;
-	}
-	
-	/**
-	 * Creates a new BindingResult associated with a new instance of the same type,
-	 * preserving all error information from the original BindingResult.
-	 * 
-	 * @param <T> The type of the target object
-	 * @param originalBindingResult The original BindingResult with error information
-	 * @param newTargetObject The new object instance to associate with the errors
-	 * @param model The Spring MVC Model to update with the new BindingResult
-	 * @return A new BindingResult with the same errors, now linked to the new object
-	 */
-	public <T> BindingResult relinkBindingResult(BindingResult originalBindingResult, T newTargetObject, Model model) {
-	    // Use the original object name for the new binding result
-	    String attributeName = originalBindingResult.getObjectName();
-	    // Create a new BindingResult for the new target object
-	    BeanPropertyBindingResult newBindingResult = new BeanPropertyBindingResult(newTargetObject, attributeName);
-	    // Copy any existing field errors from the original binding result
-	    for (FieldError error : originalBindingResult.getFieldErrors()) {
-	        newBindingResult.rejectValue(error.getField(), error.getCode(), error.getArguments(), error.getDefaultMessage());
-	    }
-	    // Copy any existing global errors from the original binding result
-	    for (ObjectError error : originalBindingResult.getGlobalErrors()) {
-	        newBindingResult.reject(error.getCode(), error.getArguments(), error.getDefaultMessage());
-	    }
-	    // Add the new binding result to the model
-	    model.addAttribute(BindingResult.MODEL_KEY_PREFIX + attributeName, newBindingResult);
-	    
-	    return newBindingResult;
-	}
-	
-	/**
 	 * Returns true if the MultipartFile has not been uploaded at all, not even an empty file
 	 * @param multipartFile
 	 */

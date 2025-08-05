@@ -19,12 +19,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-<<<<<<< HEAD
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-=======
-import java.util.stream.Collectors;
->>>>>>> refs/remotes/origin/0.7.7
 
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
