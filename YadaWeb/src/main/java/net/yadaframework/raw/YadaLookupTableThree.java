@@ -1,5 +1,9 @@
 package net.yadaframework.raw;
 
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,6 +53,22 @@ public class YadaLookupTableThree<K1, K2, V> {
 	 */
 	public void clear() {
 		col1.clear();
+	}
+	
+	public boolean isEmpty() {
+		return col1.isEmpty();
+	}
+	
+	/**
+	 * Returns a Collection of the values contained in this table (i.e. the last column). 
+	 * The collection is not backed by the table, so changes to the table are not reflected in the collection.
+	 */
+	public Collection<V> values() {
+		List <V> result = new ArrayList<>();
+		for (Map<K2, V> col2 : col1.values()) {
+			result.addAll(col2.values());
+		}
+		return result;
 	}
 	
 }

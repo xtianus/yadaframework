@@ -147,8 +147,14 @@ public class YadaAppConfig {
 	@Bean
 	public MessageSource messageSource() {
 		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-		// TODO to add more message files, use messageSource.setBasenames(String[])
-		messageSource.setBasename("WEB-INF/messages/messages"); // e.g. WEB-INF/messages/messages.properties, WEB-INF/messages/messages_en.properties
+		String[] baseNames = config.getMessageSourceBasenames();
+		// Add the "WEB-INF/messages" prefix when missing
+		for (int i=0; i<baseNames.length; i++) {
+			if (!baseNames[i].startsWith("WEB-INF/messages")) {
+				baseNames[i] = "WEB-INF/messages/" + baseNames[i];
+			}
+		}
+		messageSource.setBasenames(baseNames); // e.g. WEB-INF/messages/messages.properties, WEB-INF/messages/messages_de.properties
 		// if true, the key of the message will be displayed if the key is not
 		// found, instead of throwing a NoSuchMessageException
 		messageSource.setFallbackToSystemLocale(false);

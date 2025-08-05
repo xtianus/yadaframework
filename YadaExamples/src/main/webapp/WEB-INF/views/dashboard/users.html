@@ -27,6 +27,16 @@
 		</ul>
 	</div>
 	<br>
+	<form class="yada_dataTables_userTable form-inline" style="gap: 10px">
+		<span>Role filter:</span>
+		<div th:each="roleId : ${@config.getRoleIds()}" class="form-group form-check">
+			<label class="form-check-label">
+				<input type="checkbox" name="rolekey" th:value="${@config.getRoleKey(roleId)}" onchange="$('#userTable').data('yadaDataTableApi').ajax.reload()" class="form-check-input">
+				[[${@config.getRoleKey(roleId)}]]
+			</label>
+		</div>
+	</form>
+	<br>
 	<yada:datatable 
 		yada:configuration="${userTableAttribute}" 
 		yada:preprocessor="userTablePreprocessor"

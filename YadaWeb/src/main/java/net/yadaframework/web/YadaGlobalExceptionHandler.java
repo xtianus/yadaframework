@@ -15,10 +15,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
+import net.yadaframework.web.exceptions.YadaHttpNotFoundException;
 
 /**
  * Handles all exceptions exiting a @Controller that have not been annotated with @ResponseStatus
  * http://ankursinghal86.blogspot.it/2014/07/exception-handling-in-spring-mvc.html
+ * @see YadaHttpNotFoundException
  */
 @ControllerAdvice
 public class YadaGlobalExceptionHandler {

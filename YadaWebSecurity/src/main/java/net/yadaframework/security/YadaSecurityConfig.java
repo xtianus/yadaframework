@@ -185,6 +185,7 @@ public class YadaSecurityConfig {
 	}
 	
 	@Bean
+	// This is used by YadaSecurityUtil.checkUrlAccess()
 	public AuthorizationManager<HttpServletRequest> authorizationManager(SecurityFilterChain filterChain) {
 		AuthorizationFilter filter = (AuthorizationFilter) filterChain.getFilters().stream()
 			.filter(f -> f instanceof AuthorizationFilter).findFirst()

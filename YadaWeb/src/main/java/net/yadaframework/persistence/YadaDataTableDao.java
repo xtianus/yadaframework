@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -363,6 +364,8 @@ public class YadaDataTableDao {
 		}
 		// Sorting
 		boolean needsExtraction = false;
+		// If targetClass has an id attribute, add it to the "order by" clause for deterministic pagination
+		boolean needsOrderById = Arrays.stream(targetClass.getDeclaredFields()).anyMatch(field -> field.getName().equalsIgnoreCase("id"));
 		List<YadaDatatablesOrder> orderList = yadaDatatablesRequest.getOrder();
 		if (orderList!=null) {
 			for (YadaDatatablesOrder yadaDatatablesOrder : orderList) {
@@ -371,6 +374,9 @@ public class YadaDataTableDao {
 					YadaDatatablesColumn yadaDatatablesColumn = yadaDatatablesColumns.get(columnIndex);
 					if (yadaDatatablesColumn.isOrderable()) {
 						String attributeName = yadaDatatablesColumn.getNameOrData();
+						if ("id".equalsIgnoreCase(attributeName)) {
+							needsOrderById = false; // No need to add it twice
+						}
 						if (attributeName!=null) {
 							// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
 							String sortColumn = addLeftJoins(attributeName, yadaSql, targetClass);
@@ -384,6 +390,10 @@ public class YadaDataTableDao {
 					}
 				}
 			}
+		}
+		// Always order by id (too) to have deterministic pagination
+		if (needsOrderById) {
+			yadaSql.orderBy("e.id"); // No need to specify the direction
 		}
 		yadaSql.setParameter("globalSearchString", "%"+globalSearchString+"%");
 		yadaSql.setParameter("globalSearchNumber", globalSearchNumber);

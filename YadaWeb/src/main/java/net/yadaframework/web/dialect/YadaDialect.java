@@ -44,6 +44,8 @@ public class YadaDialect extends AbstractProcessorDialect {
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "updateOnSuccess", "data-yadaUpdateOnSuccess", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "showAjaxFeedback", "data-yadaShowAjaxFeedback", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "dropUpload", "data-yadaDropUpload", config));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "dropUploadAccept", "data-yadaDropUploadAccept", config));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "dropUploadParamName", "data-yadaDropUploadParamName", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "singleFileOnly", "data-yadaSingleFileOnly", config));
         // For append, use the $append() extended selector syntax in updateOnSuccess
         // processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "appendOnSuccess", "data-yadaAppendOnSuccess", config));

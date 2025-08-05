@@ -390,8 +390,7 @@ public class YadaAttachedFile implements CloneableDeep, Comparable<YadaAttachedF
 	/**
 	 * Returns the absolute file on the filesystem
 	 * @param type the version of the file: desktop, mobile or default
-	 * @param config
-	 * @return
+	 * @return the file or null if the file does not exist
 	 */
 	@Transient
 	public File getAbsoluteFile(YadaAttachedFileType type) {

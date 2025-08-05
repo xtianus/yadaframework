@@ -19,8 +19,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+<<<<<<< HEAD
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+=======
+import java.util.stream.Collectors;
+>>>>>>> refs/remotes/origin/0.7.7
 
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
@@ -1112,7 +1116,7 @@ public abstract class YadaConfiguration {
 				}
 				newRoleIdToKeyMap.put(id, key.toUpperCase());
 				newRoleKeyToIdMap.put(key.toUpperCase(), id);
-			}
+				}
 			for (ImmutableHierarchicalConfiguration sub : configuration.immutableConfigurationsAt("config/security/roles/role")) {
 				Integer id = sub.getInteger("id", null); // Never null here because of previous check
 				String key = sub.getString("key", null); // Never null here because of previous check
@@ -1700,6 +1704,18 @@ public abstract class YadaConfiguration {
 	 */
 	public int getYadaJobSchedulerCacheSize() {
 		return this.configuration.getInt("config/yada/jobScheduler/jobCacheSize", 500);
+	}
+
+	/**
+	 * There can be more than one "messages.properties" file for i18n, for example to split by concern e.g. "errors", "countries", etc.
+	 * @return
+	 */
+	public String[] getMessageSourceBasenames() {
+		String[] basenames = this.configuration.getStringArray("config/i18n/messageSource/basename");
+		if (basenames == null || basenames.length == 0) {
+			return new String[] {"messages"};
+		}
+		return basenames;
 	}
 
 }
