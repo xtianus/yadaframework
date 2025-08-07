@@ -12,8 +12,12 @@
 <link rel="stylesheet" type="text/css" href="../yadadocs.css" />
 
 </head>
-<body class="article">
-<!-- When editing this file, you must copy it in all other folders (without change) -->
+<body class="article toc2 toc-left">
+<!--
+	WARNING !!!!!
+	Edit the /YadaDocs/src/docs/asciidoc/common/docinfo-header.html file
+	to change this menu.
+-->
 
 <select id="navigator">
 	<option>Choose chapter...</option>
@@ -21,18 +25,23 @@
 	<option data-link="./newEclipseProject.html">Getting started</option>
 	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
 	<option data-link="./internationalization.html">Internationalization</option>
-	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./database/overview.html">Databases</option>
 	<option data-link="./forms/overview.html">Forms</option>
 	<option data-link="./ajax.html">Ajax</option>
 	<option data-link="./ajaxModal.html">Ajax Modal</option>
-	<option data-link="./security.html">Security</option>
+	<option data-link="./security/overview.html">Security</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./json.html">Read and Write JSON</option>
+	<option data-link="./confirmationModal.html">Confirmation Modal</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
 	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./staging.html">Staging Docs</option>
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
 </select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
 <script>
 document.querySelector("#navigator").addEventListener("change", function (event) {
 	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
@@ -41,24 +50,496 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 		document.location.href = link;
 	}
 });
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.style.position = 'relative';
+        header.addEventListener('click', function(e) {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+            navigator.clipboard.writeText(url);
+        });
+        header.addEventListener('mouseenter', function() {
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-clone';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.style.position = 'absolute';
+            icon.style.right = '30px';
+            icon.style.top = '50%';
+            icon.style.transform = 'translateY(-50%)';
+            icon.style.fontSize = '18px';
+            icon.style.color = 'gray';
+            header.appendChild(icon);
+        });
+        header.addEventListener('mouseleave', function() {
+            const icon = header.querySelector('.fa-clone');
+            if (icon) {
+            	header.removeChild(icon);
+            }
+        });
+    });
+});
+
+function showCopy(e) {
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-clone';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.style.position = 'absolute';
+    icon.style.left = e.pageX + 'px';
+    icon.style.top = e.pageY + 'px';
+    icon.style.zIndex = 1000;
+    icon.style.fontSize = '24px';
+    document.body.appendChild(icon);
+    setTimeout(function() {
+        document.body.removeChild(icon);
+    }, 1000); // 1 second delay
+}
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;
+    	}
+    }
+};
 </script>
 <div id="header">
 <h1>DataTables</h1>
 <div class="details">
-<span id="revnumber">version 0.7.5</span>
+<span id="revnumber">version 0.7.7</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">Introduction</a></li>
+<li><a href="#_prerequisites">Prerequisites</a></li>
+<li><a href="#_html_code">HTML Code</a></li>
+<li><a href="#_java_fluent_interface">Java Fluent Interface</a>
+<ul class="sectlevel2">
+<li><a href="#_basic_configuration">Basic Configuration</a></li>
+<li><a href="#_advanced_configuration">Advanced Configuration</a></li>
+</ul>
+</li>
+<li><a href="#_java_ajax_endpoint">Java Ajax Endpoint</a></li>
+</ul>
 </div>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Complex tables made easy</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://datatables.net/" target="_blank" rel="noopener">DataTables</a> is a very powerful javascript
+library for creating tables with complex user interactions. It has dozens of
+configuration options and can be quite complicated to set up correctly.
+The Yada Framework implements a Java Fluent API that produces the required
+javascript configuration and provides the needed backend functionality for
+server-side data loading.</p>
+</div>
+<div class="paragraph">
+<p>The current implementation covers all the core DataTables options and the
+<a href="https://datatables.net/extensions/responsive/" target="_blank" rel="noopener">Responsive</a> extension.</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../img/datatables.user.jpg" alt="User Table">
+</div>
+<div class="title">Figure 1. User Table</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+A full example is implemented in the YadaExamples project.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_prerequisites">Prerequisites</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The DataTables library can either be downloaded locally or from a CDN.
+In both cases the official download page offers different options to package
+the required elements into a downloadable zip or a specific CDN url for
+javascript and CSS.
+The Yada Framework implementation has been tested with:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Styling framework</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bootstrap 5</p></td>
+</tr>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Packages</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DataTables</p></td>
+</tr>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">Extensions</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Responsive</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>This example is for a downloaded version:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;head&gt;
+	&lt;link rel="stylesheet" type="text/css" th:href="@{/static/datatables-2.1.8/datatables.min.css}"/&gt;
+&lt;/head&gt;
+...
+&lt;script th:src="@{/static/datatables-2.1.8/datatables.min.js}"&gt;&lt;/script&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>yada.datatables.js</code> file also needs to be loaded. This is by default automatically
+packaged in the war distribution for production but should be added in development:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;script th:if="${@config.developmentEnvironment}" th:src="@{/yadares/js/yada.datatables.js}"&gt;&lt;/script&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_html_code">HTML Code</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The basic DataTable functionality is implemented just by adding the <code>yada:datatable</code> tag:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:datatable <i class="conum" data-value="1"></i><b>(1)</b>
+	yada:configuration="${userTableAttribute}"&gt; <i class="conum" data-value="2"></i><b>(2)</b>
+&lt;/yada:datatable&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The tag inserts the table at the specified position in the HTML</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The configuration must have been set in the @Controller as a Model attribute, called "userTableAttribute" in this example</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>For advanced scenarios where you need to alter the configuration before
+creating the table or work with the created table in javascript, two handlers
+can be provided via <code>yada:preprocessor</code> and <code>yada:postprocessor</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:datatable
+	yada:configuration="${userTableAttribute}"
+	yada:preprocessor="userTablePreprocessor" <i class="conum" data-value="1"></i><b>(1)</b>
+	yada:postprocessor="userTablePostprocessor"&gt; <i class="conum" data-value="2"></i><b>(2)</b>
+&lt;/yada:datatable&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The preprocessor can alter the configuration before the table is created</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The postprocessor can operate on the table once it has been created</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>More details below.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_java_fluent_interface">Java Fluent Interface</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The configuration for a DataTable is implemented in a <code>YadaDataTable</code> instance.
+This instance can be added to the Model with an attribute that has the same name
+used in <code>yada:configuration</code>, e.g. <code>userTableAttribute</code> in the example above.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaDataTable myDataTable = ...
+model.addAttribute("userTableAttribute", myDataTable);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The instance is a singleton identified by a unique id and is produced by <code>yadaDataTableFactory</code>.
+This ensures that the table configuration code is run only once for all HTTP requests
+and that the same configuration can be used in the ajax handler that loads the table data.</p>
+</div>
+<div class="paragraph">
+<p>To create or get an instance the syntax is as follows:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaDataTable myDataTable = yadaDataTableFactory.getSingleton("myTableId", locale, ...);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The locale is needed to load the i18n file and can be omitted or set to null to use the default locale
+that is either set in the application XML configuration or taken from the platform.
+In a multilanguage application it should be taken from a parameter in the @Controller @RequestMapping.</p>
+</div>
+<div class="paragraph">
+<p>The table configuration is added as a lambda after the locale parameter and uses the fluent iterface:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", locale, table -&gt; {
+	table
+		.dtAjaxUrl("someUrl")
+		.dt ...
+});</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Using the lambda ensures that the configuration code is run just once.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>All methods of the fluent interface have the "dt" prefix. This makes IDE suggestions
+more focused on the useful methods during autocompletion:</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../img/datatables.completion.jpg" alt="Method Autocompletion">
+</div>
+<div class="title">Figure 2. Method Autocompletion</div>
+</div>
+<div class="paragraph">
+<p>When a configuration option has many parameters, the corresponding
+method name has the "Obj" suffix because a new object is returned to provide the new
+configuration methods.
+To "exit" from the current object, the <code>back()</code> method must be called.</p>
+</div>
+<div class="sect2">
+<h3 id="_basic_configuration">Basic Configuration</h3>
+<div class="paragraph">
+<p>The most basic table configuration, that can be used to show data taken from an @Entity,
+only requires the entity class and fields:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/user")
+public String users(Model model) {
+	YadaDataTable basicTable = yadaDataTableFactory.getSingleton("basicTable", table -&gt; {
+		table
+			.dtEntityClass(UserProfile.class) <i class="conum" data-value="1"></i><b>(1)</b>
+			.dtStructureObj()
+				.dtColumnObj("Email", "userCredentials.username").back() <i class="conum" data-value="2"></i><b>(2)</b>
+				.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin").back() <i class="conum" data-value="2"></i><b>(2)</b>
+			.back();
+	});
+	model.addAttribute("basicTable", basicTable);
+	return "/dashboard/users";
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Provide the class of the entity that holds data</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Provide the column names and the path of the properties that hold the value to show</td>
+</tr>
+</table>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../img/datatables.basicuser.jpg" alt="Basic Usage">
+</div>
+<div class="title">Figure 3. Basic Usage</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+the endpoint is implemented in <code>YadaController.yadaDataTableData()</code>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Data retrieval will be automatic and will have the same security restrictions of the page where
+the table is shown, which is "/dashboard/user" in the example.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+security is implemented in SecurityConfig if the application is secured
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_advanced_configuration">Advanced Configuration</h3>
+<div class="paragraph">
+<p>In more advanced scenarios the ajax endpoint returning data can be customized with <code>dtAjaxUrl()</code>.
+This is an alternative approach to <code>dtEntityClass()</code> and using both will result in error.
+The argument of <code>dtAjaxUrl()</code> is the url for the ajax call that retrieves data
+from the backend. It can contain any Thymeleaf expression and will be included
+in a standard URL expression like <code>@{/myUrl}</code> when not already provided.</p>
+</div>
+<div class="paragraph">
+<p>The dtStructureObj() top method starts configuration of the "structure" of the
+table using a custom API that can be explored with autocompletion. This API
+allows the definition of columns and buttons.</p>
+</div>
+<div class="paragraph">
+<p>The other top method is <code>.dtOptionsObj()</code> that allows access to the official
+DataTables <a href="https://datatables.net/reference/option/" target="_blank" rel="noopener">options</a>. For example, the <a href="https://datatables.net/reference/option/pageLength" target="_blank" rel="noopener">PageLength</a>
+option can be set with <code>.dtOptionsObj().dtPageLength(25)</code>.
+All the DataTables core options and the Responsive extension options are available
+unless they are deprecated or not applicable in the context of the Yada Framework,
+like <a href="https://datatables.net/reference/option/retrieve" target="_blank" rel="noopener">retrieve</a>.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+anything that can&#8217;t be done in Java can be done in javascript using pre- and post- processors.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_java_ajax_endpoint">Java Ajax Endpoint</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The Yada Framework implementation of DataTables assumes that data is fetched via ajax from the server,
+therefore the <a href="https://datatables.net/reference/option/ajax" target="_blank" rel="noopener">ajax option</a> is forced to be active.</p>
+</div>
+<div class="paragraph">
+<p>The ajax endpoint is set via <code>.dtAjaxUrl()</code> on the YadaDataTable object as explained before. The
+@Controller should query the database, performing searching and sorting, and return a JSON
+file with the resulting data for the current page.</p>
+</div>
+<div class="paragraph">
+<p>When the table shows data from @Entity objects, most of that code is already provided.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping(value ="/user/userProfileTablePage", produces = MediaType.APPLICATION_JSON_VALUE)
+@ResponseBody public Map&lt;String, Object&gt; userProfileTablePage(YadaDatatablesRequest yadaDatatablesRequest, Locale locale) { <i class="conum" data-value="1"></i><b>(1)</b>
+	Map&lt;String, Object&gt; result = yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale);	<i class="conum" data-value="2"></i><b>(2)</b>
+	return result;	<i class="conum" data-value="3"></i><b>(3)</b>
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>YadaDatatablesRequest is initialized with the metadata sent by DataTables, like the current page number, the value paths and the search/sort options</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>yadaDataTableDao.getConvertedJsonPage() receives the request data and the @Entity class to perform all needed operations</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The result is a "map tree" (i.e. nested maps) that is automatically converted to json</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Using a custom endpoint for table data allows to manipulate both the query and the result, for example
+by adding conditions or creating values not directly found on the entity:</p>
+</div>
 <div class="listingblock todo">
 <div class="content">
-<pre>TODO</pre>
+<pre>ajax endpoint with manipulation of query and result
+
+toolbar, command bar, select column
+
+row class from the backend
+
+full example
+
+reference
+
+pre- and post- processors
+
+i18n is automatic by using keys instead of words</pre>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.5<br>
-Last updated 2023-04-27 09:52:09 +0200
+Version 0.7.7<br>
+Last updated 2024-11-26 19:33:44 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

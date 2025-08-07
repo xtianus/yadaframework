@@ -1,5 +1,6 @@
 =  Ajax
 :docinfo: shared
+:imagesdir: ../img/
 
 Easy ajax operations even without javascript
 
@@ -67,14 +68,16 @@ The class `yadaAjaxDisabled` disables the link. Can also be used on any other el
 
 disable the loader::
 
-The loader is started by default. To disable it, add the `yadaNoLoader` class.
+The page loader is started by default. To disable it, add the `yadaNoLoader` class.
 
+show an element loader::
 
-
-
+Instead of showing a full page loader, the ajax call can show a small loader
+inside any page element when the `yada:ajaxElementLoader` attribute is used on the
+triggering element. The value is a CSS selector that can use the <<extendedSelectors,extended syntax>>. 
+See <<loaderOption>> for some more details.
 
 ===  Returning from the backend
-
 
 Controllers can return a standard thymeleaf view (html/xml), some JSON data or any other MIME type like a PDF or an excel file content.
 The resulting objects will be passed to any "successHandler" javascript method (see below)
@@ -271,8 +274,8 @@ a| jQuery selector list (extended syntax)
 a| delete the target elements
 
 a| `data-yadaSuccessHandler`
-a| comma-separated list of function names or function body
-a| call the specified functions or execute the code
+a| comma-separated list of function names, or function body, not both (e.g. "f1,f2" or "f1();f2();" not "f1(),f2")
+a| call the specified functions or execute the code. The function is called in the context of the DOM element. It also receives the DOM element as a third parameter (see below)
 |===
 
 Yada-dialect variants:
@@ -311,9 +314,19 @@ The "jQuery selector list" is a comma-separated list of jQuery selectors, like `
 It is searched in all the document unless a special yada prefix is used (see below).
 If the selector list is empty, the target is the element itself. 
 
+[IMPORTANT]
+====
+Do not use an #id as selector.
+
 If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.
+But if you replace something by #id with something that doesn't have the #id anymore, replacement will work only for the first call.
+====
 
 Each selector can also have the following special prefixes:
+
+[[extendedSelectors]]
+
+.Extended selectors
 [cols="<25,<50",options="header"]
 |===
 h| name
@@ -406,7 +419,7 @@ public String someUrl(Model model) {
 
 ====  Calling some Handler
 
-The value of the yadaSuccessHandler attribute can either be a comma-separated list
+The value of the *yadaSuccessHandler* attribute can either be a comma-separated list
 of function names or bodies of a function.
 
 Examples:
@@ -423,7 +436,7 @@ The success handlers are called in sequence and should have the following signat
 
 [source,javascript]
 ----
-function someHandler(responseText, responseHtml, link) {
+function someHandler(responseText, responseHtml, domElement) {
 ----
 
 responseText:: 
@@ -432,12 +445,12 @@ either the unparsed text received from the ajax call, or a json object if the re
 responseHtml:: 
 the ajax response converted to jQuery html objects
 
-link:: 
-the original anchor object (DOM, not jQuery). Could also be a form or anything else, not just a "link".
+domElement:: 
+the original anchor/form object (DOM, not jQuery) that triggered the ajax call.
 
-The `link` argument is also the same as the current `this` context.
+The `domElement` argument is also the same as the current `this` context.
 
-When using function bodies, the above three arguments are valid objects. 
+When using function bodies, the above three arguments are valid objects and can be used. 
 
 [NOTE]
 ====
@@ -464,8 +477,23 @@ the classic `responseHtml.find('.parent .child')` or `$('.parent .child', respon
 
 To open a modal returned by an ajax call, see xref:ajaxModal.adoc[Ajax Modal].
 
-====  Confirm Dialog
+====  Ajax conditional HTML
 
+When returning from any ajax call the model attribute `yadaIsAjaxResponse`
+has the value `yadaIsAjaxResponse`. This can be used to conditionally show
+some section or to apply some style only when returning from ajax:
+
+[source,html]
+----
+<span th:if="${yadaIsAjaxResponse}">Just returned from Ajax call!</span>
+
+<style>
+	.yadaIsAjaxResponse { color: red; }
+</style>
+<div th:classappend="${yadaIsAjaxResponse}">This is red after Ajax</div>
+----
+
+====  Confirm Dialog
 
 You can show a confirm dialog before the ajax call is made. The user will be shown a text message and an option to confirm or abort the call.
 
@@ -493,22 +521,6 @@ a| `yada:cancelButton`
 a| (optional) text of the cancel button
 |===
 
-====  Ajax conditional HTML
-
-When returning from any ajax call the model attribute `yadaIsAjaxResponse`
-has the value `yadaIsAjaxResponse`. This can be used to conditionally show
-some section or to apply some style only when returning from ajax:
-
-[source,html]
-----
-<span th:if="${yadaIsAjaxResponse}">Just returned from Ajax call!</span>
-
-<style>
-	.yadaIsAjaxResponse { color: red; }
-</style>
-<div th:classappend="${yadaIsAjaxResponse}">This is red after Ajax</div>
-----
- 
 ==  Ajax Forms
 
 See the  xref:forms/overview.adoc#Ajax Forms[Ajax Forms section] in the Forms chapter.
@@ -571,6 +583,95 @@ complete list of ajaxifyable elements. Is the yadaAjax class needed? Examples.
 
 ----
 
+==  Ajax upload by drag&drop
+
+Any element on page can be turned into a drop target for file upload operations using the following attributes:
+
+.file upload
+[cols="<33,<33,<33",options="header"]
+|===
+h| name
+a| value
+a| description
+
+a| `yada:dropUpload`
+a| URL
+a| sends dropped files to the server via ajax
+
+a| `yada:singleFileOnly`
+a| empty
+a| (optional) prevents uploading multiple files: an error message is shown using title and message from the following message.properties keys: `yadajs.uploadAccept.error.title`, `yadajs.uploadAccept.error.message`
+
+a| `yada:dropUploadAccept`
+a| mime type or extension
+a| (optional) specify which file types should be handled. Example: "application/json", "image/*", ".jpg"
+
+a| `yada:dropUploadParamName`
+a| string
+a| (optional) specify the name of the request parameter that will contain the MultipartFile. Defaults to "multipartFile"
+
+|===
+
+NOTE: The current implementation only sends files via ajax
+
+All other ajax-related functionality can be used, so for example the page can be updated with the result of the
+ajax call using `yada:updateOnSuccess`, or some function can be called using `yada:successHandler`.
+
+NOTE: A link can also be a drop target, but in case of ajax links any handler or update operation would apply
+to both clicking and dropping, which probably is not desirable; plain links (non-ajax) always work as expected 
+
+HTML example:
+
+[source,html]
+----
+<div class="yadaNoLoader" # <1>
+	yada:updateOnSuccess="yadaParents:.fileDetails" # <1>
+	yada:successHandler="yada.showAjaxFeedback" # <1>
+	yada:dropUpload="@{/uploadGalleryImage(productId=${product.id})}" # <2>
+	yada:singleFileOnly # <3>
+	yada:dropUploadAccept="image/*" # <4>
+	title="Drop image to upload">
+	<i class="fas fa-file-upload dropIcon"></i>
+</div>
+----
+<1> any ajax-related functionality applies
+<2> the endpoint can include request parameters as usual
+<3> in this example ony one file can be dropped
+<4> files that are not images will be ignored. The value can also be a specific mime type or an extension like ".jpg"
+
+[.todo]
+----
+Currently `yada:singleFileOnly` does not accept a value but only uses the predefined message.properties keys. 
+This should be changed so that the attribute value has precedence over the key, when specified. It should contain a comma-separated title and error text. 
+----
+
+While the files are being dragged over the drop area, the `yadaDropTarget` class is added to the element. This
+allows a visual feedback (not provided by default) for example by changing the border or the background color.
+
+The @Controller receives a `MultipartFile` or a `MultipartFile[]` with a default name of "multipartFile": dropping a single file will match both signatures
+but dropping more than one would only match the latter, so choose accordingly to the use case, the latter being more versatile.
+Uploaded files can be handled as when <<forms/uploads.adoc#_java,using forms for upload>>:
+
+[source,java]
+----
+@RequestMapping("/uploadProductFiles")
+public String uploadProductFiles(Long productId, MultipartFile[] multipartFile, Model model, Locale locale) {
+	Product product = ...
+	for (int idx = 0; idx < multipartFile.length; idx++) {
+		MultipartFile multi = multipartFile[idx];
+		String clientFilename = multi.getOriginalFilename();
+		File managedFile = yadaFileManager.uploadFile(multi);
+		YadaAttachedFile newFile = yadaFileManager.attachNew(true, managedFile, clientFilename, "/productFiles", null, null, null, null);
+		newFile.setAllTitles(clientFilename);
+		newFile = yadaAttachedFileDao.save(newFile);
+		product.addFile(newFile);
+	}
+	... save product
+	return ...
+}
+----
+
+
 ==  Ajax async element load
 
 There are may use cases where it is desirable to load an element of the page only when that element scrolls into view.
@@ -578,6 +679,13 @@ For example, deferring the load of a big image or the calculation of a computati
 This is achieved using the same `yada:ajax` syntax seen above, with the addition of `yada:triggerInViewport`: when 
 any element (even a span) is tagged with `yada:triggerInViewport`, it behaves like a clicked anchor when it enters the
 viewport (or if it is there already on page load).
+
+[TIP]
+====
+When implementing a long list of triggers that get replaced with actual content
+when entering the viewport, ensure that the triggers actually have some height
+or they'll be triggered all at once
+====
 
 The following example shows an async "like button". On page load the state of the button is unknown so it shows
 as "not liked". As soon as it gets into view, an ajax call retrieves the real state of the button by querying the DB. 
@@ -642,6 +750,7 @@ button fragment again:
 </a>
 ----
 
+[[loginRedirects]]
 Another step would be to take care of "login redirects": when a logged out user clicks on the
 like button a login modal would be triggered if the url is protected (as it should) and the
 Controller, called after login with a redirect to the original url, wouldn't know the
@@ -672,16 +781,51 @@ public String toggleBookLike(Long bookId, Boolean currentLike, Boolean yadaAjaxJ
 <3> toggle like when no login has just occurred
 
 
+==  Ajax feedback
 
+When returning from an ajax call it might be useful to show some kind of
+feedback to the user. The yada loader can be used to show that a call
+is being made but sometimes it is more appropriate to show some feedback
+when the ajax call has returned, especially when the call is fast and the loader
+might disappear too quickly.
+
+Such "ajax feedback" can be shown when returning from the ajax call by either
+using HTML attributes or calling a js method in the success handler.
+ 
+.data- attribute and tag for Ajax Feedback
+[cols="<33,<33,<33",options="header"]
+|===
+h| data
+a| tag
+a| description
+
+a| `data-yadaShowAjaxFeedback`
+a| `yada:showAjaxFeedback`
+a| enables the ajax feedback
+|===
+
+[source,javascript]
+----
+yada.showAjaxFeedback();
+----
+
+The default feedback shows a green checkmark in the center of the page using the
+yadaIcon-ok icon.
+This can be styled with the `yadaAjaxFeedbackOk` class and 
+the HTML changed by adding an element with `id="yadaAjaxFeedback"` that will be
+used in place of the default one.
+
+[.center]
+.Default Ajax Feedback
+image::ajaxFeedback.jpg[Default Ajax Feedback]
 
 ==  Ajax method
-
 
 You can call the low-level yada.ajax() method directly.
 
 [source,javascript]
 ----
-yada.ajax(url, data, successHandler, method, timeout, hideLoader, asJson, responseType)
+yada.ajax(url, data, successHandler, method, timeout, loaderOption, asJson, responseType)
 ----
 
 
@@ -696,8 +840,8 @@ method::
 (optional) either "GET" (default) or "POST"
 timeout:: 
 (optional) milliseconds timeout, null for default (set by the browser)
-hideLoader:: 
-(optional) true for not showing the spinning loader (shown by default)
+loaderOption:: 
+(optional) controls the display of a loader image (e.g. spinning wheel)
 asJson:: 
 (optional) true to send the data object as json without splitting the attributes into request parameters
 responseType:: 
@@ -786,7 +930,7 @@ The success handler is called when the server returns without errors:
 
 [source,javascript]
 ----
-successHandler(responseText, $responseHtml)
+successHandler(responseText, $responseHtml, domElement)
 ----
 
 responseText:: 
@@ -808,10 +952,12 @@ If you need to preserve the "this" context of the invoking function, remember to
 yada.ajax(urlShowBom, formData, insertBom.bind(this), "POST");
 ----
 
+NOTE: you can't use `bind` in the function specified with `yada:successHandler` where the context is always the triggering DOM element
 
-===  responseType
+domElement:: 
+the dom element that triggered the ajax call, it is also the current context (`this`).
 
-
+=== responseType
 The response type of an ajax call is set automatically unless specified in this field. A useful value is "blob"
 for downloading a file on the client computer.
 See <<Returning from the backend>> for an example on how to send a PDF file from the server.
@@ -820,6 +966,28 @@ See <<Returning from the backend>> for an example on how to send a PDF file from
 ----
 yada.ajax("/catalog", null, null, null, null, null, null, "blob");
 ----
+
+=== loaderOption
+By default, when an ajax request is made a "page loader" is shown i.e. the `.loader` element is made visible.
+To prevent the loader from showing, the `loaderOption` must be `true`.
+
+Since Yada 0.7.6 a new type of loader can be started instead: the "element loader". This is like the "page loader"
+but limited to some page elements. For example, when clicking on a button a loader may appear
+just on that button or on some target div. For the element loader to show, the loaderOption must be either:
+
+- a string with a css selector
+- a DOM element
+- a JQuery object
+
+It must point to the element or elements that should be covered with a loader.
+
+The HTML of the loader is automatically added and removed. 
+By default it shows a spinning wheel but can be customised with the
+classes `yadaElementLoaderOverlay` and `yadaElementLoaderIcon`. See `yada.css` for the default settings.
+
+WARNING: The ajax method forces the targeted elements to a "relative" position when "static" or not positioned.
+This should not affect the layout. If it does, the element loader should target some specifically 
+added element or be removed.
 
 == Utilities
 === dequeueFunctionCall

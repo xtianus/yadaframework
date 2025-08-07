@@ -1,0 +1,104 @@
+= Embedded Database
+:docinfo: shared
+
+Forget about the database
+
+== Introduction
+Installing and setting up a full MySQL Server instance might be complicated for a
+developer, even more so if the wrong MySQL Server version is already
+installed on the computer. Recurring to containers could be a solution but requires
+some work too.
+
+The Yada Framework can be configured to install and run a MariaDB embedded database
+at startup so that nothing needs to be done on the host computer.
+
+== MariaDB
+https://mariadb.org/[MariaDB^] is a fork of MySQL Server and is 100% compatible with it.
+The https://github.com/vorburger/MariaDB4j[MariaDB4j^] open source project provides a 
+way to embed the MariaDB server in a Java application.
+What it does at runtime is to unpack a small version of the MariaDB binaries on some
+specified folder then run the process on a chosen port. That's all is needed to replace
+MySQL Server.  
+
+== Configuration
+Assuming that a database connection to MySQL has already been configured, changing it to
+point to the embedded database is straightforward:
+
+- add the required dependency to the `build.gradle` file:
+
+	implementation('ch.vorburger.mariaDB4j:mariaDB4j:3.+') {
+        exclude group: 'org.springframework', module: 'spring-core'
+    }
+
+- enable the embedded database in `conf.webapp.dev.xml`:
+
+	<database enabled="true">
+		<embedded enabled="true">
+
+With this minimal configuration, at server startup the MariaDB instance will be installed when missing,
+started when not running and finally connected to in place of MySQL.
+
+[NOTE]
+====
+`spring-core` is excluded because `mariaDB4j` has a dependency to the latest version and this may
+not be what the application needs
+====
+
+The full configuration for the embedded database is shown below with default values:
+
+[source,xml]
+----
+<embedded enabled="true" port="63306"> # <1>
+	<baseDir>${config/paths/basePath}/embeddedDB/MariaDB</baseDir> # <2>
+	<datadir>${config/paths/basePath}/embeddedDB/data</datadir> # <3>
+	<tmpDir>${config/paths/basePath}/embeddedDB/tmp</tmpDir> # <4>
+	<sourceSql>${config/paths/basePath}/embeddedDB/source.sql</sourceSql> # <5>
+</embedded>
+----
+<1> Ports below 1024 require root privilege, above 65535 are invalid
+<2> MariaDB binaries are saved here
+<3> Database data is stored here
+<4> Temp folder used by the database
+<5> sql to run when first creating the database. There is no default value here.
+
+[IMPORTANT]
+====
+In the above example the database configuration is set in `conf.webapp.dev.xml` so that
+the embedded version is only used in development. It would even be possible to configure it
+on a per-user basis by adding the required lines in the private `conf.webapp.localdev.xml` file
+that can be stored in the ${config/paths/basePath}/bin folder and has precedence over the former:
+
+	<config>
+		<database enabled="true">
+			<embedded enabled="true">
+			</embedded>
+		</database>
+	</config>
+
+With this configuration each developer can choose to enable or disable the embedded database, or
+which port and folders to use for it.
+====
+
+== Start and Stop
+The MariaDB process starts the first time that the application server starts. It usually
+survives application server stops and is already available at the next app start: when not, it is started
+automatically again. So it is almost transparent to the developer. 
+
+The embedded DB can also be used with any database IDE
+(like MySQL Workbench) as long as the `mariadbd` process is running. The database can be dropped and
+recreated with the usual means (`drop database` etc.) but in case a quick wipe is required, the whole data
+folder can be deleted before starting the application server. The database
+process must be killed first though because it might be locking some files preventing deletion.
+
+
+
+
+
+
+
+
+
+
+
+
+

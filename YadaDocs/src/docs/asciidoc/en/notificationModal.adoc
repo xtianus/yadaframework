@@ -20,29 +20,27 @@ image::modal-notify-1.jpg[Notification modal]
 ==  Prerequisites
 
 
-The HTML page must contain the following placeholder:
+The HTML page must contain the following code:
 
 [source,html]
 ----
-<div th:include="/yada/modalNotify :: modal" class="modal fade" id="yada-notification" role="dialog"></div>
+<div th:insert="~{${@yadaNotify.viewName} :: modal}" class="modal fade" th:classappend="|B${@config.bootstrapVersion}|" id="yada-notification" role="dialog"></div>
+
 <script th:if="${YADA_NBODY!=null}" type="text/javascript">
-	$(document).ready(function() {
+	yada.ready(function() {
 		$('#yada-notification').modal('show');
 	});
 </script>
 
-<script type="text/javascript">
-        $('#yada-notification').on('hidden.bs.modal', function (e) {
-                $('#yada-notification .glyphicon').addClass("hidden");
-        });
-</script>
 ----
 
-This is usually inserted in a common footer so that you don’t need to remember adding it to each page.
+This is usually inserted in a common footer so that you don’t need to remember adding it to each page. 
+The `yadaInit` task
+already adds a version of the above code to `footer.html`.
 
 [.todo]
 ----
-make a dialect tag for this
+make a dialect tag for this?
 
 ----
 
@@ -180,22 +178,31 @@ Please note that the `redirectOnClose()` url does not need to have the language 
 
 
 Ajax requests work roughly the same as normal requests.
-The notification will be shown only if the result contains the "/yada/modalNotify" modal.
-This can be done in one of the following alternative ways:
+The notification will be shown only if the result contains the notify modal.
+You can either return the correct HTML directly or use one of the provided methods that return
+the correct modal for the Bootstrap version in use:
 
 [source,java]
 ----
-return "/yada/modalNotify";
-return YadaViews.AJAX_NOTIFY;
+return "/yada/modalNotifyB3.html"; // for Bootstrap 3
+return YadaViews.AJAX_NOTIFY_B3; // for Bootstrap 3
+// These return the correct modal for the configured version of Bootstrap:
+return config.getNotifyModalView();
 return yadaNotify.title("Login success", model).ok().message("You have been logged in").add();
 ----
 
-The first version should of course be avoided for future compatibility.
 The last version is very convenient when returning a message at the end of the @RequestMapping method.
+The notification modal HTML can be customised with a specific HTML file, in which case the 
+"config/paths/notificationModalView" entry should point to such HTML file for all of the above to work:
 
+[source,xml]
+----
+<config>
+    <paths>
+        <notificationModalView>/myModalNotify</notificationModalView>
+----
 
 ====  Returning additional HTML
-
 
 The problem with the above approach is that you might want to also return some other HTML,
 for example the original form with validation errors, or something to insert in the page.

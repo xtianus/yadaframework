@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>User Login</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
+</head>
+<body class="article toc2 toc-left">
+<!--
+	WARNING !!!!!
+	Edit the /YadaDocs/src/docs/asciidoc/common/docinfo-header.html file
+	to change this menu.
+-->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/overview.html">Databases</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./security/overview.html">Security</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./json.html">Read and Write JSON</option>
+	<option data-link="./confirmationModal.html">Confirmation Modal</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./staging.html">Staging Docs</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.style.position = 'relative';
+        header.addEventListener('click', function(e) {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+            navigator.clipboard.writeText(url);
+        });
+        header.addEventListener('mouseenter', function() {
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-clone';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.style.position = 'absolute';
+            icon.style.right = '30px';
+            icon.style.top = '50%';
+            icon.style.transform = 'translateY(-50%)';
+            icon.style.fontSize = '18px';
+            icon.style.color = 'gray';
+            header.appendChild(icon);
+        });
+        header.addEventListener('mouseleave', function() {
+            const icon = header.querySelector('.fa-clone');
+            if (icon) {
+            	header.removeChild(icon);
+            }
+        });
+    });
+});
+
+function showCopy(e) {
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-clone';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.style.position = 'absolute';
+    icon.style.left = e.pageX + 'px';
+    icon.style.top = e.pageY + 'px';
+    icon.style.zIndex = 1000;
+    icon.style.fontSize = '24px';
+    document.body.appendChild(icon);
+    setTimeout(function() {
+        document.body.removeChild(icon);
+    }, 1000); // 1 second delay
+}
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;
+    	}
+    }
+};
+</script>
+<div id="header">
+<h1>User Login</h1>
+<div class="details">
+<span id="revnumber">version 0.7.7</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_description">Description</a></li>
+<li><a href="#_setup">Setup</a></li>
+<li><a href="#_password_reset">Password Reset</a></li>
+<li><a href="#_login_process">Login Process</a>
+<ul class="sectlevel2">
+<li><a href="#_login_post">Login POST</a></li>
+<li><a href="#_login_success">Login Success</a></li>
+<li><a href="#_login_failure">Login Failure</a></li>
+</ul>
+</li>
+<li><a href="#_credentials_change">Credentials Change</a>
+<ul class="sectlevel2">
+<li><a href="#_change_password">Change password</a></li>
+<li><a href="#_change_email">Change email</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Get in and get out of protected areas</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_description">Description</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>User login is performed using a username and a password that have been stored in the database.
+The user password is by default encrypted.
+A root user can be configured in order to perform administration operations on other users
+created at runtime.</p>
+</div>
+<div class="paragraph">
+<p>The application can have a full login page or a login modal that opens on any page.
+It is nice to have both for different use cases. For example the full page can be nicer
+when you want all users to perform login before proceeding, while the modal is convenient
+when you want to let anonymous users into the application and let them login at a later step
+without losing their current state.</p>
+</div>
+<div class="paragraph">
+<p>The login process is composed of these steps:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the user clicks on a login link or on a link to a protected page</p>
+</li>
+<li>
+<p>the login form is presented</p>
+<div class="ulist">
+<ul>
+<li>
+<p>the login form can either be on a normal page or on a modal loaded via ajax</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>the user fills the form and submits it, either with a normal or ajax request</p>
+</li>
+<li>
+<p>the server may respond with validation errors returning the same login form back</p>
+<div class="ulist">
+<ul>
+<li>
+<p>username not found</p>
+</li>
+<li>
+<p>invalid password</p>
+</li>
+<li>
+<p>too many failed login attempts</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>or the final page will be shown</p>
+<div class="ulist">
+<ul>
+<li>
+<p>if the user clicked on a login link, a preconfigured page is shown</p>
+</li>
+<li>
+<p>if the user clicked on a link to a protected page, the requested page is shown</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_setup">Setup</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>There are two functions in <code>HomeController</code> that define the ajax login page and the normal login page:
+<code>login()</code> and <code>loginAjax()</code>.
+Either is called when login fails, depending on the login POST type (normal/ajax).
+Only the first one is called after clicking on a link to a protected page,
+be it a normal or an ajax link.
+In order to change the url values, that by default are "/login" and "/ajaxLogin", the <code>SecurityConfig</code>
+bean must override the relevant variables in the constructor:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public SecurityConfig() {
+	loginUrl = "/myloginpage";
+	loginUrlAjax = "/myloginmodal";
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The "/openLogin" request mapping, implemented in <code>HomeController.openLogin()</code>, should be called on the
+link that users click to perform an explicit login. This method resets any saved request that may still be
+stored from previous aborted access attempts thus ensuring that the target page after login is the correct one.
+The @RequestMapping value can be changed to anything as long as the endpoint is not protected.</p>
+</div>
+<div class="paragraph">
+<p>The landing page after an explicit successful login can be configured in SecurityConfig too. The default
+values are "/" (the home page) for normal requests and "/yadaLoginSuccess" for ajax requests. The landing
+page after logout can also be configured this way. This is an example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public class SecurityConfig extends YadaSecurityConfig {
+ 	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http.authorizeHttpRequests(authorize -&gt; authorize
+			.requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
+			.requestMatchers(new AntPathRequestMatcher("/user/**")).hasRole("USER")
+		);
+		super.configure(http);
+		super.successHandler.setDefaultTargetUrlNormalRequest("/my/area");
+		super.successHandler.setDefaultTargetUrlAjaxRequest("/yadaLoginSuccess?targetUrl=/my/area");
+		super.logoutSuccessHandler.setDefaultTargetUrl("/my/area");
+		http.authorizeHttpRequests(authorize -&gt; authorize.anyRequest().permitAll());
+		return http.build();
+	}
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The syntax <code>/yadaLoginSuccess?targetUrl=/my/area</code> ensures that after an ajax login request a full page at "/my/area" will be loaded.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>"/yadaLoginSuccess" is handled by <code>YadaLoginController</code> and returns either <code>YadaViews.AJAX_SUCCESS</code> or a redirect to the target url
+when specified.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_password_reset">Password Reset</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Whenever there is a login with user and password there should also be a way to recover a forgotten password.
+The Yada Framework by default encrypts passwords on database so retrieval is not possible.
+As an alternative, password reset must be used.</p>
+</div>
+<div class="paragraph">
+<p>The steps are as follows:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Provide a link to the "Password reset" page near the login form</p>
+</li>
+<li>
+<p>Implement a password reset page with a form where users type their email address</p>
+</li>
+<li>
+<p>Receive the reset request and send an email with a password reset link</p>
+</li>
+<li>
+<p>Validate the password reset link and show a form where the new password can be inserted</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Show any validation errors e.g. link expired or invalid</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Update the user password</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The link to the password reset page could call a "/passwordReset" endpoint passing any
+email address the user might have typed in the login user field. This is an example
+implementation that uses javascript to copy the field value to the form behind the link:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/passwordReset}" role="form" method="post" id="pwdRecoverForm"&gt;
+	&lt;input type="hidden" name="email" th:value="${username}" /&gt;
+	&lt;a class="link link--black fs-6" href="#" th:text="#{view.link.forgotPassword}"&gt;Forgot my password&lt;/a&gt;
+&lt;/form&gt;
+&lt;script&gt;
+    $('#pwdRecoverForm a').click(function(e) {
+    	e.preventDefault();
+    	var email=$('#loginForm input[name="username"]').val();
+    	$('#pwdRecoverForm input[name="email"]').val(email);
+    	$('#pwdRecoverForm').submit();
+    	return false;
+    });
+&lt;/script&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The controller can then open the page that contains the password reset form:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">@RequestMapping("/passwordReset")
+public String passwordReset(String email, YadaRegistrationRequest yadaRegistrationRequest) {
+	yadaRegistrationRequest.setEmail(email);
+	yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
+	return "/passwordReset";
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The password reset form only required field is the email address. It should also display
+any error messages:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form role="form" th:action="@{/yadaPasswordResetPost}" th:object="${yadaRegistrationRequest}" method="post"&gt;
+	&lt;fieldset class="has-feedback"&gt;
+		&lt;label for="email"&gt;E-Mail&lt;/label&gt;
+		&lt;div th:with="hasError=${#fields.hasErrors('email')}" &gt;
+			&lt;input type="email" id="email" name="email" th:value="*{email}" class="form-control" maxlength="64"
+				th:classappend="${hasError?'is-invalid':''}" required="required" autofocus="autofocus" /&gt;
+			&lt;small th:each="err : ${#fields.errors('email')}" class="invalid-feedback" th:text="${err}"&gt;Error&lt;/small&gt;
+		&lt;/div&gt;
+	&lt;/fieldset&gt;
+	&lt;button class="btn btn-lg btn-primary w-100" type="submit"&gt;Reset Password&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The default form handler is implemented in <code>YadaRegistrationController.java</code>.
+If the user does not exist, it returns an error, otherwise it sends a recovery email to the supplied address.</p>
+</div>
+<div class="paragraph">
+<p>The email template is in <code>/src/main/resources/template/email/passwordRecovery.html</code>.
+When the email can not be sent, an error is returned to the form, otherwise a successful notification
+is shown after redirection to the page configured with <code>config/security/passwordReset/passwordResetSent</code> (defaults to home).</p>
+</div>
+<div class="paragraph">
+<p>These are the localisation keys for the whole process:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">yada.passwordrecover.username.notfound = ...
+email.subject.passwordRecovery = ...
+yada.email.send.failed = ...
+yada.email.passwordrecover.title = ...
+yada.email.passwordrecover.message =  ...</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+if you need higher security, do not acknowledge the validity of the supplied email address but just return the same message whether the email exists or not
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The recovery email contains a link to the "/passwordReset/{token}" handler.
+This handler is application-specific but can use the <code>yadaRegistrationController.passwordResetForm()</code> method
+to do all the needed work.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/passwordReset/{token}")
+public String passwordResetPost(@PathVariable String token, Model model, HttpServletRequest request, RedirectAttributes redirectAttributes, Locale locale) {
+	// Everything is done in the yada class.
+	boolean done = yadaRegistrationController.passwordResetForm(token, model, redirectAttributes);
+	if (!done) {
+		yadaNotify.titleKey(redirectAttributes, locale, "pwdreset.invalidlink.title").error().messageKey("pwdreset.invalidlink.message").add();
+		return yadaWebUtil.redirectString("/passwordReset", locale); // Moved temporarily
+	}
+	// Don't do a redirect here because you'll lose the Model
+	return homeController.home(request, model, locale);
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_login_process">Login Process</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The login page can either be a full page or a modal, and must contain the login form.</p>
+</div>
+<div class="paragraph">
+<p>The login form must have a <code>username</code> and a <code>password</code> field. The form must be submitted
+to the configured <code>loginProcessingUrl</code> endpoint (see <code>SecurityConfig.java</code>) via ajax or not depending on how it was opened (see later).</p>
+</div>
+<div class="paragraph">
+<p>An example login form/page can be found in the <code>modalLogin.html</code> file created during project initialization. It is a Bootstrap 5
+modal but it can also be embedded in a normal page by including the appropriate fragment,
+for example with</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:replace="~{/modalLogin :: #loginForm}"&gt;Login form here&lt;/div&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above file shows how to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>perform login</p>
+</li>
+<li>
+<p>show a generic login error message</p>
+</li>
+<li>
+<p>show a lockout message when the maximum number of login attempts has been tried</p>
+</li>
+<li>
+<p>show an error message below username or password</p>
+</li>
+<li>
+<p>reveal the typed password by clicking on a button</p>
+</li>
+<li>
+<p>provide a link to the password reset page</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The <code>&lt;security&gt;</code> section of the configuration file contains some useful parameters like
+the required password length or the number of attempts before the user is locked out.</p>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>- force password change after login</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The login page/modal can either be opened by clicking on a login link or by requesting a protected url: in the
+latter case the request (ajax or not) will be saved and replayed after successful login.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>A POST to a protected url that triggers the login process will be replayed as a GET (this is by
+Spring Security design) without the original payload. Never allow a post to a protected url unless the user is logged in already.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The login link can either be ajax or normal and could open either a full page or a modal:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Opening a login page with a normal request is trivial</p>
+</li>
+<li>
+<p>Opening a login modal with an ajax request is also trivial</p>
+</li>
+<li>
+<p>Opening a modal with a normal request requires landing on some page (usually the home) with a model
+parameter that triggers the opening of the embedded login modal, e.g. ${login}</p>
+</li>
+<li>
+<p>Opening a normal login page with an ajax request requires that some element in the page (not the body) has
+the <code>yadafullPage</code> class.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To make things simpler, a normal request should open a normal login page and an ajax request should open
+a modal. This reflects a common use case.</p>
+</div>
+<div class="paragraph">
+<p>The login page/modal is automatically opened when a protected url is requested. The request type (ajax/normal)
+that opens the login page/modal is the same of the initial request, that is saved for later.
+The provided <code>HomeController.login()</code> method handles both request types and adds a "login" model attribute
+before returning the home page so that the login modal can be opened via javascript.</p>
+</div>
+<div class="paragraph">
+<p>The login link must be shown only when the
+user is not logged in and replaced with the logout link otherwise:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;header th:with="loggedIn=${@yadaSecurityUtil.loggedIn()}"&gt;
+	&lt;a th:unless="${loggedIn}" th:href="@{/loginForm}" class="yadaAjax"&gt;
+		Login
+	&lt;/a&gt;
+	&lt;a th:if="${loggedIn}" th:href="@{/logout}"&gt;
+		Logout
+	&lt;/a&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The login form must post using the same method (ajax or not) used to load it.
+This is because if the login process is triggered by accessing a protected url in a normal request, the login form
+must use a normal POST otherwise the saved request would be redirected to via ajax and may not be shown correctly.
+If, on the contrary, the process is triggered when the initial request is ajax, the login form
+must use ajax to POST otherwise the saved request would be loaded non-ajax and shown as a full page.</p>
+</div>
+<div class="paragraph">
+<p>To achieve this, use the <code>yadaIsAjaxResponse</code> model attribute that is always present when returning from
+an ajax call:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/loginPost}" th:classappend="${yadaIsAjaxResponse}?yadaAjax" ... &gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After successful login, the login modal should be closed and any dynamic parts of the page that differ
+when a user is logged in should be replaced with the correct version: for example the login link
+should become a logout link.</p>
+</div>
+<div class="paragraph">
+<p>The easiest way to do so is to reload the entire page, but this can only be done when there is no
+unsaved data that needs to be kept. The <code>yada.reload()</code> function can do the trick.
+Otherwise, some javascript should fetch the new page parts from the server and replace them
+at the correct position.
+In both cases this can be done in a yada:successHandler of the login form:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/loginPost}" yada:successHandler="postLogin" <i class="conum" data-value="1"></i><b>(1)</b>
+	th:classappend="${yadaIsAjaxResponse}?yadaAjax"
+	role="form" method="post"&gt;
+...
+&lt;script th:inline="javascript"&gt;
+    function postLogin() {
+    	const headerUrl = /*[[@{/justTheHeader}]]*/ "unset";
+    	yada.ajax(headerUrl, null, function(responseText, $responseHtml) {
+    		$("header").replaceWith($("header", $responseHtml)); <i class="conum" data-value="2"></i><b>(2)</b>
+    		$("#myLoginModal").modal("hide"); <i class="conum" data-value="3"></i><b>(3)</b>
+    	});
+    }</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>postLogin will be called after successful form submission</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>the current page header is replaced by the header as seen by logged-in users</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>the login modal is closed</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Another option would be, after login, to redirect to some other page. This can be done by configuring the
+DefaultTargetUrlAjaxRequest with <code>"/yadaLoginSuccess?targetUrl=/myOtherUrl/"</code> as seen earlier.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>As said above, a public page should not contain a form that posts to a protected endpoint. Such form
+should be shown only to logged-in users. This can be done either by conditionally showing the form
+or by placing it on a modal that is opened by clicking on a protected link. For example,
+a "save icon" could be an ajax link that returns a protected modal containing the save form.
+By clicking on the save icon, the user would first trigger the login process then the save form would be shown
+in the modal to the now logged-in user.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>When using the previous tip, never open from a public page a modal containing a form to a protected page using javascript, because
+there won&#8217;t be a chance to trigger the login process. Call the backend instead as explained.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_login_post">Login POST</h3>
+<div class="paragraph">
+<p>The login POST is handled by <code>YadaUserDetailsService.loadUserByUsername()</code>. Check the source
+code to see what happens.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_login_success">Login Success</h3>
+<div class="paragraph">
+<p>When the provided credentials are valid and the user is not forbidden from entering, execution
+goes through <code>YadaAuthenticationFailureHandler</code> that performs some tasks like setting
+the user login timestamp, resetting the failed attempts counter, setting the user timezone
+and fixing the saved url (if any) by adding the language path (if configured).</p>
+</div>
+<div class="paragraph">
+<p>In case the saved request was ajax, the <code>YadaAuthenticationSuccessHandler.AJAX_LOGGEDIN_PARAM</code> is
+added to it. The name of the request parameter is <code>yadaAjaxJustLoggedIn</code> and can be used in a
+@Controller. See <a href="../ajax.html#loginRedirects">the ajax documentation</a> for an example.
+The <code>YadaAuthenticationSuccessHandler.AJAX_LOGGEDIN_HEADER</code> header is also set on the response and can
+eventually be used in javascript.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_login_failure">Login Failure</h3>
+<div class="paragraph">
+<p>When the login POST can&#8217;t authenticate the user or throws an exception,
+execution goes through <code>YadaAuthenticationFailureHandler</code> that sets the following request attributes:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>username</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name typed in the login form, this is always set</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>loginErrorFlag</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">generic login error, this is always set</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">passwordError</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">login failed for a wrong password</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">userDisabled</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">user is disabled regardless of password. This happens when <code>YadaUserCredentials.enabled</code> is false.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">credentialsExpiredException</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">password is expired regardless of what password is used. This happens when <code>YadaUserCredentials.changePassword</code> is true. Execution is forwarded to <code>"/pwdChange"</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">lockoutMinutes</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">long</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">the number of minutes before a locked account is allowed again</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">usernameNotFound, password</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean, string</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">user not found in database, value of password typed</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">loginError</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">login failed for some other reason</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The "boolean" values actually have the value of their name, e.g. <code>?loginErrorFlag=loginErrorFlag</code></p>
+</div>
+<div class="paragraph">
+<p>The <strong>first two</strong> parameters are always set, the others are mutually exclusive but one
+is always provided.
+When the reason for failure is not <code>credentialsExpiredException</code>, execution is forwarded to the
+endpoint set in <code>YadaSecurityConfig</code>, which is by default the @Controller that opens the login page. This page can then use
+the above request attributes to display the appropriate message, for example using them
+in a conditional expression in HTML:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">th:if="${loginErrorFlag!=null}"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>credentialsExpiredException</code> flag is set if the user entered valid credentials but
+its <code>YadaUserCredentials.changePassword</code> flag is true, which can happen if a password
+reset has been forced by an administrator via a dashboard. In such case, execution
+is forwarded to <code>"/pwdChange"</code> where different steps can be taken, usually showing
+the login form. As the originating request is still active, any request parameter can
+be used, for example "username":</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Autowired RegistrationController registrationController;
+
+@RequestMapping("/pwdChange")
+public String pwdChange(String username, Model model, Locale locale) {
+	// The user is not logged in yet, and we open the password reset page
+	YadaRegistrationRequest yadaRegistrationRequest = new YadaRegistrationRequest();
+	return registrationController.passwordReset(username, yadaRegistrationRequest);
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_credentials_change">Credentials Change</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Logged-in users should have an option to change their password or even their email address.
+Changing password is straightforward while changing email address requires sending a confirmation
+email similar to the password recovery step.</p>
+</div>
+<div class="sect2">
+<h3 id="_change_password">Change password</h3>
+<div class="paragraph">
+<p>TODO
+- see modalPasswordChange.html</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_change_email">Change email</h3>
+<div class="paragraph">
+<p>A logged-in user can ask for it email to be changed. A form should be provided for this purpose in a
+protected user area. When the form is submitted, a confirmation email
+will be sent to the new email address, containing a confirmation link.
+When this link is clicked, the new old email address will be replaced
+with the new one. For extra security you may ask for confirmation by password
+after the confirmation link is clicked. The link controller should not be protected or the
+user might be confused about which email address to use for login.</p>
+</div>
+<div class="paragraph">
+<p>TODO</p>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>- checking session expiration
+- autologin
+- yadaLoginSuccess?targetUrl: why use it when you have a login successHandler that can do that?
+- using YadaAuthenticationSuccessHandler.setTargetUrlParameter() to specify the landing page dynamically in the login form
+- impersonating users</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 0.7.7<br>
+Last updated 2024-11-07 18:09:11 +0100
+</div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>

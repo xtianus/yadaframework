@@ -5,17 +5,18 @@
 Uploading files to the server, handling and linking them
 
 ==  Description
-File Upload is handled via https://commons.apache.org/proper/commons-fileupload/[Commons FileUpload^].
-We don't use the Servlet 3 API because, when we had to make a choice,
-we couldn't figure out how to set the file size limit via our configuration file.
+File Upload is handled via the standard Servlet API.
 
-Yada offers some utility classes to more easily handle files _after_ they have been uploaded:
+YadaFramework offers some utility classes to more easily handle files _after_ they have been uploaded:
 
 * storing files on disk
 * resizing images
 * assigning files to Entity objects
 * generating download links
 * managing the pool of uploaded files
+
+This section shows how to upload files via plain form submission (ajax or not).
+For a way to upload by dragging, see <<../ajax.adoc#_ajax_upload_by_dragdrop,Ajax upload by drag&drop>>.
 
 ==  Configuration
 ===  Maximum file size setting
@@ -160,19 +161,34 @@ Use YadaAttachedFile to easily handle file attachments:
 ----
 @Entity
 public class Product {
-    @OneToOne(cascade=CascadeType.PERSIST)
+    @OneToOne
     protected YadaAttachedFile icon;
 
-    @OneToOne(cascade=CascadeType.PERSIST)
+    @OneToOne
     protected YadaAttachedFile specSheet;
 ----
 
 After doing this you can make use of the functionality of YadaFileManager explained below.
-You shouldn't use any `cascade` different from PERSIST or `orphanRemoval` annotations:
+You shouldn't use any `cascade` type or `orphanRemoval` annotations:
 
 * cascade `SAVE` would generate a `ConcurrentModificationException` when using the upload and crop workflow (images only - see below)
 * cascade `REMOVE` or `orphanRemoval=true` wouldn't delete the file on disk
-* cascade `PERSIST` is needed when cloning the parent object (`Product` in the example above)
+* cascade `PERSIST` would generate a "detached entity passed to persist" exception when the YadaAttachedFile
+is first loaded with YadaFileManager (see later) then added to an Entity (`Product`) that is later persisted.
+The cascade `PERSIST` would be useful though when cloning the parent Entity (`Product`) with `YadaUtil.copyEntity()`
+because, in that case, saving the clone would also save all its YadaAttachedFile attributes.
+
+[TIP]
+==== 
+If you intend to clone your Entity at some point, you can choose to use cascade `PERSIST` to save the clone in
+one go but in all other use cases, when creating an Entity instance after a file upload, you will have to merge
+the YadaAttachedFile attributes before the persist operation:
+[source,java]
+----
+product.setIcon(em.merge(product.getIcon()));
+em.persist(product);
+----
+==== 
 
 The YadaAttachedFile class stores some file-related information that you might want to keep:
 
@@ -332,6 +348,8 @@ yadaFileManager.duplicateFiles(clone.getIcon());
 ----
 
 This is *not needed* if the copy is done with `YadaUtil.copyEntity()` because the file on disk is also copied automatically.
+
+IMPORTANT: if the YadaAttachedFile attributes of the Entity don't have a cascade `PERSIST`, each such attribute of the clone will have to be persisted individually
 
 ====  Delete Files
 Files can be removed from the filesystem with `YadaFileManager.deleteFileAttachment()`. All database objects must then be deleted manually.

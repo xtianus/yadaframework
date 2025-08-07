@@ -1,0 +1,38 @@
+= Databases
+:docinfo: shared
+
+Storing and retrieving data 
+
+== Subsections
+
+<<embedded.adoc#, Database Embedding>>:: No need to install a database
+
+<<pagination.adoc#, Database Pagination>>:: Fetching all, a bunch of rows at a time  
+
+== Introduction
+Databases are almost essential to any web application. They can store user credentials, link to files,
+product information etc. The Yada Framework is written 
+with https://dev.mysql.com/downloads/mysql/[MySQL Community Server^] in mind because it's open source and widely used.
+
+This section and subsections deal with all things related to using a database in the Yada Framework.
+
+== Database Configuration
+
+TO DO
+
+== Entities
+
+TO DO
+
+== Schema Generation and Update
+
+TO DO (flyway, create db)
+
+== Data Access Objects
+
+TO DO
+
+== Queries
+
+TO DO
+

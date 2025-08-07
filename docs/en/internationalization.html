@@ -13,7 +13,11 @@
 
 </head>
 <body class="article toc2 toc-left">
-<!-- When editing this file, you must copy it in all other folders (without change) -->
+<!--
+	WARNING !!!!!
+	Edit the /YadaDocs/src/docs/asciidoc/common/docinfo-header.html file
+	to change this menu.
+-->
 
 <select id="navigator">
 	<option>Choose chapter...</option>
@@ -21,18 +25,23 @@
 	<option data-link="./newEclipseProject.html">Getting started</option>
 	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
 	<option data-link="./internationalization.html">Internationalization</option>
-	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./database/overview.html">Databases</option>
 	<option data-link="./forms/overview.html">Forms</option>
 	<option data-link="./ajax.html">Ajax</option>
 	<option data-link="./ajaxModal.html">Ajax Modal</option>
-	<option data-link="./security.html">Security</option>
+	<option data-link="./security/overview.html">Security</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./json.html">Read and Write JSON</option>
+	<option data-link="./confirmationModal.html">Confirmation Modal</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
 	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./staging.html">Staging Docs</option>
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
 </select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
 <script>
 document.querySelector("#navigator").addEventListener("change", function (event) {
 	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
@@ -41,11 +50,80 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 		document.location.href = link;
 	}
 });
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.style.position = 'relative';
+        header.addEventListener('click', function(e) {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+            navigator.clipboard.writeText(url);
+        });
+        header.addEventListener('mouseenter', function() {
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-clone';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.style.position = 'absolute';
+            icon.style.right = '30px';
+            icon.style.top = '50%';
+            icon.style.transform = 'translateY(-50%)';
+            icon.style.fontSize = '18px';
+            icon.style.color = 'gray';
+            header.appendChild(icon);
+        });
+        header.addEventListener('mouseleave', function() {
+            const icon = header.querySelector('.fa-clone');
+            if (icon) {
+            	header.removeChild(icon);
+            }
+        });
+    });
+});
+
+function showCopy(e) {
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-clone';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.style.position = 'absolute';
+    icon.style.left = e.pageX + 'px';
+    icon.style.top = e.pageY + 'px';
+    icon.style.zIndex = 1000;
+    icon.style.fontSize = '24px';
+    document.body.appendChild(icon);
+    setTimeout(function() {
+        document.body.removeChild(icon);
+    }, 1000); // 1 second delay
+}
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;
+    	}
+    }
+};
 </script>
 <div id="header">
 <h1>Internationalization</h1>
 <div class="details">
-<span id="revnumber">version 0.7.5</span>
+<span id="revnumber">version 0.7.7</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -56,9 +134,11 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <li><a href="#_search_engine_indexing">Search engine indexing</a></li>
 <li><a href="#_immutable_static_text">Immutable (static) text</a></li>
 <li><a href="#_database_text_fields">Database text fields</a></li>
+<li><a href="#_date_and_time">Date and time</a></li>
 <li><a href="#_enum_values">Enum values</a></li>
 </ul>
 </li>
+<li><a href="#_general_language_configuration">General language configuration</a></li>
 <li><a href="#_initial_language_choice">Initial language choice</a></li>
 <li><a href="#_configuring_language_in_the_path">Configuring "language in the path"</a>
 <ul class="sectlevel2">
@@ -76,8 +156,15 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <li><a href="#_configuring_language_request_parameter">Configuring "language request parameter"</a></li>
 <li><a href="#_coding_with_i18n_text">Coding with i18n text</a>
 <ul class="sectlevel2">
-<li><a href="#_static_text">Static text</a></li>
+<li><a href="#statici18ntext">Static text</a></li>
+<li><a href="#_emails">Emails</a></li>
 <li><a href="#_database_fields">Database fields</a></li>
+</ul>
+</li>
+<li><a href="#_considering_the_user_time_zone">Considering the user time zone</a>
+<ul class="sectlevel2">
+<li><a href="#_setting_the_user_time_zone">Setting the user time zone</a></li>
+<li><a href="#_working_with_date_and_time">Working with date and time</a></li>
 </ul>
 </li>
 </ul>
@@ -88,7 +175,7 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Unless there is a very good reason to do otherwise, every web application should be internationalized, or at least be
+<p>Every web application should be internationalized, or at least be
 ready for it.
 Internationalization (i18n) means that the content of the site will change according to the  <em>locale</em> of the user visiting it,
 where  <em>locale</em> stands for "language and regional settings".</p>
@@ -105,10 +192,13 @@ where  <em>locale</em> stands for "language and regional settings".</p>
 <p>search engine indexing</p>
 </li>
 <li>
-<p>immutable text</p>
+<p>static text</p>
 </li>
 <li>
 <p>database text fields</p>
+</li>
+<li>
+<p>date and time</p>
 </li>
 <li>
 <p>enum values</p>
@@ -230,12 +320,53 @@ for a single instance in a single language.</p>
 </table>
 </div>
 <div class="sect2">
+<h3 id="_date_and_time">Date and time</h3>
+<div class="paragraph">
+<p>Date and time are represented differently in different regions, for example by writing the day before the month
+or the opposite.</p>
+</div>
+<div class="paragraph">
+<p>Most importantly, every user lives in a specific time zone in the world, e.g. "Europe/Rome" or "Asia/Tokyo",
+and a time like "2024-09-19@11:37" is a different moment in different time zones.
+This means that the code should take the time zone of the user into consideration when receiving, showing or using
+a date/time value.
+This also applies to scheduled tasks that must run at a specific time of day if the time has an impact on the user.</p>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_enum_values">Enum values</h3>
 <div class="listingblock todo">
 <div class="content">
 <pre>TO BE CONTINUED...</pre>
 </div>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_general_language_configuration">General language configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The application becomes multilanguage by means of the <code>&lt;i18n&gt;</code> configuration section. In its simplest version,
+it only lists the available languages:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;i18n&gt;
+	&lt;locale&gt;en&lt;/locale&gt;
+	&lt;locale&gt;ar&lt;/locale&gt;
+	&lt;locale&gt;de&lt;/locale&gt;
+	&lt;locale&gt;fr&lt;/locale&gt;
+&lt;/i18n&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above configuration should be placed in a file like <code>conf.webapp.prod.xml</code> (were 'prod' is the environment code for "production").</p>
+</div>
+<div class="paragraph">
+<p>A <code>messages.properties</code> file must contain all the translations for what is considered the default language, because there
+is where the value is searched when a language-specific key is not found elsewhere. All other translations should be
+placed in a specific file as explained <a href="#statici18ntext">later</a>.</p>
 </div>
 </div>
 </div>
@@ -312,25 +443,19 @@ already done in <code>net.yadaframework.security.SecurityWebApplicationInitializ
 <div class="sect2">
 <h3 id="_application_configuration">Application configuration</h3>
 <div class="paragraph">
-<p>Edit the conf.webapp.prod.xml configuration file (were 'prod' is the environment code for "production") adding a section
-like the following:</p>
+<p>Language in the path is enabled with the "localePathVariable" attribute:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;i18n localePathVariable="true"&gt;
-      &lt;locale&gt;it&lt;/locale&gt;
       &lt;locale default="true"&gt;en&lt;/locale&gt;
+      &lt;locale&gt;it&lt;/locale&gt;
       &lt;locale&gt;de&lt;/locale&gt;
       &lt;locale&gt;es&lt;/locale&gt;
       &lt;locale&gt;fr&lt;/locale&gt;
       &lt;locale&gt;ru&lt;/locale&gt;
 &lt;/i18n&gt;</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>Note the use of the "default" attribute. This is <strong>not</strong> the locale that will be set when there is not a valid
-value in the request (you&#8217;d get a 404 HTTP error). This is actually the language to use for
-strings retrieved from the database (see <a href="#_database_fields">Database fields</a> below).</p>
 </div>
 <div class="paragraph">
 <p>Other than just the language, you can use a full locale code though this is rarely needed:</p>
@@ -427,6 +552,17 @@ public String home(Model model, HttpServletRequest request, Locale locale) {
 <p>The standard Thymeleaf <code>@{url}</code> syntax has been retrofitted to automatically handle language in the path:
 the current locale will be added at the start of every url, so <code>@{/home}</code> becomes <code>/de/home</code> for example.</p>
 </div>
+<div class="paragraph">
+<p>A language menu can be easily implemented with code like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;select id="langmenu"&gt;
+      &lt;option value="en" th:selected="${#locale.language=='en'}"&gt;EN&lt;/option&gt;
+      &lt;option value="it" th:selected="${#locale.language=='it'}"&gt;IT&lt;/option&gt;
+&lt;/select&gt;</code></pre>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_javascript">Javascript</h3>
@@ -439,7 +575,15 @@ the current locale will be added at the start of every url, so <code>@{/home}</c
 </div>
 </div>
 <div class="paragraph">
-<p>where "locale" is the ISO2 locale code. This code could be called when choosing from a list of languages.</p>
+<p>where "locale" is the ISO2 locale code. This code could be called when choosing from the list of languages:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">$("#langmenu").change(function() {
+      var locale = $(this).val();
+      yada.changeLanguagePathVariable(locale);
+});</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -470,7 +614,7 @@ The application configuration is the same but you need to set localePathVariable
 <h2 id="_coding_with_i18n_text">Coding with i18n text</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_static_text">Static text</h3>
+<h3 id="statici18ntext">Static text</h3>
 <div class="paragraph">
 <p>To implement localized static text just use the standard <a href="https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/core.html#context-functionality-messagesource">Spring "MessageSource"</a> concept: store all text in different
 <code>message.properties</code> files, indexed by a key.</p>
@@ -507,7 +651,8 @@ is shown as text.</p>
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">validation.empty = This value can't be empty
 validation.password.length = Password can''t be shorter than {0} characters and longer than {1}
-files.total = There {0,choice,0#are no files|1#is one file|1&lt;are {0,number,integer} files}.</code></pre>
+wait.time = Wait {0} {0, choice, 0#minutes|1#minute|1&lt;minutes} and retry
+files.total = There {0, choice, 0#are no files|1#is one file|1&lt;are {0,number,integer} files}.</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -516,13 +661,32 @@ files.total = There {0,choice,0#are no files|1#is one file|1&lt;are {0,number,in
 <div class="ulist">
 <ul>
 <li>
-<p>{0} and {1} are ways of passing parameters</p>
+<p><code>{0}</code>, <code>{1}</code> &#8230;&#8203; are ways of passing parameters (there can be any)</p>
 </li>
 <li>
-<p>when a parameter is specified, a single quote must be escaped by another single quote</p>
+<p>when a parameter is specified, any single quote must be escaped by another single quote</p>
 </li>
 <li>
-<p>there&#8217;s a powerful way of specifying variations like singular/plural (choice format)</p>
+<p>there&#8217;s a powerful way of specifying variations like singular/plural (choice format):</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>|</code> separates choices</p>
+</li>
+<li>
+<p><code>#</code> is an exact match, so <code>1#</code> means "when 1 equals the parameter"</p>
+</li>
+<li>
+<p><code>&lt;</code> is "less than" where the subject is the number, so <code>&lt;1</code> means "when 1 is less than the parameter"</p>
+</li>
+<li>
+<p><code>&gt;</code> is "greater than" where the subject is the number, so <code>&gt;1</code> means "when 1 is greater than the parameter"</p>
+</li>
+<li>
+<p>each choice can contain text and/or parameters like <code>{1}</code> or <code>{2,number,integer}</code></p>
+</li>
+</ul>
+</div>
 </li>
 </ul>
 </div>
@@ -541,6 +705,61 @@ The Message Source configuration is implemented in YadaAppConfig.messageSource()
 </tr>
 </table>
 </div>
+<div class="paragraph">
+<p>When the application grows, it may be convenient to split the message.properties files into more manageable units. For example,
+a <code>countries.properties</code> fileset might contain the translations for all the country names of the world. Any number of such units
+can be configured with the <code>&lt;basename&gt;</code> tag:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;i18n localePathVariable="true"&gt;
+	&lt;messageSource&gt;
+		&lt;basename&gt;messages&lt;/basename&gt;
+		&lt;basename&gt;countries&lt;/basename&gt;
+		&lt;basename&gt;somethingelse&lt;/basename&gt;
+	&lt;/messageSource&gt;
+	&lt;locale default="true"&gt;en&lt;/locale&gt;
+	&lt;locale&gt;it&lt;/locale&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The properties files would be:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">messages.properties
+messages_it.properties
+countries.properties
+countries_it.properties
+somethingelse.properties
+somethingelse_it.properties</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_yada_static_text">Yada static text</h4>
+<div class="paragraph">
+<p>The Yada Framework javascript may show the user some error messages, in english by default.
+In order to localize these messages, each page should include the <code>/yada/messagesProperties.html</code> file anywhere with
+something like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;th:block th:insert="~{/yada/messagesProperties :: messagesProperties}"&gt;&lt;/th:block&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The proper keys must be added to the message.properties files of course. The name of such keys can be
+found in the <code>/yada/messagesProperties.html</code> file. Esample:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">yadajs.connection.error.title = Errore di connessione
+yadajs.connection.error.message = Impossibile connettersi al server
+yadajs.forbidden.error.title = Errore di sicurezza
+yadajs.forbidden.error.message = La risorsa richiesta è vietata</code></pre>
+</div>
+</div>
+</div>
 <div class="sect3">
 <h4 id="_usage_with_thymeleaf">Usage with Thymeleaf</h4>
 <div class="paragraph">
@@ -554,6 +773,13 @@ The Message Source configuration is implemented in YadaAppConfig.messageSource()
 <div class="paragraph">
 <p>See the <a href="https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#messages">Thymeleaf docs</a> for more details.</p>
 </div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_emails">Emails</h3>
+<div class="paragraph">
+<p>Email templates can use the same message properties of HTML files, or be saved in separate files, one per language.
+See <a href="emails.html#_internationalization">Internationalization</a> in the email chapter.</p>
 </div>
 <div class="sect3">
 <h4 id="_usage_in_java">Usage in Java</h4>
@@ -685,11 +911,80 @@ not using FetchMode.SELECT may result in a cross join that loads a huge amount o
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_considering_the_user_time_zone">Considering the user time zone</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_setting_the_user_time_zone">Setting the user time zone</h3>
+<div class="paragraph">
+<p>The user time zone is automatically retrieved on page load by <code>yada.js</code> to what the browser reports
+and sent to the server once per session. The server stores this value in the user session with the
+<code>YadaConstants.SESSION_USER_TIMEZONE</code> key. This session attribute is read after user authentication
+and stored in the database in the YadaUserProfile table under the <code>timezone</code> column. This value will
+then be available to the application via <code>YadaUserProfile.getTimezone()</code>.</p>
+</div>
+<div class="paragraph">
+<p>The application should offer users to change their time zone manually. In such case, the code setting
+the time zone should also set the <code>YadaUserProfile.timezoneSetByUser</code> flag in order to stop the
+above automatic change at each login:</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../img/timezone-form.jpg" alt="User time zone form">
+</div>
+<div class="title">Figure 1. User Time Zone Form</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">if (!userProfileForm.getTimezone().equals(userProfile.getTimezone().getID())) {
+	// If the timezone is different from before, set the flag
+	userProfile.setTimezoneSetByUser(true);
+}
+userProfile.setTimezone(TimeZone.getTimeZone(userProfileForm.getTimezone()));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The time zone should also be set on user registration. When receiving the registration request
+in the <code>"/signup"</code> controller, the automatically retrieved time zone should be set in the <code>YadaRegistrationRequest</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">TimeZone userTimezone = null;
+HttpSession session = request.getSession(false);
+if (session!=null) {
+	userTimezone = (TimeZone) session.getAttribute(YadaConstants.SESSION_USER_TIMEZONE);
+}
+yadaRegistrationRequest.setTimezone(userTimezone);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When creating the new user after confirmation, the user time zone should be set in the user profile:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">TimeZone userTimezone = registrationRequest.getTimezone();
+if (userTimezone==null) {
+	userTimezone = TimeZone.getTimeZone("Europe/Rome"); // Default
+}
+userProfile.setTimezone(userTimezone);</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_working_with_date_and_time">Working with date and time</h3>
+<div class="listingblock todo">
+<div class="content">
+<pre>TO BE CONTINUED...</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.5<br>
-Last updated 2023-09-28 16:34:46 +0200
+Version 0.7.7<br>
+Last updated 2025-07-29 17:31:52 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

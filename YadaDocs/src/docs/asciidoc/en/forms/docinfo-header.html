@@ -1,4 +1,8 @@
-<!-- When editing this file, you must copy it in all other folders (without change) -->
+<!-- 
+	WARNING !!!!!
+	Edit the /YadaDocs/src/docs/asciidoc/common/docinfo-header.html file
+	to change this menu.
+-->
 
 <select id="navigator">
 	<option>Choose chapter...</option>
@@ -6,17 +10,23 @@
 	<option data-link="./newEclipseProject.html">Getting started</option>
 	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
 	<option data-link="./internationalization.html">Internationalization</option>
-	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./database/overview.html">Databases</option>
 	<option data-link="./forms/overview.html">Forms</option>
 	<option data-link="./ajax.html">Ajax</option>
 	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./security/overview.html">Security</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./json.html">Read and Write JSON</option>
+	<option data-link="./confirmationModal.html">Confirmation Modal</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
-	<option data-link="./misc.html">Misc</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./staging.html">Staging Docs</option>
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
 </select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
 <script>
 document.querySelector("#navigator").addEventListener("change", function (event) {
 	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
@@ -25,4 +35,73 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 		document.location.href = link;
 	}
 });
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.style.position = 'relative';
+        header.addEventListener('click', function(e) {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+            navigator.clipboard.writeText(url);
+        });
+        header.addEventListener('mouseenter', function() {
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-clone';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.style.position = 'absolute';
+            icon.style.right = '30px';
+            icon.style.top = '50%';
+            icon.style.transform = 'translateY(-50%)';
+            icon.style.fontSize = '18px';
+            icon.style.color = 'gray';
+            header.appendChild(icon);
+        });
+        header.addEventListener('mouseleave', function() {
+            const icon = header.querySelector('.fa-clone');
+            if (icon) {
+            	header.removeChild(icon);
+            }
+        });        
+    });
+});
+
+function showCopy(e) {
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-clone';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.style.position = 'absolute';
+    icon.style.left = e.pageX + 'px';
+    icon.style.top = e.pageY + 'px';
+    icon.style.zIndex = 1000;
+    icon.style.fontSize = '24px';
+    document.body.appendChild(icon);
+    setTimeout(function() {
+        document.body.removeChild(icon);
+    }, 1000); // 1 second delay	
+}
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;    		
+    	}
+    }
+};
 </script>

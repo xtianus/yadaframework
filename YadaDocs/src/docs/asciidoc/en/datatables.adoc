@@ -1,10 +1,246 @@
 =  DataTables
 :docinfo: shared
+:imagesdir: ../img/
+
+Complex tables made easy
+
+== Introduction
+
+https://datatables.net/[DataTables,window=_blank] is a very powerful javascript
+library for creating tables with complex user interactions. It has dozens of
+configuration options and can be quite complicated to set up correctly.
+The Yada Framework implements a Java Fluent API that produces the required
+javascript configuration and provides the needed backend functionality for
+server-side data loading.
+
+The current implementation covers all the core DataTables options and the 
+https://datatables.net/extensions/responsive/[Responsive,window=_blank] extension.
+
+
+[.center]
+.User Table
+image::datatables.user.jpg[User Table]
+
+TIP: A full example is implemented in the YadaExamples project.
+
+== Prerequisites
+The DataTables library can either be downloaded locally or from a CDN.
+In both cases the official download page offers different options to package
+the required elements into a downloadable zip or a specific CDN url for
+javascript and CSS.
+The Yada Framework implementation has been tested with:
+
+[cols="1,1"]
+|===
+h|Styling framework
+|Bootstrap 5
+
+h|Packages
+|DataTables
+
+h|Extensions
+|Responsive 
+|===
+
+This example is for a downloaded version:
+
+[source,html]
+----
+<head>
+	<link rel="stylesheet" type="text/css" th:href="@{/static/datatables-2.1.8/datatables.min.css}"/>
+</head>
+...
+<script th:src="@{/static/datatables-2.1.8/datatables.min.js}"></script>
+----
+
+The `yada.datatables.js` file also needs to be loaded. This is by default automatically
+packaged in the war distribution for production but should be added in development:
+
+[source,html]
+----
+<script th:if="${@config.developmentEnvironment}" th:src="@{/yadares/js/yada.datatables.js}"></script>
+----
+
+== HTML Code
+The basic DataTable functionality is implemented just by adding the `yada:datatable` tag:
+
+[source,html]
+----
+<yada:datatable # <1>
+	yada:configuration="${userTableAttribute}"> # <2>
+</yada:datatable>
+----
+<1> The tag inserts the table at the specified position in the HTML
+<2> The configuration must have been set in the @Controller as a Model attribute, called "userTableAttribute" in this example
+
+For advanced scenarios where you need to alter the configuration before
+creating the table or work with the created table in javascript, two handlers
+can be provided via `yada:preprocessor` and `yada:postprocessor`:
+
+[source,html]
+----
+<yada:datatable 
+	yada:configuration="${userTableAttribute}" 
+	yada:preprocessor="userTablePreprocessor" # <1>
+	yada:postprocessor="userTablePostprocessor"> # <2>
+</yada:datatable>
+----
+<1> The preprocessor can alter the configuration before the table is created
+<2> The postprocessor can operate on the table once it has been created
+
+More details below.
+
+== Java Fluent Interface
+The configuration for a DataTable is implemented in a `YadaDataTable` instance.
+This instance can be added to the Model with an attribute that has the same name
+used in `yada:configuration`, e.g. `userTableAttribute` in the example above.
+
+[source,java]
+----
+YadaDataTable myDataTable = ...
+model.addAttribute("userTableAttribute", myDataTable);
+----
+
+The instance is a singleton identified by a unique id and is produced by `yadaDataTableFactory`.
+This ensures that the table configuration code is run only once for all HTTP requests
+and that the same configuration can be used in the ajax handler that loads the table data.
+
+To create or get an instance the syntax is as follows:
+
+[source,java]
+----
+YadaDataTable myDataTable = yadaDataTableFactory.getSingleton("myTableId", locale, ...);
+----
+
+The locale is needed to load the i18n file and can be omitted or set to null to use the default locale
+that is either set in the application XML configuration or taken from the platform.
+In a multilanguage application it should be taken from a parameter in the @Controller @RequestMapping.
+
+The table configuration is added as a lambda after the locale parameter and uses the fluent iterface:
+
+[source,java]
+----
+YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", locale, table -> {
+	table
+		.dtAjaxUrl("someUrl")
+		.dt ...
+});
+----
+
+NOTE: Using the lambda ensures that the configuration code is run just once.
+
+All methods of the fluent interface have the "dt" prefix. This makes IDE suggestions
+more focused on the useful methods during autocompletion:
+
+[.center]
+.Method Autocompletion
+image::datatables.completion.jpg[Method Autocompletion]
+
+When a configuration option has many parameters, the corresponding
+method name has the "Obj" suffix because a new object is returned to provide the new
+configuration methods. 
+To "exit" from the current object, the `back()` method must be called.
+
+=== Basic Configuration
+The most basic table configuration, that can be used to show data taken from an @Entity,
+only requires the entity class and fields:
+ 
+[source,java]
+----
+@RequestMapping("/user")
+public String users(Model model) {
+	YadaDataTable basicTable = yadaDataTableFactory.getSingleton("basicTable", table -> {
+		table
+			.dtEntityClass(UserProfile.class) # <1>
+			.dtStructureObj()
+				.dtColumnObj("Email", "userCredentials.username").back() # <2>
+				.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin").back() # <2>
+			.back();
+	});
+	model.addAttribute("basicTable", basicTable);
+	return "/dashboard/users";
+}
+----
+<1> Provide the class of the entity that holds data
+<2> Provide the column names and the path of the properties that hold the value to show
+
+[.center]
+.Basic Usage
+image::datatables.basicuser.jpg[Basic Usage]
+
+TIP: the endpoint is implemented in `YadaController.yadaDataTableData()` 
+
+Data retrieval will be automatic and will have the same security restrictions of the page where
+the table is shown, which is "/dashboard/user" in the example.
+
+TIP: security is implemented in SecurityConfig if the application is secured 
+
+=== Advanced Configuration
+In more advanced scenarios the ajax endpoint returning data can be customized with `dtAjaxUrl()`.
+This is an alternative approach to `dtEntityClass()` and using both will result in error. 
+The argument of `dtAjaxUrl()` is the url for the ajax call that retrieves data
+from the backend. It can contain any Thymeleaf expression and will be included
+in a standard URL expression like `@{/myUrl}` when not already provided.
+
+The dtStructureObj() top method starts configuration of the "structure" of the
+table using a custom API that can be explored with autocompletion. This API
+allows the definition of columns and buttons.
+
+The other top method is `.dtOptionsObj()` that allows access to the official
+DataTables https://datatables.net/reference/option/[options,window=_blank]. For example, the https://datatables.net/reference/option/pageLength[PageLength,window=_blank]  
+option can be set with `.dtOptionsObj().dtPageLength(25)`.
+All the DataTables core options and the Responsive extension options are available
+unless they are deprecated or not applicable in the context of the Yada Framework, 
+like https://datatables.net/reference/option/retrieve[retrieve,window=_blank].
+
+TIP: anything that can't be done in Java can be done in javascript using pre- and post- processors.
+
+== Java Ajax Endpoint
+The Yada Framework implementation of DataTables assumes that data is fetched via ajax from the server,
+therefore the https://datatables.net/reference/option/ajax[ajax option,window=_blank] is forced to be active.
+
+The ajax endpoint is set via `.dtAjaxUrl()` on the YadaDataTable object as explained before. The
+@Controller should query the database, performing searching and sorting, and return a JSON
+file with the resulting data for the current page.
+
+When the table shows data from @Entity objects, most of that code is already provided.
+
+[source,java]
+----
+@RequestMapping(value ="/user/userProfileTablePage", produces = MediaType.APPLICATION_JSON_VALUE)
+@ResponseBody public Map<String, Object> userProfileTablePage(YadaDatatablesRequest yadaDatatablesRequest, Locale locale) { # <1>
+	Map<String, Object> result = yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale);	# <2>
+	return result;	# <3>
+}
+----
+<1> YadaDatatablesRequest is initialized with the metadata sent by DataTables, like the current page number, the value paths and the search/sort options
+<2> yadaDataTableDao.getConvertedJsonPage() receives the request data and the @Entity class to perform all needed operations
+<3> The result is a "map tree" (i.e. nested maps) that is automatically converted to json
+
+Using a custom endpoint for table data allows to manipulate both the query and the result, for example
+by adding conditions or creating values not directly found on the entity: 
+
+
+
+ 
 
 [.todo]
 ----
-TODO
+ajax endpoint with manipulation of query and result
 
+toolbar, command bar, select column 
 
+row class from the backend
+
+full example
+
+reference
+
+pre- and post- processors
+
+i18n is automatic by using keys instead of words
 
 ----
+
+
+

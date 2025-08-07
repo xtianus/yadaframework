@@ -13,7 +13,11 @@
 
 </head>
 <body class="article toc2 toc-left">
-<!-- When editing this file, you must copy it in all other folders (without change) -->
+<!--
+	WARNING !!!!!
+	Edit the /YadaDocs/src/docs/asciidoc/common/docinfo-header.html file
+	to change this menu.
+-->
 
 <select id="navigator">
 	<option>Choose chapter...</option>
@@ -21,18 +25,23 @@
 	<option data-link="./newEclipseProject.html">Getting started</option>
 	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
 	<option data-link="./internationalization.html">Internationalization</option>
-	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./database/overview.html">Databases</option>
 	<option data-link="./forms/overview.html">Forms</option>
 	<option data-link="./ajax.html">Ajax</option>
 	<option data-link="./ajaxModal.html">Ajax Modal</option>
-	<option data-link="./security.html">Security</option>
+	<option data-link="./security/overview.html">Security</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./json.html">Read and Write JSON</option>
+	<option data-link="./confirmationModal.html">Confirmation Modal</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
 	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./staging.html">Staging Docs</option>
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
 </select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
 <script>
 document.querySelector("#navigator").addEventListener("change", function (event) {
 	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
@@ -41,11 +50,80 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 		document.location.href = link;
 	}
 });
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.style.position = 'relative';
+        header.addEventListener('click', function(e) {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+            navigator.clipboard.writeText(url);
+        });
+        header.addEventListener('mouseenter', function() {
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-clone';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.style.position = 'absolute';
+            icon.style.right = '30px';
+            icon.style.top = '50%';
+            icon.style.transform = 'translateY(-50%)';
+            icon.style.fontSize = '18px';
+            icon.style.color = 'gray';
+            header.appendChild(icon);
+        });
+        header.addEventListener('mouseleave', function() {
+            const icon = header.querySelector('.fa-clone');
+            if (icon) {
+            	header.removeChild(icon);
+            }
+        });
+    });
+});
+
+function showCopy(e) {
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-clone';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.style.position = 'absolute';
+    icon.style.left = e.pageX + 'px';
+    icon.style.top = e.pageY + 'px';
+    icon.style.zIndex = 1000;
+    icon.style.fontSize = '24px';
+    document.body.appendChild(icon);
+    setTimeout(function() {
+        document.body.removeChild(icon);
+    }, 1000); // 1 second delay
+}
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;
+    	}
+    }
+};
 </script>
 <div id="header">
 <h1>Getting Started</h1>
 <div class="details">
-<span id="revnumber">version 0.7.5</span>
+<span id="revnumber">version 0.7.7</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -391,7 +469,23 @@ you from adding a Tomcat server later.</p>
 </div>
 <div class="paragraph">
 <p>From the "Window &gt; Preferences &gt; Gradle" dialog set the "Java home" entry to your JDK installation,
-which would be <code>C:\Local\jdk8</code> if you followed the instructions above. This is very important. Failing to do so may result in a "java facet" mismatch error on compilation.</p>
+which would be <code>C:\Local\jdk17</code> if you followed the instructions above.</p>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+<div class="title">Setting Gradle Java Home</div>
+<div class="paragraph">
+<p>When the Gradle Java Home is not set, Eclipse will run Gradle with the java version used to run itself
+and this may cause all sort of errors like "java facet mismatch" or "supplied phased action failed".</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>Set the editors file encoding to UTF-8, at least "General &gt; Workspace &gt; Text file encoding" and "Web &gt; CSS Files &gt; Encoding":</p>
@@ -1015,6 +1109,22 @@ admin user email to your own email address in order to receive emails from the a
 <div class="sect1">
 <h2 id="_database_setup">Database Setup</h2>
 <div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can skip this section if you&#8217;re not going to use a database (yet), but
+also Security will be disabled.
+Set &lt;database enabled="false"&gt; in the configuration.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <p>The default database schema, user and password are found in <code>/src/main/resources/conf.webapp.dev.xml</code>, <code>/src/main/resources/META-INF/persistence.xml</code>, <code>/src/main/webapp/META-INF/context.xml</code> and
 <code>/env/dev/createDatabaseAndUser.bat</code>. If you want to change them, do so in all files.</p>
@@ -1072,13 +1182,14 @@ then in the "Common" tab choose "Save as &gt; Shared file" and type "\MySiteProj
 </div>
 <div class="paragraph">
 <p>You can now run the schema creation task with a press of a button.
-If all goes well, the output will be written to the <code>/schema</code> folder (you might need to refresh it in Eclipse with F5).
-To load the schema into the database, use the <code>/env/dev/dropAndCreateDatabase.bat</code>
-script (or an equivalent linux/mac version).</p>
+You may get some compilation errors that need to be fixed before trying the generation again.
+If the schema generator can&#8217;t connect to the database check that all configuration files listed above (<code>persistence.xml</code> etc.) have the correct DB login credentials.</p>
 </div>
 <div class="paragraph">
-<p>You may get some compilation errors that need to be fixed before trying the generation again.
-If the schema generator can&#8217;t connect to the database check that all configuration files listed above (<code>persistence.xml</code> etc.) have the correct DB login credentials.</p>
+<p>If all goes well, the output will be written to the <code>/schema</code> folder (you might need to refresh it in Eclipse with F5).
+To load the schema into the database you may use the <code>/env/dev/dropAndCreateDatabase.bat</code>
+script (or an equivalent linux/mac version) but it is more convenient to have the schema loaded
+by Flyway at first application run: just copy it in the <code>/src/main/resources/database</code> folder with a name like <code>V001__baseline.sql</code>.</p>
 </div>
 </div>
 </div>
@@ -1274,8 +1385,8 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.5<br>
-Last updated 2023-09-28 16:34:46 +0200
+Version 0.7.7<br>
+Last updated 2024-10-12 21:27:53 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

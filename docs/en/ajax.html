@@ -13,7 +13,11 @@
 
 </head>
 <body class="article toc2 toc-left">
-<!-- When editing this file, you must copy it in all other folders (without change) -->
+<!--
+	WARNING !!!!!
+	Edit the /YadaDocs/src/docs/asciidoc/common/docinfo-header.html file
+	to change this menu.
+-->
 
 <select id="navigator">
 	<option>Choose chapter...</option>
@@ -21,18 +25,23 @@
 	<option data-link="./newEclipseProject.html">Getting started</option>
 	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
 	<option data-link="./internationalization.html">Internationalization</option>
-	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./database/overview.html">Databases</option>
 	<option data-link="./forms/overview.html">Forms</option>
 	<option data-link="./ajax.html">Ajax</option>
 	<option data-link="./ajaxModal.html">Ajax Modal</option>
-	<option data-link="./security.html">Security</option>
+	<option data-link="./security/overview.html">Security</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./json.html">Read and Write JSON</option>
+	<option data-link="./confirmationModal.html">Confirmation Modal</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
 	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./staging.html">Staging Docs</option>
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
 </select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
 <script>
 document.querySelector("#navigator").addEventListener("change", function (event) {
 	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
@@ -41,11 +50,80 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 		document.location.href = link;
 	}
 });
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.style.position = 'relative';
+        header.addEventListener('click', function(e) {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+            navigator.clipboard.writeText(url);
+        });
+        header.addEventListener('mouseenter', function() {
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-clone';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.style.position = 'absolute';
+            icon.style.right = '30px';
+            icon.style.top = '50%';
+            icon.style.transform = 'translateY(-50%)';
+            icon.style.fontSize = '18px';
+            icon.style.color = 'gray';
+            header.appendChild(icon);
+        });
+        header.addEventListener('mouseleave', function() {
+            const icon = header.querySelector('.fa-clone');
+            if (icon) {
+            	header.removeChild(icon);
+            }
+        });
+    });
+});
+
+function showCopy(e) {
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-clone';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.style.position = 'absolute';
+    icon.style.left = e.pageX + 'px';
+    icon.style.top = e.pageY + 'px';
+    icon.style.zIndex = 1000;
+    icon.style.fontSize = '24px';
+    document.body.appendChild(icon);
+    setTimeout(function() {
+        document.body.removeChild(icon);
+    }, 1000); // 1 second delay
+}
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;
+    	}
+    }
+};
 </script>
 <div id="header">
 <h1>Ajax</h1>
 <div class="details">
-<span id="revnumber">version 0.7.5</span>
+<span id="revnumber">version 0.7.7</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -65,13 +143,16 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <li><a href="#_ajax_on_checkbox">Ajax on checkbox</a></li>
 </ul>
 </li>
+<li><a href="#_ajax_upload_by_dragdrop">Ajax upload by drag&amp;drop</a></li>
 <li><a href="#_ajax_async_element_load">Ajax async element load</a></li>
+<li><a href="#_ajax_feedback">Ajax feedback</a></li>
 <li><a href="#_ajax_method">Ajax method</a>
 <ul class="sectlevel2">
 <li><a href="#_url">URL</a></li>
 <li><a href="#_data">data</a></li>
 <li><a href="#_successhandler">successHandler</a></li>
 <li><a href="#_responsetype">responseType</a></li>
+<li><a href="#_loaderoption">loaderOption</a></li>
 </ul>
 </li>
 <li><a href="#_utilities">Utilities</a>
@@ -168,7 +249,14 @@ the forms in the group is sent together with any url parameters:</p>
 </dd>
 <dt class="hdlist1">disable the loader</dt>
 <dd>
-<p>The loader is started by default. To disable it, add the <code>yadaNoLoader</code> class.</p>
+<p>The page loader is started by default. To disable it, add the <code>yadaNoLoader</code> class.</p>
+</dd>
+<dt class="hdlist1">show an element loader</dt>
+<dd>
+<p>Instead of showing a full page loader, the ajax call can show a small loader
+inside any page element when the <code>yada:ajaxElementLoader</code> attribute is used on the
+triggering element. The value is a CSS selector that can use the <a href="#extendedSelectors">extended syntax</a>.
+See <a href="#_loaderoption">loaderOption</a> for some more details.</p>
 </dd>
 </dl>
 </div>
@@ -457,10 +545,10 @@ The following <code>data-</code> attributes allow you to perform postprocessing 
 <p><code>data-yadaSuccessHandler</code></p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>comma-separated list of function names or function body</p>
+<p>comma-separated list of function names, or function body, not both (e.g. "f1,f2" or "f1();f2();" not "f1(),f2")</p>
 </div></div></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>call the specified functions or execute the code</p>
+<p>call the specified functions or execute the code. The function is called in the context of the DOM element. It also receives the DOM element as a third parameter (see below)</p>
 </div></div></td>
 </tr>
 </tbody>
@@ -522,13 +610,29 @@ quoting them in single quotes.</p>
 It is searched in all the document unless a special yada prefix is used (see below).
 If the selector list is empty, the target is the element itself.</p>
 </div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
 <div class="paragraph">
-<p>If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.</p>
+<p>Do not use an #id as selector.</p>
+</div>
+<div class="paragraph">
+<p>If the selector is an #id, you should ensure that the same id is not present in the returned ajax content or the result might be unexpected.
+But if you replace something by #id with something that doesn&#8217;t have the #id anymore, replacement will work only for the first call.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>Each selector can also have the following special prefixes:</p>
 </div>
-<table class="tableblock frame-all grid-all stretch">
+<table id="extendedSelectors" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. Extended selectors</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 66.6667%;">
@@ -704,7 +808,7 @@ public String someUrl(Model model) {
 <div class="sect3">
 <h4 id="_calling_some_handler">Calling some Handler</h4>
 <div class="paragraph">
-<p>The value of the yadaSuccessHandler attribute can either be a comma-separated list
+<p>The value of the <strong>yadaSuccessHandler</strong> attribute can either be a comma-separated list
 of function names or bodies of a function.</p>
 </div>
 <div class="paragraph">
@@ -723,7 +827,7 @@ yada:successHandler="alert(responseText), alert('hello'), link.reset()"</code></
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">function someHandler(responseText, responseHtml, link) {</code></pre>
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">function someHandler(responseText, responseHtml, domElement) {</code></pre>
 </div>
 </div>
 <div class="dlist">
@@ -736,17 +840,17 @@ yada:successHandler="alert(responseText), alert('hello'), link.reset()"</code></
 <dd>
 <p>the ajax response converted to jQuery html objects</p>
 </dd>
-<dt class="hdlist1">link</dt>
+<dt class="hdlist1">domElement</dt>
 <dd>
-<p>the original anchor object (DOM, not jQuery). Could also be a form or anything else, not just a "link".</p>
+<p>the original anchor/form object (DOM, not jQuery) that triggered the ajax call.</p>
 </dd>
 </dl>
 </div>
 <div class="paragraph">
-<p>The <code>link</code> argument is also the same as the current <code>this</code> context.</p>
+<p>The <code>domElement</code> argument is also the same as the current <code>this</code> context.</p>
 </div>
 <div class="paragraph">
-<p>When using function bodies, the above three arguments are valid objects.</p>
+<p>When using function bodies, the above three arguments are valid objects and can be used.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -796,12 +900,30 @@ the classic <code>responseHtml.find('.parent .child')</code> or <code>$('.parent
 </div>
 </div>
 <div class="sect3">
+<h4 id="_ajax_conditional_html">Ajax conditional HTML</h4>
+<div class="paragraph">
+<p>When returning from any ajax call the model attribute <code>yadaIsAjaxResponse</code>
+has the value <code>yadaIsAjaxResponse</code>. This can be used to conditionally show
+some section or to apply some style only when returning from ajax:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;span th:if="${yadaIsAjaxResponse}"&gt;Just returned from Ajax call!&lt;/span&gt;
+
+&lt;style&gt;
+	.yadaIsAjaxResponse { color: red; }
+&lt;/style&gt;
+&lt;div th:classappend="${yadaIsAjaxResponse}"&gt;This is red after Ajax&lt;/div&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
 <h4 id="_confirm_dialog">Confirm Dialog</h4>
 <div class="paragraph">
 <p>You can show a confirm dialog before the ajax call is made. The user will be shown a text message and an option to confirm or abort the call.</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 2. data- attributes and tags for Confirm Dialog</caption>
+<caption class="title">Table 3. data- attributes and tags for Confirm Dialog</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -861,24 +983,6 @@ the classic <code>responseHtml.find('.parent .child')</code> or <code>$('.parent
 </tr>
 </tbody>
 </table>
-</div>
-<div class="sect3">
-<h4 id="_ajax_conditional_html">Ajax conditional HTML</h4>
-<div class="paragraph">
-<p>When returning from any ajax call the model attribute <code>yadaIsAjaxResponse</code>
-has the value <code>yadaIsAjaxResponse</code>. This can be used to conditionally show
-some section or to apply some style only when returning from ajax:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;span th:if="${yadaIsAjaxResponse}"&gt;Just returned from Ajax call!&lt;/span&gt;
-
-&lt;style&gt;
-	.yadaIsAjaxResponse { color: red; }
-&lt;/style&gt;
-&lt;div th:classappend="${yadaIsAjaxResponse}"&gt;This is red after Ajax&lt;/div&gt;</code></pre>
-</div>
-</div>
 </div>
 </div>
 </div>
@@ -973,6 +1077,174 @@ Changing a select or a checkbox sumbits the enclosing form: this should be made 
 </div>
 </div>
 <div class="sect1">
+<h2 id="_ajax_upload_by_dragdrop">Ajax upload by drag&amp;drop</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Any element on page can be turned into a drop target for file upload operations using the following attributes:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 4. file upload</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">name</th>
+<th class="tableblock halign-left valign-top">value</th>
+<th class="tableblock halign-left valign-top">description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>yada:dropUpload</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>URL</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>sends dropped files to the server via ajax</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>yada:singleFileOnly</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>empty</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>(optional) prevents uploading multiple files: an error message is shown using title and message from the following message.properties keys: <code>yadajs.uploadAccept.error.title</code>, <code>yadajs.uploadAccept.error.message</code></p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>yada:dropUploadAccept</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>mime type or extension</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>(optional) specify which file types should be handled. Example: "application/json", "image/*", ".jpg"</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>yada:dropUploadParamName</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>(optional) specify the name of the request parameter that will contain the MultipartFile. Defaults to "multipartFile"</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The current implementation only sends files via ajax
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>All other ajax-related functionality can be used, so for example the page can be updated with the result of the
+ajax call using <code>yada:updateOnSuccess</code>, or some function can be called using <code>yada:successHandler</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+A link can also be a drop target, but in case of ajax links any handler or update operation would apply
+to both clicking and dropping, which probably is not desirable; plain links (non-ajax) always work as expected
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>HTML example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div class="yadaNoLoader" <i class="conum" data-value="1"></i><b>(1)</b>
+	yada:updateOnSuccess="yadaParents:.fileDetails" <i class="conum" data-value="1"></i><b>(1)</b>
+	yada:successHandler="yada.showAjaxFeedback" <i class="conum" data-value="1"></i><b>(1)</b>
+	yada:dropUpload="@{/uploadGalleryImage(productId=${product.id})}" <i class="conum" data-value="2"></i><b>(2)</b>
+	yada:singleFileOnly <i class="conum" data-value="3"></i><b>(3)</b>
+	yada:dropUploadAccept="image/*" <i class="conum" data-value="4"></i><b>(4)</b>
+	title="Drop image to upload"&gt;
+	&lt;i class="fas fa-file-upload dropIcon"&gt;&lt;/i&gt;
+&lt;/div&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>any ajax-related functionality applies</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>the endpoint can include request parameters as usual</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>in this example ony one file can be dropped</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>files that are not images will be ignored. The value can also be a specific mime type or an extension like ".jpg"</td>
+</tr>
+</table>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>Currently `yada:singleFileOnly` does not accept a value but only uses the predefined message.properties keys.
+This should be changed so that the attribute value has precedence over the key, when specified. It should contain a comma-separated title and error text.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>While the files are being dragged over the drop area, the <code>yadaDropTarget</code> class is added to the element. This
+allows a visual feedback (not provided by default) for example by changing the border or the background color.</p>
+</div>
+<div class="paragraph">
+<p>The @Controller receives a <code>MultipartFile</code> or a <code>MultipartFile[]</code> with a default name of "multipartFile": dropping a single file will match both signatures
+but dropping more than one would only match the latter, so choose accordingly to the use case, the latter being more versatile.
+Uploaded files can be handled as when <a href="forms/uploads.html#_java">using forms for upload</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/uploadProductFiles")
+public String uploadProductFiles(Long productId, MultipartFile[] multipartFile, Model model, Locale locale) {
+	Product product = ...
+	for (int idx = 0; idx &lt; multipartFile.length; idx++) {
+		MultipartFile multi = multipartFile[idx];
+		String clientFilename = multi.getOriginalFilename();
+		File managedFile = yadaFileManager.uploadFile(multi);
+		YadaAttachedFile newFile = yadaFileManager.attachNew(true, managedFile, clientFilename, "/productFiles", null, null, null, null);
+		newFile.setAllTitles(clientFilename);
+		newFile = yadaAttachedFileDao.save(newFile);
+		product.addFile(newFile);
+	}
+	... save product
+	return ...
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_ajax_async_element_load">Ajax async element load</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -981,6 +1253,22 @@ For example, deferring the load of a big image or the calculation of a computati
 This is achieved using the same <code>yada:ajax</code> syntax seen above, with the addition of <code>yada:triggerInViewport</code>: when
 any element (even a span) is tagged with <code>yada:triggerInViewport</code>, it behaves like a clicked anchor when it enters the
 viewport (or if it is there already on page load).</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>When implementing a long list of triggers that get replaced with actual content
+when entering the viewport, ensure that the triggers actually have some height
+or they&#8217;ll be triggered all at once</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>The following example shows an async "like button". On page load the state of the button is unknown so it shows
@@ -1073,7 +1361,7 @@ button fragment again:</p>
 &lt;/a&gt;</code></pre>
 </div>
 </div>
-<div class="paragraph">
+<div id="loginRedirects" class="paragraph">
 <p>Another step would be to take care of "login redirects": when a logged out user clicks on the
 like button a login modal would be triggered if the url is protected (as it should) and the
 Controller, called after login with a redirect to the original url, wouldn&#8217;t know the
@@ -1118,6 +1406,68 @@ public String toggleBookLike(Long bookId, Boolean currentLike, Boolean yadaAjaxJ
 </div>
 </div>
 <div class="sect1">
+<h2 id="_ajax_feedback">Ajax feedback</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When returning from an ajax call it might be useful to show some kind of
+feedback to the user. The yada loader can be used to show that a call
+is being made but sometimes it is more appropriate to show some feedback
+when the ajax call has returned, especially when the call is fast and the loader
+might disappear too quickly.</p>
+</div>
+<div class="paragraph">
+<p>Such "ajax feedback" can be shown when returning from the ajax call by either
+using HTML attributes or calling a js method in the success handler.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 5. data- attribute and tag for Ajax Feedback</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">data</th>
+<th class="tableblock halign-left valign-top">tag</th>
+<th class="tableblock halign-left valign-top">description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>data-yadaShowAjaxFeedback</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><code>yada:showAjaxFeedback</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>enables the ajax feedback</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.showAjaxFeedback();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The default feedback shows a green checkmark in the center of the page using the
+yadaIcon-ok icon.
+This can be styled with the <code>yadaAjaxFeedbackOk</code> class and
+the HTML changed by adding an element with <code>id="yadaAjaxFeedback"</code> that will be
+used in place of the default one.</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../img/ajaxFeedback.jpg" alt="Default Ajax Feedback">
+</div>
+<div class="title">Figure 1. Default Ajax Feedback</div>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_ajax_method">Ajax method</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -1125,7 +1475,7 @@ public String toggleBookLike(Long bookId, Boolean currentLike, Boolean yadaAjaxJ
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.ajax(url, data, successHandler, method, timeout, hideLoader, asJson, responseType)</code></pre>
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.ajax(url, data, successHandler, method, timeout, loaderOption, asJson, responseType)</code></pre>
 </div>
 </div>
 <div class="dlist">
@@ -1150,9 +1500,9 @@ public String toggleBookLike(Long bookId, Boolean currentLike, Boolean yadaAjaxJ
 <dd>
 <p>(optional) milliseconds timeout, null for default (set by the browser)</p>
 </dd>
-<dt class="hdlist1">hideLoader</dt>
+<dt class="hdlist1">loaderOption</dt>
 <dd>
-<p>(optional) true for not showing the spinning loader (shown by default)</p>
+<p>(optional) controls the display of a loader image (e.g. spinning wheel)</p>
 </dd>
 <dt class="hdlist1">asJson</dt>
 <dd>
@@ -1256,7 +1606,7 @@ public String addUser(MultipartFile someBinaryArray, String someText, Model mode
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">successHandler(responseText, $responseHtml)</code></pre>
+<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">successHandler(responseText, $responseHtml, domElement)</code></pre>
 </div>
 </div>
 <div class="dlist">
@@ -1287,6 +1637,26 @@ public String addUser(MultipartFile someBinaryArray, String someText, Model mode
 <pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.ajax(urlShowBom, formData, insertBom.bind(this), "POST");</code></pre>
 </div>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+you can&#8217;t use <code>bind</code> in the function specified with <code>yada:successHandler</code> where the context is always the triggering DOM element
+</td>
+</tr>
+</table>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">domElement</dt>
+<dd>
+<p>the dom element that triggered the ajax call, it is also the current context (<code>this</code>).</p>
+</dd>
+</dl>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_responsetype">responseType</h3>
@@ -1299,6 +1669,53 @@ See <a href="#_returning_from_the_backend">Returning from the backend</a> for an
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.ajax("/catalog", null, null, null, null, null, null, "blob");</code></pre>
 </div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_loaderoption">loaderOption</h3>
+<div class="paragraph">
+<p>By default, when an ajax request is made a "page loader" is shown i.e. the <code>.loader</code> element is made visible.
+To prevent the loader from showing, the <code>loaderOption</code> must be <code>true</code>.</p>
+</div>
+<div class="paragraph">
+<p>Since Yada 0.7.6 a new type of loader can be started instead: the "element loader". This is like the "page loader"
+but limited to some page elements. For example, when clicking on a button a loader may appear
+just on that button or on some target div. For the element loader to show, the loaderOption must be either:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a string with a css selector</p>
+</li>
+<li>
+<p>a DOM element</p>
+</li>
+<li>
+<p>a JQuery object</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>It must point to the element or elements that should be covered with a loader.</p>
+</div>
+<div class="paragraph">
+<p>The HTML of the loader is automatically added and removed.
+By default it shows a spinning wheel but can be customised with the
+classes <code>yadaElementLoaderOverlay</code> and <code>yadaElementLoaderIcon</code>. See <code>yada.css</code> for the default settings.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+The ajax method forces the targeted elements to a "relative" position when "static" or not positioned.
+This should not affect the layout. If it does, the element loader should target some specifically
+added element or be removed.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -1355,8 +1772,8 @@ when they return from ajax. Example: <code>&lt;div th:classappend="${yadaIsAjaxR
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.5<br>
-Last updated 2023-09-28 16:34:45 +0200
+Version 0.7.7<br>
+Last updated 2025-07-29 17:03:21 +0200
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

@@ -1,0 +1,185 @@
+=  User Registration
+:docinfo: shared
+
+Creating users with email validation
+
+==  Description
+Users can be created in three ways:
+
+* by adding user details in the configuration file
+* by implementing a user registration functionality used by admins
+* by allowing any user to self register
+
+Adding users via configuration has already been covered in <<overview.adoc#_root_user,Overview>>.
+
+If the user details have already been provided by some trusted means, an admin
+could input those details and create the user. The process may require the target
+user to click on a validation link in a confirmation email but this isn't strictly 
+required. Reading user details could be implemented via a protected form or a csv file upload.
+
+When users are free to register on their own, these elements should be provided:
+
+* a public registration form
+* a confirmation email with a secret confirmation link
+* a handler for the confirmation link where users are saved to database
+
+== Registration request
+If user registration requires clicking on a validation link from an email, the user
+information must be stored in the database for later. 
+The `YadaRegistrationRequest.java` class can be used for that. It can store some basic
+information like email and password and should be subclassed in order to store application-specific
+user information like name and surname or a newsletter subscription flag. 
+An example implementation is provided in the application entity package
+and should be customised as needed.
+
+== Registration form
+A registration link should open a page/modal with a registration form.
+The form can use the `YadaRegistrationRequest` subclass (`MyRegistrationRequest` in the example) as a backing bean
+or the `UserProfile` directly if a confirmation email is not required.
+
+[source,java]
+----
+@RequestMapping("/registerPage")
+public String registerPage(MyRegistrationRequest myRegistrationRequest) {
+	return "/register";
+}
+----
+
+The registration form can use a hidden "antispam" field that would be filled by spam
+scripts only, so that the most basic spam attacks can be easily prevented. In the
+example implementation the field "username" must be left blank in order for registration
+to be successful. The real username is stored in the "email" field.  
+
+[source,html]
+----
+<form th:action="@{/signup}" th:object="${myRegistrationRequest}" role="form" method="post" id="registrationForm">
+	<fieldset>
+		<!--/* The username field is hidden and used to detect spam */-->
+		<label for="username" class="hidethis">Username</label> 
+		<input type="text" class="hidethis" id="username" name="username" th:field="*{username}">
+		<label for="email">E-Mail</label>
+		<input type="email" id="email" th:field="*{email}" required="required" autofocus="autofocus">
+		<label for="password">Password</label>
+		<input type="password" th:field="*{password}" required="required">
+		<label for="confirmPassword">Confirm Password</label>
+		<input type="password" id="confirmPassword" name="confirmPassword">
+		...
+----
+
+The password confirmation field (optional) can be enabled with
+
+[source,javascript]
+----
+<script>
+	yada.enablePasswordMatch($("#registrationForm"));
+</script>
+----
+
+This will apply the classes `yada-password-mismatch` and `has-error` (for Bootstrap 4) to the form
+when the input fields named "password" and "confirmPassword" don't match. In such case it will also
+disable the form submit button. The above classes can be used for example to make visible some predefined error
+or change the color of the labels. 
+
+The controller that handles the registration form submission should perform some validation on the
+application-specific fields then call the `YadaRegistrationController.handleRegistrationRequest()` method
+to finalise the operation. A default implementation is provided in the `RegistrationController.java` class.
+
+The `handleRegistrationRequest()` method performs some simple validation on the email address syntax and 
+checks if the address has been blacklisted. Blacklisting is done by specifying regex patterns
+in the configuration as shown in this example:
+
+[source,xml]
+----
+	<email>
+		...
+		<blacklistPattern>.*invalid.*</blacklistPattern>
+		<blacklistPattern>.*@mailinator.com</blacklistPattern>
+	</email>
+----	
+
+It also checks if the user exists and the password is within the configured length.
+Validation error messages are internationalised with the following keys:
+
+[source,properties]
+----
+yada.form.registration.email.invalid = Invalid email address 
+yada.form.registration.username.exists = Email already registered
+yada.form.registration.password.length = The password must be between {0} and {1} characters long.
+yada.form.registration.email.failed = Sending the registration confirmation email has failed. Please try again later
+----
+
+If validation fails, the method returns false and sets the relevant flags on the BindingResult.
+
+== Confirmation email
+The email sent to the user is `/src/main/resources/template/email/registrationConfirmation.html`.
+The default implementation should be customised to the application needs.
+
+For localisation purposes, the system will first check for an email file ending in `_<language>`
+like `registrationConfirmation_de.html`, then fall back to the plain version without language
+if that file is not found.
+This means that email messages can be localised by creating the locale-specific file for
+each supported language other than the default one.
+
+The subject for the email is defined by the message.properties key `email.subject.registrationConfirmation'.
+It will receive the email timestamp as parameter 0 (can be omitted). Example:
+
+
+[source,properties]
+----
+email.subject.registrationConfirmation = Registration ({0})
+----
+
+== Confirmation handler
+The default link in the confirmation email has the format `/registrationConfirmation/{token}` where
+`{token}` is a unique identifier saved in the database. This can be overridden with the 
+`config/security/registration/confirmationLink` configuration entry:
+
+[source,xml]
+----
+<security>
+	<registration>
+		<confirmationLink>/my/registrationAccept</confirmationLink>
+	</registration>
+----
+
+The controller that handles the confirmation request can conveniently invoke the
+`yadaRegistrationController.handleRegistrationConfirmation()` method and handle the
+result according to the application needs:
+
+[source,java]
+----
+	@RequestMapping("/registrationConfirmation/{token}")
+	public String registrationConfirmation(@PathVariable String token, Model model, Locale locale, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpSession session) {
+		YadaRegistrationOutcome<UserProfile> outcome = yadaRegistrationController.handleRegistrationConfirmation(token, new String[]{config.getRoleName(ROLE_USER_ID)}, locale, session, UserProfile.class);
+		switch (outcome.registrationStatus) {
+		case LINK_EXPIRED:
+			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.expired.title").error().messageKey("registration.confirmation.expired.message").add();
+			return yadaWebUtil.redirectString("/", locale);
+		case USER_EXISTS:
+			redirectAttributes.addAttribute("email", outcome.email);
+			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.existing.title").error().messageKey("registration.confirmation.existing.message", outcome.email).add();
+			return yadaWebUtil.redirectString("/passwordReset", locale);
+		case OK:
+			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.ok.title").ok().messageKey("registration.confirmation.ok.message", outcome.email).add();
+			log.info("Registration of '{}' successful", outcome.email);
+			return yadaWebUtil.redirectString("/", locale);
+		case ERROR:
+		case REQUEST_INVALID:
+			yadaNotify.titleKey(redirectAttributes, locale, "registration.confirmation.error.title").error().messageKey("registration.confirmation.error.message").add();
+			return yadaWebUtil.redirectString("/", locale);
+		}
+		log.error("Invalid registration state - aborting");
+		throw new YadaInvalidUsageException("Invalid registration state");
+	}
+----
+
+It is in this method that any application-specific data gathered from the registration form should be stored in the
+user profile.
+
+TODO: show the updated code
+
+
+
+
+
+

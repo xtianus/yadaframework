@@ -1,6 +1,8 @@
 =  Yada Framework
 :docinfo: shared
 
+NOTE: Chat with this documentation in the https://chatgpt.com/g/g-IZTpvHTYM-yada-framework-manual[Yada Framework Manual^] custom GPT. Beware of hallucinations!
+
 ==  General Principles
 
 Git repository: https://github.com/xtianus/yadaframework
@@ -37,13 +39,19 @@ simple architectures can efficiently solve most practical problems a developer w
 
 ==  Documentation Chapters
 
-The documentation is a mix of tutorial and reference. It loosely follows the official
+The documentation is a mix of tutorial and reference. The tutorial loosely follows the official
 Java https://eclipse-ee4j.github.io/jakartaee-tutorial/dukes-bookstore.html["Duke’s Bookstore Case Study Example"^] with many improvements in functionality.
 
 [.bookstore]
 --
 The tutorial sections are shown using this visual style.
 --
+
+[NOTE]
+====
+What follows is a partial list of chapters with a brief explanation. The most
+updated index is in the dropdown at the top of each page.
+====
 
 <<newEclipseProject.adoc#,Getting Started>>:: This section will guide you through the setup of the development environment: installing Java, git,
 MySQL, Eclipse. It will then show you how to create an Eclipse project with a database and a web server
@@ -54,7 +62,7 @@ that will show you how to quickly create a web application
 
 <<internationalization.adoc#,i18n>>:: Implement a multilanguage site
 
-<<database/pagination.adoc#,Database pagination>>:: Fetch big data one piece at a time
+<<database/overview.adoc#,Databases>>:: Storing and retrieving data
 
 <<forms/overview.adoc#Forms,Forms>>:: Submitting data to the server
 
@@ -62,11 +70,13 @@ that will show you how to quickly create a web application
 
 <<ajaxModal.adoc#,Ajax Modals>>:: Open a modal as a result of an ajax call
 
-<<security.adoc#,Security>>:: User accounts and protecting pages behind login
+<<security/overview.adoc#,Security>>:: User accounts and protecting pages behind login
 
 <<datatables.adoc#,DataTables>>:: Effective handling of tabular data
 
 <<emails.adoc#,Sending Emails>>:: Templating applied to emails
+
+<<confirmationModal.adoc#,Confirmation Modal>>:: Easily ask for confirmation
 
 <<notificationModal.adoc#,Notification Modal>>:: Quick messages to the user
 

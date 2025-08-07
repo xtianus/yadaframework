@@ -1,0 +1,314 @@
+=  Staging
+:docinfo: shared
+
+Documentation bits waiting to be moved to the proper section
+
+
+== Copy to clipboard
+[cols="1,1"]
+|===
+h|Scope
+|HTML page
+h|Language
+|Javascript
+|===
+
+The `yada.copyToClipboard(extendedSelector, event, showFeedback)` method copies the content of some page element to the clipboard.
+
+extendedSelector:: 
+the CSS selector eventually with a yada prefix
+event::
+the event that triggered the copy (usually a click event). Propagation of this event will be stopped.
+The event is also used to properly convert any yada prefix on the CSS selector
+showFeedback::
+whether to show a <<ajax.adoc#_ajax_feedback,feedback message>>
+
+The following example is a "clone" icon that copies the content of an element with a specific id:
+
+[source,HTML]
+----
+<a href="javascript:void(0);"
+	th:onclick="|yada.copyToClipboard('#pub-${publication.id}', event, true)|"
+	title="Copy to clipboard">
+	<i class="fa fa-clone" aria-hidden="true"></i>
+</a>
+----
+
+
+
+== Lazy Initialization of class attributes
+[cols="1,1"]
+|===
+h|Scope
+|Backend
+h|Language
+|Java
+|===
+
+A common pattern in methods is to check for some attribute to be null and make an 
+instance otherwise, before using it.
+Example:
+
+[source,Java]
+----
+public void addToMyList(String data) {
+	if (this.myList == null) {
+		this.myList = new ArrayList();
+	}
+	this.myList.add(data);
+}
+
+public MyThing getMyThing(String somethingToSet) {
+	if (this.myThing == null) {
+		this.myThing = new MyThing();
+	}
+	this.myThing.setSomething(somethingToSet);
+	return this.myThing;
+}
+----
+
+This can be made more compact by using `YadaUtil.lazyUnsafeInit()`:
+
+[source,Java]
+----
+public void addToMyList(String data) {
+	this.myList = YadaUtil.lazyUnsafeInit(this.myList); # <1>
+	this.myList.add(data);
+}
+
+public MyThing getMyThing(String somethingToSet) {
+	this.myThing = YadaUtil.lazyUnsafeInit(this.myThing, MyThing::new); # <2>
+	this.myThing.setSomething(somethingToSet);
+	return this.myThing;
+}
+
+public MyThing getMyThing(String somethingToSet) {
+	this.myThing = YadaUtil.lazyUnsafeInit(this.myThing, () -> new MyThing(this)); # <3>
+	this.myThing.setSomething(somethingToSet);
+	return this.myThing;
+}
+
+public void addToMyList(String data) {
+	this.myList = YadaUtil.lazyUnsafeInit(this.myList, ArrayList::new); # <4>
+	this.myList.add(data);
+}
+----
+<1> Initializing a list with a simple api
+<2> Initializing an object with a constructor without arguments
+<3> Initializing an object with a constructor with arguments
+<3> Initializing an object with a constructor with arguments
+
+CAUTION: In a multithreaded scenario there may be race conditions with unpredictable results. This is why the method is called "lazyUnsafeInit".
+
+There are of course no race conditions if the attribute owner instance is itself guaranteed to ever be 
+used by one thread only, for example when the owner instance is created
+inside some method (i.e. is not a singleton), 
+because each thread will have its own stack and its own instance of local variables.
+
+Example:
+
+[source,Java]
+----
+public class MyOwner {
+	public SomeAttribute someAttribute;
+}
+
+public class MyProcessor {
+	MyOwner mySingletonOwner = new MyOwner();
+		
+	public SomeAttribute process() {
+		// THREAD SAFE
+		MyOwner myOwner = new MyOwner();
+		myOwner.someAttribute = YadaUtil.lazyUnsafeInit(myOwner.someAttribute, SomeAttribute::new); # <1>
+		// NOT THREAD SAFE
+		mySingletonOwner.someAttribute = YadaUtil.lazyUnsafeInit(myOwner.someAttribute, SomeAttribute::new); # <2>
+		return mySingletonOwner.someAttribute; # <3>
+	}
+}
+----
+<1> This is always going to work properly because each thread entering the process() method has its own instance of MyOwner
+<2> This is prone to race conditions if two threads enter the process() method because they would
+	operate on the same instance of MyOwner but probably with their own copy of mySingletonOwner.someAttribute
+<3> This is	going to be a problem later in the execution if each thread has its own copy of mySingletonOwner.someAttribute
+
+In a multithreaded scenario, lazy initialization involves the use of volatile attributes and synchronization, so better
+avoid it when possible.
+
+
+== Lookup Tables
+[cols="1,1"]
+|===
+h|Scope
+|Backend
+h|Language
+|Java
+|===
+
+A lookup table holds a value indexed by some other values. It is a generalisation
+of a Map where a single key indexes a value: in a lookup table the key can be a collection of many values.
+A simple implementation would be to concatenate the many keys into a single string to be
+used as a key in a Map, or to use some key object that holds many values. 
+
+A much better solution is to use the YadaLookupTable class:
+
+[source,Java]
+----
+YadaLookupTable<Integer, String> lookupTable = new YadaLookupTable<>();
+lookupTable.put("value1", 1, 2, 3);
+lookupTable.put("value2", 1, 2, 4);
+...
+lookupTable.get(1, 2, 3); // "value1"
+----
+
+The keys must all be of the same type, that can be different from the type of the value.
+In order to overcome this limitation, just use "Object" so that keys can be of mixed types.
+
+For a better control on the key types, four other classes are provided:
+
+[cols="1,1"]
+|===
+h|YadaLookupTableThree
+|Lookup table with 3 columns: two keys as index for one value
+h|YadaLookupTableFour
+|Lookup table with 4 columns: three keys as index for one value
+h|YadaLookupTableFive
+|Lookup table with 5 columns: four keys as index for one value
+h|YadaLookupTableSix
+|Lookup table with 6 columns: five keys as index for one value
+|===
+
+[source,Java]
+----
+YadaLookupTableThree<Locale, Integer, String> lookupTable = new YadaLookupTableThree<>();
+lookupTable.put(Locale.EN, 1, "Hello");
+lookupTable.put(Locale.IT, 1, "Ciao");
+...
+lookupTable.get(Locale.EN, 1); // "Hello"
+----
+
+All implementations are efficient and thread safe.
+
+== Error Handling
+[cols="1,1"]
+|===
+h|Scope
+|Configuration, HTML page
+h|Language
+|XML, HTML
+|===
+
+An error can be generated either outside the application (e.g. an endpoint doesn't exist,
+a thymeleaf template is not found) or
+inside the application via an Exception. 
+The first kind of error is handled by providing an error page in the `web.xml` file. The default
+target is `/yadaError`. 
+
+[source,XML]
+----
+<error-page>
+	<location>/yadaError</location>
+</error-page>
+----
+
+The second kind of error is handled by `YadaGlobalExceptionHandler`.
+
+These are two very distinct types or errors but the user
+doesn't need to be aware of the difference.
+For both kinds of errors, an ajax request results in the contents of `ajaxError.html`;
+for normal requests, the error details are set in some model attributes,
+then execution is forwarded to the `@RequestMapping` configured with `<errorPageForward>`.
+By default the target is the home page, where an error modal is shown.
+To show a dedicated error page, a skeleton of which can be found in `errorPage.html`,
+configure it as shown here: 
+
+[source,XML]
+----
+<paths>
+	<errorPageForward>/errorPage</errorPageForward>
+</paths>
+----
+
+TIP: A dedicated error page is generally more robust because it better handles errors generated in
+the home page itself
+
+NOTE: The global exception handler does not process exceptions annotated with `@ResponseStatus` so
+that Spring can handle them as expected
+
+A very quick way to respond to a request with some HTTP error code (e.g. 404 "NOT FOUND") is to
+throw a `RuntimeException` annotated with `@ResponseStatus`. For example `YadaHttpNotFoundException`:
+
+[source,Java]
+----
+@ResponseStatus(value=HttpStatus.NOT_FOUND)  // 404
+public class YadaHttpNotFoundException extends RuntimeException {
+}
+----
+
+TODO: implement other HTTP error exceptions
+
+== Favicon
+[cols="1,1"]
+|===
+h|Scope
+|HTML page
+h|Language
+|HTML
+|===
+Browsers load the "/favicon.ico" url by default when nothing else has been 
+specified in the HTML page or even when loading non-HTML pages, where the favicon location can't be
+specified. It is therefore important to provide a valid response when this happens.
+The "/favicon.ico" URL is handled by Yada Framework as long as a `favicon.ico` file is provided
+in the `webapp` folder.
+
+Other versions of the favicon can be specified in the header. It is good practice to put them in
+a versioned folder so that it will be easier to bypass the browser cache in case the icons will be 
+changed at a later date. The skeleton application has the following line in the header:
+
+[source,HTML]
+----
+<link rel="icon" type="image/x-icon" th:href="@{/static/favicons-1.0/favicon.ico}">
+----
+
+== document ready
+[cols="1,1"]
+|===
+h|Scope
+|HTML page
+h|Language
+|javascript
+|===
+
+Executing some javascript after the document has been fully loaded requires some lines of code that
+check the state of the document and register an event handler. This has already been implemented
+and inserted in the `header.html` file by the <<newEclipseProject#_code_generation_just_a_bit,yadaInit>> task 
+used to create the initial project skeleton.
+Example:
+
+[source,javascript]
+----
+<script th:fragment="yexready">
+	window.yex = window.yex || {};
+	yex.ready = yex.ready || function (fn) {
+		if (document.readyState != 'loading'){
+			fn();
+		} else {
+			document.addEventListener('DOMContentLoaded', fn);
+		}
+	}
+</script>
+----
+
+This can be used anywhere in all site pages that include it:
+
+[source,javascript]
+----
+<script>
+	yex.ready(function(){
+		// do something on the fully loaded page
+	});
+</script>
+----
+
+
+
+

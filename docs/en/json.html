@@ -13,7 +13,11 @@
 
 </head>
 <body class="article toc2 toc-left">
-<!-- When editing this file, you must copy it in all other folders (without change) -->
+<!--
+	WARNING !!!!!
+	Edit the /YadaDocs/src/docs/asciidoc/common/docinfo-header.html file
+	to change this menu.
+-->
 
 <select id="navigator">
 	<option>Choose chapter...</option>
@@ -21,18 +25,23 @@
 	<option data-link="./newEclipseProject.html">Getting started</option>
 	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
 	<option data-link="./internationalization.html">Internationalization</option>
-	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./database/overview.html">Databases</option>
 	<option data-link="./forms/overview.html">Forms</option>
 	<option data-link="./ajax.html">Ajax</option>
 	<option data-link="./ajaxModal.html">Ajax Modal</option>
-	<option data-link="./security.html">Security</option>
+	<option data-link="./security/overview.html">Security</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./json.html">Read and Write JSON</option>
+	<option data-link="./confirmationModal.html">Confirmation Modal</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
 	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./staging.html">Staging Docs</option>
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
 </select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
 <script>
 document.querySelector("#navigator").addEventListener("change", function (event) {
 	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
@@ -41,15 +50,85 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 		document.location.href = link;
 	}
 });
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.style.position = 'relative';
+        header.addEventListener('click', function(e) {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+            navigator.clipboard.writeText(url);
+        });
+        header.addEventListener('mouseenter', function() {
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-clone';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.style.position = 'absolute';
+            icon.style.right = '30px';
+            icon.style.top = '50%';
+            icon.style.transform = 'translateY(-50%)';
+            icon.style.fontSize = '18px';
+            icon.style.color = 'gray';
+            header.appendChild(icon);
+        });
+        header.addEventListener('mouseleave', function() {
+            const icon = header.querySelector('.fa-clone');
+            if (icon) {
+            	header.removeChild(icon);
+            }
+        });
+    });
+});
+
+function showCopy(e) {
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-clone';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.style.position = 'absolute';
+    icon.style.left = e.pageX + 'px';
+    icon.style.top = e.pageY + 'px';
+    icon.style.zIndex = 1000;
+    icon.style.fontSize = '24px';
+    document.body.appendChild(icon);
+    setTimeout(function() {
+        document.body.removeChild(icon);
+    }, 1000); // 1 second delay
+}
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;
+    	}
+    }
+};
 </script>
 <div id="header">
 <h1>Json</h1>
 <div class="details">
-<span id="revnumber">version 0.7.5</span>
+<span id="revnumber">version 0.7.7</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
+<li><a href="#_json_in_the_html">JSON in the HTML</a></li>
 <li><a href="#_download_json">Download json</a></li>
 <li><a href="#_upload_json">Upload json</a></li>
 </ul>
@@ -59,7 +138,79 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Download and upload json data</p>
+<p>Work with json data</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_json_in_the_html">JSON in the HTML</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The easiest way to use json on the page is to have a Java class automatically
+serialized by Thymeleaf in a <code>&lt;script&gt;</code> tag:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;script th:inline="javascript"&gt;
+	const myJson = /*[[${myObject}]]*/ ""; <i class="conum" data-value="1"></i><b>(1)</b>
+&lt;/script&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The Thymeleaf code is inside comments so that the file can be validated as javascript
+by the editor, but this is optional.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The instance named "myObject" will be recursively converted to json for any getter
+it has, provided that the attribute type can itself be converted.</p>
+</div>
+<div class="paragraph">
+<p>To ignore an attribute use <code>@JsonIgnore</code></p>
+</div>
+<div class="paragraph">
+<p>To ignore empty or null attributes use <code>@JsonInclude(JsonInclude.Include.NON_EMPTY)</code></p>
+</div>
+<div class="paragraph">
+<p>To serialize an attribute that doesn&#8217;t have a getter, prefix it with <code>@JsonProperty</code></p>
+</div>
+<div class="paragraph">
+<p>Example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public class Product {
+	@JsonIgnore private User user;
+	@JsonProperty private String color = "red";
+	public User getUser() {
+		return user;
+	}
+	// No getter
+	// public String getColor() {
+	//	return color;
+	//}
+}
+
+...
+
+Product product = new ...
+model.addAttribute("myObject", product);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The outcome of the previous example would be:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;script th:inline="javascript"&gt;
+	const myJson = { "color" : "red" }
+&lt;/script&gt;</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -67,20 +218,40 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <h2 id="_download_json">Download json</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Soon in this section:</p>
+<p>When the frontend makes an ajax call and expects a json result, the above
+approach could be used by returning a view that embeds the java object
+automatically converted to json by Thymeleaf:</p>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p>creating a json response with @ResponseBody public Map&lt;String, Object&gt;</p>
-</li>
-<li>
-<p>creating a json response with &lt;th:block th:inline="text"&gt;</p>
-</li>
-<li>
-<p>creating a json object with yadaUtil.makeJsonObject()</p>
-</li>
-</ul>
+<div class="listingblock todo">
+<div class="content">
+<pre>Creating a json response with &lt;th:block th:inline="text"&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A quicker approach is to
+return the json directly using <code>@ResponseBody</code> and <code>MediaType.APPLICATION_JSON_VALUE</code>:
+any resulting <code>Map&lt;String, Object&gt;</code> would be converted to a json object where
+map keys are the json attributes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping(value ="/somedata", produces = MediaType.APPLICATION_JSON_VALUE)
+@ResponseBody public Map&lt;String, Object&gt; getSomeData() {
+	Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();
+	data.put("name1", "value1");
+	data.put("name2", "value2");
+	return result;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The value of the Map can itself be a Map in order to create nested objects.</p>
+</div>
+<div class="listingblock todo">
+<div class="content">
+<pre>- creating a json object with yadaUtil.makeJsonObject()
+- returning all the Model?</pre>
+</div>
 </div>
 </div>
 </div>
@@ -111,8 +282,8 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.5<br>
-Last updated 2023-09-28 16:34:46 +0200
+Version 0.7.7<br>
+Last updated 2024-11-20 18:46:13 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

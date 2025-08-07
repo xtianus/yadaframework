@@ -1,0 +1,138 @@
+=  Confirmation Modal
+:docinfo: shared
+:imagesdir: ../img/
+
+
+Asking for confirmation when performing dangerous tasks
+
+
+== Description
+
+Some dangerous operations, like deleting an entry from the database, should be 
+performed only after receiving a confirmation from the user.
+
+The confirmation can be asked before sending the request to the server or when the server receives
+the request.
+
+The modal has a title, one or more messages, a severity for each message:
+
+[.center]
+.Confirmation modal
+image::modal-confirm-1.jpg[Confirmation modal]
+
+== Prerequisites
+
+The confirmation modal must already be included on page. There are some premade versions available 
+in yada depending on the Bootstrap in use, but it can be any modal with `id="yada-confirm"`:
+
+[source,html]
+----
+<div th:insert="~{${@yadaWebUtil.modalConfirmViewName} :: modalBlock}" id="yada-confirm"></div>
+----
+
+This is usually inserted in a common footer so that you don’t need to remember adding it to each page. 
+
+==  Javascript API
+
+On the client side, the confirmation modal can be either added as an HTML attribute to any ajax-triggering element,
+or invoked directly via a function.
+
+===  Usage via attributes
+
+.data- attribute and tag for the confirmation modal
+[cols="<33,<33,<33",options="header"]
+|===
+h| data
+a| tag
+a| description
+
+a| `data-yadaConfirm`
+a| `yada:confirm`
+a| opens the confirmation modal before performing the ajax call, showing the attribute value as message
+
+a| `data-yadaTitle`
+a| `yada:title`
+a| sets the title of the modal
+
+a| `data-yadaOkButton`
+a| `yada:okButton`
+a| sets the text of the confirmation button (defaults to yada.messages.confirmButtons.ok)
+
+a| `data-yadaCancelButton`
+a| `yada:cancelButton`
+a| sets the text of the cancel button (defaults to yada.messages.confirmButtons.cancel)
+
+a| `data-yadaOkShowsPrevious`
+a| `yada:okShowsPrevious`
+a| when false, after positive confirmation any previous modal is not reopened (defaults to true)
+
+|===
+
+[source,HTML]
+----
+<a href="/deleteAll" yada:confirm="Are you sure to delete all?">Delete all</a>
+----
+
+===  Usage via javascript
+
+This is the function signature:
+
+[source,javascript]
+----
+yada.confirm = function(title, message, callback, okButtonText, cancelButtonText, okShowsPreviousModal)
+----
+
+The `message` and `callback` parameters are the text to show and the function to call on confirmation.
+The other parameters have the same meaning as the corresponding attribute seen above.
+
+Example:
+
+[source,javascript]
+----
+yada.confirm("Confirm deletion", "Are you sure you want to delete this?", function(){
+	doSomeDeletion();
+}, "Delete", "Abort");
+----
+
+== Java API
+
+The confirmation modal can also be triggered by a server @Controller.
+The controller logic must be split over two methods. The "unconfirmed" method will return the
+confirm modal, and the "confirmed" method will perform the business logic. The two methods should
+have the same endpoint but the latter will be called when the "yadaconfirmed" request parameter is 
+present: this parameter is added by the provided HTML implementations. The original request data is
+sent both in the first and second invocation.
+
+Example:
+
+[source,HTML]
+----
+<a href="/deleteProduct?id=1231">Delete product 1231</a>
+----
+
+[source,java]
+----
+@RequestMapping("/deleteProduct")
+public String deleteProduct(Long id, Model model) {
+	return yadaWebUtil.modalConfirm("Are you sure", null, null, model);
+}
+
+@RequestMapping(value="/deleteProduct", params={"yadaconfirmed"})
+public String deleteProductConfirmed(Long id, Model model) {
+	... delete product ...
+	return yadaNotify.modalOk("Deleting", "Product successfully deleted", model);
+}
+----
+
+The `yadaWebUtil.modalConfirm()` method is a utility method with this full signature:
+
+[source,java]
+----
+public String modalConfirm(String message, String confirmButton, String cancelButton, Model model, Boolean reloadOnConfirm, Boolean openModal)
+----
+
+[.todo]
+----
+It will work in plain non-ajax calls when reloadOnConfirm is true and the page is reloaded with the yadaconfirmed parameter added to the url. Need to check where this is implemented. Not sure what openModal does.
+----
+

@@ -12,7 +12,11 @@
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
-<!-- When editing this file, you must copy it in all other folders (without change) -->
+<!--
+	WARNING !!!!!
+	Edit the /YadaDocs/src/docs/asciidoc/common/docinfo-header.html file
+	to change this menu.
+-->
 
 <select id="navigator">
 	<option>Choose chapter...</option>
@@ -20,17 +24,23 @@
 	<option data-link="./newEclipseProject.html">Getting started</option>
 	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
 	<option data-link="./internationalization.html">Internationalization</option>
-	<option data-link="./database/pagination.html">Database pagination</option>
+	<option data-link="./database/overview.html">Databases</option>
 	<option data-link="./forms/overview.html">Forms</option>
 	<option data-link="./ajax.html">Ajax</option>
 	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./security/overview.html">Security</option>
 	<option data-link="./datatables.html">DataTables</option>
 	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./json.html">Read and Write JSON</option>
+	<option data-link="./confirmationModal.html">Confirmation Modal</option>
 	<option data-link="./notificationModal.html">Notification Modal</option>
-	<option data-link="./misc.html">Misc</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./staging.html">Staging Docs</option>
 	<option data-link="./troubleshooting.html">Troubleshooting</option>
 	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
 </select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
 <script>
 document.querySelector("#navigator").addEventListener("change", function (event) {
 	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
@@ -39,11 +49,80 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 		document.location.href = link;
 	}
 });
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.style.position = 'relative';
+        header.addEventListener('click', function(e) {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+            navigator.clipboard.writeText(url);
+        });
+        header.addEventListener('mouseenter', function() {
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-clone';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.style.position = 'absolute';
+            icon.style.right = '30px';
+            icon.style.top = '50%';
+            icon.style.transform = 'translateY(-50%)';
+            icon.style.fontSize = '18px';
+            icon.style.color = 'gray';
+            header.appendChild(icon);
+        });
+        header.addEventListener('mouseleave', function() {
+            const icon = header.querySelector('.fa-clone');
+            if (icon) {
+            	header.removeChild(icon);
+            }
+        });
+    });
+});
+
+function showCopy(e) {
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-clone';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.style.position = 'absolute';
+    icon.style.left = e.pageX + 'px';
+    icon.style.top = e.pageY + 'px';
+    icon.style.zIndex = 1000;
+    icon.style.fontSize = '24px';
+    document.body.appendChild(icon);
+    setTimeout(function() {
+        document.body.removeChild(icon);
+    }, 1000); // 1 second delay
+}
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;
+    	}
+    }
+};
 </script>
 <div id="header">
 <h1>File Uploads</h1>
 <div class="details">
-<span id="revnumber">version 0.7.5</span>
+<span id="revnumber">version 0.7.7</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -95,12 +174,10 @@ document.querySelector("#navigator").addEventListener("change", function (event)
 <h2 id="_description">Description</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>File Upload is handled via <a href="https://commons.apache.org/proper/commons-fileupload/" target="_blank" rel="noopener">Commons FileUpload</a>.
-We don&#8217;t use the Servlet 3 API because, when we had to make a choice,
-we couldn&#8217;t figure out how to set the file size limit via our configuration file.</p>
+<p>File Upload is handled via the standard Servlet API.</p>
 </div>
 <div class="paragraph">
-<p>Yada offers some utility classes to more easily handle files <em>after</em> they have been uploaded:</p>
+<p>YadaFramework offers some utility classes to more easily handle files <em>after</em> they have been uploaded:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -120,6 +197,10 @@ we couldn&#8217;t figure out how to set the file size limit via our configuratio
 <p>managing the pool of uploaded files</p>
 </li>
 </ul>
+</div>
+<div class="paragraph">
+<p>This section shows how to upload files via plain form submission (ajax or not).
+For a way to upload by dragging, see <a href="../ajax.html#_ajax_upload_by_dragdrop">Ajax upload by drag&amp;drop</a>.</p>
 </div>
 </div>
 </div>
@@ -317,16 +398,16 @@ Use YadaAttachedFile to easily handle file attachments:</p>
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Entity
 public class Product {
-    @OneToOne(cascade=CascadeType.PERSIST)
+    @OneToOne
     protected YadaAttachedFile icon;
 
-    @OneToOne(cascade=CascadeType.PERSIST)
+    @OneToOne
     protected YadaAttachedFile specSheet;</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>After doing this you can make use of the functionality of YadaFileManager explained below.
-You shouldn&#8217;t use any <code>cascade</code> different from PERSIST or <code>orphanRemoval</code> annotations:</p>
+You shouldn&#8217;t use any <code>cascade</code> type or <code>orphanRemoval</code> annotations:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -337,9 +418,34 @@ You shouldn&#8217;t use any <code>cascade</code> different from PERSIST or <code
 <p>cascade <code>REMOVE</code> or <code>orphanRemoval=true</code> wouldn&#8217;t delete the file on disk</p>
 </li>
 <li>
-<p>cascade <code>PERSIST</code> is needed when cloning the parent object (<code>Product</code> in the example above)</p>
+<p>cascade <code>PERSIST</code> would generate a "detached entity passed to persist" exception when the YadaAttachedFile
+is first loaded with YadaFileManager (see later) then added to an Entity (<code>Product</code>) that is later persisted.
+The cascade <code>PERSIST</code> would be useful though when cloning the parent Entity (<code>Product</code>) with <code>YadaUtil.copyEntity()</code>
+because, in that case, saving the clone would also save all its YadaAttachedFile attributes.</p>
 </li>
 </ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you intend to clone your Entity at some point, you can choose to use cascade <code>PERSIST</code> to save the clone in
+one go but in all other use cases, when creating an Entity instance after a file upload, you will have to merge
+the YadaAttachedFile attributes before the persist operation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">product.setIcon(em.merge(product.getIcon()));
+em.persist(product);</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>The YadaAttachedFile class stores some file-related information that you might want to keep:</p>
@@ -559,6 +665,18 @@ yadaFileManager.duplicateFiles(clone.getIcon());</code></pre>
 </div>
 <div class="paragraph">
 <p>This is <strong>not needed</strong> if the copy is done with <code>YadaUtil.copyEntity()</code> because the file on disk is also copied automatically.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+if the YadaAttachedFile attributes of the Entity don&#8217;t have a cascade <code>PERSIST</code>, each such attribute of the clone will have to be persisted individually
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect3">
@@ -966,8 +1084,8 @@ This always happens in the following cases:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.5<br>
-Last updated 2023-09-28 16:34:46 +0200
+Version 0.7.7<br>
+Last updated 2025-03-11 11:49:41 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
