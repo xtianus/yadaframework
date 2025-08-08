@@ -8,7 +8,7 @@
 
 <div th:fragment="title">
 	<span th:text="${newUser?'Add User':'Edit User &quot;'+userProfile+'&quot;'}">Edit user XXX</span>
-	<a th:if="${userProfile.id!=null}" class="yadaShowLoader s_tooltip yadaAjax" th:href="@{/dashboard/user/impersonate(id=${userProfile.id})}" title="Impersonate" style="margin-left: 15px;">
+	<a th:if="${userProfile.id!=null}" class="yadaShowLoader s_tooltip" th:href="@{/dashboard/user/impersonate(id=${userProfile.id})}" title="Impersonate" style="margin-left: 15px;">
 		<i class="bi bi-mortarboard-fill"></i>
 	</a> 
 </div>

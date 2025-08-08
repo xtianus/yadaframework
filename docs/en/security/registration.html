@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>User Registration</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
@@ -213,7 +214,7 @@ or the <code>UserProfile</code> directly if a confirmation email is not required
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/registerPage")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/registerPage")
 public String registerPage(MyRegistrationRequest myRegistrationRequest) {
 	return "/register";
 }</code></pre>
@@ -227,7 +228,7 @@ to be successful. The real username is stored in the "email" field.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/signup}" th:object="${myRegistrationRequest}" role="form" method="post" id="registrationForm"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/signup}" th:object="${myRegistrationRequest}" role="form" method="post" id="registrationForm"&gt;
 	&lt;fieldset&gt;
 		&lt;!--/* The username field is hidden and used to detect spam */--&gt;
 		&lt;label for="username" class="hidethis"&gt;Username&lt;/label&gt;
@@ -246,7 +247,7 @@ to be successful. The real username is stored in the "email" field.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">&lt;script&gt;
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">&lt;script&gt;
 	yada.enablePasswordMatch($("#registrationForm"));
 &lt;/script&gt;</code></pre>
 </div>
@@ -269,7 +270,7 @@ in the configuration as shown in this example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">	&lt;email&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">	&lt;email&gt;
 		...
 		&lt;blacklistPattern&gt;.*invalid.*&lt;/blacklistPattern&gt;
 		&lt;blacklistPattern&gt;.*@mailinator.com&lt;/blacklistPattern&gt;
@@ -282,7 +283,7 @@ Validation error messages are internationalised with the following keys:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">yada.form.registration.email.invalid = Invalid email address
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">yada.form.registration.email.invalid = Invalid email address
 yada.form.registration.username.exists = Email already registered
 yada.form.registration.password.length = The password must be between {0} and {1} characters long.
 yada.form.registration.email.failed = Sending the registration confirmation email has failed. Please try again later</code></pre>
@@ -313,7 +314,7 @@ It will receive the email timestamp as parameter 0 (can be omitted). Example:</p
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">email.subject.registrationConfirmation = Registration ({0})</code></pre>
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">email.subject.registrationConfirmation = Registration ({0})</code></pre>
 </div>
 </div>
 </div>
@@ -328,7 +329,7 @@ It will receive the email timestamp as parameter 0 (can be omitted). Example:</p
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;security&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;security&gt;
 	&lt;registration&gt;
 		&lt;confirmationLink&gt;/my/registrationAccept&lt;/confirmationLink&gt;
 	&lt;/registration&gt;</code></pre>
@@ -341,7 +342,7 @@ result according to the application needs:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">	@RequestMapping("/registrationConfirmation/{token}")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">	@RequestMapping("/registrationConfirmation/{token}")
 	public String registrationConfirmation(@PathVariable String token, Model model, Locale locale, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpSession session) {
 		YadaRegistrationOutcome&lt;UserProfile&gt; outcome = yadaRegistrationController.handleRegistrationConfirmation(token, new String[]{config.getRoleName(ROLE_USER_ID)}, locale, session, UserProfile.class);
 		switch (outcome.registrationStatus) {
@@ -379,11 +380,15 @@ user profile.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 19:40:44 +0200
+Last updated 2025-08-07 10:44:57 +0200
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

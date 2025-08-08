@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>DataTables</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../yadadocs.css" />
 
 </head>
@@ -138,6 +139,13 @@ window.onscroll = function() {
 </ul>
 </li>
 <li><a href="#_java_ajax_endpoint">Java Ajax Endpoint</a></li>
+<li><a href="#_advanced_usage">Advanced Usage</a>
+<ul class="sectlevel2">
+<li><a href="#_datatables_api_access">DataTables API Access</a></li>
+<li><a href="#_table_filter">Table Filter</a></li>
+<li><a href="#_returning_extra_data">Returning extra data</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -219,7 +227,7 @@ The Yada Framework implementation has been tested with:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;head&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;head&gt;
 	&lt;link rel="stylesheet" type="text/css" th:href="@{/static/datatables-2.1.8/datatables.min.css}"/&gt;
 &lt;/head&gt;
 ...
@@ -232,7 +240,7 @@ packaged in the war distribution for production but should be added in developme
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;script th:if="${@config.developmentEnvironment}" th:src="@{/yadares/js/yada.datatables.js}"&gt;&lt;/script&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;script th:if="${@config.developmentEnvironment}" th:src="@{/yadares/js/yada.datatables.js}"&gt;&lt;/script&gt;</code></pre>
 </div>
 </div>
 </div>
@@ -245,7 +253,7 @@ packaged in the war distribution for production but should be added in developme
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:datatable <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;yada:datatable <i class="conum" data-value="1"></i><b>(1)</b>
 	yada:configuration="${userTableAttribute}"&gt; <i class="conum" data-value="2"></i><b>(2)</b>
 &lt;/yada:datatable&gt;</code></pre>
 </div>
@@ -269,7 +277,7 @@ can be provided via <code>yada:preprocessor</code> and <code>yada:postprocessor<
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:datatable
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;yada:datatable
 	yada:configuration="${userTableAttribute}"
 	yada:preprocessor="userTablePreprocessor" <i class="conum" data-value="1"></i><b>(1)</b>
 	yada:postprocessor="userTablePostprocessor"&gt; <i class="conum" data-value="2"></i><b>(2)</b>
@@ -298,12 +306,12 @@ can be provided via <code>yada:preprocessor</code> and <code>yada:postprocessor<
 <div class="sectionbody">
 <div class="paragraph">
 <p>The configuration for a DataTable is implemented in a <code>YadaDataTable</code> instance.
-This instance can be added to the Model with an attribute that has the same name
+This instance should be added to the Model with an attribute that must have the same name
 used in <code>yada:configuration</code>, e.g. <code>userTableAttribute</code> in the example above.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaDataTable myDataTable = ...
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">YadaDataTable myDataTable = ...
 model.addAttribute("userTableAttribute", myDataTable);</code></pre>
 </div>
 </div>
@@ -317,7 +325,7 @@ and that the same configuration can be used in the ajax handler that loads the t
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaDataTable myDataTable = yadaDataTableFactory.getSingleton("myTableId", locale, ...);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">YadaDataTable myDataTable = yadaDataTableFactory.getSingleton("myTableId", locale, ...);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -330,10 +338,10 @@ In a multilanguage application it should be taken from a parameter in the @Contr
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", locale, table -&gt; {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", locale, table -&gt; {
 	table
 		.dtAjaxUrl("someUrl")
-		.dt ...
+		.dt...
 });</code></pre>
 </div>
 </div>
@@ -373,7 +381,7 @@ only requires the entity class and fields:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/user")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/user")
 public String users(Model model) {
 	YadaDataTable basicTable = yadaDataTableFactory.getSingleton("basicTable", table -&gt; {
 		table
@@ -399,6 +407,16 @@ public String users(Model model) {
 <td>Provide the column names and the path of the properties that hold the value to show</td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>On the page the table is shown with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;yada:datatable
+	yada:configuration="${basicTable}"&gt;
+&lt;/yada:datatable&gt;</code></pre>
+</div>
 </div>
 <div class="imageblock center">
 <div class="content">
@@ -440,8 +458,8 @@ security is implemented in SecurityConfig if the application is secured
 <div class="paragraph">
 <p>In more advanced scenarios the ajax endpoint returning data can be customized with <code>dtAjaxUrl()</code>.
 This is an alternative approach to <code>dtEntityClass()</code> and using both will result in error.
-The argument of <code>dtAjaxUrl()</code> is the url for the ajax call that retrieves data
-from the backend. It can contain any Thymeleaf expression and will be included
+The argument of <code>dtAjaxUrl()</code> is either the url for the ajax call that retrieves data
+from the backend or a method reference to it. The string parameter can contain any Thymeleaf expression and will be included
 in a standard URL expression like <code>@{/myUrl}</code> when not already provided.</p>
 </div>
 <div class="paragraph">
@@ -469,6 +487,220 @@ anything that can&#8217;t be done in Java can be done in javascript using pre- a
 </tr>
 </table>
 </div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", locale, table -&gt; {
+	table
+		.dtEntityClass(UserProfile.class)
+		.dtAjaxUrl(this::userProfileTablePage)
+		.dtLanguageObj("/static/datatables-2.1.8/i18n/") <i class="conum" data-value="1"></i><b>(1)</b>
+			.dsAddLanguage("pt", "pt-PT.json") <i class="conum" data-value="2"></i><b>(2)</b>
+			.back()
+		.dtStructureObj()
+			.dtCssClasses("yadaNoLoader") <i class="conum" data-value="3"></i><b>(3)</b>
+			.dtColumnObj("ID", "id")
+				.dtResponsivePriority(80) <i class="conum" data-value="4"></i><b>(4)</b>
+				.back()
+			.dtColumnObj("column.enabled", "userCredentials.enabled") <i class="conum" data-value="5"></i><b>(5)</b>
+				.dtResponsivePriority(40)
+				.back()
+			.dtColumnObj("Title", "title."+locale.getLanguage()) <i class="conum" data-value="6"></i><b>(6)</b>
+				.back()
+			.dtColumnObj("Email", "userCredentials.username")
+				.dtName("userCredentials.username") <i class="conum" data-value="7"></i><b>(7)</b>
+				.dtOrderAsc(0) <i class="conum" data-value="8"></i><b>(8)</b>
+				.back()
+			.dtColumnObj("Last Login", "userCredentials.lastSuccessfulLogin")
+				.dtOrderDesc(1) <i class="conum" data-value="9"></i><b>(9)</b>
+				.dtCssClasses("nowrap") <i class="conum" data-value="10"></i><b>(10)</b>
+				.back()
+			.dtColumnCheckbox("select.allnone") <i class="conum" data-value="11"></i><b>(11)</b>
+			.dtColumnCommands("column.commands", 10) <i class="conum" data-value="12"></i><b>(12)</b>
+			.dtButtonObj("Disabled") <i class="conum" data-value="13"></i><b>(13)</b>
+				.dtUrl("@{/dashboard/user/dummy}") <i class="conum" data-value="14"></i><b>(14)</b>
+				.dtIcon("&lt;i class='bi bi-0-circle'&gt;&lt;/i&gt;") <i class="conum" data-value="15"></i><b>(15)</b>
+				.dtShowCommandIcon("disableCommandIcon") <i class="conum" data-value="16"></i><b>(16)</b>
+				.back()
+			.dtButtonObj("button.add")
+				.dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}")
+				.dtGlobal() <i class="conum" data-value="17"></i><b>(17)</b>
+				.dtIcon("&lt;i class='bi bi-plus-square'&gt;&lt;/i&gt;")
+				.dtToolbarCssClass("btn-success") <i class="conum" data-value="18"></i><b>(18)</b>
+				.dtRole("ADMIN") <i class="conum" data-value="19"></i><b>(19)</b>
+				.back()
+			.dtButtonObj("button.impersonate")
+				.dtUrlProvider("impersonate") <i class="conum" data-value="20"></i><b>(20)</b>
+				.dtNoAjax() <i class="conum" data-value="21"></i><b>(21)</b>
+				.dtIcon("&lt;i class='bi bi-mortarboard'&gt;&lt;/i&gt;")
+				.dtRole("ADMIN").dtRole("supervisor")
+				.back()
+			.dtButtonObj("button.edit")
+				.dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}")
+				.dtElementLoader("#userTable") <i class="conum" data-value="22"></i><b>(22)</b>
+				.dtIcon("&lt;i class='bi bi-pencil'&gt;&lt;/i&gt;")
+				.dtIdName("userProfileId") <i class="conum" data-value="23"></i><b>(23)</b>
+				.dtRole("ADMIN")
+				.back()
+			.dtButtonObj("button.delete")
+				.dtUrl("@{/dashboard/userwrite/ajaxDeleteUserProfile}")
+				.dtIcon("&lt;i class='bi bi-trash'&gt;&lt;/i&gt;")
+				.dtRole("ADMIN")
+				.dtMultiRow() <i class="conum" data-value="24"></i><b>(24)</b>
+				.dtToolbarCssClass("btn-danger")
+				.dtConfirmDialogObj() <i class="conum" data-value="25"></i><b>(25)</b>
+					.dtTitle("Delete User")
+					.dtMessageSingular("usertable.delete.confirm.singular")
+					.dtMessagePlural("usertable.delete.confirm.plural")
+					.dtConfirmButton("button.confirm").dtAbortButton("modal.confirm.cancel")
+					.dtPlaceholderColumnName("userCredentials.username")
+					.back()
+				.back()
+			.dtFooter() <i class="conum" data-value="26"></i><b>(26)</b>
+			.back()
+		.dtOptionsObj() <i class="conum" data-value="27"></i><b>(27)</b>
+			.dtResponsiveObj() <i class="conum" data-value="28"></i><b>(28)</b>
+				.dtDetailsObj()
+					.dtDisplay("DataTable.Responsive.display.childRowImmediate")
+					.back()
+				.back()
+			.dtPageLength(10) <i class="conum" data-value="29"></i><b>(29)</b>
+			.dtColumnDefsObj() <i class="conum" data-value="30"></i><b>(30)</b>
+				.dtTargetsName("userCredentials.username")
+				.dtAriaTitle("This is the user email")
+				.back()
+			.dtColumnDefsObj()
+				.dtTargetsName("userCredentials.lastSuccessfulLogin")
+				.dtAriaTitle("usertable.aria.lastlogin")
+				.back()
+			.back()
+		;
+});</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Set the base url where language files are located. It can be the official DataTables URL or a local endpoint. By default the "it", "de", "es" and "fr" languages are loaded.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Add a language definition that is not loaded by default.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>CSS classes to set on the &lt;table&gt; tag</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Control the order in which columns are hidden when the page is resized</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Add a new column to the table. Order is preserved.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>The column value can be a localized text</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>Set a name on this column for database operations and cross references, e.g. with <a href="https://datatables.net/reference/option/columnDefs" target="_blank" rel="noopener">column definitions</a></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="8"></i><b>8</b></td>
+<td>Set the column as the first default sort column, ascending</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td>Set the column as the second default sort column, descending</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="10"></i><b>10</b></td>
+<td>CSS classes to set on the cell</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="11"></i><b>11</b></td>
+<td>Adds the leftmost column with checkboxes to select rows</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="12"></i><b>12</b></td>
+<td>Adds a rightmost column with buttons for each row</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="13"></i><b>13</b></td>
+<td>Adds a button called "Disabled" to the toolbar</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="14"></i><b>14</b></td>
+<td>URL to be called when the button is clicked</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="15"></i><b>15</b></td>
+<td>Icon to be displayed on the button</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="16"></i><b>16</b></td>
+<td>Javascript function to be called to decide wether the icon on the row must be shown</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="17"></i><b>17</b></td>
+<td>The button is "global", i.e. is shown in the toolbar, not in the row, and is always enabled</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="18"></i><b>18</b></td>
+<td>CSS class to be added to the button in the toolbar</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="19"></i><b>19</b></td>
+<td>The button is shown only to users with the "ADMIN" role. Can be called may times with different role values</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="20"></i><b>20</b></td>
+<td>The URL is provided by a javascript function</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="21"></i><b>21</b></td>
+<td>The click does not perform an ajax call, it just follows the link</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="22"></i><b>22</b></td>
+<td>Specify a CSS selector for an element that should be covered with a "loader" icon while the ajax call is in progress</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="23"></i><b>23</b></td>
+<td>Name of the ID request parameter sent in the call, default is "id". Useless for global buttons</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="24"></i><b>24</b></td>
+<td>Enable the toolbar button when one or many rows are selected. The default is for the toolbar button to be enabled only when one row is selected</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="25"></i><b>25</b></td>
+<td>Enable javascript-side confirmation dialog for button action</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="26"></i><b>26</b></td>
+<td>Adds a footer to the table showing the same content as the header</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="27"></i><b>27</b></td>
+<td>Start configuration of the "options" of the DataTable. See the <a href="https://datatables.net/reference/option/" target="_blank" rel="noopener">official DataTables documentation</a> for details</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="28"></i><b>28</b></td>
+<td>Enable the Responsive extension</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="29"></i><b>29</b></td>
+<td>Number of rows to show per page</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="30"></i><b>30</b></td>
+<td>Configure column definitions: a way to set column options after a column has been defined</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 </div>
@@ -489,10 +721,10 @@ file with the resulting data for the current page.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping(value ="/user/userProfileTablePage", produces = MediaType.APPLICATION_JSON_VALUE)
-@ResponseBody public Map&lt;String, Object&gt; userProfileTablePage(YadaDatatablesRequest yadaDatatablesRequest, Locale locale) { <i class="conum" data-value="1"></i><b>(1)</b>
-	Map&lt;String, Object&gt; result = yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale);	<i class="conum" data-value="2"></i><b>(2)</b>
-	return result;	<i class="conum" data-value="3"></i><b>(3)</b>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping(value ="/user/userProfileTablePage", produces = MediaType.APPLICATION_JSON_VALUE) <i class="conum" data-value="1"></i><b>(1)</b>
+@ResponseBody public Map&lt;String, Object&gt; userProfileTablePage(YadaDatatablesRequest yadaDatatablesRequest, Locale locale) { <i class="conum" data-value="2"></i><b>(2)</b>
+	Map&lt;String, Object&gt; result = yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale);	<i class="conum" data-value="3"></i><b>(3)</b>
+	return result;	<i class="conum" data-value="4"></i><b>(4)</b>
 }</code></pre>
 </div>
 </div>
@@ -500,14 +732,18 @@ file with the resulting data for the current page.</p>
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>YadaDatatablesRequest is initialized with the metadata sent by DataTables, like the current page number, the value paths and the search/sort options</td>
+<td>Any type of mapping can be used, not just @RequestMapping</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>yadaDataTableDao.getConvertedJsonPage() receives the request data and the @Entity class to perform all needed operations</td>
+<td>YadaDatatablesRequest is initialized with the metadata sent by DataTables, like the current page number, the value paths and the search/sort options</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>yadaDataTableDao.getConvertedJsonPage() receives the request data and the @Entity class to perform all needed operations</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
 <td>The result is a "map tree" (i.e. nested maps) that is automatically converted to json</td>
 </tr>
 </table>
@@ -516,21 +752,69 @@ file with the resulting data for the current page.</p>
 <p>Using a custom endpoint for table data allows to manipulate both the query and the result, for example
 by adding conditions or creating values not directly found on the entity:</p>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_advanced_usage">Advanced Usage</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_datatables_api_access">DataTables API Access</h3>
+<div class="paragraph">
+<p>A reference to the DataTables API, i.e. the object returned by <code>$table.DataTable(dataTableOptions)</code>, is added to the table DOM object under the <code>yadaDataTableApi</code> key. It can be retrieved with</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">const dataTableApi = $('#yourTableId').data('yadaDataTableApi');</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>All standard DataTable <a href="https://datatables.net/reference/api/" target="_blank" rel="noopener">API methods</a> are available, for example use <code>dataTableApi.ajax.reload()</code> to reload the table data.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_table_filter">Table Filter</h3>
+<div class="paragraph">
+<p>You can add form elements to filter the data shown in your DataTable.</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../img/datatables.filter.jpg" alt="Table Filter">
+</div>
+<div class="title">Figure 4. Table Filter</div>
+</div>
+<div class="paragraph">
+<p>On the HTML page create a form with the CSS class <code>yada_dataTables_{tableId}</code> where <code>{tableId}</code> is the ID of your table: any input fields, checkboxes, or select elements in this form will automatically be sent to the server when the table loads or refreshes.</p>
+</div>
+<div class="paragraph">
+<p>On the backend, the form data is available in the <code>YadaDatatablesRequest</code> object passed to the ajax endpoint. You can access the form data using the <code>getExtraParam()</code> method, which returns a <code>Map&lt;String, String&gt;</code> containing the form field names and values.</p>
+</div>
+<div class="paragraph">
+<p>The sql used by <code>yadaDataTableDao.getConvertedJsonPage()</code> to read table data can be customized by adding conditions to the YadaSql object returned by <code>yadaDatatablesRequest.getYadaSql()</code>.</p>
+</div>
+<div class="paragraph">
+<p>For example, if you have a table showing users, you can add checkboxes to filter by user role, or text inputs to search by name. When users interact with these form elements, call <code>dataTableApi.ajax.reload()</code> to refresh the table with the new filter values.</p>
+</div>
+<div class="paragraph">
+<p>See <code>YadaExamples/src/main/java/net/yadaframework/example/web/dashboard/UserProfileController.java</code> for a full example.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_returning_extra_data">Returning extra data</h3>
+<div class="paragraph">
+<p>The call to yadaDataTableDao.getConvertedJsonPage() returns all data that was requested, but sometimes some other attributes
+may be required to compute a row value. In order to retrieve this data, use <code>yadaDatatablesRequest.addExtraJsonAttribute("attributePath")</code> before calling <code>getConvertedJsonPage()</code>.
+A use case could be to fetch the "enabled" attribute of the user credentials to show a different icon based on that value.</p>
+</div>
 <div class="listingblock todo">
 <div class="content">
-<pre>ajax endpoint with manipulation of query and result
-
-toolbar, command bar, select column
-
-row class from the backend
-
-full example
+<pre>row class from the backend
 
 reference
 
-pre- and post- processors
+pre- and post- processors examples
 
 i18n is automatic by using keys instead of words</pre>
+</div>
 </div>
 </div>
 </div>
@@ -539,11 +823,15 @@ i18n is automatic by using keys instead of words</pre>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-11-26 19:33:44 +0100
+Last updated 2025-08-08 19:27:45 +0200
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

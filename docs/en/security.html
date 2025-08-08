@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Security</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../yadadocs.css" />
 
 </head>
@@ -164,7 +165,7 @@ in order for this to work.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@ComponentScan(basePackages = { "com.example.web" })
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@ComponentScan(basePackages = { "com.example.web" })
 public class WebConfig extends YadaWebSecurityConfig {</code></pre>
 </div>
 </div>
@@ -173,7 +174,7 @@ public class WebConfig extends YadaWebSecurityConfig {</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;persistence-unit name="yadaPersistenceUnit"&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;persistence-unit name="yadaPersistenceUnit"&gt;
 	&lt;class&gt;net.yadaframework.security.persistence.entity.YadaSocialCredentials&lt;/class&gt;
 	&lt;class&gt;net.yadaframework.security.persistence.entity.YadaUserCredentials&lt;/class&gt;
 	&lt;class&gt;net.yadaframework.security.persistence.entity.YadaUserProfile&lt;/class&gt;
@@ -186,7 +187,7 @@ public class WebConfig extends YadaWebSecurityConfig {</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;config&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;config&gt;
 	&lt;security&gt;
 		&lt;sessionTimeoutMinutes&gt;240&lt;/sessionTimeoutMinutes&gt; <i class="conum" data-value="1"></i><b>(1)</b>
 		&lt;passwordLength min='5' max='128' /&gt; <i class="conum" data-value="2"></i><b>(2)</b>
@@ -270,7 +271,7 @@ attributes:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Entity
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Entity
 public class UserProfile extends YadaUserProfile {
 	@Column(length = 32)
 	String nickname; // This is an example of UserProfile customization</code></pre>
@@ -293,7 +294,7 @@ This can be implemented by subclassing <code>YadaUserSetup</code> in any bean, f
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Component
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Component
 public class Setup extends YadaUserSetup&lt;UserProfile&gt; {</code></pre>
 </div>
 </div>
@@ -304,7 +305,7 @@ This configuration in <code>conf.webapp.prod.xml</code> creates one "admin" user
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;config&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;config&gt;
 	&lt;setup&gt;
 		&lt;users&gt;
 			&lt;user&gt;
@@ -345,7 +346,7 @@ you will have to "reset" it the first time you want to log in.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="sql" class="language-sql hljs">delete from YadaUserCredentials_roles;
+<pre class="highlightjs highlight"><code class="language-sql hljs" data-lang="sql">delete from YadaUserCredentials_roles;
 delete yup, yuc FROM YadaUserProfile yup join YadaUserCredentials yuc on yup.userCredentials_id = yuc.id;</code></pre>
 </div>
 </div>
@@ -448,7 +449,7 @@ by means of a <code>login</code> model attribute:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/loginForm")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/loginForm")
 public String login(HttpServletRequest request, Model model, Locale locale) {
 	boolean loggedIn = yadaSecurityUtil.isLoggedIn();
 	if (!yadaWebUtil.isAjaxRequest()) {
@@ -493,7 +494,7 @@ user is not logged in and replaced with the logout link otherwise:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;header th:with="loggedIn=${@yadaSecurityUtil.loggedIn()}"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;header th:with="loggedIn=${@yadaSecurityUtil.loggedIn()}"&gt;
 	&lt;a th:unless="${loggedIn}" th:href="@{/loginForm}" class="yadaAjax"&gt;
 		Login
 	&lt;/a&gt;
@@ -514,7 +515,7 @@ an ajax call:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/loginPost}" th:classappend="${yadaIsAjaxResponse}?yadaAjax" ... &gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/loginPost}" th:classappend="${yadaIsAjaxResponse}?yadaAjax" ... &gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -529,7 +530,7 @@ In both cases this can be done in a yada:successHandler of the login form:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/loginPost}" yada:successHandler="postLogin" <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/loginPost}" yada:successHandler="postLogin" <i class="conum" data-value="1"></i><b>(1)</b>
 	th:classappend="${yadaIsAjaxResponse}?yadaAjax"
 	role="form" method="post" id="loginForm"&gt;
 ...
@@ -612,11 +613,15 @@ there won&#8217;t be a chance to trigger the login process.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 19:40:44 +0200
+Last updated 2023-12-07 11:06:50 +0100
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

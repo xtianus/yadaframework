@@ -1082,7 +1082,7 @@ public abstract class YadaConfiguration {
 //	}
 	
 	/**
-	 * @return a map acting role --> roles that can be changed, as role ids. Configured by &lt;handles>
+	 * @return a map: acting role --> roles that can be changed, as role ids. Configured by &lt;handles>
 	 */
 	public Map<Integer, Set<Integer>> getRoleIdToRoleChange() {
 		ensureRoleMaps();

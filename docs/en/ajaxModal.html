@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Ajax Modal</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../yadadocs.css" />
 
 </head>
@@ -192,7 +193,7 @@ added to the page &lt;head&gt; while the modal is open and removed on close.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a href="/myModal" class="yadaAjax"&gt;Click here&lt;/a&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;a href="/myModal" class="yadaAjax"&gt;Click here&lt;/a&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -200,7 +201,7 @@ added to the page &lt;head&gt; while the modal is open and removed on close.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">var data = {name: 'john', surname: 'Doe'};
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">var data = {name: 'john', surname: 'Doe'};
 yada.ajax(url, data, null, "POST");</code></pre>
 </div>
 </div>
@@ -215,7 +216,7 @@ It will be removed from the <code>&lt;body&gt;</code> on close. Any other open m
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/myModal")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/myModal")
 public String myModal(Model model, Locale locale) {
 	return "/myModal"; // There must be a myModal.html file
 }</code></pre>
@@ -271,7 +272,7 @@ To remove a fragment from the modal, use the <code>~{}</code> expression. To kee
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;!DOCTYPE html&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;!DOCTYPE html&gt;
 &lt;html xmlns:th="http://www.thymeleaf.org"&gt;
 &lt;head&gt;
         &lt;meta charset="UTF-8"/&gt;
@@ -321,7 +322,7 @@ You create a sticky modal by adding the <code>yadaStickyModal</code> class to th
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:replace="/yada/modalGeneric::fragment(~{::modalTitle},_,~{::modalBody},~{},~{::modalScript},'modal-lg yadaStickyModal')"&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div th:replace="/yada/modalGeneric::fragment(~{::modalTitle},_,~{::modalBody},~{},~{::modalScript},'modal-lg yadaStickyModal')"&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -334,7 +335,7 @@ the standard <code>modal-lg</code> or <code>modal-fullscreen</code> classes, or 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="css" class="language-css hljs">.modal-dialog {
+<pre class="highlightjs highlight"><code class="language-css hljs" data-lang="css">.modal-dialog {
         margin: 0;
         max-width: 100vw;
 }</code></pre>
@@ -346,11 +347,15 @@ the standard <code>modal-lg</code> or <code>modal-fullscreen</code> classes, or 
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 19:40:44 +0200
+Last updated 2023-12-07 11:06:50 +0100
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

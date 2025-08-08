@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Confirmation Modal</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../yadadocs.css" />
 
 </head>
@@ -179,7 +180,7 @@ in yada depending on the Bootstrap in use, but it can be any modal with <code>id
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:insert="~{${@yadaWebUtil.modalConfirmViewName} :: modalBlock}" id="yada-confirm"&gt;&lt;/div&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div th:insert="~{${@yadaWebUtil.modalConfirmViewName} :: modalBlock}" id="yada-confirm"&gt;&lt;/div&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -270,7 +271,7 @@ or invoked directly via a function.</p>
 </table>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="HTML" class="language-HTML hljs">&lt;a href="/deleteAll" yada:confirm="Are you sure to delete all?"&gt;Delete all&lt;/a&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-HTML hljs" data-lang="HTML">&lt;a href="/deleteAll" yada:confirm="Are you sure to delete all?"&gt;Delete all&lt;/a&gt;</code></pre>
 </div>
 </div>
 </div>
@@ -281,7 +282,7 @@ or invoked directly via a function.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.confirm = function(title, message, callback, okButtonText, cancelButtonText, okShowsPreviousModal)</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">yada.confirm = function(title, message, callback, okButtonText, cancelButtonText, okShowsPreviousModal)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -293,7 +294,7 @@ The other parameters have the same meaning as the corresponding attribute seen a
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.confirm("Confirm deletion", "Are you sure you want to delete this?", function(){
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">yada.confirm("Confirm deletion", "Are you sure you want to delete this?", function(){
 	doSomeDeletion();
 }, "Delete", "Abort");</code></pre>
 </div>
@@ -317,12 +318,12 @@ sent both in the first and second invocation.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="HTML" class="language-HTML hljs">&lt;a href="/deleteProduct?id=1231"&gt;Delete product 1231&lt;/a&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-HTML hljs" data-lang="HTML">&lt;a href="/deleteProduct?id=1231"&gt;Delete product 1231&lt;/a&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/deleteProduct")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/deleteProduct")
 public String deleteProduct(Long id, Model model) {
 	return yadaWebUtil.modalConfirm("Are you sure", null, null, model);
 }
@@ -339,7 +340,7 @@ public String deleteProductConfirmed(Long id, Model model) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public String modalConfirm(String message, String confirmButton, String cancelButton, Model model, Boolean reloadOnConfirm, Boolean openModal)</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public String modalConfirm(String message, String confirmButton, String cancelButton, Model model, Boolean reloadOnConfirm, Boolean openModal)</code></pre>
 </div>
 </div>
 <div class="listingblock todo">
@@ -353,11 +354,15 @@ public String deleteProductConfirmed(Long id, Model model) {
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-11-06 19:10:26 +0100
+Last updated 2025-08-07 10:44:57 +0200
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

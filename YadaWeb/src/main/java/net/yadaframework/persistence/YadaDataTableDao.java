@@ -240,6 +240,8 @@ public class YadaDataTableDao {
 				
 			if (parts.length==1) {
 				// End of the path
+				// TODO value.toString() is not always appropriate, for example for dates.
+				//      Maybe pass a map of converters from some type to String?
 				entityJson.put(attributeName, value==null?null:value.toString());
 				return;
 			}

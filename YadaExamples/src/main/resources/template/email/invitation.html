@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+		<meta charset="UTF-8"/>
+    </head>
+    <body>
+    	<p>Dear client,</p>
+    	<p>these are the credentials for the application:</p>
+    	<table>
+    		<tr><td>Username:</td><td>[[${username}]]</td></tr>
+    		<tr><td>Password:</td><td>[[${clearPassword}]]</td></tr>
+    		<tr><td><a th:href="${fullLink}" href="#">Log in</a></td><td></td></tr>
+    	</table>
+    
+    	<br>
+     	<p>
+     		<a href="http://www.example.com/"><em>EXAMPLESITE</em></a>
+        		<img style="width: 150px;" th:src="'cid:logosmall'" />
+        	</a>
+     	</p>
+    </body>
+</html>

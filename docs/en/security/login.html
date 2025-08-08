@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>User Login</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
@@ -238,7 +239,7 @@ bean must override the relevant variables in the constructor:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public SecurityConfig() {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public SecurityConfig() {
 	loginUrl = "/myloginpage";
 	loginUrlAjax = "/myloginmodal";
 }</code></pre>
@@ -257,7 +258,7 @@ page after logout can also be configured this way. This is an example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public class SecurityConfig extends YadaSecurityConfig {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class SecurityConfig extends YadaSecurityConfig {
  	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(authorize -&gt; authorize
@@ -338,7 +339,7 @@ implementation that uses javascript to copy the field value to the form behind t
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/passwordReset}" role="form" method="post" id="pwdRecoverForm"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/passwordReset}" role="form" method="post" id="pwdRecoverForm"&gt;
 	&lt;input type="hidden" name="email" th:value="${username}" /&gt;
 	&lt;a class="link link--black fs-6" href="#" th:text="#{view.link.forgotPassword}"&gt;Forgot my password&lt;/a&gt;
 &lt;/form&gt;
@@ -358,7 +359,7 @@ implementation that uses javascript to copy the field value to the form behind t
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">@RequestMapping("/passwordReset")
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">@RequestMapping("/passwordReset")
 public String passwordReset(String email, YadaRegistrationRequest yadaRegistrationRequest) {
 	yadaRegistrationRequest.setEmail(email);
 	yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
@@ -372,7 +373,7 @@ any error messages:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form role="form" th:action="@{/yadaPasswordResetPost}" th:object="${yadaRegistrationRequest}" method="post"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form role="form" th:action="@{/yadaPasswordResetPost}" th:object="${yadaRegistrationRequest}" method="post"&gt;
 	&lt;fieldset class="has-feedback"&gt;
 		&lt;label for="email"&gt;E-Mail&lt;/label&gt;
 		&lt;div th:with="hasError=${#fields.hasErrors('email')}" &gt;
@@ -399,7 +400,7 @@ is shown after redirection to the page configured with <code>config/security/pas
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="properties" class="language-properties hljs">yada.passwordrecover.username.notfound = ...
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">yada.passwordrecover.username.notfound = ...
 email.subject.passwordRecovery = ...
 yada.email.send.failed = ...
 yada.email.passwordrecover.title = ...
@@ -425,7 +426,7 @@ to do all the needed work.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/passwordReset/{token}")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/passwordReset/{token}")
 public String passwordResetPost(@PathVariable String token, Model model, HttpServletRequest request, RedirectAttributes redirectAttributes, Locale locale) {
 	// Everything is done in the yada class.
 	boolean done = yadaRegistrationController.passwordResetForm(token, model, redirectAttributes);
@@ -457,7 +458,7 @@ for example with</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:replace="~{/modalLogin :: #loginForm}"&gt;Login form here&lt;/div&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div th:replace="~{/modalLogin :: #loginForm}"&gt;Login form here&lt;/div&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -550,7 +551,7 @@ user is not logged in and replaced with the logout link otherwise:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;header th:with="loggedIn=${@yadaSecurityUtil.loggedIn()}"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;header th:with="loggedIn=${@yadaSecurityUtil.loggedIn()}"&gt;
 	&lt;a th:unless="${loggedIn}" th:href="@{/loginForm}" class="yadaAjax"&gt;
 		Login
 	&lt;/a&gt;
@@ -572,7 +573,7 @@ an ajax call:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/loginPost}" th:classappend="${yadaIsAjaxResponse}?yadaAjax" ... &gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/loginPost}" th:classappend="${yadaIsAjaxResponse}?yadaAjax" ... &gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -589,7 +590,7 @@ In both cases this can be done in a yada:successHandler of the login form:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/loginPost}" yada:successHandler="postLogin" <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/loginPost}" yada:successHandler="postLogin" <i class="conum" data-value="1"></i><b>(1)</b>
 	th:classappend="${yadaIsAjaxResponse}?yadaAjax"
 	role="form" method="post"&gt;
 ...
@@ -748,7 +749,7 @@ in a conditional expression in HTML:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">th:if="${loginErrorFlag!=null}"</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">th:if="${loginErrorFlag!=null}"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -761,7 +762,7 @@ be used, for example "username":</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Autowired RegistrationController registrationController;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Autowired RegistrationController registrationController;
 
 @RequestMapping("/pwdChange")
 public String pwdChange(String username, Model model, Locale locale) {
@@ -819,11 +820,15 @@ user might be confused about which email address to use for login.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-11-07 18:09:11 +0100
+Last updated 2025-08-07 10:44:57 +0200
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

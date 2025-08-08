@@ -5,8 +5,8 @@ buildscript {
 }
 
 plugins {
-    id 'org.asciidoctor.jvm.convert' version '3.+'
-    id 'org.asciidoctor.jvm.pdf' version '3.+'
+    id 'org.asciidoctor.jvm.convert' version '4.0.4'
+    id 'org.asciidoctor.jvm.pdf' version '4.0.4'
 }
 
 group = 'net.yadaframework'
@@ -182,6 +182,7 @@ task concatAll {
 
 asciidoctor {
 	dependsOn copyDocInfoHeader, concatAll
+	
 	// baseDirFollowsSourceDir()
 	// baseDirIsRootProjectDir()
 	// This is needed for docinfo to be found in the same subfolder of a source file

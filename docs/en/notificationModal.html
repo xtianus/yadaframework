@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Notification Modal</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../yadadocs.css" />
 
 </head>
@@ -181,7 +182,7 @@ window.onscroll = function() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:insert="~{${@yadaNotify.viewName} :: modal}" class="modal fade" th:classappend="|B${@config.bootstrapVersion}|" id="yada-notification" role="dialog"&gt;&lt;/div&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div th:insert="~{${@yadaNotify.viewName} :: modal}" class="modal fade" th:classappend="|B${@config.bootstrapVersion}|" id="yada-notification" role="dialog"&gt;&lt;/div&gt;
 
 &lt;script th:if="${YADA_NBODY!=null}" type="text/javascript"&gt;
 	yada.ready(function() {
@@ -215,7 +216,7 @@ When used in an ajax request it has some optional functionality.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Autowired private YadaNotify yadaNotify;</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Autowired private YadaNotify yadaNotify;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -223,7 +224,7 @@ When used in an ajax request it has some optional functionality.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">yadaNotify.title("Login success", model).ok().message("You have been logged in").add();</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">yadaNotify.title("Login success", model).ok().message("You have been logged in").add();</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -254,7 +255,7 @@ The message() method accepts HTML tags so you will need to escape all HTML <a hr
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">boolean failed=false;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">boolean failed=false;
 yadaNotify.title("Login " + failed?"failed":"success", model).ok(!failed).error(failed).message("You have {}been logged in", failed?"not ":"").add();</code></pre>
 </div>
 </div>
@@ -268,7 +269,7 @@ If you want to return more than one message, you can use yadaNotify as many time
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">yadaNotify.title("Login success", model).ok().message("You have been logged in").add();
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">yadaNotify.title("Login success", model).ok().message("You have been logged in").add();
 yadaNotify.title("Forbidden", model).info().message("Access to the dashboard has been revoked").add();</code></pre>
 </div>
 </div>
@@ -289,7 +290,7 @@ You can then return the thymeleaf view as usual: just after showing the target v
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/dashboard")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/dashboard")
 public String dashboard(Model model) {
         yadaNotify.title("Login success", model).ok().message("You have been logged in").add();
         return "/dashboard";</code></pre>
@@ -303,7 +304,7 @@ public String dashboard(Model model) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/dashboard")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/dashboard")
 public String dashboard(RedirectAttributes redirectAttributes) {
         yadaNotify.title("Login success", redirectAttributes).ok().message("You have been logged in").add();
         return "redirect:/console";</code></pre>
@@ -315,7 +316,7 @@ The server can test if a modal is pending with the following methods:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">isNotificationPending(...)
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">isNotificationPending(...)
 isErrorSet(...)</code></pre>
 </div>
 </div>
@@ -330,7 +331,7 @@ second example will show the modal after a redirect to "/dashboard" and redirect
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/dashboard")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/dashboard")
 public String dashboard(Model model) {
         yadaNotify.title("Login success", model).ok().message("You have been logged in").redirectOnClose("/console").add();
         return "/dashboardPage";
@@ -358,7 +359,7 @@ the correct modal for the Bootstrap version in use:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">return "/yada/modalNotifyB3.html"; // for Bootstrap 3
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">return "/yada/modalNotifyB3.html"; // for Bootstrap 3
 return YadaViews.AJAX_NOTIFY_B3; // for Bootstrap 3
 // These return the correct modal for the configured version of Bootstrap:
 return config.getNotifyModalView();
@@ -372,7 +373,7 @@ The notification modal HTML can be customised with a specific HTML file, in whic
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;config&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;config&gt;
     &lt;paths&gt;
         &lt;notificationModalView&gt;/myModalNotify&lt;/notificationModalView&gt;</code></pre>
 </div>
@@ -388,7 +389,7 @@ the returned view is also used in normal requests, an ajax check can be used:</p
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;!-- Some other html that you need goes before or after --&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;!-- Some other html that you need goes before or after --&gt;
 &lt;div th:if="${@yadaWebUtil.AjaxRequest}" class="yadaResponseData"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
         &lt;div th:if="${YADA_NBODY}" <i class="conum" data-value="2"></i><b>(2)</b>
         	th:include="/yada/modalNotify :: body" th:remove="tag"&gt;
@@ -428,7 +429,7 @@ defined with <code>yada:successHandler</code> (see <a href="ajax.html#_postproce
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Map&lt;String, String&gt; resultMap = new HashMap&lt;&gt;();
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Map&lt;String, String&gt; resultMap = new HashMap&lt;&gt;();
 resultMap.put("deletedTaskId", taskId);
 model.addAttribute("resultMap", resultMap);</code></pre>
 </div>
@@ -438,7 +439,7 @@ model.addAttribute("resultMap", resultMap);</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">function editTaskHandler(responseText, responseHtml, form, button) {
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">function editTaskHandler(responseText, responseHtml, form, button) {
         var result = yada.getEmbeddedResult(responseHtml);
         var taskId = result['deletedTaskId'];
         $('#taskRow' + taskId).remove();
@@ -468,7 +469,7 @@ on modal close with <a href="#redirectOnClose">Redirect on modal close</a>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">yadaNotify.title("Login success", model).ok().message("You have been logged in").center().add();</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">yadaNotify.title("Login success", model).ok().message("You have been logged in").center().add();</code></pre>
 </div>
 </div>
 </div>
@@ -479,7 +480,7 @@ on modal close with <a href="#redirectOnClose">Redirect on modal close</a>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">model.addAttribute("extraDialogClasses", "myclass1 myclass2");
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">model.addAttribute("extraDialogClasses", "myclass1 myclass2");
 return yadaNotify.title("Saved", model).ok().message("Item saved").add();</code></pre>
 </div>
 </div>
@@ -500,7 +501,7 @@ return yadaNotify.title("Saved", model).ok().message("Item saved").add();</code>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.showOkModal(title, message, redirectUrl)
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">yada.showOkModal(title, message, redirectUrl)
 yada.showInfoModal(title, message, redirectUrl)
 yada.showErrorModal(title, message, redirectUrl)</code></pre>
 </div>
@@ -538,7 +539,7 @@ Example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="css" class="language-css hljs">.yadaIcon {
+<pre class="highlightjs highlight"><code class="language-css hljs" data-lang="css">.yadaIcon {
 	font-family: 'Font Awesome 5 Free';
 	font-weight: 900;
 }
@@ -566,7 +567,7 @@ change it while preserving some key elements that are used as reference to add c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;config&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;config&gt;
         &lt;paths&gt;
                 &lt;notificationModalView&gt;/myModalNotify&lt;/notificationModalView&gt;</code></pre>
 </div>
@@ -576,7 +577,7 @@ change it while preserving some key elements that are used as reference to add c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:include="/myModalNotify :: modal" class="modal fade" id="yada-notification" role="dialog"&gt;&lt;/div&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div th:include="/myModalNotify :: modal" class="modal fade" id="yada-notification" role="dialog"&gt;&lt;/div&gt;</code></pre>
 </div>
 </div>
 </div>
@@ -586,11 +587,15 @@ change it while preserving some key elements that are used as reference to add c
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2025-05-09 14:17:36 +0200
+Last updated 2025-08-07 10:44:57 +0200
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

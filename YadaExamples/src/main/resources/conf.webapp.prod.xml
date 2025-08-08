@@ -122,9 +122,9 @@
 				<role>USER</role>
 			</user>
 			<user>
-				<nickname>readonly</nickname> <!-- This is an example of UserProfile customization -->
-				<email>readonly@example.com</email>
-				<password>readonly@example.com</password>
+				<nickname>supervisor</nickname> <!-- This is an example of UserProfile customization -->
+				<email>supervisor@example.com</email>
+				<password>supervisor@example.com</password>
 				<locale>en_US</locale>
 				<timezone>Europe/Rome</timezone>
 				<role>USER</role>
@@ -149,10 +149,17 @@
 			<role>
 				<id>8</id>
 				<key>ADMIN</key>
+				<!-- Which roles can this role set/unset on any user: -->
+				<handles>ADMIN</handles>
+				<handles>SUPERVISOR</handles>
+				<handles>USER</handles>
 			</role>
 			<role>
 				<id>4</id>
 				<key>SUPERVISOR</key>
+				<!-- Which roles can this role set/unset on any user: -->
+				<handles>SUPERVISOR</handles>
+				<handles>USER</handles>
 			</role>
 			<role>
 				<id>2</id>

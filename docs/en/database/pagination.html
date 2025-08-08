@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Database Pagination</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
@@ -185,14 +186,14 @@ as many rows as were loaded by the user using the "load more" button. This infor
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/searchBook}"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/searchBook}"&gt;
 	&lt;input name="searchString" th:value="${searchString}"&gt;
 	&lt;button type="submit"&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Controller
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Controller
 public class BookController {
     final static int PAGE_SIZE =  10;
     @RequestMapping("/searchBook")
@@ -207,7 +208,7 @@ Then call the proper DAO to fetch data from the database and store it in a <code
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">if (!yadaPageRequest.isValid()) {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">if (!yadaPageRequest.isValid()) {
     yadaPageRequest = new YadaPageRequest(0, PAGE_SIZE);
     yadaPageRequest.appendSort("title").ignorecase();
     yadaPageRequest.appendSort("date").desc();
@@ -222,7 +223,7 @@ return "/searchResult";</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Repository
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Repository
 @Transactional(readOnly = true)
 public class SearchDao {
     @PersistenceContext EntityManager em;
@@ -249,7 +250,7 @@ implement pagination.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div fragment="bookList" th:unless="${books.empty}" id="bookListId"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div fragment="bookList" th:unless="${books.empty}" id="bookListId"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
 	&lt;div th:each="book : ${books}" th:text="${book.title}"&gt;Book title here&lt;/div&gt;
 
 	&lt;div class="jsLoadMoreBooks" th:unless="${books.last}"&gt;
@@ -281,7 +282,7 @@ to make autoscroll work:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">&lt;script type="text/javascript" th:inline="javascript"&gt;
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">&lt;script type="text/javascript" th:inline="javascript"&gt;
 	const loadMoreObserver = new IntersectionObserver(entries =&gt; {
 		entries.forEach(entry =&gt; {
 			if (entry.intersectionRatio &gt; 0) {
@@ -318,7 +319,7 @@ When the user clicks on that link, an ajax call is made to the server in order t
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/searchBookMore")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/searchBookMore")
 public String searchBookMore(String searchString, YadaPageRequest yadaPageRequest, Model model) {
     YadaPageRows&lt;Book&gt; result = searchDao.find(searchString, yadaPageRequest);
     model.addAttribute("books", result);
@@ -369,7 +370,7 @@ must be set on the link or button that loads the next page.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Controller
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Controller
 public class BookController {
     final static int PAGE_SIZE =  10;
     @RequestMapping("/searchBook")
@@ -416,7 +417,7 @@ each pagination section:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public class SearchPagination {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class SearchPagination {
 	public YadaPageRequest product = new YadaPageRequest(0, SearchController.PAGE_SIZE);
 	public YadaPageRequest project = new YadaPageRequest(0, SearchController.PAGE_SIZE);</code></pre>
 </div>
@@ -426,7 +427,7 @@ each pagination section:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Controller
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Controller
 public class SearchController {
     final static int PAGE_SIZE =  10;
     @RequestMapping("/search")
@@ -450,11 +451,15 @@ public class SearchController {
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 19:40:44 +0200
+Last updated 2023-12-07 11:06:50 +0100
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

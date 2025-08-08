@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Getting Started</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../yadadocs.css" />
 
 </head>
@@ -267,7 +268,7 @@ make a symbolic link to it with a generic name, like</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="dos" class="language-dos hljs">mklink /D /J C:\Local\jdk8 C:\Local\Javas\jdk1.8.0_152</code></pre>
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">mklink /D /J C:\Local\jdk8 C:\Local\Javas\jdk1.8.0_152</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -356,7 +357,7 @@ port and want to start the one you need manually (recommended approach)</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="dos" class="language-dos hljs">mklink /D /J C:\Local\mysql80 C:\local\Mysqls\mysql-8.0.19-winx64</code></pre>
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">mklink /D /J C:\Local\mysql80 C:\local\Mysqls\mysql-8.0.19-winx64</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -367,7 +368,7 @@ In order to start/stop the MySQL server you should create two scripts and put th
 <div class="listingblock">
 <div class="title">startMySql80.bat</div>
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="dos" class="language-dos hljs">set MYSQL_HOME=C:\Local\mysql80
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">set MYSQL_HOME=C:\Local\mysql80
 set PATH=%MYSQL_HOME%\bin;%PATH%
 C:\Local\mysql80\bin\mysqld.exe --defaults-file="%MYSQL_HOME%\my.ini" --console</code></pre>
 </div>
@@ -375,7 +376,7 @@ C:\Local\mysql80\bin\mysqld.exe --defaults-file="%MYSQL_HOME%\my.ini" --console<
 <div class="listingblock">
 <div class="title">stopMySql80.bat</div>
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="dos" class="language-dos hljs">set MYSQL_HOME=C:\Local\mysql80
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">set MYSQL_HOME=C:\Local\mysql80
 C:\Local\mysql80\bin\mysqladmin.exe -u root shutdown</code></pre>
 </div>
 </div>
@@ -384,7 +385,7 @@ C:\Local\mysql80\bin\mysqladmin.exe -u root shutdown</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="dos" class="language-dos hljs">mysql -u root -p
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">mysql -u root -p
 SET PASSWORD FOR 'root'@'localhost' = '';</code></pre>
 </div>
 </div>
@@ -444,7 +445,7 @@ want to use. For example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="dos" class="language-dos hljs">C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\myCoding"
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\myCoding"
 C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\myRelease"</code></pre>
 </div>
 </div>
@@ -455,7 +456,7 @@ C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\myRel
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="dos" class="language-dos hljs">C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\yadaTutorial"</code></pre>
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\yadaTutorial"</code></pre>
 </div>
 </div>
 </div>
@@ -637,7 +638,7 @@ a name of "yadaframework":</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="dos" class="language-dos hljs">C:\work\git-mysite
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">C:\work\git-mysite
   mysite
     .git
     MySiteProject
@@ -693,7 +694,7 @@ We want to keep things simple so we&#8217;re going to restructure the layout in 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="bash" class="language-bash hljs">	#!/bin/bash
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">	#!/bin/bash
 	# Fix Buildship generated Eclipse project
 
 	projectFolder=$1
@@ -715,7 +716,7 @@ It should be run in the parent folder of the project passing the project folder 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="bash" class="language-bash hljs">fixProject.sh MySiteProject</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">fixProject.sh MySiteProject</code></pre>
 </div>
 </div>
 <div class="admonitionblock warning">
@@ -862,7 +863,7 @@ The resulting filesystem structure will be as follows:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="dos" class="language-dos hljs">C:\work\git-mysite
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">C:\work\git-mysite
   mysite
     .git
     MySiteProject
@@ -949,7 +950,7 @@ see <code>/YadaTools/src/main/groovy/net/yadaframework/tools/YadaProject.groovy<
 <div class="listingblock">
 <div class="title">settings.gradle</div>
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="gradle" class="language-gradle hljs">rootProject.name = 'MySiteProject'
+<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">rootProject.name = 'MySiteProject'
 include 'YadaWeb'
 project(':YadaWeb').projectDir = "../../yadaframework/YadaWeb" as File
 include 'YadaWebSecurity'
@@ -1030,7 +1031,7 @@ After that, repeat the Gradle refresh on your main project.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="dos" class="language-dos hljs">cd C:\work\git-yadabookstore\yadabookstore\YadaBookstore
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">cd C:\work\git-yadabookstore\yadabookstore\YadaBookstore
 gradlew yadaInit --no-daemon</code></pre>
 </div>
 </div>
@@ -1338,7 +1339,7 @@ The <code>YadaTomcatServer</code> class can be overridden or rewritten to achiev
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">java net.yadaframework.core.YadaTomcatServer ybsdev src/main/webapp</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">java net.yadaframework.core.YadaTomcatServer ybsdev src/main/webapp</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1386,11 +1387,15 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 21:27:53 +0200
+Last updated 2025-08-07 10:44:57 +0200
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

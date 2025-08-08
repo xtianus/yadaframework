@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Image Galleries</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
@@ -176,7 +177,7 @@ For example, the gallery of a Product entity could be a List of YadaAttachedFile
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@OneToMany(cascade=CascadeType.PERSIST) <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@OneToMany(cascade=CascadeType.PERSIST) <i class="conum" data-value="1"></i><b>(1)</b>
 @OrderBy("sortOrder") <i class="conum" data-value="2"></i><b>(2)</b>
 protected List&lt;YadaAttachedFile&gt; gallery = new ArrayList&lt;&gt;(); <i class="conum" data-value="3"></i><b>(3)</b></code></pre>
 </div>
@@ -207,7 +208,7 @@ protected List&lt;YadaAttachedFile&gt; gallery = new ArrayList&lt;&gt;(); <i cla
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:replace="~{/yadacms/imageSorter::component(
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div th:replace="~{/yadacms/imageSorter::component(
 	images=${product.gallery},
 	size=${slideImageSize}, <i class="conum" data-value="1"></i><b>(1)</b>
 	entityIdName='productId', <i class="conum" data-value="2"></i><b>(2)</b>
@@ -256,7 +257,7 @@ of all available parameters.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@ModelAttribute("product")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@ModelAttribute("product")
 public Product addProduct(@RequestParam(value="productId", required=false) Long productId) { <i class="conum" data-value="1"></i><b>(1)</b>
 	Product toEdit = null;
 	Exception exception = null;
@@ -308,7 +309,7 @@ See <a href="uploads.html#_image_upload_and_crop">the relevant section</a> for d
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/addSlide") // Ajax
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/addSlide") // Ajax
 public String addSlide(Product product, HttpServletRequest request, Model model, Locale locale) {
 	if (YadaCommonsMultipartResolver.limitExceeded(request)) {
 		// All Request Parameters sent with the form are lost so we can't return the submitted form
@@ -377,7 +378,7 @@ public String addSlide(Product product, HttpServletRequest request, Model model,
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/deleteSlide") // Ajax
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/deleteSlide") // Ajax
 public String deleteSlide(Long imageId, Product product, Model model, Locale locale) { <i class="conum" data-value="1"></i><b>(1)</b>
 	// Delete image from disk
 	YadaAttachedFile yadaAttachedFile = yadaAttachedFileDao.find(imageId);
@@ -402,7 +403,7 @@ public String deleteSlide(Long imageId, Product product, Model model, Locale loc
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Transactional(readOnly = false)
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Transactional(readOnly = false)
 public Product deleteGallerySlide(Long productId, Long imageId) {
 	em.createNativeQuery("delete from ...") <i class="conum" data-value="1"></i><b>(1)</b>
 		.setParameter("imageId", imageId)
@@ -437,7 +438,7 @@ public Product findAndPrefetch(Long productId) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/sortSlide") // Ajax
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/sortSlide") // Ajax
 public String sortSlide(Long productId, Long currentId, Long otherId, Model model, Locale locale) {
 	yadaAttachedFileDao.swapSortOrder(currentId, otherId);
 	Product product = productDao.findAndPrefetch(productId); // Reload the updated list
@@ -465,7 +466,7 @@ public String sortSlide(Long productId, Long currentId, Long otherId, Model mode
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/showProduct")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/showProduct")
 public String showProduct(Long productId, Model model, Locale locale) {
 	Product product = productDao.findAndPrefetch(productId);
 	model.addAttribute("product", product);
@@ -478,7 +479,7 @@ public String showProduct(Long productId, Model model, Locale locale) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:each="slide: ${product.gallery}"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div th:each="slide: ${product.gallery}"&gt;
 	&lt;picture&gt;
         &lt;source media="(max-width: 767px)" th:srcset="@{${@yadaFileManager.getMobileImageUrl(slide)}}"&gt;
         &lt;img th:src="@{${@yadaFileManager.getDesktopImageUrl(slide)}}"&gt;
@@ -492,11 +493,15 @@ public String showProduct(Long productId, Model model, Locale locale) {
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 19:40:44 +0200
+Last updated 2023-12-07 11:06:50 +0100
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

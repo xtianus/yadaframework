@@ -215,7 +215,7 @@
 	// @Deprecated. Should use the generic modal instead of the login modal
 	yada.handlePostLoginHandler = function(responseHtml, responseText) {
 		var isError = yada.isNotifyError(responseHtml);
-		yada.handleNotify(responseHtml);
+		yada.handleNotify(responseHtml, responseText);
 		if (yada.postLoginHandler != null) {
 			if (!isError) { // Esegue l'handler solo se non ho ricevuto una notifica di errore
 				yada.postLoginHandler(responseText, responseHtml); 
@@ -1595,7 +1595,7 @@
 
 				// Per mostrare una notification al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify"
 				// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
-				var notify=yada.handleNotify(responseHtml);
+				var notify=yada.handleNotify(responseHtml, responseTrimmed);
 				if (notify) {
 					return;
 				}
@@ -1937,19 +1937,18 @@
 	/**
 	 * Returns true if the response contains a notification modal
 	 */
-	function isNotification(responseHtml) {
+	function isNotification(responseText) {
 		// The notification modal is marked with the class yadaNotify
-		return /class=["'][^"']*yadaNotify[^"']*["']/.test(responseHtml);
+		return /class=["'][^"']*yadaNotify[^"']*["']/.test(responseText);
 	}
 	
 	// Se un ritorno da una chiamata ajax ha un notify, lo mostra.
 	// Per mostrare un notify al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify" 
 	// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
 	// Ritorna true se la notify è stata mostrata.
-	yada.handleNotify = function(responseHtml) {
-		// var notification=$(responseHtml).find(".yadaNotify");
-		if (isNotification(responseHtml)) {
-			// Mostro la notification
+	yada.handleNotify = function(responseHtml, responseText) {
+		if (isNotification(responseText)) {
+			var notification=$(responseHtml).find(".yadaNotify");
 			$('.modal:visible').modal('hide'); // Close any current modals
 			$('#yada-notification').children().remove();
 			$('#yada-notification').append(notification);

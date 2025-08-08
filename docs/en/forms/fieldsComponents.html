@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Form Components</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
@@ -174,7 +175,7 @@ HTML files that can be included in the Thymeleaf templates with the standard syn
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div th:replace="~{/yada/form/text::body(fieldName='subject',maxlength=64,required=true,labelKey='form.label.subject')}"&gt;&lt;/div&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div th:replace="~{/yada/form/text::body(fieldName='subject',maxlength=64,required=true,labelKey='form.label.subject')}"&gt;&lt;/div&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -322,7 +323,7 @@ submits its value via ajax when it changes:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input type="number" min="0" max="99"
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;yada:input type="number" min="0" max="99"
 	yada:ajax="@{/setRooms(annuncioId=${annuncio.id})}"
 	class="yadaNoLoader"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
 &lt;/yada:input&gt;</code></pre>
@@ -349,7 +350,7 @@ submits its value via ajax when it changes:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input name="price" type="number" min="0"
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;yada:input name="price" type="number" min="0"
 	class="noButtons"&gt; <i class="conum" data-value="1"></i><b>(1)</b>
 	&lt;yada:addonRight&gt;.00&lt;/yada:addonRight&gt; <i class="conum" data-value="2"></i><b>(2)</b>
 &lt;/yada:input&gt;</code></pre>
@@ -369,7 +370,7 @@ submits its value via ajax when it changes:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="css" class="language-css hljs">.yadaInput.noButtons {
+<pre class="highlightjs highlight"><code class="language-css hljs" data-lang="css">.yadaInput.noButtons {
 	.yadaInputNumericDecrement, .yadaInputNumericIncrement, .yadaShowPasswordAddon {
 		display: none;
 	}
@@ -382,7 +383,7 @@ field with the <code>addonLeft</code> and <code>addonRight</code> tags, that acc
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input name="price"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;yada:input name="price"&gt;
 	&lt;yada:addonLeft&gt;&lt;b&gt;$&lt;/b&gt;&lt;/yada:addonLeft&gt;
 	&lt;yada:addonRight&gt;.00&lt;/yada:addonRight&gt;
 &lt;/yada:input&gt;</code></pre>
@@ -399,7 +400,7 @@ be removed via a specific trash icon that appears after file selection.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input type="file" id="someFileUpload"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;yada:input type="file" id="someFileUpload"&gt;
 	&lt;yada:addonRight&gt;
 		&lt;i class="bi bi-upload" onclick="$('#someFileUpload').click();"&gt;&lt;/i&gt; <i class="conum" data-value="1"></i><b>(1)</b>
 	&lt;/yada:addonRight&gt;
@@ -425,7 +426,7 @@ tag can show all choices:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input type="radio" name="color" th:value="${product.color}"
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;yada:input type="radio" name="color" th:value="${product.color}"
 	yada:enumclassname="com.example.ColorEnum" <i class="conum" data-value="1"></i><b>(1)</b>
 	yada:labelKeyPrefix="enum.campaignType." <i class="conum" data-value="2"></i><b>(2)</b>
 	yada:ajax="@{/setColor(productId=${product.id})}"&gt;
@@ -482,7 +483,7 @@ showing all elements so far added. This HTML will be inserted in page.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:input name="dogname"
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;yada:input name="dogname"
 	yada:ajax="@{/addDog(ownerId=${owner.id})}" <i class="conum" data-value="1"></i><b>(1)</b>
 	yada:updateOnSuccess="'yadaParents:.jsDogsSection'"&gt; <i class="conum" data-value="2"></i><b>(2)</b>
 	&lt;yada:suggestion
@@ -527,7 +528,7 @@ and can be used by adding a model attribute named <code>yadaSuggestions</code> w
 <div class="listingblock">
 <div class="title">Returning a List of strings:</div>
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/dognameSuggestion")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/dognameSuggestion")
 public String dognameSuggestion(String prefix, Model model, Locale locale) {
 	List&lt;String&gt; suggestions = getDognameSuggestions(prefix, locale); // Some DB query
 	model.addAttribute("yadaSuggestions", suggestions);
@@ -549,7 +550,7 @@ seen above: this has precedence over anything else (see <code>YadaInputTagSugges
 <div class="listingblock">
 <div class="title">Returning a Map:</div>
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/dognameSuggestion")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/dognameSuggestion")
 public String dognameSuggestion(String prefix, Model model, Locale locale) {
 	List&lt;Dog&gt; suggestions = getDogs(prefix, locale); // Some DB query that returns Dog objects
 	// Convert the list to a map
@@ -585,7 +586,7 @@ parameters set on the URL (<code>ownerId</code> in this example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/addDog")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/addDog")
 public String addDog(String dogname, Long ownerId, Model model, Locale locale) {
 	List&lt;String&gt; allDogs = addDog(ownerID, dogname);; // Some code to add the name of the dog to its owner
 	model.addAttribute("allDogs", allDogs);
@@ -621,7 +622,7 @@ or the <code>&lt;yada:validationError&gt;</code> tag:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="HTML" class="language-HTML hljs">&lt;yada:input name="dogname" yada:validationError="${dogNameError}"</code></pre>
+<pre class="highlightjs highlight"><code class="language-HTML hljs" data-lang="HTML">&lt;yada:input name="dogname" yada:validationError="${dogNameError}"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -631,7 +632,7 @@ When you need more control on the error appearance, you can use the <code>&lt;ya
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="HTML" class="language-HTML hljs">&lt;yada:input name="dogname"
+<pre class="highlightjs highlight"><code class="language-HTML hljs" data-lang="HTML">&lt;yada:input name="dogname"
 	...
 	&lt;yada:validationError yada:invalidFlag="${dognameHasError}" th:text="#{error.dogname}"&gt;
 		(Dummy) error text here
@@ -649,7 +650,7 @@ nor false. In the above example the error is shown with</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">model.addAttribute("dognameHasError", true);
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">model.addAttribute("dognameHasError", true);
 // Also:
 model.addAttribute("dognameHasError", "yes");</code></pre>
 </div>
@@ -663,7 +664,7 @@ above example, a localized text is being fetched from <code>message.properties</
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="HTML" class="language-HTML hljs">&lt;yada:input name="dogname"
+<pre class="highlightjs highlight"><code class="language-HTML hljs" data-lang="HTML">&lt;yada:input name="dogname"
 	...
 	&lt;yada:validationError yada:messageKey="${dognameErrorKey}"&gt;
 		Localized error text example
@@ -672,7 +673,7 @@ above example, a localized text is being fetched from <code>message.properties</
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">model.addAttribute("dognameErrorKey", "error.dogname.short");
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">model.addAttribute("dognameErrorKey", "error.dogname.short");
 // or
 model.addAttribute("dognameErrorKey", "error.dogname.long");</code></pre>
 </div>
@@ -698,7 +699,7 @@ the <code>yada:inputCounterId</code> attribute of the <code>&lt;yada:input&gt;</
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:inputCounter id="titleCounter"&gt;&lt;/yada:inputCounter&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;yada:inputCounter id="titleCounter"&gt;&lt;/yada:inputCounter&gt;
 &lt;yada:input yada:inputCounterId="titleCounter" name="title" maxlength="70"&gt;&lt;/yada:input&gt;</code></pre>
 </div>
 </div>
@@ -708,7 +709,7 @@ with a container div with appropriate CSS:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div class="labelAndCounter"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div class="labelAndCounter"&gt;
 	&lt;label for="title"&gt;Title&lt;/label&gt;
 	&lt;yada:inputCounter id="titleCounter"&gt;&lt;/yada:inputCounter&gt;
 &lt;/div&gt;
@@ -717,7 +718,7 @@ with a container div with appropriate CSS:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="CSS" class="language-CSS hljs">.labelAndCounter {
+<pre class="highlightjs highlight"><code class="language-CSS hljs" data-lang="CSS">.labelAndCounter {
 	display: flex;
 	justify-content: space-between;
 }</code></pre>
@@ -760,7 +761,7 @@ work, so the <code>yada:text</code> attribute should be used instead for this sp
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;yada:inputCounter id="descriptionCounter"&gt;&lt;/yada:inputCounter&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;yada:inputCounter id="descriptionCounter"&gt;&lt;/yada:inputCounter&gt;
 &lt;yada:textarea id="description" name="description"
 	yada:text="*{description}" <i class="conum" data-value="1"></i><b>(1)</b>
 	yada:inputCounterId="descriptionCounter" <i class="conum" data-value="2"></i><b>(2)</b>
@@ -809,11 +810,15 @@ with a container div as shown above for the <code>&lt;yada:input&gt;</code> tag.
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2025-05-09 15:28:34 +0200
+Last updated 2025-08-07 10:44:57 +0200
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

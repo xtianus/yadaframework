@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Json</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../yadadocs.css" />
 
 </head>
@@ -151,7 +152,7 @@ serialized by Thymeleaf in a <code>&lt;script&gt;</code> tag:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;script th:inline="javascript"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;script th:inline="javascript"&gt;
 	const myJson = /*[[${myObject}]]*/ ""; <i class="conum" data-value="1"></i><b>(1)</b>
 &lt;/script&gt;</code></pre>
 </div>
@@ -183,7 +184,7 @@ it has, provided that the attribute type can itself be converted.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@JsonInclude(JsonInclude.Include.NON_EMPTY)
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Product {
 	@JsonIgnore private User user;
 	@JsonProperty private String color = "red";
@@ -207,7 +208,7 @@ model.addAttribute("myObject", product);</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;script th:inline="javascript"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;script th:inline="javascript"&gt;
 	const myJson = { "color" : "red" }
 &lt;/script&gt;</code></pre>
 </div>
@@ -235,7 +236,7 @@ map keys are the json attributes:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping(value ="/somedata", produces = MediaType.APPLICATION_JSON_VALUE)
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping(value ="/somedata", produces = MediaType.APPLICATION_JSON_VALUE)
 @ResponseBody public Map&lt;String, Object&gt; getSomeData() {
 	Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();
 	data.put("name1", "value1");
@@ -283,11 +284,15 @@ map keys are the json attributes:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-11-20 18:46:13 +0100
+Last updated 2025-08-07 10:44:57 +0200
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

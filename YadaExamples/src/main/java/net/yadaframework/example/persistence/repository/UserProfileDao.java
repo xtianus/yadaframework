@@ -54,7 +54,10 @@ public class UserProfileDao extends YadaUserProfileDao<UserProfile> {
      * @param userProfileId
      * @return UserProfile instance or null
      */
-    public UserProfile find(long userProfileId) {
+    public UserProfile find(Long userProfileId) {
+    	if (userProfileId==null) {
+    		return null;
+    	}
     	UserProfile userProfile = em.find(UserProfile.class, userProfileId);
     	return userProfile;
     }

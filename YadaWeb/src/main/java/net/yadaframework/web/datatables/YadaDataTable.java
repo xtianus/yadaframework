@@ -97,6 +97,25 @@ public class YadaDataTable {
 		this.ajaxUrl = yadaWebUtil.ensureThymeleafUrl(ajaxUrl);
 		return this;
 	}
+
+
+	/**
+	 * Type-safe overload that accepts a method reference to a controller method
+	 * and extracts its @RequestMapping path (combined with class-level mapping if present).
+	 *
+	 * Usage example inside a controller: <pre>.dtAjaxUrl(this::userProfileTablePage)</pre>
+	 *
+	 * The referenced method is expected to have the signature:
+	 * Map<String,Object> method(YadaDatatablesRequest request, Locale locale)
+	 *
+	 * @param handlerRef method reference to a controller handler
+	 * @return this instance for method chaining
+	 */
+	public YadaDataTable dtAjaxUrl(YadaDtAjaxHandler handlerRef) {
+		String url = YadaDataTableHelper.resolveAjaxUrlFromHandlerRef(handlerRef);
+		this.ajaxUrl = yadaWebUtil.ensureThymeleafUrl(url);
+		return this;
+	}
 	
 	/**
 	 * Set the entity class that will be used to fetch data from the database.

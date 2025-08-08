@@ -52,7 +52,7 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 
     /**
      * Enable javascript-side confirmation dialog for button action. 
-     * NOte: a backend call will always be able to trigger a confirmation dialog regardless of this setting.
+     * Note: a backend call will always be able to trigger a confirmation dialog regardless of this setting.
      * @return this instance for method chaining
      */
     public YadaDataTableConfirmDialog dtConfirmDialogObj() {

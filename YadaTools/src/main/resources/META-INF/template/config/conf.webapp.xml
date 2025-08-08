@@ -143,6 +143,9 @@
 			<role>
 				<id>8</id>
 				<key>ADMIN</key>
+				<!-- Which roles can this role set/unset on any user: -->
+				<handles>ADMIN</handles>
+				<handles>USER</handles>
 			</role>
 			<role>
 				<id>2</id>

@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Forms</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
@@ -209,13 +210,13 @@ a lot of work.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/addBook}"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/addBook}"&gt;
         &lt;input name="bookTitle" th:value="${bookTitle}"&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Controller
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Controller
 public class BookController {
         @RequestMapping("/addBook")
         public String addBook(String bookTitle) {
@@ -229,14 +230,14 @@ This is a possible solution for error handling:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/addBook}"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/addBook}"&gt;
         &lt;input name="bookTitle" th:value="${bookTitle}" th:classappend="${titleError}?'formError':''"&gt;
         &lt;div th:if="${titleError!=null}" th:text="${titleError}" class="formError"&gt;Title Error&lt;/div&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Controller
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Controller
 public class BookController {
         @RequestMapping("/addBook")
         public String addBook(String bookTitle, Model model) {
@@ -274,14 +275,14 @@ Even more, you can write a single method to handle both addition and editing of 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/addBook}" th:object="${book}"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/addBook}" th:object="${book}"&gt;
         &lt;input type="hidden" name="bookId" value="*{id}"&gt;
         &lt;input th:field="*{bookTitle}"&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Controller
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Controller
 public class BookController {
 
         @ModelAttribute("book")
@@ -360,7 +361,7 @@ instance.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/editBook")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/editBook")
 public String editBook(Book book, BindingResult bindingResult, Model model) {
     if (book.titleIsEmpty()) {
 	    // Reject the submission if title is empty
@@ -387,7 +388,7 @@ public String editBook(Book book, BindingResult bindingResult, Model model) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form class="yadaAjax" action="/subscribe"&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form class="yadaAjax" action="/subscribe"&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -395,7 +396,7 @@ public String editBook(Book book, BindingResult bindingResult, Model model) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.enableAjaxForms();</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">yada.enableAjaxForms();</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -425,7 +426,7 @@ to be called in order. Submission is aborted if any returns false and any follow
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form class="yadaAjax" action="/subscribe" yada:submitHandler="validateInput"&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form class="yadaAjax" action="/subscribe" yada:submitHandler="validateInput"&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -441,7 +442,7 @@ returned html:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form class="yadaAjax" action="/subscribe" yada:updateOnSuccess="#someSection"&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form class="yadaAjax" action="/subscribe" yada:updateOnSuccess="#someSection"&gt;</code></pre>
 </div>
 </div>
 </div>
@@ -479,7 +480,7 @@ the modal stays open, and the form must be annotated with <code>yada:updateOnSuc
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">return "/someModalWithForm";
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">return "/someModalWithForm";
 
 return yadaNotify.title("Lorem", model).ok().message("Ipsum").add();
 
@@ -554,7 +555,7 @@ overwrites any form fields with the same name.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form action="/someAction" yada:formGroup="myGroup"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form action="/someAction" yada:formGroup="myGroup"&gt;
 	&lt;input name="a" value="1"&gt;
 	&lt;button type="submit"&gt;Submit&lt;/button&gt;
 &lt;/form&gt;
@@ -591,7 +592,7 @@ The use of <code>yada:formGroup</code> has the following advantages:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a href="" yada:ajax="/someUrl?a=9" yada:formGroup="myGroup"&gt;Click me&lt;/a&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;a href="" yada:ajax="/someUrl?a=9" yada:formGroup="myGroup"&gt;Click me&lt;/a&gt;
 &lt;form action="/someAction" yada:formGroup="myGroup"&gt;
 	&lt;input name="a" value="1"&gt;
 	&lt;input name="c" value="3"&gt;
@@ -619,11 +620,15 @@ The use of <code>yada:formGroup</code> has the following advantages:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2025-04-18 15:31:37 +0200
+Last updated 2025-08-07 10:44:57 +0200
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

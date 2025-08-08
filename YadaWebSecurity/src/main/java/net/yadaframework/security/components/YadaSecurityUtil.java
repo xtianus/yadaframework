@@ -163,6 +163,7 @@ public class YadaSecurityUtil {
 	 * @param rolesAfter the roles that the target user should have after modification. On exit, the roles that can't be changed are reset to the value in rolesBefore
 	 * @return the roles that the actingUser can't change
 	 */
+	@Deprecated // Use userCanEditUser instead because this method could be misused
 	public Set<Integer> setRolesWhenAllowed(YadaUserProfile actingUser, List<Integer> rolesBefore, List<Integer> rolesAfter) {
 		Set<Integer> forbiddenRoles = new HashSet<Integer>();
 		List<Integer> allRoleIds = config.getRoleIds();
@@ -213,19 +214,45 @@ public class YadaSecurityUtil {
 	}	
 	
 	/**
-	 * Check if the roles of the actingUser allow it to change the targetUser based on its roles, as configured by &lt;handles>
-	 * A target user can be changed only when its roles can all be changed by any of the roles of the acting user.
-	 * @param actingUser
-	 * @param targetUser
+	 * Check if the roles of the actingUser allow it to change some target user based on its roles, as configured by &lt;handles>
+	 * A target user can be changed only when both its current roles and its new roles can all be changed by any of the roles of the acting user.
+	 * So for example a "Manager" can not change a "Guest" to an "Admin" or an "Admin" to a "Guest", nor edit an Admin.
+	 * @param actingUser the user that wants to change the targetUser
+	 * @param oldRoles the roles of the target user before changing them
+	 * @param newRoles the roles of the target user after changing them
 	 * @return true if actingUser can edit targetUser, false otherwise
 	 */
-	public boolean userCanEditUser(YadaUserProfile actingUser, YadaUserProfile targetUser) {
+	public boolean userCanEditUser(YadaUserProfile actingUser, List<Integer> oldRoles, List<Integer> newRoles) {
 		List<Integer> actingRoleIds = actingUser.getUserCredentials().getRoles();
-		List<Integer> targetRoleIds = targetUser.getUserCredentials().getRoles();
 		Map<Integer, Set<Integer>> roleIdToRoleChange = config.getRoleIdToRoleChange();
 		for (Integer actingRoleId : actingRoleIds) {
 			Set<Integer> canChangeIds = roleIdToRoleChange.get(actingRoleId);
-			if (canChangeIds.containsAll(targetRoleIds)) {
+			// Check if the acting user can change both the old roles and the new roles
+			if (canChangeIds != null && 
+				(oldRoles == null || canChangeIds.containsAll(oldRoles)) && 
+				canChangeIds.containsAll(newRoles)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Check if the roles of the actingUser allow it to impersonate the targetUser based on its roles, as configured by &lt;handles>
+	 * The actingUser can impersonate the targetUser only when there is at least one role of actingUser that can change all roles of targetUser.
+	 * @param actingUser the user that wants to impersonate the targetUser
+	 * @param targetUser the user that might be impersonated
+	 * @return true if actingUser can impersonate targetUser, false otherwise
+	 */
+	public boolean userCanImpersonate(YadaUserProfile actingUser, YadaUserProfile targetUser) {
+		List<Integer> actingRoleIds = actingUser.getUserCredentials().getRoles();
+		List<Integer> targetRoleIds = targetUser.getUserCredentials().getRoles();
+		Map<Integer, Set<Integer>> roleIdToRoleChange = config.getRoleIdToRoleChange();
+		
+		for (Integer actingRoleId : actingRoleIds) {
+			Set<Integer> canChangeIds = roleIdToRoleChange.get(actingRoleId);
+			// Check if the acting user can change all roles of the target user
+			if (canChangeIds != null && canChangeIds.containsAll(targetRoleIds)) {
 				return true;
 			}
 		}

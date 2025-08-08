@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Sending Emails</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../yadadocs.css" />
 
 </head>
@@ -174,7 +175,7 @@ values before being sent via a SMTP server you have configured. I18n is also ava
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;email&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;email&gt;
         &lt;enabled&gt;true&lt;/enabled&gt;
         &lt;from&gt;mysender@gmail.com&lt;/from&gt;
         &lt;logoImage&gt;/template/email/mycompany-logo.png&lt;/logoImage&gt;
@@ -274,7 +275,7 @@ a "Model attribute" with the full URL must be used instead. The <code>YadaWebUti
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;!DOCTYPE html&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;!DOCTYPE html&gt;
 &lt;html xmlns:th="http://www.thymeleaf.org"&gt;
     &lt;head&gt;
                 &lt;meta charset="UTF-8"/&gt;
@@ -329,7 +330,7 @@ An easier API is provided by the <code>YadaEmailBuilder</code> class.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public void confirmVisit(Booking booking, String customerEmail, File catalog, Locale locale) {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public void confirmVisit(Booking booking, String customerEmail, File catalog, Locale locale) {
 
 	String cancelLink = yadaWebUtil.getFullUrl("/booking/cancel/", locale, "bookingId", booking.getId());
 
@@ -378,11 +379,15 @@ For example:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 19:40:44 +0200
+Last updated 2025-08-07 10:44:57 +0200
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

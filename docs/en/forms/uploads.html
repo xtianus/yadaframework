@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>File Uploads</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
@@ -214,7 +215,7 @@ For a way to upload by dragging, see <a href="../ajax.html#_ajax_upload_by_dragd
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;config&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;config&gt;
 	&lt;maxFileUploadSizeBytes&gt;3000000&lt;/maxFileUploadSizeBytes&gt;</code></pre>
 </div>
 </div>
@@ -230,7 +231,7 @@ You can ensure to see the message with the following logback configuration:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;logger name="org.springframework.web.multipart.commons.YadaCommonsMultipartResolver" level="DEBUG"/&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;logger name="org.springframework.web.multipart.commons.YadaCommonsMultipartResolver" level="DEBUG"/&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -243,7 +244,7 @@ the MaxUploadSizeExceededException as a value.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaCommonsMultipartResolver.limitExceeded(request)</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">YadaCommonsMultipartResolver.limitExceeded(request)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -251,7 +252,7 @@ the MaxUploadSizeExceededException as a value.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">if (YadaCommonsMultipartResolver.limitExceeded(request)) {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">if (YadaCommonsMultipartResolver.limitExceeded(request)) {
 	yadaNotify.title("News not saved", model).error().message("File too big. Size limit is " + config.getMaxFileUploadSizeBytes()/(1024*1024) + " MB").add();
     return "/cms/news";
 }</code></pre>
@@ -295,7 +296,7 @@ The drawback would be that network bandwidth would be wasted and the user will h
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">function fileTooBig() {
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">function fileTooBig() {
     var file = $('input[name=attachment]')[0].files[0];
     if (file==null) {
             return false;
@@ -334,7 +335,7 @@ $('#theForm').submit(function() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form method="POST" enctype="multipart/form-data" action="doUpload"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form method="POST" enctype="multipart/form-data" action="doUpload"&gt;
     File to upload: &lt;input type="file" name="upfile"&gt;&lt;br/&gt;
     &lt;button type="submit"&gt;Upload&lt;/button&gt;
 &lt;/form&gt;</code></pre>
@@ -348,7 +349,7 @@ The following example also shows any error:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/profile}" th:object="${formProfile}" enctype="multipart/form-data" method="post"
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/profile}" th:object="${formProfile}" enctype="multipart/form-data" method="post"
 th:classappend="${#fields.hasErrors('*')}? has-error" role="form"&gt;
 
     &lt;div th:replace="/yada/form/fileUpload::field(fieldName='avatarImage',label='Avatar')"&gt;&lt;/div&gt;</code></pre>
@@ -379,7 +380,7 @@ by adding it to the @RequestMapping signature.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public String storeFile(MultipartFile submittedFile) {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public String storeFile(MultipartFile submittedFile) {
     File destination = new File("someFolder");
     YadaWebUtil.saveAttachment(submittedFile, destination):</code></pre>
 </div>
@@ -396,7 +397,7 @@ Use YadaAttachedFile to easily handle file attachments:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Entity
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Entity
 public class Product {
     @OneToOne
     protected YadaAttachedFile icon;
@@ -439,7 +440,7 @@ the YadaAttachedFile attributes before the persist operation:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">product.setIcon(em.merge(product.getIcon()));
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">product.setIcon(em.merge(product.getIcon()));
 em.persist(product);</code></pre>
 </div>
 </div>
@@ -498,7 +499,7 @@ created automatically if the tomcat process has enough permissions, otherwise yo
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public String updateProfile(MultipartFile uploadedMultipart) {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public String updateProfile(MultipartFile uploadedMultipart) {
     File uploadedFile = yadaFileManager.uploadFile(uploadedMultipart);</code></pre>
 </div>
 </div>
@@ -507,7 +508,7 @@ created automatically if the tomcat process has enough permissions, otherwise yo
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "/userData", "icon");
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedFile, uploadedMultipart, "/userData", "icon");
 if (newIcon!=null) {
     user.setIcon(newIcon);
     userRepository.save(user);
@@ -519,7 +520,7 @@ if (newIcon!=null) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "/userData", "icon");</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">YadaAttachedFile newIcon = yadaFileManager.attachNew(uploadedMultipart, "/userData", "icon");</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -531,7 +532,7 @@ The original file is by default deleted from the "uploads" folder unless a speci
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;yadaFileManager&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;yadaFileManager&gt;
     &lt;deleteUploads&gt;false&lt;/deleteUploads&gt;
 &lt;/yadaFileManager&gt;</code></pre>
 </div>
@@ -550,7 +551,7 @@ the new ones. No explicit database operation is needed in this case.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaAttachedFile previousIcon = user.getIcon();
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">YadaAttachedFile previousIcon = user.getIcon();
 YadaAttachedFile iconAttachedFile = yadaFileManager.attachReplace(previousIcon, uploadedFile, "icon", "jpg", null, null);</code></pre>
 </div>
 </div>
@@ -577,7 +578,7 @@ There is no way to detect if you are using the wrong method, so be careful.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">/**
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">/**
  * Uploads an "icon" image for the user
  */
 public String updateProfile(MultipartFile uploadedMultipart) {
@@ -606,7 +607,7 @@ public String updateProfile(MultipartFile uploadedMultipart) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">yadaFileManager.attach(uploadedFile, "userData", "icon", "jpg", 1280, 768);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">yadaFileManager.attach(uploadedFile, "userData", "icon", "jpg", 1280, 768);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -642,7 +643,7 @@ either be used in the @Controller or directly in the HTML:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;img th:src="@{${@yadaFileManager.getDesktopImageUrl(user.icon)}}"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;img th:src="@{${@yadaFileManager.getDesktopImageUrl(user.icon)}}"&gt;
 &lt;a th:href="@{${@yadaFileManager.getFileUrl(product.manual)}}"&gt;Download manual&lt;/a&gt;</code></pre>
 </div>
 </div>
@@ -659,7 +660,7 @@ new entity will reference the old files.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">ConfiguratorShape clone = configuratorDao.copy(configuratorShape);
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">ConfiguratorShape clone = configuratorDao.copy(configuratorShape);
 yadaFileManager.duplicateFiles(clone.getIcon());</code></pre>
 </div>
 </div>
@@ -686,7 +687,7 @@ if the YadaAttachedFile attributes of the Entity don&#8217;t have a cascade <cod
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaAttachedFile icon = user.getIcon();
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">YadaAttachedFile icon = user.getIcon();
 yadaFileManager.deleteFileAttachment(icon);
 user.setIcon(null); // Remove relationship before deletion
 user = userDao.save(user);
@@ -734,7 +735,7 @@ crop all images added to the queue until there are no more left.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;config&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;config&gt;
     &lt;dimension targetImageExtension="jpg" preserveImageExtensions="gif"&gt;
         &lt;news&gt;
             &lt;top&gt;
@@ -762,7 +763,7 @@ The above configuration can be read in your subclass of <code>YadaConfiguration<
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public YadaIntDimension[] getDimensionsNewsThumbnail() {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public YadaIntDimension[] getDimensionsNewsThumbnail() {
     return super.getImageDimensions("/news/thumbnail");
 }</code></pre>
 </div>
@@ -777,7 +778,7 @@ This example can crop and resize any image, preserving animated gifs if the gif 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;config&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;config&gt;
     &lt;shell&gt;
         &lt;yadaCropAndResize timeoutseconds="20"&gt;
             &lt;executable&gt;convert&lt;/executable&gt;
@@ -799,7 +800,7 @@ This example can crop and resize any image, preserving animated gifs if the gif 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;yadaCropAndResize timeoutseconds="20"&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;yadaCropAndResize timeoutseconds="20"&gt;
     &lt;executable&gt;convert&lt;/executable&gt;
     &lt;arg&gt;${FILENAMEIN}&lt;/arg&gt;
     &lt;arg&gt;-background&lt;/arg&gt; &lt;!-- "-background white -flatten" converts any transparent png backround to white instead of the default black --&gt;
@@ -818,7 +819,7 @@ This example can crop and resize any image, preserving animated gifs if the gif 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;executable&gt;magick&lt;/executable&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;executable&gt;magick&lt;/executable&gt;
 &lt;arg&gt;convert&lt;/arg&gt;
 &lt;arg&gt;${FILENAMEIN}&lt;/arg&gt;</code></pre>
 </div>
@@ -835,7 +836,7 @@ for each multipart file you need to receive:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Entity
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Entity
 public class News implements CloneableDeep {
     @OneToOne(cascade=CascadeType.PERSIST)
     protected YadaAttachedFile thumbnail;
@@ -856,7 +857,7 @@ You can also use a <a href="overview.html#_form_backing_beans">Form Backing Bean
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/addOrUpdateNews}" th:object="${news}" enctype="multipart/form-data"
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/addOrUpdateNews}" th:object="${news}" enctype="multipart/form-data"
 	method="post" role="form" th:with="hasError=${#fields.hasErrors('myFieldName')}"&gt;
 	&lt;input type="file" name="myFieldName" accept="image/*" th:classappend="${hasError}?is-invalid"&gt;
 	&lt;div th:each="err : ${#fields.errors('myFieldName')}" th:text="${err}" class="invalid-feedback"&gt;Invalid image&lt;/div&gt;</code></pre>
@@ -867,7 +868,7 @@ You can also use a <a href="overview.html#_form_backing_beans">Form Backing Bean
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;form th:action="@{/addOrUpdateNews}" th:object="${news}" enctype="multipart/form-data" th:classappend="${#fields.hasErrors('*')}? has-error" method="post" role="form"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/addOrUpdateNews}" th:object="${news}" enctype="multipart/form-data" th:classappend="${#fields.hasErrors('*')}? has-error" method="post" role="form"&gt;
     &lt;div th:replace="/yada/form/fileUpload::field(fieldName='thumbnailImage',size=${thumbnailSize},accept='image/*',label='Upload thumbnail image',required=${news.thumbnail==null},help='Thumbnail image',attachedFile=*{thumbnail})"&gt;&lt;/div&gt;</code></pre>
 </div>
 </div>
@@ -901,7 +902,7 @@ You can also use a <a href="overview.html#_form_backing_beans">Form Backing Bean
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">YadaIntDimension[] dimensionsDesktopAndMobile = config.getDimensionsNewsThumbnail();
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">YadaIntDimension[] dimensionsDesktopAndMobile = config.getDimensionsNewsThumbnail();
 YadaIntDimension biggestNeeded = YadaIntDimension.biggest(dimensionsDesktopAndMobile);
 model.addAttribute("thumbnailSize", biggestNeeded);</code></pre>
 </div>
@@ -914,7 +915,7 @@ model.addAttribute("thumbnailSize", biggestNeeded);</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/addOrUpdateNews")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/addOrUpdateNews")
 public String addOrUpdateNews(News news, BindingResult newsBinding, HttpServletRequest request, Model model, Locale locale) {
     if (YadaCommonsMultipartResolver.limitExceeded(request)) {
         yadaNotify.title("News not saved", model).error().message("File too big. Size limit is " + config.getMaxFileUploadSizeBytes()/(1024*1024) + " MB").add();
@@ -927,7 +928,7 @@ public String addOrUpdateNews(News news, BindingResult newsBinding, HttpServletR
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">MultipartFile thumbnailImage = news.getThumbnailImage(); // Can be null</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">MultipartFile thumbnailImage = news.getThumbnailImage(); // Can be null</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -935,7 +936,7 @@ public String addOrUpdateNews(News news, BindingResult newsBinding, HttpServletR
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">boolean valid = true;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">boolean valid = true;
 YadaManagedFile thumbnailManagedFile = null;
 YadaIntDimension[] thumbnailDimensionsDesktopMobile = null;
 if (thumbnailImage!=null &amp;&amp; !thumbnailImage.isEmpty()) {
@@ -971,7 +972,7 @@ It is important that, if the YadaSession object has been subclassed, it has the 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Component
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Component
 @Primary
 @Scope(value="session", proxyMode=ScopedProxyMode.TARGET_CLASS)
 public class ApplicationSession extends YadaSession&lt;UserProfile&gt; {</code></pre>
@@ -982,7 +983,7 @@ public class ApplicationSession extends YadaSession&lt;UserProfile&gt; {</code><
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">boolean imageLoaded = false;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">boolean imageLoaded = false;
 String cropRedirect = yadaWebUtil.redirectString("/manager/cropPage", locale);
 String finalRedirect = yadaWebUtil.redirectString("/manager/journal", locale);
 YadaCropQueue yadaCropQueue = applicationSession.addCropQueue(cropRedirect, finalRedirect); // Clear any previous abandoned crops and set the destination
@@ -1001,7 +1002,7 @@ If the <code>YadaAttachedFile</code> is modified outside the <code>link</code> m
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">newOrExisting.setTitle(news.getTitle());
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">newOrExisting.setTitle(news.getTitle());
 newOrExisting = yadaAttachedFileDao.save(newOrExisting);
 yadaCropImage.setYadaAttachedFile(newOrExisting);</code></pre>
 </div>
@@ -1011,7 +1012,7 @@ yadaCropImage.setYadaAttachedFile(newOrExisting);</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">if (!imageLoaded) {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">if (!imageLoaded) {
     applicationSession.deleteCropQueue();
 } else {
     news = newsRepository.save(news);
@@ -1028,7 +1029,7 @@ yadaCropImage.setYadaAttachedFile(newOrExisting);</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;head&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;head&gt;
     &lt;link rel="stylesheet" th:href="@{/static/jcrop-3/jcrop.css}"&gt;
     &lt;script th:src="@{/static/jcrop-3/jcrop.js}"&gt;&lt;/script&gt;
 &lt;/head&gt;
@@ -1075,7 +1076,7 @@ This always happens in the following cases:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">yadaCropImage.setYadaAttachedFile(yadaAttachedFile);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">yadaCropImage.setYadaAttachedFile(yadaAttachedFile);</code></pre>
 </div>
 </div>
 </div>
@@ -1085,11 +1086,15 @@ This always happens in the following cases:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2025-03-11 11:49:41 +0100
+Last updated 2025-08-07 10:44:57 +0200
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

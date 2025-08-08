@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Staging</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../yadadocs.css" />
 
 </head>
@@ -189,7 +190,7 @@ The event is also used to properly convert any yada prefix on the CSS selector</
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="HTML" class="language-HTML hljs">&lt;a href="javascript:void(0);"
+<pre class="highlightjs highlight"><code class="language-HTML hljs" data-lang="HTML">&lt;a href="javascript:void(0);"
 	th:onclick="|yada.copyToClipboard('#pub-${publication.id}', event, true)|"
 	title="Copy to clipboard"&gt;
 	&lt;i class="fa fa-clone" aria-hidden="true"&gt;&lt;/i&gt;
@@ -224,7 +225,7 @@ Example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="Java" class="language-Java hljs">public void addToMyList(String data) {
+<pre class="highlightjs highlight"><code class="language-Java hljs" data-lang="Java">public void addToMyList(String data) {
 	if (this.myList == null) {
 		this.myList = new ArrayList();
 	}
@@ -245,7 +246,7 @@ public MyThing getMyThing(String somethingToSet) {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="Java" class="language-Java hljs">public void addToMyList(String data) {
+<pre class="highlightjs highlight"><code class="language-Java hljs" data-lang="Java">public void addToMyList(String data) {
 	this.myList = YadaUtil.lazyUnsafeInit(this.myList); <i class="conum" data-value="1"></i><b>(1)</b>
 	this.myList.add(data);
 }
@@ -311,7 +312,7 @@ because each thread will have its own stack and its own instance of local variab
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="Java" class="language-Java hljs">public class MyOwner {
+<pre class="highlightjs highlight"><code class="language-Java hljs" data-lang="Java">public class MyOwner {
 	public SomeAttribute someAttribute;
 }
 
@@ -382,7 +383,7 @@ used as a key in a Map, or to use some key object that holds many values.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="Java" class="language-Java hljs">YadaLookupTable&lt;Integer, String&gt; lookupTable = new YadaLookupTable&lt;&gt;();
+<pre class="highlightjs highlight"><code class="language-Java hljs" data-lang="Java">YadaLookupTable&lt;Integer, String&gt; lookupTable = new YadaLookupTable&lt;&gt;();
 lookupTable.put("value1", 1, 2, 3);
 lookupTable.put("value2", 1, 2, 4);
 ...
@@ -422,7 +423,7 @@ In order to overcome this limitation, just use "Object" so that keys can be of m
 </table>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="Java" class="language-Java hljs">YadaLookupTableThree&lt;Locale, Integer, String&gt; lookupTable = new YadaLookupTableThree&lt;&gt;();
+<pre class="highlightjs highlight"><code class="language-Java hljs" data-lang="Java">YadaLookupTableThree&lt;Locale, Integer, String&gt; lookupTable = new YadaLookupTableThree&lt;&gt;();
 lookupTable.put(Locale.EN, 1, "Hello");
 lookupTable.put(Locale.IT, 1, "Ciao");
 ...
@@ -462,7 +463,7 @@ target is <code>/yadaError</code>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="XML" class="language-XML hljs">&lt;error-page&gt;
+<pre class="highlightjs highlight"><code class="language-XML hljs" data-lang="XML">&lt;error-page&gt;
 	&lt;location&gt;/yadaError&lt;/location&gt;
 &lt;/error-page&gt;</code></pre>
 </div>
@@ -482,7 +483,7 @@ configure it as shown here:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="XML" class="language-XML hljs">&lt;paths&gt;
+<pre class="highlightjs highlight"><code class="language-XML hljs" data-lang="XML">&lt;paths&gt;
 	&lt;errorPageForward&gt;/errorPage&lt;/errorPageForward&gt;
 &lt;/paths&gt;</code></pre>
 </div>
@@ -519,7 +520,7 @@ throw a <code>RuntimeException</code> annotated with <code>@ResponseStatus</code
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="Java" class="language-Java hljs">@ResponseStatus(value=HttpStatus.NOT_FOUND)  // 404
+<pre class="highlightjs highlight"><code class="language-Java hljs" data-lang="Java">@ResponseStatus(value=HttpStatus.NOT_FOUND)  // 404
 public class YadaHttpNotFoundException extends RuntimeException {
 }</code></pre>
 </div>
@@ -562,7 +563,7 @@ changed at a later date. The skeleton application has the following line in the 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="HTML" class="language-HTML hljs">&lt;link rel="icon" type="image/x-icon" th:href="@{/static/favicons-1.0/favicon.ico}"&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-HTML hljs" data-lang="HTML">&lt;link rel="icon" type="image/x-icon" th:href="@{/static/favicons-1.0/favicon.ico}"&gt;</code></pre>
 </div>
 </div>
 </div>
@@ -595,7 +596,7 @@ Example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">&lt;script th:fragment="yexready"&gt;
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">&lt;script th:fragment="yexready"&gt;
 	window.yex = window.yex || {};
 	yex.ready = yex.ready || function (fn) {
 		if (document.readyState != 'loading'){
@@ -612,7 +613,7 @@ Example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">&lt;script&gt;
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">&lt;script&gt;
 	yex.ready(function(){
 		// do something on the fully loaded page
 	});
@@ -625,11 +626,15 @@ Example:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2025-07-29 17:43:23 +0200
+Last updated 2025-08-07 10:44:57 +0200
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

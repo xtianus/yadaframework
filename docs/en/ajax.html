@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Ajax</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../yadadocs.css" />
 
 </head>
@@ -181,7 +182,7 @@ It is automatically included in production, merged with the other yada javascrip
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;script th:if="${@config.developmentEnvironment}" yada:src="@{/yadares/js/yada.ajax.js}"&gt;&lt;/script&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;script th:if="${@config.developmentEnvironment}" yada:src="@{/yadares/js/yada.ajax.js}"&gt;&lt;/script&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -199,7 +200,7 @@ It is automatically included in production, merged with the other yada javascrip
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a href="/some/endpoint" class="yadaAjax"&gt;Click here&lt;/a&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;a href="/some/endpoint" class="yadaAjax"&gt;Click here&lt;/a&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -211,7 +212,7 @@ The href attribute should either be empty or "javascript:;" in that case.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a href="javascript:;" yada:ajax="@{/some/endpoint}"&gt;Click here&lt;/a&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;a href="javascript:;" yada:ajax="@{/some/endpoint}"&gt;Click here&lt;/a&gt;</code></pre>
 </div>
 </div>
 <div class="sect3">
@@ -222,7 +223,7 @@ the forms in the group is sent together with any url parameters:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a yada:href="@{/some/endpoint(a=1)}" yada:formGroup="myGroup"&gt;Click here&lt;/a&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;a yada:href="@{/some/endpoint(a=1)}" yada:formGroup="myGroup"&gt;Click here&lt;/a&gt;
 &lt;form action="ignored" yada:formGroup="myGroup"&gt;
 	&lt;input name="b" value="2"&gt;
 &lt;/form&gt;</code></pre>
@@ -278,7 +279,7 @@ a message or to update a table (see <a href="#_postprocessing">Postprocessing</a
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/addRow")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/addRow")
 public String addRowAjax() {
     // Change something in the model...
     // ...then return a fragment of the original page
@@ -288,7 +289,7 @@ public String addRowAjax() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a th:href="@{/addRow}" class="yadaAjax" yada:updateOnSuccess="'#table'"&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;a th:href="@{/addRow}" class="yadaAjax" yada:updateOnSuccess="'#table'"&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -302,7 +303,7 @@ public String addRowAjax() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping(path = "/people", produces = MediaType.APPLICATION_JSON_VALUE)
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping(path = "/people", produces = MediaType.APPLICATION_JSON_VALUE)
 @ResponseBody
 public Map&lt;String, Object&gt; people() {
     Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
@@ -329,7 +330,7 @@ The template must have the following form (also in a fragment):</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;th:block th:inline="text"&gt;["error",
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;th:block th:inline="text"&gt;["error",
 {
 	"description": "[[${errorDescription}]]"
 }
@@ -358,7 +359,7 @@ See <a href="notificationModal.html#_ajax_request">Notification Modal: Ajax requ
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping(path = "/catalog", produces = org.springframework.http.MediaType.APPLICATION_PDF_VALUE)
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping(path = "/catalog", produces = org.springframework.http.MediaType.APPLICATION_PDF_VALUE)
 @ResponseBody
 public String downloadCatalog(HttpServletResponse response) {
     yadaWebUtil.downloadFile(fileToDownload, false, MediaType.APPLICATION_PDF_VALUE, clientFilename, response);
@@ -740,7 +741,7 @@ But if you replace something by #id with something that doesn&#8217;t have the #
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;button yada:ajax="@{/someUrl}" yada:updateOnSuccess="$prepend(yadaParents:div)"</code></pre>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;button yada:ajax="@{/someUrl}" yada:updateOnSuccess="$prepend(yadaParents:div)"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -757,7 +758,7 @@ When there is a single selector, fragments are ignored and the whole result is u
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div id="root"&gt; <i class="conum" data-value="4"></i><b>(4)</b>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div id="root"&gt; <i class="conum" data-value="4"></i><b>(4)</b>
 	&lt;h1&gt;There you go&lt;/h1&gt;
 	&lt;!-- itemRoot will end up here --&gt;
 &lt;/div&gt;
@@ -796,7 +797,7 @@ When there is a single selector, fragments are ignored and the whole result is u
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/someUrl")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/someUrl")
 public String someUrl(Model model) {
 	...
 	model.addAttribute("itemList", new Item[] {itemButton, itemRoot});
@@ -816,7 +817,7 @@ of function names or bodies of a function.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">yada:successHandler="countItems"
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">yada:successHandler="countItems"
 yada:successHandler="countItems, showValue"
 yada:successHandler="|$('#${messageId}').addClass('obsolete');|"
 yada:successHandler="alert(responseText), alert('hello'), link.reset()"</code></pre>
@@ -827,7 +828,7 @@ yada:successHandler="alert(responseText), alert('hello'), link.reset()"</code></
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">function someHandler(responseText, responseHtml, domElement) {</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">function someHandler(responseText, responseHtml, domElement) {</code></pre>
 </div>
 </div>
 <div class="dlist">
@@ -908,7 +909,7 @@ some section or to apply some style only when returning from ajax:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;span th:if="${yadaIsAjaxResponse}"&gt;Just returned from Ajax call!&lt;/span&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;span th:if="${yadaIsAjaxResponse}"&gt;Just returned from Ajax call!&lt;/span&gt;
 
 &lt;style&gt;
 	.yadaIsAjaxResponse { color: red; }
@@ -1019,7 +1020,7 @@ that can contain a pipe-separated list of <a href="https://developer.mozilla.org
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;input
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;input
 	yada:ajax="@{/user/setAddress(userId=${user.id})}" <i class="conum" data-value="1"></i><b>(1)</b>
 	yada:ajaxTriggerKeys="Enter|ArrowRight| |," <i class="conum" data-value="2"></i><b>(2)</b>
 	yada:updateOnSuccess="yadaParents:.addresses"
@@ -1063,7 +1064,7 @@ Changing a select or a checkbox sumbits the enclosing form: this should be made 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;input yada:ajax="@{/product/onOff(productId=${product.id})}"
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;input yada:ajax="@{/product/onOff(productId=${product.id})}"
     name="enabled" th:checked="${product.enabled}" type="checkbox" /&gt;</code></pre>
 </div>
 </div>
@@ -1177,7 +1178,7 @@ to both clicking and dropping, which probably is not desirable; plain links (non
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;div class="yadaNoLoader" <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div class="yadaNoLoader" <i class="conum" data-value="1"></i><b>(1)</b>
 	yada:updateOnSuccess="yadaParents:.fileDetails" <i class="conum" data-value="1"></i><b>(1)</b>
 	yada:successHandler="yada.showAjaxFeedback" <i class="conum" data-value="1"></i><b>(1)</b>
 	yada:dropUpload="@{/uploadGalleryImage(productId=${product.id})}" <i class="conum" data-value="2"></i><b>(2)</b>
@@ -1225,7 +1226,7 @@ Uploaded files can be handled as when <a href="forms/uploads.html#_java">using f
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/uploadProductFiles")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/uploadProductFiles")
 public String uploadProductFiles(Long productId, MultipartFile[] multipartFile, Model model, Locale locale) {
 	Product product = ...
 	for (int idx = 0; idx &lt; multipartFile.length; idx++) {
@@ -1276,7 +1277,7 @@ as "not liked". As soon as it gets into view, an ajax call retrieves the real st
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;span yada:triggerInViewport <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;span yada:triggerInViewport <i class="conum" data-value="1"></i><b>(1)</b>
 	th:if="${@yadaSecurityUtil.loggedIn}"
 	class="yadaNoLoader"
 	yada:ajax="@{/getBookLikeButtonFragment(bookId=${book.id})}" <i class="conum" data-value="2"></i><b>(2)</b>
@@ -1314,7 +1315,7 @@ as "not liked". As soon as it gets into view, an ajax call retrieves the real st
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/getBookLikeButtonFragment")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/getBookLikeButtonFragment")
 public String getBookLikeButtonFragment(Long bookId, Model model, Locale locale) {
 	boolean isLikedByUser = false;
 	Long currentUserProfileId = mySession.getCurrentUserProfileId();
@@ -1335,7 +1336,7 @@ is a bit more complicated:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a class="like" ...
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;a class="like" ...
 	th:classappend="|${isLikedByUser==true?'liked':''} ${yadaIsAjaxResponse!=null?'':'yadaAjaxDisabled'}|" <i class="conum" data-value="1"></i><b>(1)</b>
 	...</code></pre>
 </div>
@@ -1355,7 +1356,7 @@ button fragment again:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="html" class="language-html hljs">&lt;a class="like" ...
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;a class="like" ...
 	yada:ajax="@{/user/toggleBookLike(bookId=${book.id},currentLike=${isLikedByUser})}"
 	yada:updateOnSuccess=""&gt;
 &lt;/a&gt;</code></pre>
@@ -1371,7 +1372,7 @@ that is added to the original url and can be checked in the Controller, called <
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/toggleBookLike")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/toggleBookLike")
 public String toggleBookLike(Long bookId, Boolean currentLike, Boolean yadaAjaxJustLoggedIn, Model model, Locale locale) {
 	Long currentUserProfileId = mySession.getCurrentUserProfileId();
 	if (currentUserProfileId!=null) {
@@ -1449,7 +1450,7 @@ using HTML attributes or calling a js method in the success handler.</p>
 </table>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.showAjaxFeedback();</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">yada.showAjaxFeedback();</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1475,7 +1476,7 @@ used in place of the default one.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.ajax(url, data, successHandler, method, timeout, loaderOption, asJson, responseType)</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">yada.ajax(url, data, successHandler, method, timeout, loaderOption, asJson, responseType)</code></pre>
 </div>
 </div>
 <div class="dlist">
@@ -1525,7 +1526,7 @@ If the code is in a js file, the url will have to be passed to the script using 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">window.myUrl = [[@{/path}]]</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">window.myUrl = [[@{/path}]]</code></pre>
 </div>
 </div>
 </div>
@@ -1539,7 +1540,7 @@ If the code is in a js file, the url will have to be passed to the script using 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">var data = {};
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">var data = {};
 data.name = "John";
 data.surname = "Doe";</code></pre>
 </div>
@@ -1549,7 +1550,7 @@ data.surname = "Doe";</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/addUser")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/addUser")
 public String addUser(String name, String surname, Model model) {</code></pre>
 </div>
 </div>
@@ -1558,7 +1559,7 @@ public String addUser(String name, String surname, Model model) {</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">var data = {name: 'john', surname: 'Doe'};
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">var data = {name: 'john', surname: 'Doe'};
 yada.ajax(url, data, null, "POST", null, false, true);</code></pre>
 </div>
 </div>
@@ -1567,7 +1568,7 @@ yada.ajax(url, data, null, "POST", null, false, true);</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/addUser")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/addUser")
 public String addUser(@RequestBody NameSurname data, Model model) {</code></pre>
 </div>
 </div>
@@ -1579,7 +1580,7 @@ public String addUser(@RequestBody NameSurname data, Model model) {</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">var data = new FormData();
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">var data = new FormData();
 data.append("someBinaryArray", blob);
 data.append("someText", text);
 yada.ajax(url, data, null, "POST");</code></pre>
@@ -1591,7 +1592,7 @@ The controller should have a <code>MultipartFile</code> argument for each binary
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@RequestMapping("/addUser")
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping("/addUser")
 public String addUser(MultipartFile someBinaryArray, String someText, Model model) {</code></pre>
 </div>
 </div>
@@ -1606,7 +1607,7 @@ public String addUser(MultipartFile someBinaryArray, String someText, Model mode
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">successHandler(responseText, $responseHtml, domElement)</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">successHandler(responseText, $responseHtml, domElement)</code></pre>
 </div>
 </div>
 <div class="dlist">
@@ -1626,7 +1627,7 @@ public String addUser(MultipartFile someBinaryArray, String someText, Model mode
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">successHandler.executeAnyway=true</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">successHandler.executeAnyway=true</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1634,7 +1635,7 @@ public String addUser(MultipartFile someBinaryArray, String someText, Model mode
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.ajax(urlShowBom, formData, insertBom.bind(this), "POST");</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">yada.ajax(urlShowBom, formData, insertBom.bind(this), "POST");</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -1667,7 +1668,7 @@ See <a href="#_returning_from_the_backend">Returning from the backend</a> for an
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.ajax("/catalog", null, null, null, null, null, null, "blob");</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">yada.ajax("/catalog", null, null, null, null, null, null, "blob");</code></pre>
 </div>
 </div>
 </div>
@@ -1733,7 +1734,7 @@ keystroke done within the timeout of 200ms will cancel the previous call. Exampl
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="javascript" class="language-javascript hljs">yada.dequeueFunctionCall(document, someFunction);</code></pre>
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">yada.dequeueFunctionCall(document, someFunction);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1773,11 +1774,15 @@ when they return from ajax. Example: <code>&lt;div th:classappend="${yadaIsAjaxR
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2025-07-29 17:03:21 +0200
+Last updated 2025-08-07 10:44:57 +0200
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

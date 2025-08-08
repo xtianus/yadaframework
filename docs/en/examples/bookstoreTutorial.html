@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Bookstore Tutorial</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../../highlight/styles/github.min.css">
 <link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
 </head>
 <body class="article toc2 toc-left">
@@ -242,7 +243,7 @@ as explained in the <a href="../newEclipseProject.html#Database Layer">Database 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">import javax.persistence.Entity;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import javax.persistence.Entity;
 import javax.persistence.Table;
 ...
 
@@ -290,7 +291,7 @@ if its database value has been modified in the meanwhile</td>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="sql" class="language-sql hljs">create table Book (id bigint not null auto_increment, calendarYear integer, description varchar(255), firstname varchar(255), inventory integer, onsale bit, price double precision, surname varchar(255), title varchar(255), version bigint not null, primary key (id)) engine=InnoDB;
+<pre class="highlightjs highlight"><code class="language-sql hljs" data-lang="sql">create table Book (id bigint not null auto_increment, calendarYear integer, description varchar(255), firstname varchar(255), inventory integer, onsale bit, price double precision, surname varchar(255), title varchar(255), version bigint not null, primary key (id)) engine=InnoDB;
 alter table Book add constraint UK9u3gktk5oqaaxduqbu8hql9yy unique (surname, firstname, title, calendarYear);</code></pre>
 </div>
 </div>
@@ -305,7 +306,7 @@ or equivalent.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Entity
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Entity
 @Table(name = "WEB_BOOKSTORE_BOOKS") <i class="conum" data-value="1"></i><b>(1)</b>
 @NamedQuery( <i class="conum" data-value="2"></i><b>(2)</b>
         name = "findBooks",
@@ -360,7 +361,7 @@ They must be annotated with @Repository and some other transaction-definition el
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">import org.springframework.stereotype.Repository;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -420,7 +421,7 @@ Java Bean (EJB) but it&#8217;s not much different from our version:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Stateful <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Stateful <i class="conum" data-value="1"></i><b>(1)</b>
 public class BookRequestBean {
 
     @PersistenceContext
@@ -489,7 +490,7 @@ the same in every environment, just add it to the production configuration and i
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;setup&gt;
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;setup&gt;
 	&lt;books&gt;
 		&lt;book&gt;
 			&lt;surname&gt;Duke&lt;/surname&gt;
@@ -521,7 +522,7 @@ the conversion and return a Book list with the values from the configuration:</p
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public List&lt;Book&gt; getInitialBooks() {
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public List&lt;Book&gt; getInitialBooks() {
 	List&lt;Book&gt; result = new ArrayList&lt;&gt;();
 	List&lt;ImmutableHierarchicalConfiguration&gt; booksSetup = configuration.immutableConfigurationsAt("config/setup/books/book");
 	for (ImmutableHierarchicalConfiguration bookSetup : booksSetup) {
@@ -545,7 +546,7 @@ the conversion and return a Book list with the values from the configuration:</p
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs"> @Override
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java"> @Override
  protected void setupApplication() {
 	 List&lt;Book&gt; configuredBooks = config.getInitialBooks();
 	 bookDao.createWhenMissing(configuredBooks);
@@ -561,7 +562,7 @@ in the database.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Transactional(readOnly = false)
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Transactional(readOnly = false)
 public void createWhenMissing(List&lt;Book&gt; configuredBooks) {
 	String sql = "insert ignore into Book (surname, firstname, title, price, onsale, calendarYear, description, inventory) "
 		+ "values (:surname, :firstname, :title, :price, :onsale, :calendarYear, :description, :inventory)"; <i class="conum" data-value="1"></i><b>(1)</b>
@@ -597,7 +598,7 @@ exception when the first book is already stored.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">@Singleton
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Singleton
 @Startup
 public class ConfigBean {
     @EJB
@@ -668,7 +669,7 @@ In the latter case, the command from the command line is the following:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">java net.yadaframework.core.YadaTomcatServer ybsdev src/main/webapp</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">java net.yadaframework.core.YadaTomcatServer ybsdev src/main/webapp</code></pre>
 </div>
 </div>
 </div>
@@ -677,11 +678,15 @@ In the latter case, the command from the command line is the following:</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.7<br>
-Last updated 2024-10-12 19:40:44 +0200
+Last updated 2023-12-07 11:06:50 +0100
 </div>
 </div>
-<link rel="stylesheet" href="../../highlight/styles/github.min.css">
 <script src="../../highlight/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
 </body>
 </html>

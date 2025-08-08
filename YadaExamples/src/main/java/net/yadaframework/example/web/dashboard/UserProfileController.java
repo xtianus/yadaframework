@@ -1,5 +1,7 @@
 package net.yadaframework.example.web.dashboard;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -85,41 +87,68 @@ public class UserProfileController {
 	}
 	
 	@RequestMapping(value="/userwrite/ajaxAddOrUpdateUserProfile")
-	public String ajaxAddOrUpdateUserProfileConfirmed(UserProfile userProfile, BindingResult userProfileBinding, Model model) {
-		boolean inviteEmail = userProfile.isInviteEmail(); // Save it before is overwritten
+	public String ajaxAddOrUpdateUserProfileConfirmed(UserProfile editedUserProfile, BindingResult userProfileBinding, Model model) {
+		boolean inviteEmail = editedUserProfile.isInviteEmail(); // Save it before is overwritten
+		// The "user" role is forced
+		editedUserProfile.getUserCredentials().ensureRole(config.getRoleId("user"));
+		// Check permission to edit
+		UserProfile currentUserProfile = userSession.getCurrentUserProfile();
+		UserProfile uneditedUserProfile = userProfileDao.find(editedUserProfile.getId()); // The user before changing its roles, or null
+		List<Integer> oldRoles = uneditedUserProfile!=null?uneditedUserProfile.getUserCredentials().getRoles():null;
+		List<Integer> newRoles = editedUserProfile.getUserCredentials().getRoles();
+		boolean userCanEditUser = yadaSecurityUtil.userCanEditUser(currentUserProfile, oldRoles, newRoles);
+		if (!userCanEditUser) {
+			if (editedUserProfile.getId()==null) {
+				return yadaNotify.title("Error Adding User", model).error().message("You don't have permission to add users with the given roles").add();
+			}
+			return yadaNotify.title("Error Editing User", model).error().message("You don't have permission to edit user {}", editedUserProfile).add();
+		}
+		String editedUsername = editedUserProfile.getUserCredentials().getUsername().trim();
+		// Validation
 		ValidationUtils.rejectIfEmptyOrWhitespace(userProfileBinding, "userCredentials.username", "validation.value.empty");
 		ValidationUtils.rejectIfEmpty(userProfileBinding, "userCredentials.roles", "validation.value.empty");
 
-		// Controllo i casi in cui l'username esista già:
-		// - ne esiste già uno con un id diverso da quello arrivato via web
-		YadaUserCredentials existing = yadaUserCredentialsDao.findFirstByUsername(userProfile.getEmail());
-		if (existing!=null && !existing.getId().equals(userProfile.getUserCredentials().getId())) {
+		// Check if username already exists with a different id
+		YadaUserCredentials existing = yadaUserCredentialsDao.findFirstByUsername(editedUsername);
+		if (existing!=null && !existing.getId().equals(editedUserProfile.getUserCredentials().getId())) {
 			userProfileBinding.rejectValue("userCredentials.username", "validation.value.existing");
 		}
-		if (!userProfileBinding.hasErrors()) {
-			YadaUserCredentials yadaUserCredentials = userProfile.getUserCredentials();
-			String username = yadaUserCredentials.getUsername().trim();
-			String newPassword = StringUtils.trimToNull(yadaUserCredentials.getNewPassword());
-			yadaUserCredentials.setUsername(username); // Trimmed
-			if (newPassword!=null) {
-				yadaUserCredentials.changePassword(newPassword, passwordEncoder);
-			}
-			userProfile = userProfileDao.save(userProfile);
-			
-			// Send invitation email
-			if (inviteEmail) {
-				HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
-				Locale locale = userProfile.getLocale();
-				boolean invited = yexEmailService.sendInvitation(userProfile, newPassword, request, locale);
-				if (!invited) {
-					yadaNotify.titleKey(model, "user.invitation.error.title").error().messageKey("user.invitation.error.message").add();
-				} else {
-					yadaNotify.titleKey(model, "user.invitation.ok.title").ok().messageKey("user.invitation.ok.message").add();
-				}
-			}
-			return yadaNotify.titleKey(model, "user.addedit.ok.title").ok().messageKey("user.addedit.ok.message", userProfile.getEmail()).add();
+		if (userProfileBinding.hasErrors()) {
+			return ajaxEditUserProfileForm(editedUserProfile);
 		}
-		return ajaxEditUserProfileForm(userProfile);
+		// Credentials
+		YadaUserCredentials editedUserCredentials = editedUserProfile.getUserCredentials();
+		editedUserCredentials.setUsername(editedUsername); // Trimmed
+		String newPassword = StringUtils.trimToNull(editedUserCredentials.getNewPassword());
+		if (newPassword!=null) {
+			yadaSecurityUtil.changePassword(editedUserProfile, newPassword);
+		}
+		
+		// When failedAttempts have changed, set the timestamp too
+		int editedFailedAttempts = editedUserProfile.getUserCredentials().getFailedAttempts();
+		if (uneditedUserProfile!=null && uneditedUserProfile.getUserCredentials().getFailedAttempts() != editedFailedAttempts) {
+			Date timestamp = null;
+			if (editedFailedAttempts>0) {
+				timestamp = new Date();
+			}
+			editedUserProfile.getUserCredentials().setLastFailedAttempt(timestamp);
+		}
+		
+		// All other values have already been set on the editedUserProfile
+		editedUserProfile = userProfileDao.save(editedUserProfile);
+		
+		// Send invitation email
+		if (inviteEmail) {
+			HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+			Locale locale = currentUserProfile.getLocale(); // Eventually should be a choice in the add form
+			boolean invited = yexEmailService.sendInvitation(editedUserProfile, newPassword, request, locale);
+			if (!invited) {
+				yadaNotify.titleKey(model, "user.invitation.error.title").error().messageKey("user.invitation.error.message").add();
+			} else {
+				yadaNotify.titleKey(model, "user.invitation.ok.title").ok().messageKey("user.invitation.ok.message").add();
+			}
+		}
+		return yadaNotify.titleKey(model, "user.addedit.ok.title").ok().messageKey("user.addedit.ok.message", editedUserProfile.getEmail()).add();
 	}
 
 	/**
@@ -171,6 +200,21 @@ public class UserProfileController {
 	// yadaDatatablesRequest.addExtraJsonAttribute("email");
 	// yadaDatatablesRequest.addExtraJsonAttribute("loginDate");
 	
+	// Role filter
+	Map<String,String> extraParam = yadaDatatablesRequest.getExtraParam();
+	if (extraParam!=null) {
+		String roleKeys = extraParam.get("rolekey");
+		if (roleKeys!=null) {
+			String[] roleKeyArray = roleKeys.split(",");
+			for (int i = 0; i < roleKeyArray.length; i++) {
+			    String roleKey = roleKeyArray[i];
+			    int roleId = config.getRoleId(roleKey);
+				yadaSql.where("where :role"+i+" member of userCredentials.roles").and();
+				yadaSql.setParameter("role"+i, roleId);
+			}
+		}
+	}
+	
 	Map<String, Object> result = yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale);
 		return result;
 	}
@@ -193,10 +237,15 @@ public class UserProfileController {
 	public String impersonate(@PathVariable long id, @RequestParam(name = "currentLocation", required = false) String currentLocation, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response, Locale locale) {
 		UserProfile theUser = userProfileDao.find(id);
 		if (theUser==null) {
-			yadaNotify.titleKey(redirectAttributes, "user.impersonate.error.title").error().messageKey("user.impersonate.error.message").add();
+			yadaNotify.titleKey(redirectAttributes, "user.impersonate.error.title").error().messageKey("user.impersonate.missing.message").add();
 		} else {
-			userSession.impersonate(theUser.getId(), currentLocation, request, response);
-			yadaNotify.titleKey(redirectAttributes, "user.impersonate.ok.title").ok().messageKey("user.impersonate.ok.message", theUser.getEmail()).add();
+			// Check role permissions
+			if (!yadaSecurityUtil.userCanImpersonate(userSession.getCurrentUserProfile(), theUser)) {
+				yadaNotify.titleKey(redirectAttributes, "user.impersonate.error.title").error().messageKey("user.impersonate.noauth.message").add();
+			} else {
+				userSession.impersonate(theUser.getId(), currentLocation, request, response);
+				yadaNotify.titleKey(redirectAttributes, "user.impersonate.ok.title").ok().messageKey("user.impersonate.ok.message", theUser.getEmail()).add();
+			}
 		}
 		// model.addAttribute(YadaViews.AJAX_REDIRECT_URL, "/user/dashboard");
 		return yadaWebUtil.redirectString("/", locale);
@@ -221,7 +270,8 @@ public class UserProfileController {
 		YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", locale, table -> {
 			table
 				.dtEntityClass(UserProfile.class)
-				.dtAjaxUrl("/dashboard/user/userProfileTablePage")
+				// .dtAjaxUrl("/dashboard/user/userProfileTablePage")
+				.dtAjaxUrl(this::userProfileTablePage)
 				.dtLanguageObj("/static/datatables-2.1.8/i18n/").dsAddLanguage("pt", "pt-PT.json").back()
 				.dtStructureObj()
 					.dtCssClasses("yadaNoLoader")
@@ -234,9 +284,9 @@ public class UserProfileController {
 					.dtColumnCheckbox("select.allnone") 
 					.dtColumnCommands("column.commands", 10)
 					.dtButtonObj("Disabled").dtUrl("@{/dashboard/user/dummy}").dtIcon("<i class='bi bi-0-circle'></i>").dtShowCommandIcon("disableCommandIcon").back()
-					.dtButtonObj("button.add").dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}").dtGlobal().dtIcon("<i class='bi bi-plus-square'></i>").dtToolbarCssClass("btn-success").dtRole("ADMIN").back()
+					.dtButtonObj("button.add").dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}").dtGlobal().dtIcon("<i class='bi bi-plus-square'></i>").dtToolbarCssClass("btn-success").back()
 					.dtButtonObj("button.impersonate").dtUrlProvider("impersonate").dtNoAjax().dtIcon("<i class='bi bi-mortarboard'></i>").dtRole("ADMIN").dtRole("supervisor").back()
-					.dtButtonObj("button.edit").dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}").dtElementLoader("#userTable").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId").dtRole("ADMIN").back()
+					.dtButtonObj("button.edit").dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}").dtElementLoader("#userTable").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId").back()
 					.dtButtonObj("button.delete").dtUrl("@{/dashboard/userwrite/ajaxDeleteUserProfile}").dtIcon("<i class='bi bi-trash'></i>")
 						.dtRole("ADMIN").dtMultiRow().dtToolbarCssClass("btn-danger")
 						.dtConfirmDialogObj()
