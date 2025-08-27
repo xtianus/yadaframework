@@ -337,7 +337,7 @@ public abstract class YadaConfiguration {
 	/**
 	 * Returns the configured path for the notification modal.
 	 * The configuration path is config/paths/notificationModalView
-	 * @return
+	 * @return the configured path or the default one depending on the bootstrap version in use
 	 */
 	public String getNotifyModalView() {
 		if (defaultNotifyModalView==null) {

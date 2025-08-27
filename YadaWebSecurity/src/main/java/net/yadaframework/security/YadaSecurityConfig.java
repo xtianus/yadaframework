@@ -1,6 +1,7 @@
 package net.yadaframework.security;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -22,7 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
-import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -186,11 +186,15 @@ public class YadaSecurityConfig {
 	
 	@Bean
 	// This is used by YadaSecurityUtil.checkUrlAccess()
-	public AuthorizationManager<HttpServletRequest> authorizationManager(SecurityFilterChain filterChain) {
-		AuthorizationFilter filter = (AuthorizationFilter) filterChain.getFilters().stream()
-			.filter(f -> f instanceof AuthorizationFilter).findFirst()
-			.orElseThrow(() -> new IllegalStateException("No AuthorizationFilter found"));
-
-		return filter.getAuthorizationManager();
+	public List<AuthorizationManager<HttpServletRequest>> authorizationManagers(List<SecurityFilterChain> filterChains) {
+	    return filterChains.stream()
+	        .map(filterChain -> {
+	            AuthorizationFilter filter = (AuthorizationFilter) filterChain.getFilters().stream()
+	                .filter(f -> f instanceof AuthorizationFilter).findFirst()
+	                .orElse(null);
+	            return filter != null ? filter.getAuthorizationManager() : null;
+	        })
+	        .filter(manager -> manager != null)
+	        .collect(java.util.stream.Collectors.toList());
 	}
 }

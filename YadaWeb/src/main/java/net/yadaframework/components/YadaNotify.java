@@ -596,9 +596,12 @@ public class YadaNotify {
 	}
 
 	/**
-	 * Return the view name for the notification modal. Can be used when adding many messages and the last
+	 * Return the view name for the yada notification modal. Can be used when adding many messages and the last
 	 * message is not at the method end. Also used in html to get the correct modal.
-	 * @return
+	 * Note: this always returns the yada notification modal. Use {@code yadaConfiguration.getNotifyModalView()} if
+	 * your application has a custom notification modal configured in conf.webapp.prod.xml
+	 * @return the view name for the notification modal
+	 * @see YadaConfiguration#getNotifyModalView()
 	 */
 	public String getViewName() {
 		return yadaConfiguration.getForB3B4B5(YadaViews.AJAX_NOTIFY_B3, YadaViews.AJAX_NOTIFY_B4, YadaViews.AJAX_NOTIFY_B5);

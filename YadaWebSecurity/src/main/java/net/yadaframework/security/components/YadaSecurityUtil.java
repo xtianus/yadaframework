@@ -63,7 +63,7 @@ public class YadaSecurityUtil {
 	@Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaConfiguration config;
 	@Autowired private PasswordEncoder passwordEncoder; // Null when encoding not configured
-	@Autowired private AuthorizationManager<HttpServletRequest> authorizationManager;
+	@Autowired private List<AuthorizationManager<HttpServletRequest>> authorizationManagers;
 
 	 /**
      * Checks if the current user has access to the specified path
@@ -89,18 +89,27 @@ public class YadaSecurityUtil {
                     return normalizedPath;
                 }
             };
-            AuthorizationDecision decision = authorizationManager.check(() -> authentication, modifiedRequest);
-            if (decision == null) {
-                log.debug("No security constraints found for path: {}", normalizedPath);
-                return true; // No security constraints = permitted
+
+            // Try all authorization managers - grant access if any allows it
+            boolean unprotected = true;
+            for (AuthorizationManager<HttpServletRequest> manager : authorizationManagers) {
+                AuthorizationDecision decision = manager.check(() -> authentication, modifiedRequest);
+                if (decision != null) {
+                		unprotected = false;
+					if (decision.isGranted()) {
+						log.debug("Access granted to path: {} for user: {}", normalizedPath, authentication.getName());
+						return true;
+					}
+                }
             }
-            boolean granted = decision.isGranted();
-            if (granted) {
-                log.debug("Access granted to path: {} for user: {}", normalizedPath, authentication.getName());
+
+            if (unprotected) {
+            		log.debug("No security constraints found for path: {}", normalizedPath);
+            		return true; // No security constraints = permitted
             } else {
                 log.debug("Access denied to path: {} for user: {}", normalizedPath, authentication.getName());
             }
-            return granted;
+            return false;
         } catch (Exception e) {
             log.error("Error checking URL access for path: {}", normalizedPath, e);
             return false;
