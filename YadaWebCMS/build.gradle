@@ -5,18 +5,20 @@ plugins {
 	id 'eclipse-wtp'
 }
 
+apply from: '../YadaWeb/loadSharedProperties.gradle'
+
 group = 'net.yadaframework'
-version = '0.7.8'
+version = yada_version
 
 if (!project.hasProperty('repoPath')) {
 	ext.repoPath="repoPathMissing"
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
+    targetCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
 	// toolchain {
-	// 	languageVersion = JavaLanguageVersion.of(8)
+	// 	languageVersion = JavaLanguageVersion.of(java_version)
 	// }
 	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
 	withSourcesJar()
@@ -60,12 +62,13 @@ dependencies {
 		// 'org.springframework:spring-webmvc:5.3.23',
 		// 'org.springframework:spring-orm:5.3.23',
 		// 'org.hibernate:hibernate-entitymanager:5.5.0.Final',
-        'com.fasterxml.jackson.core:jackson-annotations:2.18.2',
-        'com.fasterxml.jackson.core:jackson-core:2.18.2'
+        'com.fasterxml.jackson.core:jackson-annotations:2.19.2',
+        'com.fasterxml.jackson.core:jackson-core:2.19.2'
 		// 'com.fasterxml.jackson.core:jackson-databind:2.13.4',
 		// 'org.apache.commons:commons-io:1.3.2'
 		
-	testImplementation 'junit:junit:4.13.2'
+	testImplementation platform('org.junit:junit-bom:5.13.4')
+	testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 jar {

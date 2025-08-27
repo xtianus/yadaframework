@@ -15,8 +15,10 @@ plugins {
 	id("com.github.node-gradle.node") version "3.5.1"
 }
 
+apply from: '../YadaWeb/loadSharedProperties.gradle'
+
 group = 'net.yadaframework'
-version = '0.7.8'
+version = yada_version
 
 ext.acronym = 'yex'
 apply plugin: 'war'
@@ -52,17 +54,17 @@ sassCompile {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
+    targetCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(java_version)
 	}
 }
 
 eclipse {
     jdt {
-	    sourceCompatibility = JavaVersion.VERSION_21
-	    targetCompatibility = JavaVersion.VERSION_21
+	    sourceCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
+	    targetCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
         // https://stackoverflow.com/a/35302104/587641
         file {
                 File dir = file('.settings')
@@ -116,7 +118,7 @@ dependencies {
 	implementation	 project(':YadaWebCMS')	
 	implementation	 project(':YadaWebCommerce')
 
-	implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.14'
+	implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.10'
 
 }
 
@@ -134,7 +136,7 @@ configurations {
     generateSchema
 }
 dependencies {
-    generateSchema 'org.apache.logging.log4j:log4j-core:2.21.1'
+    generateSchema 'org.apache.logging.log4j:log4j-core:2.25.1'
 }
 
 task dbSchema(dependsOn: [classes], type: JavaExec) {

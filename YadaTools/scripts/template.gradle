@@ -39,17 +39,17 @@ sassCompile {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 
 eclipse {
     jdt {
-	    sourceCompatibility = JavaVersion.VERSION_17
-	    targetCompatibility = JavaVersion.VERSION_17
+	    sourceCompatibility = JavaVersion.VERSION_21
+	    targetCompatibility = JavaVersion.VERSION_21
         // https://stackoverflow.com/a/35302104/587641
         file {
                 File dir = file('.settings')
@@ -84,7 +84,7 @@ compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
 tasks.withType(JavaCompile) {
-	options.encoding = 'UTF8'
+	options.encoding = 'UTF-8'
 }
 
 tasks.withType(JavaCompile).configureEach {

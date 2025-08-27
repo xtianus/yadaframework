@@ -5,8 +5,10 @@ plugins {
 	id 'eclipse-wtp'
 }
 
+apply from: '../YadaWeb/loadSharedProperties.gradle'
+
 group = 'net.yadaframework'
-version = '0.7.8'
+version = yada_version
 
 apply plugin: 'eclipse-wtp'
 
@@ -16,10 +18,10 @@ if (!project.hasProperty('repoPath')) {
 
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
+    targetCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
 	// toolchain {
-	// 	languageVersion = JavaLanguageVersion.of(8)
+	// 	languageVersion = JavaLanguageVersion.of(java_version)
 	// }
 	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
 	withSourcesJar()

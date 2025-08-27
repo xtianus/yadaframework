@@ -9,8 +9,10 @@ plugins {
     id 'org.asciidoctor.jvm.pdf' version '4.0.4'
 }
 
+apply from: '../YadaWeb/loadSharedProperties.gradle'
+
 group = 'net.yadaframework'
-version = '0.7.7'
+version = yada_version
 
 apply plugin: 'java-library'
 apply plugin: 'eclipse-wtp'
@@ -37,7 +39,7 @@ eclipse {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(java_version)
     }
 }
 

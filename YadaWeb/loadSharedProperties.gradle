@@ -1,0 +1,12 @@
+def loadSharedProperties() {
+    def sharedProps = new Properties()
+    file('../YadaWeb/shared.gradle.properties').withInputStream { 
+        sharedProps.load(it) 
+    }
+    sharedProps.each { key, value ->
+        project.ext[key] = value
+    }
+}
+
+// Call it immediately when the script is applied
+loadSharedProperties()
