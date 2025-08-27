@@ -15,6 +15,9 @@ plugins {
 	id("com.github.node-gradle.node") version "3.5.1"
 }
 
+group = 'net.yadaframework'
+version = '0.7.8'
+
 ext.acronym = 'yex'
 apply plugin: 'war'
 apply plugin: 'eclipse-wtp'
@@ -49,17 +52,17 @@ sassCompile {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 
 eclipse {
     jdt {
-	    sourceCompatibility = JavaVersion.VERSION_17
-	    targetCompatibility = JavaVersion.VERSION_17
+	    sourceCompatibility = JavaVersion.VERSION_21
+	    targetCompatibility = JavaVersion.VERSION_21
         // https://stackoverflow.com/a/35302104/587641
         file {
                 File dir = file('.settings')

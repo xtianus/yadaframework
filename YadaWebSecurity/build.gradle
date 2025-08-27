@@ -6,15 +6,15 @@ plugins {
 }
 
 group = 'net.yadaframework'
-version = '0.7.7'
+version = '0.7.8'
 
 if (!project.hasProperty('repoPath')) {
 	ext.repoPath="repoPathMissing"
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 	// toolchain {
 	// 	languageVersion = JavaLanguageVersion.of(8)
 	// }
@@ -61,9 +61,6 @@ dependencies {
 
 	api 'com.google.api-client:google-api-client-jackson2:2.7.1',
 			'com.google.api-client:google-api-client-gson:2.7.1',
-			// For Spring: 	using a specific version instead of the + wildcard to prevent side effects 
-			// 				in the application when new versions are made available 
-			// 'org.springframework:spring-webmvc:6.1.5',
 			'org.springframework.security:spring-security-web:6.2.2',
 			'org.springframework.security:spring-security-config:6.2.2'
 
