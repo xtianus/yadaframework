@@ -86,7 +86,7 @@ public class YadaUserMessageDao {
     	String sql = "select case when exists ( "
 			+ "select 1 from YadaUserMessage s where s.recipient_id=:userProfileId and s.readByRecipient=false limit 1 "
 			+ ") then 1 else 0 end";
-    	Query nativeQuery = em.createNativeQuery(sql);
+    	Query nativeQuery = em.createNativeQuery(sql, Long.class);
     	nativeQuery.setParameter("userProfileId", userProfile.getId());
 		Long singleResult = (Long) nativeQuery.getSingleResult();
     	return singleResult.intValue()==1;

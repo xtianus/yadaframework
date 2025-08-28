@@ -29,10 +29,10 @@ public class YadaTransactionDao {
      * @return
      */
     public YadaMoney sumAmount(@Nullable YadaUserProfile accountOwner) {
-    	Long sum = (Long) YadaSql.instance().selectFrom("select SUM(amount) from YadaTransaction")
+    	Long sum = YadaSql.instance().selectFrom("select SUM(amount) from YadaTransaction")
     		.where(accountOwner!=null, "where accountOwner=:accountOwner")
     		.setParameter("accountOwner", accountOwner)
-    		.query(em).getSingleResult();
+    		.query(em, Long.class).getSingleResult();
     	YadaMoney result = YadaMoney.fromDatabaseColumn(sum);
     	return result;
     	}
