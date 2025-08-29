@@ -54,7 +54,7 @@ class YadaInitTask extends YadaProject {
 		} else {
 			project.file("Launches").mkdir();
 		}
-		File webAppRootFolder = project.webAppDir; // "Doesn't compile" but works - injected by war plugin
+		File webAppRootFolder = project.war.webAppDirectory; // Updated to use modern war plugin API
 		File resFolder = new File(webAppRootFolder, resDirName);
 		File webinfFolder = new File(webAppRootFolder, "WEB-INF");
 		File messagesFolder = new File(webinfFolder, messagesDirName);

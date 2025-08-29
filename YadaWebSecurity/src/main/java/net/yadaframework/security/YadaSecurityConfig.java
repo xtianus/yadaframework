@@ -13,7 +13,7 @@ import org.springframework.core.annotation.Order;
 // import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authorization.AuthorizationManager;
-import org.springframework.security.config.annotation.ObjectPostProcessor;
+
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -137,19 +137,23 @@ public class YadaSecurityConfig {
         }
     }
     
+	/**
+	 * Creates a DaoAuthenticationProvider bean with custom configuration.
+	 * This replaces the deprecated ObjectPostProcessor approach.
+	 */
+	@Bean
+	public DaoAuthenticationProvider daoAuthenticationProvider() {
+		DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+		provider.setHideUserNotFoundExceptions(false); // Permette alla UsernameNotFoundException di arrivare al FailureHandler
+		if (yadaConfiguration.encodePassword()) {
+			provider.setPasswordEncoder(passwordEncoder);
+		}
+		return provider;
+	}
+
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-		// Uso un PostProcessor per chiamare setHideUserNotFoundExceptions
-		auth.userDetailsService(userDetailsService).addObjectPostProcessor(new ObjectPostProcessor<DaoAuthenticationProvider>() {
-			@Override
-			public DaoAuthenticationProvider postProcess(DaoAuthenticationProvider processor) {
-				processor.setHideUserNotFoundExceptions(false); // Permette alla UsernameNotFoundException di arrivare al FailureHandler
-				if (yadaConfiguration.encodePassword()) {
-					processor.setPasswordEncoder(passwordEncoder);
-				}
-				return processor;
-			}
-		});
+		auth.authenticationProvider(daoAuthenticationProvider());
 	}
 
 	// Non più usato perchè CSRF disabilitato per tutti, visto che causa troppi 403 al timeout di session

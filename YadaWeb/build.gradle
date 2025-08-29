@@ -141,7 +141,7 @@ dependencies {
 
 task listJars {
 	doLast {
-		configurations.compile.each { File file -> println file.name }
+		configurations.compileClasspath.each { File file -> println file.name }
 	}
 }
 
@@ -183,12 +183,14 @@ configurations {
 configurations {
 	hibtools {
 		extendsFrom configurations.implementation
+		canBeResolved = true
+		canBeConsumed = false
 	}
 }
 
 dependencies {
-	hibtools files("$buildDir/classes/java/main")
-	hibtools files("$buildDir/classes/java/test") // Needed for yadaPersistenceUnit
+	hibtools files(layout.buildDirectory.dir("classes/java/main"))
+	hibtools files(layout.buildDirectory.dir("classes/java/test")) // Needed for yadaPersistenceUnit
 	hibtools 'org.hibernate:hibernate-tools:5.6.15.Final'
 }
 
@@ -196,15 +198,15 @@ task testDbSchema(dependsOn: [testClasses], type: net.yadaframework.tools.YadaCr
 	inputs.files configurations.hibtools
 	outputfilename = "V1__yadatest.sql"
 	doFirst {
-		new File("$buildDir/classes/java/test/META-INF").mkdirs()
+		layout.buildDirectory.dir("classes/java/test/META-INF").get().asFile.mkdirs()
 		copy {
-			from "$buildDir/resources/test/META-INF/persistence.test.xml"
-			into "$buildDir/classes/java/test/META-INF"
+			from layout.buildDirectory.dir("resources/test/META-INF/persistence.test.xml")
+			into layout.buildDirectory.dir("classes/java/test/META-INF")
 			rename 'persistence.test.xml', 'persistence.xml'
 		} 
 	}
 	doLast { 
-		delete "$buildDir/classes/java/test/META-INF/persistence.xml"
+		delete layout.buildDirectory.file("classes/java/test/META-INF/persistence.xml")
 	}
 }
 
@@ -264,7 +266,7 @@ publishing {
     repositories {
     	// Creates task publishYadaWebCMSLibraryPublicationToPublicRepoRepository
         maven {
-        	name "PublicRepo"
+        	name = "PublicRepo"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
@@ -275,7 +277,7 @@ publishing {
         }
         // Creates task publishYadaWebLibraryPublicationToLocalRepoRepository
         maven {
-        	name "LocalRepo"
+        	name = "LocalRepo"
         	// repoPath must be passed when invoking gradle using -P
         	url = "file://${repoPath}"
     	}

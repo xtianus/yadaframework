@@ -146,7 +146,7 @@ publishing {
     repositories {
     	// Creates task publishYadaWebCMSLibraryPublicationToPublicRepoRepository
         maven {
-        	name "PublicRepo"
+        	name = "PublicRepo"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
 			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
@@ -157,7 +157,7 @@ publishing {
         }
          // Creates task publishYadaWebCMSLibraryPublicationToLocalRepoRepository
         maven {
-        	name "LocalRepo"
+        	name = "LocalRepo"
         	// repoPath must be passed when invoking gradle using -P
         	url = "file://${repoPath}"
     	}
