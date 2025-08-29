@@ -165,6 +165,11 @@ javadoc {
 	failOnError = false
 }
 
+configurations {
+    // Fix Spring logging conflict: exclude commons-logging in favor of spring-jcl
+    all*.exclude group: 'commons-logging', module: 'commons-logging'
+}
+
 // http://stackoverflow.com/a/27853822/587641
 // task javadocJar(type: Jar) {
 //     classifier = 'javadoc'

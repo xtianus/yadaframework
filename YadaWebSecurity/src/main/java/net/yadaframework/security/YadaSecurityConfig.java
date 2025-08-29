@@ -28,6 +28,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.YadaCommonsMultipartResolver;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.ServletException;
@@ -182,6 +183,12 @@ public class YadaSecurityConfig {
 	@Bean(name="filterMultipartResolver")
 	public MultipartResolver multipartResolver() {
 		return new YadaCommonsMultipartResolver();
+	}
+	
+	// This is needed since AntPathRequestMatcher has been removed
+	@Bean
+	public HandlerMappingIntrospector mvcHandlerMappingIntrospector() {
+		return new HandlerMappingIntrospector();
 	}
 	
 	@Bean
