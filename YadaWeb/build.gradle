@@ -63,14 +63,14 @@ repositories {
 dependencies {
 	api 'org.apache.commons:commons-configuration2:2.+'
 	
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:8.5.+'
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:8.5.100'
 	// For embedded Tomcat ONLY - add these to your project
     // runtimeOnly 'org.apache.tomcat:tomcat-el-api:8.5.+'
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper-el:8.5.+'
     // runtimeOnly 'org.apache.tomcat:tomcat-jasper:8.5.+'
 	
 	// Needed by Commons Configuration
-    runtimeOnly 'commons-jxpath:commons-jxpath:1.+'
+    runtimeOnly 'commons-jxpath:commons-jxpath:1.4.0'
 	
     implementation 'org.springframework:spring-webmvc:5.3.23',
 		'org.springframework:spring-context-support:5.3.23',
@@ -82,10 +82,10 @@ dependencies {
 		'org.thymeleaf:thymeleaf-spring5:3.0.15.RELEASE',
 		'mysql:mysql-connector-java:8.+',
 		'commons-collections:commons-collections:3.2.2',
-		'org.apache.tomcat:tomcat-servlet-api:8.5.+',
+		'org.apache.tomcat:tomcat-servlet-api:8.5.100',
 		'commons-fileupload:commons-fileupload:1.3.3',
 		'org.apache.commons:commons-exec:1.3',
-		'com.sun.mail:javax.mail:1.+',
+		'com.sun.mail:javax.mail:1.6.2',
 		'com.google.guava:guava:26.0-jre',
 		'org.jsoup:jsoup:1.9.+',
 		'com.fasterxml.jackson.core:jackson-annotations:2.13.2',
@@ -99,11 +99,11 @@ dependencies {
 		// 'org.littleshoot:littleproxy:1.1.2',
 		// 'org.quartz-scheduler:quartz:2.2.3',
 		'org.flywaydb:flyway-core:5.0.5',
-		'commons-beanutils:commons-beanutils:1.9.+'
+		'commons-beanutils:commons-beanutils:1.9.4'
 		
 	 // Connection pool for embedded Tomcat and programmatic datasource
-	implementation 'org.vibur:vibur-dbcp:25.+'
-	runtimeOnly 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.+'
+	implementation 'org.vibur:vibur-dbcp:25.0'
+	runtimeOnly 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.2'
 	
 	// Needed to run in Tomcat
 	// runtime 'commons-jxpath:commons-jxpath:1.3'
@@ -111,7 +111,7 @@ dependencies {
 	testImplementation 'junit:junit:4.12',
 		'org.springframework:spring-test:5.3.19'
 	
-	testRuntimeOnly 'commons-beanutils:commons-beanutils:1.9.+',
+	testRuntimeOnly 'commons-beanutils:commons-beanutils:1.9.4',
 		'commons-jxpath:commons-jxpath:1.3'
 		
 }
