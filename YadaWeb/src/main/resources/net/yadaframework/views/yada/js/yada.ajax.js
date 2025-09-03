@@ -957,27 +957,30 @@
 	    	var $button = $(this);
 	    	var confirmText = $button.attr("data-yadaConfirm") || $button.attr("data-confirm");
 	    	if (confirmText!=null && confirmText!="") {
-	    		var title = $button.attr("data-yadaTitle");
-	    		var okButton = $button.attr("data-yadaOkButton") || $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
-	    		var cancelButton = $button.attr("data-yadaCancelButton") || $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
-	    		$button.click(function() {
-	    			$button = $(this); // Needed otherwise $button could be stale (from a previous ajax replacement) 
-	    			yada.confirm(title, confirmText, function(result) {
-	    				if (result==true) {
-	    					$button.off("click");
-	    					$button.click();
-	    					// No $form.submit(); because of the button name that has to be preserved (see clickedButton above)
-	    					// TODO/BUG if the submit button contains an <input>, that value will not be included in $(form).serializeArray() and will not be sent
-	    					// This only happens when the form is sent with $button.click(): its value is sent correctly when no confirm dialog is used.
-	    					// The workaround is to set the value of <input> on the submit button itself using name= and value= attributes
-	    				}
-	    			}, okButton, cancelButton);
-	    			return false; // Stop form submission
-	    		});
+	    		$button.click(handleFormConfirm);
 	    	}
 	    });
 		$form.not('.'+markerClass).addClass(markerClass);
 	};
+	
+	function handleFormConfirm() {
+		var $button = $(this); // Needed otherwise $button could be stale (from a previous ajax replacement) 
+		var title = $button.attr("data-yadaTitle");
+		var confirmText = $button.attr("data-yadaConfirm") || $button.attr("data-confirm");
+		var okButton = $button.attr("data-yadaOkButton") || $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
+		var cancelButton = $button.attr("data-yadaCancelButton") || $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
+		yada.confirm(title, confirmText, function(result) {
+			if (result==true) {
+				$button.off("click", handleFormConfirm);
+				$button.click();
+				// No $form.submit(); because of the button name that has to be preserved (see clickedButton above)
+				// TODO/BUG if the submit button contains an <input>, that value will not be included in $(form).serializeArray() and will not be sent
+				// This only happens when the form is sent with $button.click(): its value is sent correctly when no confirm dialog is used.
+				// The workaround is to set the value of <input> on the submit button itself using name= and value= attributes
+			}
+		}, okButton, cancelButton);
+		return false; // Stop form submission
+	}
 	
 	function showFullPage(html) {
 		document.open();
