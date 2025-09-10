@@ -74,9 +74,9 @@ dependencies {
 	// Using "api" to keep things simple: no need to repeat the libraries in other projects for compilation
 
 	api 'org.apache.commons:commons-configuration2:2.12.0'
-	
-	// Fixes commons-text:1.9 CVE-2022-42889 caused by commons-configuration2:2.8.0
-	api 'org.apache.commons:commons-text:1.13.1'
+	// These are added to fix the vulnerability "Uncontrolled Recursion" in commons-configuration2 2.12.0
+	api 'org.apache.commons:commons-text:1.14.0'
+	api 'org.apache.commons:commons-lang3:3.18.0'
 	
 	// For embedded Tomcat ONLY - add these to your project
     // runtimeOnly 'org.apache.tomcat:tomcat-el-api:8.5.+'
@@ -104,8 +104,8 @@ dependencies {
 		'commons-collections:commons-collections:3.2.2',
 		'org.apache.commons:commons-exec:1.3',
 		// 'jakarta.mail:jakarta.mail-api:2.1.2',
-		'com.sun.mail:jakarta.mail:2.0.1', // The implementation is needed, not the api
-		'com.google.guava:guava:31.1-jre',
+		'com.sun.mail:jakarta.mail:2.0.2', // The implementation is needed, not the api
+		'com.google.guava:guava:33.4.8-jre',
 		'org.jsoup:jsoup:1.20.1',
 		'ch.qos.logback:logback-classic:1.5.18',
 		'com.fasterxml.jackson.core:jackson-databind:2.19.2',

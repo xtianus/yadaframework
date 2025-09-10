@@ -2,7 +2,6 @@ package net.yadaframework.web.dialect;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.checkerframework.checker.units.qual.K;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.context.ITemplateContext;
