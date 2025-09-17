@@ -13,7 +13,6 @@ import org.springframework.core.annotation.Order;
 // import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authorization.AuthorizationManager;
-
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,7 +23,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.YadaCommonsMultipartResolver;
@@ -162,11 +161,15 @@ public class YadaSecurityConfig {
 	// Veniva usato per /ajaxStoryBunch ma adesso quello usa una GET quindi non serve più per ora.
 	private static class MyRequestMatcher implements RequestMatcher {
 		private Pattern allowedMethods = Pattern.compile("^(GET|HEAD|TRACE|OPTIONS)$");
-		private AntPathRequestMatcher apiMatcher = new AntPathRequestMatcher("/ajaxStoryBunch*", null);
+		private RequestMatcher apiMatcher;
 		// Per usare altri matcher si possono concatenare con AndRequestMatcher e simili
 		// Vedi http://docs.spring.io/spring-security/site/docs/3.2.x/apidocs/ per i matcher disponibili
 		// private RegexRequestMatcher apiMatcher = new RegexRequestMatcher("/ajax.*", null);
 
+		public MyRequestMatcher(HandlerMappingIntrospector introspector) {
+	        this.apiMatcher = new MvcRequestMatcher(introspector, "/ajaxStoryBunch/**");
+	    }
+		
 		@Override
 		public boolean matches(HttpServletRequest request) {
 			// No CSRF due to allowedMethod
