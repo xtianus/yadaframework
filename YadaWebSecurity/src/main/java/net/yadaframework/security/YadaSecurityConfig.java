@@ -119,7 +119,6 @@ public class YadaSecurityConfig {
 	        });
 	}
 
-
 	/**
 	 * Needed to redirect to a language-specific login url when a protected page is requested
 	 */
@@ -153,38 +152,6 @@ public class YadaSecurityConfig {
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		auth.authenticationProvider(daoAuthenticationProvider());
-	}
-
-	// Non più usato perchè CSRF disabilitato per tutti, visto che causa troppi 403 al timeout di session
-	//
-	// Questo consente di fare delle richieste ajax in post verso le url indicate, senza incorrere in un 403 Forbidden
-	// Veniva usato per /ajaxStoryBunch ma adesso quello usa una GET quindi non serve più per ora.
-	private static class MyRequestMatcher implements RequestMatcher {
-		private Pattern allowedMethods = Pattern.compile("^(GET|HEAD|TRACE|OPTIONS)$");
-		private RequestMatcher apiMatcher;
-		// Per usare altri matcher si possono concatenare con AndRequestMatcher e simili
-		// Vedi http://docs.spring.io/spring-security/site/docs/3.2.x/apidocs/ per i matcher disponibili
-		// private RegexRequestMatcher apiMatcher = new RegexRequestMatcher("/ajax.*", null);
-
-		public MyRequestMatcher(HandlerMappingIntrospector introspector) {
-	        this.apiMatcher = new MvcRequestMatcher(introspector, "/ajaxStoryBunch/**");
-	    }
-		
-		@Override
-		public boolean matches(HttpServletRequest request) {
-			// No CSRF due to allowedMethod
-			if(allowedMethods.matcher(request.getMethod()).matches()) {
-				return false;
-			}
-
-			// No CSRF due to api call
-			if(apiMatcher.matches(request)) {
-				return false;
-			}
-
-			// CSRF for everything else that is not an API call or an allowedMethod
-			return true;
-		}
 	}
 
 	@Bean(name="filterMultipartResolver")
