@@ -152,6 +152,31 @@ public class YadaUtil {
     }
 	
 	/**
+	 * Ensure the temporary folder for POI files exists and is writable.
+	 * It must be called every time before using POI because the temp folder is
+	 * periodically deleted by tomcat and POI does not recreate it automatically (on linux).
+	 * @throws YadaSystemException if the folder cannot be created or is not writable
+	 */
+	public void ensurePoiTempFolder() {
+		String tempDir = System.getProperty("java.io.tmpdir");
+		// String poifilesDirPath = tempDir + File.separator + "poifiles";
+        File poifilesDir = new File(tempDir, "poifiles");
+        if (!poifilesDir.exists()) {
+        	boolean dirCreated = poifilesDir.mkdirs();
+        	if (dirCreated) {
+        		log.info("Temporary folder for POI '{}' created", poifilesDir);
+        	} else {
+        		log.error("Startup aborted: cannot create temporary folder for POI '{}'", poifilesDir);
+        		throw new YadaSystemException("Cannot create temporary folder for POI '" + poifilesDir + "' - startup aborted");
+        	}
+        }
+        if (!Files.isWritable(poifilesDir.toPath())) {
+        	log.error("Startup aborted: temporary folder for POI '{}' is not writable", poifilesDir);
+			throw new YadaSystemException("Temporary folder for POI '" + poifilesDir + "' is not writable - startup aborted");
+		}
+	}
+	
+	/**
 	 * Returns a list of files from a folder where the name contains the given string, sorted alphabetically
 	 * @param folderPath the folder where to looks for files, excluding subfolders.
 	 * @param contains a string that the name must contain, can be empty or null to accept any
