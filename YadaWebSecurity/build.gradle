@@ -62,16 +62,12 @@ dependencies {
 	api 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.3.RELEASE'
 
 	api 'com.google.api-client:google-api-client-gson:2.8.1',
-			'org.springframework.security:spring-security-web:6.5.3',
-			'org.springframework.security:spring-security-config:6.5.3'
+			'org.springframework.security:spring-security-web:6.5.5',
+			'org.springframework.security:spring-security-config:6.5.5'
 
 	implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
 
 	compileOnlyApi 'jakarta.servlet:jakarta.servlet-api:6.1.0'
-
-    // Consumers might need these at runtime when using embedded Tomcat:
-	//	'org.apache.tomcat:tomcat-servlet-api:11.0.10',
-	//	'org.apache.tomcat.embed:tomcat-embed-core:11.0.10',
 			
 }
 

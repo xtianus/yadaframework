@@ -58,6 +58,24 @@ public class YadaPageRows<T> implements Iterable<T> {
 		}
 	}
 
+	/**
+	 * Returns the number of elements in this page, which can be less, equal or higher than the page size
+	 * @Deprecated use {@link #getRowNumber()} instead
+	 */
+	@Deprecated // Kept for compatibility with Spring Data's Page interface
+	public int getNumberOfElements() {
+		return rows.size();
+	}
+	
+	/**
+	 * Returns the content of this page
+	 * @Deprecated use {@link #getRows()} instead
+	 */
+	@Deprecated // Kept for compatibility with Spring Data's Page interface
+	public List<T> getContent() {
+		return rows;
+	}
+	
 	public String getPageParam() {
 		String paramPrefix = currentPageRequest.getParamPrefix();
 		paramPrefix = paramPrefix==null?"":paramPrefix + ".";
