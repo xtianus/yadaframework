@@ -107,12 +107,11 @@ public class YadaJobDao {
      * Return the list of jobs that can be recovered after a crash.
      * @return
      */
-    @SuppressWarnings("unchecked")
 	public List<YadaJob> getRecoverableJobs() {
     	return YadaSql.instance().selectFrom("select yg from YadaJob yg left join yg.jobStateObject")
     		.where("where yg.jobGroupPaused = false and yg.jobRecoverable = true and yg.jobStateObject = :running")
     		.setParameter("running", YadaJobState.RUNNING.toYadaPersistentEnum())
-    		.query(em).getResultList();
+    		.query(em, YadaJob.class).getResultList();
     }
     
 	/**

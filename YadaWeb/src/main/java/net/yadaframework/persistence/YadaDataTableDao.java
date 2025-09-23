@@ -400,14 +400,14 @@ public class YadaDataTableDao {
 		yadaSql.setParameter("globalSearchString", "%"+globalSearchString+"%");
 		yadaSql.setParameter("globalSearchNumber", globalSearchNumber);
 
-    	Query query = yadaSql.query(em);
-    	// Set the page size. When paging is disabled on the FE, limit is -1
-    	int limit = yadaDatatablesRequest.getLength();
-    	if (limit>-1) {
-	    	query.setMaxResults(limit);
-    	}
+	    	Query query = yadaSql.query(em);
+	    	// Set the page size. When paging is disabled on the FE, limit is -1
+	    	int limit = yadaDatatablesRequest.getLength();
+	    	if (limit>-1) {
+		    	query.setMaxResults(limit);
+	    	}
 		query.setFirstResult(yadaDatatablesRequest.getStart());
-    	@SuppressWarnings("unchecked")
+		@SuppressWarnings("unchecked")
 		List<targetClass> result = query.getResultList();
 		// TODO sort using an outer query instead of this trick
 		if (needsExtraction) {
