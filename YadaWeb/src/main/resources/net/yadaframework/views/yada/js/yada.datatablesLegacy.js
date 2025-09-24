@@ -240,15 +240,16 @@
 		    	// Need to add any extra parameter if a form is present
 		    	var addedData = $("form.yada_dataTables_"+tableId).serializeArray();
 		    	var extraParam = data['extraParam']={};
-				data.legacy=true; // pre yada 0.7.7
-		    	var i=0;
-		    	for (i=0; i<addedData.length; i++) {
-		    		var paramObj = addedData[i];
-		    		var paramName = paramObj.name;
-		    		var paramValue = paramObj.value;
-		    		extraParam[paramName] = paramValue;
-		    	}
-		    	var noLoader = $table.hasClass('noLoader') || $table.hasClass('yadaNoLoader');
+			data.legacy=true; // pre yada 0.7.7
+			addedData.forEach(paramObj => {
+			    const paramName = paramObj.name;
+			    const paramValue = paramObj.value;
+			    if (!extraParam[paramName]) {
+			        extraParam[paramName] = [];
+			    }
+			    extraParam[paramName].push(paramValue);
+			});
+			var noLoader = $table.hasClass('noLoader') || $table.hasClass('yadaNoLoader');
 		    	yada.ajax(dataUrl, jQuery.param(data), callback, 'POST', null, noLoader);
 		    },
 		    language: {
