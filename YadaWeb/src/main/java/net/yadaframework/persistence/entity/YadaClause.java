@@ -38,7 +38,6 @@ public class YadaClause implements Serializable {
 	private int clauseVersion;
 	
 	@Lob
-	@Column(columnDefinition = "longtext") // Needed because of hibernate bug https://hibernate.atlassian.net/browse/HHH-17907
 	private String content;
 
 	public Long getId() {
