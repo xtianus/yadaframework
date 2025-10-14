@@ -1251,12 +1251,23 @@
 		$('#yada-confirm .okButton').off().click(function(){
 			okClicked=true;
 			cancelClicked=false;
-			if (typeof callback == "function") callback(true);
+			if (typeof callback == "function") {
+				if (callback.length === 0) {
+					// Callback has no parameters - only call on positive confirmation
+					callback();
+				} else {
+					// Callback expects parameters - pass true
+					callback(true);
+				}
+			}
 		});
 		$('#yada-confirm .cancelButton').off().click(function(){
 			cancelClicked=true;
 			okClicked=false;
-			if (typeof callback == "function") callback(false);
+			if (typeof callback == "function" && callback.length > 0) {
+				// Only call if callback expects parameters
+				callback(false);
+			}
 		});
 		var $modal = $('#yada-confirm .modal');
 		if ($modal.length==0) {

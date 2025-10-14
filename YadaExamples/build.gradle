@@ -133,17 +133,21 @@ yadaInit {
 }
 
 configurations {
-    generateSchema
+    generateSchema {
+    		canBeResolved = true
+		canBeConsumed = false
+	}
 }
 dependencies {
     generateSchema 'org.apache.logging.log4j:log4j-core:2.25.1'
+    generateSchema 'org.glassfish:jakarta.el:5.0.0-M1'
 }
 
 task dbSchema(dependsOn: [classes], type: JavaExec) {
 	inputs.files (configurations.generateSchema, "$rootDir/src/main/resources/META-INF/persistence.xml") 
 	outputs.files "$rootDir/schema/${acronym}.sql" // This must be the same name used in persistence.xml
     classpath = configurations.generateSchema + sourceSets.main.runtimeClasspath
-    main = 'net.yadaframework.tools.YadaSchemaGenerator'
+    mainClass = 'net.yadaframework.tools.YadaSchemaGenerator'
     doFirst {
         delete outputs.files
 		// Since recently, for autodiscovery of entities to work, 
@@ -151,7 +155,7 @@ task dbSchema(dependsOn: [classes], type: JavaExec) {
 		// so I copy the META-INF file there:
         copy {
      		from 'src/main/resources/META-INF'
-    		into 'build/classes/java/main/META-INF'
+    		into layout.buildDirectory.dir('classes/java/main/META-INF')
         }
     }
     doLast {

@@ -96,7 +96,6 @@ dependencies {
 		'org.springframework:spring-webmvc:6.2.11',
 		'org.springframework:spring-core:6.2.11',
 		'org.hibernate.orm:hibernate-core:7.1.1.Final',
-		'org.hibernate.validator:hibernate-validator:8.0.3.Final',
 		'org.thymeleaf:thymeleaf-spring6:3.1.3.RELEASE',
 		'com.mysql:mysql-connector-j:9.4.0',
 		'commons-collections:commons-collections:3.2.2',
@@ -110,7 +109,14 @@ dependencies {
 		'com.drewnoakes:metadata-extractor:2.19.0',
 		'org.flywaydb:flyway-mysql:11.13.1', // Java 21
 		'commons-beanutils:commons-beanutils:1.11.0'
-		
+	
+	api('org.hibernate.validator:hibernate-validator:8.0.3.Final') {
+		// validator pulls an old version of jboss-logging but we need the one compatible with hibernate-core
+		exclude group: 'org.jboss.logging', module: 'jboss-logging'
+	}
+	// Jakarta EL needed by hibernate-validator
+	api 'org.glassfish.expressly:expressly:5.0.0'	
+	
 	// Needed to compile against JPA types, but don’t ship it at runtime
 	compileOnly 'jakarta.persistence:jakarta.persistence-api:3.2.0'
 		
@@ -134,7 +140,6 @@ dependencies {
 	testImplementation 'org.springframework:spring-test:6.2.11'
 	testImplementation 'javax.servlet:javax.servlet-api:4.0.1'
 	
-		
 }
 
 task listJars {

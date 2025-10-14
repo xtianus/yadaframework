@@ -84,7 +84,8 @@ public class YadaJpaConfig {
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		// vendorAdapter.setGenerateDdl(true); // Crea la tabella e le colonne quando non esistono
 		vendorAdapter.setShowSql(config.getShowSql());
-		vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQLDialect");
+		// HHH90000025: MySQLDialect does not need to be specified explicitly
+		// vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQLDialect");
 		LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
 		factory.setJpaVendorAdapter(vendorAdapter);
 		List<String> packages = config.getDbEntityPackages();
