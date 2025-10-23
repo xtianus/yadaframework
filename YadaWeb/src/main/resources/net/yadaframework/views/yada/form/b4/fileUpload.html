@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 </head>
-<!--/*
+<!--/* [Bootstrap 4 version]
 A file-upload input element.
 Do not use if you don't have a form object holding a MultipartFile.
 
@@ -24,10 +24,10 @@ Message keys:
 
 Example:
 <div th:replace="/yada/form/fileUpload::field(fieldName='thumbnailImage',label='Upload thumbnail image',size=${thumbnailSize},required=true,help='Image that will be shown in the list',attachedFile=*{thumbnail})"></div>
-
+Also for compatibility with future bootstrap versions: <div th:replace="~{${@yadaWebUtil.getFormFragment('fileUpload')}::body(fieldName='...
 
 */-->
-<body>
+<body th:remove= "tag">
 <div class="form-group yadaFileUpload" 
 	th:fragment="field"
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}" th:classappend="${hasError}? 'is-invalid'">

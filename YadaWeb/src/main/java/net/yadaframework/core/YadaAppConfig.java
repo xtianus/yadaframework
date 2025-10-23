@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -38,6 +39,7 @@ import net.yadaframework.web.dialect.YadaDialect;
 
 //@Configuration not needed when using WebApplicationInitializer.java
 @ComponentScan(basePackages = { "net.yadaframework.components" })
+@Import(YadaAiConfigImportSelector.class)
 @EnableScheduling
 @EnableAsync
 public class YadaAppConfig {

@@ -24,7 +24,7 @@ Message keys:
 
 Example:
 <div th:replace="/yada/form/b5/fileUpload::field(fieldName='thumbnailImage',label='Upload thumbnail image',size=${thumbnailSize},required=true,help='Image that will be shown in the list',attachedFile=*{thumbnail})"></div>
-
+Also for compatibility with future bootstrap versions: <div th:replace="~{${@yadaWebUtil.getFormFragment('fileUpload')}::body(fieldName='...
 
 */-->
 <body th:remove="tag">

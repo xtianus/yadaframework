@@ -108,6 +108,17 @@ public class YadaWebUtil {
 	private Map<String, List<?>> sortedLocalEnumCache = new ConcurrentHashMap<>();
 	
 	/**
+	 * Returns the view name of a form fragment for the configured bootstrap version.
+	 * Example usage: &lt;div th:replace="~{${@yadaWebUtil.getFormFragment('fileUpload')}::body(fieldName='topInd...
+	 * @param formFragmentViewName like "fileUpload"
+	 * @return the full view name like "/yada/form/b5/fileUpload"
+	 */
+	public String getFormFragment(String formFragmentViewName) {
+		String prefix = "/yada/form/";
+		return prefix + "b" + config.getBootstrapVersion() + "/" + formFragmentViewName;
+	}
+	
+	/**
 	 * Convenience method for generating a random id of 6 characters to be used in pages with "@yadaWebUtil.randomId6"
 	 * @see YadaUtil#getRandomString(length)
 	 * @return a random string of 6 characters

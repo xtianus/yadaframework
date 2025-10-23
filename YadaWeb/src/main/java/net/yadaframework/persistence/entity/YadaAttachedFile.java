@@ -146,12 +146,12 @@ public class YadaAttachedFile implements CloneableDeep, Comparable<YadaAttachedF
 	@ElementCollection
 	@Column(length=1024)
 	@MapKeyColumn(name="locale", length=32)
-	protected Map<Locale, String> title;
+	protected Map<Locale, String> title; // Could be an image caption
 
 	@ElementCollection
 	@Column(length=8192)
 	@MapKeyColumn(name="locale", length=32)
-	protected Map<Locale, String> description;
+	protected Map<Locale, String> description; // Could be an image alt text
 
 	@Column(columnDefinition="TIMESTAMP NULL")
 	@Temporal(TemporalType.TIMESTAMP)
