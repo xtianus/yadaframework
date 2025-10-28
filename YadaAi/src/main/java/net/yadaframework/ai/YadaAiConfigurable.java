@@ -21,19 +21,6 @@ public interface YadaAiConfigurable {
 	ImmutableHierarchicalConfiguration getConfiguration();
 
 	/**
-	 * Returns the prompt text for AI caption generation
-	 * @return the caption prompt
-	 */
-	default String getAiCaptionPrompt() {
-		String key = "config/yadaAi/caption/prompt";
-		String prompt = getConfiguration().getString(key, null);
-		if (prompt==null) {
-			throw new YadaConfigurationException("AI caption prompt not found in configuration at key {}", key);
-		}
-		return prompt;
-	}
-
-	/**
 	 * @return the AWS access key ID for Bedrock
 	 */
 	default String getBedrockAccessKeyId() {

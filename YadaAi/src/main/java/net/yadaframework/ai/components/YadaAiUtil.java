@@ -2,6 +2,7 @@ package net.yadaframework.ai.components;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 import jakarta.annotation.PostConstruct;
 import net.yadaframework.ai.YadaAiConfigurable;
 import net.yadaframework.ai.components.bedrock.claude.YadaClaudeRequest;
+import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaSystemException;
 import software.amazon.awssdk.core.SdkBytes;
@@ -54,14 +55,15 @@ public class YadaAiUtil {
 	 * "fr": "L'image montre un chat."
 	 * }
 	 * </pre>
-	 * @return a map of Locale to localized strings. The Locale usually does not contain any other component other than the language, unless the prompt returns it.
+	 * @return a map of Locale to localized strings. Can be empty. 
+	 * The Locale will have the country component when configured in the application configuration.
 	 * @throws YadaSystemException if the invocation or the conversion fails
 	 */
 	public Map<Locale,String> getLocalizedMap(YadaClaudeRequest claudeRequest) {
 		try {
-		String jsonWithMarkdown = invokeClaudeModel(claudeRequest);
-		String jsonString = cleanJson(jsonWithMarkdown);
-		return parseJsonLocaleMap(jsonString);
+			String jsonWithMarkdown = invokeClaudeModel(claudeRequest);
+			String jsonString = cleanJson(jsonWithMarkdown);
+			return parseJsonLocaleMap(jsonString);
 		} catch (JsonProcessingException e) {
 			throw new YadaSystemException("Failed to parse alt text JSON", e);
 		}
@@ -117,15 +119,21 @@ public class YadaAiUtil {
 	/**
 	 * Parse the json string into a map of Locale to localized strings
 	 * @param jsonString the json string that contains the map of Locale to localized strings
-	 * @return the map of Locale to localized strings
+	 * @return the map of Locale to localized strings, can be empty but not null
 	 */
 	private Map<Locale, String> parseJsonLocaleMap(String jsonString) throws JsonProcessingException {
 		Map<Locale, String> result = new HashMap<>();
 		@SuppressWarnings("unchecked")
 		Map<String, String> jsonMap = objectMapper.readValue(jsonString, Map.class);
+		List<Locale> configuredLocales = ((YadaConfiguration)config).getLocales();
 		for (Map.Entry<String, String> entry : jsonMap.entrySet()) {
-			Locale locale = Locale.forLanguageTag(entry.getKey());
-			result.put(locale, entry.getValue());
+			String languageFromJson = entry.getKey();
+			// Find the configured locale that matches this language
+			Locale matchingLocale = configuredLocales.stream()
+				.filter(locale -> locale.getLanguage().equals(languageFromJson))
+				.findFirst()
+				.orElse(Locale.forLanguageTag(languageFromJson));
+			result.put(matchingLocale, entry.getValue());
 		}
 		return result;
 	}	
