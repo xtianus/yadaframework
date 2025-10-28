@@ -100,6 +100,11 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.gif.GifHeaderDirectory;
 import com.drew.metadata.jpeg.JpegDirectory;
+import com.drew.metadata.webp.WebpDirectory;
+import com.drew.metadata.png.PngDirectory;
+import com.drew.metadata.bmp.BmpHeaderDirectory;
+import com.drew.metadata.ico.IcoDirectory;
+import com.drew.metadata.pcx.PcxDirectory;
 
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotNull;
@@ -1096,14 +1101,43 @@ public class YadaUtil {
 			boolean valid = false;
 			int orientation = 1; // Default when can't be retrieved
 			int width = -1, height = -1;
+			
+			// Retrieve all possible directory types
 			ExifIFD0Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-			if (directory!=null && directory.containsTag(ExifIFD0Directory.TAG_ORIENTATION)) {
-				orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-			}
 			ExifSubIFDDirectory directory2 = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+			WebpDirectory directoryWebp = metadata.getFirstDirectoryOfType(WebpDirectory.class);
+			PngDirectory directoryPng = metadata.getFirstDirectoryOfType(PngDirectory.class);
+			BmpHeaderDirectory directoryBmp = metadata.getFirstDirectoryOfType(BmpHeaderDirectory.class);
+			IcoDirectory directoryIco = metadata.getFirstDirectoryOfType(IcoDirectory.class);
+			PcxDirectory directoryPcx = metadata.getFirstDirectoryOfType(PcxDirectory.class);
 			if (directory2!=null) {
 				width = directory2.getInt(ExifSubIFDDirectory.TAG_EXIF_IMAGE_WIDTH);
 				height = directory2.getInt(ExifSubIFDDirectory.TAG_EXIF_IMAGE_HEIGHT);
+				valid = true;
+			} else if (directoryWebp!=null) {
+				width = directoryWebp.getInt(WebpDirectory.TAG_IMAGE_WIDTH);
+				height = directoryWebp.getInt(WebpDirectory.TAG_IMAGE_HEIGHT);
+				valid = true;
+			} else if (directoryPng!=null) {
+				width = directoryPng.getInt(PngDirectory.TAG_IMAGE_WIDTH);
+				height = directoryPng.getInt(PngDirectory.TAG_IMAGE_HEIGHT);
+				valid = true;
+			} else if (directoryBmp!=null) {
+				width = directoryBmp.getInt(BmpHeaderDirectory.TAG_IMAGE_WIDTH);
+				height = directoryBmp.getInt(BmpHeaderDirectory.TAG_IMAGE_HEIGHT);
+				valid = true;
+			} else if (directoryIco!=null) {
+				width = directoryIco.getInt(IcoDirectory.TAG_IMAGE_WIDTH);
+				height = directoryIco.getInt(IcoDirectory.TAG_IMAGE_HEIGHT);
+				valid = true;
+			} else if (directoryPcx!=null) {
+				// PCX uses min/max coordinates instead of direct width/height
+				int xMin = directoryPcx.getInt(PcxDirectory.TAG_XMIN);
+				int xMax = directoryPcx.getInt(PcxDirectory.TAG_XMAX);
+				int yMin = directoryPcx.getInt(PcxDirectory.TAG_YMIN);
+				int yMax = directoryPcx.getInt(PcxDirectory.TAG_YMAX);
+				width = xMax - xMin + 1;
+				height = yMax - yMin + 1;
 				valid = true;
 			} else {
 				// If there is no exif directory, look for info in the gif header
@@ -1123,6 +1157,11 @@ public class YadaUtil {
 				}
 			}
 			if (valid) {
+				// Check for orientation tag in EXIF data (supported by JPEG, TIFF, PNG with eXIf chunk, WebP with EXIF chunk)
+				// Orientation values 6 and 8 indicate 90° rotation (CW and CCW respectively)
+				if (directory!=null && directory.containsTag(ExifIFD0Directory.TAG_ORIENTATION)) {
+					orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+				}
 				if (orientation==6 || orientation==8) {
 					// Image is rotated 90° so dimensions must be swapped
 					return new YadaIntDimension(height, width);
