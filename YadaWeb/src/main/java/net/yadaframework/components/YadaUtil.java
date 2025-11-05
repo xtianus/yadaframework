@@ -1528,6 +1528,7 @@ public class YadaUtil {
 	 * Used in entities with localized string attributes.
 	 * If a default locale has been configured with <code>&lt;locale default='true'></code>, then that locale is attempted when
 	 * there is no value for the needed locale (and they differ)
+	 * If the map is null, returns the empty string.
 	 * @param localizedValueMap
 	 * @param locale the needed locale for the value, can be null for the current request locale
 	 * @return the localized value, or the empty string if no value has been defined and no default locale has been configured
@@ -1537,6 +1538,9 @@ public class YadaUtil {
 		try {
 			if (locale==null) {
 				locale = LocaleContextHolder.getLocale();
+			}
+			if (localizedValueMap==null) {
+				return "";
 			}
 			result = localizedValueMap.get(locale);
 		} catch (Exception e) {
