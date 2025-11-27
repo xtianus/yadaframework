@@ -50,7 +50,7 @@ public class YadaClaudeImageSource {
      * Sets the image data by reading from a file path and encoding it as base64.
      * Automatically sets both the type to BASE64 and the mediaType based on the file extension.
      * 
-     * @param imagePath the path to the image file
+     * @param imagePath the path to the image file. For best results, ensure image is within 512px on each side
      * @return this ImageSource instance for method chaining
      * @throws IOException if the file cannot be read
      * @throws IllegalArgumentException if the file extension is not supported

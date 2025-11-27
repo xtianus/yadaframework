@@ -5,8 +5,11 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -19,6 +22,7 @@ import jakarta.persistence.PersistenceContext;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInternalException;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.persistence.YadaSql;
 
@@ -34,6 +38,65 @@ public class YadaLocaleDao {
 
     @PersistenceContext
 	private EntityManager em;
+
+    /**
+	 * Prefetches localized string maps on the given target to avoid lazy loading issues, recursively following JPA relations.
+	 * <p>
+	 * Supported targets:
+	 * <ul>
+	 * <li>a single entity instance</li>
+	 * <li>a {@link Collection} of entities</li>
+	 * </ul>
+	 * Returns the managed instance(s) attached to the current persistence context.
+	 * For collections, the returned value is a {@link java.util.List} of managed entities.
+	 * @param target entity, collection of entities, or localized value map
+	 * @param attributes optional localized string attribute names to prefetch; if empty, all are prefetched. No dot notation allowed.
+	 * @return the managed target (or null if input is null)
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T prefetchLocalValuesRecursive(T target, String...attributes) {
+		if (target==null) {
+			return null;
+		}
+		// Direct Map<Locale,String>: just force initialization. Probably never works because the map is detached.
+		if (target instanceof Map) {
+			Map<Locale, String> localValues = (Map<Locale, String>) target;
+			try {
+				localValues.size(); // Fails when the map is detached
+			} catch (org.hibernate.LazyInitializationException e) {
+				throw new YadaInvalidUsageException("Can't prefetch a detached Map<Locale,String>; pass the owning entity instead");
+			}
+			return target;
+		}
+		// Collection of entities: merge each into the current persistence context and return the managed list
+		if (target instanceof Collection) {
+			Collection<?> entities = (Collection<?>) target;
+			if (entities.isEmpty()) {
+				return target;
+			}
+			List<Object> managed = new ArrayList<>();
+			Class<?> entityClass = null;
+			for (Object element : entities) {
+				if (element!=null) {
+					Object merged = em.merge(element);
+					managed.add(merged);
+					if (entityClass==null) {
+						entityClass = merged.getClass();
+					}
+				}
+			}
+			if (entityClass==null || managed.isEmpty()) {
+				return target;
+			}
+			// Recursive prefetch on all managed entities
+			YadaUtil.prefetchLocalizedStringListRecursive(managed, entityClass, attributes);
+			return (T) managed;
+		}
+		// Single entity instance: merge and recursively prefetch on the managed copy
+		Object managed = em.merge(target);
+		YadaUtil.prefetchLocalizedStringsRecursive(managed, managed.getClass(), attributes);
+		return (T) managed;
+	}
 
     /**
      * Finds all entities of the given type, then initializes all localized string attributes defined as Map&lt;Locale, String>
@@ -66,16 +129,34 @@ public class YadaLocaleDao {
 
     /**
      * Finds an object of the given id, then initializes all localized string attributes defined as Map&lt;Locale, String>
-     * with recursion on the fields.
+     * with recursion on the fields up to the default max depth
      * @param entityId
      * @param entityClass
      * @return
+	 * @see YadaLocaleDao#findOneWithLocalValuesRecursive(Long, Class, int)
      */
    public <entityClass> entityClass findOneWithLocalValuesRecursive(Long entityId, Class<?> entityClass) {
     	@SuppressWarnings("unchecked")
     	entityClass entity = (entityClass) em.find(entityClass, entityId);
     	if (entity!=null) {
     		YadaUtil.prefetchLocalizedStringsRecursive(entity, entityClass);
+    	}
+    	return entity;
+    }
+
+    /**
+     * Finds an object of the given id, then initializes all localized string attributes defined as Map&lt;Locale, String>
+     * with recursion on the fields up to the specified max depth
+     * @param entityId
+     * @param entityClass
+     * @param maxDepth maximum depth of recursion into related entities (1 = only direct relations, 2 = relations of relations, etc.)
+     * @return
+     */
+    public <entityClass> entityClass findOneWithLocalValuesRecursive(Long entityId, Class<?> entityClass, int maxDepth) {
+    	@SuppressWarnings("unchecked")
+    	entityClass entity = (entityClass) em.find(entityClass, entityId);
+    	if (entity!=null) {
+    		YadaUtil.prefetchLocalizedStringsRecursive(entity, entityClass, maxDepth);
     	}
     	return entity;
     }

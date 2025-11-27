@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -73,6 +74,8 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 
+import org.hibernate.Hibernate;
+
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
@@ -135,6 +138,8 @@ public class YadaUtil {
     public final static long MILLIS_IN_MINUTE = 60*1000;
 	public final static long MILLIS_IN_HOUR = 60*MILLIS_IN_MINUTE;
 	public final static long MILLIS_IN_DAY = 24*MILLIS_IN_HOUR;
+	
+	private static final int DEFAULT_PREFETCH_MAX_DEPTH = 2;
 
 	private SecureRandom secureRandom = new SecureRandom();
 	private final static char CHAR_AT = '@';
@@ -1390,17 +1395,40 @@ public class YadaUtil {
 
 	/**
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
-	 * It must be called in a transaction.
+	 * It must be called in a transaction. Uses default max depth of 2.
 	 * @param fetchedEntity object fetched from database that may contain localized strings
 	 * @param targetClass type of fetchedEntities elements
 	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
 	 */
 	public static <targetClass> void prefetchLocalizedStringsRecursive(targetClass fetchedEntity, Class<?> targetClass, String...attributes) {
+		prefetchLocalizedStringsRecursive(fetchedEntity, targetClass, DEFAULT_PREFETCH_MAX_DEPTH, attributes);
+	}
+
+	/**
+	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
+	 * It must be called in a transaction.
+	 * @param fetchedEntity object fetched from database that may contain localized strings
+	 * @param targetClass type of fetchedEntities elements
+	 * @param maxDepth maximum depth of recursion into related entities (1 = only direct relations, 2 = relations of relations, etc.)
+	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
+	 */
+	public static <targetClass> void prefetchLocalizedStringsRecursive(targetClass fetchedEntity, Class<?> targetClass, int maxDepth, String...attributes) {
 		if (fetchedEntity!=null) {
 			List<targetClass> list = new ArrayList<>();
 			list.add(fetchedEntity);
-			prefetchLocalizedStringListRecursive(list, targetClass, attributes);
+			prefetchLocalizedStringListRecursive(list, targetClass, maxDepth, attributes);
 		}
+	}
+
+	/**
+	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
+	 * It must be called in a transaction. Uses default max depth of 2.
+	 * @param entities objects fetched from database that may contain localized strings
+	 * @param entityClass type of fetchedEntities elements
+	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
+	 */
+	public static <entityClass> void prefetchLocalizedStringListRecursive(List<entityClass> entities, Class<?> entityClass, String...attributes) {
+		prefetchLocalizedStringListRecursive(entities, entityClass, DEFAULT_PREFETCH_MAX_DEPTH, attributes);
 	}
 
 	/**
@@ -1408,47 +1436,127 @@ public class YadaUtil {
 	 * It must be called in a transaction.
 	 * @param entities objects fetched from database that may contain localized strings
 	 * @param entityClass type of fetchedEntities elements
+	 * @param maxDepth maximum depth of recursion into related entities (1 = only direct relations, 2 = relations of relations, etc.)
 	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
 	 */
-	public static <entityClass> void prefetchLocalizedStringListRecursive(List<entityClass> entities, Class<?> entityClass, String...attributes) {
-		// TODO I don't actually get how this works.
-		//      It looks like it's prefetching all first-level local strings, then
-		//      if an attribute is not a generic, it will fetch all first-level local strings there.
-		//      It doesn't make sense.
-		//      It should instead recurse on itself for all attributes that are neither primitive not local strings,
-		//		unrolling collections and arrays.
+	public static <entityClass> void prefetchLocalizedStringListRecursive(List<entityClass> entities, Class<?> entityClass, int maxDepth, String...attributes) {
+		Set<Object> visited = new HashSet<>();
+		prefetchLocalizedStringListRecursive(entities, entityClass, visited, maxDepth, attributes);
+		int totVisited = visited.size();
+		if (totVisited > 100) {
+			log.warn("prefetchLocalizedStringListRecursive visited {} objects - you may want to decrease the maxDepth", totVisited);
+		} else if (log.isDebugEnabled()) {
+			log.debug("prefetchLocalizedStringListRecursive visited {} objects", totVisited);
+		}
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static <entityClass> void prefetchLocalizedStringListRecursive(List<entityClass> entities, Class<?> entityClass, Set<Object> visited, int remainingDepth, String...attributes) {
 		if (entities==null || entities.isEmpty()) {
 			return;
 		}
 		// Prefetch first level strings for all objects
 		prefetchLocalizedStringList(entities, entityClass, attributes);
-		// Look for strings in all attributes recursively
+		// Stop recursion if max depth reached
+		if (remainingDepth <= 0) {
+			return;
+		}
+		// Recurse on all fields that may contain entities with localized strings
+		// Mark all entities as visited to avoid infinite loops on circular references
+		for (Object entity : entities) {
+			if (entity != null) {
+				visited.add(entity);
+			}
+		}
+		final int nextDepth = remainingDepth - 1;
 		ReflectionUtils.doWithFields(entityClass, new ReflectionUtils.FieldCallback() {
 			@Override
 			public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
 				for (Object object : entities) {
-					if (object!=null) {
-						try {
-							field.setAccessible(true);
-							Object fieldValue = field.get(object);
-							if (fieldValue!=null) {
-								Class fieldClass = field.getType();
-								List secondLevel = new ArrayList<>();
-								secondLevel.add(fieldValue);
-								// TODO shouldn't this call prefetchLocalizedStringListRecursive()?
-								prefetchLocalizedStringList(secondLevel, fieldClass, attributes);
-							}
-						} catch (Exception e) {
-							log.error("Failed to initialize field {} for object {} (ignored)", field, object);
+					if (object==null) {
+						continue;
+					}
+					try {
+						field.setAccessible(true);
+						Object fieldValue = field.get(object);
+						if (fieldValue==null || visited.contains(fieldValue)) {
+							continue;
 						}
+						// Handle collections
+						if (fieldValue instanceof Collection) {
+							Collection<?> collection = (Collection<?>) fieldValue;
+							if (!collection.isEmpty()) {
+								List<Object> collectionList = new ArrayList<>(collection);
+								Object firstElement = collectionList.stream().filter(e -> e != null).findFirst().orElse(null);
+								if (firstElement != null) {
+									Class<?> elementClass = firstElement.getClass();
+									prefetchLocalizedStringListRecursive(collectionList, elementClass, visited, nextDepth, attributes);
+								}
+							}
+						}
+						// Handle arrays
+						else if (fieldValue.getClass().isArray()) {
+							int length = Array.getLength(fieldValue);
+							if (length > 0) {
+								List<Object> arrayList = new ArrayList<>();
+								for (int i = 0; i < length; i++) {
+									arrayList.add(Array.get(fieldValue, i));
+								}
+								Object firstElement = arrayList.stream().filter(e -> e != null).findFirst().orElse(null);
+								if (firstElement != null) {
+									Class<?> elementClass = firstElement.getClass();
+									prefetchLocalizedStringListRecursive(arrayList, elementClass, visited, nextDepth, attributes);
+								}
+							}
+						}
+						// Handle single objects
+						else {
+							visited.add(fieldValue); // Mark as visited before recursing
+							Class<?> fieldClass = fieldValue.getClass();
+							List<Object> singleList = new ArrayList<>();
+							singleList.add(fieldValue);
+							prefetchLocalizedStringListRecursive(singleList, fieldClass, visited, nextDepth, attributes);
+						}
+					} catch (Exception e) {
+						log.error("Failed to initialize field {} for object {} (ignored)", field, object);
 					}
 				}
 			}
 		}, new ReflectionUtils.FieldFilter() {
 			@Override
 			public boolean matches(Field field) {
-				Type type = field.getGenericType();
-				return !(type instanceof ParameterizedType);
+				// Only process fields that are JPA relationships
+				// Check both field and getter for annotations (annotations may be on either)
+				if (hasJpaRelationshipAnnotation(field)) {
+					return true;
+				}
+				// Check the getter method for annotations
+				String fieldName = field.getName();
+				String getterName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+				try {
+					Method getter = entityClass.getMethod(getterName);
+					return hasJpaRelationshipAnnotation(getter);
+				} catch (NoSuchMethodException e) {
+					// Try isXxx for boolean fields
+					if (field.getType() == boolean.class || field.getType() == Boolean.class) {
+						String isGetterName = "is" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+						try {
+							Method isGetter = entityClass.getMethod(isGetterName);
+							return hasJpaRelationshipAnnotation(isGetter);
+						} catch (NoSuchMethodException e2) {
+							return false;
+						}
+					}
+					return false;
+				}
+			}
+
+			private boolean hasJpaRelationshipAnnotation(java.lang.reflect.AnnotatedElement element) {
+				return element.isAnnotationPresent(jakarta.persistence.OneToOne.class) ||
+					element.isAnnotationPresent(jakarta.persistence.OneToMany.class) ||
+					element.isAnnotationPresent(jakarta.persistence.ManyToOne.class) ||
+					element.isAnnotationPresent(jakarta.persistence.ManyToMany.class) ||
+					element.isAnnotationPresent(jakarta.persistence.ElementCollection.class);
 			}
 		});
 	}
@@ -1456,6 +1564,7 @@ public class YadaUtil {
 	/**
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
 	 * It must be called in a transaction.
+	 * WARNING: this is the non-recursive version so it only handles first level attributes.
 	 * @param entities objects fetched from database that may contain localized strings
 	 * @param entityClass type of fetchedEntities elements
 	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.

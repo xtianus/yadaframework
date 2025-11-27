@@ -53,7 +53,7 @@ Note: you can't set a default value using thymeleaf, must do it in the controlle
 	
 		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
 			<a th:if="${help!=null}" class="yadaHelpButton" data-trigger="focus" data-container="body" 
-				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
+				data-toggle="popover" data-placement="auto" tabindex="-1"
 				data-html="true"
 				th:attr="data-content=${help}">
 				<i class="yadaIcon yadaIcon-help"></i>

@@ -388,6 +388,28 @@ public class YadaAttachedFile implements CloneableDeep, Comparable<YadaAttachedF
 	}
 
 	/**
+	 * Returns the absolute file on the filesystem, using the first non-null value from DESKTOP, MOBILE, PDF or DEFAULT type in order
+	 * @return the absolute file or null if the file does not exist
+	 */
+	public File getAbsoluteFile() {
+		File result = null;
+		result = getAbsoluteFile(YadaAttachedFileType.DESKTOP);
+		if (result!=null) {
+			return result;
+		}
+		result = getAbsoluteFile(YadaAttachedFileType.MOBILE);
+		if (result!=null) {
+			return result;
+		}
+		result = getAbsoluteFile(YadaAttachedFileType.PDF);
+		if (result!=null) {
+			return result;
+		}
+		result = getAbsoluteFile(YadaAttachedFileType.DEFAULT);
+		return result;
+	}
+
+	/**
 	 * Returns the absolute file on the filesystem
 	 * @param type the version of the file: desktop, mobile or default
 	 * @return the file or null if the file does not exist
