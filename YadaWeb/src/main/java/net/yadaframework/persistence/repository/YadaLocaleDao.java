@@ -40,7 +40,8 @@ public class YadaLocaleDao {
 	private EntityManager em;
 
     /**
-	 * Prefetches localized string maps on the given target to avoid lazy loading issues, recursively following JPA relations.
+	 * Prefetches localized string maps on the given target to avoid lazy loading issues, recursively following JPA relations.<br>
+	 * <i>Note: this is most useful for model attributes to be used in thymeleaf templates but a DAO would be more efficient for backend-only code.</i>
 	 * <p>
 	 * Supported targets:
 	 * <ul>

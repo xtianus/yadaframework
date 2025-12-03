@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:yada="http://www.yadaframework.net" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
+	<meta charset="UTF-8">
 </head>
-<!--/* [Deprecated, use a version inside b4 or b5 folders]
+<!--/* [Bootstrap 4 version]
 A select list for objects, maps or static (Spring-EL) elements.
 It must be used inside a form with a th:object form bean.
 
@@ -42,19 +42,18 @@ Parameters (can be set in the replace tag or in any parent tag):
 - yadaUpdateOnSuccess = (optional) css selector of an element to update after returning from the ajax call.
 
 Example:
-<div th:replace="/yada/form/list::field(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()',addHeader=true)"></div>
-<div th:replace="/yada/form/list::field(fieldName='userCredentials.enabled',options=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
-<div th:replace="/yada/form/list::field(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
-<div th:replace="/yada/form/list::field(fieldName='building',options=${buildingEnumList},addHeader='UNKNOWN')"></div> where 'UNKNOWN' is an enum name to use for the header value
-
+<div th:replace="/yada/form/b4/list::field(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()',addHeader=true)"></div>
+<div th:replace="/yada/form/b4/list::field(fieldName='userCredentials.enabled',options=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
+<div th:replace="/yada/form/b4/list::field(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
+<div th:replace="/yada/form/b4/list::field(fieldName='building',options=${buildingEnumList},addHeader='UNKNOWN')"></div> where 'UNKNOWN' is an enum name to use for the header value
 */-->
-<body>
+<body th:remove="tag">
 <div class="form-group" 
 	th:fragment="field"
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')},idPrefix=${idPrefix?:'fieldId'}" 
-	th:classappend="|${hasError==true?'has-error':''} ${inline==true?'form-inline':''} ${noFeedback==true?'':'has-feedback'}|">
+	th:classappend="${inline==true}?form-inline">
 	<label th:if="${label!=null or labelKey!=null}" 
-		class="control-label" th:for="${#ids.next(idPrefix)}" 
+		class="form-label" th:for="${#ids.next(idPrefix)}" 
 		th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Company</label>
 	<div class="input-group" th:style="${inline==true?'display:inline-table':'width:100%'}"> <!--/* width is needed when help is not present e.g. in password fields */-->
 		<select th:field="*{__${fieldName}__}" th:multiple="${multiple}" 
@@ -63,7 +62,8 @@ Example:
 			th:required="${required}" 
 			th:readonly="${readonly}"
 			th:disabled="${disabled}"
-			th:classappend="|${yadahref!=null?'yadaAjax':''} ${readonly==true?'yadaReadonly':'form-control'+(noFeedback==true?'':' has-feedback')}|"
+			class="form-control"
+			th:classappend="|${yadahref!=null?' yadaAjax':''} ${readonly==true?' yadaReadonly':''} ${hasError==true?' is-invalid':''}|"
 			th:id="${#ids.seq(idPrefix)}" 
 			th:aria-describedby="${#ids.next(idPrefix)}"
 			th:data-yadahref="${yadahref}"
@@ -117,20 +117,23 @@ Example:
 			//]]>
 		</script>
 		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
-			<a th:if="${help!=null}" class="yadaHelpButton input-group-addon" data-trigger="focus" data-container="body" 
-				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
-				data-html="true"
-				th:attr="data-content=${help}">
-				<i class="yadaIcon yadaIcon-help"></i>
-			</a>
+			<div th:if="${help!=null}" class="input-group-append">
+				<button type="button" class="yadaHelpButton btn btn-outline-secondary" data-trigger="focus" data-container="body" 
+					data-toggle="popover" data-placement="auto" tabindex="-1"
+					data-html="true"
+					th:attr="data-content=${help}">
+					<i class="yadaIcon yadaIcon-help"></i>
+				</button>
+			</div>
 		</th:block>
 	</div>
-	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+	<span th:if="${hasError}" class="fa fa-times form-control-feedback" aria-hidden="true"></span>
 	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
 		<span th:text="${err}" th:id="${#ids.seq(idPrefix)}">Error Text</span>
-		<button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
 	</div>
-</div>    	
+</div>	
 </body>
 </html>
-
