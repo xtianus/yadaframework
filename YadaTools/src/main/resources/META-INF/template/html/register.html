@@ -52,7 +52,7 @@
 
 	<script th:inline="javascript">
 		yada.enablePasswordMatch(${"\$"}("#registrationForm"));
-		${acronym}.ready(yada.loaderOff);
+		yada.ready(yada.loaderOff);
 		${"\$"}("#registrationForm").submit(function(){yada.loaderOn();});
 	</script>
 

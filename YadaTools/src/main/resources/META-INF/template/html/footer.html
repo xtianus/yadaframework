@@ -28,7 +28,7 @@
 			yada.resourceDir = /*[[${"\$"}{@config.versionedResourceDir}]]*/ "unset";
 			yada.messages.connectionError.title = /*[[#{javascript.connection.error.title}]]*/ "unset";
 			yada.messages.connectionError.message = /*[[#{javascript.connection.error.message}]]*/ "unset";
-			${acronym}.ready(function(){
+			yada.ready(function(){
 				const showNotification = /*[[${"\$"}{YADA_NBODY!=null}]]*/ false;
 				if (showNotification) {
 					setTimeout(function(){
