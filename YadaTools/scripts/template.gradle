@@ -4,7 +4,9 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath 'net.yadaframework:yadatools:0.7.8'
+        classpath 'net.yadaframework:yadatools:0.7.8.1'
+        // For local development:
+        // classpath files('../../yadaframework/YadaTools/build/libs/YadaTools-0.7.8.1.jar')
     }
 }
 

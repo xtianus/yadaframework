@@ -6,7 +6,9 @@
 		<p>This is the footer</p>
 	</footer>
 	
+	<!-- 
 	<script th:src="@{/static/jquery-3.7.1.min.js}" ></script>
+	 -->
 	<script th:if="${"\$"}{!@config.developmentEnvironment}" th:src="@{/res/js/yada.min.js}"></script>
 	<script th:if="${"\$"}{@config.developmentEnvironment}" th:src="@{/yadares/js/yada.js}"></script>
 	<script th:if="${"\$"}{@config.developmentEnvironment}" th:src="@{/yadares/js/yada.ajax.js}"></script>

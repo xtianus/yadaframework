@@ -26,8 +26,6 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import net.yadaframework.security.components.YadaSecurityUtil;
@@ -60,13 +58,11 @@ public class YadaUserCredentials implements Serializable {
 	private String newPassword; // For use in forms
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date passwordDate;
 
 	private boolean changePassword=false; // true quando un utente deve cambiare password al prossimo login
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date creationDate;
 
 	private boolean enabled=false;
@@ -78,12 +74,10 @@ public class YadaUserCredentials implements Serializable {
 	private int failedAttempts; // Fallimenti di login consecutivi. Viene modificato direttamente nel db da UserCredentialsRepository.resetFailedAttempts()
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastFailedAttempt; // timestamp dell'ultimo login fallito
 	@JsonSerialize(using=YadaJsonDateTimeShortSerializer.class)
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastSuccessfulLogin; // timestamp dell'ultimo login completato - settare con userCredentialsRepository.updateLoginTimestamp()
 
 	@JsonIgnore // Ignored because of lazy association

@@ -28,8 +28,6 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.PostPersist;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import net.yadaframework.components.YadaUtil;
@@ -63,7 +61,6 @@ public class YadaAttachedFile implements CloneableDeep, Comparable<YadaAttachedF
 
 	// For synchronization with external databases
 	@Column(insertable = false, updatable = false, columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified = new Date();
 
 	// For optimistic locking
@@ -154,7 +151,6 @@ public class YadaAttachedFile implements CloneableDeep, Comparable<YadaAttachedF
 	protected Map<Locale, String> description; // Could be an image alt text
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date uploadTimestamp;
 
 	protected boolean published = false; // Application-defined flag

@@ -10,8 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 
 /**
  * Keeps a timestamped log of events for rate-limiting purposes
@@ -28,7 +26,6 @@ public class YadaRateLog implements Serializable {
 	private Long id;
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date at;
 	private int type;
 	private long data1;

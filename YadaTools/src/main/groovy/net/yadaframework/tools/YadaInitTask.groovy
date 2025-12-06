@@ -240,6 +240,7 @@ class YadaInitTask extends YadaProject {
 				env : env,
 				envs : envs,
 				acronym : acronym,
+				acronymCapitalized : acronym.capitalize(),
 				basePath : basePath,
 				schemaFolderPath : project.file(schemaDirName),
 				basePackage : basePackage,

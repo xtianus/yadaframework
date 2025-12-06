@@ -18,8 +18,6 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import net.yadaframework.core.YadaLocalEnum;
@@ -50,7 +48,6 @@ public class YadaTicket implements Serializable {
 	protected int priority;
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date creationDate = new Date();
 
 	@OneToOne(fetch = FetchType.EAGER)

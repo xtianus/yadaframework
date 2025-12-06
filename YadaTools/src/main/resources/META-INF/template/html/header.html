@@ -15,7 +15,9 @@
 		<link th:if="${"\$"}{@config.developmentEnvironment}" rel="stylesheet" type="text/css" th:href="@{/yadares/css/yada.css}" />
 	    <link th:if="${"\$"}{!@config.developmentEnvironment}" rel="stylesheet" type="text/css" th:href="@{/res/css/yada.min.css}" />
 		<link rel="stylesheet" type="text/css" th:href="@{/res/css/$acronym.min.css}" />
+		<!-- Add the favicons
 		<link rel="icon" type="image/x-icon" th:href="@{/static/favicons-1.0/favicon.ico}">		
+		-->
 	</th:block>
 </head>
 <body th:remove="tag">
