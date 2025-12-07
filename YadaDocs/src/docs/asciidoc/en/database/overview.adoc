@@ -26,7 +26,118 @@ TO DO
 
 == Schema Generation and Update
 
-TO DO (flyway, create db)
+TODO schema generation
+
+The Yada Framework uses https://flywaydb.org/[Flyway^] for database schema migrations.
+Flyway tracks which SQL scripts have been applied and runs any new ones automatically at application startup.
+
+=== Single-Tenant Setup (Default)
+
+For a standard single-tenant application, migrations by default are stored in a single folder:
+
+[source]
+----
+src/main/resources/database/
+├── V001__baseline.sql
+├── V002__add_users.sql
+├── V003__add_products.sql
+└── ...
+----
+
+**Migration Naming Convention:**
+
+* Prefix `V` followed by a version number (e.g., `V001`, `V002`)
+* Double underscore `__` separates version from description
+* Description uses underscores for spaces
+* Example: `V003__add_product_table.sql`
+
+At startup, Flyway checks the `flyway_schema_history` table and runs any migrations not yet applied. The name of this table can be configured in `conf.webapp.*.xml` if needed.
+This must be enabled in the configuration:
+
+[source,xml]
+----
+<config>
+    <database>
+		<databaseMigrationAtStartup outOfOrder="true">true</databaseMigrationAtStartup>
+----
+
+where "outOfOrder" is set to true to allow migrations to be applied out of order: a migration with lower version number can be applied after a migration with higher version number is already in the database. Useful when making schema changes on different branches then merging at a later time.
+
+=== Multi-Tenant Setup
+
+For applications that support multiple tenants with different databases, migrations can be organized
+into common and tenant-specific folders:
+
+[source]
+----
+src/main/resources/database/
+├── common/                          # Migrations for ALL tenants
+│   ├── V001__baseline.sql
+│   └── V002__add_feature.sql
+├── companyA/                        # Migrations ONLY for companyA
+│   └── V100__companyA_initial_data.sql
+└── demo/
+    └── V100__demo_sample_data.sql
+----
+
+Override the `getFlywayLocations()` method in your `AppConfig` class (which extends `YadaAppConfig`) to specify tenant-specific migration locations:
+
+[source,java]
+----
+public class AppConfig extends YadaAppConfig {
+    
+    @Autowired private MyConfiguration myConfig;
+    
+    /**
+     * Returns tenant-specific Flyway migration locations.
+     * Loads common migrations for all tenants, plus tenant-specific migrations for non-default tenants.
+     */
+    @Override
+    protected String[] getFlywayLocations() {
+        String tenantId = myConfig.getTenantId();
+        if ("default".equals(tenantId)) {
+            // Default tenant uses only common migrations
+            return new String[] { "classpath:database/common" };
+        } else {
+            // Other tenants use common + tenant-specific migrations
+            return new String[] { 
+                "classpath:database/common",
+                "classpath:database/" + tenantId
+            };
+        }
+    }
+}
+----
+
+**Numbering Convention for Multi-Tenant (not required):**
+
+* `V001-V099`: Common schema migrations (applied to all tenants)
+* `V100+`: Tenant-specific data or customizations
+
+This ensures common migrations always run first, and tenant-specific migrations can safely assume
+the common schema is in place. You will have to set the outOfOrder flag for this to work properly:
+
+[source,xml]
+----
+<config>
+    <database>
+		<databaseMigrationAtStartup outOfOrder="true">true</databaseMigrationAtStartup>
+----
+
+Each tenant uses its own database, configured in `conf.webapp.tenant.{tenantId}.xml`:
+
+[source,xml]
+----
+<config>
+    <database enabled="true">
+        <datasource>
+			<jdbcUrl>jdbc:mysql://localhost/companyAdbprod?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;sslMode=DISABLED&amp;allowPublicKeyRetrieval=true</jdbcUrl>
+			<username>companyAuser</username>
+	        <!-- password in security.properties -->
+			<password>${dbpwd}</password>
+    </database>
+</config>
+----
 
 == Data Access Objects
 

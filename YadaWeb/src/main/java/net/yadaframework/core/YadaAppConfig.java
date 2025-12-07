@@ -65,7 +65,7 @@ public class YadaAppConfig {
 			Flyway flyway = Flyway.configure()
 				.dataSource(dataSource)
 				.cleanDisabled(true) // Just to be safe
-				.locations("classpath:database") // Where sql scripts are stored
+				.locations(getFlywayLocations()) // Where sql scripts are stored
 				.outOfOrder(config.useDatabaseMigrationOutOfOrder()) // Apply new migrations with lower number added later. Needed for parallel development.
 				// If the db is not empty and there is no metadata, add the metadata instead of failing, setting the version to 1
 				.baselineOnMigrate(true)
@@ -75,6 +75,14 @@ public class YadaAppConfig {
 				.load();
 			flyway.migrate();
 		}
+	}
+	
+	/**
+	 * Returns the Flyway migration locations. Override this method to customize migration paths.
+	 * @return array of classpath locations for Flyway migrations
+	 */
+	protected String[] getFlywayLocations() {
+		return new String[] { "classpath:database" };
 	}
 	
 	/**
@@ -94,8 +102,31 @@ public class YadaAppConfig {
 		return CONFIG;
 	}
 
+	/**
+	 * Creates and configures the email template resolver.
+	 * Override {@link #createEmailTemplateResolver()} to provide a custom resolver implementation.
+	 * @return configured template resolver for emails
+	 */
 	public ClassLoaderTemplateResolver emailTemplateResolver() {
-		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+		ClassLoaderTemplateResolver resolver = createEmailTemplateResolver();
+		configureEmailTemplateResolver(resolver);
+		return resolver;
+	}
+	
+	/**
+	 * Creates the email template resolver instance.
+	 * Override this method to provide a custom resolver (e.g., tenant-aware resolver).
+	 * @return a new ClassLoaderTemplateResolver or subclass
+	 */
+	protected ClassLoaderTemplateResolver createEmailTemplateResolver() {
+		return new ClassLoaderTemplateResolver();
+	}
+	
+	/**
+	 * Configures the email template resolver with common settings.
+	 * @param resolver the resolver to configure
+	 */
+	protected void configureEmailTemplateResolver(ClassLoaderTemplateResolver resolver) {
 		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
 		resolver.setPrefix(YadaConstants.EMAIL_TEMPLATES_PREFIX); // Attenzione allo slash finale!
 //		resolver.setPrefix(YadaConstants.EMAIL_TEMPLATES_PREFIX + "/"); // Attenzione allo slash finale!
@@ -107,7 +138,6 @@ public class YadaAppConfig {
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setCacheable(config.isProductionEnvironment());
 		// resolver.setOrder(40); // Order not needed because resolver on different SpringTemplateEngine
-		return resolver;
 	}
 
 	@Bean
