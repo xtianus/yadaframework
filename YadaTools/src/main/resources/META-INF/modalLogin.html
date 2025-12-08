@@ -13,7 +13,7 @@ using <div th:replace="~{/modalLogin :: #loginForm}">Login form here</div>
 
 	<th:block th:fragment="modalBody">
 		<div class="modal-body">
-			<form th:action="@{/loginPost}" role="form" method="post" id="loginForm" th:classappend="${yadaIsAjaxResponse}?yadaAjax">
+			<form th:action="@{/loginPost}" role="form" method="post" id="loginForm" yada:successHandler="postLogin" th:classappend="${yadaIsAjaxResponse}?yadaAjax">
 				<div class="mb-3">
 					<div th:if="${lockoutMinutes}" class="alert alert-danger" role="alert">Too many failed attempts: login disabled.<br/>
 						Wait <span th:text="${lockoutMinutes}">5</span> minute<span th:text="${lockoutMinutes>1?'s':''}">s</span> and retry, 
@@ -57,7 +57,7 @@ using <div th:replace="~{/modalLogin :: #loginForm}">Login form here</div>
 		</div>
 	</th:block>
 		
-	<script th:fragment="modalScript">
+	<script th:fragment="modalScript" th:inline="javascript">
 		$('#pwdRecoverForm a').click(function(e) {
 			e.preventDefault();
 			var email=$('#loginForm input[name="username"]').val();
@@ -65,9 +65,18 @@ using <div th:replace="~{/modalLogin :: #loginForm}">Login form here</div>
 			$('#pwdRecoverForm').submit();
 			return false;
 		});
+		
 	    yada.ready(function() {
 		    $("#loginModal:hidden").modal("show");
 	    });
+	    
+	    function postLogin() {
+	    	const headerUrl = /*[[@{/justTheHeader}]]*/ "unset";
+	    	yada.ajax(headerUrl, null, function(responseText, $responseHtml) {
+	    		$("header").replaceWith($("header", $responseHtml));
+	    		$("#loginModal").modal("hide");
+	    	});
+	    }
 	</script>
 
 </div>

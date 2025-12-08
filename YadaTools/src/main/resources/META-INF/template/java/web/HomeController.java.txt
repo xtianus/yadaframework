@@ -115,6 +115,15 @@ public class HomeController {
 	public String errorPage(Model model, Locale locale) {
 		return "/errorPage";
 	}
+
+	/**
+	 * Returns just the header so that it can change after login
+	 * @return
+	 */
+	@RequestMapping("/justTheHeader")
+	public String justTheHeader() {
+		return "/header";
+	}
 	
 
 }
