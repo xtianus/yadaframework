@@ -23,31 +23,31 @@ using <div th:replace="~{/modalLogin :: #loginForm}">Login form here</div>
 					</div>
 				</div>
 				<div class="mb-3">
-    				<label class="control-label" for="username">E-Mail</label>
-    				<div>
-    					<input type="email" id="username" name="username" th:value="${username}"
-    						th:classappend="${usernameNotFound!=null || userDisabled!=null}?is-invalid" 
-    						class="form-control" placeholder="E-Mail" required="required" autofocus="autofocus">
-	    				<span th:if="${usernameNotFound}" class="invalid-feedback">User not found. Please check that the email is correct, or register</span>
-	    				<span th:if="${userDisabled}" class="invalid-feedback">User disabled. Please contact us to fix this issue.</span>
-    				</div>
-  				</div>
-  				<div class="mb-3">
-    				<label class="control-label" for="password">Password</label>
-   					<div class="input-group">
-   						<input type="password" name="password" class="form-control" id="password" 
-   							th:classappend="${passwordError!=null}?is-invalid" 
-   							placeholder="Password" required="required" th:value="${password}">
+					<label class="control-label" for="username">E-Mail</label>
+					<div>
+						<input type="email" id="username" name="username" th:value="${username}"
+							th:classappend="${usernameNotFound!=null || userDisabled!=null}?is-invalid" 
+							class="form-control" placeholder="E-Mail" required="required" autofocus="autofocus">
+						<span th:if="${usernameNotFound}" class="invalid-feedback">User not found. Please check that the email is correct, or register</span>
+						<span th:if="${userDisabled}" class="invalid-feedback">User disabled. Please contact us to fix this issue.</span>
+					</div>
+				</div>
+				<div class="mb-3">
+					<label class="control-label" for="password">Password</label>
+					<div class="input-group">
+						<input type="password" name="password" class="form-control" id="password" 
+							th:classappend="${passwordError!=null}?is-invalid" 
+							placeholder="Password" required="required" th:value="${password}">
 						<a class="btn yadaShowPassword" href="#" title="Show password">
 							<span class="yadaIcon yadaIcon-eye"></span>
 						</a>
-	   					<span th:if="${passwordError}" class="invalid-feedback">Invalid password. If you forgot it, <a th:href="@{/passwordReset(email=${username})}">click here</a>.</span>
-   					</div>
-  				</div>
-  				<div class="mb-3">
-  					<button type="submit" class="btn btn-primary">Login</button>
-  					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-  				</div>
+						<span th:if="${passwordError}" class="invalid-feedback">Invalid password. If you forgot it, <a th:href="@{/passwordReset(email=${username})}">click here</a>.</span>
+					</div>
+				</div>
+				<div class="mb-3">
+					<button type="submit" class="btn btn-primary">Login</button>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+				</div>
 			</form>
 			
 			<form th:action="@{/passwordReset}" role="form" method="post" id="pwdRecoverForm">
@@ -56,14 +56,17 @@ using <div th:replace="~{/modalLogin :: #loginForm}">Login form here</div>
 			</form>
 		</div>
 	</th:block>
-        
+		
 	<script th:fragment="modalScript">
-	    $('#pwdRecoverForm a').click(function(e) {
-	    	e.preventDefault();
-	    	var email=$('#loginForm input[name="username"]').val();
-	    	$('#pwdRecoverForm input[name="email"]').val(email);
-	    	$('#pwdRecoverForm').submit();
-	    	return false;
+		$('#pwdRecoverForm a').click(function(e) {
+			e.preventDefault();
+			var email=$('#loginForm input[name="username"]').val();
+			$('#pwdRecoverForm input[name="email"]').val(email);
+			$('#pwdRecoverForm').submit();
+			return false;
+		});
+	    yada.ready(function() {
+		    $("#loginModal:hidden").modal("show");
 	    });
 	</script>
 

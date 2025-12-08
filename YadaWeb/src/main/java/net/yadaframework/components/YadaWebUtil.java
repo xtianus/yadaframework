@@ -108,6 +108,14 @@ public class YadaWebUtil {
 	private Map<String, List<?>> sortedLocalEnumCache = new ConcurrentHashMap<>();
 	
 	/**
+	 * @return the current request URI, for example "/some/product"
+	 */
+	public String getRequestURI() {
+        ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        return sra!=null?sra.getRequest().getRequestURI():"";
+	}
+	
+	/**
 	 * Returns the view name of a form fragment for the configured bootstrap version.
 	 * Example usage: &lt;div th:replace="~{${@yadaWebUtil.getFormFragment('fileUpload')}::body(fieldName='topInd...
 	 * @param formFragmentViewName like "fileUpload"

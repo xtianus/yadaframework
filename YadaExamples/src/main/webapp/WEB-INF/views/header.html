@@ -29,7 +29,7 @@
 </script>
 
 <header th:with="loggedIn=${@yadaSecurityUtil.loggedIn()}">
-	<div th:if="${@userSession.impersonationActive}" class="yadaImpersonationBanner">
+	<div th:if="${loggedIn and @userSession.impersonationActive}" class="yadaImpersonationBanner">
 		<a th:href="@{/dashboard/user/deimpersonate}">
 			<span>Impersonating <strong th:text="${@userSession.currentUserProfile.userCredentials.username}">John Doe</strong></span>
 		    <button type="button" class="btn-close" aria-label="Close Impersonation"></button>
