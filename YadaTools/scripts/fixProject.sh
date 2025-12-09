@@ -10,7 +10,7 @@ then
 	exit 0;
 fi
 
-sed -i "s/include('lib')//g" $projectFolder/settings.gradle
+sed -i "s/include('lib')//g" $projectFolder/settings.gradle*
 
 mv $projectFolder/lib/bin $projectFolder
 mv $projectFolder/lib/src $projectFolder

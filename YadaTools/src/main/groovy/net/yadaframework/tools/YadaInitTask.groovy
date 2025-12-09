@@ -54,7 +54,7 @@ class YadaInitTask extends YadaProject {
 		} else {
 			project.file("Launches").mkdir();
 		}
-		File webAppRootFolder = project.war.webAppDirectory; // Updated to use modern war plugin API
+		File webAppRootFolder = project.war.webAppDirectory.get().asFile; // Updated to use modern war plugin API (DirectoryProperty in recent Gradle versions)
 		File resFolder = new File(webAppRootFolder, resDirName);
 		File webinfFolder = new File(webAppRootFolder, "WEB-INF");
 		File messagesFolder = new File(webinfFolder, messagesDirName);
@@ -118,7 +118,7 @@ class YadaInitTask extends YadaProject {
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/modalLogin.html", viewsFolder);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/example_gitignore", project.projectDir);
 		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/gradle.local.properties.example", project.projectDir);
-		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/.gitattributes", project.projectDir);
+		yadaToolsUtil.copyFileFromClasspathFolder("$RESOURCECONFIGROOT/dot_gitattributes", project.projectDir, ".gitattributes");
 		processTemplate(HTMLDIRNAME, "home.html", null, viewsFolder);
 		processTemplate(HTMLDIRNAME, "header.html", null, viewsFolder);
 		processTemplate(HTMLDIRNAME, "footer.html", null, viewsFolder);

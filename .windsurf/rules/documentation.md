@@ -1,6 +1,6 @@
 ---
 trigger: model_decision
-description: Write or update documentation
+description: Yada Framework for java documentation
 ---
 
 Documentation for the yada framework is implemented in Ascii Doctor format inside the .\YadaDocs\src\docs\asciidoc folder.
@@ -69,4 +69,3 @@ AsciiDoctor configuration settings
 HTML header and document info for generated documentation
 
 Each file is written in AsciiDoc format and focuses on specific aspects of web development using the Yada Framework, providing both tutorial-style guidance and reference documentation.
-
