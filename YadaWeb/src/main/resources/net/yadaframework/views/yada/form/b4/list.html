@@ -42,10 +42,10 @@ Parameters (can be set in the replace tag or in any parent tag):
 - yadaUpdateOnSuccess = (optional) css selector of an element to update after returning from the ajax call.
 
 Example:
-<div th:replace="/yada/form/b4/list::field(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()',addHeader=true)"></div>
-<div th:replace="/yada/form/b4/list::field(fieldName='userCredentials.enabled',options=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
-<div th:replace="/yada/form/b4/list::field(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
-<div th:replace="/yada/form/b4/list::field(fieldName='building',options=${buildingEnumList},addHeader='UNKNOWN')"></div> where 'UNKNOWN' is an enum name to use for the header value
+<div th:replace="/yada/form/b4/list::body(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()',addHeader=true)"></div>
+<div th:replace="/yada/form/b4/list::body(fieldName='userCredentials.enabled',options=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
+<div th:replace="/yada/form/b4/list::body(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
+<div th:replace="/yada/form/b4/list::body(fieldName='building',options=${buildingEnumList},addHeader='UNKNOWN')"></div> where 'UNKNOWN' is an enum name to use for the header value
 */-->
 <body th:remove="tag">
 <div class="form-group" 

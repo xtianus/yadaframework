@@ -21,7 +21,7 @@ Example: <div th:replace="~{/yada/form/b4/boolean::body(fieldName='useGold',labe
 Note: you can't set a default value using thymeleaf, must do it in the controller.
 */-->
 <body th:remove="tag">
-<div class="form-group" 
+<div class="form-group" th:fragment="field"
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}, 
 		inputId=${id?:#ids.seq(@yadaWebUtil.getRequestMapping())}">
 	<div class="checkbox">

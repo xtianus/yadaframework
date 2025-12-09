@@ -29,13 +29,13 @@ Parameters:
              in page many times via javascript, otherwise all selects will end up having the same ids. Not needed when the ajaxLists are not inserted via javascript.
 
 Example:
-<div th:replace="/yada/form/b4/checklist::field(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()')"></div>
-<div th:replace="/yada/form/b4/checklist::field(fieldName='userCredentials.enabled',options=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
-<div th:replace="/yada/form/b4/checklist::field(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
+<div th:replace="/yada/form/b4/checklist::body(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()')"></div>
+<div th:replace="/yada/form/b4/checklist::body(fieldName='userCredentials.enabled',options=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
+<div th:replace="/yada/form/b4/checklist::body(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
 
 */-->
 <body th:remove="tag">
-<div class="form-group" 
+<div class="form-group" th:fragment="field" 
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')},
 		type=${type?:'checkbox'},
 		idPrefix=${idPrefix?:'fieldId'},
