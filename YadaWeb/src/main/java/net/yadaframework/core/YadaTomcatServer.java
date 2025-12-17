@@ -6,7 +6,10 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 
+import org.apache.catalina.Lifecycle;
+import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
@@ -38,15 +41,17 @@ public class YadaTomcatServer {
 
     private Tomcat tomcat;
     private String acroenv;
+    private volatile boolean contextFailed = false;
 
     /**
      * Starts the standalone server on port 8080 by default. Different ports can be specified in the application configuration.
      * @param args
-     *        - acronym+environment used for the shutdown command
-     *        - relative path of the webapp folder in eclipse ("src/main/webapp"), or the full path elsewhere
-     *        - the third argument is optional in Eclipse, otherwise it must be the full path of the temp folder for Tomcat data (where the war is exploded)
-     *        When the third argument is not provided, "dev mode" is assumed.
-     *        When the third argument is specified, an additional fourth argument of "dev" starts in developer mode
+     *        - <acroenv> acronym+environment used for the shutdown command
+     *        - <webappFolder> relative path of the webapp folder in eclipse ("src/main/webapp"), or the full path elsewhere
+     *        - optional: <baseDir> full path of the temp folder for Tomcat data (where the war is exploded)
+     *        - optional: --dev enables developer mode (HTTPS connector)
+     *        - optional: --eclipse adds the bin/main folder to the classpath (needed when running from Eclipse IDE) and implies --dev
+     *        When baseDir is not provided and no options are specified, both dev and eclipse modes are enabled.
      * @throws Exception
      */
 	public static void main(String[] args) throws Exception {
@@ -73,22 +78,36 @@ public class YadaTomcatServer {
 		this();
 		
 		log.debug("Starting Tomcat server with args: {}", Arrays.asList(args));
-		if (args.length == 0 || args.length>4) {
-			throw new YadaInvalidUsageException("Command line parameter missing. Usage: {} <acroenv> <webappFolder> [<baseDir> [dev]]", YadaTomcatServer.class.getName());
+		if (args.length < 2) {
+			throw new YadaInvalidUsageException("Command line parameter missing. Usage: {} <acroenv> <webappFolder> [<baseDir>] [--dev] [--eclipse]", YadaTomcatServer.class.getName());
 		}
 		this.acroenv = args[0];
 		String webappFolder = args[1];
-		String baseDir=null;
-		boolean dev = true;
-		if (args.length>2) {
-			baseDir = args[2];
-			// Is there an additional "dev" argument? If not, dev is false
-			dev = args.length>3 && "dev".equals(args[3]);
-			if (!new File(baseDir).canWrite()) {
-				throw new YadaInvalidUsageException("The baseDir {} must exist and be writable", new File(baseDir));
+		String baseDir = null;
+		boolean dev = false;
+		boolean eclipse = false;
+		boolean hasOptions = false;
+		for (int i = 2; i < args.length; i++) {
+			if ("--dev".equals(args[i])) {
+				dev = true;
+				hasOptions = true;
+			} else if ("--eclipse".equals(args[i])) {
+				eclipse = true;
+				hasOptions = true;
+				dev = true;
+			} else if (!args[i].startsWith("--")) {
+				baseDir = args[i];
 			}
 		}
-		this.configure(webappFolder, baseDir, dev, YadaAppConfig.getStaticConfig());
+		if (baseDir == null && !hasOptions) {
+			// No baseDir and no options: assume dev mode in Eclipse
+			dev = true;
+			eclipse = true;
+		}
+		if (baseDir != null && !new File(baseDir).canWrite()) {
+			throw new YadaInvalidUsageException("The baseDir {} must exist and be writable", new File(baseDir));
+		}
+		this.configure(webappFolder, baseDir, dev, eclipse, YadaAppConfig.getStaticConfig());
 	}
 
 	public void start() throws LifecycleException {
@@ -96,6 +115,14 @@ public class YadaTomcatServer {
 			log.info("Starting Tomcat embedded server...");
 			long startTime = System.currentTimeMillis();
 			tomcat.start();
+			log.debug("After tomcat.start(): contextFailed={}", contextFailed);
+			if (contextFailed) {
+				log.error("Context initialization failed - shutting down");
+				tomcat.stop();
+				tomcat.destroy();
+				System.exit(1);
+				return;
+			}
 			Connector[] connectors = tomcat.getService().findConnectors();
 			String connectorPorts = "";
 			for (int i = 0; i < connectors.length; i++) {
@@ -106,9 +133,12 @@ public class YadaTomcatServer {
 			}
 			log.info("Tomcat started in {} ms on ports {}", System.currentTimeMillis() - startTime, connectorPorts);
 			tomcat.getServer().await();
+			log.info("Exiting JVM");
+			System.exit(0);
 		} catch (LifecycleException e) {
 			tomcat.destroy();
 			log.error("Server exited in error", e);
+			System.exit(1);
 		}
 	}
 
@@ -147,15 +177,17 @@ public class YadaTomcatServer {
 	 * @param webappFolder
 	 * @param baseDir
 	 * @param dev
-	 * @param tomconf 
+	 * @param eclipse when true, adds the bin/main folder to the classpath (needed when running from Eclipse IDE)
+	 * @param config 
 	 * @throws ServletException
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 */
-	protected void configure(String webappFolder, String baseDir, boolean dev, YadaConfiguration config) throws ServletException, MalformedURLException, IOException {
+	protected void configure(String webappFolder, String baseDir, boolean dev, boolean eclipse, YadaConfiguration config) throws ServletException, MalformedURLException, IOException {
 		log.debug("webappFolder={}", webappFolder);
 		log.debug("baseDir={}", baseDir);
 		log.debug("dev={}", dev);
+		log.debug("eclipse={}", eclipse);
 		System.setProperty("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE", "true");
 		if (baseDir!=null) {
 			tomcat.setBaseDir(baseDir);
@@ -165,7 +197,16 @@ public class YadaTomcatServer {
 		setCompressableMimeType(tomcat.getConnector(), null);
 		tomcat.setAddDefaultWebXmlToWebapp(false); // Use web.xml
 		StandardContext ctx = (StandardContext) tomcat.addWebapp("", new File(webappFolder).getAbsolutePath());
-		if (dev) {
+		ctx.addLifecycleListener(new LifecycleListener() {
+			@Override
+			public void lifecycleEvent(LifecycleEvent event) {
+				if (Lifecycle.BEFORE_STOP_EVENT.equals(event.getType()) && ctx.getState() == org.apache.catalina.LifecycleState.FAILED) {
+					log.info("Context failed during startup - will shutdown");
+					contextFailed = true;
+				}
+			}
+		});
+		if (eclipse) {
 			File eclipseClasses = new File("bin/main");
 			if (eclipseClasses.canRead() && eclipseClasses.list().length>0) {
 				WebResourceRoot resources = new StandardRoot(ctx);
