@@ -20,10 +20,14 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.apache.commons.configuration2.ConfigurationUtils;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
+import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
+import org.apache.commons.configuration2.builder.ConfigurationBuilderResultCreatedEvent;
 import org.apache.commons.configuration2.builder.combined.CombinedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -50,6 +54,8 @@ public abstract class YadaConfiguration {
 
 	protected ImmutableHierarchicalConfiguration configuration;
 	protected CombinedConfigurationBuilder builder;
+	private final CopyOnWriteArrayList<Runnable> configurationReloadListeners = new CopyOnWriteArrayList<>();
+	private volatile boolean reloadListenerRegistered = false;
 
 	// Cached values
 	// Questi valori li memorizzo perchè probabilmente verranno controllati
@@ -128,6 +134,13 @@ public abstract class YadaConfiguration {
 	 */
 	public boolean isDatabaseEnabled() {
 		return configuration.getBoolean("config/database/@enabled", true);
+	}
+
+	/**
+	 * @return true when DB instrumentation logging is enabled
+	 */
+	public boolean isYadaLogDbStatsEnabled() {
+		return configuration.getBoolean("config/database/yadaLogDbStats", false);
 	}
 	
 	/**
@@ -1644,12 +1657,46 @@ public abstract class YadaConfiguration {
 	public void setBuilder(CombinedConfigurationBuilder builder) throws ConfigurationException {
 		this.builder = builder;
 		this.configuration = ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration());
+		registerConfigurationReloadListenerIfNeeded();
+	}
+
+	public void addConfigurationReloadListener(Runnable listener) {
+		if (listener != null) {
+			configurationReloadListeners.add(listener);
+		}
+		registerConfigurationReloadListenerIfNeeded();
+	}
+
+	private void registerConfigurationReloadListenerIfNeeded() {
+		if (builder == null || reloadListenerRegistered) {
+			return;
+		}
+		if (builder instanceof BasicConfigurationBuilder) {
+			BasicConfigurationBuilder<?> basicBuilder = (BasicConfigurationBuilder<?>) builder;
+			reloadListenerRegistered = true;
+			basicBuilder.addEventListener(ConfigurationBuilderResultCreatedEvent.RESULT_CREATED, event -> {
+				if (event.getConfiguration() instanceof HierarchicalConfiguration) {
+					HierarchicalConfiguration<?> newConfig = (HierarchicalConfiguration<?>) event.getConfiguration();
+					setConfiguration(ConfigurationUtils.unmodifiableConfiguration(newConfig));
+				} else if (event.getConfiguration() instanceof ImmutableHierarchicalConfiguration) {
+					setConfiguration((ImmutableHierarchicalConfiguration) event.getConfiguration());
+				}
+				for (Runnable listener : configurationReloadListeners) {
+					try {
+						listener.run();
+					} catch (RuntimeException ex) {
+						log.warn("Configuration reload listener failed.", ex);
+					}
+				}
+			});
+		}
 	}
 
 	/**
 	 * Call this method to trigger a configuration reload, but only if the file has changed and the timeout since last reload has passed
 	 * @throws ConfigurationException
 	 */
+	@Deprecated // Configuration reload is now automatic
 	public void reloadIfNeeded() throws ConfigurationException {
 		// TODO Doesn't seem to work
 		if (builder instanceof ReloadingCombinedConfigurationBuilder) {

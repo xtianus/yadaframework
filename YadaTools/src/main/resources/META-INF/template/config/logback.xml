@@ -10,7 +10,7 @@
       		<maxFileSize>20MB</maxFileSize>
     	</triggeringPolicy>
 		<encoder>
-			<pattern>%d %-5level :%X{session}:%X{remoteIp}:%X{username} [%thread] %logger{36} - %msg%n
+			<pattern>%d %-5level :%X{session}:%X{remoteIp}:%X{username}:%X{traceId}:%X{endpoint} [%thread] %logger{36} - %msg%n
 			</pattern>
 		</encoder>
 	</appender>
@@ -37,6 +37,9 @@
     
     <logger name="net.yadaframework.security.AuditFilter" level="INFO"/>
     <logger name="net.yadaframework.security.AuditFilter.files" level="ERROR"/> <!-- Remove or set to INFO to show files -->
+    
+	<logger name="net.yadaframework.components.logging.YadaTomcatPoolMetricsLogger" level="INFO"/>
+    <logger name="net.yadaframework.components.logging.YadaHibernateStatsLogger" level="INFO"/>
     
     <!-- To hide WARN: bad write method arg count: public final void org.apache.commons.configuration2.AbstractConfiguration.setProperty -->
     <logger name="org.apache.commons.beanutils.FluentPropertyBeanIntrospector" level="ERROR"/> 

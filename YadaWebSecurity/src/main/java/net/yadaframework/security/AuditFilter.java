@@ -35,6 +35,8 @@ public class AuditFilter extends OncePerRequestFilter implements Filter {
 	private static final String MDC_USERNAME = "username";
 	private static final String MDC_SESSION = "session";
 	private static final String MDC_REMOTEIP = "remoteIp";
+	private static final String MDC_TRACEID = "traceId"; // Must sync with YadaTraceStatementInspector
+	private static final String MDC_ENDPOINT = "endpoint";
 
 	private String yadaResourceUrlStart = null; // Prefix for resource urls from /src/main/webapp/yadares
 	private String resourceUrlStart = null; // Prefix for resource urls from /src/main/webapp/res
@@ -111,9 +113,13 @@ public class AuditFilter extends OncePerRequestFilter implements Filter {
 				log.debug("No username in securityContext");
 			}
 		}
+		String traceId = YadaUtil.INSTANCE.getRandomString(8); // UUID.randomUUID().toString();
+		
 		MDC.put(MDC_SESSION, sessionId); // Session viene messo sull'MDC. Usarlo con %X{session} nel pattern
 		MDC.put(MDC_USERNAME, username); // username viene messo sull'MDC. Usarlo con %X{username} nel pattern
 		MDC.put(MDC_REMOTEIP, remoteIp); // remoteIp viene messo sull'MDC. Usarlo con %X{remoteIp} nel pattern
+		MDC.put(MDC_TRACEID, traceId); // traceId viene messo sull'MDC. Usarlo con %X{traceId} nel pattern
+		MDC.put(MDC_ENDPOINT, requestUri); // requestUri viene messo sull'MDC. Usarlo con %X{endpoint} nel pattern
 
 		if (isFirstRequest) {
 			beforeRequest(request);
@@ -135,6 +141,8 @@ public class AuditFilter extends OncePerRequestFilter implements Filter {
 			MDC.remove(MDC_USERNAME);
 			MDC.remove(MDC_SESSION);
 			MDC.remove(MDC_REMOTEIP);
+			MDC.remove(MDC_TRACEID);
+			MDC.remove(MDC_ENDPOINT);
 		}
 	}
 

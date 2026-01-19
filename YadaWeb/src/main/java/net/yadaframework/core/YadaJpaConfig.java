@@ -1,7 +1,9 @@
 package net.yadaframework.core;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -27,7 +29,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.vibur.dbcp.ViburDBCPDataSource;
 
 import net.yadaframework.components.YadaMariaDBServer;
-
+import net.yadaframework.components.logging.YadaTraceStatementInspector;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
@@ -79,11 +81,16 @@ public class YadaJpaConfig {
 		return (DataSource) jndiObjectFactoryBean.getObject();
 	}
 	
+	/**
+	 * Builds the entity manager factory used by Spring at startup.
+	 * Enables SQL comments and Hibernate statistics only when yadaLogDbStats capture is active.
+	 */
 	@Bean
 	public EntityManagerFactory entityManagerFactory() throws SQLException {
+		boolean yadaLogDbStats = config.isYadaLogDbStatsEnabled();
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		// vendorAdapter.setGenerateDdl(true); // Crea la tabella e le colonne quando non esistono
-		vendorAdapter.setShowSql(config.getShowSql());
+		vendorAdapter.setShowSql(config.getShowSql() || yadaLogDbStats);
 		// HHH90000025: MySQLDialect does not need to be specified explicitly
 		// vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQLDialect");
 		LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
@@ -96,6 +103,13 @@ public class YadaJpaConfig {
 		log.info("Scanning packages for entities: {}", StringUtils.join(packages, ","));
 		factory.setPackagesToScan(packages.toArray(new String[]{}));
 		factory.setDataSource(dataSource());
+		Map<String, Object> jpaProperties = new HashMap<>();
+		jpaProperties.put("hibernate.use_sql_comments", yadaLogDbStats);
+		if (yadaLogDbStats) {
+			jpaProperties.put("hibernate.session_factory.statement_inspector", YadaTraceStatementInspector.class.getName());
+		}
+		jpaProperties.put("hibernate.generate_statistics", yadaLogDbStats);
+		factory.setJpaPropertyMap(jpaProperties);
 		factory.afterPropertiesSet();
 		return factory.getObject();
 	}	
