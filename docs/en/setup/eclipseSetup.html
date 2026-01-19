@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.18">
+<title>Eclipse Setup</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
+</head>
+<body class="article toc2 toc-left">
+<!--
+	WARNING !!!!!
+	Edit the /YadaDocs/src/docs/asciidoc/common/docinfo-header.html file
+	to change this menu.
+-->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./setup/gettingStarted.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/overview.html">Databases</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./security/overview.html">Security</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./json.html">Read and Write JSON</option>
+	<option data-link="./confirmationModal.html">Confirmation Modal</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./staging.html">Staging Docs</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.style.position = 'relative';
+        header.addEventListener('click', function(e) {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+            navigator.clipboard.writeText(url);
+        });
+        header.addEventListener('mouseenter', function() {
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-clone';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.style.position = 'absolute';
+            icon.style.right = '30px';
+            icon.style.top = '50%';
+            icon.style.transform = 'translateY(-50%)';
+            icon.style.fontSize = '18px';
+            icon.style.color = 'gray';
+            header.appendChild(icon);
+        });
+        header.addEventListener('mouseleave', function() {
+            const icon = header.querySelector('.fa-clone');
+            if (icon) {
+            	header.removeChild(icon);
+            }
+        });
+    });
+});
+
+function showCopy(e) {
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-clone';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.style.position = 'absolute';
+    icon.style.left = e.pageX + 'px';
+    icon.style.top = e.pageY + 'px';
+    icon.style.zIndex = 1000;
+    icon.style.fontSize = '24px';
+    document.body.appendChild(icon);
+    setTimeout(function() {
+        document.body.removeChild(icon);
+    }, 1000); // 1 second delay
+}
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;
+    	}
+    }
+};
+</script>
+<div id="header">
+<h1>Eclipse Setup</h1>
+<div class="details">
+<span id="revnumber">version '0.7.8'</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_installation">Installation</a></li>
+<li><a href="#_connect_to_git">Connect to GIT</a>
+<ul class="sectlevel2">
+<li><a href="#_add_the_repositories">Add the repositories</a></li>
+</ul>
+</li>
+<li><a href="#_the_first_project">The First Project</a>
+<ul class="sectlevel2">
+<li><a href="#_creating_the_project">Creating the Project</a></li>
+<li><a href="#_importing_the_yadaframework_projects">Importing the YadaFramework Projects</a></li>
+<li><a href="#_saving_to_git">Saving to git</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_installation">Installation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Install the latest version of <a href="https://www.eclipse.org/downloads/packages/" target="_blank" rel="noopener">Eclipse IDE for Enterprise Java and Web Developers</a>.
+Be sure to install the 64 bit "Enterprise Java and Web" version.</p>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+<div class="title">Need Enterprise version?</div>
+<div class="paragraph">
+<p>A 32 bit Eclipse will not run on a 64 bit Java installation so be careful not to install the 32 bit.
+The non-enterprise version will not be able to
+run a web application in a standalone Tomcat, and it lacks some plugins that you
+would otherwise need to install separately.
+If you need a minimalistic development environment, you should be able to code with the non-enterprise
+version though.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>With a single installation of Eclipse you can have as many workspaces as you like. For big projects involving multiple branches and many people,
+you might want to create at least two workspaces, one for your own development and another one for checking other people&#8217;s work or for deployment.
+It is very convenient to create a different shortcut for each workspace. Using the "-data" command line option you can specify which workspace you
+want to use. For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\myCoding"
+C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\myRelease"</code></pre>
+</div>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>Create a workspace for the bookstore tutorial:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\yadaTutorial"</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Run Eclipse with the chosen workspace and click on the "Workbench" or "Hide" icon to the right of the "Welcome to Eclipse" page.</p>
+</div>
+<div class="paragraph">
+<p>Update your installation with "Help &gt; Check for Updates" and follow the instructions. Failing to do so might prevent
+you from adding a Tomcat server later.</p>
+</div>
+<div class="paragraph">
+<p>From the "Window &gt; Preferences &gt; Gradle" dialog set the "Java home" entry to your JDK installation,
+which would be <code>C:\Local\jdk21</code> if you followed the instructions above.</p>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+<div class="title">Setting Gradle Java Home</div>
+<div class="paragraph">
+<p>When the Gradle Java Home is not set, Eclipse will run Gradle with the java version used to run itself
+and this may cause all sort of errors like "java facet mismatch" or "supplied phased action failed".</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Set the editors file encoding to UTF-8, at least "General &gt; Workspace &gt; Text file encoding" and "Web &gt; CSS Files &gt; Encoding":</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/newEclipseProject/encoding.jpg" alt="Eclipse file encoding">
+</div>
+<div class="title">Figure 1. Eclipse file encoding</div>
+</div>
+<div class="paragraph">
+<p>The "New text file line delimiter" shown in the above image is also better set to "Unix".</p>
+</div>
+<div class="paragraph">
+<p>Also set UTF-8 in the "Content Types &gt; Text &gt; Java Properties File &gt; Default encoding" field and be sure to
+click on "Update" before applying the changes:</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/newEclipseProject/java-properties-utf8.png" alt="Eclipse file encoding">
+</div>
+<div class="title">Figure 2. Eclipse file encoding</div>
+</div>
+<div class="paragraph">
+<p>Add the <a href="#Java SDK">previously donwloaded</a> JRE as a new Runtime in "Window &gt; Preferences &gt; Java &gt; Installed JREs" and set it as the default.
+Also set the "Window &gt; Preferences &gt; Java &gt; Compiler &gt; JDK Compliance" accordingly (that would be "21" for Java 21). You should also set "Store information about method parameters (usable via reflection)" to use simpler method signatures in Spring controllers (no @RequestParam is needed).</p>
+</div>
+<div class="paragraph">
+<p>In order to better spot errors and stack traces, you should considerably increase the console output buffer or remove the limit altogether
+using the "Window &gt; Preferences &gt; Run/Debug &gt; Console" options:</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/newEclipseProject/console.png" alt="Console output limit">
+</div>
+<div class="title">Figure 3. Console output limit</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_connect_to_git">Connect to GIT</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_add_the_repositories">Add the repositories</h3>
+<div class="paragraph">
+<p>The Yada Framework sources are hosted on the public GitHub site.
+To access the GitHub repository use your GitHub credentials on the <a href="https://github.com/xtianus/yadaframework" target="_blank" rel="noopener">yadaframework repo</a>.
+The git url should be <code>git@github.com:xtianus/yadaframework.git</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Since 2021 the preferred method for connecting to GitHub is ssh. If you didn&#8217;t do so already, you should create
+a pair of SSH private/public keys and upload the public one to GitHub <a href="https://github.com/settings/keys" target="_blank" rel="noopener">here</a>.
+The keys can be generated on Windows using <a href="https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html" target="_blank" rel="noopener">PuttyGen</a>.
+The public one to upload to GitHub is the text shown in the "authorized_keys" box of PuttyGen. The private one to keep on your
+computer must be exported via the "Conversions &gt; Export OpenSSH key" menu without a passphrase.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Once you have the repository credentials, connect Eclipse:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Open the SSH2 preferences dialog from "Window &gt; Preferences"</p>
+</li>
+<li>
+<p>browse to the location of your private GitHub OpenSSH key</p>
+</li>
+</ul>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/newEclipseProject/github-key.jpg" alt="GitHub ssh key">
+</div>
+<div class="title">Figure 4. GitHub ssh key</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Open the "git perspective" from "Window &gt; Perspective &gt; Open Perspective"</p>
+</li>
+<li>
+<p>On the left of the workspace you should see the "Git Repositories" panel</p>
+</li>
+<li>
+<p>Click on "Clone a Git repository" and add the needed information</p>
+</li>
+</ul>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/newEclipseProject/clonegit.jpg" alt="Clone the Git repository">
+</div>
+<div class="title">Figure 5. Clone the Git repository</div>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/newEclipseProject/clonedialog1.jpg" alt="Clone the Git repository">
+</div>
+<div class="title">Figure 6. Clone the Git repository</div>
+</div>
+<div class="paragraph">
+<p>On the "Branch Selection" dialog you should NOT select "master" but the latest versioned branch, for example "0.7.3".</p>
+</div>
+<div class="paragraph">
+<p>On the "Local Destination" dialog you need to select a local folder where to clone the repository.
+Here we assume that you are going to create a new Eclipse project called <code>MySiteProject</code> (will be explained later) and
+add it to a git repository called <code>mysite</code>.
+It is very important that you <strong>store both the Yada Framework repository and your application repository in a common parent folder</strong> that is specific to the current project, for example
+<code>C:\work\git-mysite</code>, otherwise relative paths in the build file won&#8217;t work and you&#8217;ll have to customise them.</p>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>For the bookstore example we create a common git folder called <code>C:\work\git-yadabookstore</code> that will contain the "yadaframework" git repo.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>You should create your base git folder before proceeding. The Yada Framework will have to be cloned inside this folder, with
+a name of "yadaframework":</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/newEclipseProject/cloneDialog2.jpg" alt="Repository destination folder">
+</div>
+<div class="title">Figure 7. Repository destination folder</div>
+</div>
+<div class="paragraph">
+<p>At the end, when you later also add the "mysite" git and web project, the filesystem structure will be like the following, where "mysite" is any new project that uses the Yada Framework:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">C:\work\git-mysite
+  mysite
+    .git
+    MySiteProject
+  yadaframework
+    .git
+    docs
+    YadaDocs
+    YadaTools
+    YadaWeb
+    ... and other folders</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When you have connected the yada repository, you can switch to the "Java Perspective" in Eclipse.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_first_project">The First Project</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_creating_the_project">Creating the Project</h3>
+<div class="paragraph">
+<p>Create a new Eclipse Project using "File &gt; New &gt; Project&#8230;&#8203; &gt; Gradle &gt; Gradle Project" menu.
+Use any name you like ("MySiteProject" in the above example) and accept all defaults. Two new Java projects will be created in your workspace.</p>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>For the bookstore example the project name will be <code>YadaBookstore</code></p>
+</div>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Since Gradle 7 the wizard creates a <code>lib</code> subproject because that&#8217;s how the Gradle developers want
+to structure <a href="https://github.com/eclipse/buildship/issues/1077#issuecomment-970241752" target="_blank" rel="noopener">all projects</a>.
+We want to keep things simple so we&#8217;re going to restructure the layout in order to have a single project instead.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The following <code>fixProject.sh</code> bash script can be used in order to get rid of the <code>lib</code> subproject:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">	#!/bin/bash
+	# Fix Buildship generated Eclipse project
+
+	projectFolder=$1
+
+	sed -i "s/include('lib')//g" $projectFolder/settings.gradle
+
+	mv $projectFolder/lib/bin $projectFolder
+	mv $projectFolder/lib/src $projectFolder
+	mv $projectFolder/lib/.classpath $projectFolder
+	mv $projectFolder/lib/build.gradle $projectFolder
+	rm -rf $projectFolder/lib
+	rm -rf $projectFolder/src/main/java/*
+	rm -rf $projectFolder/src/test/java/*</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can find a version of it in <code>YadaTools/scripts/fixProject.sh</code>.
+It should be run in the parent folder of the project passing the project folder itself as an argument:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">fixProject.sh MySiteProject</code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>We don&#8217;t currently provide a Windows equivalent so you should run the above script under a windows version of bash.
+Git for windows provides such a program in a path like <code>C:\Program Files\Git\git-bash.exe</code>. The <a href="https://learn.microsoft.com/en-us/windows/wsl/install" target="_blank" rel="noopener">"Windows Subsystem for Linux"</a>
+also installs a bash executable.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>After the project has been fixed, select the old projects in Eclipse and do a "refresh" accepting to delete the <code>lib</code> project when prompted.</p>
+</div>
+<div class="paragraph">
+<p>Optional: edit the <code>/MySiteProject/gradle/wrapper/gradle-wrapper.properties</code> file changing the <code>distributionUrl</code> to match the version of
+Gradle that you want to use. For example <code>distributionUrl=https\://services.gradle.org/distributions/gradle-7.6-bin.zip</code>.
+This is only needed if the gradle you want to use is not yet available in Eclipse. Right-click the project and choose "Gradle &gt; Refresh Gradle Project" to update the version of Gradle used.</p>
+</div>
+<div class="paragraph">
+<p>You can choose to add an external Tomcat server or use the embedded version. In the first case, you should be using the "Enterprise" version of Eclipse.
+If not, you should at least install the "Eclipse Web Tools Platform" (WTP) plugin.</p>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>The bookstore application will use Tomcat embedded, so no need to install any standalone server.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_importing_the_yadaframework_projects">Importing the YadaFramework Projects</h3>
+<div class="paragraph">
+<p>After connecting to the GitHub repository as explained above, you can import the
+needed projects using the "File &gt; Import&#8230;&#8203; &gt; Gradle &gt; Existing Gradle Project" menu.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The Yada projects will be located in the git folder you chose before,
+not along with the new project just created. This may be confusing because
+the Import dialog will initially open in the workspace and you will have to
+browse to the git folder instead.
+After adding the new project to git as explained later, all projects will be
+found in the git folder.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To import most Yada Framework projects at once you could just import the "YadaWebCommerce" project and rely on dependency resolution to automatically
+import everything else.
+Don&#8217;t worry about Gradle versions here: the version used will be the one configured inside the imported projects.</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/newEclipseProject/importYada.jpg" alt="Import the YadaWebCommerce project">
+</div>
+<div class="title">Figure 8. Import the YadaWebCommerce project</div>
+</div>
+<div class="paragraph">
+<p>The <code>YadaTools</code> project should also be imported because you will later need to copy some files from it.</p>
+</div>
+<div class="paragraph">
+<p>If the imported projects have any errors, first of all right-click and choose "Gradle &gt; Refresh Gradle Project".
+If it complains about some unbound system library, open "Properties &gt; Java build path &gt; Libraries" and remove the library.</p>
+</div>
+<div class="paragraph">
+<p>You should now have, in your workspace, the following Yada projects:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>YadaTools</p>
+</li>
+<li>
+<p>YadaWeb</p>
+</li>
+<li>
+<p>YadaWebCMS</p>
+</li>
+<li>
+<p>YadaWebCommerce</p>
+</li>
+<li>
+<p>YadaWebSecurity</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_saving_to_git">Saving to git</h3>
+<div class="paragraph">
+<p>The next step is to create a git repository to store your projects.
+You must definitely use git to store your files, because
+after sharing the project to the repo it will be moved to the same root folder of the
+Yada projects so that relative paths in the build file will work effortlessly.</p>
+</div>
+<div class="paragraph">
+<p>For a quick test, you can just create a
+local repository. It must reside in the same root folder that was used when cloning Yada, that was <code>C:\work\git-mysite</code>
+in the previous example. The name can be anything you like. Here we use 'mysite':</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/newEclipseProject/newGit.jpg" alt="Create a local git repository">
+</div>
+<div class="title">Figure 9. Create a local git repository</div>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>In the bookstore tutorial the git folder would be <code>C:\work\git-yadabookstore\yadabookstore</code></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also use any public provider like GitHub or a private server installation
+based for example on GitLab and clone the repository locally, being careful to create the correct directory tree.</p>
+</div>
+<div class="paragraph">
+<p>When using GitLab, let it create a default readme.md file so that you&#8217;ll be able to check out the repository easily (there should be a
+similar option on GitHub). Then add the repository location to the Git Perspective as done for the Yada Framework.</p>
+</div>
+<div class="paragraph">
+<p>After the repository has been added to Eclipse, to add your project to the git repository right-click on it and
+choose "Team &gt; Share Project&#8230;&#8203;".
+In the dialog you should just select the correct repository and accept the defaults.
+The resulting filesystem structure will be as follows:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">C:\work\git-mysite
+  mysite
+    .git
+    MySiteProject
+  yadaframework
+    .git
+    docs
+    YadaDocs
+    YadaTools
+    YadaWeb
+    ... and other stuff</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Finally edit <code>.gitignore</code> in the root of your project to make it look like the following:</p>
+</div>
+<div class="listingblock">
+<div class="title">.gitignore</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">/.gradle/
+/build/
+/bin/
+/.gitattributes
+/.settings/
+/.classpath
+/.project
+!gradle-wrapper.jar
+/.sass/
+**/res/css/*.min.*
+**/res/js/*.min.*</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you don&#8217;t see the file, you should change the workspace filter. Next to the "Package Explorer" title there&#8217;s a
+menu icon containing the "Filters&#8230;&#8203;" item. Ensure that ".* resources" is NOT selected.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version '0.7.8'<br>
+Last updated 2025-12-06 16:35:51 +0100
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
+</body>
+</html>
