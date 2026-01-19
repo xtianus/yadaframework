@@ -23,7 +23,7 @@
 <select id="navigator">
 	<option>Choose chapter...</option>
 	<option data-link="./index.html">Index</option>
-	<option data-link="./newEclipseProject.html">Getting started</option>
+	<option data-link="./setup/gettingStarted.html">Getting started</option>
 	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
 	<option data-link="./internationalization.html">Internationalization</option>
 	<option data-link="./database/overview.html">Databases</option>
@@ -124,12 +124,13 @@ window.onscroll = function() {
 <div id="header">
 <h1>Upgrade Yada Framework Version</h1>
 <div class="details">
-<span id="revnumber">version 0.7.7</span>
+<span id="revnumber">version '0.7.8'</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_latest_stable_version">Latest Stable Version</a></li>
+<li><a href="#_version_comparison">Version Comparison</a></li>
 </ul>
 </div>
 </div>
@@ -145,23 +146,71 @@ window.onscroll = function() {
 <h2 id="_latest_stable_version">Latest Stable Version</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The current stable version of the Yada Framework is <a href="https://github.com/xtianus/yadaframework/tree/0.7.6" target="_blank" rel="noopener">0.7.6</a></p>
+<p>The current stable version of the Yada Framework is <a href="https://github.com/xtianus/yadaframework/tree/0.7.8" target="_blank" rel="noopener">0.7.8</a></p>
 </div>
 <div class="paragraph">
-<p>Version <a href="https://github.com/xtianus/yadaframework/tree/0.7.7" target="_blank" rel="noopener">0.7.7</a> has more features but it
-changes very frequently and the new API may not be stable. This documentation, though,
-is for this version.</p>
+<p>Version <a href="https://github.com/xtianus/yadaframework/tree/0.7.8.1" target="_blank" rel="noopener">0.7.8.1</a> has more features but it
+changes frequently and the new API may not be stable. This documentation, though,
+is for that version.</p>
 </div>
-<div class="paragraph">
-<p>Both use JDK17, Spring 6, Hibernate 6, Bootstrap 3 to 5, Tomcat 10</p>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_version_comparison">Version Comparison</h2>
+<div class="sectionbody">
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Yada</th>
+<th class="tableblock halign-left valign-top">Java</th>
+<th class="tableblock halign-left valign-top">Spring</th>
+<th class="tableblock halign-left valign-top">Hibernate</th>
+<th class="tableblock halign-left valign-top">Bootstrap</th>
+<th class="tableblock halign-left valign-top">Tomcat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">0.7.7</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JDK 17</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Spring 6</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Hibernate 6</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bootstrap 3-5</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Tomcat 10</p></td>
+</tr>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">0.7.8</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JDK 21</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Spring 6</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Hibernate 7</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bootstrap 3-5</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Tomcat 11</p></td>
+</tr>
+<tr>
+<th class="tableblock halign-left valign-top"><p class="tableblock">0.7.8.1</p></th>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JDK 21</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Spring 6</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Hibernate 7</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bootstrap 3-5</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Tomcat 11</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.7<br>
-Last updated 2025-08-07 10:44:57 +0200
+Version '0.7.8'<br>
+Last updated 2025-12-06 18:44:20 +0100
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

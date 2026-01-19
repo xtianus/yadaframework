@@ -1,8 +1,6 @@
 =  Yada Framework
 :docinfo: shared
 
-NOTE: Chat with this documentation in the https://chatgpt.com/g/g-IZTpvHTYM-yada-framework-manual[Yada Framework Manual^] custom GPT. Beware of hallucinations!
-
 ==  General Principles
 
 Git repository: https://github.com/xtianus/yadaframework
@@ -53,7 +51,7 @@ What follows is a partial list of chapters with a brief explanation. The most
 updated index is in the dropdown at the top of each page.
 ====
 
-<<newEclipseProject.adoc#,Getting Started>>:: This section will guide you through the setup of the development environment: installing Java, git,
+<<setup/gettingStarted.adoc#,Getting Started>>:: This section will guide you through the setup of the development environment: installing Java, git,
 MySQL, Eclipse. It will then show you how to create an Eclipse project with a database and a web server
 
 <<examples/bookstoreTutorial.adoc#,Bookstore Tutorial>>:: When your development environment has
