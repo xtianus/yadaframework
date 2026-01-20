@@ -143,6 +143,8 @@ public class AuditFilter extends OncePerRequestFilter implements Filter {
 			MDC.remove(MDC_REMOTEIP);
 			MDC.remove(MDC_TRACEID);
 			MDC.remove(MDC_ENDPOINT);
+			// Return the generated traceId in the response header for debugging
+			response.setHeader("X-Trace-Id", traceId);
 		}
 	}
 

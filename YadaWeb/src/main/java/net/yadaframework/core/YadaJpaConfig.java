@@ -87,10 +87,9 @@ public class YadaJpaConfig {
 	 */
 	@Bean
 	public EntityManagerFactory entityManagerFactory() throws SQLException {
-		boolean yadaLogDbStats = config.isYadaLogDbStatsEnabled();
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		// vendorAdapter.setGenerateDdl(true); // Crea la tabella e le colonne quando non esistono
-		vendorAdapter.setShowSql(config.getShowSql() || yadaLogDbStats);
+		vendorAdapter.setShowSql(config.getShowSql());
 		// HHH90000025: MySQLDialect does not need to be specified explicitly
 		// vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQLDialect");
 		LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
@@ -103,6 +102,8 @@ public class YadaJpaConfig {
 		log.info("Scanning packages for entities: {}", StringUtils.join(packages, ","));
 		factory.setPackagesToScan(packages.toArray(new String[]{}));
 		factory.setDataSource(dataSource());
+		
+		boolean yadaLogDbStats = config.isYadaLogDbStatsEnabled();
 		Map<String, Object> jpaProperties = new HashMap<>();
 		jpaProperties.put("hibernate.use_sql_comments", yadaLogDbStats);
 		if (yadaLogDbStats) {
