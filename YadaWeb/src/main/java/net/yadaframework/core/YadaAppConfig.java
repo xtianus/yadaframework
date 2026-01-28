@@ -1,6 +1,7 @@
 package net.yadaframework.core;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -11,6 +12,7 @@ import javax.sql.DataSource;
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.reloading.PeriodicReloadingTrigger;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.migration.JavaMigration;
 import org.slf4j.Logger;
@@ -206,18 +208,21 @@ public class YadaAppConfig {
 					.setFile(new File("configuration.xml"))
 				);
 		yadaConfiguration.setBuilder(builder);
-//		yadaConfiguration.setConfiguration(ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration()));
+		// Start periodic reloading trigger every 2 seconds
+		PeriodicReloadingTrigger trigger = new PeriodicReloadingTrigger(builder.getReloadingController(), null, 2, TimeUnit.SECONDS);
 
-//		builder.addEventListener(ConfigurationBuilderEvent.CONFIGURATION_REQUEST, new EventListener<Event>() {
-//			@Override
-//			public void onEvent(Event event) {
-//				builder.getReloadingController().checkForReloading(null);
-////				try {
-////					yadaConfiguration.setConfiguration(ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration()));
-////				} catch (ConfigurationException e) {
-////					log.error("Can't reload configuration (ignored)", e);
-////				}
-//			}
-//	    });
+		// The ReloadingCombinedConfigurationBuilder manages multiple configuration sources 
+		// (the main configuration.xml plus any included files). Each source has its own reloading controller, 
+		// and the composite controller fires events for each sub-controller that detects a change.
+		// So it's normal to see more than one debug message "Configuration file changed, reloading..." and it's harmless
+		builder.getReloadingController().addEventListener(org.apache.commons.configuration2.reloading.ReloadingEvent.ANY, event -> {
+			try {
+				log.debug("Configuration file changed, reloading...");
+				builder.getConfiguration(); // This triggers the actual reload and fires RESULT_CREATED
+			} catch (ConfigurationException e) {
+				log.error("Failed to reload configuration", e);
+			}
+		});
+		trigger.start();
 	}
 }

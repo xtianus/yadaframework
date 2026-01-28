@@ -46,11 +46,6 @@
     
     <logger name="org.vibur.dbcp" level="info"/>
     
-<!-- 
-    <logger name="com" level="WARN"/>
-    <logger name="freemarker" level="WARN"/>
-    <logger name="mobi.ldm.web.gestione" level="debug"/>
- -->
     <logger name="security" level="INFO">
 		<appender-ref ref="SEC" />
     </logger>
