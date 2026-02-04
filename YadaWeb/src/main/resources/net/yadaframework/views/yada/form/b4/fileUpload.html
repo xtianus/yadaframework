@@ -23,7 +23,7 @@ Message keys:
 - yada.form.fileUpload.minimumSize
 
 Example:
-<div th:replace="/yada/form/fileUpload::field(fieldName='thumbnailImage',label='Upload thumbnail image',size=${thumbnailSize},required=true,help='Image that will be shown in the list',attachedFile=*{thumbnail})"></div>
+<div th:replace="/yada/form/b4/fileUpload::body(fieldName='thumbnailImage',label='Upload thumbnail image',size=${thumbnailSize},required=true,help='Image that will be shown in the list',attachedFile=*{thumbnail})"></div>
 Also for compatibility with future bootstrap versions: <div th:replace="~{${@yadaWebUtil.getFormFragment('fileUpload')}::body(fieldName='...
 
 */-->

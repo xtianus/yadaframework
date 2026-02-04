@@ -82,7 +82,7 @@ This is the function signature:
 yada.confirm = function(title, message, callback, okButtonText, cancelButtonText, okShowsPreviousModal)
 ----
 
-The `message` and `callback` parameters are the text to show and the function to call on confirmation.
+The `message` and `callback` parameters are the text to show and the function to call on user choice (confirmation or eventually cancellation).
 The other parameters have the same meaning as the corresponding attribute seen above.
 
 Example:
@@ -91,6 +91,20 @@ Example:
 ----
 yada.confirm("Confirm deletion", "Are you sure you want to delete this?", function(){
 	doSomeDeletion();
+}, "Delete", "Abort");
+----
+
+If the `callback` is defined without parameters, it will only be called on positive confirmation. If it is defined with a parameter,
+it will always be called and will receive `true` for confirmation and `false` for abort.
+
+[source,javascript]
+----
+yada.confirm("Confirm deletion", "Are you sure you want to delete this?", function(result) {
+	if (result) { 
+		doSomeDeletion();
+	} else {
+		doSomthingElse();
+	} 
 }, "Delete", "Abort");
 ----
 

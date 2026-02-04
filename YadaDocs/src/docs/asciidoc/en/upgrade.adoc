@@ -5,10 +5,42 @@ Sometimes you have to forget the past
 
 ==  Latest Stable Version
 
-The current stable version of the Yada Framework is https://github.com/xtianus/yadaframework/tree/0.7.6[0.7.6^]
+The current stable version of the Yada Framework is https://github.com/xtianus/yadaframework/tree/0.7.8[0.7.8^]
 
-Version https://github.com/xtianus/yadaframework/tree/0.7.7[0.7.7^] has more features but it
-changes very frequently and the new API may not be stable. This documentation, though,
-is for this version.
+Version https://github.com/xtianus/yadaframework/tree/0.7.8.1[0.7.8.1^] has more features but it
+changes frequently and the new API may not be stable. This documentation, though,
+is for that version.
 
-Both use JDK17, Spring 6, Hibernate 6, Bootstrap 3 to 5, Tomcat 10
+== Version Comparison
+
+[%header,cols="1h,1,1,1,1,1"]
+|===
+|Yada
+|Java
+|Spring
+|Hibernate
+|Bootstrap
+|Tomcat
+
+|0.7.7
+|JDK 17
+|Spring 6
+|Hibernate 6
+|Bootstrap 3-5
+|Tomcat 10
+
+|0.7.8
+|JDK 21
+|Spring 6
+|Hibernate 7
+|Bootstrap 3-5
+|Tomcat 11
+
+|0.7.8.1
+|JDK 21
+|Spring 6
+|Hibernate 7
+|Bootstrap 3-5
+|Tomcat 11
+
+|===

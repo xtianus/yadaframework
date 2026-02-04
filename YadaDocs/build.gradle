@@ -5,8 +5,8 @@ buildscript {
 }
 
 plugins {
-    id 'org.asciidoctor.jvm.convert' version '4.0.4'
-    id 'org.asciidoctor.jvm.pdf' version '4.0.4'
+	id 'org.asciidoctor.jvm.convert' version '4.0.4'
+	id 'org.asciidoctor.jvm.pdf' version '4.0.4'
 }
 
 apply from: '../YadaWeb/loadSharedProperties.gradle'
@@ -22,32 +22,32 @@ eclipse {
 	jdt {
 		// https://stackoverflow.com/a/35302104/587641
 		file {
-      		File dir = file('.settings')
-      		dir.mkdirs()
-      		File f = file('.settings/org.eclipse.core.resources.prefs')
-      		if (!f.exists()) {
-      			f.write('eclipse.preferences.version=1\n')
-      			f.append('encoding/<project>=utf-8')
-      		}
-    	}
+	  		File dir = file('.settings')
+	  		dir.mkdirs()
+	  		File f = file('.settings/org.eclipse.core.resources.prefs')
+	  		if (!f.exists()) {
+	  			f.write('eclipse.preferences.version=1\n')
+	  			f.append('encoding/<project>=utf-8')
+	  		}
+		}
 	}
 	classpath {
-        downloadJavadoc = true
-        downloadSources = true
-    }
+		downloadJavadoc = true
+		downloadSources = true
+	}
 }
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(java_version)
-    }
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(java_version)
+	}
 }
 
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 
 dependencies {
@@ -60,10 +60,10 @@ task listJars {
 }
 
 jar {
-    manifest {
-        attributes("Implementation-Title": "YadaDocs",
-                   "Implementation-Version": archiveVersion)
-    }
+	manifest {
+		attributes("Implementation-Title": "YadaDocs",
+				   "Implementation-Version": archiveVersion)
+	}
 }
 
 // Set the yada version in the properties file
@@ -78,19 +78,19 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 task copyDocInfoHeader {
-    doLast {
-        def sourceFile = file('src/docs/asciidoc/common/docinfo-header.html')
-        def rootDir = file('src/docs/asciidoc')
+	doLast {
+		def sourceFile = file('src/docs/asciidoc/common/docinfo-header.html')
+		def rootDir = file('src/docs/asciidoc')
 
-        Files.walk(Paths.get(rootDir.absolutePath))
-             .filter { Files.isDirectory(it) && !it.equals(rootDir.toPath()) && !it.equals(sourceFile.getParentFile().toPath()) }
-             .forEach { dir ->
-                 copy {
-                     from sourceFile
-                     into dir.toFile()
-                 }
-             }
-    }
+		Files.walk(Paths.get(rootDir.absolutePath))
+			 .filter { Files.isDirectory(it) && !it.equals(rootDir.toPath()) && !it.equals(sourceFile.getParentFile().toPath()) }
+			 .forEach { dir ->
+				 copy {
+					 from sourceFile
+					 into dir.toFile()
+				 }
+			 }
+	}
 }
 
 // Create one pdf for each .adoc file.
@@ -105,85 +105,85 @@ asciidoctorPdf {
 	attributes(
 		// Override imagesdir for PDF generation
 		'imagesdir': "$projectDir/src/docs/resources/img"
-    )
+	)
 	options doctype: 'book', safe: 'unsafe'
 }
 
 // This task concatenates all .adoc files into a single txt file that has been fed to ChatGPT: https://chatgpt.com/g/g-IZTpvHTYM-yada-framework-manual
 task concatAdocFiles {
-    doLast {
-        def startFolder = file('src/docs/asciidoc/en')
-        def outputFile = file("../docs/alltext.txt")
+	doLast {
+		def startFolder = file('src/docs/asciidoc/en')
+		def outputFile = file("../docs/alltext.txt")
 
-        outputFile.withWriter { writer ->
-        	writer << 'This file contains all the Yada Framework .adoc sources.'
-            startFolder.eachFileRecurse { file ->
-           	def relativePath = file.toPath().toAbsolutePath().toString().replace(startFolder.toPath().toAbsolutePath().toString(), "").replaceAll("\\\\", "/")
-                if (file.name.endsWith('.adoc')) {
- 	            	writer << "\n=============\nFilename: $relativePath \n\n"
-                    writer << file.text << '\n'
-                }
-            }
-        }
-    }
+		outputFile.withWriter { writer ->
+			writer << 'This file contains all the Yada Framework .adoc sources.'
+			startFolder.eachFileRecurse { file ->
+		   	def relativePath = file.toPath().toAbsolutePath().toString().replace(startFolder.toPath().toAbsolutePath().toString(), "").replaceAll("\\\\", "/")
+				if (file.name.endsWith('.adoc')) {
+ 					writer << "\n=============\nFilename: $relativePath \n\n"
+					writer << file.text << '\n'
+				}
+			}
+		}
+	}
 }
 
 // This task concatenates all .java files into a single txt file that has been fed to ChatGPT: https://chatgpt.com/g/g-IZTpvHTYM-yada-framework-manual
 task concatJavaFiles {
-    doLast {
-        def startFolder = file('..')
-        def outputFile = file("../docs/alljava.txt")
+	doLast {
+		def startFolder = file('..')
+		def outputFile = file("../docs/alljava.txt")
 
-        outputFile.withWriter { writer ->
-        	writer << 'This file contains all the Yada Framework java sources. All java classes are separated by "============="\n\n'
-            startFolder.eachFileRecurse { file ->
-            	def relativePath = file.toPath().toAbsolutePath().toString().replace(startFolder.toPath().toAbsolutePath().toString(), "").replaceAll("\\\\", "/")
-                if (file.name.endsWith('.java')) {
- 	            	writer << "\n=============\nFilename: $relativePath \n\n"
-                    writer << file.text << '\n'
-                }
-            }
-        }
-    }
+		outputFile.withWriter { writer ->
+			writer << 'This file contains all the Yada Framework java sources. All java classes are separated by "============="\n\n'
+			startFolder.eachFileRecurse { file ->
+				def relativePath = file.toPath().toAbsolutePath().toString().replace(startFolder.toPath().toAbsolutePath().toString(), "").replaceAll("\\\\", "/")
+				if (file.name.endsWith('.java')) {
+ 					writer << "\n=============\nFilename: $relativePath \n\n"
+					writer << file.text << '\n'
+				}
+			}
+		}
+	}
 }
 
 // This task concatenates all frontend files into a single txt file that has been fed to ChatGPT: https://chatgpt.com/g/g-IZTpvHTYM-yada-framework-manual
 task concatFrontendFiles {
-    doLast {
-        def startFolder = file('..')
-        def outputFile = file("../docs/allfe.txt")
+	doLast {
+		def startFolder = file('..')
+		def outputFile = file("../docs/allfe.txt")
 
-        outputFile.withWriter { writer ->
-        	writer << 'This file contains all the Yada Framework frontend sources. Single files are separated by "============="\n\n'
-            startFolder.eachFileRecurse { file ->
-            	def relativePath = file.toPath().toAbsolutePath().toString().replace(startFolder.toPath().toAbsolutePath().toString(), "").replaceAll("\\\\", "/")
-                if (!relativePath.startsWith('/docs/') &&
-                	!relativePath.startsWith('/.git/') &&
-                	!relativePath.startsWith('/YadaDocs/') &&
-                	!relativePath.startsWith('/YadaTools/') &&
-                	!relativePath.matches(".*/bin/.*") &&
-                	!relativePath.matches(".*/\\..*/.*") &&
-                	(file.name.endsWith('.js') || 
-                    file.name.endsWith('.css') || 
-                    file.name.endsWith('.xml') || 
-                    file.name.endsWith('.html'))) {
-	            	writer << "\n=============\nFilename: $relativePath \n\n"
-                    writer << file.text << '\n'
-                }
-            }
-        }
-    }
+		outputFile.withWriter { writer ->
+			writer << 'This file contains all the Yada Framework frontend sources. Single files are separated by "============="\n\n'
+			startFolder.eachFileRecurse { file ->
+				def relativePath = file.toPath().toAbsolutePath().toString().replace(startFolder.toPath().toAbsolutePath().toString(), "").replaceAll("\\\\", "/")
+				if (!relativePath.startsWith('/docs/') &&
+					!relativePath.startsWith('/.git/') &&
+					!relativePath.startsWith('/YadaDocs/') &&
+					!relativePath.startsWith('/YadaTools/') &&
+					!relativePath.matches(".*/bin/.*") &&
+					!relativePath.matches(".*/\\..*/.*") &&
+					(file.name.endsWith('.js') || 
+					file.name.endsWith('.css') || 
+					file.name.endsWith('.xml') || 
+					file.name.endsWith('.html'))) {
+					writer << "\n=============\nFilename: $relativePath \n\n"
+					writer << file.text << '\n'
+				}
+			}
+		}
+	}
 }
 
 task concatAll {
-    dependsOn concatAdocFiles, concatJavaFiles, concatFrontendFiles
-    doLast {
-        println 'All concatenation tasks are complete. Feed the output to ChatGPT.'
-    }
+	dependsOn concatAdocFiles, concatJavaFiles, concatFrontendFiles
+	doLast {
+		println 'All concatenation tasks are complete. Feed the output to ChatGPT.'
+	}
 }
 
 asciidoctor {
-	dependsOn copyDocInfoHeader, concatAll
+	dependsOn copyDocInfoHeader
 	
 	// baseDirFollowsSourceDir()
 	// baseDirIsRootProjectDir()
