@@ -1,0 +1,186 @@
+= Core Framework Reference
+:docinfo: shared
+
+This file covers the core YadaWeb module and the shared utilities that every Yada-based webapp relies on.
+
+== Bootstrapping and configuration
+[cols="1,2,3"]
+|===
+|Class |Location |What it is for / how to use it
+
+|YadaWebApplicationInitializer, YadaTomcatServer |net/yadaframework/core |Servlet bootstrap helpers: `YadaWebApplicationInitializer` registers Spring MVC without `web.xml` and exposes the root `DispatcherServlet`; `YadaTomcatServer` starts an embedded Tomcat pointing at `src/main/webapp` and lets you switch environment with `<acronym><env>`. Use them together for local dev or integration tests.
+|YadaAppConfig, YadaJpaConfig, YadaDummyJpaConfig, YadaDummyDatasource, YadaDummyEntityManagerFactory |net/yadaframework/core |Spring configuration for datasource, Flyway, mail sender, schedulers and framework beans. The `Dummy*` variants avoid a real DB when running isolated tests; override beans here when wiring custom datasources or replacing the mail sender.
+|YadaWebConfig |net/yadaframework/core |Spring MVC configuration (view resolvers, Thymeleaf dialect, locale resolver/interceptor, async timeout, static resource handlers). Extend when you need to register additional converters, resource handlers or customize view caching.
+|YadaConfiguration, YadaConstants |net/yadaframework/core |Hierarchical configuration built on Apache Commons Configuration with environment overlays. Inject `YadaConfiguration` instead of reading property files directly; `YadaConstants` gathers shared parameter names, header names, and session keys to avoid magic strings.
+|YadaAiConfigImportSelector |net/yadaframework/core |Conditional importer that activates the AI module configuration when the YadaAi dependency is present; keep it if you want `@Import(YadaAiConfig.class)` handled automatically.
+|YadaSetup |net/yadaframework/components |Startup hook; extend it to seed users/data at application bootstrap (`run` is invoked after the context is ready).
+|YadaMariaDB, YadaMariaDBServer |net/yadaframework/components |Embedded MariaDB bootstrapper/server wrapper. Use when `<embedded enabled="true">` is configured or tests need an ephemeral DB; exposes start/stop, port selection, and data directory management.
+|YadaCommonsMultipartResolver |org/springframework/web/multipart/commons |Multipart resolver that detects upload size and produces friendly errors; drop it into your MVC config to unify file upload handling.
+|===
+
+== Core services, utilities, and enums
+[cols="1,2,3"]
+|===
+|Class |Location |What it is for / how to use it
+
+|YadaUtil, YadaWebUtil |net/yadaframework/components |General-purpose helpers for strings/dates/timezones/json, reflection with deep copy, lazy initializers, servlet helpers, redirects, and ajax detection. `YadaWebUtil` adds download helpers, locale-aware redirects, pagination helpers, and merges `BindingResult` after entity copies; prefer these over ad-hoc utilities to keep controllers small.
+|CloneableDeep, CloneableFiltered |net/yadaframework/core |Marker interfaces consumed by `YadaUtil.deepClone` to describe which fields get copied; implement when you need deterministic cloning (for DTO snapshots without IDs/relations).
+|YadaLocalEnum, YadaRegistrationType |net/yadaframework/core |Enum helpers for localized text and default registration request types. Useful when building drop-downs or mapping registration flows to readable labels.
+|YadaFluentBase |net/yadaframework/core |Base class for fluent builders (DataTables, SQL) that implements the `back()` pattern so nested builders remain readable.
+|YadaFormHelper |net/yadaframework/components |Inspects `BindingResult` and field metadata to drive dynamic form rendering and validation feedback.
+|===
+
+== File and media management
+[cols="1,2,3"]
+|===
+|Class |Location |What it is for / how to use it
+
+|YadaFileManager, YadaManagedFile, YadaAttachedFileCloneSet |net/yadaframework/components / persistence.entity |Central entry point for uploads: saves files, creates desktop/mobile variants, clones attachments across entities, deletes from disk, and derives URLs (`getFileUrl`, `getDesktopImageUrl`). Call `manageFile(MultipartFile)` right after validation and attach the returned `YadaManagedFile`/`YadaAttachedFile` to your entity.
+|YadaCopyNot, YadaCopyShallow |net/yadaframework/components |Annotations consumed by `YadaUtil.copyEntity()` to skip or shallow-copy specific fields during deep copies (useful for JPA entities with relations).
+|YadaCropQueue, YadaCropImage |net/yadaframework/web |Holds pending images to crop after upload. Add crop requests before redirecting the user to the crop UI, then link the cropped file back to your entity with `crop.link(existingField)`.
+|===
+
+== Communication and user feedback
+[cols="1,2,3"]
+|===
+|Class |Location |What it is for / how to use it
+
+|YadaEmailService, YadaEmailBuilder |net/yadaframework/components |Low-level and fluent email senders; build messages from Thymeleaf templates, handle attachments/inline resources, and log results. Inject `YadaEmailBuilder` in services/controllers to send templated mail without touching JavaMail APIs.
+|YadaEmailParam, YadaEmailContent |net/yadaframework/web |DTOs representing envelope and body data used by `YadaEmailBuilder`; populate them when testing templates or sending custom bodies.
+|YadaNotify, YadaNotifyData |net/yadaframework/components |Builder for modal notifications (OK/info/error) usable in ajax and normal flows; stores messages in model/redirect attributes for consistent feedback after controller actions.
+|===
+
+== Jobs, scheduling, and rate limiting
+[cols="1,2,3"]
+|===
+|Class |Location |What it is for / how to use it
+
+|YadaJobScheduler, YadaJobManager, YadaLongRunningExclusive, YadaJob, YadaJobState |net/yadaframework/components / persistence.entity |Job scheduling/execution components with DB-backed locking and retry support. Use `YadaJobScheduler.schedule()` to enqueue tasks and `YadaJobManager` to guard long-running exclusives; persist state via the provided entities.
+|YadaJobDao, YadaJobSchedulerDao |net/yadaframework/persistence/repository |DAOs that encapsulate locking, heartbeat updates, and cleanup for scheduled jobs; inject them when building custom job monitors or housekeeping tasks.
+|YadaKeyRateLimiter, YadaSimpleRateLimiter, YadaSleepingRateLimiter |net/yadaframework/components |In-memory rate limiters keyed by identifiers to throttle user actions or external API calls; choose the sleeping variant when backpressure is acceptable.
+|===
+
+== Persistence helpers and entities
+[cols="1,2,3"]
+|===
+|Class |Location |What it is for / how to use it
+
+|YadaDao |net/yadaframework/persistence |Base DAO with EntityManager utilities and HQL helpers. Extend to avoid boilerplate for pagination, typed queries, and transaction handling.
+|YadaSql, YadaSqlBuilder |net/yadaframework/persistence |Fluent SQL/HQL builders with parameter binding, pagination helpers, and convenience joins. Prefer `YadaSqlBuilder` when composing dynamic filters out of reusable `YadaClause` definitions.
+|YadaMoney, YadaMoneyConverter |net/yadaframework/persistence |Monetary value holder plus JPA converter; use as field type to keep currency/totals consistent instead of raw `BigDecimal`.
+|YadaAttachedFile, YadaPersistentEnum, YadaBrowserId, YadaRateLog, YadaClause |net/yadaframework/persistence/entity |Reusable JPA entities for attachments with metadata, persistent enums, browser fingerprint info, rate-limit logging, and query clause definitions. Use as-is or extend when adding custom fields.
+|YadaAttachedFileDao, YadaPersistentEnumDao, YadaBrowserIdDao, YadaClauseDao, YadaLocaleDao, YadaFileManagerDao |net/yadaframework/persistence/repository |DAOs that encapsulate lifecycle and cleanup logic for the shared entities; call them instead of wiring `EntityManager` manually.
+|===
+
+== Web layer primitives and DTOs
+[cols="1,2,3"]
+|===
+|Class |Location |What it is for / how to use it
+
+|YadaController |net/yadaframework/web |Base controller offering locale/session helpers, redirect building, and ajax detection. Extend instead of a plain `@Controller` base to reuse common patterns.
+|YadaViews |net/yadaframework/web |Constants for common view names/commands (AJAX_* shortcuts, predefined modal templates); return these from controllers to avoid typos.
+|YadaPageRequest, YadaPageRows, YadaPageSort |net/yadaframework/web |Pagination request/response DTOs supporting bookmarkable and "load more" flows; pair with `YadaSql` queries for consistent paging.
+|YadaDatatablesRequest, YadaDatatablesColumn, YadaDatatablesColumnSearch, YadaDatatablesOrder |net/yadaframework/web |DTOs mirroring DataTables ajax payloads; bind your endpoint parameters to these objects before returning JSON pages.
+|YadaJsonDateSimpleSerializer, YadaJsonDateTimeShortSerializer, YadaJsonRawStringSerializer, YadaJsonView |net/yadaframework/web |Jackson helpers for date formatting and raw-string serialization, plus marker views for partial JSON responses.
+|YadaPersistentEnumEditor |net/yadaframework/web |Property editor for `YadaPersistentEnum` use in MVC forms.
+|YadaPublicSuffix |net/yadaframework/web |Validator that checks domains/emails against the public suffix list; run it before sending verification emails.
+|YadaFormFieldMap, YadaFormPasswordChange |net/yadaframework/web/form |DTOs for dynamic form rendering and password-change binding to keep controller signatures small.
+|YadaSocial, YadaFacebookRequest, YadaFacebookRequestV9 |net/yadaframework/web/social |Helper classes to call Facebook APIs and store social user profile data; inject when enabling social login.
+|YadaFlot* classes (Axis, Grid, Chart, SeriesOptions, SeriesObject, PlotOptions) |net/yadaframework/web/flot |Java representations of Flot chart configuration; build chart JSON server-side and pass to the view.
+|===
+
+== DataTables fluent API
+[cols="1,2,3"]
+|===
+|Class |Location |What it is for / how to use it
+
+|YadaDataTable, YadaDataTableHelper, YadaDataTableFactory, YadaDtAjaxHandler |net/yadaframework/web/datatables |Fluent builder and helper for server-side DataTables. Call `yadaDataTableFactory.getSingleton("id", locale, table -> { ... })` to centralize column definitions and `YadaDataTableDao.getConvertedJsonPage()` inside ajax endpoints; reuse singleton configs to avoid rebuilding them per request.
+|YadaDataTableConfigurer |net/yadaframework/web/datatables |Callback interface that custom DataTable builders can implement to configure tables; keeps builder code separate from controller logic.
+|YadaDataTableButton, YadaDataTableHTML, YadaDataTableConfirmDialog, YadaDataTableColumn, YadaDataTableLanguage |net/yadaframework/web/datatables/config |Builder pieces for toolbar buttons, column definitions, localized labels, confirm dialogs, and HTML wrappers (row/toolbar).
+|YadaDTOptions, YadaDTColumns, YadaDTColumnDef, YadaDTOrder, YadaDTBreakpoint, YadaDTResponsive, YadaDTResponsiveDetails |net/yadaframework/web/datatables/options |Java mirrors of DataTables options and Responsive extension; chain setters for paging, sorting, visibility, and responsive details to keep Java/JS in sync.
+|Proxy counterparts (YadaDataTableProxy, YadaDataTableButtonProxy, YadaDataTableColumnProxy, YadaDataTableConfirmDialogProxy, YadaDataTableHTMLProxy, YadaDataTableLanguageProxy, YadaDTColumnsProxy, YadaDTColumnDefProxy, YadaDTOptionsProxy) |net/yadaframework/web/datatables/proxy |Serializable snapshots used to pass configuration to the frontend via JSON/Thymeleaf; useful when caching table configs.
+|===
+
+== Thymeleaf Yada dialect
+[cols="1,2,3"]
+|===
+|Class |Location |What it is for / how to use it
+
+|YadaDialect |net/yadaframework/web/dialect |Registers custom processors/tags (`yada:` namespace) such as ajax links, src rewrites, and form components; include in your `SpringTemplateEngine` to simplify view markup.
+|YadaAjaxAttrProcessor, YadaHrefAttrProcessor, YadaSrcAttrProcessor, YadaSrcsetAttrProcessor |net/yadaframework/web/dialect |Attribute processors that convert yada attributes to proper HTML/Thymeleaf for ajax calls and resource resolution; use when you need consistent ajax wiring.
+|YadaBrOnFirstSpaceAttrProcessor, YadaNewlineTextAttrProcessor, YadaSimpleAttrProcessor |net/yadaframework/web/dialect |Text/markup processors to add `<br>` on first space, preserve newlines, or pass simple attributes through expression evaluation.
+|YadaDataTableTagProcessor |net/yadaframework/web/dialect |Custom `<yada:datatable>` tag that injects DataTable HTML and binds configuration from your `YadaDataTable`.
+|YadaInputTagProcessor, YadaInputTagSuggestion, YadaInputCounterTagProcessor, YadaTextareaTagProcessor |net/yadaframework/web/dialect |Implement `<yada:input>` and `<yada:textarea>` with addons, password toggles, enum rendering, ajax suggestions, and counters; pair with the JS dialect support.
+|===
+
+== Raw utilities, selenium, and tools
+[cols="1,2,3"]
+|===
+|Class |Location |What it is for / how to use it
+
+|YadaHttpUtil, YadaNetworkUtil |net/yadaframework/raw |HTTP client helpers (GET/POST with charset and timeout), cookie parsing, and network utilities; handy for service-to-service calls outside Spring RestTemplate.
+|YadaIntDimension |net/yadaframework/raw |Width/height holder with cover/contain helpers used by crop/resize routines.
+|YadaRegexReplacer, YadaRegexUtil |net/yadaframework/raw |Regex convenience functions (placeholder replacement, safe matching) to keep regex logic reusable. 
+|YadaLookupTable, YadaLookupTableThree/Four/Five/Six |net/yadaframework/raw |Thread-safe lookup tables keyed by tuples; cache computed values using composite keys.
+|YadaSeleniumUtil |net/yadaframework/selenium |Selenium WebDriver helpers for waits, screenshots, and environment setup; reuse in UI tests instead of ad-hoc sleeps.
+|AntIncrementBuild |net/yadaframework/tools |Ant task to bump build numbers during builds.
+|YadaSchemaGenerator |net/yadaframework/tools |Utility to generate DB schema DDL from the configured persistence unit; useful when diffing schema changes.
+|UCheckDigit, UCheckNum |sogei.utility |Validation helpers for Italian fiscal codes/VAT (check digit/number algorithms).
+|===
+
+== Exception types
+[cols="1,2,3"]
+|===
+|Class |Location |What it is for / how to use it
+
+|YadaJobFailedException and other Yada* exceptions |net/yadaframework/exceptions |Typed runtime exceptions for configuration errors, invalid values, email failures, running job conflicts, and system-level faults. Throw these from services instead of generic RuntimeException so the global exception handler and logs stay meaningful.
+|InternalException, InvalidValueException, SystemException |net/yadaframework/exceptions |Low-level runtime wrappers signalling internal faults or invalid inputs; commonly rethrown by util classes when validation fails.
+|===
+
+== Frontend assets (in `YadaWeb/src/main/resources/net/yadaframework/views`)
+- AJAX command fragments: `ajaxCloseModal.html`, `ajaxError.html`, `ajaxForbidden.html`, `ajaxList.html`, `ajaxRedirect.html`, `ajaxReload.html`, `ajaxResponseData.html`, `ajaxSuccess.html` for server-driven ajax responses.
+- DataTables templates: `dataTable.html` (generic table skeleton) and `dataTableCrud.html` (table with CRUD toolbar wiring) that pair with `YadaDataTable`.
+- Messaging: `feedbackMessages.html`, `messagesProperties.html` export i18n keys to JS so the client can reuse server messages.
+- Modal and dialogs: `modalGeneric.html` plus Bootstrap-specific variants `modalGenericB3/B4/B5`, confirmation modals `modalConfirm.html` and B3/B4/B5 variants, notification modals `modalNotifyB3/B4/B5`, password change modal `modalPasswordChange.html`, `httpError.html`, and `empty.html` placeholder.
+- CSS: `yada/css/yada.css` (base widgets) and image assets in `yada/css/images/`.
+- JS: `yada/js/yada.js` (core UI utilities including loader and autocomplete), `yada/ajax.js` (ajax helpers, success handlers, loaders), `yada/datatable` scripts (`yada.datatables.js` and `yada.datatablesLegacy.js` for older markup), `yada.dialect.js` (client-side support for dialect tags), `yada.social.js` (social login helpers), `yada.cookieBanner.js` (GDPR banner), `formdata.3.0.17.js` polyfill.
+- Form fragments (Thymeleaf includes): `form/text.html`, `form/boolean.html`, `form/checklist.html`, `form/enum.html`, `form/list*.html`, `form/password.html`, `form/radio-values.html`, `form/range.html`, `form/fileUpload.html`, with Bootstrap 3/4/5 variants under `form/b3`, `form/b4`, `form/b5`. Custom formfield widgets: `formfields/input.html`, `inputCounter.html`, `inputEnum.html`, `inputSuggestionFragment.html`, `textarea.html`.
+
+== Configuration files
+- `YadaDialect.xml`: registers the Thymeleaf dialect with Spring.
+- `net.yadaframework.yadaweb.properties`: exposes the YadaWeb version placeholder (@YADA_VERSION@).
+- `log4j.properties`: default JVM logging config for non-SLF4J environments.
+
+== Usage examples
+- Build a DataTable:
++
+[source,java]
+----
+YadaDataTable users = yadaDataTableFactory.getSingleton("users", locale, t -> {
+    t.dtEntityClass(UserProfile.class)
+     .dtStructureObj()
+        .dtColumnObj("Email", "userCredentials.username").back()
+        .dtButtonObj("Edit").dtUrl("@{/dashboard/userEdit}").dtIcon("<i class='bi bi-pencil'></i>").back()
+     .back();
+});
+model.addAttribute("userTable", users);
+----
+
+- Handle a file upload with cropping:
++
+[source,java]
+----
+MultipartFile multipart = form.getAvatar();
+YadaCropQueue queue = session.addCropQueue(yadaWebUtil.redirectString("/crop", locale), yadaWebUtil.redirectString("/profile", locale));
+YadaCropImage crop = queue.addCropImage(yadaFileManager.manageFile(multipart), config.getAvatarDims(), "/user", "avatar_");
+user.setAvatar(crop.link(user.getAvatar()));
+return queue.getCropRedirect();
+----
+
+- Send a notification after an ajax action:
++
+[source,java]
+----
+yadaNotify.title("Saved", model).ok().message("Book stored").add();
+return YadaViews.AJAX_NOTIFY_B5;
+----

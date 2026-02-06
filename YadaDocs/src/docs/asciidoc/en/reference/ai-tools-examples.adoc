@@ -1,0 +1,121 @@
+= AI, Tools, and Examples Reference
+:docinfo: shared
+
+Covers the YadaAi integration module, build tools, skeleton projects, and the YadaExamples sample app. Use this as a map when you need to wire AI calls or to study the reference application.
+
+== YadaAi (AWS Bedrock / Claude integration)
+[cols="1,2,3"]
+|===
+|Class |Location |Purpose / usage
+
+|YadaAiConfigurable |net/yadaframework/ai |Configuration interface exposing AI-related getters (prompts, model names, safety settings). Implement it on your `YadaConfiguration` subclass so the Bedrock client knows which model/guardrails to use per environment.
+|YadaAiConfig |net/yadaframework/ai |Spring configuration enabling Bedrock client beans and wiring configuration properties. Import it or rely on `YadaAiConfigImportSelector` (from the core module) to activate beans automatically.
+|YadaAiUtil |net/yadaframework/ai/components |Component that builds Bedrock `InvokeModelRequest`, encodes images, parses JSON responses, and logs AI calls. Inject it into services/controllers to run prompts against Claude models, handling retries and content-type setup for you.
+|YadaClaudeRequest |net/yadaframework/ai/components/bedrock/claude |Fluent builder for Claude requests (system messages, user messages, tool definitions, temperature, maxTokens). Use lambdas to add messages and tools; the builder returns the request ready for `YadaAiUtil.invoke()`.
+|YadaClaude* parts (ContentBlock, ContentType, ImageSource, ImageSourceType, InputSchema, MediaType, Message, Metadata, Role, SystemContent, Tool, ToolChoice) |net/yadaframework/ai/components/bedrock/claude/parts |Value objects representing Claude payload pieces (messages, roles, media, tool schemas). Compose them via `YadaClaudeRequest` lambdas to avoid hand-writing JSON structures.
+|===
+
+Configuration file: `net.yadaframework.yadaai.properties` exposes the module version placeholder. See `YadaAi/README.md` for detailed setup (add dependency, implement `YadaAiConfigurable`, supply `<yadaAi>` entries in `configuration.xml`, set AWS credentials).
+
+Typical call pattern:
++
+[source,java]
+----
+YadaClaudeRequest request = YadaClaudeRequest.build(r -> r
+    .systemMessage("You are translating support tickets")
+    .userMessage("Translate to Italian:\n" + ticket.getBody())
+    .temperature(0.2)
+    .maxTokens(400));
+String translated = yadaAiUtil.invokeText(request, yadaConfiguration);
+----
+Keep `YadaAiUtil` out of controllers when possible—delegate to a service layer so you can stub it in tests.
+
+== YadaTools (build tasks and scripts)
+[cols="1,2,3"]
+|===
+|File |Location |Purpose / usage
+
+|YadaInitTask.groovy |YadaTools/src/main/groovy/net/yadaframework/tools |Gradle task that scaffolds a new project (copies templates, creates env folders, config files, SASS props). Run it when starting a new app to get consistent module dependencies and directory layout.
+|YadaCreateDbSchemaTask.groovy |YadaTools/src/main/groovy/net/yadaframework/tools |Gradle task to generate SQL schema from JPA entities. Handy when you need a DDL snapshot for DBAs or migrations.
+|YadaProject.groovy, YadaProjectConfiguration.groovy |YadaTools/src/main/groovy/net/yadaframework/tools |Gradle plugin internals defining project metadata and helper methods; used by `template.gradle` to wire module coordinates and env-specific properties.
+|YadaToolsPlugin.groovy, YadaToolsUtil.groovy |YadaTools/src/main/groovy/net/yadaframework/tools |Registers custom Gradle tasks and utilities (filesystem helpers, env detection). Apply the plugin in `build.gradle` to enable `yadaInit`, `yadaCreateDbSchema`, and related tasks.
+|template.gradle |YadaTools/scripts |Base Gradle build file template for new apps (declares Yada module dependencies, common tasks, envs array). Feed it to `gradle init --type basic` or copy it when bootstrapping manually.
+|fixProject.sh |YadaTools/scripts |Script to flatten Gradle-generated `lib` subproject when creating a new Eclipse Gradle project; run once after `gradle eclipse`.
+|sass.properties |YadaTools/scripts |Default SASS build properties copied into new apps; tweak variables here before building CSS.
+|terraforming.sh, terraformingMore.sh, terraforming.cfg |YadaTools/scripts |Provisioning helpers to prepare servers and Tomcat deploy directories (creates users, folders, sets permissions). Execute on target hosts before deploying.
+|defaultCourtesyPage/pleaseWait.html, logo.jpg |YadaTools/scripts/defaultCourtesyPage |Simple maintenance/courtesy page assets to deploy alongside apps as a fallback when the app is down.
+|===
+
+== YadaBones
+- Placeholder project kept for future skeleton content. Use it when you need a minimal module to clone without dragging the full example app.
+
+== YadaExamples sample application
+
+=== Core configuration classes
+[cols="1,2,3"]
+|===
+|Class |Location |Purpose / usage
+
+|WebApplicationInitializer |net/yadaframework/example/core |Bootstraps Spring MVC and Security; registers configurations. Mirrors how a production app wires modules without a `web.xml`.
+|AppConfig |net/yadaframework/example/core |Application beans and message-source setup; a good starting point for wiring custom services.
+|WebConfig |net/yadaframework/example/core |MVC configuration extending `YadaWebSecurityConfig` (templates, resource handlers, dialects). Shows how to plug in the Yada dialect and static resources.
+|JpaConfig |net/yadaframework/example/core |JPA and transaction configuration (persistence unit name matches `persistence.xml`). Use it as a template when creating your own persistence unit.
+|SecurityConfig |net/yadaframework/example/core |Application-specific security rules using `YadaSecurityConfig` (login URLs, role protections). Demonstrates hooking login modal routes and dashboard restrictions.
+|YexConfiguration |net/yadaframework/example/core |Application configuration extending `YadaConfiguration` with getters used by views; illustrates how to read env overrides from `conf.webapp.*.xml`.
+|Setup |net/yadaframework/example/components |Extends `YadaUserSetup` to create initial users from `conf.webapp.*.xml`; run during startup to guarantee admin accounts exist.
+|YexEmailService |net/yadaframework/example/components |Thin wrapper providing app-specific email sending (delegates to `YadaEmailService`) so controllers stay decoupled from mail plumbing.
+|UserSession |net/yadaframework/example/web |Session-scoped bean storing current user profile id and small pieces of UI state.
+|===
+
+=== Persistence
+[cols="1,2,3"]
+|===
+|Class |Location |Purpose / usage
+
+|UserProfile |net/yadaframework/example/persistence/entity |Application-specific user profile extending `YadaUserProfile` with extra fields (e.g., nickname, terms acceptance flags). Shows how to extend the base model without breaking security code.
+|YexRegistrationRequest |net/yadaframework/example/persistence/entity |Registration request extension used during signup; carries extra validation fields.
+|UserProfileDao |net/yadaframework/example/persistence/repository |DAO for user profiles (lookup by email, populate DataTables data). Demonstrates how to plug DAOs into the DataTables backend.
+|===
+
+=== Web controllers
+[cols="1,2,3"]
+|===
+|Class |Location |Purpose / usage
+
+|HomeController |net/yadaframework/example/web |Home page, login helpers, locale handling. Shows the pattern for ajax modal login and locale path building.
+|RegistrationController |net/yadaframework/example/web |Signup flow that delegates to `YadaRegistrationController` plus custom validation (e.g., terms acceptance). A good reference for mixing default controllers with project-specific checks.
+|DashboardController |net/yadaframework/example/web/dashboard |Minimal dashboard landing page that wires common model attributes.
+|UserProfileController |net/yadaframework/example/web/dashboard |CRUD for users, DataTables endpoint, file upload for avatars, password change modal usage; illustrates combining `YadaDataTable`, `YadaFileManager`, and `YadaNotify`.
+|===
+
+=== Views (WEB-INF/views)
+- `header.html` / `footer.html`: common layout wrappers that include loaders, message bundle export, navigation, and the notification modal.
+- `home.html`: public landing page demonstrating ajax modals and i18n.
+- `modalLogin.html`: Bootstrap login modal supporting ajax and normal posts, shows validation messages and password reset link.
+- `passwordReset.html`: form to request password recovery email.
+- `register.html`: signup form using `YexRegistrationRequest` with password match helper.
+- `errorPage.html`: dedicated error display used by `YadaGlobalExceptionHandler` when forwarded.
+- Dashboard templates under `dashboard/`: `dashboard.html` (layout), `usersLegacy.html` (pre-DataTables example), `users.html` (DataTables integration), `userProfileEditForm.html` (ajax form for editing users).
+
+=== Email templates (src/main/resources/template/email)
+- `registrationConfirmation.html`, `passwordRecovery.html`, `emailChange.html`, `invitation.html`, `supportRequest.html`: localized HTML email bodies using Thymeleaf expressions.
+- `imageLeftRight.html`: generic two-column email content template.
+- `logo50.png`: inline image asset used by emails.
+
+=== Configuration files
+- `configuration.xml`: base combined configuration loaded by `YadaConfiguration`.
+- `conf.webapp.dev.xml`, `conf.webapp.prod.xml`: environment-specific overrides (paths, DB creds, i18n locales, email settings, initial users/roles).
+- `META-INF/persistence.xml`: JPA persistence unit definition listing entity classes and Hibernate properties.
+- `logback.xml`: logging configuration (appenders/levels) for the sample app.
+- Flyway baseline: `database/V001__baseline.sql` to initialize schema.
+
+=== Misc assets
+- `env/` scripts: `createDatabaseAndUser` and `dropAndCreateDatabase` batch/sh files to manage MySQL user/schema.
+- `schema/` folder: generated DDL snapshots for reference.
+- `sass.properties`: copied from YadaTools to configure SASS compilation.
+
+== Usage tips
+- To extend the example, add new tabs under `dashboard/` and secure them in `SecurityConfig` (e.g., `.requestMatchers("/dashboard/**").hasRole("ADMIN")`).
+- Emails: inject `YexEmailService` and call `send(name, modelAttributes...)` with template names matching files under `template/email`; the example shows how to pass inline images and locale-aware links.
+- DataTables endpoint example: `UserProfileController.userProfileTablePage()` demonstrates using `YadaDataTableDao.getConvertedJsonPage` with a custom `YadaDatatablesRequest` for filtering; mirror this pattern when adding new tables.
+- Inspect the example when wiring login modals and password reset—`HomeController` and `RegistrationController` show which request attributes/views are expected by the security handlers.

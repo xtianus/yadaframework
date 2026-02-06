@@ -1,0 +1,66 @@
+= CMS and Commerce Reference
+:docinfo: shared
+
+Covers YadaWebCMS (content/images) and YadaWebCommerce (orders/carts) modules. It focuses on the pieces you integrate into a custom site when you need media management and transactional flows.
+
+== CMS core
+[cols="1,2,3"]
+|===
+|Class |Location |Purpose / usage
+
+|YadaCmsConfiguration |net/yadaframework/cms |Extends `YadaConfiguration` with CMS-specific getters (image dimensions, upload folders). Wire it into your application config (`YadaCmsConfig`) and read these getters instead of hardcoding paths.
+|YadaWebCmsHelper |net/yadaframework/cms/components |Utility helper for CMS pages (slug generation, paging helpers, link building) so controllers stay lean. Call it when rendering lists and building friendly URLs.
+|===
+
+== CMS persistence
+[cols="1,2,3"]
+|===
+|Class |Location |Purpose / usage
+
+|YadaArticle |net/yadaframework/cms/persistence/entity |Generic article/page entity with localized title/body, attachments, and publish windows. Extend it when you need custom fields but want to keep the default localization and publish-window logic.
+|YadaProduct |net/yadaframework/cms/persistence/entity |Base CMS product/catalog item (files, gallery, localized description, price info). Use it for gallery-driven catalog pages; enrich it with domain-specific attributes.
+|YadaGallerySlide |net/yadaframework/cms/persistence/entity |Slide metadata (image, video, flags, localized text) for complex galleries and carousels. Stores sort order and caption data so the UI can rebuild client-side structures.
+|YadaDimension |net/yadaframework/cms/persistence/entity |Editable width/height specs for CMS assets; shared by crop definitions and responsive assets so editors can adjust without code changes.
+|YadaSortableEntity |net/yadaframework/cms/persistence/entity |Mixin for sortable rows (provides `sortOrder` field). Implement it on entities that appear in drag/drop lists to reuse the sorting helpers.
+|YadaProductDao, YadaWebCmsDao |net/yadaframework/cms/persistence/repository |DAOs for products and generic CMS utilities (sorting, localized queries). Use their helpers instead of writing ad-hoc `ORDER BY` logic.
+|===
+
+== CMS web layer and views
+[cols="1,2,3"]
+|===
+|Class |Location |Purpose / usage
+
+|YadaCmsProductController |net/yadaframework/cms/web |Example controller for CMS product editing; wires gallery upload/crop and sorting. Use it as a template for your own controllers (it shows how to combine `YadaFileManager`, `YadaCropQueue`, and `YadaWebCmsHelper`).
+|entitySorter.html |net/yadaframework/views/yadacms |Generic sorter UI for arrays of entities (drag to reorder, ajax post updates). Accepts `entityIdName/value`, `urlSort`, `urlDelete`, and label overrides; returns fragments ready to replace the list content.
+|imageSorter.html |net/yadaframework/views/yadacms |Drag/drop image gallery manager (upload, delete, sort) backed by `YadaCropQueue` and `YadaFileManager`; expects model attributes `gallery`, `uploadUrl`, `deleteUrl`, `sortUrl`, and crop definitions.
+|imageCropper.html |net/yadaframework/views/yadacms |Crop UI using Jcrop; consumes a `YadaCropQueue` to crop each pending image and redirects back once all images are processed.
+|yadacms.css |net/yadaframework/views/yada/css |CMS-specific styles for sorter/cropper widgets; include alongside the base `yada.css`.
+|===
+
+== Commerce core
+[cols="1,2,3"]
+|===
+|Class |Location |Purpose / usage
+
+|YadaCommerceConfig |net/yadaframework/commerce |Spring config stub to activate the commerce module; import into your application config so DAOs/entities are scanned.
+|YadaCurrencyMismatchException |net/yadaframework/commerce/exceptions |Thrown when mixing currencies in carts/orders. Catch it near checkout to prompt users to fix inconsistent currency selections.
+|===
+
+== Commerce persistence
+[cols="1,2,3"]
+|===
+|Class |Location |Purpose / usage
+
+|YadaAddress |net/yadaframework/commerce/persistence/entity |Customer address (locale-aware strings, geolocation slots). Extend when you need VAT IDs or delivery instructions.
+|YadaCart, YadaCartItem |net/yadaframework/commerce/persistence/entity |Shopping cart container and items (article reference, quantity, price, personalization fields). Supports multiple items per cart and can be tied to a user or session.
+|YadaOrder, YadaOrderItem, YadaOrderStatus |net/yadaframework/commerce/persistence/entity |Order aggregate with lifecycle state and item breakdown. Track status transitions using the enum and delegate persistence to the DAO to keep transitions consistent.
+|YadaTransaction |net/yadaframework/commerce/persistence/entity |Payment transaction record (provider refs, status, currency, totals). Persist provider responses here so retries and reconciliation have context.
+|YadaCommerceArticle |net/yadaframework/commerce/persistence/entity |Marker interface for purchasable items; implement it on domain entities that need to live in carts.
+|YadaOrderDao, YadaTransactionDao |net/yadaframework/commerce/persistence/repository |DAOs encapsulating cart/order/transaction persistence and status transitions. Use them to handle concurrency (e.g., preventing double-checkout) instead of writing custom updates.
+|===
+
+== Usage tips
+- Gallery workflow: when a CMS form posts a new image, validate size with `YadaManagedFile`, enqueue it with `YadaCropQueue.addCropImage()`, then redirect to the cropper fragment returned by `queue.getCropRedirect()`; after crop, link the resulting `YadaAttachedFile` back into the owning entity.
+- Sorting slides: the `imageSorter.html` fragment posts to `urlSort` with `currentId` and `otherId`; on the server call `yadaAttachedFileDao.swapSortOrder()` and return the updated fragment to keep UI and DB in sync.
+- CMS pagination: leverage `YadaWebCmsHelper` paging helpers when rendering articles/products so URLs and localized slugs stay consistent across locales.
+- Commerce totals: ensure all `YadaMoney` values in carts and transactions share the same currency to avoid `YadaCurrencyMismatchException`; let `YadaOrderDao` calculate totals after promotions/taxes to avoid drifting amounts.

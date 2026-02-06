@@ -1,0 +1,74 @@
+= Security Module Reference
+:docinfo: shared
+
+Reference for the YadaWebSecurity module (authentication/authorization helpers and the web glue around it).
+
+== Configuration, filters, and shared beans
+[cols="1,2,3"]
+|===
+|Class |Location |Purpose / usage
+
+|YadaSecurityConfig, YadaWebSecurityConfig |net/yadaframework/security |Spring Security config base classes; extend `YadaSecurityConfig` to set login URLs, success targets, protected paths, and to plug in captcha/CSRF handling. `YadaWebSecurityConfig` pulls in MVC conveniences (view resolvers, dialect) so your application config can stay thin.
+|SecurityWebApplicationInitializer |net/yadaframework/security |Registers the Spring Security filter chain without `web.xml`; leave it on the classpath so the filter is active in servlet containers and tests.
+|AuditFilter |net/yadaframework/security |Servlet filter that logs request metadata and user info for auditing; install early in the chain to capture even failed auth attempts.
+|CheckSessionFilter |net/yadaframework/security |Detects expired sessions and blocks unauthorized access; use it when session invalidation and ajax-friendly handling matter.
+|YadaLocalePathRequestCache, YadaWrappedSavedRequest |net/yadaframework/security |Saved-request cache aware of locale-in-path URLs; wraps saved requests so redirects after login land on the intended localized page.
+|YadaSecurityBeans |net/yadaframework/security/components |Factory for core security beans (password encoder, user details service) that applications import; override methods to customize password policy or user lookup.
+|YadaSecurityUtilStub |net/yadaframework/security/components |No-op replacement for `YadaSecurityUtil` when the security module is absent; prevents null checks in shared templates/services.
+|TooManyFailedAttemptsException |net/yadaframework/security |Exception thrown when login attempt thresholds are exceeded; catch/translate it in login controllers to show lockout messages.
+|===
+
+== Authentication, login, and user utilities
+[cols="1,2,3"]
+|===
+|Class |Location |Purpose / usage
+
+|YadaUserDetailsService |net/yadaframework/security/components |Loads users from DB implementing Spring `UserDetailsService`; enforces lockout, password change flags, and role mapping. Override to enrich the returned principal.
+|YadaAuthenticationSuccessHandler, YadaAuthenticationSuccessFilter |net/yadaframework/security/components |Handle login success by updating timestamps/timezone and returning redirects or AJAX payloads. The filter injects ajax flags so templates can branch between modal/redirect flows.
+|YadaAuthenticationFailureHandler |net/yadaframework/security/components |Populates request attributes on login failure (wrong password, locked, expired) and forwards to the login page; read these attributes in your templates instead of reinventing error mapping.
+|YadaLogoutSuccessHandler |net/yadaframework/security/components |Redirects or notifies after logout; wire it into your `HttpSecurity.logout()` configuration.
+|YadaTokenHandler |net/yadaframework/security/components |Creates and validates remember-me / auto-login tokens. Keep it stateless in controllers and let it read/write `YadaAutoLoginToken` via the DAO.
+|YadaSecurityEmailService |net/yadaframework/security/components |Sends registration, password reset, and email-change confirmations using Thymeleaf templates; pull it into controllers instead of touching `JavaMailSender` directly.
+|YadaSecurityUtil |net/yadaframework/security/components |Helper exposing authentication status, roles, impersonation, and clearing saved requests; use inside controllers and templates to guard content and to build login/redirect links.
+|YadaUserSetup |net/yadaframework/security/components |Base class that seeds initial users/roles from configuration at startup; extend in your app so dev and prod environments bootstrap predictably.
+|YadaAuthenticationException classes |net/yadaframework/security/exceptions |`InternalAuthenticationException` and `YadaInvalidUserException` for malformed or unknown credentials; throw these from custom authentication providers.
+|===
+
+== Persistence layer
+[cols="1,2,3"]
+|===
+|Class |Location |Purpose / usage
+
+|YadaUserProfile, YadaUserCredentials |net/yadaframework/security/persistence/entity |User model and login credentials (email, password, roles, timezone, password-change flag). Extend `YadaUserProfile` when you need more profile fields but keep the credential mapping intact.
+|YadaSocialCredentials |net/yadaframework/security/persistence/entity |Stores OAuth/social login identifiers and tokens; associate with profiles to merge classic and social auth.
+|YadaRegistrationRequest |net/yadaframework/security/persistence/entity |Temporary registration/password-recovery request persisted until confirmation; consumed by `YadaRegistrationController`.
+|YadaAutoLoginToken |net/yadaframework/security/persistence/entity |Persistent remember-me tokens handled by `YadaTokenHandler`; persisted so logins survive server restarts.
+|YadaTicket, YadaTicketStatus, YadaTicketType, YadaTicketMessage |net/yadaframework/security/persistence/entity |Generic support ticket entities for user/system messages with localization support; use for contact/helpdesk scenarios.
+|YadaUserMessage, YadaUserMessageType |net/yadaframework/security/persistence/entity |Outbox/notifications for a user (with type and locale info) used by `YadaSecurityEmailService` and dashboards.
+|YadaCommentMessage |net/yadaframework/security/persistence/entity |Simple embedded message holder for audit notes.
+|YadaUserProfileDao, YadaUserCredentialsDao, YadaSocialCredentialsDao, YadaRegistrationRequestDao, YadaAutoLoginTokenDao, YadaTicketDao, YadaTicketMessageDao, YadaUserMessageDao |net/yadaframework/security/persistence/repository |DAOs for CRUD and lookup of all security-related entities; use instead of wiring `EntityManager` directly.
+|===
+
+== Web controllers, session objects, and dialect extensions
+[cols="1,2,3"]
+|===
+|Class |Location |Purpose / usage
+
+|YadaLoginController |net/yadaframework/security/web |Handles login page/modal, forwards saved requests, exposes `/yadaLoginSuccess` for ajax logins, and supports locale-aware redirects. Extend or reuse its methods rather than duplicating login plumbing.
+|YadaRegistrationController |net/yadaframework/security/web |Implements registration and password-recovery flows (sends confirmation emails, validates tokens, creates users with roles). Override hooks to add application-specific validation fields.
+|YadaMiscController |net/yadaframework/security/web |Shared endpoints such as image crop execution and generic helpers; useful when you need standard upload/crop flows without writing a controller.
+|YadaSession |net/yadaframework/security/web |Session-scoped bean storing user-specific transient data (crop queues, cached locale/timezone). Inject into controllers to carry temporary UI state between requests.
+|YadaDialectWithSecurity |net/yadaframework/security/web |Dialect extension that adds security-aware processors on top of YadaDialect; include alongside the base dialect when you need role-aware rendering.
+|YadaSocialRegistrationData |net/yadaframework/security/web |DTO used when binding social registration data from providers like Facebook.
+|YadaCropDefinition |net/yadaframework/security/web |Metadata describing target crop sizes for managed uploads; pair with `YadaCropQueue` before forwarding to the crop UI.
+|YadaActionUploadAttrProcessor |net/yadaframework/security/web |Thymeleaf processor that adds upload metadata to HTML attributes used in security-managed contexts (e.g., drag/drop uploads with crop enforcement).
+|===
+
+== Configuration files
+- `net.yadaframework.yadawebsecurity.properties`: exposes the security module version placeholder; keep version alignment when packaging.
+
+== Usage snippets
+- Password reset request: call `YadaRegistrationController.handleRegistrationRequest()` from your controller after validating subscription fields; on success it sends `/registrationConfirmation/{token}` emails using `YadaSecurityEmailService` templates. Use `YadaRegistrationRequestDao` to check for existing pending requests before creating new ones.
+- Intercept login failures: check request attributes such as `passwordError`, `userDisabled`, and `lockoutMinutes` in your login view (e.g., `th:if="${passwordError!=null}"`) to show specific guidance. The failure handler places them on the request so you do not need to parse exceptions.
+- Remember-me tokens: enable auto login by wiring `YadaTokenHandler` in your security configuration and persisting `YadaAutoLoginToken` via the provided DAO; clear tokens on logout to avoid stale cookies.
+- Crop/upload flows: use `YadaActionUploadAttrProcessor` to tag upload fields and pass a `YadaCropDefinition` plus `YadaCropQueue` to the views; `YadaMiscController` exposes endpoints to perform the crop and return cropped attachments.

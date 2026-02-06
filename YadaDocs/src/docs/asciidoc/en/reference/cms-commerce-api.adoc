@@ -1,0 +1,381 @@
+:docinfo: shared
+= Cms Commerce API Reference (auto-generated)
+
+Generated from source (auto-extracted). Lists public methods per class (signatures collapsed to one line); includes Javadoc summary when present.
+
+== net.yadaframework.cms
+=== YadaCmsConfiguration (YadaWebCMS/src/main/java/net/yadaframework/cms/YadaCmsConfiguration.java)
+- `File getAssetManagerPrivatePath()`
+- `File assetManagerPublicPath()`
+- `String folderName = configuration.getString("config/paths/assetManager/publicDir");`
+- `String assetManagerPublicUrl()`
+- `String urlSegment = configuration.getString("config/paths/assetManager/publicDir/@url");`
+
+
+== net.yadaframework.cms.components
+=== YadaWebCmsHelper (YadaWebCMS/src/main/java/net/yadaframework/cms/components/YadaWebCmsHelper.java)
+- `String getFlagClasses(Object target, String flagClasses)` - Returns a space-separated list of classes taken from the flagClasses list when the corresponding flag on target is true. Non-existing flags are ignored.
+
+
+== net.yadaframework.cms.persistence.entity
+=== YadaArticle (YadaWebCMS/src/main/java/net/yadaframework/cms/persistence/entity/YadaArticle.java)
+- `String getLocalName()` - Returns the localized name in the current request locale
+- `void setLocalName(String name)`
+- `void setLocalName(Locale locale, String name)`
+- `String getLocalColor()` - Returns the localized color in the current request locale
+- `void setLocalcolor (String color)`
+- `String getColor(Locale locale)`
+- `Long getId()`
+- `void setId(Long id)`
+- `String getSku()`
+- `void setSku(String code)`
+- `Map<Locale, String> getColor()`
+- `void setColor(Map<Locale, String> description)`
+- `YadaDimension getDimension()`
+- `void setDimension(YadaDimension dimension)`
+- `YadaMoney getUnitPrice()`
+- `void setUnitPrice(YadaMoney unitPrice)`
+- `YadaProduct getProduct()`
+- `void setProduct(YadaProduct product)`
+- `boolean isPublished()`
+- `void setPublished(boolean published)`
+- `Date getModified()`
+- `void setModified(Date modified)`
+- `long getVersion()`
+- `List<YadaAttachedFile> getGalleryImages()`
+- `void setGalleryImages(List<YadaAttachedFile> galleryImages)`
+- `List<YadaAttachedFile> getSilhouetteImages()`
+- `void setSilhouetteImages(List<YadaAttachedFile> silhouetteImages)`
+- `List<YadaAttachedFile> getAttachments()`
+- `void setAttachments(List<YadaAttachedFile> attachments)`
+- `YadaAttachedFile getImage()`
+- `void setImage(YadaAttachedFile image)`
+- `Map<Locale, String> getName()`
+- `void setName(Map<Locale, String> name)`
+- `Field[] getExcludedFields()`
+- `Long getChosenProductId()`
+- `void setChosenProductId(Long chosenProductId)`
+- `String getInternalName()`
+- `void setInternalName(String internalName)`
+
+=== YadaDimension (YadaWebCMS/src/main/java/net/yadaframework/cms/persistence/entity/YadaDimension.java)
+- `String getSize()`
+- `void setSize(String size)`
+- `Float getWidth()`
+- `void setWidth(Float width)`
+- `Float getHeight()`
+- `void setHeight(Float height)`
+- `Float getDepth()`
+- `void setDepth(Float depth)`
+- `Float getDiameter()`
+- `void setDiameter(Float diameter)`
+- `Float getWeight()`
+- `void setWeight(Float weight)`
+- `Integer getElements()`
+- `void setElements(Integer elements)`
+- `Float getLength()`
+- `void setLength(Float length)`
+- `Float getRadius()`
+- `void setRadius(Float radius)`
+
+=== YadaGallerySlide (YadaWebCMS/src/main/java/net/yadaframework/cms/persistence/entity/YadaGallerySlide.java)
+- `Field[] getExcludedFields()`
+- `String getText5LocalValue()`
+- `String getText6LocalValue()`
+- `String getText7LocalValue()`
+- `String getText8LocalValue()`
+- `Long getId()`
+- `void setId(Long id)`
+- `YadaAttachedFile getVideo()`
+- `void setVideo(YadaAttachedFile video)`
+- `YadaAttachedFile getImage()`
+- `void setImage(YadaAttachedFile image)`
+- `String getText1()`
+- `void setText1(String text1)`
+- `String getText2()`
+- `void setText2(String text2)`
+- `String getText3()`
+- `void setText3(String text3)`
+- `Map<Locale, String> getText5local()`
+- `void setText5local(Map<Locale, String> text5local)`
+- `Map<Locale, String> getText6local()`
+- `void setText6local(Map<Locale, String> text6local)`
+- `Long getPos()`
+- `void setPos(Long pos)`
+- `boolean isSlideEnabled()`
+- `void setSlideEnabled(boolean enabled)`
+- `boolean isFlag1()`
+- `void setFlag1(boolean flag1)`
+- `boolean isFlag2()`
+- `void setFlag2(boolean flag2)`
+- `String getText4()`
+- `void setText4(String text4)`
+- `Map<Locale, String> getText7local()`
+- `void setText7local(Map<Locale, String> text7local)`
+- `Map<Locale, String> getText8local()`
+- `void setText8local(Map<Locale, String> text8local)`
+- `String getData1()`
+- `void setData1(String data1)`
+- `String getData2()`
+- `void setData2(String data2)`
+- `String getData3()`
+- `void setData3(String data3)`
+- `String getData4()`
+- `void setData4(String data4)`
+- `String getData5()`
+- `void setData5(String data5)`
+- `String getData6()`
+- `void setData6(String data6)`
+- `MultipartFile getMultipartImage()`
+- `void setMultipartImage(MultipartFile multipartImage)`
+- `MultipartFile getMultipartVideo()`
+- `void setMultipartVideo(MultipartFile multipartVideo)`
+- `int hashCode()`
+- `boolean equals(Object obj)`
+- `int hashCodeInternal()`
+- `boolean equalsInternal(Object obj)`
+
+=== YadaProduct (YadaWebCMS/src/main/java/net/yadaframework/cms/persistence/entity/YadaProduct.java)
+- `// public void initBinder(WebDataBinder binder)`
+- `// public YadaProduct()`
+- `// public String getLocalName()`
+- `// public String getLocalSubtitle()`
+- `// public String getLocalDescription()`
+- `// public String getLocalMaterials()`
+- `String getLocalName()` - Returns the localized name in the current request locale
+- `void seLocalName(String name)`
+- `String getLocalSubtitle()` - Returns the localized subtitle in the current request locale
+- `void seLocalSubtitle(String subtitle)`
+- `String getLocalDescription()` - Returns the localized description in the current request locale
+- `void seLocalDescription(String description)`
+- `String getLocalMaterials()` - Returns the localized materials in the current request locale
+- `void seLocalMaterials (String materials)`
+- `Long getId()`
+- `void setId(Long id)`
+- `int getYear()`
+- `void setYear(int year)`
+- `Map<Locale, String> getName()`
+- `void setName(Map<Locale, String> name)`
+- `Map<Locale, String> getSubtitle()`
+- `void setSubtitle(Map<Locale, String> subtitle)`
+- `Map<Locale, String> getDescription()`
+- `void setDescription(Map<Locale, String> description)`
+- `Map<Locale, String> getMaterials()`
+- `void setMaterials(Map<Locale, String> materials)`
+- `List<YadaProduct> getAccessories()`
+- `void setAccessories(List<YadaProduct> accessories)`
+- `List<YadaProduct> getAccessoryOf()`
+- `void setAccessoryOf(List<YadaProduct> accessoryOf)`
+- `List<YadaArticle> getArticles()`
+- `void setArticles(List<YadaArticle> articles)`
+- `boolean isPublished()`
+- `void setPublished(boolean published)`
+- `Date getModified()`
+- `void setModified(Date modified)`
+- `long getVersion()`
+- `List<YadaAttachedFile> getGalleryImages()`
+- `void setGalleryImages(List<YadaAttachedFile> galleryImages)`
+- `List<YadaAttachedFile> getAttachments()`
+- `void setAttachments(List<YadaAttachedFile> attachments)`
+- `YadaAttachedFile getImage()`
+- `void setImage(YadaAttachedFile image)`
+- `Field[] getExcludedFields()`
+- `boolean isAccessoryFlag()`
+- `void setAccessoryFlag(boolean accessoryFlag)`
+- `List<YadaPersistentEnum<?>> getCategories()`
+- `void setCategories(List<YadaPersistentEnum<?>> categories)`
+- `List<YadaPersistentEnum<?>> getSubcategories()`
+- `void setSubcategories(List<YadaPersistentEnum<?>> subcategories)`
+
+
+== net.yadaframework.cms.persistence.repository
+=== YadaProductDao (YadaWebCMS/src/main/java/net/yadaframework/cms/persistence/repository/YadaProductDao.java)
+- `void removeGalleryImage(Long productId, Long yadaAttachedFileId)` - Remove the association of a gallery image from a product
+- `void addGalleryImage(Long productId, Long yadaAttachedFileId)` - Adds a new gallery image attachment to a product
+- `void setThumbnailImage(Long productId, Long yadaAttachedFileId)` - Update a new thumbnail image attachment to a product
+
+=== YadaWebCmsDao (YadaWebCMS/src/main/java/net/yadaframework/cms/persistence/repository/YadaWebCmsDao.java)
+- `void swapAttributes(Class<?> entityClass, String attributeName, Long oneId, Long anotherId)` - Swaps the attributes of two entities. For example for swapping positions.
+
+
+== net.yadaframework.cms.web
+=== YadaCmsProductController (YadaWebCMS/src/main/java/net/yadaframework/cms/web/YadaCmsProductController.java)
+- `String deleteGalleryImage(Long productId, Long imageId)`
+
+
+== net.yadaframework.commerce.exceptions
+=== YadaCurrencyMismatchException (YadaWebCommerce/src/main/java/net/yadaframework/commerce/exceptions/YadaCurrencyMismatchException.java)
+- `YadaCurrencyMismatchException()`
+- `YadaCurrencyMismatchException(String message)`
+- `YadaCurrencyMismatchException(String format, Object... params)` - Build the message using slf4j log format syntax
+- `YadaCurrencyMismatchException(Throwable cause, String format, Object... params)`
+- `YadaCurrencyMismatchException(Throwable cause)`
+- `YadaCurrencyMismatchException(String message, Throwable cause)`
+
+
+== net.yadaframework.commerce.persistence.entity
+=== YadaAddress (YadaWebCommerce/src/main/java/net/yadaframework/commerce/persistence/entity/YadaAddress.java)
+- `Long getId()`
+- `void setId(Long id)`
+- `String getStreet()`
+- `void setStreet(String street)`
+- `String getNumber()`
+- `void setNumber(String number)`
+- `String getCity()`
+- `void setCity(String city)`
+- `String getZipCode()`
+- `void setZipCode(String zipCode)`
+- `String getNotes()`
+- `void setNotes(String notes)`
+- `YadaUserProfile getOwner()`
+- `void setOwner(YadaUserProfile owner)`
+- `String getState()`
+- `void setState(String state)`
+- `String getCountry()`
+- `void setCountry(String country)`
+- `Date getModified()`
+- `void setModified(Date modified)`
+- `long getVersion()`
+
+=== YadaCart (YadaWebCommerce/src/main/java/net/yadaframework/commerce/persistence/entity/YadaCart.java)
+- `YadaUserProfile getOwner()`
+- `void setOwner(YadaUserProfile owner)`
+- `Date getModified()`
+- `void setModified(Date modified)`
+- `Long getId()`
+- `void setId(Long id)`
+- `Date getCreationTimestamp()`
+- `void setCreationTimestamp(Date creationTimestamp)`
+- `List<YadaCartItem> getCartItems()`
+- `void setCartItems(List<YadaCartItem> cartItems)`
+- `long getVersion()`
+
+=== YadaCartItem (YadaWebCommerce/src/main/java/net/yadaframework/commerce/persistence/entity/YadaCartItem.java)
+- `Long getId()`
+- `void setId(Long id)`
+- `int getQuantity()`
+- `void setQuantity(int quantity)`
+- `YadaCommerceArticle getArticle()`
+- `void setArticle(YadaCommerceArticle article)`
+- `YadaCart getCart()`
+- `void setCart(YadaCart cart)`
+- `Date getModified()`
+- `void setModified(Date modified)`
+- `long getVersion()`
+
+=== YadaCommerceArticle (YadaWebCommerce/src/main/java/net/yadaframework/commerce/persistence/entity/YadaCommerceArticle.java)
+- `int getAvailableQuantity()`
+- `void setAvailableQuantity(int availableQuantity)`
+- `int getDaysBeforeAvailable()`
+- `void setDaysBeforeAvailable(int daysBeforeAvailable)`
+
+=== YadaOrder (YadaWebCommerce/src/main/java/net/yadaframework/commerce/persistence/entity/YadaOrder.java)
+- `YadaMoney getTotalPayment(YadaTransactionDao yadaTransactionDao)` - Returns the sum of all transactions relative to this order created by the owner. The result can be positive, negative or zero (no transaction or payment+refund), but never null.
+- `Long getId()`
+- `void setId(Long id)`
+- `YadaPersistentEnum<YadaOrderStatus> getOrderStatus()`
+- `void setOrderStatus(YadaPersistentEnum<YadaOrderStatus> orderStatus)`
+- `Date getCreationTimestamp()`
+- `void setCreationTimestamp(Date creationTimestamp)`
+- `Date getStateChangeTimestamp()`
+- `void setStateChangeTimestamp(Date stateChangeTimestamp)`
+- `Date getShippingTimestamp()`
+- `void setShippingTimestamp(Date shippingTimestamp)`
+- `String getTrackingData()`
+- `void setTrackingData(String trackingData)`
+- `String getNotes()`
+- `void setNotes(String notes)`
+- `YadaMoney getTotalPrice()`
+- `void setTotalPrice(YadaMoney totalPrice)`
+- `List<YadaOrderItem> getOrderItems()`
+- `void setOrderItems(List<YadaOrderItem> orderItems)`
+- `YadaUserProfile getOwner()`
+- `void setOwner(YadaUserProfile owner)`
+- `Date getModified()`
+- `void setModified(Date modified)`
+- `long getVersion()`
+- `String getCurrency()`
+- `void setCurrency(String currency)`
+
+=== YadaOrderItem (YadaWebCommerce/src/main/java/net/yadaframework/commerce/persistence/entity/YadaOrderItem.java)
+- `Long getId()`
+- `void setId(Long id)`
+- `int getQuantity()`
+- `void setQuantity(int quantity)`
+- `YadaMoney getUnitPrice()`
+- `void setUnitPrice(YadaMoney unitPrice)`
+- `YadaOrder getOrder()`
+- `void setOrder(YadaOrder order)`
+- `String getArticleCode()`
+- `void setArticleCode(String articleCode)`
+- `Date getModified()`
+- `void setModified(Date modified)`
+- `long getVersion()`
+- `int hashCode()`
+- `boolean equals(Object obj)`
+
+=== YadaOrderStatus (YadaWebCommerce/src/main/java/net/yadaframework/commerce/persistence/entity/YadaOrderStatus.java)
+- `YadaPersistentEnum<YadaOrderStatus> toYadaPersistentEnum()`
+- `void setYadaPersistentEnum(YadaPersistentEnum yadaPersistentEnum)`
+- `String toString(MessageSource messageSource, Locale locale)`
+
+=== YadaTransaction (YadaWebCommerce/src/main/java/net/yadaframework/commerce/persistence/entity/YadaTransaction.java)
+- `String getTimestampAsRelative(Locale locale)` - Returns the timestamp formatted as a relative time from now, in the account owner's timezone
+- `Date getModified()`
+- `void setModified(Date modified)`
+- `long getVersion()`
+- `void setVersion(long version)`
+- `Long getId()`
+- `void setId(Long id)`
+- `YadaUserProfile getAccountOwner()`
+- `void setAccountOwner(YadaUserProfile payer)`
+- `YadaUserProfile getOtherParty()`
+- `void setOtherParty(YadaUserProfile payee)`
+- `String getCurrencyCode()`
+- `void setCurrencyCode(String currencyCode)`
+- `Date getTimestamp()`
+- `void setTimestamp(Date timestamp)`
+- `String getStatus()`
+- `void setStatus(String status)`
+- `String getTransactionId()`
+- `void setTransactionId(String transactionId)`
+- `YadaMoney getAmount()`
+- `void setAmount(YadaMoney amount)`
+- `String getDescription()`
+- `void setDescription(String description)`
+- `String getData()`
+- `void setData(String data)`
+- `YadaOrder getOrder()`
+- `void setOrder(YadaOrder order)`
+- `String getPayerId1()`
+- `void setPayerId1(String payerId1)`
+- `String getPayerId2()`
+- `void setPayerId2(String payerId2)`
+- `Boolean getInverse()`
+- `void setInverse(Boolean inverse)`
+- `String getPaymentSystem()`
+- `void setPaymentSystem(String paymentSystem)`
+- `Boolean getSuspended()`
+- `void setSuspended(Boolean suspended)`
+- `Boolean getExternal()`
+- `void setExternal(Boolean external)`
+
+
+== net.yadaframework.commerce.persistence.repository
+=== YadaOrderDao (YadaWebCommerce/src/main/java/net/yadaframework/commerce/persistence/repository/YadaOrderDao.java)
+- `List<YadaOrderItem> find(YadaUserProfile owner, String articleCode)` - Find a previously saved YadaOrderItem. Can be many if the user repeated the request.
+- `void cleanup()` - Delete unpaid orders after 20 days
+- `void cleanup(int daysPassed)` - Delete unpaid orders after some time
+- `YadaOrderItem save(YadaOrderItem entity)`
+- `YadaOrder save(YadaOrder yadaOrder)`
+
+=== YadaTransactionDao (YadaWebCommerce/src/main/java/net/yadaframework/commerce/persistence/repository/YadaTransactionDao.java)
+- `YadaMoney sumAmount(@Nullable YadaUserProfile accountOwner)` - Returns the sum of all transaction amounts for the given user or for all users. double ledger system.
+- `YadaTransaction createInverse(YadaTransaction payment)` - Given an existing transaction, create the twin opposite transaction in order to implement a double ledger
+- `// public YadaTransaction makeTwinTransactions(YadaMoney movement, String currency, YadaUserProfile sender, YadaUserProfile receiver, // String externalTransactionId, Date externalTransactionTime, String externalStatus, String description, String externalPayerEmail, // YadaOrder yadaOrder)`
+- `int deleteSuspended(YadaOrder yadaOrder)` - Delete a suspended transaction relative to an order.
+- `List<YadaTransaction> find(YadaOrder yadaOrder)` - Find all direct transactions (not the inverse) related to an order, and not suspended i.e. only the originating transactions of the double ledger, that may be two in case of a refund
+- `YadaPageRows<YadaTransaction> find(Long userProfileId, YadaPageRequest yadaPageRequest)` - Find a page of transactions (payments received or sent) for the specified user
+- `YadaTransaction find(Long id)`
+- `YadaTransaction save(YadaTransaction entity)`
+

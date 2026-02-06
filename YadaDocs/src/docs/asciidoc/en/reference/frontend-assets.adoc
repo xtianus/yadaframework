@@ -1,0 +1,47 @@
+:docinfo: shared
+= Frontend Assets Reference
+
+Reference for the reusable HTML/JS/CSS shipped in `YadaWeb/src/main/resources/net/yadaframework/views`. Use these fragments alongside the Yada dialect/JS helpers to keep markup and behaviors consistent.
+
+== AJAX response fragments (`yada/ajax*.html`)
+- `ajaxSuccess.html`, `ajaxError.html`, `ajaxForbidden.html`, `ajaxReload.html`, `ajaxRedirect.html`, `ajaxCloseModal.html`, `ajaxList.html`, `ajaxResponseData.html`: small Thymeleaf fragments returned by controllers to drive client-side actions. Choose the fragment via `YadaViews.AJAX_*` constants; the JS in `yada/ajax.js` interprets them and dispatches redirects, reloads, modal closures, or payload rendering.
+
+== Modal and dialog templates
+- `modalGeneric.html`, `modalGenericB3/B4/B5`: base modal shells (plain and Bootstrap 3/4/5) that take a `modalTitle`, `modalBodyFragment`, and footer buttons. Render them server-side or via AJAX to keep modals consistent.
+- `modalConfirm.html`, `modalConfirmB3/B4/B5`: confirmation dialogs driven by model attributes like `message`, `okUrl`, and `cancelUrl`; used by delete flows and dangerous actions.
+- `modalNotifyB3/B4/B5`: notification modals wired to `YadaNotify`; display success/error/info messages with optional title and detail.
+- `modalPasswordChange.html`: password change modal that binds to `YadaFormPasswordChange` and supports AJAX validation.
+- `httpError.html`, `empty.html`: generic error and placeholder fragments for controller fallbacks.
+
+== DataTables templates
+- `dataTable.html`: generic server-side DataTable shell bound to a `YadaDataTableProxy`/`YadaDataTable` instance. Includes table header/body placeholders and standard classes.
+- `dataTableCrud.html`: DataTable plus CRUD toolbar placeholders; expects button configs from the DataTable builder.
+
+== Messaging helpers
+- `feedbackMessages.html`: renders success/error/info messages from the model (pairs with `YadaNotify`).
+- `messagesProperties.html`: exports selected i18n messages into JS variables for client-side validation/labels.
+
+== Forms (vanilla and Bootstrap variants)
+- Common fragments: `form/text.html`, `boolean.html`, `checklist.html`, `enum.html`, `fileUpload.html`, `list*.html` (values/objects), `password.html`, `radio-values.html`, `range.html`. Bind to `th:field` values and pass optional parameters like `labelKey`, `placeholderKey`, `helpKey`, `required`.
+- Bootstrap variants: under `form/b3`, `form/b4`, `form/b5` with matching component styles (e.g., `text.html`, `boolean.html`, `checklist.html`, `fileUpload.html`, `enum.html`, `list.html`, `radio-values.html`, `range.html`). Use the variant that matches your CSS framework to keep form spacing/feedback consistent.
+- Crop/upload: `fileUpload.html` integrates drag-and-drop markup and responds to `YadaActionUploadAttrProcessor` output for crop metadata.
+
+== Custom formfield widgets
+- `formfields/input.html`, `inputCounter.html`, `inputEnum.html`, `inputSuggestionFragment.html`, `textarea.html`: higher-level widgets powered by the Yada dialect and JS helpers. They expose attributes for addons, icon buttons, suggestion lists, counters, and enum dropdowns.
+
+== CSS
+- `yada/css/yada.css`: base stylesheet for the widgets above (forms, modals, DataTables skin, loaders). Pair it with framework CSS (Bootstrap if applicable) and include accompanying `images/` assets for icons/loading indicators.
+- `yadacms.css` (under `yada/css/`): extra styles for CMS sorters/croppers shipped in the CMS module; include when using `entitySorter.html` or `imageSorter.html`.
+
+== JavaScript
+- `yada/js/yada.js`: core UI utilities (loader overlay, ajax form helpers, DOM helpers, autocomplete wiring, field validation hooks).
+- `yada/js/yada.ajax.js`: interprets server AJAX fragments (above) and dispatches redirects/reloads/modal flows; registers default success/error handlers.
+- `yada/js/yada.datatables.js`, `yada/js/yada.datatablesLegacy.js`: client-side glue for Yada DataTables proxies (modern and legacy markup); initializes responsive tables and binds toolbar buttons.
+- `yada/js/yada.dialect.js`: client support for the Yada Thymeleaf dialect (input widgets, suggestion dropdowns, counters).
+- `yada/js/yada.social.js`: social-login helpers (popup handling, callback wiring).
+- `yada/js/yada.cookieBanner.js`: GDPR/banner display and consent persistence.
+- `yada/js/formdata.3.0.17.js`: FormData polyfill for older browsers; include when targeting legacy clients.
+
+== HTML utilities
+- `messagesProperties.html`, `feedbackMessages.html`: include early in layouts to expose i18n strings and to show queued notifications after redirects.
+- `ajax*` fragments and modal shells can be embedded directly or fetched via AJAX; all assume the Yada JS bundle is loaded (`yada.js` + `yada.ajax.js` and any needed DataTables/social/cookie scripts).

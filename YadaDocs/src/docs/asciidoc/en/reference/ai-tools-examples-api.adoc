@@ -1,0 +1,232 @@
+:docinfo: shared
+= Ai Tools Examples API Reference (auto-generated)
+
+Generated from source (auto-extracted). Lists public methods per class (signatures collapsed to one line); includes Javadoc summary when present.
+
+== (no package)
+=== YadaCreateDbSchemaTask (YadaTools/src/main/groovy/net/yadaframework/tools/YadaCreateDbSchemaTask.groovy)
+- `createDbSchema()`
+
+=== YadaInitTask (YadaTools/src/main/groovy/net/yadaframework/tools/YadaInitTask.groovy)
+- `initWebApp()`
+
+
+== net.yadaframework.ai
+=== YadaAiConfig (YadaAi/src/main/java/net/yadaframework/ai/YadaAiConfig.java)
+- `void validateConfiguration()`
+- `BedrockRuntimeClient bedrockRuntimeClient()` - Creates a lazy-initialized BedrockRuntimeClient bean. The client is only instantiated when first accessed (e.g., when AiUtil uses it), not at application startup. This avoids unnecessary AWS connection overhead if AI features are not used.
+
+
+== net.yadaframework.ai.components
+=== YadaAiUtil (YadaAi/src/main/java/net/yadaframework/ai/components/YadaAiUtil.java)
+- `Map<Locale,String> getLocalizedMap(YadaClaudeRequest claudeRequest)` - Invokes the Claude model expecting a json map as result, where the keys are the ISO2 language codes and the values are the localized strings. <pre> { "en": "The image shows a cat.", "fr": "L'image montre un chat." } </pre> The Locale will have the country component when configured in the application configuration.
+- `String invokeClaudeModel(YadaClaudeRequest claudeRequest)` - Invoke the Claude model and return the response as a string without any postprocessing
+
+
+== net.yadaframework.ai.components.bedrock.claude
+=== YadaClaudeRequest (YadaAi/src/main/java/net/yadaframework/ai/components/bedrock/claude/YadaClaudeRequest.java)
+- `YadaClaudeRequest()`
+- `YadaClaudeRequest anthropicVersion(String anthropicVersion)`
+- `YadaClaudeRequest maxTokens(int maxTokens)` - Sets the maximum number of tokens to generate.
+- `YadaClaudeRequest addMessage(YadaClaudeMessage message)`
+- `YadaClaudeRequest addMessage(Consumer<YadaClaudeMessage> messageBuilder)` - Adds a message using a lambda expression or method reference. This allows for a more concise syntax when building messages. <pre> request.addMessage(msg -> msg.content("Hello, Claude!")); request.addMessage(msg -> msg     .addContentBlock(new ContentBlock().text("Describe this image"))     .addContentBlock(new ContentBlock().source(imageSource))); </pre>
+- `YadaClaudeRequest messages(List<YadaClaudeMessage> messages)`
+- `YadaClaudeRequest system(String system)`
+- `YadaClaudeRequest system(List<YadaClaudeSystemContent> system)`
+- `YadaClaudeRequest temperature(double temperature)` - Sets the temperature for response generation. Controls randomness: lower values make output more focused and deterministic, higher values make output more random and creative.
+- `YadaClaudeRequest topP(double topP)` - Sets the top-p (nucleus sampling) parameter. Only tokens with cumulative probability up to top_p are considered.
+- `YadaClaudeRequest topK(int topK)` - Sets the top-k parameter. Only the top k most likely tokens are considered for sampling.
+- `YadaClaudeRequest stopSequences(List<String> stopSequences)`
+- `YadaClaudeRequest addStopSequence(String stopSequence)`
+- `YadaClaudeRequest stream(boolean stream)`
+- `YadaClaudeRequest metadata(YadaClaudeMetadata metadata)`
+- `YadaClaudeRequest metadata(Consumer<YadaClaudeMetadata> metadataBuilder)` - Sets the metadata using a lambda expression or method reference. This allows for a more concise syntax when building metadata. <pre> request.metadata(meta -> meta.userId("user123")); </pre>
+- `YadaClaudeRequest tools(List<YadaClaudeTool> tools)`
+- `YadaClaudeRequest addTool(YadaClaudeTool tool)`
+- `YadaClaudeRequest addTool(Consumer<YadaClaudeTool> toolBuilder)` - Adds a tool using a lambda expression or method reference. This allows for a more concise syntax when building tools. <pre> request.addTool(tool -> tool     .name("get_weather")     .description("Get the current weather")     .inputSchema(new InputSchema().type("object"))); </pre>
+- `YadaClaudeRequest toolChoice(YadaClaudeToolChoice toolChoice)`
+- `YadaClaudeRequest toolChoice(Consumer<YadaClaudeToolChoice> toolChoiceBuilder)` - Sets the tool choice using a lambda expression or method reference. This allows for a more concise syntax when building tool choice. <pre> request.toolChoice(choice -> choice     .type("tool")     .name("get_weather")); </pre>
+- `String toJson() throws JsonProcessingException` - Validates the request and converts it to JSON string. Validates that all required fields are set and within valid ranges.
+- `// public String getAnthropicVersion()  return anthropicVersion; }`
+- `// public Integer getMaxTokens()  return maxTokens; }`
+- `// public List<YadaClaudeMessage> getMessages()  return messages; }`
+- `// public Object getSystem()  return system; }`
+- `// public Double getTemperature()  return temperature; }`
+- `// public Double getTopP()  return topP; }`
+- `// public Integer getTopK()  return topK; }`
+- `// public List<String> getStopSequences()  return stopSequences; }`
+- `// public Boolean getStream()  return stream; }`
+- `// public YadaClaudeMetadata getMetadata()  return metadata; }`
+- `// public List<YadaClaudeTool> getTools()  return tools; }`
+- `// public YadaClaudeToolChoice getToolChoice()  return toolChoice; }`
+
+
+== net.yadaframework.ai.components.bedrock.claude.parts
+=== YadaClaudeContentBlock (YadaAi/src/main/java/net/yadaframework/ai/components/bedrock/claude/parts/YadaClaudeContentBlock.java)
+- `YadaClaudeContentBlock() }`
+- `YadaClaudeContentBlock type(YadaClaudeContentType type)`
+- `YadaClaudeContentBlock text(String text)`
+- `YadaClaudeContentBlock source(YadaClaudeImageSource source)`
+- `YadaClaudeContentBlock source(Consumer<YadaClaudeImageSource> sourceBuilder)` - Sets the image source using a lambda expression or method reference. This allows for a more concise syntax when building image sources. <pre> contentBlock.source(src -> src     .data(imagePath)     .mediaType(MediaType.IMAGE_PNG)); </pre>
+- `YadaClaudeContentBlock id(String id)`
+- `YadaClaudeContentBlock name(String name)`
+- `YadaClaudeContentBlock input(Map<String, Object> input)`
+- `YadaClaudeContentBlock toolUseId(String toolUseId)`
+- `YadaClaudeContentBlock isError(boolean isError)`
+- `// public YadaClaudeContentType getType()  return type; }`
+- `// public String getText()  return text; }`
+- `// public YadaClaudeImageSource getSource()  return source; }`
+- `// public String getId()  return id; }`
+- `// public String getName()  return name; }`
+- `// public Map<String, Object> getInput()  return input; }`
+- `// public String getToolUseId()  return toolUseId; }`
+- `// public Boolean getIsError()  return isError; }`
+
+=== YadaClaudeImageSource (YadaAi/src/main/java/net/yadaframework/ai/components/bedrock/claude/parts/YadaClaudeImageSource.java)
+- `YadaClaudeImageSource() }`
+- `YadaClaudeImageSource type(YadaClaudeImageSourceType type)`
+- `YadaClaudeImageSource mediaType(YadaClaudeMediaType mediaType)`
+- `YadaClaudeImageSource data(String base64ImageString)` - Sets the image data as a base64-encoded string. Automatically sets the type to BASE64.          when using this method, as it cannot be auto-detected from a string.
+- `YadaClaudeImageSource data(Path imagePath)` - Sets the image data by reading from a file path and encoding it as base64. Automatically sets both the type to BASE64 and the mediaType based on the file extension.          The mediaType is automatically detected and set, so you don't need to call          {@link #mediaType(YadaClaudeMediaType)} when using this method.
+- `YadaClaudeImageSource url(String url)`
+- `// public YadaClaudeImageSourceType getType()  return type; }`
+- `// public YadaClaudeMediaType getMediaType()  return mediaType; }`
+- `// public String getData()  return data; }`
+- `// public String getUrl()  return url; }`
+
+=== YadaClaudeInputSchema (YadaAi/src/main/java/net/yadaframework/ai/components/bedrock/claude/parts/YadaClaudeInputSchema.java)
+- `YadaClaudeInputSchema()`
+- `YadaClaudeInputSchema type(String type)`
+- `YadaClaudeInputSchema properties(Map<String, Object> properties)`
+- `YadaClaudeInputSchema addProperty(String name, Object schema)`
+- `YadaClaudeInputSchema required(List<String> required)`
+- `YadaClaudeInputSchema addRequired(String field)`
+- `// public String getType()  return type; }`
+- `// public Map<String, Object> getProperties()  return properties; }`
+- `// public List<String> getRequired()  return required; }`
+
+=== YadaClaudeMessage (YadaAi/src/main/java/net/yadaframework/ai/components/bedrock/claude/parts/YadaClaudeMessage.java)
+- `YadaClaudeMessage() }`
+- `YadaClaudeMessage role(YadaClaudeRole role)`
+- `YadaClaudeMessage roleUser()`
+- `YadaClaudeMessage roleAssistant()`
+- `YadaClaudeMessage content(String content)`
+- `YadaClaudeMessage content(List<YadaClaudeContentBlock> content)`
+- `YadaClaudeMessage addContentBlock(YadaClaudeContentBlock contentBlock)`
+- `YadaClaudeMessage addContentBlock(Consumer<YadaClaudeContentBlock> contentBlockBuilder)` - Adds a content block using a lambda expression or method reference. This allows for a more concise syntax when building content blocks. <pre> message.addContentBlock(block -> block.text("Hello, Claude!")); message.addContentBlock(block -> block     .source(new ImageSource().data(imagePath))); </pre>
+- `// public YadaClaudeRole getRole()  return role; }`
+- `// public Object getContent()  return content; }`
+
+=== YadaClaudeMetadata (YadaAi/src/main/java/net/yadaframework/ai/components/bedrock/claude/parts/YadaClaudeMetadata.java)
+- `YadaClaudeMetadata() }`
+- `YadaClaudeMetadata userId(String userId)`
+- `// public String getUserId()  return userId; }`
+
+=== YadaClaudeRole (YadaAi/src/main/java/net/yadaframework/ai/components/bedrock/claude/parts/YadaClaudeRole.java)
+- `String toString()`
+
+=== YadaClaudeSystemContent (YadaAi/src/main/java/net/yadaframework/ai/components/bedrock/claude/parts/YadaClaudeSystemContent.java)
+- `YadaClaudeSystemContent() }`
+- `YadaClaudeSystemContent text(String text)`
+- `// public String getText()  return text; }`
+
+=== YadaClaudeTool (YadaAi/src/main/java/net/yadaframework/ai/components/bedrock/claude/parts/YadaClaudeTool.java)
+- `YadaClaudeTool() }`
+- `YadaClaudeTool name(String name)`
+- `YadaClaudeTool description(String description)`
+- `YadaClaudeTool inputSchema(YadaClaudeInputSchema inputSchema)`
+- `YadaClaudeTool inputSchema(Consumer<YadaClaudeInputSchema> schemaBuilder)` - Sets the input schema using a lambda expression or method reference. This allows for a more concise syntax when building input schemas. <pre> tool.inputSchema(schema -> schema     .type("object")     .addProperty("location", Map.of("type", "string"))     .addRequired("location")); </pre>
+- `// public String getName()  return name; }`
+- `// public String getDescription()  return description; }`
+- `// public YadaClaudeInputSchema getInputSchema()  return inputSchema; }`
+
+=== YadaClaudeToolChoice (YadaAi/src/main/java/net/yadaframework/ai/components/bedrock/claude/parts/YadaClaudeToolChoice.java)
+- `YadaClaudeToolChoice() }`
+- `YadaClaudeToolChoice type(String type)`
+- `YadaClaudeToolChoice name(String name)`
+- `// public String getType()  return type; }`
+- `// public String getName()  return name; }`
+
+
+== net.yadaframework.example.components
+=== YexEmailService (YadaExamples/src/main/java/net/yadaframework/example/components/YexEmailService.java)
+- `boolean sendInvitation(UserProfile userProfile, String clearPassword, HttpServletRequest request, Locale locale)`
+
+
+== net.yadaframework.example.core
+=== AppConfig (YadaExamples/src/main/java/net/yadaframework/example/core/AppConfig.java)
+- `YexConfiguration config() throws ConfigurationException` - Create a "config" bean
+
+=== SecurityConfig (YadaExamples/src/main/java/net/yadaframework/example/core/SecurityConfig.java)
+- `SecurityFilterChain filterChain(HttpSecurity http) throws Exception`
+
+=== YexConfiguration (YadaExamples/src/main/java/net/yadaframework/example/core/YexConfiguration.java)
+- `Integer getSessionTimeoutMinutes()`
+
+
+== net.yadaframework.example.persistence.entity
+=== UserProfile (YadaExamples/src/main/java/net/yadaframework/example/persistence/entity/UserProfile.java)
+- `String getDT_RowClass()` - Used in Datatables to define the row class.
+- `String getUserId()`
+- `Long getId()`
+- `String toString()`
+- `String getEmail()`
+- `Boolean getEnabled()`
+- `Date getRegistrationDate()`
+- `Date getLoginDate()`
+- `String getNickname()`
+- `void setNickname(String nickname)`
+- `boolean isInviteEmail()`
+- `void setInviteEmail(boolean inviteEmail)`
+
+=== YexRegistrationRequest (YadaExamples/src/main/java/net/yadaframework/example/persistence/entity/YexRegistrationRequest.java)
+- `String getName()`
+- `void setName(String name)`
+- `String getSurname()`
+- `void setSurname(String surname)`
+- `String getUsername()`
+- `void setUsername(String username)`
+
+
+== net.yadaframework.example.persistence.repository
+=== UserProfileDao (YadaExamples/src/main/java/net/yadaframework/example/persistence/repository/UserProfileDao.java)
+- `void delete(UserProfile userProfile)` - Delete a UserProfile
+- `UserProfile find(Long userProfileId)` - Find a userProfile from its id
+
+
+== net.yadaframework.example.web
+=== HomeController (YadaExamples/src/main/java/net/yadaframework/example/web/HomeController.java)
+- `String errorPage(Model model, Locale locale)`
+- `String datatables(Model model, Locale locale)`
+- `String datatablesLegacy(Model model, Locale locale)`
+- `String timeout(Model model, Locale locale)` - Called after session timeout
+- `String home(HttpServletRequest request, Model model, Locale locale)`
+- `String openLogin(HttpServletRequest request, Model model, Locale locale)` - This method should be called when the user clicks on a login link explicitly
+- `String login(HttpServletRequest request, Model model, Locale locale)` - Normal request login page. Also called when a protected page is requested.
+- `String loginAjax()` - Ajax request login page (modal)
+
+=== RegistrationController (YadaExamples/src/main/java/net/yadaframework/example/web/RegistrationController.java)
+- `String registerPage(YexRegistrationRequest yexRegistrationRequest)` - Open the registration form
+- `String signup(YexRegistrationRequest yexRegistrationRequest, BindingResult formBinding, Model model, HttpServletRequest request, Locale locale, RedirectAttributes redirectAttributes)` - Handle the registration form submission
+- `String registrationConfirmation(@PathVariable String token, Model model, Locale locale, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpSession session)` - Handles the confirmation link clicked by the user from the email
+- `String passwordReset(String email, YadaRegistrationRequest yadaRegistrationRequest)` - Opens the password reset page
+- `String passwordResetPost(@PathVariable String token, Model model, HttpServletRequest request, RedirectAttributes redirectAttributes, Locale locale)` - Handler called when clicking on the link in the registration confirmation email
+
+
+== net.yadaframework.example.web.dashboard
+=== DashboardController (YadaExamples/src/main/java/net/yadaframework/example/web/dashboard/DashboardController.java)
+- `String dashboard()`
+
+=== UserProfileController (YadaExamples/src/main/java/net/yadaframework/example/web/dashboard/UserProfileController.java)
+- `UserProfile addUserProfile(@RequestParam(value="userProfileId", required=false) Long id)`
+- `String ajaxAddOrUpdateUserProfileConfirmed(UserProfile editedUserProfile, BindingResult userProfileBinding, Model model)`
+- `void deleteUserProfile(UserProfile userProfile)` - Delete a user
+- `String ajaxDeleteUserProfile(Long[] id, Model model)`
+- `String ajaxEditUserProfileForm(UserProfile userProfile)`
+- `@ResponseBody public Map<String, Object> userProfileTablePage(YadaDatatablesRequest yadaDatatablesRequest, Locale locale) // boolean usersSuspended = yadaDatatablesRequest.getExtraParam().get("usersSuspendedSet")!=null;`
+- `String deimpersonate(RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response, Locale locale)`
+- `String impersonate(String id, @RequestParam(name = "currentLocation", required = false) String currentLocation, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response, Locale locale)`
+- `String impersonate(@PathVariable long id, @RequestParam(name = "currentLocation", required = false) String currentLocation, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response, Locale locale)`
+- `String users(Model model, Locale locale)`
+- `String legacy()`
+
