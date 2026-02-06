@@ -362,6 +362,20 @@ const dataTableApi = $('#yourTableId').data('yadaDataTableApi');
 
 All standard DataTable https://datatables.net/reference/api/[API methods,window=_blank] are available, for example use `dataTableApi.ajax.reload()` to reload the table data.
 
+=== Reload after row change
+As shown in the previous section, the table can be reloaded with fresh data using the `reload()` API method.
+A common case is to reload the table after the row has been changed in an edit modal. For example, the
+user table may have an "edit" button that opens a modal with a form to edit the user: after submitting the
+new values, the table contents should be updated to reflect the changes. This is achieved using standard Yada Framework logic
+by calling the reload method in the form success handler:
+
+[source,java]
+----
+<form name="userForm" yada:successhandler="$('#userTable').data('yadaDataTableApi').ajax.reload(null, false)" # <1>
+	th:action="@{/saveUser}" th:object="${userProfile}" class="yadaAjax">
+----
+<1> the success handler is invoked after the form has been submitted and the ajax call has returned, therefore any changes to the data have been executed and will be shown after reload
+
 === Table Filter
 
 You can add form elements to filter the data shown in your DataTable. 

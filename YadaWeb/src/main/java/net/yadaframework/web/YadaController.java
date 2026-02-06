@@ -102,10 +102,11 @@ public class YadaController {
         	errorMessage = exception.getMessage();
         }
         String isAjaxString = yadaWebUtil.isAjaxRequest(request)?" (ajax)":"";
+        String currentUsername = yadaSecurityUtil.getUsername();
         if (exception==null) {
-        	log.error("Error (HTTP {} '{}') shown to user for {}, at {}", errorCode, errorMessage, isAjaxString, requestUri);
+        	log.error("Error (HTTP {} '{}') shown to user '{}' at {}{}", errorCode, errorMessage, currentUsername, isAjaxString, requestUri, isAjaxString);
         } else {
-        	log.error("Error (HTTP {} '{}') shown to user for {}, at {}", errorCode, errorMessage, isAjaxString, requestUri, exception);
+        	log.error("Error (HTTP {} '{}') shown to user '{}' at {}{}", errorCode, errorMessage, currentUsername, isAjaxString, requestUri, isAjaxString, exception);
         }
         model.addAttribute(YadaConstants.REQUEST_HASERROR_FLAG, "true");
         // If it was an ajax request, return an error object
