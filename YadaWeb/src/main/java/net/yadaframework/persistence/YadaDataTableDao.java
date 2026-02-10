@@ -299,8 +299,17 @@ public class YadaDataTableDao {
 //						Field field = targetClass.getDeclaredField(attributeName);
 //						Class attributeType = field.getType();
 						Class attributeType;
+						boolean isCollection = false;
+						boolean isNumber = false;
 						try {
 							attributeType = yadaUtil.getType(targetClass, attributeName);
+							isCollection = yadaUtil.isCollection(targetClass, attributeName);
+							isNumber = attributeType == Long.class || attributeType == long.class 
+							|| attributeType == Integer.class || attributeType == int.class 
+							|| attributeType == BigInteger.class || attributeType == BigDecimal.class
+							|| attributeType == Float.class || attributeType == float.class
+							|| attributeType == Double.class || attributeType == double.class
+							|| attributeType == Short.class || attributeType == short.class;
 						} catch (Exception e) {
 							// If the searched attribute is composite like "shape.color" but some part of the path is implemented in a
 							// subclass (for example the "color" attribute is only implemented in the class ColoredShape that is a subclass
@@ -313,7 +322,15 @@ public class YadaDataTableDao {
 						}
 						// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
 						attributeName = addLeftJoins(attributeName, yadaSql, targetClass);
-						if (attributeType == String.class) {
+						if (isCollection) {
+							// Collections require "member of" operator in JPQL
+							if (attributeType == String.class) {
+								searchSql.where(":globalSearchStringExact member of " + attributeName).or();
+							} else if (globalSearchNumber!=null) {
+								// For any numeric collection element type, use the parsed number
+								searchSql.where(":globalSearchNumber member of " + attributeName).or();
+							}
+						} else if (attributeType == String.class) {
 							searchSql.where(attributeName + " like :globalSearchString").or();
 						} else if (attributeType == Boolean.class || attributeType == boolean.class) {
 							// TODO localizzare "true"/"false" (ma anche no)
@@ -336,13 +353,7 @@ public class YadaDataTableDao {
 								}
 							}
 							searchSql.whereIn(attributeName, enumValues).or();
-						} else if (attributeType == Long.class || attributeType == long.class 
-							|| attributeType == Integer.class || attributeType == int.class 
-							|| attributeType == BigInteger.class || attributeType == BigDecimal.class
-							|| attributeType == Float.class || attributeType == float.class
-							|| attributeType == Double.class || attributeType == double.class
-							|| attributeType == Short.class || attributeType == short.class
-							) {
+						} else if (isNumber) {
 							// Vorrei fare il match parziale della stringa digitata dentro al valore numerico ma JPA non supporta il like e CONVERT causa un 
 							// java.lang.NullPointerException dentro a org.hibernate.hql.internal.antlr.HqlBaseParser.identPrimary(HqlBaseParser.java:4285)
 							searchSql.where(globalSearchNumber!=null, attributeName + " = :globalSearchNumber").or();
@@ -398,6 +409,7 @@ public class YadaDataTableDao {
 			yadaSql.orderBy("e.id"); // No need to specify the direction
 		}
 		yadaSql.setParameter("globalSearchString", "%"+globalSearchString+"%");
+		yadaSql.setParameter("globalSearchStringExact", globalSearchString);
 		yadaSql.setParameter("globalSearchNumber", globalSearchNumber);
 
 	    	Query query = yadaSql.query(em);
@@ -409,7 +421,8 @@ public class YadaDataTableDao {
 		query.setFirstResult(yadaDatatablesRequest.getStart());
 		@SuppressWarnings("unchecked")
 		List<targetClass> result = query.getResultList();
-		// TODO sort using an outer query instead of this trick
+		// An outer query (two-phase ID approach) was considered but doesn't help: the inner query
+		// would still need DISTINCT + ORDER BY on a joined column, hitting the same MySQL limitation.
 		if (needsExtraction) {
 			// When doing an "order by" on a joined column we add the column to the select clause to prevent the "ORDER BY clause is not in SELECT list" error.
 			// This means that the result now is a list of Object[] where only the first element is what we need.

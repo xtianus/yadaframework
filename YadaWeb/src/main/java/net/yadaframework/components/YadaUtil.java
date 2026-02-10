@@ -1835,6 +1835,51 @@ public class YadaUtil {
 	}
 
 	/**
+	 * Check if the last segment of an attribute path is a Collection (List, Set, etc.)
+	 * @param rootClass the root entity class
+	 * @param attributePath field name like "roles" or even a path like "userCredentials.roles"
+	 * @return true if the final attribute is a Collection type
+	 * @throws NoSuchFieldException if the field is not found in the class hierarchy
+	 * @throws SecurityException
+	 */
+	public boolean isCollection(Class rootClass, String attributePath) throws NoSuchFieldException, SecurityException {
+		if (StringUtils.isBlank(attributePath)) {
+			return false;
+		}
+		String attributeName = StringUtils.substringBefore(attributePath, ".");
+		String remaining = StringUtils.substringAfter(attributePath, ".");
+		Field field = null;
+		Class<?> currentClass = rootClass;
+		while (field == null && currentClass != null) {
+			try {
+				field = currentClass.getDeclaredField(attributeName);
+			} catch (NoSuchFieldException e) {
+				currentClass = currentClass.getSuperclass();
+			}
+		}
+		if (field == null) {
+			throw new NoSuchFieldException("No field " + attributeName + " found in hierarchy of " + rootClass.getName());
+		}
+		Class<?> attributeType = field.getType();
+		if (StringUtils.isNotBlank(remaining)) {
+			if (java.util.Collection.class.isAssignableFrom(attributeType) || java.util.Map.class.isAssignableFrom(attributeType)) {
+				ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
+				if (parameterizedType != null) {
+					Type[] types = parameterizedType.getActualTypeArguments();
+					if (types.length > 0) {
+						if (java.util.Map.class.isAssignableFrom(attributeType)) {
+							remaining = StringUtils.substringAfter(remaining, ".");
+						}
+						attributeType = (Class<?>) types[types.length - 1];
+					}
+				}
+			}
+			return isCollection(attributeType, remaining);
+		}
+		return java.util.Collection.class.isAssignableFrom(attributeType);
+	}
+
+	/**
 	 * Ritorna un messaggio localizzato da un contesto fuori da Spring (ad esempio in un enum o un Entity)
 	 * @param key
 	 * @param params
