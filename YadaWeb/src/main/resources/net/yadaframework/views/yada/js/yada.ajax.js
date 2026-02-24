@@ -440,6 +440,12 @@
 		}
 		// From here on the $link is a single anchor, not an array
 		$link.not('.'+markerClass).click(function(e) {
+			// Allow native browser behavior for "open in new tab" (Ctrl+click, Cmd+click, Shift+click, middle-click)
+			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) {
+				yada.loaderOff();
+				this.blur(); // Remove :focus to clear any focus-triggered styles (e.g. shade overlay)
+				return true;
+			}
 			$link = $(this); // Needed otherwise $link could be stale (from a previous ajax replacement) 
 			// Fix pagination parameters if any
 			handlePaginationHistoryAttribute($link, $link);
@@ -761,6 +767,8 @@
 				multipart = $formGroup.filter("[enctype='multipart/form-data']").length > 0;
 				data = multipart ? new FormData() : [];
 				addAllFormsInGroup($formGroup, data);
+				// Use the method of the first form in the group
+				method = $formGroup.first().attr('method')?.toUpperCase() || method;
 			}
 		}
 		// Any yadaRequestData is also sent (see yada.dialect.js)
