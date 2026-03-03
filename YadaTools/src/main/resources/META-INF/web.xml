@@ -9,8 +9,9 @@
 	<location>/yadaError</location>
 </error-page>
 
+<!-- WARNING: this value must be the same as the value of sessionTimeoutMinutes in conf.webapp.<ENV>.xml or the session might never expire -->
+<!-- This is done automatically when using YadaTomcatServer.java so there's no need to set the value in web.xml for embedded tomcat -->
 <session-config>
-	<!-- WARNING: this value must be the same as the value of sessionTimeoutMinutes in conf.webapp.<ENV>.xml or the session might never expire -->
 	<session-timeout>240</session-timeout> <!-- 240 minutes -->
 </session-config>
 
