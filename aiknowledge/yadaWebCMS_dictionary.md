@@ -4,7 +4,7 @@
 
 | Class | Description |
 |---|---|
-| [YadaWebCmsHelper](yadaWebCMS/YadaWebCmsHelper.md) | Exposes reusable web cms helper behavior in the Yada framework. Use it when that responsibility is needed directly. |
+| [YadaWebCmsHelper](yadaWebCMS/YadaWebCmsHelper.md) | Provides Thymeleaf-friendly CMS helpers, such as deriving CSS classes from boolean flags on content objects. Use it from YadaWebCMS fragments and templates. |
 
 ## `net.yadaframework.cms.persistence.repository`
 

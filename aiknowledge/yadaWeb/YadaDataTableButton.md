@@ -8,7 +8,7 @@
 | `dtIcon` | HTML content for the button's icon. |
 | `dtUrlProvider` | javascript function to be called when the button is clicked in order to compute the target URL for the button action. |
 | `dtUrl` | URL to be called when the button is clicked, it can be a thymeleaf expression and will be inserted in a @{ when missing |
-| `dtGlobal` | Set for a button that is always enabled regardless of row selection, for example an Add button. |
+| `dtGlobal` | Sets for a button that is always enabled regardless of row selection, for example an Add button. |
 | `dtIdName` | Name of the ID request parameter, default is "id". |
 | `dtNoAjax` | Indicate that the button should use a normal request |
 | `dtHidePageLoader` | Do not show the page loader when the button is clicked |

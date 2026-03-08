@@ -2,4 +2,4 @@
 
 | Method | Description |
 |---|---|
-| `addExtraJsonAttribute` | Add any entity attribute you need to return in the json object. |
+| `addExtraJsonAttribute` | Adds an extra entity attribute path to include in the DataTables JSON rows. |

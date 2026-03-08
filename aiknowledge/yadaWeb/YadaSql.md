@@ -3,7 +3,7 @@
 | Method | Description |
 |---|---|
 | `getOrderByNative` | Returns the "order by" statement in MySql syntax |
-| `union` | Add a query as a union of the current one. |
+| `union` | Adds a query as a union of the current one. |
 | `deleteFrom` | Starts a delete query. |
 | `selectFrom` | Starts or extends a select query. |
 | `selectFromReplace` | Replaces the current select section. |

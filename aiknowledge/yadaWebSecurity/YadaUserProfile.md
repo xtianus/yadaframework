@@ -2,5 +2,5 @@
 
 | Method | Description |
 |---|---|
-| `hasAnyRoleKey` | Check if the user has any of the specified roles |
-| `hasAnyRoleId` | Check if the user has any of the specified roles |
+| `hasAnyRoleKey` | Checks if the user has any of the specified roles |
+| `hasAnyRoleId` | Checks if the user has any of the specified roles |

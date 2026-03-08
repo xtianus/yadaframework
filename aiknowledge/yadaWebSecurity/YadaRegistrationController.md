@@ -2,10 +2,10 @@
 
 | Method | Description |
 |---|---|
-| `handleRegistrationConfirmation` | To be called when the link in the registration confirmation email has been clicked. |
-| `createNewUser` | Create a new user. |
-| `handleRegistrationRequest` | This method should be called by a registration controller to perform the actual registration |
-| `passwordChangeAfterRequest` | Default method to change a user password. |
-| `passwordResetForm` | To be called in the controller that handles the password recovery link in the email. |
-| `yadaPasswordResetPost` | Handles the password reset form |
-| `changeUsername` | Change a username after the user clicked on the confirmation email link |
+| `handleRegistrationConfirmation` | Processes a registration-confirmation token, creates the user when valid, and returns the outcome. |
+| `createNewUser` | Creates and persists a new enabled user profile with encoded credentials and roles. |
+| `handleRegistrationRequest` | Validates a registration request, stores the confirmation token, and sends the registration email. |
+| `passwordChangeAfterRequest` | Processes the final password-change form reached from a reset request. |
+| `passwordResetForm` | Validates a password-reset token and populates the model for the final password-change dialog. |
+| `yadaPasswordResetPost` | Creates a password-reset request and sends the recovery email when the user exists. |
+| `changeUsername` | Processes an email-change confirmation token and renames the user when it is valid. |

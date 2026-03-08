@@ -2,4 +2,4 @@
 
 | Method | Description |
 |---|---|
-| `getConvertedJsonPage` | Returns a map with the result in the format needed by DataTables. |
+| `getConvertedJsonPage` | Returns one DataTables response page as a map of row data and counters. |

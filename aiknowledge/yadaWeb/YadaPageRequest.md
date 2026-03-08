@@ -2,6 +2,6 @@
 
 | Method | Description |
 |---|---|
-| `appendSort` | Add sort parameters after any existing ones |
-| `prependSort` | Add sort parameters before any existing ones |
+| `appendSort` | Appends sort parameters after the existing ones. |
+| `prependSort` | Prepends sort parameters before the existing ones. |
 | `of` | Creates a page request from offset and size. |

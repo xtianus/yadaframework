@@ -12,7 +12,7 @@
 | `dtDataFunction` | This property can be used to read and write data to and from any data source property. |
 | `dtDefaultContent` | Static content in a column or default content when the data source is null. |
 | `dtFooter` | Sets footer. |
-| `dtName` | Set a descriptive name for a column. |
+| `dtName` | Sets a descriptive name for a column. |
 | `dtOrderData` | Sets order data. |
 | `dtOrderDataType` | Sets order data type. |
 | `dtOrderSequence` | Sets order sequence. |

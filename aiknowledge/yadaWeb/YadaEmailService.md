@@ -2,7 +2,7 @@
 
 | Method | Description |
 |---|---|
-| `buildLink` | Convert a site-relative link to absolute, because in emails we can't use @{. |
+| `buildLink` | Converts a site-relative link to absolute, because in emails we can't use @{. |
 | `sendSupportRequest` | Sends the configured support-request email. |
 | `sendHtmlEmail` | Send a HTML email. |
 | `loadTemplate` | Loads a template. |

@@ -2,7 +2,7 @@
 
 | Method | Description |
 |---|---|
-| `dtTargets` | Set the target for the column definition. |
-| `dtTargetsCss` | Set the target for the column definition. |
-| `dtTargetsName` | Set the target for the column definition. |
+| `dtTargets` | Sets the target for the column definition. |
+| `dtTargetsCss` | Sets the target for the column definition. |
+| `dtTargetsName` | Sets the target for the column definition. |
 | `dtTargetsAll` | Target all columns. |

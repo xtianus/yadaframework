@@ -2,5 +2,5 @@
 
 | Method | Description |
 |---|---|
-| `findByYadaTicketOrderByCreatedDesc` | Find all YadaTicketMessage by one yadaTicket. |
-| `findMessagesAndAttachmentByYadaTicketOrderByModifiedDesc` | Find all YadaTicketMessage and Attachments by one yadaTicket. |
+| `findByYadaTicketOrderByCreatedDesc` | Returns the messages for a ticket ordered by creation time descending. |
+| `findMessagesAndAttachmentByYadaTicketOrderByModifiedDesc` | Returns the messages and fetched attachments for a ticket ordered by modification time descending. |

@@ -38,7 +38,7 @@
 | `dtScrollCollapseOn` | Allow the table to reduce in height when a limited number of rows are shown. |
 | `dtScrollXOn` | Enable horizontal scrolling. |
 | `dtScrollY` | Enable vertical scrolling. |
-| `dtSearchDelay` | Set a delay for search operations. |
+| `dtSearchDelay` | Sets a delay for search operations. |
 | `dtSearchingOff` | Disable searching abilities in DataTables. |
 | `dtServerSideOff` | Disable server-side processing. |
 | `dtStateDuration` | Duration for which the saved state information is considered valid. |

@@ -2,6 +2,6 @@
 
 | Method | Description |
 |---|---|
-| `findByMostSigBitsAndLeastSigBits` | Find the instance with the given value |
+| `findByMostSigBitsAndLeastSigBits` | Finds a browser identifier by the UUID bit pair stored in the database. |
 | `ensureYadaBrowserId` | Get or create a YadaBrowserId using a cookie. |
-| `findOrCreate` | Find or create the instance with the given UUID |
+| `findOrCreate` | Finds an existing browser identifier for the UUID or creates it. |

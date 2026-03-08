@@ -6,7 +6,7 @@
 | `getJobState` | Get the current job state from the database |
 | `stateChangeFromTo` | Invoked by the scheduler classes when starting a job. |
 | `getJobStartTime` | Returns the start time of a job |
-| `isJobGroupPaused` | Check if the job group has been paused. |
+| `isJobGroupPaused` | Checks if the job group has been paused. |
 | `findByJobGroupAndState` | Returns all jobs for the given group that are in the given state |
 | `findRunning` | Returns the running job for the given group if any |
 | `countByJobGroupAndStates` | Returns the number of jobs for the given group, that are in one of the given states |

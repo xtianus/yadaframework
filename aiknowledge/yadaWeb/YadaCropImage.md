@@ -2,6 +2,6 @@
 
 | Method | Description |
 |---|---|
-| `linkAdd` | Link to an Entity by means of a new YadaAttachedFile. |
-| `link` | Link to an Entity by means of a YadaAttachedFile. |
-| `titleKey` | Set the title to show when cropping this image |
+| `linkAdd` | Creates and links a new YadaAttachedFile for the cropped image. |
+| `link` | Links the cropped image to an existing or new YadaAttachedFile. |
+| `titleKey` | Sets the message key for the crop-page title. |

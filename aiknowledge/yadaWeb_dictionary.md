@@ -22,7 +22,7 @@
 | Class | Description |
 |---|---|
 | [YadaConfiguration](yadaWeb/YadaConfiguration.md) | Exposes framework configuration values resolved from properties and setup data. Use when code needs environment-specific Yada settings. |
-| [YadaRegistrationType](yadaWeb/YadaRegistrationType.md) | Exposes reusable registration type behavior in the Yada framework. Use it when that responsibility is needed directly. |
+| [YadaRegistrationType](yadaWeb/YadaRegistrationType.md) | Enumerates the purposes of a YadaRegistrationRequest, such as registration, password recovery, email change, and social signup. Use it to distinguish security-link workflows. |
 
 ## `net.yadaframework.persistence`
 
@@ -78,10 +78,10 @@
 
 | Class | Description |
 |---|---|
-| [YadaCropImage](yadaWeb/YadaCropImage.md) | Supports crop image behavior in the Yada web layer. Use it when that workflow must be represented or reused. |
-| [YadaCropQueue](yadaWeb/YadaCropQueue.md) | Supports crop queue behavior in the Yada web layer. Use it when that workflow must be represented or reused. |
-| [YadaDatatablesRequest](yadaWeb/YadaDatatablesRequest.md) | Supports datatables request behavior in the Yada web layer. Use it when that workflow must be represented or reused. |
-| [YadaPageRequest](yadaWeb/YadaPageRequest.md) | Supports page request behavior in the Yada web layer. Use it when that workflow must be represented or reused. |
+| [YadaCropImage](yadaWeb/YadaCropImage.md) | Stores one pending crop operation, including the source upload, target file metadata, and desktop, mobile, or PDF crop settings. Use it inside a YadaCropQueue during upload flows. |
+| [YadaCropQueue](yadaWeb/YadaCropQueue.md) | Keeps the session-scoped queue of images that still need cropping, together with the crop and destination redirects. Use it to drive multi-image crop workflows across requests. |
+| [YadaDatatablesRequest](yadaWeb/YadaDatatablesRequest.md) | Represents the server-side request parameters sent by DataTables, including paging, ordering, search, and extra JSON attributes. Use it in controller or DAO code that serves Yada tables. |
+| [YadaPageRequest](yadaWeb/YadaPageRequest.md) | Represents a pageable request with page, size, sort, and load-previous options. Use it to drive Yada pagination and bookmark-friendly scrolling. |
 | [YadaPublicSuffix](yadaWeb/YadaPublicSuffix.md) | Parses public-suffix data to split hostnames into registrable domains and subdomains. Use when cookies or multi-tenant domains depend on the effective top-level domain. |
 
 ## `net.yadaframework.web.datatables`

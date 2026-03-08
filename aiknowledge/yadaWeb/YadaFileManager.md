@@ -2,8 +2,8 @@
 
 | Method | Description |
 |---|---|
-| `moveToTemp` | Move the file to the public temp folder for later processing. |
-| `delete` | Remove a managed file from disk and database |
+| `moveToTemp` | Moves the file to the public temp folder for later processing. |
+| `delete` | Removes a managed file from disk and database |
 | `getAbsoluteFile` | Returns the absolute path of a managed file |
 | `duplicateFiles` | You don't usually need to call this method but YadaUtil#copyEntity(net.yadaframework.core.CloneableFiltered) instead. |
 | `getAbsoluteMobileFile` | Returns the absolute path of the mobile file |

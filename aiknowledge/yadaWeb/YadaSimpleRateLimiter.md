@@ -2,4 +2,4 @@
 
 | Method | Description |
 |---|---|
-| `validateRate` | To be called at every event |
+| `validateRate` | Records one event and returns whether it is still within the configured rate limit. |

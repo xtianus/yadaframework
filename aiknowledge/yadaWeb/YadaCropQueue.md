@@ -2,6 +2,6 @@
 
 | Method | Description |
 |---|---|
-| `delete` | Delete any images in the queue, aborting the upload of any remaining pictures. |
-| `addCropImage` | Add an image to be cropped |
-| `hasCropImages` | Check if there are any images to be cropped |
+| `delete` | Deletes the remaining queued images and aborts the crop workflow. |
+| `addCropImage` | Adds an uploaded image to the crop queue with its target dimensions and destination folder. |
+| `hasCropImages` | Returns whether the queue still contains images to crop. |

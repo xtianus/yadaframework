@@ -2,4 +2,4 @@
 
 | Method | Description |
 |---|---|
-| `dsAddLanguage` | Add a language definition. |
+| `dsAddLanguage` | Adds a language definition. |

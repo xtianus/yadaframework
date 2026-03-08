@@ -2,4 +2,4 @@
 
 | Method | Description |
 |---|---|
-| `toEnum` | Convert the localised enum back to a normal Enum instance. |
+| `toEnum` | Converts the localised enum back to a normal Enum instance. |

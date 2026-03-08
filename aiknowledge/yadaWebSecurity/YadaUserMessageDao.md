@@ -6,5 +6,5 @@
 | `markAsRead` | Marks the given messages as read. |
 | `find` | Finds matching data. |
 | `hasUnreadMessage` | Returns true if there exists at least one unread message for the user |
-| `deleteBelongingTo` | Delete all messages that do not involve users other than the one specified (no other users as sender o recipient) |
+| `deleteBelongingTo` | Deletes all messages that do not involve users other than the one specified (no other users as sender o recipient) |
 | `createOrIncrement` | Save a message. |

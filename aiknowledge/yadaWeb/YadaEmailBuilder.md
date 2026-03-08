@@ -9,10 +9,10 @@
 | `subjectParams` | Assigns values to subject parameters as {0, {1 etc. |
 | `addModelAttribute` | Thymeleaf model attribute to use in the template. |
 | `modelAttributes` | Thymeleaf model attributes to use in the template - can be null. |
-| `addInlineResources` | Add an inline image to be used with src="cid:somekey" |
+| `addInlineResources` | Adds an inline image to be used with src="cid:somekey" |
 | `inlineResources` | Key-value pairs of inline images to be used with "cid:somekey" as src. |
-| `addAttachment` | Add a file attachment. |
+| `addAttachment` | Adds a file attachment. |
 | `attachments` | Key-value pairs of filename-File to send as attachment. |
-| `addTimestamp` | Add a timestamp to the subject - defaults to false. |
+| `addTimestamp` | Adds a timestamp to the subject - defaults to false. |
 | `batch` | Choose whether to send this email to all recipients as a batch of distinct emails |
 | `send` | Send the email. |

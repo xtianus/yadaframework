@@ -2,10 +2,10 @@
 
 | Method | Description |
 |---|---|
-| `hasRole` | Checks whether it has role. |
-| `ensureRoles` | Add all roles if not already present. |
-| `addRoles` | Add all roles if not already present. |
-| `ensureRole` | Add a role if not already present. |
-| `addRole` | Add a role if not already present. |
-| `removeRole` | Remove a role if present |
+| `hasRole` | Returns whether the credentials include the given role ID. |
+| `ensureRoles` | Adds all roles if not already present. |
+| `addRoles` | Adds all roles if not already present. |
+| `ensureRole` | Adds a role if not already present. |
+| `addRole` | Adds a role if not already present. |
+| `removeRole` | Removes a role if present |
 | `addYadaSocialCredentials` | Adds a yada social credentials. |
