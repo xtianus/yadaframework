@@ -145,6 +145,7 @@ public class YadaUtil {
 	private final static char CHAR_AT = '@';
 	private final static char CHAR_DOT = '.';
 	private final static char CHAR_SPACE = ' ';
+	private static final Pattern WINDOWS_RESERVED_FILENAME_PATTERN = Pattern.compile("^(con|prn|aux|nul|com[1-9]|lpt[1-9])$", Pattern.CASE_INSENSITIVE);
 
 	private static Locale defaultLocale = null;
 
@@ -3740,22 +3741,32 @@ public class YadaUtil {
 		if (StringUtils.isBlank(originalFilename)) {
 			return "noname";
 		}
-        // Normalize the filename to decompose characters using NFKD
-        String normalizedFilename = Normalizer.normalize(originalFilename, Normalizer.Form.NFKD);
-        // Remove diacritical marks (accents)
-        String withoutDiacritics = normalizedFilename.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-        // Replace invalid characters with underscores
-        String safeFilename = withoutDiacritics.replaceAll("[^a-zA-Z0-9._-]", "_");
+		// Normalize the filename to decompose characters using NFKD
+		String normalizedFilename = Normalizer.normalize(originalFilename, Normalizer.Form.NFKD);
+		// Remove diacritical marks (accents)
+		String withoutDiacritics = normalizedFilename.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+		// Replace invalid characters with underscores
+		String safeFilename = withoutDiacritics.replaceAll("[^a-zA-Z0-9._-]", "_");
 		// Remove consecutive underscores
-        safeFilename = safeFilename.replaceAll("__+", "_");
-		// Remove leading and trailing underscores
-        safeFilename = safeFilename.replaceAll("^[_]+", "").replaceAll("[_]+$", "");
+		safeFilename = safeFilename.replaceAll("__+", "_");
 		// Remove underscore when followed by punctuation and preceded by any letter or digit
-        safeFilename = safeFilename.replaceAll("([a-zA-Z0-9])_([\\p{Punct}])", "$1$2");
-        // Convert to lowercase if needed
-        if (toLowercase) {
-            safeFilename = safeFilename.toLowerCase();
-        }
-        return safeFilename;
+		safeFilename = safeFilename.replaceAll("([a-zA-Z0-9])_([\\p{Punct}])", "$1$2");
+		// Windows forbids trailing dots/spaces and dot-only names are unsafe on any OS
+		safeFilename = safeFilename.replaceAll("[._]+$", "");
+		safeFilename = safeFilename.replaceAll("^[_\\.]+", "");
+		if (StringUtils.isBlank(safeFilename)) {
+			return "noname";
+		}
+		String[] filenameParts = splitFileNameAndExtension(safeFilename);
+		String baseName = filenameParts[0];
+		String extension = filenameParts[1];
+		if (WINDOWS_RESERVED_FILENAME_PATTERN.matcher(baseName).matches()) {
+			baseName = "_" + baseName;
+		}
+		safeFilename = extension.isEmpty() ? baseName : baseName + "." + extension;
+		if (toLowercase) {
+			safeFilename = safeFilename.toLowerCase();
+		}
+		return safeFilename;
 	}
 }
