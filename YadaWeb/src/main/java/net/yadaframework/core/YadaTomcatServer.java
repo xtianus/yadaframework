@@ -197,7 +197,7 @@ public class YadaTomcatServer {
 		setCompressableMimeType(tomcat.getConnector(), null);
 		tomcat.setAddDefaultWebXmlToWebapp(false); // Use web.xml
 		StandardContext ctx = (StandardContext) tomcat.addWebapp("", new File(webappFolder).getAbsolutePath());
-		ctx.setSessionTimeout(config.getSessionTimeoutMinutes() * 60); // Convert minutes to seconds
+		ctx.setSessionTimeout(config.getSessionTimeoutMinutes()); // Tomcat expects minutes
 		ctx.addLifecycleListener(new LifecycleListener() {
 			@Override
 			public void lifecycleEvent(LifecycleEvent event) {
