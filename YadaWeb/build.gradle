@@ -123,8 +123,8 @@ dependencies {
 	 // Connection pool for embedded Tomcat and programmatic datasource
 	api 'org.vibur:vibur-dbcp:25.0'
 	runtimeOnly 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.2'
-	implementation 'org.apache.tomcat:tomcat-servlet-api:11.0.11'
-	compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:11.0.11'
+	implementation 'org.apache.tomcat:tomcat-servlet-api:11.0.18'
+	compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:11.0.18'
 	compileOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
 	compileOnly 'org.seleniumhq.selenium:selenium-java:4.35.0'
 
