@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Lazy;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 
+// TODO refactor using a pattern similar to YadaAiConfigurable and use the "config/yadaWebCms/" prefix in the configuration
 public abstract class YadaCmsConfiguration extends YadaConfiguration {
 	private static Logger log = LoggerFactory.getLogger(YadaCmsConfiguration.class);
 	

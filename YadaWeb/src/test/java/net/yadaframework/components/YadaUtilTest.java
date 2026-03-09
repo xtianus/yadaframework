@@ -280,4 +280,22 @@ class YadaUtilTest {
         String result = yadaUtil.ensureSafeFilename("Hello.TXT", true);
         assertEquals("hello.txt", result);
     }
+
+    @Test
+    void ensureSafeFilename_WithOnlyInvalidCharacters_ReturnsNoname() {
+        assertEquals("noname", yadaUtil.ensureSafeFilename("..."));
+        assertEquals("noname", yadaUtil.ensureSafeFilename("___"));
+    }
+
+    @Test
+    void ensureSafeFilename_WithTrailingDots_RemovesTrailingDots() {
+        assertEquals("report", yadaUtil.ensureSafeFilename("report..."));
+        assertEquals("report.txt", yadaUtil.ensureSafeFilename("report.txt..."));
+    }
+
+    @Test
+    void ensureSafeFilename_WithReservedWindowsNames_AvoidsReservedBasename() {
+        assertEquals("_con.txt", yadaUtil.ensureSafeFilename("con.txt"));
+        assertEquals("_LPT1", yadaUtil.ensureSafeFilename("LPT1", false));
+    }
 }

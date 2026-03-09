@@ -94,7 +94,7 @@ Example:
 		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
 			<div th:if="${help!=null}" class="input-group-append">
 				<button type="button" class="yadaHelpButton btn btn-outline-secondary" data-trigger="focus" data-container="body" 
-					data-toggle="popover" data-placement="auto bottom" tabindex="-1"
+					data-toggle="popover" data-placement="auto" tabindex="-1"
 					data-html="true"
 					th:attr="data-content=${help}">
 					<i class="yadaIcon yadaIcon-help"></i>
@@ -111,6 +111,9 @@ Example:
         	var targetId = [[${id}?:${#ids.prev(seqName)}]];
         	ClassicEditor
             	.create(document.getElementById(targetId), {
+            		// Possible values for Classic build:
+            		// ["undo", "redo", "bold", "italic", "blockQuote", "ckfinder", "imageTextAlternative", "imageUpload", "heading", "imageStyle:full", "imageStyle:side", "indent", "outdent", "link", "numberedList", "bulletedList", "mediaEmbed", "insertTable", "tableColumn", "tableRow", "mergeTableCells"]
+            		// "link" removed because it doesn't work in modals
             		removePlugins: [ 'Image', 'Media embed' ],
             		toolbar: [[${toolbar}?:${ {"undo", "redo", "bold", "italic", "blockQuote", "heading", "indent", "outdent", "numberedList", "bulletedList", "insertTable", "tableColumn", "tableRow", "mergeTableCells"} }]],
             		image: {

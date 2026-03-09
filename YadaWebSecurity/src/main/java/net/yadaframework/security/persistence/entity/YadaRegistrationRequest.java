@@ -18,8 +18,6 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import net.yadaframework.core.YadaRegistrationType;
@@ -60,7 +58,6 @@ public class YadaRegistrationRequest implements Serializable {
 	private String password;
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date timestamp; // Creazione
 
 	private long token;

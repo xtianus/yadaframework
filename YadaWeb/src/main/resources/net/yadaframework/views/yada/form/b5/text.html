@@ -92,7 +92,7 @@ Example:
 			th:attr="aria-describedby=${id}?:${#ids.next(seqName)}"></textarea> <!--/* WRONG ID */-->
 		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
 			<a th:if="${help!=null}" class="yadaHelpButton input-group-text" data-trigger="focus" data-container="body" 
-				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
+				data-toggle="popover" data-placement="auto" tabindex="-1"
 				data-html="true"
 				th:attr="data-content=${help}">
 				<i class="yadaIcon yadaIcon-help"></i>

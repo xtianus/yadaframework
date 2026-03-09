@@ -121,6 +121,12 @@
     cursor: pointer;
 }
 
+/* Help button on the right of an input field must have no margin else it creates a gap */
+.input-group-append .yadaHelpButton {
+	margin-left: 0;
+	margin-right: 0;
+}
+
 .yadaHelpButton.input-group-text {
 	margin-right: 0;
 }

@@ -14,8 +14,6 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 
 /**
@@ -40,11 +38,9 @@ public class YadaAutoLoginToken implements Serializable {
 	private long token;
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date timestamp; // Token creation date
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date expiration; // Token expiration. Null = never expire
 
 	@OneToOne

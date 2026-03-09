@@ -6,7 +6,9 @@
 		<p>This is the footer</p>
 	</footer>
 	
+	<!-- 
 	<script th:src="@{/static/jquery-3.7.1.min.js}" ></script>
+	 -->
 	<script th:if="${"\$"}{!@config.developmentEnvironment}" th:src="@{/res/js/yada.min.js}"></script>
 	<script th:if="${"\$"}{@config.developmentEnvironment}" th:src="@{/yadares/js/yada.js}"></script>
 	<script th:if="${"\$"}{@config.developmentEnvironment}" th:src="@{/yadares/js/yada.ajax.js}"></script>
@@ -26,11 +28,11 @@
 			yada.resourceDir = /*[[${"\$"}{@config.versionedResourceDir}]]*/ "unset";
 			yada.messages.connectionError.title = /*[[#{javascript.connection.error.title}]]*/ "unset";
 			yada.messages.connectionError.message = /*[[#{javascript.connection.error.message}]]*/ "unset";
-			${acronym}.ready(function(){
+			yada.ready(function(){
 				const showNotification = /*[[${"\$"}{YADA_NBODY!=null}]]*/ false;
 				if (showNotification) {
 					setTimeout(function(){
-						$('#yada-notification').modal('show');
+						${"\$"}('#yada-notification').modal('show');
 					}, 300);
 				}
 			});
@@ -38,7 +40,7 @@
 	</script>
 
 	<!--/* Notify modal */-->
-	<div th:insert="~{${@yadaNotify.viewName} :: modal}" class="modal fade" th:classappend="|B${@config.bootstrapVersion}|" id="yada-notification" role="dialog"></div>
+	<div th:insert="~{${"\$"}{@yadaNotify.viewName} :: modal}" class="modal fade" th:classappend="|B${"\$"}{@config.bootstrapVersion}|" id="yada-notification" role="dialog"></div>
 
 </body>
 </html>

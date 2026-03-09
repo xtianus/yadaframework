@@ -33,6 +33,23 @@ public class YadaSecurityUtilStub implements ApplicationListener<ContextRefreshe
 			}
 		}
 	}
+	
+	/**
+	 *
+	 * @return the username of the logged-in user, or null
+	 */
+	public String getUsername() {
+		if (yadaSecurityUtilInstance!=null) {
+			try {
+				Method method = yadaSecurityUtilInstance.getClass().getMethod("getUsername");
+				return (String) method.invoke(yadaSecurityUtilInstance);
+			} catch (Exception e) {
+				// This should not happen if everything is correctly configured and used
+				throw new YadaInvalidUsageException("Error invoking getUsername in {}", yadaSecurityUtilInstance.getClass().getName(), e);
+			}
+		}
+		return null; // No user if YadaWebSecurity is not present
+	}
 
 	 /**
      * Checks if the current user has access to the specified path

@@ -20,8 +20,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import net.yadaframework.components.YadaUtil;
@@ -52,7 +50,6 @@ public class YadaManagedFile implements CloneableDeep {
 
 	// For synchronization with external databases
 	@Column(insertable = false, updatable = false, columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified = new Date();
 
 	// For optimistic locking
@@ -81,7 +78,6 @@ public class YadaManagedFile implements CloneableDeep {
 	@Column(length=512)
 	protected String description; // Typed by the uploader
 
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date uploadTimestamp;
 	
 	/**
@@ -111,7 +107,6 @@ public class YadaManagedFile implements CloneableDeep {
 	/**
 	 * When not null, this file can be deleted after the specified timestamp (application specific).
 	 */
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date expirationTimestamp;
 
 	@Transient

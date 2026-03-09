@@ -980,6 +980,7 @@ just on that button or on some target div. For the element loader to show, the l
 - a JQuery object
 
 It must point to the element or elements that should be covered with a loader.
+It can also be specified as an HTML attribute: `yada:ajaxElementLoader`
 
 The HTML of the loader is automatically added and removed. 
 By default it shows a spinning wheel but can be customised with the

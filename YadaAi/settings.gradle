@@ -1,0 +1,6 @@
+
+rootProject.name = 'YadaAi'
+
+include 'YadaWeb'
+project(':YadaWeb').projectDir = "../YadaWeb" as File
+

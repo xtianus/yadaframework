@@ -14,8 +14,6 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.persistence.YadaMoney;
@@ -32,7 +30,6 @@ public class YadaTransaction {
 
 	// For synchronization with external databases
 	@Column(insertable = false, updatable = false, columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified;
 
 	// For optimistic locking
@@ -58,7 +55,6 @@ public class YadaTransaction {
 	protected String currencyCode;
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date timestamp;
 
 	@Column(length = 32)

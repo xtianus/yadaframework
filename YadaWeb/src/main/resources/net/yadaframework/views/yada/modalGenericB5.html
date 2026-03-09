@@ -22,26 +22,26 @@
 <div th:fragment="fragment(title,header,body,footer,script,extraDialogClasses,idModal)" th:with="titleId='t'+${#strings.randomAlphanumeric(16)}"
 	class="modal fade B5" tabindex="-1" role="dialog" th:aria-labelledby="${titleId}" aria-hidden="true" th:id="${idModal?:#strings.randomAlphanumeric(16)}" th:data-bs-backdrop="${modalOptions!=null?modalOptions['databsbackdrop']:''}">
 	<div class="modal-dialog" th:classappend="${extraDialogClasses}" role="document">
-    	<div class="modal-content card">
-    		<th:block th:replace="${header}">
-	    		<div class="modal-header">
-	    			<h4 class="modal-title" th:id="${titleId}"><span th:replace="${title}"></span></h4>
-	    			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-	   			</div>
-    		</th:block>
-     		<div th:replace="${body}">
-	   			<div class="modal-body p0">
-	   				<div class="card-body">
-	   					Default body
-	   				</div>
-	   			</div>
- 			</div>
- 			<div th:replace="${footer}">
-	   			<div class="modal-footer">
+		<div class="modal-content card">
+			<th:block th:replace="${header}">
+				<div class="modal-header">
+					<h4 class="modal-title" th:id="${titleId}"><span th:replace="${title}"></span></h4>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+			</th:block>
+			<div th:replace="${body}">
+				<div class="modal-body p0">
+					<div class="card-body">
+						Default body
+					</div>
+				</div>
+			</div>
+			<div th:replace="${footer}">
+				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{yada.view.modal.button.close}">Close</button>
-	   			</div>
- 			</div>   		
-  		</div>
+				</div>
+			</div>
+		</div>
 		<script th:replace="${script}"></script>
 	</div>
 

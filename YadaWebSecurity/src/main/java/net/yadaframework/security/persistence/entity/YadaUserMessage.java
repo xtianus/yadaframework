@@ -33,8 +33,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import net.yadaframework.components.YadaUtil;
@@ -80,13 +78,11 @@ public class YadaUserMessage<YLE extends YadaLocalEnum<?>> implements Serializab
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	@Fetch(FetchMode.SELECT)
-	@Temporal(TemporalType.TIMESTAMP)
 	//@JsonView(YadaJsonView.WithEagerAttributes.class)
 	//@JsonView(YadaJsonView.WithLazyAttributes.class)
 	protected List<Date> created; // Creation date of the message, a new date is added for each stacked message
 
 	@Column(insertable = false, updatable = false, columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified = new Date();
 
 	protected int stackSize = 0; // Counter for identical messages (stacked)

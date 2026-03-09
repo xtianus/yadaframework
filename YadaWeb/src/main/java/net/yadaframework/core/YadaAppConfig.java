@@ -1,6 +1,7 @@
 package net.yadaframework.core;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -11,6 +12,7 @@ import javax.sql.DataSource;
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.reloading.PeriodicReloadingTrigger;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.migration.JavaMigration;
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -38,6 +41,7 @@ import net.yadaframework.web.dialect.YadaDialect;
 
 //@Configuration not needed when using WebApplicationInitializer.java
 @ComponentScan(basePackages = { "net.yadaframework.components" })
+@Import(YadaAiConfigImportSelector.class)
 @EnableScheduling
 @EnableAsync
 public class YadaAppConfig {
@@ -63,7 +67,7 @@ public class YadaAppConfig {
 			Flyway flyway = Flyway.configure()
 				.dataSource(dataSource)
 				.cleanDisabled(true) // Just to be safe
-				.locations("classpath:database") // Where sql scripts are stored
+				.locations(getFlywayLocations()) // Where sql scripts are stored
 				.outOfOrder(config.useDatabaseMigrationOutOfOrder()) // Apply new migrations with lower number added later. Needed for parallel development.
 				// If the db is not empty and there is no metadata, add the metadata instead of failing, setting the version to 1
 				.baselineOnMigrate(true)
@@ -73,6 +77,14 @@ public class YadaAppConfig {
 				.load();
 			flyway.migrate();
 		}
+	}
+	
+	/**
+	 * Returns the Flyway migration locations. Override this method to customize migration paths.
+	 * @return array of classpath locations for Flyway migrations
+	 */
+	protected String[] getFlywayLocations() {
+		return new String[] { "classpath:database" };
 	}
 	
 	/**
@@ -92,8 +104,31 @@ public class YadaAppConfig {
 		return CONFIG;
 	}
 
+	/**
+	 * Creates and configures the email template resolver.
+	 * Override {@link #createEmailTemplateResolver()} to provide a custom resolver implementation.
+	 * @return configured template resolver for emails
+	 */
 	public ClassLoaderTemplateResolver emailTemplateResolver() {
-		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+		ClassLoaderTemplateResolver resolver = createEmailTemplateResolver();
+		configureEmailTemplateResolver(resolver);
+		return resolver;
+	}
+	
+	/**
+	 * Creates the email template resolver instance.
+	 * Override this method to provide a custom resolver (e.g., tenant-aware resolver).
+	 * @return a new ClassLoaderTemplateResolver or subclass
+	 */
+	protected ClassLoaderTemplateResolver createEmailTemplateResolver() {
+		return new ClassLoaderTemplateResolver();
+	}
+	
+	/**
+	 * Configures the email template resolver with common settings.
+	 * @param resolver the resolver to configure
+	 */
+	protected void configureEmailTemplateResolver(ClassLoaderTemplateResolver resolver) {
 		// Relative paths never work, with or without trailing slash, so better to be consistent without and always use "absolute" paths [xtian]
 		resolver.setPrefix(YadaConstants.EMAIL_TEMPLATES_PREFIX); // Attenzione allo slash finale!
 //		resolver.setPrefix(YadaConstants.EMAIL_TEMPLATES_PREFIX + "/"); // Attenzione allo slash finale!
@@ -105,7 +140,6 @@ public class YadaAppConfig {
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setCacheable(config.isProductionEnvironment());
 		// resolver.setOrder(40); // Order not needed because resolver on different SpringTemplateEngine
-		return resolver;
 	}
 
 	@Bean
@@ -204,18 +238,21 @@ public class YadaAppConfig {
 					.setFile(new File("configuration.xml"))
 				);
 		yadaConfiguration.setBuilder(builder);
-//		yadaConfiguration.setConfiguration(ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration()));
+		// Start periodic reloading trigger every 2 seconds
+		PeriodicReloadingTrigger trigger = new PeriodicReloadingTrigger(builder.getReloadingController(), null, 2, TimeUnit.SECONDS);
 
-//		builder.addEventListener(ConfigurationBuilderEvent.CONFIGURATION_REQUEST, new EventListener<Event>() {
-//			@Override
-//			public void onEvent(Event event) {
-//				builder.getReloadingController().checkForReloading(null);
-////				try {
-////					yadaConfiguration.setConfiguration(ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration()));
-////				} catch (ConfigurationException e) {
-////					log.error("Can't reload configuration (ignored)", e);
-////				}
-//			}
-//	    });
+		// The ReloadingCombinedConfigurationBuilder manages multiple configuration sources 
+		// (the main configuration.xml plus any included files). Each source has its own reloading controller, 
+		// and the composite controller fires events for each sub-controller that detects a change.
+		// So it's normal to see more than one debug message "Configuration file changed, reloading..." and it's harmless
+		builder.getReloadingController().addEventListener(org.apache.commons.configuration2.reloading.ReloadingEvent.ANY, event -> {
+			try {
+				log.debug("Configuration file changed, reloading...");
+				builder.getConfiguration(); // This triggers the actual reload and fires RESULT_CREATED
+			} catch (ConfigurationException e) {
+				log.error("Failed to reload configuration", e);
+			}
+		});
+		trigger.start();
 	}
 }

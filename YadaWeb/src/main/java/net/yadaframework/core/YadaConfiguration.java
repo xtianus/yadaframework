@@ -20,10 +20,14 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.apache.commons.configuration2.ConfigurationUtils;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
+import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
+import org.apache.commons.configuration2.builder.ConfigurationBuilderResultCreatedEvent;
 import org.apache.commons.configuration2.builder.combined.CombinedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -50,6 +54,8 @@ public abstract class YadaConfiguration {
 
 	protected ImmutableHierarchicalConfiguration configuration;
 	protected CombinedConfigurationBuilder builder;
+	private final CopyOnWriteArrayList<Runnable> configurationReloadListeners = new CopyOnWriteArrayList<>();
+	private volatile boolean reloadListenerRegistered = false;
 
 	// Cached values
 	// Questi valori li memorizzo perchè probabilmente verranno controllati
@@ -104,6 +110,7 @@ public abstract class YadaConfiguration {
 	private File tempFolder = null;
 	private String googleApiKey = null;
 	private Integer bootstrapVersion = null;
+	private Integer sessionTimeoutMinutes = null;
 	
 	/**
 	 * Copy the already initialised configuration to a different instance
@@ -114,6 +121,19 @@ public abstract class YadaConfiguration {
 		yadaConfiguration.configuration = this.configuration;
 	}
 
+	public Integer getSessionTimeoutMinutes() {
+		if (sessionTimeoutMinutes==null) {
+			sessionTimeoutMinutes = configuration.getInt("config/security/sessionTimeoutMinutes", -1);
+			if (sessionTimeoutMinutes==-1) {
+				// When using standalone tomcat server the session timeout must be configured with the same value set in web.xml
+				// otherwise the session might never expire because the javascript code would keep it awake.
+				log.error("Session timeout not configured correctly (defaulting to 20). Please configure session timeout in conf.webapp.xml equal to web.xml");
+				sessionTimeoutMinutes = 20;
+			}
+		}
+		return sessionTimeoutMinutes;
+	}
+	
 	/**
 	 * Returns the configured timeout for asynchronous requests in seconds.
 	 * Equivalent to the Tomcat parameter asyncTimeout, but more effective (the application-defined parameter takes precedence).
@@ -128,6 +148,13 @@ public abstract class YadaConfiguration {
 	 */
 	public boolean isDatabaseEnabled() {
 		return configuration.getBoolean("config/database/@enabled", true);
+	}
+
+	/**
+	 * @return true when DB instrumentation logging is enabled
+	 */
+	public boolean isYadaLogDbStatsEnabled() {
+		return configuration.getBoolean("config/database/yadaLogDbStats", false);
 	}
 	
 	/**
@@ -1644,12 +1671,46 @@ public abstract class YadaConfiguration {
 	public void setBuilder(CombinedConfigurationBuilder builder) throws ConfigurationException {
 		this.builder = builder;
 		this.configuration = ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration());
+		registerConfigurationReloadListenerIfNeeded();
+	}
+
+	public void addConfigurationReloadListener(Runnable listener) {
+		if (listener != null) {
+			configurationReloadListeners.add(listener);
+		}
+		registerConfigurationReloadListenerIfNeeded();
+	}
+
+	private void registerConfigurationReloadListenerIfNeeded() {
+		if (builder == null || reloadListenerRegistered) {
+			return;
+		}
+		if (builder instanceof BasicConfigurationBuilder) {
+			BasicConfigurationBuilder<?> basicBuilder = (BasicConfigurationBuilder<?>) builder;
+			reloadListenerRegistered = true;
+			basicBuilder.addEventListener(ConfigurationBuilderResultCreatedEvent.RESULT_CREATED, event -> {
+				if (event.getConfiguration() instanceof HierarchicalConfiguration) {
+					HierarchicalConfiguration<?> newConfig = (HierarchicalConfiguration<?>) event.getConfiguration();
+					setConfiguration(ConfigurationUtils.unmodifiableConfiguration(newConfig));
+				} else if (event.getConfiguration() instanceof ImmutableHierarchicalConfiguration) {
+					setConfiguration((ImmutableHierarchicalConfiguration) event.getConfiguration());
+				}
+				for (Runnable listener : configurationReloadListeners) {
+					try {
+						listener.run();
+					} catch (RuntimeException ex) {
+						log.warn("Configuration reload listener failed.", ex);
+					}
+				}
+			});
+		}
 	}
 
 	/**
 	 * Call this method to trigger a configuration reload, but only if the file has changed and the timeout since last reload has passed
 	 * @throws ConfigurationException
 	 */
+	@Deprecated // Configuration reload is now automatic
 	public void reloadIfNeeded() throws ConfigurationException {
 		// TODO Doesn't seem to work
 		if (builder instanceof ReloadingCombinedConfigurationBuilder) {

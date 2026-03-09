@@ -7,7 +7,7 @@
 		<build>${"\$"}{build}</build>
 	</info>
 	<paths>
-		<serverAddress>http://$env.EXAMPLE.com/</serverAddress>
+		<serverAddress>https://$env.EXAMPLE.com/</serverAddress>
 		<basePath>$basePath/$acronym$env</basePath>
 		<% if (env=="prod") { /* TODO remove the "prod" string and use envs[prodIndex] */ %>
 		<!-- The name is the folder name inside basePath -->
@@ -93,7 +93,7 @@
 		<databaseMigrationAtStartup>true</databaseMigrationAtStartup>
 		<!-- Datasource for embedded Tomcat -->
 		<datasource>
-			<jdbcUrl>jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</jdbcUrl>
+			<jdbcUrl>jdbc:mysql://localhost/${acronym}db$env?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;sslMode=DISABLED&amp;allowPublicKeyRetrieval=true</jdbcUrl>
 			<username>${acronym}user$env</username>
 			<password>$dbpwd</password>
 			
@@ -117,7 +117,7 @@
 			<user>
 				<nickname>admin</nickname> <!-- This is an example of UserProfile customization -->
 				<email>admin@EXAMPLE.com</email>
-				<password>myAppPassword</password>
+				<password>${admin_password}</password>
 				<locale>en_US</locale>
 				<timezone>Europe/Rome</timezone>
 				<role>USER</role>
@@ -129,7 +129,8 @@
 	<% if (env=="prod") { /* TODO remove the "prod" string and use envs[prodIndex] */ %>
 	<security>
 		<!-- sessionTimeoutMinutes is used via javascript to check if the browser session is expired and show a warning modal -->
-		<!-- WARNING: this value must be the same as the value of session-timeout in /src/main/webapp/WEB-INF/web.xml or the session might never expire -->
+		 <!-- WARNING: this value must be the same as the value of session-timeout in /src/main/webapp/WEB-INF/web.xml or the session might never expire -->
+		<!-- This is done automatically when using YadaTomcatServer.java so there's no need to set the value in web.xml for embedded tomcat -->
 		<sessionTimeoutMinutes>240</sessionTimeoutMinutes>
 		<passwordLength min='5' max='128' />
 		<encodePassword>true</encodePassword>

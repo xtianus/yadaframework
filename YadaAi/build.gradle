@@ -1,0 +1,163 @@
+plugins {
+	id 'java-library'
+	id 'maven-publish'
+	id 'signing'
+	id 'eclipse-wtp'
+}
+
+apply from: '../YadaWeb/loadSharedProperties.gradle'
+
+group = 'net.yadaframework'
+version = yada_version
+
+if (!project.hasProperty('repoPath')) {
+	ext.repoPath="repoPathMissing"
+}
+
+java {
+	sourceCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
+	targetCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
+	// toolchain {
+	// 	languageVersion = JavaLanguageVersion.of(java_version)
+	// }
+	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
+	withSourcesJar()
+	withJavadocJar() // https://stackoverflow.com/a/75710366/587641
+}
+
+tasks.withType(JavaCompile).configureEach {
+	// Needed since Spring 6.1: 
+	// https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
+	options.compilerArgs.add("-parameters")
+}
+
+eclipse {
+	jdt {
+		// sourceCompatibility = 1.8
+		// targetCompatibility = 1.8
+		// https://stackoverflow.com/a/35302104/587641
+		file {
+	  		File dir = file('.settings')
+	  		dir.mkdirs()
+	  		File f = file('.settings/org.eclipse.core.resources.prefs')
+	  		if (!f.exists()) {
+	  			f.write('eclipse.preferences.version=1\n')
+	  			f.append('encoding/<project>=utf-8')
+	  		}
+		}
+	}
+}
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation project(':YadaWeb')
+	implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
+	implementation 'com.google.code.gson:gson:2.13.2'
+	// These are compile only because in the future there may be other providers to choose from in the application	
+	compileOnly 'software.amazon.awssdk:bedrock:2.35.9'
+	compileOnly 'software.amazon.awssdk:bedrockruntime:2.35.9'
+}
+
+jar {
+	manifest {
+		attributes("Implementation-Title": "YadaAi",
+				   "Implementation-Version": archiveVersion)
+	}
+}
+
+// Set the yada version in the properties file
+processResources {
+	doLast {
+		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadaai.properties", token: '@YADA_VERSION@', value: version)
+	}
+}
+
+javadoc {
+	options.encoding = 'UTF-8'
+	options.docEncoding = 'UTF-8'
+	options.charSet = 'UTF-8'
+	failOnError = false
+}
+
+// http://stackoverflow.com/a/27853822/587641
+// task javadocJar(type: Jar) {
+//     classifier = 'javadoc'
+//     from javadoc
+// }   
+
+publishing {
+	publications {
+		yadaAiLibrary(MavenPublication) {
+			artifactId = 'yadaai'
+			from components.java
+
+			versionMapping {
+				usage('java-api') {
+					fromResolutionOf('runtimeClasspath')
+				}
+				usage('java-runtime') {
+					fromResolutionOf('runtimeClasspath')
+				}
+			}
+  			pom {
+				name = 'YadaAi'
+				description = 'Yada Framework for AI integration'
+				url = 'https://yadaframework.net/en/index.html'
+				inceptionYear = '2025'
+				packaging = 'jar'
+				licenses {
+					license {
+						name = 'MIT License'
+						url = 'https://en.wikipedia.org/wiki/MIT_License'
+					}
+				}
+				developers {
+					developer {
+						id = 'xtianus'
+						name = 'Studio Ghezzi'
+						email = 'studio@ghezzi.net'
+					}
+				}
+				organization {
+					name = 'Studio Ghezzi'
+					url = 'https://studio.ghezzi.net/'
+				}
+				scm {
+					connection = 'scm:git:git@github.com:xtianus/yadaframework.git'
+					developerConnection = 'scm:git:git@github.com:xtianus/yadaframework.git'
+					url = 'https://github.com/xtianus/yadaframework'
+				}
+			}
+		}
+	}
+	repositories {
+		// Creates task publishYadaAiLibraryPublicationToPublicRepoRepository
+		maven {
+			name = "PublicRepo"
+			def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+			def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+			url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+			credentials(PasswordCredentials) {
+				username = project.hasProperty('ossrhUsername')?ossrhUsername:'USERUNSET'
+				password = project.hasProperty('ossrhPassword')?ossrhPassword:'PWDUNSET'
+			}
+		}
+		 // Creates task publishYadaAiLibraryPublicationToLocalRepoRepository
+		maven {
+			name = "LocalRepo"
+			// repoPath must be passed when invoking gradle using -P
+			url = "file://${repoPath}"
+		}
+	}    
+}
+
+signing {
+	sign publishing.publications.yadaAiLibrary
+}
+

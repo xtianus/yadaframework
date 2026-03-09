@@ -14,8 +14,6 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
 
@@ -26,7 +24,6 @@ public class YadaCart implements Serializable {
 
 	// For synchronization with external databases
 	@Column(insertable = false, updatable = false, columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified;
 
 	// For optimistic locking
@@ -41,7 +38,6 @@ public class YadaCart implements Serializable {
 	protected YadaUserProfile owner;
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date creationTimestamp;
 
 	@OneToMany(mappedBy="cart", cascade=CascadeType.ALL, orphanRemoval=true)

@@ -9,9 +9,4 @@
 	<location>/yadaError</location>
 </error-page>
 
-<session-config>
-	<!-- WARNING: this value must be the same as the value of sessionTimeoutMinutes in conf.webapp.<ENV>.xml or the session might never expire -->
-	<session-timeout>240</session-timeout> <!-- 240 minutes -->
-</session-config>
-
 </web-app>

@@ -22,8 +22,6 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 
 // TODO spostare in YadaBones?
@@ -53,11 +51,9 @@ public abstract class YadaJob implements Callable<Void> {
 	protected boolean jobGroupPaused = false;
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date jobScheduledTime;
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date jobLastSuccessfulRun;
 
 	@Column(length=128)
@@ -116,7 +112,6 @@ public abstract class YadaJob implements Callable<Void> {
 	 * The time at which the job was started - null if the job is not in the RUNNING state.
 	 */
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date jobStartTime = null;
 
 	/**

@@ -8,6 +8,10 @@
     <persistence-unit name="yadaPersistenceUnit">
     	<!-- These are used for schema generation. You can remove the ones you don't need but
     		 you will get a schema generation error if some needed class is missing -->
+    		 
+    		 <class>net.yadaframework.example.persistence.entity.UserProfile</class>
+    		 <class>net.yadaframework.example.persistence.entity.YexRegistrationRequest</class>
+    		 
   		<class>net.yadaframework.persistence.entity.YadaAttachedFile</class>
   		<class>net.yadaframework.persistence.entity.YadaBrowserId</class>
   		<class>net.yadaframework.persistence.entity.YadaClause</class>
@@ -23,12 +27,10 @@
   		<class>net.yadaframework.security.persistence.entity.YadaTicketMessage</class>
   		<class>net.yadaframework.security.persistence.entity.YadaUserMessage</class>
   		<class>net.yadaframework.security.persistence.entity.YadaCommentMessage</class>
-     	
      	 
   		<class>net.yadaframework.cms.persistence.entity.YadaArticle</class>
   		<class>net.yadaframework.cms.persistence.entity.YadaProduct</class>
        	
-     	 
   		<class>net.yadaframework.commerce.persistence.entity.YadaAddress</class>
   		<class>net.yadaframework.commerce.persistence.entity.YadaCart</class>
   		<class>net.yadaframework.commerce.persistence.entity.YadaCartItem</class>

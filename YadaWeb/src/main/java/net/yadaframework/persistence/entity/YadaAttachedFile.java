@@ -28,8 +28,6 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.PostPersist;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import net.yadaframework.components.YadaUtil;
@@ -63,7 +61,6 @@ public class YadaAttachedFile implements CloneableDeep, Comparable<YadaAttachedF
 
 	// For synchronization with external databases
 	@Column(insertable = false, updatable = false, columnDefinition="DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date modified = new Date();
 
 	// For optimistic locking
@@ -146,15 +143,14 @@ public class YadaAttachedFile implements CloneableDeep, Comparable<YadaAttachedF
 	@ElementCollection
 	@Column(length=1024)
 	@MapKeyColumn(name="locale", length=32)
-	protected Map<Locale, String> title;
+	protected Map<Locale, String> title; // Could be an image caption
 
 	@ElementCollection
 	@Column(length=8192)
 	@MapKeyColumn(name="locale", length=32)
-	protected Map<Locale, String> description;
+	protected Map<Locale, String> description; // Could be an image alt text
 
 	@Column(columnDefinition="TIMESTAMP NULL")
-	@Temporal(TemporalType.TIMESTAMP)
 	protected Date uploadTimestamp;
 
 	protected boolean published = false; // Application-defined flag
@@ -385,6 +381,28 @@ public class YadaAttachedFile implements CloneableDeep, Comparable<YadaAttachedF
 			log.error("Can't rename file from {} to {}: {}", source, target, e.getMessage());
 			return false;
 		}
+	}
+
+	/**
+	 * Returns the absolute file on the filesystem, using the first non-null value from DESKTOP, MOBILE, PDF or DEFAULT type in order
+	 * @return the absolute file or null if the file does not exist
+	 */
+	public File getAbsoluteFile() {
+		File result = null;
+		result = getAbsoluteFile(YadaAttachedFileType.DESKTOP);
+		if (result!=null) {
+			return result;
+		}
+		result = getAbsoluteFile(YadaAttachedFileType.MOBILE);
+		if (result!=null) {
+			return result;
+		}
+		result = getAbsoluteFile(YadaAttachedFileType.PDF);
+		if (result!=null) {
+			return result;
+		}
+		result = getAbsoluteFile(YadaAttachedFileType.DEFAULT);
+		return result;
 	}
 
 	/**

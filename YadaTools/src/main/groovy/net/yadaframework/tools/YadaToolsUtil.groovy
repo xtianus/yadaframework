@@ -90,21 +90,38 @@ public class YadaToolsUtil {
 		}
 	} 
 	
-	void copyFileFromClasspathFolder(String sourcePathInJar, File destinationFolder, boolean overwrite=false) {
+	void copyFileFromClasspathFolder(String sourcePathInJar, File destinationFolder, String destFilename=null, boolean overwrite=false) {
 		ClassLoader classLoader = this.getClass().getClassLoader();
-		String templatePathString = classLoader.getResource(sourcePathInJar).toString().split("!")[0];
-		FileSystem fileSystem = null;
+		def resourceUrl = classLoader.getResource(sourcePathInJar);
+		if (resourceUrl == null) {
+			println "FAILED to locate resource on classpath: ${sourcePathInJar}";
+			return;
+		}
+		destinationFolder.mkdirs();
+		String entryPath = sourcePathInJar;
+		String filename = destFilename ?: entryPath.substring(entryPath.lastIndexOf("/") + 1);
+		Path targetPath = destinationFolder.toPath().resolve(filename);
+		java.io.InputStream inputStream = null;
 		try {
-			try {
-				fileSystem = FileSystems.getFileSystem(URI.create(templatePathString));
-			} catch (FileSystemNotFoundException e) {
-				fileSystem = FileSystems.newFileSystem(URI.create(templatePathString), new HashMap<>());
+			inputStream = resourceUrl.openStream();
+			if (!overwrite) {
+				try {
+					Files.copy(inputStream, targetPath);
+					printCopied(targetPath.toString());
+				} catch (java.nio.file.FileAlreadyExistsException e) {
+					printSkipped(targetPath.toString());
+				}
+			} else {
+				if (targetPath.toFile().exists()) {
+					printReplaced(targetPath.toString());
+				} else {
+					printCopied(targetPath.toString());
+				}
+				Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
 			}
-			Path jarSourceFile = fileSystem.getPath(sourcePathInJar);
-			copyFile(jarSourceFile, destinationFolder, overwrite)
 		} finally {
-			if (fileSystem!=null) {
-				fileSystem.close();
+			if (inputStream != null) {
+				inputStream.close();
 			}
 		}
 	}

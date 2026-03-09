@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:yada="http://www.yadaframework.net" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
+<!--/* [Bootstrap 4 version]
+A component to add, edit, sort and delete a set of entities that contain at least one uploaded image used as a thumbnail while sorting.
+The entities must implement YadaSortableEntity.
+The "add" and "edit" button can either go to a new page (non-ajax) or open a modal (ajax). In the latter case, after form submission
+you will have to update the page with the new data, either by updating a single element or by reloading the whole page to show the new content. 
+In the non-ajax case you just have to redirect back to the sorter page.
+
+Parameters:
+- entities = A list of @Entity that implement YadaSortableEntity, can be empty but never null
+- entityIdName = (optional) the name of the id request parameter - defaults to "id". It is sent to the add/edit/delete urls. Example: "bookId"
+- ajax = (optional) true to make an ajax call for add/edit. Defaults to false.
+- urlAdd = (optional) url to open the "add" page/modal. When missing, no 'Add' button will be shown.
+- urlEdit = (optional) url to open the "edit" page/modal. Defaults to urlAdd. When missing, no 'Edit' button will be shown.
+- urlClone = (optional) url to clone the element, always ajax. When missing, no 'Clone' button will be shown.
+- urlDelete = (optional) url to delete an entity, always ajax. It receives the "entityIdName" parameter. Example: bookId=412
+- urlSort = url to sort an Entity, always ajax. It receives the "currentId" and "otherId" parameters.
+	currentId is the id of the entity that is being moved to a new destination position.
+	otherId is the id of the entity that is in the destination position and should be moved to the currentId's position.
+	The @Controller implementation can use YadaWebCmsDao.swapAttributes() to swap positions, the add to the model the sorted "entities" list.
+- deleteConfirmKey = key in messages.properties for the delete image confirmation modal.
+- deleteConfirm = delete image confirmation text, if not using a deleteConfirmKey. 
+				  If neither deleteConfirmKey nor deleteConfirm is given, no confirmation on delete is asked.
+- addButtonKey = key in messages.properties for the add-button unescaped text (can have html for icons).
+- addButton = add-button unescaped text to use, if not using an addButtonKey. Defaults to "Add"
+- sorterName = (optional) The HTML id of this sorter, useful when there is more than one on page. Defaults to "yadaEntitySorter"
+- flagClasses = (optional) space separated list of entity attributes that are added as classes when true e.g. "enabled important expired"  
+
+Example:
+<div th:replace="~{/yadacms/b4/entitySorter::component(entities=${shelf.books},entityIdName='bookId',urlAdd=@{/library/bookForm(shelfId=${shelf.id})},urlDelete=@{/library/deleteBook},urlSort=@{/library/sortBook},deleteConfirm='Do you really want to delete this book?')}"></div>
+
+Ajax calls for add/edit/sort/delete/clone should return just the yadaEntitySorterEntities fragment.
+When returning from edit, sort, delete or clone, the needed model attributes are "entities", "entityIdName" and (optional) "flagClasses".
+They last two can either be added "manually" with the specific value, can be taken from the request or better still passed along
+using passThrough() - the latter being the more robust version.
+Example 1:
+	public String sortShape(Long currentId, Long otherId, Model model) {
+		... retrieve bookList...
+		model.addAttribute("entities", bookList);
+		model.addAttribute("entityIdName", "bookId");
+		model.addAttribute("flagClasses", "enabled important expired");
+		return "/yadacms/b4/entitySorter :: .yadaEntitySorterEntities";
+Example 2:
+	public String sortShape(Long currentId, Long otherId, String entityIdName, String flagClasses, Model model) {
+		... retrieve bookList...
+		model.addAttribute("entities", bookList);
+		model.addAttribute("entityIdName", entityIdName);
+		model.addAttribute("flagClasses", flagClasses);
+		return "/yadacms/b4/entitySorter :: .yadaEntitySorterEntities";
+Example 3:
+	public String sortShape(Long currentId, Long otherId, HttpServletRequest request, Model model) {
+		... retrieve bookList...
+		model.addAttribute("entities", bookList);
+		yadaWebUtil.passThrough(model, request);
+		return "/yadacms/b4/entitySorter :: .yadaEntitySorterEntities";
+			
+*/-->
+<body>
+<th:block th:fragment="component">
+	<div th:if="${entities!=null}" class="yadaEntitySorter" th:id="${sorterName}"
+		th:with="sorterName=${sorterName}?:'yadaEntitySorter',entityIdName=${entityIdName}?:'id',urlEdit=${urlEdit}?:${urlAdd}" >
+
+		<div th:class="|${urlEdit==null?'yadaHideEdit':''} ${urlClone==null?'yadaHideClone':''} ${urlDelete==null?'yadaHideDelete':''}|">
+		
+			<!--/* Add */-->
+			<a th:if="${urlAdd!=null}" th:href="${urlAdd}" class="btn btn-success yadaAdd" th:classappend="${true==ajax}?'yadaAjax':''" role="button"
+				th:utext="${addButtonKey!=null?#messages.msg(addButtonKey):addButton?:'Add'}">Add</a>
+	
+			<!--/* These forms have been split so that we don't need to carry over these parameters
+					when replacing some HTML element coming back from an ajax call: they stay put here */-->
+			
+			<form th:action="${urlSort}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" class="yadaAjax yadaNoLoader sortForm" method="post">
+				<input type="hidden" name="entityIdName" th:value="${entityIdName}">
+				<input type="hidden" name="flagClasses" th:value="${flagClasses}">
+			</form>
+	
+			<form th:if="${urlEdit!=null}" th:action="${urlEdit}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" 
+				class="editForm" th:classappend="${true==ajax}?'yadaAjax':''"  method="post">
+				<input type="hidden" name="entityIdName" th:value="${entityIdName}">
+				<input type="hidden" name="flagClasses" th:value="${flagClasses}">
+			</form>
+					
+			<form th:if="${urlClone!=null}" th:action="${urlClone}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" 
+				class="yadaAjax cloneForm" th:classappend="${true==ajax}?'yadaAjax':''"  method="post">
+				<input type="hidden" name="entityIdName" th:value="${entityIdName}">
+				<input type="hidden" name="flagClasses" th:value="${flagClasses}">
+			</form>
+					
+			<form th:if="${urlDelete!=null}" th:action="${urlDelete}" data-yadaUpdateOnSuccess="yadaSiblings:.yadaEntitySorterEntities" class="yadaAjax deleteForm" method="post"
+				yada:confirm="${deleteConfirmKey!=null?#messages.msg(deleteConfirmKey):deleteConfirm?:''}">
+				<input type="hidden" name="entityIdName" th:value="${entityIdName}">
+				<input type="hidden" name="flagClasses" th:value="${flagClasses}">
+			</form>
+		
+			<div class="yadaEntitySorterEntities">
+				<div th:each="sorterEntity,iter : ${entities}" 
+					th:class="'yadaImageControl ' + ${@yadaWebCmsHelper.getFlagClasses(sorterEntity, flagClasses)}" 
+					th:classappend="${iter.odd}? 'odd'">
+					<p th:text="|#${sorterEntity.id}|">#123</p>
+					<img th:src="@{${@yadaFileManager.getDesktopImageUrl(sorterEntity.getThumbnail())}}" />
+					<div class="yadaEntityTitle" th:text="${sorterEntity.title}">Title</div>
+					<div class="commandBar">
+						<!--/* Move up */-->
+						<form th:unless="${iter.last}" action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .sortForm" >
+							<input type="hidden" name="currentId" th:value="${sorterEntity.id}">
+							<input type="hidden" name="otherId" th:value="${entities.get(iter.index+1).id}">
+							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" class="yadaNoLoader">
+								<i class="yadaIcon yadaIcon-down"></i> <!--/* TODO add a localized tooltip and aria- tag */-->
+							</a>
+						</form>
+						<!--/* Move down */-->
+						<form th:unless="${iter.first}" action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .sortForm" >
+							<input type="hidden" name="currentId" th:value="${sorterEntity.id}">
+							<input type="hidden" name="otherId" th:value="${entities.get(iter.index-1).id}">
+							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" class="yadaNoLoader">
+								<i class="yadaIcon yadaIcon-up"></i> <!--/* TODO add a localized tooltip and aria- tag */-->
+							</a>
+						</form>
+						<!--/* Delete
+							* Do not be tempted to use yadaDeleteOnSuccess because you'd have to fix the command bar too (e.g. when you delete the last element) 
+						*/-->
+						<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .deleteForm" class="float-right yadaDeletetButton">
+							<input type="hidden" th:name="${entityIdName}" th:value="${sorterEntity.id}">
+							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" class="yadaNoLoader" title="Delete">
+								<i class="yadaIcon yadaIcon-delete"></i>
+							</a>
+						</form>
+						<!--/* Clone */-->
+						<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .cloneForm" class="float-right yadaClonetButton" >
+							<input type="hidden" th:name="${entityIdName}" th:value="${sorterEntity.id}">
+							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" title="Clone">
+								<i class="yadaIcon yadaIcon-clone"></i>
+							</a>
+						</form>
+						<!--/* Edit */-->
+						<form action="dummy" data-yadaParentForm="yadaClosestFind:.yadaEntitySorter .editForm" class="float-right yadaEditButton">
+							<input type="hidden" th:name="${entityIdName}" th:value="${sorterEntity.id}">
+							<a href="javascript:" onclick="$(this).closest('form').submit(); return false;" title="Edit">
+								<i class="yadaIcon yadaIcon-edit"></i>
+							</a>
+						</form>
+					</div>
+					<div class="clearfix"></div>
+				</div>
+				
+				<div th:if="${@yadaWebUtil.AjaxRequest}" class="yadaResponseData">
+        			<div th:if="${YADA_NBODY}" th:include="~{${@yadaNotify.viewName} :: body}" th:remove="tag"></div>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+
+</th:block>    	
+</body>
+</html>

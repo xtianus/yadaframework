@@ -159,6 +159,24 @@ public class YadaUserCredentialsDao {
 				log.error("Failed to setup user of type {}", userProfileClass, e1);
 				throw new YadaInvalidUsageException("Invalid user type {}", userProfileClass);
 			}
+		} else {
+			// Sync roles with the configured ones
+			Set<Integer> configuredRoles = (Set<Integer>) userDefinition.get("roles");
+			if (configuredRoles != null) {
+				List<Integer> currentRoles = existingUserCredentials.getRoles();
+				// Remove roles not in the configuration
+				if (currentRoles != null) {
+					for (Integer existingRole : new ArrayList<>(currentRoles)) {
+						if (!configuredRoles.contains(existingRole)) {
+							existingUserCredentials.removeRole(existingRole);
+						}
+					}
+				}
+				// Add missing roles from the configuration
+				for (Integer configuredRole : configuredRoles) {
+					existingUserCredentials.addRole(configuredRole);
+				}
+			}
 		}
 		return null;
     }

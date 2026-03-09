@@ -45,7 +45,7 @@ Example: <div th:replace="/yada/form/b5/range::field(fieldName='minGrowTimeForMo
 		<th:block th:with="help = ${helpKey!=null}?#{__${helpKey}__}:${help}">
 			<a th:if="${help!=null}" class="yadaHelpButton input-group-addon" data-trigger="focus" data-container="body" 
 				style="background-color: inherit; border: 0; padding-top: 0px;"
-				data-toggle="popover" data-placement="auto bottom" tabindex="-1"
+				data-toggle="popover" data-placement="auto" tabindex="-1"
 				data-html="true"
 				th:attr="data-content=${help}">
 				<i class="yadaIcon yadaIcon-help"></i>

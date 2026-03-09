@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -73,6 +74,8 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 
+import org.hibernate.Hibernate;
+
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
@@ -100,6 +103,11 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.gif.GifHeaderDirectory;
 import com.drew.metadata.jpeg.JpegDirectory;
+import com.drew.metadata.webp.WebpDirectory;
+import com.drew.metadata.png.PngDirectory;
+import com.drew.metadata.bmp.BmpHeaderDirectory;
+import com.drew.metadata.ico.IcoDirectory;
+import com.drew.metadata.pcx.PcxDirectory;
 
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotNull;
@@ -130,11 +138,14 @@ public class YadaUtil {
     public final static long MILLIS_IN_MINUTE = 60*1000;
 	public final static long MILLIS_IN_HOUR = 60*MILLIS_IN_MINUTE;
 	public final static long MILLIS_IN_DAY = 24*MILLIS_IN_HOUR;
+	
+	private static final int DEFAULT_PREFETCH_MAX_DEPTH = 2;
 
 	private SecureRandom secureRandom = new SecureRandom();
 	private final static char CHAR_AT = '@';
 	private final static char CHAR_DOT = '.';
 	private final static char CHAR_SPACE = ' ';
+	private static final Pattern WINDOWS_RESERVED_FILENAME_PATTERN = Pattern.compile("^(con|prn|aux|nul|com[1-9]|lpt[1-9])$", Pattern.CASE_INSENSITIVE);
 
 	private static Locale defaultLocale = null;
 
@@ -1096,14 +1107,43 @@ public class YadaUtil {
 			boolean valid = false;
 			int orientation = 1; // Default when can't be retrieved
 			int width = -1, height = -1;
+			
+			// Retrieve all possible directory types
 			ExifIFD0Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-			if (directory!=null && directory.containsTag(ExifIFD0Directory.TAG_ORIENTATION)) {
-				orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-			}
 			ExifSubIFDDirectory directory2 = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+			WebpDirectory directoryWebp = metadata.getFirstDirectoryOfType(WebpDirectory.class);
+			PngDirectory directoryPng = metadata.getFirstDirectoryOfType(PngDirectory.class);
+			BmpHeaderDirectory directoryBmp = metadata.getFirstDirectoryOfType(BmpHeaderDirectory.class);
+			IcoDirectory directoryIco = metadata.getFirstDirectoryOfType(IcoDirectory.class);
+			PcxDirectory directoryPcx = metadata.getFirstDirectoryOfType(PcxDirectory.class);
 			if (directory2!=null) {
 				width = directory2.getInt(ExifSubIFDDirectory.TAG_EXIF_IMAGE_WIDTH);
 				height = directory2.getInt(ExifSubIFDDirectory.TAG_EXIF_IMAGE_HEIGHT);
+				valid = true;
+			} else if (directoryWebp!=null) {
+				width = directoryWebp.getInt(WebpDirectory.TAG_IMAGE_WIDTH);
+				height = directoryWebp.getInt(WebpDirectory.TAG_IMAGE_HEIGHT);
+				valid = true;
+			} else if (directoryPng!=null) {
+				width = directoryPng.getInt(PngDirectory.TAG_IMAGE_WIDTH);
+				height = directoryPng.getInt(PngDirectory.TAG_IMAGE_HEIGHT);
+				valid = true;
+			} else if (directoryBmp!=null) {
+				width = directoryBmp.getInt(BmpHeaderDirectory.TAG_IMAGE_WIDTH);
+				height = directoryBmp.getInt(BmpHeaderDirectory.TAG_IMAGE_HEIGHT);
+				valid = true;
+			} else if (directoryIco!=null) {
+				width = directoryIco.getInt(IcoDirectory.TAG_IMAGE_WIDTH);
+				height = directoryIco.getInt(IcoDirectory.TAG_IMAGE_HEIGHT);
+				valid = true;
+			} else if (directoryPcx!=null) {
+				// PCX uses min/max coordinates instead of direct width/height
+				int xMin = directoryPcx.getInt(PcxDirectory.TAG_XMIN);
+				int xMax = directoryPcx.getInt(PcxDirectory.TAG_XMAX);
+				int yMin = directoryPcx.getInt(PcxDirectory.TAG_YMIN);
+				int yMax = directoryPcx.getInt(PcxDirectory.TAG_YMAX);
+				width = xMax - xMin + 1;
+				height = yMax - yMin + 1;
 				valid = true;
 			} else {
 				// If there is no exif directory, look for info in the gif header
@@ -1123,6 +1163,11 @@ public class YadaUtil {
 				}
 			}
 			if (valid) {
+				// Check for orientation tag in EXIF data (supported by JPEG, TIFF, PNG with eXIf chunk, WebP with EXIF chunk)
+				// Orientation values 6 and 8 indicate 90° rotation (CW and CCW respectively)
+				if (directory!=null && directory.containsTag(ExifIFD0Directory.TAG_ORIENTATION)) {
+					orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+				}
 				if (orientation==6 || orientation==8) {
 					// Image is rotated 90° so dimensions must be swapped
 					return new YadaIntDimension(height, width);
@@ -1351,17 +1396,40 @@ public class YadaUtil {
 
 	/**
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
-	 * It must be called in a transaction.
+	 * It must be called in a transaction. Uses default max depth of 2.
 	 * @param fetchedEntity object fetched from database that may contain localized strings
 	 * @param targetClass type of fetchedEntities elements
 	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
 	 */
 	public static <targetClass> void prefetchLocalizedStringsRecursive(targetClass fetchedEntity, Class<?> targetClass, String...attributes) {
+		prefetchLocalizedStringsRecursive(fetchedEntity, targetClass, DEFAULT_PREFETCH_MAX_DEPTH, attributes);
+	}
+
+	/**
+	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
+	 * It must be called in a transaction.
+	 * @param fetchedEntity object fetched from database that may contain localized strings
+	 * @param targetClass type of fetchedEntities elements
+	 * @param maxDepth maximum depth of recursion into related entities (1 = only direct relations, 2 = relations of relations, etc.)
+	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
+	 */
+	public static <targetClass> void prefetchLocalizedStringsRecursive(targetClass fetchedEntity, Class<?> targetClass, int maxDepth, String...attributes) {
 		if (fetchedEntity!=null) {
 			List<targetClass> list = new ArrayList<>();
 			list.add(fetchedEntity);
-			prefetchLocalizedStringListRecursive(list, targetClass, attributes);
+			prefetchLocalizedStringListRecursive(list, targetClass, maxDepth, attributes);
 		}
+	}
+
+	/**
+	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
+	 * It must be called in a transaction. Uses default max depth of 2.
+	 * @param entities objects fetched from database that may contain localized strings
+	 * @param entityClass type of fetchedEntities elements
+	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
+	 */
+	public static <entityClass> void prefetchLocalizedStringListRecursive(List<entityClass> entities, Class<?> entityClass, String...attributes) {
+		prefetchLocalizedStringListRecursive(entities, entityClass, DEFAULT_PREFETCH_MAX_DEPTH, attributes);
 	}
 
 	/**
@@ -1369,47 +1437,127 @@ public class YadaUtil {
 	 * It must be called in a transaction.
 	 * @param entities objects fetched from database that may contain localized strings
 	 * @param entityClass type of fetchedEntities elements
+	 * @param maxDepth maximum depth of recursion into related entities (1 = only direct relations, 2 = relations of relations, etc.)
 	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
 	 */
-	public static <entityClass> void prefetchLocalizedStringListRecursive(List<entityClass> entities, Class<?> entityClass, String...attributes) {
-		// TODO I don't actually get how this works.
-		//      It looks like it's prefetching all first-level local strings, then
-		//      if an attribute is not a generic, it will fetch all first-level local strings there.
-		//      It doesn't make sense.
-		//      It should instead recurse on itself for all attributes that are neither primitive not local strings,
-		//		unrolling collections and arrays.
+	public static <entityClass> void prefetchLocalizedStringListRecursive(List<entityClass> entities, Class<?> entityClass, int maxDepth, String...attributes) {
+		Set<Object> visited = new HashSet<>();
+		prefetchLocalizedStringListRecursive(entities, entityClass, visited, maxDepth, attributes);
+		int totVisited = visited.size();
+		if (totVisited > 100) {
+			log.warn("prefetchLocalizedStringListRecursive visited {} objects - you may want to decrease the maxDepth", totVisited);
+		} else if (log.isDebugEnabled()) {
+			log.debug("prefetchLocalizedStringListRecursive visited {} objects", totVisited);
+		}
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static <entityClass> void prefetchLocalizedStringListRecursive(List<entityClass> entities, Class<?> entityClass, Set<Object> visited, int remainingDepth, String...attributes) {
 		if (entities==null || entities.isEmpty()) {
 			return;
 		}
 		// Prefetch first level strings for all objects
 		prefetchLocalizedStringList(entities, entityClass, attributes);
-		// Look for strings in all attributes recursively
+		// Stop recursion if max depth reached
+		if (remainingDepth <= 0) {
+			return;
+		}
+		// Recurse on all fields that may contain entities with localized strings
+		// Mark all entities as visited to avoid infinite loops on circular references
+		for (Object entity : entities) {
+			if (entity != null) {
+				visited.add(entity);
+			}
+		}
+		final int nextDepth = remainingDepth - 1;
 		ReflectionUtils.doWithFields(entityClass, new ReflectionUtils.FieldCallback() {
 			@Override
 			public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
 				for (Object object : entities) {
-					if (object!=null) {
-						try {
-							field.setAccessible(true);
-							Object fieldValue = field.get(object);
-							if (fieldValue!=null) {
-								Class fieldClass = field.getType();
-								List secondLevel = new ArrayList<>();
-								secondLevel.add(fieldValue);
-								// TODO shouldn't this call prefetchLocalizedStringListRecursive()?
-								prefetchLocalizedStringList(secondLevel, fieldClass, attributes);
-							}
-						} catch (Exception e) {
-							log.error("Failed to initialize field {} for object {} (ignored)", field, object);
+					if (object==null) {
+						continue;
+					}
+					try {
+						field.setAccessible(true);
+						Object fieldValue = field.get(object);
+						if (fieldValue==null || visited.contains(fieldValue)) {
+							continue;
 						}
+						// Handle collections
+						if (fieldValue instanceof Collection) {
+							Collection<?> collection = (Collection<?>) fieldValue;
+							if (!collection.isEmpty()) {
+								List<Object> collectionList = new ArrayList<>(collection);
+								Object firstElement = collectionList.stream().filter(e -> e != null).findFirst().orElse(null);
+								if (firstElement != null) {
+									Class<?> elementClass = firstElement.getClass();
+									prefetchLocalizedStringListRecursive(collectionList, elementClass, visited, nextDepth, attributes);
+								}
+							}
+						}
+						// Handle arrays
+						else if (fieldValue.getClass().isArray()) {
+							int length = Array.getLength(fieldValue);
+							if (length > 0) {
+								List<Object> arrayList = new ArrayList<>();
+								for (int i = 0; i < length; i++) {
+									arrayList.add(Array.get(fieldValue, i));
+								}
+								Object firstElement = arrayList.stream().filter(e -> e != null).findFirst().orElse(null);
+								if (firstElement != null) {
+									Class<?> elementClass = firstElement.getClass();
+									prefetchLocalizedStringListRecursive(arrayList, elementClass, visited, nextDepth, attributes);
+								}
+							}
+						}
+						// Handle single objects
+						else {
+							visited.add(fieldValue); // Mark as visited before recursing
+							Class<?> fieldClass = fieldValue.getClass();
+							List<Object> singleList = new ArrayList<>();
+							singleList.add(fieldValue);
+							prefetchLocalizedStringListRecursive(singleList, fieldClass, visited, nextDepth, attributes);
+						}
+					} catch (Exception e) {
+						log.error("Failed to initialize field {} for object {} (ignored)", field, object);
 					}
 				}
 			}
 		}, new ReflectionUtils.FieldFilter() {
 			@Override
 			public boolean matches(Field field) {
-				Type type = field.getGenericType();
-				return !(type instanceof ParameterizedType);
+				// Only process fields that are JPA relationships
+				// Check both field and getter for annotations (annotations may be on either)
+				if (hasJpaRelationshipAnnotation(field)) {
+					return true;
+				}
+				// Check the getter method for annotations
+				String fieldName = field.getName();
+				String getterName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+				try {
+					Method getter = entityClass.getMethod(getterName);
+					return hasJpaRelationshipAnnotation(getter);
+				} catch (NoSuchMethodException e) {
+					// Try isXxx for boolean fields
+					if (field.getType() == boolean.class || field.getType() == Boolean.class) {
+						String isGetterName = "is" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+						try {
+							Method isGetter = entityClass.getMethod(isGetterName);
+							return hasJpaRelationshipAnnotation(isGetter);
+						} catch (NoSuchMethodException e2) {
+							return false;
+						}
+					}
+					return false;
+				}
+			}
+
+			private boolean hasJpaRelationshipAnnotation(java.lang.reflect.AnnotatedElement element) {
+				return element.isAnnotationPresent(jakarta.persistence.OneToOne.class) ||
+					element.isAnnotationPresent(jakarta.persistence.OneToMany.class) ||
+					element.isAnnotationPresent(jakarta.persistence.ManyToOne.class) ||
+					element.isAnnotationPresent(jakarta.persistence.ManyToMany.class) ||
+					element.isAnnotationPresent(jakarta.persistence.ElementCollection.class);
 			}
 		});
 	}
@@ -1417,6 +1565,7 @@ public class YadaUtil {
 	/**
 	 * Force initialization of localized strings implemented with Map&lt;Locale, String>.
 	 * It must be called in a transaction.
+	 * WARNING: this is the non-recursive version so it only handles first level attributes.
 	 * @param entities objects fetched from database that may contain localized strings
 	 * @param entityClass type of fetchedEntities elements
 	 * @param attributes the localized string attributes to prefetch (optional). If missing, all attributes of the right type are prefetched.
@@ -1489,6 +1638,7 @@ public class YadaUtil {
 	 * Used in entities with localized string attributes.
 	 * If a default locale has been configured with <code>&lt;locale default='true'></code>, then that locale is attempted when
 	 * there is no value for the needed locale (and they differ)
+	 * If the map is null, returns the empty string.
 	 * @param localizedValueMap
 	 * @param locale the needed locale for the value, can be null for the current request locale
 	 * @return the localized value, or the empty string if no value has been defined and no default locale has been configured
@@ -1498,6 +1648,9 @@ public class YadaUtil {
 		try {
 			if (locale==null) {
 				locale = LocaleContextHolder.getLocale();
+			}
+			if (localizedValueMap==null) {
+				return "";
 			}
 			result = localizedValueMap.get(locale);
 		} catch (Exception e) {
@@ -1680,6 +1833,51 @@ public class YadaUtil {
 			}
 		}
 		return getType(attributeType, StringUtils.substringAfter(attributePath, "."));
+	}
+
+	/**
+	 * Check if the last segment of an attribute path is a Collection (List, Set, etc.)
+	 * @param rootClass the root entity class
+	 * @param attributePath field name like "roles" or even a path like "userCredentials.roles"
+	 * @return true if the final attribute is a Collection type
+	 * @throws NoSuchFieldException if the field is not found in the class hierarchy
+	 * @throws SecurityException
+	 */
+	public boolean isCollection(Class rootClass, String attributePath) throws NoSuchFieldException, SecurityException {
+		if (StringUtils.isBlank(attributePath)) {
+			return false;
+		}
+		String attributeName = StringUtils.substringBefore(attributePath, ".");
+		String remaining = StringUtils.substringAfter(attributePath, ".");
+		Field field = null;
+		Class<?> currentClass = rootClass;
+		while (field == null && currentClass != null) {
+			try {
+				field = currentClass.getDeclaredField(attributeName);
+			} catch (NoSuchFieldException e) {
+				currentClass = currentClass.getSuperclass();
+			}
+		}
+		if (field == null) {
+			throw new NoSuchFieldException("No field " + attributeName + " found in hierarchy of " + rootClass.getName());
+		}
+		Class<?> attributeType = field.getType();
+		if (StringUtils.isNotBlank(remaining)) {
+			if (java.util.Collection.class.isAssignableFrom(attributeType) || java.util.Map.class.isAssignableFrom(attributeType)) {
+				ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
+				if (parameterizedType != null) {
+					Type[] types = parameterizedType.getActualTypeArguments();
+					if (types.length > 0) {
+						if (java.util.Map.class.isAssignableFrom(attributeType)) {
+							remaining = StringUtils.substringAfter(remaining, ".");
+						}
+						attributeType = (Class<?>) types[types.length - 1];
+					}
+				}
+			}
+			return isCollection(attributeType, remaining);
+		}
+		return java.util.Collection.class.isAssignableFrom(attributeType);
 	}
 
 	/**
@@ -3543,22 +3741,32 @@ public class YadaUtil {
 		if (StringUtils.isBlank(originalFilename)) {
 			return "noname";
 		}
-        // Normalize the filename to decompose characters using NFKD
-        String normalizedFilename = Normalizer.normalize(originalFilename, Normalizer.Form.NFKD);
-        // Remove diacritical marks (accents)
-        String withoutDiacritics = normalizedFilename.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-        // Replace invalid characters with underscores
-        String safeFilename = withoutDiacritics.replaceAll("[^a-zA-Z0-9._-]", "_");
+		// Normalize the filename to decompose characters using NFKD
+		String normalizedFilename = Normalizer.normalize(originalFilename, Normalizer.Form.NFKD);
+		// Remove diacritical marks (accents)
+		String withoutDiacritics = normalizedFilename.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+		// Replace invalid characters with underscores
+		String safeFilename = withoutDiacritics.replaceAll("[^a-zA-Z0-9._-]", "_");
 		// Remove consecutive underscores
-        safeFilename = safeFilename.replaceAll("__+", "_");
-		// Remove leading and trailing underscores
-        safeFilename = safeFilename.replaceAll("^[_]+", "").replaceAll("[_]+$", "");
+		safeFilename = safeFilename.replaceAll("__+", "_");
 		// Remove underscore when followed by punctuation and preceded by any letter or digit
-        safeFilename = safeFilename.replaceAll("([a-zA-Z0-9])_([\\p{Punct}])", "$1$2");
-        // Convert to lowercase if needed
-        if (toLowercase) {
-            safeFilename = safeFilename.toLowerCase();
-        }
-        return safeFilename;
+		safeFilename = safeFilename.replaceAll("([a-zA-Z0-9])_([\\p{Punct}])", "$1$2");
+		// Windows forbids trailing dots/spaces and dot-only names are unsafe on any OS
+		safeFilename = safeFilename.replaceAll("[._]+$", "");
+		safeFilename = safeFilename.replaceAll("^[_\\.]+", "");
+		if (StringUtils.isBlank(safeFilename)) {
+			return "noname";
+		}
+		String[] filenameParts = splitFileNameAndExtension(safeFilename);
+		String baseName = filenameParts[0];
+		String extension = filenameParts[1];
+		if (WINDOWS_RESERVED_FILENAME_PATTERN.matcher(baseName).matches()) {
+			baseName = "_" + baseName;
+		}
+		safeFilename = extension.isEmpty() ? baseName : baseName + "." + extension;
+		if (toLowercase) {
+			safeFilename = safeFilename.toLowerCase();
+		}
+		return safeFilename;
 	}
 }
