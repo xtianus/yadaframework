@@ -1856,15 +1856,15 @@
 					yada.showAjaxFeedback();
 				}
 			}).catch(function(err) {
-				copyUsingFallback();
+				copyUsingFallback(text, showFeedback);
 			});
 		} else {
-			copyUsingFallback();
+			copyUsingFallback(text, showFeedback);
 		}
 	}
 		
 	// Fallback approach using document.execCommand
-	function copyUsingFallback() {
+	function copyUsingFallback(text, showFeedback) {
 		try {
 			// Create a temporary textarea
 			const textArea = document.createElement('textarea');
