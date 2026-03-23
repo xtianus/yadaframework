@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:yada="http://www.yadaframework.net">
+<head>
+	<th:block th:replace="~{/header :: headFragment}"/>
+</head>
+<body>
+
+<th:block th:replace="~{/header :: body}"/>
+
+<main class="container">
+	<h1 th:text="${item.name()}">Item Name</h1>
+	<p>Catalog: <strong th:text="${item.catalog()}">catalog</strong></p>
+	<p>Category: <strong th:text="${item.category()}">category</strong></p>
+	<p class="mt-4"><a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm">&larr; Back to list</a></p>
+</main>
+
+<th:block th:replace="~{/footer :: body}"/>
+
+</body>
+</html>

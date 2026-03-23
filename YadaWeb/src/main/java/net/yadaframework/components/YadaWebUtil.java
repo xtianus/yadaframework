@@ -68,6 +68,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.AbstractDispatcherServletInitializer;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.Cookie;
@@ -569,13 +570,21 @@ public class YadaWebUtil {
 
 	/**
 	 * Creates a new URL string from a starting one, taking into account the locale in the path and optional url parameters.
-	 * @param url the original url, like "/some/place"
+	 * The path of the result is urlencoded.
+	 * @param url the original url, like "/some/place" (can contain parameters and anchors)
 	 * @param locale added as a path in the url, only if the url is absolute. Can be null if the locale is not needed in the path
 	 * @param params optional request parameters to be set on the url, in the form of comma-separated name,value pairs. E.g. "id","123","name","joe".
 	 * 			Existing parameters are not replaced. Null values become empty strings. Null names are skipped with their values.
 	 * @return a url like "/en/some/place?id=123&name=joe"
 	 */
 	public String enhanceUrl(String url, Locale locale, String...params) {
+		// UTF-8 encode the path portion of the URL to handle special characters (e.g. accented letters)
+		int splitPos = url.length();
+		int qPos = url.indexOf('?');
+		int hPos = url.indexOf('#');
+		if (qPos >= 0) splitPos = Math.min(splitPos, qPos);
+		if (hPos >= 0) splitPos = Math.min(splitPos, hPos);
+		url = UriUtils.encodePath(url.substring(0, splitPos), "UTF-8") + url.substring(splitPos);
 		StringBuilder result = new StringBuilder();
 		if (config.isLocalePathVariableEnabled()) {
 			// The language is added only to absolute urls, if it doesn't exist yet
