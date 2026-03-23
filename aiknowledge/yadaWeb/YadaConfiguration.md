@@ -27,4 +27,12 @@
 | `getString` | Returns a string. |
 | `getInt` | Returns an int. |
 | `getLong` | Returns a long. |
+| `setReloadingTrigger` | Stores the periodic Commons Configuration reloading trigger owned by this configuration instance. |
+| `startReloadingTrigger` | Starts the stored periodic reloading trigger when runtime configuration reloading is enabled. |
+| `stopReloadingTrigger` | Shuts down the stored periodic reloading trigger and clears the reference. |
 | `addConfigurationReloadListener` | Adds a configuration reload listener. |
+
+## Notes
+
+- `copyTo` copies the combined-configuration builder, the resolved immutable configuration, and the active reloading trigger reference, so static startup access and the Spring bean observe the same reloading state.
+- `stopReloadingTrigger` shuts down the trigger executor, which is what releases the `ReloadingTrigger-*` thread used by Commons Configuration.
