@@ -11,6 +11,7 @@ buildscript {
 
 plugins {
 	id 'java-library'
+	id 'java-test-fixtures'
 	id 'maven-publish'
 	id 'signing'
 	id 'eclipse-wtp'
@@ -139,6 +140,8 @@ dependencies {
 	testImplementation 'org.mockito:mockito-junit-jupiter:5.3.1'
 	testImplementation 'org.springframework:spring-test:6.2.11'
 	testImplementation 'javax.servlet:javax.servlet-api:4.0.1'
+	testFixturesImplementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.18'
+	testFixturesImplementation 'jakarta.servlet:jakarta.servlet-api:6.1.0'
 	
 }
 

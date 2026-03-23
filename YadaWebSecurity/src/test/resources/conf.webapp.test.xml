@@ -1,0 +1,21 @@
+<config>
+	<info>
+		<env>dev</env>
+		<appName>UploadLimitTest</appName>
+		<version>0.1</version>
+		<build>${build}</build>
+		<date>2026-03-11</date>
+		<alpha>true</alpha>
+		<beta>false</beta>
+	</info>
+
+	<maxFileUploadSizeBytes>1</maxFileUploadSizeBytes>
+
+	<database enabled="false">
+		<jndiname>java:comp/env/jdbc/yadatestdb</jndiname>
+	</database>
+
+	<paths>
+		<basePath>build/test-upload-runtime</basePath>
+	</paths>
+</config>

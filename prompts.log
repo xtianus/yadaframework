@@ -1,0 +1,141 @@
+2026-03-11T17:31:19Z
+PLEASE IMPLEMENT THIS PLAN:
+# Fix embedded test classpath scope, multipart CSRF URL building, and config reload lifecycle
+
+**Summary**
+- Make the embedded Tomcat harness mount only classpath roots that belong to the target test module by default, with optional extra roots for nonstandard layouts.
+- Rebuild multipart form actions with `UriComponentsBuilder` so `_csrf` stays in the query string even when the action contains a fragment.
+- Give `YadaConfiguration` ownership of the periodic reloading trigger so it is stopped on Spring context shutdown and when test scopes swap the static config.
+
+**Implementation Changes**
+- Embedded Tomcat harness:
+  - Keep the current constructors. Add overloads that accept extra classpath roots (`Path...` or `Collection<Path>`), appended after the inferred defaults.
+  - Replace `getClasspathDirectories()` with a resolver that:
+    - finds the nearest `build` ancestor of `webappDir`
+    - treats that ancestor’s parent as the target module root
+    - keeps only JVM classpath directories under that module root
+    - preserves JVM classpath order and de-duplicates absolute paths
+    - throws a clear `IllegalArgumentException` when no `build` ancestor can be inferred and no extra roots are supplied
+  - Continue mounting only those resolved roots into `/WEB-INF/classes`; do not mount unrelated module directories.
+- Multipart form CSRF rewriting:
+  - In `YadaMultipartFormTagProcessor`, replace string concatenation and raw `action.contains(...)` checks with parsed query inspection and `queryParam(...)` composition via `UriComponentsBuilder`.
+  - Preserve relative URLs, existing query parameters, and `#fragment` ordering; append `_csrf` only when the action query does not already contain that parameter.
+  - Do not change `YadaActionUploadAttrProcessor` in this pass; leave it for a separate deprecation/alignment follow-up.
+- Reload trigger lifecycle:
+  - Add a `PeriodicReloadingTrigger` field plus idempotent `start/stop` methods to `YadaConfiguration`; have `copyTo(...)` copy the trigger reference together with the builder/configuration.
+  - Change `YadaAppConfig.makeCombinedConfiguration(...)` to register the listener and start the trigger through `YadaConfiguration`, not a local variable.
+  - Add `@PreDestroy` or an equivalent destroy hook in `YadaAppConfig` to stop the active trigger when the root context closes.
+  - In `YadaTestConfigurationScope.close()`, stop the currently active test config trigger before restoring `previousConfig`; do not stop `previousConfig` itself.
+  - Keep runtime reloading enabled. This is lifecycle cleanup, not a test-only feature toggle.
+
+**Test Plan**
+- Add a focused test for the harness root resolver that feeds synthetic classpath directories and verifies:
+  - same-module `build/classes` and `build/resources` roots are kept
+  - unrelated module roots are dropped
+  - explicit extra roots are appended only when requested
+- Extend the upload integration app with a form whose action includes `#done`, then assert an oversized upload still returns `413` rather than `403`.
+- Add a shutdown regression that starts and closes the embedded server, then polls `Thread.getAllStackTraces().keySet()` until no `ReloadingTrigger-*` thread remains alive.
+- Re-run `OversizedMultipartUploadIntegrationTest` to confirm the oversized-upload flow still reaches the controller.
+
+**Public API / Interface Changes**
+- `YadaEmbeddedTomcatTestServer` gains constructor overloads for extra mount roots; existing constructors remain but become safe-by-default.
+- `YadaConfiguration` gains internal reload-trigger lifecycle methods/reference. No XML schema or user-facing config keys change.
+
+**Assumptions**
+- The default harness path is the Gradle test layout used here (`.../build/resources/test/itest-webapp`); nonstandard layouts must use the extra-roots overload.
+- The legacy `yada:actionUpload` attribute remains untouched in this fix and should be handled in a separate cleanup/deprecation pass.
+
+2026-03-11T16:20:13Z
+PLEASE IMPLEMENT THIS PLAN:
+# Oversized Multipart Integration Test With Reusable Tomcat Harness
+
+## Summary
+- Implement the regression test in `YadaWebSecurity`, but put the reusable servlet-test infrastructure in `YadaWeb`.
+- Use raw embedded Tomcat, not `YadaTomcatServer`, and do not add any dependency on `YadaExamples`.
+- Add the test first against a plain multipart form with standard CSRF hidden field and `th:action`; if it fails, fix the framework and rerun the same test unchanged.
+
+## Public And Reusable Additions
+- In `YadaWeb` main code, centralize configuration-file resolution behind one internal hook with fallback to `configuration.xml`.
+  Default: read absolute path from system property `yada.configurationFile`; if absent, keep current behavior.
+- Use that same resolver both in `YadaAppConfig.makeCombinedConfiguration()` and in `YadaWebApplicationInitializer.customizeRegistration()`, so servlet multipart limits and Spring config are loaded from the same file.
+- In `YadaWeb`, expose reusable test fixtures via Gradle `java-test-fixtures`.
+  Publish:
+  - a non-blocking embedded Tomcat harness
+  - a config-scope helper that sets `yada.configurationFile`, clears cached static config before startup, and restores state after shutdown
+
+## Implementation Changes
+- `YadaWeb`
+  - Add `java-test-fixtures` to the Gradle build.
+  - Add a test-fixture Tomcat helper built directly on `org.apache.catalina.startup.Tomcat`.
+    Behavior:
+    - HTTP only
+    - port `0` for ephemeral binding
+    - no `await()`
+    - no `System.exit()`
+    - `AutoCloseable`
+    - mounts the requested webapp folder
+    - mounts all directory entries from the current test JVM classpath into `/WEB-INF/classes` so `WebApplicationInitializer`, test controllers, and test configs are discoverable
+  - Add a test-fixture config helper that:
+    - sets `System.setProperty("yada.configurationFile", absolutePath)`
+    - resets `YadaAppConfig.CONFIG` before startup and after shutdown
+    - is safe to use with one server at a time in the JVM
+- `YadaWebSecurity`
+  - Add `testImplementation(testFixtures(project(':YadaWeb')))` plus JUnit Jupiter and `useJUnitPlatform()`.
+  - Create test-only application classes:
+    - `UploadLimitTestAppConfig extends YadaAppConfig`
+      It creates the `config` bean by copying the statically loaded config into a concrete `YadaConfiguration` instance.
+    - `UploadLimitTestWebConfig extends YadaWebSecurityConfig`
+      It scans only the test web package.
+    - `UploadLimitTestSecurityConfig extends YadaSecurityConfig`
+      It keeps CSRF enabled, calls `super.configure(http)`, then ends with `anyRequest().permitAll()`.
+    - `UploadLimitTestWebApplicationInitializer extends YadaWebApplicationInitializer`
+      It mirrors the `YadaExamples` pattern without importing that project:
+      add `super` root configs, add `UploadLimitTestAppConfig`, add `YadaDummyJpaConfig` when DB is disabled, add `UploadLimitTestSecurityConfig`, and use `UploadLimitTestWebConfig` as servlet config.
+    - `UploadLimitTestController`
+      - `GET /test/upload/form` returns a Thymeleaf form view
+      - `POST /test/upload/submit` checks `YadaCommonsMultipartResolver.limitExceeded(request)` and returns:
+        - `413` + body marker `LIMIT_EXCEEDED`
+        - otherwise `200` + body marker `UPLOAD_OK`
+  - Add test resources in `YadaWebSecurity`:
+    - dedicated `configuration.xml`
+    - dedicated `conf.webapp.test.xml`
+    - minimal `itest-webapp/WEB-INF/web.xml`
+    - `itest-webapp/WEB-INF/views/test/upload/form.html`
+  - Configure the test XML with:
+    - `<maxFileUploadSizeBytes>1</maxFileUploadSizeBytes>`
+    - `<database enabled="false">`
+    - a writable build-local base path such as `build/test-upload-runtime`
+  - The HTML form must use:
+    - standard `th:action`
+    - `enctype="multipart/form-data"`
+    - standard Spring Security hidden CSRF input
+    - no `yada:actionUpload`
+
+## Test Plan
+- `formPageLoadsAndContainsCsrfField`
+  - Start the reusable Tomcat harness against the `YadaWebSecurity` test webapp.
+  - Load the dedicated `configuration.xml` through `yada.configurationFile`.
+  - `GET /test/upload/form`
+  - Assert `200` and presence of the CSRF hidden input.
+- `oversizedMultipartDoesNotReturn403AndReachesController`
+  - Reuse the same server shape with `maxFileUploadSizeBytes=1`.
+  - Use Java `HttpClient` with `CookieManager`.
+  - Parse the form HTML with existing `jsoup` from `YadaWeb` dependencies.
+  - Submit a multipart POST with:
+    - the CSRF hidden field value extracted from the form
+    - a file field with 2 bytes of payload
+  - Assert:
+    - status is `413`
+    - body contains `LIMIT_EXCEEDED`
+    - status is not `403`
+- If the second test fails, apply the smallest framework fix in `YadaWeb` or `YadaWebSecurity` and rerun that exact test unchanged.
+
+## Assumptions And Defaults
+- Tomcat stays the chosen engine.
+  Reason: Yada already has Tomcat-oriented startup code, and the behavior under verification is container-sensitive.
+- Reusable test infrastructure belongs to `YadaWeb` as test fixtures; test-specific app classes, controller, templates, and XML config belong to `YadaWebSecurity`.
+- The test proves the documented contract from `uploads.adoc`, not the legacy `yada:actionUpload` workaround.
+- The file payload is intentionally tiny but above the configured limit, so the test exercises multipart overflow without depending on large-request connector behavior such as `maxSwallowSize`.
+
+
+

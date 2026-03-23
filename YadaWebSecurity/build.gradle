@@ -68,6 +68,12 @@ dependencies {
 	implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
 
 	compileOnlyApi 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+	
+	testImplementation(testFixtures(project(':YadaWeb')))
+	testImplementation platform('org.junit:junit-bom:6.0.3')
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation 'org.junit.platform:junit-platform-launcher'
+	testRuntimeOnly 'org.junit.platform:junit-platform-engine'
 			
 }
 
@@ -168,5 +174,13 @@ publishing {
 
 signing {
 	sign publishing.publications.yadaWebSecurityLibrary
+}
+
+test {
+	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
+		showStandardStreams = true
+	}
 }
 
