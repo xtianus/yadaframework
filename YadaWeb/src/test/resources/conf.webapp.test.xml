@@ -8,6 +8,8 @@
 		<alpha>true</alpha>
 		<beta>false</beta>
 	</info>
+
+	<maxFileUploadSizeBytes>3000000</maxFileUploadSizeBytes>
 	
 	<database>
 		<jndiname>java:comp/env/jdbc/yadatestdb</jndiname>

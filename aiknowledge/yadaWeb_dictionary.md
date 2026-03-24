@@ -21,8 +21,11 @@
 
 | Class | Description |
 |---|---|
+| [YadaAppConfig](yadaWeb/YadaAppConfig.md) | Builds the root Yada Spring configuration and loads the combined `configuration.xml` tree, including optional system-property overrides used by tests and custom launchers. |
 | [YadaConfiguration](yadaWeb/YadaConfiguration.md) | Exposes framework configuration values resolved from properties and setup data. Use when code needs environment-specific Yada settings. |
+| [YadaEmbeddedTomcatTestServer](yadaWeb/YadaEmbeddedTomcatTestServer.md) | Starts an in-process Tomcat instance for servlet integration tests without blocking the JVM. Use it when tests need a real servlet container instead of `MockMvc`. |
 | [YadaRegistrationType](yadaWeb/YadaRegistrationType.md) | Enumerates the purposes of a YadaRegistrationRequest, such as registration, password recovery, email change, and social signup. Use it to distinguish security-link workflows. |
+| [YadaTestConfigurationScope](yadaWeb/YadaTestConfigurationScope.md) | Applies a specific `configuration.xml` file to Yada static startup code for the lifetime of a test scope. Use it to isolate integration tests that need different startup configuration. |
 
 ## `net.yadaframework.persistence`
 
@@ -110,3 +113,9 @@
 | [YadaDTOptions](yadaWeb/YadaDTOptions.md) | Builds the DT options section of a DataTables configuration. Use while composing a Yada DataTable. |
 | [YadaDTResponsive](yadaWeb/YadaDTResponsive.md) | Builds the DT responsive section of a DataTables configuration. Use while composing a Yada DataTable. |
 | [YadaDTResponsiveDetails](yadaWeb/YadaDTResponsiveDetails.md) | Builds the DT responsive details section of a DataTables configuration. Use while composing a Yada DataTable. |
+
+## `org.springframework.web.multipart.commons`
+
+| Class | Description |
+|---|---|
+| [YadaCommonsMultipartResolver](yadaWeb/YadaCommonsMultipartResolver.md) | Wraps Spring’s standard multipart resolver so upload-size failures are exposed on the request and controller code can inspect them with `limitExceeded`. |

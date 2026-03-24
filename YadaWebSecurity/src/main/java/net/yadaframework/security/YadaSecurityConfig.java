@@ -84,7 +84,6 @@ public class YadaSecurityConfig {
 
 	    http
 	        .headers(headers -> headers.disable())
-	        .csrf(csrf -> csrf.disable())
 	        .sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 	        .logout(logout -> {
 	            logout

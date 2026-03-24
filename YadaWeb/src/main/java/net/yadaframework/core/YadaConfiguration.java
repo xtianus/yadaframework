@@ -31,6 +31,7 @@ import org.apache.commons.configuration2.builder.ConfigurationBuilderResultCreat
 import org.apache.commons.configuration2.builder.combined.CombinedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.reloading.PeriodicReloadingTrigger;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.format.Formatter;
 
+import jakarta.annotation.PreDestroy;
 import jakarta.servlet.http.HttpServletRequest;
 import net.yadaframework.exceptions.YadaConfigurationException;
 import net.yadaframework.exceptions.YadaInternalException;
@@ -54,6 +56,7 @@ public abstract class YadaConfiguration {
 
 	protected ImmutableHierarchicalConfiguration configuration;
 	protected CombinedConfigurationBuilder builder;
+	private PeriodicReloadingTrigger reloadingTrigger;
 	private final CopyOnWriteArrayList<Runnable> configurationReloadListeners = new CopyOnWriteArrayList<>();
 	private volatile boolean reloadListenerRegistered = false;
 
@@ -119,6 +122,7 @@ public abstract class YadaConfiguration {
 	public void copyTo(YadaConfiguration yadaConfiguration) {
 		yadaConfiguration.builder = this.builder;
 		yadaConfiguration.configuration = this.configuration;
+		yadaConfiguration.reloadingTrigger = this.reloadingTrigger;
 	}
 
 	public Integer getSessionTimeoutMinutes() {
@@ -1672,6 +1676,44 @@ public abstract class YadaConfiguration {
 		this.builder = builder;
 		this.configuration = ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration());
 		registerConfigurationReloadListenerIfNeeded();
+	}
+
+	/**
+	 * Sets the periodic reloading trigger used by this configuration.
+	 * @param reloadingTrigger the periodic reloading trigger to use
+	 */
+	public synchronized void setReloadingTrigger(PeriodicReloadingTrigger reloadingTrigger) {
+		if (this.reloadingTrigger != null && this.reloadingTrigger != reloadingTrigger) {
+			this.reloadingTrigger.stop();
+		}
+		this.reloadingTrigger = reloadingTrigger;
+	}
+
+	/**
+	 * Starts the periodic reloading trigger if one is configured.
+	 */
+	public synchronized void startReloadingTrigger() {
+		if (reloadingTrigger != null) {
+			reloadingTrigger.start();
+		}
+	}
+
+	/**
+	 * Stops the periodic reloading trigger if one is configured.
+	 */
+	public synchronized void stopReloadingTrigger() {
+		if (reloadingTrigger != null) {
+			reloadingTrigger.shutdown();
+			reloadingTrigger = null;
+		}
+	}
+
+	/**
+	 * Stops the periodic reloading trigger when the configuration bean is destroyed.
+	 */
+	@PreDestroy
+	public void destroy() {
+		stopReloadingTrigger();
 	}
 
 	public void addConfigurationReloadListener(Runnable listener) {

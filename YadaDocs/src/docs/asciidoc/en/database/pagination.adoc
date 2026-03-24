@@ -177,6 +177,34 @@ the back button those values will be sent to the "first query" method seen at th
 pages up to the current one will be fetched from database and shown at the original scroll position. The `yada:paginationHistory` attribute
 must be set on the link or button that loads the next page.
 
+=== Preserving Filter Parameters
+
+When a paginated page also has filters (e.g. search keywords, category checkboxes), the browser history
+entries created by `yada:paginationHistory` only store pagination state by default. If the user applies
+filters, loads more results, navigates away, then presses back, the restored URL lacks the filter
+parameters and the page reloads without the correct filter state.
+
+The `yada:historyPreserveParams` attribute solves this by specifying which additional request parameters
+should be preserved in history entries. It is opt-in and must be placed on the same element as
+`yada:paginationHistory` (or on the parent form):
+
+[source,html]
+----
+<a yada:ajax="@{/search(query=${query}, category=${categories},
+        page=${items.nextPage}, size=${items.pageSize})}"
+    yada:paginationHistory
+    yada:historyPreserveParams="query, category"
+    yada:updateOnSuccess="yadaParents:.jsLoadMore" href="">Load More
+</a>
+----
+
+The attribute accepts a comma-separated list of request parameter names.
+Single-value parameters (e.g. `query=lamp`) and multi-value parameters (e.g. `category=Table&category=Chair`)
+are both supported. Empty-string values are not preserved; explicit `"false"` and `"0"` are preserved.
+
+For forms with a load-more button, the preserved values are read from the form data being submitted.
+For links, they are read from the link's href URL.
+
 ==  Advanced Usage
 
 === Single Controller Method
