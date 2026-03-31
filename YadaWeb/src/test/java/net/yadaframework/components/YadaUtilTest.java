@@ -5,7 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -247,6 +250,114 @@ class YadaUtilTest {
 //            assertNull(yadaUtil.getJsonArray(jsonObject, "key"));
 //            assertEquals("object", yadaUtil.getJsonAttribute(jsonObject, "key.field"));
 //        }
+    }
+
+    @Nested
+    class CompareNaturalTests {
+
+        @Test
+        void numericPrefix_SortsByNumericValue() {
+            assertTrue(YadaUtil.compareNatural("20W power", "100W power") < 0);
+            assertTrue(YadaUtil.compareNatural("100W power", "20W power") > 0);
+        }
+
+        @Test
+        void numericInMiddle_SortsByNumericValue() {
+            assertTrue(YadaUtil.compareNatural("file2.txt", "file10.txt") < 0);
+            assertTrue(YadaUtil.compareNatural("file10.txt", "file2.txt") > 0);
+        }
+
+        @Test
+        void equalStrings_ReturnsZero() {
+            assertEquals(0, YadaUtil.compareNatural("abc", "abc"));
+            assertEquals(0, YadaUtil.compareNatural("file10", "file10"));
+        }
+
+        @Test
+        void caseInsensitive() {
+            assertEquals(0, YadaUtil.compareNatural("ABC", "abc"));
+            assertTrue(YadaUtil.compareNatural("Abc", "abd") < 0);
+        }
+
+        @Test
+        void purelyAlphabetic_SortsLexicographically() {
+            assertTrue(YadaUtil.compareNatural("apple", "banana") < 0);
+            assertTrue(YadaUtil.compareNatural("banana", "apple") > 0);
+        }
+
+        @Test
+        void purelyNumeric_SortsByValue() {
+            assertTrue(YadaUtil.compareNatural("2", "10") < 0);
+            assertTrue(YadaUtil.compareNatural("100", "20") > 0);
+        }
+
+        @Test
+        void prefixSubstring_ShorterComesFirst() {
+            assertTrue(YadaUtil.compareNatural("file", "file1") < 0);
+            assertTrue(YadaUtil.compareNatural("abc", "abcd") < 0);
+        }
+
+        @Test
+        void multipleNumericSegments() {
+            assertTrue(YadaUtil.compareNatural("v1.2.3", "v1.10.1") < 0);
+            assertTrue(YadaUtil.compareNatural("v2.0.0", "v1.9.9") > 0);
+        }
+
+        @Test
+        void listSorting_ProducesNaturalOrder() {
+            List<String> items = Arrays.asList("item10", "item2", "item1", "item20", "item3");
+            items.sort(YadaUtil.NATURAL_SORT_ORDER);
+            assertEquals(Arrays.asList("item1", "item2", "item3", "item10", "item20"), items);
+        }
+
+        @Test
+        void accessoryNames_SortCorrectly() {
+            List<String> accessories = Arrays.asList(
+                "100W CEILING POWER SUPPLY",
+                "20W WALL POWER SUPPLY",
+                "50W CEILING POWER SUPPLY",
+                "ANTI-GLARE SCREEN",
+                "240W CEILING POWER SUPPLY"
+            );
+            accessories.sort(YadaUtil.NATURAL_SORT_ORDER);
+            assertEquals(Arrays.asList(
+                "20W WALL POWER SUPPLY",
+                "50W CEILING POWER SUPPLY",
+                "100W CEILING POWER SUPPLY",
+                "240W CEILING POWER SUPPLY",
+                "ANTI-GLARE SCREEN"
+            ), accessories);
+        }
+    }
+
+    @Nested
+    class NaturalSortOrderLocaleTests {
+
+        @Test
+        void italianAccents_SortNearBaseCharacter() {
+            Comparator<String> cmp = YadaUtil.naturalSortOrder(Locale.ITALIAN);
+            List<String> items = Arrays.asList("città", "ciao", "dado", "banca", "àncora");
+            items.sort(cmp);
+            // "àncora" should sort near "a", "città" near "c"
+            assertEquals("àncora", items.get(0));
+            assertEquals("banca", items.get(1));
+            assertEquals("ciao", items.get(2));
+            assertEquals("città", items.get(3));
+            assertEquals("dado", items.get(4));
+        }
+
+        @Test
+        void localeAware_StillHandlesNumbers() {
+            Comparator<String> cmp = YadaUtil.naturalSortOrder(Locale.ITALIAN);
+            assertTrue(cmp.compare("20W alimentatore", "100W alimentatore") < 0);
+            assertTrue(cmp.compare("file2.txt", "file10.txt") < 0);
+        }
+
+        @Test
+        void localeAware_CaseInsensitive() {
+            Comparator<String> cmp = YadaUtil.naturalSortOrder(Locale.ITALIAN);
+            assertEquals(0, cmp.compare("ABC", "abc"));
+        }
     }
 
     @Test

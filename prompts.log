@@ -1,3 +1,13 @@
+2026-03-23T21:17:36Z
+there's a stale tomcat process that listens on 8080 and I need to kill it
+2026-03-23T21:10:46Z
+the eclipse project C:\work\gits\YadaDevelopment\yadaframework\YadaWebSecurity doesn't build.
+I have several errors:
+
+- The import net.yadaframework.core.YadaEmbeddedTomcatTestServer cannot be resolved
+- The method server() from the type OversizedMultipartUploadIntegrationTest.TestServerContext refers to the missing type YadaEmbeddedTomcatTestServer
+- YadaTestConfigurationScope cannot be resolved to a type
+
 2026-03-11T17:31:19Z
 PLEASE IMPLEMENT THIS PLAN:
 # Fix embedded test classpath scope, multipart CSRF URL building, and config reload lifecycle
@@ -136,6 +146,8 @@ PLEASE IMPLEMENT THIS PLAN:
 - Reusable test infrastructure belongs to `YadaWeb` as test fixtures; test-specific app classes, controller, templates, and XML config belong to `YadaWebSecurity`.
 - The test proves the documented contract from `uploads.adoc`, not the legacy `yada:actionUpload` workaround.
 - The file payload is intentionally tiny but above the configured limit, so the test exercises multipart overflow without depending on large-request connector behavior such as `maxSwallowSize`.
+
+
 
 
 
