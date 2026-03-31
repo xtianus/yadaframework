@@ -47,6 +47,17 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 //	}
 	
 	/**
+	 * Specify a javascript function to use for rendering the cell
+	 * @param renderFunction javascript function name
+     * @return This instance for method chaining.
+     * @see <a href="https://datatables.net/reference/option/columns.render">DataTables Reference: columns.render</a>
+	 */
+	public YadaDataTableColumn dtRender(String renderFunction) {
+	    yadaDTColumns.dtRender(renderFunction);
+	    return this;
+	}
+	
+	/**
 	 * css classes to set on the cell.
 	 * @param cssClasses space-separated css classes
 	 * @return this instance for method chaining

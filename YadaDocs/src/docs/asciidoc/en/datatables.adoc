@@ -352,6 +352,44 @@ by adding conditions or creating values not directly found on the entity:
 
 == Advanced Usage
 
+=== Custom Cell Rendering
+
+You can customize how cell values are displayed by providing a javascript render function.
+This is useful for wrapping values in HTML tags, applying conditional formatting, or transforming data before display.
+
+Use the `.dtRender()` method on a column to specify a javascript function that will be called for each cell:
+
+[source,java]
+----
+YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("myTable", locale, table -> {
+	table
+		.dtEntityClass(MyEntity.class)
+		.dtStructureObj()
+			.dtColumnObj("Name", "name")
+				.dtRender("renderNameCell") # <1>
+				.back()
+		.back();
+});
+----
+<1> Specify the name of a javascript function to render the cell
+
+On the HTML page, define the render function. The function signature follows the DataTables convention:
+
+[source,javascript]
+----
+function renderNameCell(data, type, row, meta) {
+	return '<span class="myClass">' + data + '</span>';
+}
+----
+
+The function receives:
+- `data`: the cell value from the data source
+- `type`: the type of data requested (filter, display, sort, type)
+- `row`: the full data object for the row
+- `meta`: an object with metadata about the cell (row index, column index, etc.)
+
+Return the HTML string to be displayed in the cell. This allows you to wrap values in tags, add icons, apply conditional styling, or create complex cell content based on the row data.
+
 === DataTables API Access
 A reference to the DataTables API, i.e. the object returned by `$table.DataTable(dataTableOptions)`, is added to the table DOM object under the `yadaDataTableApi` key. It can be retrieved with
 
@@ -362,9 +400,43 @@ const dataTableApi = $('#yourTableId').data('yadaDataTableApi');
 
 All standard DataTable https://datatables.net/reference/api/[API methods,window=_blank] are available, for example use `dataTableApi.ajax.reload()` to reload the table data.
 
-=== Table Filter
+=== Custom Text Search
 
-You can add form elements to filter the data shown in your DataTable. 
+You can add a simple custom text search input to filter the data shown in your DataTable across all searchable columns, in case the default search box one is not suitable for your needs.
+The DataTables built-in global search is handled automatically by `YadaDataTableDao`: when the search value is set, it generates LIKE queries on all columns that have `searchable` enabled, with no additional backend code required.
+
+On the HTML page, add a text input anywhere and use the postprocessor to wire it to the DataTables `search()` API with a debounce:
+
+[source,html]
+----
+<input type="text" class="mySearchInput" />
+
+<yada:datatable
+	yada:configuration="${myTableAttribute}"
+	yada:postprocessor="myTablePostprocessor">
+</yada:datatable>
+----
+
+[source,javascript]
+----
+function myTablePostprocessor(dataTableApi, dataTableJson) {
+	var timer;
+	$('.mySearchInput').on('input', function() {
+		clearTimeout(timer);
+		var value = $(this).val();
+		timer = setTimeout(function() {
+			dataTableApi.search(value).draw();
+		}, 300);
+	});
+}
+----
+
+The `search(value).draw()` call sends the value as the standard DataTables `search[value]` parameter.
+On the backend, `YadaDataTableDao.getPage()` reads it automatically and applies a LIKE search on all searchable columns of the entity. No changes to the ajax endpoint are needed.
+
+=== Multi-field Filter
+
+You can add structured form elements (text inputs, checkboxes, selects) to filter the data shown in your DataTable with custom server-side logic.
 
 [.center]
 .Table Filter
