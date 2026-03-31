@@ -27,6 +27,7 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.Normalizer;
 import java.text.NumberFormat;
@@ -126,6 +127,25 @@ import sogei.utility.UCheckNum;
 @Component
 public class YadaUtil {
 	private final static Logger log = LoggerFactory.getLogger(YadaUtil.class);
+	
+	/**
+	 * A case-insensitive natural sort {@link Comparator} for strings.
+	 * <p>Numeric segments within the strings are compared by their integer value rather than lexicographically,
+	 * so that "file2.txt" sorts before "file10.txt" and "20W power" sorts before "100W power".
+	 * Numbers are recognized at any position in the string. Non-numeric characters are compared case-insensitively.</p>
+	 * <p>Does not handle null values. Wrap with {@link Comparator#nullsLast(Comparator)}
+	 * or {@link Comparator#nullsFirst(Comparator)} when nulls are possible.</p>
+	 * <p>Usage example:</p>
+	 * <pre>
+	 * // Simple list sort
+	 * myList.sort(YadaUtil.NATURAL_SORT_ORDER);
+	 *
+	 * // Sort objects by a string property, with null safety
+	 * items.sort(Comparator.comparing(Item::getName, Comparator.nullsLast(YadaUtil.NATURAL_SORT_ORDER)));
+	 * </pre>
+	 * @see #compareNatural(String, String)
+	 */
+	public static final Comparator<String> NATURAL_SORT_ORDER = YadaUtil::compareNatural;
 
 	@Autowired private YadaConfiguration config;
     @Autowired private AutowireCapableBeanFactory autowireCapableBeanFactory; // For autowiring entities
@@ -3594,6 +3614,91 @@ public class YadaUtil {
 			// Ignored
 		}
 		return false;
+	}
+
+
+	/**
+	 * Case-insensitive natural order comparison between two non-null strings.
+	 * <p>Walks both strings character by character. When both characters at the current position are digits,
+	 * the full numeric chunk is extracted from each string and compared as an integer value.
+	 * Non-digit characters are compared case-insensitively. If one string is a prefix of the other,
+	 * the shorter string sorts first.</p>
+	 * <p>Prefer using the {@link #NATURAL_SORT_ORDER} constant when a {@link Comparator} is needed.</p>
+	 * @param a first string (must not be null)
+	 * @param b second string (must not be null)
+	 * @return a negative integer, zero, or a positive integer if {@code a} is less than, equal to,
+	 *         or greater than {@code b} in natural sort order
+	 */
+	public static int compareNatural(String a, String b) {
+		int ia = 0, ib = 0;
+		while (ia < a.length() && ib < b.length()) {
+			char ca = a.charAt(ia);
+			char cb = b.charAt(ib);
+			if (Character.isDigit(ca) && Character.isDigit(cb)) {
+				int startA = ia, startB = ib;
+				while (ia < a.length() && Character.isDigit(a.charAt(ia))) ia++;
+				while (ib < b.length() && Character.isDigit(b.charAt(ib))) ib++;
+				int cmp = Integer.compare(Integer.parseInt(a.substring(startA, ia)), Integer.parseInt(b.substring(startB, ib)));
+				if (cmp != 0) return cmp;
+			} else {
+				int cmp = Character.compare(Character.toLowerCase(ca), Character.toLowerCase(cb));
+				if (cmp != 0) return cmp;
+				ia++;
+				ib++;
+			}
+		}
+		return Integer.compare(a.length(), b.length());
+	}
+
+	/**
+	 * Returns a locale-aware natural sort {@link Comparator} for strings.
+	 * <p>Like {@link #NATURAL_SORT_ORDER} but uses a {@link Collator} for the given locale,
+	 * so that accented characters sort correctly (e.g. "à" near "a" in Italian).
+	 * Numeric segments are still compared by integer value.</p>
+	 * <p>Does not handle null values. Wrap with {@link Comparator#nullsLast(Comparator)}
+	 * or {@link Comparator#nullsFirst(Comparator)} when nulls are possible.</p>
+	 * <p>Usage example:</p>
+	 * <pre>
+	 * items.sort(Comparator.comparing(Item::getName, Comparator.nullsLast(YadaUtil.naturalSortOrder(Locale.ITALIAN))));
+	 * </pre>
+	 * @param locale the locale for accent and character ordering rules
+	 * @return a natural sort comparator for the given locale
+	 * @see #NATURAL_SORT_ORDER
+	 */
+	public static Comparator<String> naturalSortOrder(Locale locale) {
+		Collator collator = Collator.getInstance(locale);
+		collator.setStrength(Collator.SECONDARY); // case-insensitive, accent-aware
+		return (a, b) -> compareNatural(a, b, collator);
+	}
+
+	/**
+	 * Locale-aware natural order comparison using a {@link Collator} for non-numeric segments.
+	 * @param a first string (must not be null)
+	 * @param b second string (must not be null)
+	 * @param collator the collator for locale-sensitive character comparison
+	 * @return a negative integer, zero, or a positive integer if {@code a} is less than, equal to,
+	 *         or greater than {@code b} in natural sort order
+	 */
+	private static int compareNatural(String a, String b, Collator collator) {
+		int ia = 0, ib = 0;
+		while (ia < a.length() && ib < b.length()) {
+			char ca = a.charAt(ia);
+			char cb = b.charAt(ib);
+			if (Character.isDigit(ca) && Character.isDigit(cb)) {
+				int startA = ia, startB = ib;
+				while (ia < a.length() && Character.isDigit(a.charAt(ia))) ia++;
+				while (ib < b.length() && Character.isDigit(b.charAt(ib))) ib++;
+				int cmp = Integer.compare(Integer.parseInt(a.substring(startA, ia)), Integer.parseInt(b.substring(startB, ib)));
+				if (cmp != 0) return cmp;
+			} else {
+				// Compare single characters using collator
+				int cmp = collator.compare(String.valueOf(ca), String.valueOf(cb));
+				if (cmp != 0) return cmp;
+				ia++;
+				ib++;
+			}
+		}
+		return Integer.compare(a.length(), b.length());
 	}
 
 	// Trasforma una mappa qualunque in un set ordinato in base ai valori
