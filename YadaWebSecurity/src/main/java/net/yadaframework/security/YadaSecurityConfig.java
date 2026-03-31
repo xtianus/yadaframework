@@ -114,7 +114,8 @@ public class YadaSecurityConfig {
 	            // Forward requests should never be protected with Spring MVC: https://docs.spring.io/spring-security/reference/5.8/migration/servlet/authorization.html#_permit_forward_when_using_spring_mvc
 	            // This is especially the case when using YadaLocalePathVariableFilter.
 	            authorize
-	                .dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll();
+	                .dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
+	                .requestMatchers("/yadaTimezone").permitAll();
 	        });
 	}
 
