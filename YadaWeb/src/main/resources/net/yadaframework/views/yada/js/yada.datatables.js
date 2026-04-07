@@ -35,12 +35,22 @@
 			}
 		}
 
+		// Propagate orderSequence from table level to each column that doesn't have its own,
+		// because DataTables only processes orderSequence at the column level, not at the table level.
+		if (dataTableOptions.orderSequence && dataTableOptions.columns) {
+			dataTableOptions.columns.forEach(col => {
+				if (col.orderSequence === undefined || col.orderSequence === null) {
+					col.orderSequence = dataTableOptions.orderSequence;
+				}
+			});
+		}
+
 		// Preprocessor can override, add, delete configured options
 		const preprocessor = window[preprocessorName];
 		if (typeof preprocessor === "function") {
 		    preprocessor(dataTableJson);
 		}
-		
+
 		const $table = $("#" + dataTableId);
 		const dataTableApi = $table.DataTable(dataTableOptions);
 		$table.data("yadaDataTableApi", dataTableApi); // Make the created datatable API an attribute of the DOM object

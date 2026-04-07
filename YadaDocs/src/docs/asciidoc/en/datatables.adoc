@@ -390,6 +390,57 @@ The function receives:
 
 Return the HTML string to be displayed in the cell. This allows you to wrap values in tags, add icons, apply conditional styling, or create complex cell content based on the row data.
 
+=== Column Sort Sequence
+
+By default, DataTables cycles through three sorting states when a column header is clicked: ascending, descending, and no sorting.
+This means that clicking a column header three times will remove the sort entirely.
+
+You can customize this cycling behavior using `dtOrderSequence()` to control which directions are available.
+For example, you can prevent users from removing the sort by excluding the empty string from the sequence.
+
+==== Table-wide configuration
+Set the sort sequence for all columns at once using `dtOptionsObj().dtOrderSequence()`:
+
+[source,java]
+----
+YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("myTable", locale, table -> {
+	table
+		.dtEntityClass(MyEntity.class)
+		.dtStructureObj()
+			.dtColumnObj("Name", "name").back()
+			.dtColumnObj("Date", "createdDate").dtOrderDesc().back()
+		.back()
+		.dtOptionsObj()
+			.dtOrderSequence("asc", "desc") // <1>
+			.back()
+		;
+});
+----
+<1> All columns will cycle between ascending and descending only, never removing the sort
+
+NOTE: The table-level `dtOrderSequence()` sets the same sequence for all columns that don't have a per-column setting. It is a Yada extension and has no direct equivalent in the official DataTables API. If you need different sequences for different columns, use the per-column `dtOrderSequence()` method.
+
+==== Per-column configuration
+Override the sort sequence on individual columns using `dtOrderSequence()` on the column:
+
+[source,java]
+----
+.dtStructureObj()
+	.dtColumnObj("Name", "name")
+		.dtOrderSequence("asc", "desc") // <1>
+		.back()
+	.dtColumnObj("Priority", "priority")
+		.dtOrderSequence("desc", "asc") // <2>
+		.back()
+.back()
+----
+<1> This column cycles between ascending and descending only
+<2> This column starts with descending and never allows "no sort"
+
+NOTE: The per-column `dtOrderSequence()` overrides any table-wide setting from `dtOptionsObj().dtOrderSequence()`.
+
+Valid values for the sequence are `"asc"`, `"desc"`, and `""` (empty string for no sorting).
+
 === DataTables API Access
 A reference to the DataTables API, i.e. the object returned by `$table.DataTable(dataTableOptions)`, is added to the table DOM object under the `yadaDataTableApi` key. It can be retrieved with
 
