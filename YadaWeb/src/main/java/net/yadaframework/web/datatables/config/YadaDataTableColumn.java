@@ -47,6 +47,17 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 //	}
 	
 	/**
+	 * Specify a javascript function to use for rendering the cell
+	 * @param renderFunction javascript function name
+     * @return This instance for method chaining.
+     * @see <a href="https://datatables.net/reference/option/columns.render">DataTables Reference: columns.render</a>
+	 */
+	public YadaDataTableColumn dtRender(String renderFunction) {
+	    yadaDTColumns.dtRender(renderFunction);
+	    return this;
+	}
+	
+	/**
 	 * css classes to set on the cell.
 	 * @param cssClasses space-separated css classes
 	 * @return this instance for method chaining
@@ -54,6 +65,23 @@ public class YadaDataTableColumn extends YadaFluentBase<YadaDataTableHTML> {
 	 */
 	public YadaDataTableColumn dtCssClasses(String cssClasses) {
 		yadaDTColumns.dtClassName(cssClasses);
+		return this;
+	}
+
+	/**
+	 * Define the sequence of sorting directions when the user clicks on the column header.
+	 * The default DataTables sequence is "asc", "desc", "" (empty string means no sorting).
+	 * Use this to remove the "no sorting" option or change the order.
+	 * For example, calling dtOrderSequence("asc", "desc") will prevent the user from unsetting the sort on this column.
+	 * You can set the option once at table level with the {@link net.yadaframework.web.datatables.options.YadaDTOptions#dtOrderSequence(String...)} method.
+	 * @param directions the sorting directions in the desired order. Valid values are "asc", "desc", "" (empty string for no sorting)
+	 * @return this instance for method chaining
+	 * @see <a href="https://datatables.net/reference/option/columns.orderSequence">DataTables Reference: columns.orderSequence</a>
+	 */
+	public YadaDataTableColumn dtOrderSequence(String... directions) {
+		for (String direction : directions) {
+			yadaDTColumns.dtOrderSequence(direction);
+		}
 		return this;
 	}
 
