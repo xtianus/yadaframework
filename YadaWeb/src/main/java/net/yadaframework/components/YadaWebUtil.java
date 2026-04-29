@@ -54,6 +54,7 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.web.YadaUserAgent;
 
 @Service
 public class YadaWebUtil {
@@ -478,6 +479,23 @@ public class YadaWebUtil {
 	public boolean isAjaxRequest(HttpServletRequest request) {
 		String ajaxHeader = request.getHeader("X-Requested-With");
 		return "XMLHttpRequest".equalsIgnoreCase(ajaxHeader);
+	}
+
+	/**
+	 * Returns true when the current request user-agent identifies a bot or crawler.
+	 * @return true for bots and for missing requests
+	 */
+	public boolean isBotRequest() {
+		return YadaUserAgent.isBot(getCurrentRequest());
+	}
+
+	/**
+	 * Returns true when the request user-agent identifies a bot or crawler.
+	 * @param request the current request, can be null
+	 * @return true for bots and for missing requests
+	 */
+	public boolean isBotRequest(HttpServletRequest request) {
+		return YadaUserAgent.isBot(request);
 	}
 
 	/**
