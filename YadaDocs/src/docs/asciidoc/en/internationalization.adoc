@@ -387,7 +387,16 @@ TIP: The Message Source configuration is implemented in YadaAppConfig.messageSou
 
 === Frontend message export
 
-JavaScript applications can fetch a request-locale message map from `GET /messageProperties`.
+JavaScript applications can fetch a request-locale message map from a backend controller that uses YadaWebUtil.getFrontendMessages():
+
+[source,java]
+----
+	@RequestMapping(value ="/messageProperties", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public Map<String, String> messageProperties(Locale locale) {
+		return yadaWebUtil.getFrontendMessages(locale);
+	}
+----
+
 The endpoint reads the configured Yada message source basenames to discover frontend keys from the
 default-locale bundles, returns only keys that match `config/i18n/frontendKeyPrefix`, and resolves
 values through the configured Spring `MessageSource`.
