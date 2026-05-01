@@ -17,22 +17,28 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,6 +56,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.support.AbstractResourceBasedMessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
@@ -94,6 +101,7 @@ public class YadaWebUtil {
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private MessageSource messageSource;
+	@Autowired private ServletContext servletContext;
 	
 	/**
 	 * Instance to be used when autowiring is not available
@@ -107,6 +115,60 @@ public class YadaWebUtil {
 	private static final String PATTERN_INVALID_SLUG = "[?%:,;=&!+~()@*$'\"\\s]";
 
 	private Map<String, List<?>> sortedLocalEnumCache = new ConcurrentHashMap<>();
+	
+	/**
+	 * Returns frontend-exportable messages for the current locale using MessageSource value resolution.
+	 * All keys prefixed by any of the values in <i18n><frontendKeyPrefix> will be resolved for the current locale and returned to the caller.
+	 */
+	public Map<String, String> getFrontendMessages(Locale locale) {
+		List<String> prefixes = config.getFrontendMessageKeyPrefixes(); // "ts."
+		if (prefixes.isEmpty()) {
+			return Collections.emptyMap();
+		}
+		Map<String, String> messages = new TreeMap<>();
+		// No need to read the basenames from config and normalize them: already done in YadaAppConfig.messageSource()
+		// config.getMessageSourceBasenames()
+		Set<String> basenames = ((AbstractResourceBasedMessageSource)messageSource).getBasenameSet();
+		for (String basename : basenames) {
+			Properties properties = new Properties();
+			loadProperties(properties, basename + ".properties");
+			for (String key : new TreeSet<>(properties.stringPropertyNames())) {
+				if (messages.containsKey(key) || !matchesAnyPrefix(key, prefixes)) {
+					continue;
+				}
+				messages.put(key, messageSource.getMessage(key, null, locale));
+			}
+		}
+		return Collections.unmodifiableMap(messages);
+	}
+
+	/**
+	 * Adds one UTF-8 properties resource into the target properties when it exists.
+	 */
+	private void loadProperties(Properties target, String resourcePath) {
+		try (InputStream inputStream = servletContext.getResourceAsStream("/" + resourcePath)) {
+			if (inputStream == null) {
+				throw new YadaSystemException("Could not load message bundle '{}' because inputStream null", resourcePath);
+			}
+			Properties loaded = new Properties();
+			loaded.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+			target.putAll(loaded);
+		} catch (IOException e) {
+			throw new YadaSystemException("Could not load message bundle '{}'", resourcePath, e);
+		}
+	}
+
+	/**
+	 * Checks if a message key is allowed by any configured prefix e.g. "ts."
+	 */
+	private boolean matchesAnyPrefix(String key, List<String> prefixes) {
+		for (String prefix : prefixes) {
+			if (key.startsWith(prefix)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	/**
 	 * @return the current request URI, for example "/some/product"

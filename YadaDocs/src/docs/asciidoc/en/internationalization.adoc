@@ -365,9 +365,44 @@ In particular:
 ** `>` is "greater than" where the subject is the number, so `>1` means "when 1 is greater than the parameter"
 ** each choice can contain text and/or parameters like `{1}` or `{2,number,integer}`
 
-In production, files are reloaded every 600 seconds (10 minutes) to pick up changes.
+Message source files are reloaded every 600 seconds (10 minutes) by default.
+The reload interval can be configured with `<cacheSeconds>` inside `<messageSource>`:
+
+[source,xml]
+----
+<i18n localePathVariable="true">
+	<messageSource>
+		<cacheSeconds>600</cacheSeconds>
+	</messageSource>
+	<locale default="true">en</locale>
+	<locale>it</locale>
+</i18n>
+----
+
+The value is the number of seconds before checking the files again. Use `-1` to never reload
+message files and `0` to check them on every lookup. In development environments the framework
+forces `0`, regardless of the configured value, so message changes are visible immediately.
 
 TIP: The Message Source configuration is implemented in YadaAppConfig.messageSource()
+
+=== Frontend message export
+
+JavaScript applications can fetch a request-locale message map from `GET /messageProperties`.
+The endpoint reads the configured Yada message source basenames to discover frontend keys from the
+default-locale bundles, returns only keys that match `config/i18n/frontendKeyPrefix`, and resolves
+values through the configured Spring `MessageSource`.
+
+[source,xml]
+----
+<i18n localePathVariable="true">
+	<frontendKeyPrefix>ts.</frontendKeyPrefix>
+</i18n>
+----
+
+Message values follow the same
+locale fallback behavior as normal server-side message lookups. 
+Applications should generate the URL server-side with the usual locale-aware URL handling, then load it
+from the frontend before rendering user-visible JavaScript UI text.
 
 When the application grows, it may be convenient to split the message.properties files into more manageable units. For example,
 a `countries.properties` fileset might contain the translations for all the country names of the world. Any number of such units
@@ -599,7 +634,4 @@ userProfile.setTimezone(userTimezone);
 ----
 TO BE CONTINUED...
 ----
-
-
-
 

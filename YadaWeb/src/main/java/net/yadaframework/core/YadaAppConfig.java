@@ -206,8 +206,8 @@ public class YadaAppConfig {
 		messageSource.setFallbackToSystemLocale(false);
 		messageSource.setUseCodeAsDefaultMessage(true);
 		messageSource.setDefaultEncoding("UTF-8");
-		// # -1 : never reload, 0 always reload
-		messageSource.setCacheSeconds(config.isProductionEnvironment()?600:0);
+		int messageSourceCacheSeconds = config.getMessageSourceCacheSeconds(); // # -1 : never reload, 0 always reload
+		messageSource.setCacheSeconds(config.isDevelopmentEnvironment()?0:messageSourceCacheSeconds);
 		YadaUtil.messageSource = messageSource; // Needs to be done for use outside of Beans
 		return messageSource;
 	}

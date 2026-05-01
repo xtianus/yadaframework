@@ -1816,5 +1816,21 @@ public abstract class YadaConfiguration {
 		}
 		return basenames;
 	}
+	
+	/**
+	 * Seconds before message.properties files are reloaded. -1=never, 0=always
+	 * @return
+	 */
+	public int getMessageSourceCacheSeconds() {
+		return this.configuration.getInt("config/i18n/messageSource/cacheSeconds", 600);
+	}
+
+	/**
+	 * Returns the message key prefixes that can be exported to frontend code.
+	 * @return the configured prefixes, or an empty list
+	 */
+	public List<String> getFrontendMessageKeyPrefixes() {
+		return Arrays.asList(this.configuration.getStringArray("config/i18n/frontendKeyPrefix"));
+	}
 
 }
