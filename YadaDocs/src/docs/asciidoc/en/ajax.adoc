@@ -990,6 +990,23 @@ WARNING: The ajax method forces the targeted elements to a "relative" position w
 This should not affect the layout. If it does, the element loader should target some specifically 
 added element or be removed.
 
+== Security
+=== CSRF Protection
+
+When Spring Security CSRF protection is enabled, the page must expose the CSRF token in standard meta tags so that `yada.ajax.js` can add the CSRF header to same-origin ajax requests that use unsafe HTTP methods such as POST, PUT, PATCH, or DELETE.
+
+[source,html]
+----
+<!--/* CSRF token exposed to JS so yada can attach it to AJAX requests */-->
+<th:block th:if="${_csrf != null}">
+	<meta name="_csrf" th:content="${_csrf.token}"/>
+	<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+	<meta name="_csrf_parameter" th:content="${_csrf.parameterName}"/>
+</th:block>
+----
+
+These tags belong in the HTML page `<head>`, usually in the shared header fragment. See `YadaExamples/src/main/webapp/WEB-INF/views/header.html` for the reference placement.
+
 == Utilities
 === dequeueFunctionCall
 

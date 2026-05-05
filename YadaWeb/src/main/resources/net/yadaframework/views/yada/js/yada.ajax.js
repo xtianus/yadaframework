@@ -49,7 +49,41 @@
 	function initObservers($element) {
 		yada.enableAjaxTriggerInViewport($element);
 	}
-	
+
+	//////////////////////
+	// CSRF: when the page exposes the standard Spring Security meta tags
+	// <meta name="_csrf" content="..."> and <meta name="_csrf_header" content="...">
+	// attach the CSRF header to all jQuery AJAX requests that mutate state.
+	// This must run at script load (before document.ready) so the handler is in place
+	// before any AJAX POST call is fired.
+	yada.csrf = (function() {
+		const tokenMeta = document.querySelector("meta[name='_csrf']");
+		const headerMeta = document.querySelector("meta[name='_csrf_header']");
+		const parameterMeta = document.querySelector("meta[name='_csrf_parameter']");
+		if (tokenMeta == null || headerMeta == null) {
+			return null;
+		}
+		return {
+			token: tokenMeta.getAttribute("content"),
+			header: headerMeta.getAttribute("content"),
+			parameterName: parameterMeta != null ? parameterMeta.getAttribute("content") : "_csrf"
+		};
+	})();
+	if (yada.csrf != null && yada.csrf.token && yada.csrf.header) {
+		$(document).ajaxSend(function(event, jqXHR, settings) {
+			const method = (settings.type || "GET").toUpperCase();
+			// Skip safe methods - they are not subject to CSRF protection on the server
+			if (method === "GET" || method === "HEAD" || method === "OPTIONS" || method === "TRACE") {
+				return;
+			}
+			// Skip cross-origin requests
+			if (settings.crossDomain) {
+				return;
+			}
+			jqXHR.setRequestHeader(yada.csrf.header, yada.csrf.token);
+		});
+	}
+
 	//////////////////////
 	/// Pagination support
 	/**

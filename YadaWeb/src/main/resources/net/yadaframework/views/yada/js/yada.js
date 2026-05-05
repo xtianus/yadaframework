@@ -74,7 +74,8 @@
 			const data = {
 				'timezone': Intl.DateTimeFormat().resolvedOptions().timeZone
 			}
-			jQuery.post("/yadaTimezone", data, function(){
+			// Using GET to prevent CSRF problems here
+			jQuery.get("/yadaTimezone", data, function(){
 				sessionStorage.setItem(sessionStorageKeyTimezone, true);
 			});
 		}
