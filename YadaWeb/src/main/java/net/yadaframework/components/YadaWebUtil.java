@@ -88,6 +88,7 @@ import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.exceptions.YadaSystemException;
 import net.yadaframework.web.YadaPageRequest;
 import net.yadaframework.web.YadaPageRows;
+import net.yadaframework.web.YadaUserAgent;
 import net.yadaframework.web.YadaViews;
 
 /**
@@ -1008,6 +1009,23 @@ public class YadaWebUtil {
 		}
 		String ajaxHeader = request.getHeader("X-Requested-With");
 		return "XMLHttpRequest".equalsIgnoreCase(ajaxHeader);
+	}
+
+	/**
+	 * Returns true when the current request user-agent identifies a bot or crawler.
+	 * @return true for bots and for missing requests
+	 */
+	public boolean isBotRequest() {
+		return YadaUserAgent.isBot(getCurrentRequest());
+	}
+
+	/**
+	 * Returns true when the request user-agent identifies a bot or crawler.
+	 * @param request the current request, can be null
+	 * @return true for bots and for missing requests
+	 */
+	public boolean isBotRequest(HttpServletRequest request) {
+		return YadaUserAgent.isBot(request);
 	}
 
 	/**
