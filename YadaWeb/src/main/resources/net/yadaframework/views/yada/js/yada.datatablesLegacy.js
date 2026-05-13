@@ -51,7 +51,7 @@
 	 * - abortButtonText (optional)
 	 * @returns the DataTable object
 	 */
-	yada.dataTableCrud = function($table, dataUrl, dataAttributes, editDef, deleteDef, order, pageLength, languageUrl, extraButtons, removeCheckbox) {
+	yada.dataTableCrud = function($table, dataUrl, dataAttributes, editDef, deleteDef, order, pageLength, languageUrl, extraButtons, removeCheckbox, lengthMenu) {
 		// Method argument validation
 		if ($table == null || typeof $table != "object" || $table.length!=1 || typeof $table[0] != "object") {
 			return;
@@ -90,6 +90,10 @@
 		}
 		if (removeCheckbox!=null && typeof removeCheckbox != "boolean") {
 			console.error("yada.datatables: removeCheckbox must be a boolean or null");
+			return;
+		}
+		if (lengthMenu!=null && (!Array.isArray(lengthMenu) || lengthMenu.length == 0 ) ) {
+			console.error("yada.datatables: lengthMenu must be a non-empty array or null");
 			return;
 		}
 		
@@ -232,6 +236,7 @@
 		var dataTable = $table.DataTable( {
 	        responsive: true,
 	        pageLength: pageLength,
+			lengthMenu: lengthMenu ?? [10, 25, 50, 100],
 			orderMulti: order.length>1,
 			order: order,
 			columns: columnDef,					
