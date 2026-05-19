@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.18">
+<title>Getting Started</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
+</head>
+<body class="article toc2 toc-left">
+<!--
+	WARNING !!!!!
+	Edit the /YadaDocs/src/docs/asciidoc/common/docinfo-header.html file
+	to change this menu.
+-->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./setup/gettingStarted.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/overview.html">Databases</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./security/overview.html">Security</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./json.html">Read and Write JSON</option>
+	<option data-link="./confirmationModal.html">Confirmation Modal</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./staging.html">Staging Docs</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.style.position = 'relative';
+        header.addEventListener('click', function(e) {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+            navigator.clipboard.writeText(url);
+        });
+        header.addEventListener('mouseenter', function() {
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-clone';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.style.position = 'absolute';
+            icon.style.right = '30px';
+            icon.style.top = '50%';
+            icon.style.transform = 'translateY(-50%)';
+            icon.style.fontSize = '18px';
+            icon.style.color = 'gray';
+            header.appendChild(icon);
+        });
+        header.addEventListener('mouseleave', function() {
+            const icon = header.querySelector('.fa-clone');
+            if (icon) {
+            	header.removeChild(icon);
+            }
+        });
+    });
+});
+
+function showCopy(e) {
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-clone';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.style.position = 'absolute';
+    icon.style.left = e.pageX + 'px';
+    icon.style.top = e.pageY + 'px';
+    icon.style.zIndex = 1000;
+    icon.style.fontSize = '24px';
+    document.body.appendChild(icon);
+    setTimeout(function() {
+        document.body.removeChild(icon);
+    }, 1000); // 1 second delay
+}
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;
+    	}
+    }
+};
+</script>
+<div id="header">
+<h1>Getting Started</h1>
+<div class="details">
+<span id="revnumber">version '0.7.8'</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">Introduction</a></li>
+<li><a href="#_prerequisites">Prerequisites</a>
+<ul class="sectlevel2">
+<li><a href="#_java_sdk">Java SDK</a></li>
+<li><a href="#_git">GIT</a></li>
+<li><a href="#_mysql">MySQL</a></li>
+<li><a href="#_ide">IDE</a></li>
+<li><a href="#_node_js_optional">Node.js (optional)</a></li>
+</ul>
+</li>
+<li><a href="#_the_build_file">The Build File</a></li>
+<li><a href="#_code_generation_just_a_bit">Code Generation (just a bit)</a></li>
+<li><a href="#_initial_customization">Initial Customization</a></li>
+<li><a href="#_database_setup">Database Setup</a></li>
+<li><a href="#_tomcat_server">Tomcat server</a></li>
+<li><a href="#_embedded_tomcat">Embedded Tomcat</a></li>
+<li><a href="#_troubleshooting">Troubleshooting</a>
+<ul class="sectlevel2">
+<li><a href="#_compilation_errors">Compilation Errors</a></li>
+<li><a href="#_validation_errors">Validation Errors</a></li>
+<li><a href="#_tomcat_startup_errors">Tomcat Startup Errors</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The following procedure will guide you through the creation of a new project for your web app using either Visual Studio Code or Eclipse. At the end you will have a Web Project that can be run in a Java EE server (e.g. Tomcat) with all the needed layers set up and ready for customization:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Database access layer with transactions (Hibernate / JPA / Spring)</p>
+</li>
+<li>
+<p>Web application controller (Spring)</p>
+</li>
+<li>
+<p>Page templates (Thymeleaf)</p>
+</li>
+<li>
+<p>Security (Spring)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>You will also have a basic deployment procedure already set up:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Database schema generator</p>
+</li>
+<li>
+<p>Configurations for development, test and production</p>
+</li>
+<li>
+<p>Deployment script</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_prerequisites">Prerequisites</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You should have <a href="https://www.oracle.com/java/technologies/javase-downloads.html" target="_blank" rel="noopener">Java</a>, <a href="https://git-scm.com/downloads" target="_blank" rel="noopener">git</a>, <a href="https://dev.mysql.com/downloads/mysql/" target="_blank" rel="noopener">MySQL Community Server</a>
+and a working copy of either <a href="https://code.visualstudio.com/">Visual Studio Code</a> or <a href="https://www.eclipse.org/downloads/packages/" target="_blank" rel="noopener">Eclipse IDE</a>. Check the notes in this section before installing anything.</p>
+</div>
+<div class="sect2">
+<h3 id="_java_sdk">Java SDK</h3>
+<div class="paragraph">
+<p>The more robust way to install Java is to download and uncompress the zip archive of the needed SDK in some folder like <code>C:\Local\Javas\jdk-21.0.8</code> and
+make a symbolic link to it with a generic name, like <code>C:\Local\jdk21</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">mklink /D /J C:\Local\jdk21 C:\Local\Javas\jdk-21.0.8</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now you can refer to <code>C:\Local\jdk21</code> in your scripts and when you update the java (minor) version you just change the link, not the scripts.</p>
+</div>
+<div class="paragraph">
+<p>Currently the Yada Framework source is <strong>tested with Java 21</strong>. Running on an untested version might give weird errors.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_git">GIT</h3>
+<div class="paragraph">
+<p>Install <a href="https://git-scm.com/downloads" target="_blank" rel="noopener">git</a> for your OS.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_mysql">MySQL</h3>
+<div class="paragraph">
+<p>Install <a href="https://dev.mysql.com/downloads/mysql/" target="_blank" rel="noopener">MySQL Community Server</a> v8: any later versions have not been tested yet.</p>
+</div>
+<div class="paragraph">
+<p>For a future-proof installation you should not install MySQL as a Service, but run it manually when needed because one day
+you might want to use different versions in different projects.</p>
+</div>
+<div class="paragraph">
+<p>If you already have a MySQL installation, you may use it. Just check that the "lower_case_table_names" system variable is set to "2":
+if it&#8217;s not, it can&#8217;t be changed after installation so you can either reinstall, install a new instance or live with it (see below).</p>
+</div>
+<div class="paragraph">
+<p>If you don&#8217;t have a MySQL installation already, the easiest way to install it is by downloading the "MySQL installer":</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>on the <a href="https://dev.mysql.com/downloads/mysql/" target="_blank" rel="noopener">MySQL Download Page</a> click on "MySQL Installer":  you will be presented with two downloads,
+the smaller one is the "web installer" and it&#8217;s the one you should use.
+You will be asked to login or register before download but there&#8217;s also a link to download right away.</p>
+</li>
+<li>
+<p>run the installer and choose the version you want to install: be sure to check the "Enable the Select Features page
+to customize product features" checkbox before continuing (NOTE: not sure it&#8217;s needed but do it anyway) because you&#8217;ll need to set the "lower_case_table_names" system
+variable before installation. If you don&#8217;t do this on Windows, you either need to uninstall and reinstall the MySQL server or
+ignore the "lower_case_table_names" setting, in which case you might write SQL queries that don&#8217;t work on the production Linux servers</p>
+</li>
+</ul>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/newEclipseProject/MySQL-checkbox.jpg" alt="MySQL &quot;Features Page&quot; Checkbox">
+</div>
+<div class="title">Figure 1. MySQL "Features Page" Checkbox</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>when installing you will get to some wizard pages that allow to select the following:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>"Show Advanced and Logging Options" should be checked</p>
+</li>
+<li>
+<p>authentication method: any would do</p>
+</li>
+<li>
+<p>root password: you may leave it blank on your development computer (do as you wish)</p>
+</li>
+<li>
+<p>install as a service: you should not configure the server as a service if you have many versions on the same
+port and want to start the one you need manually (recommended approach)</p>
+</li>
+<li>
+<p>"Advanced Options": <strong>"Preserve Given Case" should be checked</strong>. This will set the "lower_case_table_names" appropriately as explained above</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/newEclipseProject/MySQL-preservecase.jpg" alt="Preserve case">
+</div>
+<div class="title">Figure 2. Installing MySQL</div>
+</div>
+<div class="paragraph">
+<p>After installation, make a symbolic link to the server folder with a generic name, like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">mklink /D /J C:\Local\mysql80 C:\local\Mysqls\mysql-8.0.19-winx64</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now you can refer to <code>C:\Local\mysql80</code> in your scripts and when you want to use a different installation
+you just change the link, not the scripts.
+In order to start/stop the MySQL server you should create two scripts and put their shortcut somewhere easy like the desktop or the taskbar.</p>
+</div>
+<div class="listingblock">
+<div class="title">startMySql80.bat</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">set MYSQL_HOME=C:\Local\mysql80
+set PATH=%MYSQL_HOME%\bin;%PATH%
+C:\Local\mysql80\bin\mysqld.exe --defaults-file="%MYSQL_HOME%\my.ini" --console</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">stopMySql80.bat</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">set MYSQL_HOME=C:\Local\mysql80
+C:\Local\mysql80\bin\mysqladmin.exe -u root shutdown</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is very convenient to set an empty password for root on the development computer (the above script won&#8217;t work otherwise):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">mysql -u root -p
+SET PASSWORD FOR 'root'@'localhost' = '';</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When you start MySQL you may get a few errors and warnings like "Failed to set up SSL" or "Cannot open Windows EventLog": you
+can safely ignore them as long as the process doesn&#8217;t stop.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ide">IDE</h3>
+<div class="paragraph">
+<p>You can edit the source files and compile the binaries in any IDE. This documentation only shows how to set up Visual Studio Code (and derived) and Eclipse, in the following sections:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="eclipseSetup.html">Eclipse Setup</a></p>
+</li>
+<li>
+<p><a href="vsCodeSetup.html">Visual Studio Code Setup</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Follow the relevant section then come back to this page.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_node_js_optional">Node.js (optional)</h3>
+<div class="paragraph">
+<p>Node.js is not strictly needed but it can be useful.
+Install the <a href="https://nodejs.org/en/download/">latest LTS version</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_build_file">The Build File</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Replace your <code>build.gradle</code> with the contents of <code>/YadaTools/scripts/template.gradle</code>.</p>
+</div>
+<div class="paragraph">
+<p>The lines marked with <code>// CHANGE THIS !!!</code> should be edited to suit your needs.</p>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>In the bookstore tutorial we use the <code>ybs</code> acronym and keep all the defaults.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>ext.acronym = 'ybs'</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The Yada Framework has the concept of "environment" built in: an environment is an installation of the application.
+There can be a development environemnt that runs on your computer, a test environment that is deployed on a remote
+server and is used for testing, a production environment that is deployed on a remote serer and is used by the
+end users.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The default environments are "dev" for "Development", "tst" for "Test" and "prod" for "Production".
+You can rename them (or also add/remove some) using the "envs" property in the <code>yadaInit</code> task of the build,
+but the envs array must always have the "development" environtment first and the "production" environment last
+in order to create a correct configuration.xml file. For a list of all other options for the <code>yadaInit</code> task
+see <code>/YadaTools/src/main/groovy/net/yadaframework/tools/YadaProject.groovy</code></p>
+</div>
+<div class="paragraph">
+<p>Replace your <code>settings.gradle</code> with the following:</p>
+</div>
+<div class="listingblock">
+<div class="title">settings.gradle</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-gradle hljs" data-lang="gradle">rootProject.name = 'MySiteProject'
+include 'YadaWeb'
+project(':YadaWeb').projectDir = "../../yadaframework/YadaWeb" as File
+include 'YadaWebSecurity'
+project(':YadaWebSecurity').projectDir = "../../yadaframework/YadaWebSecurity" as File
+include 'YadaWebCMS'
+project(':YadaWebCMS').projectDir = "../../yadaframework/YadaWebCMS" as File
+include 'YadaWebCommerce'
+project(':YadaWebCommerce').projectDir = "../../yadaframework/YadaWebCommerce" as File</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should change the project name to whatever you used. The above assumes that you cloned the yadaframework repository
+in the same root folder of your project repository as explained in
+"<a href="#Add the repositories">[Add the repositories]</a>" above.
+This setup is needed to use YadaWeb class files directly instead of going through the jar,
+and is handy when you plan to work on the YadaWeb sources to fix and improve them.</p>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>Use <code>rootProject.name = 'YadaBookstore'</code> for the bookstore tutorial.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>More information on the wtp syntax <a href="https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpComponent.html" target="_blank" rel="noopener">here</a> and <a href="https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpFacet.html" target="_blank" rel="noopener">here</a>.</p>
+</div>
+<div class="paragraph">
+<p>Copy the <code>/YadaTools/scripts/sass.properties</code> file into the project folder.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_code_generation_just_a_bit">Code Generation (just a bit)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ensure you have these folders in your project before the next step, and create them when missing:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>src/main/java</code></p>
+</li>
+<li>
+<p><code>src/main/webapp</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Use the <code>Gradle &gt; Refresh Gradle Project</code> project menu item to initialise the project.
+Check the Elcipse console (Window &gt; Show view &gt; Console) to see if there are any problems.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you get the error "<strong>Java compiler level does not match the version of the installed Java project facet</strong>"
+you may have an inconsistent workspace, probably because you changed the default Gradle options during project creation.
+Check that the file <code>.settings/org.eclipse.jdt.core.prefs</code> matches the project&#8217;s compiler compliance level as
+shown in the project properties dialog. Also check that the same value is present in <code>.settings/org.eclipse.wst.common.project.facet.core.xml</code>
+under <code>facet="jst.java"</code>.
+You may need to edit these files manually to make them consistent.
+After that, repeat the Gradle refresh on your main project.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Open a command prompt in the root folder of your project (e.g. <code>C:\work\git-mysite\MySiteProject</code>) and run <code>gradlew yadaInit --no-daemon</code>.</p>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>For the bookstore tutorial:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-dos hljs" data-lang="dos">cd C:\work\git-yadabookstore\yadabookstore\YadaBookstore
+gradlew yadaInit --no-daemon</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This task will add the java core Spring configuration and some default files that later will have to be either deleted or customised.
+The "--no-daemon" option is to stay on the safe side.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can run the task multiple times and it will never overwrite existing files: to revert a change, delete the file and run the task again</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Refresh your project in Eclipse (F5). If you see compilation errors ensure that you&#8217;re just missing some classpath libraries and do a "Refresh Gradle Project" again. If you
+still have errors, try to fix them ;-) For example you might need to remove the dependency on YadaWebSeurity classes if you didn&#8217;t want to use it.</p>
+</div>
+<div class="paragraph">
+<p>This may be a good time to commit and push to git.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_initial_customization">Initial Customization</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>By default, all files used and created by the application are to be found inside the <code>/srv/&lt;acronym&gt;&lt;env&gt;</code> root
+folder,
+where <code>&lt;acronym&gt;</code> is the value of <code>ext.acronym</code> in the <code>build.gradle</code> file and <code>&lt;env&gt;</code> is the "environment",
+as explained in <a href="#_the_build_file">The Build File</a> above. This folder should be manually created.</p>
+</div>
+<div class="paragraph">
+<p>The predefined application user is (literally) <code>admin@EXAMPLE.com</code> with password <code>myAppPassword</code>.
+Before starting the server for the first time, you may want to change that values by editing
+the <code>/src/main/resources/conf.webapp.dev.xml</code> file at the &lt;user&gt; tag. The data is stored in the database on first startup
+and never read from file again, so this is the best time to change it to your likes.
+More users can still be added later: only existing users are ignored.</p>
+</div>
+<div class="paragraph">
+<p>There are some other items that can be customized but they can wait for later:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>configuration files</p>
+</li>
+<li>
+<p>log configuration</p>
+</li>
+<li>
+<p>startup actions in <code>Setup.java</code></p>
+</li>
+</ul>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>For the YadaBookstore application, the default root folder is <code>/srv/ybsdev</code>. You should change the
+admin user email to your own email address in order to receive emails from the application.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_database_setup">Database Setup</h2>
+<div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can skip this section if you&#8217;re not going to use a database (yet), but
+also Security will be disabled.
+Set &lt;database enabled="false"&gt; in the configuration.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The default database schema, user and password are found in <code>/src/main/resources/conf.webapp.dev.xml</code>, <code>/src/main/resources/META-INF/persistence.xml</code>, <code>/src/main/webapp/META-INF/context.xml</code> and
+<code>/env/dev/createDatabaseAndUser.bat</code>. If you want to change them, do so in all files.</p>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>For the YadaBookstore application, the default values are:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">schema</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ybsdbdev</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">user</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ybsuserdev</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">password</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">mydevpwd</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="paragraph">
+<p>To create the database and user, run the <code>/env/dev/createDatabaseAndUser.bat</code>
+(if you&#8217;re not on windows, just copy the content and adapt it to your platform).
+On Windows you can open a cmd window and drag the file there from Eclipse, then just press Enter.</p>
+</div>
+<div class="paragraph">
+<p>If all goes well, you can now generate an initial schema by running the <code>dbSchema</code> gradle task. The schema
+will be derived from the classes listed in <code>/src/main/resources/META-INF/persistence.xml</code> so, to simplify the schema,
+you may revise this file and remove any unneeded classes. You will always be able to remove/add a class later
+though you will have to manually delete the removed classes from the database too.</p>
+</div>
+<div class="paragraph">
+<p>As you will be generating a new schema often, you should create a "Run Configuration" in Eclipse to generate the schema.
+Click on "Run &gt; Run Configurations&#8230;&#8203; &gt; Gradle Task" then press the "New launch configuration" icon.
+A new configuration called "New_configuration" will be created. Change the name to anything you like,
+for example "MySiteProject - DB Schema", add a Gradle Task named "dbSchema", set your application project as the Working Directory,
+then in the "Common" tab choose "Save as &gt; Shared file" and type "\MySiteProject\Launches"</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/newEclipseProject/dbSchemaTask.jpg" alt="Run Configuration for schema creation">
+</div>
+<div class="title">Figure 3. Run Configuration for schema creation</div>
+</div>
+<div class="paragraph">
+<p>You can now run the schema creation task with a press of a button.
+You may get some compilation errors that need to be fixed before trying the generation again.
+If the schema generator can&#8217;t connect to the database check that all configuration files listed above (<code>persistence.xml</code> etc.) have the correct DB login credentials.</p>
+</div>
+<div class="paragraph">
+<p>If all goes well, the output will be written to the <code>/schema</code> folder (you might need to refresh it in Eclipse with F5).
+To load the schema into the database you may use the <code>/env/dev/dropAndCreateDatabase.bat</code>
+script (or an equivalent linux/mac version) but it is more convenient to have the schema loaded
+by Flyway at first application run: just copy it in the <code>/src/main/resources/database</code> folder with a name like <code>V001__baseline.sql</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_tomcat_server">Tomcat server</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section is about setting up a standalone Tomcat server that can be controlled from Eclipse.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can skip this section if you&#8217;re going to use the
+embedded version of Tomcat (recommended option for a generic use case).</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="openblock bookstore">
+<div class="content">
+<div class="paragraph">
+<p>Skip this section for the bookstore tutorial.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Download <a href="https://tomcat.apache.org/download-80.cgi">Apache Tomcat 8.5</a> "64-bit Windows zip" and unzip the folder to some place like <code>C:\local\Tomcats\apache-tomcat-8.5.51</code>.</p>
+</div>
+<div class="paragraph">
+<p>Create a new folder where you will keep all your web application deploys, like <code>C:\local\Deploy</code>.</p>
+</div>
+<div class="paragraph">
+<p>In Eclipse, while in the "Java Perspective", show the "Servers" view from "Window &gt; Show View &gt; Other&#8230;&#8203; &gt; Server &gt; Servers".
+You will see the link "No servers available. Click to create a new server&#8230;&#8203;". Click that link. You will see a dialog
+where you should choose "Apache &gt; Tomcat v8.5 Server". In the Next dialog choose your "Tomcat installation directory",
+for example <code>C:\local\Tomcats\apache-tomcat-8.5.51</code>, and finish.
+Just to be safe, check that Tomcat works by running it and browsing to <code><a href="http://localhost:8080/" class="bare">http://localhost:8080/</a></code>. If all is fine, you should see
+an error from Tomcat:</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/newEclipseProject/tomcatError.jpg" alt="Tomcat error">
+</div>
+<div class="title">Figure 4. Tomcat error</div>
+</div>
+<div class="paragraph">
+<p>Stop Tomcat then right-click on it and choose "Open". You will see the Overview:</p>
+</div>
+<div class="imageblock center">
+<div class="content">
+<img src="../../img/newEclipseProject/tomcatOverview.JPG" alt="Tomcat configuration">
+</div>
+<div class="title">Figure 5. Tomcat configuration</div>
+</div>
+<div class="paragraph">
+<p>On this page do the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Under "Server locations" set "Use custom location &gt; Server path" to <code>C:\local\Deploy\myProject</code> where "myProject" is anything you like</p>
+</li>
+<li>
+<p>Under "Server Options" uncheck "Modules auto reload by default"</p>
+</li>
+<li>
+<p>Under "Timeouts" add a trailing 0 to both timeouts so that 45 becomes 450 and 15 becomes 150</p>
+</li>
+<li>
+<p>Save with CTRL+S.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If your sources in the "Package Explorer" window don&#8217;t have any red marks (no compilation errors), you can add the web application to Tomcat:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Right-click on the Tomcat server in the "Servers" view</p>
+</li>
+<li>
+<p>Select "Add and Remove&#8230;&#8203; &gt; Add All &gt;&gt;"</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If the server starts with no errors, you can see the homepage placeholder at <a href="http://localhost:8080/">http://localhost:8080/</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_embedded_tomcat">Embedded Tomcat</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section is about running the embedded Tomcat server.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can skip this section if you&#8217;re going to use the
+standalone version of Tomcat.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The application is started by running the <code>net.yadaframework.core.YadaTomcatServer</code> class.
+It accepts two mandatory arguments and an optional one:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">acronym+environment</dt>
+<dd>
+<p>a string that will be used by the shutdown command</p>
+</dd>
+<dt class="hdlist1">webapp folder</dt>
+<dd>
+<p>relative path of the webapp folder in eclipse ("src/main/webapp"), or the full path elsewhere</p>
+</dd>
+<dt class="hdlist1">temp folder</dt>
+<dd>
+<p>optional in Eclipse, it must be the full path of the temp folder for Tomcat data (where the war is exploded)</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>When the last argument is missing, "developer mode" is assumed and the HTTPS connector is enabled. It&#8217;s not
+enabled in all other environments because HTTPS is supposed to be handled by Apache.
+The <code>YadaTomcatServer</code> class can be overridden or rewritten to achieve a different behavior.</p>
+</div>
+<div class="paragraph">
+<p>The command line to start the application on the developer PC is something like</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">java net.yadaframework.core.YadaTomcatServer ybsdev src/main/webapp</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This can be easily added in Eclipse as a "Java Application" entry in the "Run Configurations" dialog.</p>
+</div>
+<div class="paragraph">
+<p>After running the server, point the browser to <a href="http://localhost:8080/" class="bare">http://localhost:8080/</a> in order to see a skeleton home page.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_troubleshooting">Troubleshooting</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_compilation_errors">Compilation Errors</h3>
+<div class="paragraph">
+<p>In case of compilation errors, the first thing to do is to run a "Refresh Gradle Project" on the affected project or the including project.
+If errors persist, check that you have imported all the needed Yada projects.
+Also be sure to have "Projects &gt; Build Automatically" checked and try with a "Project &gt; Clean&#8230;&#8203;".</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_validation_errors">Validation Errors</h3>
+<div class="paragraph">
+<p>If you get an error like</p>
+</div>
+<div class="paragraph">
+<p><code>CHKJ3000E: WAR Validation Failed: org.eclipse.jst.j2ee.commonarchivecore.internal.exception.DeploymentDescriptorLoadException: WEB-INF/web.xml</code></p>
+</div>
+<div class="paragraph">
+<p>you may fix it just by forcing a validation on the project via the menu.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tomcat_startup_errors">Tomcat Startup Errors</h3>
+<div class="paragraph">
+<p>If Tomcat doesn&#8217;t start, it might have stale data. Try with a "Clean&#8230;&#8203;" on the server. If everything fails, stop the server and delete the content of the Deploy folder,
+for example <code>C:\local\Deploy\myProject</code>. Then do a "Publish" on the server. If you can&#8217;t delete some file because Windows says it&#8217;s open, you&#8217;ll need to quit Eclipse
+and be sure that there are no ghost Tomcat processes running. In extreme cases, you might need to restart your PC.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version '0.7.8'<br>
+Last updated 2025-12-05 12:33:56 +0100
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
+</body>
+</html>

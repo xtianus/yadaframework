@@ -1,0 +1,18 @@
+=  Visual Studio Code Setup
+:docinfo: shared
+:imagesdir: ../../img/
+
+
+==  Installation
+
+Install the latest version of https://code.visualstudio.com/[Visual Studio Code^] or a derived IDE like https://www.windsurfrs.com/[Windsurf^] or https://cursor.com/download[Cursor^]. Add the "Extension Pack for Java" and "Gradle for Java" extensions.
+
+==  Connect to GIT
+===  Add the repositories
+The Yada Framework sources are hosted on the public GitHub site.
+To access the GitHub repository use your GitHub credentials on the https://github.com/xtianus/yadaframework[yadaframework repo^].
+The git url should be `git@github.com:xtianus/yadaframework.git`.
+
+
+TO BE CONTINUED...
+

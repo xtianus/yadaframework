@@ -28,6 +28,7 @@ maxConnLifetimeMillis: The maximum lifetime in milliseconds of a connection. Aft
 <Resource name="jdbc/${acronym}db$env" 
 	type="javax.sql.DataSource"
 	factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+	jmxEnabled="true"
 	logAbandoned="true"
 	initialSize="3"
 	maxTotal="20"

@@ -93,7 +93,7 @@ public class YadaPageRequest {
 	 * @param loadPrevious true if all pages before this one must be fetched from database
 	 */
 	public YadaPageRequest(int page, int size, boolean loadPrevious) {
-		this(page, size, false, null);
+		this(page, size, loadPrevious, null);
 	}
 
 	/**

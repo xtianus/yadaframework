@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:yada="http://www.yadaframework.net">
+<head>
+	<th:block th:replace="~{/header :: headFragment}"/>
+</head>
+<body>
+
+<th:block th:replace="~{/header :: body}"/>
+
+<main class="container">
+	<h1>Pagination with Preserved Filters</h1>
+	<p>Select filters, load more items, navigate to a detail page, then press the browser back button.
+		The history URL preserves both pagination and filter state.</p>
+
+	<!--/* Filter form: normal GET submit reloads the page with filters in the URL */-->
+	<form th:action="@{/pagination}" method="get" class="mb-4">
+		<fieldset class="mb-3">
+			<legend>Catalog</legend>
+			<div class="form-check form-check-inline">
+				<input class="form-check-input" type="radio" name="catalog" id="catalogAll" value="" th:checked="${catalog == null || catalog == ''}">
+				<label class="form-check-label" for="catalogAll">All</label>
+			</div>
+			<div th:each="cat, iter : ${allCatalogs}" class="form-check form-check-inline">
+				<input class="form-check-input" type="radio" name="catalog" th:id="'catalog' + ${iter.index}" th:value="${cat}" th:checked="${catalog == cat}">
+				<label class="form-check-label" th:for="'catalog' + ${iter.index}" th:text="${cat}">Catalog</label>
+			</div>
+		</fieldset>
+		<fieldset class="mb-3">
+			<legend>Category</legend>
+			<div th:each="cat, iter : ${allCategories}" class="form-check form-check-inline">
+				<input class="form-check-input" type="checkbox" name="category" th:id="'category' + ${iter.index}" th:value="${cat}"
+					th:checked="${categories != null && categories.contains(cat)}">
+				<label class="form-check-label" th:for="'category' + ${iter.index}" th:text="${cat}">Category</label>
+			</div>
+		</fieldset>
+		<button type="submit" class="btn btn-primary btn-sm">Apply Filters</button>
+	</form>
+
+	<!--/* Paginated results */-->
+	<div th:fragment="itemList" th:unless="${items.empty}" id="itemListContainer">
+		<div th:each="item : ${items}" class="p-2 border-bottom">
+			<a th:href="@{/pagination/detail(id=${item.id()})}" th:text="${item.name()}">Item Name</a>
+			<small class="text-muted" th:text="'(' + ${item.catalog()} + ' / ' + ${item.category()} + ')'"></small>
+		</div>
+		<div class="jsLoadMore mt-3" th:unless="${items.last}">
+			<a yada:ajax="@{/pagination(catalog=${catalog}, category=${categories},
+				page=${items.nextPage}, size=${items.pageSize})}"
+				yada:paginationHistory
+				yada:historyPreserveParams="catalog, category"
+				yada:successHandler="initLoadMoreObserver"
+				yada:updateOnSuccess="yadaParents:.jsLoadMore"
+				class="btn btn-outline-secondary" href="">Load More</a>
+		</div>
+	</div>
+
+	<div th:if="${items == null || items.empty}">
+		<p class="text-muted">No items found with the current filters.</p>
+	</div>
+</main>
+
+<th:block th:replace="~{/footer :: body}"/>
+
+<script type="text/javascript" th:inline="javascript">
+	//<![CDATA[
+	const loadMoreObserver = new IntersectionObserver(entries => {
+		entries.forEach(entry => {
+			if (entry.intersectionRatio > 0) {
+				$(entry.target).click();
+			}
+		})
+	});
+	function initLoadMoreObserver() {
+		$(".jsLoadMore a").each(function(){
+			loadMoreObserver.observe(this);
+		});
+	}
+	$(document).ready(function() {
+		initLoadMoreObserver();
+		const yadaContainerId = /*[[${yadaContainer}]]*/ null;
+		if (yadaContainerId != null) {
+			const yadaScroll = /*[[${yadaScroll}]]*/ 0;
+			$("#" + yadaContainerId).scrollTop(yadaScroll);
+		}
+	});
+	//]]>
+</script>
+
+</body>
+</html>
