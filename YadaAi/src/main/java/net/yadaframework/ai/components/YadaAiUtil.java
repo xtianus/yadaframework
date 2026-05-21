@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 import jakarta.annotation.PostConstruct;
 import net.yadaframework.ai.YadaAiConfigurable;
+import net.yadaframework.ai.components.bedrock.YadaAiMessageInterface;
 import net.yadaframework.ai.components.bedrock.claude.YadaClaudeRequest;
+import net.yadaframework.ai.components.bedrock.nova.YadaNovaRequest;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaSystemException;
@@ -36,7 +36,6 @@ public class YadaAiUtil {
 	
 	@Autowired private BedrockRuntimeClient bedrockRuntimeClient;
 	
-	private static final Gson gson = new Gson(); // Reusable Gson instance. Gson is thread-safe.
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 	
 	@PostConstruct
@@ -47,8 +46,8 @@ public class YadaAiUtil {
 	}
 
 	/**
-	 * Invokes the Claude model expecting a json map as result, where the keys are the ISO2 language codes and the values are the localized strings.
-	 * @param claudeRequest a request for Claude that will result in a json map. Output example:
+	 * Invokes the configured Bedrock AI model expecting a json map as result, where the keys are the ISO2 language codes and the values are the localized strings.
+	 * @param message a request that will result in a json map. Output example:
 	 * <pre>
 	 * {
 	 * "en": "The image shows a cat.",
@@ -59,9 +58,9 @@ public class YadaAiUtil {
 	 * The Locale will have the country component when configured in the application configuration.
 	 * @throws YadaSystemException if the invocation or the conversion fails
 	 */
-	public Map<Locale,String> getLocalizedMap(YadaClaudeRequest claudeRequest) {
+	public Map<Locale,String> getLocalizedMap(YadaAiMessageInterface message) {
 		try {
-			String jsonWithMarkdown = invokeClaudeModel(claudeRequest);
+			String jsonWithMarkdown = invokeModel(message);
 			String jsonString = cleanJson(jsonWithMarkdown);
 			return parseJsonLocaleMap(jsonString);
 		} catch (JsonProcessingException e) {
@@ -70,36 +69,38 @@ public class YadaAiUtil {
 	}
 
 	/**
-	 * Invoke the Claude model and return the response as a string without any postprocessing
-	 * @param claudeRequest the request for Claude
-	 * @return the response from Claude as a string
+	 * Invoke the configured Bedrock AI model and return the response as a string without any postprocessing
+	 * @param message the request for the configured Bedrock AI model
+	 * @return the response from the configured Bedrock AI model as a string
 	 * @throws YadaSystemException if the invocation fails
 	 */
-	public String invokeClaudeModel(YadaClaudeRequest claudeRequest) {
+	public String invokeModel(YadaAiMessageInterface message) {
         try {
-            String jsonPayload = claudeRequest.toJson();
+            String jsonPayload = message.toJson();
             InvokeModelRequest request = InvokeModelRequest.builder()
 				.modelId(config.getBedrockModelId())
 				.body(SdkBytes.fromString(jsonPayload, StandardCharsets.UTF_8))
 				.build();
             
-            InvokeModelResponse response = bedrockRuntimeClient.invokeModel(request);
+            InvokeModelResponse response = bedrockRuntimeClient.invokeModel(request); // bedrock-runtime invoke API
             
             String responseBody = response.body().asString(StandardCharsets.UTF_8);
-            JsonObject responseJson = gson.fromJson(responseBody, JsonObject.class);
-            // Extract text from response
-            if (responseJson.has("content")) {
-                return responseJson.getAsJsonArray("content")
-					.get(0)
-					.getAsJsonObject()
-					.get("text")
-					.getAsString();
-            }
-            return responseBody;
+            return message.extractText(responseBody);
         } catch (Exception e) {
-            log.error("Error invoking Claude model", e);
-            throw new YadaSystemException("Failed to invoke Claude model", e);
+            log.error("Error invoking Bedrock AI model", e);
+            throw new YadaSystemException("Failed to invoke Bedrock AI model", e);
         }
+	}
+
+	public YadaAiMessageInterface createMessage() {
+		String modelId = config.getBedrockModelId();
+		if (modelId.contains("anthropic")) {
+			return new YadaClaudeRequest();
+		}
+		if (modelId.contains("nova")) {
+			return new YadaNovaRequest();
+		}
+		throw new YadaInternalException("Unsupported Bedrock model: " + modelId);
 	}
 
 	/**
