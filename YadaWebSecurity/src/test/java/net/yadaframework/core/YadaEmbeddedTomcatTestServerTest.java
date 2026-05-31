@@ -30,7 +30,7 @@ class YadaEmbeddedTomcatTestServerTest {
 			List.of(sameModuleTestClasses, sameModuleTestResources, sameModuleMainClasses, otherModuleTestFixtures, otherModuleResources),
 			List.of());
 
-		assertIterableEquals(List.of(sameModuleTestClasses.toAbsolutePath().normalize(), sameModuleTestResources.toAbsolutePath().normalize()), resolvedRoots);
+		assertIterableEquals(List.of(sameModuleTestClasses.toAbsolutePath().normalize()), resolvedRoots);
 	}
 
 	/**
@@ -60,6 +60,6 @@ class YadaEmbeddedTomcatTestServerTest {
 			List.of(),
 			List.of()));
 
-		assertEquals("Unable to infer classpath roots for webappDir C:\\work\\tests\\custom-layout\\itest-webapp. Add explicit classpath roots when using a non-Gradle layout.", exception.getMessage());
+		assertEquals("Unable to infer classpath roots for webappDir " + webappDir.toAbsolutePath().normalize() + ". Add explicit classpath roots when using a non-Gradle layout.", exception.getMessage());
 	}
 }

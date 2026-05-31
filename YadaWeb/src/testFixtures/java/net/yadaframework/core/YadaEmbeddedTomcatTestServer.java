@@ -13,6 +13,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.connector.Connector;
@@ -20,6 +21,8 @@ import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
+import org.apache.tomcat.util.scan.StandardJarScanner;
+import org.springframework.web.SpringServletContainerInitializer;
 import org.springframework.web.WebApplicationInitializer;
 
 /**
@@ -115,10 +118,18 @@ public class YadaEmbeddedTomcatTestServer implements AutoCloseable {
 		connector.setThrowOnFailure(true);
 		tomcat.setAddDefaultWebXmlToWebapp(false);
 		StandardContext context = (StandardContext) tomcat.addWebapp(contextPath, webappDir.toString());
+		StandardJarScanner jarScanner = new StandardJarScanner();
+		jarScanner.setScanClassPath(false);
+		jarScanner.setScanManifest(false);
+		jarScanner.setScanAllDirectories(false);
+		context.setJarScanner(jarScanner);
 		List<Path> classpathDirectories = getJvmClasspathDirectories();
 		List<Path> mountedClasspathRoots = resolveClasspathDirectories(webappDir, classpathDirectories, extraClasspathRoots);
-		context.setParentClassLoader(buildParentClassLoader(Thread.currentThread().getContextClassLoader(), classpathDirectories, mountedClasspathRoots));
+		ClassLoader parentClassLoader = buildParentClassLoader(Thread.currentThread().getContextClassLoader(), classpathDirectories, mountedClasspathRoots);
+		context.setParentClassLoader(parentClassLoader);
 		context.setResources(buildResources(context, mountedClasspathRoots));
+		context.setContainerSciFilter(Pattern.quote(SpringServletContainerInitializer.class.getName()));
+		context.addServletContainerInitializer(new SpringServletContainerInitializer(), loadMountedInitializerClasses(mountedClasspathRoots, parentClassLoader));
 		tomcat.start();
 		started = true;
 	}
@@ -179,6 +190,27 @@ public class YadaEmbeddedTomcatTestServer implements AutoCloseable {
 	}
 
 	/**
+	 * Loads the web application initializers that belong to the mounted WEB-INF/classes roots.
+	 * @param mountedClasspathRoots the classpath roots mounted into WEB-INF/classes
+	 * @param parentClassLoader the classloader used to load candidate initializer classes
+	 * @return the concrete initializer classes available to Spring's ServletContainerInitializer
+	 */
+	private Set<Class<?>> loadMountedInitializerClasses(Collection<Path> mountedClasspathRoots, ClassLoader parentClassLoader) {
+		Set<Class<?>> initializerClasses = new LinkedHashSet<>();
+		for (Path mountedClasspathRoot : mountedClasspathRoots) {
+			for (String className : findInitializerClasses(mountedClasspathRoot, parentClassLoader)) {
+				try {
+					Class<?> initializerClass = Class.forName(className, false, parentClassLoader);
+					initializerClasses.add(initializerClass);
+				} catch (ClassNotFoundException | LinkageError ignored) {
+					// Ignore classes that cannot be loaded while preparing the embedded test webapp.
+				}
+			}
+		}
+		return initializerClasses;
+	}
+
+	/**
 	 * Resolves the classpath directories for the target webapp.
 	 * @param webappDir the target webapp directory
 	 * @param classpathDirectories the available classpath directories
@@ -201,6 +233,9 @@ public class YadaEmbeddedTomcatTestServer implements AutoCloseable {
 		for (Path classpathDirectory : classpathDirectories) {
 			Path normalizedDirectory = classpathDirectory.toAbsolutePath().normalize();
 			if (!normalizedDirectory.startsWith(moduleRoot)) {
+				continue;
+			}
+			if (normalizedWebappDir.startsWith(normalizedDirectory)) {
 				continue;
 			}
 			if (sourceSetName != null && !matchesSourceSet(buildDir, normalizedDirectory, sourceSetName)) {
