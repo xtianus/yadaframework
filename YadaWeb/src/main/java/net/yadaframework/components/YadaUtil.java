@@ -108,12 +108,11 @@ import net.yadaframework.raw.YadaIntDimension;
 import sogei.utility.UCheckDigit;
 import sogei.utility.UCheckNum;
 
-@Component
 public class YadaUtil {
 	private final static Logger log = LoggerFactory.getLogger(YadaUtil.class);
 
-	@Autowired private YadaConfiguration config;
-    @Autowired private AutowireCapableBeanFactory autowireCapableBeanFactory; // For autowiring entities
+	private YadaConfiguration config; // !!! THIS IS NULL in this yada version
+    private AutowireCapableBeanFactory autowireCapableBeanFactory; // For autowiring entities
 
     static private YadaFileManager yadaFileManager;
 
@@ -3300,6 +3299,14 @@ public class YadaUtil {
 			resultChars[i]=c;
 		}
 		return new String(resultChars).replaceAll("__+", "_").replaceAll("--+", "-");
+	}
+
+	public AutowireCapableBeanFactory getAutowireCapableBeanFactory() {
+		return autowireCapableBeanFactory;
+	}
+
+	public void setAutowireCapableBeanFactory(AutowireCapableBeanFactory autowireCapableBeanFactory) {
+		this.autowireCapableBeanFactory = autowireCapableBeanFactory;
 	}
 
 
