@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ import net.yadaframework.ai.components.bedrock.claude.YadaClaudeRequest;
 import net.yadaframework.ai.components.bedrock.nova.YadaNovaRequest;
 import net.yadaframework.exceptions.YadaInternalException;
 import net.yadaframework.exceptions.YadaSystemException;
+import net.yadaframework.exceptions.YadaInvalidServiceResponseException;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
@@ -159,15 +162,20 @@ public class YadaAiUtil {
 	 * </pre>
 	 * @return a map of Locale to localized strings. Can be empty. 
 	 * The Locale will have the country component when configured in the application configuration.
-	 * @throws YadaSystemException if the invocation or the conversion fails
+	 * @throws YadaSystemException if the model invocation fails
+	 * @throws YadaInvalidServiceResponseException if the response can't be parsed into a non-empty json map
 	 */
 	public Map<Locale,String> getLocalizedMap(YadaAiMessageInterface message) {
+		String rawResponse = invokeModel(message);
+		String jsonString = extractJson(rawResponse);
 		try {
-			String jsonWithMarkdown = invokeModel(message);
-			String jsonString = cleanJson(jsonWithMarkdown);
-			return parseJsonLocaleMap(jsonString);
+			Map<Locale, String> result = parseJsonLocaleMap(jsonString);
+			if (result.isEmpty()) {
+				throw new YadaInvalidServiceResponseException("Empty json map in AI response: {}", rawResponse);
+			}
+			return result;
 		} catch (JsonProcessingException e) {
-			throw new YadaSystemException("Failed to parse alt text JSON", e);
+			throw new YadaInvalidServiceResponseException(e, "Failed to parse json map from AI response: {}", rawResponse);
 		}
 	}
 
@@ -208,18 +216,51 @@ public class YadaAiUtil {
 		throw new YadaInternalException("Unsupported Bedrock model: " + modelId);
 	}
 
+	// Matches a fenced ```json ... ``` (or bare ``` ... ```) block anywhere in the text, capturing the json object
+	private static final Pattern FENCED_JSON_PATTERN = Pattern.compile("```(?:json)?\\s*(\\{.*?\\})\\s*```", Pattern.DOTALL);
+
 	/**
-	 * Remove markdown code block markers if present
-	 * @param jsonWithMarkdown the json string with possible markdown code block markers
-	 * @return the json string without markdown code block markers
+	 * Extract the json object from a model response that may wrap it in markdown code fences and/or surround it with
+	 * explanatory prose. A fenced json block found anywhere in the text is preferred; otherwise the substring from the
+	 * first '{' to the last '}' is used. Any leading or trailing text found around the json is logged at info level.
+	 * @param rawResponse the raw model response, possibly containing prose, markdown fences and the json object
+	 * @return the extracted json string, or the trimmed input when no json delimiters are found
 	 */
-	private String cleanJson(String jsonWithMarkdown) {
-		String cleanJson = jsonWithMarkdown.trim();
-		if (cleanJson.startsWith("```")) {
-			// Remove opening ```json or ``` and closing ```
-			cleanJson = cleanJson.replaceFirst("^```(?:json)?\\s*", "").replaceFirst("```\\s*$", "").trim();
+	private String extractJson(String rawResponse) {
+		String trimmed = rawResponse.trim();
+		// Prefer a fenced json block found anywhere in the text
+		Matcher fencedMatcher = FENCED_JSON_PATTERN.matcher(trimmed);
+		if (fencedMatcher.find()) {
+			String json = fencedMatcher.group(1).trim();
+			logExtraneousText(trimmed.substring(0, fencedMatcher.start()), trimmed.substring(fencedMatcher.end()));
+			return json;
 		}
-		return cleanJson;
+		// Fallback: substring from the first '{' to the last '}'
+		int firstBrace = trimmed.indexOf('{');
+		int lastBrace = trimmed.lastIndexOf('}');
+		if (firstBrace >= 0 && lastBrace > firstBrace) {
+			String json = trimmed.substring(firstBrace, lastBrace + 1).trim();
+			logExtraneousText(trimmed.substring(0, firstBrace), trimmed.substring(lastBrace + 1));
+			return json;
+		}
+		// No json delimiters found: return as-is and let the parser report the problem
+		return trimmed;
+	}
+
+	/**
+	 * Log, at info level, any non-blank text found before or after the extracted json
+	 * @param leading the text preceding the json
+	 * @param trailing the text following the json
+	 */
+	private void logExtraneousText(String leading, String trailing) {
+		String leadingText = leading.trim();
+		String trailingText = trailing.trim();
+		if (!leadingText.isEmpty()) {
+			log.info("Leading text found before json in AI response: {}", leadingText);
+		}
+		if (!trailingText.isEmpty()) {
+			log.info("Trailing text found after json in AI response: {}", trailingText);
+		}
 	}
 
 	/**
