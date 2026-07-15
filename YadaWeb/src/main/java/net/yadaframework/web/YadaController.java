@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -120,8 +119,8 @@ public class YadaController {
         if (!response.isCommitted()) {
             // Clear any buffered content before sending a new response
             response.resetBuffer();
-            // Set the new response status and content
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            // Preserve the original servlet error status while rendering the configured error page
+            response.setStatus(errorCode);
         } else {
         	// Experimental code to try to return some information on the error, not just a blank page or a truncated page
         	try {
