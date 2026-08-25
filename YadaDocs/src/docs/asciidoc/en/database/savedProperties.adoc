@@ -103,7 +103,7 @@ The JSON codec requires both an explicit `Class<T>` and a caller-supplied `Objec
 
 `getValue()` without either a stored row or a key default throws `YadaInvalidUsageException`.
 Null writes, a stored logical type that differs from the key, malformed stored text, and a decoded value of the wrong Java type throw `YadaInvalidValueException` with the scope and name as context.
-Changing the codec type for an existing `(applicationName, name)` is therefore rejected; migrate or delete the old value deliberately instead.
+Changing to a codec with a different logical storage type for an existing `(applicationName, name)` is rejected; migrate or delete the old value deliberately instead. This check does not detect enum or JSON target-class changes within the same logical type.
 Duplicate rows indicate storage corruption and cause `YadaInternalException`, while the database unique constraint normally prevents them.
 
 `YadaSavedProperty.version` is a JPA optimistic-lock version. Concurrent updates to the same row detect a stale write and fail instead of silently overwriting it; handle the resulting optimistic-lock failure as a conflict and retry the complete transaction only when that is safe.
