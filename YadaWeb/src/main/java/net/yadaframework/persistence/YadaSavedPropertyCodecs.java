@@ -123,7 +123,14 @@ public final class YadaSavedPropertyCodecs {
 			 */
 			@Override
 			public String serialize(T value) {
-				return serializer.apply(value);
+				if (value == null) {
+					throw new YadaInvalidValueException("Null {} saved property values are not allowed", type);
+				}
+				String serializedValue = serializer.apply(value);
+				if (serializedValue == null) {
+					throw new YadaInvalidValueException("The {} saved property serializer returned null", type);
+				}
+				return serializedValue;
 			}
 
 			/**
@@ -131,8 +138,17 @@ public final class YadaSavedPropertyCodecs {
 			 */
 			@Override
 			public T deserialize(String value) {
+				if (value == null) {
+					throw new YadaInvalidValueException("Null {} saved property text is not allowed", type);
+				}
 				try {
-					return deserializer.apply(value);
+					T deserializedValue = deserializer.apply(value);
+					if (deserializedValue == null) {
+						throw new YadaInvalidValueException("Invalid {} saved property value: {}", type, value);
+					}
+					return deserializedValue;
+				} catch (YadaInvalidValueException exception) {
+					throw exception;
 				} catch (RuntimeException exception) {
 					throw new YadaInvalidValueException(exception, "Invalid {} saved property value: {}", type, value);
 				}

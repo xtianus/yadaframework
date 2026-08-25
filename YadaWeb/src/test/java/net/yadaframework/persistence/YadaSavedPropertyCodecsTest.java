@@ -113,6 +113,45 @@ class YadaSavedPropertyCodecsTest {
 	}
 
 	/**
+	 * Verifies that every codec rejects null values during serialization.
+	 */
+	@Test
+	void nullValuesAreRejectedDuringSerialization() {
+		List<YadaSavedPropertyCodec<?>> codecs = List.of(
+			YadaSavedPropertyCodecs.stringCodec(),
+			YadaSavedPropertyCodecs.booleanCodec(),
+			YadaSavedPropertyCodecs.longCodec(),
+			YadaSavedPropertyCodecs.decimalCodec(),
+			YadaSavedPropertyCodecs.instantCodec(),
+			YadaSavedPropertyCodecs.enumCodec(YadaSavedPropertyTestEnum.class),
+			YadaSavedPropertyCodecs.jsonCodec(YadaSavedPropertyJsonFixture.class, new ObjectMapper()));
+
+		for (YadaSavedPropertyCodec<?> codec : codecs) {
+			assertNullSerializationRejected(codec);
+		}
+	}
+
+	/**
+	 * Verifies that null input and decoded null results are rejected during deserialization.
+	 */
+	@Test
+	void nullProducingDeserializationIsRejected() {
+		List<YadaSavedPropertyCodec<?>> codecs = List.of(
+			YadaSavedPropertyCodecs.stringCodec(),
+			YadaSavedPropertyCodecs.booleanCodec(),
+			YadaSavedPropertyCodecs.longCodec(),
+			YadaSavedPropertyCodecs.decimalCodec(),
+			YadaSavedPropertyCodecs.instantCodec(),
+			YadaSavedPropertyCodecs.enumCodec(YadaSavedPropertyTestEnum.class),
+			YadaSavedPropertyCodecs.jsonCodec(YadaSavedPropertyJsonFixture.class, new ObjectMapper()));
+
+		for (YadaSavedPropertyCodec<?> codec : codecs) {
+			assertNullDeserializationRejected(codec, null);
+		}
+		assertNullDeserializationRejected(YadaSavedPropertyCodecs.jsonCodec(YadaSavedPropertyJsonFixture.class, new ObjectMapper()), "null");
+	}
+
+	/**
 	 * Verifies explicitly typed JSON round trips and malformed JSON handling.
 	 */
 	@Test
@@ -153,6 +192,25 @@ class YadaSavedPropertyCodecsTest {
 			assertFalse(encodedValue.contains(YadaSavedPropertyJsonFixture.class.getName()));
 			assertFalse(encodedValue.contains(YadaSavedPropertyJsonFixture.class.getSimpleName()));
 		}
+	}
+
+	/**
+	 * Verifies that a codec rejects a null value before serialization.
+	 * @param codec the codec to exercise
+	 */
+	private void assertNullSerializationRejected(YadaSavedPropertyCodec<?> codec) {
+		YadaInvalidValueException exception = assertThrows(YadaInvalidValueException.class, () -> codec.serialize(null));
+		assertTrue(exception.getMessage().contains(codec.getType().name()));
+	}
+
+	/**
+	 * Verifies that a codec rejects text that would produce a null value.
+	 * @param codec the codec to exercise
+	 * @param value the null or null-producing encoded text
+	 */
+	private void assertNullDeserializationRejected(YadaSavedPropertyCodec<?> codec, String value) {
+		YadaInvalidValueException exception = assertThrows(YadaInvalidValueException.class, () -> codec.deserialize(value));
+		assertTrue(exception.getMessage().contains(codec.getType().name()));
 	}
 
 	/**
