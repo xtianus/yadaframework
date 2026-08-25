@@ -1,10 +1,12 @@
 package net.yadaframework.persistence.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.hibernate.annotations.Collate;
 import org.junit.jupiter.api.Test;
 
 import net.yadaframework.exceptions.YadaInvalidValueException;
@@ -28,6 +30,18 @@ class YadaSavedPropertyTest {
 		assertNull(savedProperty.getValue());
 		assertNull(savedProperty.getId());
 		assertEquals(0, savedProperty.getVersion());
+	}
+
+	/**
+	 * Verifies that property-name comparisons use the required case-sensitive database collation.
+	 * @throws NoSuchFieldException when the mapped field is unexpectedly absent
+	 */
+	@Test
+	void nameUsesCaseSensitiveDatabaseCollation() throws NoSuchFieldException {
+		Collate collate = YadaSavedProperty.class.getDeclaredField("name").getAnnotation(Collate.class);
+
+		assertNotNull(collate);
+		assertEquals("utf8mb4_bin", collate.value());
 	}
 
 	/**

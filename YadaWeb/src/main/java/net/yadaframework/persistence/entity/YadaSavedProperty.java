@@ -1,5 +1,6 @@
 package net.yadaframework.persistence.entity;
 
+import org.hibernate.annotations.Collate;
 import org.hibernate.annotations.ColumnDefault;
 
 import jakarta.persistence.Column;
@@ -35,6 +36,7 @@ public class YadaSavedProperty {
 	private String applicationName = YadaSavedPropertyKey.DEFAULT_APPLICATION_NAME;
 
 	@Column(nullable = false, length = 191)
+	@Collate("utf8mb4_bin")
 	private String name;
 
 	@Enumerated(EnumType.STRING)

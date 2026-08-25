@@ -27,7 +27,7 @@ private static final YadaSavedPropertyKey<Instant> LAST_RUN =
 ----
 
 A null, empty, or whitespace-only application scope is normalized to `"default"`; other scopes and names are trimmed.
-Names must not be blank and remain case-sensitive. Application scopes and names are limited to 64 and 191 characters respectively.
+Names must not be blank and remain case-sensitive. The mapped `name` column uses the MySQL-compatible `utf8mb4_bin` collation, so ordinary DAO equality and the composite unique constraint distinguish names that differ only by case. Application scopes and names are limited to 64 and 191 characters respectively.
 
 Inject `YadaSavedPropertyDao` as a Spring bean, preferably by constructor:
 
@@ -119,8 +119,8 @@ Schema generation uses the consuming application's schema-generation `persistenc
 <class>net.yadaframework.persistence.entity.YadaSavedProperty</class>
 ----
 
-The generated schema must contain the `YadaSavedProperty` table and the unique constraint on `(applicationName, name)`.
-For every consuming released application, regenerate the schema, diff it against the previous revision, and add a new additive Flyway migration containing that table and constraint.
+The generated schema must contain the `YadaSavedProperty` table, the `name` column's explicit `utf8mb4_bin` collation, and the unique constraint on `(applicationName, name)`.
+For every consuming released application, regenerate the schema, diff it against the previous revision, and add a new additive Flyway migration containing that table and constraint. Preserve the generated `utf8mb4_bin` collation in the consuming migration so database lookups and uniqueness remain case-sensitive.
 Never edit an old versioned migration that may already have run.
 
 YadaWeb is a library: it owns no runtime database and no runtime Flyway migration.
