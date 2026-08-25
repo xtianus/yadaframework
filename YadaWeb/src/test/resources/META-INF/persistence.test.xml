@@ -11,6 +11,7 @@
   		<class>net.yadaframework.persistence.entity.YadaClause</class>
   		<class>net.yadaframework.persistence.entity.YadaPersistentEnum</class>
   		<class>net.yadaframework.persistence.entity.YadaJob</class>
+		<class>net.yadaframework.persistence.entity.YadaSavedProperty</class>
   		
       <properties>
             <property name="hibernate.id.new_generator_mappings" value="true"/> <!-- Defaults to true in Hibernate 5 -->
