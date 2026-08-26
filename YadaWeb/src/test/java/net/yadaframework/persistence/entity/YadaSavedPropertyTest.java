@@ -1,12 +1,12 @@
 package net.yadaframework.persistence.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.hibernate.annotations.Collate;
+import java.lang.reflect.Field;
+
 import org.junit.jupiter.api.Test;
 
 import net.yadaframework.exceptions.YadaInvalidValueException;
@@ -33,77 +33,75 @@ class YadaSavedPropertyTest {
 	}
 
 	/**
-	 * Verifies that property-name comparisons use the required case-sensitive database collation.
-	 * @throws NoSuchFieldException when the mapped field is unexpectedly absent
-	 */
-	@Test
-	void nameUsesCaseSensitiveDatabaseCollation() throws NoSuchFieldException {
-		Collate collate = YadaSavedProperty.class.getDeclaredField("name").getAnnotation(Collate.class);
-
-		assertNotNull(collate);
-		assertEquals("utf8mb4_bin", collate.value());
-	}
-
-	/**
 	 * Verifies constructor normalization while retaining semantic values.
 	 */
 	@Test
-	void constructorNormalizesScopeAndRetainsValues() {
-		YadaSavedProperty defaultProperty = new YadaSavedProperty(null, "feature.enabled", YadaSavedPropertyTypeEnum.BOOLEAN, "true");
-		YadaSavedProperty scopedProperty = new YadaSavedProperty("  my-application  ", "counter", YadaSavedPropertyTypeEnum.LONG, "42");
+	void constructorNormalizesIdentifiersAndRetainsValues() {
+		YadaSavedProperty defaultProperty = new YadaSavedProperty(null, "  Feature.Enabled  ", YadaSavedPropertyTypeEnum.BOOLEAN, "true");
+		YadaSavedProperty scopedProperty = new YadaSavedProperty("  My-Application  ", "  Usage.Counter  ", YadaSavedPropertyTypeEnum.LONG, "42");
 
 		assertEquals("default", defaultProperty.getApplicationName());
 		assertEquals("feature.enabled", defaultProperty.getName());
 		assertSame(YadaSavedPropertyTypeEnum.BOOLEAN, defaultProperty.getType());
 		assertEquals("true", defaultProperty.getValue());
 		assertEquals("my-application", scopedProperty.getApplicationName());
-		assertEquals("counter", scopedProperty.getName());
+		assertEquals("usage.counter", scopedProperty.getName());
 		assertSame(YadaSavedPropertyTypeEnum.LONG, scopedProperty.getType());
 		assertEquals("42", scopedProperty.getValue());
 	}
 
 	/**
-	 * Verifies setter normalization and semantic value retention.
+	 * Verifies identifier setter normalization and semantic value retention.
 	 */
 	@Test
-	void settersNormalizeScopeAndRetainValues() {
+	void settersNormalizeIdentifiersAndRetainValues() {
 		YadaSavedProperty savedProperty = new YadaSavedProperty();
 
 		savedProperty.setApplicationName(" \t ");
-		savedProperty.setName("Display.Name");
+		savedProperty.setName("  Display.Name  ");
 		savedProperty.setType(YadaSavedPropertyTypeEnum.STRING);
 		savedProperty.setValue("  retained value  ");
 
 		assertEquals("default", savedProperty.getApplicationName());
-		assertEquals("Display.Name", savedProperty.getName());
+		assertEquals("display.name", savedProperty.getName());
 		assertSame(YadaSavedPropertyTypeEnum.STRING, savedProperty.getType());
 		assertEquals("  retained value  ", savedProperty.getValue());
 
-		savedProperty.setApplicationName("  another-application  ");
+		savedProperty.setApplicationName("  Another-Application  ");
 		assertEquals("another-application", savedProperty.getApplicationName());
 	}
 
 	/**
-	 * Verifies that lifecycle validation accepts a complete row.
+	 * Verifies that the lifecycle callback itself re-normalizes identifier state that bypassed setters.
+	 * The callback is invoked directly because this is a plain unit test: it cannot verify that Hibernate
+	 * includes a field first modified inside {@code @PreUpdate} in the generated UPDATE statement, since
+	 * dirty state is computed before the callback runs. The callback is therefore only a safety net for
+	 * state populated without setters; every framework write path normalizes through the setters instead.
+	 * @throws ReflectiveOperationException when an expected persistence field cannot be changed
 	 */
 	@Test
-	void completeStatePassesLifecycleValidation() {
+	void lifecycleRenormalizesIdentifiersThatBypassedSetters() throws ReflectiveOperationException {
 		YadaSavedProperty savedProperty = new YadaSavedProperty(null, "feature.enabled", YadaSavedPropertyTypeEnum.BOOLEAN, "false");
+		setField(savedProperty, "applicationName", "  My-Application  ");
+		setField(savedProperty, "name", "  Feature.Enabled  ");
 
 		savedProperty.normalizeAndValidate();
 
-		assertEquals("default", savedProperty.getApplicationName());
+		assertEquals("my-application", savedProperty.getApplicationName());
+		assertEquals("feature.enabled", savedProperty.getName());
 	}
 
 	/**
-	 * Verifies that lifecycle validation rejects incomplete rows.
+	 * Verifies that setters and lifecycle validation reject incomplete rows.
+	 * @throws ReflectiveOperationException when an expected persistence field cannot be changed
 	 */
 	@Test
-	void incompleteStateFailsLifecycleValidation() {
+	void incompleteStateFailsLifecycleValidation() throws ReflectiveOperationException {
 		YadaSavedProperty savedProperty = new YadaSavedProperty();
 
 		assertThrows(YadaInvalidValueException.class, savedProperty::normalizeAndValidate);
-		savedProperty.setName(" \t ");
+		assertThrows(YadaInvalidValueException.class, () -> savedProperty.setName(" \t "));
+		setField(savedProperty, "name", " \t ");
 		savedProperty.setType(YadaSavedPropertyTypeEnum.STRING);
 		savedProperty.setValue("");
 		assertThrows(YadaInvalidValueException.class, savedProperty::normalizeAndValidate);
@@ -113,5 +111,18 @@ class YadaSavedPropertyTest {
 		savedProperty.setType(YadaSavedPropertyTypeEnum.STRING);
 		savedProperty.setValue(null);
 		assertThrows(YadaInvalidValueException.class, savedProperty::normalizeAndValidate);
+	}
+
+	/**
+	 * Changes a persistence field to simulate state populated without entity setters.
+	 * @param savedProperty the entity to change
+	 * @param fieldName the persistence field name
+	 * @param value the raw field value
+	 * @throws ReflectiveOperationException when the field cannot be changed
+	 */
+	private void setField(YadaSavedProperty savedProperty, String fieldName, String value) throws ReflectiveOperationException {
+		Field field = YadaSavedProperty.class.getDeclaredField(fieldName);
+		field.setAccessible(true);
+		field.set(savedProperty, value);
 	}
 }

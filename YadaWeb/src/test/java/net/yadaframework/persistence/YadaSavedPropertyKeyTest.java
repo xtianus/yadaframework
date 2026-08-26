@@ -1,7 +1,6 @@
 package net.yadaframework.persistence;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,25 +27,25 @@ class YadaSavedPropertyKeyTest {
 	}
 
 	/**
-	 * Verifies that explicit scopes are trimmed and otherwise retained.
+	 * Verifies that explicit scopes are trimmed and lowercased.
 	 */
 	@Test
-	void explicitApplicationNamesAreTrimmedAndRetained() {
-		assertEquals("MyApplication", YadaSavedPropertyKey.normalizeApplicationName("  MyApplication  "));
-		assertEquals("MyApplication", YadaSavedPropertyKey.of("  MyApplication  ", "name", YadaSavedPropertyCodecs.stringCodec()).getApplicationName());
+	void explicitApplicationNamesAreCanonicalLowercase() {
+		assertEquals("myapplication", YadaSavedPropertyKey.normalizeApplicationName("  MyApplication  "));
+		assertEquals("myapplication", YadaSavedPropertyKey.of("  MyApplication  ", "name", YadaSavedPropertyCodecs.stringCodec()).getApplicationName());
 	}
 
 	/**
-	 * Verifies that names are trimmed without changing their case.
+	 * Verifies that names are trimmed, lowercased, and canonicalized to the same identifier.
 	 */
 	@Test
-	void namesAreTrimmedAndRemainCaseSensitive() {
-		YadaSavedPropertyKey<String> uppercaseKey = YadaSavedPropertyKey.of("app", "  Feature.Enabled  ", YadaSavedPropertyCodecs.stringCodec());
+	void namesAreCanonicalLowercase() {
+		YadaSavedPropertyKey<String> mixedCaseKey = YadaSavedPropertyKey.of("app", "  Feature.Enabled  ", YadaSavedPropertyCodecs.stringCodec());
 		YadaSavedPropertyKey<String> lowercaseKey = YadaSavedPropertyKey.of("app", "feature.enabled", YadaSavedPropertyCodecs.stringCodec());
 
-		assertEquals("Feature.Enabled", uppercaseKey.getName());
-		assertEquals("feature.enabled", lowercaseKey.getName());
-		assertFalse(uppercaseKey.getName().equals(lowercaseKey.getName()));
+		assertEquals("feature.enabled", YadaSavedPropertyKey.normalizeName("  Feature.Enabled  "));
+		assertEquals("feature.enabled", mixedCaseKey.getName());
+		assertEquals(lowercaseKey.getName(), mixedCaseKey.getName());
 	}
 
 	/**
@@ -70,6 +69,8 @@ class YadaSavedPropertyKeyTest {
 
 		assertThrows(YadaInvalidValueException.class, () -> YadaSavedPropertyKey.of("a".repeat(65), "name", codec));
 		assertThrows(YadaInvalidValueException.class, () -> YadaSavedPropertyKey.of("app", "n".repeat(192), codec));
+		assertThrows(YadaInvalidValueException.class, () -> YadaSavedPropertyKey.of("İ".repeat(64), "name", codec));
+		assertThrows(YadaInvalidValueException.class, () -> YadaSavedPropertyKey.of("app", "İ".repeat(191), codec));
 		assertEquals(64, YadaSavedPropertyKey.of("a".repeat(64), "name", codec).getApplicationName().length());
 		assertEquals(191, YadaSavedPropertyKey.of("app", "n".repeat(191), codec).getName().length());
 	}

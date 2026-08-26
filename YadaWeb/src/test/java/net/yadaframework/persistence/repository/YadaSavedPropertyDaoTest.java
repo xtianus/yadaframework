@@ -185,25 +185,25 @@ class YadaSavedPropertyDaoTest {
 	 * Verifies that a missing row is persisted with normalized key metadata and canonical text.
 	 */
 	@Test
-	void setValuePersistsNormalizedCanonicalRowWhenMissing() {
+	void setValuePersistsLowercaseCanonicalRowWhenMissing() {
 		when(entityManager.createQuery(FIND_QUERY, YadaSavedProperty.class)).thenReturn(query);
-		when(query.setParameter("applicationName", "default")).thenReturn(query);
-		when(query.setParameter("name", "property.name")).thenReturn(query);
+		when(query.setParameter("applicationName", "billing-application")).thenReturn(query);
+		when(query.setParameter("name", "feature.enabled")).thenReturn(query);
 		when(query.getResultList()).thenReturn(List.of());
-		YadaSavedPropertyKey<Long> key = YadaSavedPropertyKey.of(" \t ", "property.name", YadaSavedPropertyCodecs.longCodec());
+		YadaSavedPropertyKey<Long> key = YadaSavedPropertyKey.of("  Billing-Application  ", "  Feature.Enabled  ", YadaSavedPropertyCodecs.longCodec());
 
 		savedPropertyDao.setValue(key, 42L);
 
 		verify(entityManager).persist(savedPropertyCaptor.capture());
 		YadaSavedProperty persisted = savedPropertyCaptor.getValue();
-		assertEquals("default", persisted.getApplicationName());
-		assertEquals("property.name", persisted.getName());
+		assertEquals("billing-application", persisted.getApplicationName());
+		assertEquals("feature.enabled", persisted.getName());
 		assertSame(YadaSavedPropertyTypeEnum.LONG, persisted.getType());
 		assertEquals("42", persisted.getValue());
 		verify(entityManager, never()).merge(any());
 		verify(entityManager).createQuery(FIND_QUERY, YadaSavedProperty.class);
-		verify(query).setParameter("applicationName", "default");
-		verify(query).setParameter("name", "property.name");
+		verify(query).setParameter("applicationName", "billing-application");
+		verify(query).setParameter("name", "feature.enabled");
 		verify(query).getResultList();
 	}
 
@@ -282,11 +282,11 @@ class YadaSavedPropertyDaoTest {
 	}
 
 	/**
-	 * Creates the standard long-valued key used by DAO tests.
+	 * Creates the standard mixed-case long-valued key used to verify canonical DAO lookups.
 	 * @return the key
 	 */
 	private YadaSavedPropertyKey<Long> longKey() {
-		return YadaSavedPropertyKey.of("application", "property.name", YadaSavedPropertyCodecs.longCodec());
+		return YadaSavedPropertyKey.of("  Application  ", "  Property.Name  ", YadaSavedPropertyCodecs.longCodec());
 	}
 
 	/**

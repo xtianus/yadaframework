@@ -17,17 +17,17 @@ Values are stored as text; arbitrary polymorphic JSON and native Java serializat
 == Declaring and Using Keys
 
 Declare typed keys in the consuming application and reuse them for every access.
-A key combines an application scope, a case-sensitive name, and a codec:
+A key combines a canonical application scope, a canonical property name, and a codec:
 
 [source,java]
 ----
 private static final YadaSavedPropertyKey<Instant> LAST_RUN =
-	YadaSavedPropertyKey.of("billing", "jobs.invoice.lastRun",
+	YadaSavedPropertyKey.of("billing", "jobs.invoice.last-run",
 		YadaSavedPropertyCodecs.instantCodec());
 ----
 
-A null, empty, or whitespace-only application scope is normalized to `"default"`; other scopes and names are trimmed.
-Names must not be blank and remain case-sensitive. The mapped `name` column uses the MySQL-compatible `utf8mb4_bin` collation, so ordinary DAO equality and the composite unique constraint distinguish names that differ only by case. Application scopes and names are limited to 64 and 191 characters respectively.
+A null, empty, or whitespace-only application scope is normalized to `"default"`.
+Non-blank application scopes and all property names are stripped and lowercased with `Locale.ROOT`, so mixed-case inputs identify the same canonical key. Names must not be blank. The 64-character application-scope and 191-character property-name limits are validated after canonicalization.
 
 Inject `YadaSavedPropertyDao` as a Spring bean, preferably by constructor:
 
@@ -58,7 +58,7 @@ savedPropertyDao.setValue(LAST_RUN, Instant.now());
 boolean removed = savedPropertyDao.delete(LAST_RUN);
 ----
 
-`setValue()` inserts a missing row or updates the managed row. `delete()` identifies the row by normalized scope and name, does not inspect the codec, and returns `false` when no row exists.
+`setValue()` inserts a missing row or updates the managed row. `delete()` identifies the row by its canonical lowercase scope and name, does not inspect the codec, and returns `false` when no row exists.
 
 == Built-in Codecs
 
@@ -90,7 +90,7 @@ boolean removed = savedPropertyDao.delete(LAST_RUN);
 
 |A specific enum
 |`enumCodec(MyEnum.class)`
-|The constant's case-sensitive `name()`, never its ordinal
+|The constant's exact `name()`, never its ordinal
 
 |A specific JSON class
 |`jsonCodec(MyValue.class, objectMapper)`
@@ -104,6 +104,7 @@ The JSON codec requires both an explicit `Class<T>` and a caller-supplied `Objec
 `getValue()` without either a stored row or a key default throws `YadaInvalidUsageException`.
 Null writes, a stored logical type that differs from the key, malformed stored text, and a decoded value of the wrong Java type throw `YadaInvalidValueException` with the scope and name as context.
 Changing to a codec with a different logical storage type for an existing `(applicationName, name)` is rejected; migrate or delete the old value deliberately instead. This check does not detect enum or JSON target-class changes within the same logical type.
+The two cases are not equally safe: reading a stored constant with a different enum class fails loudly, while two JSON classes with overlapping field names can deserialize successfully into the wrong shape with no error at all, depending on the supplied `ObjectMapper` configuration. Treat the JSON target class of a key as part of its stored contract and change it only through an explicit migration.
 Duplicate rows indicate storage corruption and cause `YadaInternalException`, while the database unique constraint normally prevents them.
 
 `YadaSavedProperty.version` is a JPA optimistic-lock version. Concurrent updates to the same row detect a stale write and fail instead of silently overwriting it; handle the resulting optimistic-lock failure as a conflict and retry the complete transaction only when that is safe.
@@ -119,8 +120,8 @@ Schema generation uses the consuming application's schema-generation `persistenc
 <class>net.yadaframework.persistence.entity.YadaSavedProperty</class>
 ----
 
-The generated schema must contain the `YadaSavedProperty` table, the `name` column's explicit `utf8mb4_bin` collation, and the unique constraint on `(applicationName, name)`.
-For every consuming released application, regenerate the schema, diff it against the previous revision, and add a new additive Flyway migration containing that table and constraint. Preserve the generated `utf8mb4_bin` collation in the consuming migration so database lookups and uniqueness remain case-sensitive.
+The generated schema must contain the `YadaSavedProperty` table and the unique constraint on `(applicationName, name)`; both identifiers are stored in canonical lowercase form by the Java API and entity lifecycle.
+For every consuming released application, regenerate the schema, diff it against the previous revision, and add a new additive Flyway migration containing that table and constraint.
 Never edit an old versioned migration that may already have run.
 
 YadaWeb is a library: it owns no runtime database and no runtime Flyway migration.

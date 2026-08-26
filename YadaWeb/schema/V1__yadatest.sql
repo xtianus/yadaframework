@@ -6,7 +6,7 @@ create table YadaJob_BeCompleted (YadaJob_id bigint not null, jobsMustComplete_i
 create table YadaJob_BeInactive (YadaJob_id bigint not null, jobsMustBeInactive_id bigint not null) engine=InnoDB;
 create table YadaPersistentEnum (id bigint not null auto_increment, enumClassName varchar(255) not null, enumName varchar(255) not null, enumOrdinal integer not null, primary key (id)) engine=InnoDB;
 create table YadaPersistentEnum_langToText (YadaPersistentEnum_id bigint not null, localText varchar(255), language varchar(255) not null, primary key (YadaPersistentEnum_id, language)) engine=InnoDB;
-create table YadaSavedProperty (id bigint not null auto_increment, applicationName varchar(64) default 'default' not null, name varchar(191) collate utf8mb4_bin not null, type varchar(32) not null, value longtext not null, version bigint not null, primary key (id)) engine=InnoDB;
+create table YadaSavedProperty (id bigint not null auto_increment, version bigint not null, applicationName varchar(64) default 'default' not null, name varchar(191) not null, type enum ('BOOLEAN','DECIMAL','ENUM','INSTANT','JSON','LONG','STRING') not null, value longtext not null, primary key (id)) engine=InnoDB;
 alter table YadaBrowserId add constraint UKlvfuna79iqujxpkn0l6xvirh4 unique (mostSigBits, leastSigBits);
 alter table YadaClause add constraint UKek0brxiv78vf6idvd6dv8v69d unique (name, clauseVersion);
 alter table YadaPersistentEnum add constraint UKfuc71vofqasw0r57t7etipp7p unique (enumClassName, enumOrdinal);

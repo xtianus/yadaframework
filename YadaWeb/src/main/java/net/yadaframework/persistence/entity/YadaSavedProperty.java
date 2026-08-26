@@ -1,6 +1,6 @@
 package net.yadaframework.persistence.entity;
 
-import org.hibernate.annotations.Collate;
+import org.hibernate.Length;
 import org.hibernate.annotations.ColumnDefault;
 
 import jakarta.persistence.Column;
@@ -10,7 +10,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -36,15 +35,13 @@ public class YadaSavedProperty {
 	private String applicationName = YadaSavedPropertyKey.DEFAULT_APPLICATION_NAME;
 
 	@Column(nullable = false, length = 191)
-	@Collate("utf8mb4_bin")
 	private String name;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false, length = 32, columnDefinition = "varchar(32)")
+	@Column(nullable = false, length = 32)
 	private YadaSavedPropertyTypeEnum type;
 
-	@Lob
-	@Column(nullable = false, columnDefinition = "longtext")
+	@Column(nullable = false, length = Length.LONG32)
 	private String value;
 
 	@Version
@@ -65,21 +62,19 @@ public class YadaSavedProperty {
 	 */
 	public YadaSavedProperty(String applicationName, String name, YadaSavedPropertyTypeEnum type, String value) {
 		setApplicationName(applicationName);
-		this.name = name;
+		setName(name);
 		this.type = type;
 		this.value = value;
 	}
 
 	/**
-	 * Normalizes the scope and rejects incomplete persistent state.
+	 * Normalizes the identifiers and rejects incomplete persistent state.
 	 */
 	@PrePersist
 	@PreUpdate
 	void normalizeAndValidate() {
 		applicationName = YadaSavedPropertyKey.normalizeApplicationName(applicationName);
-		if (name == null || name.isBlank()) {
-			throw new YadaInvalidValueException("Saved property name must not be blank");
-		}
+		name = YadaSavedPropertyKey.normalizeName(name);
 		if (type == null) {
 			throw new YadaInvalidValueException("Saved property type must not be null");
 		}
@@ -121,11 +116,11 @@ public class YadaSavedProperty {
 	}
 
 	/**
-	 * Sets the property name.
+	 * Sets and normalizes the property name.
 	 * @param name the property name
 	 */
 	public void setName(String name) {
-		this.name = name;
+		this.name = YadaSavedPropertyKey.normalizeName(name);
 	}
 
 	/**

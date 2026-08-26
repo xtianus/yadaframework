@@ -1,5 +1,6 @@
 package net.yadaframework.persistence;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -61,13 +62,14 @@ public final class YadaSavedPropertyKey<T> {
 	/**
 	 * Normalizes a nullable application scope and enforces its storage limit.
 	 * @param applicationName the application scope
-	 * @return the trimmed scope or {@link #DEFAULT_APPLICATION_NAME}
+	 * @return the canonical lowercase scope or {@link #DEFAULT_APPLICATION_NAME}
 	 */
 	public static String normalizeApplicationName(String applicationName) {
 		String normalized = applicationName == null ? "" : applicationName.strip();
 		if (normalized.isEmpty()) {
 			return DEFAULT_APPLICATION_NAME;
 		}
+		normalized = normalized.toLowerCase(Locale.ROOT);
 		if (normalized.length() > MAX_APPLICATION_NAME_LENGTH) {
 			throw new YadaInvalidValueException("Saved property application name exceeds {} characters: {}", MAX_APPLICATION_NAME_LENGTH, normalized);
 		}
@@ -77,10 +79,10 @@ public final class YadaSavedPropertyKey<T> {
 	/**
 	 * Normalizes and validates a property name.
 	 * @param name the property name
-	 * @return the trimmed property name
+	 * @return the canonical lowercase property name
 	 */
-	private static String normalizeName(String name) {
-		String normalized = name == null ? "" : name.strip();
+	public static String normalizeName(String name) {
+		String normalized = name == null ? "" : name.strip().toLowerCase(Locale.ROOT);
 		if (normalized.isEmpty()) {
 			throw new YadaInvalidValueException("Saved property name must not be blank");
 		}
@@ -99,7 +101,7 @@ public final class YadaSavedPropertyKey<T> {
 	}
 
 	/**
-	 * Returns the case-sensitive property name.
+	 * Returns the canonical lowercase property name.
 	 * @return the property name
 	 */
 	public String getName() {
