@@ -1,0 +1,128 @@
+= Saved Properties
+:docinfo: shared
+
+Persist typed application state by key
+
+== Intended Use
+
+`YadaSavedPropertyDao` stores small pieces of application-owned state, such as a job's last-run timestamp or a feature's enabled state.
+Use a normal domain table or column when the value belongs to a domain entity, needs relationships or queries, has history or auditing requirements, or is part of a larger structure.
+
+[WARNING]
+====
+Saved properties are not a secret store. Do not use them for passwords, tokens, or other credentials.
+Values are stored as text; arbitrary polymorphic JSON and native Java serialization are not supported.
+====
+
+== Declaring and Using Keys
+
+Declare typed keys in the consuming application and reuse them for every access.
+A key combines a canonical application scope, a canonical property name, and a codec:
+
+[source,java]
+----
+private static final YadaSavedPropertyKey<Instant> LAST_RUN =
+	YadaSavedPropertyKey.of("billing", "jobs.invoice.last-run",
+		YadaSavedPropertyCodecs.instantCodec());
+----
+
+A null, empty, or whitespace-only application scope is normalized to `"default"`.
+Non-blank application scopes and all property names are stripped and lowercased with `Locale.ROOT`, so mixed-case inputs identify the same canonical key. Names must not be blank. The 64-character application-scope and 191-character property-name limits are validated after canonicalization.
+
+Inject `YadaSavedPropertyDao` as a Spring bean, preferably by constructor:
+
+[source,java]
+----
+private final YadaSavedPropertyDao savedPropertyDao;
+public InvoiceJob(YadaSavedPropertyDao savedPropertyDao) {
+	this.savedPropertyDao = savedPropertyDao;
+}
+----
+
+`findValue()` represents a missing row with `Optional.empty()`; `getValue()` returns the stored value or the key's default:
+
+[source,java]
+----
+Optional<Instant> lastRun = savedPropertyDao.findValue(LAST_RUN);
+Instant requiredLastRun = savedPropertyDao.getValue(LAST_RUN);
+----
+
+Create a key with a non-null default by calling `YadaSavedPropertyKey.withDefault(applicationName, name, codec, defaultValue)` instead of `of()`.
+A default is returned by `getValue()` only when no row exists; it is not written to the database.
+
+Write a non-null value or delete the row through the same typed key:
+
+[source,java]
+----
+savedPropertyDao.setValue(LAST_RUN, Instant.now());
+boolean removed = savedPropertyDao.delete(LAST_RUN);
+----
+
+`setValue()` inserts a missing row or updates the managed row. `delete()` identifies the row by its canonical lowercase scope and name, does not inspect the codec, and returns `false` when no row exists.
+
+== Built-in Codecs
+
+`YadaSavedPropertyCodecs` provides these representations:
+
+[cols="1,2,3"]
+|===
+|Java type |Codec factory |Canonical stored text
+
+|`String`
+|`stringCodec()`
+|Unchanged text
+
+|`Boolean`
+|`booleanCodec()`
+|Strict lowercase `true` or `false`
+
+|`Long`
+|`longCodec()`
+|Signed base-ten integer
+
+|`BigDecimal`
+|`decimalCodec()`
+|Plain notation from `toPlainString()`, without an exponent
+
+|`Instant`
+|`instantCodec()`
+|`DateTimeFormatter.ISO_INSTANT` text
+
+|A specific enum
+|`enumCodec(MyEnum.class)`
+|The constant's exact `name()`, never its ordinal
+
+|A specific JSON class
+|`jsonCodec(MyValue.class, objectMapper)`
+|JSON produced by the supplied `ObjectMapper` for the explicit target class
+|===
+
+The JSON codec requires both an explicit `Class<T>` and a caller-supplied `ObjectMapper`; the codec does not provide arbitrary polymorphic deserialization.
+
+== Defaults, Errors, and Concurrency
+
+`getValue()` without either a stored row or a key default throws `YadaInvalidUsageException`.
+Null writes, a stored logical type that differs from the key, malformed stored text, and a decoded value of the wrong Java type throw `YadaInvalidValueException` with the scope and name as context.
+Changing to a codec with a different logical storage type for an existing `(applicationName, name)` is rejected; migrate or delete the old value deliberately instead. This check does not detect enum or JSON target-class changes within the same logical type.
+The two cases are not equally safe: reading a stored constant with a different enum class fails loudly, while two JSON classes with overlapping field names can deserialize successfully into the wrong shape with no error at all, depending on the supplied `ObjectMapper` configuration. Treat the JSON target class of a key as part of its stored contract and change it only through an explicit migration.
+Duplicate rows indicate storage corruption and cause `YadaInternalException`, while the database unique constraint normally prevents them.
+
+`YadaSavedProperty.version` is a JPA optimistic-lock version. Concurrent updates to the same row detect a stale write and fail instead of silently overwriting it; handle the resulting optimistic-lock failure as a conflict and retry the complete transaction only when that is safe.
+Concurrent first inserts are protected by the unique constraint on `(applicationName, name)` and may similarly require conflict handling.
+
+== Schema Adoption and Flyway Responsibility
+
+Yada's runtime package scanning discovers `YadaSavedProperty` in `net.yadaframework.persistence.entity`.
+Schema generation uses the consuming application's schema-generation `persistence.xml`, which must explicitly include:
+
+[source,xml]
+----
+<class>net.yadaframework.persistence.entity.YadaSavedProperty</class>
+----
+
+The generated schema must contain the `YadaSavedProperty` table and the unique constraint on `(applicationName, name)`; both identifiers are stored in canonical lowercase form by the Java API and entity lifecycle.
+For every consuming released application, regenerate the schema, diff it against the previous revision, and add a new additive Flyway migration containing that table and constraint.
+Never edit an old versioned migration that may already have run.
+
+YadaWeb is a library: it owns no runtime database and no runtime Flyway migration.
+Therefore, do not add a YadaWeb migration; each consuming application owns and applies its new migration.

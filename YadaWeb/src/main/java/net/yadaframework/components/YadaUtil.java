@@ -3381,6 +3381,8 @@ public class YadaUtil {
 	 * @throws IOException
 	 * @throws YadaInvalidUsageException when the length of filenames is greater than zero but different from the length of sourceFiles
 	 */
+	// TODO this should be rewritten because it passes all filenames as a single argument to the shell, and this breaks with spaces in paths. 
+	//      Also it uses the deprecated DefaultExecutor 
 	public boolean createZipProcess(File zipFile, File[] sourceFiles, String[] filenames, boolean fixNames) throws IOException {
 		if (filenames!=null && filenames.length>0 && filenames.length!=sourceFiles.length) {
 			throw new YadaInvalidUsageException("When provided, there must be as many filenames as source files");
@@ -3400,7 +3402,13 @@ public class YadaUtil {
 		try (BufferedWriter renameWriter = new BufferedWriter(new FileWriter(tempRename))) {
 			for (int i=0; i<sourceFiles.length; i++) {
 				File sourceFile = sourceFiles[i];
-				if (sourceFile!=null && sourceFile.canRead()) {
+				// Skip paths containing spaces because the zip command would fail on them anyway, causing a zipnote exception.
+				// The real solution is to use ProcessBuilder with one argument per file instead of DefaultExecutor with a single concatenated string argument for all files. 
+				boolean skipBecauseOfSpace = sourceFile.getAbsolutePath().contains(" ");
+				if (skipBecauseOfSpace) {
+					log.error("Skipping file from zip because of spaces: {}", sourceFile.getAbsolutePath());
+				}
+				if (sourceFile!=null && sourceFile.canRead() && !skipBecauseOfSpace) {
 					sourceNames.append(sourceFile.getAbsolutePath()).append(" ");
 					String sourceFilename = sourceFile.getName();
 					String sourceExtensionNoDot = getFileExtension(sourceFilename); // jpg

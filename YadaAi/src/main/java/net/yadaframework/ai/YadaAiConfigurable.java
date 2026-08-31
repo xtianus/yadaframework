@@ -57,26 +57,26 @@ public interface YadaAiConfigurable {
 	}
 
 	/**
-	 * @return the Claude model ID for Bedrock
+	 * @return the Bedrock model ID for Bedrock
 	 */
 	default String getBedrockModelId() {
 		String key = "config/yadaAi/bedrock/modelId";
 		String modelId = getConfiguration().getString(key, null);
 		if (modelId==null) {
-			throw new YadaConfigurationException("Claude model ID for Bedrock not found in configuration at key {}", key);
+			throw new YadaConfigurationException("Bedrock model ID not found in configuration at key {}", key);
 		}
 		return modelId;
 	}
 
 	/**
-	 * @return the maximum number of tokens for Claude responses
+	 * @return the maximum number of tokens for Bedrock responses
 	 */
 	default int getBedrockMaxTokens() {
 		return getConfiguration().getInt("config/yadaAi/bedrock/maxTokens", 1000);
 	}
 
 	/**
-	 * @return the temperature setting for Claude (controls randomness)
+	 * @return the temperature setting for Bedrock (controls randomness)
 	 */
 	default double getBedrockTemperature() {
 		return getConfiguration().getDouble("config/yadaAi/bedrock/temperature", 0.7);
