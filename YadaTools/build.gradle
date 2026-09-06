@@ -47,8 +47,11 @@ repositories {
 }
 
 dependencies {
-	implementation gradleApi(), localGroovy(),
-		'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final' 
+	// Gradle supplies its own API and Groovy runtime to plugins, so these must not leak
+	// to consumers: the gradle-api fat jar embeds javax.xml and org.w3c.dom, which clash
+	// with the JDK java.xml module on any consumer classpath.
+	compileOnly gradleApi(), localGroovy()
+	implementation 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final' 
 }
 
 /* TODO Da finire: lanciando da eclipse la console è nulla. Vedi http://stackoverflow.com/a/24360969/587641 
