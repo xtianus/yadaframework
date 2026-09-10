@@ -184,7 +184,11 @@ public class YadaTomcatServer {
 		StandardContext ctx = (StandardContext) tomcat.addWebapp("", new File(webappFolder).getAbsolutePath());
 		if (dev) {
 			File eclipseClasses = new File("bin/main");
-			if (eclipseClasses.canRead() && eclipseClasses.list().length>0) {
+			// When launched by Gradle ("run" task), classes and resources are already on the runtime
+			// classpath: adding the Eclipse bin folder as well would duplicate persistence.xml and
+			// break the JPA startup with "Conflicting persistence unit definitions".
+			boolean gradleLaunch = new File("build/classes/java/main").canRead();
+			if (!gradleLaunch && eclipseClasses.canRead() && eclipseClasses.list().length>0) {
 				WebResourceRoot resources = new StandardRoot(ctx);
 				// Needed in Eclipse because classes are found in the "bin" folder
 				log.warn("Adding eclipse bin folder to classpath");
