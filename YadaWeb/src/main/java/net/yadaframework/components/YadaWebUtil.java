@@ -85,6 +85,7 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.web.YadaUserAgent;
 import net.yadaframework.exceptions.YadaSystemException;
 import net.yadaframework.web.YadaPageRequest;
 import net.yadaframework.web.YadaPageRows;
