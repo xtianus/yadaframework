@@ -329,7 +329,7 @@ public class YadaFileManager {
 	}
 
 	/**
-	 * Returns the (relative) url of the pdf image if any, or null.
+	 * Returns the (relative) url of the pdf image if any, or "NO IMAGE".
 	 * @param yadaAttachedFile
 	 * @return
 	 */
@@ -342,6 +342,19 @@ public class YadaFileManager {
 			return NOIMAGE_DATA;
 		}
 		return computeUrl(yadaAttachedFile, imageName);
+	}
+
+	/**
+	 * Returns the (relative) url of the pdf image. If not defined, falls back to the desktop image or plain file.
+	 * @param yadaAttachedFile
+	 * @return
+	 */
+	public String getPdfOrDesktopImageUrl(YadaAttachedFile yadaAttachedFile) {
+		String result = getPdfImageUrl(yadaAttachedFile);
+		if (NOIMAGE_DATA.equals(result)) {
+			return getDesktopImageUrl(yadaAttachedFile);
+		}
+		return result;
 	}
 
 	/**

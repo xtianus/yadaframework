@@ -110,6 +110,11 @@ public class YadaJpaConfig {
 			jpaProperties.put("hibernate.session_factory.statement_inspector", YadaTraceStatementInspector.class.getName());
 		}
 		jpaProperties.put("hibernate.generate_statistics", yadaLogDbStats);
+		int batchFetchSize = config.getDbDefaultBatchFetchSize();
+		if (batchFetchSize > 0) {
+			// Batch-loads lazy collections/proxies in IN (?, ?, ...) groups to mitigate N+1 globally
+			jpaProperties.put("hibernate.default_batch_fetch_size", batchFetchSize);
+		}
 		factory.setJpaPropertyMap(jpaProperties);
 		factory.afterPropertiesSet();
 		return factory.getObject();

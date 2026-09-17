@@ -1576,6 +1576,15 @@ public abstract class YadaConfiguration {
 		return configuration.getBoolean("config/database/showSql", false);
 	}
 
+	/**
+	 * Value for the Hibernate "default_batch_fetch_size" setting, used to batch-load lazy collections and
+	 * entity proxies with IN (?, ?, ...) clauses instead of one query each, mitigating N+1 problems globally.
+	 * @return the configured batch size, or 0 (disabled) when not set
+	 */
+	public int getDbDefaultBatchFetchSize() {
+		return configuration.getInt("config/database/defaultBatchFetchSize", 0);
+	}
+
 	public boolean encodePassword() {
 		return configuration.getBoolean("config/security/encodePassword", false);
 	}

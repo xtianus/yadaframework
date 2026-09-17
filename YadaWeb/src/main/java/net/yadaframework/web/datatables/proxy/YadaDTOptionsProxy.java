@@ -149,6 +149,10 @@ public class YadaDTOptionsProxy extends YadaDTOptions {
 		return orderMulti;
 	}
 
+	public List<String> getOrderSequence() {
+		return orderSequence;
+	}
+
 	public Boolean getOrdering() {
 		return ordering;
 	}

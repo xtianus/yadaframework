@@ -118,6 +118,23 @@ public class YadaAttachedFileDao {
 		return em.find(YadaAttachedFile.class, yadaAttachedFileId);
 	}
 
+	/**
+	 * Find entity from the id, eagerly loading localized descriptions.
+	 * @param yadaAttachedFileId
+	 * @return the found entity instance or null if the entity does not exist
+	 */
+	public YadaAttachedFile findWithDescription(Long yadaAttachedFileId) {
+		if (yadaAttachedFileId==null) {
+			return null;
+		}
+		List<YadaAttachedFile> result = YadaSql.instance().selectFrom("select distinct yaf from YadaAttachedFile yaf")
+			.join("left join fetch yaf.description")
+			.where("yaf.id=:yadaAttachedFileId")
+			.setParameter("yadaAttachedFileId", yadaAttachedFileId)
+			.query(em, YadaAttachedFile.class).getResultList();
+		return result.isEmpty() ? null : result.get(0);
+	}
+
 	// Kept for compatibility with Spring Data Repository
 	@Deprecated // it is a Spring Data api
 	public Optional<YadaAttachedFile> findById(Long yadaAttachedFileId) {

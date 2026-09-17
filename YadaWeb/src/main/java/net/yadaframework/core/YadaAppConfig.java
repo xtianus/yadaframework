@@ -133,9 +133,14 @@ public class YadaAppConfig {
 		// Do nothing
 	}
 
+	/**
+	 * Creates a ThreadPoolTaskScheduler with default values, but with a pool size of 4 threads.
+	 * If you need to configure it, override this method in your appConfig bean.
+	 */
 	@Bean
 	public TaskScheduler taskScheduler() {
 		TaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+		((ThreadPoolTaskScheduler) taskScheduler).setPoolSize(4); // Defaults to 4 threads, better than the default of 1
 		return taskScheduler;
 	}
 
