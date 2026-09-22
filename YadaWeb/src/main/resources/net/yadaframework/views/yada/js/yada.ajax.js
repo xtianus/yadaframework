@@ -1727,7 +1727,7 @@
 					return;
 				}
 
-				// Per mostrare una notification al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify"
+				// Per mostrare una notification al ritorno dalla get, basta che il Controller ritorni "/yada/b5/modalNotify" (see YadaConfiguration.getBootstrapView)
 				// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
 				var notify=yada.handleNotify(responseHtml, responseTrimmed);
 				if (notify) {
@@ -2077,7 +2077,7 @@
 	}
 	
 	// Se un ritorno da una chiamata ajax ha un notify, lo mostra.
-	// Per mostrare un notify al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify" 
+	// Per mostrare un notify al ritorno dalla get, basta che il Controller ritorni "/yada/b5/modalNotify" (see YadaConfiguration.getBootstrapView) 
 	// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
 	// Ritorna true se la notify è stata mostrata.
 	yada.handleNotify = function(responseHtml, responseText) {

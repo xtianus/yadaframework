@@ -7,7 +7,7 @@ using <div th:replace="~{/modalLogin :: #loginForm}">Login form here</div>
 */-->
 <body th:remove="tag">
 
-<div th:replace="~{/yada/modalGenericB5::fragment(~{::modalTitle},_,~{::modalBody},~{},~{::modalScript},'modal-lg','loginModal')}">
+<div th:replace="~{/yada/b5/modalGeneric::fragment(~{::modalTitle},_,~{::modalBody},~{},~{::modalScript},'modal-lg','loginModal')}">
 
 	<div th:fragment="modalTitle">Login</div>
 

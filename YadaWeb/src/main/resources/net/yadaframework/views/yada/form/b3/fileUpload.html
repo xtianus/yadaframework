@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 </head>
-<!--/* [Deprecated, use a version inside b4 or b5 folders]
+<!--/* [Bootstrap 3 version]
 A file-upload input element.
 Do not use if you don't have a form object holding a MultipartFile.
 
@@ -23,7 +23,7 @@ Message keys:
 - yada.form.fileUpload.minimumSize
 
 Example:
-<div th:replace="/yada/form/fileUpload::field(fieldName='thumbnailImage',label='Upload thumbnail image',size=${thumbnailSize},required=true,help='Image that will be shown in the list',attachedFile=*{thumbnail})"></div>
+<div th:replace="/yada/form/b3/fileUpload::field(fieldName='thumbnailImage',label='Upload thumbnail image',size=${thumbnailSize},required=true,help='Image that will be shown in the list',attachedFile=*{thumbnail})"></div>
 
 
 */-->
@@ -44,7 +44,7 @@ Example:
 	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
 	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
 		<span th:text="${err}" th:id="${#ids.seq(seqName)}">Error Text</span>
-		<button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	</div>
 	<div th:if="${attachedFile!=null}">
 		<div th:if="${attachedFile.filename!=null}">

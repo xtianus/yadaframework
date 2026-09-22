@@ -187,8 +187,7 @@ public class YadaWebUtil {
 	 * @return the full view name like "/yada/form/b5/fileUpload"
 	 */
 	public String getFormFragment(String formFragmentViewName) {
-		String prefix = "/yada/form/";
-		return prefix + "b" + config.getBootstrapVersion() + "/" + formFragmentViewName;
+		return config.getBootstrapFormView(formFragmentViewName);
 	}
 	
 	/**
@@ -1480,10 +1479,10 @@ public class YadaWebUtil {
 	
 	/**
 	 * Return the view name for the confirmation modal. Used in html to get the correct modal.
-	 * @return something like "/yada/modalConfirmB5" depending on the current bootstrap version
+	 * @return something like "/yada/b5/modalConfirm" depending on the current bootstrap version
 	 */
 	public String getModalConfirmViewName() {
-		return config.getForB3B4B5(YadaViews.CONFIRM_B3, YadaViews.CONFIRM_B4, YadaViews.CONFIRM_B5);
+		return config.getBootstrapView(YadaViews.CONFIRM);
 	}
 	
 	

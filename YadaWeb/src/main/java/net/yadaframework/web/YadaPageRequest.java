@@ -30,8 +30,7 @@ public class YadaPageRequest {
 	 * @return
 	 */
 	public YadaPageSortApi appendSort(String paramNames) {
-		parsedSort = new YadaPageSort();
-		return parsedSort.addSortParameters(paramNames, false);
+		return getPageSort().addSortParameters(paramNames, false);
 	}
 
 	/**
@@ -40,8 +39,7 @@ public class YadaPageRequest {
 	 * @return
 	 */
 	public YadaPageSortApi prependSort(String paramNames) {
-		parsedSort = new YadaPageSort();
-		return parsedSort.addSortParameters(paramNames, false);
+		return getPageSort().addSortParameters(paramNames, true);
 	}
 
 	/**

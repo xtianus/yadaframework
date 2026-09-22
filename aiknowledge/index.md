@@ -9,3 +9,4 @@
 | `aiknowledge/yadaAI_dictionary.md` | the YadaAI helper and Claude request-builder API surface |
 | `aiknowledge/ajax_csrf_notes.md` | Ajax CSRF meta-tag requirements for Yada pages using Spring Security |
 | `aiknowledge/workspace_build_notes.md` | module linkage and Eclipse/Gradle workspace build behavior |
+| `aiknowledge/bootstrap_views_and_mail_notes.md` | where the Bootstrap version of a view lives, how to resolve a versioned view name, Mailpit capture in development, and mail preview templates |

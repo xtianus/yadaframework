@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Version;
@@ -43,7 +44,9 @@ public class YadaAutoLoginToken implements Serializable {
 	@Column(columnDefinition="TIMESTAMP NULL")
 	private Date expiration; // Token expiration. Null = never expire
 
-	@OneToOne
+	// ManyToOne: the same user can hold several auto-login tokens at the same time, so a OneToOne
+	// would make Hibernate generate a unique constraint that the data cannot satisfy.
+	@ManyToOne
 	private YadaUserCredentials yadaUserCredentials;
 
 	@PrePersist

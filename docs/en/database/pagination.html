@@ -123,14 +123,18 @@ window.onscroll = function() {
 <div id="header">
 <h1>Database Pagination</h1>
 <div class="details">
-<span id="revnumber">version '0.7.8'</span>
+<span id="revnumber">version 0.7.9</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_description">Description</a></li>
 <li><a href="#_first_query">"First" Query</a></li>
-<li><a href="#_load_more_query">"Load More" Query</a></li>
+<li><a href="#_load_more_query">"Load More" Query</a>
+<ul class="sectlevel2">
+<li><a href="#_preserving_filter_parameters">Preserving Filter Parameters</a></li>
+</ul>
+</li>
 <li><a href="#_advanced_usage">Advanced Usage</a>
 <ul class="sectlevel2">
 <li><a href="#_single_controller_method">Single Controller Method</a></li>
@@ -358,6 +362,39 @@ the back button those values will be sent to the "first query" method seen at th
 pages up to the current one will be fetched from database and shown at the original scroll position. The <code>yada:paginationHistory</code> attribute
 must be set on the link or button that loads the next page.</p>
 </div>
+<div class="sect2">
+<h3 id="_preserving_filter_parameters">Preserving Filter Parameters</h3>
+<div class="paragraph">
+<p>When a paginated page also has filters (e.g. search keywords, category checkboxes), the browser history
+entries created by <code>yada:paginationHistory</code> only store pagination state by default. If the user applies
+filters, loads more results, navigates away, then presses back, the restored URL lacks the filter
+parameters and the page reloads without the correct filter state.</p>
+</div>
+<div class="paragraph">
+<p>The <code>yada:historyPreserveParams</code> attribute solves this by specifying which additional request parameters
+should be preserved in history entries. It is opt-in and must be placed on the same element as
+<code>yada:paginationHistory</code> (or on the parent form):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;a yada:ajax="@{/search(query=${query}, category=${categories},
+        page=${items.nextPage}, size=${items.pageSize})}"
+    yada:paginationHistory
+    yada:historyPreserveParams="query, category"
+    yada:updateOnSuccess="yadaParents:.jsLoadMore" href=""&gt;Load More
+&lt;/a&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The attribute accepts a comma-separated list of request parameter names.
+Single-value parameters (e.g. <code>query=lamp</code>) and multi-value parameters (e.g. <code>category=Table&amp;category=Chair</code>)
+are both supported. Empty-string values are not preserved; explicit <code>"false"</code> and <code>"0"</code> are preserved.</p>
+</div>
+<div class="paragraph">
+<p>For forms with a load-more button, the preserved values are read from the form data being submitted.
+For links, they are read from the link&#8217;s href URL.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -450,8 +487,8 @@ public class SearchController {
 </div>
 <div id="footer">
 <div id="footer-text">
-Version '0.7.8'<br>
-Last updated 2025-07-30 20:47:19 +0200
+Version 0.7.9<br>
+Last updated 2026-09-19 12:04:57 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

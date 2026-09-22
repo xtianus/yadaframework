@@ -124,7 +124,7 @@ window.onscroll = function() {
 <div id="header">
 <h1>DataTables</h1>
 <div class="details">
-<span id="revnumber">version '0.7.8'</span>
+<span id="revnumber">version 0.7.9</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -141,8 +141,12 @@ window.onscroll = function() {
 <li><a href="#_java_ajax_endpoint">Java Ajax Endpoint</a></li>
 <li><a href="#_advanced_usage">Advanced Usage</a>
 <ul class="sectlevel2">
+<li><a href="#_custom_cell_rendering">Custom Cell Rendering</a></li>
+<li><a href="#_column_sort_sequence">Column Sort Sequence</a></li>
 <li><a href="#_datatables_api_access">DataTables API Access</a></li>
-<li><a href="#_table_filter">Table Filter</a></li>
+<li><a href="#_reload_after_row_change">Reload after row change</a></li>
+<li><a href="#_custom_text_search">Custom Text Search</a></li>
+<li><a href="#_multi_field_filter">Multi-field Filter</a></li>
 <li><a href="#_returning_extra_data">Returning extra data</a></li>
 <li><a href="#_dynamic_row_css_from_the_backend">Dynamic row CSS from the backend</a></li>
 </ul>
@@ -759,6 +763,155 @@ by adding conditions or creating values not directly found on the entity:</p>
 <h2 id="_advanced_usage">Advanced Usage</h2>
 <div class="sectionbody">
 <div class="sect2">
+<h3 id="_custom_cell_rendering">Custom Cell Rendering</h3>
+<div class="paragraph">
+<p>You can customize how cell values are displayed by providing a javascript render function.
+This is useful for wrapping values in HTML tags, applying conditional formatting, or transforming data before display.</p>
+</div>
+<div class="paragraph">
+<p>Use the <code>.dtRender()</code> method on a column to specify a javascript function that will be called for each cell:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("myTable", locale, table -&gt; {
+	table
+		.dtEntityClass(MyEntity.class)
+		.dtStructureObj()
+			.dtColumnObj("Name", "name")
+				.dtRender("renderNameCell") <i class="conum" data-value="1"></i><b>(1)</b>
+				.back()
+		.back();
+});</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Specify the name of a javascript function to render the cell</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>On the HTML page, define the render function. The function signature follows the DataTables convention:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">function renderNameCell(data, type, row, meta) {
+	return '&lt;span class="myClass"&gt;' + data + '&lt;/span&gt;';
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The function receives:
+- <code>data</code>: the cell value from the data source
+- <code>type</code>: the type of data requested (filter, display, sort, type)
+- <code>row</code>: the full data object for the row
+- <code>meta</code>: an object with metadata about the cell (row index, column index, etc.)</p>
+</div>
+<div class="paragraph">
+<p>Return the HTML string to be displayed in the cell. This allows you to wrap values in tags, add icons, apply conditional styling, or create complex cell content based on the row data.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_column_sort_sequence">Column Sort Sequence</h3>
+<div class="paragraph">
+<p>By default, DataTables cycles through three sorting states when a column header is clicked: ascending, descending, and no sorting.
+This means that clicking a column header three times will remove the sort entirely.</p>
+</div>
+<div class="paragraph">
+<p>You can customize this cycling behavior using <code>dtOrderSequence()</code> to control which directions are available.
+For example, you can prevent users from removing the sort by excluding the empty string from the sequence.</p>
+</div>
+<div class="sect3">
+<h4 id="_table_wide_configuration">Table-wide configuration</h4>
+<div class="paragraph">
+<p>Set the sort sequence for all columns at once using <code>dtOptionsObj().dtOrderSequence()</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("myTable", locale, table -&gt; {
+	table
+		.dtEntityClass(MyEntity.class)
+		.dtStructureObj()
+			.dtColumnObj("Name", "name").back()
+			.dtColumnObj("Date", "createdDate").dtOrderDesc().back()
+		.back()
+		.dtOptionsObj()
+			.dtOrderSequence("asc", "desc") <i class="conum" data-value="1"></i><b>(1)</b>
+			.back()
+		;
+});</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>All columns will cycle between ascending and descending only, never removing the sort</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The table-level <code>dtOrderSequence()</code> sets the same sequence for all columns that don&#8217;t have a per-column setting. It is a Yada extension and has no direct equivalent in the official DataTables API. If you need different sequences for different columns, use the per-column <code>dtOrderSequence()</code> method.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_per_column_configuration">Per-column configuration</h4>
+<div class="paragraph">
+<p>Override the sort sequence on individual columns using <code>dtOrderSequence()</code> on the column:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">.dtStructureObj()
+	.dtColumnObj("Name", "name")
+		.dtOrderSequence("asc", "desc") <i class="conum" data-value="1"></i><b>(1)</b>
+		.back()
+	.dtColumnObj("Priority", "priority")
+		.dtOrderSequence("desc", "asc") <i class="conum" data-value="2"></i><b>(2)</b>
+		.back()
+.back()</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>This column cycles between ascending and descending only</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This column starts with descending and never allows "no sort"</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The per-column <code>dtOrderSequence()</code> overrides any table-wide setting from <code>dtOptionsObj().dtOrderSequence()</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Valid values for the sequence are <code>"asc"</code>, <code>"desc"</code>, and <code>""</code> (empty string for no sorting).</p>
+</div>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_datatables_api_access">DataTables API Access</h3>
 <div class="paragraph">
 <p>A reference to the DataTables API, i.e. the object returned by <code>$table.DataTable(dataTableOptions)</code>, is added to the table DOM object under the <code>yadaDataTableApi</code> key. It can be retrieved with</p>
@@ -773,9 +926,71 @@ by adding conditions or creating values not directly found on the entity:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_table_filter">Table Filter</h3>
+<h3 id="_reload_after_row_change">Reload after row change</h3>
 <div class="paragraph">
-<p>You can add form elements to filter the data shown in your DataTable.</p>
+<p>As shown in the previous section, the table can be reloaded with fresh data using the <code>reload()</code> API method.
+A common case is to reload the table after the row has been changed in an edit modal. For example, the
+user table may have an "edit" button that opens a modal with a form to edit the user: after submitting the
+new values, the table contents should be updated to reflect the changes. This is achieved using standard Yada Framework logic
+by calling the reload method in the form success handler:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">&lt;form name="userForm" yada:successhandler="$('#userTable').data('yadaDataTableApi').ajax.reload(null, false)" <i class="conum" data-value="1"></i><b>(1)</b>
+	th:action="@{/saveUser}" th:object="${userProfile}" class="yadaAjax"&gt;</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the success handler is invoked after the form has been submitted and the ajax call has returned, therefore any changes to the data have been executed and will be shown after reload</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_custom_text_search">Custom Text Search</h3>
+<div class="paragraph">
+<p>You can add a simple custom text search input to filter the data shown in your DataTable across all searchable columns, in case the default search box one is not suitable for your needs.
+The DataTables built-in global search is handled automatically by <code>YadaDataTableDao</code>: when the search value is set, it generates LIKE queries on all columns that have <code>searchable</code> enabled, with no additional backend code required.</p>
+</div>
+<div class="paragraph">
+<p>On the HTML page, add a text input anywhere and use the postprocessor to wire it to the DataTables <code>search()</code> API with a debounce:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;input type="text" class="mySearchInput" /&gt;
+
+&lt;yada:datatable
+	yada:configuration="${myTableAttribute}"
+	yada:postprocessor="myTablePostprocessor"&gt;
+&lt;/yada:datatable&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-javascript hljs" data-lang="javascript">function myTablePostprocessor(dataTableApi, dataTableJson) {
+	var timer;
+	$('.mySearchInput').on('input', function() {
+		clearTimeout(timer);
+		var value = $(this).val();
+		timer = setTimeout(function() {
+			dataTableApi.search(value).draw();
+		}, 300);
+	});
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>search(value).draw()</code> call sends the value as the standard DataTables <code>search[value]</code> parameter.
+On the backend, <code>YadaDataTableDao.getPage()</code> reads it automatically and applies a LIKE search on all searchable columns of the entity. No changes to the ajax endpoint are needed.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_multi_field_filter">Multi-field Filter</h3>
+<div class="paragraph">
+<p>You can add structured form elements (text inputs, checkboxes, selects) to filter the data shown in your DataTable with custom server-side logic.</p>
 </div>
 <div class="imageblock center">
 <div class="content">
@@ -842,8 +1057,8 @@ i18n is automatic by using keys instead of words</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version '0.7.8'<br>
-Last updated 2025-09-03 15:35:15 +0200
+Version 0.7.9<br>
+Last updated 2026-09-19 12:04:57 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

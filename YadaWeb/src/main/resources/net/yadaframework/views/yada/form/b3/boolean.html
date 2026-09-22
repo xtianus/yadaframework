@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 </head>
-<!--/* [Deprecated, use a version inside b4 or b5 folders]
+<!--/* [Bootstrap 3 version]
 A checkbox for boolean elements.
 
 Parameters:
@@ -17,7 +17,7 @@ Parameters:
 - disabled = true for a disabled checkbox (optional)
 - toggle = css selector of an element to toggle (optional)
 
-Example: <div th:replace="/yada/form/boolean::field(fieldName='useGold',label='Use Gold',help='Enable the use of gold to complete building')"></div>
+Example: <div th:replace="/yada/form/b3/boolean::field(fieldName='useGold',label='Use Gold',help='Enable the use of gold to complete building')"></div>
 
 
 - NO: help = testo per il pulsante di help (optional) Can be localised with: help=#{form.help.notifyCommentMyStory}
@@ -72,7 +72,7 @@ Example: <div th:replace="/yada/form/boolean::field(fieldName='useGold',label='U
 	
 	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
 		<span th:text="${err}">Error Text</span>
-		<button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	</div>
 	
 </div>    	

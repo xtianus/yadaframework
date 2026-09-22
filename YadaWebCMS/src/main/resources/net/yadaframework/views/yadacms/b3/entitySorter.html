@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 </head>
-<!--/* [Deprecated bootstrap 3 version]
+<!--/* [Bootstrap 3 version]
 A component to add, edit, sort and delete a set of entities that contain at least one uploaded image used as a thumbnail while sorting.
 The entities must implement YadaSortableEntity.
 The "add" and "edit" button can either go to a new page (non-ajax) or open a modal (ajax). In the latter case, after form submission
@@ -31,7 +31,7 @@ Parameters:
 - flagClasses = (optional) space separated list of entity attributes that are added as classes when true e.g. "enabled important expired"  
 
 Example:
-<div th:replace="~{/yadacms/entitySorter::component(entities=${shelf.books},entityIdName='bookId',urlAdd=@{/library/bookForm(shelfId=${shelf.id})},urlDelete=@{/library/deleteBook},urlSort=@{/library/sortBook},deleteConfirm='Do you really want to delete this book?')}"></div>
+<div th:replace="~{/yadacms/b3/entitySorter::component(entities=${shelf.books},entityIdName='bookId',urlAdd=@{/library/bookForm(shelfId=${shelf.id})},urlDelete=@{/library/deleteBook},urlSort=@{/library/sortBook},deleteConfirm='Do you really want to delete this book?')}"></div>
 
 Ajax calls for add/edit/sort/delete/clone should return just the yadaEntitySorterEntities fragment.
 When returning from edit, sort, delete or clone, the needed model attributes are "entities", "entityIdName" and (optional) "flagClasses".
@@ -43,20 +43,20 @@ Example 1:
 		model.addAttribute("entities", bookList);
 		model.addAttribute("entityIdName", "bookId");
 		model.addAttribute("flagClasses", "enabled important expired");
-		return "/yadacms/entitySorter :: .yadaEntitySorterEntities";
+		return "/yadacms/b3/entitySorter :: .yadaEntitySorterEntities";
 Example 2:
 	public String sortShape(Long currentId, Long otherId, String entityIdName, String flagClasses, Model model) {
 		... retrieve bookList...
 		model.addAttribute("entities", bookList);
 		model.addAttribute("entityIdName", entityIdName);
 		model.addAttribute("flagClasses", flagClasses);
-		return "/yadacms/entitySorter :: .yadaEntitySorterEntities";
+		return "/yadacms/b3/entitySorter :: .yadaEntitySorterEntities";
 Example 3:
 	public String sortShape(Long currentId, Long otherId, HttpServletRequest request, Model model) {
 		... retrieve bookList...
 		model.addAttribute("entities", bookList);
 		yadaWebUtil.passThrough(model, request);
-		return "/yadacms/entitySorter :: .yadaEntitySorterEntities";
+		return "/yadacms/b3/entitySorter :: .yadaEntitySorterEntities";
 				
 */-->
 <body>

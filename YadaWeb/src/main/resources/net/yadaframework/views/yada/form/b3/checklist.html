@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 </head>
-<!--/* [Deprecated, use a version inside b4 or b5 folders]
+<!--/* [Bootstrap 3 version]
 A checkbox list for objects, maps or static (Spring-EL) elements.
 It must be used inside a form with a th:object form bean.
 
@@ -27,9 +27,9 @@ Parameters:
              in page many times via javascript, otherwise all selects will end up having the same ids. Not needed when the ajaxLists are not inserted via javascript.
 
 Example:
-<div th:replace="/yada/form/checklist::field(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()')"></div>
-<div th:replace="/yada/form/checklist::field(fieldName='userCredentials.enabled',options=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
-<div th:replace="/yada/form/checklist::field(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
+<div th:replace="/yada/form/b3/checklist::field(fieldName='toBeCompleted',options=${accountTasks},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()')"></div>
+<div th:replace="/yada/form/b3/checklist::field(fieldName='userCredentials.enabled',options=${ {true, false} },labelKey='form.label.enabled',textKey='list.enabled.')"></div>
+<div th:replace="/yada/form/b3/checklist::field(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
 
 */-->
 <body>
@@ -102,7 +102,7 @@ Example:
 	<span th:if="${hasError}" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
 	<div th:each="err : ${#fields.errors('__${fieldName}__')}" class="alert alert-danger alert-dismissible yadaInputError" role="alert">
 		<span th:text="${err}" th:id="${#ids.seq(idPrefix)}">Error Text</span>
-		<button type="button" class="close" data-bs-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	</div>
 </div>    	
 </body>

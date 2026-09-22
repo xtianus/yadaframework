@@ -49,17 +49,26 @@ public interface YadaViews {
 	 * Open a notification modal when returning from an ajax request.
 	 * The notification must have been saved using the YadaNotify API before returning.
 	 * This is the default modal. You can customize it with config/paths/notificationModalView
+	 * The value is a view <em>name</em>, not a path: resolve it to a full view name with
+	 * {@link net.yadaframework.core.YadaConfiguration#getBootstrapView(String)}, which prepends
+	 * the folder of the configured Bootstrap version, e.g. "/yada/b3/modalNotify".
 	 */
-	String AJAX_NOTIFY_B5 = "/yada/modalNotifyB5";
-	String AJAX_NOTIFY_B4 = "/yada/modalNotifyB4";
-	String AJAX_NOTIFY_B3 = "/yada/modalNotifyB3";
+	String AJAX_NOTIFY = "modalNotify";
 
 	/**
 	 * Open a confirm modal.
+	 * The value is a view <em>name</em>, not a path: resolve it to a full view name with
+	 * {@link net.yadaframework.core.YadaConfiguration#getBootstrapView(String)}, which prepends
+	 * the folder of the configured Bootstrap version, e.g. "/yada/b3/modalConfirm".
 	 */
-	String CONFIRM_B5 = "/yada/modalConfirmB5";
-	String CONFIRM_B4 = "/yada/modalConfirmB4";
-	String CONFIRM_B3 = "/yada/modalConfirmB3";
+	String CONFIRM = "modalConfirm";
+
+	/**
+	 * Generic modal used to wrap application content.
+	 * The value is a view <em>name</em>, not a path: resolve it with
+	 * {@link net.yadaframework.core.YadaConfiguration#getBootstrapView(String)}.
+	 */
+	String MODAL_GENERIC = "modalGeneric";
 
 	/**
 	 * Close any open modal

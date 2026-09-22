@@ -315,9 +315,10 @@ public class YadaWebConfig implements WebMvcConfigurer {
 //		ServletContextTemplateResolver resolver = new ServletContextTemplateResolver();
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
 	    resolver.setApplicationContext(applicationContext);
-		resolver.setPrefix("/WEB-INF/classes/" + YadaConstants.EMAIL_TEMPLATES_PREFIX);
+		// A "classpath:" location is resolved both from a deployed war and from a plain classpath, so the
+		// preview works on the embedded Tomcat and in Eclipse WTP too, where "/WEB-INF/classes/" does not exist.
+		resolver.setPrefix("classpath:" + YadaConstants.EMAIL_TEMPLATES_PREFIX);
 // The final slash is not needed because all email template paths must start with "/email/" as specified in the "patterns.add()" statement below
-//		resolver.setPrefix("/WEB-INF/classes/" + YadaConstants.EMAIL_TEMPLATES_PREFIX + "/");
 		/* From the tutorial:
 		 When several template resolvers are applied, it is recommended to specify patterns
 		 for each template resolver so that Thymeleaf can quickly discard those template resolvers

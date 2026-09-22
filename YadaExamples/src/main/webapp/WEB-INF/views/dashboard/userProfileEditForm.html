@@ -4,7 +4,7 @@
 	>
 <body th:with="newUser=${userProfile.id==null}">
 
-<div th:replace="~{/yada/modalGenericB5::fragment(~{::title},_,~{::content},~{},_,'',~{})}">
+<div th:replace="~{/yada/b5/modalGeneric::fragment(~{::title},_,~{::content},~{},_,'',~{})}">
 
 <div th:fragment="title">
 	<span th:text="${newUser?'Add User':'Edit User &quot;'+userProfile+'&quot;'}">Edit user XXX</span>
