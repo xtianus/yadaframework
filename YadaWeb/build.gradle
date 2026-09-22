@@ -18,6 +18,7 @@ plugins {
 }
 
 apply from: '../YadaWeb/loadSharedProperties.gradle'
+apply from: '../YadaWeb/eclipseSetup.gradle'
 
 group = 'net.yadaframework'
 version = yada_version
@@ -39,20 +40,6 @@ if (!project.hasProperty('repoPath')) {
 }
 
 eclipse {
-	jdt {
-		// sourceCompatibility = 1.8
-		// targetCompatibility = 1.8
-		// https://stackoverflow.com/a/35302104/587641
-		file {
-	  		File dir = file('.settings')
-	  		dir.mkdirs()
-	  		File f = file('.settings/org.eclipse.core.resources.prefs')
-	  		if (!f.exists()) {
-	  			f.write('eclipse.preferences.version=1\n')
-	  			f.append('encoding/<project>=utf-8')
-	  		}
-		}
-	}
 	classpath {
 		downloadJavadoc = true
 		downloadSources = true

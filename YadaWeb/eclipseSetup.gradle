@@ -1,0 +1,51 @@
+// Shared Eclipse (Buildship + WTP) configuration for all Yada modules.
+//
+// The Gradle "eclipse" tasks MERGE into the metadata already on disk, so a stale
+// "jst.java" facet or nature left over from an older Java version survives the
+// regeneration and silently downgrades the Eclipse compiler compliance: the WTP
+// java facet version wins over the JDT settings. Buildship's "Refresh Gradle
+// Project" never runs the WTP tasks at all, so it can't repair those files either.
+// This script makes the generated metadata authoritative.
+//
+// Requires java_version to be set: apply loadSharedProperties.gradle first.
+
+def javaVersionString = project.ext.java_version as String
+def javaVersionEnum = JavaVersion.valueOf("VERSION_${javaVersionString}")
+
+eclipse {
+	project {
+		// Buildship needs these to consider the project a Gradle project,
+		// otherwise "Refresh Gradle Project" is not available on it
+		natures 'org.eclipse.buildship.core.gradleprojectnature'
+		buildCommand 'org.eclipse.buildship.core.gradleprojectbuilder'
+		file {
+			whenMerged { eclipseProject ->
+				eclipseProject.natures = eclipseProject.natures.unique()
+				eclipseProject.buildCommands = eclipseProject.buildCommands.unique { it.name }
+			}
+		}
+	}
+	jdt {
+		sourceCompatibility = javaVersionEnum
+		targetCompatibility = javaVersionEnum
+		javaRuntimeName = "JavaSE-${javaVersionString}"
+		// https://stackoverflow.com/a/35302104/587641
+		file {
+			File dir = file('.settings')
+			dir.mkdirs()
+			File encodingPrefs = file('.settings/org.eclipse.core.resources.prefs')
+			if (!encodingPrefs.exists()) {
+				encodingPrefs.write('eclipse.preferences.version=1\n')
+				encodingPrefs.append('encoding/<project>=utf-8')
+			}
+		}
+	}
+}
+
+if (project.plugins.hasPlugin('eclipse-wtp')) {
+	eclipse.wtp.facet.file.whenMerged { wtpFacet ->
+		// Drop java facets of any other version, then remove duplicates
+		wtpFacet.facets.removeAll { it.name == 'jst.java' && it.version != null && it.version != javaVersionString }
+		wtpFacet.facets = wtpFacet.facets.unique { [it.type, it.name, it.version] }
+	}
+}
