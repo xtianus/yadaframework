@@ -830,7 +830,9 @@
 		
 		var data = [];
 		var multipart = false;
-		var method = null; // Defaults to GET
+		// The method can be forced with data-yadaMethod (yada:method), so that state-changing
+		// links can use POST and be protected by CSRF. Defaults to GET.
+		var method = $element.attr('data-yadaMethod')?.toUpperCase() || null;
 		var url = null;
 		var paramName = 'multipartFile';
 		const droppedFiles = e?.originalEvent?.dataTransfer?.files;
