@@ -28,6 +28,7 @@ Parameters:
 - readonly = true for readonly (optional)
 - maxlength = max number of characters accepted (optional). 
               When greater than 80, a textarea is generated instead of an input tag, unless notextarea is true.
+- minlength = min number of characters accepted (optional)
 - rows = number of rows for the textarea (optional)
 - notextarea = do not automatically use textarea when maxlength>80 (optional)
 - addonLeft = character to set as a bootstrap "input-group-prepend" to the left of the input field (optional)
@@ -70,7 +71,7 @@ Example:
 			th:min="${min}" th:max="${max}" th:step="${step}" 
 			th:class="${classes}?:'form-control'"
 			th:classappend="|${hasError==true?'is-invalid':''} ${readonly==true?'yadaReadonly':''}|"
-			th:maxlength="${maxlength}" 
+			th:maxlength="${maxlength}" th:minlength="${minlength}"
 			th:tabindex="${tabindex}"
 			th:autocomplete="${autocomplete}"
 			th:id="${id}?:${#ids.seq(seqName)}"  
@@ -83,7 +84,7 @@ Example:
 		</span>
 		<textarea th:if="${(maxlength > 80 and notextarea!=true) or editor==true}" th:rows="${rows}?:3" th:field="*{{__${fieldName}__}}" 
 			th:placeholder="${placeholderKey!=null?#messages.msg(placeholderKey):placeholder}"
-			th:required="${required}" th:disabled="${disabled}" th:maxlength="${maxlength}" 
+			th:required="${required}" th:disabled="${disabled}" th:maxlength="${maxlength}" th:minlength="${minlength}"
 			th:class="${classes}?:'form-control'"
 			th:classappend="|${hasError==true?'is-invalid':''} ${readonly==true?'yadaReadonly':''}|"
 			th:tabindex="${tabindex}"
