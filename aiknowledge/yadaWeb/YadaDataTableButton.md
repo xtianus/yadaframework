@@ -11,6 +11,7 @@
 | `dtGlobal` | Sets for a button that is always enabled regardless of row selection, for example an Add button. |
 | `dtIdName` | Name of the ID request parameter, default is "id". |
 | `dtNoAjax` | Indicate that the button should use a normal request |
+| `dtMethod` | HTTP method of the request sent by the button (GET when not set); use `POST` for state-changing buttons so the request is CSRF-validated. With `dtNoAjax` a POST is sent by submitting a hidden form |
 | `dtHidePageLoader` | Do not show the page loader when the button is clicked |
 | `dtElementLoader` | Show the loader on the selected element |
 | `dtWindowTarget` | Name of the window for opening the URL in a new window. |

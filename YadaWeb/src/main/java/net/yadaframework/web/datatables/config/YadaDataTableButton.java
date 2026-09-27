@@ -35,6 +35,7 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
 	protected String toolbarCssClass = "btn btn-default"; // CSS class to be applied to the button
 	protected String idName = "id"; // Name of the ID request parameter (optional, default is "id")
 	protected boolean ajax = true; // Boolean to indicate if the button should use an AJAX request
+	protected String method; // HTTP method of the request sent by the button, GET when null
 	protected Boolean hidePageLoader; // Boolean to control whether the page loader should be shown or not
 	protected String elementLoader; // CSS selector for the element that will be hidden by the loader
 	protected YadaDataTableConfirmDialog yadaDataTableConfirmDialog;
@@ -164,6 +165,22 @@ public class YadaDataTableButton extends YadaFluentBase<YadaDataTableHTML> {
         return this;
     }
     
+    /**
+     * HTTP method of the request sent when the button is clicked, GET by default.
+     * Use "POST" for any button that changes state, so that the request is protected by CSRF validation.
+     * With {@link #dtNoAjax()} a POST is sent by submitting a hidden form that navigates to the response.
+     * @param method an HTTP method like "POST"
+     * @throws YadaInvalidUsageException when the method is blank
+     * @return this instance for method chaining
+     */
+    public YadaDataTableButton dtMethod(String method) {
+    	if (StringUtils.isBlank(method)) {
+    		throw new YadaInvalidUsageException("method cannot be blank");
+    	}
+        this.method = method.trim().toUpperCase();
+        return this;
+    }
+
     /**
      * Do not show the page loader when the button is clicked
      * @return this instance for method chaining

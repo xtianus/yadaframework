@@ -65,6 +65,10 @@ public class YadaDataTableButtonProxy extends YadaDataTableButton {
 		return ajax;
 	}
 
+	public String getMethod() {
+		return method;
+	}
+
 	public Boolean isHidePageLoader() {
 		return hidePageLoader;
 	}

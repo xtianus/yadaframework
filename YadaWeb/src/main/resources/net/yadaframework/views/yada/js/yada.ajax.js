@@ -84,6 +84,46 @@
 		});
 	}
 
+	/**
+	 * Navigates to the response of a POST request by submitting a hidden form that carries the CSRF token.
+	 * Use it instead of a GET navigation when the target changes state.
+	 * @param url the form action
+	 * @param data optional object of request parameters; an array value is sent as a repeated parameter
+	 * @param windowTarget optional name of the window where the response is shown, like "_blank"
+	 */
+	yada.postNavigate = function(url, data, windowTarget) {
+		const form = document.createElement("form");
+		form.method = "POST";
+		form.action = url;
+		form.style.display = "none";
+		if (windowTarget) {
+			form.target = windowTarget;
+		}
+		function addField(name, value) {
+			const input = document.createElement("input");
+			input.type = "hidden";
+			input.name = name;
+			input.value = value;
+			form.appendChild(input);
+		}
+		for (const [name, value] of Object.entries(data || {})) {
+			if (value == null) {
+				continue;
+			}
+			if (Array.isArray(value)) {
+				value.forEach(item => addField(name, item));
+			} else {
+				addField(name, value);
+			}
+		}
+		if (yada.csrf != null && yada.csrf.token) {
+			addField(yada.csrf.parameterName, yada.csrf.token);
+		}
+		document.body.appendChild(form);
+		form.submit();
+		form.remove();
+	}
+
 	//////////////////////
 	/// Pagination support
 	/**

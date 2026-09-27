@@ -1485,6 +1485,14 @@ public class YadaWebUtil {
 		return config.getBootstrapView(YadaViews.CONFIRM);
 	}
 	
+	/**
+	 * Return the view name for the generic modal. Used in html to get the correct modal.
+	 * @return something like "/yada/b5/modalGeneric" depending on the current bootstrap version
+	 */
+	public String getModalGenericViewName() {
+		return config.getBootstrapView(YadaViews.MODAL_GENERIC);
+	}
+
 	
 	/**
 	 * Encloses the string in a thymeleaf url operator when missing

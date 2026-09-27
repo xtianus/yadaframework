@@ -21,7 +21,7 @@ Resolve a versioned view name at runtime rather than hardcoding a folder:
 - `YadaConfiguration.getBootstrapFormView(name)` → `/yada/form/b<N>/<name>`; `YadaWebUtil.getFormFragment(name)`
   delegates to it and is the form used from html:
   `th:replace="~{${@yadaWebUtil.getFormFragment('text')} :: field(...)}"`.
-- `YadaWebUtil.getModalConfirmViewName()` and `YadaConfiguration.getNotifyModalView()` return already-resolved names.
+- `YadaWebUtil.getModalConfirmViewName()`, `YadaWebUtil.getModalGenericViewName()` and `YadaConfiguration.getNotifyModalView()` return already-resolved names.
   `getNotifyModalView()` still honours `config/paths/notificationModalView` when set.
 
 `getForB3B4B5` remains for css classes and similar values; it is not used for view names.

@@ -195,12 +195,15 @@
 	}
 	
 	function dtDoButtonCall(url, requestData, ajax, loader, buttonConf, dataTableApi) {
+		const method = buttonConf.method; // null for GET
 		if (ajax) {
-			yada.ajax(url, requestData, ()=>dataTableApi.draw(false), null, null, loader);
+			yada.ajax(url, requestData, ()=>dataTableApi.draw(false), method, null, loader);
+		} else if (method && method!=="GET") {
+			yada.postNavigate(url, requestData, buttonConf.windowTarget);
 		} else {
 			url = yada.addUrlParameters(url, requestData);
 			if (buttonConf.windowTarget) {
-				window.open(url, buttonData.windowName, buttonData.windowFeatures);
+				window.open(url, buttonConf.windowTarget, buttonConf.windowFeatures);
 			} else {
 				window.location.href = url;
 			}
