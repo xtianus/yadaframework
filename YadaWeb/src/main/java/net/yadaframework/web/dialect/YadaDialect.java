@@ -35,10 +35,13 @@ public class YadaDialect extends AbstractProcessorDialect {
         processors.add(new YadaAjaxAttrProcessor(dialectPrefix)); // yada:ajax
         processors.add(new YadaHrefAttrProcessor(dialectPrefix)); // yada:href
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "ajaxElementLoader", "data-yadaAjaxElementLoader", config));
+        // yada:method forces the HTTP method of an ajax link or button, e.g. yada:method="POST"
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "method", "data-yadaMethod", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "popover", "data-yadaPopover", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "formGroup", "data-yadaFormGroup", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "triggerInViewport", "data-yadaTriggerInViewport", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "paginationHistory", "data-yadaPaginationHistory", config));
+        processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "historyPreserveParams", "data-yadaHistoryPreserveParams", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "submitHandler", "data-yadaSubmitHandler", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "successHandler", "data-yadaSuccessHandler", config));
         processors.add(new YadaSimpleAttrProcessor(dialectPrefix, "updateOnSuccess", "data-yadaUpdateOnSuccess", config));

@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +21,7 @@ public class YadaCommonsMultipartResolver extends StandardServletMultipartResolv
 		} catch (MaxUploadSizeExceededException e) {
 			request.setAttribute(MAX_UPLOAD_SIZE_EXCEEDED_KEY, e);
 			log.debug("Max upload file size exceeded", e);
-			return new StandardMultipartHttpServletRequest(request, true);
+			return new YadaFailedMultipartHttpServletRequest(request);
 		}
 	}
 

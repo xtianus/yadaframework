@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.18">
+<title>Saved Properties</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
+<link rel="stylesheet" type="text/css" href="../../yadadocs.css" />
+</head>
+<body class="article toc2 toc-left">
+<!--
+	WARNING !!!!!
+	Edit the /YadaDocs/src/docs/asciidoc/common/docinfo-header.html file
+	to change this menu.
+-->
+
+<select id="navigator">
+	<option>Choose chapter...</option>
+	<option data-link="./index.html">Index</option>
+	<option data-link="./setup/gettingStarted.html">Getting started</option>
+	<option data-link="./examples/bookstoreTutorial.html">Bookstore tutorial</option>
+	<option data-link="./internationalization.html">Internationalization</option>
+	<option data-link="./database/overview.html">Databases</option>
+	<option data-link="./forms/overview.html">Forms</option>
+	<option data-link="./ajax.html">Ajax</option>
+	<option data-link="./ajaxModal.html">Ajax Modal</option>
+	<option data-link="./security/overview.html">Security</option>
+	<option data-link="./datatables.html">DataTables</option>
+	<option data-link="./emails.html">Sending Emails</option>
+	<option data-link="./json.html">Read and Write JSON</option>
+	<option data-link="./confirmationModal.html">Confirmation Modal</option>
+	<option data-link="./notificationModal.html">Notification Modal</option>
+	<option data-link="./misc.html">Miscellaneous</option>
+	<option data-link="./staging.html">Staging Docs</option>
+	<option data-link="./troubleshooting.html">Troubleshooting</option>
+	<option data-link="./upgrade.html">Upgrade Yada Framework Version</option>
+</select>
+<button id="backToTopButton" onclick="scrollToTop()"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>
+
+<script>
+document.querySelector("#navigator").addEventListener("change", function (event) {
+	const goup = location.href.lastIndexOf("/") - location.href.lastIndexOf("/en") > 3;
+	const link = (goup?"../":"") + this.options[this.selectedIndex].getAttribute("data-link");
+	if (link!=null) {
+		document.location.href = link;
+	}
+});
+
+/* Make headers clickable to copy the url */
+document.addEventListener('DOMContentLoaded', function () {
+    const headers = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.style.position = 'relative';
+        header.addEventListener('click', function(e) {
+            const url = window.location.href.split('#')[0] + '#' + this.id;
+            window.location.href = url;
+            navigator.clipboard.writeText(url);
+        });
+        header.addEventListener('mouseenter', function() {
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-clone';
+            icon.setAttribute('aria-hidden', 'true');
+            icon.style.position = 'absolute';
+            icon.style.right = '30px';
+            icon.style.top = '50%';
+            icon.style.transform = 'translateY(-50%)';
+            icon.style.fontSize = '18px';
+            icon.style.color = 'gray';
+            header.appendChild(icon);
+        });
+        header.addEventListener('mouseleave', function() {
+            const icon = header.querySelector('.fa-clone');
+            if (icon) {
+            	header.removeChild(icon);
+            }
+        });
+    });
+});
+
+function showCopy(e) {
+    const icon = document.createElement('i');
+    icon.className = 'fa fa-clone';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.style.position = 'absolute';
+    icon.style.left = e.pageX + 'px';
+    icon.style.top = e.pageY + 'px';
+    icon.style.zIndex = 1000;
+    icon.style.fontSize = '24px';
+    document.body.appendChild(icon);
+    setTimeout(function() {
+        document.body.removeChild(icon);
+    }, 1000); // 1 second delay
+}
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+/* Only show the backToTopButton when scrolled 200px from the top */
+let visible = false;
+window.onscroll = function() {
+    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+    	if (!visible) {
+	        document.getElementById("backToTopButton").style.display = "block";
+	        visible = true;
+    	}
+    } else {
+    	if (visible) {
+	        document.getElementById("backToTopButton").style.display = "none";
+			visible = false;
+    	}
+    }
+};
+</script>
+<div id="header">
+<h1>Saved Properties</h1>
+<div class="details">
+<span id="revnumber">version 0.7.9</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_intended_use">Intended Use</a></li>
+<li><a href="#_declaring_and_using_keys">Declaring and Using Keys</a></li>
+<li><a href="#_built_in_codecs">Built-in Codecs</a></li>
+<li><a href="#_defaults_errors_and_concurrency">Defaults, Errors, and Concurrency</a></li>
+<li><a href="#_schema_adoption_and_flyway_responsibility">Schema Adoption and Flyway Responsibility</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Persist typed application state by key</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_intended_use">Intended Use</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>YadaSavedPropertyDao</code> stores small pieces of application-owned state, such as a job&#8217;s last-run timestamp or a feature&#8217;s enabled state.
+Use a normal domain table or column when the value belongs to a domain entity, needs relationships or queries, has history or auditing requirements, or is part of a larger structure.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Saved properties are not a secret store. Do not use them for passwords, tokens, or other credentials.
+Values are stored as text; arbitrary polymorphic JSON and native Java serialization are not supported.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_declaring_and_using_keys">Declaring and Using Keys</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Declare typed keys in the consuming application and reuse them for every access.
+A key combines a canonical application scope, a canonical property name, and a codec:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">private static final YadaSavedPropertyKey&lt;Instant&gt; LAST_RUN =
+	YadaSavedPropertyKey.of("billing", "jobs.invoice.last-run",
+		YadaSavedPropertyCodecs.instantCodec());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A null, empty, or whitespace-only application scope is normalized to <code>"default"</code>.
+Non-blank application scopes and all property names are stripped and lowercased with <code>Locale.ROOT</code>, so mixed-case inputs identify the same canonical key. Names must not be blank. The 64-character application-scope and 191-character property-name limits are validated after canonicalization.</p>
+</div>
+<div class="paragraph">
+<p>Inject <code>YadaSavedPropertyDao</code> as a Spring bean, preferably by constructor:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">private final YadaSavedPropertyDao savedPropertyDao;
+public InvoiceJob(YadaSavedPropertyDao savedPropertyDao) {
+	this.savedPropertyDao = savedPropertyDao;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>findValue()</code> represents a missing row with <code>Optional.empty()</code>; <code>getValue()</code> returns the stored value or the key&#8217;s default:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Optional&lt;Instant&gt; lastRun = savedPropertyDao.findValue(LAST_RUN);
+Instant requiredLastRun = savedPropertyDao.getValue(LAST_RUN);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create a key with a non-null default by calling <code>YadaSavedPropertyKey.withDefault(applicationName, name, codec, defaultValue)</code> instead of <code>of()</code>.
+A default is returned by <code>getValue()</code> only when no row exists; it is not written to the database.</p>
+</div>
+<div class="paragraph">
+<p>Write a non-null value or delete the row through the same typed key:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">savedPropertyDao.setValue(LAST_RUN, Instant.now());
+boolean removed = savedPropertyDao.delete(LAST_RUN);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>setValue()</code> inserts a missing row or updates the managed row. <code>delete()</code> identifies the row by its canonical lowercase scope and name, does not inspect the codec, and returns <code>false</code> when no row exists.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_built_in_codecs">Built-in Codecs</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>YadaSavedPropertyCodecs</code> provides these representations:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 33.3333%;">
+<col style="width: 50.0001%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Java type</th>
+<th class="tableblock halign-left valign-top">Codec factory</th>
+<th class="tableblock halign-left valign-top">Canonical stored text</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>stringCodec()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Unchanged text</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>booleanCodec()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Strict lowercase <code>true</code> or <code>false</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>longCodec()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Signed base-ten integer</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>BigDecimal</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>decimalCodec()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Plain notation from <code>toPlainString()</code>, without an exponent</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Instant</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>instantCodec()</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>DateTimeFormatter.ISO_INSTANT</code> text</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A specific enum</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>enumCodec(MyEnum.class)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The constant&#8217;s exact <code>name()</code>, never its ordinal</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A specific JSON class</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>jsonCodec(MyValue.class, objectMapper)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JSON produced by the supplied <code>ObjectMapper</code> for the explicit target class</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The JSON codec requires both an explicit <code>Class&lt;T&gt;</code> and a caller-supplied <code>ObjectMapper</code>; the codec does not provide arbitrary polymorphic deserialization.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_defaults_errors_and_concurrency">Defaults, Errors, and Concurrency</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>getValue()</code> without either a stored row or a key default throws <code>YadaInvalidUsageException</code>.
+Null writes, a stored logical type that differs from the key, malformed stored text, and a decoded value of the wrong Java type throw <code>YadaInvalidValueException</code> with the scope and name as context.
+Changing to a codec with a different logical storage type for an existing <code>(applicationName, name)</code> is rejected; migrate or delete the old value deliberately instead. This check does not detect enum or JSON target-class changes within the same logical type.
+The two cases are not equally safe: reading a stored constant with a different enum class fails loudly, while two JSON classes with overlapping field names can deserialize successfully into the wrong shape with no error at all, depending on the supplied <code>ObjectMapper</code> configuration. Treat the JSON target class of a key as part of its stored contract and change it only through an explicit migration.
+Duplicate rows indicate storage corruption and cause <code>YadaInternalException</code>, while the database unique constraint normally prevents them.</p>
+</div>
+<div class="paragraph">
+<p><code>YadaSavedProperty.version</code> is a JPA optimistic-lock version. Concurrent updates to the same row detect a stale write and fail instead of silently overwriting it; handle the resulting optimistic-lock failure as a conflict and retry the complete transaction only when that is safe.
+Concurrent first inserts are protected by the unique constraint on <code>(applicationName, name)</code> and may similarly require conflict handling.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_schema_adoption_and_flyway_responsibility">Schema Adoption and Flyway Responsibility</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Yada&#8217;s runtime package scanning discovers <code>YadaSavedProperty</code> in <code>net.yadaframework.persistence.entity</code>.
+Schema generation uses the consuming application&#8217;s schema-generation <code>persistence.xml</code>, which must explicitly include:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;class&gt;net.yadaframework.persistence.entity.YadaSavedProperty&lt;/class&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The generated schema must contain the <code>YadaSavedProperty</code> table and the unique constraint on <code>(applicationName, name)</code>; both identifiers are stored in canonical lowercase form by the Java API and entity lifecycle.
+For every consuming released application, regenerate the schema, diff it against the previous revision, and add a new additive Flyway migration containing that table and constraint.
+Never edit an old versioned migration that may already have run.</p>
+</div>
+<div class="paragraph">
+<p>YadaWeb is a library: it owns no runtime database and no runtime Flyway migration.
+Therefore, do not add a YadaWeb migration; each consuming application owns and applies its new migration.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 0.7.9<br>
+Last updated 2026-09-19 12:04:57 +0200
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code[data-lang]')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
+</body>
+</html>

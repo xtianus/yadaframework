@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import net.yadaframework.components.YadaFileManager;
 import net.yadaframework.components.YadaUtil;
+import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
 import net.yadaframework.persistence.entity.YadaManagedFile;
@@ -29,6 +30,7 @@ public class YadaCropQueue {
 	@Autowired private YadaFileManagerDao yadaFileManagerDao;
 	@Autowired private YadaAttachedFileDao yadaAttachedFileDao;
 	@Autowired private YadaFileManager yadaFileManager;
+	@Autowired private YadaWebUtil yadaWebUtil;
 	// private @Autowired YadaConfiguration config;
 
 
@@ -148,6 +150,24 @@ public class YadaCropQueue {
 	 */
 	public String getDestinationRedirect() {
 		return this.destinationRedirect;
+	}
+
+	/**
+	 * Adds one request parameter to the final crop redirect URL.
+	 * @param name the parameter name; ignored when null
+	 * @param value the parameter value; null becomes an empty value
+	 * @return this queue
+	 */
+	public YadaCropQueue addRedirectParameter(String name, String value) {
+		if (name==null) {
+			return this;
+		}
+		String redirectPrefix = "redirect:";
+		boolean hasRedirectPrefix = destinationRedirect!=null && destinationRedirect.startsWith(redirectPrefix);
+		String url = hasRedirectPrefix ? destinationRedirect.substring(redirectPrefix.length()) : destinationRedirect;
+		url = yadaWebUtil.enhanceUrl(url, null, name, value);
+		destinationRedirect = hasRedirectPrefix ? redirectPrefix + url : url;
+		return this;
 	}
 
 	@SuppressWarnings("unused")

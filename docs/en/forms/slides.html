@@ -123,7 +123,7 @@ window.onscroll = function() {
 <div id="header">
 <h1>Multimedia Galleries</h1>
 <div class="details">
-<span id="revnumber">version '0.7.8'</span>
+<span id="revnumber">version 0.7.9</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -219,11 +219,11 @@ added ones.</p>
 		&lt;input type="hidden" name="yadaGallerySlideId" th:value="${yadaGallerySlide.id}"&gt;
 		&lt;th:block th:if="${size==null}"&gt;
 			&lt;!--/* Adding a new slide: the size is from config */--&gt;
-			&lt;div th:replace="/yada/form/fileUpload::field(fieldName='multipartImage', label='Add slide',accept='image/*',attachedFile=*{image},required=true,size=${slideImageSize})"&gt;&lt;/div&gt;
+			&lt;div th:replace="~{${@yadaWebUtil.getFormFragment('fileUpload')} :: field(fieldName='multipartImage', label='Add slide',accept='image/*',attachedFile=*{image},required=true,size=${slideImageSize})}"&gt;&lt;/div&gt;
 		&lt;/th:block&gt;
 		&lt;th:block th:if="${size!=null}"&gt;
 			&lt;!--/* Editing a slide: the size is from previous choice */--&gt;
-			&lt;div th:replace="/yada/form/fileUpload::field(fieldName='multipartImage', label='Edit slide',accept='image/*',attachedFile=*{image},required=true,size=${size})"&gt;&lt;/div&gt;
+			&lt;div th:replace="~{${@yadaWebUtil.getFormFragment('fileUpload')} :: field(fieldName='multipartImage', label='Edit slide',accept='image/*',attachedFile=*{image},required=true,size=${size})}"&gt;&lt;/div&gt;
 		&lt;/th:block&gt;
 		&lt;button class="btn btn-success" type="submit" name="Save"&gt;[[*{id}!=null?'Save':'Add']] Slide&lt;/button&gt;
 	&lt;/fieldset&gt;
@@ -390,8 +390,8 @@ private YadaManagedFile validateAndUploadSlideImage(YadaGallerySlide yadaGallery
 </div>
 <div id="footer">
 <div id="footer-text">
-Version '0.7.8'<br>
-Last updated 2025-07-30 20:47:19 +0200
+Version 0.7.9<br>
+Last updated 2026-09-21 14:58:50 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

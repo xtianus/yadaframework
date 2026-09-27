@@ -17,22 +17,28 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,6 +56,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.support.AbstractResourceBasedMessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
@@ -68,6 +75,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.AbstractDispatcherServletInitializer;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.Cookie;
@@ -77,9 +85,11 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
 import net.yadaframework.core.YadaLocalEnum;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.web.YadaUserAgent;
 import net.yadaframework.exceptions.YadaSystemException;
 import net.yadaframework.web.YadaPageRequest;
 import net.yadaframework.web.YadaPageRows;
+import net.yadaframework.web.YadaUserAgent;
 import net.yadaframework.web.YadaViews;
 
 /**
@@ -93,6 +103,7 @@ public class YadaWebUtil {
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaUtil yadaUtil;
 	@Autowired private MessageSource messageSource;
+	@Autowired private ServletContext servletContext;
 	
 	/**
 	 * Instance to be used when autowiring is not available
@@ -106,6 +117,60 @@ public class YadaWebUtil {
 	private static final String PATTERN_INVALID_SLUG = "[?%:,;=&!+~()@*$'\"\\s]";
 
 	private Map<String, List<?>> sortedLocalEnumCache = new ConcurrentHashMap<>();
+	
+	/**
+	 * Returns frontend-exportable messages for the current locale using MessageSource value resolution.
+	 * All keys prefixed by any of the values in <i18n><frontendKeyPrefix> will be resolved for the current locale and returned to the caller.
+	 */
+	public Map<String, String> getFrontendMessages(Locale locale) {
+		List<String> prefixes = config.getFrontendMessageKeyPrefixes(); // "ts."
+		if (prefixes.isEmpty()) {
+			return Collections.emptyMap();
+		}
+		Map<String, String> messages = new TreeMap<>();
+		// No need to read the basenames from config and normalize them: already done in YadaAppConfig.messageSource()
+		// config.getMessageSourceBasenames()
+		Set<String> basenames = ((AbstractResourceBasedMessageSource)messageSource).getBasenameSet();
+		for (String basename : basenames) {
+			Properties properties = new Properties();
+			loadProperties(properties, basename + ".properties");
+			for (String key : new TreeSet<>(properties.stringPropertyNames())) {
+				if (messages.containsKey(key) || !matchesAnyPrefix(key, prefixes)) {
+					continue;
+				}
+				messages.put(key, messageSource.getMessage(key, null, locale));
+			}
+		}
+		return Collections.unmodifiableMap(messages);
+	}
+
+	/**
+	 * Adds one UTF-8 properties resource into the target properties when it exists.
+	 */
+	private void loadProperties(Properties target, String resourcePath) {
+		try (InputStream inputStream = servletContext.getResourceAsStream("/" + resourcePath)) {
+			if (inputStream == null) {
+				throw new YadaSystemException("Could not load message bundle '{}' because inputStream null", resourcePath);
+			}
+			Properties loaded = new Properties();
+			loaded.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+			target.putAll(loaded);
+		} catch (IOException e) {
+			throw new YadaSystemException("Could not load message bundle '{}'", resourcePath, e);
+		}
+	}
+
+	/**
+	 * Checks if a message key is allowed by any configured prefix e.g. "ts."
+	 */
+	private boolean matchesAnyPrefix(String key, List<String> prefixes) {
+		for (String prefix : prefixes) {
+			if (key.startsWith(prefix)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	/**
 	 * @return the current request URI, for example "/some/product"
@@ -122,8 +187,7 @@ public class YadaWebUtil {
 	 * @return the full view name like "/yada/form/b5/fileUpload"
 	 */
 	public String getFormFragment(String formFragmentViewName) {
-		String prefix = "/yada/form/";
-		return prefix + "b" + config.getBootstrapVersion() + "/" + formFragmentViewName;
+		return config.getBootstrapFormView(formFragmentViewName);
 	}
 	
 	/**
@@ -569,13 +633,21 @@ public class YadaWebUtil {
 
 	/**
 	 * Creates a new URL string from a starting one, taking into account the locale in the path and optional url parameters.
-	 * @param url the original url, like "/some/place"
+	 * The path of the result is urlencoded.
+	 * @param url the original url, like "/some/place" (can contain parameters and anchors)
 	 * @param locale added as a path in the url, only if the url is absolute. Can be null if the locale is not needed in the path
 	 * @param params optional request parameters to be set on the url, in the form of comma-separated name,value pairs. E.g. "id","123","name","joe".
 	 * 			Existing parameters are not replaced. Null values become empty strings. Null names are skipped with their values.
 	 * @return a url like "/en/some/place?id=123&name=joe"
 	 */
 	public String enhanceUrl(String url, Locale locale, String...params) {
+		// UTF-8 encode the path portion of the URL to handle special characters (e.g. accented letters)
+		int splitPos = url.length();
+		int qPos = url.indexOf('?');
+		int hPos = url.indexOf('#');
+		if (qPos >= 0) splitPos = Math.min(splitPos, qPos);
+		if (hPos >= 0) splitPos = Math.min(splitPos, hPos);
+		url = UriUtils.encodePath(url.substring(0, splitPos), "UTF-8") + url.substring(splitPos);
 		StringBuilder result = new StringBuilder();
 		if (config.isLocalePathVariableEnabled()) {
 			// The language is added only to absolute urls, if it doesn't exist yet
@@ -937,6 +1009,23 @@ public class YadaWebUtil {
 		}
 		String ajaxHeader = request.getHeader("X-Requested-With");
 		return "XMLHttpRequest".equalsIgnoreCase(ajaxHeader);
+	}
+
+	/**
+	 * Returns true when the current request user-agent identifies a bot or crawler.
+	 * @return true for bots and for missing requests
+	 */
+	public boolean isBotRequest() {
+		return YadaUserAgent.isBot(getCurrentRequest());
+	}
+
+	/**
+	 * Returns true when the request user-agent identifies a bot or crawler.
+	 * @param request the current request, can be null
+	 * @return true for bots and for missing requests
+	 */
+	public boolean isBotRequest(HttpServletRequest request) {
+		return YadaUserAgent.isBot(request);
 	}
 
 	/**
@@ -1390,12 +1479,20 @@ public class YadaWebUtil {
 	
 	/**
 	 * Return the view name for the confirmation modal. Used in html to get the correct modal.
-	 * @return something like "/yada/modalConfirmB5" depending on the current bootstrap version
+	 * @return something like "/yada/b5/modalConfirm" depending on the current bootstrap version
 	 */
 	public String getModalConfirmViewName() {
-		return config.getForB3B4B5(YadaViews.CONFIRM_B3, YadaViews.CONFIRM_B4, YadaViews.CONFIRM_B5);
+		return config.getBootstrapView(YadaViews.CONFIRM);
 	}
 	
+	/**
+	 * Return the view name for the generic modal. Used in html to get the correct modal.
+	 * @return something like "/yada/b5/modalGeneric" depending on the current bootstrap version
+	 */
+	public String getModalGenericViewName() {
+		return config.getBootstrapView(YadaViews.MODAL_GENERIC);
+	}
+
 	
 	/**
 	 * Encloses the string in a thymeleaf url operator when missing

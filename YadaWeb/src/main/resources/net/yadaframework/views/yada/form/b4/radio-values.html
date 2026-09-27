@@ -30,12 +30,13 @@ Example:
 <div th:fragment="field"
 	class="form-group" th:with="
 		inputId=${id?:#ids.seq(@yadaWebUtil.getRequestMapping())},
+		currentValue=*{__${fieldName}__},
 		hasError=${#fields.hasErrors('__${fieldName}__')}">
 	<label th:if="${label!=null || labelKey!=null}" class="form-label" th:utext="${labelKey!=null?#messages.msg(labelKey):label}">Nome:</label>
-	<div th:each="value : ${values}" class="form-check">
-		<input class="form-check-input" type="radio" th:field="*{__${fieldName}__}" th:value="${value}" th:id="${inputId}"
-			th:classappend="${hasError}? is-invalid">
-		<label class="form-check-label" th:for="${inputId}" th:text="#{${labelPrefix+value}}">Radio Text</label>
+	<div th:each="value, iterStat : ${values}" class="form-check">
+		<input class="form-check-input" type="radio" th:name="${fieldName}" th:value="${value}" th:id="${inputId}+'-'+${value}"
+			th:classappend="${hasError}? is-invalid" th:checked="${currentValue == null or currentValue == '' ? iterStat.first : currentValue == value}">
+		<label class="form-check-label" th:for="${inputId}+'-'+${value}" th:text="#{${labelPrefix+value}}">Radio Text</label>
 		<th:block th:if="${helpPrefix!=null}">
 			<a class="yadaHelpButton yadaNoLoader" data-trigger="focus" data-container="body" data-toggle="popover" data-placement="auto" tabindex="-1"
 				data-html="true"

@@ -32,6 +32,7 @@
 	 *  - abortButtonText (optional)
 	 *  - idName the name of the id request parameter (optional - defaults to "id")
 	 *  - nameColumn the index of the column holding the text to show in the dialog when deleting one element (checkboxes = 1)
+	 *  - method the HTTP method of the delete request (optional - defaults to GET); use 'POST' when the endpoint is CSRF-protected
 	 * @param order array of column ordering, e.g. [ [1, 'asc'] ] or [ [ 0, 'asc' ], [ 1, 'asc' ] ]
 	 *        - be careful that in thymeleaf you need a space between two open squares: [ [ not [[
 	 * NOTE: index 1 is the checkbox column
@@ -43,6 +44,7 @@
 	 * - icon for the button, like '<i class="fa fa-power-off" aria-hidden="true"></i>'
 	 * - idName the name of the id request parameter (optional - defaults to "id")
 	 * - ajax (optional) false to make a normal page transition to the target link
+	 * - method the HTTP method of the request (optional - defaults to GET); use 'POST' when the endpoint is CSRF-protected
 	 * - confirmTitle (optional)
 	 * - confirmOneMessage (optional)
 	 * - confirmNameColumn the index of the column holding the element name, will replace the {0} placeholder in the message
@@ -51,7 +53,7 @@
 	 * - abortButtonText (optional)
 	 * @returns the DataTable object
 	 */
-	yada.dataTableCrud = function($table, dataUrl, dataAttributes, editDef, deleteDef, order, pageLength, languageUrl, extraButtons, removeCheckbox) {
+	yada.dataTableCrud = function($table, dataUrl, dataAttributes, editDef, deleteDef, order, pageLength, languageUrl, extraButtons, removeCheckbox, lengthMenu) {
 		// Method argument validation
 		if ($table == null || typeof $table != "object" || $table.length!=1 || typeof $table[0] != "object") {
 			return;
@@ -90,6 +92,10 @@
 		}
 		if (removeCheckbox!=null && typeof removeCheckbox != "boolean") {
 			console.error("yada.datatables: removeCheckbox must be a boolean or null");
+			return;
+		}
+		if (lengthMenu!=null && (!Array.isArray(lengthMenu) || lengthMenu.length == 0 ) ) {
+			console.error("yada.datatables: lengthMenu must be a non-empty array or null");
 			return;
 		}
 		
@@ -232,6 +238,7 @@
 		var dataTable = $table.DataTable( {
 	        responsive: true,
 	        pageLength: pageLength,
+			lengthMenu: lengthMenu ?? [10, 25, 50, 100],
 			orderMulti: order.length>1,
 			order: order,
 			columns: columnDef,					
@@ -298,7 +305,7 @@
 					if (result==true) {
 						yada.ajax(deleteDef.url, requestData, function() {
 							thisDataTable.draw(false);
-						}, null, null, noLoader);
+						}, deleteDef.method || null, null, noLoader);
 					}
 				}, confirmButtonText + ' "' + rowName + '"', abortButtonText);
 			});
@@ -433,7 +440,7 @@
 							dataTable.draw(false);
 						};
 						handler.executeAnyway=true;
-						yada.ajax(deleteDef.url, requestData, handler, null, null, noLoader);
+						yada.ajax(deleteDef.url, requestData, handler, deleteDef.method || null, null, noLoader);
 					}
 				}, confirmButtonText + ' ' + totElements, abortButtonText);
 			});
@@ -539,7 +546,7 @@
 				recursiveEnableAjaxForm(responseText, responseHtml);
 			};
 			if (extraButtonDef.confirm!=true) {
-				yada.ajax(buttonUrl, requestData, handler, null, null, noLoader);
+				yada.ajax(buttonUrl, requestData, handler, extraButtonDef.method || null, null, noLoader);
 			} else {
 				// Confirm modal
 				const confirmTitle = extraButtonDef.confirmTitle || null;
@@ -558,7 +565,7 @@
 				}
 				yada.confirm(confirmTitle, confirmMessage, function(result) {
 						if (result==true) {
-							yada.ajax(buttonUrl, requestData, handler, null, null, noLoader);
+							yada.ajax(buttonUrl, requestData, handler, extraButtonDef.method || null, null, noLoader);
 						}
 					}, extraButtonDef.confirmButtonText, extraButtonDef.abortButtonText
 				);

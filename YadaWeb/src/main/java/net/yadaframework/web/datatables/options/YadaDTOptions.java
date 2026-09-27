@@ -67,6 +67,7 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
     protected Boolean orderDescReverse;
     protected Object orderFixed; // Fluent api not implemented yet.
     protected Boolean orderMulti;
+    protected List<String> orderSequence;
     protected Boolean ordering;
     protected Integer pageLength;
     protected Boolean paging;
@@ -436,6 +437,23 @@ public class YadaDTOptions extends YadaFluentBase<YadaDataTable> {
      */
     public YadaDTOptions dtOrderMultiOff() {
         this.orderMulti = false;
+        return this;
+    }
+
+    /**
+     * Define the default sequence of sorting directions when the user clicks on any column header.
+     * This option does not exist at table level in the original DataTables API.
+     * This implementation propagates the option to all columns that don't have a specific value set.
+     * See {@link YadaDataTableColumn#dtOrderSequence(String...)}.
+     * @param directions the sorting directions in the desired order. Valid values are "asc", "desc", "" (empty string for no sorting)
+     * @return this instance for method chaining
+     * @see <a href="https://datatables.net/reference/option/columns.orderSequence">orderSequence</a>
+     */
+    public YadaDTOptions dtOrderSequence(String... directions) {
+        this.orderSequence = new ArrayList<>();
+        for (String direction : directions) {
+            this.orderSequence.add(direction);
+        }
         return this;
     }
 

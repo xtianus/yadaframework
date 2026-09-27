@@ -604,7 +604,7 @@ public class YadaNotify {
 	 * @see YadaConfiguration#getNotifyModalView()
 	 */
 	public String getViewName() {
-		return yadaConfiguration.getForB3B4B5(YadaViews.AJAX_NOTIFY_B3, YadaViews.AJAX_NOTIFY_B4, YadaViews.AJAX_NOTIFY_B5);
+		return yadaConfiguration.getBootstrapView(YadaViews.AJAX_NOTIFY);
 	}
 
 }

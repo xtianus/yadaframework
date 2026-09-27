@@ -123,7 +123,7 @@ window.onscroll = function() {
 <div id="header">
 <h1>Image Galleries</h1>
 <div class="details">
-<span id="revnumber">version '0.7.8'</span>
+<span id="revnumber">version 0.7.9</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -204,11 +204,11 @@ protected List&lt;YadaAttachedFile&gt; gallery = new ArrayList&lt;&gt;(); <i cla
 <h2 id="_editing_slides_html">Editing slides: HTML</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In the CMS page, just include the <code>/yadacms/imageSorter</code> component to handle creation, editing and sorting:</p>
+<p>In the CMS page, just include the <code>/yadacms/b3/imageSorter</code> (or the folder of the Bootstrap version in use) component to handle creation, editing and sorting:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div th:replace="~{/yadacms/imageSorter::component(
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;div th:replace="~{/yadacms/b3/imageSorter::component(
 	images=${product.gallery},
 	size=${slideImageSize}, <i class="conum" data-value="1"></i><b>(1)</b>
 	entityIdName='productId', <i class="conum" data-value="2"></i><b>(2)</b>
@@ -243,7 +243,7 @@ protected List&lt;YadaAttachedFile&gt; gallery = new ArrayList&lt;&gt;(); <i cla
 </div>
 <div class="paragraph">
 <p>This example only shows a file input element for uploading images.
-See <code>/YadaWebCMS/src/main/resources/net/yadaframework/views/yadacms/imageSorter.html</code> for a detailed list and explanation
+See <code>/YadaWebCMS/src/main/resources/net/yadaframework/views/yadacms/b3/imageSorter.html</code> for a detailed list and explanation
 of all available parameters.</p>
 </div>
 </div>
@@ -335,7 +335,7 @@ public String addSlide(Product product, HttpServletRequest request, Model model,
 			if (!errorMessages.isEmpty()) {
 				yadaFileManager.delete(newImageManagedFile);
 				model.addAttribute("images", product.getGallery()); <i class="conum" data-value="2"></i><b>(2)</b>
-				return "/yadacms/imageSorter :: .yadaImageSorterImages";
+				return "/yadacms/b3/imageSorter :: .yadaImageSorterImages";
 			}
 			//
 			// Upload and crop image
@@ -357,7 +357,7 @@ public String addSlide(Product product, HttpServletRequest request, Model model,
 	}
 	// In case of error, go back to the form immediately
 	model.addAttribute("images", product.getGallery());  <i class="conum" data-value="2"></i><b>(2)</b>
-	return "/yadacms/imageSorter :: .yadaImageSorterImages";
+	return "/yadacms/b3/imageSorter :: .yadaImageSorterImages";
 }</code></pre>
 </div>
 </div>
@@ -386,7 +386,7 @@ public String deleteSlide(Long imageId, Product product, Model model, Locale loc
 	// Delete from DB
 	Product product = productDao.deleteGallerySlide(product.getId(), imageId);
 	model.addAttribute("images", product.getGallery());
-	return "/yadacms/imageSorter :: .yadaImageSorterImages";
+	return "/yadacms/b3/imageSorter :: .yadaImageSorterImages";
 }</code></pre>
 </div>
 </div>
@@ -443,7 +443,7 @@ public String sortSlide(Long productId, Long currentId, Long otherId, Model mode
 	yadaAttachedFileDao.swapSortOrder(currentId, otherId);
 	Product product = productDao.findAndPrefetch(productId); // Reload the updated list
 	model.addAttribute("images", product.getGallery());
-	return "/yadacms/imageSorter :: .yadaImageSorterImages";
+	return "/yadacms/b3/imageSorter :: .yadaImageSorterImages";
 }</code></pre>
 </div>
 </div>
@@ -492,8 +492,8 @@ public String showProduct(Long productId, Model model, Locale locale) {
 </div>
 <div id="footer">
 <div id="footer-text">
-Version '0.7.8'<br>
-Last updated 2025-07-30 20:47:19 +0200
+Version 0.7.9<br>
+Last updated 2026-09-21 14:58:46 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

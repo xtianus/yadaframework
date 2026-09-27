@@ -1,10 +1,10 @@
 # YadaAi Module
 
-This module provides AI integration capabilities for the Yada Framework, with a focus on AWS Bedrock support for Claude models. It offers a fluent API for building Claude requests and utilities for processing AI responses.
+This module provides AI integration capabilities for the Yada Framework, with a focus on AWS Bedrock support for Claude and Amazon Nova models. It offers a fluent API for building model-agnostic requests and utilities for processing AI responses.
 
 ## Features
 
-- **Fluent API** for building Claude model requests with lambda expressions
+- **Fluent API** for building Bedrock AI model requests with lambda expressions
 - **Automatic AWS Bedrock client configuration** via Spring
 - **YadaAiUtil component** with utility methods for common AI tasks
 - **Image handling** with automatic base64 encoding and media type detection
@@ -85,14 +85,12 @@ private YadaAiUtil yadaAiUtil;
 private MyAppConfiguration config;
 
 public void simpleTextQuery() {
-    YadaClaudeRequest request = new YadaClaudeRequest()
+    YadaAiMessageInterface request = yadaAiUtil.createMessage()
         .maxTokens(config.getBedrockMaxTokens())
         .temperature(config.getBedrockTemperature())
-        .addMessage(msg -> msg
-            .roleUser()
-            .content("What is the capital of France?"));
+        .addUserText("What is the capital of France?");
     
-    String response = yadaAiUtil.invokeClaudeModel(request);
+    String response = yadaAiUtil.invokeModel(request);
     System.out.println(response);
 }
 ```
@@ -101,14 +99,12 @@ public void simpleTextQuery() {
 
 ```java
 public void analyzeImage(Path imagePath) {
-    YadaClaudeRequest request = new YadaClaudeRequest()
+    YadaAiMessageInterface request = yadaAiUtil.createMessage()
         .maxTokens(1024)
-        .addMessage(msg -> msg
-            .roleUser()
-            .addContentBlock(block -> block.source(src -> src.data(imagePath)))
-            .addContentBlock(block -> block.text("What is in this image?")));
+        .addUserImage(imagePath)
+        .addUserText("What is in this image?");
     
-    String description = yadaAiUtil.invokeClaudeModel(request);
+    String description = yadaAiUtil.invokeModel(request);
 }
 ```
 
@@ -116,19 +112,14 @@ public void analyzeImage(Path imagePath) {
 
 ```java
 public void advancedRequest() {
-    YadaClaudeRequest request = new YadaClaudeRequest()
+    YadaAiMessageInterface request = yadaAiUtil.createMessage()
         .maxTokens(2048)
         .temperature(0.5)
         .topP(0.9)
-        .topK(50)
-        .addStopSequence("\n\n")
         .system("You are a helpful assistant specialized in technical documentation.")
-        .addMessage(msg -> msg
-            .roleUser()
-            .content("Explain dependency injection"))
-        .metadata(meta -> meta.userId("user-123"));
+        .addUserText("Explain dependency injection");
     
-    String response = yadaAiUtil.invokeClaudeModel(request);
+    String response = yadaAiUtil.invokeModel(request);
 }
 ```
 
@@ -136,19 +127,13 @@ public void advancedRequest() {
 
 ```java
 public void conversationExample() {
-    YadaClaudeRequest request = new YadaClaudeRequest()
+    YadaAiMessageInterface request = yadaAiUtil.createMessage()
         .maxTokens(1024)
-        .addMessage(msg -> msg
-            .roleUser()
-            .content("What is Spring Framework?"))
-        .addMessage(msg -> msg
-            .roleAssistant()
-            .content("Spring Framework is a comprehensive framework for Java development..."))
-        .addMessage(msg -> msg
-            .roleUser()
-            .content("Can you explain dependency injection in Spring?"));
+        .addUserText("What is Spring Framework?")
+        .addAssistantText("Spring Framework is a comprehensive framework for Java development...")
+        .addUserText("Can you explain dependency injection in Spring?");
     
-    String response = yadaAiUtil.invokeClaudeModel(request);
+    String response = yadaAiUtil.invokeModel(request);
 }
 ```
 
@@ -160,42 +145,47 @@ The main utility component for AI operations:
 
 #### Methods
 
-- **`String invokeClaudeModel(YadaClaudeRequest request)`**
-  - Invokes the Claude model and returns the response as a string
+- **`YadaAiMessageInterface createMessage()`**
+  - Creates a request builder for the configured Bedrock model ID
+  - Returns `YadaClaudeRequest` for Anthropic model IDs and `YadaNovaRequest` for Nova model IDs
+
+- **`String invokeModel(YadaAiMessageInterface request)`**
+  - Invokes the configured Bedrock AI model and returns the response as a string
   - Throws `YadaSystemException` if invocation fails
 
-- **`Map<Locale, String> getLocalizedMap(YadaClaudeRequest request)`**
-  - Invokes Claude expecting a JSON map response where keys are ISO-2 language codes
+- **`Map<Locale, String> getLocalizedMap(YadaAiMessageInterface request)`**
+  - Invokes the configured Bedrock AI model expecting a JSON map response where keys are ISO-2 language codes
   - Example response: `{"en": "Hello", "it": "Ciao", "fr": "Bonjour"}`
   - Automatically cleans markdown code blocks from the response
   - Returns a `Map<Locale, String>` with parsed locales
   - Throws `YadaSystemException` if parsing fails
 
-### YadaClaudeRequest Fluent API
+### YadaAiMessageInterface Fluent API
 
-Builder class for constructing Claude API requests:
+Model-agnostic builder interface implemented by `YadaClaudeRequest` and `YadaNovaRequest`:
 
 #### Core Methods
 
 - **`maxTokens(int maxTokens)`** - Sets maximum tokens to generate (required, minimum 1)
 - **`temperature(double temperature)`** - Controls randomness (0.0-1.0, lower = more deterministic)
 - **`topP(double topP)`** - Nucleus sampling parameter (0.0-1.0)
-- **`topK(int topK)`** - Top-k sampling parameter (minimum 1)
 - **`system(String system)`** - Sets system prompt as string
-- **`system(List<YadaClaudeSystemContent> system)`** - Sets system prompt as structured content
-
-#### Message Building
-
-- **`addMessage(Consumer<YadaClaudeMessage> messageBuilder)`** - Adds a message using lambda
-- **`addMessage(YadaClaudeMessage message)`** - Adds a pre-built message
+- **`addUserText(String text)`** - Adds a user text message
+- **`addUserImage(Path imagePath)`** - Adds a user image message
+- **`addAssistantText(String text)`** - Adds an assistant text message
 
 #### Additional Options
 
+Concrete builders expose model-specific options:
+
+- **`YadaClaudeRequest.topK(int topK)`** - Claude top-k sampling parameter
 - **`addStopSequence(String sequence)`** - Adds a stop sequence
 - **`stream(boolean stream)`** - Enables streaming responses
 - **`metadata(Consumer<YadaClaudeMetadata> metadataBuilder)`** - Adds metadata
 - **`addTool(Consumer<YadaClaudeTool> toolBuilder)`** - Adds a tool definition
 - **`toolChoice(Consumer<YadaClaudeToolChoice> toolChoiceBuilder)`** - Sets tool choice preferences
+- **`YadaNovaRequest.topK(int topK)`** - Nova top-k sampling parameter
+- **`YadaNovaRequest.addTool(Consumer<YadaNovaTool> toolBuilder)`** - Adds a Nova tool definition
 
 #### Conversion
 
@@ -245,7 +235,7 @@ All methods have default implementations that read from Apache Commons Configura
 - **`String getBedrockAccessKeyId()`** - Returns AWS access key from `config/yadaAi/bedrock/accessKeyId`
 - **`String getBedrockSecretAccessKey()`** - Returns AWS secret key from `config/yadaAi/bedrock/secretAccessKey`
 - **`Region getBedrockRegion()`** - Returns AWS region from `config/yadaAi/bedrock/region`
-- **`String getBedrockModelId()`** - Returns Claude model ID from `config/yadaAi/bedrock/modelId`
+- **`String getBedrockModelId()`** - Returns the Bedrock model ID from `config/yadaAi/bedrock/modelId`
 - **`int getBedrockMaxTokens()`** - Returns max tokens from `config/yadaAi/bedrock/maxTokens` (default: 1000)
 - **`double getBedrockTemperature()`** - Returns temperature from `config/yadaAi/bedrock/temperature` (default: 0.7)
 
@@ -294,7 +284,7 @@ The module performs validation at two levels:
    - Ensures `YadaAiConfigurable` is implemented
    - Provides clear error messages if configuration is missing
 
-2. **Request validation** (in `YadaClaudeRequest.toJson()`)
+2. **Request validation** (in `YadaClaudeRequest.toJson()` and `YadaNovaRequest.toJson()`)
    - Validates required fields are present
    - Checks parameter ranges (temperature, topP, topK, maxTokens)
    - Prevents invalid requests from being sent to AWS

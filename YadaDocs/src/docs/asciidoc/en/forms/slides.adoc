@@ -53,11 +53,11 @@ The form to add/edit can be like the following:
 		<input type="hidden" name="yadaGallerySlideId" th:value="${yadaGallerySlide.id}">
 		<th:block th:if="${size==null}">
 			<!--/* Adding a new slide: the size is from config */-->
-			<div th:replace="/yada/form/fileUpload::field(fieldName='multipartImage', label='Add slide',accept='image/*',attachedFile=*{image},required=true,size=${slideImageSize})"></div>
+			<div th:replace="~{${@yadaWebUtil.getFormFragment('fileUpload')} :: field(fieldName='multipartImage', label='Add slide',accept='image/*',attachedFile=*{image},required=true,size=${slideImageSize})}"></div>
 		</th:block>
 		<th:block th:if="${size!=null}">
 			<!--/* Editing a slide: the size is from previous choice */-->
-			<div th:replace="/yada/form/fileUpload::field(fieldName='multipartImage', label='Edit slide',accept='image/*',attachedFile=*{image},required=true,size=${size})"></div>
+			<div th:replace="~{${@yadaWebUtil.getFormFragment('fileUpload')} :: field(fieldName='multipartImage', label='Edit slide',accept='image/*',attachedFile=*{image},required=true,size=${size})}"></div>
 		</th:block>		
 		<button class="btn btn-success" type="submit" name="Save">[[*{id}!=null?'Save':'Add']] Slide</button>
 	</fieldset>

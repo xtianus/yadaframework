@@ -20,6 +20,7 @@ public class YadaDialectWithSecurity extends YadaDialect {
 	@Override
     public Set<IProcessor> getProcessors(final String dialectPrefix) {
 		Set<IProcessor> processors = super.getProcessors(dialectPrefix);
+        processors.add(new YadaMultipartFormTagProcessor(dialectPrefix));
         processors.add(new YadaActionUploadAttrProcessor(dialectPrefix));
         return processors;
     }

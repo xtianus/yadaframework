@@ -29,9 +29,9 @@ Parameters:
              in page many times via javascript, otherwise all selects will end up having the same ids. Not needed when the ajaxLists are not inserted via javascript.
 
 Example:
-<div th:replace="/yada/form/list::body(options=${accountTasks},selected=${selectedId},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()',addHeader=true)"></div>
-<div th:replace="/yada/form/list::body(options=${ {true, false} },selected=${enabled},labelKey='form.label.enabled',textKey='list.enabled.')"></div>
-<div th:replace="/yada/form/list::body(options=${@config.typeMap},selected=${chosenTypes},multiple=true,idPrefix=${username},onclick=clicked)"></div>
+<div th:replace="~{${@yadaWebUtil.getFormFragment('list')} :: body(options=${accountTasks},selected=${selectedId},labelKey='task.runAfter.label',valueAttribute='id',textAttribute='toPublicString()',addHeader=true)}"></div>
+<div th:replace="~{${@yadaWebUtil.getFormFragment('list')} :: body(options=${ {true, false} },selected=${enabled},labelKey='form.label.enabled',textKey='list.enabled.')}"></div>
+<div th:replace="~{${@yadaWebUtil.getFormFragment('list')} :: body(options=${@config.typeMap},selected=${chosenTypes},multiple=true,idPrefix=${username},onclick=clicked)}"></div>
 
 */-->
 <head>

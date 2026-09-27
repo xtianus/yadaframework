@@ -180,25 +180,25 @@ public class AuditFilter extends OncePerRequestFilter implements Filter {
 					}
 				}
 				if (log.isDebugEnabled()) {
-					Map<String, String[]> postDataMap = request.getParameterMap();
-					for (String paramName : postDataMap.keySet()) {
-						String[] paramValue = postDataMap.get(paramName);
-						StringBuffer paramString = new StringBuffer();
-						for (int i = 0; i < paramValue.length; i++) {
-							if (i>0) {
-								paramString.append(" & ");
+					if (new StandardServletMultipartResolver().isMultipart(request)) {
+						log.debug("** multipart request");
+					} else {
+						Map<String, String[]> postDataMap = request.getParameterMap();
+						for (String paramName : postDataMap.keySet()) {
+							String[] paramValue = postDataMap.get(paramName);
+							StringBuffer paramString = new StringBuffer();
+							for (int i = 0; i < paramValue.length; i++) {
+								if (i>0) {
+									paramString.append(" & ");
+								}
+								paramString.append(paramValue[i]);
 							}
-							paramString.append(paramValue[i]);
+							if ("password".equals(paramName) || "confirmPassword".equals(paramName)) {
+								paramString=new StringBuffer("[value hidden from log]");
+							}
+							log.debug("** {} = {} **", paramName, paramString);
 						}
-						if ("password".equals(paramName) || "confirmPassword".equals(paramName)) {
-							paramString=new StringBuffer("[value hidden from log]");
-						}
-						log.debug("** {} = {} **", paramName, paramString);
-					}
-					if (postDataMap.isEmpty()) {
-						if (new StandardServletMultipartResolver().isMultipart(request)) {
-							log.debug("** multipart request");
-						} else if (request.getContentType().equals("application/json;charset=UTF-8")) {
+						if (postDataMap.isEmpty() && "application/json;charset=UTF-8".equals(request.getContentType())) {
 							log.debug("** json object");
 						}
 					}

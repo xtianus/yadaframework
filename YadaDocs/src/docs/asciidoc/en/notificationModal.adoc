@@ -184,8 +184,8 @@ the correct modal for the Bootstrap version in use:
 
 [source,java]
 ----
-return "/yada/modalNotifyB3.html"; // for Bootstrap 3
-return YadaViews.AJAX_NOTIFY_B3; // for Bootstrap 3
+return config.getBootstrapView(YadaViews.AJAX_NOTIFY); // resolves to /yada/b3/modalNotify on Bootstrap 3
+return YadaViews.AJAX_NOTIFY; // the view name, to be resolved as above
 // These return the correct modal for the configured version of Bootstrap:
 return config.getNotifyModalView();
 return yadaNotify.title("Login success", model).ok().message("You have been logged in").add();

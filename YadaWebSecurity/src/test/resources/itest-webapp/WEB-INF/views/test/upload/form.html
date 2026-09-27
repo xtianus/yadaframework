@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Upload Limit Test</title>
+</head>
+<body>
+	<form action="/test/upload/submit#done" method="post" enctype="multipart/form-data">
+		<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+		<input type="file" name="upfile">
+		<button type="submit">Upload</button>
+	</form>
+</body>
+</html>

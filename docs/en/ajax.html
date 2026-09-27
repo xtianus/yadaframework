@@ -124,7 +124,7 @@ window.onscroll = function() {
 <div id="header">
 <h1>Ajax</h1>
 <div class="details">
-<span id="revnumber">version '0.7.8'</span>
+<span id="revnumber">version 0.7.9</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -154,6 +154,11 @@ window.onscroll = function() {
 <li><a href="#_successhandler">successHandler</a></li>
 <li><a href="#_responsetype">responseType</a></li>
 <li><a href="#_loaderoption">loaderOption</a></li>
+</ul>
+</li>
+<li><a href="#_security">Security</a>
+<ul class="sectlevel2">
+<li><a href="#_csrf_protection">CSRF Protection</a></li>
 </ul>
 </li>
 <li><a href="#_utilities">Utilities</a>
@@ -1697,7 +1702,8 @@ just on that button or on some target div. For the element loader to show, the l
 </ul>
 </div>
 <div class="paragraph">
-<p>It must point to the element or elements that should be covered with a loader.</p>
+<p>It must point to the element or elements that should be covered with a loader.
+It can also be specified as an HTML attribute: <code>yada:ajaxElementLoader</code></p>
 </div>
 <div class="paragraph">
 <p>The HTML of the loader is automatically added and removed.
@@ -1717,6 +1723,30 @@ added element or be removed.
 </td>
 </tr>
 </table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_security">Security</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_csrf_protection">CSRF Protection</h3>
+<div class="paragraph">
+<p>When Spring Security CSRF protection is enabled, the page must expose the CSRF token in standard meta tags so that <code>yada.ajax.js</code> can add the CSRF header to same-origin ajax requests that use unsafe HTTP methods such as POST, PUT, PATCH, or DELETE.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;!--/* CSRF token exposed to JS so yada can attach it to AJAX requests */--&gt;
+&lt;th:block th:if="${_csrf != null}"&gt;
+	&lt;meta name="_csrf" th:content="${_csrf.token}"/&gt;
+	&lt;meta name="_csrf_header" th:content="${_csrf.headerName}"/&gt;
+	&lt;meta name="_csrf_parameter" th:content="${_csrf.parameterName}"/&gt;
+&lt;/th:block&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>These tags belong in the HTML page <code>&lt;head&gt;</code>, usually in the shared header fragment. See <code>YadaExamples/src/main/webapp/WEB-INF/views/header.html</code> for the reference placement.</p>
 </div>
 </div>
 </div>
@@ -1773,8 +1803,8 @@ when they return from ajax. Example: <code>&lt;div th:classappend="${yadaIsAjaxR
 </div>
 <div id="footer">
 <div id="footer-text">
-Version '0.7.8'<br>
-Last updated 2025-07-30 20:47:19 +0200
+Version 0.7.9<br>
+Last updated 2026-09-19 12:04:57 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

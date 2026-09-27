@@ -36,6 +36,7 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.web.dialect.YadaDialect;
 
@@ -46,6 +47,7 @@ import net.yadaframework.web.dialect.YadaDialect;
 @EnableAsync
 public class YadaAppConfig {
 	private final static Logger log = LoggerFactory.getLogger(YadaAppConfig.class);
+	static final String CONFIGURATION_FILE_SYSTEM_PROPERTY = "yada.configurationFile";
 	
 	// Static instance of the configuration to use when the ApplicationContext is not (yet) available
 	protected static YadaConfiguration CONFIG = null;
@@ -76,6 +78,16 @@ public class YadaAppConfig {
 			    .javaMigrations(applicationContext.getBeansOfType(JavaMigration.class).values().toArray(new JavaMigration[0]))
 				.load();
 			flyway.migrate();
+		}
+	}
+
+	/**
+	 * Stops the configuration reloading trigger when the Spring context closes.
+	 */
+	@PreDestroy
+	public void destroy() {
+		if (config != null) {
+			config.stopReloadingTrigger();
 		}
 	}
 	
@@ -163,9 +175,14 @@ public class YadaAppConfig {
 		// Do nothing
 	}
 
+	/**
+	 * Creates a ThreadPoolTaskScheduler with default values, but with a pool size of 4 threads.
+	 * If you need to configure it, override this method in your appConfig bean.
+	 */
 	@Bean
 	public TaskScheduler taskScheduler() {
 		TaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+		((ThreadPoolTaskScheduler) taskScheduler).setPoolSize(4); // Defaults to 4 threads, better than the default of 1
 		return taskScheduler;
 	}
 
@@ -194,8 +211,8 @@ public class YadaAppConfig {
 		messageSource.setFallbackToSystemLocale(false);
 		messageSource.setUseCodeAsDefaultMessage(true);
 		messageSource.setDefaultEncoding("UTF-8");
-		// # -1 : never reload, 0 always reload
-		messageSource.setCacheSeconds(config.isProductionEnvironment()?600:0);
+		int messageSourceCacheSeconds = config.getMessageSourceCacheSeconds(); // # -1 : never reload, 0 always reload
+		messageSource.setCacheSeconds(config.isDevelopmentEnvironment()?0:messageSourceCacheSeconds);
 		YadaUtil.messageSource = messageSource; // Needs to be done for use outside of Beans
 		return messageSource;
 	}
@@ -235,11 +252,12 @@ public class YadaAppConfig {
 		ReloadingCombinedConfigurationBuilder builder = new ReloadingCombinedConfigurationBuilder()
 			.configure(
 				params.fileBased()
-					.setFile(new File("configuration.xml"))
+					.setFile(getConfigurationFile())
 				);
 		yadaConfiguration.setBuilder(builder);
 		// Start periodic reloading trigger every 2 seconds
 		PeriodicReloadingTrigger trigger = new PeriodicReloadingTrigger(builder.getReloadingController(), null, 2, TimeUnit.SECONDS);
+		yadaConfiguration.setReloadingTrigger(trigger);
 
 		// The ReloadingCombinedConfigurationBuilder manages multiple configuration sources 
 		// (the main configuration.xml plus any included files). Each source has its own reloading controller, 
@@ -253,6 +271,21 @@ public class YadaAppConfig {
 				log.error("Failed to reload configuration", e);
 			}
 		});
-		trigger.start();
+		yadaConfiguration.startReloadingTrigger();
+	}
+
+	/**
+	 * Returns the main configuration file, optionally overridden by a system property.
+	 * @return the configuration file used for startup and static configuration
+	 */
+	static File getConfigurationFile() {
+		String configurationFilePath = System.getProperty(CONFIGURATION_FILE_SYSTEM_PROPERTY);
+		if (configurationFilePath != null) {
+			configurationFilePath = configurationFilePath.trim();
+			if (configurationFilePath.length() > 0) {
+				return new File(configurationFilePath);
+			}
+		}
+		return new File("configuration.xml");
 	}
 }

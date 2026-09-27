@@ -7,3 +7,6 @@
 | `aiknowledge/yadaWebSecurity_dictionary.md` | the YadaWebSecurity controllers, helpers, and DAO surface |
 | `aiknowledge/yadaWebCMS_dictionary.md` | the YadaWebCMS helpers and persistence API surface |
 | `aiknowledge/yadaAI_dictionary.md` | the YadaAI helper and Claude request-builder API surface |
+| `aiknowledge/ajax_csrf_notes.md` | Ajax CSRF meta-tag requirements for Yada pages using Spring Security, and how to force the HTTP method of an ajax link, button or legacy datatable command so that a write is protected |
+| `aiknowledge/workspace_build_notes.md` | module linkage and Eclipse/Gradle workspace build behavior |
+| `aiknowledge/bootstrap_views_and_mail_notes.md` | where the Bootstrap version of a view lives, how to resolve a versioned view name, Mailpit capture in development, and mail preview templates |

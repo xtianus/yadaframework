@@ -31,6 +31,7 @@ import org.apache.commons.configuration2.builder.ConfigurationBuilderResultCreat
 import org.apache.commons.configuration2.builder.combined.CombinedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.combined.ReloadingCombinedConfigurationBuilder;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.reloading.PeriodicReloadingTrigger;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.format.Formatter;
 
+import jakarta.annotation.PreDestroy;
 import jakarta.servlet.http.HttpServletRequest;
 import net.yadaframework.exceptions.YadaConfigurationException;
 import net.yadaframework.exceptions.YadaInternalException;
@@ -54,6 +56,7 @@ public abstract class YadaConfiguration {
 
 	protected ImmutableHierarchicalConfiguration configuration;
 	protected CombinedConfigurationBuilder builder;
+	private PeriodicReloadingTrigger reloadingTrigger;
 	private final CopyOnWriteArrayList<Runnable> configurationReloadListeners = new CopyOnWriteArrayList<>();
 	private volatile boolean reloadListenerRegistered = false;
 
@@ -105,7 +108,11 @@ public abstract class YadaConfiguration {
 	private Map<String, SortedSet<Entry<Integer,String>>> localSetCache = new ConcurrentHashMap<>(); // Deprecated
 	private String targetImageExtension=null;
 	private String preserveImageExtensions=null;
+	private static final String SMTP_PREFIX_STANDARD = "/config/email/smtpserver";
+	private static final String SMTP_PREFIX_MAILPIT = "/config/email/smtpserver-mailpit";
+
 	private String defaultNotifyModalView = null;
+	private String smtpServerPrefix = null;
 	private File uploadsFolder = null;
 	private File tempFolder = null;
 	private String googleApiKey = null;
@@ -119,6 +126,7 @@ public abstract class YadaConfiguration {
 	public void copyTo(YadaConfiguration yadaConfiguration) {
 		yadaConfiguration.builder = this.builder;
 		yadaConfiguration.configuration = this.configuration;
+		yadaConfiguration.reloadingTrigger = this.reloadingTrigger;
 	}
 
 	public Integer getSessionTimeoutMinutes() {
@@ -209,8 +217,10 @@ public abstract class YadaConfiguration {
 	}
 	
 	/**
-	 * Given three strings (e.g. classes) returns the one that corresponds to the
-	 * configured Bootstrap version, from 3 to 5
+	 * Given three strings (e.g. css classes) returns the one that corresponds to the
+	 * configured Bootstrap version, from 3 to 5.
+	 * This is for css classes and similar values: view names are resolved with
+	 * {@link #getBootstrapView(String)} and {@link #getBootstrapFormView(String)} instead.
 	 * @param classForB3
 	 * @param classForB4
 	 * @param classForB5
@@ -231,6 +241,28 @@ public abstract class YadaConfiguration {
 		return classForB5;
 	}
 	
+	/**
+	 * Returns the full view name of a Bootstrap-version-specific Yada view, e.g. "/yada/b3/modalConfirm"
+	 * when the configured Bootstrap version is 3. The version is carried by the folder only.
+	 * @param viewName the version-independent view name, like "modalConfirm" (see YadaViews constants)
+	 * @return the full view name
+	 * @see #getBootstrapFormView(String)
+	 */
+	public String getBootstrapView(String viewName) {
+		return "/yada/b" + getBootstrapVersion() + "/" + viewName;
+	}
+
+	/**
+	 * Returns the full view name of a Bootstrap-version-specific Yada form fragment,
+	 * e.g. "/yada/form/b3/text" when the configured Bootstrap version is 3.
+	 * @param formFragmentViewName the version-independent fragment name, like "text"
+	 * @return the full view name
+	 * @see #getBootstrapView(String)
+	 */
+	public String getBootstrapFormView(String formFragmentViewName) {
+		return "/yada/form/b" + getBootstrapVersion() + "/" + formFragmentViewName;
+	}
+
 	public boolean isB5() {
 		return getBootstrapVersion()==5;
 	}
@@ -368,7 +400,7 @@ public abstract class YadaConfiguration {
 	 */
 	public String getNotifyModalView() {
 		if (defaultNotifyModalView==null) {
-			defaultNotifyModalView = configuration.getString("config/paths/notificationModalView", getForB3B4B5(YadaViews.AJAX_NOTIFY_B3, YadaViews.AJAX_NOTIFY_B4, YadaViews.AJAX_NOTIFY_B5));
+			defaultNotifyModalView = configuration.getString("config/paths/notificationModalView", getBootstrapView(YadaViews.AJAX_NOTIFY));
 		}
 		return defaultNotifyModalView;
 	}
@@ -1372,68 +1404,94 @@ public abstract class YadaConfiguration {
 		return configuration.getBoolean("config/email/enabled", false);
 	}
 
+	/**
+	 * Returns the configuration prefix of the SMTP server section to use.
+	 * In the development environment a &lt;smtpserver-mailpit enabled="true"> section, when present,
+	 * takes precedence over &lt;smtpserver>, so that mail is captured by a local Mailpit instance
+	 * instead of being delivered by the real provider. The section is usually enabled with the
+	 * ${usemailpit} variable, which can be set as a system property or as an environment variable
+	 * of the application JVM.
+	 * @return "/config/email/smtpserver-mailpit" or "/config/email/smtpserver"
+	 */
+	private String getSmtpServerPrefix() {
+		if (smtpServerPrefix==null) {
+			smtpServerPrefix = SMTP_PREFIX_STANDARD;
+			if (isDevelopmentEnvironment()) {
+				// The value is read as a String because an unresolved ${usemailpit} variable is left in place
+				// as literal text by Commons Configuration and getBoolean() would throw on it.
+				String enabled = configuration.getString(SMTP_PREFIX_MAILPIT + "/@enabled", null);
+				boolean sectionExists = configuration.getString(SMTP_PREFIX_MAILPIT + "/host", null)!=null;
+				if (sectionExists && "true".equalsIgnoreCase(StringUtils.trimToEmpty(enabled))) {
+					smtpServerPrefix = SMTP_PREFIX_MAILPIT;
+					log.info("Mail is sent to the Mailpit section configured at {} - real SMTP delivery is disabled", SMTP_PREFIX_MAILPIT);
+				}
+			}
+		}
+		return smtpServerPrefix;
+	}
+
 	public String getEmailHost() {
 		try {
-			String result = configuration.getString("/config/email/smtpserver/host");
+			String result = configuration.getString(getSmtpServerPrefix() + "/host");
 			log.info("Mail Server Host = {}", result);
 			return result;
 		} catch (Exception e) {
-			log.warn("No SMTP Server Host defined at /config/email/smtpserver/host - (ignored)");
+			log.warn("No SMTP Server Host defined at {}/host - (ignored)", getSmtpServerPrefix());
 			return null;
 		}
 	}
 
 	public int getEmailPort() {
 		try {
-			int result = configuration.getInt("/config/email/smtpserver/port");
+			int result = configuration.getInt(getSmtpServerPrefix() + "/port");
 			log.info("Mail Server Port = {}", result);
 			return result;
 		} catch (Exception e) {
-			log.warn("No SMTP Server Port defined at /config/email/smtpserver/port - (ignored)");
+			log.warn("No SMTP Server Port defined at {}/port - (ignored)", getSmtpServerPrefix());
 			return 0;
 		}
 	}
 
 	public String getEmailProtocol() {
 		try {
-			String result = configuration.getString("/config/email/smtpserver/protocol");
+			String result = configuration.getString(getSmtpServerPrefix() + "/protocol");
 			log.info("Mail Server Protocol = {}", result);
 			return result;
 		} catch (Exception e) {
-			log.warn("No SMTP Server Protocol defined at /config/email/smtpserver/protocol - (ignored)");
+			log.warn("No SMTP Server Protocol defined at {}/protocol - (ignored)", getSmtpServerPrefix());
 			return null;
 		}
 	}
 
 	public String getEmailUsername() {
 		try {
-			String result = configuration.getString("/config/email/smtpserver/username");
+			String result = configuration.getString(getSmtpServerPrefix() + "/username");
 			log.info("Mail Server Username = {}", result);
 			return result;
 		} catch (Exception e) {
-			log.warn("No SMTP Server Username defined at /config/email/smtpserver/username - (ignored)");
+			log.warn("No SMTP Server Username defined at {}/username - (ignored)", getSmtpServerPrefix());
 			return null;
 		}
 	}
 
 	public String getEmailPassword() {
 		try {
-			String result = configuration.getString("/config/email/smtpserver/password");
+			String result = configuration.getString(getSmtpServerPrefix() + "/password");
 			log.info("Mail Server Password = ******");
 			return result;
 		} catch (Exception e) {
-			log.warn("No SMTP Server Password defined at /config/email/smtpserver/password - (ignored)");
+			log.warn("No SMTP Server Password defined at {}/password - (ignored)", getSmtpServerPrefix());
 			return null;
 		}
 	}
 
 	public Properties getEmailProperties() {
 		try {
-			Properties result = configuration.getProperties("/config/email/smtpserver/properties");
+			Properties result = configuration.getProperties(getSmtpServerPrefix() + "/properties");
 			log.info("Mail Server Properties = {}", result);
 			return result;
 		} catch (Exception e) {
-			log.warn("No SMTP Server Properties defined at /config/email/smtpserver/properties - (ignored)");
+			log.warn("No SMTP Server Properties defined at {}/properties - (ignored)", getSmtpServerPrefix());
 			return null;
 		}
 	}
@@ -1590,6 +1648,15 @@ public abstract class YadaConfiguration {
 		return configuration.getBoolean("config/database/showSql", false);
 	}
 
+	/**
+	 * Value for the Hibernate "default_batch_fetch_size" setting, used to batch-load lazy collections and
+	 * entity proxies with IN (?, ?, ...) clauses instead of one query each, mitigating N+1 problems globally.
+	 * @return the configured batch size, or 0 (disabled) when not set
+	 */
+	public int getDbDefaultBatchFetchSize() {
+		return configuration.getInt("config/database/defaultBatchFetchSize", 0);
+	}
+
 	public boolean encodePassword() {
 		return configuration.getBoolean("config/security/encodePassword", false);
 	}
@@ -1672,6 +1739,44 @@ public abstract class YadaConfiguration {
 		this.builder = builder;
 		this.configuration = ConfigurationUtils.unmodifiableConfiguration(builder.getConfiguration());
 		registerConfigurationReloadListenerIfNeeded();
+	}
+
+	/**
+	 * Sets the periodic reloading trigger used by this configuration.
+	 * @param reloadingTrigger the periodic reloading trigger to use
+	 */
+	public synchronized void setReloadingTrigger(PeriodicReloadingTrigger reloadingTrigger) {
+		if (this.reloadingTrigger != null && this.reloadingTrigger != reloadingTrigger) {
+			this.reloadingTrigger.stop();
+		}
+		this.reloadingTrigger = reloadingTrigger;
+	}
+
+	/**
+	 * Starts the periodic reloading trigger if one is configured.
+	 */
+	public synchronized void startReloadingTrigger() {
+		if (reloadingTrigger != null) {
+			reloadingTrigger.start();
+		}
+	}
+
+	/**
+	 * Stops the periodic reloading trigger if one is configured.
+	 */
+	public synchronized void stopReloadingTrigger() {
+		if (reloadingTrigger != null) {
+			reloadingTrigger.shutdown();
+			reloadingTrigger = null;
+		}
+	}
+
+	/**
+	 * Stops the periodic reloading trigger when the configuration bean is destroyed.
+	 */
+	@PreDestroy
+	public void destroy() {
+		stopReloadingTrigger();
 	}
 
 	public void addConfigurationReloadListener(Runnable listener) {
@@ -1773,6 +1878,22 @@ public abstract class YadaConfiguration {
 			return new String[] {"messages"};
 		}
 		return basenames;
+	}
+	
+	/**
+	 * Seconds before message.properties files are reloaded. -1=never, 0=always
+	 * @return
+	 */
+	public int getMessageSourceCacheSeconds() {
+		return this.configuration.getInt("config/i18n/messageSource/cacheSeconds", 600);
+	}
+
+	/**
+	 * Returns the message key prefixes that can be exported to frontend code.
+	 * @return the configured prefixes, or an empty list
+	 */
+	public List<String> getFrontendMessageKeyPrefixes() {
+		return Arrays.asList(this.configuration.getStringArray("config/i18n/frontendKeyPrefix"));
 	}
 
 }

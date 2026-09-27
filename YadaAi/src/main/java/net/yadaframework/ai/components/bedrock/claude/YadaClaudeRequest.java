@@ -1,16 +1,23 @@
 package net.yadaframework.ai.components.bedrock.claude;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
+import net.yadaframework.ai.components.bedrock.YadaAiMessageInterface;
 import net.yadaframework.ai.components.bedrock.claude.parts.YadaClaudeMessage;
 import net.yadaframework.ai.components.bedrock.claude.parts.YadaClaudeMetadata;
 import net.yadaframework.ai.components.bedrock.claude.parts.YadaClaudeSystemContent;
@@ -43,7 +50,7 @@ import net.yadaframework.ai.components.bedrock.claude.parts.YadaClaudeToolChoice
  * </pre>
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class YadaClaudeRequest {
+public class YadaClaudeRequest implements YadaAiMessageInterface {
     
     @JsonProperty("anthropic_version")
     private String anthropicVersion = "bedrock-2023-05-31"; // Will change when changing the message schema
@@ -63,9 +70,12 @@ public class YadaClaudeRequest {
     private List<YadaClaudeTool> tools;
     @JsonProperty("tool_choice")
     private YadaClaudeToolChoice toolChoice;
+    @JsonIgnore
+    private YadaClaudeMessage currentUserContentBlockMessage;
     
     // Configure the mapper to access private fields as we removed the getters to keep autocomplation clean
     private static final ObjectMapper objectMapper = new ObjectMapper().setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+    private static final Gson gson = new Gson();
 
     // Constants for validation
     private static final double MIN_TEMPERATURE = 0.0;
@@ -91,6 +101,7 @@ public class YadaClaudeRequest {
      * @return this ClaudeRequest instance for method chaining
      * @throws IllegalArgumentException if maxTokens is less than 1
      */
+    @Override
     public YadaClaudeRequest maxTokens(int maxTokens) {
         if (maxTokens < MIN_MAX_TOKENS) {
             throw new IllegalArgumentException(
@@ -101,6 +112,7 @@ public class YadaClaudeRequest {
     }
     
     public YadaClaudeRequest addMessage(YadaClaudeMessage message) {
+        this.currentUserContentBlockMessage = null;
         this.messages.add(message);
         return this;
     }
@@ -124,15 +136,18 @@ public class YadaClaudeRequest {
     public YadaClaudeRequest addMessage(Consumer<YadaClaudeMessage> messageBuilder) {
         YadaClaudeMessage message = new YadaClaudeMessage();
         messageBuilder.accept(message);
+        this.currentUserContentBlockMessage = null;
         this.messages.add(message);
         return this;
     }
 
     public YadaClaudeRequest messages(List<YadaClaudeMessage> messages) {
+        this.currentUserContentBlockMessage = null;
         this.messages = messages;
         return this;
     }
     
+    @Override
     public YadaClaudeRequest system(String system) {
         this.system = system;
         return this;
@@ -152,6 +167,7 @@ public class YadaClaudeRequest {
      * @return this ClaudeRequest instance for method chaining
      * @throws IllegalArgumentException if temperature is not in valid range
      */
+    @Override
     public YadaClaudeRequest temperature(double temperature) {
         if (temperature < MIN_TEMPERATURE || temperature > MAX_TEMPERATURE) {
             throw new IllegalArgumentException(
@@ -170,6 +186,7 @@ public class YadaClaudeRequest {
      * @return this ClaudeRequest instance for method chaining
      * @throws IllegalArgumentException if topP is not in valid range
      */
+    @Override
     public YadaClaudeRequest topP(double topP) {
         if (topP < MIN_TOP_P || topP > MAX_TOP_P) {
             throw new IllegalArgumentException(
@@ -302,6 +319,29 @@ public class YadaClaudeRequest {
         this.toolChoice = toolChoice;
         return this;
     }
+
+    @Override
+    public YadaClaudeRequest addUserText(String text) {
+        if (this.currentUserContentBlockMessage != null) {
+            this.currentUserContentBlockMessage.addContentBlock(block -> block.text(text));
+            this.currentUserContentBlockMessage = null;
+            return this;
+        }
+        return addMessage(msg -> msg.roleUser().content(text));
+    }
+
+    @Override
+    public YadaClaudeRequest addUserImage(Path imagePath) {
+        ensureCurrentUserContentBlockMessage()
+            .addContentBlock(block -> block.source(source -> source.data(imagePath)));
+        return this;
+    }
+
+    @Override
+    public YadaClaudeRequest addAssistantText(String text) {
+        this.currentUserContentBlockMessage = null;
+        return addMessage(msg -> msg.roleAssistant().content(text));
+    }
     
     /**
      * Validates the request and converts it to JSON string.
@@ -311,9 +351,29 @@ public class YadaClaudeRequest {
      * @throws JsonProcessingException if JSON serialization fails
      * @throws IllegalStateException if required fields are missing or invalid
      */
+    @Override
     public String toJson() throws JsonProcessingException {
         validate();
         return objectMapper.writeValueAsString(this);
+    }
+
+    @Override
+    public String extractText(String responseBody) {
+        JsonObject responseJson = gson.fromJson(responseBody, JsonObject.class);
+        if (!responseJson.has("content") || !responseJson.get("content").isJsonArray()) {
+            return responseBody;
+        }
+        JsonArray content = responseJson.getAsJsonArray("content");
+        StringBuilder text = new StringBuilder();
+        for (JsonElement element : content) {
+            if (element.isJsonObject()) {
+                JsonObject block = element.getAsJsonObject();
+                if (block.has("text") && !block.get("text").isJsonNull()) {
+                    text.append(block.get("text").getAsString());
+                }
+            }
+        }
+        return text.length() > 0 ? text.toString() : responseBody;
     }
 
     /**
@@ -358,7 +418,15 @@ public class YadaClaudeRequest {
         }
     }
 
-    // No getters to keep autocomplation clean
+    private YadaClaudeMessage ensureCurrentUserContentBlockMessage() {
+        if (this.currentUserContentBlockMessage == null) {
+            this.currentUserContentBlockMessage = new YadaClaudeMessage().roleUser();
+            this.messages.add(this.currentUserContentBlockMessage);
+        }
+        return this.currentUserContentBlockMessage;
+    }
+
+    // No getters to keep autocompletion clean
 //    // Getters
 //    public String getAnthropicVersion() { return anthropicVersion; }
 //    public Integer getMaxTokens() { return maxTokens; }

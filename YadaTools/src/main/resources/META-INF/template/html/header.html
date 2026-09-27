@@ -6,6 +6,12 @@
 		<meta charset="UTF-8"/>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1">
+		<!--/* CSRF token exposed to JS so yada can attach it to AJAX requests */-->
+		<th:block th:if="${_csrf != null}">
+			<meta name="_csrf" th:content="${_csrf.token}"/>
+			<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+			<meta name="_csrf_parameter" th:content="${_csrf.parameterName}"/>
+		</th:block>
 		<!--/* The Bootstrap CDN can be replaced with a locally downloaded copy
 		<link rel="stylesheet" type="text/css" th:href="@{/static/bootstrap-5.3.3/css/bootstrap.min.css}"/> 
 		<link rel="stylesheet" type="text/css" th:href="@{/static/bootstrap-icons-1.11.3/bootstrap-icons.min.css}" />

@@ -123,7 +123,7 @@ window.onscroll = function() {
 <div id="header">
 <h1>File Uploads</h1>
 <div class="details">
-<span id="revnumber">version '0.7.8'</span>
+<span id="revnumber">version 0.7.9</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -137,7 +137,7 @@ window.onscroll = function() {
 </li>
 <li><a href="#_html">HTML</a>
 <ul class="sectlevel2">
-<li><a href="#_form_fragment_yadaformfileupload">Form Fragment /yada/form/fileUpload</a></li>
+<li><a href="#_form_fragment_yadaformbnfileupload">Form Fragment /yada/form/bN/fileUpload</a></li>
 </ul>
 </li>
 <li><a href="#_java">JAVA</a>
@@ -342,7 +342,7 @@ $('#theForm').submit(function() {
 </div>
 </div>
 <div class="sect2">
-<h3 id="_form_fragment_yadaformfileupload">Form Fragment /yada/form/fileUpload</h3>
+<h3 id="_form_fragment_yadaformbnfileupload">Form Fragment /yada/form/bN/fileUpload</h3>
 <div class="paragraph">
 <p>If you&#8217;re using a  <em>form backing bean</em> you can include a yada fragment for the input tag.
 The following example also shows any error:</p>
@@ -352,12 +352,12 @@ The following example also shows any error:</p>
 <pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/profile}" th:object="${formProfile}" enctype="multipart/form-data" method="post"
 th:classappend="${#fields.hasErrors('*')}? has-error" role="form"&gt;
 
-    &lt;div th:replace="/yada/form/fileUpload::field(fieldName='avatarImage',label='Avatar')"&gt;&lt;/div&gt;</code></pre>
+    &lt;div th:replace="~{${@yadaWebUtil.getFormFragment('fileUpload')} :: field(fieldName='avatarImage',label='Avatar')}"&gt;&lt;/div&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>You can display a link to the uploaded file underneath the input field by passing an instance of <code>YadaAttachedFile</code> to the <code>attachedFile</code> fragment attribute.
-For other usage instructions see the source file for <code>/yada/form/fileUpload</code>.</p>
+For other usage instructions see the source file for <code>/yada/form/bN/fileUpload</code>, where N is the configured Bootstrap version.</p>
 </div>
 </div>
 </div>
@@ -864,12 +864,12 @@ You can also use a <a href="overview.html#_form_backing_beans">Form Backing Bean
 </div>
 </div>
 <div class="paragraph">
-<p>The form can also be implemented using the <code>/yada/form/fileUpload</code> fragment:</p>
+<p>The form can also be implemented using the <code>/yada/form/bN/fileUpload</code>, where N is the configured Bootstrap version fragment:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form th:action="@{/addOrUpdateNews}" th:object="${news}" enctype="multipart/form-data" th:classappend="${#fields.hasErrors('*')}? has-error" method="post" role="form"&gt;
-    &lt;div th:replace="/yada/form/fileUpload::field(fieldName='thumbnailImage',size=${thumbnailSize},accept='image/*',label='Upload thumbnail image',required=${news.thumbnail==null},help='Thumbnail image',attachedFile=*{thumbnail})"&gt;&lt;/div&gt;</code></pre>
+    &lt;div th:replace="~{${@yadaWebUtil.getFormFragment('fileUpload')} :: field(fieldName='thumbnailImage',size=${thumbnailSize},accept='image/*',label='Upload thumbnail image',required=${news.thumbnail==null},help='Thumbnail image',attachedFile=*{thumbnail})}"&gt;&lt;/div&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1041,7 +1041,7 @@ yadaCropImage.setYadaAttachedFile(newOrExisting);</code></pre>
         &lt;/h1&gt;
         &lt;p&gt;Drag the handles to the desired crop, then press the [[#{yada.crop.cropSubmit}]] button&lt;/p&gt;
 
-        &lt;div th:replace="~{/yadacms/imageCropper::component(cropQueue=${cropQueue})}"&gt;&lt;/div&gt;
+        &lt;div th:replace="~{/yadacms/b3/imageCropper::component(cropQueue=${cropQueue})}"&gt;&lt;/div&gt;
 
     &lt;/div&gt;
 &lt;/body&gt;</code></pre>
@@ -1085,8 +1085,8 @@ This always happens in the following cases:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version '0.7.8'<br>
-Last updated 2025-07-30 20:47:19 +0200
+Version 0.7.9<br>
+Last updated 2026-09-21 14:58:50 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

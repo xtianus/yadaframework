@@ -9,6 +9,8 @@ Storing and retrieving data
 
 <<pagination.adoc#, Database Pagination>>:: Fetching all, a bunch of rows at a time  
 
+<<savedProperties.adoc#, Saved Properties>>:: Persisting typed application state by key
+
 == Introduction
 Databases are almost essential to any web application. They can store user credentials, link to files,
 product information etc. The Yada Framework is written 

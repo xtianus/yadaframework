@@ -49,7 +49,81 @@
 	function initObservers($element) {
 		yada.enableAjaxTriggerInViewport($element);
 	}
-	
+
+	//////////////////////
+	// CSRF: when the page exposes the standard Spring Security meta tags
+	// <meta name="_csrf" content="..."> and <meta name="_csrf_header" content="...">
+	// attach the CSRF header to all jQuery AJAX requests that mutate state.
+	// This must run at script load (before document.ready) so the handler is in place
+	// before any AJAX POST call is fired.
+	yada.csrf = (function() {
+		const tokenMeta = document.querySelector("meta[name='_csrf']");
+		const headerMeta = document.querySelector("meta[name='_csrf_header']");
+		const parameterMeta = document.querySelector("meta[name='_csrf_parameter']");
+		if (tokenMeta == null || headerMeta == null) {
+			return null;
+		}
+		return {
+			token: tokenMeta.getAttribute("content"),
+			header: headerMeta.getAttribute("content"),
+			parameterName: parameterMeta != null ? parameterMeta.getAttribute("content") : "_csrf"
+		};
+	})();
+	if (yada.csrf != null && yada.csrf.token && yada.csrf.header) {
+		$(document).ajaxSend(function(event, jqXHR, settings) {
+			const method = (settings.type || "GET").toUpperCase();
+			// Skip safe methods - they are not subject to CSRF protection on the server
+			if (method === "GET" || method === "HEAD" || method === "OPTIONS" || method === "TRACE") {
+				return;
+			}
+			// Skip cross-origin requests
+			if (settings.crossDomain) {
+				return;
+			}
+			jqXHR.setRequestHeader(yada.csrf.header, yada.csrf.token);
+		});
+	}
+
+	/**
+	 * Navigates to the response of a POST request by submitting a hidden form that carries the CSRF token.
+	 * Use it instead of a GET navigation when the target changes state.
+	 * @param url the form action
+	 * @param data optional object of request parameters; an array value is sent as a repeated parameter
+	 * @param windowTarget optional name of the window where the response is shown, like "_blank"
+	 */
+	yada.postNavigate = function(url, data, windowTarget) {
+		const form = document.createElement("form");
+		form.method = "POST";
+		form.action = url;
+		form.style.display = "none";
+		if (windowTarget) {
+			form.target = windowTarget;
+		}
+		function addField(name, value) {
+			const input = document.createElement("input");
+			input.type = "hidden";
+			input.name = name;
+			input.value = value;
+			form.appendChild(input);
+		}
+		for (const [name, value] of Object.entries(data || {})) {
+			if (value == null) {
+				continue;
+			}
+			if (Array.isArray(value)) {
+				value.forEach(item => addField(name, item));
+			} else {
+				addField(name, value);
+			}
+		}
+		if (yada.csrf != null && yada.csrf.token) {
+			addField(yada.csrf.parameterName, yada.csrf.token);
+		}
+		document.body.appendChild(form);
+		form.submit();
+		form.remove();
+	}
+
 	//////////////////////
 	/// Pagination support
 	/**
@@ -64,7 +138,7 @@
 	 *        It just tells when the user pressed the back button, so that eventually all previous pages can be loaded, not just the last one.
 	 * @see net.yadaframework.web.YadaPageRequest
 	 */
-	yada.fixPaginationLinkHistory = function($linkOrForm, pageParam, sizeParam, loadPreviousParam) {
+	yada.fixPaginationLinkHistory = function($linkOrForm, pageParam, sizeParam, loadPreviousParam, preserveList, requestData) {
 		const NEXTPAGE_NAME="page";
 		const NEXTSIZE_NAME="size";
 		const CONTAINERID_NAME="yadaContainer";
@@ -99,6 +173,10 @@
 			newUrl = yada.addOrUpdateUrlParameter(newUrl, CONTAINERSCROLL_NAME, scrollPos);
 		}
 		
+		// Merge preserved filter params into the history URL (opt-in via data-yadaHistoryPreserveParams)
+		if (preserveList && preserveList.length > 0) {
+			newUrl = mergePreservedParams(newUrl, preserveList, $linkOrForm, requestData);
+		}
 		history.pushState({}, "", newUrl);
 	};
 	
@@ -106,7 +184,7 @@
 	 * If the "data-yadaPaginationHistory" attribute is present, set a new history entry.
 	 * @return true if the attribute is present.
 	 */
-	function handlePaginationHistoryAttribute($elem, $linkOrForm) {
+	function handlePaginationHistoryAttribute($elem, $linkOrForm, requestData) {
 		var yadaPagination = $elem.attr("data-yadaPaginationHistory"); // ="pageParam, sizeParam, loadPreviousParam"
 		if (yadaPagination==null) {
 			return false;
@@ -115,8 +193,92 @@
 			yadaPagination=null;
 		}
 		const paginationParams = yada.listToArray(yadaPagination);
-		yada.fixPaginationLinkHistory($linkOrForm, paginationParams[0], paginationParams[1], paginationParams[2]);
+		var preserveList = getHistoryPreserveParamsList($elem, $linkOrForm);
+		yada.fixPaginationLinkHistory($linkOrForm, paginationParams[0], paginationParams[1], paginationParams[2], preserveList, requestData);
 		return true;
+	}
+
+	/**
+	 * Reads the data-yadaHistoryPreserveParams attribute, checking the clicked element first, then the form.
+	 * @return an array of parameter names to preserve in history, or an empty array
+	 */
+	function getHistoryPreserveParamsList($elem, $linkOrForm) {
+		var preserveAttr = $elem.attr("data-yadaHistoryPreserveParams");
+		if (preserveAttr == null && !$elem.is($linkOrForm)) {
+			preserveAttr = $linkOrForm.attr("data-yadaHistoryPreserveParams");
+		}
+		if (preserveAttr == null || preserveAttr === "") {
+			return [];
+		}
+		return yada.listToArray(preserveAttr);
+	}
+
+	/**
+	 * Extracts values for preserved params from the effective request data.
+	 * For forms: reads from serializeArray (array) or FormData.
+	 * For links: reads from the link's href/data-yadahref URL.
+	 * Uses request data instead of window.location because it reflects the actual filter state being sent.
+	 * Empty strings are dropped; explicit "false" and "0" are preserved because they carry filter meaning.
+	 */
+	function getPreservedValues(preserveList, $linkOrForm, requestData) {
+		var values = [];
+		if (requestData != null) {
+			if (Array.isArray(requestData)) {
+				// serializeArray format: [{name, value}, ...]
+				for (var i = 0; i < requestData.length; i++) {
+					var entry = requestData[i];
+					if (preserveList.indexOf(entry.name) >= 0 && entry.value !== "") {
+						values.push({name: entry.name, value: entry.value});
+					}
+				}
+			} else if (requestData instanceof FormData) {
+				for (var k = 0; k < preserveList.length; k++) {
+					var paramName = preserveList[k];
+					var paramValues = requestData.getAll(paramName);
+					for (var m = 0; m < paramValues.length; m++) {
+						if (paramValues[m] !== "") {
+							values.push({name: paramName, value: paramValues[m]});
+						}
+					}
+				}
+			}
+		} else {
+			// Link path: extract from href URL
+			var href = $linkOrForm.attr("data-yadahref") || $linkOrForm.attr("href");
+			if (href) {
+				try {
+					var linkUrl = new URL(href, window.location.origin);
+					for (var j = 0; j < preserveList.length; j++) {
+						var pName = preserveList[j];
+						var pValues = linkUrl.searchParams.getAll(pName);
+						for (var n = 0; n < pValues.length; n++) {
+							if (pValues[n] !== "") {
+								values.push({name: pName, value: pValues[n]});
+							}
+						}
+					}
+				} catch (e) {
+					// Malformed URL, skip preserved params
+				}
+			}
+		}
+		return values;
+	}
+
+	/**
+	 * Merges preserved parameter values into the history URL.
+	 * Removes existing occurrences first, then appends fresh values from request data.
+	 */
+	function mergePreservedParams(urlString, preserveList, $linkOrForm, requestData) {
+		var url = new URL(urlString);
+		for (var i = 0; i < preserveList.length; i++) {
+			url.searchParams.delete(preserveList[i]);
+		}
+		var values = getPreservedValues(preserveList, $linkOrForm, requestData);
+		for (var j = 0; j < values.length; j++) {
+			url.searchParams.append(values[j].name, values[j].value);
+		}
+		return url.toString();
 	}
 
 	////////////////////
@@ -440,6 +602,12 @@
 		}
 		// From here on the $link is a single anchor, not an array
 		$link.not('.'+markerClass).click(function(e) {
+			// Allow native browser behavior for "open in new tab" (Ctrl+click, Cmd+click, Shift+click, middle-click)
+			if (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2) {
+				yada.loaderOff();
+				this.blur(); // Remove :focus to clear any focus-triggered styles (e.g. shade overlay)
+				return true;
+			}
 			$link = $(this); // Needed otherwise $link could be stale (from a previous ajax replacement) 
 			// Fix pagination parameters if any
 			handlePaginationHistoryAttribute($link, $link);
@@ -702,7 +870,9 @@
 		
 		var data = [];
 		var multipart = false;
-		var method = null; // Defaults to GET
+		// The method can be forced with data-yadaMethod (yada:method), so that state-changing
+		// links can use POST and be protected by CSRF. Defaults to GET.
+		var method = $element.attr('data-yadaMethod')?.toUpperCase() || null;
 		var url = null;
 		var paramName = 'multipartFile';
 		const droppedFiles = e?.originalEvent?.dataTransfer?.files;
@@ -761,6 +931,8 @@
 				multipart = $formGroup.filter("[enctype='multipart/form-data']").length > 0;
 				data = multipart ? new FormData() : [];
 				addAllFormsInGroup($formGroup, data);
+				// Use the method of the first form in the group
+				method = $formGroup.first().attr('method')?.toUpperCase() || method;
 			}
 		}
 		// Any yadaRequestData is also sent (see yada.dialect.js)
@@ -1273,8 +1445,9 @@
 				// Either the form or the button can have a loaderOptions, the button has precedence
 				loaderOption = getLoaderOption($(clickedButton)) ?? loaderOption;
 				// Pagination history
-				buttonHistoryAttribute = handlePaginationHistoryAttribute($(clickedButton), $(clickedButton).closest("form"));
+				buttonHistoryAttribute = handlePaginationHistoryAttribute($(clickedButton), $(clickedButton).closest("form"), data);
 			}
+			var dataForHistory = data; // Keep reference before $.param converts array to string
 			if (!multipart) {
 				data = $.param(data);
 			}
@@ -1325,7 +1498,7 @@
 			var method = $form.attr('method') || "POST";
 			
 			if (!buttonHistoryAttribute) {
-				handlePaginationHistoryAttribute($form, $form);
+				handlePaginationHistoryAttribute($form, $form, dataForHistory);
 			}
 			
 			yada.ajax(action, data, joinedHandler.bind(this), method, getTimeoutValue($form), loaderOption);
@@ -1338,14 +1511,21 @@
 			var $button = $(this);
 			var confirmText = $button.attr("data-yadaConfirm") || $button.attr("data-confirm");
 			if (confirmText!=null && confirmText!="") {
-				var title = $button.attr("data-yadaTitle");
+	    		$button.click(handleFormConfirm);
+	    	}
+	    });
+		$form.not('.'+markerClass).addClass(markerClass);
+	};
+	
+	function handleFormConfirm() {
+		var $button = $(this); // Needed otherwise $button could be stale (from a previous ajax replacement) 
+		var title = $button.attr("data-yadaTitle");
+		var confirmText = $button.attr("data-yadaConfirm") || $button.attr("data-confirm");
 				var okButton = $button.attr("data-yadaOkButton") || $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
 				var cancelButton = $button.attr("data-yadaCancelButton") || $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
-				$button.click(function() {
-					$button = $(this); // Needed otherwise $button could be stale (from a previous ajax replacement) 
 					yada.confirm(title, confirmText, function(result) {
 						if (result==true) {
-							$button.off("click");
+							$button.off("click", handleFormConfirm);
 							$button.click();
 							// No $form.submit(); because of the button name that has to be preserved (see clickedButton above)
 							// TODO/BUG if the submit button contains an <input>, that value will not be included in $(form).serializeArray() and will not be sent
@@ -1354,11 +1534,7 @@
 						}
 					}, okButton, cancelButton);
 					return false; // Stop form submission
-				});
 			}
-		});
-		$form.not('.'+markerClass).addClass(markerClass);
-	};
 	
 	function showFullPage(html) {
 		document.open();
@@ -1593,7 +1769,7 @@
 					return;
 				}
 
-				// Per mostrare una notification al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify"
+				// Per mostrare una notification al ritorno dalla get, basta che il Controller ritorni "/yada/b5/modalNotify" (see YadaConfiguration.getBootstrapView)
 				// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
 				var notify=yada.handleNotify(responseHtml, responseTrimmed);
 				if (notify) {
@@ -1943,7 +2119,7 @@
 	}
 	
 	// Se un ritorno da una chiamata ajax ha un notify, lo mostra.
-	// Per mostrare un notify al ritorno dalla get, basta che il Controller ritorni "/yada/modalNotify" 
+	// Per mostrare un notify al ritorno dalla get, basta che il Controller ritorni "/yada/b5/modalNotify" (see YadaConfiguration.getBootstrapView) 
 	// dopo aver chiamato ad esempio yadaWebUtil.modalOk()
 	// Ritorna true se la notify è stata mostrata.
 	yada.handleNotify = function(responseHtml, responseText) {

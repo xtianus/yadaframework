@@ -3,7 +3,10 @@
 | Method | Description |
 |---|---|
 | `copyTo` | Copy the already initialised configuration to a different instance |
-| `getForB3B4B5` | Returns the value that matches the configured Bootstrap version. |
+| `getForB3B4B5` | Returns the value that matches the configured Bootstrap version. It is for css classes and similar values, not for view names. |
+| `getBootstrapView` | Returns the full view name of a Bootstrap-version-specific Yada view from its version-independent name, e.g. `getBootstrapView("modalConfirm")` returns `/yada/b3/modalConfirm` when the configured version is 3. The version is carried by the folder only. |
+| `getBootstrapFormView` | Returns the full view name of a Bootstrap-version-specific form fragment, e.g. `/yada/form/b3/text`. `YadaWebUtil.getFormFragment` delegates to it. |
+| `getEmailHost`, `getEmailPort`, `getEmailProtocol`, `getEmailUsername`, `getEmailPassword`, `getEmailProperties` | Read the SMTP settings from the section selected by the private `getSmtpServerPrefix`: `/config/email/smtpserver-mailpit` when the environment is development and that section exists with `enabled="true"` (case-insensitive), otherwise `/config/email/smtpserver`. All six always read from the same section. The `enabled` attribute is compared as a String because an unresolved `${usemailpit}` variable is left in place as literal text. |
 | `isLocalFlag` | Gets the value of any boolean config key defined in the /config/local configuration file (it should reside on the developers computer in a personal folder, not shared). |
 | `getLocalConfig` | Gets the value of any config key defined in the /config/local configuration file (it should reside on the developers computer in a personal folder, not shared). |
 | `isPreserveImageExtension` | Checks if the image extension has to be preserved when converting. |
@@ -27,4 +30,12 @@
 | `getString` | Returns a string. |
 | `getInt` | Returns an int. |
 | `getLong` | Returns a long. |
+| `setReloadingTrigger` | Stores the periodic Commons Configuration reloading trigger owned by this configuration instance. |
+| `startReloadingTrigger` | Starts the stored periodic reloading trigger when runtime configuration reloading is enabled. |
+| `stopReloadingTrigger` | Shuts down the stored periodic reloading trigger and clears the reference. |
 | `addConfigurationReloadListener` | Adds a configuration reload listener. |
+
+## Notes
+
+- `copyTo` copies the combined-configuration builder, the resolved immutable configuration, and the active reloading trigger reference, so static startup access and the Spring bean observe the same reloading state.
+- `stopReloadingTrigger` shuts down the trigger executor, which is what releases the `ReloadingTrigger-*` thread used by Commons Configuration.

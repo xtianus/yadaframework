@@ -16,6 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Transient;
@@ -70,10 +71,12 @@ public class YadaRegistrationRequest implements Serializable {
 
 	private YadaRegistrationType registrationType;
 
-	@OneToOne
+	// ManyToOne: the same user can have several open requests (email change, password recovery)
+	@ManyToOne
 	private YadaUserCredentials yadaUserCredentials; // Used for email change
 
-	@OneToOne
+	// ManyToOne: every registration request refers to the same current version of the clause
+	@ManyToOne
 	@Deprecated // italian language; should have multiple values
 	private YadaClause trattamentoDati; // Usato per visualizzare la clausola nel form, e poi per sapere quale clausola è stata accettata in fase di creazione utente
 

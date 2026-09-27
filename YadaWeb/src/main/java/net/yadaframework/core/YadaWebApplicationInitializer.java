@@ -1,6 +1,5 @@
 package net.yadaframework.core;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +65,7 @@ public abstract class YadaWebApplicationInitializer extends AbstractAnnotationCo
 			YadaConfiguration tempConfig = new YadaConfiguration(){};
 			Parameters params = new Parameters();
 			CombinedConfigurationBuilder builder = new CombinedConfigurationBuilder()
-					.configure(params.fileBased().setFile(new File("configuration.xml")));
+					.configure(params.fileBased().setFile(YadaAppConfig.getConfigurationFile()));
 			tempConfig.setConfiguration(builder.getConfiguration());
 
 			registration.setMultipartConfig(new MultipartConfigElement(tempConfig.getUploadsFolder().getAbsolutePath(),

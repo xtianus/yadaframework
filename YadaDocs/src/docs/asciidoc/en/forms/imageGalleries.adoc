@@ -28,11 +28,11 @@ protected List<YadaAttachedFile> gallery = new ArrayList<>(); # <3>
 <3> Better use a List than a Set because sorting slides requires accessing them by index
 
 == Editing slides: HTML
-In the CMS page, just include the `/yadacms/imageSorter` component to handle creation, editing and sorting:
+In the CMS page, just include the `/yadacms/b3/imageSorter` (or the folder of the Bootstrap version in use) component to handle creation, editing and sorting:
 
 [source,html]
 ----
-<div th:replace="~{/yadacms/imageSorter::component(
+<div th:replace="~{/yadacms/b3/imageSorter::component(
 	images=${product.gallery},
 	size=${slideImageSize}, # <1>
 	entityIdName='productId', # <2>
@@ -54,7 +54,7 @@ In the CMS page, just include the `/yadacms/imageSorter` component to handle cre
 image::forms/galleryForm.jpg[Slide upload form]
 
 This example only shows a file input element for uploading images.
-See `/YadaWebCMS/src/main/resources/net/yadaframework/views/yadacms/imageSorter.html` for a detailed list and explanation 
+See `/YadaWebCMS/src/main/resources/net/yadaframework/views/yadacms/b3/imageSorter.html` for a detailed list and explanation 
 of all available parameters. 
 
 == Editing slides: Java
@@ -127,7 +127,7 @@ public String addSlide(Product product, HttpServletRequest request, Model model,
 			if (!errorMessages.isEmpty()) {
 				yadaFileManager.delete(newImageManagedFile);
 				model.addAttribute("images", product.getGallery()); # <2>
-				return "/yadacms/imageSorter :: .yadaImageSorterImages";
+				return "/yadacms/b3/imageSorter :: .yadaImageSorterImages";
 			}
 			//
 			// Upload and crop image
@@ -149,7 +149,7 @@ public String addSlide(Product product, HttpServletRequest request, Model model,
 	}
 	// In case of error, go back to the form immediately
 	model.addAttribute("images", product.getGallery());  # <2>
-	return "/yadacms/imageSorter :: .yadaImageSorterImages";
+	return "/yadacms/b3/imageSorter :: .yadaImageSorterImages";
 }
 ----
 <1> the Product entity should have a `@Transient MultipartFile newImage` attribute with getters and setters to receive the file sent from the browser
@@ -167,7 +167,7 @@ public String deleteSlide(Long imageId, Product product, Model model, Locale loc
 	// Delete from DB
 	Product product = productDao.deleteGallerySlide(product.getId(), imageId);
 	model.addAttribute("images", product.getGallery());
-	return "/yadacms/imageSorter :: .yadaImageSorterImages";
+	return "/yadacms/b3/imageSorter :: .yadaImageSorterImages";
 }
 ----
 <1> `imageId` is the id of the `YadaAttachedFile`
@@ -205,7 +205,7 @@ public String sortSlide(Long productId, Long currentId, Long otherId, Model mode
 	yadaAttachedFileDao.swapSortOrder(currentId, otherId);
 	Product product = productDao.findAndPrefetch(productId); // Reload the updated list
 	model.addAttribute("images", product.getGallery());
-	return "/yadacms/imageSorter :: .yadaImageSorterImages";
+	return "/yadacms/b3/imageSorter :: .yadaImageSorterImages";
 }
 ----
 

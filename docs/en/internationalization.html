@@ -124,7 +124,7 @@ window.onscroll = function() {
 <div id="header">
 <h1>Internationalization</h1>
 <div class="details">
-<span id="revnumber">version '0.7.8'</span>
+<span id="revnumber">version 0.7.9</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -158,6 +158,7 @@ window.onscroll = function() {
 <li><a href="#_coding_with_i18n_text">Coding with i18n text</a>
 <ul class="sectlevel2">
 <li><a href="#statici18ntext">Static text</a></li>
+<li><a href="#_frontend_message_export">Frontend message export</a></li>
 <li><a href="#_emails">Emails</a></li>
 <li><a href="#_database_fields">Database fields</a></li>
 </ul>
@@ -692,7 +693,24 @@ files.total = There {0, choice, 0#are no files|1#is one file|1&lt;are {0,number,
 </ul>
 </div>
 <div class="paragraph">
-<p>In production, files are reloaded every 600 seconds (10 minutes) to pick up changes.</p>
+<p>Message source files are reloaded every 600 seconds (10 minutes) by default.
+The reload interval can be configured with <code>&lt;cacheSeconds&gt;</code> inside <code>&lt;messageSource&gt;</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;i18n localePathVariable="true"&gt;
+	&lt;messageSource&gt;
+		&lt;cacheSeconds&gt;600&lt;/cacheSeconds&gt;
+	&lt;/messageSource&gt;
+	&lt;locale default="true"&gt;en&lt;/locale&gt;
+	&lt;locale&gt;it&lt;/locale&gt;
+&lt;/i18n&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The value is the number of seconds before checking the files again. Use <code>-1</code> to never reload
+message files and <code>0</code> to check them on every lookup. In development environments the framework
+forces <code>0</code>, regardless of the configured value, so message changes are visible immediately.</p>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -705,6 +723,38 @@ The Message Source configuration is implemented in YadaAppConfig.messageSource()
 </td>
 </tr>
 </table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_frontend_message_export">Frontend message export</h3>
+<div class="paragraph">
+<p>JavaScript applications can fetch a request-locale message map from a backend controller that uses YadaWebUtil.getFrontendMessages():</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">	@RequestMapping(value ="/messageProperties", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public Map&lt;String, String&gt; messageProperties(Locale locale) {
+		return yadaWebUtil.getFrontendMessages(locale);
+	}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The endpoint reads the configured Yada message source basenames to discover frontend keys from the
+default-locale bundles, returns only keys that match <code>config/i18n/frontendKeyPrefix</code>, and resolves
+values through the configured Spring <code>MessageSource</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;i18n localePathVariable="true"&gt;
+	&lt;frontendKeyPrefix&gt;ts.&lt;/frontendKeyPrefix&gt;
+&lt;/i18n&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Message values follow the same
+locale fallback behavior as normal server-side message lookups.
+Applications should generate the URL server-side with the usual locale-aware URL handling, then load it
+from the frontend before rendering user-visible JavaScript UI text.</p>
 </div>
 <div class="paragraph">
 <p>When the application grows, it may be convenient to split the message.properties files into more manageable units. For example,
@@ -984,8 +1034,8 @@ userProfile.setTimezone(userTimezone);</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version '0.7.8'<br>
-Last updated 2025-07-30 20:47:19 +0200
+Version 0.7.9<br>
+Last updated 2026-09-19 12:04:57 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

@@ -56,6 +56,14 @@ public class YadaGlobalExceptionHandler {
         	log.info("Rethrowing @ResponseStatus exception: {}", e.toString());
             throw e;
         }
+		// Spring 6 replaced @ResponseStatus on its own web exceptions with the ErrorResponse interface,
+		// which carries the status code. Without this branch such exceptions would fall through to the
+		// error-page forward below and the response would end up as 500: an unmapped url, for example,
+		// raises NoHandlerFoundException and would answer 500 instead of 404.
+        if (e instanceof org.springframework.web.ErrorResponse errorResponse) {
+        	log.info("Rethrowing ErrorResponse exception with status {}: {}", errorResponse.getStatusCode(), e.toString());
+            throw e;
+        }
         if (e instanceof org.springframework.web.servlet.NoHandlerFoundException) {
         	// Someone is using an unmapped url. Just log the url not the stacktrace.
         	log.error("NoHandlerFoundException: {}", e.getMessage());

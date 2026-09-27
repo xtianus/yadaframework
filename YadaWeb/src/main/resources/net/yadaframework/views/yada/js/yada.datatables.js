@@ -35,12 +35,22 @@
 			}
 		}
 
+		// Propagate orderSequence from table level to each column that doesn't have its own,
+		// because DataTables only processes orderSequence at the column level, not at the table level.
+		if (dataTableOptions.orderSequence && dataTableOptions.columns) {
+			dataTableOptions.columns.forEach(col => {
+				if (col.orderSequence === undefined || col.orderSequence === null) {
+					col.orderSequence = dataTableOptions.orderSequence;
+				}
+			});
+		}
+
 		// Preprocessor can override, add, delete configured options
 		const preprocessor = window[preprocessorName];
 		if (typeof preprocessor === "function") {
 		    preprocessor(dataTableJson);
 		}
-		
+
 		const $table = $("#" + dataTableId);
 		const dataTableApi = $table.DataTable(dataTableOptions);
 		$table.data("yadaDataTableApi", dataTableApi); // Make the created datatable API an attribute of the DOM object
@@ -185,12 +195,15 @@
 	}
 	
 	function dtDoButtonCall(url, requestData, ajax, loader, buttonConf, dataTableApi) {
+		const method = buttonConf.method; // null for GET
 		if (ajax) {
-			yada.ajax(url, requestData, ()=>dataTableApi.draw(false), null, null, loader);
+			yada.ajax(url, requestData, ()=>dataTableApi.draw(false), method, null, loader);
+		} else if (method && method!=="GET") {
+			yada.postNavigate(url, requestData, buttonConf.windowTarget);
 		} else {
 			url = yada.addUrlParameters(url, requestData);
 			if (buttonConf.windowTarget) {
-				window.open(url, buttonData.windowName, buttonData.windowFeatures);
+				window.open(url, buttonConf.windowTarget, buttonConf.windowFeatures);
 			} else {
 				window.location.href = url;
 			}

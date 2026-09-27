@@ -119,7 +119,7 @@ File upload starts from a `"multipart/form-data"` form. This is a standard form 
 </form>
 ----
 
-===  Form Fragment /yada/form/fileUpload
+===  Form Fragment /yada/form/bN/fileUpload
 If you're using a  _form backing bean_ you can include a yada fragment for the input tag. 
 The following example also shows any error:
 
@@ -128,11 +128,11 @@ The following example also shows any error:
 <form th:action="@{/profile}" th:object="${formProfile}" enctype="multipart/form-data" method="post"
 th:classappend="${#fields.hasErrors('*')}? has-error" role="form">
 
-    <div th:replace="/yada/form/fileUpload::field(fieldName='avatarImage',label='Avatar')"></div>
+    <div th:replace="~{${@yadaWebUtil.getFormFragment('fileUpload')} :: field(fieldName='avatarImage',label='Avatar')}"></div>
 ----
 
 You can display a link to the uploaded file underneath the input field by passing an instance of `YadaAttachedFile` to the `attachedFile` fragment attribute.
-For other usage instructions see the source file for `/yada/form/fileUpload`.
+For other usage instructions see the source file for `/yada/form/bN/fileUpload`, where N is the configured Bootstrap version.
 
 ==  JAVA
 After submission, the uploaded file will be processed by  _Commons File Upload_ and sent to the @Controller as a `MultipartFile` object.
@@ -504,12 +504,12 @@ The upload form can be as simple as a plain file input (here with spring/bootstr
 	<div th:each="err : ${#fields.errors('myFieldName')}" th:text="${err}" class="invalid-feedback">Invalid image</div>
 ----
 
-The form can also be implemented using the `/yada/form/fileUpload` fragment:
+The form can also be implemented using the `/yada/form/bN/fileUpload`, where N is the configured Bootstrap version fragment:
 
 [source,html]
 ----
 <form th:action="@{/addOrUpdateNews}" th:object="${news}" enctype="multipart/form-data" th:classappend="${#fields.hasErrors('*')}? has-error" method="post" role="form">
-    <div th:replace="/yada/form/fileUpload::field(fieldName='thumbnailImage',size=${thumbnailSize},accept='image/*',label='Upload thumbnail image',required=${news.thumbnail==null},help='Thumbnail image',attachedFile=*{thumbnail})"></div>
+    <div th:replace="~{${@yadaWebUtil.getFormFragment('fileUpload')} :: field(fieldName='thumbnailImage',size=${thumbnailSize},accept='image/*',label='Upload thumbnail image',required=${news.thumbnail==null},help='Thumbnail image',attachedFile=*{thumbnail})}"></div>
 ----
 
 These are the needed parameters:
@@ -652,7 +652,7 @@ The crop page can be easily implemented by including the link:++https://jcrop.co
         </h1>
         <p>Drag the handles to the desired crop, then press the [[#{yada.crop.cropSubmit}]] button</p>
 
-        <div th:replace="~{/yadacms/imageCropper::component(cropQueue=${cropQueue})}"></div>
+        <div th:replace="~{/yadacms/b3/imageCropper::component(cropQueue=${cropQueue})}"></div>
 
     </div>
 </body>

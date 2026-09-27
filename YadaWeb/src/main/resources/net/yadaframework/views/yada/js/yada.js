@@ -74,7 +74,8 @@
 			const data = {
 				'timezone': Intl.DateTimeFormat().resolvedOptions().timeZone
 			}
-			jQuery.post("/yadaTimezone", data, function(){
+			// Using GET to prevent CSRF problems here
+			jQuery.get("/yadaTimezone", data, function(){
 				sessionStorage.setItem(sessionStorageKeyTimezone, true);
 			});
 		}
@@ -1829,9 +1830,19 @@
 	    return path.split('.').reduce((acc, part) => acc && acc[part], rootObject);
 	}
 	
-	yada.impersonate = function(url, userId) {
-		const impersonateUrl = yada.addUrlParameters(url, {id: userId, currentLocation: window.location.href});
-		window.location.href = impersonateUrl;
+	/**
+	 * Starts impersonating a user by navigating to the impersonation url with the "id" and "currentLocation" parameters.
+	 * @param url the impersonation url
+	 * @param userId the id of the user to impersonate
+	 * @param method optional HTTP method: "POST" submits a form that carries the CSRF token (needs yada.ajax.js), GET when missing
+	 */
+	yada.impersonate = function(url, userId, method) {
+		const data = {id: userId, currentLocation: window.location.href};
+		if (method && method.toUpperCase()!=="GET") {
+			yada.postNavigate(url, data);
+			return;
+		}
+		window.location.href = yada.addUrlParameters(url, data);
 	}
 
 	/**

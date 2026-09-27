@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInvalidValueException;
 import net.yadaframework.persistence.entity.YadaAttachedFile;
@@ -21,6 +24,7 @@ import net.yadaframework.persistence.entity.YadaAttachedFile;
  * some id of the clone, which are not known during cloning.
  */
 public class YadaAttachedFileCloneSet {
+	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	// Map from the original relative path to the new instances
 	private Map<String, Set<YadaAttachedFile>> allFiles = new HashMap<>();
 	private Path tempFolder = null;
@@ -46,9 +50,12 @@ public class YadaAttachedFileCloneSet {
 	}
 	
 	/**
-	 * Move all collected files to some relative folder (will be created when missing)
-	 * @param oldRelativeNewRelative map from old relative folder to new relative folder
+	 * Move all collected files to some relative folder (will be created when missing).
+	 * Entries of the map whose source folder holds no cloned file are ignored: this happens
+	 * when the cloned object has a component (e.g. a page module) without any attached file.
+	 * @param oldRelativeNewRelative map from old relative folder to new relative folder. Consumed entries are removed.
 	 * @throws IOException
+	 * @throws YadaInvalidValueException when a cloned file has no mapping for its source folder
 	 */
 	public void moveAll(Map<String, String> oldRelativeNewRelative) throws IOException {
 		try {
@@ -69,7 +76,7 @@ public class YadaAttachedFileCloneSet {
 			tempFolder.toFile().delete();
 		}
 		if (oldRelativeNewRelative.size()>0) {
-			throw new YadaInvalidValueException("Unused values in oldRelativeNewRelative {}", oldRelativeNewRelative.keySet());
+			log.debug("No cloned files found in source folders {}", oldRelativeNewRelative.keySet());
 		}
 	}
 }
