@@ -1,6 +1,7 @@
 package net.yadaframework.security.persistence.entity;
 
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -17,7 +18,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
@@ -34,6 +34,7 @@ import net.yadaframework.persistence.entity.YadaClause;
 public class YadaRegistrationRequest implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
+	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
 	// For optimistic locking
 	@Version
@@ -98,7 +99,7 @@ public class YadaRegistrationRequest implements Serializable {
 	@PrePersist
 	void setDefaults() {
 		timestamp=new Date();
-		token=(long) (Math.random()*Long.MAX_VALUE);
+		token = SECURE_RANDOM.nextLong() & Long.MAX_VALUE;
 	}
 
 	public String getEmail() {
