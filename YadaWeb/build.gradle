@@ -17,8 +17,8 @@ plugins {
 	id 'eclipse-wtp'
 }
 
-apply from: '../YadaWeb/loadSharedProperties.gradle'
-apply from: '../YadaWeb/eclipseSetup.gradle'
+apply from: '../loadSharedProperties.gradle'
+apply from: '../eclipseSetup.gradle'
 
 group = 'net.yadaframework'
 version = yada_version

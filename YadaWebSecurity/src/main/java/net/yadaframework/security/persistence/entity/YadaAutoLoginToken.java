@@ -1,5 +1,6 @@
 package net.yadaframework.security.persistence.entity;
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import jakarta.persistence.Version;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class YadaAutoLoginToken implements Serializable {
 	private static final long serialVersionUID = 1L;
+	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
 	@SuppressWarnings("unused")
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
@@ -52,7 +54,7 @@ public class YadaAutoLoginToken implements Serializable {
 	@PrePersist
 	void setDefaults() {
 		timestamp = new Date();
-		token = (long) (Math.random()*Long.MAX_VALUE);
+		token = SECURE_RANDOM.nextLong() & Long.MAX_VALUE;
 	}
 
 	public Long getId() {

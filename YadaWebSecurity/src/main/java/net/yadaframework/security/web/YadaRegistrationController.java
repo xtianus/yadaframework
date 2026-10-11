@@ -328,17 +328,23 @@ public class YadaRegistrationController {
 		}
 		// Check if a user actually exists
 		String email = yadaRegistrationRequest.getEmail();
+		// Sterilize the incoming data: never use yadaRegistrationRequest for anything because it could contain forged data other than email
+		// TODO much cleaner if I just receive an email string instead of the full YadaRegistrationRequest in the parameters
+		yadaRegistrationRequest = null;
 		YadaUserCredentials existing = yadaUserCredentialsDao.findFirstByUsername(StringUtils.trimToEmpty(email).toLowerCase(Locale.ROOT));
 		if (existing!=null) {
-			yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
+			// Sanitize the yadaRegistrationRequest preventing malicious injections of id  and other values
+			YadaRegistrationRequest cleanYadaRegistrationRequest = new YadaRegistrationRequest();
+			cleanYadaRegistrationRequest.setEmail(email);
+			cleanYadaRegistrationRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
 			// Pulisco le vecchie richieste
-			yadaSecurityUtil.registrationRequestCleanup(yadaRegistrationRequest);
-			yadaRegistrationRequest.setPassword("fakefake"); // La metto solo per evitare un errore di validazione al save
-			yadaRegistrationRequest = yadaRegistrationRequestDao.save(yadaRegistrationRequest); // Save here to get id and token
-			emailSent = yadaSecurityEmailService.sendPasswordRecovery(yadaRegistrationRequest, request, locale);
+			yadaSecurityUtil.registrationRequestCleanup(cleanYadaRegistrationRequest);
+			cleanYadaRegistrationRequest.setPassword("fakefake"); // La metto solo per evitare un errore di validazione al save
+			cleanYadaRegistrationRequest = yadaRegistrationRequestDao.save(cleanYadaRegistrationRequest); // Save here to get id and token
+			emailSent = yadaSecurityEmailService.sendPasswordRecovery(cleanYadaRegistrationRequest, request, locale);
 			if (!emailSent) {
-				yadaRegistrationRequestDao.delete(yadaRegistrationRequest);
-				log.debug("Sending email to {} failed while resetting password", yadaRegistrationRequest.getEmail());
+				yadaRegistrationRequestDao.delete(cleanYadaRegistrationRequest);
+				log.debug("Sending email to {} failed while resetting password", cleanYadaRegistrationRequest.getEmail());
 				yadaNotify.titleKey(redirectAttributes, locale, "yada.email.passwordrecover.title")
 				.ok().messageKey("yada.email.send.failed").add();				
 			}

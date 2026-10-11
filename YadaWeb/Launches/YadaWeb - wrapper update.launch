@@ -2,7 +2,7 @@
 <launchConfiguration type="org.eclipse.buildship.core.launch.runconfiguration">
     <listAttribute key="arguments"/>
     <booleanAttribute key="build_scans_enabled" value="false"/>
-    <stringAttribute key="gradle_distribution" value="GRADLE_DISTRIBUTION(VERSION(3.4.1))"/>
+    <stringAttribute key="gradle_distribution" value="GRADLE_DISTRIBUTION(WRAPPER)"/>
     <stringAttribute key="gradle_user_home" value=""/>
     <stringAttribute key="java_home" value=""/>
     <listAttribute key="jvm_arguments"/>
@@ -15,5 +15,5 @@
         <listEntry value="wrapper"/>
     </listAttribute>
     <booleanAttribute key="use_gradle_distribution_from_import" value="false"/>
-    <stringAttribute key="working_dir" value="${workspace_loc:/YadaWeb}"/>
+    <stringAttribute key="working_dir" value="${workspace_loc:/yadaframework}"/>
 </launchConfiguration>

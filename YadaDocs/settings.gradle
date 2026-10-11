@@ -1,6 +1,0 @@
-
-/*
-rootProject.name = 'YadaDocs'
-include 'YadaWeb'
-project(':YadaWeb').projectDir = "../YadaWeb" as File
-*/

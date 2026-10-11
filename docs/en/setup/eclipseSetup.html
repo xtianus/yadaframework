@@ -136,7 +136,7 @@ window.onscroll = function() {
 <li><a href="#_the_first_project">The First Project</a>
 <ul class="sectlevel2">
 <li><a href="#_creating_the_project">Creating the Project</a></li>
-<li><a href="#_importing_the_yadaframework_projects">Importing the YadaFramework Projects</a></li>
+<li><a href="#_the_yadaframework_projects">The YadaFramework Projects</a></li>
 <li><a href="#_saving_to_git">Saving to git</a></li>
 </ul>
 </li>
@@ -482,10 +482,29 @@ If not, you should at least install the "Eclipse Web Tools Platform" (WTP) plugi
 </div>
 </div>
 <div class="sect2">
-<h3 id="_importing_the_yadaframework_projects">Importing the YadaFramework Projects</h3>
+<h3 id="_the_yadaframework_projects">The YadaFramework Projects</h3>
 <div class="paragraph">
-<p>After connecting to the GitHub repository as explained above, you can import the
-needed projects using the "File &gt; Import&#8230;&#8203; &gt; Gradle &gt; Existing Gradle Project" menu.</p>
+<p>You don&#8217;t need to import the Yada projects separately when building an application.
+Later, in "<a href="gettingStarted.html#_the_build_file">The Build File</a>", your project&#8217;s <code>settings.gradle</code> includes <code>YadaWeb</code>, <code>YadaWebSecurity</code>, <code>YadaWebCMS</code>
+and <code>YadaWebCommerce</code> from the cloned repository, so they are added to the workspace
+the first time you run "Gradle &gt; Refresh Gradle Project" on your project, and they belong to your project&#8217;s Gradle build.</p>
+</div>
+<div class="paragraph">
+<p>The files that you will later copy from <code>YadaTools</code>, like <code>/YadaTools/scripts/template.gradle</code>, can be taken directly from
+the cloned repository folder, for example <code>C:\work\git-mysite\yadaframework\YadaTools\scripts</code>.</p>
+</div>
+<div class="paragraph">
+<p>If the imported projects have any errors, first of all right-click and choose "Gradle &gt; Refresh Gradle Project".
+If it complains about some unbound system library, open "Properties &gt; Java build path &gt; Libraries" and remove the library.</p>
+</div>
+<div class="sect3">
+<h4 id="_working_on_the_framework_alone">Working on the framework alone</h4>
+<div class="paragraph">
+<p>To work on the framework without an application, use "File &gt; Import&#8230;&#8203; &gt; Gradle &gt; Existing Gradle Project" and select
+the root folder of the cloned repository (e.g. <code>C:\work\git-mysite\yadaframework</code>), not one of its subfolders.
+The import dialog initially opens in the workspace, so you have to browse to the git folder.
+This adds the <code>yadaframework</code> root project together with <code>YadaWeb</code>, <code>YadaWebSecurity</code>, <code>YadaWebCMS</code>, <code>YadaWebCommerce</code>,
+<code>YadaAi</code>, <code>YadaTools</code> and <code>YadaDocs</code>. The Gradle version is the one of the repository-root wrapper.</p>
 </div>
 <div class="admonitionblock warning">
 <table>
@@ -495,56 +514,32 @@ needed projects using the "File &gt; Import&#8230;&#8203; &gt; Gradle &gt; Exist
 </td>
 <td class="content">
 <div class="paragraph">
-<p>The Yada projects will be located in the git folder you chose before,
-not along with the new project just created. This may be confusing because
-the Import dialog will initially open in the workspace and you will have to
-browse to the git folder instead.
-After adding the new project to git as explained later, all projects will be
-found in the git folder.</p>
+<p>Each Yada module can belong to only one Gradle build in an Eclipse workspace: either the framework root or your application.
+Buildship stores the owning build in the <code>.settings/org.eclipse.buildship.core.prefs</code> file of each module,
+and a new import does not reliably replace an existing file, even when no problems are reported.
+To switch a checkout between framework work and application work:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Delete the projects from the workspace without deleting their contents on disk.</p>
+</li>
+<li>
+<p>Delete <code>.settings/org.eclipse.buildship.core.prefs</code> in the repository root and in each module folder. These files are not
+stored in git and are recreated by the import.</p>
+</li>
+<li>
+<p>Import the build you want to use: the framework root as shown above, or your application project.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>To work on both at the same time, use a separate clone of the repository and a separate Eclipse workspace.</p>
 </div>
 </td>
 </tr>
 </table>
 </div>
-<div class="paragraph">
-<p>To import most Yada Framework projects at once you could just import the "YadaWebCommerce" project and rely on dependency resolution to automatically
-import everything else.
-Don&#8217;t worry about Gradle versions here: the version used will be the one configured inside the imported projects.</p>
-</div>
-<div class="imageblock center">
-<div class="content">
-<img src="../../img/newEclipseProject/importYada.jpg" alt="Import the YadaWebCommerce project">
-</div>
-<div class="title">Figure 8. Import the YadaWebCommerce project</div>
-</div>
-<div class="paragraph">
-<p>The <code>YadaTools</code> project should also be imported because you will later need to copy some files from it.</p>
-</div>
-<div class="paragraph">
-<p>If the imported projects have any errors, first of all right-click and choose "Gradle &gt; Refresh Gradle Project".
-If it complains about some unbound system library, open "Properties &gt; Java build path &gt; Libraries" and remove the library.</p>
-</div>
-<div class="paragraph">
-<p>You should now have, in your workspace, the following Yada projects:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>YadaTools</p>
-</li>
-<li>
-<p>YadaWeb</p>
-</li>
-<li>
-<p>YadaWebCMS</p>
-</li>
-<li>
-<p>YadaWebCommerce</p>
-</li>
-<li>
-<p>YadaWebSecurity</p>
-</li>
-</ul>
 </div>
 </div>
 <div class="sect2">
@@ -564,7 +559,7 @@ in the previous example. The name can be anything you like. Here we use 'mysite'
 <div class="content">
 <img src="../../img/newEclipseProject/newGit.jpg" alt="Create a local git repository">
 </div>
-<div class="title">Figure 9. Create a local git repository</div>
+<div class="title">Figure 8. Create a local git repository</div>
 </div>
 <div class="openblock bookstore">
 <div class="content">
@@ -632,7 +627,7 @@ menu icon containing the "Filters&#8230;&#8203;" item. Ensure that ".* resources
 <div id="footer">
 <div id="footer-text">
 Version 0.7.9<br>
-Last updated 2026-09-17 19:09:05 +0200
+Last updated 2026-10-11 22:12:47 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
