@@ -225,49 +225,39 @@ If not, you should at least install the "Eclipse Web Tools Platform" (WTP) plugi
 The bookstore application will use Tomcat embedded, so no need to install any standalone server.
 --
 
-=== Importing the YadaFramework Projects
-After connecting to the GitHub repository as explained above, you can import the
-needed projects using the "File > Import... > Gradle > Existing Gradle Project" menu.
+=== The YadaFramework Projects
+You don't need to import the Yada projects separately when building an application.
+Later, in "<<gettingStarted.adoc#_the_build_file,The Build File>>", your project's `settings.gradle` includes `YadaWeb`, `YadaWebSecurity`, `YadaWebCMS`
+and `YadaWebCommerce` from the cloned repository, so they are added to the workspace
+the first time you run "Gradle > Refresh Gradle Project" on your project, and they belong to your project's Gradle build.
 
-[WARNING]
-====
-The Yada projects will be located in the git folder you chose before, 
-not along with the new project just created. This may be confusing because
-the Import dialog will initially open in the workspace and you will have to
-browse to the git folder instead.
-After adding the new project to git as explained later, all projects will be
-found in the git folder.
-====
-
-////
-Import the Yada projects that you need to use, for which there isn't a Maven distribution yet. At the
-time of writing, only the YadaTools project has such a distribution, so you don't need to import it unless
-you need to change it.
-[.center]
-.Import the YadaTools project
-image::newEclipseProject/yadaTools.jpg[Import the YadaTools project]
-////
-
-To import most Yada Framework projects at once you could just import the "YadaWebCommerce" project and rely on dependency resolution to automatically
-import everything else.
-Don't worry about Gradle versions here: the version used will be the one configured inside the imported projects.
-
-[.center]
-.Import the YadaWebCommerce project
-image::newEclipseProject/importYada.jpg[Import the YadaWebCommerce project]
-
-The `YadaTools` project should also be imported because you will later need to copy some files from it.
+The files that you will later copy from `YadaTools`, like `/YadaTools/scripts/template.gradle`, can be taken directly from
+the cloned repository folder, for example `C:\work\git-mysite\yadaframework\YadaTools\scripts`.
 
 If the imported projects have any errors, first of all right-click and choose "Gradle > Refresh Gradle Project".
 If it complains about some unbound system library, open "Properties > Java build path > Libraries" and remove the library.
 
-You should now have, in your workspace, the following Yada projects:
+==== Working on the framework alone
+To work on the framework without an application, use "File > Import... > Gradle > Existing Gradle Project" and select
+the root folder of the cloned repository (e.g. `C:\work\git-mysite\yadaframework`), not one of its subfolders.
+The import dialog initially opens in the workspace, so you have to browse to the git folder.
+This adds the `yadaframework` root project together with `YadaWeb`, `YadaWebSecurity`, `YadaWebCMS`, `YadaWebCommerce`,
+`YadaAi`, `YadaTools` and `YadaDocs`. The Gradle version is the one of the repository-root wrapper.
 
-* YadaTools
-* YadaWeb
-* YadaWebCMS
-* YadaWebCommerce
-* YadaWebSecurity
+[WARNING]
+====
+Each Yada module can belong to only one Gradle build in an Eclipse workspace: either the framework root or your application.
+Buildship stores the owning build in the `.settings/org.eclipse.buildship.core.prefs` file of each module,
+and a new import does not reliably replace an existing file, even when no problems are reported.
+To switch a checkout between framework work and application work:
+
+. Delete the projects from the workspace without deleting their contents on disk.
+. Delete `.settings/org.eclipse.buildship.core.prefs` in the repository root and in each module folder. These files are not
+  stored in git and are recreated by the import.
+. Import the build you want to use: the framework root as shown above, or your application project.
+
+To work on both at the same time, use a separate clone of the repository and a separate Eclipse workspace.
+====
 
 === Saving to git
 

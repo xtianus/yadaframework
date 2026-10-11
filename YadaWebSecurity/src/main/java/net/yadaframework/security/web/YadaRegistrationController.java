@@ -329,6 +329,7 @@ public class YadaRegistrationController {
 		// Check if a user actually exists
 		String email = yadaRegistrationRequest.getEmail();
 		// Sterilize the incoming data: never use yadaRegistrationRequest for anything because it could contain forged data other than email
+		// TODO much cleaner if I just receive an email string instead of the full YadaRegistrationRequest in the parameters
 		yadaRegistrationRequest = null;
 		YadaUserCredentials existing = yadaUserCredentialsDao.findFirstByUsername(StringUtils.trimToEmpty(email).toLowerCase(Locale.ROOT));
 		if (existing!=null) {
