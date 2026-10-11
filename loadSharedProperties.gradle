@@ -1,6 +1,6 @@
 def loadSharedProperties() {
     def sharedProps = new Properties()
-    file('../YadaWeb/shared.gradle.properties').withInputStream { 
+    file('../shared.gradle.properties').withInputStream {
         sharedProps.load(it) 
     }
     sharedProps.each { key, value ->

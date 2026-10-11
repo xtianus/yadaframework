@@ -1,0 +1,9 @@
+rootProject.name = 'yadaframework'
+
+include 'YadaWeb'
+include 'YadaWebSecurity'
+include 'YadaWebCMS'
+include 'YadaWebCommerce'
+include 'YadaAi'
+include 'YadaTools'
+include 'YadaDocs'

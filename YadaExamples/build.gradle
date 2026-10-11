@@ -15,7 +15,7 @@ plugins {
 	id("com.github.node-gradle.node") version "3.5.1"
 }
 
-apply from: '../YadaWeb/loadSharedProperties.gradle'
+apply from: '../loadSharedProperties.gradle'
 
 group = 'net.yadaframework'
 version = yada_version
