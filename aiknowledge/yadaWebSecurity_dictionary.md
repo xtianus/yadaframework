@@ -4,9 +4,9 @@
 
 | Class | Description |
 |---|---|
-| [YadaSecurityEmailService](yadaWebSecurity/YadaSecurityEmailService.md) | Builds security-specific emails such as registration, password reset, and email change confirmations. Use when authentication flows must send signed links. |
+| [YadaSecurityEmailService](yadaWebSecurity/YadaSecurityEmailService.md) | Builds security-specific emails such as registration, password reset, and email change confirmations. Use when authentication flows must send bearer-token links. |
 | [YadaSecurityUtil](yadaWebSecurity/YadaSecurityUtil.md) | Collects higher-level security helpers for access checks, password changes, login state, and controller error parameters. Use from security-aware services and controllers. |
-| [YadaTokenHandler](yadaWebSecurity/YadaTokenHandler.md) | Creates and parses signed autologin and one-time security links. Use when flows need expiring links tied to a user and purpose. |
+| [YadaTokenHandler](yadaWebSecurity/YadaTokenHandler.md) | Creates and parses opaque bearer-token links for autologin and registration requests. Expiry, purpose validation, and consumption depend on the calling flow; the link parameters are not cryptographically signed. |
 
 ## `net.yadaframework.security.persistence.entity`
 
