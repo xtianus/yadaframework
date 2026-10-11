@@ -42,7 +42,7 @@ Publication checks generated POMs and inspected dry-run graphs only; they did no
 
 Generated metadata for all six shared-script modules contains the JavaSE-21 classpath container and Buildship nature. WTP modules contain exactly one installed `jst.java` facet at version 21. The security classpath exposes `/YadaWeb` with `without_test_code=false`, enabling the core test fixtures. Metadata stays ignored.
 
-Interactive root import and the module-directory `GRADLE_DISTRIBUTION(WRAPPER)` launch remain pending because Eclipse/Buildship is unavailable in this environment. CLI module-directory discovery and `help` passed; those do not substitute for the interactive launch check. Buildship connections and checkout/workspace ownership are documented in `aiknowledge/workspace_build_notes.md`.
+Interactive root import and the module-directory `GRADLE_DISTRIBUTION(WRAPPER)` launch could not be checked in this environment; they were verified later on Windows (see "Eclipse verification"). CLI module-directory discovery and `help` passed; those do not substitute for the interactive launch check. Buildship connections and checkout/workspace ownership are documented in `aiknowledge/workspace_build_notes.md`.
 
 Documentation generation changed timestamps in 31 tracked HTML files. Those generated-only changes were inspected and restored; none existed in the initial working tree. Unrelated security dictionary edits and pre-existing untracked plans are preserved.
 
@@ -52,3 +52,12 @@ Documentation generation changed timestamps in 31 tracked HTML files. Those gene
 - The new root wrapper is executable. Its source wrapper was mode 100644, contrary to the plan's executable-permission assumption; the only additional change is the root script's executable bit. The example wrapper retains its original mode and is invoked through Bash on Linux.
 
 Independent final review found no implementation defects and identified the direct-loader documentation caveat above. It was treated as actionable because following the incomplete guidance could break external application configuration; documentation was clarified and both the failing direct-apply case and working explicit-properties alternative were exercised.
+
+## Eclipse verification
+
+Verified interactively on Windows 10 with Eclipse IDE for Enterprise Java 2026-03 (platform 4.39.0), Buildship 3.1.11.v20250904-1000, and JDK 21.
+
+- Root import: the first *Existing Gradle Project* import of the repository root, over prefs files left by earlier `YadaExamples`, `YadaDocs`, and Windsurf imports, reported no problems but left wrong connections (`YadaDocs` for the root, `../YadaDocs` and `../YadaExamples` for modules). After removing all projects from the workspace and deleting every `org.eclipse.buildship.core.prefs`, a fresh import wrote an empty `connection.project.dir` for the root and `..` for all seven modules. The Problems view showed no errors. The security `.classpath` references `/YadaWeb` with `without_test_code=false`.
+- Module-directory wrapper launch: a temporary copy of `YadaWeb - upload to public repo.launch` with `help` instead of `publish` (working directory `${workspace_loc:/YadaWeb}`, `GRADLE_DISTRIBUTION(WRAPPER)`) reported "Gradle wrapper from target build", Gradle 8.14.3, ran `:YadaWeb:help`, and wrote its problems report under the repository-root `build/`, so it ran in the `yadaframework` root build. The temporary launch was deleted.
+- Wrapper update launch: it ran the root `:wrapper` task from the repository root with the 8.14.3 wrapper. The `--dry-run` argument added to the file on disk was not picked up by the running Eclipse (console "Program Arguments: None"), so the task actually executed and regenerated the root wrapper files; they were restored from git, as was the launch file. The regenerated `gradle-wrapper.jar` differs from the committed one (43764 vs 61574 bytes), and the regenerated properties add `validateDistributionUrl=true`.
+- No launch file needs retargeting.
