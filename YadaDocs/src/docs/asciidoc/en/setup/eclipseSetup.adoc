@@ -30,7 +30,7 @@ C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\myCod
 C:\local\Eclipses\eclipse-jee-2019-09-R\eclipse.exe -data "C:\work\wspaces\myRelease"
 ----
 
-[bookstore]
+[.bookstore]
 --
 Create a workspace for the bookstore tutorial:
 [source,dos]
@@ -71,7 +71,7 @@ click on "Update" before applying the changes:
 image::newEclipseProject/java-properties-utf8.png[Eclipse file encoding]
 
 
-Add the <<Java SDK,previously donwloaded>> JRE as a new Runtime in "Window > Preferences > Java > Installed JREs" and set it as the default.
+Add the <<gettingStarted.adoc#_java_sdk,previously downloaded>> JRE as a new Runtime in "Window > Preferences > Java > Installed JREs" and set it as the default.
 Also set the "Window > Preferences > Java > Compiler > JDK Compliance" accordingly (that would be "21" for Java 21). You should also set "Store information about method parameters (usable via reflection)" to use simpler method signatures in Spring controllers (no @RequestParam is needed).
 
 In order to better spot errors and stack traces, you should considerably increase the console output buffer or remove the limit altogether

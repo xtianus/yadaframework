@@ -52,7 +52,7 @@ dependencies {
 		
 	compileOnly 'com.paypal.sdk:checkout-sdk:1.0.5'
 
-	testImplementation 'junit:junit:4.12'
+	// Tests live in the YadaTests project
 }
 
 jar {

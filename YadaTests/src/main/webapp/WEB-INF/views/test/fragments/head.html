@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:yada="http://www.yadaframework.net">
+<!--/* Common head content of the scenario pages: <head th:replace="~{/test/fragments/head :: head(title='...')}"></head> */-->
+<head th:fragment="head(title)">
+	<meta charset="UTF-8">
+	<title th:text="${title}">YadaTests</title>
+	<!--/* CSRF token exposed to JS so yada can attach it to Ajax requests */-->
+	<meta name="_csrf" th:content="${_csrf.token}"/>
+	<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+	<link rel="stylesheet" th:href="@{/static/bootstrap-5.3.3/css/bootstrap.min.css}">
+	<link rel="stylesheet" yada:href="@{/yadares/css/yada.css}">
+</head>
+</html>

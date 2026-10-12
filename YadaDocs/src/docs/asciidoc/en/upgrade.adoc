@@ -44,3 +44,24 @@ is for that version.
 |Tomcat 11
 
 |===
+
+== Changes in 0.7.9
+
+=== Embedded database
+
+Yada no longer attaches silently to any database that answers on the configured embedded port: the running server
+must use the configured data folder, otherwise the application fails at startup. If you rely on a database
+started separately on that port, configure the same `datadir` or a different port.
+On Linux and macOS, embedded database folders containing whitespace are refused at startup with a clear message.
+
+=== Hibernate dialect
+
+Hibernate still detects the dialect by itself, except when the embedded database is enabled: Yada then uses
+`MariaDBDialect`, because Hibernate can't recognize MariaDB 11 through MySQL Connector/J and would fail at startup.
+The new `<database><dialect>` setting forces any dialect, e.g. `MariaDBDialect` for a MariaDB server reached
+through MySQL Connector/J. See <<database/overview.adoc#_hibernate_dialect,Hibernate Dialect>>.
+
+=== Sorting
+
+A single `sort=property,direction` request parameter bound to `YadaPageRequest` works: it was split at the comma
+by Spring and rejected with "No sort column specified".

@@ -212,3 +212,76 @@ asciidoctor {
 	}
 }
 
+
+// Documentation verification, used by :YadaTests:verifyDocs.
+// The sources are staged and rendered to HTML in docsVerificationDir (set by YadaTests to its own build folder),
+// so that neither the source tree (see copyDocInfoHeader) nor the published ../docs folder is touched.
+ext.docsVerificationDir = objects.directoryProperty().convention(layout.buildDirectory.dir('docs-verification'))
+
+tasks.register('stageAsciidocForVerification') {
+	description = 'Copies the documentation sources to the verification folder, with the docinfo header in each subfolder'
+	def sourceRoot = file('src/docs/asciidoc')
+	def docinfoHeader = file('src/docs/asciidoc/common/docinfo-header.html')
+	def stagingDir = docsVerificationDir.dir('src')
+	inputs.dir(sourceRoot)
+	outputs.dir(stagingDir)
+	doLast {
+		def target = stagingDir.get().asFile
+		project.delete(target)
+		project.copy {
+			from sourceRoot
+			into target
+		}
+		// The same placement as copyDocInfoHeader, applied to the staged copy
+		target.eachDirRecurse { dir ->
+			if (dir.name != 'common') {
+				project.copy {
+					from docinfoHeader
+					into dir
+				}
+			}
+		}
+	}
+}
+
+tasks.register('verifyAsciidoc', org.asciidoctor.gradle.jvm.AsciidoctorTask) {
+	description = 'Renders the documentation to HTML in a staging folder, failing on any Asciidoctor warning or broken relative link'
+	group = 'verification'
+	dependsOn 'stageAsciidocForVerification'
+	sourceDir docsVerificationDir.dir('src')
+	outputDir docsVerificationDir.dir('html')
+	baseDirFollowsSourceFile()
+	languages 'en'
+	asciidoctorj {
+		attribute 'toc', 'left'
+		attribute 'source-highlighter', 'highlightjs'
+		attribute 'icons', 'font'
+		attribute 'linkcss', 'linkcss'
+		fatalWarnings ~/.*/
+	}
+	resources {
+		from('src/docs/resources') {
+		}
+		into '../'
+	}
+	doLast {
+		// Relative links between pages must point to existing files and anchors
+		def htmlRoot = docsVerificationDir.dir('html').get().asFile
+		def broken = []
+		htmlRoot.eachFileRecurse { page ->
+			if (page.name.endsWith('.html') && page.path.contains("${File.separator}en${File.separator}")) {
+				(page.text =~ /href="([^"#:?]+\.html)(?:#([^"]*))?"/).each { match, target, anchor ->
+					def targetFile = new File(page.parentFile, target).canonicalFile
+					if (!targetFile.isFile()) {
+						broken << "${htmlRoot.toPath().relativize(page.toPath())}: missing ${target}"
+					} else if (anchor && !(targetFile.text.contains("id=\"${anchor}\""))) {
+						broken << "${htmlRoot.toPath().relativize(page.toPath())}: missing anchor ${target}#${anchor}"
+					}
+				}
+			}
+		}
+		if (!broken.isEmpty()) {
+			throw new GradleException("Broken documentation links:\n" + broken.unique().join('\n'))
+		}
+	}
+}

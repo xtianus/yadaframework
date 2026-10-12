@@ -1649,6 +1649,16 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
+	 * The Hibernate dialect configured in &lt;database>&lt;dialect>, used by YadaJpaConfig.
+	 * When missing, Hibernate detects the dialect from the database, except with the embedded database (see YadaJpaConfig).
+	 * Set it for a MariaDB server reached through MySQL Connector/J, which Hibernate can't recognize as MariaDB.
+	 * @return the dialect class name, or null when not configured
+	 */
+	public String getDbDialect() {
+		return configuration.getString("config/database/dialect", null);
+	}
+
+	/**
 	 * Value for the Hibernate "default_batch_fetch_size" setting, used to batch-load lazy collections and
 	 * entity proxies with IN (?, ?, ...) clauses instead of one query each, mitigating N+1 problems globally.
 	 * @return the configured batch size, or 0 (disabled) when not set

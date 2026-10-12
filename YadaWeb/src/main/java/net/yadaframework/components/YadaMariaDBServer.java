@@ -2,15 +2,19 @@ package net.yadaframework.components;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +22,23 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import ch.vorburger.exec.ManagedProcessException;
 import ch.vorburger.mariadb4j.DB;
 import ch.vorburger.mariadb4j.DBConfigurationBuilder;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaSystemException;
 
+/**
+ * Installs, starts or attaches to the embedded MariaDB database configured in &lt;database>&lt;embedded>.
+ * <p>
+ * An instance owns the database process only when it started that process. An instance that attached to a process
+ * that was already running does not own it and never stops it. Attaching is refused when the running server uses a
+ * data directory different from the configured one, so that a port collision can't silently use, or create schemas in,
+ * someone else's database.
+ * <p>
+ * The process is not stopped when the application context closes: it is expected to keep running between
+ * application restarts during development. Use {@link #stopOwnedDatabase()} to stop it explicitly.
+ */
 @Lazy // Create instance only when used
 @Component("yadaMariaDBServer")
 @DependsOn("config")
@@ -30,6 +46,9 @@ public class YadaMariaDBServer {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 	private DB db;
 	private Integer port;
+	private boolean owner = false; // True when this instance called start() on the process
+	private boolean attached = false; // True when this instance attached to an already running process
+	private boolean stopped = false;
 	
 	private YadaConfiguration config;
 	
@@ -48,6 +67,8 @@ public class YadaMariaDBServer {
 			String tmpDir = config.getEmbeddedDatabaseTmpDir();
 			File baseDirFile = new File(baseDir);
 			File embeddedDatabaseDataDirFile = new File(dataDir);
+			// Fail with a clear message before MariaDB4j fails with an obscure one, and before creating any folder
+			checkSupportedPaths(baseDirFile, embeddedDatabaseDataDirFile, new File(tmpDir));
 			embeddedDatabaseDataDirFile.mkdirs();
 			if (!embeddedDatabaseDataDirFile.isDirectory() || !embeddedDatabaseDataDirFile.canWrite()) {
 				throw new YadaSystemException("Can't write embedded database to folder {}", embeddedDatabaseDataDirFile);
@@ -63,6 +84,7 @@ public class YadaMariaDBServer {
 			if (install) {
 				db = DB.newEmbeddedDB(configBuilder.build());
 				log.info("Installing new database in {}", baseDir);
+				owner = true; // Set before starting so that a partial start can be cleaned up
 				db.start();
 			} else {
 				db = YadaMariaDB.openEmbeddedDB(configBuilder.build());
@@ -71,11 +93,17 @@ public class YadaMariaDBServer {
 					Connection connection = openConnection();
 					connection.close();
 					// Yes it's running.
-					log.debug("Attaching to running database instance");
+					attached = true;
 				} catch (Exception e) {
 					// Not running so start it
 					log.debug("Starting database process");
+					owner = true; // Set before starting so that a partial start can be cleaned up
 					db.start();
+				}
+				if (attached) {
+					// Must be checked before touching the server in any way
+					ensureSameDataDirectory(embeddedDatabaseDataDirFile);
+					log.debug("Attaching to running database instance");
 				}
 			}
 			//
@@ -95,7 +123,84 @@ public class YadaMariaDBServer {
 				loadDatabase();
 			}
 		} catch (Exception e) {
-			throw new YadaSystemException("Failed to start the embedded MariaDB", e);
+			YadaSystemException failure = new YadaSystemException("Failed to start the embedded MariaDB", e);
+			// Don't leave behind a process that nobody can stop because this instance will never be registered
+			try {
+				stopOwnedDatabase();
+			} catch (Exception cleanupException) {
+				failure.addSuppressed(cleanupException);
+			}
+			throw failure;
+		}
+	}
+
+	/**
+	 * Fails when the embedded database folders can't work on the current operating system.
+	 * <p>
+	 * On Linux and macOS, MariaDB4j (up to at least 3.3.1, through ch.vorburger.exec 3.3.2) passes folder arguments
+	 * to the MariaDB programs as --datadir="/some path", and the quotes reach the program literally because no shell is
+	 * involved. The installation then fails with an obscure "Could not find my_print_defaults" error. Windows quotes the
+	 * whole argument instead and is not affected.
+	 * The YadaTests suite verifies that the MariaDB4j limitation still exists: when that test fails, remove this check.
+	 * @param folders the embedded database folders
+	 * @throws YadaSystemException when a folder contains whitespace on a non-Windows system
+	 */
+	static void checkSupportedPaths(File... folders) {
+		if (SystemUtils.IS_OS_WINDOWS) {
+			return;
+		}
+		for (File folder : folders) {
+			if (folder != null && folder.getAbsolutePath().chars().anyMatch(Character::isWhitespace)) {
+				throw new YadaSystemException("The embedded database folder \"{}\" contains whitespace: MariaDB4j can't install or start MariaDB in such a folder on this operating system. "
+					+ "Configure a path without whitespace in <database><embedded> (baseDir, datadir, tmpDir) or in <paths><basePath>.", folder.getAbsolutePath());
+			}
+		}
+	}
+
+	/**
+	 * Refuses to use a running server that stores its data in a different folder than the configured one.
+	 * @param configuredDataDir the configured data folder
+	 * @throws YadaSystemException when the folders differ or the check can't be performed
+	 */
+	private void ensureSameDataDirectory(File configuredDataDir) throws SQLException {
+		String runningDataDir;
+		try (Connection connection = openConnection(); Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery("SELECT @@datadir")) {
+			resultSet.next();
+			runningDataDir = resultSet.getString(1);
+		}
+		Path expected = normalizeDirectory(configuredDataDir.getAbsolutePath());
+		Path actual = runningDataDir==null ? null : normalizeDirectory(runningDataDir);
+		if (!expected.equals(actual)) {
+			throw new YadaSystemException("The database already running on port {} uses data directory {} instead of the configured data directory {}: refusing to attach. Configure a different port.", port, runningDataDir, expected);
+		}
+	}
+
+	private Path normalizeDirectory(String directory) {
+		Path path = Path.of(directory).toAbsolutePath().normalize();
+		try {
+			return path.toRealPath();
+		} catch (IOException e) {
+			return path;
+		}
+	}
+
+	/**
+	 * Stops the database process started by this instance. It does nothing when the process was already running and this
+	 * instance just attached to it, when the embedded database is disabled, or when the process has already been stopped.
+	 * The process is otherwise left running when the application stops, so call this method only when the database should
+	 * really go away, e.g. in tests.
+	 * @throws YadaSystemException if the process could not be stopped
+	 */
+	public synchronized void stopOwnedDatabase() {
+		if (!owner || stopped || db==null) {
+			return;
+		}
+		try {
+			db.stop();
+			stopped = true;
+			log.info("Embedded MariaDB on port {} stopped", port);
+		} catch (ManagedProcessException e) {
+			throw new YadaSystemException("Failed to stop the embedded MariaDB on port " + port, e);
 		}
 	}
 	

@@ -1,0 +1,30 @@
+# YadaTests Notes
+
+`YadaTests` owns every automated test of the framework modules. `YadaTests/README.md` lists the suites and commands; `YadaTests/coverage-inventory.md` maps tests to suites and records known framework issues.
+
+## Source sets and dependencies
+
+- `src/main` is a small Spring MVC application in `net.yadaframework.tests` (configuration in `core`, scenario controllers in `web`, DAOs in `persistence.repository`, `TestDataService` and `StartupSchemaCheck` in `components`). It is never packaged: Tomcat mounts its compiled output and `src/main/webapp`.
+- `src/harness` holds the test infrastructure and never depends on `src/main`: names of application classes are passed as strings or functions.
+- `src/test` (unit), `src/integrationTest`, `src/e2eTest` (Playwright Java) and `src/toolTest` (YadaTools, TestKit) have separate classpaths. Ai and Tools stay out of the shared runtime classpaths. JUnit and Mockito versions come from the shared `testCommon` configuration; all configurations are locked in `gradle.lockfile` (refresh with `../gradlew :YadaTests:dependencies --write-locks`).
+- Relocated tests keep their original packages, because some use package-private members (e.g. `YadaEmbeddedTomcatTestServer.resolveClasspathDirectories`).
+
+## Harness
+
+- `TestRun` creates `build/runs/<run-id>` with the MariaDB `MariaDB`, `data` and `tmp` folders, a free port (never 3306 or 63306), schema `yts_<run-id>`, and a generated `configuration.xml` that overrides the classpath `conf.webapp.yts.xml`. `close()` deletes the folder only when the port is free and fails if anything survives.
+- `TestApplication.start(run)` opens a `YadaTestConfigurationScope`, starts `YadaEmbeddedTomcatTestServer` with exactly `SecurityWebApplicationInitializer` and the application initializer, parent-first class loading, and the `globalInitializerClasses` parameter that installs `EmbeddedDatabaseOwnership`. That initializer swaps the class of the `yadaMariaDBServer` bean for `CapturingMariaDBServer`, which records itself in `OwnedDatabases` as soon as it is constructed, so a failed refresh can't lose the handle needed to stop the process. Startup is retried with a new port only when the database never started and the port is taken.
+- Teardown order: Tomcat (contexts, EntityManagerFactory, pool), then `OwnedDatabases.stopAll()`, then the configuration scope.
+- `YadaTestConfigurationScope` sets `yada.configurationFile`, clears `YadaAppConfig.CONFIG`, and on close stops the scoped reload trigger and restores the property, the static configuration and `YadaUtil.applicationContext`. Only one scope is active at a time.
+- `YadaEmbeddedTomcatTestServer` either runs the initializers found in the mounted classpath roots (inferred from the nearest `build` ancestor of the webapp folder, or passed explicitly) or exactly an allowlist set with `setInitializerClassNames`. Tomcat does not throw when the web application fails to start, so `start()` checks the context state and reports the root context exception that Spring stored in the servlet context. It restores the JVM-wide `catalina.base` and `catalina.home` properties on close. Its default base folder is under `build/tomcat` when the `yts.buildDir` property is set.
+- `DatabaseFixtures.reset()` deletes the rows of every table except the Flyway history with foreign key checks disabled and resets the auto-increment counters (DELETE, not TRUNCATE: TRUNCATE is DDL in MariaDB and once hit a lock wait timeout), then runs the seeder (`TestDataService::seedDefaults`), so default rows get the same ids every time. `ApplicationSession` bundles a run, its application and fixtures.
+- `BrowserTestSupport` (e2e) starts one application and one Chromium per class, a new browser context and a database reset per test, and writes a screenshot and trace for failed tests to `build/e2e-artifacts`.
+
+## Application facts
+
+- The application database schema comes from Flyway `V001__baseline.sql`, generated with `:YadaTests:dbSchema` from `src/dbSchema/META-INF/persistence.xml` (MariaDB dialect, script only). `StartupSchemaCheck` fails the root context when V001 is not in the history as a successful SQL migration.
+- `:YadaTests:webTestDbSchema` generates the historical YadaWeb core test schema (`YadaWeb/schema/V1__yadatest.sql`) from `src/webTestDbSchema`; `YadaWeb:testDbSchema` only points to it.
+- `YadaJpaConfig.chooseDialect` sets the Hibernate dialect: the configured `<database><dialect>`, else `MariaDBDialect` when the embedded database is enabled (MariaDB 11.4 through MySQL Connector/J can't be detected), else none, so Hibernate detects it (`MySQLDialect` for MySQL). The YadaTests application relies on the embedded default.
+- Framework resources under `/yadares` are reached through `yada:src`/`yada:href`, which add the framework version required by the resource handler. jQuery and Bootstrap are served locally from `src/main/webapp/static`.
+- The `entityManager` bean of `YadaJpaConfig` is not bound to Spring transactions; transactional test code uses `SharedEntityManagerCreator` or the application DAOs.
+- `YadaMoney` stores 1/10000 of the currency: `fromDatabaseColumn` takes that internal value, not cents.
+- Spring binds a single `sort=property,direction` request parameter to `YadaPageRequest.setSort(List)` as `[property, direction]`; `YadaPageRequest.getPageSort()` joins a lone `asc`/`desc`/`ignorecase` back to the previous element. Two or more `sort` parameters are bound unsplit.

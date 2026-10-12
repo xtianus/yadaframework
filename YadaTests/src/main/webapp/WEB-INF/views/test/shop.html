@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{/test/fragments/head :: head(title=#{yts.shop.title})}"></head>
+<body>
+	<h1 th:text="#{yts.shop.title}">Shop</h1>
+	<ul>
+		<li th:each="article : ${articles}" th:attr="data-testid=|shopArticle-${article.sku}|">
+			<span th:text="${article.localName}">Name</span>
+			<span data-testid="price" th:text="${article.unitPrice.toString(#locale)}">0.00</span>
+			<form th:action="@{/test/user/shop/add/{id}(id=${article.id})}" method="post">
+				<button type="submit" th:text="#{yts.shop.add}" th:attr="aria-label=|#{yts.shop.add} ${article.sku}|">Add</button>
+			</form>
+		</li>
+	</ul>
+	<h2 th:text="#{yts.shop.cart}">Cart</h2>
+	<ul data-testid="cart">
+		<li th:each="item : ${cart?.cartItems}" data-testid="cartItem" th:text="|${item.article.sku} x ${item.quantity}|">item</li>
+	</ul>
+	<p><span th:text="#{yts.shop.total}">Total</span> <span data-testid="cartTotal" th:text="${total.toString(#locale)}">0.00</span></p>
+	<form th:action="@{/test/user/shop/order}" method="post">
+		<button type="submit" th:text="#{yts.shop.order}">Place order</button>
+	</form>
+	<ul data-testid="orders">
+		<li th:each="order : ${orders}" data-testid="order">
+			<span data-testid="orderTotal" th:text="${order.totalPrice.toString(#locale)}">0.00</span>
+			<span data-testid="orderStatus" th:text="${order.orderStatus.langToText[#locale.toString()]}">status</span>
+			<span data-testid="orderItems" th:text="${#lists.size(order.orderItems)}">0</span>
+		</li>
+	</ul>
+	<div th:replace="~{/test/fragments/scripts :: body}"></div>
+</body>
+</html>

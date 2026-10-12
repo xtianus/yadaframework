@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+	version="3.0">
+
+	<!-- Only used by the :YadaTests:dbSchema task to generate the DDL of the application.
+		It is never on the application classpath: the application scans its entity packages at startup. -->
+	<persistence-unit name="yadaPersistenceUnit">
+		<class>net.yadaframework.tests.persistence.entity.UserProfile</class>
+
+		<class>net.yadaframework.cms.persistence.entity.YadaArticle</class>
+		<class>net.yadaframework.cms.persistence.entity.YadaGallerySlide</class>
+		<class>net.yadaframework.cms.persistence.entity.YadaProduct</class>
+		<class>net.yadaframework.commerce.persistence.entity.YadaAddress</class>
+		<class>net.yadaframework.commerce.persistence.entity.YadaCart</class>
+		<class>net.yadaframework.commerce.persistence.entity.YadaCartItem</class>
+		<class>net.yadaframework.commerce.persistence.entity.YadaCommerceArticle</class>
+		<class>net.yadaframework.commerce.persistence.entity.YadaOrder</class>
+		<class>net.yadaframework.commerce.persistence.entity.YadaOrderItem</class>
+		<class>net.yadaframework.commerce.persistence.entity.YadaTransaction</class>
+		<class>net.yadaframework.persistence.entity.YadaAttachedFile</class>
+		<class>net.yadaframework.persistence.entity.YadaBrowserId</class>
+		<class>net.yadaframework.persistence.entity.YadaClause</class>
+		<class>net.yadaframework.persistence.entity.YadaJob</class>
+		<class>net.yadaframework.persistence.entity.YadaManagedFile</class>
+		<class>net.yadaframework.persistence.entity.YadaPersistentEnum</class>
+		<class>net.yadaframework.persistence.entity.YadaRateLog</class>
+		<class>net.yadaframework.persistence.entity.YadaSavedProperty</class>
+		<class>net.yadaframework.security.persistence.entity.YadaAutoLoginToken</class>
+		<class>net.yadaframework.security.persistence.entity.YadaCommentMessage</class>
+		<class>net.yadaframework.security.persistence.entity.YadaRegistrationRequest</class>
+		<class>net.yadaframework.security.persistence.entity.YadaSocialCredentials</class>
+		<class>net.yadaframework.security.persistence.entity.YadaTicket</class>
+		<class>net.yadaframework.security.persistence.entity.YadaTicketMessage</class>
+		<class>net.yadaframework.security.persistence.entity.YadaUserCredentials</class>
+		<class>net.yadaframework.security.persistence.entity.YadaUserMessage</class>
+		<class>net.yadaframework.security.persistence.entity.YadaUserProfile</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+		<properties>
+			<!-- Script-only generation: no database is needed or touched -->
+			<property name="jakarta.persistence.schema-generation.database.action" value="none"/>
+			<property name="jakarta.persistence.schema-generation.scripts.action" value="create"/>
+			<property name="jakarta.persistence.schema-generation.scripts.create-target" value="build/schema/yts.sql"/>
+			<property name="hibernate.boot.allow_jdbc_metadata_access" value="false"/>
+			<property name="hibernate.dialect" value="org.hibernate.dialect.MariaDBDialect"/>
+			<!-- MariaDB4j 3.2.0 runs MariaDB 11.4 -->
+			<property name="jakarta.persistence.database-product-name" value="MariaDB"/>
+			<property name="jakarta.persistence.database-major-version" value="11"/>
+			<property name="jakarta.persistence.database-minor-version" value="4"/>
+			<property name="hibernate.hbm2ddl.delimiter" value=";"/>
+			<property name="hibernate.format_sql" value="true"/>
+		</properties>
+	</persistence-unit>
+</persistence>

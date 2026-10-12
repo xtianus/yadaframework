@@ -202,7 +202,7 @@ project(':YadaWebCommerce').projectDir = "../../yadaframework/YadaWebCommerce" a
 
 You should change the project name to whatever you used. The above assumes that you cloned the yadaframework repository
 in the same root folder of your project repository as explained in
-"<<Add the repositories>>" above.
+"<<eclipseSetup.adoc#_add_the_repositories,Add the repositories>>" of the IDE setup.
 This setup is needed to use YadaWeb class files directly instead of going through the jar,
 and is handy when you plan to work on the YadaWeb sources to fix and improve them.
 

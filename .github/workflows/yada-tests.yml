@@ -1,0 +1,62 @@
+# Source-based verification of the Yada Framework with the central YadaTests suites.
+# No database service or container and no credentials: the suites start their own native embedded MariaDB
+# and embedded Tomcat, and Chromium runs headless.
+name: YadaTests
+
+on:
+  push:
+    branches: [ master, '0.*' ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: yada-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  framework-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Native prerequisites of the embedded MariaDB
+        run: sudo apt-get update && sudo apt-get install -y libcrypt1 libsystemd0
+
+      - name: Chromium and its system packages
+        run: ./gradlew :YadaTests:installBrowsersCi
+
+      - name: Full verification and coverage
+        timeout-minutes: 75
+        run: ./gradlew :YadaTests:frameworkCheck :YadaTests:frameworkCoverage --continue
+
+      # The suites stop what they start; this only catches processes left by a cancelled or timed-out run.
+      # It matches the database processes of YadaTests run folders and nothing else.
+      - name: Stop leftover embedded databases
+        if: always()
+        # "[m]ariadbd" keeps the pattern from matching the shell that runs it
+        run: pkill -f "${GITHUB_WORKSPACE}/YadaTests/build/runs/.*/[m]ariadbd" || true
+
+      - name: Upload reports, failure screenshots and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yada-tests-reports
+          path: |
+            YadaTests/build/reports/
+            YadaTests/build/test-results/
+            YadaTests/build/e2e-artifacts/
+            YadaTests/build/runs/*/embeddedDB*/data/*.err
+            YadaTests/build/runs/*/tomcat/logs/
+          if-no-files-found: warn
+          retention-days: 14

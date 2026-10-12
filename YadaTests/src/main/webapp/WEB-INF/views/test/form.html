@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{/test/fragments/head :: head(title=#{yts.form.title})}"></head>
+<body>
+	<h1 th:text="#{yts.form.title}">Contact form</h1>
+	<p th:if="${saved}" data-testid="saved" th:text="#{yts.form.saved(${contactForm.name})}">Saved</p>
+	<form th:action="@{/test/form}" th:object="${contactForm}" method="post" novalidate data-testid="contactForm">
+		<label for="name" th:text="#{yts.form.name}">Name</label>
+		<input type="text" id="name" th:field="*{name}">
+		<span data-testid="nameError" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">error</span>
+		<label for="email" th:text="#{yts.form.email}">Email</label>
+		<input type="text" id="email" th:field="*{email}">
+		<span data-testid="emailError" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">error</span>
+		<button type="submit" th:text="#{yts.form.submit}">Send</button>
+	</form>
+	<div th:replace="~{/test/fragments/scripts :: body}"></div>
+</body>
+</html>

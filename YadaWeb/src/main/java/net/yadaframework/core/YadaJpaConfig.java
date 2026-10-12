@@ -90,8 +90,10 @@ public class YadaJpaConfig {
 		HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 		// vendorAdapter.setGenerateDdl(true); // Crea la tabella e le colonne quando non esistono
 		vendorAdapter.setShowSql(config.getShowSql());
-		// HHH90000025: MySQLDialect does not need to be specified explicitly
-		// vendorAdapter.setDatabasePlatform("org.hibernate.dialect.MySQLDialect");
+		String dialect = chooseDialect(config);
+		if (dialect!=null) {
+			vendorAdapter.setDatabasePlatform(dialect);
+		}
 		LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
 		factory.setJpaVendorAdapter(vendorAdapter);
 		List<String> packages = config.getDbEntityPackages();
@@ -137,6 +139,24 @@ public class YadaJpaConfig {
 		return new HibernateExceptionTranslator();
 	}
 	
+	/**
+	 * Chooses the Hibernate dialect: the configured &lt;database>&lt;dialect>, otherwise MariaDBDialect when the embedded
+	 * database is enabled, because Hibernate can't detect MariaDB 11 through MySQL Connector/J.
+	 * Otherwise null, so that Hibernate detects the dialect from the database.
+	 * @param config the application configuration
+	 * @return the dialect class name, or null to let Hibernate detect it
+	 */
+	static String chooseDialect(YadaConfiguration config) {
+		String configured = config.getDbDialect();
+		if (configured!=null) {
+			return configured;
+		}
+		if (config.isUseEmbeddedDatabase()) {
+			return "org.hibernate.dialect.MariaDBDialect";
+		}
+		return null;
+	}
+
 	/**
 	 * Returns a DataSource that has NOT been configured on JNDI. Given that there is a configuration file for each environment, you
 	 * could have a programmatic datasource in development and a JNDI datasource in production, if needed.

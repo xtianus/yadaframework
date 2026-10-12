@@ -1,0 +1,373 @@
+// Central test project for the Yada Framework.
+// It owns every automated test of the framework modules and a minimal Spring MVC application
+// used by the integration and browser suites. It applies no publishing plugin and produces no archive.
+// See README.md for the suites and how to run them.
+
+plugins {
+	id 'java'
+	id 'eclipse'
+	id 'jacoco'
+}
+
+apply from: '../loadSharedProperties.gradle'
+apply from: '../eclipseSetup.gradle'
+
+group = 'net.yadaframework'
+version = yada_version
+
+// Test-only dependency versions. Framework library versions come from the framework projects.
+ext {
+	junitBomVersion = '6.0.3'
+	mockitoVersion = '5.3.1'
+	springTestVersion = '6.2.11'
+	tomcatVersion = '11.0.18'
+	servletApiVersion = '6.1.0'
+	mariaDB4jVersion = '3.2.0'
+	playwrightVersion = '1.63.0'
+	jacocoVersion = '0.8.15'
+}
+
+java {
+	sourceCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
+	targetCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+	// Needed since Spring 6.1 for parameter name retention
+	options.compilerArgs.add("-parameters")
+}
+
+repositories {
+	mavenCentral()
+}
+
+jacoco {
+	toolVersion = jacocoVersion
+}
+
+sourceSets {
+	// Test infrastructure: run directories, embedded database ownership, embedded Tomcat, fixtures.
+	// It never depends on the application (main) and is never packaged.
+	harness {
+	}
+	test {
+		compileClasspath += harness.output
+		runtimeClasspath += harness.output
+	}
+	integrationTest {
+		compileClasspath += main.output + harness.output
+		runtimeClasspath += main.output + harness.output
+	}
+	e2eTest {
+		compileClasspath += main.output + harness.output
+		runtimeClasspath += main.output + harness.output
+	}
+	toolTest {
+	}
+}
+
+configurations {
+	// Shared JUnit/Mockito constraints for all suites, without inheriting any suite's classpath
+	testCommon {
+		canBeResolved = false
+		canBeConsumed = false
+	}
+	testImplementation.extendsFrom testCommon
+	integrationTestImplementation.extendsFrom testCommon, harnessImplementation
+	integrationTestRuntimeOnly.extendsFrom harnessRuntimeOnly
+	e2eTestImplementation.extendsFrom testCommon, harnessImplementation
+	e2eTestRuntimeOnly.extendsFrom harnessRuntimeOnly
+	toolTestImplementation.extendsFrom testCommon
+	// The YadaTools jar and its runtime dependencies, loaded by Gradle TestKit as the plugin under test
+	toolsPluginClasspath {
+		canBeResolved = true
+		canBeConsumed = false
+	}
+	// The unit suite compiles against the harness (e.g. path resolution of the Tomcat fixture) without starting it
+	testImplementation.extendsFrom harnessImplementation
+	all*.exclude group: 'commons-logging', module: 'commons-logging'
+}
+
+dependencyLocking {
+	lockAllConfigurations()
+}
+
+dependencies {
+	testCommon platform("org.junit:junit-bom:${junitBomVersion}")
+	testCommon 'org.junit.jupiter:junit-jupiter'
+	testCommon 'org.junit.platform:junit-platform-launcher'
+	testCommon "org.mockito:mockito-core:${mockitoVersion}"
+	testCommon "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+
+	// The application under test
+	implementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'), project(':YadaWebCommerce')
+	implementation('ch.vorburger.mariaDB4j:mariaDB4j:' + mariaDB4jVersion) {
+		// mariaDB4j pulls the latest version of spring core but this is never a good thing.
+		exclude group: 'org.springframework', module: 'spring-core'
+	}
+	compileOnly "jakarta.servlet:jakarta.servlet-api:${servletApiVersion}"
+
+	harnessImplementation project(':YadaWeb')
+	harnessImplementation "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+	harnessImplementation "jakarta.servlet:jakarta.servlet-api:${servletApiVersion}"
+	harnessImplementation('ch.vorburger.mariaDB4j:mariaDB4j:' + mariaDB4jVersion) {
+		exclude group: 'org.springframework', module: 'spring-core'
+	}
+
+	testImplementation project(':YadaWeb'), project(':YadaAi')
+	testImplementation "org.springframework:spring-test:${springTestVersion}"
+
+	integrationTestImplementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'), project(':YadaWebCommerce')
+	integrationTestImplementation "org.springframework:spring-test:${springTestVersion}"
+
+	e2eTestImplementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'), project(':YadaWebCommerce')
+	e2eTestImplementation "com.microsoft.playwright:playwright:${playwrightVersion}"
+
+	// Tools is a Gradle plugin: the Gradle API and Groovy are supplied by Gradle itself
+	toolTestImplementation project(':YadaTools')
+	toolTestImplementation gradleApi(), localGroovy(), gradleTestKit()
+	toolsPluginClasspath project(':YadaTools')
+}
+
+/**
+ * Fails a test task that discovers no test at all, so a wiring mistake can't pass silently.
+ */
+def failWhenNoTestsDiscovered = { Test testTask ->
+	def executedTests = 0L
+	testTask.afterSuite { descriptor, result ->
+		if (descriptor.parent == null) {
+			executedTests = result.testCount
+		}
+	}
+	testTask.doLast {
+		boolean filtered = !testTask.filter.includePatterns.isEmpty() || !testTask.filter.commandLineIncludePatterns.isEmpty()
+		if (executedTests == 0 && !filtered) {
+			throw new GradleException("${testTask.path} discovered no tests")
+		}
+	}
+}
+
+def configureSuite = { Test testTask ->
+	testTask.useJUnitPlatform()
+	testTask.testLogging {
+		events "passed", "skipped", "failed"
+		exceptionFormat "full"
+	}
+	testTask.systemProperty 'yts.buildDir', layout.buildDirectory.get().asFile.absolutePath
+	testTask.systemProperty 'yts.projectDir', projectDir.absolutePath
+	failWhenNoTestsDiscovered(testTask)
+}
+
+test {
+	configureSuite(it)
+}
+
+// Stateful suites run serially in one fork, without JUnit parallel execution
+def configureStatefulSuite = { Test testTask ->
+	configureSuite(testTask)
+	testTask.maxParallelForks = 1
+	testTask.forkEvery = 0
+	testTask.systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'
+}
+
+tasks.register('integrationTest', Test) {
+	description = 'Runs the database, HTTP container and lifecycle tests (native embedded MariaDB, embedded Tomcat)'
+	group = 'verification'
+	testClassesDirs = sourceSets.integrationTest.output.classesDirs
+	classpath = sourceSets.integrationTest.runtimeClasspath
+	dependsOn sourceSets.main.output, sourceSets.harness.output
+	mustRunAfter test
+	configureStatefulSuite(it)
+	timeout = java.time.Duration.ofMinutes(30)
+}
+
+tasks.register('e2eTest', Test) {
+	description = 'Runs the Playwright browser tests against the YadaTests application'
+	group = 'verification'
+	testClassesDirs = sourceSets.e2eTest.output.classesDirs
+	classpath = sourceSets.e2eTest.runtimeClasspath
+	dependsOn sourceSets.main.output, sourceSets.harness.output
+	mustRunAfter test, tasks.named('integrationTest')
+	configureStatefulSuite(it)
+	systemProperty 'yts.e2eArtifactsDir', layout.buildDirectory.dir('e2e-artifacts').get().asFile.absolutePath
+	// The deliberately failing scenario is run only by CleanupAfterFailureE2eTest
+	useJUnitPlatform {
+		excludeTags 'selfcheck'
+	}
+	timeout = java.time.Duration.ofMinutes(30)
+}
+
+tasks.register('toolTest', Test) {
+	description = 'Runs the YadaTools unit and Gradle TestKit functional tests'
+	group = 'verification'
+	testClassesDirs = sourceSets.toolTest.output.classesDirs
+	classpath = sourceSets.toolTest.runtimeClasspath
+	configureStatefulSuite(it)
+	// YadaTools has no java-gradle-plugin metadata: the plugin classpath is passed explicitly (a jar, because the
+	// plugin reads its templates through a jar file system)
+	def pluginClasspath = configurations.toolsPluginClasspath
+	inputs.files(pluginClasspath).withNormalizer(ClasspathNormalizer)
+	jvmArgumentProviders.add({ ["-Dyts.toolsPluginClasspath=${pluginClasspath.asPath}".toString()] } as CommandLineArgumentProvider)
+	systemProperty 'yts.testKitDir', layout.buildDirectory.dir('testkit').get().asFile.absolutePath
+	// Needed by ProjectBuilder on recent JDKs
+	jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED'
+	timeout = java.time.Duration.ofMinutes(20)
+}
+
+/**
+ * Registers a task that writes the DDL of a persistence unit with YadaSchemaGenerator. No database is needed.
+ * The persistence descriptor in descriptorDir/META-INF is staged next to the classpath only for the task,
+ * so it never reaches the application classpath. The descriptor names the output file, relative to the project folder.
+ */
+def registerSchemaTask = { String taskName, String taskDescription, String descriptorDir, String outputPath ->
+	tasks.register(taskName, JavaExec) {
+		description = taskDescription
+		group = 'build'
+		def stagingDir = layout.buildDirectory.dir("schema-generation/${taskName}")
+		def schemaFile = layout.projectDirectory.file(outputPath)
+		inputs.files(sourceSets.main.runtimeClasspath, descriptorDir)
+		outputs.file schemaFile
+		classpath = files(stagingDir) + sourceSets.main.runtimeClasspath
+		mainClass = 'net.yadaframework.tools.YadaSchemaGenerator'
+		workingDir = projectDir
+		doFirst {
+			delete stagingDir, schemaFile
+			copy {
+				from descriptorDir
+				into stagingDir
+			}
+			schemaFile.asFile.parentFile.mkdirs()
+		}
+		doLast {
+			if (!schemaFile.asFile.isFile()) {
+				throw new GradleException("No schema generated in ${schemaFile.asFile}")
+			}
+			logger.lifecycle("Schema written to ${schemaFile.asFile}")
+		}
+	}
+}
+
+// The complete DDL of the YadaTests application, to write or review its migrations (src/main/resources/database)
+registerSchemaTask('dbSchema', 'Generates the YadaTests application DDL in build/schema/yts.sql', 'src/dbSchema', 'build/schema/yts.sql')
+
+// The historical YadaWeb test schema (YadaWeb/schema/V1__yadatest.sql), formerly YadaWeb:testDbSchema.
+// It covers a few core entities only and is unrelated to the application baseline above.
+registerSchemaTask('webTestDbSchema', 'Generates the YadaWeb core test schema in build/schema/V1__yadatest.sql', 'src/webTestDbSchema', 'build/schema/V1__yadatest.sql')
+
+// Documentation verification: :YadaDocs:verifyAsciidoc renders the staged sources in this project's build folder.
+// The tracked documentation sources and the published docs folder must be unchanged afterwards.
+evaluationDependsOn(':YadaDocs')
+def docsVerificationDir = layout.buildDirectory.dir('docs-verification')
+project(':YadaDocs').ext.docsVerificationDir.set(docsVerificationDir)
+def trackedDocFolders = [rootProject.file('YadaDocs/src'), rootProject.file('docs')]
+def hashTrackedDocs = {
+	def hashes = new TreeMap<String, String>()
+	trackedDocFolders.findAll { it.isDirectory() }.each { folder ->
+		folder.eachFileRecurse(groovy.io.FileType.FILES) { file ->
+			hashes[rootProject.relativePath(file)] = java.security.MessageDigest.getInstance('SHA-256').digest(file.bytes).encodeHex().toString()
+		}
+	}
+	return hashes
+}
+def docHashesBefore = null
+def snapshotTrackedDocs = tasks.register('snapshotTrackedDocs') {
+	description = 'Records the hashes of the tracked documentation files before the verification'
+	outputs.upToDateWhen { false }
+	doLast {
+		docHashesBefore = hashTrackedDocs()
+	}
+}
+// Runs as a finalizer, so that tracked files are compared even when the rendering fails
+def compareTrackedDocs = tasks.register('compareTrackedDocs') {
+	description = 'Fails when the documentation verification changed tracked files'
+	outputs.upToDateWhen { false }
+	onlyIf { docHashesBefore != null }
+	doLast {
+		def after = hashTrackedDocs()
+		if (docHashesBefore != after) {
+			def changed = (docHashesBefore.keySet() + after.keySet()).findAll { docHashesBefore[it] != after[it] }
+			throw new GradleException("The documentation verification changed tracked files: ${changed}")
+		}
+	}
+}
+project(':YadaDocs').tasks.named('stageAsciidocForVerification') {
+	mustRunAfter snapshotTrackedDocs
+}
+project(':YadaDocs').tasks.named('verifyAsciidoc') {
+	finalizedBy compareTrackedDocs
+}
+tasks.register('verifyDocs') {
+	description = 'Verifies that the documentation renders without warnings or broken links, leaving tracked files untouched'
+	group = 'verification'
+	dependsOn snapshotTrackedDocs, ':YadaDocs:verifyAsciidoc', compareTrackedDocs
+	doLast {
+		logger.lifecycle("Documentation verified in ${docsVerificationDir.get().asFile}")
+	}
+}
+
+// The canonical full verification: unit, integration and browser suites, Tools suite and documentation
+tasks.register('frameworkCheck') {
+	description = 'Runs every central suite and the documentation verification'
+	group = 'verification'
+	dependsOn 'test', 'integrationTest', 'e2eTest', 'toolTest', 'verifyDocs'
+}
+tasks.named('toolTest') {
+	mustRunAfter 'e2eTest'
+}
+tasks.named('verifyDocs') {
+	mustRunAfter 'toolTest'
+}
+
+// Coverage of the framework production classes by the central suites, one report per module.
+// The harness and the scenario application are not part of any report. Each suite writes its own
+// execution data (build/jacoco/<task>.exec). Code run by Gradle TestKit in separate Gradle processes is not
+// instrumented, so YadaTools coverage comes from the in-process tests only.
+def coverageSuites = ['test', 'integrationTest', 'e2eTest', 'toolTest']
+def coveredModules = ['YadaWeb', 'YadaWebSecurity', 'YadaWebCMS', 'YadaWebCommerce', 'YadaAi', 'YadaTools']
+def moduleCoverageTasks = coveredModules.collect { moduleName ->
+	def module = project(":${moduleName}")
+	tasks.register("frameworkCoverage${moduleName}", JacocoReport) {
+		description = "Coverage of ${moduleName} by the central suites"
+		group = 'verification'
+		dependsOn ":${moduleName}:classes"
+		mustRunAfter coverageSuites
+		executionData.from(files(coverageSuites.collect { layout.buildDirectory.file("jacoco/${it}.exec") }).filter { it.exists() })
+		classDirectories.from(module.layout.buildDirectory.dir('classes/java/main'), module.layout.buildDirectory.dir('classes/groovy/main'))
+		sourceDirectories.from(module.file('src/main/java'), module.file('src/main/groovy'))
+		reports {
+			xml.required = true
+			html.required = true
+			xml.outputLocation = layout.buildDirectory.file("reports/frameworkCoverage/${moduleName}.xml")
+			html.outputLocation = layout.buildDirectory.dir("reports/frameworkCoverage/${moduleName}")
+		}
+	}
+}
+tasks.register('frameworkCoverage') {
+	description = 'Writes the coverage reports of all framework modules in build/reports/frameworkCoverage'
+	group = 'verification'
+	dependsOn moduleCoverageTasks
+}
+
+// Browser installation for the e2e suite, through the Playwright CLI of the pinned Playwright version.
+// installBrowsers downloads Chromium for the current user; installBrowsersCi also installs its system packages (needs root).
+['installBrowsers': ['install', 'chromium'], 'installBrowsersCi': ['install', '--with-deps', 'chromium']].each { taskName, cliArgs ->
+	tasks.register(taskName, JavaExec) {
+		description = "Installs the Playwright browsers used by e2eTest (playwright ${cliArgs.join(' ')})"
+		group = 'verification'
+		classpath = configurations.e2eTestRuntimeClasspath
+		mainClass = 'com.microsoft.playwright.CLI'
+		args cliArgs
+	}
+}
+
+eclipse {
+	classpath {
+		plusConfigurations += [configurations.harnessCompileClasspath, configurations.integrationTestCompileClasspath, configurations.e2eTestCompileClasspath]
+	}
+}
+
+// The application is mounted from its compiled outputs by the harness: no archive is produced
+jar {
+	enabled = false
+}

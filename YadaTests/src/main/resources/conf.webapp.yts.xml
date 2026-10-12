@@ -1,0 +1,49 @@
+<config>
+	<!-- Application settings of the YadaTests application.
+		The database, paths and run identity are written for each run by the test harness (TestRun),
+		which overrides this file. -->
+	<info>
+		<env>dev</env>
+		<appName>YadaTests</appName>
+	</info>
+	<paths>
+		<!-- Where YadaController.yadaError() forwards HTTP errors -->
+		<errorPageForward>/test/error</errorPageForward>
+	</paths>
+	<bootstrapVersion>5</bootstrapVersion>
+	<!-- Small on purpose, so that the browser tests can exceed it -->
+	<maxFileUploadSizeBytes>102400</maxFileUploadSizeBytes>
+	<i18n localePathVariable="false">
+		<locale default="true">en</locale>
+	</i18n>
+	<email>
+		<enabled>false</enabled>
+		<from>
+			<address>noreply@yts.test</address>
+			<name>YadaTests</name>
+		</from>
+	</email>
+	<database>
+		<entityPackage>net.yadaframework.tests.persistence.entity</entityPackage>
+	</database>
+	<security>
+		<sessionTimeoutMinutes>240</sessionTimeoutMinutes>
+		<passwordLength min='5' max='128' />
+		<encodePassword>true</encodePassword>
+		<maxFailedAttempts>10</maxFailedAttempts>
+		<failedAttemptsLockoutMinutes>10</failedAttemptsLockoutMinutes>
+		<autologinExpirationHours>48</autologinExpirationHours>
+		<roles>
+			<role>
+				<id>8</id>
+				<key>ADMIN</key>
+				<handles>ADMIN</handles>
+				<handles>USER</handles>
+			</role>
+			<role>
+				<id>2</id>
+				<key>USER</key>
+			</role>
+		</roles>
+	</security>
+</config>

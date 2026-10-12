@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{/test/fragments/head :: head(title=#{yts.login.title})}"></head>
+<body>
+	<h1 th:text="#{yts.login.title}">Login</h1>
+	<!--/* Flags set as request attributes by YadaAuthenticationFailureHandler */-->
+	<p th:if="${loginErrorFlag!=null}" data-testid="loginError" th:text="#{yts.login.error}">Wrong username or password</p>
+	<form th:action="@{/loginPost}" method="post" data-testid="loginForm">
+		<label for="username" th:text="#{yts.login.username}">Email</label>
+		<input type="email" id="username" name="username" th:value="${username}" required>
+		<label for="password" th:text="#{yts.login.password}">Password</label>
+		<input type="password" id="password" name="password" required>
+		<button type="submit" th:text="#{yts.login.submit}">Log in</button>
+	</form>
+	<div th:replace="~{/test/fragments/scripts :: body}"></div>
+</body>
+</html>
