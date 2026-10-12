@@ -30,3 +30,4 @@ Root `./gradlew publish` publishes all six libraries. The `YadaTools` publicatio
 
 Import the repository root into Eclipse/Buildship for framework work, or import `YadaExamples` for application work. Buildship stores one owning build connection per module directory. To own the shared modules from both builds at the same time, use separate checkouts and separate Eclipse workspaces; within one checkout, switch ownership by reimporting the chosen build. See [workspace build notes](aiknowledge/workspace_build_notes.md) for metadata generation and shared-script ordering.
 
+
