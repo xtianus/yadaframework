@@ -242,7 +242,7 @@ To work on the framework without an application, use "File > Import... > Gradle 
 the root folder of the cloned repository (e.g. `C:\work\git-mysite\yadaframework`), not one of its subfolders.
 The import dialog initially opens in the workspace, so you have to browse to the git folder.
 This adds the `yadaframework` root project together with `YadaWeb`, `YadaWebSecurity`, `YadaWebCMS`, `YadaWebCommerce`,
-`YadaAi`, `YadaTools` and `YadaDocs`. The Gradle version is the one of the repository-root wrapper.
+`YadaAi`, `YadaTools`, `YadaDocs` and `YadaTests`. The Gradle version is the one of the repository-root wrapper.
 
 [WARNING]
 ====
