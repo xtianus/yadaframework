@@ -17,12 +17,12 @@ version = yada_version
 
 // Test-only dependency versions. Framework library versions come from the framework projects.
 ext {
-	junitBomVersion = '6.0.3'
-	mockitoVersion = '5.3.1'
-	springTestVersion = '6.2.11'
-	tomcatVersion = '11.0.18'
+	junitBomVersion = '6.1.3'
+	mockitoVersion = '5.24.0'
+	springTestVersion = '6.2.19'
+	tomcatVersion = '11.0.27'
 	servletApiVersion = '6.1.0'
-	mariaDB4jVersion = '3.2.0'
+	mariaDB4jVersion = '3.3.1'
 	playwrightVersion = '1.63.0'
 	jacocoVersion = '0.8.15'
 }

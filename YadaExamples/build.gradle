@@ -10,7 +10,7 @@ buildscript {
 
 plugins {
     id 'application' // for the "run" task
-	id 'org.hidetake.ssh' version '2.10.1'
+	id 'org.hidetake.ssh' version '2.12.0'
 	id 'com.meiuwa.gradle.sass' version "1.0.0"	// Only when using SASS !!! v2.0.0 may not work
 	id("com.github.node-gradle.node") version "3.5.1"
 }
@@ -118,7 +118,7 @@ dependencies {
 	implementation	 project(':YadaWebCMS')	
 	implementation	 project(':YadaWebCommerce')
 
-	implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.10'
+	implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.27'
 
 }
 
@@ -139,7 +139,7 @@ configurations {
 	}
 }
 dependencies {
-    generateSchema 'org.apache.logging.log4j:log4j-core:2.25.1'
+    generateSchema 'org.apache.logging.log4j:log4j-core:2.26.1'
     generateSchema 'org.glassfish:jakarta.el:5.0.0-M1'
 }
 

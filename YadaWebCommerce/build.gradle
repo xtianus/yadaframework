@@ -50,7 +50,7 @@ dependencies {
 		// 'org.springframework:spring-orm:5.3.18',
 		// 'org.hibernate:hibernate-entitymanager:5.5.0.Final',
 		
-	compileOnly 'com.paypal.sdk:checkout-sdk:1.0.5'
+	compileOnly 'com.paypal.sdk:checkout-sdk:2.0.0'
 
 	// Tests live in the YadaTests project
 }

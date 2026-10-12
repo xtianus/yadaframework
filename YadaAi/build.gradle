@@ -42,10 +42,10 @@ repositories {
 dependencies {
 	implementation project(':YadaWeb')
 	implementation 'jakarta.annotation:jakarta.annotation-api:3.0.0'
-	implementation 'com.google.code.gson:gson:2.13.2'
+	implementation 'com.google.code.gson:gson:2.14.0'
 	// These are compile only because in the future there may be other providers to choose from in the application	
-	compileOnly 'software.amazon.awssdk:bedrock:2.35.9'
-	compileOnly 'software.amazon.awssdk:bedrockruntime:2.35.9'
+	compileOnly 'software.amazon.awssdk:bedrock:2.55.14'
+	compileOnly 'software.amazon.awssdk:bedrockruntime:2.55.14'
 
 	// Tests live in the YadaTests project
 }
