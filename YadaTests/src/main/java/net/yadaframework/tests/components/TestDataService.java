@@ -13,6 +13,9 @@ import net.yadaframework.commerce.persistence.entity.YadaOrderStatus;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.persistence.YadaMoney;
 import net.yadaframework.persistence.repository.YadaPersistentEnumDao;
+import net.yadaframework.security.components.YadaTokenHandler;
+import net.yadaframework.security.persistence.entity.YadaAutoLoginToken;
+import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 import net.yadaframework.tests.persistence.entity.UserProfile;
 import net.yadaframework.tests.persistence.repository.ArticleDao;
@@ -23,7 +26,8 @@ import net.yadaframework.tests.persistence.repository.UserProfileDao;
  * so that every write is committed in its own transaction.
  * <p>
  * Reset contract: the test harness empties every application table (keeping the Flyway history)
- * and then calls {@link #seedDefaults()}, which recreates the same data with the same ids.
+ * and then calls {@link #seedDefaults()}, which recreates the same data with the same ids and empties the
+ * mailbox of the {@link CapturingMailSender}.
  */
 @Service
 public class TestDataService {
@@ -44,19 +48,24 @@ public class TestDataService {
 	private final YadaConfiguration config;
 	private final YadaPersistentEnumDao yadaPersistentEnumDao;
 	private final ArticleDao articleDao;
+	private final CapturingMailSender capturingMailSender;
+	private final YadaTokenHandler yadaTokenHandler;
 
-	public TestDataService(YadaUserCredentialsDao yadaUserCredentialsDao, UserProfileDao userProfileDao, YadaConfiguration config, YadaPersistentEnumDao yadaPersistentEnumDao, ArticleDao articleDao) {
+	public TestDataService(YadaUserCredentialsDao yadaUserCredentialsDao, UserProfileDao userProfileDao, YadaConfiguration config, YadaPersistentEnumDao yadaPersistentEnumDao, ArticleDao articleDao, CapturingMailSender capturingMailSender, YadaTokenHandler yadaTokenHandler) {
 		this.yadaUserCredentialsDao = yadaUserCredentialsDao;
 		this.userProfileDao = userProfileDao;
 		this.config = config;
 		this.yadaPersistentEnumDao = yadaPersistentEnumDao;
 		this.articleDao = articleDao;
+		this.capturingMailSender = capturingMailSender;
+		this.yadaTokenHandler = yadaTokenHandler;
 	}
 
 	/**
 	 * Creates the deterministic default data: the persistent order states, one administrator, one plain user and the default articles.
 	 */
 	public void seedDefaults() {
+		capturingMailSender.clear();
 		yadaPersistentEnumDao.initDatabase(List.of(YadaOrderStatus.class), config.getLocales());
 		createUser(ADMIN_EMAIL, ADMIN_PASSWORD, "admin", "USER", "ADMIN");
 		createUser(USER_EMAIL, USER_PASSWORD, "user", "USER");
@@ -88,6 +97,22 @@ public class TestDataService {
 		userDefinition.put("nickname", nickname);
 		userDefinition.put("roles", roles);
 		return yadaUserCredentialsDao.create(userDefinition, UserProfile.class);
+	}
+
+	/**
+	 * Issues an autologin link for a user with the application token API, as an application does before emailing it.
+	 * The link starts with the configured server address, so tests request only its path and query.
+	 * @param email the login name of an existing user
+	 * @param targetAction the "action" to reach after login, e.g. "/test/user/area"
+	 * @return the absolute autologin link
+	 */
+	public String issueAutologinLink(String email, String targetAction) {
+		YadaUserCredentials userCredentials = yadaUserCredentialsDao.findFirstByUsername(email);
+		if (userCredentials == null) {
+			throw new IllegalArgumentException("No user " + email);
+		}
+		YadaAutoLoginToken autoLoginToken = yadaTokenHandler.makeAutoLoginToken(userCredentials);
+		return yadaTokenHandler.makeAutologinLink(autoLoginToken, targetAction, null, config.getServerAddress());
 	}
 
 	/**

@@ -8,6 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 import net.yadaframework.core.YadaAppConfig;
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.tests.components.CapturingMailSender;
 
 /**
  * Root configuration of the YadaTests application.
@@ -29,6 +30,16 @@ public class AppConfig extends YadaAppConfig {
 		staticConfig.copyTo(config);
 		CONFIG = config;
 		return config;
+	}
+
+	/**
+	 * Replaces the SMTP sender: every email is captured in memory, never sent
+	 * @return the capturing sender, also reachable as a CapturingMailSender bean
+	 */
+	@Bean
+	@Override
+	public CapturingMailSender javaMailSender() {
+		return new CapturingMailSender();
 	}
 
 	@Override

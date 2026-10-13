@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{/test/fragments/head :: head(title=#{yts.register.title})}"></head>
+<body>
+	<h1 th:text="#{yts.register.title}">Registration</h1>
+	<!--/* Posted to RegistrationController.signup(), which calls YadaRegistrationController.handleRegistrationRequest() */-->
+	<form th:action="@{/signup}" th:object="${yadaRegistrationRequest}" method="post" novalidate data-testid="registerForm">
+		<label for="email" th:text="#{yts.register.email}">Email</label>
+		<input type="email" id="email" th:field="*{email}">
+		<span data-testid="emailError" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">error</span>
+		<label for="password" th:text="#{yts.register.password}">Password</label>
+		<input type="password" id="password" th:field="*{password}">
+		<span data-testid="passwordError" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">error</span>
+		<button type="submit" th:text="#{yts.register.submit}">Register</button>
+	</form>
+	<div th:replace="~{/test/fragments/scripts :: body}"></div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Yada configuration of the YadaExamples tests, set by the Gradle "test" task in the yada.configurationFile system property.
+	It replaces src/main/resources/configuration.xml: it reads only the framework properties and conf.webapp.test.xml,
+	so no /srv file, no conf.webapp.dev/tst/prod.xml and no developer configuration can reach the tests.
+	The optional file named by the yex.test.settingsFile system property (Gradle: -PyexTestSettings=<file>) overrides
+	conf.webapp.test.xml for a whole run, e.g. <config><info><env>tst</env></info></config>. -->
+<configuration>
+	<header>
+		<result>
+			<expressionEngine config-class="org.apache.commons.configuration2.tree.xpath.XPathExpressionEngine"/>
+		</result>
+	</header>
+	<override>
+		<xml config-name="settings" config-at="config" fileName="${sys:yex.test.settingsFile}" config-optional="true"/>
+		<properties fileName="net.yadaframework.yadaweb.properties"/>
+		<properties fileName="net.yadaframework.yadawebsecurity.properties" config-optional="true"/>
+		<properties fileName="net.yadaframework.yadawebcms.properties" config-optional="true"/>
+		<properties fileName="net.yadaframework.yadawebcommerce.properties" config-optional="true"/>
+		<xml config-name="test" config-at="config" fileName="conf.webapp.test.xml"/>
+	</override>
+</configuration>

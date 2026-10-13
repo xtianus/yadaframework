@@ -20,6 +20,8 @@ ext {
 	junitBomVersion = '6.1.3'
 	mockitoVersion = '5.24.0'
 	springTestVersion = '6.2.19'
+	// Same version as the Spring Security of YadaWebSecurity
+	springSecurityTestVersion = '6.5.11'
 	tomcatVersion = '11.0.27'
 	servletApiVersion = '6.1.0'
 	mariaDB4jVersion = '3.3.1'
@@ -115,11 +117,13 @@ dependencies {
 		exclude group: 'org.springframework', module: 'spring-core'
 	}
 
-	testImplementation project(':YadaWeb'), project(':YadaAi')
+	testImplementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaAi')
 	testImplementation "org.springframework:spring-test:${springTestVersion}"
+	testImplementation "org.springframework.security:spring-security-test:${springSecurityTestVersion}"
 
 	integrationTestImplementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'), project(':YadaWebCommerce')
 	integrationTestImplementation "org.springframework:spring-test:${springTestVersion}"
+	integrationTestImplementation "org.springframework.security:spring-security-test:${springSecurityTestVersion}"
 
 	e2eTestImplementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'), project(':YadaWebCommerce')
 	e2eTestImplementation "com.microsoft.playwright:playwright:${playwrightVersion}"

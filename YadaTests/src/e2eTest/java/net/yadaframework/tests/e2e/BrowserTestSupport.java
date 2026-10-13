@@ -49,7 +49,7 @@ public abstract class BrowserTestSupport {
 
 	@BeforeAll
 	void startApplicationAndBrowser() {
-		session = ApplicationSession.start(application -> application.getBean(TestDataService.class)::seedDefaults);
+		session = ApplicationSession.start(this::configureRun, application -> application.getBean(TestDataService.class)::seedDefaults);
 		try {
 			playwright = Playwright.create();
 			browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
@@ -67,6 +67,15 @@ public abstract class BrowserTestSupport {
 		context.setDefaultTimeout(TIMEOUT_MILLIS);
 		context.tracing().start(new Tracing.StartOptions().setScreenshots(true).setSnapshots(true));
 		page = context.newPage();
+	}
+
+	/**
+	 * Override to set per-run application settings before the application of this class starts
+	 * @param run the new run
+	 * @see TestRun#setConfigurationValue(String, String...)
+	 */
+	protected void configureRun(TestRun run) {
+		// No setting by default
 	}
 
 	void recordOutcome(Throwable failure) {

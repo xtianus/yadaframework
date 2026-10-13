@@ -122,6 +122,87 @@ dependencies {
 
 }
 
+// Tests of the example application (src/test): unit tests with JUnit and Mockito, and tests that boot the real
+// configuration in a Spring web test context over src/main/webapp, on the framework embedded MariaDB.
+// Versions are aligned with YadaTests and with the Spring Security version of YadaWebSecurity.
+ext {
+	junitBomVersion = '6.1.3'
+	mockitoVersion = '5.24.0'
+	springTestVersion = '6.2.19'
+	hamcrestVersion = '3.0'
+	springSecurityTestVersion = '6.5.11'
+	mariaDB4jVersion = '3.3.1'
+}
+
+dependencies {
+	testImplementation platform("org.junit:junit-bom:${junitBomVersion}")
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+	testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+	testImplementation "org.springframework:spring-test:${springTestVersion}"
+	// Optional dependency of spring-test, needed by the MockMvc result matchers
+	testImplementation "org.hamcrest:hamcrest:${hamcrestVersion}"
+	testImplementation "org.springframework.security:spring-security-test:${springSecurityTestVersion}"
+	// The embedded database is compileOnly in YadaWeb
+	testImplementation("ch.vorburger.mariaDB4j:mariaDB4j:${mariaDB4jVersion}") {
+		// mariaDB4j pulls the latest version of spring core but this is never a good thing.
+		exclude group: 'org.springframework', module: 'spring-core'
+	}
+}
+
+test {
+	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
+		exceptionFormat "full"
+	}
+	// The test configuration replaces src/main/resources/configuration.xml (see src/test/resources)
+	systemProperty 'yada.configurationFile', file('src/test/resources/yex-test-configuration.xml').absolutePath
+	// ExampleTestDatabase keeps the embedded database of each test JVM below build/test-db
+	def testDatabaseRoot = layout.buildDirectory.dir('test-db').get().asFile
+	def testTempDir = layout.buildDirectory.dir('tmp/test-jvm').get().asFile
+	systemProperty 'yex.buildDir', layout.buildDirectory.get().asFile.absolutePath
+	systemProperty 'java.io.tmpdir', testTempDir.absolutePath
+	// Optional run-wide overrides of conf.webapp.test.xml, e.g. -PyexTestSettings=/path/to/settings.xml
+	if (project.hasProperty('yexTestSettings')) {
+		systemProperty 'yex.test.settingsFile', file(project.property('yexTestSettings')).absolutePath
+	}
+	maxParallelForks = 1
+	doFirst {
+		// A test JVM that was killed leaves its database process running: stop only the processes that use our folder
+		def folderPrefix = testDatabaseRoot.absolutePath + File.separator
+		ProcessHandle.allProcesses().filter { process ->
+			process.pid() != ProcessHandle.current().pid() && process.info().commandLine().map { it.contains(folderPrefix) && it.contains('mariadbd') }.orElse(false)
+		}.forEach { process ->
+			logger.lifecycle("Stopping the leftover test database process ${process.pid()}")
+			process.destroy()
+			try {
+				process.onExit().get(30, java.util.concurrent.TimeUnit.SECONDS)
+			} catch (java.util.concurrent.TimeoutException e) {
+				process.destroyForcibly()
+				process.onExit().get(30, java.util.concurrent.TimeUnit.SECONDS)
+			}
+		}
+		// Every run starts from an empty schema, so that every migration runs
+		delete testDatabaseRoot, testTempDir
+		testTempDir.mkdirs()
+	}
+	// Fails a test task that discovers no test at all, as in YadaTests, so a wiring mistake can't pass silently
+	def executedTests = 0L
+	afterSuite { descriptor, result ->
+		if (descriptor.parent == null) {
+			executedTests = result.testCount
+		}
+	}
+	doLast {
+		boolean filtered = !filter.includePatterns.isEmpty() || !filter.commandLineIncludePatterns.isEmpty()
+		if (executedTests == 0 && !filtered) {
+			throw new GradleException("${path} discovered no tests")
+		}
+	}
+}
+
 yadaInit {
     projectName = rootProject.name
     acronym = project.acronym

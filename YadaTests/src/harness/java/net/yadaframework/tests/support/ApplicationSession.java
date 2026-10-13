@@ -1,6 +1,7 @@
 package net.yadaframework.tests.support;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -25,10 +26,23 @@ public final class ApplicationSession implements AutoCloseable {
 	 * @return the running session
 	 */
 	public static ApplicationSession start(Function<TestApplication, Runnable> seederFactory) {
+		return start(run -> {}, seederFactory);
+	}
+
+	/**
+	 * Starts the application on a new run configured by the caller, e.g. with per-run settings, and resets its data.
+	 * @param runConfigurer called before the application starts, e.g. {@code run -> run.setConfigurationValue("security/autologinExpirationHours", "1")}
+	 * @param seederFactory gives the seeder of the started application
+	 * @return the running session
+	 * @see TestRun#setConfigurationValue(String, String...)
+	 */
+	public static ApplicationSession start(Consumer<TestRun> runConfigurer, Function<TestApplication, Runnable> seederFactory) {
+		Objects.requireNonNull(runConfigurer);
 		Objects.requireNonNull(seederFactory);
 		TestRun run = TestRun.create();
 		TestApplication application = null;
 		try {
+			runConfigurer.accept(run);
 			application = TestApplication.start(run);
 			DatabaseFixtures fixtures = new DatabaseFixtures(application, seederFactory.apply(application));
 			fixtures.reset();
