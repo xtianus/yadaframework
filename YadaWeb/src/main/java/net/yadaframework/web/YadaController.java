@@ -68,7 +68,8 @@ public class YadaController {
 				throw new AccessDeniedException("Access is denied to data for table '"+dataTableId+"' because path '"+ securityAsPath + "' is forbidden to current user by configuration");
 			}
 		}
-		return yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, entityClass, locale);
+		// Columns, search, sort and output come from the table configuration, never from the request
+		return yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, entityClass, locale, yadaDataTable.getQueryPolicy());
 	}
 
 	/**

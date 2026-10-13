@@ -29,7 +29,8 @@
 
 | Class | Description |
 |---|---|
-| [YadaDataTableDao](yadaWeb/YadaDataTableDao.md) | Executes paged queries and converts the results to DataTables JSON payloads. Use behind server-side Yada DataTable endpoints. |
+| [YadaDataTableDao](yadaWeb/YadaDataTableDao.md) | Executes paged queries and converts the results to DataTables JSON payloads, within a server-side `YadaDataTableQueryPolicy`. Use behind server-side Yada DataTable endpoints. |
+| [YadaDataTableQueryPolicy](yadaWeb/YadaDataTableQueryPolicy.md) | Immutable server-side allowlist of the entity paths a DataTable may return, search and sort, plus extra outputs. Required by every `getConvertedJsonPage` call; the default endpoint derives it from the YadaDataTable configuration. |
 | [YadaMoney](yadaWeb/YadaMoney.md) | Wraps money amounts as integer minor units and exposes safe arithmetic helpers. Use instead of floating-point math for prices and totals. |
 | [YadaSql](yadaWeb/YadaSql.md) | Builds SQL or JPQL fragments incrementally with conditional joins, filters, grouping, ordering, unions, and parameters. Use when dynamic queries are clearer than Criteria or manual string concatenation. |
 

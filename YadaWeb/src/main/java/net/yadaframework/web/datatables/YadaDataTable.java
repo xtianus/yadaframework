@@ -123,7 +123,7 @@ public class YadaDataTable {
 	 * by the ajax call.
 	 * @param entityClass the entity
 	 * @return this instance for method chaining
-	 * @see YadaDataTableDao#getConvertedJsonPage(YadaDatatablesRequest, Class)
+	 * @see YadaDataTableDao#getConvertedJsonPage(YadaDatatablesRequest, Class, Locale, net.yadaframework.persistence.YadaDataTableQueryPolicy)
 	 */
 	public YadaDataTable dtEntityClass(Class entityClass) {
 		this.entityClass = entityClass;

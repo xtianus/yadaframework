@@ -31,8 +31,6 @@ import net.yadaframework.components.YadaDataTableFactory;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
-import net.yadaframework.web.YadaDatatablesColumn;
-import net.yadaframework.web.YadaDatatablesOrder;
 import net.yadaframework.web.YadaDatatablesRequest;
 import net.yadaframework.web.datatables.proxy.YadaDataTableProxy;
 
@@ -51,45 +49,38 @@ public class YadaDataTableDao {
     @PersistenceContext
 	EntityManager em;
 	
-    /**
-	 * Returns a map with the result in the format needed by DataTables.
-	 * All values that are included in the annotated json view (on the caller) will end up in the resulting json
-     * @param yadaDatatablesRequest
-     * @param entityClass
-     * @param locale
-     * @return
-     */
-    @Deprecated // Use getConvertedJsonPage instead
-	public <entityClass> Map<String, Object> getJsonPage(YadaDatatablesRequest yadaDatatablesRequest, Class<?> entityClass, Locale locale) {
-		Map<String, Object> json = new HashMap<String, Object>();
-		try {
-			List<entityClass> data = getPage(yadaDatatablesRequest, entityClass, locale);
-	    	// Eagerly fetching localized strings. This should not be a performance problem as DataTables is generally used in internal admin pages with a few lines.
-	    	YadaUtil.prefetchLocalizedStringList(data, entityClass);
-			json.put("draw", yadaDatatablesRequest.getDraw());
-			json.put("recordsTotal", yadaDatatablesRequest.getRecordsTotal());
-			json.put("recordsFiltered", yadaDatatablesRequest.getRecordsFiltered());
-			json.put("data", data);
-		} catch (Exception e) {
-			log.error("Can't retrieve data", e);
-			json.put("error", e.toString()); // TODO handle the error in javascript 
-		}
-		return json;
-	}
-	
 	/**
-	 * Returns a map with the result in the format needed by DataTables.
-	 * Only requested values are returned in the map. There is no need to call a json converter because everything is a map already.
-	 * @param yadaDatatablesRequest the request parameters sent by DataTables
+	 * Returns one page of data in the format needed by DataTables, reading only what the policy allows.
+	 * The request is checked against the policy before any query: a column, search, order or extra attribute that
+	 * the policy does not allow rejects the whole request with a "yadaError" and no data. Each row contains
+	 * the requested policy columns, the policy extra outputs, "DT_RowId" and "DT_RowClass" (from getDT_RowClass(), if any).
+	 * There is no need to call a json converter because everything is a map already.
+	 * @param yadaDatatablesRequest the request parameters sent by DataTables. Conditions added by the server to
+	 * 	{@link YadaDatatablesRequest#getYadaSql()} are kept.
 	 * @param entityClass the entity class to fetch from the database
 	 * @param locale the locale to use for localized values
-	 * @return one page of data
+	 * @param policy the server-side policy for this table, e.g. {@code yadaDataTable.getQueryPolicy()} or one built
+	 * 	with {@link YadaDataTableQueryPolicy#forEntity(Class)}; it must have been built for entityClass or a superclass
+	 * @return one page of data, or a map with "yadaError"
 	 */
-	public <entityClass> Map<String, Object> getConvertedJsonPage(YadaDatatablesRequest yadaDatatablesRequest, Class<?> entityClass, Locale locale) {
+	public <T> Map<String, Object> getConvertedJsonPage(YadaDatatablesRequest yadaDatatablesRequest, Class<T> entityClass, Locale locale, YadaDataTableQueryPolicy policy) {
+		if (policy == null || entityClass == null || !policy.getEntityClass().isAssignableFrom(entityClass)) {
+			throw new YadaInvalidUsageException("A DataTable policy for {} is required", entityClass);
+		}
 		Map<String, Object> json = new HashMap<String, Object>();
+		YadaDataTableQueryPolicy.Resolved resolved;
 		try {
-			List<entityClass> entityPage = getPage(yadaDatatablesRequest, entityClass, locale);
-			List<Map<String, Object>> jsonData = convertToJson(entityPage, yadaDatatablesRequest, entityClass, locale);
+			resolved = policy.resolve(yadaDatatablesRequest);
+		} catch (YadaDataTableQueryPolicy.RejectedRequestException e) {
+			log.warn("DataTable request rejected for {}: {}", entityClass.getSimpleName(), e.getMessage());
+			Map<String, String> inner = new HashMap<>();
+			inner.put("error", "Invalid table request");
+			json.put("yadaError", inner);
+			return json;
+		}
+		try {
+			List<T> entityPage = getPage(yadaDatatablesRequest, entityClass, locale, resolved);
+			List<Map<String, Object>> jsonData = convertToJson(entityPage, yadaDatatablesRequest, entityClass, resolved);
 			json.put("draw", yadaDatatablesRequest.getDraw());
 			json.put("recordsTotal", yadaDatatablesRequest.getRecordsTotal());
 			json.put("recordsFiltered", yadaDatatablesRequest.getRecordsFiltered());
@@ -103,35 +94,22 @@ public class YadaDataTableDao {
 		}
 		return json;
 	}
-	
+
 	/**
-	 * Retrieve all values requested and put them in a json-like structure
-	 * @param entityPage
-	 * @param yadaDatatablesRequest
-	 * @param entityClass
-	 * @param locale
+	 * Retrieve all values allowed by the policy and put them in a json-like structure
 	 * @return never null
 	 */
-	private <entityClass> List<Map<String, Object>> convertToJson(List<entityClass> entityPage, YadaDatatablesRequest yadaDatatablesRequest, Class<?> entityClass, Locale locale) {
+	private <T> List<Map<String, Object>> convertToJson(List<T> entityPage, YadaDatatablesRequest yadaDatatablesRequest, Class<?> entityClass, YadaDataTableQueryPolicy.Resolved resolved) {
 		Field idField = yadaUtil.getFieldNoTraversing(entityClass, "id");
 		idField.setAccessible(true);
 		//
 		List<Map<String, Object>> json = new ArrayList<Map<String, Object>>();
-		for (entityClass entity : entityPage) {
+		for (T entity : entityPage) {
 			Map<String, Object> entityJson = new HashMap<String, Object>();
 			json.add(entityJson);
-			// Conversion from java to map
-			for (YadaDatatablesColumn  column : yadaDatatablesRequest.getColumns()) {
-				String attributePath = column.getNameOrData(); // Name is the database attribute, data is the json attribute and could also be a javascript function
-				if (attributePath!=null) {
-					addAttributeValue(entity, entityJson, attributePath);
-				}
-			}
-			// Add any extra json attributes
-			for (String  attributePath : yadaDatatablesRequest.getExtraJsonAttributes()) {
-				if (attributePath!=null) {
-					addAttributeValue(entity, entityJson, attributePath);
-				}
+			// Conversion from java to map, only for the paths allowed by the policy
+			for (String attributePath : resolved.outputPaths()) {
+				addAttributeValue(entity, entityJson, attributePath);
 			}
 			// Add DT_RowClass to the value returned by getDT_RowClass() if any
 			addAttributeValue(entity, entityJson, "DT_RowClass"); // See YadaUserMessage for an example
@@ -167,6 +145,11 @@ public class YadaDataTableDao {
 			String[] parts = attributePath.split("\\.", 2);
 			String attributeName = parts[0];
 			if (COLUMN_SELECTION.equals(attributeName) || COLUMN_COMMAND.equals(attributeName)) {
+				return;
+			}
+			if (!(entity instanceof java.util.Map) && YadaDataTableQueryPolicy.isSecretName(attributeName)) {
+				// Second safeguard after the policy validation: credentials are never returned
+				log.warn("Credential attribute {} not returned", attributeName);
 				return;
 			}
 			if (entity instanceof java.util.Map) {
@@ -242,6 +225,11 @@ public class YadaDataTableDao {
 				// End of the path
 				// TODO value.toString() is not always appropriate, for example for dates.
 				//      Maybe pass a map of converters from some type to String?
+				if (isEntityValue(value)) {
+					// Never return the toString() of a related entity
+					log.warn("Entity value of {} not returned: add the attribute name to the path", attributeName);
+					value = null;
+				}
 				entityJson.put(attributeName, value==null?null:value.toString());
 				return;
 			}
@@ -258,24 +246,39 @@ public class YadaDataTableDao {
 	}
 
 	/**
-	 * Preleva una pagina di risultati che rispettino i parametri inviati via web.
-	 * Il nome delle colonne su cui fare le query e il sort viene preso da "name" oppure da "data" di DataTables.
-	 * @param yadaDatatablesRequest parametri della query, conterrà anche il count finale
-	 * @param targetClass tipo dell'oggetto da cercare
-	 * @return Pagina di oggetti di tipo targetClass. Il numero totale è reperibile in yadaDatatablesRequest.recordsFiltered
+	 * @return true for an entity, or a collection or map holding entities
+	 */
+	private boolean isEntityValue(Object value) {
+		if (value==null) {
+			return false;
+		}
+		if (value instanceof java.util.Collection<?> collection) {
+			return collection.stream().anyMatch(this::isEntityValue);
+		}
+		if (value instanceof Map<?,?> map) {
+			return map.values().stream().anyMatch(this::isEntityValue);
+		}
+		return YadaDataTableQueryPolicy.isEntityClass(value.getClass());
+	}
+
+	/**
+	 * Fetches one page of results using only the paths that the policy has allowed.
+	 * @param yadaDatatablesRequest the request: only paging and the global search value are read from it, plus the server conditions in getYadaSql().
+	 * 	It also receives the final counts.
+	 * @param targetClass the entity class to query
+	 * @param resolved the trusted paths and directions returned by {@link YadaDataTableQueryPolicy}
+	 * @return the page of entities. The total is in yadaDatatablesRequest.recordsFiltered
 	 */
 	@SuppressWarnings("rawtypes")
-	protected <targetClass> List<targetClass> getPage(YadaDatatablesRequest yadaDatatablesRequest, Class targetClass, Locale locale) {
+	protected <targetClass> List<targetClass> getPage(YadaDatatablesRequest yadaDatatablesRequest, Class targetClass, Locale locale, YadaDataTableQueryPolicy.Resolved resolved) {
 		String requestSearchValue = yadaDatatablesRequest.getSearch().getValue();
 		String globalSearchString = requestSearchValue!=null?StringUtils.trimToNull(requestSearchValue.toLowerCase(locale)):null;
-//		String globalCondition = StringUtils.trimToNull(yadaDatatablesRequest.getGlobalCondition());
 		Long globalSearchNumber = null;
 		boolean globalSearchEnabled = globalSearchString!=null;
 		if (globalSearchEnabled) {
 			try {
 				globalSearchNumber = Long.parseLong(globalSearchString);
 			} catch (NumberFormatException e) {
-				// log.debug("Invalid globalSearchString '{}'", globalSearchString);
 				// Ignore
 			}
 		}
@@ -286,86 +289,64 @@ public class YadaDataTableDao {
 		yadaSql.selectFrom("select distinct e from "+targetClass.getSimpleName()+" e");
 		countSql.selectFromReplace("select count(distinct e.id) from "+targetClass.getSimpleName()+" e");
 		
-		// Searching
-		List<YadaDatatablesColumn> yadaDatatablesColumns = yadaDatatablesRequest.getColumns();
-		for (YadaDatatablesColumn yadaDatatablesColumn : yadaDatatablesColumns) {
-			boolean columnSearchable = yadaDatatablesColumn.isSearchable();
-			if (globalSearchEnabled && columnSearchable) {
-				// First use the name as the attribute, then use the data
-				String attributeName = yadaDatatablesColumn.getNameOrData();
-				if (attributeName!=null) {
-					try {
-						// attributeName could be composite like company.name so we can't get the Field directly
-//						Field field = targetClass.getDeclaredField(attributeName);
-//						Class attributeType = field.getType();
-						Class attributeType;
-						boolean isCollection = false;
-						boolean isNumber = false;
-						try {
-							attributeType = yadaUtil.getType(targetClass, attributeName);
-							isCollection = yadaUtil.isCollection(targetClass, attributeName);
-							isNumber = attributeType == Long.class || attributeType == long.class 
-							|| attributeType == Integer.class || attributeType == int.class 
-							|| attributeType == BigInteger.class || attributeType == BigDecimal.class
-							|| attributeType == Float.class || attributeType == float.class
-							|| attributeType == Double.class || attributeType == double.class
-							|| attributeType == Short.class || attributeType == short.class;
-						} catch (Exception e) {
-							// If the searched attribute is composite like "shape.color" but some part of the path is implemented in a
-							// subclass (for example the "color" attribute is only implemented in the class ColoredShape that is a subclass
-							// of the class Shape that is the type of the shape attribute), we get an exception because the
-							// subclass can not be searched for the attribute.
-							// There's nothing we can do about it because from the superclass we can't get the subclass.
-							// As a fallback, we use the String type but this can not be always appropriate.
-							log.warn("Can't find type for {}.{}, using String.class as a fallback (might not work)", targetClass.getSimpleName(), attributeName);
-							attributeType = String.class;
-						}
-						// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
-						attributeName = addLeftJoins(attributeName, yadaSql, targetClass);
-						if (isCollection) {
-							// Collections require "member of" operator in JPQL
-							if (attributeType == String.class) {
-								searchSql.where(":globalSearchStringExact member of " + attributeName).or();
-							} else if (globalSearchNumber!=null) {
-								// For any numeric collection element type, use the parsed number
-								searchSql.where(":globalSearchNumber member of " + attributeName).or();
-							}
-						} else if (attributeType == String.class) {
-							searchSql.where(attributeName + " like :globalSearchString").or();
-						} else if (attributeType == Boolean.class || attributeType == boolean.class) {
-							// TODO localizzare "true"/"false" (ma anche no)
-							if ("true".indexOf(globalSearchString)>-1) {
-								searchSql.where(attributeName + " = true").or();
-							} else if ("false".indexOf(globalSearchString)>-1) {
-								searchSql.where(attributeName + " = false").or();
-							}
-						} else if (attributeType == YadaPersistentEnum.class) {
-							// No need for KEY(" + attributeName + ") = :yadalang" because it's added by addLeftJoins()
-							searchSql.where(attributeName + " like :globalSearchString").or();
-							searchSql.setParameter("yadalang", LocaleContextHolder.getLocale().getLanguage());
-						} else if (attributeType.isEnum()) {
-							// Per gli enum devo ciclare su tutte le chiavi, prendere i valori nel locale corrente, e scoprire quali enum contengono la searchkey
-							List<Integer> enumValues = new ArrayList<Integer>();
-							for (Object enumConstant : attributeType.getEnumConstants()) {
-								String enumText = enumConstant.toString().toLowerCase();
-								if (enumText.indexOf(globalSearchString)>-1) {
-									enumValues.add(((Enum)enumConstant).ordinal());
-								}
-							}
-							searchSql.whereIn(attributeName, enumValues).or();
-						} else if (isNumber) {
-							// Vorrei fare il match parziale della stringa digitata dentro al valore numerico ma JPA non supporta il like e CONVERT causa un 
-							// java.lang.NullPointerException dentro a org.hibernate.hql.internal.antlr.HqlBaseParser.identPrimary(HqlBaseParser.java:4285)
-							searchSql.where(globalSearchNumber!=null, attributeName + " = :globalSearchNumber").or();
-//							yadaSqlBuilder.addWhere(globalSearchNumber!=null, "CONVERT("+attributeName + " USING utf8) like :globalSearchString", "or");
-						} else {
-							log.error("Invalid attribute type for {} (skipped) ", attributeName);
-						}
-					} catch (Exception e) {
-						log.error("Can't get attribute type (skipped)", e);
-						continue;
+		// Searching: the policy has already removed the columns that are not searchable
+		for (String attributePath : resolved.searchPaths()) {
+			if (!globalSearchEnabled) {
+				break;
+			}
+			Class attributeType;
+			boolean isCollection;
+			try {
+				attributeType = yadaUtil.getType(targetClass, attributePath);
+				isCollection = yadaUtil.isCollection(targetClass, attributePath);
+			} catch (Exception e) {
+				// The policy has validated the path, so this should never happen. No fallback type: the column is not searched.
+				log.error("Can't find type for {}.{} (not searched)", targetClass.getSimpleName(), attributePath, e);
+				continue;
+			}
+			boolean isNumber = attributeType == Long.class || attributeType == long.class 
+				|| attributeType == Integer.class || attributeType == int.class 
+				|| attributeType == BigInteger.class || attributeType == BigDecimal.class
+				|| attributeType == Float.class || attributeType == float.class
+				|| attributeType == Double.class || attributeType == double.class
+				|| attributeType == Short.class || attributeType == short.class;
+			// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
+			String attributeName = addLeftJoins(attributePath, yadaSql, targetClass);
+			if (isCollection) {
+				// Collections require "member of" operator in JPQL
+				if (attributeType == String.class) {
+					searchSql.where(":globalSearchStringExact member of " + attributeName).or();
+				} else if (globalSearchNumber!=null) {
+					// For any numeric collection element type, use the parsed number
+					searchSql.where(":globalSearchNumber member of " + attributeName).or();
+				}
+			} else if (attributeType == String.class) {
+				searchSql.where(attributeName + " like :globalSearchString").or();
+			} else if (attributeType == Boolean.class || attributeType == boolean.class) {
+				if ("true".indexOf(globalSearchString)>-1) {
+					searchSql.where(attributeName + " = true").or();
+				} else if ("false".indexOf(globalSearchString)>-1) {
+					searchSql.where(attributeName + " = false").or();
+				}
+			} else if (attributeType == YadaPersistentEnum.class) {
+				// No need for KEY(" + attributeName + ") = :yadalang because it's added by addLeftJoins()
+				searchSql.where(attributeName + " like :globalSearchString").or();
+				searchSql.setParameter("yadalang", LocaleContextHolder.getLocale().getLanguage());
+			} else if (attributeType.isEnum()) {
+				// Loop on all enum constants to find the ones that contain the search key
+				List<Integer> enumValues = new ArrayList<Integer>();
+				for (Object enumConstant : attributeType.getEnumConstants()) {
+					String enumText = enumConstant.toString().toLowerCase();
+					if (enumText.indexOf(globalSearchString)>-1) {
+						enumValues.add(((Enum)enumConstant).ordinal());
 					}
 				}
+				searchSql.whereIn(attributeName, enumValues).or();
+			} else if (isNumber) {
+				// JPA doesn't support "like" on numbers, so only exact matches are found
+				searchSql.where(globalSearchNumber!=null, attributeName + " = :globalSearchNumber").or();
+			} else {
+				log.debug("Attribute type {} of {} is not searchable (skipped)", attributeType, attributePath);
 			}
 		}
 		String searchConditions = searchSql.getWhere();
@@ -379,29 +360,18 @@ public class YadaDataTableDao {
 		boolean needsExtraction = false;
 		// If targetClass has an id attribute, add it to the "order by" clause for deterministic pagination
 		boolean needsOrderById = Arrays.stream(targetClass.getDeclaredFields()).anyMatch(field -> field.getName().equalsIgnoreCase("id"));
-		List<YadaDatatablesOrder> orderList = yadaDatatablesRequest.getOrder();
-		if (orderList!=null) {
-			for (YadaDatatablesOrder yadaDatatablesOrder : orderList) {
-				int columnIndex = yadaDatatablesOrder.getColumnIndex();
-				if (columnIndex>=0) {
-					YadaDatatablesColumn yadaDatatablesColumn = yadaDatatablesColumns.get(columnIndex);
-					if (yadaDatatablesColumn.isOrderable()) {
-						String attributeName = yadaDatatablesColumn.getNameOrData();
-						if ("id".equalsIgnoreCase(attributeName)) {
-							needsOrderById = false; // No need to add it twice
-						}
-						if (attributeName!=null) {
-							// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
-							String sortColumn = addLeftJoins(attributeName, yadaSql, targetClass);
-							yadaSql.orderBy(sortColumn + " " + yadaDatatablesOrder.getDir());
-							if (attributeName.indexOf('.')>-1) {
-								yadaSql.selectFrom(sortColumn); // Needed to avoid "ORDER BY clause is not in SELECT list"
-								needsExtraction = true;
-							}
-							// Class attributeType = yadaUtil.getType(targetClass, attributeName);
-						}
-					}
-				}
+		for (String[] order : resolved.orders()) {
+			String attributeName = order[0];
+			String direction = order[1]; // Only "asc" or "desc"
+			if ("id".equalsIgnoreCase(attributeName)) {
+				needsOrderById = false; // No need to add it twice
+			}
+			// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
+			String sortColumn = addLeftJoins(attributeName, yadaSql, targetClass);
+			yadaSql.orderBy(sortColumn + " " + direction);
+			if (attributeName.indexOf('.')>-1) {
+				yadaSql.selectFrom(sortColumn); // Needed to avoid "ORDER BY clause is not in SELECT list"
+				needsExtraction = true;
 			}
 		}
 		// Always order by id (too) to have deterministic pagination
@@ -434,24 +404,22 @@ public class YadaDataTableDao {
 			}
 			result = extractedResult;
 		}
-    	// Count con where
-    	yadaSql.toCount(); // Trasforma in un count
-    	query = yadaSql.query(em);
-    	long count = (long) query.getSingleResult();
-    	yadaDatatablesRequest.setRecordsFiltered(count);
-    	// Count senza search
-    	query = countSql.query(em);
-    	count = (long) query.getSingleResult();
-    	yadaDatatablesRequest.setRecordsTotal(count);
-    	return result;
+	    	// Count with the search conditions
+	    	yadaSql.toCount();
+	    	query = yadaSql.query(em);
+	    	long count = (long) query.getSingleResult();
+	    	yadaDatatablesRequest.setRecordsFiltered(count);
+	    	// Count without the search conditions
+	    	query = countSql.query(em);
+	    	count = (long) query.getSingleResult();
+	    	yadaDatatablesRequest.setRecordsTotal(count);
+	    	return result;
 	}
 	
 	/**
 	 * From an attribute with a path, like "location.company.name", inserts needed left joins and returns the last segment "company.name".
 	 * Joins are inserted for all elements before the last dot: "location" and "company" in the example.
-	 * @param attributePath
-	 * @param yadaSqlBuilder
-	 * @return
+	 * The path must have been validated by {@link YadaDataTableQueryPolicy}.
 	 */
 	private String addLeftJoins(String attributePath, YadaSql yadaSqlBuilder, Class targetClass) {
 		if (attributePath==null) {
@@ -471,12 +439,15 @@ public class YadaDataTableDao {
 		if (parts.length>1) { // location.company.name
 			String alias = context + "_" + current; // Adding the context to the alias to prevent name clashes - TODO maybe all the preceding path should be added?
 			yadaSql.join("left join " + context + "." + current + " " + alias); // e.location location
-			if (currentClass.equals(Map.class)) {
-				// Need to add a condition on the map key. Need to check for null to handle absent data
+			if (Map.class.equals(currentClass)) {
+				// Need to add a condition on the map key. Need to check for null to handle absent data.
+				// The key is always bound as a parameter, never written in the query.
 				String keyValue = parts[1]; // en
-				String whereToAdd = "(KEY("+alias+") is null or KEY("+alias+")='" + keyValue + "')"; // (KEY(name) is null or KEY(name)='en');
+				String keyParameter = mapKeyParameter(alias, keyValue);
+				String whereToAdd = "(KEY("+alias+") is null or KEY("+alias+")=:" + keyParameter + ")"; // (KEY(e_name) is null or KEY(e_name)=:yadaKey_e_name_656e);
 				if (yadaSql.getWhere().indexOf(whereToAdd)<0) {
 					yadaSql.where(whereToAdd).and();
+					yadaSql.setParameter(keyParameter, toMapKey(keyValue, currentField));
 				}
 				// If the current attribute is a map, continue only if there is something more after the map key
 				if (parts.length>2) {
@@ -491,34 +462,53 @@ public class YadaDataTableDao {
 				}
 			}
 			return addLeftJoinsRecurse(StringUtils.substringAfter(attributePath, "."), alias, yadaSql, currentClass);
-//			if (!contextClass.equals(Map.class)) {
-//				attributeClass = field.getType();
-//			} else {
-//				// If the targetClass is a map, then the current attribute is the key of the map so there's no need to add a join
-//				// but we need to know the type of the value in the map.
-//				// TODO don't we need to add a KEY(current)=:xxx? What would xxx be?
-//			}
-//			return addLeftJoinsRecurse(StringUtils.substringAfter(attributePath, "."), current, yadaSql, attributeClass);
 		} else {
-//			try {
-				// Last element of the path - if it's a YadaPersistentEnum we still need a join for the map
-				// if (yadaUtil.getType(targetClass, attributePath) == YadaPersistentEnum.class) {
-				if (YadaPersistentEnum.class.equals(currentClass)) {
-					String alias = attributePath + "_langToText";
-					yadaSql.join("left join " + context + "." + attributePath + " " + attributePath); 	// left join user.status status
-					yadaSql.join("left join " + attributePath + ".langToText " + alias);	// left join status.langToText status_langToText
-					String whereToAdd = "(KEY("+alias+") is null or KEY("+alias+")=:yadalang)";
-					if (yadaSql.getWhere().indexOf(whereToAdd)<0) {
-						yadaSql.where(whereToAdd).and();
-						yadaSql.setParameter("yadalang", LocaleContextHolder.getLocale().getLanguage());
-					}
-					return alias;
+			// Last element of the path - if it's a YadaPersistentEnum we still need a join for the map
+			if (YadaPersistentEnum.class.equals(currentClass)) {
+				String alias = attributePath + "_langToText";
+				yadaSql.join("left join " + context + "." + attributePath + " " + attributePath); 	// left join user.status status
+				yadaSql.join("left join " + attributePath + ".langToText " + alias);	// left join status.langToText status_langToText
+				String whereToAdd = "(KEY("+alias+") is null or KEY("+alias+")=:yadalang)";
+				if (yadaSql.getWhere().indexOf(whereToAdd)<0) {
+					yadaSql.where(whereToAdd).and();
+					yadaSql.setParameter("yadalang", LocaleContextHolder.getLocale().getLanguage());
 				}
-//			} catch (NoSuchFieldException e) {
-//				log.error("No field {} found on class {} (ignored)", attributePath, targetClass.getName());
-//			}
+				return alias;
+			}
 			return context + "." + attributePath; // e.phone, company.name
 		}
+	}
+
+	/**
+	 * Converts the key segment of a path to the key type of the map, so that it can be bound as a query parameter.
+	 * @param keyValue the key as written in the path, e.g. "en" or "en_US"
+	 * @param mapField the Map field
+	 * @return the key as a Locale, enum constant, number or String depending on the declared key type
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Object toMapKey(String keyValue, Field mapField) {
+		Class<?> keyType = String.class;
+		if (mapField.getGenericType() instanceof ParameterizedType mapType && mapType.getActualTypeArguments()[0] instanceof Class<?> keyClass) {
+			keyType = keyClass;
+		}
+		if (Locale.class.equals(keyType)) {
+			return org.apache.commons.lang3.LocaleUtils.toLocale(keyValue.replace('-', '_'));
+		} else if (keyType.isEnum()) {
+			return Enum.valueOf((Class<? extends Enum>) keyType, keyValue);
+		} else if (Integer.class.equals(keyType) || int.class.equals(keyType)) {
+			return Integer.valueOf(keyValue);
+		} else if (Long.class.equals(keyType) || long.class.equals(keyType)) {
+			return Long.valueOf(keyValue);
+		}
+		return keyValue;
+	}
+
+	/**
+	 * @return a query parameter name for a map key, unique for each alias and key: the key is hex-encoded,
+	 * 	so "en-US" and "en_US" get different names, e.g. "yadaKey_e_title_656e2d5553"
+	 */
+	private String mapKeyParameter(String alias, String keyValue) {
+		return "yadaKey_" + alias + "_" + java.util.HexFormat.of().formatHex(keyValue.getBytes(java.nio.charset.StandardCharsets.UTF_8));
 	}
 
 }
