@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -50,6 +51,15 @@ class YadaDataTableSecurityTest {
 
 	public enum Kind { RED, BLUE }
 
+	@Embeddable
+	public static class Size {
+		private int width;
+		@Override
+		public String toString() {
+			return "Size[width=" + width + "]";
+		}
+	}
+
 	@Entity
 	public static class Item {
 		private Long id;
@@ -62,6 +72,9 @@ class YadaDataTableSecurityTest {
 		private int count;
 		private String password;
 		private String tokenHash;
+		private Map<String, String> labels = new HashMap<>();
+		private Map<String, String> settings = new HashMap<>();
+		private Size size;
 
 		public String getComputed() {
 			return "computed-" + name;
@@ -76,9 +89,20 @@ class YadaDataTableSecurityTest {
 			return owner;
 		}
 
+		/** Declared as Object, so only the runtime safeguard can see that it is an embeddable */
+		public Object getSizeObject() {
+			return size;
+		}
+
 		public String getDT_RowClass() {
 			return "row-" + id;
 		}
+	}
+
+	/** A subclass with an attribute that the declared entity class doesn't have */
+	@Entity
+	public static class SpecialItem extends Item {
+		private String special;
 	}
 
 	private EntityManager em;
@@ -181,9 +205,14 @@ class YadaDataTableSecurityTest {
 
 	@ParameterizedTest
 	@ValueSource(strings = { "password", "owner.password", "tokenHash", "owner", "owners", "mainOwner", "missing", "owner.missing",
-		"name or 1=1", "name)", "id desc", "e.name", "title.en'", "" })
+		"name or 1=1", "name)", "id desc", "e.name", "title.en'", "", "settings.password", "labels.token", "size", "special" })
 	void policyRefusesUnsafeOrInvalidPaths(String path) {
 		assertThrows(YadaInvalidUsageException.class, () -> YadaDataTableQueryPolicy.forEntity(Item.class).column(path, false, false).build());
+	}
+
+	@Test
+	void policyAcceptsEmbeddableAttributes() {
+		assertNotNull(YadaDataTableQueryPolicy.forEntity(Item.class).column("size.width").build());
 	}
 
 	@Test
@@ -320,10 +349,28 @@ class YadaDataTableSecurityTest {
 		Map<String, Object> json = send(request);
 		assertNull(json.get("yadaError"), json.toString());
 		String hql = hqlCaptor.getAllValues().get(0);
-		assertTrue(hql.contains("KEY(e_title)=:yadaKey_e_title_en"), hql);
+		assertTrue(hql.contains("KEY(e_title)=:yadaKey_e_title_656e)"), hql);
 		assertFalse(hql.contains("'en'"), hql);
-		// Bound on the page query and on the filtered count query
-		verify(query, org.mockito.Mockito.times(2)).setParameter("yadaKey_e_title_en", "en");
+		// Bound with the key type of the map (Locale), on the page query and on the filtered count query
+		verify(query, org.mockito.Mockito.times(2)).setParameter("yadaKey_e_title_656e", Locale.ENGLISH);
+	}
+
+	@Test
+	void similarMapKeysGetDistinctParameters() {
+		YadaDataTableQueryPolicy policy = YadaDataTableQueryPolicy.forEntity(Item.class).column("labels.en-US").column("labels.en_US").build();
+		when(query.getResultList()).thenReturn(new ArrayList<>());
+		YadaDatatablesRequest request = new YadaDatatablesRequest();
+		request.setDataTableId("itemTable");
+		request.setLength(10);
+		request.setColumns(new ArrayList<>(List.of(column("labels.en-US", "labels.en-US", true, true), column("labels.en_US", "labels.en_US", true, true))));
+		request.getSearch().put("value", "abc");
+		Map<String, Object> json = dao.getConvertedJsonPage(request, Item.class, Locale.ENGLISH, policy);
+		assertNull(json.get("yadaError"), json.toString());
+		String hql = hqlCaptor.getAllValues().get(0);
+		assertTrue(hql.contains("KEY(e_labels)=:yadaKey_e_labels_656e2d5553)"), hql);
+		assertTrue(hql.contains("KEY(e_labels)=:yadaKey_e_labels_656e5f5553)"), hql);
+		verify(query, org.mockito.Mockito.atLeastOnce()).setParameter("yadaKey_e_labels_656e2d5553", "en-US");
+		verify(query, org.mockito.Mockito.atLeastOnce()).setParameter("yadaKey_e_labels_656e5f5553", "en_US");
 	}
 
 	// Output
@@ -366,5 +413,105 @@ class YadaDataTableSecurityTest {
 		request.getExtraJsonAttributes().add("count");
 		assertNull(send(request).get("yadaError"));
 		verify(em, org.mockito.Mockito.atLeastOnce()).createQuery(anyString());
+	}
+
+	// Policies derived from a configured table
+
+	@Test
+	void explicitPolicyFailsFastOnNonPersistentQueryablePaths() {
+		assertThrows(YadaInvalidUsageException.class, () -> YadaDataTableQueryPolicy.forEntity(Item.class).column("computed").build());
+		assertThrows(YadaInvalidUsageException.class, () -> YadaDataTableQueryPolicy.forEntity(Item.class).column("special").build());
+		assertThrows(YadaInvalidUsageException.class, () -> YadaDataTableQueryPolicy.forEntity(Item.class).column("special", false, false).build());
+	}
+
+	@Test
+	void configuredTableMakesNonPersistentColumnsOutputOnly() {
+		YadaDataTableQueryPolicy policy = YadaDataTableQueryPolicy.forConfiguredTable("itemTable", Item.class).column("id").column("computed").column("special").build();
+		assertTrue(policy.isSearchable("id") && policy.isOrderable("id"));
+		assertEquals(List.of("id", "computed", "special"), List.copyOf(policy.getColumnPaths()));
+		assertFalse(policy.isSearchable("computed") || policy.isOrderable("computed"));
+		assertFalse(policy.isSearchable("special") || policy.isOrderable("special"));
+	}
+
+	@Test
+	void configuredTableStillRefusesUnsafePaths() {
+		for (String path : new String[] { "password", "owner.password", "settings.password", "owner", "size", "mainOwner", "name or 1=1" }) {
+			assertThrows(YadaInvalidUsageException.class, () -> YadaDataTableQueryPolicy.forConfiguredTable("itemTable", Item.class).column(path).build(), path);
+		}
+	}
+
+	private YadaDatatablesRequest configuredRequest() {
+		YadaDatatablesRequest request = new YadaDatatablesRequest();
+		request.setDataTableId("itemTable");
+		request.setLength(1);
+		request.setStart(1);
+		request.setColumns(new ArrayList<>(List.of(column("id", "id", true, true), column("computed", "computed", true, true), column("special", "special", true, true))));
+		request.setOrder(new ArrayList<>(List.of(order("0", "asc"))));
+		return request;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	void configuredTableWithGetterAndSubclassColumnsPagesAndRejectsTheirSorting() {
+		YadaDataTableQueryPolicy policy = YadaDataTableQueryPolicy.forConfiguredTable("itemTable", Item.class).column("id").column("computed").column("special").build();
+		SpecialItem special = new SpecialItem();
+		((Item) special).id = 2L;
+		((Item) special).name = "second";
+		special.special = "only-in-subclass";
+		when(query.getResultList()).thenReturn(new ArrayList<>(List.of(special)));
+		YadaDatatablesRequest request = configuredRequest();
+		request.getSearch().put("value", "second");
+		Map<String, Object> json = dao.getConvertedJsonPage(request, Item.class, Locale.ENGLISH, policy);
+		assertNull(json.get("yadaError"), json.toString());
+		Map<String, Object> row = ((List<Map<String, Object>>) json.get("data")).get(0);
+		assertEquals("computed-second", row.get("computed"));
+		assertEquals("only-in-subclass", row.get("special"));
+		String hql = hqlCaptor.getAllValues().get(0);
+		assertFalse(hql.contains("computed") || hql.contains("special"), "Output-only columns reached the query: " + hql);
+		verify(query).setFirstResult(1);
+		verify(query).setMaxResults(1);
+		for (String index : new String[] { "1", "2" }) {
+			YadaDatatablesRequest sorted = configuredRequest();
+			sorted.getOrder().set(0, order(index, "asc"));
+			org.mockito.Mockito.clearInvocations(em);
+			Map<String, Object> rejected = dao.getConvertedJsonPage(sorted, Item.class, Locale.ENGLISH, policy);
+			assertNotNull(rejected.get("yadaError"), rejected.toString());
+			verifyNoInteractions(em);
+		}
+	}
+
+	@Test
+	void configuredTableLogsOneWarningPerOutputOnlyColumn() {
+		ch.qos.logback.classic.Logger policyLogger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(YadaDataTableQueryPolicy.class);
+		ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent> appender = new ch.qos.logback.core.read.ListAppender<>();
+		appender.start();
+		policyLogger.addAppender(appender);
+		try {
+			YadaDataTableQueryPolicy.forConfiguredTable("itemTable", Item.class).column("id").column("computed").column("special").build();
+		} finally {
+			policyLogger.detachAppender(appender);
+		}
+		List<String> warnings = appender.list.stream().filter(event -> event.getLevel() == ch.qos.logback.classic.Level.WARN).map(ch.qos.logback.classic.spi.ILoggingEvent::getFormattedMessage).toList();
+		assertEquals(2, warnings.size(), warnings.toString());
+		assertTrue(warnings.get(0).contains("'itemTable' column 'computed'"), warnings.get(0));
+		assertTrue(warnings.get(1).contains("'itemTable' column 'special'"), warnings.get(1));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	void embeddableValuesAreNeverReturned() {
+		Item item = item(1, "first");
+		item.size = new Size();
+		when(query.getResultList()).thenReturn(new ArrayList<>(List.of(item)));
+		YadaDataTableQueryPolicy policy = YadaDataTableQueryPolicy.forEntity(Item.class).column("id").column("sizeObject", false, false).build();
+		YadaDatatablesRequest request = new YadaDatatablesRequest();
+		request.setDataTableId("itemTable");
+		request.setLength(10);
+		request.setColumns(new ArrayList<>(List.of(column("id", "id", true, true), column("sizeObject", "sizeObject", false, false))));
+		Map<String, Object> json = dao.getConvertedJsonPage(request, Item.class, Locale.ENGLISH, policy);
+		Map<String, Object> row = ((List<Map<String, Object>>) json.get("data")).get(0);
+		assertTrue(row.containsKey("sizeObject"), row.toString());
+		assertNull(row.get("sizeObject"), row.toString());
+		assertFalse(json.toString().contains("Size["), json.toString());
 	}
 }

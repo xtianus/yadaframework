@@ -444,10 +444,10 @@ public class YadaDataTableDao {
 				// The key is always bound as a parameter, never written in the query.
 				String keyValue = parts[1]; // en
 				String keyParameter = mapKeyParameter(alias, keyValue);
-				String whereToAdd = "(KEY("+alias+") is null or KEY("+alias+")=:" + keyParameter + ")"; // (KEY(e_name) is null or KEY(e_name)=:yadaKey_e_name_en);
+				String whereToAdd = "(KEY("+alias+") is null or KEY("+alias+")=:" + keyParameter + ")"; // (KEY(e_name) is null or KEY(e_name)=:yadaKey_e_name_656e);
 				if (yadaSql.getWhere().indexOf(whereToAdd)<0) {
 					yadaSql.where(whereToAdd).and();
-					yadaSql.setParameter(keyParameter, keyValue);
+					yadaSql.setParameter(keyParameter, toMapKey(keyValue, currentField));
 				}
 				// If the current attribute is a map, continue only if there is something more after the map key
 				if (parts.length>2) {
@@ -480,10 +480,35 @@ public class YadaDataTableDao {
 	}
 
 	/**
-	 * @return a query parameter name for a map key, e.g. "yadaKey_e_title_en"
+	 * Converts the key segment of a path to the key type of the map, so that it can be bound as a query parameter.
+	 * @param keyValue the key as written in the path, e.g. "en" or "en_US"
+	 * @param mapField the Map field
+	 * @return the key as a Locale, enum constant, number or String depending on the declared key type
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Object toMapKey(String keyValue, Field mapField) {
+		Class<?> keyType = String.class;
+		if (mapField.getGenericType() instanceof ParameterizedType mapType && mapType.getActualTypeArguments()[0] instanceof Class<?> keyClass) {
+			keyType = keyClass;
+		}
+		if (Locale.class.equals(keyType)) {
+			return org.apache.commons.lang3.LocaleUtils.toLocale(keyValue.replace('-', '_'));
+		} else if (keyType.isEnum()) {
+			return Enum.valueOf((Class<? extends Enum>) keyType, keyValue);
+		} else if (Integer.class.equals(keyType) || int.class.equals(keyType)) {
+			return Integer.valueOf(keyValue);
+		} else if (Long.class.equals(keyType) || long.class.equals(keyType)) {
+			return Long.valueOf(keyValue);
+		}
+		return keyValue;
+	}
+
+	/**
+	 * @return a query parameter name for a map key, unique for each alias and key: the key is hex-encoded,
+	 * 	so "en-US" and "en_US" get different names, e.g. "yadaKey_e_title_656e2d5553"
 	 */
 	private String mapKeyParameter(String alias, String keyValue) {
-		return "yadaKey_" + alias + "_" + keyValue.replaceAll("[^A-Za-z0-9_]", "_");
+		return "yadaKey_" + alias + "_" + java.util.HexFormat.of().formatHex(keyValue.getBytes(java.nio.charset.StandardCharsets.UTF_8));
 	}
 
 }

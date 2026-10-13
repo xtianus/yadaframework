@@ -24,6 +24,7 @@ import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -167,6 +168,19 @@ class DataTableSecurityIntegrationTest {
 		final List<String> extraJsonAttributes = new ArrayList<>();
 		String searchValue = "";
 		String dataTableId;
+
+		/**
+		 * A request with one data column for each path, the first one sorted ascending
+		 */
+		static TableRequest with(String tableId, String... paths) {
+			TableRequest result = new TableRequest();
+			result.dataTableId = tableId;
+			for (String path : paths) {
+				result.columns.add(new String[] { path, path, "true", "true" });
+			}
+			result.orders.add(new String[] { "0", "asc" });
+			return result;
+		}
 
 		/**
 		 * The request that the page sends for a table
@@ -376,5 +390,56 @@ class DataTableSecurityIntegrationTest {
 		HttpResponse<String> response = user.table(endpoint, TableRequest.of(endpoint));
 		assertNotEquals(200, response.statusCode(), response.body());
 		assertFalse(response.body().contains(TestDataService.ADMIN_EMAIL), response.body());
+	}
+
+	@Test
+	void subclassColumnOfAConfiguredTableIsOutputOnly() throws Exception {
+		testDataService.createUser("zz@yts.test", "zebra-password", "zebra", "USER");
+		Browser browser = admin();
+		String table = DataTableScenarioController.SUPERCLASS_TABLE_ID;
+		try (LogCapture logs = LogCapture.start()) {
+			// Second page of one row, sorted by email: the nickname is read from each UserProfile row
+			TableRequest page = TableRequest.with(table, "id", "userCredentials.username", "nickname");
+			page.orders.set(0, new String[] { "1", "asc" });
+			Map<String, String> fields = page.fields();
+			fields.put("start", "1");
+			fields.put("length", "1");
+			String body = browser.post("/yadaDataTableData", fields, browser.csrfHeader, browser.csrfToken).body();
+			JsonNode json = JSON.readTree(body);
+			assertTrue(json.get("yadaError") == null, body);
+			assertEquals(3, json.get("recordsTotal").asInt(), body);
+			assertEquals(1, json.get("data").size(), body);
+			assertEquals(TestDataService.USER_EMAIL, json.get("data").get(0).get("userCredentials").get("username").asText(), body);
+			assertEquals("user", json.get("data").get(0).get("nickname").asText(), body);
+			// Searching the nickname is ignored even if the browser asks for it
+			TableRequest search = TableRequest.with(table, "id", "userCredentials.username", "nickname");
+			search.searchValue = "zebra";
+			body = browser.table(Endpoint.CONFIGURED, search).body();
+			assertEquals(0, JSON.readTree(body).get("recordsFiltered").asInt(), body);
+			long warnings = logs.events().stream().filter(event -> event.getFormattedMessage().contains("DataTable '" + table + "' column 'nickname' is not a persistent field")).count();
+			assertEquals(1, warnings, logs.text());
+		}
+		// Sorting on it is rejected before any query
+		TableRequest sort = TableRequest.with(table, "id", "userCredentials.username", "nickname");
+		sort.orders.set(0, new String[] { "2", "asc" });
+		assertRejected(browser, Endpoint.CONFIGURED, sort);
+	}
+
+	@Test
+	void localizedMapKeysAreBoundWithTheirType() throws Exception {
+		Browser browser = admin();
+		TableRequest sorted = TableRequest.with("ytsArticleTable", "id", "sku", "name.en");
+		sorted.orders.set(0, new String[] { "2", "desc" });
+		String body = browser.post("/test/admin/datatable/articleTablePage", sorted.fields(), browser.csrfHeader, browser.csrfToken).body();
+		JsonNode json = JSON.readTree(body);
+		assertTrue(json.get("yadaError") == null, body);
+		assertEquals(TestDataService.ARTICLES.size(), json.get("data").size(), body);
+		assertEquals("Easel", json.get("data").get(0).get("name").get("en").asText(), body);
+		TableRequest search = TableRequest.with("ytsArticleTable", "id", "sku", "name.en");
+		search.searchValue = "armc";
+		body = browser.post("/test/admin/datatable/articleTablePage", search.fields(), browser.csrfHeader, browser.csrfToken).body();
+		json = JSON.readTree(body);
+		assertEquals(1, json.get("recordsFiltered").asInt(), body);
+		assertEquals("Armchair", json.get("data").get(0).get("name").get("en").asText(), body);
 	}
 }

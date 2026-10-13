@@ -88,7 +88,8 @@ public class YadaDataTableProxy extends YadaDataTable {
 	 * Returns the server-side query policy of this table, derived from its configuration: one column for each
 	 * configured column name (or data path when the name is not set), searchable and orderable unless switched off
 	 * with dtSearchableOff() or dtOrderableOff(). Selection and command columns, and columns whose data is a
-	 * javascript function without a name, are not part of it.
+	 * javascript function without a name, are not part of it. A column whose path is not a persistent field of the
+	 * entity class (a getter, a computed value, a subclass-only attribute) is output-only, with a warning in the log.
 	 * @return the policy to pass to {@link YadaDataTableDao#getConvertedJsonPage(net.yadaframework.web.YadaDatatablesRequest, Class, Locale, YadaDataTableQueryPolicy)}
 	 * @throws YadaInvalidUsageException when the entity class is not set or a column path is not valid for it
 	 */
@@ -100,7 +101,7 @@ public class YadaDataTableProxy extends YadaDataTable {
 				throw new YadaInvalidUsageException("Entity class must be set in dataTableId '{}'", id);
 			}
 			prepareConfiguration();
-			YadaDataTableQueryPolicy.Builder builder = YadaDataTableQueryPolicy.forEntity(entityClass);
+			YadaDataTableQueryPolicy.Builder builder = YadaDataTableQueryPolicy.forConfiguredTable(id, entityClass);
 			List<YadaDTColumns> columns = ((YadaDTOptionsProxy) options).getColumns();
 			if (columns != null) {
 				for (YadaDTColumns column : columns) {

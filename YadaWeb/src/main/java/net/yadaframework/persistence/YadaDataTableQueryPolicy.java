@@ -19,6 +19,10 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.MappedSuperclass;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
@@ -39,8 +43,12 @@ import net.yadaframework.web.YadaDatatablesRequest;
  * Paths are validated against the entity class when the policy is built: a queryable (searchable or orderable) path
  * must resolve to persistent fields, map keys included; an output-only path may end with a getter that returns no
  * entity, collection or map. Paths that end
- * with an entity (except {@link YadaPersistentEnum}), a collection or map of entities, or that contain a credential
- * field name (see {@link #isSecretName(String)}) are refused.
+ * with an entity or embeddable (except {@link YadaPersistentEnum}), a collection or map of entities, or that contain
+ * a credential name in any segment, map keys included (see {@link #isSecretName(String)}), are refused.
+ * <p>
+ * An explicit policy ({@link #forEntity(Class)}) fails in build() when a searchable or orderable path is not a
+ * persistent field. The policy of a configured table ({@link #forConfiguredTable(String, Class)}) makes such
+ * columns output-only instead.
  * <p>
  * Example: <pre>
  * YadaDataTableQueryPolicy policy = YadaDataTableQueryPolicy.forEntity(UserProfile.class)
@@ -51,6 +59,7 @@ import net.yadaframework.web.YadaDatatablesRequest;
  * The default /yadaDataTableData endpoint derives the policy from the YadaDataTable configuration.
  */
 public final class YadaDataTableQueryPolicy {
+	private static final Logger log = LoggerFactory.getLogger(YadaDataTableQueryPolicy.class);
 	/** A field name segment of an attribute path */
 	private static final Pattern FIELD_SEGMENT = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*");
 	/** A map key segment of an attribute path, e.g. a language. Map keys are always bound as query parameters. */
@@ -85,9 +94,20 @@ public final class YadaDataTableQueryPolicy {
 		}
 	}
 
-	private YadaDataTableQueryPolicy(Builder builder) {
+	/**
+	 * Thrown by the path validation when a segment is neither a field nor (for output) a getter of the declared class:
+	 * a computed value, a subclass-only attribute or a typo. Any other validation failure means the path is unsafe.
+	 */
+	static final class UnresolvedPathException extends YadaInvalidUsageException {
+		private static final long serialVersionUID = 1L;
+		UnresolvedPathException(String format, Object... params) {
+			super(format, params);
+		}
+	}
+
+	private YadaDataTableQueryPolicy(Builder builder, Map<String, Column> validatedColumns) {
 		this.entityClass = builder.entityClass;
-		this.columns = Collections.unmodifiableMap(new LinkedHashMap<>(builder.columns));
+		this.columns = Collections.unmodifiableMap(new LinkedHashMap<>(validatedColumns));
 		this.extraOutputs = Collections.unmodifiableSet(new LinkedHashSet<>(builder.extraOutputs));
 	}
 
@@ -97,7 +117,21 @@ public final class YadaDataTableQueryPolicy {
 	 * @return a builder
 	 */
 	public static Builder forEntity(Class<?> entityClass) {
-		return new Builder(entityClass);
+		return new Builder(entityClass, null);
+	}
+
+	/**
+	 * Starts the policy of a table configured with YadaDataTable, as used by the default /yadaDataTableData endpoint.
+	 * It differs from {@link #forEntity(Class)} only for columns whose path is not a persistent field of the declared
+	 * entity class (a getter, a computed value, a subclass-only attribute): instead of failing, build() makes them
+	 * output-only (never searched or sorted) and logs a warning. Their value is still read on each row with the
+	 * output safeguards, and a path that is unsafe (credential name, whole entity, invalid syntax) still fails.
+	 * @param tableId the table id, used in the log
+	 * @param entityClass the entity class of the table
+	 * @return a builder
+	 */
+	public static Builder forConfiguredTable(String tableId, Class<?> entityClass) {
+		return new Builder(entityClass, tableId == null ? "" : tableId);
 	}
 
 	/**
@@ -239,12 +273,14 @@ public final class YadaDataTableQueryPolicy {
 		private final Class<?> entityClass;
 		private final Map<String, Column> columns = new LinkedHashMap<>();
 		private final Set<String> extraOutputs = new LinkedHashSet<>();
+		private final String configuredTableId; // null for explicit policies, which fail fast
 
-		private Builder(Class<?> entityClass) {
+		private Builder(Class<?> entityClass, String configuredTableId) {
 			if (entityClass == null) {
 				throw new YadaInvalidUsageException("The entity class of a DataTable policy can't be null");
 			}
 			this.entityClass = entityClass;
+			this.configuredTableId = configuredTableId;
 		}
 
 		/**
@@ -289,17 +325,38 @@ public final class YadaDataTableQueryPolicy {
 
 		/**
 		 * @return the immutable policy
-		 * @throws YadaInvalidUsageException when a path is invalid for the entity class or discloses a credential or an entity
+		 * @throws YadaInvalidUsageException when a path is invalid for the entity class or discloses a credential or an entity.
+		 * 	For a configured table (see {@link YadaDataTableQueryPolicy#forConfiguredTable(String, Class)}) a path that is
+		 * 	not a persistent field becomes output-only instead.
 		 */
 		public YadaDataTableQueryPolicy build() {
-			for (Map.Entry<String, Column> column : columns.entrySet()) {
-				boolean queryable = column.getValue().searchable() || column.getValue().orderable();
-				validatePath(entityClass, column.getKey(), queryable);
+			Map<String, Column> validated = new LinkedHashMap<>();
+			for (Map.Entry<String, Column> entry : columns.entrySet()) {
+				String path = entry.getKey();
+				Column column = entry.getValue();
+				boolean queryable = column.searchable() || column.orderable();
+				try {
+					validatePath(entityClass, path, queryable);
+				} catch (UnresolvedPathException e) {
+					if (configuredTableId == null) {
+						throw e; // Explicit policies fail fast
+					}
+					String verified = "verified";
+					try {
+						validatePath(entityClass, path, false);
+					} catch (UnresolvedPathException outputException) {
+						// e.g. an attribute of a subclass: the value is read from each row at runtime, with the output safeguards
+						verified = "not found on " + entityClass.getSimpleName() + ", read from each row";
+					}
+					log.warn("DataTable '{}' column '{}' is not a persistent field of {}: output only, never searched or sorted ({})", configuredTableId, path, entityClass.getSimpleName(), verified);
+					column = new Column(false, false);
+				}
+				validated.put(path, column);
 			}
 			for (String extra : extraOutputs) {
 				validatePath(entityClass, extra, false);
 			}
-			return new YadaDataTableQueryPolicy(this);
+			return new YadaDataTableQueryPolicy(this, validated);
 		}
 	}
 
@@ -309,6 +366,15 @@ public final class YadaDataTableQueryPolicy {
 	 */
 	static void validatePath(Class<?> entityClass, String path, boolean queryable) {
 		String[] segments = path.split("\\.", -1);
+		// Checked on every segment, map keys included, before resolving anything
+		for (String segment : segments) {
+			if (!KEY_SEGMENT.matcher(segment).matches()) {
+				throw new YadaInvalidUsageException("Invalid DataTable path '{}' for {}", path, entityClass.getSimpleName());
+			}
+			if (isSecretName(segment)) {
+				throw new YadaInvalidUsageException("DataTable path '{}' would disclose a credential", path);
+			}
+		}
 		Class<?> currentClass = entityClass;
 		Type currentType = entityClass;
 		for (int i = 0; i < segments.length; i++) {
@@ -330,7 +396,7 @@ public final class YadaDataTableQueryPolicy {
 					}
 					return;
 				}
-				throw new YadaInvalidUsageException("DataTable path '{}' does not resolve to {} field '{}' of {}", path, queryable ? "a persistent" : "a", segment, currentClass.getName());
+				throw new UnresolvedPathException("DataTable path '{}' does not resolve to {} field '{}' of {}", path, queryable ? "a persistent" : "a", segment, currentClass.getName());
 			}
 			currentClass = field.getType();
 			currentType = field.getGenericType();
@@ -417,11 +483,11 @@ public final class YadaDataTableQueryPolicy {
 	}
 
 	/**
-	 * @return true if the class or one of its superclasses is an entity or a mapped superclass
+	 * @return true if the class or one of its superclasses is an entity, a mapped superclass or an embeddable
 	 */
 	static boolean isEntityClass(Class<?> type) {
 		for (Class<?> current = type; current != null && current != Object.class; current = current.getSuperclass()) {
-			if (current.isAnnotationPresent(Entity.class) || current.isAnnotationPresent(MappedSuperclass.class)) {
+			if (current.isAnnotationPresent(Entity.class) || current.isAnnotationPresent(MappedSuperclass.class) || current.isAnnotationPresent(Embeddable.class)) {
 				return true;
 			}
 		}

@@ -15,6 +15,8 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.persistence.YadaDataTableDao;
 import net.yadaframework.persistence.YadaDataTableQueryPolicy;
 import net.yadaframework.persistence.YadaSql;
+import net.yadaframework.security.persistence.entity.YadaUserProfile;
+import net.yadaframework.commerce.persistence.entity.YadaCommerceArticle;
 import net.yadaframework.tests.persistence.entity.UserProfile;
 import net.yadaframework.web.YadaDatatablesRequest;
 import net.yadaframework.web.datatables.YadaDataTable;
@@ -31,6 +33,8 @@ public class DataTableScenarioController {
 	public static final String CONFIGURED_TABLE_ID = "ytsUserTable";
 	/** Id of the table served by {@link #userTablePage(YadaDatatablesRequest, Locale)} */
 	public static final String CUSTOM_TABLE_ID = "ytsCustomUserTable";
+	/** Id of a table configured on the YadaUserProfile superclass, with the subclass-only "nickname" column */
+	public static final String SUPERCLASS_TABLE_ID = "ytsProfileTable";
 
 	/**
 	 * What the custom endpoint allows, written by hand as a custom endpoint must do: the same columns as the table
@@ -40,6 +44,15 @@ public class DataTableScenarioController {
 		.column("nickname", false, true)
 		.column("userCredentials.username")
 		.column("userCredentials.lastSuccessfulLogin", true, false)
+		.build();
+
+	/**
+	 * Articles have localized names (a Map with Locale keys): the key in "name.en" is bound as a Locale parameter
+	 */
+	private static final YadaDataTableQueryPolicy ARTICLE_TABLE_POLICY = YadaDataTableQueryPolicy.forEntity(YadaCommerceArticle.class)
+		.column("id")
+		.column("sku")
+		.column("name.en")
 		.build();
 
 	private final YadaDataTableFactory yadaDataTableFactory;
@@ -81,6 +94,16 @@ public class DataTableScenarioController {
 					.dtColumnCheckbox("Select")
 				.back();
 		});
+		// "nickname" is only a field of the UserProfile subclass: the derived policy makes it output-only
+		yadaDataTableFactory.getSingleton(SUPERCLASS_TABLE_ID, locale, table -> {
+			table
+				.dtEntityClass(YadaUserProfile.class)
+				.dtStructureObj()
+					.dtColumnObj("ID", "id").back()
+					.dtColumnObj("Email", "userCredentials.username").dtOrderAsc().back()
+					.dtColumnObj("Nickname", "nickname").back()
+				.back();
+		});
 		model.addAttribute("configuredTable", configuredTable);
 		model.addAttribute("customTable", customTable);
 		return "/test/datatable/users";
@@ -100,5 +123,14 @@ public class DataTableScenarioController {
 			yadaSql.setParameter("roleId", roleId == null ? -1 : roleId);
 		}
 		return yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale, CUSTOM_TABLE_POLICY);
+	}
+
+	/**
+	 * Custom data endpoint over the seeded articles, sorted and searched on a localized name
+	 */
+	@RequestMapping(value = "/articleTablePage", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Object> articleTablePage(YadaDatatablesRequest yadaDatatablesRequest, Locale locale) {
+		return yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, YadaCommerceArticle.class, locale, ARTICLE_TABLE_POLICY);
 	}
 }
