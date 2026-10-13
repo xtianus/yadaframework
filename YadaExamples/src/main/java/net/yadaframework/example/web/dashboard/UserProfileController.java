@@ -35,6 +35,7 @@ import net.yadaframework.example.persistence.entity.UserProfile;
 import net.yadaframework.example.persistence.repository.UserProfileDao;
 import net.yadaframework.example.web.UserSession;
 import net.yadaframework.persistence.YadaDataTableDao;
+import net.yadaframework.persistence.YadaDataTableQueryPolicy;
 import net.yadaframework.persistence.YadaSql;
 import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
@@ -188,6 +189,18 @@ public class UserProfileController {
 		return "/dashboard/userProfileEditForm";
 	}
 	
+	/**
+	 * What userProfileTablePage may query and return: the columns of both the "userTable" and the legacy "usersTable".
+	 * Anything else that the browser asks for is rejected.
+	 */
+	private static final YadaDataTableQueryPolicy USER_TABLE_POLICY = YadaDataTableQueryPolicy.forEntity(UserProfile.class)
+		.column("id")
+		.column("userCredentials.enabled")
+		.column("nickname")
+		.column("userCredentials.username")
+		.column("userCredentials.lastSuccessfulLogin")
+		.build();
+
 	@RequestMapping(value ="/user/userProfileTablePage", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public Map<String, Object> userProfileTablePage(YadaDatatablesRequest yadaDatatablesRequest, Locale locale) {//		boolean usersSuspended = yadaDatatablesRequest.getExtraParam().get("usersSuspendedSet")!=null;
 	YadaSql yadaSql = yadaDatatablesRequest.getYadaSql();
@@ -215,7 +228,7 @@ public class UserProfileController {
 		}
 	}
 	
-	Map<String, Object> result = yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale);
+	Map<String, Object> result = yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale, USER_TABLE_POLICY);
 		return result;
 	}
 	
