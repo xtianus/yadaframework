@@ -27,6 +27,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -41,6 +42,7 @@ import net.yadaframework.persistence.YadaSavedPropertyCodecs;
 import net.yadaframework.persistence.YadaSavedPropertyKey;
 import net.yadaframework.persistence.repository.YadaPersistentEnumDao;
 import net.yadaframework.persistence.repository.YadaSavedPropertyDao;
+import net.yadaframework.tests.components.CapturingMailSender;
 import net.yadaframework.tests.components.TestDataService;
 import net.yadaframework.tests.persistence.entity.UserProfile;
 import net.yadaframework.tests.persistence.repository.ArticleDao;
@@ -169,7 +171,9 @@ class PersistenceIntegrationTest {
 		assertEquals(102400, config.getMaxFileUploadSizeBytes());
 		assertTrue(config.isUseEmbeddedDatabase());
 		assertEquals(session.run().databasePort(), config.getEmbeddedDatabasePort());
-		assertFalse(config.isEmailEnabled());
+		// Email is enabled, but only towards the in-memory CapturingMailSender
+		assertTrue(config.isEmailEnabled());
+		assertTrue(bean(JavaMailSender.class) instanceof CapturingMailSender);
 		assertEquals(Locale.ENGLISH, config.getDefaultLocale());
 	}
 

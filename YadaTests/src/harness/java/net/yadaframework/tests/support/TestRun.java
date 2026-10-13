@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -45,6 +46,7 @@ public final class TestRun implements AutoCloseable {
 	private final Path directory;
 	private final Path configurationFile;
 	private final Path runConfigurationFile;
+	private final Path settingsFile;
 	private final Map<String, String> datasourceSettings = new LinkedHashMap<>();
 	private Path databaseRoot;
 	private int databasePort;
@@ -55,6 +57,8 @@ public final class TestRun implements AutoCloseable {
 	private boolean customJdbcUrl = false;
 	private String jdbcUrl = null;
 	private String extraConfiguration = "";
+	/** Per-run application settings, written to conf.settings.xml: element path relative to &lt;config> → values */
+	private final Map<String, List<String>> settings = new LinkedHashMap<>();
 
 	private TestRun(Path buildDirectory) throws IOException {
 		this.runId = LocalDateTime.now().format(ID_FORMAT) + "_" + Long.toString(ProcessHandle.current().pid(), 36) + Integer.toString(ThreadLocalRandom.current().nextInt(36*36*36, 36*36*36*36), 36);
@@ -62,6 +66,7 @@ public final class TestRun implements AutoCloseable {
 		Files.createDirectories(directory);
 		this.configurationFile = directory.resolve("configuration.xml");
 		this.runConfigurationFile = directory.resolve("conf.run.xml");
+		this.settingsFile = directory.resolve("conf.settings.xml");
 		datasourceSettings.put("name", "yts" + runId);
 		datasourceSettings.put("poolInitialSize", "1");
 		datasourceSettings.put("poolMaxSize", "10");
@@ -206,6 +211,103 @@ public final class TestRun implements AutoCloseable {
 		writeConfiguration();
 	}
 
+	/**
+	 * Sets an application setting for this run only, without editing the shared conf.webapp.yts.xml.
+	 * The settings have the highest priority: they override the run configuration and the application configuration.
+	 * A setting given here replaces the whole element list of the same path in the other files, so that list settings
+	 * (e.g. trusted proxies, roles) are never merged with the defaults.
+	 * <p>
+	 * The configuration is read when the application starts: set values before {@link TestApplication#start(TestRun)},
+	 * or close the application and start it again on the same run.
+	 * <p>
+	 * Examples: {@code setConfigurationValue("security/autologinExpirationHours", "1")},
+	 * {@code setConfigurationValue("security/trustedProxies/proxy", "127.0.0.1", "::1")},
+	 * {@code setConfigurationValue("email/@throwExceptions", "true")}.
+	 * @param path element names separated by "/" relative to &lt;config>; the last segment may be an attribute like "@name"
+	 * @param values one value for a single element, several for a repeated element; none removes the setting
+	 */
+	public synchronized void setConfigurationValue(String path, String... values) {
+		String normalizedPath = normalizeSettingPath(path);
+		if (values == null || values.length == 0) {
+			settings.remove(normalizedPath);
+		} else {
+			if (normalizedPath.contains("@") && values.length != 1) {
+				throw new IllegalArgumentException("An attribute takes exactly one value: " + path);
+			}
+			settings.put(normalizedPath, List.of(values));
+		}
+		writeConfiguration();
+	}
+
+	/**
+	 * Removes every setting set with {@link #setConfigurationValue(String, String...)}
+	 */
+	public synchronized void clearConfigurationValues() {
+		settings.clear();
+		writeConfiguration();
+	}
+
+	private static String normalizeSettingPath(String path) {
+		if (path == null || !path.matches("[A-Za-z_][\\w.-]*(/[A-Za-z_][\\w.-]*)*(/@[A-Za-z_][\\w.-]*)?")) {
+			throw new IllegalArgumentException("Invalid setting path (expected e.g. \"security/autologinExpirationHours\" or \"email/@throwExceptions\"): " + path);
+		}
+		return path;
+	}
+
+	/**
+	 * Renders the settings as nested elements, merging common ancestors
+	 */
+	private String settingsXml() {
+		SettingNode root = new SettingNode();
+		for (Map.Entry<String, List<String>> setting : settings.entrySet()) {
+			String[] segments = setting.getKey().split("/");
+			SettingNode parent = root;
+			int elementCount = segments[segments.length-1].startsWith("@") ? segments.length - 1 : segments.length;
+			for (int i = 0; i < elementCount - 1; i++) {
+				parent = parent.children.computeIfAbsent(segments[i], name -> new SettingNode());
+			}
+			if (elementCount < segments.length) {
+				// Attribute of the last element
+				parent = parent.children.computeIfAbsent(segments[elementCount-1], name -> new SettingNode());
+				parent.attributes.put(segments[segments.length-1].substring(1), setting.getValue().get(0));
+			} else {
+				SettingNode leaf = parent.children.computeIfAbsent(segments[elementCount-1], name -> new SettingNode());
+				leaf.values = setting.getValue();
+			}
+		}
+		StringBuilder xml = new StringBuilder("<config>\n");
+		root.appendChildren(xml, "\t");
+		return xml.append("</config>\n").toString();
+	}
+
+	private static final class SettingNode {
+		private final Map<String, SettingNode> children = new LinkedHashMap<>();
+		private final Map<String, String> attributes = new LinkedHashMap<>();
+		private List<String> values = null;
+
+		private void appendChildren(StringBuilder xml, String indent) {
+			for (Map.Entry<String, SettingNode> child : children.entrySet()) {
+				child.getValue().append(xml, indent, child.getKey());
+			}
+		}
+
+		private void append(StringBuilder xml, String indent, String name) {
+			StringBuilder openTag = new StringBuilder("<").append(name);
+			for (Map.Entry<String, String> attribute : attributes.entrySet()) {
+				openTag.append(" ").append(attribute.getKey()).append("=\"").append(xml(attribute.getValue())).append("\"");
+			}
+			if (values != null) {
+				for (String value : values) {
+					xml.append(indent).append(openTag).append(">").append(xml(value)).append("</").append(name).append(">\n");
+				}
+			} else {
+				xml.append(indent).append(openTag).append(">\n");
+				appendChildren(xml, indent + "\t");
+				xml.append(indent).append("</").append(name).append(">\n");
+			}
+		}
+	}
+
 	private void writeConfiguration() {
 		StringBuilder datasource = new StringBuilder();
 		String writtenJdbcUrl = customJdbcUrl ? jdbcUrl : configuredJdbcUrl();
@@ -229,9 +331,6 @@ public final class TestRun implements AutoCloseable {
 					<basePath>%s</basePath>
 					<serverAddress>http://localhost/</serverAddress>
 				</paths>
-				<email>
-					<enabled>false</enabled>
-				</email>
 				<database enabled="true">
 					<embedded enabled="true" port="%d">
 						<baseDir>%s</baseDir>
@@ -249,7 +348,7 @@ public final class TestRun implements AutoCloseable {
 				xml(databaseBaseDirectory().toString()), xml(dataDirectory().toString()), xml(databaseRoot.resolve("tmp").toString()),
 				sourceSql == null ? "" : "\t\t\t\t<sourceSql>" + xml(sourceSql.toString()) + "</sourceSql>\n",
 				migrationAtStartup, datasource, extraConfiguration);
-		// The run configuration overrides the application test configuration found on the classpath, if any
+		// The per-run settings override the run configuration, which overrides the application test configuration found on the classpath, if any
 		String configuration = """
 			<?xml version="1.0" encoding="UTF-8"?>
 			<configuration>
@@ -259,6 +358,7 @@ public final class TestRun implements AutoCloseable {
 					</result>
 				</header>
 				<override>
+					<xml config-name="settings" config-at="config" fileName="%s"/>
 					<properties fileName="net.yadaframework.yadaweb.properties" config-optional="true"/>
 					<properties fileName="net.yadaframework.yadawebsecurity.properties" config-optional="true"/>
 					<properties fileName="net.yadaframework.yadawebcms.properties" config-optional="true"/>
@@ -267,8 +367,9 @@ public final class TestRun implements AutoCloseable {
 					<xml config-name="application" config-at="config" fileName="conf.webapp.yts.xml" config-optional="true"/>
 				</override>
 			</configuration>
-			""".formatted(xml(runConfigurationFile.toString()));
+			""".formatted(xml(settingsFile.toString()), xml(runConfigurationFile.toString()));
 		try {
+			Files.writeString(settingsFile, settingsXml(), StandardCharsets.UTF_8);
 			Files.writeString(runConfigurationFile, runConfiguration, StandardCharsets.UTF_8);
 			Files.writeString(configurationFile, configuration, StandardCharsets.UTF_8);
 		} catch (IOException e) {
