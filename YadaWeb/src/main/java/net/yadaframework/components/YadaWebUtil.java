@@ -12,6 +12,7 @@ import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_ERR
 import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_INFO;
 import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -23,6 +24,9 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -629,6 +633,107 @@ public class YadaWebUtil {
 		}
 		String enhancedUrl = enhanceUrl(url, locale, params);
 		return "redirect:" + enhancedUrl;
+	}
+
+	/**
+	 * Validates a redirect target that comes from the client (a request parameter, a stored "current location", etc.)
+	 * so that a redirect can't leave the site.
+	 * <p>
+	 * The candidate is accepted unchanged only when it is an absolute local path like "/dashboard?tab=users#top":
+	 * it starts with a single "/", contains no backslash, whitespace, control or invisible format character anywhere,
+	 * and its path has no "." or ".." segment. The path is also percent-decoded, up to {@value #SAFE_REDIRECT_DECODING_ROUNDS}
+	 * times, and every decoded form must satisfy the same rules and contain no encoded "/" or "\", so that double-encoded
+	 * values like "/%252F%252Fevil.example" are rejected too. Malformed or too deeply nested encodings are rejected.
+	 * The query string and the fragment are kept as they are.
+	 * <p>
+	 * The result is never decoded or re-encoded: return it with "redirect:" or pass it to
+	 * {@link #redirectString(String, Locale, String...)}, which only formats it. Unlike {@link #sanitizeUrl(String)}, which
+	 * produces external urls, this method never returns a value that leaves the site. Locale and context path segments
+	 * are left untouched, as any other local segment.
+	 * @param candidate the requested target, can be null
+	 * @return the candidate when it is a safe local path, otherwise "/"
+	 */
+	public String safeLocalRedirect(String candidate) {
+		if (isSafeLocalRedirect(candidate)) {
+			return candidate;
+		}
+		// The value is not logged: it can be long, forged or carry a token
+		log.debug("Unsafe redirect target replaced with \"/\"");
+		return "/";
+	}
+
+	/** How many times safeLocalRedirect() decodes a path before rejecting it as too deeply encoded */
+	private static final int SAFE_REDIRECT_DECODING_ROUNDS = 3;
+	private static final Pattern ENCODED_SEPARATOR = Pattern.compile("%(2f|5c)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern PERCENT_ESCAPE = Pattern.compile("%[0-9A-Fa-f]{2}");
+
+	private boolean isSafeLocalRedirect(String candidate) {
+		if (candidate==null || !hasOnlySafeRedirectCharacters(candidate)) {
+			return false;
+		}
+		int pathEnd = StringUtils.indexOfAny(candidate, '?', '#');
+		String path = pathEnd<0 ? candidate : candidate.substring(0, pathEnd);
+		for (int round = 0; ; round++) {
+			if (!path.startsWith("/") || path.startsWith("//") || !hasOnlySafeRedirectCharacters(path) || hasDotSegment(path) || ENCODED_SEPARATOR.matcher(path).find()) {
+				return false;
+			}
+			if (path.indexOf('%')<0) {
+				return true;
+			}
+			if (round>=SAFE_REDIRECT_DECODING_ROUNDS) {
+				return false; // Still encoded after the allowed rounds
+			}
+			path = strictPercentDecode(path);
+			if (path==null) {
+				return false;
+			}
+		}
+	}
+
+	private boolean hasOnlySafeRedirectCharacters(String value) {
+		for (int i = 0; i < value.length(); i++) {
+			char character = value.charAt(i);
+			if (character=='\\' || Character.isWhitespace(character) || Character.isSpaceChar(character) || Character.isISOControl(character) || Character.getType(character)==Character.FORMAT) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean hasDotSegment(String path) {
+		for (String segment : path.split("/", -1)) {
+			if (segment.equals(".") || segment.equals("..")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Decodes the %XX escapes of a path as UTF-8, without turning "+" into a space
+	 * @return the decoded path, or null when an escape is malformed or the bytes are not valid UTF-8
+	 */
+	private String strictPercentDecode(String path) {
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream(path.length());
+		int position = 0;
+		while (position < path.length()) {
+			int escapePosition = path.indexOf('%', position);
+			int plainEnd = escapePosition<0 ? path.length() : escapePosition;
+			bytes.writeBytes(path.substring(position, plainEnd).getBytes(StandardCharsets.UTF_8));
+			if (escapePosition<0) {
+				break;
+			}
+			if (escapePosition+3>path.length() || !PERCENT_ESCAPE.matcher(path.substring(escapePosition, escapePosition+3)).matches()) {
+				return null; // A "%" that doesn't start a valid escape
+			}
+			bytes.write(Integer.parseInt(path.substring(escapePosition+1, escapePosition+3), 16));
+			position = escapePosition+3;
+		}
+		try {
+			return StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes.toByteArray())).toString();
+		} catch (CharacterCodingException e) {
+			return null;
+		}
 	}
 
 	/**
