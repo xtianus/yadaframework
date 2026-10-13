@@ -357,12 +357,26 @@ Everything in YadaDatatablesRequest is sent by the browser and can be tampered w
 and returned: a request with a column that is not in the policy, an order on a column that is not orderable, an order
 direction other than `asc`/`desc`, an invalid order index or an undeclared extra attribute is rejected before any query
 with a `yadaError` and no data. A column is searched only when both the policy and the browser flag allow it.
-Paths are checked against the entity when the policy is built: queryable paths must be persistent fields (map keys
-included, e.g. `"title.en"`), output-only columns (`column(path, false, false)`) can also end with a getter, and
-paths that would return a credential field (`password`, `token`, ...) or a whole entity are refused.
+Paths are checked against the entity class when the policy is built:
+
+* searchable or orderable paths must be persistent fields of that class (map keys included, e.g. `"title.en"`; the key
+is bound as a query parameter of the map key type, like `Locale`);
+* output-only columns (`column(path, false, false)`) and `extraOutput` paths can also end with a getter that returns
+no entity, collection or map;
+* paths that would return a credential (`password`, `token`, ... in any segment, map keys included), a whole entity
+or an embeddable are always refused.
+
+A policy built with `YadaDataTableQueryPolicy.forEntity()` for a custom endpoint fails in `build()` when a searchable
+or orderable path is not a persistent field of the class, e.g. a getter, a computed value or an attribute that only
+exists in a subclass. Declare getters and computed values with `column(path, false, false)`, and build the policy for
+the concrete subclass when the table shows subclass attributes.
+
 The default `/yadaDataTableData` endpoint, used when a table has `dtEntityClass()` and no `dtAjaxUrl()`, derives the
 policy from the table columns: each column name (or data path) is searchable and orderable unless switched off with
-`dtSearchableOff()`/`dtOrderableOff()`. A custom endpoint that serves a configured table can reuse that policy with
+`dtSearchableOff()`/`dtOrderableOff()`. A column that is not a persistent field of the `dtEntityClass()` class (a getter,
+a computed value, a subclass-only attribute) becomes output-only: it is shown but never searched or sorted, a sort
+request on it is rejected, and a warning is logged once when the policy is built. A subclass-only value is read from
+each row at runtime. To search or sort such a column, pass the subclass to `dtEntityClass()`. A custom endpoint that serves a configured table can reuse that policy with
 `yadaDataTableFactory.getSingleton(tableId, locale).getQueryPolicy()` once the table page has been rendered, but a
 policy constant like the one above is simpler and also serves tables that are not configured in Java.
 
