@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--/*
+	Autologin confirmation page, returned by YadaLoginController.autologinConfirmation() for a valid link.
+	Opening the link doesn't log in: the visitor must press the button, which posts the form with the CSRF token of the session.
+	The page must never submit itself. Texts come from the application message bundle, with English defaults.
+	Model: yadaAutologinAccount (username of the link), yadaAutologinTokenLink, yadaAutologinAction (a safe local path).
+*/-->
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="robots" content="noindex">
+	<title th:text="${@messageSource.getMessage('yada.autologin.confirm.title', null, 'Sign in', #locale)}">Sign in</title>
+</head>
+<body>
+	<main class="yadaAutologinConfirm">
+		<h1 th:text="${@messageSource.getMessage('yada.autologin.confirm.title', null, 'Sign in', #locale)}">Sign in</h1>
+		<p th:text="${@messageSource.getMessage('yada.autologin.confirm.message', null, 'This link signs you in to the following account:', #locale)}">This link signs you in to the following account:</p>
+		<p><strong data-testid="autologinAccount" th:text="${yadaAutologinAccount}">user@example.com</strong></p>
+		<form id="yadaAutologinForm" th:action="@{/autologin/{tokenLink}(tokenLink=${yadaAutologinTokenLink})}" method="post" data-testid="autologinConfirmForm">
+			<input type="hidden" name="action" th:value="${yadaAutologinAction}">
+			<button type="submit" th:text="${@messageSource.getMessage('yada.autologin.confirm.button', null, 'Sign in', #locale)}">Sign in</button>
+			<a th:href="@{/}" th:text="${@messageSource.getMessage('yada.autologin.confirm.cancel', null, 'Cancel', #locale)}">Cancel</a>
+		</form>
+	</main>
+	<script>
+		// Keeps the #fragment of the link after the login redirect
+		(function() {
+			var form = document.getElementById("yadaAutologinForm");
+			if (form && window.location.hash) {
+				form.action = form.action + window.location.hash;
+			}
+		})();
+	</script>
+</body>
+</html>
