@@ -81,7 +81,8 @@ yada.ready(function(){
 				"toolbarText": impersonateButtonTitle,
 				"toolbarClass": "s_singlerowButton", // s_singlerowButton or s_multirowButton or both
 				"toolbarPosition": 1, // zero-based
-				"ajax": false
+				"ajax": false,
+				"method": "POST" // Impersonation needs a CSRF-protected POST
    			}
 		]
     );

@@ -59,12 +59,16 @@ hr {
 	background-color: yellow;
 	font-size: 12px;
 	text-align: center;
-	a, a:hover, a:visited {
-	    color: black !important;
-	    position: relative;
-	    top: -3px;
-		text-decoration: none;
-		button {
+	button[type=submit] {
+		width: 100%;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: black;
+		font-size: inherit;
+		position: relative;
+		top: -3px;
+		.btn-close {
 			float: right;
 		}
 	}
