@@ -336,16 +336,35 @@ When the table shows data from @Entity objects, most of that code is already pro
 
 [source,java]
 ----
-@RequestMapping(value ="/user/userProfileTablePage", produces = MediaType.APPLICATION_JSON_VALUE) # <1>
-@ResponseBody public Map<String, Object> userProfileTablePage(YadaDatatablesRequest yadaDatatablesRequest, Locale locale) { # <2>
-	Map<String, Object> result = yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale);	# <3>
-	return result;	# <4>
+private static final YadaDataTableQueryPolicy USER_TABLE_POLICY = YadaDataTableQueryPolicy.forEntity(UserProfile.class) # <1>
+	.column("id").column("nickname").column("userCredentials.username")
+	.column("userCredentials.lastSuccessfulLogin", false, true) // not searchable, orderable
+	.build();
+
+@RequestMapping(value ="/user/userProfileTablePage", produces = MediaType.APPLICATION_JSON_VALUE) # <2>
+@ResponseBody public Map<String, Object> userProfileTablePage(YadaDatatablesRequest yadaDatatablesRequest, Locale locale) { # <3>
+	Map<String, Object> result = yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale, USER_TABLE_POLICY);	# <4>
+	return result;	# <5>
 }
 ----
-<1> Any type of mapping can be used, not just @RequestMapping
-<2> YadaDatatablesRequest is initialized with the metadata sent by DataTables, like the current page number, the value paths and the search/sort options
-<3> yadaDataTableDao.getConvertedJsonPage() receives the request data and the @Entity class to perform all needed operations
-<4> The result is a "map tree" (i.e. nested maps) that is automatically converted to json
+<1> The server-side policy lists the entity paths that the table may return, search and sort
+<2> Any type of mapping can be used, not just @RequestMapping
+<3> YadaDatatablesRequest is initialized with the metadata sent by DataTables, like the current page number, the value paths and the search/sort options
+<4> yadaDataTableDao.getConvertedJsonPage() checks the request against the policy, then performs all needed operations on the @Entity class
+<5> The result is a "map tree" (i.e. nested maps) that is automatically converted to json
+
+Everything in YadaDatatablesRequest is sent by the browser and can be tampered with. The policy decides what is queried
+and returned: a request with a column that is not in the policy, an order on a column that is not orderable, an order
+direction other than `asc`/`desc`, an invalid order index or an undeclared extra attribute is rejected before any query
+with a `yadaError` and no data. A column is searched only when both the policy and the browser flag allow it.
+Paths are checked against the entity when the policy is built: queryable paths must be persistent fields (map keys
+included, e.g. `"title.en"`), output-only columns (`column(path, false, false)`) can also end with a getter, and
+paths that would return a credential field (`password`, `token`, ...) or a whole entity are refused.
+The default `/yadaDataTableData` endpoint, used when a table has `dtEntityClass()` and no `dtAjaxUrl()`, derives the
+policy from the table columns: each column name (or data path) is searchable and orderable unless switched off with
+`dtSearchableOff()`/`dtOrderableOff()`. A custom endpoint that serves a configured table can reuse that policy with
+`yadaDataTableFactory.getSingleton(tableId, locale).getQueryPolicy()` once the table page has been rendered, but a
+policy constant like the one above is simpler and also serves tables that are not configured in Java.
 
 Using a custom endpoint for table data allows to manipulate both the query and the result, for example
 by adding conditions or creating values not directly found on the entity: 
@@ -518,8 +537,9 @@ For example, if you have a table showing users, you can add checkboxes to filter
 See `YadaExamples/src/main/java/net/yadaframework/example/web/dashboard/UserProfileController.java` for a full example.
 
 === Returning extra data
-The call to yadaDataTableDao.getConvertedJsonPage() returns all data that was requested, but sometimes some other attributes
-may be required to compute a row value. In order to retrieve this data, use `yadaDatatablesRequest.addExtraJsonAttribute("attributePath")` before calling `getConvertedJsonPage()`. 
+The call to yadaDataTableDao.getConvertedJsonPage() returns the policy columns that were requested, but sometimes some other attributes
+may be required to compute a row value. In order to retrieve this data, declare the path in the policy with `.extraOutput("attributePath")`:
+it is returned for every row. 
 A use case could be to fetch the "enabled" attribute of the user credentials to show a different icon based on that value.
 
 === Dynamic row CSS from the backend

@@ -66,6 +66,8 @@ Relocated resources and fixtures:
 | `integrationTest` | `YadaEmbeddedTomcatTestServerIntegrationTest` | Initializer allowlist, parent-first class sharing, failed start |
 | `integrationTest` | `ConfigurationIsolationTest` | Start-close-start across two configurations: static configuration, application context and reload threads |
 | `integrationTest` | `PersistenceIntegrationTest` | DAO insert/read/update/delete and rollback, foreign keys, saved-property uniqueness, persistent enums, YadaPageRequest queries, configuration, framework resources |
+| `integrationTest` | `DataTableSecurityIntegrationTest` | DataTables query policy over HTTP on `/yadaDataTableData` and a custom endpoint: tampered columns, order directions and indexes, search flags and extra attributes rejected before any SQL, no credential output, page access |
+| `test` | `YadaDataTableSecurityTest` | `YadaDataTableQueryPolicy` path validation, rejection before any query, HQL built only from policy paths, bound map keys, policy-only output |
 | `test` | `YadaAiRequestBuilderTest` | Claude and Nova request building: turns, tools, optional fields, parameter ranges |
 | `test` | `YadaConfigurationDialectTest` | Dialect chosen by `YadaJpaConfig`: none by default, `MariaDBDialect` for the embedded database, configured `<database><dialect>` first |
 | `e2eTest` | `AuthenticationE2eTest` | Login, failed login, logout, anonymous redirect, user and admin areas, CSRF acceptance and rejection |
@@ -84,7 +86,7 @@ Discovered tests per suite: `test` 122 (110 relocated + 12 new), `integrationTes
 
 | Module | Central coverage | Backlog (scenario owner) |
 |---|---|---|
-| YadaWeb | Unit tests of utilities, configuration, saved properties, crop queue, page sort, user agent; embedded MariaDB lifecycle; persistence, persistent enums, YadaSql paging; resource handlers; Ajax, notifications, error page, YadaMoney | Datatables (`ArticlesE2eTest` or a new datatable scenario), `YadaFileManager` and attachments (`UploadE2eTest`), jobs (`PersistenceIntegrationTest`), e-mail with a local fake (new mail scenario), `YadaLocalePathVariableFilter` with locale paths (new locale scenario) |
+| YadaWeb | Unit tests of utilities, configuration, DataTables query policy, saved properties, crop queue, page sort, user agent; embedded MariaDB lifecycle; persistence, persistent enums, YadaSql paging; resource handlers; Ajax, notifications, error page, YadaMoney | Datatables rendering in a browser (the scenario page doesn't render `<yada:datatable>`: its template needs a `userSession` bean), `YadaFileManager` and attachments (`UploadE2eTest`), jobs (`PersistenceIntegrationTest`), e-mail with a local fake (new mail scenario), `YadaLocalePathVariableFilter` with locale paths (new locale scenario) |
 | YadaWebSecurity | Login, logout, failure flags, role-based access, CSRF, multipart before security (upload tests), user creation through `YadaUserCredentialsDao` | Registration and password reset (new registration scenario with a local mail fake), autologin links, lockout after failed attempts (`AuthenticationE2eTest`), impersonation |
 | YadaWebCMS | `YadaArticle` localized names, editing, paging and sorting | `YadaProduct` galleries and `YadaProductDao`, `YadaWebCmsDao.swapAttributes` (`ArticlesE2eTest`), image cropper views |
 | YadaWebCommerce | `TestYadaMoney`, cart, order and order items, `YadaOrderDao.save`, `YadaOrderStatus` persistent enum | `YadaTransactionDao` and payments (with a local fake, `ShopE2eTest`), `YadaOrderDao.cleanup` |
