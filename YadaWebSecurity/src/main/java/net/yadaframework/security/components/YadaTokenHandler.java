@@ -1,12 +1,10 @@
 package net.yadaframework.security.components;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,30 +13,35 @@ import net.yadaframework.components.YadaUtil;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.security.components.YadaSecurityTokenCodec.ParsedSecurityToken;
 import net.yadaframework.security.persistence.entity.YadaAutoLoginToken;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaAutoLoginTokenDao;
 
 /**
- * Handles autologin links: creation and parsing.
- * The autologin link has the following format: /autologin/id-token?action=someAction#hashCommand
- * id and token are from the same YadaAutoLoginToken stored in the database.
+ * Creates and parses the opaque bearer-token links of autologin and registration requests.
+ * The autologin link has the following format: /autologin/id-secret?action=someAction#hashCommand
+ * where id and secret belong to a YadaAutoLoginToken (see {@link YadaSecurityTokenCodec}). The link parameters are not
+ * signed: the action is validated as a local path when the link is created and again when it is used.
+ * <p>
+ * Links can be built only from the instance returned when the token was issued, because the database keeps only the
+ * digest of the secret: to send a link later, issue a new token.
  */
 
 @Component
 public class YadaTokenHandler {
-	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired private YadaUtil yadaUtil;
     @Autowired private YadaWebUtil yadaWebUtil;
 	@Autowired private YadaConfiguration config;
 	@Autowired private YadaAutoLoginTokenDao yadaAutoLoginTokenDao;
+	@Autowired private YadaSecurityTokenCodec yadaSecurityTokenCodec;
 
 	/**
 	 * Create a new YadaAutoLoginToken for the given user that expires after the configured amount of hours (config/security/autologinExpirationHours)
 	 * @param targetUser
-	 * @return
+	 * @return the new token, whose link can be built with makeAutologinLink() 
 	 */
 	public YadaAutoLoginToken makeAutoLoginToken(YadaUserCredentials targetUser) {
 		Date expiration = yadaUtil.addHours(new Date(), config.getAutologinExpirationHours());
@@ -48,16 +51,13 @@ public class YadaTokenHandler {
 	/**
 	 * Create a new YadaAutoLoginToken for the given user
 	 * @param targetUser
-	 * @param expiration can be null to not expire ever
-	 * @return
+	 * @param expiration the time from which the token can't be used, required
+	 * @return the new token, whose link can be built with makeAutologinLink() 
+	 * @throws YadaInvalidUsageException when the expiration is null
 	 */
     public YadaAutoLoginToken makeAutoLoginToken(YadaUserCredentials targetUser, Date expiration) {
     	yadaAutoLoginTokenDao.deleteExpired(); // Cleanup expired ones
-    	YadaAutoLoginToken yadaAutoLoginToken = new YadaAutoLoginToken();
-    	yadaAutoLoginToken.setExpiration(expiration);
-    	yadaAutoLoginToken.setYadaUserCredentials(targetUser);
-    	yadaAutoLoginToken = yadaAutoLoginTokenDao.save(yadaAutoLoginToken);
-    	return yadaAutoLoginToken;
+    	return yadaAutoLoginTokenDao.issue(targetUser, expiration);
     }
 
 	/**
@@ -79,40 +79,42 @@ public class YadaTokenHandler {
 
 	/**
 	 * Return the autologin link generated from the given parameters
-	 * @param yadaAutoLoginToken
-	 * @param targetAction
+	 * @param yadaAutoLoginToken a token just returned by makeAutoLoginToken()
+	 * @param targetAction the local path to open after login, e.g. "/dashboard?tab=users"; null for "/"
 	 * @param hashCommand
 	 * @param myServerAddress
 	 * @param request
 	 * @return
+	 * @throws YadaInvalidUsageException when the token has not just been issued or the action is not a local path
 	 */
 	public String makeAutologinLink(YadaAutoLoginToken yadaAutoLoginToken, String targetAction, String hashCommand, String myServerAddress, HttpServletRequest request) {
 		myServerAddress = ensureServerAddress(myServerAddress, request);
-    	StringBuilder result = new StringBuilder(myServerAddress);
-    	result.append("/autologin/");
-    	result.append(makeLink(yadaAutoLoginToken.getId(), yadaAutoLoginToken.getToken(), null));
-		result.append("?action=").append(yadaWebUtil.urlEncode(targetAction));
-		if (hashCommand!=null) {
-			result.append(hashCommand);
-		}
-    	return result.toString();
+		return makeAutologinLink(yadaAutoLoginToken, targetAction, hashCommand, myServerAddress);
 	}
 
-	//Idem but without HttpServletRequest because we have the myServerAddress not null
 	/**
 	 * Return the autologin link generated from the given parameters
-	 * @param yadaAutoLoginToken
-	 * @param targetAction
-	 * @param hashCommand
-	 * @param myServerAddress
-	 * @param request
+	 * @param yadaAutoLoginToken a token just returned by makeAutoLoginToken()
+	 * @param targetAction the local path to open after login, e.g. "/dashboard?tab=users"; null for "/".
+	 * 	It must be accepted by {@link YadaWebUtil#safeLocalRedirect(String)}.
+	 * @param hashCommand optional "anchor" starting with #
+	 * @param myServerAddress our server address
 	 * @return
+	 * @throws YadaInvalidUsageException when the token has not just been issued or the action is not a local path
 	 */
 	public String makeAutologinLink(YadaAutoLoginToken yadaAutoLoginToken, String targetAction, String hashCommand, String myServerAddress) {
+		String secret = yadaAutoLoginToken.getRawSecret();
+		if (secret==null) {
+			throw new YadaInvalidUsageException("The link of an autologin token can only be built when the token is issued: create a new token");
+		}
+		String action = targetAction==null ? "/" : targetAction;
+		if (!action.equals(yadaWebUtil.safeLocalRedirect(action))) {
+			throw new YadaInvalidUsageException("The autologin action must be a local path");
+		}
 		StringBuilder result = new StringBuilder(myServerAddress);
 		result.append("/autologin/");
-		result.append(makeLink(yadaAutoLoginToken.getId(), yadaAutoLoginToken.getToken(), null));
-		result.append("?action=").append(yadaWebUtil.urlEncode(targetAction));
+		result.append(yadaSecurityTokenCodec.format(yadaAutoLoginToken.getId(), secret));
+		result.append("?action=").append(yadaWebUtil.urlEncode(action));
 		if (hashCommand!=null) {
 			result.append(hashCommand);
 		}
@@ -121,13 +123,29 @@ public class YadaTokenHandler {
 
 	/**
 	 * Create a token-link
-	 * @param yadaRegistrationRequest
+	 * @param yadaRegistrationRequest a request just returned by YadaRegistrationRequestDao.issue()
 	 * @param linkParameters name-value paris of url parameters to add at the end - can be null or empty
-	 * @return una stringa <ID>-<token>
+	 * @return a string &lt;ID>-&lt;secret>, followed by the parameters if any
+	 * @throws YadaInvalidUsageException when the request has not just been issued
 	 */
 	// used by YadaSecurityEmailService
 	public String makeLink(YadaRegistrationRequest yadaRegistrationRequest, Map<String, String> linkParameters) {
-		return makeLink(yadaRegistrationRequest.getId(), yadaRegistrationRequest.getToken(), linkParameters);
+		String secret = yadaRegistrationRequest.getRawSecret();
+		if (secret==null) {
+			throw new YadaInvalidUsageException("The link of a registration request can only be built when the request is issued: create a new request");
+		}
+		StringBuilder result = new StringBuilder(yadaSecurityTokenCodec.format(yadaRegistrationRequest.getId(), secret)).append("?");
+		if (linkParameters!=null) {
+			for (String key : linkParameters.keySet()) {
+				String name = URLEncoder.encode(key, StandardCharsets.UTF_8);
+				String value = URLEncoder.encode(linkParameters.get(key), StandardCharsets.UTF_8);
+				result.append(name).append("=").append(value).append("&");
+			}
+		}
+		String link = result.toString();
+		link = StringUtils.removeEnd(link, "&");
+		link = StringUtils.removeEnd(link, "?");
+		return link;
 	}
 
     /**
@@ -150,47 +168,13 @@ public class YadaTokenHandler {
     }
 
 	/**
-	 * Create a token-link, used both for autologin links and registration links.
-	 * @param id
-	 * @param token
-	 * @param linkParameters name-value paris of url parameters to add at the end - can be null or empty
-	 * @return a string <ID>-<token>
+	 * Splits a token-link string into id and secret. Nothing is logged, because the value may carry a secret.
+	 * @param linkId with the format &lt;ID>-&lt;secret>
+	 * @return the id and secret, or null when the format is not valid
+	 * @see YadaSecurityTokenCodec#parse(String)
 	 */
-	public String makeLink(long id, long token, Map<String, String> linkParameters) {
-		StringBuilder result = new StringBuilder(id + "-" + token).append("?");
-		if (linkParameters!=null) {
-			try {
-				for (String key : linkParameters.keySet()) {
-					String name = URLEncoder.encode(key, "UTF-8");
-					String value = URLEncoder.encode(linkParameters.get(key), "UTF-8");
-					result.append(name).append("=").append(value).append("&");
-				}
-			} catch (UnsupportedEncodingException e) {
-				log.error("Impossible error occurred", e);
-			}
-		}
-		String link = result.toString();
-		link = StringUtils.removeEnd(link, "&");
-		link = StringUtils.removeEnd(link, "?");
-		return link;
-	}
-
-	/**
-	 * Splits a token-link string into the two components: id and token.
-	 * @param linkId with the format <ID>-<token>
-	 * @return a two dimensional array with {<ID>, <token>}
-	 */
-	public long[] parseLink(String linkId) {
-		try {
-			String[] parts = linkId.split("-");
-			long[] result = new long[2];
-			result[0] = Long.parseLong(parts[0]);
-			result[1] = Long.parseLong(parts[1]);
-			return result;
-		} catch (Exception e) {
-			log.debug("Invalid linkId '{}'", linkId);
-			return null;
-		}
+	public ParsedSecurityToken parseLink(String linkId) {
+		return yadaSecurityTokenCodec.parse(linkId);
 	}
 
 }

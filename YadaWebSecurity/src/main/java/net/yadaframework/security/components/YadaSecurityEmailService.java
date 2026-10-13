@@ -21,7 +21,6 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.persistence.entity.YadaAutoLoginToken;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
-import net.yadaframework.security.persistence.repository.YadaAutoLoginTokenDao;
 
 @Service
 // Deve stare in questo package perchè tirato dentro da YadaWebConfig, altrimenti SpringTemplateEngine non viene iniettato
@@ -34,7 +33,6 @@ public class YadaSecurityEmailService {
     @Autowired private YadaTokenHandler yadaTokenHandler;
     @Autowired private YadaWebUtil yadaWebUtil;
     @Autowired private YadaEmailService yadaEmailService;
-	@Autowired private YadaAutoLoginTokenDao yadaAutoLoginTokenDao;
 	@Autowired private YadaUtil yadaUtil;
 
     /**
@@ -143,7 +141,7 @@ public class YadaSecurityEmailService {
      * Create a link that will not require the user to log in. The server address is taken from the request.
      * @param targetAction
      * @param targetUser
-     * @param expiration expiration date, null for never
+     * @param expiration expiration date, required
      * @param hashCommand optional "anchor", e.g. "#storyId=49;command=showMessages"
      * @return
      */
@@ -157,26 +155,15 @@ public class YadaSecurityEmailService {
      * Create a link that will not require the user to log in
      * @param targetAction
      * @param targetUser
-     * @param expiration expiration date, null for never
+     * @param expiration expiration date, required
      * @param hashCommand optional "anchor" starting with #, e.g. "#storyId=49;command=showMessages"
      * @param myServerAddress our server address
      * @return
      */
     @Deprecated // Use the same method on yadaTokenHandler
     public String makeAutologinLink(String targetAction, YadaUserCredentials targetUser, Date expiration, String hashCommand, String myServerAddress) {
-    	YadaAutoLoginToken yadaAutoLoginToken = new YadaAutoLoginToken();
-    	yadaAutoLoginToken.setExpiration(expiration);
-    	yadaAutoLoginToken.setYadaUserCredentials(targetUser);
-    	yadaAutoLoginToken = yadaAutoLoginTokenDao.save(yadaAutoLoginToken);
-    	yadaAutoLoginTokenDao.deleteExpired(); // Rimuovo quelle vecchie, per pulizia
-    	StringBuilder result = new StringBuilder(myServerAddress);
-    	result.append("/autologin/");
-    	result.append(yadaTokenHandler.makeLink(yadaAutoLoginToken.getId(), yadaAutoLoginToken.getToken(), null));
-		result.append("?action=").append(yadaWebUtil.urlEncode(targetAction));
-		if (hashCommand!=null) {
-			result.append(hashCommand);
-		}
-    	return result.toString();
+    	YadaAutoLoginToken yadaAutoLoginToken = yadaTokenHandler.makeAutoLoginToken(targetUser, expiration);
+    	return yadaTokenHandler.makeAutologinLink(yadaAutoLoginToken, targetAction, hashCommand, myServerAddress);
     }
 
     /**

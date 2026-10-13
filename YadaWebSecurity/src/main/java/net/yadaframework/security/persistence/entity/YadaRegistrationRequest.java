@@ -1,7 +1,6 @@
 package net.yadaframework.security.persistence.entity;
 
 import java.io.Serializable;
-import java.security.SecureRandom;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -25,8 +24,12 @@ import net.yadaframework.core.YadaRegistrationType;
 import net.yadaframework.persistence.entity.YadaClause;
 
 /**
- * Data to submit during user registration.
+ * A pending registration, password recovery or email change, confirmed by a link with a bearer token.
  * Subclasses must not define a id field.
+ * <p>
+ * Only the digest of the token secret is stored ({@link #getTokenHash()}). The secret itself is available through
+ * {@link #getRawSecret()} only on the instance returned by YadaRegistrationRequestDao.issue(), so a request loaded
+ * from the database can't produce its link again. Requests are created with issue() and never updated.
  */
 @Entity
 //Subclasses must not have an id but should still be tagged as @Entity
@@ -34,7 +37,6 @@ import net.yadaframework.persistence.entity.YadaClause;
 public class YadaRegistrationRequest implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
-	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
 	// For optimistic locking
 	@Version
@@ -62,7 +64,16 @@ public class YadaRegistrationRequest implements Serializable {
 	@Column(columnDefinition="TIMESTAMP NULL")
 	private Date timestamp; // Creazione
 
-	private long token;
+	@Column(columnDefinition="TIMESTAMP NULL")
+	private Date expiration; // The link can't be used from this time on; null means expired
+
+	// SHA-256 digest of the token secret and purpose, see YadaSecurityTokenCodec
+	@Column(length=64, nullable=false)
+	private String tokenHash;
+
+	// The token secret, known only on the instance that has just been issued; never stored
+	@Transient
+	private transient String rawSecret;
 
 	// The destination url could be saved before sending the registration email, but it is usually better handled by the confirmation controller without this field.
 	// This is also used by the password recovery process to create the confirmation link, but it's not safe because its value could be injected from the FE.
@@ -98,8 +109,44 @@ public class YadaRegistrationRequest implements Serializable {
 
 	@PrePersist
 	void setDefaults() {
-		timestamp=new Date();
-		token = SECURE_RANDOM.nextLong() & Long.MAX_VALUE;
+		if (timestamp==null) {
+			timestamp=new Date();
+		}
+	}
+
+	/**
+	 * Sets the token of a request that is being issued. Used by YadaRegistrationRequestDao.issue() only.
+	 * @param rawSecret the secret that goes into the link
+	 * @param tokenHash the digest of the secret
+	 * @param timestamp the creation time
+	 * @param expiration the time from which the link can't be used
+	 */
+	public void applyIssuedToken(String rawSecret, String tokenHash, Date timestamp, Date expiration) {
+		this.rawSecret = rawSecret;
+		this.tokenHash = tokenHash;
+		this.timestamp = timestamp;
+		this.expiration = expiration;
+	}
+
+	/**
+	 * @return the token secret when this instance has just been issued, null otherwise
+	 */
+	public String getRawSecret() {
+		return rawSecret;
+	}
+
+	/**
+	 * @return the digest of the token secret
+	 */
+	public String getTokenHash() {
+		return tokenHash;
+	}
+
+	/**
+	 * @return the time from which the link can't be used, null for an invalid request
+	 */
+	public Date getExpiration() {
+		return expiration;
 	}
 
 	public String getEmail() {
@@ -126,14 +173,6 @@ public class YadaRegistrationRequest implements Serializable {
 		this.timestamp = timestamp;
 	}
 
-	public long getToken() {
-		return token;
-	}
-
-	public void setToken(long token) {
-		this.token = token;
-	}
-
 	public Long getId() {
 		return id;
 	}
@@ -142,15 +181,17 @@ public class YadaRegistrationRequest implements Serializable {
 		this.id = id;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
+	/**
+	 * Shows neither the token nor the password
 	 */
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE).
+	       append("id", id).
+	       append("registrationType", registrationType).
 	       append("email", email).
 	       append("timestamp", timestamp).
-	       append("token", token).
+	       append("expiration", expiration).
 	       toString();
 	}
 

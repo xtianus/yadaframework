@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jsoup.Jsoup;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -95,6 +96,13 @@ class TestApplicationSmokeTest {
 		return client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
 	}
 
+	/**
+	 * @return how many versioned migrations the application has in classpath:database
+	 */
+	private static int migrationCount() throws Exception {
+		return new PathMatchingResourcePatternResolver().getResources("classpath*:database/V*__*.sql").length;
+	}
+
 	private List<String> queryColumn(String sql) throws SQLException {
 		List<String> result = new ArrayList<>();
 		try (Connection connection = DriverManager.getConnection(run.configuredJdbcUrl(), "root", ""); Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery(sql)) {
@@ -113,7 +121,9 @@ class TestApplicationSmokeTest {
 	@Order(1)
 	void baselineMigrationRanAsSql() throws Exception {
 		List<String> history = queryColumn("SELECT CONCAT_WS(':', version, type, script, success) FROM flyway_schema_history ORDER BY installed_rank");
-		assertEquals(List.of("001:SQL:" + StartupSchemaCheck.BASELINE_SCRIPT + ":1"), history, "An automatic baseline row does not prove that V001 ran");
+		assertEquals("001:SQL:" + StartupSchemaCheck.BASELINE_SCRIPT + ":1", history.get(0), "An automatic baseline row does not prove that V001 ran");
+		assertEquals(migrationCount(), history.size(), history.toString());
+		assertTrue(history.stream().allMatch(row -> row.contains(":SQL:") && row.endsWith(":1")), history.toString());
 		assertTrue(queryColumn("SHOW TABLES").contains("YadaUserProfile"));
 	}
 
@@ -179,7 +189,7 @@ class TestApplicationSmokeTest {
 		assertEquals(2, fixtures.countRows("YadaUserCredentials"));
 		assertNull(testDataService.findUser("extra@yts.test"));
 		assertEquals(adminId, testDataService.findUser(TestDataService.ADMIN_EMAIL).getId(), "Reseeded ids are not deterministic");
-		assertEquals(1, fixtures.countRows("flyway_schema_history"), "The reset removed the migration history");
+		assertEquals(migrationCount(), fixtures.countRows("flyway_schema_history"), "The reset removed the migration history");
 	}
 
 	@Test
@@ -191,7 +201,7 @@ class TestApplicationSmokeTest {
 		application = TestApplication.start(run);
 		fixtures = new DatabaseFixtures(application, application.getBean(TestDataService.class)::seedDefaults);
 		assertEquals(before, schemaFingerprint());
-		assertEquals(1, fixtures.countRows("flyway_schema_history"));
+		assertEquals(migrationCount(), fixtures.countRows("flyway_schema_history"));
 		assertEquals(200, get(newClient(), "/test/home").statusCode());
 	}
 }

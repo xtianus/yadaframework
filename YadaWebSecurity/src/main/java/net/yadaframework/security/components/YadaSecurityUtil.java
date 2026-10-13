@@ -5,7 +5,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -34,6 +37,8 @@ import jakarta.servlet.http.HttpSession;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.core.YadaRegistrationType;
+import net.yadaframework.security.components.YadaSecurityTokenCodec.ParsedSecurityToken;
 import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.entity.YadaUserProfile;
@@ -339,41 +344,57 @@ public class YadaSecurityUtil {
 	}
 
 	/**
-	 * Change the user password and log in after eventually checking that the password is actually different from the previous one
+	 * Aborts a password change inside the consumption transaction, so that the link stays usable
+	 */
+	private static class PasswordChangeAbort extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+		private final int outcome;
+		PasswordChangeAbort(int outcome) {
+			super(null, null, false, false);
+			this.outcome = outcome;
+		}
+	}
+
+	/**
+	 * Change the user password and log in after eventually checking that the password is actually different from the previous one.
+	 * The token must be a valid, unexpired password recovery link. It is used once: the token is consumed in the same
+	 * transaction that changes the password, and stays valid when the change fails. The login happens after the commit.
 	 * @param yadaFormPasswordChange
 	 * @param forceDifferentPassword set to true to force a different password
 	 * @return the outcome: 0 = ok, 1 = invalid token, 2 = same password as before, 3 = generic error
 	 */
 	public int performPasswordChange(YadaFormPasswordChange yadaFormPasswordChange, Boolean forceDifferentPassword) {
-		long[] parts = yadaTokenHandler.parseLink(yadaFormPasswordChange.getToken());
+		ParsedSecurityToken token = yadaTokenHandler.parseLink(yadaFormPasswordChange.getToken());
+		if (token==null) {
+			return 1; // Invalid token
+		}
+		String newPassword = yadaFormPasswordChange.getPassword();
 		try {
-			if (parts!=null && parts.length==2) {
-				// The token must be valid to get a registrationRequest from DB
-				YadaRegistrationRequest registrationRequest = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1], YadaRegistrationRequest.class).get(0);
-				if (registrationRequest==null) {
-					return 1; // Invalid token
+			Optional<YadaUserCredentials> changed = yadaRegistrationRequestDao.consume(token, YadaRegistrationType.PASSWORD_RECOVERY, YadaRegistrationRequest.class, registrationRequest -> {
+				String username = StringUtils.trimToEmpty(registrationRequest.getEmail()).toLowerCase(Locale.ROOT);
+				YadaUserCredentials yadaUserCredentials = yadaUserCredentialsDao.findFirstByUsername(username);
+				if (yadaUserCredentials==null) {
+					log.debug("No user for password recovery request {}", token.id());
+					throw new PasswordChangeAbort(3);
 				}
-				String username = registrationRequest.getEmail();
-				YadaUserCredentials yadaUserCredentials = yadaUserCredentialsDao.findFirstByUsername(StringUtils.trimToEmpty(username).toLowerCase());
-				if (yadaUserCredentials!=null) {
-					//
-					if (Boolean.TRUE.equals(forceDifferentPassword)) {
-						String newPassword = yadaFormPasswordChange.getPassword();
-						if (yadaUserDetailsService.passwordMatch(newPassword, yadaUserCredentials)) {
-							log.debug("Password for user {} not changed because same as old one", username);
-							return 2; // Same password as before
-						}
-					}
-					//
-					yadaUserCredentials = yadaUserCredentialsDao.changePassword(yadaUserCredentials, yadaFormPasswordChange.getPassword());
-					yadaRegistrationRequestDao.delete(registrationRequest);
-					if (yadaUserCredentials.isEnabled()) {
-						yadaUserDetailsService.authenticateAs(yadaUserCredentials);
-					}
-					log.info("PASSWORD CHANGE for user='{}'", username);
-					return 0; // OK
+				if (Boolean.TRUE.equals(forceDifferentPassword) && yadaUserDetailsService.passwordMatch(newPassword, yadaUserCredentials)) {
+					log.debug("Password for user {} not changed because same as old one", username);
+					throw new PasswordChangeAbort(2);
 				}
+				return yadaUserCredentialsDao.changePassword(yadaUserCredentials, newPassword);
+			});
+			if (changed.isEmpty()) {
+				log.debug("Password recovery link {} not valid", token.id());
+				return 1; // Invalid token
 			}
+			YadaUserCredentials yadaUserCredentials = changed.get();
+			if (yadaUserCredentials.isEnabled()) {
+				yadaUserDetailsService.authenticateAs(yadaUserCredentials);
+			}
+			log.info("PASSWORD CHANGE for user='{}'", yadaUserCredentials.getUsername());
+			return 0; // OK
+		} catch (PasswordChangeAbort e) {
+			return e.outcome;
 		} catch (Exception e) {
 			log.info("Password change failed", e);
 		}
@@ -505,7 +526,7 @@ public class YadaSecurityUtil {
 			// Cancello la precedente richiesta di registrazione per lo stesso email e stesso tipo
 			List<YadaRegistrationRequest> ownRequests = yadaRegistrationRequestDao.findByEmailAndRegistrationType(registrationRequest.getEmail(), registrationRequest.getRegistrationType(), YadaRegistrationRequest.class);
 			for (YadaRegistrationRequest deletable : ownRequests) {
-				if (deletable.getId()!=registrationRequest.getId()) {
+				if (!Objects.equals(deletable.getId(), registrationRequest.getId())) {
 					yadaRegistrationRequestDao.delete(deletable);
 					log.info("Previous RegistrationRequest ({}) deleted", deletable);
 				}
