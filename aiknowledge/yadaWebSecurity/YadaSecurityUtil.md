@@ -12,7 +12,7 @@
 | `copyLoginErrorParams` | Copy all not-null login error parameters to the Model |
 | `addLoginErrorParams` | Adds to some url the login error request parameters defined in YadaAuthenticationFailureHandler so that the login modal can show them. |
 | `generateClearPassword` | Generate a 32 characters random password |
-| `performPasswordChange` | Changes the user password and log in |
+| `performPasswordChange` | Consumes a PASSWORD_RECOVERY link and changes the password in one transaction (a failure, or the same password when `forceDifferentPassword`, rolls back and keeps the link), then logs in; outcome 0 ok, 1 invalid/expired/wrong-purpose link, 2 same password, 3 error. |
 | `loggedIn` | Checks if the current user is logged in. |
 | `clearAnySavedRequest` | Clears any saved request. |
 | `caseAnonAuth` | Returns one of two values depending on whether the current user is authenticated. |
