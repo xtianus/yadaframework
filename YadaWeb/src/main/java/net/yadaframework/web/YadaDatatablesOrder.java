@@ -31,7 +31,8 @@ public class YadaDatatablesOrder extends HashMap<String, String> {
 	
 	/**
 	 * 
-	 * @return Ordering direction for this column. It will be asc or desc to indicate ascending ordering or descending ordering, respectively.
+	 * @return Ordering direction for this column as sent by the browser. DataTables sends asc or desc, but the value is
+	 * 	untrusted and must never be written in a query without checking it: YadaDataTableQueryPolicy accepts only asc or desc.
 	 */
 	public String getDir() {
 		return (String) this.get("dir");
