@@ -24,11 +24,12 @@
 		</form>
 	</main>
 	<script>
-		// Keeps the #fragment of the link after the login redirect
+		// Keeps the #fragment of the link after the login redirect.
+		// The attribute is used because form.action is the hidden input named "action".
 		(function() {
 			var form = document.getElementById("yadaAutologinForm");
 			if (form && window.location.hash) {
-				form.action = form.action + window.location.hash;
+				form.setAttribute("action", form.getAttribute("action") + window.location.hash);
 			}
 		})();
 	</script>

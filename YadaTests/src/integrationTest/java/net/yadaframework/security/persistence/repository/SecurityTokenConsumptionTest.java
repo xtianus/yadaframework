@@ -96,13 +96,18 @@ class SecurityTokenConsumptionTest {
 	}
 
 	/**
-	 * Waits until a transaction of the schema is waiting for a row lock
+	 * Waits until a transaction of the schema is waiting for a row lock, or fails when the waiting future ends first
 	 */
-	private void awaitLockWait() throws Exception {
+	private void awaitLockWait(CompletableFuture<?> waiting) throws Exception {
 		long deadline = System.currentTimeMillis() + 20_000;
 		try (Connection connection = DriverManager.getConnection(session.run().configuredJdbcUrl(), "root", ""); Statement statement = connection.createStatement()) {
 			while (System.currentTimeMillis() < deadline) {
-				try (ResultSet resultSet = statement.executeQuery("SELECT COUNT(*) FROM information_schema.INNODB_TRX WHERE trx_state='LOCK WAIT'")) {
+				if (waiting.isDone()) {
+					throw new AssertionError("The second transaction ended without waiting: " + (waiting.isCompletedExceptionally() ? "exception" : waiting.getNow(null)));
+				}
+				// MariaDB reads a primary key row while optimizing the query, so the blocked SELECT ... FOR UPDATE can wait in
+				// the "Statistics" state without a LOCK WAIT transaction
+				try (ResultSet resultSet = statement.executeQuery("SELECT (SELECT COUNT(*) FROM information_schema.INNODB_TRX WHERE trx_state='LOCK WAIT') + (SELECT COUNT(*) FROM information_schema.PROCESSLIST WHERE COMMAND='Query' AND INFO LIKE '%for update' AND ID<>CONNECTION_ID())")) {
 					resultSet.next();
 					if (resultSet.getInt(1) > 0) {
 						return;
@@ -111,7 +116,17 @@ class SecurityTokenConsumptionTest {
 				Thread.sleep(20);
 			}
 		}
-		throw new AssertionError("The second transaction never waited for the row lock");
+		StringBuilder diagnostics = new StringBuilder();
+		try (Connection connection = DriverManager.getConnection(session.run().configuredJdbcUrl(), "root", ""); Statement statement = connection.createStatement()) {
+			for (String query : new String[] { "SELECT trx_id, trx_state, trx_query FROM information_schema.INNODB_TRX", "SELECT ID, COMMAND, STATE, INFO FROM information_schema.PROCESSLIST WHERE DB IS NOT NULL" }) {
+				try (ResultSet resultSet = statement.executeQuery(query)) {
+					while (resultSet.next()) {
+						diagnostics.append(resultSet.getString(1)).append(" | ").append(resultSet.getString(2)).append(" | ").append(resultSet.getString(3)).append(" | ").append(query.contains("PROCESSLIST") ? resultSet.getString(4) : "").append('\n');
+					}
+				}
+			}
+		}
+		throw new AssertionError("The second transaction never waited for the row lock:\n" + diagnostics);
 	}
 
 	@Test
@@ -131,7 +146,7 @@ class SecurityTokenConsumptionTest {
 		}), executor);
 		assertTrue(firstHoldsTheLock.await(20, TimeUnit.SECONDS));
 		CompletableFuture<Optional<String>> second = CompletableFuture.supplyAsync(() -> registrationRequestDao.consume(token, YadaRegistrationType.PASSWORD_RECOVERY, YadaRegistrationRequest.class, locked -> "second"), executor);
-		awaitLockWait();
+		awaitLockWait(second);
 		releaseFirst.countDown();
 		assertEquals(Optional.of("first"), first.get(30, TimeUnit.SECONDS));
 		assertEquals(Optional.empty(), second.get(30, TimeUnit.SECONDS));
@@ -158,7 +173,7 @@ class SecurityTokenConsumptionTest {
 		assertTrue(firstConsumed.await(20, TimeUnit.SECONDS));
 		assertEquals(1, session.fixtures().countRows("YadaAutoLoginToken"), "The first consumption is already committed");
 		CompletableFuture<YadaUserCredentials> second = CompletableFuture.supplyAsync(() -> autoLoginTokenDao.consume(token), executor);
-		awaitLockWait();
+		awaitLockWait(second);
 		releaseFirst.countDown();
 		assertNotNull(first.get(30, TimeUnit.SECONDS));
 		assertNull(second.get(30, TimeUnit.SECONDS));
