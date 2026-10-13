@@ -1,5 +1,7 @@
 package net.yadaframework.security.uploadtest.web;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -16,6 +18,8 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @Controller
 public class UploadLimitTestController {
+	/** Number of uploads accepted by the application: the observable "mutation" of the tests */
+	private final AtomicInteger acceptedUploads = new AtomicInteger();
 
 	/**
 	 * Renders the upload form page.
@@ -38,6 +42,16 @@ public class UploadLimitTestController {
 		if (YadaCommonsMultipartResolver.limitExceeded(request)) {
 			return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body("LIMIT_EXCEEDED");
 		}
-		return ResponseEntity.ok(upfile == null ? "UPLOAD_OK" : "UPLOAD_OK");
+		acceptedUploads.incrementAndGet();
+		return ResponseEntity.ok("UPLOAD_OK " + (upfile == null ? 0 : upfile.getSize()));
+	}
+
+	/**
+	 * @return the number of uploads accepted so far
+	 */
+	@GetMapping("/test/upload/accepted")
+	@ResponseBody
+	public String accepted() {
+		return String.valueOf(acceptedUploads.get());
 	}
 }

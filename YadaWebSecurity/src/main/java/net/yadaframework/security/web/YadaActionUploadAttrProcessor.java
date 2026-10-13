@@ -1,9 +1,16 @@
 package net.yadaframework.security.web;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.engine.AttributeName;
+import org.thymeleaf.model.AttributeValueQuotes;
+import org.thymeleaf.model.IModel;
+import org.thymeleaf.model.IModelFactory;
 import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.element.AbstractAttributeTagProcessor;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
@@ -11,19 +18,19 @@ import org.thymeleaf.standard.expression.IStandardExpression;
 import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templatemode.TemplateMode;
+import org.unbescape.html.HtmlEscape;
 
 // TODO this used to be included in the "yada" dialect before splitting the YadaWebSecurity project.
 // Now it's not used anymore, waiting for a new "yadasec" dialect
 
 /**
- * Serve solo se il csrf è attivo.
- * Questa classe aggiunge il tag yada:actionUpload da usare quando si fa multipart file upload con Spring Security e la dimensione massima del file settata.
- * Vedi http://stackoverflow.com/questions/23856254/how-to-nicely-handle-file-upload-maxuploadsizeexceededexception-with-spring-secu
- * Senza questo tag, Spring Security lancia un 403 Forbidden quando il max filesize specificato nel filtro viene superato, e non si arriva al Controller.
- * Con questo tag (e il workaround del YadaCommonsMultipartResolver) invece tutto funziona e si arriva al Controller con un MultipartFile pari a null.
- * Il trucco consiste nel mettere il _csrf come parametro nell'url della form action.
- * Esempio: <form yada:actionUpload="@{/submitImage}"
- *  
+ * Implements yada:actionUpload, which sets the action of a multipart form and, when CSRF is enabled, adds the CSRF token
+ * as a hidden field at the start of the form. The token is added only when the action is a url of the same origin (no
+ * scheme and host), and any token found in the action query is removed: tokens are never sent in a url.
+ * An oversized plain form can't be CSRF-validated because its body is not parsed: YadaUploadLimitAccessDeniedHandler
+ * answers 413 without reaching the controller. Ajax uploads send the token in a header and reach the controller,
+ * where YadaCommonsMultipartResolver.limitExceeded() is true.
+ * Example: &lt;form yada:actionUpload="@{/submitImage}" method="post" enctype="multipart/form-data"&gt;
  */
 public class YadaActionUploadAttrProcessor extends AbstractAttributeTagProcessor {
 	// A value of 10000 is higher than any attribute in the
@@ -67,22 +74,36 @@ public class YadaActionUploadAttrProcessor extends AbstractAttributeTagProcessor
          * Execute the expression just parsed
          */
         final String origurl = (String) expression.execute(context);
-        StringBuilder urlBuilder = new StringBuilder(origurl);
-   	
+        String action = origurl;
+
     	CsrfToken token = (CsrfToken) context.getVariable("_csrf");
     	// token è null quando il csrf è stato disabilitato
-    	if (token!=null) { 
-    		final String tokenName = token.getParameterName();
-    		final String tokenValue = token.getToken();
-			if (urlBuilder.lastIndexOf("?")>-1) {
-				urlBuilder.append("&");
-			} else {
-				urlBuilder.append("?");
-			}
-			urlBuilder.append(tokenName).append("=").append(tokenValue);
+    	if (token!=null) {
+    		// The token is never put in the url: it is sent in a hidden field, and only to the same origin
+    		action = YadaMultipartFormTagProcessor.removeQueryParameter(origurl, token.getParameterName());
+    		if (isSameOrigin(action)) {
+    			IModelFactory modelFactory = context.getModelFactory();
+    			Map<String, String> attributes = new LinkedHashMap<>();
+    			attributes.put("type", "hidden");
+    			attributes.put("name", HtmlEscape.escapeHtml5Xml(token.getParameterName()));
+    			attributes.put("value", HtmlEscape.escapeHtml5Xml(token.getToken()));
+    			IModel hiddenField = modelFactory.createModel();
+    			hiddenField.add(modelFactory.createStandaloneElementTag("input", attributes, AttributeValueQuotes.DOUBLE, false, false));
+    			structureHandler.insertImmediatelyAfter(hiddenField, false);
+    		}
     	}
-    	structureHandler.setAttribute("action", urlBuilder.toString());
-        
+    	structureHandler.setAttribute("action", HtmlEscape.escapeHtml4Xml(action));
+
+    }
+
+    /**
+     * @return true for a url without scheme and host, that is sent to the origin of the page
+     */
+    static boolean isSameOrigin(String url) {
+    	if (url.startsWith("//") || url.startsWith("\\")) {
+    		return false;
+    	}
+    	return UriComponentsBuilder.fromUriString(url).build().getScheme()==null;
     }
 
 }

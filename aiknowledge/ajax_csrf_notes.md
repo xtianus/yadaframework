@@ -8,6 +8,15 @@ Yada ajax requests use CSRF data exposed in the HTML page `<head>`. Pages that r
 
 `yada.ajax.js` reads those meta tags at script load. When `_csrf` and `_csrf_header` are present, it adds the configured CSRF header to same-origin jQuery ajax requests that use unsafe HTTP methods.
 
+## Multipart uploads
+
+The CSRF token of a multipart form is never put in the action URL. The `MultipartFilter` runs before Spring Security,
+so `CsrfFilter` reads the hidden `_csrf` field of a parsed multipart body, or the header sent by `yada.ajax.js` for
+ajax uploads. A body over `maxFileUploadSizeBytes` is not parsed: a plain form fails CSRF validation and gets 413 from
+`YadaUploadLimitAccessDeniedHandler` without reaching a controller, while an upload with a valid CSRF header reaches the
+controller with `YadaCommonsMultipartResolver.limitExceeded(request)` true. See `YadaMultipartFormTagProcessor` in the
+YadaWebSecurity dictionary.
+
 ## Forcing the HTTP method of an ajax request
 
 `makeAjaxCall` sends GET unless the request is multipart or the element belongs to a `yadaFormGroup` whose first

@@ -21,6 +21,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
@@ -104,6 +105,8 @@ public class YadaSecurityConfig {
 	        .exceptionHandling(exceptionHandling -> {
 	            // This is needed to redirect to a language-specific login url
 	            exceptionHandling.authenticationEntryPoint(new CustomAuthenticationEntryPoint());
+	            // Also used by the CsrfFilter: answers 413 when the CSRF field of an oversized multipart form could not be read
+	            exceptionHandling.accessDeniedHandler(new YadaUploadLimitAccessDeniedHandler(new AccessDeniedHandlerImpl()));
 	        })
 	        .requestCache(requestCache -> {
 	            if (yadaConfiguration.isLocalePathVariableEnabled()) {

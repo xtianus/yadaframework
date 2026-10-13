@@ -66,7 +66,7 @@ class ConfigurationIsolationTest {
 			YadaEmbeddedTomcatTestServer server = new YadaEmbeddedTomcatTestServer(resourcePath("uploadtest-webapp"))) {
 			server.start();
 			assertFalse(staticConfiguration().isDatabaseEnabled());
-			assertEquals(1, staticConfiguration().getMaxFileUploadSizeBytes());
+			assertEquals(1024, staticConfiguration().getMaxFileUploadSizeBytes());
 		}
 		assertTrue(waitForReloadingTriggerCount(baselineThreads, Duration.ofSeconds(5)), "A reload thread of the first application survived");
 		assertEquals(previousConfigurationFile, System.getProperty("yada.configurationFile"));
@@ -77,7 +77,7 @@ class ConfigurationIsolationTest {
 			try (TestApplication application = TestApplication.start(run)) {
 				YadaConfiguration config = application.getBean(YadaConfiguration.class);
 				assertTrue(config.isDatabaseEnabled());
-				// 1 in the upload test configuration, 102400 in conf.webapp.yts.xml
+				// 1024 in the upload test configuration, 102400 in conf.webapp.yts.xml
 				assertEquals(102400, config.getMaxFileUploadSizeBytes(), "The upload test configuration leaked into the next application");
 				assertSame(config, staticConfiguration());
 			}

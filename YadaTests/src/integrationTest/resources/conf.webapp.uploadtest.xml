@@ -9,7 +9,7 @@
 		<beta>false</beta>
 	</info>
 
-	<maxFileUploadSizeBytes>1</maxFileUploadSizeBytes>
+	<maxFileUploadSizeBytes>1024</maxFileUploadSizeBytes>
 
 	<database enabled="false">
 		<jndiname>java:comp/env/jdbc/yadatestdb</jndiname>

@@ -65,6 +65,23 @@ if (YadaCommonsMultipartResolver.limitExceeded(request)) {
 On an ajax POST, anything returned by the @Controller is discarded and the user only sees a generic error message. 
 ====
 
+[[uploadCsrf]]
+===  CSRF token of multipart forms
+The `MultipartFilter` parses the multipart body before Spring Security, so the CSRF token can be sent in a multipart
+field. It is never sent in the action url, where it would end up in access logs, browser history and `Referer` headers:
+
+* a form with `th:action` gets the hidden `_csrf` field from Spring Security;
+* `yada:actionUpload="@{/someUrl}"` sets the action and adds the hidden field, but only for a url of the same origin (no scheme and host);
+* ajax uploads made by `yada.ajax.js` send the token in the header named by the `_csrf_header` meta tag, as all ajax POSTs do;
+* a `_csrf` parameter written in the action query of a multipart form is removed when the page is rendered.
+
+When the size limit is exceeded the body is not parsed and the hidden field is lost, so a plain (non ajax) form can't be
+CSRF-validated. `YadaSecurityConfig` rejects it before any @Controller is called and answers with status 413
+(Payload Too Large), through `YadaUploadLimitAccessDeniedHandler`. Map the 413 status to an error page in `web.xml` to show a
+friendly message. An application that sets its own `accessDeniedHandler` gets a 403 instead.
+Uploads that send the token in the header (ajax) are validated and reach the @Controller, where `limitExceeded(request)` is true
+as described above. To show the size error inside the page, upload with ajax or check the size in the browser.
+
 [WARNING]
 ====
 

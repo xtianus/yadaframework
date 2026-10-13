@@ -9,7 +9,7 @@ import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.FilePayload;
 
 /**
- * Multipart upload through the framework multipart handling, below and above maxFileUploadSizeBytes (100 KiB)
+ * Multipart upload of a plain form through the framework multipart handling, below and above maxFileUploadSizeBytes (100 KiB)
  */
 class UploadE2eTest extends BrowserTestSupport {
 
@@ -25,11 +25,16 @@ class UploadE2eTest extends BrowserTestSupport {
 		assertThat(page.getByTestId("uploaded")).hasText("Received small.bin (1,000 bytes)"); // Formatted by the message bundle
 	}
 
+	/**
+	 * The CSRF hidden field of a plain form over the limit can't be read, so the request is rejected with 413 before
+	 * reaching the controller, instead of 403
+	 */
 	@Test
-	void fileOverTheLimitIsReportedAndNotRejectedAsForbidden() {
+	void fileOverTheLimitIsRejectedAsTooLargeAndNotAsForbidden() {
 		upload("large.bin", 200 * 1024);
-		assertThat(page.getByTestId("tooLarge")).isVisible();
+		// The test application maps no error page to 413, so the container status page is shown
+		assertThat(page.locator("h1")).containsText("413");
 		assertThat(page.getByTestId("uploaded")).hasCount(0);
-		assertThat(page.getByTestId("errorStatus")).hasCount(0);
+		assertThat(page.getByTestId("tooLarge")).hasCount(0);
 	}
 }

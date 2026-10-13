@@ -1,14 +1,30 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:yada="http://www.yadaframework.net">
 <head>
 	<meta charset="UTF-8">
+	<meta name="_csrf" th:content="${_csrf.token}"/>
+	<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+	<meta name="_csrf_parameter" th:content="${_csrf.parameterName}"/>
 	<title>Upload Limit Test</title>
 </head>
 <body>
-	<form action="/test/upload/submit#done" method="post" enctype="multipart/form-data">
+	<!--/* Plain action with an explicit hidden CSRF field */-->
+	<form action="/test/upload/submit#done" method="post" enctype="multipart/form-data" data-testid="plainForm">
 		<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 		<input type="file" name="upfile">
 		<button type="submit">Upload</button>
+	</form>
+	<!--/* Legacy template that still writes the CSRF token in the action: Spring adds the hidden field */-->
+	<form th:action="${'/test/upload/submit?x=1&' + _csrf.parameterName + '=' + _csrf.token + '#done'}" method="post" enctype="multipart/form-data" data-testid="legacyForm">
+		<input type="file" name="upfile">
+	</form>
+	<!--/* yada:actionUpload on a local action adds the hidden field */-->
+	<form yada:actionUpload="@{/test/upload/submit(x=2)}" method="post" enctype="multipart/form-data" data-testid="actionUploadForm">
+		<input type="file" name="upfile">
+	</form>
+	<!--/* yada:actionUpload never sends the token to another origin */-->
+	<form yada:actionUpload="@{https://elsewhere.example/upload(x=3)}" method="post" enctype="multipart/form-data" data-testid="externalForm">
+		<input type="file" name="upfile">
 	</form>
 </body>
 </html>

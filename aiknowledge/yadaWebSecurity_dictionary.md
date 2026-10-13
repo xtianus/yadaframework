@@ -33,5 +33,5 @@
 
 | Class | Description |
 |---|---|
-| [YadaMultipartFormTagProcessor](yadaWebSecurity/YadaMultipartFormTagProcessor.md) | Rewrites multipart form actions so the CSRF token is available in the request URL before servlet multipart parsing. Use it through the Yada security dialect on multipart upload forms. |
+| [YadaMultipartFormTagProcessor](yadaWebSecurity/YadaMultipartFormTagProcessor.md) | Removes a CSRF token written in the action query of multipart POST forms; the token travels in the hidden field or the Ajax header, never in a URL. Runs automatically in the Yada security dialect. |
 | [YadaRegistrationController](yadaWebSecurity/YadaRegistrationController.md) | Exposes registration, password reset, and username change endpoints. Reuse or subclass it when enabling the built-in registration flows. |
