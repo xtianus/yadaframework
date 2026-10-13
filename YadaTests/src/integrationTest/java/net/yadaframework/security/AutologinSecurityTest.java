@@ -224,6 +224,38 @@ class AutologinSecurityTest {
 	}
 
 	@Test
+	void aSessionWithoutUserProfileIsNeverReplaced() throws Exception {
+		// A user with credentials but no YadaUserProfile, with the password of the seeded user
+		String bareEmail = "bare@yts.test";
+		db.update("INSERT INTO YadaUserCredentials (changePassword, enabled, failedAttempts, version, password, username) SELECT 0, 1, 0, 0, password, ? FROM YadaUserCredentials WHERE username=?", bareEmail, TestDataService.USER_EMAIL);
+		db.update("INSERT INTO YadaUserCredentials_roles (roles, YadaUserCredentials_id) SELECT r.roles, (SELECT id FROM YadaUserCredentials WHERE username=?) FROM YadaUserCredentials_roles r JOIN YadaUserCredentials c ON c.id=r.YadaUserCredentials_id WHERE c.username=?", bareEmail, TestDataService.USER_EMAIL);
+		String link = issueUserLink(TARGET);
+		AuthTestClient bare = newClient();
+		bare.login(bareEmail, TestDataService.USER_PASSWORD);
+		assertEquals("Logged in as " + bareEmail, bare.loggedAs());
+
+		HttpResponse<String> page = bare.get(AuthTestClient.pathAndQuery(link));
+		assertNull(Jsoup.parse(page.body()).selectFirst("[data-testid=autologinAccount]"), "The confirmation is offered to a logged-in user");
+		HttpResponse<String> response = bare.post(linkPath(link), postFields(bare, TARGET));
+		assertLocalLocation(response);
+		assertEquals("Logged in as " + bareEmail, bare.loggedAs());
+		assertEquals(1, tokenRows(), "The token was consumed without logging in");
+	}
+
+	@Test
+	void theCsrfTokenIsRenewedByTheAutologin() throws Exception {
+		String link = issueUserLink(TARGET);
+		AuthTestClient client = newClient();
+		Map<String, String> fields = client.formFields(AuthTestClient.pathAndQuery(link), CONFIRM_FORM);
+		String preLoginToken = fields.get("_csrf");
+		assertEquals(302, client.post(linkPath(link), fields).statusCode());
+		assertEquals("Logged in as " + TestDataService.USER_EMAIL, client.loggedAs());
+		assertEquals(403, client.post("/test/echo", Map.of("_csrf", preLoginToken, "message", "hello")).statusCode(), "The pre-login CSRF token is still valid");
+		HttpResponse<String> echo = client.post("/test/echo", Map.of("_csrf", client.csrfToken(), "message", "hello"));
+		assertEquals(200, echo.statusCode(), echo.body());
+	}
+
+	@Test
 	void theSameUserIsJustRedirected() throws Exception {
 		String link = issueUserLink(TARGET);
 		AuthTestClient user = newClient();

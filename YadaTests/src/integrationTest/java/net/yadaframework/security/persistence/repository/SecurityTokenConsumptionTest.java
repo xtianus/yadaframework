@@ -171,7 +171,7 @@ class SecurityTokenConsumptionTest {
 			return consumed;
 		}), executor);
 		assertTrue(firstConsumed.await(20, TimeUnit.SECONDS));
-		assertEquals(1, session.fixtures().countRows("YadaAutoLoginToken"), "The first consumption is already committed");
+		assertEquals(1, session.fixtures().countRows("YadaAutoLoginToken"), "The first transaction must still hold the uncommitted deletion");
 		CompletableFuture<YadaUserCredentials> second = CompletableFuture.supplyAsync(() -> autoLoginTokenDao.consume(token), executor);
 		awaitLockWait(second);
 		releaseFirst.countDown();

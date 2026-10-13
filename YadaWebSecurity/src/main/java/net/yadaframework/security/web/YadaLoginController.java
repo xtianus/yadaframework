@@ -3,9 +3,13 @@ import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.csrf.CsrfAuthenticationStrategy;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,12 +27,12 @@ import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.components.YadaAuthenticationFailureHandler;
 import net.yadaframework.security.components.YadaAuthenticationSuccessHandler;
+import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.security.components.YadaSecurityTokenCodec.ParsedSecurityToken;
 import net.yadaframework.security.components.YadaTokenHandler;
 import net.yadaframework.security.components.YadaUserDetailsService;
 import net.yadaframework.security.persistence.entity.YadaAutoLoginToken;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
-import net.yadaframework.security.persistence.entity.YadaUserProfile;
 import net.yadaframework.security.persistence.repository.YadaAutoLoginTokenDao;
 import net.yadaframework.web.YadaViews;
 
@@ -57,6 +61,9 @@ public class YadaLoginController {
 	@Autowired private YadaUserDetailsService yadaUserDetailsService;
 	@Autowired private YadaAuthenticationFailureHandler failureHandler;
 	@Autowired protected YadaAuthenticationSuccessHandler successHandler;
+	@Autowired private YadaSecurityUtil yadaSecurityUtil;
+	/** The CSRF token repository, when the application declares it as a bean; the Spring Security default otherwise */
+	@Autowired private ObjectProvider<CsrfTokenRepository> csrfTokenRepositoryProvider;
 	
 	/**
 	 * This can be the success handler target url in order to close the login modal after successful login
@@ -126,9 +133,10 @@ public class YadaLoginController {
 			return invalidAutologin(parsedToken, redirectAttributes);
 		}
 		YadaUserCredentials yadaUserCredentials = yadaAutoLoginToken.getYadaUserCredentials();
-		YadaUserProfile currentUserProfile = yadaSession.getCurrentUserProfile();
-		if (currentUserProfile!=null) {
-			if (!currentUserProfile.getUserCredentials().getId().equals(yadaUserCredentials.getId())) {
+		// The authenticated principal, not the user profile, tells whether someone is logged in
+		String currentUsername = yadaSecurityUtil.getUsername();
+		if (currentUsername!=null) {
+			if (!currentUsername.equalsIgnoreCase(yadaUserCredentials.getUsername())) {
 				alreadyLoggedIn(redirectAttributes);
 			}
 			return "redirect:" + safeAction;
@@ -153,8 +161,9 @@ public class YadaLoginController {
 		if (parsedToken==null) {
 			return invalidAutologin(null, redirectAttributes);
 		}
-		YadaUserProfile currentUserProfile = yadaSession.getCurrentUserProfile();
-		if (currentUserProfile!=null) {
+		// The authenticated principal, not the user profile, tells whether someone is logged in
+		String currentUsername = yadaSecurityUtil.getUsername();
+		if (currentUsername!=null) {
 			// A user is already logged in.
 			// I wanted to logout the current user but it doesn't work: if I use SecurityContextLogoutHandler().logout() the Session is cleared
 			// and I get a login page, while if I use request.logout() the session is not cleared but a new session copy of the current one before
@@ -162,7 +171,7 @@ public class YadaLoginController {
 			// contains the old UserProfile id.
 			// So I just exit, showing an error if the current user is different from the new one, and the token is not used.
 			YadaAutoLoginToken yadaAutoLoginToken = yadaAutoLoginTokenDao.findValid(parsedToken);
-			if (yadaAutoLoginToken==null || !currentUserProfile.getUserCredentials().getId().equals(yadaAutoLoginToken.getYadaUserCredentials().getId())) {
+			if (yadaAutoLoginToken==null || !currentUsername.equalsIgnoreCase(yadaAutoLoginToken.getYadaUserCredentials().getUsername())) {
 				alreadyLoggedIn(redirectAttributes);
 			}
 			return "redirect:" + safeAction;
@@ -182,6 +191,9 @@ public class YadaLoginController {
 		try {
 			// Need to call the login success handler to perform eventual login tasks
 			Authentication authentication = yadaUserDetailsService.authenticateAs(yadaUserCredentials, request, response);
+			// A new CSRF token after login, as Spring Security does for the login form
+			CsrfTokenRepository csrfTokenRepository = csrfTokenRepositoryProvider.getIfAvailable(HttpSessionCsrfTokenRepository::new);
+			new CsrfAuthenticationStrategy(csrfTokenRepository).onAuthentication(authentication, request, response);
 			successHandler.onAuthenticationSuccessCustom(request, authentication);
 		} catch (Exception e) {
 			log.error("Auhtentication success handler failed on autologin (ignored)", e);

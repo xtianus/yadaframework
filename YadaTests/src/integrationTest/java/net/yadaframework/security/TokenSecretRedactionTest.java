@@ -1,5 +1,6 @@
 package net.yadaframework.security;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -167,6 +168,44 @@ class TokenSecretRedactionTest {
 			newClient().get(AuthTestClient.pathAndQuery(recovery));
 			newClient().get("/registrationConfirmation/" + AuthTestClient.tokenOf(recovery) + "-1");
 			assertNoSecret(applicationLogs(logs), links);
+		}
+	}
+
+	@Test
+	void errorDispatchesOfTokenUrlsDoNotLogSecrets() throws Exception {
+		List<String> links = new ArrayList<>();
+		try (LogCapture logs = LogCapture.start()) {
+			// Autologin POST with a wrong CSRF token, e.g. after the session expired between the GET and the click
+			String autologin = testDataService.issueAutologinLink(TestDataService.USER_EMAIL, TARGET);
+			links.add(autologin);
+			AuthTestClient client = newClient();
+			Map<String, String> fields = client.formFields(AuthTestClient.pathAndQuery(autologin), "autologinConfirmForm");
+			fields.put("_csrf", "expired-or-forged");
+			assertEquals(403, client.post(URI.create(autologin).getRawPath(), fields).statusCode());
+			// And without any CSRF token
+			fields.remove("_csrf");
+			assertEquals(403, newClient().post(URI.create(autologin).getRawPath(), fields).statusCode());
+
+			// Error dispatches on registration confirmation and password recovery urls
+			AuthTestClient registrationClient = newClient();
+			Map<String, String> registrationFields = registrationClient.formFields("/registerPage", "registerForm");
+			registrationFields.put("email", NEW_USER_EMAIL);
+			registrationFields.put("password", NEW_PASSWORD);
+			registrationClient.post("/signup", registrationFields);
+			String registration = mailbox.lastMessageTo(NEW_USER_EMAIL).link();
+			links.add(registration);
+			assertEquals(403, newClient().post(URI.create(registration).getRawPath(), Map.of("x", "1")).statusCode());
+			AuthTestClient resetClient = newClient();
+			Map<String, String> resetFields = resetClient.formFields("/passwordReset", "passwordResetForm");
+			resetFields.put("email", TestDataService.USER_EMAIL);
+			resetClient.post("/yadaPasswordResetPost", resetFields);
+			String recovery = mailbox.lastMessageTo(TestDataService.USER_EMAIL).link();
+			links.add(recovery);
+			assertEquals(403, newClient().post(URI.create(recovery).getRawPath(), Map.of("x", "1")).statusCode());
+
+			String text = applicationLogs(logs);
+			assertTrue(text.contains("HTTP 403"), "The error page was not reached:\n" + text);
+			assertNoSecret(text, links);
 		}
 	}
 }
