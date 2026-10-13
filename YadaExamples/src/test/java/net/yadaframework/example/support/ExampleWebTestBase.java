@@ -4,12 +4,14 @@ import static org.springframework.security.test.web.servlet.response.SecurityMoc
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +19,19 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.configuration2.BaseHierarchicalConfiguration;
+import org.apache.commons.configuration2.CombinedConfiguration;
+import org.apache.commons.configuration2.ConfigurationUtils;
+import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
+import org.apache.commons.configuration2.builder.combined.CombinedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.tree.OverrideCombiner;
+import org.apache.commons.configuration2.tree.xpath.XPathExpressionEngine;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +79,10 @@ import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
  * transactions: a test that changes data and needs a clean state for the next test calls {@link #resetDatabase()}.
  * Use {@link #login(String, String)} to obtain an authenticated session through the real login form; a
  * spring-security-test mock user is acceptable only with the username of a seeded account.
+ * <p>
+ * {@link #overrideConfiguration(String, String...)} changes configuration values for one test, e.g. a token lifetime.
+ * Values that the application reads once (the environment, cached addresses, beans built at startup) need the
+ * run-wide settings file instead: {@code -PyexTestSettings=<file>} (see src/test/resources/yex-test-configuration.xml).
  */
 @ExtendWith(SpringExtension.class)
 @WebAppConfiguration("src/main/webapp")
@@ -111,6 +127,9 @@ public abstract class ExampleWebTestBase {
 	@Autowired private CapturingMailSender capturingMailSender;
 
 	protected MockMvc mockMvc;
+	/** The configuration in use before the first override of the current test, or null */
+	private ImmutableHierarchicalConfiguration configurationBeforeOverrides = null;
+	private final Map<String, List<String>> configurationOverrides = new LinkedHashMap<>();
 
 	@BeforeEach
 	void setUpExampleTest() throws Exception {
@@ -122,6 +141,62 @@ public abstract class ExampleWebTestBase {
 			resetDatabase();
 			seededFor = getClass();
 		}
+	}
+
+	/**
+	 * Undoes the configuration overrides of the test
+	 */
+	@AfterEach
+	protected void restoreConfiguration() {
+		if (configurationBeforeOverrides != null) {
+			config.setConfiguration(configurationBeforeOverrides);
+			configurationBeforeOverrides = null;
+			configurationOverrides.clear();
+		}
+	}
+
+	/**
+	 * Overrides configuration values until the end of the current test, without editing the shared test configuration.
+	 * The application reads them on its next access to the configuration: this works for values read at each use, like
+	 * {@code security/autologinExpirationHours}, but not for values that YadaConfiguration caches (the environment, the
+	 * server address) or that beans read at startup. Several values replace a whole repeated element.
+	 * @param path element names separated by "/" relative to &lt;config>, e.g. "security/autologinExpirationHours";
+	 * 	the last segment may be an attribute like "@throwExceptions"
+	 * @param values the values; none removes a previous override of the same path
+	 */
+	protected void overrideConfiguration(String path, String... values) throws ConfigurationException {
+		if (path == null || !path.matches("[A-Za-z_][\\w.-]*(/[A-Za-z_][\\w.-]*)*(/@[A-Za-z_][\\w.-]*)?")) {
+			throw new IllegalArgumentException("Invalid configuration path: " + path);
+		}
+		if (configurationBeforeOverrides == null) {
+			configurationBeforeOverrides = config.getConfiguration();
+		}
+		if (values.length == 0) {
+			configurationOverrides.remove(path);
+		} else {
+			configurationOverrides.put(path, List.of(values));
+		}
+		BaseHierarchicalConfiguration overrides = new BaseHierarchicalConfiguration();
+		for (Map.Entry<String, List<String>> override : configurationOverrides.entrySet()) {
+			// Default expression engine: "config.security.autologinExpirationHours", "config.email[@throwExceptions]"
+			String key = "config." + override.getKey().replaceFirst("/@(.+)$", "[@$1]").replace('/', '.');
+			for (String value : override.getValue()) {
+				overrides.addProperty(key, value);
+			}
+		}
+		CombinedConfiguration combined = new CombinedConfiguration(new OverrideCombiner());
+		combined.addConfiguration(overrides);
+		combined.addConfiguration(loadTestConfiguration());
+		combined.setExpressionEngine(new XPathExpressionEngine());
+		config.setConfiguration(ConfigurationUtils.unmodifiableConfiguration(combined));
+	}
+
+	/**
+	 * @return a new copy of the test configuration, read from the yada.configurationFile set by Gradle
+	 */
+	private static CombinedConfiguration loadTestConfiguration() throws ConfigurationException {
+		File configurationFile = new File(System.getProperty("yada.configurationFile"));
+		return new CombinedConfigurationBuilder().configure(new Parameters().fileBased().setFile(configurationFile)).getConfiguration();
 	}
 
 	/**

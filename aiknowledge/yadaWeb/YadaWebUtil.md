@@ -21,9 +21,10 @@
 | `isErrorPage` | Returns true if we are in a forward that should display an error handled by YadaController.yadaError() or YadaGlobalExceptionHandler |
 | `downloadTempFile` | Copies the content of a file to the Response then deletes the file. |
 | `downloadFile` | Copies the content of a file to the Response then optionally deletes the file. |
-| `redirectString` | Creates a redirect string to be returned by a @Controller, taking into account the locale in the path. |
+| `redirectString` | Creates a redirect string to be returned by a @Controller, taking into account the locale in the path. It percent-encodes the path and prepends the request locale unless the path starts with that same locale: use it only for decoded, locale-less paths written in code. |
+| `safeLocalRedirect` | Returns a client-supplied redirect target unchanged when it is a safe absolute local path, otherwise "/". Use the result as `"redirect:" + safeLocalRedirect(target)`, never through redirectString, which would encode it again and add a locale. |
 | `enhanceUrl` | Creates a new URL string from a starting one, taking into account the locale in the path and optional url parameters. |
 | `downloadZip` | Make a zip file and send it to the client. |
 | `sortLocalEnum` | Sorts a localized enum according to the locale specified |
 | `saveAttachment` | Save an uploaded file to a temporary file |
-| `sanitizeUrl` | Fix a url so that it valid and doesn't allow XSS attacks |
+| `sanitizeUrl` | Fix a url so that it valid and doesn't allow XSS attacks; it produces external urls and is not a redirect validator |

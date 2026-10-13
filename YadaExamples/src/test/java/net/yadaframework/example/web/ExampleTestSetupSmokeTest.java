@@ -1,5 +1,7 @@
 package net.yadaframework.example.web;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -85,6 +87,21 @@ class ExampleTestSetupSmokeTest extends ExampleWebTestBase {
 		mockMvc.perform(post("/dashboard").session(supervisorSession).param("_csrf", csrfToken(supervisorSession))).andExpect(status().isOk()).andExpect(view().name("/dashboard/dashboard"));
 		MockHttpSession userSession = login(USER_EMAIL, USER_PASSWORD);
 		mockMvc.perform(post("/dashboard").session(userSession).param("_csrf", csrfToken(userSession))).andExpect(status().isForbidden());
+	}
+
+	@Test
+	void configurationCanBeOverriddenForOneTest() throws Exception {
+		assertEquals(48, config.getAutologinExpirationHours());
+		overrideConfiguration("security/autologinExpirationHours", "2");
+		overrideConfiguration("email/@throwExceptions", "true");
+		assertEquals(2, config.getAutologinExpirationHours());
+		assertTrue(config.isEmailThrowExceptions());
+		assertEquals(240, config.getConfiguration().getInt("config/security/sessionTimeoutMinutes"), "Sibling values are kept");
+		assertEquals(Integer.valueOf(4), config.getRoleId("SUPERVISOR"), "Configured lists are kept");
+		overrideConfiguration("security/autologinExpirationHours");
+		assertEquals(48, config.getAutologinExpirationHours(), "Removing an override restores the value");
+		restoreConfiguration();
+		assertFalse(config.isEmailThrowExceptions(), "The overrides survive the test");
 	}
 
 	@Test

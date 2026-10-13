@@ -1,10 +1,18 @@
 package net.yadaframework.components;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.util.Locale;
+
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import net.yadaframework.core.YadaConfiguration;
 
 /**
  * {@link YadaWebUtil#safeLocalRedirect(String)} keeps local paths, with their query string and fragment, and replaces
@@ -174,6 +182,54 @@ class YadaWebUtilRedirectTest {
 	})
 	void dotSegmentsBecomeRoot(String candidate) {
 		assertEquals("/", yadaWebUtil.safeLocalRedirect(candidate));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"/dashboard/{id}",
+		"/dashboard?tab={tab}",
+		"/dashboard#{x}",
+		"/%7Bid%7D/dashboard",
+		"/%257Bid%257D",
+	})
+	void uriTemplateBracesBecomeRoot(String candidate) {
+		assertEquals("/", yadaWebUtil.safeLocalRedirect(candidate));
+	}
+
+	/**
+	 * A once-encoded "%" decodes to "%" followed by text that is not a valid escape: such paths are rejected by design,
+	 * because they can't be told apart from a partial double encoding. A "%25" that decodes to a valid escape of a safe
+	 * character is accepted.
+	 */
+	@Test
+	void onceEncodedPercentSigns() {
+		assertEquals("/", yadaWebUtil.safeLocalRedirect("/100%25"));
+		assertEquals("/", yadaWebUtil.safeLocalRedirect("/100%25off"));
+		assertEquals("/a%2541", yadaWebUtil.safeLocalRedirect("/a%2541"));
+		assertEquals("/discount?rate=100%25", yadaWebUtil.safeLocalRedirect("/discount?rate=100%25"));
+	}
+
+	/**
+	 * Pins why a validated value must be used as {@code "redirect:" + safeLocalRedirect(value)} and never passed to
+	 * redirectString(): redirectString encodes the path again and prepends the request locale.
+	 */
+	@Test
+	void composedWithRedirectString() {
+		YadaConfiguration config = mock(YadaConfiguration.class);
+		when(config.isLocalePathVariableEnabled()).thenReturn(true);
+		YadaWebUtil configured = new YadaWebUtil();
+		ReflectionTestUtils.setField(configured, "config", config);
+		// Raw, already encoded value (e.g. a stored getRequestURI()): kept as it is by safeLocalRedirect
+		assertEquals("redirect:/caf%C3%A9/menu", "redirect:" + configured.safeLocalRedirect("/caf%C3%A9/menu"));
+		// ...but encoded a second time by redirectString
+		assertEquals("redirect:/it/caf%25C3%25A9", configured.redirectString(configured.safeLocalRedirect("/caf%C3%A9"), Locale.ITALIAN));
+		// A decoded path is accepted, and redirectString is the right formatter for it
+		assertEquals("/café", configured.safeLocalRedirect("/café"));
+		assertEquals("redirect:/it/caf%C3%A9", configured.redirectString("/café", Locale.ITALIAN));
+		// A path that already has a locale keeps it with "redirect:", gets a second one from redirectString
+		assertEquals("redirect:/en/x", "redirect:" + configured.safeLocalRedirect("/en/x"));
+		assertEquals("redirect:/it/en/x", configured.redirectString(configured.safeLocalRedirect("/en/x"), Locale.ITALIAN));
+		assertEquals("redirect:/en/x", configured.redirectString("/en/x", Locale.ENGLISH));
 	}
 
 	@ParameterizedTest

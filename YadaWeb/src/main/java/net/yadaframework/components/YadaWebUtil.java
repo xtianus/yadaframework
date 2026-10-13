@@ -640,16 +640,22 @@ public class YadaWebUtil {
 	 * so that a redirect can't leave the site.
 	 * <p>
 	 * The candidate is accepted unchanged only when it is an absolute local path like "/dashboard?tab=users#top":
-	 * it starts with a single "/", contains no backslash, whitespace, control or invisible format character anywhere,
-	 * and its path has no "." or ".." segment. The path is also percent-decoded, up to {@value #SAFE_REDIRECT_DECODING_ROUNDS}
-	 * times, and every decoded form must satisfy the same rules and contain no encoded "/" or "\", so that double-encoded
-	 * values like "/%252F%252Fevil.example" are rejected too. Malformed or too deeply nested encodings are rejected.
-	 * The query string and the fragment are kept as they are.
+	 * it starts with a single "/", contains no backslash, no "{" or "}" (RedirectView would expand them as URI template
+	 * variables), no whitespace, control or invisible format character anywhere, and its path has no "." or ".." segment.
+	 * The path is also percent-decoded, up to {@value #SAFE_REDIRECT_DECODING_ROUNDS} times, and every decoded form must
+	 * satisfy the same rules and contain no encoded "/" or "\", so that double-encoded values like
+	 * "/%252F%252Fevil.example" are rejected too. Malformed or too deeply nested encodings are rejected. By design this
+	 * also rejects a path with an encoded "%" whose decoded form is not a valid escape, such as "/100%25" ("/100%"),
+	 * because it can't be told apart from a partial double encoding. The query string and the fragment are kept as they are.
 	 * <p>
-	 * The result is never decoded or re-encoded: return it with "redirect:" or pass it to
-	 * {@link #redirectString(String, Locale, String...)}, which only formats it. Unlike {@link #sanitizeUrl(String)}, which
-	 * produces external urls, this method never returns a value that leaves the site. Locale and context path segments
-	 * are left untouched, as any other local segment.
+	 * The result is never decoded or re-encoded: it is meant to be used as it is, as {@code "redirect:" + safeLocalRedirect(target)}.
+	 * This is the only correct use for raw or already encoded values, like a stored {@code request.getRequestURI()} or a
+	 * request parameter carrying a path with a locale segment.
+	 * Do not pass the result to {@link #redirectString(String, Locale, String...)}: that method percent-encodes the path
+	 * again ("/caf%C3%A9" becomes "/caf%25C3%25A9") and, when the locale path variable is enabled, prepends the request
+	 * locale unless the path already starts with that same locale ("/en/x" becomes "/it/en/x" for an Italian request).
+	 * redirectString is only for decoded, locale-less application paths written in code.
+	 * Unlike {@link #sanitizeUrl(String)}, which produces external urls, this method never returns a value that leaves the site.
 	 * @param candidate the requested target, can be null
 	 * @return the candidate when it is a safe local path, otherwise "/"
 	 */
@@ -693,7 +699,7 @@ public class YadaWebUtil {
 	private boolean hasOnlySafeRedirectCharacters(String value) {
 		for (int i = 0; i < value.length(); i++) {
 			char character = value.charAt(i);
-			if (character=='\\' || Character.isWhitespace(character) || Character.isSpaceChar(character) || Character.isISOControl(character) || Character.getType(character)==Character.FORMAT) {
+			if (character=='\\' || character=='{' || character=='}' || Character.isWhitespace(character) || Character.isSpaceChar(character) || Character.isISOControl(character) || Character.getType(character)==Character.FORMAT) {
 				return false;
 			}
 		}

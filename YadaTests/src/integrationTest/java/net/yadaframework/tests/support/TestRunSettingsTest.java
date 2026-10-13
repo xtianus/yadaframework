@@ -1,6 +1,7 @@
 package net.yadaframework.tests.support;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -60,6 +61,27 @@ class TestRunSettingsTest {
 		ImmutableConfiguration configuration = configuration();
 		assertEquals(List.of("127.0.0.1", "::1"), configuration.getList(String.class, "config/security/trustedProxies/proxy"));
 		assertEquals(List.of("it", "en"), configuration.getList(String.class, "config/i18n/locale"));
+	}
+
+	/**
+	 * The base lists have several entries: the two roles of conf.webapp.yts.xml and three proxies in the run configuration
+	 */
+	@Test
+	void repeatedValuesReplaceABaseListWithSeveralEntries() {
+		assertEquals(List.of("ADMIN", "USER"), configuration().getList(String.class, "config/security/roles/role/key"));
+		run.setExtraConfiguration("<yts><proxies><proxy>10.0.0.1</proxy><proxy>10.0.0.2</proxy><proxy>10.0.0.3</proxy></proxies></yts>");
+		assertEquals(List.of("10.0.0.1", "10.0.0.2", "10.0.0.3"), configuration().getList(String.class, "config/yts/proxies/proxy"));
+
+		run.setConfigurationValue("yts/proxies/proxy", "192.168.1.1");
+		assertEquals(List.of("192.168.1.1"), configuration().getList(String.class, "config/yts/proxies/proxy"));
+		run.setConfigurationValue("yts/proxies/proxy", "192.168.1.1", "192.168.1.2");
+		assertEquals(List.of("192.168.1.1", "192.168.1.2"), configuration().getList(String.class, "config/yts/proxies/proxy"));
+
+		run.setConfigurationValue("security/roles/role/key", "ONLY");
+		ImmutableConfiguration configuration = configuration();
+		assertEquals(List.of("ONLY"), configuration.getList(String.class, "config/security/roles/role/key"), "The configured roles were merged with the setting");
+		assertFalse(configuration.containsKey("config/security/roles/role/id"), "The ids of the configured roles survived");
+		assertEquals(240, configuration.getInt("config/security/sessionTimeoutMinutes"), "Siblings of the replaced list are kept");
 	}
 
 	@Test

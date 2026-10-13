@@ -164,8 +164,26 @@ test {
 	def testTempDir = layout.buildDirectory.dir('tmp/test-jvm').get().asFile
 	systemProperty 'yex.buildDir', layout.buildDirectory.get().asFile.absolutePath
 	systemProperty 'java.io.tmpdir', testTempDir.absolutePath
+	// Optional run-wide overrides of conf.webapp.test.xml, e.g. -PyexTestSettings=/path/to/settings.xml
+	if (project.hasProperty('yexTestSettings')) {
+		systemProperty 'yex.test.settingsFile', file(project.property('yexTestSettings')).absolutePath
+	}
 	maxParallelForks = 1
 	doFirst {
+		// A test JVM that was killed leaves its database process running: stop only the processes that use our folder
+		def folderPrefix = testDatabaseRoot.absolutePath + File.separator
+		ProcessHandle.allProcesses().filter { process ->
+			process.pid() != ProcessHandle.current().pid() && process.info().commandLine().map { it.contains(folderPrefix) && it.contains('mariadbd') }.orElse(false)
+		}.forEach { process ->
+			logger.lifecycle("Stopping the leftover test database process ${process.pid()}")
+			process.destroy()
+			try {
+				process.onExit().get(30, java.util.concurrent.TimeUnit.SECONDS)
+			} catch (java.util.concurrent.TimeoutException e) {
+				process.destroyForcibly()
+				process.onExit().get(30, java.util.concurrent.TimeUnit.SECONDS)
+			}
+		}
 		// Every run starts from an empty schema, so that every migration runs
 		delete testDatabaseRoot, testTempDir
 		testTempDir.mkdirs()
