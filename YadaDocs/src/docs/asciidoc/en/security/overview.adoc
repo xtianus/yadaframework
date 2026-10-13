@@ -82,6 +82,44 @@ limited access, a "TEACHER" could see the score editing form.
 It's important not to change either the id or the key once the application goes to production because 
 these values are stored in the database.
 
+[[client-address]]
+=== Client address behind a reverse proxy
+
+The address written by `AuditFilter` in the `remoteIp` logback MDC field, and returned by `YadaWebUtil.getClientAddress()`, is the address of the TCP peer, `request.getRemoteAddr()`.
+The `X-Forwarded-For` header is written by whoever sends the request, so it is never believed by default: a client connected directly to Tomcat can not choose the address that ends up in the audit log.
+The raw header text, with control characters replaced and a length limit, is available in the separate `forwardedFor` MDC field (`%X{forwardedFor}`) for diagnostics only.
+
+When the application is behind a reverse proxy or load balancer, configure Tomcat's `RemoteIpValve` so that `getRemoteAddr()` already is the real client address:
+
+[source,xml]
+----
+<Valve className="org.apache.catalina.valves.RemoteIpValve"
+	remoteIpHeader="X-Forwarded-For"
+	internalProxies="10\.0\.0\.1|10\.0\.0\.2"
+	trustedProxies="" />
+----
+
+* `internalProxies` (and `trustedProxies`) must list exactly the addresses of the ingress. The Tomcat default for `internalProxies` covers all private networks, which is too wide if other hosts of those networks can reach Tomcat directly.
+* The ingress must overwrite client-supplied `X-Forwarded-For` (and `X-Forwarded-Proto`, `X-Forwarded-Host`) with what it observed, not append to them. A header passed on unchanged lets a client forge the left part of the chain, and a misconfigured valve would then believe it.
+* Tomcat must not be reachable except through the ingress.
+
+Without a valve, the framework can read the header itself, but only from an explicit list of proxy addresses:
+
+[source,xml]
+----
+<config>
+	<security>
+		<trustedProxies>
+			<proxy>10.0.0.1</proxy>
+			<proxy>10.0.0.2</proxy>
+		</trustedProxies>
+	</security>
+</config>
+----
+
+Only IP addresses are accepted (entries such as `*`, a host name or a network range are ignored, so there is no way to trust everybody). The header is considered only when the peer is in the list; the chain is then read from the right-hand end and the first address that is not a listed proxy is the client. A malformed address in the chain makes the peer address the result.
+When the valve is used, leave the list empty.
+
 == User Profile
 
 Every web application handles a specific kind of user with different attributes like name, address, age etc.

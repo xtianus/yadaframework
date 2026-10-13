@@ -917,6 +917,24 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
+	 * The IP addresses of the reverse proxies that are allowed to set the X-Forwarded-For header, from
+	 * &lt;security>&lt;trustedProxies>&lt;proxy>. Only plain IP addresses are accepted: other entries (e.g. "*", host names) are ignored,
+	 * so there is no way to trust every peer. The default is an empty list: the client address is the address of the TCP peer.
+	 * Prefer Tomcat's RemoteIpValve to this setting.
+	 * @return the configured addresses, empty when none is configured
+	 * @see net.yadaframework.components.YadaClientAddress
+	 */
+	public List<String> getTrustedProxies() {
+		List<String> result = new ArrayList<>();
+		for (String proxy : configuration.getList(String.class, "config/security/trustedProxies/proxy", Collections.emptyList())) {
+			if (proxy!=null && !proxy.isBlank()) {
+				result.add(proxy.trim());
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * @return the lifetime of new autologin links in hours, from &lt;security>&lt;autologinExpirationHours>, default 10
 	 */
 	public int getAutologinExpirationHours() {

@@ -137,6 +137,8 @@
 		<maxFailedAttempts>10</maxFailedAttempts>
 		<failedAttemptsLockoutMinutes>10</failedAttemptsLockoutMinutes>
 		<autologinExpirationHours>48</autologinExpirationHours>
+		<!-- Client address behind a reverse proxy: prefer Tomcat's RemoteIpValve (see the documentation). Only if the framework must read X-Forwarded-For, list the proxy IP addresses here. Empty (default) trusts nobody. -->
+		<!-- <trustedProxies><proxy>10.0.0.1</proxy></trustedProxies> -->
 		<roles>
 			<!-- ATTENTION: the ID and the KEY must be set at the start and NEVER CHANGED again because they go into the DB.
 					Non-consecutive values have been chosen for the IDs to eventually allow insertion of values in between,
