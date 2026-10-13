@@ -113,7 +113,8 @@ public class YadaController {
         if (response.isCommitted()) {
         	// The browser has received part of the page (and the original status code) already, so a new view can't be rendered.
         	// Nothing is written either: exception text would be inserted in the middle of an unknown document.
-        	// The response is just completed, which also avoids a second error dispatch.
+        	// The response is just flushed, which also avoids a second error dispatch. It is deliberately not closed with a
+        	// fake "complete" ending: a response that failed after commit must stay visibly truncated or aborted for the client.
         	try {
         		response.flushBuffer();
         	} catch (IOException | RuntimeException ex) {
@@ -143,10 +144,11 @@ public class YadaController {
 
     /**
      * The text that can be shown to the user for an HTTP error status: the standard reason phrase, never exception-derived text.
+     * The text is English, like the log messages: localizing it would need a message bundle entry per status.
      * @param errorCode the HTTP status code
      * @return the reason phrase, or "Server Error" for an unknown status
      */
-    private String getSafeErrorMessage(int errorCode) {
+    static String getSafeErrorMessage(int errorCode) {
     	HttpStatus status = HttpStatus.resolve(errorCode);
     	return status==null?"Server Error":status.getReasonPhrase();
     }
