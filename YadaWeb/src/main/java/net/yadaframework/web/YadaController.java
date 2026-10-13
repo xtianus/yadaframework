@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -103,49 +104,51 @@ public class YadaController {
         }
         String isAjaxString = yadaWebUtil.isAjaxRequest(request)?" (ajax)":"";
         String currentUsername = yadaSecurityUtil.getUsername();
+        // The detailed message and the stacktrace go to the server log only
         if (exception==null) {
-        	log.error("Error (HTTP {} '{}') shown to user '{}' at {}{}", errorCode, errorMessage, currentUsername, isAjaxString, requestUri, isAjaxString);
+        	log.error("Error (HTTP {} '{}') shown to user '{}' at {}{}", errorCode, errorMessage, currentUsername, requestUri, isAjaxString);
         } else {
-        	log.error("Error (HTTP {} '{}') shown to user '{}' at {}{}", errorCode, errorMessage, currentUsername, isAjaxString, requestUri, isAjaxString, exception);
+        	log.error("Error (HTTP {} '{}') shown to user '{}' at {}{}", errorCode, errorMessage, currentUsername, requestUri, isAjaxString, exception);
         }
+        if (response.isCommitted()) {
+        	// The browser has received part of the page (and the original status code) already, so a new view can't be rendered.
+        	// Nothing is written either: exception text would be inserted in the middle of an unknown document.
+        	// The response is just completed, which also avoids a second error dispatch.
+        	try {
+        		response.flushBuffer();
+        	} catch (IOException | RuntimeException ex) {
+        		log.debug("Error flushing the committed response", ex);
+        	}
+        	return null;
+        }
+        // Only a generic text derived from the status code is ever sent to the client
+        String safeMessage = getSafeErrorMessage(errorCode);
         model.addAttribute(YadaConstants.REQUEST_HASERROR_FLAG, "true");
         // If it was an ajax request, return an error object
         if (yadaWebUtil.isAjaxRequest(request)) {
-        	model.addAttribute("errorDescription", errorMessage);
+        	model.addAttribute("errorDescription", safeMessage);
         	return "/yada/ajaxError";
         }
         // Otherwise forward to the configured error page (defaults to home)
         model.addAttribute("yadaHttpStatus", errorCode);
-        model.addAttribute("yadaHttpMessage", errorMessage);
-        if (!response.isCommitted()) {
-            // Clear any buffered content before sending a new response
-            response.resetBuffer();
-            // Preserve the original servlet error status while rendering the configured error page
-            response.setStatus(errorCode);
-        } else {
-        	// Experimental code to try to return some information on the error, not just a blank page or a truncated page
-        	try {
-                if (response.getWriter() != null) {
-                	response.getWriter().write("\n--></script></template><br><br><br><p>INTERNAL SERVER ERROR</p>");
-                	response.getWriter().write(errorMessage + "<br>");
-                    // Close the writer otherwise a blank page is returned
-                    response.getWriter().close();
-                }
-            } catch (IllegalStateException ex) {
-            	// Should never get here
-                // If getWriter() was not used, close the output stream instead
-                try {
-                    response.getOutputStream().close();
-                } catch (IOException ioEx) {
-                    log.debug("Error closing the response output stream", ioEx);
-                }
-            } catch (IOException ioEx) {
-                log.debug("Error closing the response writer", ioEx);
-            }
-        }
+        model.addAttribute("yadaHttpMessage", safeMessage);
+        // Clear any buffered content before sending a new response
+        response.resetBuffer();
+        // Preserve the original servlet error status while rendering the configured error page
+        response.setStatus(errorCode);
         return "forward:" + config.getErrorPageForward();
 //        YadaLocalePathVariableFilter.resetCalledFlag(request); // Reset so that the locale is set again and stripped
 //        return "forward:" + yadaWebUtil.getLocaleSafeForward(config.getErrorPageForward());
+    }
+
+    /**
+     * The text that can be shown to the user for an HTTP error status: the standard reason phrase, never exception-derived text.
+     * @param errorCode the HTTP status code
+     * @return the reason phrase, or "Server Error" for an unknown status
+     */
+    private String getSafeErrorMessage(int errorCode) {
+    	HttpStatus status = HttpStatus.resolve(errorCode);
+    	return status==null?"Server Error":status.getReasonPhrase();
     }
 
 }

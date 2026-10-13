@@ -87,9 +87,10 @@ public class YadaDataTableDao {
 			json.put("data", jsonData);
 		} catch (Exception e) {
 			log.error("Can't retrieve data", e);
-			// The error object must have the same structure of the one inside ajaxError.html
+			// The error object must have the same structure of the one inside ajaxError.html.
+			// The exception text stays in the log: it can contain SQL, table names or user input.
 			Map<String, String> inner = new HashMap<>();
-			inner.put("error", e.toString());
+			inner.put("error", "Server error");
 			json.put("yadaError", inner);
 		}
 		return json;

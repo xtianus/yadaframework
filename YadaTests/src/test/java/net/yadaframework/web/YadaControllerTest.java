@@ -2,15 +2,20 @@ package net.yadaframework.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Locale;
@@ -107,6 +112,108 @@ class YadaControllerTest {
 		assertEquals("forward:/errorPage", viewName);
 		verify(response).resetBuffer();
 		verify(response).setStatus(errorStatus);
+	}
+
+	private static final String HOSTILE = "<script>alert(1)</script></template>--></script>";
+
+	private YadaController errorController(boolean ajax) {
+		YadaConfiguration configuration = mock(YadaConfiguration.class);
+		YadaWebUtil yadaWebUtil = mock(YadaWebUtil.class);
+		YadaSecurityUtilStub yadaSecurityUtil = mock(YadaSecurityUtilStub.class);
+		when(configuration.getErrorPageForward()).thenReturn("/errorPage");
+		when(yadaWebUtil.isAjaxRequest(any())).thenReturn(ajax);
+		YadaController controller = new YadaController();
+		ReflectionTestUtils.setField(controller, "config", configuration);
+		ReflectionTestUtils.setField(controller, "yadaWebUtil", yadaWebUtil);
+		ReflectionTestUtils.setField(controller, "yadaSecurityUtil", yadaSecurityUtil);
+		return controller;
+	}
+
+	private HttpServletRequest errorRequest(int status, String servletMessage, Exception exception) {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getAttribute("jakarta.servlet.error.status_code")).thenReturn(status);
+		when(request.getAttribute("jakarta.servlet.error.message")).thenReturn(servletMessage);
+		when(request.getAttribute("jakarta.servlet.error.exception")).thenReturn(exception);
+		when(request.getAttribute("jakarta.servlet.error.request_uri")).thenReturn("/boom");
+		return request;
+	}
+
+	/**
+	 * After commit nothing is written, no second view is rendered and the response is just flushed.
+	 */
+	@Test
+	void yadaError_CommittedResponseGetsNoExceptionTextAndNoForward() throws Exception {
+		for (boolean ajax : new boolean[] { false, true }) {
+			for (String message : new String[] { HOSTILE, null }) {
+				HttpServletRequest request = errorRequest(500, message, new IllegalStateException(HOSTILE));
+				HttpServletResponse response = mock(HttpServletResponse.class);
+				when(response.isCommitted()).thenReturn(true);
+				ExtendedModelMap model = new ExtendedModelMap();
+
+				String view = errorController(ajax).yadaError(request, response, mock(RedirectAttributes.class), model, Locale.ENGLISH);
+
+				assertNull(view, "No view must be rendered on a committed response");
+				verify(response, never()).getWriter();
+				verify(response, never()).getOutputStream();
+				verify(response, never()).resetBuffer();
+				verify(response, never()).setStatus(anyInt());
+				verify(response).flushBuffer();
+				assertFalse(model.toString().contains("<script"), model.toString());
+			}
+		}
+	}
+
+	/**
+	 * A response whose writer or stream state is inconsistent must not make the error handling fail or loop.
+	 */
+	@Test
+	void yadaError_CommittedResponseToleratesFlushFailure() throws Exception {
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		when(response.isCommitted()).thenReturn(true);
+		doThrow(new IOException(HOSTILE)).when(response).flushBuffer();
+		String view = errorController(false).yadaError(errorRequest(500, HOSTILE, null), response, mock(RedirectAttributes.class), new ExtendedModelMap(), Locale.ENGLISH);
+		assertNull(view);
+		verify(response, never()).getWriter();
+		verify(response, never()).getOutputStream();
+	}
+
+	/**
+	 * An uncommitted error keeps the original status and the configured page, but the page model carries no exception text.
+	 */
+	@Test
+	void yadaError_UncommittedPageKeepsStatusAndPageWithGenericMessage() {
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		ExtendedModelMap model = new ExtendedModelMap();
+		String view = errorController(false).yadaError(errorRequest(500, HOSTILE, new IllegalStateException(HOSTILE)), response, mock(RedirectAttributes.class), model, Locale.ENGLISH);
+		assertEquals("forward:/errorPage", view);
+		verify(response).resetBuffer();
+		verify(response).setStatus(500);
+		assertEquals(500, model.get("yadaHttpStatus"));
+		assertEquals("Internal Server Error", model.get("yadaHttpMessage"));
+		assertFalse(model.toString().contains("<script"), model.toString());
+	}
+
+	/**
+	 * An Ajax error is rendered as text that the browser shows in a modal: it must not carry exception text.
+	 */
+	@Test
+	void yadaError_AjaxErrorHasGenericDescription() {
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		ExtendedModelMap model = new ExtendedModelMap();
+		String view = errorController(true).yadaError(errorRequest(500, null, new IllegalStateException(HOSTILE)), response, mock(RedirectAttributes.class), model, Locale.ENGLISH);
+		assertEquals("/yada/ajaxError", view);
+		assertEquals("Internal Server Error", model.get("errorDescription"));
+		assertFalse(model.toString().contains("<script"), model.toString());
+	}
+
+	/**
+	 * An unknown status gets a generic message too.
+	 */
+	@Test
+	void yadaError_UnknownStatusGetsServerError() {
+		ExtendedModelMap model = new ExtendedModelMap();
+		errorController(true).yadaError(errorRequest(599, HOSTILE, null), mock(HttpServletResponse.class), mock(RedirectAttributes.class), model, Locale.ENGLISH);
+		assertEquals("Server Error", model.get("errorDescription"));
 	}
 
 	/**
