@@ -1832,12 +1832,14 @@
 	
 	/**
 	 * Starts impersonating a user by navigating to the impersonation url with the "id" and "currentLocation" parameters.
+	 * currentLocation is the local path of the current page with its query string, e.g. "/en/dashboard/user?page=2",
+	 * so that the server can accept it with YadaWebUtil.safeLocalRedirect().
 	 * @param url the impersonation url
 	 * @param userId the id of the user to impersonate
 	 * @param method optional HTTP method: "POST" submits a form that carries the CSRF token (needs yada.ajax.js), GET when missing
 	 */
 	yada.impersonate = function(url, userId, method) {
-		const data = {id: userId, currentLocation: window.location.href};
+		const data = {id: userId, currentLocation: window.location.pathname + window.location.search};
 		if (method && method.toUpperCase()!=="GET") {
 			yada.postNavigate(url, data);
 			return;
