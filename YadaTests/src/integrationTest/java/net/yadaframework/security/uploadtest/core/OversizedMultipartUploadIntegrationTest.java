@@ -89,6 +89,8 @@ class OversizedMultipartUploadIntegrationTest {
 		assertEquals(1, form(document, "actionUploadForm").select("input[type=hidden][name=_csrf]").size());
 		assertEquals("https://elsewhere.example/upload?x=3", form(document, "externalForm").attr("action"));
 		assertTrue(form(document, "externalForm").select("input[name=_csrf]").isEmpty(), "The token is sent to another origin");
+		assertEquals("/\\elsewhere.example/upload", form(document, "backslashForm").attr("action"));
+		assertTrue(form(document, "backslashForm").select("input[name=_csrf]").isEmpty(), "The token is sent to another origin");
 		for (Element form : document.select("form")) {
 			assertFalse(form.attr("action").contains("_csrf"), form.attr("action"));
 			assertFalse(form.attr("action").contains(token), form.attr("action"));
@@ -206,14 +208,22 @@ class OversizedMultipartUploadIntegrationTest {
 		assertEquals(accepted, acceptedUploads());
 	}
 
+	/**
+	 * The multipart body is stored in temporary files (fileSizeThreshold 0) that exist while the request is handled and
+	 * are deleted afterwards, also for requests rejected by Spring Security and for oversized bodies
+	 */
 	@Test
 	void multipartTempFilesAreDeleted() throws Exception {
 		Csrf csrf = csrf();
-		upload(csrf.name(), csrf.token(), null, null, SMALL_FILE);
-		upload(null, null, null, null, SMALL_FILE);
-		upload(csrf.name(), csrf.token(), null, null, LARGE_FILE);
-		upload(null, null, csrf.header(), csrf.token(), LARGE_FILE);
 		File uploadsFolder = YadaAppConfig.getStaticConfig().getUploadsFolder();
+		HttpResponse<String> observed = upload(csrf.name(), csrf.token(), null, null, SMALL_FILE, "/test/upload/submitObservingTempFiles");
+		assertEquals(200, observed.statusCode(), observed.body());
+		assertTrue(Integer.parseInt(observed.body()) > 0, "No temporary file was written in " + uploadsFolder);
+
+		assertEquals(200, upload(csrf.name(), csrf.token(), null, null, SMALL_FILE).statusCode());
+		assertEquals(403, upload(null, null, null, null, SMALL_FILE).statusCode());
+		assertEquals(413, upload(csrf.name(), csrf.token(), null, null, LARGE_FILE).statusCode());
+		assertEquals(413, upload(null, null, csrf.header(), csrf.token(), LARGE_FILE).statusCode());
 		long deadline = System.nanoTime() + Duration.ofSeconds(5).toNanos();
 		String[] leftovers = uploadsFolder.list();
 		while (leftovers != null && leftovers.length > 0 && System.nanoTime() < deadline) {
@@ -270,6 +280,13 @@ class OversizedMultipartUploadIntegrationTest {
 	 * @param fileContent content of the uploaded file
 	 */
 	private HttpResponse<String> upload(String fieldName, String fieldValue, String headerName, String headerValue, byte[] fileContent) throws Exception {
+		return upload(fieldName, fieldValue, headerName, headerValue, fileContent, SUBMIT_PATH);
+	}
+
+	/**
+	 * Posts a multipart upload to the given path
+	 */
+	private HttpResponse<String> upload(String fieldName, String fieldValue, String headerName, String headerValue, byte[] fileContent, String path) throws Exception {
 		String boundary = "----YadaBoundary" + UUID.randomUUID().toString().replace("-", "");
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		if (fieldName != null) {
@@ -277,7 +294,7 @@ class OversizedMultipartUploadIntegrationTest {
 		}
 		writeFilePart(outputStream, boundary, "upfile", "upload.txt", fileContent);
 		outputStream.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
-		HttpRequest.Builder builder = HttpRequest.newBuilder(serverContext.server().resolve(SUBMIT_PATH))
+		HttpRequest.Builder builder = HttpRequest.newBuilder(serverContext.server().resolve(path))
 			.header("Content-Type", "multipart/form-data; boundary=" + boundary)
 			.POST(HttpRequest.BodyPublishers.ofByteArray(outputStream.toByteArray()));
 		if (headerName != null) {

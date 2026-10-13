@@ -673,7 +673,14 @@ public class YadaWebUtil {
 	private static final Pattern ENCODED_SEPARATOR = Pattern.compile("%(2f|5c)", Pattern.CASE_INSENSITIVE);
 	private static final Pattern PERCENT_ESCAPE = Pattern.compile("%[0-9A-Fa-f]{2}");
 
-	private boolean isSafeLocalRedirect(String candidate) {
+	/**
+	 * Tells if a url is an absolute local path that can't reach another origin, with the same rules as
+	 * {@link #safeLocalRedirect(String)}. Use it to decide whether a url may receive data that must stay on the site,
+	 * like a CSRF token.
+	 * @param candidate the url to check, can be null
+	 * @return true when {@link #safeLocalRedirect(String)} would return the candidate unchanged
+	 */
+	public boolean isSafeLocalRedirect(String candidate) {
 		if (candidate==null || !hasOnlySafeRedirectCharacters(candidate)) {
 			return false;
 		}

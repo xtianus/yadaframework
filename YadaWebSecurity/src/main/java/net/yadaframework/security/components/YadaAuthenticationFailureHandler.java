@@ -104,7 +104,7 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
 		try {
 			if (exception instanceof TooManyFailedAttemptsException || exception instanceof LockedException) {
 				// Must come before UsernameNotFoundException, which TooManyFailedAttemptsException extends
-				YadaUserCredentials yadaUserCredentials = yadaUserCredentialsDao.findFirstByUsername(username.trim().toLowerCase());
+				YadaUserCredentials yadaUserCredentials = username==null ? null : yadaUserCredentialsDao.findFirstByUsername(username.trim().toLowerCase());
 				if (yadaUserCredentials!=null) {
 					int lockMinutes = yadaConfiguration.getPasswordFailedAttemptsLockoutMinutes();
 					Date lastFailedTimestamp = yadaUserCredentials.getLastFailedAttempt();

@@ -26,5 +26,9 @@
 	<form yada:actionUpload="@{https://elsewhere.example/upload(x=3)}" method="post" enctype="multipart/form-data" data-testid="externalForm">
 		<input type="file" name="upfile">
 	</form>
+	<!--/* A backslash after the first slash is read by browsers as "//elsewhere.example" */-->
+	<form yada:actionUpload="${'/\elsewhere.example/upload'}" method="post" enctype="multipart/form-data" data-testid="backslashForm">
+		<input type="file" name="upfile">
+	</form>
 </body>
 </html>

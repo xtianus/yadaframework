@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +30,7 @@ import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.security.TooManyFailedAttemptsException;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
 import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
+import net.yadaframework.tests.support.LogCapture;
 
 /**
  * A failed login looks the same whether the username exists or not, also when a custom authentication provider
@@ -137,5 +140,18 @@ class YadaAuthenticationFailureHandlerTest {
 	void unknownUserCountsAsAFailedAttemptLikeAWrongPassword() throws Exception {
 		fail("someone@yts.test", false, new UsernameNotFoundException("not found"), new MockHttpServletResponse());
 		verify(yadaUserCredentialsDao).incrementFailedAttempts("someone@yts.test");
+	}
+
+	@Test
+	void lockoutWithoutUsernameIsHandledWithoutErrors() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/loginPost");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		try (LogCapture logs = LogCapture.start()) {
+			handler.onAuthenticationFailure(request, response, new LockedException("User account is locked"));
+			assertFalse(logs.text().contains("Failed to handle authentication failure"), logs.text());
+		}
+		verify(yadaUserCredentialsDao, never()).findFirstByUsername(any());
+		assertEquals("loginErrorFlag", request.getAttribute(YadaAuthenticationFailureHandler.REQUESTATTR_LOGINERRORFLAG));
+		assertEquals("/login", response.getForwardedUrl());
 	}
 }

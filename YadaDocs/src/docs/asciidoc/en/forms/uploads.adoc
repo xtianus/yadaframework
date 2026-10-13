@@ -71,7 +71,7 @@ The `MultipartFilter` parses the multipart body before Spring Security, so the C
 field. It is never sent in the action url, where it would end up in access logs, browser history and `Referer` headers:
 
 * a form with `th:action` gets the hidden `_csrf` field from Spring Security;
-* `yada:actionUpload="@{/someUrl}"` sets the action and adds the hidden field, but only for a url of the same origin (no scheme and host);
+* `yada:actionUpload="@{/someUrl}"` sets the action and adds the hidden field, but only for an absolute local path such as `@{/someUrl}` (checked with `YadaWebUtil.isSafeLocalRedirect`, so `//host`, `/\host`, encoded separators and control characters get no token; relative paths and absolute urls get none either);
 * ajax uploads made by `yada.ajax.js` send the token in the header named by the `_csrf_header` meta tag, as all ajax POSTs do;
 * a `_csrf` parameter written in the action query of a multipart form is removed when the page is rendered.
 

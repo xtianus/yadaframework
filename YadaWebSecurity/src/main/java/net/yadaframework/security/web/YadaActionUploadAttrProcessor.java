@@ -4,7 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.web.util.UriComponentsBuilder;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.engine.AttributeName;
@@ -14,19 +13,22 @@ import org.thymeleaf.model.IModelFactory;
 import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.element.AbstractAttributeTagProcessor;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
+import org.thymeleaf.spring6.context.SpringContextUtils;
 import org.thymeleaf.standard.expression.IStandardExpression;
 import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.unbescape.html.HtmlEscape;
 
+import net.yadaframework.components.YadaWebUtil;
+
 // TODO this used to be included in the "yada" dialect before splitting the YadaWebSecurity project.
 // Now it's not used anymore, waiting for a new "yadasec" dialect
 
 /**
  * Implements yada:actionUpload, which sets the action of a multipart form and, when CSRF is enabled, adds the CSRF token
- * as a hidden field at the start of the form. The token is added only when the action is a url of the same origin (no
- * scheme and host), and any token found in the action query is removed: tokens are never sent in a url.
+ * as a hidden field at the start of the form. The token is added only when the action is an absolute local path that can't
+ * reach another origin (see isSameOrigin()), and any token found in the action query is removed: tokens are never sent in a url.
  * An oversized plain form can't be CSRF-validated because its body is not parsed: YadaUploadLimitAccessDeniedHandler
  * answers 413 without reaching the controller. Ajax uploads send the token in a header and reach the controller,
  * where YadaCommonsMultipartResolver.limitExceeded() is true.
@@ -81,7 +83,7 @@ public class YadaActionUploadAttrProcessor extends AbstractAttributeTagProcessor
     	if (token!=null) {
     		// The token is never put in the url: it is sent in a hidden field, and only to the same origin
     		action = YadaMultipartFormTagProcessor.removeQueryParameter(origurl, token.getParameterName());
-    		if (isSameOrigin(action)) {
+    		if (isSameOrigin(action, SpringContextUtils.getApplicationContext(context).getBean(YadaWebUtil.class))) {
     			IModelFactory modelFactory = context.getModelFactory();
     			Map<String, String> attributes = new LinkedHashMap<>();
     			attributes.put("type", "hidden");
@@ -97,13 +99,13 @@ public class YadaActionUploadAttrProcessor extends AbstractAttributeTagProcessor
     }
 
     /**
-     * @return true for a url without scheme and host, that is sent to the origin of the page
+     * Only an absolute local path accepted by {@link YadaWebUtil#isSafeLocalRedirect(String)} gets the token: browsers
+     * read variants like "/\host" or "/\t/host" as "//host", so a simple prefix check is not enough.
+     * Relative paths and absolute urls, even of the same host, get no token.
+     * @return true when the url can only reach the origin of the page
      */
-    static boolean isSameOrigin(String url) {
-    	if (url.startsWith("//") || url.startsWith("\\")) {
-    		return false;
-    	}
-    	return UriComponentsBuilder.fromUriString(url).build().getScheme()==null;
+    static boolean isSameOrigin(String url, YadaWebUtil yadaWebUtil) {
+    	return yadaWebUtil.isSafeLocalRedirect(url);
     }
 
 }

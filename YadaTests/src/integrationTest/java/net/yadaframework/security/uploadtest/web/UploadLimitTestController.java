@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.YadaCommonsMultipartResolver;
 
 import jakarta.servlet.http.HttpServletRequest;
+import net.yadaframework.core.YadaConfiguration;
 
 /**
  * Endpoints used by the upload limit integration tests.
@@ -20,6 +21,11 @@ import jakarta.servlet.http.HttpServletRequest;
 public class UploadLimitTestController {
 	/** Number of uploads accepted by the application: the observable "mutation" of the tests */
 	private final AtomicInteger acceptedUploads = new AtomicInteger();
+	private final YadaConfiguration config;
+
+	public UploadLimitTestController(YadaConfiguration config) {
+		this.config = config;
+	}
 
 	/**
 	 * Renders the upload form page.
@@ -44,6 +50,19 @@ public class UploadLimitTestController {
 		}
 		acceptedUploads.incrementAndGet();
 		return ResponseEntity.ok("UPLOAD_OK " + (upfile == null ? 0 : upfile.getSize()));
+	}
+
+	/**
+	 * Receives an upload and reports how many multipart temporary files exist in the uploads folder while the request
+	 * is being handled, so that a test can tell that the multipart body was stored on disk
+	 * @param upfile uploaded file
+	 * @return the number of files in the uploads folder
+	 */
+	@PostMapping("/test/upload/submitObservingTempFiles")
+	@ResponseBody
+	public String submitObservingTempFiles(MultipartFile upfile) {
+		String[] files = config.getUploadsFolder().list();
+		return String.valueOf(files == null ? 0 : files.length);
 	}
 
 	/**
