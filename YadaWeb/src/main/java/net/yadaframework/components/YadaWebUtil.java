@@ -1507,30 +1507,28 @@ public class YadaWebUtil {
 
 	/**
 	 * Returns the browser's remote ip address.
-	 * If the connection uses a proxy that sets the "X-Forwarded-For" header, the result is taken from that header.
+	 * The result is the address of the TCP peer ({@code request.getRemoteAddr()}). The "X-Forwarded-For" header is believed only when
+	 * the peer is one of the proxies listed in &lt;security>&lt;trustedProxies>&lt;proxy> (empty by default), and then the client is the
+	 * first address from the right-hand end of the chain that is not a trusted proxy. The header is never trusted otherwise.
+	 * When the application runs behind a proxy it is better to configure Tomcat's RemoteIpValve so that
+	 * {@code getRemoteAddr()} is already the client address.
 	 * @param request
-	 * @return The client IP address, ignoring any proxy address when possible
+	 * @return The client IP address, ignoring any trusted proxy address when possible
+	 * @see YadaClientAddress
 	 */
 	public String getClientAddress(HttpServletRequest request) {
-		String forwardedFor = request.getHeader("X-Forwarded-For"); // X-Forwarded-For: 203.0.113.195, 70.41.3.18, 150.172.238.178
-		if (!StringUtils.isBlank(forwardedFor)) {
-			return forwardedFor.split(",", 2)[0].trim();
-		}
-		return request.getRemoteAddr();
+		return YadaClientAddress.resolve(request.getRemoteAddr(), Collections.list(request.getHeaders("X-Forwarded-For")), config.getTrustedProxies());
 	}
 
-	@Deprecated // Quite useless because of the format of the result
+	/**
+	 * Returns the same address as {@link #getClientAddress(HttpServletRequest)}, or "?" when it is not available.
+	 * A forwarded header is never part of the result.
+	 * @deprecated use {@link #getClientAddress(HttpServletRequest)}
+	 */
+	@Deprecated
 	public String getClientIp(HttpServletRequest request) {
-		String remoteAddr = request.getRemoteAddr();
-		String forwardedFor = request.getHeader("X-Forwarded-For");
-		String remoteIp = "?";
-		if (!StringUtils.isBlank(remoteAddr)) {
-			remoteIp = remoteAddr;
-		}
-		if (!StringUtils.isBlank(forwardedFor)) {
-			remoteIp = "[for " + forwardedFor + "]";
-		}
-		return remoteIp;
+		String clientAddress = getClientAddress(request);
+		return StringUtils.isBlank(clientAddress)?"?":clientAddress;
 	}
 
 	/**
