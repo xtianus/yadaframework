@@ -11,3 +11,4 @@
 | `aiknowledge/workspace_build_notes.md` | module linkage, Eclipse/Gradle workspace build behavior, the YadaExamples test setup, and why some libraries are pinned to older versions |
 | `aiknowledge/yada_tests_notes.md` | the YadaTests project: suites, test application, embedded database and Tomcat harness, fixtures and framework quirks found by the tests |
 | `aiknowledge/bootstrap_views_and_mail_notes.md` | where the Bootstrap version of a view lives, how to resolve a versioned view name, Mailpit capture in development, and mail preview templates |
+| `aiknowledge/security_tokens_notes.md` | the bearer-token contract of autologin, registration, password recovery and email change links: digest storage, issue-time links, purpose/expiry checks, atomic consumption, autologin confirmation, log redaction and the V002 migrations |

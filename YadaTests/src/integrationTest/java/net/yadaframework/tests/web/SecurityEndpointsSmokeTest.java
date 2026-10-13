@@ -195,7 +195,10 @@ class SecurityEndpointsSmokeTest {
 	void autologinWithAnIssuedLink() throws Exception {
 		String link = testDataService.issueAutologinLink(TestDataService.USER_EMAIL, "/test/user/area");
 		HttpClient client = newClient();
-		HttpResponse<String> autologin = get(client, pathAndQuery(link));
+		// The link opens a confirmation page, whose form logs in
+		Map<String, String> fields = formFields(client, pathAndQuery(link), "autologinConfirmForm");
+		assertNull(loggedAs(client));
+		HttpResponse<String> autologin = post(client, URI.create(link).getRawPath(), fields);
 		assertEquals(302, autologin.statusCode(), autologin.body());
 		assertEquals("/test/user/area", URI.create(location(autologin)).getPath());
 		assertEquals("Logged in as " + TestDataService.USER_EMAIL, loggedAs(client));

@@ -917,11 +917,34 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
-	 *
-	 * @return
+	 * @return the lifetime of new autologin links in hours, from &lt;security>&lt;autologinExpirationHours>, default 10
 	 */
 	public int getAutologinExpirationHours() {
 		return configuration.getInt("config/security/autologinExpirationHours", 10);
+	}
+
+	/**
+	 * @return the lifetime of new password recovery links in minutes, from
+	 * 	&lt;security>&lt;passwordReset>&lt;expirationMinutes>, default 30
+	 */
+	public int getPasswordResetExpirationMinutes() {
+		return configuration.getInt("config/security/passwordReset/expirationMinutes", 30);
+	}
+
+	/**
+	 * @return the lifetime of new email change confirmation links in minutes, from
+	 * 	&lt;security>&lt;emailChange>&lt;expirationMinutes>, default 30
+	 */
+	public int getEmailChangeExpirationMinutes() {
+		return configuration.getInt("config/security/emailChange/expirationMinutes", 30);
+	}
+
+	/**
+	 * @return the lifetime of new registration confirmation links in hours, from
+	 * 	&lt;security>&lt;registration>&lt;expirationHours>, default 24
+	 */
+	public int getRegistrationExpirationHours() {
+		return configuration.getInt("config/security/registration/expirationHours", 24);
 	}
 
 	/**

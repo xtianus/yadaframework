@@ -17,6 +17,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import net.yadaframework.components.YadaLogRedaction;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaWebConfig;
@@ -75,7 +76,7 @@ public class AuditFilter extends OncePerRequestFilter implements Filter {
 				filterChain.doFilter(request, response);
 			} catch (Exception e) {
 				// Log the file anyway in case of exception
-				String requestUri = request.getRequestURI();
+				String requestUri = YadaLogRedaction.redactTokens(request.getRequestURI());
 				log.error("Error loading {}: {}", requestUri, e.getMessage());
 				throw e;
 			}
@@ -96,7 +97,8 @@ public class AuditFilter extends OncePerRequestFilter implements Filter {
 			remoteIp = "[for " + forwardedFor + "]";
 		}
 		//
-		String requestUri = request.getRequestURI();
+		// Token links carry secrets in the path: the logged and MDC value is redacted
+		String requestUri = YadaLogRedaction.redactTokens(request.getRequestURI());
 		HttpSession session = request.getSession(false);
 		SecurityContext securityContext = null;
 		if (session!=null) {
@@ -162,8 +164,8 @@ public class AuditFilter extends OncePerRequestFilter implements Filter {
 
 	// Stampo i parametri di request (get e post)
 	protected void beforeRequest(HttpServletRequest request) {
-		String requestUri = request.getRequestURI();
-		String queryString = request.getQueryString();
+		String requestUri = YadaLogRedaction.redactTokens(request.getRequestURI());
+		String queryString = YadaLogRedaction.redactQueryString(request.getQueryString());
 		boolean maliciousString = (requestUri!=null && requestUri.contains(";")) || (queryString!=null && queryString.contains(";"));
 		if (log.isInfoEnabled() || maliciousString) {
 			try {
@@ -193,7 +195,7 @@ public class AuditFilter extends OncePerRequestFilter implements Filter {
 								}
 								paramString.append(paramValue[i]);
 							}
-							if ("password".equals(paramName) || "confirmPassword".equals(paramName)) {
+							if ("password".equals(paramName) || "confirmPassword".equals(paramName) || "token".equals(paramName)) {
 								paramString=new StringBuffer("[value hidden from log]");
 							}
 							log.debug("** {} = {} **", paramName, paramString);

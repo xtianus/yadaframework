@@ -1,6 +1,9 @@
 package net.yadaframework.security.web;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -11,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +29,9 @@ import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaRegistrationType;
 import net.yadaframework.exceptions.YadaInternalException;
+import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.security.components.YadaSecurityEmailService;
+import net.yadaframework.security.components.YadaSecurityTokenCodec.ParsedSecurityToken;
 import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.security.components.YadaTokenHandler;
 import net.yadaframework.security.components.YadaUserDetailsService;
@@ -37,9 +43,22 @@ import net.yadaframework.security.persistence.repository.YadaUserCredentialsDao;
 import net.yadaframework.security.persistence.repository.YadaUserProfileDao;
 import net.yadaframework.web.form.YadaFormPasswordChange;
 
+/**
+ * Registration, password recovery and email change. Every flow is confirmed by a single-use link with an expiring bearer
+ * token (see YadaRegistrationRequestDao): links are checked for their own purpose and consumed in the same transaction
+ * that performs the change.
+ * <p>
+ * Registration requests must never be bound from a form as a whole entity: the application controller restricts the
+ * binding with {@link #setRegistrationAllowedFields(WebDataBinder, String...)} in an {@code @InitBinder} method, and
+ * {@link #handleRegistrationRequest(YadaRegistrationRequest, BindingResult, Model, HttpServletRequest, Locale)} rejects
+ * requests that already have an identity.
+ */
 @Controller
 public class YadaRegistrationController {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
+
+	/** The fields of YadaRegistrationRequest that a registration form may set */
+	public static final String[] REGISTRATION_FORM_FIELDS = { "email", "password", "confirmPassword" };
 
 	@Autowired private YadaUserCredentialsDao yadaUserCredentialsDao;
 	@Autowired private YadaUserProfileDao yadaUserProfileDao;
@@ -101,13 +120,35 @@ public class YadaRegistrationController {
 
 	}
 
+	/**
+	 * Restricts the binding of a registration form to the {@link #REGISTRATION_FORM_FIELDS} and the given fields of a
+	 * subclass, so that the id, the token, the type, the user or the timestamps of a request can't be set from the
+	 * request parameters. Call it from an {@code @InitBinder} method of the application controller, e.g.
+	 * <pre>
+	 * &#64;InitBinder("yexRegistrationRequest")
+	 * void registrationBinder(WebDataBinder binder) {
+	 * 	YadaRegistrationController.setRegistrationAllowedFields(binder, "name", "surname");
+	 * }
+	 * </pre>
+	 * Parameters of other fields are ignored.
+	 * @param binder the binder of the registration request model attribute
+	 * @param subclassFields the extra fields that the form may set, e.g. "name"
+	 */
+	public static void setRegistrationAllowedFields(WebDataBinder binder, String... subclassFields) {
+		List<String> allowed = new ArrayList<>(Arrays.asList(REGISTRATION_FORM_FIELDS));
+		allowed.addAll(Arrays.asList(subclassFields));
+		binder.setAllowedFields(allowed.toArray(new String[0]));
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////// Registration helpers                                                                         /////
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * To be called when the link in the registration confirmation email has been clicked.
-	 * It creates a YadaUserCredential instance with basic YadaUserProfile values which should be refined and saved by the caller
+	 * It creates a YadaUserCredential instance with basic YadaUserProfile values which should be refined and saved by the caller.
+	 * The link must be a valid, unexpired registration link; it is consumed in the transaction that creates the user, so
+	 * it works once.
 	 * @param token
 	 * @param userRoles an array of configured roles, like <pre>new String[]{"USER"}</pre>. 
 	 * The role name must be exactly as configured in &lt;security>&lt;roles>&lt;role>&lt;key>
@@ -123,20 +164,17 @@ public class YadaRegistrationController {
 		}
 
 		YadaRegistrationOutcome<T, R> result = new YadaRegistrationOutcome<>();
-		long[] parts = yadaTokenHandler.parseLink(token);
+		ParsedSecurityToken parsedToken = yadaTokenHandler.parseLink(token);
+		if (parsedToken==null) {
+			result.registrationStatus = YadaRegistrationStatus.REQUEST_INVALID;
+			log.warn("Invalid registration url");
+			return result;
+		}
 		try {
-			if (parts!=null) {
-				List<R> registrationRequests = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1], registrationRequestClass);
-				if (registrationRequests.isEmpty()) {
-					log.warn("registrationRequests.isEmpty()");
-					result.registrationStatus = YadaRegistrationStatus.LINK_EXPIRED;
-					return result;
-				}
-				R registrationRequest = registrationRequests.get(0);
+			Optional<YadaRegistrationOutcome<T, R>> consumed = yadaRegistrationRequestDao.consume(parsedToken, YadaRegistrationType.REGISTRATION, registrationRequestClass, registrationRequest -> {
 				String email = registrationRequest.getEmail().toLowerCase(Locale.ROOT);
 				// String destinationUrl = registrationRequest.getDestinationUrl(); // This was a security issue
 				result.email = email;
-				// result.destinationUrl = destinationUrl;
 				result.yadaRegistrationRequest = registrationRequest; // This can be a subclass with extra data
 				YadaUserCredentials existing = yadaUserCredentialsDao.findFirstByUsername(email);
 				if (existing!=null) {
@@ -145,22 +183,24 @@ public class YadaRegistrationController {
 					return result;
 				}
 				// Create new user
-				T userProfile = createNewUser(registrationRequest.getEmail(), registrationRequest.getPassword(), userRoles, locale, userProfileClass);
-				result.userProfile = userProfile;
-				//
-				yadaRegistrationRequestDao.delete(registrationRequest);
-				yadaUserDetailsService.authenticateAs(userProfile.getUserCredentials());
-				//
-				log.info("Registration of '{}' successful", email);
+				result.userProfile = createNewUser(registrationRequest.getEmail(), registrationRequest.getPassword(), userRoles, locale, userProfileClass);
 				result.registrationStatus = YadaRegistrationStatus.OK;
 				return result;
-			} else {
-				result.registrationStatus = YadaRegistrationStatus.REQUEST_INVALID;
-				log.error("Invalid registration url");
+			});
+			if (consumed.isEmpty()) {
+				log.warn("Registration request {} not found, expired or of another type", parsedToken.id());
+				result.registrationStatus = YadaRegistrationStatus.LINK_EXPIRED;
+				return result;
 			}
+			if (result.registrationStatus==YadaRegistrationStatus.OK) {
+				// Authentication after the commit
+				yadaUserDetailsService.authenticateAs(result.userProfile.getUserCredentials());
+				log.info("Registration of '{}' successful", result.email);
+			}
+			return result;
 		} catch (Exception e) {
 			result.registrationStatus = YadaRegistrationStatus.ERROR;
-			log.error("Registration of token {} failed", token, e);
+			log.error("Registration with request {} failed", parsedToken.id(), e);
 		}
 		return result;
 	}
@@ -199,6 +239,10 @@ public class YadaRegistrationController {
 	 * @return true if the user has been registered, false otherwise
 	 */
 	public boolean handleRegistrationRequest(YadaRegistrationRequest yadaRegistrationRequest, BindingResult bindingResult, Model model, HttpServletRequest request, Locale locale) {
+		// A bound id or user would let the form overwrite an existing request or attach it to an account
+		if (yadaRegistrationRequest.getId()!=null || yadaRegistrationRequest.getYadaUserCredentials()!=null) {
+			throw new YadaInvalidUsageException("A registration request from a form must be new: restrict the binding with setRegistrationAllowedFields()");
+		}
 		//
 		// Validation
 		//
@@ -232,10 +276,10 @@ public class YadaRegistrationController {
 		yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.REGISTRATION);
 		// Cleanup of old requests
 		yadaSecurityUtil.registrationRequestCleanup(yadaRegistrationRequest);
-		yadaRegistrationRequest = yadaRegistrationRequestDao.save(yadaRegistrationRequest); // To get id and token
+		yadaRegistrationRequest = yadaRegistrationRequestDao.issue(yadaRegistrationRequest); // To get id and token
 		boolean emailSent = yadaSecurityEmailService.sendRegistrationConfirmation(yadaRegistrationRequest, null, request, locale);
 		if (!emailSent) {
-			log.debug("Registration mail not sent to {}", email);
+			log.debug("Registration mail not sent to {} (request {})", email, yadaRegistrationRequest.getId());
 			if (!yadaConfiguration.isDevelopmentEnvironment()) {
 				yadaRegistrationRequestDao.delete(yadaRegistrationRequest);
 			} else {
@@ -289,28 +333,26 @@ public class YadaRegistrationController {
 	}
 
 	/** To be called in the controller that handles the password recovery link in the email.
-	 * It creates these model attributes: username, token, dialogType=passwordRecovery
+	 * It creates these model attributes: username, token, dialogType=passwordRecovery.
+	 * The link is checked like the final password change does (purpose and expiration) but is not used.
 	 * @return false for an invalid request (link expired), true if valid
 	 */
 	public boolean passwordResetForm(String token, Model model, RedirectAttributes redirectAttributes) {
-		long[] parts = yadaTokenHandler.parseLink(token);
-		if (parts!=null) {
-			List<YadaRegistrationRequest> registrationRequests = yadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1], YadaRegistrationRequest.class);
-			if (registrationRequests.isEmpty()) {
-				return false;
-			}
-			YadaRegistrationRequest registrationRequest = registrationRequests.get(0);
-			model.addAttribute("username", registrationRequest.getEmail());
-			model.addAttribute("token", token);
-			model.addAttribute("dialogType", "passwordRecovery");
-			return true;
+		ParsedSecurityToken parsedToken = yadaTokenHandler.parseLink(token);
+		YadaRegistrationRequest registrationRequest = yadaRegistrationRequestDao.findValid(parsedToken, YadaRegistrationType.PASSWORD_RECOVERY, YadaRegistrationRequest.class);
+		if (registrationRequest==null) {
+			return false;
 		}
-		return false;
+		model.addAttribute("username", registrationRequest.getEmail());
+		model.addAttribute("token", token);
+		model.addAttribute("dialogType", "passwordRecovery");
+		return true;
 	}
 
 	/**
-	 * Handles the password reset form
-	 * @param yadaRegistrationRequest will contain the email address that requires a password reset
+	 * Handles the password reset form: when a user with the submitted email exists, a new password recovery request
+	 * replaces the previous ones and its link is emailed. Only the email is read from the request.
+	 * @param yadaPasswordResetForm will contain the email address that requires a password reset
 	 * @param bindingResult
 	 * @param locale
 	 * @param redirectAttributes
@@ -319,32 +361,29 @@ public class YadaRegistrationController {
 	 * @return
 	 */
 	@RequestMapping("/yadaPasswordResetPost")
-	public String yadaPasswordResetPost(YadaRegistrationRequest yadaRegistrationRequest, BindingResult bindingResult, Locale locale, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) {
+	public String yadaPasswordResetPost(YadaPasswordResetForm yadaPasswordResetForm, BindingResult bindingResult, Locale locale, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) {
 		boolean emailSent = false;
 		String targetView = yadaConfiguration.getPasswordResetSent(locale);
 		// TODO view-related code should be moved to the application controller
-		if (yadaRegistrationRequest==null || yadaRegistrationRequest.getEmail()==null) {
+		String email = yadaPasswordResetForm==null ? null : StringUtils.trimToNull(yadaPasswordResetForm.getEmail());
+		if (email==null) {
 			return "redirect:/passwordReset";
 		}
+		email = email.toLowerCase(Locale.ROOT);
 		// Check if a user actually exists
-		String email = yadaRegistrationRequest.getEmail();
-		// Sterilize the incoming data: never use yadaRegistrationRequest for anything because it could contain forged data other than email
-		// TODO much cleaner if I just receive an email string instead of the full YadaRegistrationRequest in the parameters
-		yadaRegistrationRequest = null;
-		YadaUserCredentials existing = yadaUserCredentialsDao.findFirstByUsername(StringUtils.trimToEmpty(email).toLowerCase(Locale.ROOT));
+		YadaUserCredentials existing = yadaUserCredentialsDao.findFirstByUsername(email);
 		if (existing!=null) {
-			// Sanitize the yadaRegistrationRequest preventing malicious injections of id  and other values
-			YadaRegistrationRequest cleanYadaRegistrationRequest = new YadaRegistrationRequest();
-			cleanYadaRegistrationRequest.setEmail(email);
-			cleanYadaRegistrationRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
+			YadaRegistrationRequest recoveryRequest = new YadaRegistrationRequest();
+			recoveryRequest.setEmail(email);
+			recoveryRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
 			// Pulisco le vecchie richieste
-			yadaSecurityUtil.registrationRequestCleanup(cleanYadaRegistrationRequest);
-			cleanYadaRegistrationRequest.setPassword("fakefake"); // La metto solo per evitare un errore di validazione al save
-			cleanYadaRegistrationRequest = yadaRegistrationRequestDao.save(cleanYadaRegistrationRequest); // Save here to get id and token
-			emailSent = yadaSecurityEmailService.sendPasswordRecovery(cleanYadaRegistrationRequest, request, locale);
+			yadaSecurityUtil.registrationRequestCleanup(recoveryRequest);
+			recoveryRequest.setPassword("fakefake"); // La metto solo per evitare un errore di validazione al save
+			recoveryRequest = yadaRegistrationRequestDao.issue(recoveryRequest); // Save here to get id and token
+			emailSent = yadaSecurityEmailService.sendPasswordRecovery(recoveryRequest, request, locale);
 			if (!emailSent) {
-				yadaRegistrationRequestDao.delete(cleanYadaRegistrationRequest);
-				log.debug("Sending email to {} failed while resetting password", cleanYadaRegistrationRequest.getEmail());
+				yadaRegistrationRequestDao.delete(recoveryRequest);
+				log.debug("Sending email to {} failed while resetting password", recoveryRequest.getEmail());
 				yadaNotify.titleKey(redirectAttributes, locale, "yada.email.passwordrecover.title")
 				.ok().messageKey("yada.email.send.failed").add();				
 			}
@@ -352,52 +391,74 @@ public class YadaRegistrationController {
 		if (emailSent || existing==null) {
 			yadaNotify.titleKey(redirectAttributes, locale, "yada.email.passwordrecover.title")
 			.ok().messageKey("yada.email.passwordrecover.message")
-			// .messageKey("yada.email.passwordrecover.message", yadaRegistrationRequest.getEmail())
 			.add();
 		}
 
         return yadaWebUtil.redirectString(targetView, locale);
 	}
+
+	/**
+	 * Sends the confirmation email of an email (username) change. The new address is used when the user opens the
+	 * link, see {@link #changeUsername(String)}. A new request replaces the previous ones of the same user.
+	 * @param yadaUserCredentials the user that changes the email
+	 * @param newEmail the new email
+	 * @param request
+	 * @param locale
+	 * @return true when the email has been sent
+	 */
+	public boolean handleEmailChangeRequest(YadaUserCredentials yadaUserCredentials, String newEmail, HttpServletRequest request, Locale locale) {
+		YadaRegistrationRequest changeRequest = new YadaRegistrationRequest();
+		changeRequest.setEmail(StringUtils.trimToEmpty(newEmail).toLowerCase(Locale.ROOT));
+		changeRequest.setRegistrationType(YadaRegistrationType.EMAIL_CHANGE);
+		changeRequest.setYadaUserCredentials(yadaUserCredentials);
+		changeRequest.setPassword("unused"); // Not null
+		for (YadaRegistrationRequest previous : yadaRegistrationRequestDao.findByUserAndRegistrationType(yadaUserCredentials, YadaRegistrationType.EMAIL_CHANGE)) {
+			yadaRegistrationRequestDao.delete(previous);
+		}
+		changeRequest = yadaRegistrationRequestDao.issue(changeRequest);
+		boolean emailSent = yadaSecurityEmailService.sendEmailChangeConfirmation(changeRequest, request, locale);
+		if (!emailSent) {
+			yadaRegistrationRequestDao.delete(changeRequest);
+		}
+		return emailSent;
+	}
 	
 	/**
-	 * Change a username after the user clicked on the confirmation email link
-	 * @param fromUsername the old username (email)
+	 * Change a username after the user clicked on the confirmation email link.
+	 * The link must be a valid, unexpired email change link; it is consumed in the transaction that changes the username.
 	 * @param token
-	 * @param locale
 	 * @return
 	 */
 	public YadaChangeUsernameOutcome changeUsername(String token) {
 		YadaChangeUsernameOutcome result = new YadaChangeUsernameOutcome();
-		long[] parts = yadaTokenHandler.parseLink(token);
+		ParsedSecurityToken parsedToken = yadaTokenHandler.parseLink(token);
+		if (parsedToken==null) {
+			return result.setCode(YadaChangeUsernameResult.REQUEST_INVALID);
+		}
 		try {
-			if (parts != null) {
-				List<YadaRegistrationRequest> registrationRequests = yadaRegistrationRequestDao
-						.findByIdAndTokenOrderByTimestampDesc(parts[0], parts[1], YadaRegistrationRequest.class);
-				if (registrationRequests.isEmpty()) {
-					return result.setCode(YadaChangeUsernameResult.LINK_EXPIRED);
-				}
-				YadaRegistrationRequest registrationRequest = registrationRequests.get(0);
+			Optional<YadaChangeUsernameOutcome> consumed = yadaRegistrationRequestDao.consume(parsedToken, YadaRegistrationType.EMAIL_CHANGE, YadaRegistrationRequest.class, registrationRequest -> {
 				String newUsername = registrationRequest.getEmail();
 				result.newUsername = newUsername;
 				// Check that in the meantime no other user with that email has been registered
 				YadaUserCredentials existing = yadaUserCredentialsDao.findFirstByUsername(newUsername.toLowerCase(Locale.ROOT));
 				if (existing!=null) {
-					yadaRegistrationRequestDao.delete(registrationRequest);
 					return result.setCode(YadaChangeUsernameResult.USER_EXISTS);
 				}
-				String previousUsername = registrationRequest.getYadaUserCredentials().getUsername();
-				yadaRegistrationRequestDao.delete(registrationRequest);
-				boolean changed = yadaUserCredentialsDao.changeUsername(previousUsername, newUsername);
-				if (!changed) {
+				if (registrationRequest.getYadaUserCredentials()==null) {
 					return result.setCode(YadaChangeUsernameResult.ERROR);
 				}
-				return result.setCode(YadaChangeUsernameResult.OK);
-			} else {
-				return result.setCode(YadaChangeUsernameResult.REQUEST_INVALID);
+				String previousUsername = registrationRequest.getYadaUserCredentials().getUsername();
+				boolean changed = yadaUserCredentialsDao.changeUsername(previousUsername, newUsername);
+				return result.setCode(changed ? YadaChangeUsernameResult.OK : YadaChangeUsernameResult.ERROR);
+			});
+			if (consumed.isEmpty()) {
+				return result.setCode(YadaChangeUsernameResult.LINK_EXPIRED);
 			}
+			return result;
 		} catch (Exception e) {
 			log.debug("Can't change username", e);
 			return result.setCode(YadaChangeUsernameResult.ERROR);
 		}
 	}	
+
 }

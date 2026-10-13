@@ -6,7 +6,8 @@
 |---|---|
 | [YadaSecurityEmailService](yadaWebSecurity/YadaSecurityEmailService.md) | Builds security-specific emails such as registration, password reset, and email change confirmations. Use when authentication flows must send bearer-token links. |
 | [YadaSecurityUtil](yadaWebSecurity/YadaSecurityUtil.md) | Collects higher-level security helpers for access checks, password changes, login state, and controller error parameters. Use from security-aware services and controllers. |
-| [YadaTokenHandler](yadaWebSecurity/YadaTokenHandler.md) | Creates and parses opaque bearer-token links for autologin and registration requests. Expiry, purpose validation, and consumption depend on the calling flow; the link parameters are not cryptographically signed. |
+| [YadaSecurityTokenCodec](yadaWebSecurity/YadaSecurityTokenCodec.md) | Generates 256-bit token secrets, digests them with SHA-256 per purpose, and strictly parses `<id>-<secret>` links. Use for any new bearer-token link. |
+| [YadaTokenHandler](yadaWebSecurity/YadaTokenHandler.md) | Creates and parses opaque bearer-token links for autologin and registration requests; links can be built only at issue time and the autologin action must be a safe local path. The link parameters are not signed: expiry, purpose and single use are enforced by the DAOs. |
 
 ## `net.yadaframework.security.persistence.entity`
 
@@ -20,8 +21,8 @@
 
 | Class | Description |
 |---|---|
-| [YadaAutoLoginTokenDao](yadaWebSecurity/YadaAutoLoginTokenDao.md) | Handles persistence and query operations for auto login token. Use when services need auto login token-specific lookups or updates. |
-| [YadaRegistrationRequestDao](yadaWebSecurity/YadaRegistrationRequestDao.md) | Handles persistence and query operations for registration request. Use when services need registration request-specific lookups or updates. |
+| [YadaAutoLoginTokenDao](yadaWebSecurity/YadaAutoLoginTokenDao.md) | Issues, validates and atomically consumes single-use autologin tokens (digest only, mandatory expiration, enabled user). |
+| [YadaRegistrationRequestDao](yadaWebSecurity/YadaRegistrationRequestDao.md) | Issues registration, password recovery and email change requests with expiring token digests, and consumes them once per purpose under a row lock together with the change they authorize. |
 | [YadaSocialCredentialsDao](yadaWebSecurity/YadaSocialCredentialsDao.md) | Handles persistence and query operations for social credentials. Use when services need social credentials-specific lookups or updates. |
 | [YadaTicketDao](yadaWebSecurity/YadaTicketDao.md) | Handles persistence and query operations for ticket. Use when services need ticket-specific lookups or updates. |
 | [YadaTicketMessageDao](yadaWebSecurity/YadaTicketMessageDao.md) | Handles persistence and query operations for ticket message. Use when services need ticket message-specific lookups or updates. |
@@ -34,4 +35,4 @@
 | Class | Description |
 |---|---|
 | [YadaMultipartFormTagProcessor](yadaWebSecurity/YadaMultipartFormTagProcessor.md) | Removes a CSRF token written in the action query of multipart POST forms; the token travels in the hidden field or the Ajax header, never in a URL. Runs automatically in the Yada security dialect. |
-| [YadaRegistrationController](yadaWebSecurity/YadaRegistrationController.md) | Exposes registration, password reset, and username change endpoints. Reuse or subclass it when enabling the built-in registration flows. |
+| [YadaRegistrationController](yadaWebSecurity/YadaRegistrationController.md) | Exposes registration, password reset, and username change endpoints. Reuse or subclass it when enabling the built-in registration flows; restrict registration form binding with `setRegistrationAllowedFields`. |

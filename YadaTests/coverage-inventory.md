@@ -61,7 +61,12 @@ Relocated resources and fixtures:
 | `integrationTest` | `EmbeddedDatabaseLifecycleTest` | Fresh install, reopen, double stop, attach ownership, data-directory guard, failure after launch, failed Spring refresh, concurrent runs |
 | `integrationTest` | `EmbeddedDatabaseSourceSqlTest` | `<sourceSql>` seed: applied once, `.loaded` rename of the copy only, invalid and unreadable files |
 | `integrationTest` | `EmbeddedDatabaseWhitespacePathTest` | Rejection of folders with whitespace while MariaDB4j can't use them |
-| `integrationTest` | `TestApplicationSmokeTest` | V001 migration, rendering, CSRF, persisted fixtures, reset, schema after restart |
+| `integrationTest` | `TestApplicationSmokeTest` | Every migration (V001 first) ran as SQL, rendering, CSRF, persisted fixtures, reset, schema after restart |
+| `integrationTest` | `AutologinSecurityTest` | Autologin GET confirmation page without login or consumption, CSRF-protected single-use POST, foreign and cross-session POST rejection, unsafe actions redirected locally, other user's session preserved, expired/null/disabled/forged/digest/malformed tokens rejected, no raw secret stored |
+| `integrationTest` | `RegistrationTokenSecurityTest` | Forged fields on signup and reset, single-use and expiring registration/recovery/email change links, replacement of previous links, purpose separation, default lifetimes, no raw secret stored, concurrent password changes |
+| `integrationTest` | `SecurityTokenConsumptionTest` | Row-locked consumption: one of two concurrent transactions wins (registration and autologin), rollback keeps the token, purpose checks, reloaded tokens can't build links, issue/save refuse existing requests, autologin expiry and local actions |
+| `integrationTest` | `TokenSecretRedactionTest` | No token secret in application logs for successful, expired, unknown, malformed and repeated tokens and request cleanup |
+| `integrationTest` | `SecurityTokenMigrationRehearsalTest` | V001 to latest upgrade with legacy token rows: tokens deleted, accounts, roles and profiles kept, new columns |
 | `integrationTest` | `TestApplicationStartupFailureTest` | Missing and broken schema fail startup and release the database |
 | `integrationTest` | `YadaEmbeddedTomcatTestServerIntegrationTest` | Initializer allowlist, parent-first class sharing, failed start |
 | `integrationTest` | `ConfigurationIsolationTest` | Start-close-start across two configurations: static configuration, application context and reload threads |
@@ -69,8 +74,10 @@ Relocated resources and fixtures:
 | `integrationTest` | `DataTableSecurityIntegrationTest` | DataTables query policy over HTTP on `/yadaDataTableData` and a custom endpoint: tampered columns, order directions and indexes, search flags and extra attributes rejected before any SQL, no credential output, page access |
 | `test` | `YadaDataTableSecurityTest` | `YadaDataTableQueryPolicy` path validation, rejection before any query, HQL built only from policy paths, bound map keys, policy-only output |
 | `test` | `YadaAiRequestBuilderTest` | Claude and Nova request building: turns, tools, optional fields, parameter ranges |
+| `test` | `YadaSecurityTokenCodecTest`, `YadaLogRedactionTest` | Token format, digest, strict parsing and expiry rule; secret redaction of urls, query strings and email bodies |
 | `test` | `YadaConfigurationDialectTest` | Dialect chosen by `YadaJpaConfig`: none by default, `MariaDBDialect` for the embedded database, configured `<database><dialect>` first |
 | `e2eTest` | `AuthenticationE2eTest` | Login, failed login, logout, anonymous redirect, user and admin areas, CSRF acceptance and rejection |
+| `e2eTest` | `AutologinConfirmationE2eTest` | Autologin confirmation page: no automatic submit or login, explicit confirmation works once and keeps the fragment, another user's session preserved |
 | `e2eTest` | `AjaxE2eTest` | yada.ajax.js fragment replacement without reload, Ajax notification modal |
 | `e2eTest` | `FormE2eTest` | Bean Validation failure and success, notification after a normal request |
 | `e2eTest` | `UploadE2eTest` | Upload within and above `maxFileUploadSizeBytes` |
@@ -87,7 +94,7 @@ Discovered tests per suite: `test` 122 (110 relocated + 12 new), `integrationTes
 | Module | Central coverage | Backlog (scenario owner) |
 |---|---|---|
 | YadaWeb | Unit tests of utilities, configuration, DataTables query policy, saved properties, crop queue, page sort, user agent; embedded MariaDB lifecycle; persistence, persistent enums, YadaSql paging; resource handlers; Ajax, notifications, error page, YadaMoney | Datatables rendering in a browser (the scenario page doesn't render `<yada:datatable>`: its template needs a `userSession` bean), `YadaFileManager` and attachments (`UploadE2eTest`), jobs (`PersistenceIntegrationTest`), e-mail with a local fake (new mail scenario), `YadaLocalePathVariableFilter` with locale paths (new locale scenario) |
-| YadaWebSecurity | Login, logout, failure flags, role-based access, CSRF, multipart before security (upload tests), user creation through `YadaUserCredentialsDao` | Registration and password reset (new registration scenario with a local mail fake), autologin links, lockout after failed attempts (`AuthenticationE2eTest`), impersonation |
+| YadaWebSecurity | Login, logout, failure flags, role-based access, CSRF, multipart before security (upload tests), user creation through `YadaUserCredentialsDao`, registration, password recovery, email change and autologin token flows (`net.yadaframework.security` integration tests) | Lockout after failed attempts (`AuthenticationE2eTest`), impersonation |
 | YadaWebCMS | `YadaArticle` localized names, editing, paging and sorting | `YadaProduct` galleries and `YadaProductDao`, `YadaWebCmsDao.swapAttributes` (`ArticlesE2eTest`), image cropper views |
 | YadaWebCommerce | `TestYadaMoney`, cart, order and order items, `YadaOrderDao.save`, `YadaOrderStatus` persistent enum | `YadaTransactionDao` and payments (with a local fake, `ShopE2eTest`), `YadaOrderDao.cleanup` |
 | YadaAi | JSON shape and request building of Claude and Nova requests, response text extraction | Calls through the AWS client are never made; a local HTTP fake would be needed (`YadaAiRequestBuilderTest`) |

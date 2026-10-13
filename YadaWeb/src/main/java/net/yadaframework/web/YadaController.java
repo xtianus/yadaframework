@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import net.yadaframework.components.YadaDataTableFactory;
+import net.yadaframework.components.YadaLogRedaction;
 import net.yadaframework.components.YadaSecurityUtilStub;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
@@ -104,9 +105,9 @@ public class YadaController {
         String isAjaxString = yadaWebUtil.isAjaxRequest(request)?" (ajax)":"";
         String currentUsername = yadaSecurityUtil.getUsername();
         if (exception==null) {
-        	log.error("Error (HTTP {} '{}') shown to user '{}' at {}{}", errorCode, errorMessage, currentUsername, isAjaxString, requestUri, isAjaxString);
+        	log.error("Error (HTTP {} '{}') shown to user '{}' at {}{}", errorCode, YadaLogRedaction.redactTokens(errorMessage), currentUsername, isAjaxString, YadaLogRedaction.redactTokens(requestUri), isAjaxString);
         } else {
-        	log.error("Error (HTTP {} '{}') shown to user '{}' at {}{}", errorCode, errorMessage, currentUsername, isAjaxString, requestUri, isAjaxString, exception);
+        	log.error("Error (HTTP {} '{}') shown to user '{}' at {}{}", errorCode, YadaLogRedaction.redactTokens(errorMessage), currentUsername, isAjaxString, YadaLogRedaction.redactTokens(requestUri), isAjaxString, exception);
         }
         model.addAttribute(YadaConstants.REQUEST_HASERROR_FLAG, "true");
         // If it was an ajax request, return an error object
