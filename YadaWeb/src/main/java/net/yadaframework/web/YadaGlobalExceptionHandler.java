@@ -34,6 +34,11 @@ public class YadaGlobalExceptionHandler {
 
 	@ExceptionHandler(value = Exception.class)
 	public ModelAndView globalErrorHandler(HttpServletRequest request, HttpServletResponse response, Exception e) throws Exception {
+		if (response.isCommitted()) {
+			// A view can't be rendered anymore and nothing is written: the response stays truncated, see YadaController#yadaError
+			log.error("Unhandled exception after the response was committed (nothing sent to the client)", e);
+			return null;
+		}
 		response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.addObject(YadaConstants.REQUEST_HASERROR_FLAG, "true");
@@ -73,12 +78,12 @@ public class YadaGlobalExceptionHandler {
         if (yadaWebUtil.isAjaxRequest(request)) {
         	// If it was an ajax request, return an error object
         	modelAndView.setViewName("/yada/ajaxError");
-        	modelAndView.addObject("errorDescription", e.getMessage());
+        	modelAndView.addObject("errorDescription", YadaController.getSafeErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value()));
         } else {
         	// Otherwise forward to the configured error page (defaults to home)
         	modelAndView.setViewName("forward:" + config.getErrorPageForward());
         	modelAndView.addObject("yadaExceptionObject", e);
-        	modelAndView.addObject("yadaExceptionMessage", e.getMessage());
+        	modelAndView.addObject("yadaExceptionMessage", YadaController.getSafeErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value()));
         	modelAndView.addObject("yadaExceptionUrl", request.getRequestURL());
         }
         return modelAndView;
