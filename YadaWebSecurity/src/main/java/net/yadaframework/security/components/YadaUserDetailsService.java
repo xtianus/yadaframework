@@ -86,9 +86,9 @@ public class YadaUserDetailsService implements UserDetailsService {
 						yadaUserCredentials.setLastFailedAttempt(null);
 					}
 				}
-				if (!lockout) {
-					result = createUserDetails(yadaUserCredentials);
-				}
+				// A locked out user is returned as locked: the provider then throws LockedException before checking the password.
+				// Throwing TooManyFailedAttemptsException here would not work because the provider hides it as a UsernameNotFoundException.
+				result = createUserDetails(yadaUserCredentials, !lockout);
 			}
 		} catch (Exception e) {
 			log.error("Internal error while authenticating user", e);
@@ -104,17 +104,20 @@ public class YadaUserDetailsService implements UserDetailsService {
 		}
 		if (lockout) {
 			logSec.debug("Username '{}' too many failed attempts: locked out", username);
-			throw new TooManyFailedAttemptsException();
 		}
 		return result;
 	}
 
 	private UserDetails createUserDetails(YadaUserCredentials userCredentials) {
+		return createUserDetails(userCredentials, true);
+	}
+
+	private UserDetails createUserDetails(YadaUserCredentials userCredentials, boolean accountNonLocked) {
 		Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
 		for (Integer roleId : userCredentials.getRoles()) {
 			authorities.add(new SimpleGrantedAuthority(yadaConfiguration.getRoleSpringName(roleId)));
 		}
-		UserDetails userDetails = new org.springframework.security.core.userdetails.User(userCredentials.getUsername().toLowerCase(), userCredentials.getPassword(), userCredentials.isEnabled(), true, !userCredentials.isChangePassword(), true, authorities);
+		UserDetails userDetails = new org.springframework.security.core.userdetails.User(userCredentials.getUsername().toLowerCase(), userCredentials.getPassword(), userCredentials.isEnabled(), true, !userCredentials.isChangePassword(), accountNonLocked, authorities);
 		return userDetails;
 	}
 

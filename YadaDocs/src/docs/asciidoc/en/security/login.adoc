@@ -356,7 +356,8 @@ execution goes through `YadaAuthenticationFailureHandler` that sets the followin
 
 |passwordError
 |boolean
-|login failed for a wrong password
+|login failed for a wrong password or an unknown username: the two cases are reported in the same way so that the
+login form doesn't reveal which accounts exist (`DaoAuthenticationProvider` hides `UsernameNotFoundException`)
 
 |userDisabled
 |boolean
@@ -368,11 +369,8 @@ execution goes through `YadaAuthenticationFailureHandler` that sets the followin
 
 |lockoutMinutes
 |long
-|the number of minutes before a locked account is allowed again
-
-|usernameNotFound, password
-|boolean, string
-|user not found in database, value of password typed
+|the number of minutes before a locked account is allowed again. The account is locked after more than
+`<security><maxFailedAttempts>` wrong passwords, and stays locked for `<failedAttemptsLockoutMinutes>`
 
 |loginError
 |boolean

@@ -26,9 +26,8 @@ using <div th:replace="~{/modalLogin :: #loginForm}">Login form here</div>
 					<label class="control-label" for="username">E-Mail</label>
 					<div>
 						<input type="email" id="username" name="username" th:value="${username}"
-							th:classappend="${usernameNotFound!=null || userDisabled!=null}?is-invalid" 
+							th:classappend="${userDisabled!=null}?is-invalid" 
 							class="form-control" placeholder="E-Mail" required="required" autofocus="autofocus">
-						<span th:if="${usernameNotFound}" class="invalid-feedback">User not found. Please check that the email is correct, or register</span>
 						<span th:if="${userDisabled}" class="invalid-feedback">User disabled. Please contact us to fix this issue.</span>
 					</div>
 				</div>
@@ -37,11 +36,11 @@ using <div th:replace="~{/modalLogin :: #loginForm}">Login form here</div>
 					<div class="input-group">
 						<input type="password" name="password" class="form-control" id="password" 
 							th:classappend="${passwordError!=null}?is-invalid" 
-							placeholder="Password" required="required" th:value="${password}">
+							placeholder="Password" required="required">
 						<a class="btn yadaShowPassword" href="#" title="Show password">
 							<span class="yadaIcon yadaIcon-eye"></span>
 						</a>
-						<span th:if="${passwordError}" class="invalid-feedback">Invalid password. If you forgot it, <a th:href="@{/passwordReset(email=${username})}">click here</a>.</span>
+						<span th:if="${passwordError}" class="invalid-feedback">Invalid email or password. If you forgot the password, <a th:href="@{/passwordReset(email=${username})}">click here</a>.</span>
 					</div>
 				</div>
 				<div class="mb-3">

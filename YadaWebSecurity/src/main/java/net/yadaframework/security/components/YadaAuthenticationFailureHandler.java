@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.WebAttributes;
@@ -38,13 +39,18 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
 
 	public final static String REQUESTATTR_LOGINERRORFLAG="loginErrorFlag"; // Set when login fails
 	// Failure reason flags
+	/** Set when the username is unknown or the password is wrong: the two cases are not distinguished */
 	public final static String REQUESTATTR_PASSWORDERRORFLAG="passwordError";
 	public final static String REQUESTATTR_USERDISABLEDFLAG="userDisabled";
+	/** @deprecated never set: an unknown username sets {@link #REQUESTATTR_PASSWORDERRORFLAG} like a wrong password */
+	@Deprecated
 	public final static String REQUESTATTR_USERNAMENOTFOUNDFLAG="usernameNotFound";
 	public final static String REQUESTATTR_CREDENTIALSEXPIREDFLAG="credentialsExpiredException";
 	public final static String REQUESTATTR_GENERICERRORFLAG="loginError";
 	// Login data
 	public final static String REQUESTATTR_USERNAME="username";
+	/** @deprecated never set: the submitted password is not copied to the request attributes */
+	@Deprecated
 	public final static String REQUESTATTR_PASSWORD="password";
 	//
 	public final static String REQUESTATTR_LOCKOUTMINUTES="lockoutMinutes";
@@ -84,7 +90,6 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
 		addIfNotNull(params, YadaAuthenticationFailureHandler.REQUESTATTR_PASSWORDERRORFLAG, request);
 		addIfNotNull(params, YadaAuthenticationFailureHandler.REQUESTATTR_USERDISABLEDFLAG, request);
 		addIfNotNull(params, YadaAuthenticationFailureHandler.REQUESTATTR_USERNAME, request);
-		addIfNotNull(params, YadaAuthenticationFailureHandler.REQUESTATTR_USERNAMENOTFOUNDFLAG, request);
 		// Do not add the password value for security reasons
 		// addIfNotNull(params, YadaAuthenticationFailureHandler.REQUESTATTR_PASSWORD, request);
 		return params;
@@ -97,17 +102,9 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
 		request.setAttribute(REQUESTATTR_USERNAME, username);
 		request.setAttribute(REQUESTATTR_LOGINERRORFLAG, REQUESTATTR_LOGINERRORFLAG);
 		try {
-			if (exception instanceof BadCredentialsException) {
-				request.setAttribute(REQUESTATTR_PASSWORDERRORFLAG, REQUESTATTR_PASSWORDERRORFLAG);
-				yadaUserCredentialsDao.incrementFailedAttempts(username);
-			} else if (exception instanceof DisabledException) {
-				request.setAttribute(REQUESTATTR_USERDISABLEDFLAG, REQUESTATTR_USERDISABLEDFLAG);
-			} else if (exception instanceof CredentialsExpiredException) {
-				request.setAttribute(REQUESTATTR_CREDENTIALSEXPIREDFLAG, REQUESTATTR_CREDENTIALSEXPIREDFLAG);
-				request.getRequestDispatcher("/pwdChange").forward(request, response);
-				return;
-			} else if (exception instanceof TooManyFailedAttemptsException) {
-				YadaUserCredentials yadaUserCredentials = yadaUserCredentialsDao.findFirstByUsername(username.toLowerCase());
+			if (exception instanceof TooManyFailedAttemptsException || exception instanceof LockedException) {
+				// Must come before UsernameNotFoundException, which TooManyFailedAttemptsException extends
+				YadaUserCredentials yadaUserCredentials = yadaUserCredentialsDao.findFirstByUsername(username.trim().toLowerCase());
 				if (yadaUserCredentials!=null) {
 					int lockMinutes = yadaConfiguration.getPasswordFailedAttemptsLockoutMinutes();
 					Date lastFailedTimestamp = yadaUserCredentials.getLastFailedAttempt();
@@ -117,10 +114,17 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
 						request.setAttribute(REQUESTATTR_LOCKOUTMINUTES, minutesLeft);
 					}
 				}
-			} else if (exception instanceof UsernameNotFoundException) {
-				// ATTENZIONE, deve essere l'ultima della catena di if altrimenti le sottoclassi non vengono considerate
-				request.setAttribute(REQUESTATTR_USERNAMENOTFOUNDFLAG, REQUESTATTR_USERNAMENOTFOUNDFLAG);
-				request.setAttribute(REQUESTATTR_PASSWORD, request.getParameter("password"));
+			} else if (exception instanceof BadCredentialsException || exception instanceof UsernameNotFoundException) {
+				// An unknown username is reported exactly like a wrong password, so that the response doesn't reveal which accounts exist.
+				// The provider normally hides UsernameNotFoundException already, but a custom provider might not.
+				request.setAttribute(REQUESTATTR_PASSWORDERRORFLAG, REQUESTATTR_PASSWORDERRORFLAG);
+				yadaUserCredentialsDao.incrementFailedAttempts(username);
+			} else if (exception instanceof DisabledException) {
+				request.setAttribute(REQUESTATTR_USERDISABLEDFLAG, REQUESTATTR_USERDISABLEDFLAG);
+			} else if (exception instanceof CredentialsExpiredException) {
+				request.setAttribute(REQUESTATTR_CREDENTIALSEXPIREDFLAG, REQUESTATTR_CREDENTIALSEXPIREDFLAG);
+				request.getRequestDispatcher("/pwdChange").forward(request, response);
+				return;
 			} else {
 				request.setAttribute(REQUESTATTR_GENERICERRORFLAG, REQUESTATTR_GENERICERRORFLAG);
 			}
@@ -132,7 +136,8 @@ public class YadaAuthenticationFailureHandler implements AuthenticationFailureHa
 		String failureUrl = ajaxRequest?failureUrlAjaxRequest:failureUrlNormalRequest;
         if (failureUrl == null) {
             log.debug("No failure URL set, sending 401 Unauthorized error");
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed: " + exception.getMessage());
+            // The exception message is not sent because it could tell an unknown user from a wrong password
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed");
         } else {
         	log.debug("Forwarding to " + failureUrl);
 

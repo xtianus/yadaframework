@@ -22,11 +22,10 @@
 					<fieldset>
 						<div th:if="${lockoutMinutes}" class="alert alert-danger">Too many failed attempts: login disabled.<br/>Wait <span th:text="${lockoutMinutes}">5</span> minute<span th:text="${lockoutMinutes>1?'s':''}">s</span> and retry, or <a th:href="@{/passwordReset(email=${username})}">recover your password</a> in the meantime</div>
 						<div th:if="${loginError}" class="alert alert-danger">Can't login. Please try again later and contact us if the problem persists.</div>
-		  				<div class="form-group has-feedback" th:classappend="${usernameNotFound!=null || userDisabled!=null?'has-error':''}" >
+		  				<div class="form-group has-feedback" th:classappend="${userDisabled!=null?'has-error':''}" >
 		    				<label class="control-label" for="username">E-Mail</label>
 		    				<div>
 		    					<input type="email" id="username" name="username" th:value="${username}" class="form-control" placeholder="E-Mail" required="required" autofocus="autofocus" />
-			    				<span th:if="${usernameNotFound}" class="help-block">User not found. Please check that the email is correct, or register</span>
 			    				<span th:if="${userDisabled}" class="help-block">User disabled. Please contact us to fix this issue.</span>
 		    				</div>
 		  				</div>
@@ -42,7 +41,7 @@
 										<a class="btn  btn-secondary yadaShowPassword" href="#" title="Show password"><i class="bi bi-eye"></i></a>
 									</span>
 		    					</div>
-		    					<span th:if="${passwordError}" class="help-block">Invalid password. If you forgot it, <a th:href="@{/passwordReset(email=${username})}">click here</a>.</span>
+		    					<span th:if="${passwordError}" class="help-block">Invalid email or password. If you forgot the password, <a th:href="@{/passwordReset(email=${username})}">click here</a>.</span>
 		    				</div>
 		  				</div>
 		  				<div class="form-group">

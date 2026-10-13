@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -83,7 +84,10 @@ public class YadaSecurityConfig {
 		logoutSuccessHandler.setDefaultTargetUrl("/"); // language path will be added in the handler
 
 	    http
-	        .headers(headers -> headers.disable())
+	        // Spring Security default headers (nosniff, X-Frame-Options DENY, no-cache for dynamic responses,
+	        // HSTS on secure requests) plus a same-origin Referrer-Policy.
+	        // Resources keep the Cache-Control set by their resource handler because the cache writer skips responses that already have one.
+	        .headers(headers -> headers.referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.SAME_ORIGIN)))
 	        .sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 	        .logout(logout -> {
 	            logout
@@ -142,7 +146,8 @@ public class YadaSecurityConfig {
 	@Bean
 	public DaoAuthenticationProvider daoAuthenticationProvider() {
 		DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-		provider.setHideUserNotFoundExceptions(false); // Permette alla UsernameNotFoundException di arrivare al FailureHandler
+		// An unknown username fails like a wrong password, so that login errors don't reveal which accounts exist
+		provider.setHideUserNotFoundExceptions(true);
 		if (yadaConfiguration.encodePassword()) {
 			provider.setPasswordEncoder(passwordEncoder);
 		}
