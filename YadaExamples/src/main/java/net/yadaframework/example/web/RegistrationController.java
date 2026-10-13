@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -23,9 +25,8 @@ import net.yadaframework.example.persistence.repository.UserProfileDao;
 
 import net.yadaframework.components.YadaNotify;
 import net.yadaframework.components.YadaWebUtil;
-import net.yadaframework.core.YadaRegistrationType;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
-import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;
+import net.yadaframework.security.web.YadaPasswordResetForm;
 import net.yadaframework.security.web.YadaRegistrationController;
 import net.yadaframework.security.web.YadaRegistrationController.YadaRegistrationOutcome;
 
@@ -51,6 +52,15 @@ public class RegistrationController {
 	///////////////////////////////////////////////////////////////////////
 	////// Registration                                               /////
 	///////////////////////////////////////////////////////////////////////
+
+	/**
+	 * The registration form can only set the email, the password and the fields of YexRegistrationRequest.
+	 * Any other parameter (id, token, type, user, timestamps) is ignored.
+	 */
+	@InitBinder("yexRegistrationRequest")
+	void registrationBinder(WebDataBinder binder) {
+		YadaRegistrationController.setRegistrationAllowedFields(binder, "name", "surname", "username");
+	}
 
 	/**
 	 * Open the registration form
@@ -133,12 +143,11 @@ public class RegistrationController {
 	/**
 	 * Opens the password reset page
 	 * @param email can be sent to prefill the field
-	 * @param yadaRegistrationRequest
+	 * @param yadaPasswordResetForm the form, posted to the framework "/yadaPasswordResetPost"
 	 */
 	@RequestMapping("/passwordReset")
-	public String passwordReset(String email, YadaRegistrationRequest yadaRegistrationRequest) {
-		yadaRegistrationRequest.setEmail(email);
-		yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
+	public String passwordReset(String email, YadaPasswordResetForm yadaPasswordResetForm) {
+		yadaPasswordResetForm.setEmail(email);
 		return "/passwordReset";
 	}
 
