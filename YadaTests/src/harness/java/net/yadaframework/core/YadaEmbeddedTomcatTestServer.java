@@ -236,11 +236,46 @@ public class YadaEmbeddedTomcatTestServer implements AutoCloseable {
 		context.setResources(buildResources(context, mountedClasspathRoots));
 		context.setContainerSciFilter(Pattern.quote(SpringServletContainerInitializer.class.getName()));
 		context.addServletContainerInitializer(new SpringServletContainerInitializer(), initializerClasses);
+		initializeSharedSpelCompilerLoader(parentClassLoader);
 		tomcat.start();
 		started = true;
 		// Tomcat does not throw when the web application fails to start: it just marks the context as failed
 		if (context.getState() != LifecycleState.STARTED || !context.getState().isAvailable()) {
 			throw new IllegalStateException("The web application at '" + contextPath + "' failed to start (state " + context.getState() + ")" + (rootContextFailure == null ? ": see the log for the cause" : ""), rootContextFailure);
+		}
+	}
+
+	/**
+	 * Initializes Thymeleaf's SPELVariableExpressionEvaluator, as the parent class loader sees it, before any web application
+	 * can, with the loader that defines it as the context class loader.
+	 * <p>
+	 * Its static initializer creates the compiling SpEL parser with the context class loader of the first thread that
+	 * uses it, and Spring's SpelCompiler defines the compiled expressions in a child of that loader. The web applications
+	 * started in one JVM share the Thymeleaf classes of the test class path, so without this the loader would be the web
+	 * application class loader of the first application: once that application is closed, Tomcat refuses every class
+	 * request on it and the next compilation in a later application fails with
+	 * NoClassDefFoundError: org/springframework/expression/spel/CompiledExpression. Nothing happens when Thymeleaf is
+	 * missing or the class has already been initialized.
+	 * @param parentClassLoader the parent class loader of the web application
+	 */
+	private static void initializeSharedSpelCompilerLoader(ClassLoader parentClassLoader) {
+		Class<?> evaluatorClass;
+		try {
+			evaluatorClass = Class.forName("org.thymeleaf.spring6.expression.SPELVariableExpressionEvaluator", false, parentClassLoader);
+		} catch (ClassNotFoundException ignored) {
+			// No Thymeleaf with Spring support: no compiling parser to initialize
+			return;
+		}
+		Thread thread = Thread.currentThread();
+		ClassLoader previousContextClassLoader = thread.getContextClassLoader();
+		// The loader that defines Thymeleaf lives as long as its static parser
+		thread.setContextClassLoader(evaluatorClass.getClassLoader());
+		try {
+			Class.forName(evaluatorClass.getName(), true, evaluatorClass.getClassLoader());
+		} catch (ClassNotFoundException e) {
+			throw new IllegalStateException("Thymeleaf class vanished from its own class loader", e);
+		} finally {
+			thread.setContextClassLoader(previousContextClassLoader);
 		}
 	}
 
