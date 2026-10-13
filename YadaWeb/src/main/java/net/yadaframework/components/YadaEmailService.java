@@ -412,7 +412,7 @@ public class YadaEmailService {
 				invalidEmails.removeAll(validEmail);
 				for (String address : invalidEmails) {
 					log.warn("Email not authorized in configuration (not in <validEmail>). Skipping message for '{}' from='{}' subject='{}' body='{}'",
-						new Object[]{address, yadaEmailContent.from, yadaEmailContent.subject, yadaEmailContent.body});
+						new Object[]{address, yadaEmailContent.from, yadaEmailContent.subject, YadaLogRedaction.redactTokens(yadaEmailContent.body)});
 				}
 			}
 			return recipients.toArray(new String[0]);
@@ -424,7 +424,7 @@ public class YadaEmailService {
 	private MimeMessage createMimeMessage(YadaEmailContent yadaEmailContent) throws MessagingException {
 		if (!config.isEmailEnabled()) {
 			log.warn("Emails not enabled. Skipping message from='{}' to='{}' cc='{}' bcc='{}' subject='{}' body='{}'", 
-					new Object[]{yadaEmailContent.from, yadaEmailContent.to, yadaEmailContent.cc, yadaEmailContent.bcc, yadaEmailContent.subject, yadaEmailContent.body});
+					new Object[]{yadaEmailContent.from, yadaEmailContent.to, yadaEmailContent.cc, yadaEmailContent.bcc, yadaEmailContent.subject, YadaLogRedaction.redactTokens(yadaEmailContent.body)});
 			return null;
 		}
 		int totRecipients = 0;
@@ -495,7 +495,7 @@ public class YadaEmailService {
 			}
 		}
 		log.info("Sending email to={}, from={}, replyTo={}, cc={}, bcc={}, subject={}", new Object[] {yadaEmailContent.to, yadaEmailContent.from, yadaEmailContent.replyTo, yadaEmailContent.cc, yadaEmailContent.bcc, yadaEmailContent.subject});
-		log.debug("Email body = {}", yadaEmailContent.body);
+		log.debug("Email body = {}", YadaLogRedaction.redactTokens(yadaEmailContent.body)); // Token links are hidden
 		return msg;
 	}
 	
