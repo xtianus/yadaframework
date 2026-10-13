@@ -26,6 +26,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.persistence.Entity;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -181,5 +183,25 @@ class YadaControllerTest {
 		YadaController controller = dataTableController(table, dao, yadaSecurityUtil);
 		assertThrows(AccessDeniedException.class, () -> controller.yadaDataTableData(tableRequest, request, Locale.ENGLISH));
 		verifyNoInteractions(dao);
+	}
+
+	/**
+	 * The table is serialized into the page: the policy must never be part of it, and a table without entity class
+	 * (served by a custom endpoint) must still serialize.
+	 */
+	@Test
+	void queryPolicyIsNotSerializedToThePage() throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		YadaDataTableProxy configured = configuredTable();
+		configured.getQueryPolicy();
+		String json = objectMapper.writeValueAsString(configured);
+		assertFalse(json.contains("queryPolicy"), json);
+		assertTrue(json.contains("rowTable"), json);
+
+		YadaDataTableProxy ajaxOnly = new YadaDataTableProxy("ajaxTable", Locale.ENGLISH);
+		ajaxOnly.dtAjaxUrl("/custom/tablePage").dtStructureObj().dtColumnObj("Name", "name").back().back();
+		String ajaxJson = objectMapper.writeValueAsString(ajaxOnly);
+		assertFalse(ajaxJson.contains("queryPolicy"), ajaxJson);
+		assertThrows(net.yadaframework.exceptions.YadaInvalidUsageException.class, ajaxOnly::getQueryPolicy);
 	}
 }
