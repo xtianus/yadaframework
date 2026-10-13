@@ -1,0 +1,91 @@
+<config>
+	<!-- Application settings of the YadaExamples tests. They repeat the application settings of conf.webapp.prod.xml
+		(roles, locales, entities, security) and replace the database with the framework embedded MariaDB.
+		${sys:yex.test.runDir} and ${sys:yex.test.databasePort} are set by ExampleTestDatabase in the test JVM:
+		a folder below YadaExamples/build/test-db and a free port, so concurrent runs never share a database. -->
+	<info>
+		<env>dev</env>
+		<appName>YadaExamples</appName>
+		<version>test</version>
+	</info>
+	<paths>
+		<serverAddress>http://localhost/</serverAddress>
+		<basePath>${sys:yex.test.runDir}</basePath>
+		<contentDir name="contents" url="/contents"></contentDir>
+		<errorPageForward>/errorPage</errorPageForward>
+	</paths>
+	<bootstrapVersion>5</bootstrapVersion>
+	<i18n localePathVariable="true">
+		<locale default="true">en</locale>
+		<locale>it</locale>
+		<locale>de</locale>
+		<locale>fr</locale>
+		<locale>es</locale>
+	</i18n>
+	<!-- Emails are kept in memory by CapturingMailSender (see TestRootConfig): nothing is ever sent -->
+	<email>
+		<enabled>true</enabled>
+		<from>
+			<address>noreply@example.test</address>
+			<name>YadaExamples tests</name>
+		</from>
+		<support>
+			<to>admin@example.test</to>
+		</support>
+		<logoImage>template/email/logo50.png</logoImage>
+	</email>
+	<database enabled="true">
+		<embedded enabled="true" port="${sys:yex.test.databasePort}">
+			<baseDir>${sys:yex.test.runDir}/MariaDB</baseDir>
+			<datadir>${sys:yex.test.runDir}/data</datadir>
+			<tmpDir>${sys:yex.test.runDir}/tmp</tmpDir>
+		</embedded>
+		<showSql>false</showSql>
+		<entityPackage>net.yadaframework.example.persistence.entity</entityPackage>
+		<!-- Every example migration runs on the fresh schema of each test run -->
+		<databaseMigrationAtStartup>true</databaseMigrationAtStartup>
+		<datasource>
+			<!-- The port is replaced with the embedded database port; the embedded database accepts root without password -->
+			<jdbcUrl>jdbc:mysql://localhost/yexdbtest?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</jdbcUrl>
+			<username>root</username>
+			<password></password>
+			<name>yextestpool</name>
+			<poolInitialSize>1</poolInitialSize>
+			<poolMaxSize>10</poolMaxSize>
+			<poolEnableConnectionTracking>true</poolEnableConnectionTracking>
+			<logQueryExecutionLongerThanMs>2000</logQueryExecutionLongerThanMs>
+			<logStackTraceForLongQueryExecution>false</logStackTraceForLongQueryExecution>
+			<logLargeResultSet>500</logLargeResultSet>
+			<logStackTraceForLargeResultSet>false</logStackTraceForLargeResultSet>
+			<includeQueryParameters>true</includeQueryParameters>
+			<statementCacheMaxSize>50</statementCacheMaxSize>
+		</datasource>
+	</database>
+	<security>
+		<sessionTimeoutMinutes>240</sessionTimeoutMinutes>
+		<passwordLength min='5' max='128' />
+		<encodePassword>true</encodePassword>
+		<maxFailedAttempts>10</maxFailedAttempts>
+		<failedAttemptsLockoutMinutes>10</failedAttemptsLockoutMinutes>
+		<autologinExpirationHours>48</autologinExpirationHours>
+		<roles>
+			<role>
+				<id>8</id>
+				<key>ADMIN</key>
+				<handles>ADMIN</handles>
+				<handles>SUPERVISOR</handles>
+				<handles>USER</handles>
+			</role>
+			<role>
+				<id>4</id>
+				<key>SUPERVISOR</key>
+				<handles>SUPERVISOR</handles>
+				<handles>USER</handles>
+			</role>
+			<role>
+				<id>2</id>
+				<key>USER</key>
+			</role>
+		</roles>
+	</security>
+</config>
