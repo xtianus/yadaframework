@@ -10,7 +10,7 @@ Defaults of YadaWebSecurity and YadaWeb that affect every application extending 
 ## Login failure
 
 - `YadaAuthenticationFailureHandler` sets `passwordError` for a wrong password and for an unknown username alike (`DaoAuthenticationProvider` hides `UsernameNotFoundException`), so the login form can't enumerate accounts. `usernameNotFound` and the `password` request attribute are never set (`REQUESTATTR_USERNAMENOTFOUNDFLAG` and `REQUESTATTR_PASSWORD` are deprecated). Login templates show one generic message and never use `${password}`. The 401 fallback sends "Authentication Failed" without the exception message.
-- A lockout is signalled by `YadaUserDetailsService.loadUserByUsername` returning a locked `UserDetails`, so the provider throws `LockedException`; the handler checks both `LockedException` and `TooManyFailedAttemptsException` (the latter is no longer thrown by the framework). An unknown username also goes through `incrementFailedAttempts` and updates no row. The lockout branch skips the credentials lookup when the `username` parameter is missing.
+- A lockout is signalled by `YadaUserDetailsService.loadUserByUsername` returning a locked `UserDetails`, so the provider throws `LockedException`; the handler checks both `LockedException` and `TooManyFailedAttemptsException` (the framework itself throws only `LockedException` for a lockout). An unknown username also goes through `incrementFailedAttempts` and updates no row. The lockout branch skips the credentials lookup when the `username` parameter is missing.
 
 ## Error responses
 

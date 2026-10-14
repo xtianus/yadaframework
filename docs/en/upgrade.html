@@ -280,7 +280,8 @@ issue a new token instead.</p>
 <p>New: <code>YadaSecurityTokenCodec</code>, <code>YadaAutoLoginTokenDao.issue/findValid/consume</code>,
 <code>YadaRegistrationRequestDao.issue/findValid/consume/findByUserAndRegistrationType/getLifetimeMillis</code> and
 <code>YadaRegistrationController.handleEmailChangeRequest</code>. <code>YadaRegistrationRequestDao.save</code> is deprecated: it issues
-new requests and throws for an existing one; <code>YadaAutoLoginTokenDao.save</code> throws for a new token.</p>
+new requests and throws for an existing one; <code>YadaAutoLoginTokenDao.save</code> throws for a new token. Applications that create EMAIL_CHANGE requests themselves keep
+working through <code>save</code>, or can use <code>handleEmailChangeRequest</code>.</p>
 </li>
 <li>
 <p>The <code>action</code> of an autologin link must be a local path accepted unchanged by <code>YadaWebUtil.safeLocalRedirect</code>
@@ -289,7 +290,8 @@ callers that encoded it twice must encode it once.</p>
 </li>
 <li>
 <p>A registration confirmation that finds an existing user, and the <code>USER_EXISTS</code> and <code>ERROR</code> outcomes of <code>changeUsername</code>,
-now consume the request. <code>YadaAutoLoginTokenDao.deleteExpired</code> also deletes tokens without expiration.</p>
+now consume the request. <code>YadaAutoLoginTokenDao.deleteExpired</code> also deletes tokens without expiration, and <code>findByYadaUserCredentials</code> excludes them.
+The new <code>YadaLogRedaction</code> class hides token secrets in logged text (see Logging below).</p>
 </li>
 </ul>
 </div>
@@ -306,7 +308,7 @@ sets its own <code>CsrfTokenRepository</code>, expose it as a bean so that the l
 </div>
 </div>
 <div class="sect4">
-<h5 id="_migration_v002_and_rollout">Migration V002 and rollout</h5>
+<h5 id="_database_migration_and_rollout">Database migration and rollout</h5>
 <div class="paragraph">
 <p>Applications that map <code>YadaRegistrationRequest</code> or <code>YadaAutoLoginToken</code> need a Flyway migration, with the next free
 version number, for example <code>V&lt;n&gt;__hashed_security_tokens.sql</code>. It must:</p>
@@ -397,22 +399,25 @@ as an empty table.</p>
 </li>
 <li>
 <p>Removed: the deprecated <code>YadaDataTableDao.getJsonPage(&#8230;&#8203;)</code>, which serialized whole entities. The protected <code>getPage(&#8230;&#8203;)</code>
-takes the resolved policy. <code>YadaDatatablesRequest.addExtraJsonAttribute</code> is deprecated: declare <code>extraOutput(path)</code> in the policy.</p>
+takes the resolved policy. <code>YadaDatatablesRequest.addExtraJsonAttribute</code> is deprecated: declare <code>extraOutput(path)</code> in the policy: extras are returned on every row, and a requested extra that the policy
+does not declare rejects the request.</p>
 </li>
 <li>
 <p>The default <code>/yadaDataTableData</code> endpoint needs no code change: it derives the policy from the column definitions.
 A column that is not a persistent field of the <code>dtEntityClass()</code> class (a getter, a computed value, an attribute that exists
 only in a subclass) becomes output-only: it is still shown but never searched or sorted, a sort request on it is rejected, and
-one warning is logged per table and column. Set the subclass as <code>dtEntityClass()</code> to search or sort on it.</p>
+one warning is logged per table and column. Set the subclass as <code>dtEntityClass()</code> to search or sort on it. Columns are searchable
+and orderable unless <code>dtSearchableOff()</code> or <code>dtOrderableOff()</code> is set.</p>
 </li>
 <li>
 <p>With an explicit <code>forEntity</code> policy, a searchable or orderable path that is not a persistent field fails in <code>build()</code>:
 declare getters and computed values with <code>column(path, false, false)</code>, and build the policy for the concrete subclass
-when the table shows subclass attributes.</p>
+when the table shows subclass attributes: a subclass-only path is refused on a policy for the superclass, even as output-only.</p>
 </li>
 <li>
-<p>Columns that would return a credential (<code>password</code>, <code>token</code>, <code>tokenHash</code>, <code>secret</code>, <code>salt</code>&#8230;&#8203; in any path segment), a
-whole entity or an embeddable are refused, and entity <code>toString()</code> values are never returned.</p>
+<p>Columns that would return a credential (<code>password</code>, <code>token</code>, <code>tokenHash</code>, <code>secret</code>, <code>salt</code>&#8230;&#8203; in any path segment, map keys included), a
+whole entity or an embeddable are refused, and entity <code>toString()</code> values are never returned. An embeddable value reached through
+a getter is emitted as null.</p>
 </li>
 <li>
 <p>Order directions other than <code>asc</code> and <code>desc</code> and invalid order indexes are rejected, <code>dataTableId</code> must match
@@ -482,14 +487,15 @@ goes through <code>incrementFailedAttempts</code>, which updates no row.</p>
 <ul>
 <li>
 <p>The CSRF token is no longer added to the action url of multipart forms, where it ended up in logs, history and <code>Referer</code> headers.
-It is sent as the hidden <code>_csrf</code> field (added by <code>th:action</code>, and by <code>yada:actionUpload</code> for same-origin actions) or, for Ajax uploads,
+It is sent as the hidden <code>_csrf</code> field (added by <code>th:action</code>, and by <code>yada:actionUpload</code> for absolute local paths) or, for Ajax uploads,
 in the CSRF header from the <code>_csrf</code> and <code>_csrf_header</code> meta tags. A multipart form with a plain static <code>action</code> and no hidden
 <code>_csrf</code> field, which used to work thanks to the url token, now gets 403: use <code>th:action</code> or add the hidden input. A <code>_csrf</code>
 parameter written in a multipart action query is removed at render time. <code>MultipartFilter</code> must stay before the Spring Security filter.</p>
 </li>
 <li>
 <p><code>yada:actionUpload</code> adds the hidden token only when the action is an absolute local path accepted by
-<code>YadaWebUtil.isSafeLocalRedirect</code> (now public); relative paths and absolute urls, even of the same host, get no token.</p>
+<code>YadaWebUtil.isSafeLocalRedirect</code> (now public); relative paths and absolute urls, even of the same host, get no token and therefore a 403 on submit:
+templates must write the action as an absolute local path such as <code>@{/&#8230;&#8203;}</code>.</p>
 </li>
 <li>
 <p>A plain (non-Ajax) multipart form larger than <code>maxFileUploadSizeBytes</code> no longer reaches the controller with
@@ -575,7 +581,7 @@ request urls and bound values: keep it off in production. Server error details a
 <div id="footer">
 <div id="footer-text">
 Version 0.7.9<br>
-Last updated 2026-10-14 05:15:09 +0200
+Last updated 2026-10-14 05:28:41 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

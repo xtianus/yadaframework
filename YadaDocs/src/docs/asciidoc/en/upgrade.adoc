@@ -93,12 +93,14 @@ issue a new token instead.
 * New: `YadaSecurityTokenCodec`, `YadaAutoLoginTokenDao.issue/findValid/consume`,
 `YadaRegistrationRequestDao.issue/findValid/consume/findByUserAndRegistrationType/getLifetimeMillis` and
 `YadaRegistrationController.handleEmailChangeRequest`. `YadaRegistrationRequestDao.save` is deprecated: it issues
-new requests and throws for an existing one; `YadaAutoLoginTokenDao.save` throws for a new token.
+new requests and throws for an existing one; `YadaAutoLoginTokenDao.save` throws for a new token. Applications that create EMAIL_CHANGE requests themselves keep
+working through `save`, or can use `handleEmailChangeRequest`.
 * The `action` of an autologin link must be a local path accepted unchanged by `YadaWebUtil.safeLocalRedirect`
 (see <<_local_redirect_targets,below>>), otherwise `makeAutologinLink` throws. The action is decoded once, by Spring MVC:
 callers that encoded it twice must encode it once.
 * A registration confirmation that finds an existing user, and the `USER_EXISTS` and `ERROR` outcomes of `changeUsername`,
-now consume the request. `YadaAutoLoginTokenDao.deleteExpired` also deletes tokens without expiration.
+now consume the request. `YadaAutoLoginTokenDao.deleteExpired` also deletes tokens without expiration, and `findByYadaUserCredentials` excludes them.
+The new `YadaLogRedaction` class hides token secrets in logged text (see Logging below).
 
 ===== Autologin needs a confirmation click
 
@@ -110,7 +112,7 @@ Disabled users are rejected. The page texts are the message keys `yada.autologin
 and `.cancel`; English defaults are built in, so applications only define them to translate or reword. If the application
 sets its own `CsrfTokenRepository`, expose it as a bean so that the login can renew its token.
 
-===== Migration V002 and rollout
+===== Database migration and rollout
 
 Applications that map `YadaRegistrationRequest` or `YadaAutoLoginToken` need a Flyway migration, with the next free
 version number, for example `V<n>__hashed_security_tokens.sql`. It must:
@@ -162,16 +164,19 @@ or take it from a table configured in Java with `yadaDataTableFactory.getSinglet
 A request for anything outside the policy is rejected with `yadaError` and no data, so a missing column shows up
 as an empty table.
 * Removed: the deprecated `YadaDataTableDao.getJsonPage(...)`, which serialized whole entities. The protected `getPage(...)`
-takes the resolved policy. `YadaDatatablesRequest.addExtraJsonAttribute` is deprecated: declare `extraOutput(path)` in the policy.
+takes the resolved policy. `YadaDatatablesRequest.addExtraJsonAttribute` is deprecated: declare `extraOutput(path)` in the policy: extras are returned on every row, and a requested extra that the policy
+does not declare rejects the request.
 * The default `/yadaDataTableData` endpoint needs no code change: it derives the policy from the column definitions.
 A column that is not a persistent field of the `dtEntityClass()` class (a getter, a computed value, an attribute that exists
 only in a subclass) becomes output-only: it is still shown but never searched or sorted, a sort request on it is rejected, and
-one warning is logged per table and column. Set the subclass as `dtEntityClass()` to search or sort on it.
+one warning is logged per table and column. Set the subclass as `dtEntityClass()` to search or sort on it. Columns are searchable
+and orderable unless `dtSearchableOff()` or `dtOrderableOff()` is set.
 * With an explicit `forEntity` policy, a searchable or orderable path that is not a persistent field fails in `build()`:
 declare getters and computed values with `column(path, false, false)`, and build the policy for the concrete subclass
-when the table shows subclass attributes.
-* Columns that would return a credential (`password`, `token`, `tokenHash`, `secret`, `salt`... in any path segment), a
-whole entity or an embeddable are refused, and entity `toString()` values are never returned.
+when the table shows subclass attributes: a subclass-only path is refused on a policy for the superclass, even as output-only.
+* Columns that would return a credential (`password`, `token`, `tokenHash`, `secret`, `salt`... in any path segment, map keys included), a
+whole entity or an embeddable are refused, and entity `toString()` values are never returned. An embeddable value reached through
+a getter is emitted as null.
 * Order directions other than `asc` and `desc` and invalid order indexes are rejected, `dataTableId` must match
 `[A-Za-z0-9_-]{1,100}`, and map keys in paths (`name.en`) are bound as query parameters of the map key type instead of quoted literals.
 
@@ -213,12 +218,13 @@ goes through `incrementFailedAttempts`, which updates no row.
 ==== Multipart forms and CSRF
 
 * The CSRF token is no longer added to the action url of multipart forms, where it ended up in logs, history and `Referer` headers.
-It is sent as the hidden `_csrf` field (added by `th:action`, and by `yada:actionUpload` for same-origin actions) or, for Ajax uploads,
+It is sent as the hidden `_csrf` field (added by `th:action`, and by `yada:actionUpload` for absolute local paths) or, for Ajax uploads,
 in the CSRF header from the `_csrf` and `_csrf_header` meta tags. A multipart form with a plain static `action` and no hidden
 `_csrf` field, which used to work thanks to the url token, now gets 403: use `th:action` or add the hidden input. A `_csrf`
 parameter written in a multipart action query is removed at render time. `MultipartFilter` must stay before the Spring Security filter.
 * `yada:actionUpload` adds the hidden token only when the action is an absolute local path accepted by
-`YadaWebUtil.isSafeLocalRedirect` (now public); relative paths and absolute urls, even of the same host, get no token.
+`YadaWebUtil.isSafeLocalRedirect` (now public); relative paths and absolute urls, even of the same host, get no token and therefore a 403 on submit:
+templates must write the action as an absolute local path such as `@{/...}`.
 * A plain (non-Ajax) multipart form larger than `maxFileUploadSizeBytes` no longer reaches the controller with
 `limitExceeded(request)` true: it gets HTTP 413 from `YadaUploadLimitAccessDeniedHandler` before any controller.
 Map 413 to an error page in `web.xml` for a friendly message, or upload with Ajax or check the size in the browser. Ajax uploads
