@@ -80,9 +80,11 @@
 
 | Class | Description |
 |---|---|
+| [YadaController](yadaWeb/YadaController.md) | Handles the servlet error dispatch (`/yadaError`): logs the details, shows only the HTTP reason phrase to the user and leaves committed responses truncated. |
 | [YadaCropImage](yadaWeb/YadaCropImage.md) | Stores one pending crop operation, including the source upload, target file metadata, and desktop, mobile, or PDF crop settings. Use it inside a YadaCropQueue during upload flows. |
 | [YadaCropQueue](yadaWeb/YadaCropQueue.md) | Keeps the session-scoped queue of images that still need cropping, together with the crop and destination redirects. Use it to drive multi-image crop workflows across requests. |
 | [YadaDatatablesRequest](yadaWeb/YadaDatatablesRequest.md) | Represents the server-side request parameters sent by DataTables, including paging, ordering, search, and extra JSON attributes. Use it in controller or DAO code that serves Yada tables. |
+| [YadaGlobalExceptionHandler](yadaWeb/YadaGlobalExceptionHandler.md) | `@ControllerAdvice` that logs exceptions leaving a controller and answers with the generic HTTP reason phrase, in Ajax modals and error pages. |
 | [YadaPageRequest](yadaWeb/YadaPageRequest.md) | Represents a pageable request with page, size, sort, and load-previous options. Use it to drive Yada pagination and bookmark-friendly scrolling. |
 | [YadaPublicSuffix](yadaWeb/YadaPublicSuffix.md) | Parses public-suffix data to split hostnames into registrable domains and subdomains. Use when cookies or multi-tenant domains depend on the effective top-level domain. |
 

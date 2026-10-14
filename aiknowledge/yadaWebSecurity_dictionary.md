@@ -35,4 +35,5 @@
 | Class | Description |
 |---|---|
 | [YadaMultipartFormTagProcessor](yadaWebSecurity/YadaMultipartFormTagProcessor.md) | Removes a CSRF token written in the action query of multipart POST forms; the token travels in the hidden field or the Ajax header, never in a URL. Runs automatically in the Yada security dialect. |
+| [YadaPasswordResetForm](yadaWebSecurity/YadaPasswordResetForm.md) | The password recovery form bean: it carries only the email address, so a browser can't inject other request fields. |
 | [YadaRegistrationController](yadaWebSecurity/YadaRegistrationController.md) | Exposes registration, password reset, and username change endpoints. Reuse or subclass it when enabling the built-in registration flows; restrict registration form binding with `setRegistrationAllowedFields`. |
