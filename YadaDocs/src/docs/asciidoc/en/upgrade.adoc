@@ -267,8 +267,3 @@ Token secrets are replaced by `<id>-[hidden]` in logged request urls, query stri
 hidden by `AuditFilter`. Developers who used to copy links from the development log must use a mail catcher such as Mailpit.
 Spring and Hibernate DEBUG logging (for example `org.springframework.web` and `org.hibernate.SQL`) still prints complete
 request urls and bound values: keep it off in production. Server error details are only logged, never sent to the browser.
-
-==== Embedded database
-
-The installation step of the embedded MariaDB now runs with the configured `tmpDir` instead of the shared system temporary folder,
-where concurrent installations (parallel builds, tests) could delete each other's temporary tables and fail to start.
