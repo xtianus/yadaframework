@@ -8,9 +8,14 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.csrf.CsrfAuthenticationStrategy;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -71,6 +76,8 @@ public class YadaRegistrationController {
 	@Autowired private YadaConfiguration yadaConfiguration;
 	@Autowired private YadaNotify yadaNotify;
 	@Autowired private YadaWebUtil yadaWebUtil;
+	@Autowired private YadaSession<?> yadaSession;
+	@Autowired private ObjectProvider<CsrfTokenRepository> csrfTokenRepositoryProvider;
 
 	// For some reason, autowiring of the "passwordEncoder" created by YadaSecurityConfig doesn't work: bean is not found
 	/*@Autowired */ private PasswordEncoder passwordEncoder = null;
@@ -298,17 +305,23 @@ public class YadaRegistrationController {
 
 	/** 
 	 * Default method to change a user password. POST only: the change must come from the form, with its CSRF token.
+	 * The user is logged in with a new session id and a new CSRF token.
 	 * @return
 	 */
 	@PostMapping("/passwordChangeAfterRequest") // Ajax
-	public String passwordChangeAfterRequest(YadaFormPasswordChange yadaFormPasswordChange, BindingResult bindingResult, Model model, Locale locale) {
+	public String passwordChangeAfterRequest(YadaFormPasswordChange yadaFormPasswordChange, BindingResult bindingResult, Model model, Locale locale, HttpServletRequest request, HttpServletResponse response) {
 		// TODO view-related code should be moved to the application controller
 		if (!yadaUserDetailsService.validatePasswordSyntax(yadaFormPasswordChange.getPassword())) {
 			bindingResult.rejectValue("password", "validation.password.length", new Object[]{yadaConfiguration.getMinPasswordLength(), yadaConfiguration.getMaxPasswordLength()}, "Wrong password length");
 			return "/yada/modalPasswordChange";
 		}
-		boolean done = yadaSecurityUtil.performPasswordChange(yadaFormPasswordChange);
+		// The login after the change gets a new session id
+		boolean done = yadaSecurityUtil.performPasswordChange(yadaFormPasswordChange, null, request, response) == 0;
 		if (done) {
+			yadaSession.clearCaches(); // A user that was logged in before may be another one
+			// A new CSRF token after login, as Spring Security does for the login form
+			CsrfTokenRepository csrfTokenRepository = csrfTokenRepositoryProvider.getIfAvailable(HttpSessionCsrfTokenRepository::new);
+			new CsrfAuthenticationStrategy(csrfTokenRepository).onAuthentication(SecurityContextHolder.getContext().getAuthentication(), request, response);
 			log.info("Password changed for user '{}'", yadaFormPasswordChange.getUsername());
 			// redirectOnClose() is to show the logged in version of the site (no "login" link)
 			yadaNotify.titleKey(model, locale, "yada.pwdreset.done.title").ok().messageKey("yada.pwdreset.done.message").redirectOnClose("/").add();

@@ -41,5 +41,5 @@ accepts an optional third `method` argument and uses it when the method is not G
 local path and query string of the page (`location.pathname + location.search`), not a full url. The path includes
 the servlet context path, while `"redirect:"` adds it again, so the server validates the value with
 `YadaWebUtil.safeLocalRedirect`, removes `request.getContextPath()` and replays it as
-`"redirect:" + safeLocalRedirect(saved)`; the example's `UserProfileController` impersonation endpoints are POST-only
+`"redirect:" + safeLocalRedirect(saved)`; the example's `UserProfileController` impersonation and user delete endpoints are POST-only
 and work this way (`contextRelativeLocation`).

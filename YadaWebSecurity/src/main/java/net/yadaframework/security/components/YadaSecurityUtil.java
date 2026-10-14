@@ -30,9 +30,12 @@ import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.components.YadaWebUtil;
@@ -364,6 +367,21 @@ public class YadaSecurityUtil {
 	 * @return the outcome: 0 = ok, 1 = invalid token, 2 = same password as before, 3 = generic error
 	 */
 	public int performPasswordChange(YadaFormPasswordChange yadaFormPasswordChange, Boolean forceDifferentPassword) {
+		return performPasswordChange(yadaFormPasswordChange, forceDifferentPassword, null, null);
+	}
+
+	/**
+	 * Change the user password and log in with a new session id, against session fixation, after eventually checking
+	 * that the password is actually different from the previous one.
+	 * The token must be a valid, unexpired password recovery link. It is used once: the token is consumed in the same
+	 * transaction that changes the password, and stays valid when the change fails. The login happens after the commit.
+	 * @param yadaFormPasswordChange
+	 * @param forceDifferentPassword set to true to force a different password
+	 * @param request the current request, null to use the one of the current thread
+	 * @param response the current response, null to use the one of the current thread
+	 * @return the outcome: 0 = ok, 1 = invalid token, 2 = same password as before, 3 = generic error
+	 */
+	public int performPasswordChange(YadaFormPasswordChange yadaFormPasswordChange, Boolean forceDifferentPassword, HttpServletRequest request, HttpServletResponse response) {
 		ParsedSecurityToken token = yadaTokenHandler.parseLink(yadaFormPasswordChange.getToken());
 		if (token==null) {
 			return 1; // Invalid token
@@ -389,7 +407,7 @@ public class YadaSecurityUtil {
 			}
 			YadaUserCredentials yadaUserCredentials = changed.get();
 			if (yadaUserCredentials.isEnabled()) {
-				yadaUserDetailsService.authenticateAs(yadaUserCredentials);
+				loginWithNewSessionId(yadaUserCredentials, request, response);
 			}
 			log.info("PASSWORD CHANGE for user='{}'", yadaUserCredentials.getUsername());
 			return 0; // OK
@@ -399,6 +417,31 @@ public class YadaSecurityUtil {
 			log.info("Password change failed", e);
 		}
 		return 3; // Generic error
+	}
+
+	/**
+	 * Logs in after a token-based change, with a new session id against session fixation, and sets the login timestamp
+	 * @param yadaUserCredentials the user to log in
+	 * @param request the current request, null to use the one of the current thread
+	 * @param response the current response, null to use the one of the current thread
+	 */
+	private void loginWithNewSessionId(YadaUserCredentials yadaUserCredentials, HttpServletRequest request, HttpServletResponse response) {
+		if (request==null && RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attributes) {
+			request = attributes.getRequest();
+			response = attributes.getResponse();
+		}
+		if (request!=null) {
+			try {
+				request.changeSessionId();
+			} catch (IllegalStateException e) {
+				log.debug("No session to change at password change (ignored)");
+			}
+		}
+		if (request==null || response==null) {
+			yadaUserDetailsService.authenticateAs(yadaUserCredentials);
+		} else {
+			yadaUserDetailsService.authenticateAs(yadaUserCredentials, true, request, response);
+		}
 	}
 
 	/**

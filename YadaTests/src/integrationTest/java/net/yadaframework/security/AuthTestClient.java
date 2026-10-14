@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.net.HttpCookie;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -28,10 +29,11 @@ import net.yadaframework.tests.support.TestApplication;
 final class AuthTestClient {
 	private final TestApplication application;
 	private final HttpClient client;
+	private final CookieManager cookieManager;
 
 	AuthTestClient(TestApplication application) {
 		this.application = application;
-		CookieManager cookieManager = new CookieManager();
+		cookieManager = new CookieManager();
 		cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 		this.client = HttpClient.newBuilder().cookieHandler(cookieManager).followRedirects(HttpClient.Redirect.NEVER).build();
 	}
@@ -105,6 +107,13 @@ final class AuthTestClient {
 		fields.put("username", email);
 		fields.put("password", password);
 		return post("/loginPost", fields);
+	}
+
+	/**
+	 * @return the session cookie value that this client sends, or null when it has no session
+	 */
+	String sessionId() {
+		return cookieManager.getCookieStore().getCookies().stream().filter(cookie -> "JSESSIONID".equals(cookie.getName())).map(HttpCookie::getValue).findFirst().orElse(null);
 	}
 
 	static String location(HttpResponse<String> response) {

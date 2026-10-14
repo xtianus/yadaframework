@@ -216,7 +216,10 @@ public class UserProfileController {
 		userSession.clearCaches();
 	}
 
-	@RequestMapping("/userwrite/ajaxDeleteUserProfile")
+	/**
+	 * Deletes the users with the given ids. POST only, so that the CSRF token is checked.
+	 */
+	@PostMapping("/userwrite/ajaxDeleteUserProfile")
 	public String ajaxDeleteUserProfile(Long[] id, Model model) {
 		// Extra security by checking isManager
 		if (userSession.isAdmin() && id!=null && id.length>0) {
@@ -421,7 +424,7 @@ public class UserProfileController {
 					.dtButtonObj("button.impersonate").dtUrlProvider("impersonate").dtNoAjax().dtIcon("<i class='bi bi-mortarboard'></i>").dtRole("ADMIN").dtRole("supervisor").back()
 					.dtButtonObj("button.edit").dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}").dtElementLoader("#userTable").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId").back()
 					.dtButtonObj("button.delete").dtUrl("@{/dashboard/userwrite/ajaxDeleteUserProfile}").dtIcon("<i class='bi bi-trash'></i>")
-						.dtRole("ADMIN").dtMultiRow().dtToolbarCssClass("btn-danger")
+						.dtRole("ADMIN").dtMultiRow().dtToolbarCssClass("btn-danger").dtMethod("POST")
 						.dtConfirmDialogObj()
 							.dtTitle("Delete User")
 							.dtMessageSingular("usertable.delete.confirm.singular")

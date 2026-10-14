@@ -28,8 +28,8 @@ yada.ready(function(){
 	var usersTable;
 	let language = /*[[${#locale.language}]]*/ "placehoder";
 	let tablePageLoadUrl = /*[[@{/dashboard/user/userProfileTablePage}]]*/ "placehoder";
-	let userEditUrl = /*[[@{/dashboard/user/ajaxEditUserProfileForm}]]*/ "placehoder";
-	let userDeleteUrl = /*[[@{/dashboard/user/ajaxDeleteUserProfile}]]*/ "placehoder";
+	let userEditUrl = /*[[@{/dashboard/userwrite/ajaxEditUserProfileForm}]]*/ "placehoder";
+	let userDeleteUrl = /*[[@{/dashboard/userwrite/ajaxDeleteUserProfile}]]*/ "placehoder";
 	let userImpersonateUrl = /*[[@{/dashboard/user/impersonate}]]*/ "placehoder";
 	let languageFileUrl;
 	if (language === 'en') {
@@ -67,7 +67,8 @@ yada.ready(function(){
    			"confirmOneMessage": deleteConfirmationMessage,
    			"confirmManyMessage": deleteConfirmationManyMessage,
    			"confirmButtonText": deleteConfirmationButton,
-   			"abortButtonText": deleteAbortButton
+   			"abortButtonText": deleteAbortButton,
+   			"method": "POST" // Deleting needs a CSRF-protected POST
        	},
    		[ [ 2, 'desc' ] ], 
    		10,
