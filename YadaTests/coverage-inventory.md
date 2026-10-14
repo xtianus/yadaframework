@@ -58,6 +58,8 @@ Relocated resources and fixtures:
 
 | Suite | Class | Scope |
 |---|---|---|
+| `integrationTest` | `EmbeddedDatabaseInstallTmpDirTest` | Flake fix: `mariadb-install-db` runs with the run's `tmpDir` (a `#sql*` probe there is removed, the shared `/tmp` is never touched), and an existing non-empty data folder is reused, not reinstalled |
+| `test` | `YadaMariaDBInstallCommandTest` | The non-Windows install command: exact arguments including `--tmpdir`, working directory and executable |
 | `integrationTest` | `EmbeddedDatabaseLifecycleTest` | Fresh install, reopen, double stop, attach ownership, data-directory guard, failure after launch, failed Spring refresh, concurrent runs |
 | `integrationTest` | `EmbeddedDatabaseSourceSqlTest` | `<sourceSql>` seed: applied once, `.loaded` rename of the copy only, invalid and unreadable files |
 | `integrationTest` | `EmbeddedDatabaseWhitespacePathTest` | Rejection of folders with whitespace while MariaDB4j can't use them |
@@ -101,7 +103,7 @@ Relocated resources and fixtures:
 | `toolTest` | `YadaToolsPluginTest` | Plugin application rules, task registration, classpath file copy utilities |
 | `toolTest` | `YadaToolsFunctionalTest` | TestKit: `yadaInit` skeleton generation, rerun without overwriting, missing properties, missing `war` plugin |
 
-Discovered tests per suite at the end of the security remediation: `test` 388, `integrationTest` 159, `e2eTest` 26, `toolTest` 10, none skipped.
+Discovered tests per suite at the end of the security remediation: `test` 389, `integrationTest` 161, `e2eTest` 26, `toolTest` 10, none skipped.
 
 ## Example application tests
 
@@ -132,9 +134,10 @@ Discovered tests per suite at the end of the security remediation: `test` 388, `
 
 ## Known framework issues found by the suites
 
-- With MariaDB4j 3.2.0 (MariaDB 11.4), MySQL Connector/J 9.4 and Hibernate 7.1, Hibernate couldn't pick a dialect: Connector/J queries `INFORMATION_SCHEMA.KEYWORDS.RESERVED`, which MariaDB lacks. Fixed: `YadaJpaConfig` uses `MariaDBDialect` for the embedded database unless `<database><dialect>` says otherwise (`YadaConfigurationDialectTest`, `PersistenceIntegrationTest`).
+- With MariaDB4j 3.3.1 (MariaDB 11.4), MySQL Connector/J 9.4 and Hibernate 7.1, Hibernate couldn't pick a dialect: Connector/J queries `INFORMATION_SCHEMA.KEYWORDS.RESERVED`, which MariaDB lacks. Fixed: `YadaJpaConfig` uses `MariaDBDialect` for the embedded database unless `<database><dialect>` says otherwise (`YadaConfigurationDialectTest`, `PersistenceIntegrationTest`).
 - A single request parameter `sort=sku,desc` bound to `YadaPageRequest` was split at the comma by Spring and rejected by `YadaPageSort` ("No sort column specified in 'desc'"). Fixed in `YadaPageRequest.getPageSort()` (`YadaPageRequestSortTest`, `ArticlesE2eTest.singleSortParameterWithDirection`).
 - All embedded webapps of a JVM share Thymeleaf under parent-first loading, and its SpEL compiler kept the class loader of the first application that rendered a page. After that application stopped, a later application failed with `NoClassDefFoundError: CompiledExpression` once an expression was compiled (after 100 evaluations). This is a harness property: a deployed webapp loads its own Thymeleaf. `YadaEmbeddedTomcatTestServer` now initializes the Thymeleaf evaluator with a loader that is never stopped (`SpelCompilerAcrossApplicationsTest`).
+- Concurrent `mariadb-install-db` runs failed with "ERROR: 1051 Unknown table 'mysql.tmp_user_sys'" (`EmbeddedDatabaseLifecycleTest.concurrentRunsAreIsolated` and others): MariaDB4j 3.3.1 passes `--tmpdir` only to the server, so installations shared `/tmp` and deleted each other's `#sql*` temporary tables. Fixed for Linux and macOS in `YadaMariaDB` (`EmbeddedDatabaseInstallTmpDirTest`, `YadaMariaDBInstallCommandTest`); Windows still uses the system TEMP folder.
 - The `entityManager` bean of `YadaJpaConfig` is created with `createEntityManager()` and is not bound to Spring transactions. Tests use a shared EntityManager instead.
 
 ## Threads and processes left by libraries

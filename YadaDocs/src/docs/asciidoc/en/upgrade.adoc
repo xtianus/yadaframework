@@ -273,3 +273,14 @@ Token secrets are replaced by `<id>-[hidden]` in logged request urls, query stri
 hidden by `AuditFilter`. Developers who used to copy links from the development log must use a mail catcher such as Mailpit.
 Spring and Hibernate DEBUG logging (for example `org.springframework.web` and `org.hibernate.SQL`) still prints complete
 request urls and bound values: keep it off in production. Server error details are only logged, never sent to the browser.
+
+==== Embedded database installation
+
+The installation step of the embedded MariaDB (`mariadb-install-db`) now runs with the configured embedded `tmpDir` on Linux
+and macOS, through the new public factory `YadaMariaDB.newEmbeddedDB(DBConfiguration)`, which `YadaMariaDBServer` uses.
+MariaDB4j passed `--tmpdir` only to the server, so concurrent installations (parallel builds or tests) shared `/tmp`, deleted each
+other's temporary tables and failed with "Unknown table 'mysql.tmp_user_sys'". As in MariaDB4j, a non-empty data folder is reused
+and not installed again. Windows is unchanged: the original MariaDB4j command runs with the system TEMP folder.
+`YadaMariaDB` copies the MariaDB4j install command: when upgrading MariaDB4j, compare `createUnixInstallProcessBuilder()` with
+the new `DB.createDBInstallProcess()`.
+

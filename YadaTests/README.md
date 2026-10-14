@@ -36,7 +36,7 @@ Each production module still builds on its own, for example `./gradlew :YadaWeb:
 ## Prerequisites
 
 - Java 21, through the root wrapper.
-- The embedded MariaDB (MariaDB4j 3.2.0, MariaDB 11.4) runs as the current user and needs no installation. On Linux it needs the usual system libraries (`libcrypt1`, `libsystemd0`), present on standard Ubuntu installations.
+- The embedded MariaDB (MariaDB4j 3.3.1, MariaDB 11.4) runs as the current user and needs no installation. On Linux it needs the usual system libraries (`libcrypt1`, `libsystemd0`), present on standard Ubuntu installations.
 - On Linux and macOS the checkout path must not contain whitespace: MariaDB4j can't start MariaDB in such folders, and Yada refuses them with a clear message. `EmbeddedDatabaseWhitespacePathTest` fails as soon as a MariaDB4j release fixes this, with instructions to remove the check.
 - The browser tests download Chromium with `installBrowsers`; they need no network access afterwards, since jQuery and Bootstrap are served from `src/main/webapp/static`.
 

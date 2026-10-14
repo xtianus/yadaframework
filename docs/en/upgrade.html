@@ -574,6 +574,18 @@ Spring and Hibernate DEBUG logging (for example <code>org.springframework.web</c
 request urls and bound values: keep it off in production. Server error details are only logged, never sent to the browser.</p>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_embedded_database_installation">Embedded database installation</h4>
+<div class="paragraph">
+<p>The installation step of the embedded MariaDB (<code>mariadb-install-db</code>) now runs with the configured embedded <code>tmpDir</code> on Linux
+and macOS, through the new public factory <code>YadaMariaDB.newEmbeddedDB(DBConfiguration)</code>, which <code>YadaMariaDBServer</code> uses.
+MariaDB4j passed <code>--tmpdir</code> only to the server, so concurrent installations (parallel builds or tests) shared <code>/tmp</code>, deleted each
+other&#8217;s temporary tables and failed with "Unknown table 'mysql.tmp_user_sys'". As in MariaDB4j, a non-empty data folder is reused
+and not installed again. Windows is unchanged: the original MariaDB4j command runs with the system TEMP folder.
+<code>YadaMariaDB</code> copies the MariaDB4j install command: when upgrading MariaDB4j, compare <code>createUnixInstallProcessBuilder()</code> with
+the new <code>DB.createDBInstallProcess()</code>.</p>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -581,7 +593,7 @@ request urls and bound values: keep it off in production. Server error details a
 <div id="footer">
 <div id="footer-text">
 Version 0.7.9<br>
-Last updated 2026-10-14 05:28:41 +0200
+Last updated 2026-10-14 05:34:53 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
