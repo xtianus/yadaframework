@@ -32,6 +32,8 @@
 
     <logger name="org.springframework.web.multipart.commons.CommonsFileUploadSupport" level="DEBUG"/>
     <logger name="org.thymeleaf.TemplateEngine.CONFIG" level="INFO"/>
+    <!-- Spring logs the complete url of unmapped requests here, with any token secret: keep it at ERROR -->
+    <logger name="org.springframework.web.servlet.PageNotFound" level="ERROR"/>
     <logger name="org.apache.commons.configuration.DefaultConfigurationBuilder" level="ERROR"/>
     <logger name="net.yodadog.yada.security.CheckSessionFilter" level="DEBUG"/>
     

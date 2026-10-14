@@ -171,6 +171,42 @@ class TokenSecretRedactionTest {
 		}
 	}
 
+	/**
+	 * Unmapped variants of the token urls (trailing slash, extra segment) end in a Spring exception that carries the
+	 * url, logged by the global exception handler and the error page. Spring itself logs the complete url of an unmapped
+	 * request at WARN on "org.springframework.web.servlet.PageNotFound": like production, the test application keeps that
+	 * logger at ERROR in logback.xml (a deployment condition)
+	 */
+	@Test
+	void unmappedTokenUrlVariantsDoNotLogSecrets() throws Exception {
+		List<String> links = new ArrayList<>();
+		links.add(testDataService.issueAutologinLink(TestDataService.USER_EMAIL, TARGET));
+		AuthTestClient registrationClient = newClient();
+		Map<String, String> registrationFields = registrationClient.formFields("/registerPage", "registerForm");
+		registrationFields.put("email", NEW_USER_EMAIL);
+		registrationFields.put("password", NEW_PASSWORD);
+		registrationClient.post("/signup", registrationFields);
+		links.add(mailbox.lastMessageTo(NEW_USER_EMAIL).link());
+		AuthTestClient resetClient = newClient();
+		Map<String, String> resetFields = resetClient.formFields("/passwordReset", "passwordResetForm");
+		resetFields.put("email", TestDataService.USER_EMAIL);
+		resetClient.post("/yadaPasswordResetPost", resetFields);
+		links.add(mailbox.lastMessageTo(TestDataService.USER_EMAIL).link());
+		try (LogCapture logs = LogCapture.start()) {
+			for (String link : links) {
+				String path = URI.create(link).getRawPath();
+				for (String variant : List.of(path + "/", path + "/extra", path + "/extra/")) {
+					int status = newClient().get(variant).statusCode();
+					assertTrue(status >= 300, variant.replace(AuthTestClient.secretOf(link), "SECRET") + " answered " + status);
+					newClient().post(variant, Map.of("x", "1"));
+				}
+			}
+			String text = applicationLogs(logs);
+			assertTrue(text.contains("Rethrowing ErrorResponse exception with status 404"), "The global exception handler was not reached:\n" + text);
+			assertNoSecret(text, links);
+		}
+	}
+
 	@Test
 	void errorDispatchesOfTokenUrlsDoNotLogSecrets() throws Exception {
 		List<String> links = new ArrayList<>();

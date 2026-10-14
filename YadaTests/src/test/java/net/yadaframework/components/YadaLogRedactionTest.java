@@ -3,6 +3,7 @@ package net.yadaframework.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -41,5 +42,23 @@ class YadaLogRedactionTest {
 		assertEquals("a=1&token=[hidden]&_csrf=[hidden]&password=[hidden]&b=2", YadaLogRedaction.redactQueryString("a=1&token=3-" + SECRET + "&_csrf=abc&password=x&b=2"));
 		assertEquals("action=%2Fhome", YadaLogRedaction.redactQueryString("action=%2Fhome"));
 		assertNull(YadaLogRedaction.redactQueryString(null));
+	}
+
+	@Test
+	void nestedSecretParametersAreHidden() {
+		assertEquals("userCredentials.newPassword=[hidden]&userCredentials.username=joe&form.confirmPassword=[hidden]",
+			YadaLogRedaction.redactQueryString("userCredentials.newPassword=s3cret&userCredentials.username=joe&form.confirmPassword=s3cret"));
+		assertEquals("newPasswordHint=x&mytoken=y", YadaLogRedaction.redactQueryString("newPasswordHint=x&mytoken=y"));
+	}
+
+	@Test
+	void secretParameterNames() {
+		for (String name : new String[] {"password", "confirmPassword", "newPassword", "token", "_csrf", "userCredentials.newPassword", "a.b.password"}) {
+			assertTrue(YadaLogRedaction.isSecretParameter(name), name);
+		}
+		for (String name : new String[] {"username", "newPasswordHint", "mytoken", "password.length", "xpassword", ""}) {
+			assertFalse(YadaLogRedaction.isSecretParameter(name), name);
+		}
+		assertFalse(YadaLogRedaction.isSecretParameter(null));
 	}
 }

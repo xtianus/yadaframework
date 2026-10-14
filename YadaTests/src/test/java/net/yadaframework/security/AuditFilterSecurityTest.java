@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -11,15 +12,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import net.yadaframework.components.YadaClientAddress;
+import net.yadaframework.tests.support.LogCapture;
 
 /**
  * The audit address (MDC "remoteIp") is the TCP peer address; X-Forwarded-For only counts when it comes from a trusted
@@ -136,6 +142,34 @@ class AuditFilterSecurityTest {
 		Map<String, String> mdc = mdcSeen(new TestAuditFilter(Collections.emptyList()), request);
 		assertNotNull(mdc.get("endpoint"));
 		assertFalse(mdc.get("endpoint").contains("12345678901234567890123456789012345678901234"), mdc.get("endpoint"));
+	}
+
+	/**
+	 * The DEBUG dump of the request parameters hides every secret parameter known to YadaLogRedaction, also when
+	 * the name is a nested property path
+	 */
+	@Test
+	void debugParameterDumpHidesSecrets() throws Exception {
+		Logger auditLogger = (Logger) LoggerFactory.getLogger(AuditFilter.class);
+		Level previousLevel = auditLogger.getLevel();
+		auditLogger.setLevel(Level.DEBUG);
+		try (LogCapture logs = LogCapture.start()) {
+			MockHttpServletRequest request = new MockHttpServletRequest("POST", "/dashboard/user/save");
+			request.setRemoteAddr("10.0.0.1");
+			request.addParameter("userCredentials.username", "visible-user");
+			request.addParameter("userCredentials.newPassword", "secret-new-password");
+			request.addParameter("newPassword", "secret-plain-new-password");
+			request.addParameter("password", "secret-password");
+			request.addParameter("confirmPassword", "secret-confirm-password");
+			request.addParameter("token", "secret-token");
+			request.addParameter("_csrf", "secret-csrf");
+			mdcSeen(new TestAuditFilter(Collections.emptyList()), request);
+			String text = logs.text();
+			assertTrue(text.contains("visible-user"), "The parameter dump did not run:\n" + text);
+			assertFalse(text.contains("secret-"), text);
+		} finally {
+			auditLogger.setLevel(previousLevel);
+		}
 	}
 
 	@Test

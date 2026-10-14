@@ -13,6 +13,7 @@ import org.springframework.web.multipart.commons.YadaCommonsMultipartResolver;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import net.yadaframework.components.YadaLogRedaction;
 
 /**
  * Answers 413 (Payload Too Large) instead of 403 when CSRF validation fails on a multipart request whose body
@@ -36,7 +37,7 @@ public class YadaUploadLimitAccessDeniedHandler implements AccessDeniedHandler {
 	@Override
 	public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
 		if (accessDeniedException instanceof CsrfException && YadaCommonsMultipartResolver.limitExceeded(request) && !hasCsrfHeader(request) && !response.isCommitted()) {
-			log.debug("Rejecting oversized multipart request to {} that has no readable CSRF token", request.getRequestURI());
+			log.debug("Rejecting oversized multipart request to {} that has no readable CSRF token", YadaLogRedaction.redactTokens(request.getRequestURI()));
 			response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
 			return;
 		}

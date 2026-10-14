@@ -12,6 +12,8 @@
 	<logger name="ch.vorburger" level="INFO"/>
 	<logger name="org.hibernate" level="WARN"/>
 	<logger name="org.springframework" level="WARN"/>
+	<!-- Spring logs the complete url of unmapped requests here, with any token secret: kept at ERROR as in production -->
+	<logger name="org.springframework.web.servlet.PageNotFound" level="ERROR"/>
 	<logger name="org.flywaydb" level="INFO"/>
 
 	<root level="INFO">

@@ -1,5 +1,6 @@
 package net.yadaframework.components;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,8 +19,10 @@ public final class YadaLogRedaction {
 	private static final Pattern TOKEN = Pattern.compile("(?<![0-9A-Za-z])(\\d+)-(?:[0-9a-fA-F]{64}|\\d{8,})(?![0-9A-Za-z])");
 	/** The path segment after the routes that receive a token */
 	private static final Pattern TOKEN_ROUTE = Pattern.compile("(/(?:autologin|registrationConfirmation|passwordReset|changeEmailConfirm|yadaPasswordChangeModal)/)(?!\\d+-" + Pattern.quote(HIDDEN) + "(?:[/?#;\\s\"'<]|$))[^/?#;\\s\"'<]+");
-	/** Request parameters whose value is a secret */
-	private static final Pattern SECRET_PARAMETER = Pattern.compile("((?:^|[?&;])(?:token|password|confirmPassword|newPassword|_csrf)=)[^&#\\s]*");
+	/** The names of the request parameters whose value is a secret, also as the last segment of a property path like "userCredentials.newPassword" */
+	private static final List<String> SECRET_PARAMETER_NAMES = List.of("token", "password", "confirmPassword", "newPassword", "_csrf");
+	/** A secret parameter in a query string */
+	private static final Pattern SECRET_PARAMETER = Pattern.compile("((?:^|[?&;])(?:[^&#;=\\s]*\\.)?(?:" + String.join("|", SECRET_PARAMETER_NAMES) + ")=)[^&#\\s]*");
 
 	private YadaLogRedaction() {
 	}
@@ -38,7 +41,23 @@ public final class YadaLogRedaction {
 	}
 
 	/**
-	 * Hides the token links and the values of the token, password and CSRF parameters of a query string
+	 * Tells if the value of a request parameter is a secret that must not be logged: the token, password, confirmPassword,
+	 * newPassword and _csrf parameters, also as the last segment of a property path such as "userCredentials.newPassword".
+	 * {@link #redactQueryString(String)} hides the same parameters.
+	 * @param parameterName the name of the parameter, can be null
+	 * @return true when the value must be hidden
+	 */
+	public static boolean isSecretParameter(String parameterName) {
+		if (parameterName==null) {
+			return false;
+		}
+		String lastSegment = parameterName.substring(parameterName.lastIndexOf('.')+1);
+		return SECRET_PARAMETER_NAMES.contains(lastSegment);
+	}
+
+	/**
+	 * Hides the token links and the values of the token, password and CSRF parameters of a query string, also when the
+	 * parameter name is a property path (see {@link #isSecretParameter(String)})
 	 * @param queryString the query string, can be null
 	 * @return the query string without secrets, null for null
 	 */

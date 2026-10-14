@@ -85,7 +85,7 @@ public class AuditFilter extends OncePerRequestFilter implements Filter {
 			} catch (Exception e) {
 				// Log the file anyway in case of exception
 				String requestUri = YadaLogRedaction.redactTokens(request.getRequestURI());
-				log.error("Error loading {}: {}", requestUri, e.getMessage());
+				log.error("Error loading {}: {}", requestUri, YadaLogRedaction.redactTokens(e.getMessage()));
 				throw e;
 			}
 			return;
@@ -215,7 +215,7 @@ public class AuditFilter extends OncePerRequestFilter implements Filter {
 								}
 								paramString.append(paramValue[i]);
 							}
-							if ("password".equals(paramName) || "confirmPassword".equals(paramName) || "token".equals(paramName)) {
+							if (YadaLogRedaction.isSecretParameter(paramName)) {
 								paramString=new StringBuffer("[value hidden from log]");
 							}
 							log.debug("** {} = {} **", paramName, paramString);

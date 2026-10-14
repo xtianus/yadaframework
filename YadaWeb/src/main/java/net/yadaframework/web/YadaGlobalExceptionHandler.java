@@ -12,6 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import net.yadaframework.components.YadaLogRedaction;
 import net.yadaframework.components.YadaWebUtil;
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.core.YadaConstants;
@@ -58,20 +59,21 @@ public class YadaGlobalExceptionHandler {
 
 		// If the exception is annotated with @ResponseStatus rethrow it and let the framework handle it.
         if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null) {
-        	log.info("Rethrowing @ResponseStatus exception: {}", e.toString());
+        	log.info("Rethrowing @ResponseStatus exception: {}", YadaLogRedaction.redactTokens(e.toString()));
             throw e;
         }
 		// Spring 6 replaced @ResponseStatus on its own web exceptions with the ErrorResponse interface,
 		// which carries the status code. Without this branch such exceptions would fall through to the
 		// error-page forward below and the response would end up as 500: an unmapped url, for example,
 		// raises NoHandlerFoundException and would answer 500 instead of 404.
+        // The text of these exceptions can contain the request url, with the secret of a token link: it is redacted.
         if (e instanceof org.springframework.web.ErrorResponse errorResponse) {
-        	log.info("Rethrowing ErrorResponse exception with status {}: {}", errorResponse.getStatusCode(), e.toString());
+        	log.info("Rethrowing ErrorResponse exception with status {}: {}", errorResponse.getStatusCode(), YadaLogRedaction.redactTokens(e.toString()));
             throw e;
         }
         if (e instanceof org.springframework.web.servlet.NoHandlerFoundException) {
         	// Someone is using an unmapped url. Just log the url not the stacktrace.
-        	log.error("NoHandlerFoundException: {}", e.getMessage());
+        	log.error("NoHandlerFoundException: {}", YadaLogRedaction.redactTokens(e.getMessage()));
         } else {
         	log.error("Unhandled exception shown to user", e);
         }
