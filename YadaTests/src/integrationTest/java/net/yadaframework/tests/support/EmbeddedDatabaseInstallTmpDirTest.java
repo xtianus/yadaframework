@@ -43,4 +43,26 @@ class EmbeddedDatabaseInstallTmpDirTest {
 			assertFalse(TestRun.isListening(run.databasePort()), "The installation must not leave a server running: " + db);
 		}
 	}
+
+	@Test
+	void existingDataFolderIsReusedNotInstalled() throws Exception {
+		try (TestRun run = TestRun.create()) {
+			Path tmpDir = run.databaseRoot().resolve("tmp");
+			Files.createDirectories(tmpDir);
+			Path probe = Files.createFile(tmpDir.resolve("#sql-ytsprobe-1-1.MAI"));
+			Path existingFile = Files.createDirectories(run.dataDirectory()).resolve("existing.txt");
+			Files.writeString(existingFile, "existing data");
+			DBConfigurationBuilder configBuilder = DBConfigurationBuilder.newBuilder();
+			configBuilder.setBaseDir(run.databaseBaseDirectory().toFile());
+			configBuilder.setDataDir(run.dataDirectory().toFile());
+			configBuilder.setTmpDir(tmpDir.toString());
+			configBuilder.setPort(run.databasePort());
+			YadaMariaDB.newEmbeddedDB(configBuilder.build());
+			// Like DB.newEmbeddedDB of MariaDB4j 3.3.1: nothing unpacked, nothing installed
+			assertFalse(Files.exists(run.databaseBaseDirectory().resolve("scripts")), "The binaries were unpacked over an existing data folder");
+			assertFalse(Files.exists(run.dataDirectory().resolve("mysql")), "An existing data folder was installed again");
+			assertTrue(Files.exists(existingFile));
+			assertTrue(Files.exists(probe), "mariadbd ran although nothing had to be installed");
+		}
+	}
 }
