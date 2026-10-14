@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.slf4j.LoggerFactory;
 
 import net.yadaframework.tests.components.CapturingMailSender;
 import net.yadaframework.tests.components.TestDataService;
@@ -174,8 +176,8 @@ class TokenSecretRedactionTest {
 	/**
 	 * Unmapped variants of the token urls (trailing slash, extra segment) end in a Spring exception that carries the
 	 * url, logged by the global exception handler and the error page. Spring itself logs the complete url of an unmapped
-	 * request at WARN on "org.springframework.web.servlet.PageNotFound": like production, the test application keeps that
-	 * logger at ERROR in logback.xml (a deployment condition)
+	 * request at WARN on "org.springframework.web.servlet.PageNotFound": like production (a deployment condition), that
+	 * logger is kept at ERROR, by logback.xml and explicitly here so that the result doesn't depend on the other suites
 	 */
 	@Test
 	void unmappedTokenUrlVariantsDoNotLogSecrets() throws Exception {
@@ -192,6 +194,9 @@ class TokenSecretRedactionTest {
 		resetFields.put("email", TestDataService.USER_EMAIL);
 		resetClient.post("/yadaPasswordResetPost", resetFields);
 		links.add(mailbox.lastMessageTo(TestDataService.USER_EMAIL).link());
+		Logger pageNotFoundLogger = (Logger) LoggerFactory.getLogger("org.springframework.web.servlet.PageNotFound");
+		Level previousLevel = pageNotFoundLogger.getLevel();
+		pageNotFoundLogger.setLevel(Level.ERROR);
 		try (LogCapture logs = LogCapture.start()) {
 			for (String link : links) {
 				String path = URI.create(link).getRawPath();
@@ -204,6 +209,8 @@ class TokenSecretRedactionTest {
 			String text = applicationLogs(logs);
 			assertTrue(text.contains("Rethrowing ErrorResponse exception with status 404"), "The global exception handler was not reached:\n" + text);
 			assertNoSecret(text, links);
+		} finally {
+			pageNotFoundLogger.setLevel(previousLevel);
 		}
 	}
 
