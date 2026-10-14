@@ -1832,8 +1832,12 @@
 	
 	/**
 	 * Starts impersonating a user by navigating to the impersonation url with the "id" and "currentLocation" parameters.
-	 * currentLocation is the local path of the current page with its query string, e.g. "/en/dashboard/user?page=2",
-	 * so that the server can accept it with YadaWebUtil.safeLocalRedirect().
+	 * currentLocation is not a full url but the local path of the current page with its query string,
+	 * location.pathname + location.search, e.g. "/en/dashboard/user?page=2". The path includes the servlet context path
+	 * when the application doesn't run on the root context, e.g. "/shop/en/dashboard/user?page=2".
+	 * The server should validate it with YadaWebUtil.safeLocalRedirect(), remove the context path, and redirect to it as
+	 * "redirect:" + safeLocalRedirect(saved), which adds the context path again (see UserProfileController in YadaExamples).
+	 * YadaWebUtil.redirectString() is not suitable because it encodes the path again and can add a second locale.
 	 * @param url the impersonation url
 	 * @param userId the id of the user to impersonate
 	 * @param method optional HTTP method: "POST" submits a form that carries the CSRF token (needs yada.ajax.js), GET when missing
