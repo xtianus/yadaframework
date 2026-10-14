@@ -312,8 +312,8 @@ YadaDataTable yadaDataTable = yadaDataTableFactory.getSingleton("userTable", loc
 <17> The button is "global", i.e. is shown in the toolbar, not in the row, and is always enabled
 <18> CSS class to be added to the button in the toolbar
 <19> The button is shown only to users with the "ADMIN" role. Can be called may times with different role values
-<20> The URL is provided by a javascript function
-<21> The click does not perform an ajax call, it just follows the link
+<20> The URL is provided by a javascript function. Here it calls `yada.impersonate(url, userId, "POST")`: impersonation must be a POST, and the function sends the current page as a local path, see <<upgrade.adoc#_impersonation,Impersonation>>
+<21> The click does not perform an ajax call. A legacy `yada.dataTableCrud` button with `ajax: false` and `method: "POST"` submits a POST form
 <22> Specify a CSS selector for an element that should be covered with a "loader" icon while the ajax call is in progress
 <23> Name of the ID request parameter sent in the call, default is "id". Useless for global buttons
 <24> Enable the toolbar button when one or many rows are selected. The default is for the toolbar button to be enabled only when one row is selected

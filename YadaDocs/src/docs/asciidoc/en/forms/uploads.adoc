@@ -65,6 +65,13 @@ if (YadaCommonsMultipartResolver.limitExceeded(request)) {
 On an ajax POST, anything returned by the @Controller is discarded and the user only sees a generic error message. 
 ====
 
+[NOTE]
+====
+With Spring Security CSRF protection a plain (non ajax) form over the limit never reaches the @Controller: it is answered with
+status 413 before any @Controller is called, see <<uploadCsrf,CSRF token of multipart forms>>. The check above is reached by uploads
+that send the CSRF token in a header, like ajax uploads, and by applications without CSRF protection.
+====
+
 [[uploadCsrf]]
 ===  CSRF token of multipart forms
 The `MultipartFilter` parses the multipart body before Spring Security, so the CSRF token can be sent in a multipart

@@ -124,9 +124,8 @@ The controller can then open the page that contains the password reset form:
 [source,html]
 ----
 @RequestMapping("/passwordReset")
-public String passwordReset(String email, YadaRegistrationRequest yadaRegistrationRequest) {
-	yadaRegistrationRequest.setEmail(email);
-	yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
+public String passwordReset(String email, YadaPasswordResetForm yadaPasswordResetForm) {
+	yadaPasswordResetForm.setEmail(email);
 	return "/passwordReset";
 }
 ----
@@ -136,7 +135,7 @@ any error messages:
 
 [source,html]
 ----
-<form role="form" th:action="@{/yadaPasswordResetPost}" th:object="${yadaRegistrationRequest}" method="post">
+<form role="form" th:action="@{/yadaPasswordResetPost}" th:object="${yadaPasswordResetForm}" method="post">
 	<fieldset class="has-feedback">
 		<label for="email">E-Mail</label>
 		<div th:with="hasError=${#fields.hasErrors('email')}" >
@@ -150,26 +149,27 @@ any error messages:
 ----
 
 The default form handler is implemented in `YadaRegistrationController.java`.
-If the user does not exist, it returns an error, otherwise it sends a recovery email to the supplied address.
+It binds the `YadaPasswordResetForm` class, which has the `email` field only, so that nothing else can be injected
+by the browser. If the user exists, it replaces any previous recovery request with a new one and sends a recovery email
+to the supplied address. The answer shown to the user is the same whether the user exists or not.
 
 The email template is in `/src/main/resources/template/email/passwordRecovery.html`.
-When the email can not be sent, an error is returned to the form, otherwise a successful notification
+When the email can not be sent for an existing user, an error is notified, otherwise a successful notification
 is shown after redirection to the page configured with `config/security/passwordReset/passwordResetSent` (defaults to home).
 
 These are the localisation keys for the whole process:
 
 [source,properties]
 ----
-yada.passwordrecover.username.notfound = ...
 email.subject.passwordRecovery = ...
 yada.email.send.failed = ...
 yada.email.passwordrecover.title = ...
 yada.email.passwordrecover.message =  ...
 ----
 
-IMPORTANT: if you need higher security, do not acknowledge the validity of the supplied email address but just return the same message whether the email exists or not
-
-The recovery email contains a link to the "/passwordReset/{token}" handler.
+The recovery email contains a link to the "/passwordReset/{token}" handler. The `{token}` is an opaque
+single-use secret of the form `<id>-<64 hex characters>`: the database keeps only its SHA-256 digest, and the link
+expires after `config/security/passwordReset/expirationMinutes` (30 by default).
 This handler is application-specific but can use the `yadaRegistrationController.passwordResetForm()` method
 to do all the needed work.
 
@@ -377,6 +377,10 @@ login form doesn't reveal which accounts exist (`DaoAuthenticationProvider` hide
 |login failed for some other reason
 |===
 
+An account that exceeded the maximum number of failed attempts is locked: `YadaUserDetailsService` returns a locked
+`UserDetails`, so Spring Security throws `LockedException` (not `TooManyFailedAttemptsException`). The framework handler
+sets `lockoutMinutes` for it; custom failure handlers should check `LockedException`.
+
 The "boolean" values actually have the value of their name, e.g. `?loginErrorFlag=loginErrorFlag`
 
 The *first two* parameters are always set, the others are mutually exclusive but one
@@ -406,8 +410,7 @@ be used, for example "username":
 @RequestMapping("/pwdChange")
 public String pwdChange(String username, Model model, Locale locale) {
 	// The user is not logged in yet, and we open the password reset page
-	YadaRegistrationRequest yadaRegistrationRequest = new YadaRegistrationRequest();
-	return registrationController.passwordReset(username, yadaRegistrationRequest);
+	return registrationController.passwordReset(username, new YadaPasswordResetForm());
 }
 ----
 
@@ -437,10 +440,22 @@ TODO
 [.todo]
 ----
 - checking session expiration
-- autologin
 - yadaLoginSuccess?targetUrl: why use it when you have a login successHandler that can do that?
 - using YadaAuthenticationSuccessHandler.setTargetUrlParameter() to specify the landing page dynamically in the login form
 - impersonating users
 ----
 
+==  Autologin Links
 
+An autologin link logs a user in without a password, for example from an email. The link is created by
+`YadaSecurityEmailService.makeAutologinLink()` (or `YadaTokenHandler`) and has the form `/autologin/<id>-<64 hex characters>?action=/some/path`. The token
+is an opaque bearer secret, valid once, and the database keeps only its digest. The expiration is mandatory:
+`config/security/autologinExpirationHours` (10 by default). Tokens of disabled users are rejected.
+
+Opening the link with a GET shows a confirmation page with the account name and a button; only the confirming POST (protected
+by CSRF) consumes the token and logs in, so that mail scanners and link previews can't use the link. A user who is already
+logged in is never switched to another account. The texts of the page are the message keys `yada.autologin.confirm.title`,
+`.message`, `.button` and `.cancel`, with English defaults.
+
+The `action` is the local path where the user lands after the login. It must be accepted unchanged by
+`YadaWebUtil.safeLocalRedirect()`, otherwise `makeAutologinLink()` throws.

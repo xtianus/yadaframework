@@ -69,7 +69,7 @@ Some security parameters must be configured in `conf.webapp.prod.xml`:
 <3> when true, passwords are encrypted in the database
 <4> the number of consecutive failed login attempts before an account is locked out
 <5> the number of minutes to wait for a locked out account before a new login attempt can be made
-<6> the validity time of autologin links
+<6> the validity time of autologin links, which must have an expiration. Registration confirmation links expire after `<registration><expirationHours>` (24), password recovery and email change links after `<passwordReset><expirationMinutes>` and `<emailChange><expirationMinutes>` (30 each)
 <7> list of roles that users can have
 
 The list of roles defines an id and a key for every role a user can have in the application.

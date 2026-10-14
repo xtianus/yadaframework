@@ -45,6 +45,19 @@ public String registerPage(MyRegistrationRequest myRegistrationRequest) {
 }
 ----
 
+The registration request is bound from user input, so the @Controller that receives the form must restrict the bound fields
+with an `@InitBinder` for its model attribute. Only `email`, `password` and `confirmPassword`, plus the listed fields of the
+subclass, are bound; anything else sent by the browser (such as an id or a user) is ignored, and
+`handleRegistrationRequest` throws `YadaInvalidUsageException` if the request already has an id or a user:
+
+[source,java]
+----
+@InitBinder("myRegistrationRequest")
+void initBinder(WebDataBinder binder) {
+	YadaRegistrationController.setRegistrationAllowedFields(binder, "name", "surname");
+}
+----
+
 The registration form can use a hidden "antispam" field that would be filled by spam
 scripts only, so that the most basic spam attacks can be easily prevented. In the
 example implementation the field "username" must be left blank in order for registration
@@ -131,7 +144,9 @@ email.subject.registrationConfirmation = Registration ({0})
 
 == Confirmation handler
 The default link in the confirmation email has the format `/registrationConfirmation/{token}` where
-`{token}` is a unique identifier saved in the database. This can be overridden with the 
+`{token}` is an opaque single-use secret of the form `<id>-<64 hex characters>`: the database keeps only its SHA-256 digest,
+and the link expires after `config/security/registration/expirationHours` (24 by default). The link can be used once;
+opening it creates the user. This can be overridden with the 
 `config/security/registration/confirmationLink` configuration entry:
 
 [source,xml]
