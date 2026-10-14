@@ -1,6 +1,7 @@
 package net.yadaframework.tools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -87,6 +88,29 @@ class YadaToolsFunctionalTest {
 		Files.writeString(webXml, "<!-- edited -->");
 		runner(projectDir, "yadaInit").build();
 		assertEquals("<!-- edited -->", Files.readString(webXml));
+	}
+
+	/**
+	 * The generated registration code uses the current security APIs: the registration form binds only the allowed
+	 * fields and the password reset form binds only the email
+	 */
+	@Test
+	void yadaInitGeneratesTheHardenedRegistrationCode(@TempDir Path projectDir) throws Exception {
+		writeBuild(projectDir, """
+				projectName = 'YtTest'
+				acronym = 'ytt'
+				basePackage = 'com.example.ytt'
+				basePath = '%s'
+			""".formatted(projectDir.resolve("srv").toString().replace("\\", "/")));
+		runner(projectDir, "yadaInit").build();
+		String controller = Files.readString(projectDir.resolve("src/main/java/com/example/ytt/web/RegistrationController.java"));
+		assertTrue(controller.contains("@InitBinder(\"yttRegistrationRequest\")"), controller);
+		assertTrue(controller.contains("YadaRegistrationController.setRegistrationAllowedFields(binder, \"name\", \"surname\", \"username\");"), controller);
+		assertTrue(controller.contains("public String passwordReset(String email, YadaPasswordResetForm yadaPasswordResetForm)"), controller);
+		assertFalse(controller.contains("YadaRegistrationRequest yadaRegistrationRequest"), controller);
+		assertFalse(controller.contains("import net.yadaframework.security.persistence.entity.YadaRegistrationRequest;"), controller);
+		String passwordReset = Files.readString(projectDir.resolve("src/main/webapp/WEB-INF/views/passwordReset.html"));
+		assertTrue(passwordReset.contains("th:action=\"@{/yadaPasswordResetPost}\" th:object=\"${yadaPasswordResetForm}\" method=\"post\""), passwordReset);
 	}
 
 	@Test
