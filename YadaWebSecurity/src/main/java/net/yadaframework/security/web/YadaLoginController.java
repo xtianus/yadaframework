@@ -77,7 +77,8 @@ public class YadaLoginController {
 	/**
 	 * This method can be set as the default ajax login target in a Security Config, and will redirect to the targetUrl when specified.
 	 * Example: successHandler.setDefaultTargetUrlAjaxRequest("/yadaLoginSuccess?targetUrl=/configurator/");
-	 * @param targetUrl the final url after login, without any language in the path (will be added)
+	 * @param targetUrl the final url after login, without any language in the path (will be added). It must be a local path
+	 * accepted by {@link YadaWebUtil#safeLocalRedirect(String)}, otherwise the redirect goes to "/"
 	 * @param model
 	 * @return
 	 */
@@ -86,6 +87,8 @@ public class YadaLoginController {
 		if (targetUrl==null) {
 			return YadaViews.AJAX_SUCCESS;
 		}
+		// The parameter comes from the client: a target that would leave the site becomes "/"
+		targetUrl = yadaWebUtil.safeLocalRedirect(targetUrl);
 		// Automatically add the language in the target url path when needed
 		if (yadaConfiguration.isLocalePathVariableEnabled()) {
 			Locale locale = LocaleContextHolder.getLocale();

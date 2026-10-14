@@ -668,6 +668,35 @@ public class YadaWebUtil {
 		return "/";
 	}
 
+	/**
+	 * Escapes a value for use inside a JSON string literal, without the enclosing quotes, in a document that may also be
+	 * read as HTML or JavaScript, like the YadaViews.AJAX_REDIRECT answer. Besides the quote, the backslash and the control
+	 * characters, also "&lt;", "&gt;", "&amp;", "'" and the U+2028/U+2029 separators become JSON unicode escapes (a backslash,
+	 * "u" and four hex digits), so the value can't end the string, add JSON properties, or open or close an HTML element or
+	 * a script. JSON.parse() returns the original value.
+	 * @param value the text to escape, can be null
+	 * @return the escaped text, an empty string for null
+	 */
+	public static String escapeJsonString(String value) {
+		if (value==null) {
+			return "";
+		}
+		StringBuilder result = new StringBuilder(value.length() + 16);
+		for (int i = 0; i < value.length(); i++) {
+			char character = value.charAt(i);
+			if (character=='"') {
+				result.append("\\\"");
+			} else if (character=='\\') {
+				result.append("\\\\");
+			} else if (character<0x20 || character==0x7f || character=='<' || character=='>' || character=='&' || character=='\'' || character=='\u2028' || character=='\u2029') {
+				result.append(String.format("\\u%04x", (int) character));
+			} else {
+				result.append(character);
+			}
+		}
+		return result.toString();
+	}
+
 	/** How many times safeLocalRedirect() decodes a path before rejecting it as too deeply encoded */
 	private static final int SAFE_REDIRECT_DECODING_ROUNDS = 3;
 	private static final Pattern ENCODED_SEPARATOR = Pattern.compile("%(2f|5c)", Pattern.CASE_INSENSITIVE);
