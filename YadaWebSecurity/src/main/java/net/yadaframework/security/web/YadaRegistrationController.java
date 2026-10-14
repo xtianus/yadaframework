@@ -17,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -296,10 +297,10 @@ public class YadaRegistrationController {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/** 
-	 * Default method to change a user password.
+	 * Default method to change a user password. POST only: the change must come from the form, with its CSRF token.
 	 * @return
 	 */
-	@RequestMapping("/passwordChangeAfterRequest") // Ajax
+	@PostMapping("/passwordChangeAfterRequest") // Ajax
 	public String passwordChangeAfterRequest(YadaFormPasswordChange yadaFormPasswordChange, BindingResult bindingResult, Model model, Locale locale) {
 		// TODO view-related code should be moved to the application controller
 		if (!yadaUserDetailsService.validatePasswordSyntax(yadaFormPasswordChange.getPassword())) {
@@ -352,6 +353,8 @@ public class YadaRegistrationController {
 	/**
 	 * Handles the password reset form: when a user with the submitted email exists, a new password recovery request
 	 * replaces the previous ones and its link is emailed. Only the email is read from the request.
+	 * POST only: the request deletes the pending links of the user and sends an email, so it must come from the form,
+	 * with its CSRF token.
 	 * @param yadaPasswordResetForm will contain the email address that requires a password reset
 	 * @param bindingResult
 	 * @param locale
@@ -360,7 +363,7 @@ public class YadaRegistrationController {
 	 * @param response
 	 * @return
 	 */
-	@RequestMapping("/yadaPasswordResetPost")
+	@PostMapping("/yadaPasswordResetPost")
 	public String yadaPasswordResetPost(YadaPasswordResetForm yadaPasswordResetForm, BindingResult bindingResult, Locale locale, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) {
 		boolean emailSent = false;
 		String targetView = yadaConfiguration.getPasswordResetSent(locale);
