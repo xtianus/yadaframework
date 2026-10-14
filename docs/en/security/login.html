@@ -144,6 +144,7 @@ window.onscroll = function() {
 <li><a href="#_change_email">Change email</a></li>
 </ul>
 </li>
+<li><a href="#_autologin_links">Autologin Links</a></li>
 </ul>
 </div>
 </div>
@@ -360,9 +361,8 @@ implementation that uses javascript to copy the field value to the form behind t
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">@RequestMapping("/passwordReset")
-public String passwordReset(String email, YadaRegistrationRequest yadaRegistrationRequest) {
-	yadaRegistrationRequest.setEmail(email);
-	yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
+public String passwordReset(String email, YadaPasswordResetForm yadaPasswordResetForm) {
+	yadaPasswordResetForm.setEmail(email);
 	return "/passwordReset";
 }</code></pre>
 </div>
@@ -373,7 +373,7 @@ any error messages:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form role="form" th:action="@{/yadaPasswordResetPost}" th:object="${yadaRegistrationRequest}" method="post"&gt;
+<pre class="highlightjs highlight"><code class="language-html hljs" data-lang="html">&lt;form role="form" th:action="@{/yadaPasswordResetPost}" th:object="${yadaPasswordResetForm}" method="post"&gt;
 	&lt;fieldset class="has-feedback"&gt;
 		&lt;label for="email"&gt;E-Mail&lt;/label&gt;
 		&lt;div th:with="hasError=${#fields.hasErrors('email')}" &gt;
@@ -388,11 +388,13 @@ any error messages:</p>
 </div>
 <div class="paragraph">
 <p>The default form handler is implemented in <code>YadaRegistrationController.java</code>.
-If the user does not exist, it returns an error, otherwise it sends a recovery email to the supplied address.</p>
+It binds the <code>YadaPasswordResetForm</code> class, which has the <code>email</code> field only, so that nothing else can be injected
+by the browser. If the user exists, it replaces any previous recovery request with a new one and sends a recovery email
+to the supplied address. The answer shown to the user is the same whether the user exists or not.</p>
 </div>
 <div class="paragraph">
 <p>The email template is in <code>/src/main/resources/template/email/passwordRecovery.html</code>.
-When the email can not be sent, an error is returned to the form, otherwise a successful notification
+When the email can not be sent for an existing user, an error is notified, otherwise a successful notification
 is shown after redirection to the page configured with <code>config/security/passwordReset/passwordResetSent</code> (defaults to home).</p>
 </div>
 <div class="paragraph">
@@ -400,27 +402,16 @@ is shown after redirection to the page configured with <code>config/security/pas
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">yada.passwordrecover.username.notfound = ...
-email.subject.passwordRecovery = ...
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">email.subject.passwordRecovery = ...
 yada.email.send.failed = ...
 yada.email.passwordrecover.title = ...
 yada.email.passwordrecover.message =  ...</code></pre>
 </div>
 </div>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
-if you need higher security, do not acknowledge the validity of the supplied email address but just return the same message whether the email exists or not
-</td>
-</tr>
-</table>
-</div>
 <div class="paragraph">
-<p>The recovery email contains a link to the "/passwordReset/{token}" handler.
+<p>The recovery email contains a link to the "/passwordReset/{token}" handler. The <code>{token}</code> is an opaque
+single-use secret of the form <code>&lt;id&gt;-&lt;64 hex characters&gt;</code>: the database keeps only its SHA-256 digest, and the link
+expires after <code>config/security/passwordReset/expirationMinutes</code> (30 by default).
 This handler is application-specific but can use the <code>yadaRegistrationController.passwordResetForm()</code> method
 to do all the needed work.</p>
 </div>
@@ -707,7 +698,8 @@ execution goes through <code>YadaAuthenticationFailureHandler</code> that sets t
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">passwordError</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">boolean</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">login failed for a wrong password</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">login failed for a wrong password or an unknown username: the two cases are reported in the same way so that the
+login form doesn&#8217;t reveal which accounts exist (<code>DaoAuthenticationProvider</code> hides <code>UsernameNotFoundException</code>)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">userDisabled</p></td>
@@ -722,12 +714,8 @@ execution goes through <code>YadaAuthenticationFailureHandler</code> that sets t
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">lockoutMinutes</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">long</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">the number of minutes before a locked account is allowed again</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">usernameNotFound, password</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">boolean, string</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">user not found in database, value of password typed</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">the number of minutes before a locked account is allowed again. The account is locked after more than
+<code>&lt;security&gt;&lt;maxFailedAttempts&gt;</code> wrong passwords, and stays locked for <code>&lt;failedAttemptsLockoutMinutes&gt;</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">loginError</p></td>
@@ -736,6 +724,11 @@ execution goes through <code>YadaAuthenticationFailureHandler</code> that sets t
 </tr>
 </tbody>
 </table>
+<div class="paragraph">
+<p>An account that exceeded the maximum number of failed attempts is locked: <code>YadaUserDetailsService</code> returns a locked
+<code>UserDetails</code>, so Spring Security throws <code>LockedException</code> (not <code>TooManyFailedAttemptsException</code>). The framework handler
+sets <code>lockoutMinutes</code> for it; custom failure handlers should check <code>LockedException</code>.</p>
+</div>
 <div class="paragraph">
 <p>The "boolean" values actually have the value of their name, e.g. <code>?loginErrorFlag=loginErrorFlag</code></p>
 </div>
@@ -767,8 +760,7 @@ be used, for example "username":</p>
 @RequestMapping("/pwdChange")
 public String pwdChange(String username, Model model, Locale locale) {
 	// The user is not logged in yet, and we open the password reset page
-	YadaRegistrationRequest yadaRegistrationRequest = new YadaRegistrationRequest();
-	return registrationController.passwordReset(username, yadaRegistrationRequest);
+	return registrationController.passwordReset(username, new YadaPasswordResetForm());
 }</code></pre>
 </div>
 </div>
@@ -807,7 +799,6 @@ user might be confused about which email address to use for login.</p>
 <div class="listingblock todo">
 <div class="content">
 <pre>- checking session expiration
-- autologin
 - yadaLoginSuccess?targetUrl: why use it when you have a login successHandler that can do that?
 - using YadaAuthenticationSuccessHandler.setTargetUrlParameter() to specify the landing page dynamically in the login form
 - impersonating users</pre>
@@ -816,11 +807,32 @@ user might be confused about which email address to use for login.</p>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_autologin_links">Autologin Links</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>An autologin link logs a user in without a password, for example from an email. The link is created by
+<code>YadaSecurityEmailService.makeAutologinLink()</code> (or <code>YadaTokenHandler</code>) and has the form <code>/autologin/&lt;id&gt;-&lt;64 hex characters&gt;?action=/some/path</code>. The token
+is an opaque bearer secret, valid once, and the database keeps only its digest. The expiration is mandatory:
+<code>config/security/autologinExpirationHours</code> (10 by default). Tokens of disabled users are rejected.</p>
+</div>
+<div class="paragraph">
+<p>Opening the link with a GET shows a confirmation page with the account name and a button; only the confirming POST (protected
+by CSRF) consumes the token and logs in, so that mail scanners and link previews can&#8217;t use the link. A user who is already
+logged in is never switched to another account. The texts of the page are the message keys <code>yada.autologin.confirm.title</code>,
+<code>.message</code>, <code>.button</code> and <code>.cancel</code>, with English defaults.</p>
+</div>
+<div class="paragraph">
+<p>The <code>action</code> is the local path where the user lands after the login. It must be accepted unchanged by
+<code>YadaWebUtil.safeLocalRedirect()</code>, otherwise <code>makeAutologinLink()</code> throws.</p>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.9<br>
-Last updated 2026-09-17 19:09:05 +0200
+Last updated 2026-10-14 05:13:59 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

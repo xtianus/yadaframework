@@ -131,6 +131,14 @@ window.onscroll = function() {
 <ul class="sectlevel1">
 <li><a href="#_latest_stable_version">Latest Stable Version</a></li>
 <li><a href="#_version_comparison">Version Comparison</a></li>
+<li><a href="#_changes_in_0_7_9">Changes in 0.7.9</a>
+<ul class="sectlevel2">
+<li><a href="#_embedded_database">Embedded database</a></li>
+<li><a href="#_hibernate_dialect">Hibernate dialect</a></li>
+<li><a href="#_sorting">Sorting</a></li>
+<li><a href="#_security_hardening">Security hardening</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -206,11 +214,368 @@ is for that version.</p>
 </table>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_changes_in_0_7_9">Changes in 0.7.9</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_embedded_database">Embedded database</h3>
+<div class="paragraph">
+<p>Yada no longer attaches silently to any database that answers on the configured embedded port: the running server
+must use the configured data folder, otherwise the application fails at startup. If you rely on a database
+started separately on that port, configure the same <code>datadir</code> or a different port.
+On Linux and macOS, embedded database folders containing whitespace are refused at startup with a clear message.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_hibernate_dialect">Hibernate dialect</h3>
+<div class="paragraph">
+<p>Hibernate still detects the dialect by itself, except when the embedded database is enabled: Yada then uses
+<code>MariaDBDialect</code>, because Hibernate can&#8217;t recognize MariaDB 11 through MySQL Connector/J and would fail at startup.
+The new <code>&lt;database&gt;&lt;dialect&gt;</code> setting forces any dialect, e.g. <code>MariaDBDialect</code> for a MariaDB server reached
+through MySQL Connector/J. See <a href="database/overview.html#_hibernate_dialect">Hibernate Dialect</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sorting">Sorting</h3>
+<div class="paragraph">
+<p>A single <code>sort=property,direction</code> request parameter bound to <code>YadaPageRequest</code> works: it was split at the comma
+by Spring and rejected with "No sort column specified".</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_security_hardening">Security hardening</h3>
+<div class="paragraph">
+<p>The following changes come from a security review of the framework. Some of them break existing code or
+configuration: read the whole section before upgrading an application that uses Yada security, DataTables or uploads.
+Unless stated otherwise there are no new mandatory configuration keys.</p>
+</div>
+<div class="sect3">
+<h4 id="_security_links_are_single_use_bearer_tokens">Security links are single-use bearer tokens</h4>
+<div class="paragraph">
+<p>Autologin, registration confirmation, password recovery and email change links no longer carry a number that is
+stored in the database. A link now has the form <code>&lt;id&gt;-&lt;64 hex characters&gt;</code>; the hex part is a random 256-bit secret that exists
+only in the link, while the database stores a SHA-256 digest of it (column <code>tokenHash</code>). A link is a bearer token, not a signed
+link: whoever holds it can use it once, until it expires. Opening a link consumes it under a database row lock, so two
+concurrent requests can&#8217;t both succeed, and a rolled-back change leaves the link usable.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Registration confirmation links expire after <code>security/registration/expirationHours</code> (default 24), password recovery
+and email change links after <code>security/passwordReset/expirationMinutes</code> and <code>security/emailChange/expirationMinutes</code> (default 30 each).
+<code>security/autologinExpirationHours</code> (default 10) is unchanged, but an autologin token without expiration is now invalid.</p>
+</li>
+<li>
+<p>Links can be built only from the instance returned when the token is issued (<code>YadaTokenHandler.makeAutoLoginToken</code>,
+<code>YadaRegistrationRequestDao.issue</code>). Building a link from a token loaded from the database throws <code>YadaInvalidUsageException</code>:
+issue a new token instead.</p>
+</li>
+<li>
+<p>Removed: <code>YadaRegistrationRequest.getToken/setToken</code>, <code>YadaAutoLoginToken.getToken/setToken</code>,
+<code>YadaTokenHandler.makeLink(long, long, Map)</code>, <code>YadaRegistrationRequestDao.findByIdAndTokenOrderByTimestampDesc</code> and
+<code>YadaAutoLoginTokenDao.findByIdAndTokenOrderByTimestampDesc</code>. <code>YadaTokenHandler.parseLink</code> now returns a
+<code>YadaSecurityTokenCodec.ParsedSecurityToken</code>, or null when the link is not valid.</p>
+</li>
+<li>
+<p>New: <code>YadaSecurityTokenCodec</code>, <code>YadaAutoLoginTokenDao.issue/findValid/consume</code>,
+<code>YadaRegistrationRequestDao.issue/findValid/consume/findByUserAndRegistrationType/getLifetimeMillis</code> and
+<code>YadaRegistrationController.handleEmailChangeRequest</code>. <code>YadaRegistrationRequestDao.save</code> is deprecated: it issues
+new requests and throws for an existing one; <code>YadaAutoLoginTokenDao.save</code> throws for a new token.</p>
+</li>
+<li>
+<p>The <code>action</code> of an autologin link must be a local path accepted unchanged by <code>YadaWebUtil.safeLocalRedirect</code>
+(see <a href="#_local_redirect_targets">below</a>), otherwise <code>makeAutologinLink</code> throws. The action is decoded once, by Spring MVC:
+callers that encoded it twice must encode it once.</p>
+</li>
+<li>
+<p>A registration confirmation that finds an existing user, and the <code>USER_EXISTS</code> and <code>ERROR</code> outcomes of <code>changeUsername</code>,
+now consume the request. <code>YadaAutoLoginTokenDao.deleteExpired</code> also deletes tokens without expiration.</p>
+</li>
+</ul>
+</div>
+<div class="sect4">
+<h5 id="_autologin_needs_a_confirmation_click">Autologin needs a confirmation click</h5>
+<div class="paragraph">
+<p><code>GET /autologin/{token}</code> no longer logs in: it shows a confirmation page (<code>/yada/security/autologinConfirm</code>) with the
+account name and a button, and only the <code>POST</code> to the same url, protected by CSRF, consumes the token and logs in.
+This stops mail scanners and link previews from using the link. The page can&#8217;t be disabled. A user who is already logged
+in is never switched to another account, and the token stays unused. The CSRF token is renewed after the login.
+Disabled users are rejected. The page texts are the message keys <code>yada.autologin.confirm.title</code>, <code>.message</code>, <code>.button</code>
+and <code>.cancel</code>; English defaults are built in, so applications only define them to translate or reword. If the application
+sets its own <code>CsrfTokenRepository</code>, expose it as a bean so that the login can renew its token.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_migration_v002_and_rollout">Migration V002 and rollout</h5>
+<div class="paragraph">
+<p>Applications that map <code>YadaRegistrationRequest</code> or <code>YadaAutoLoginToken</code> need a Flyway migration, with the next free
+version number, for example <code>V&lt;n&gt;__hashed_security_tokens.sql</code>. It must:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>delete the rows of every JOINED subclass of <code>YadaRegistrationRequest</code> and <code>YadaAutoLoginToken</code>, then the rows of the two
+tables themselves, because outstanding links can&#8217;t be converted;</p>
+</li>
+<li>
+<p>drop the <code>token</code> column of both tables, and add the <code>tokenHash varchar(64) not null</code> column to both and the
+<code>expiration TIMESTAMP NULL</code> column to <code>YadaRegistrationRequest</code>;</p>
+</li>
+<li>
+<p>when the schema still has the old unique constraints on <code>yadaUserCredentials_id</code> (both tables) or <code>trattamentoDati_id</code>
+(<code>YadaRegistrationRequest</code>), first add a plain index on each of those columns, in its own <code>ALTER</code>, then drop the unique index
+(<code>SHOW INDEX FROM YadaAutoLoginToken</code> shows the names). A user can now hold several tokens.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The complete script, with a comment on each step, is <code>YadaExamples/src/main/resources/database/V002<em>hashed_security_tokens.sql</code>
+(<code>YexRegistrationRequest</code> is the example subclass); <code>YadaTests/src/main/resources/database/V002</em>hashed_security_tokens.sql</code>
+is the same for the test application. Check the result against the schema generated for your entities.</p>
+</div>
+<div class="paragraph">
+<p>Roll out in a maintenance window:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>stop every node of the old application before the migration runs, so that no node issues a legacy token meanwhile, then
+start the new version;</p>
+</li>
+<li>
+<p>every outstanding autologin, registration, password recovery and email change link stops working: users have to
+ask for new ones. Accounts and profiles are not touched;</p>
+</li>
+<li>
+<p>DDL is not transactional in MySQL and MariaDB: back up the token tables (and the subclass tables) first. A failure after the
+<code>DELETE</code> statements can&#8217;t be rolled back by Flyway: fix the script and run <code>repair</code>, or restore the backup;</p>
+</li>
+<li>
+<p>rolling the application back needs a restore of the old schema; the old links are gone either way.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_registration_binding_and_password_reset">Registration binding and password reset</h4>
+<div class="paragraph">
+<p>The registration request and the password reset form are bound from user input, so they are restricted to what the form
+needs.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>YadaRegistrationController.handleRegistrationRequest</code> throws <code>YadaInvalidUsageException</code> for a request that already has an id
+or a user. The application controller that binds the registration form must declare an <code>@InitBinder</code> for its model attribute
+that calls the static <code>YadaRegistrationController.setRegistrationAllowedFields(binder, "extraField", &#8230;&#8203;)</code>: only <code>email</code>,
+<code>password</code> and <code>confirmPassword</code> plus the listed subclass fields are bound.</p>
+</li>
+<li>
+<p><code>/yadaPasswordResetPost</code> binds the new class <code>YadaPasswordResetForm</code>, which has the <code>email</code> field only. The application page
+that shows the form should use <code>th:object="${yadaPasswordResetForm}"</code> and a <code>YadaPasswordResetForm</code> method parameter instead of
+<code>YadaRegistrationRequest</code>. The email is stored trimmed and lowercased, and the answer is the same whether the user exists or not.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_datatables_query_policy">DataTables query policy</h4>
+<div class="paragraph">
+<p>DataTables requests are sent by the browser and can be tampered with. Every query now runs inside a server-side
+<code>YadaDataTableQueryPolicy</code>, which lists the entity paths a table may return, search and sort. See
+<a href="datatables.html#_java_ajax_endpoint">Java Ajax Endpoint</a>.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Removed: <code>YadaDataTableDao.getConvertedJsonPage(YadaDatatablesRequest, Class, Locale)</code>. Custom endpoints must pass a policy
+with <code>getConvertedJsonPage(request, MyEntity.class, locale, POLICY)</code>, built with <code>YadaDataTableQueryPolicy.forEntity(&#8230;&#8203;)</code>,
+or take it from a table configured in Java with <code>yadaDataTableFactory.getSingleton(tableId, locale).getQueryPolicy()</code>.
+A request for anything outside the policy is rejected with <code>yadaError</code> and no data, so a missing column shows up
+as an empty table.</p>
+</li>
+<li>
+<p>Removed: the deprecated <code>YadaDataTableDao.getJsonPage(&#8230;&#8203;)</code>, which serialized whole entities. The protected <code>getPage(&#8230;&#8203;)</code>
+takes the resolved policy. <code>YadaDatatablesRequest.addExtraJsonAttribute</code> is deprecated: declare <code>extraOutput(path)</code> in the policy.</p>
+</li>
+<li>
+<p>The default <code>/yadaDataTableData</code> endpoint needs no code change: it derives the policy from the column definitions.
+A column that is not a persistent field of the <code>dtEntityClass()</code> class (a getter, a computed value, an attribute that exists
+only in a subclass) becomes output-only: it is still shown but never searched or sorted, a sort request on it is rejected, and
+one warning is logged per table and column. Set the subclass as <code>dtEntityClass()</code> to search or sort on it.</p>
+</li>
+<li>
+<p>With an explicit <code>forEntity</code> policy, a searchable or orderable path that is not a persistent field fails in <code>build()</code>:
+declare getters and computed values with <code>column(path, false, false)</code>, and build the policy for the concrete subclass
+when the table shows subclass attributes.</p>
+</li>
+<li>
+<p>Columns that would return a credential (<code>password</code>, <code>token</code>, <code>tokenHash</code>, <code>secret</code>, <code>salt</code>&#8230;&#8203; in any path segment), a
+whole entity or an embeddable are refused, and entity <code>toString()</code> values are never returned.</p>
+</li>
+<li>
+<p>Order directions other than <code>asc</code> and <code>desc</code> and invalid order indexes are rejected, <code>dataTableId</code> must match
+<code>[A-Za-z0-9_-]{1,100}</code>, and map keys in paths (<code>name.en</code>) are bound as query parameters of the map key type instead of quoted literals.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_client_address_and_trusted_proxies">Client address and trusted proxies</h4>
+<div class="paragraph">
+<p><code>YadaWebUtil.getClientAddress()</code>, the deprecated <code>getClientIp()</code> and the <code>remoteIp</code> field written by <code>AuditFilter</code> now return
+<code>request.getRemoteAddr()</code>, unless the peer is a trusted proxy: a client can no longer choose the address in the audit log by sending
+an <code>X-Forwarded-For</code> header. <code>getClientIp()</code> no longer returns the <code>[for &#8230;&#8203;]</code> text; the sanitized raw header is in the new MDC
+key <code>forwardedFor</code>, which can be added to logback patterns as <code>%X{forwardedFor}</code>.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Behind a reverse proxy the preferred setup is Tomcat&#8217;s <code>RemoteIpValve</code> with <code>remoteIpHeader="X-Forwarded-For"</code>, with
+<code>internalProxies</code> and <code>trustedProxies</code> listing exactly the addresses of the ingress (the Tomcat default for <code>internalProxies</code> covers
+every private network). The ingress must overwrite, not append to, the client-supplied <code>X-Forwarded-For</code>, <code>X-Forwarded-Proto</code>
+and <code>X-Forwarded-Host</code>, and Tomcat must be reachable only through the ingress. With the valve, leave the framework list empty.</p>
+</li>
+<li>
+<p>Without a valve, the optional <code>&lt;security&gt;&lt;trustedProxies&gt;&lt;proxy&gt;IP&lt;/proxy&gt;&#8230;&#8203;&lt;/trustedProxies&gt;&lt;/security&gt;</code> configuration lists
+the proxies whose header is believed. Only IP addresses are accepted; <code>*</code>, names and ranges are ignored. The default is an
+empty list.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>See <a href="security/overview.html#client-address">Client address behind a reverse proxy</a>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_security_headers_login_failures_and_lockout">Security headers, login failures and lockout</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Applications extending <code>YadaSecurityConfig</code> send Spring Security&#8217;s default response headers again: <code>X-Content-Type-Options: nosniff</code>,
+<code>X-Frame-Options: DENY</code>, <code>Cache-Control</code> with <code>Pragma</code> and <code>Expires</code> that disable caching of dynamic responses, <code>X-XSS-Protection: 0</code>,
+and <code>Strict-Transport-Security</code> on HTTPS requests only, plus the new <code>Referrer-Policy: same-origin</code>. Resources served by the
+<code>YadaWebConfig</code> handlers keep their <code>max-age</code>. Applications that frame their own pages must call <code>frameOptions(sameOrigin)</code> in
+their subclass. Behind a TLS-terminating proxy HSTS is sent only if the request is seen as secure (<code>RemoteIpValve</code>), otherwise
+set it at the proxy. Applications that added these headers themselves may now send them twice and should remove their own.</p>
+</li>
+<li>
+<p>An unknown username now sets the same <code>passwordError</code> request attribute as a wrong password, so the login form can&#8217;t be used to
+find out which accounts exist. <code>usernameNotFound</code> and the <code>password</code> request attribute are no longer set
+(<code>REQUESTATTR_USERNAMENOTFOUNDFLAG</code> and <code>REQUESTATTR_PASSWORD</code> are deprecated). Login templates should show one generic "invalid email
+or password" message for <code>passwordError</code> and must not use <code>${password}</code>; the project template and the example modal are updated.
+The 401 fallback (no failure url) sends "Authentication Failed" without the exception message.</p>
+</li>
+<li>
+<p><code>YadaUserDetailsService.loadUserByUsername</code> signals a locked account with a locked <code>UserDetails</code>, so the authentication provider
+throws <code>LockedException</code>; it no longer throws <code>TooManyFailedAttemptsException</code>. Custom failure handlers that check for
+<code>TooManyFailedAttemptsException</code> must check <code>LockedException</code> too (the framework handler checks both). An unknown username also
+goes through <code>incrementFailedAttempts</code>, which updates no row.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_multipart_forms_and_csrf">Multipart forms and CSRF</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>The CSRF token is no longer added to the action url of multipart forms, where it ended up in logs, history and <code>Referer</code> headers.
+It is sent as the hidden <code>_csrf</code> field (added by <code>th:action</code>, and by <code>yada:actionUpload</code> for same-origin actions) or, for Ajax uploads,
+in the CSRF header from the <code>_csrf</code> and <code>_csrf_header</code> meta tags. A multipart form with a plain static <code>action</code> and no hidden
+<code>_csrf</code> field, which used to work thanks to the url token, now gets 403: use <code>th:action</code> or add the hidden input. A <code>_csrf</code>
+parameter written in a multipart action query is removed at render time. <code>MultipartFilter</code> must stay before the Spring Security filter.</p>
+</li>
+<li>
+<p><code>yada:actionUpload</code> adds the hidden token only when the action is an absolute local path accepted by
+<code>YadaWebUtil.isSafeLocalRedirect</code> (now public); relative paths and absolute urls, even of the same host, get no token.</p>
+</li>
+<li>
+<p>A plain (non-Ajax) multipart form larger than <code>maxFileUploadSizeBytes</code> no longer reaches the controller with
+<code>limitExceeded(request)</code> true: it gets HTTP 413 from <code>YadaUploadLimitAccessDeniedHandler</code> before any controller.
+Map 413 to an error page in <code>web.xml</code> for a friendly message, or upload with Ajax or check the size in the browser. Ajax uploads
+that send the CSRF header still reach the controller with <code>limitExceeded</code> true. An application with its own <code>accessDeniedHandler</code>
+gets 403 instead, unless it wraps its handler in <code>YadaUploadLimitAccessDeniedHandler</code>. If a subclass sets
+<code>sessionManagement.invalidSessionUrl</code>, a plain-form POST from a browser without a session is redirected there instead of getting 413.
+The browser sees the 413 only if Tomcat can swallow the rest of the body (<code>maxSwallowSize</code>, 2 MB by default): see
+<a href="forms/uploads.html#uploadCsrf">CSRF token of multipart forms</a>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_error_responses">Error responses</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Error pages and Ajax modals show the standard HTTP reason phrase instead of the exception or servlet error message. The global
+exception handler no longer puts <code>e.getMessage()</code> in <code>errorDescription</code> or <code>yadaExceptionMessage</code>; applications that showed it, for
+example during development, must read the server log. DataTables database failures answer with <code>yadaError.error</code> "Server error".</p>
+</li>
+<li>
+<p>When the response is already committed, <code>/yadaError</code> and the global exception handler write nothing and return no view:
+the client sees a truncated or aborted response instead of a page that looks complete.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_local_redirect_targets">Local redirect targets</h4>
+<div class="paragraph">
+<p>New <code>YadaWebUtil.safeLocalRedirect(String)</code> validates a redirect target that comes from the client, like a request parameter or a
+stored location: it returns the candidate unchanged only if it is an absolute local path such as <code>/dashboard?tab=users#top</code>
+(no <code>//host</code>, backslash, control character, <code>.</code> or <code>..</code> segment, nor encoded separator, even when double-encoded), otherwise <code>/</code>.
+Use it as <code>"redirect:" + yadaWebUtil.safeLocalRedirect(target)</code>. Never pass the result to <code>redirectString</code>, which encodes the
+path again and may prepend a second locale. <code>isSafeLocalRedirect(String)</code> returns whether the candidate would be returned unchanged.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_impersonation">Impersonation</h4>
+<div class="ulist">
+<ul>
+<li>
+<p><code>yada.impersonate(url, userId, method)</code> now sends <code>currentLocation</code> as <code>location.pathname + location.search</code>, not the absolute
+<code>location.href</code>. The value is a local path that includes the servlet context path and any locale segment, for example
+<code>/shop/en/dashboard/user?page=2</code>. A controller that saves it and later replays it must validate it with <code>safeLocalRedirect</code>
+when saving, remove the context path if the value starts with it (<code>"redirect:"</code> adds it again, otherwise a non-root application
+redirects to <code>/ctx/ctx/&#8230;&#8203;</code>), and replay it as <code>"redirect:" + safeLocalRedirect(saved)</code>, never with <code>redirectString</code>. The example
+<code>UserProfileController.contextRelativeLocation</code> does exactly this.</p>
+</li>
+<li>
+<p><code>yada.dataTableCrud</code> extra buttons with <code>ajax: false</code> and a <code>method</code> other than GET now submit a POST with <code>yada.postNavigate</code>,
+in <code>windowName</code> when set. Before, <code>method</code> was ignored for non-Ajax buttons.</p>
+</li>
+<li>
+<p>Impersonation and deimpersonation must be POST-only. In applications that copied the example <code>UserProfileController</code>: call
+<code>yada.impersonate(&#8230;&#8203;, "POST")</code>, use a <code>th:action</code> form for deimpersonation, and send <code>"method": "POST"</code> on legacy table buttons.
+The example <code>ajaxAddOrUpdateUserProfile</code> is POST-only and binds only allowlisted fields, <code>ajaxEditUserProfileForm</code> takes
+<code>userProfileId</code>, an unknown <code>userProfileId</code> fails instead of creating a user, and <code>failedAttempts</code> can only be reset to 0.</p>
+</li>
+<li>
+<p>The project template <code>header.html</code> generated by YadaTools shows the impersonation banner as a POST form to
+<code>/dashboard/user/deimpersonate</code>; generated applications need a POST-only deimpersonation endpoint.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_logging">Logging</h4>
+<div class="paragraph">
+<p>Token secrets are replaced by <code>&lt;id&gt;-[hidden]</code> in logged request urls, query strings and email bodies, and the <code>token</code> parameter is
+hidden by <code>AuditFilter</code>. Developers who used to copy links from the development log must use a mail catcher such as Mailpit.
+Spring and Hibernate DEBUG logging (for example <code>org.springframework.web</code> and <code>org.hibernate.SQL</code>) still prints complete
+request urls and bound values: keep it off in production. Server error details are only logged, never sent to the browser.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.9<br>
-Last updated 2026-09-17 19:09:05 +0200
+Last updated 2026-10-14 05:15:09 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

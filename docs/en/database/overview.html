@@ -130,7 +130,11 @@ window.onscroll = function() {
 <ul class="sectlevel1">
 <li><a href="#_subsections">Subsections</a></li>
 <li><a href="#_introduction">Introduction</a></li>
-<li><a href="#_database_configuration">Database Configuration</a></li>
+<li><a href="#_database_configuration">Database Configuration</a>
+<ul class="sectlevel2">
+<li><a href="#_hibernate_dialect">Hibernate Dialect</a></li>
+</ul>
+</li>
 <li><a href="#_entities">Entities</a></li>
 <li><a href="#_schema_generation_and_update">Schema Generation and Update</a>
 <ul class="sectlevel2">
@@ -190,6 +194,35 @@ with <a href="https://dev.mysql.com/downloads/mysql/" target="_blank" rel="noope
 <div class="sectionbody">
 <div class="paragraph">
 <p>TO DO</p>
+</div>
+<div class="sect2">
+<h3 id="_hibernate_dialect">Hibernate Dialect</h3>
+<div class="paragraph">
+<p>By default Hibernate detects the dialect from the database: with MySQL it picks <code>MySQLDialect</code>.
+Yada sets it only in two cases:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>when <code>&lt;database&gt;&lt;dialect&gt;</code> is configured, that dialect is used;</p>
+</li>
+<li>
+<p>otherwise, when the <a href="embedded.html">embedded database</a> is enabled, <code>org.hibernate.dialect.MariaDBDialect</code> is used,
+because the embedded database is MariaDB 11, which Hibernate can&#8217;t recognize through the MySQL Connector/J driver.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Applications that run on a MariaDB server through MySQL Connector/J should set the dialect explicitly
+(with the MariaDB JDBC driver, Hibernate detects MariaDB by itself):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;database&gt;
+	&lt;dialect&gt;org.hibernate.dialect.MariaDBDialect&lt;/dialect&gt;
+&lt;/database&gt;</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -370,7 +403,7 @@ the common schema is in place. You will have to set the outOfOrder flag for this
 <div id="footer">
 <div id="footer-text">
 Version 0.7.9<br>
-Last updated 2026-09-27 23:19:03 +0200
+Last updated 2026-10-14 05:10:42 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
