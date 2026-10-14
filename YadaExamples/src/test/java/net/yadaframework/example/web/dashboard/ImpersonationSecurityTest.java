@@ -113,6 +113,32 @@ class ImpersonationSecurityTest extends ExampleWebTestBase {
 		assertFalse(impersonating(supervisor));
 	}
 
+	/**
+	 * yada.impersonate sends location.pathname, which includes the context path, and "redirect:" adds the context
+	 * path again: the saved location must be relative to the context
+	 */
+	@Test
+	void theStartingPathRoundTripsUnderAContextPath() throws Exception {
+		String[][] cases = {
+			{ "/ctx/en/dashboard/user?page=2", "/ctx/en/dashboard/user?page=2" },
+			{ "/ctx", "/ctx/" },
+			{ "/ctx?x=1", "/ctx/?x=1" },
+			{ "/ctxother/page", "/ctx/ctxother/page" },
+			{ "https://evil.example/", "/ctx/" } };
+		for (String[] pair : cases) {
+			mockMvc.perform(post("/ctx/dashboard/user/impersonate/" + targetId).contextPath("/ctx").session(supervisor)
+				.param("_csrf", csrfToken(supervisor))
+				.param("currentLocation", pair[0]))
+				.andExpect(status().is3xxRedirection());
+			assertLoggedInAs(supervisor, TARGET_EMAIL);
+			String redirect = mockMvc.perform(post("/ctx" + DEIMPERSONATE_URL).contextPath("/ctx").session(supervisor).param("_csrf", csrfToken(supervisor)))
+				.andExpect(status().is3xxRedirection())
+				.andReturn().getResponse().getRedirectedUrl();
+			assertLoggedInAs(supervisor, SUPERVISOR_EMAIL);
+			assertEquals(pair[1], redirect, pair[0]);
+		}
+	}
+
 	@Test
 	void theFormWithTheIdParameterWorksToo() throws Exception {
 		mockMvc.perform(post("/dashboard/user/impersonate").session(supervisor)

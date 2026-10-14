@@ -342,12 +342,35 @@ public class UserProfileController {
 				yadaNotify.titleKey(redirectAttributes, "user.impersonate.error.title").error().messageKey("user.impersonate.noauth.message").add();
 			} else {
 				changeSessionId(request);
-				userSession.impersonate(theUser.getId(), yadaWebUtil.safeLocalRedirect(currentLocation), request, response);
+				userSession.impersonate(theUser.getId(), contextRelativeLocation(currentLocation, request), request, response);
 				yadaNotify.titleKey(redirectAttributes, "user.impersonate.ok.title").ok().messageKey("user.impersonate.ok.message", theUser.getEmail()).add();
 			}
 		}
 		// model.addAttribute(YadaViews.AJAX_REDIRECT_URL, "/user/dashboard");
 		return yadaWebUtil.redirectString("/", locale);
+	}
+
+	/**
+	 * The location where impersonation started, as a safe local path relative to the servlet context.
+	 * yada.impersonate() sends location.pathname, which includes the context path, while "redirect:" adds the context
+	 * path again, so it is removed here. The result is validated with safeLocalRedirect both before and after.
+	 * @param currentLocation the location sent by the browser, can be null
+	 * @return a local path that "redirect:" can use, "/" when the location is not safe
+	 */
+	private String contextRelativeLocation(String currentLocation, HttpServletRequest request) {
+		String location = yadaWebUtil.safeLocalRedirect(currentLocation);
+		String contextPath = request.getContextPath();
+		if (StringUtils.isEmpty(contextPath) || !location.startsWith(contextPath)) {
+			return location;
+		}
+		String rest = location.substring(contextPath.length());
+		if (rest.isEmpty() || rest.startsWith("?")) {
+			return yadaWebUtil.safeLocalRedirect("/" + rest);
+		}
+		if (rest.startsWith("/")) {
+			return yadaWebUtil.safeLocalRedirect(rest);
+		}
+		return location; // Another path with the same prefix, like "/ctxother" for "/ctx"
 	}
 
 	/**

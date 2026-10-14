@@ -38,6 +38,8 @@ than GET navigates through `yada.postNavigate`.
 `yada.postNavigate(url, data, windowTarget)` in `yada.ajax.js` submits a hidden POST form carrying the CSRF token
 from the page meta tags, so a full-page navigation that changes state can be CSRF-validated. `yada.impersonate`
 accepts an optional third `method` argument and uses it when the method is not GET. It sends `currentLocation` as the
-local path and query string of the page (`location.pathname + location.search`), so the server can accept it with
-`YadaWebUtil.safeLocalRedirect` and replay it as `"redirect:" + safeLocalRedirect(saved)`; the example's
-`UserProfileController` impersonation endpoints are POST-only and work this way.
+local path and query string of the page (`location.pathname + location.search`), not a full url. The path includes
+the servlet context path, while `"redirect:"` adds it again, so the server validates the value with
+`YadaWebUtil.safeLocalRedirect`, removes `request.getContextPath()` and replays it as
+`"redirect:" + safeLocalRedirect(saved)`; the example's `UserProfileController` impersonation endpoints are POST-only
+and work this way (`contextRelativeLocation`).
