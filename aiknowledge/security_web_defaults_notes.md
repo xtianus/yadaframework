@@ -9,7 +9,7 @@ Defaults of YadaWebSecurity and YadaWeb that affect every application extending 
 
 ## Login failure
 
-- `YadaAuthenticationFailureHandler` sets `passwordError` for a wrong password and for an unknown username alike (`DaoAuthenticationProvider` hides `UsernameNotFoundException`), so the login form can't enumerate accounts. `usernameNotFound` and the `password` request attribute are never set (`REQUESTATTR_USERNAMENOTFOUNDFLAG` and `REQUESTATTR_PASSWORD` are deprecated). Login templates show one generic message and never use `${password}`. The 401 fallback sends "Authentication Failed" without the exception message.
+- `YadaAuthenticationFailureHandler` sets `passwordError` for a wrong password and for an unknown username alike (`DaoAuthenticationProvider` hides `UsernameNotFoundException`), so a single wrong password doesn't tell whether an account exists. The form still reveals existence in other ways: disabled and locked accounts get their own outcome, and since unknown usernames never lock, an account that locks after `security/maxFailedAttempts`+1 wrong attempts exists. `usernameNotFound` and the `password` request attribute are never set (`REQUESTATTR_USERNAMENOTFOUNDFLAG` and `REQUESTATTR_PASSWORD` are deprecated). Login templates show one generic message and never use `${password}`. The 401 fallback sends "Authentication Failed" without the exception message.
 - A lockout is signalled by `YadaUserDetailsService.loadUserByUsername` returning a locked `UserDetails`, so the provider throws `LockedException`; the handler checks both `LockedException` and `TooManyFailedAttemptsException` (the framework itself throws only `LockedException` for a lockout). An unknown username also goes through `incrementFailedAttempts` and updates no row. The lockout branch skips the credentials lookup when the `username` parameter is missing.
 
 ## Error responses
@@ -19,6 +19,7 @@ Defaults of YadaWebSecurity and YadaWeb that affect every application extending 
 ## Redirect targets and impersonation
 
 - A redirect target from the client goes through `YadaWebUtil.safeLocalRedirect` and is used as `"redirect:" + target`; see `yadaWeb/YadaWebUtil.md`.
+- `/yadaLoginSuccess?targetUrl=` (`YadaLoginController`) validates the target with `safeLocalRedirect` before adding the locale, and `yada/ajaxRedirect.html` (`YadaViews.AJAX_REDIRECT`) writes `targetUrl`/`targetUrlRelative` with `YadaWebUtil.escapeJsonString`, so the JSON answer can carry no markup or extra property.
 - Impersonation and deimpersonation are POST-only in the example application and in the YadaTools project template banner; `yada.impersonate` sends a local path (see `ajax_csrf_notes.md`).
 
 ## Uploads

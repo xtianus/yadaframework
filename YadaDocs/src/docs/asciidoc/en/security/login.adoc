@@ -81,7 +81,7 @@ The syntax `/yadaLoginSuccess?targetUrl=/my/area` ensures that after an ajax log
 [TIP]
 ====
 "/yadaLoginSuccess" is handled by `YadaLoginController` and returns either `YadaViews.AJAX_SUCCESS` or a redirect to the target url
-when specified.
+when specified. The target must be a local path accepted by `YadaWebUtil.safeLocalRedirect`, otherwise the redirect goes to "/".
 ====
 
 ==  Password Reset

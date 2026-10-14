@@ -288,7 +288,7 @@ page after logout can also be configured this way. This is an example:</p>
 <td class="content">
 <div class="paragraph">
 <p>"/yadaLoginSuccess" is handled by <code>YadaLoginController</code> and returns either <code>YadaViews.AJAX_SUCCESS</code> or a redirect to the target url
-when specified.</p>
+when specified. The target must be a local path accepted by <code>YadaWebUtil.safeLocalRedirect</code>, otherwise the redirect goes to "/".</p>
 </div>
 </td>
 </tr>
@@ -832,7 +832,7 @@ logged in is never switched to another account. The texts of the page are the me
 <div id="footer">
 <div id="footer-text">
 Version 0.7.9<br>
-Last updated 2026-10-14 05:13:59 +0200
+Last updated 2026-10-14 06:08:03 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

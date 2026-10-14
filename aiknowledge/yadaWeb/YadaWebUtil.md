@@ -23,6 +23,7 @@
 | `downloadFile` | Copies the content of a file to the Response then optionally deletes the file. |
 | `redirectString` | Creates a redirect string to be returned by a @Controller, taking into account the locale in the path. It percent-encodes the path and prepends the request locale unless the path starts with that same locale: use it only for decoded, locale-less paths written in code. |
 | `safeLocalRedirect` | Returns a client-supplied redirect target unchanged when it is a safe absolute local path, otherwise "/". Use the result as `"redirect:" + safeLocalRedirect(target)`, never through redirectString, which would encode it again and add a locale. |
+| `escapeJsonString` | Static. Escapes a value for the inside of a JSON string in a document that may be read as HTML or JavaScript: quote, backslash, control characters, `<`, `>`, `&`, `'` and U+2028/2029 become `\uXXXX`. `yada/ajaxRedirect.html` writes the redirect target with it. |
 | `enhanceUrl` | Creates a new URL string from a starting one, taking into account the locale in the path and optional url parameters. |
 | `downloadZip` | Make a zip file and send it to the client. |
 | `sortLocalEnum` | Sorts a localized enum according to the locale specified |

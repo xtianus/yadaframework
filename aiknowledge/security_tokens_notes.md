@@ -6,9 +6,9 @@ Bearer-token links of YadaWebSecurity: autologin (`/autologin/<id>-<secret>`), r
 
 - The link part is `<positive id>-<64 lowercase hex secret>` (`YadaSecurityTokenCodec`). Rows store only `tokenHash`, the SHA-256 of a domain prefix, the purpose (`AUTOLOGIN` or the `YadaRegistrationType` name) and the secret. No pepper/HMAC: the secrets have 256 random bits.
 - Only the instance returned at issue time (`YadaAutoLoginTokenDao.issue` via `YadaTokenHandler.makeAutoLoginToken`, `YadaRegistrationRequestDao.issue`) carries the `@Transient` raw secret; `YadaTokenHandler.makeLink`/`makeAutologinLink` throw `YadaInvalidUsageException` on a reloaded entity. To send a link later, issue a new token.
-- Validity: row exists, purpose matches, digest matches (constant time), `now < expiration` (null expiration is invalid). Autologin also needs an enabled user. Lifetimes: recovery and email change 30 minutes, registration 24 hours, autologin `security/autologinExpirationHours` (10); cleanup jobs are maintenance only.
+- Validity: row exists, purpose matches, digest matches (constant time), `now < expiration` (null expiration is invalid). Autologin also needs an enabled user: only `isEnabled()` is checked, so a user locked out by failed password attempts can still log in with a valid autologin link, and that login resets the failure counter. Lifetimes: recovery and email change 30 minutes, registration 24 hours, autologin `security/autologinExpirationHours` (10); cleanup jobs are maintenance only.
 - Consumption locks the row with `SELECT ... FOR UPDATE` (`em.find(..., PESSIMISTIC_WRITE)`), deletes it and performs the change in the same transaction; authentication happens after commit. A rolled-back change leaves the link usable. Verified on MariaDB 11.4 (InnoDB); the lock is in the database, so it holds across application instances.
-- Registration requests are never updated: `issue` and the deprecated `save` refuse an entity with an id, and `handleRegistrationRequest` throws for a bound id or user. Application controllers restrict registration binding with `YadaRegistrationController.setRegistrationAllowedFields(binder, subclassFields...)` in an `@InitBinder("<model attribute>")`; `/yadaPasswordResetPost` binds `YadaPasswordResetForm` (email only).
+- Registration requests are never updated: `issue` and the deprecated `save` refuse an entity with an id, and `handleRegistrationRequest` throws for a bound id or user. Application controllers restrict registration binding with `YadaRegistrationController.setRegistrationAllowedFields(binder, subclassFields...)` in an `@InitBinder("<model attribute>")`; `/yadaPasswordResetPost` binds `YadaPasswordResetForm` (email only). `/yadaPasswordResetPost` and `/passwordChangeAfterRequest` are `@PostMapping` (GET answers 405), because they delete pending links, send mail or change the password.
 
 ## Autologin
 
@@ -19,7 +19,9 @@ Bearer-token links of YadaWebSecurity: autologin (`/autologin/<id>-<secret>`), r
 
 ## Logs
 
-`YadaLogRedaction` (YadaWeb) hides token secrets in paths, query strings and email bodies; `AuditFilter` uses it for its request lines and the MDC `endpoint`, and hides the `token` parameter. Spring and Hibernate DEBUG logging still print full request urls and must stay off in production.
+`YadaLogRedaction` (YadaWeb) hides token secrets in paths, query strings and email bodies. `isSecretParameter` is the one list of secret parameters (`token`, `password`, `confirmPassword`, `newPassword`, `_csrf`, also as the last segment of a property path like `userCredentials.newPassword`), used by `redactQueryString` and by the `AuditFilter` DEBUG parameter dump. `AuditFilter` redacts its request lines and the MDC `endpoint`; `YadaGlobalExceptionHandler`, `YadaController.yadaError` and `YadaUploadLimitAccessDeniedHandler` redact the urls and exception texts they log.
+
+Outside the framework: Spring logs the complete url of an unmapped request (e.g. a token link with a trailing slash) at WARN on `org.springframework.web.servlet.PageNotFound`, which the YadaTools logback template, the YadaExamples `env` files and the YadaTests `logback.xml` keep at ERROR; Spring and Hibernate DEBUG logging print full request urls; container and proxy access logs record the GET token urls (the GET of an autologin or recovery link doesn't consume the token). All of these must be kept off or masked in production.
 
 ## Migrations
 
