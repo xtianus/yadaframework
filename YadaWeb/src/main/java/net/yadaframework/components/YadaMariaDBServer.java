@@ -82,8 +82,8 @@ public class YadaMariaDBServer {
 			String[] filesInBaseDir = baseDirFile.list();
 			boolean install = filesInBaseDir == null || filesInBaseDir.length == 0; // No files
 			if (install) {
-				db = DB.newEmbeddedDB(configBuilder.build());
 				log.info("Installing new database in {}", baseDir);
+				db = YadaMariaDB.newEmbeddedDB(configBuilder.build());
 				owner = true; // Set before starting so that a partial start can be cleaned up
 				db.start();
 			} else {
