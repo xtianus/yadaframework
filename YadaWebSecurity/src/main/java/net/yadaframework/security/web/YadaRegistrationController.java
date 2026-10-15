@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -318,27 +319,30 @@ public class YadaRegistrationController {
 	 * @param response
 	 * @return
 	 */
-	@RequestMapping("/yadaPasswordResetPost")
-	public String yadaPasswordResetPost(YadaRegistrationRequest yadaRegistrationRequest, BindingResult bindingResult, Locale locale, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) {
+	@PostMapping("/yadaPasswordResetPost")
+	public String yadaPasswordResetPost(YadaPasswordResetForm yadaPasswordResetForm, BindingResult bindingResult, Locale locale, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) {
 		boolean emailSent = false;
 		String targetView = yadaConfiguration.getPasswordResetSent(locale);
 		// TODO view-related code should be moved to the application controller
-		if (yadaRegistrationRequest==null || yadaRegistrationRequest.getEmail()==null) {
+		String email = yadaPasswordResetForm==null ? null : StringUtils.trimToNull(yadaPasswordResetForm.getEmail());
+		if (email==null) {
 			return "redirect:/passwordReset";
 		}
+		email = email.toLowerCase(Locale.ROOT);
 		// Check if a user actually exists
-		String email = yadaRegistrationRequest.getEmail();
-		YadaUserCredentials existing = yadaUserCredentialsDao.findFirstByUsername(StringUtils.trimToEmpty(email).toLowerCase(Locale.ROOT));
+		YadaUserCredentials existing = yadaUserCredentialsDao.findFirstByUsername(email);
 		if (existing!=null) {
-			yadaRegistrationRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
+			YadaRegistrationRequest recoveryRequest = new YadaRegistrationRequest();
+			recoveryRequest.setEmail(email);
+			recoveryRequest.setRegistrationType(YadaRegistrationType.PASSWORD_RECOVERY);
 			// Pulisco le vecchie richieste
-			yadaSecurityUtil.registrationRequestCleanup(yadaRegistrationRequest);
-			yadaRegistrationRequest.setPassword("fakefake"); // La metto solo per evitare un errore di validazione al save
-			yadaRegistrationRequest = yadaRegistrationRequestDao.save(yadaRegistrationRequest); // Save here to get id and token
-			emailSent = yadaSecurityEmailService.sendPasswordRecovery(yadaRegistrationRequest, request, locale);
+			yadaSecurityUtil.registrationRequestCleanup(recoveryRequest);
+			recoveryRequest.setPassword("fakefake"); // La metto solo per evitare un errore di validazione al save
+			recoveryRequest = yadaRegistrationRequestDao.save(recoveryRequest); // Save here to get id and token
+			emailSent = yadaSecurityEmailService.sendPasswordRecovery(recoveryRequest, request, locale);
 			if (!emailSent) {
-				yadaRegistrationRequestDao.delete(yadaRegistrationRequest);
-				log.debug("Sending email to {} failed while resetting password", yadaRegistrationRequest.getEmail());
+				yadaRegistrationRequestDao.delete(recoveryRequest);
+				log.debug("Sending email to {} failed while resetting password", recoveryRequest.getEmail());
 				yadaNotify.titleKey(redirectAttributes, locale, "yada.email.passwordrecover.title")
 				.ok().messageKey("yada.email.send.failed").add();				
 			}
