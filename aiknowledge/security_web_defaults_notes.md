@@ -5,7 +5,7 @@ Defaults of YadaWebSecurity and YadaWeb that affect every application extending 
 ## Response headers
 
 - `YadaSecurityConfig` keeps the Spring Security default headers: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Cache-Control: no-cache, no-store, max-age=0, must-revalidate` with `Pragma: no-cache` and `Expires: 0` on dynamic responses, `X-XSS-Protection: 0`, and `Strict-Transport-Security` on secure requests only. It adds `Referrer-Policy: same-origin`.
-- Resources served by the `YadaWebConfig` resource handlers keep their own `max-age`. A subclass that frames its own pages sets `frameOptions(sameOrigin)`. Behind a TLS-terminating proxy HSTS appears only when the request is seen as secure (`RemoteIpValve`, see `client_address_notes.md`).
+- Resources served by the `YadaWebConfig` resource handlers use `Cache-Control: no-store` in the development environment and keep their configured `max-age` in other environments (100 days for static resources and contents, one day for `robots.txt`). `YadaSecurityDefaultsTest` checks these headers in both `dev` and `prod`. A subclass that frames its own pages sets `frameOptions(sameOrigin)`. Behind a TLS-terminating proxy HSTS appears only when the request is seen as secure (`RemoteIpValve`, see `client_address_notes.md`).
 
 ## Login failure
 

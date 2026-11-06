@@ -22,11 +22,14 @@ import java.util.stream.Collectors;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.AfterParameterizedClassInvocation;
+import org.junit.jupiter.params.BeforeParameterizedClassInvocation;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import net.yadaframework.core.YadaConfiguration;
 import net.yadaframework.tests.components.TestDataService;
@@ -34,9 +37,11 @@ import net.yadaframework.tests.support.ApplicationSession;
 
 /**
  * Response headers and login failure responses of YadaSecurityConfig, checked through the real Spring Security
- * filter chain of the YadaTests application.
+ * filter chain of the YadaTests application in development and production.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ParameterizedClass(name = "{0}")
+@CsvSource({"dev, no-store, no-store", "prod, max-age=8640000, max-age=86400"})
 class YadaSecurityDefaultsTest {
 	private static final String UNKNOWN_EMAIL = "nobody-here@yts.test";
 	private static final String SUBMITTED_PASSWORD = "Submitted-Secret-4711";
@@ -46,16 +51,27 @@ class YadaSecurityDefaultsTest {
 	private ApplicationSession session;
 	private YadaConfiguration config;
 
-	@BeforeAll
+	@Parameter(0)
+	String environment;
+	@Parameter(1)
+	String resourceCacheControl;
+	@Parameter(2)
+	String robotsCacheControl;
+
+	@BeforeParameterizedClassInvocation
 	void startApplication() throws Exception {
-		session = ApplicationSession.start(run -> run.setConfigurationValue("security/maxFailedAttempts", String.valueOf(MAX_FAILED_ATTEMPTS)), application -> application.getBean(TestDataService.class)::seedDefaults);
+		session = ApplicationSession.start(run -> {
+			run.setConfigurationValue("info/env", environment);
+			run.setConfigurationValue("security/maxFailedAttempts", String.valueOf(MAX_FAILED_ATTEMPTS));
+		}, application -> application.getBean(TestDataService.class)::seedDefaults);
 		config = session.application().getBean(YadaConfiguration.class);
+		assertEquals(environment, config.getApplicationEnvironment());
 		Path contentFile = config.getContentsFolder().toPath().resolve(CONTENT_FIXTURE);
 		Files.createDirectories(contentFile.getParent());
 		Files.writeString(contentFile, "content");
 	}
 
-	@AfterAll
+	@AfterParameterizedClassInvocation
 	void stopApplication() {
 		if (session != null) {
 			session.close();
@@ -165,13 +181,12 @@ class YadaSecurityDefaultsTest {
 	@Test
 	void staticResourcesKeepTheirConfiguredCaching() throws Exception {
 		HttpClient client = newClient();
-		String hundredDays = "max-age=8640000";
 		Map<String, String> expected = new LinkedHashMap<>();
-		expected.put("/res-" + config.getApplicationBuild() + "/securityheaders/marker.txt", hundredDays);
-		expected.put("/static/jquery-3.7.1.min.js", hundredDays);
-		expected.put("/yadares-" + config.getYadaVersion() + "/js/yada.js", hundredDays);
-		expected.put(config.getContentUrl() + "/" + CONTENT_FIXTURE, hundredDays);
-		expected.put("/robots.txt", "max-age=86400");
+		expected.put("/res-" + config.getApplicationBuild() + "/securityheaders/marker.txt", resourceCacheControl);
+		expected.put("/static/jquery-3.7.1.min.js", resourceCacheControl);
+		expected.put("/yadares-" + config.getYadaVersion() + "/js/yada.js", resourceCacheControl);
+		expected.put(config.getContentUrl() + "/" + CONTENT_FIXTURE, resourceCacheControl);
+		expected.put("/robots.txt", robotsCacheControl);
 		for (Map.Entry<String, String> resource : expected.entrySet()) {
 			HttpResponse<String> response = get(client, resource.getKey());
 			assertEquals(200, response.statusCode(), resource.getKey());
