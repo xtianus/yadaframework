@@ -22,9 +22,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
@@ -244,7 +246,7 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		if (res.endsWith("/")) {
 			res = StringUtils.chop(res); // Remove last character
 		}
-		registry.addResourceHandler(res + "-" + config.getApplicationBuild() + "/**").addResourceLocations(res+"/").setCachePeriod(8640000); // 100 days cache period
+		setCachePeriod(registry.addResourceHandler(res + "-" + config.getApplicationBuild() + "/**").addResourceLocations(res+"/"), 8640000); // 100 days cache period
 		// Uso "-?*/**" per matchare anche eventuali versioni vecchie che qualcuno potrebbe avere in cache
 		// Non si può fare perché non matcha
 		// registry.addResourceHandler(res + "-*/**").addResourceLocations(res+"/").setCachePeriod(31556926); // 1 year cache period
@@ -253,28 +255,40 @@ public class YadaWebConfig implements WebMvcConfigurer {
 		if (s.endsWith("/")) {
 			s = StringUtils.chop(s); // Remove last character
 		}
-		registry.addResourceHandler(s + "/**").addResourceLocations(s+"/").setCachePeriod(8640000); // 100 days cache period
+		setCachePeriod(registry.addResourceHandler(s + "/**").addResourceLocations(s+"/"), 8640000); // 100 days cache period
 
 		// yadares prende le risorse dal classpath
 		String yadares = STATIC_YADARESOURCES_FOLDER;
 		if (yadares.endsWith("/")) {
 			yadares = StringUtils.chop(res); // Remove last character
 		}
-		registry.addResourceHandler(yadares + "-" + config.getYadaVersion() + "/**").addResourceLocations("classpath:" + YadaConstants.YADA_VIEW_PREFIX+"/yada/").setCachePeriod(8640000); // 100 days cache period
+		setCachePeriod(registry.addResourceHandler(yadares + "-" + config.getYadaVersion() + "/**").addResourceLocations("classpath:" + YadaConstants.YADA_VIEW_PREFIX+"/yada/"), 8640000); // 100 days cache period
 
 		// Handling the "contents" uploaded locally
 		// NOTE: if you don't need versioning but are happy with the apache file handling, just let apache serve the contents
 		if (config.isContentUrlLocal()) {
 			String contentUrl = config.getContentUrl();
 			// TODO The problem with contents is that the version should be taken from the file timestamp so here it should accept any value but I don't know how to make it work with any version value
-			registry.addResourceHandler(contentUrl + "/**").addResourceLocations("file:"+config.getContentPath() + "/").setCachePeriod(8640000); // 100 days cache period
+			setCachePeriod(registry.addResourceHandler(contentUrl + "/**").addResourceLocations("file:"+config.getContentPath() + "/"), 8640000); // 100 days cache period
 		}
 
 		// robots.txt is usually added by the deploy script depending on the environment
-		registry.addResourceHandler("/robots.txt").addResourceLocations("/").setCachePeriod(86400); // 1 day cache period
+		setCachePeriod(registry.addResourceHandler("/robots.txt").addResourceLocations("/"), 86400); // 1 day cache period
 		// favicon.ico is requested by browsers from the root folder in some cases even if configured elsewhere in the html, 
 		// so better handle it to avoid an error in the log
-		registry.addResourceHandler("/favicon.ico").addResourceLocations("/").setCachePeriod(8640000); // 100 days cache period
+		setCachePeriod(registry.addResourceHandler("/favicon.ico").addResourceLocations("/"), 8640000); // 100 days cache period
+	}
+
+	/**
+	 * Sets the browser cache period of a resource handler. In the development environment the cache is disabled
+	 * with "Cache-Control: no-store", so that changed files (e.g. regenerated contents) are always fetched again.
+	 */
+	protected void setCachePeriod(ResourceHandlerRegistration registration, int cacheSeconds) {
+		if (config.isDevelopmentEnvironment()) {
+			registration.setCacheControl(CacheControl.noStore());
+		} else {
+			registration.setCachePeriod(cacheSeconds);
+		}
 	}
 
 	//
