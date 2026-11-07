@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -639,8 +640,6 @@ public class YadaFileManager {
 		yadaAttachedFile.setRelativeFolderPath(relativeFolderPath);
 		// This save should not bee needed anymore because of @PostPersist in YadaAttachedFile
 		yadaAttachedFile = yadaAttachedFileDao.save(yadaAttachedFile); // Get the id
-		File targetFolder = new File(config.getContentPath(), relativeFolderPath);
-		targetFolder.mkdirs();
 		return attach(move, yadaAttachedFile, managedFile, clientFilename, namePrefix, targetExtension, desktopWidth, mobileWidth);
 	}
 	
@@ -692,6 +691,8 @@ public class YadaFileManager {
 		yadaAttachedFile.setImageDimension(dimension);
 		boolean imageExtensionChanged = (origExtension==null && targetExtension!=null) || (targetExtension!=null && targetExtension.compareToIgnoreCase(origExtension)!=0);
 		boolean requiresTransofmation = imageExtensionChanged || desktopWidth!=null || mobileWidth!=null;
+		// The folder may be missing even when replacing, e.g. when the database was copied without the contents folder
+		Files.createDirectories(new File(config.getContentPath(), StringUtils.trimToEmpty(yadaAttachedFile.getRelativeFolderPath())).toPath());
 		//
 		// If the file does not need resizing, there is just one default filename like "product-mydoc_2631.pdf"
 		if (!requiresTransofmation) {
