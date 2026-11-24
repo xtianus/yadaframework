@@ -40,6 +40,21 @@ sassCompile {
     output = file("src/main/webapp/res/css")
 }
 
+def sassOsName = System.getProperty('os.name', 'unknown').toLowerCase(Locale.ROOT)
+def sassArchName = System.getProperty('os.arch', 'unknown').toLowerCase(Locale.ROOT)
+def sassPlatformKey
+if (sassOsName.contains('win')) {
+	sassPlatformKey = 'windows'
+} else if (sassOsName.contains('mac') || sassOsName.contains('darwin')) {
+	sassPlatformKey = 'macos'
+} else if (sassOsName.contains('linux')) {
+	sassPlatformKey = 'linux'
+} else {
+	sassPlatformKey = sassOsName.replaceAll(/[^a-z0-9]+/, '-')
+}
+// One Dart Sass download per platform, so that Windows (Eclipse) and WSL/Linux builds don't overwrite each other
+def sassDownloadDir = "$rootDir/.sass-${sassPlatformKey}-${sassArchName.replaceAll(/[^a-z0-9]+/, '-')}"
+
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
@@ -159,7 +174,7 @@ sass {
 	properties = "$rootDir/sass.properties"
     download {
 		version = "1.58.2"
-		output = "$rootDir/.sass"
+		output = sassDownloadDir
     }
 }
 
