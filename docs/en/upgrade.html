@@ -136,6 +136,8 @@ window.onscroll = function() {
 <li><a href="#_embedded_database">Embedded database</a></li>
 <li><a href="#_hibernate_dialect">Hibernate dialect</a></li>
 <li><a href="#_sorting">Sorting</a></li>
+<li><a href="#_bootstrap_versioned_views">Bootstrap-versioned views</a></li>
+<li><a href="#_embedded_tomcat">Embedded Tomcat</a></li>
 <li><a href="#_security_hardening">Security hardening</a></li>
 </ul>
 </li>
@@ -240,6 +242,66 @@ through MySQL Connector/J. See <a href="database/overview.html#_hibernate_dialec
 <div class="paragraph">
 <p>A single <code>sort=property,direction</code> request parameter bound to <code>YadaPageRequest</code> works: it was split at the comma
 by Spring and rejected with "No sort column specified".</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_bootstrap_versioned_views">Bootstrap-versioned views</h3>
+<div class="paragraph">
+<p>The Bootstrap version of a framework view is now carried by a folder, selected by <code>&lt;bootstrapVersion&gt;</code> in the configuration, instead of a suffix or no marker at all: <code>/yada/modalConfirmB4</code> is now <code>/yada/b4/modalConfirm</code>, <code>/yada/form/text</code> is now <code>/yada/form/b3/text</code> and <code>/yadacms/imageSorter</code> is now <code>/yadacms/b3/imageSorter</code>. The old names fail at runtime with a template-not-found error, and the <code>YadaViews</code> constants <code>AJAX_NOTIFY_B3/B4/B5</code> and <code>CONFIRM_B3/B4/B5</code> are removed.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Resolve view names instead of hardcoding a folder: <code>${@yadaWebUtil.modalConfirmViewName}</code>, <code>${@yadaWebUtil.modalGenericViewName}</code> and <code>${@config.notifyModalView}</code> in templates, <code>config.getBootstrapView(name)</code> and <code>config.getNotifyModalView()</code> in Java. <code>YadaViews.AJAX_NOTIFY</code>, <code>CONFIRM</code> and <code>MODAL_GENERIC</code> hold a view name such as <code>"modalNotify"</code>, not a path: never return them from a controller. A configured <code>config/paths/notificationModalView</code> is still honoured.</p>
+</li>
+<li>
+<p>Form fragments are resolved with <code>${@yadaWebUtil.getFormFragment('text')}</code> or <code>config.getBootstrapFormView("text")</code>. Since the name is now an expression, a legacy unwrapped fragment expression such as <code>th:replace="/yada/form/text::field(&#8230;&#8203;)"</code> must be wrapped in <code>~{&#8230;&#8203;}</code>.</p>
+</li>
+<li>
+<p><code>getForB3B4B5</code> stays for css classes and similar values only.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Not every form fragment exists for every Bootstrap version, and the resolver does not fall back to another version:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 80%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Folder</th>
+<th class="tableblock halign-left valign-top">Fragments</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/yada/form/b3/</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>boolean</code>, <code>checklist</code>, <code>enum</code>, <code>fileUpload</code>, <code>list</code>, <code>list-objects</code>, <code>list-values</code>, <code>password</code>, <code>radio-values</code>, <code>range</code>, <code>text</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/yada/form/b4/</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>boolean</code>, <code>checklist</code>, <code>fileUpload</code>, <code>list</code>, <code>radio-values</code>, <code>text</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>/yada/form/b5/</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>boolean</code>, <code>checklist</code>, <code>enum</code>, <code>fileUpload</code>, <code>list</code>, <code>radio-values</code>, <code>range</code>, <code>text</code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p><code>getFormFragment</code> with a name that is missing for the configured version selects a template that doesn&#8217;t exist, and the page fails to render. The unversioned fragments of 0.7.8 were the Bootstrap 3 markup and are now unchanged under <code>/yada/form/b3/</code>: a Bootstrap 4 or 5 application that used one of the missing fragments keeps the same markup by referencing <code>/yada/form/b3/&lt;name&gt;</code> explicitly, or copies the fragment into the application. Replacing an unversioned fragment with <code>getFormFragment</code> in a Bootstrap 4 or 5 application also switches it from Bootstrap 3 to version-specific markup, so check how the form looks.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_embedded_tomcat">Embedded Tomcat</h3>
+<div class="paragraph">
+<p>The <code>YadaTomcatServer</code> command line changed from <code>&lt;acroenv&gt; &lt;webappFolder&gt; [&lt;baseDir&gt; [dev]]</code> to <code>&lt;acroenv&gt; &lt;webappFolder&gt; [&lt;baseDir&gt;] [--dev] [--eclipse]</code>, see <a href="setup/gettingStarted.html#_embedded_tomcat">Embedded Tomcat</a>. The old fourth argument <code>dev</code> is now taken as the base dir and replaces the real one, so startup normally fails with "The baseDir dev must exist and be writable". In launch configurations, Gradle tasks, scripts and service units replace <code>dev</code> with <code>--eclipse</code> to keep the old behaviour (HTTPS connector and the Eclipse <code>bin/main</code> classes), or with <code>--dev</code> for the HTTPS connector only. A launch with only the two mandatory arguments still starts in developer mode for Eclipse, and a base dir without options still starts without developer mode.</p>
+</div>
+<div class="paragraph">
+<p>Subclasses must adapt to the new signature <code>configure(String webappFolder, String baseDir, boolean dev, boolean eclipse, YadaConfiguration config)</code>. The JVM now exits with status 1 when the web application fails to start, instead of leaving Tomcat running without it.</p>
 </div>
 </div>
 <div class="sect2">
@@ -662,7 +724,7 @@ the new <code>DB.createDBInstallProcess()</code>.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.9<br>
-Last updated 2026-11-24 16:34:06 +0100
+Last updated 2026-11-24 18:50:36 +0100
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

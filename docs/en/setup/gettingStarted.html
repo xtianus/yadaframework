@@ -778,7 +778,7 @@ standalone version of Tomcat.</p>
 </div>
 <div class="paragraph">
 <p>The application is started by running the <code>net.yadaframework.core.YadaTomcatServer</code> class.
-It accepts two mandatory arguments and an optional one:</p>
+It accepts two mandatory arguments followed by optional ones:</p>
 </div>
 <div class="dlist">
 <dl>
@@ -792,13 +792,20 @@ It accepts two mandatory arguments and an optional one:</p>
 </dd>
 <dt class="hdlist1">temp folder</dt>
 <dd>
-<p>optional in Eclipse, it must be the full path of the temp folder for Tomcat data (where the war is exploded)</p>
+<p>optional, the full path of an existing, writable folder for Tomcat data (where the war is exploded)</p>
+</dd>
+<dt class="hdlist1"><code>--dev</code></dt>
+<dd>
+<p>optional, enables "developer mode": the HTTPS connector is enabled</p>
+</dd>
+<dt class="hdlist1"><code>--eclipse</code></dt>
+<dd>
+<p>optional, also adds the Eclipse <code>bin/main</code> folder to the classpath; it implies <code>--dev</code></p>
 </dd>
 </dl>
 </div>
 <div class="paragraph">
-<p>When the last argument is missing, "developer mode" is assumed and the HTTPS connector is enabled. It&#8217;s not
-enabled in all other environments because HTTPS is supposed to be handled by Apache.
+<p>When only the two mandatory arguments are given, both <code>--dev</code> and <code>--eclipse</code> are assumed. In all other environments the HTTPS connector is not enabled unless requested, because HTTPS is supposed to be handled by Apache.
 The <code>YadaTomcatServer</code> class can be overridden or rewritten to achieve a different behavior.</p>
 </div>
 <div class="paragraph">
@@ -854,7 +861,7 @@ and be sure that there are no ghost Tomcat processes running. In extreme cases, 
 <div id="footer">
 <div id="footer-text">
 Version 0.7.9<br>
-Last updated 2026-11-24 16:34:06 +0100
+Last updated 2026-11-24 18:50:36 +0100
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

@@ -66,6 +66,38 @@ through MySQL Connector/J. See <<database/overview.adoc#_hibernate_dialect,Hiber
 A single `sort=property,direction` request parameter bound to `YadaPageRequest` works: it was split at the comma
 by Spring and rejected with "No sort column specified".
 
+=== Bootstrap-versioned views
+
+The Bootstrap version of a framework view is now carried by a folder, selected by `<bootstrapVersion>` in the configuration, instead of a suffix or no marker at all: `/yada/modalConfirmB4` is now `/yada/b4/modalConfirm`, `/yada/form/text` is now `/yada/form/b3/text` and `/yadacms/imageSorter` is now `/yadacms/b3/imageSorter`. The old names fail at runtime with a template-not-found error, and the `YadaViews` constants `AJAX_NOTIFY_B3/B4/B5` and `CONFIRM_B3/B4/B5` are removed.
+
+* Resolve view names instead of hardcoding a folder: `${@yadaWebUtil.modalConfirmViewName}`, `${@yadaWebUtil.modalGenericViewName}` and `${@config.notifyModalView}` in templates, `config.getBootstrapView(name)` and `config.getNotifyModalView()` in Java. `YadaViews.AJAX_NOTIFY`, `CONFIRM` and `MODAL_GENERIC` hold a view name such as `"modalNotify"`, not a path: never return them from a controller. A configured `config/paths/notificationModalView` is still honoured.
+* Form fragments are resolved with `${@yadaWebUtil.getFormFragment('text')}` or `config.getBootstrapFormView("text")`. Since the name is now an expression, a legacy unwrapped fragment expression such as `th:replace="/yada/form/text::field(...)"` must be wrapped in `~{...}`.
+* `getForB3B4B5` stays for css classes and similar values only.
+
+Not every form fragment exists for every Bootstrap version, and the resolver does not fall back to another version:
+
+[cols="1,4"]
+|===
+|Folder |Fragments
+
+|`/yada/form/b3/`
+|`boolean`, `checklist`, `enum`, `fileUpload`, `list`, `list-objects`, `list-values`, `password`, `radio-values`, `range`, `text`
+
+|`/yada/form/b4/`
+|`boolean`, `checklist`, `fileUpload`, `list`, `radio-values`, `text`
+
+|`/yada/form/b5/`
+|`boolean`, `checklist`, `enum`, `fileUpload`, `list`, `radio-values`, `range`, `text`
+|===
+
+`getFormFragment` with a name that is missing for the configured version selects a template that doesn't exist, and the page fails to render. The unversioned fragments of 0.7.8 were the Bootstrap 3 markup and are now unchanged under `/yada/form/b3/`: a Bootstrap 4 or 5 application that used one of the missing fragments keeps the same markup by referencing `/yada/form/b3/<name>` explicitly, or copies the fragment into the application. Replacing an unversioned fragment with `getFormFragment` in a Bootstrap 4 or 5 application also switches it from Bootstrap 3 to version-specific markup, so check how the form looks.
+
+=== Embedded Tomcat
+
+The `YadaTomcatServer` command line changed from `<acroenv> <webappFolder> [<baseDir> [dev]]` to `<acroenv> <webappFolder> [<baseDir>] [--dev] [--eclipse]`, see <<setup/gettingStarted.adoc#_embedded_tomcat,Embedded Tomcat>>. The old fourth argument `dev` is now taken as the base dir and replaces the real one, so startup normally fails with "The baseDir dev must exist and be writable". In launch configurations, Gradle tasks, scripts and service units replace `dev` with `--eclipse` to keep the old behaviour (HTTPS connector and the Eclipse `bin/main` classes), or with `--dev` for the HTTPS connector only. A launch with only the two mandatory arguments still starts in developer mode for Eclipse, and a base dir without options still starts without developer mode.
+
+Subclasses must adapt to the new signature `configure(String webappFolder, String baseDir, boolean dev, boolean eclipse, YadaConfiguration config)`. The JVM now exits with status 1 when the web application fails to start, instead of leaving Tomcat running without it.
+
 === Security hardening
 
 The following changes come from a security review of the framework. Some of them break existing code or

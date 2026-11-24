@@ -415,17 +415,20 @@ standalone version of Tomcat.
 ====
 
 The application is started by running the `net.yadaframework.core.YadaTomcatServer` class.
-It accepts two mandatory arguments and an optional one:
+It accepts two mandatory arguments followed by optional ones:
 
 acronym+environment::
 a string that will be used by the shutdown command
 webapp folder::
 relative path of the webapp folder in eclipse ("src/main/webapp"), or the full path elsewhere
 temp folder::
-optional in Eclipse, it must be the full path of the temp folder for Tomcat data (where the war is exploded)
+optional, the full path of an existing, writable folder for Tomcat data (where the war is exploded)
+`--dev`::
+optional, enables "developer mode": the HTTPS connector is enabled
+`--eclipse`::
+optional, also adds the Eclipse `bin/main` folder to the classpath; it implies `--dev`
 
-When the last argument is missing, "developer mode" is assumed and the HTTPS connector is enabled. It's not
-enabled in all other environments because HTTPS is supposed to be handled by Apache.
+When only the two mandatory arguments are given, both `--dev` and `--eclipse` are assumed. In all other environments the HTTPS connector is not enabled unless requested, because HTTPS is supposed to be handled by Apache.
 The `YadaTomcatServer` class can be overridden or rewritten to achieve a different behavior.
 
 The command line to start the application on the developer PC is something like
