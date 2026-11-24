@@ -41,7 +41,7 @@ The href attribute should either be empty or "javascript:;" in that case.
 
 ====  Sending a Form Group
 
-The ajax link can be part of a <<forms/overview.adoc#_scattered_forms_form_groups,Form Group>>, in which case all data gathered from
+The ajax link can be part of a <<forms/overview.adoc#_form_groups,Form Group>>, in which case all data gathered from
 the forms in the group is sent together with any url parameters:
 
 [source,html]
@@ -523,7 +523,7 @@ a| (optional) text of the cancel button
 
 ==  Ajax Forms
 
-See the  xref:forms/overview.adoc#Ajax Forms[Ajax Forms section] in the Forms chapter.
+See the  xref:forms/overview.adoc#_ajax_forms[Ajax Forms section] in the Forms chapter.
 
 ==  Ajax on other elements
 
@@ -921,7 +921,7 @@ The controller should have a `MultipartFile` argument for each binary part:
 public String addUser(MultipartFile someBinaryArray, String someText, Model model) {
 ----
 
-More info on binary uploads can be found in xref:forms/uploads#JAVA[File Uploads].
+More info on binary uploads can be found in xref:forms/uploads.adoc#_java[File Uploads].
 
 ===  successHandler
 

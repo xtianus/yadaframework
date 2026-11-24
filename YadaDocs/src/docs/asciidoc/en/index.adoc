@@ -62,7 +62,7 @@ that will show you how to quickly create a web application
 
 <<database/overview.adoc#,Databases>>:: Storing and retrieving data
 
-<<forms/overview.adoc#Forms,Forms>>:: Submitting data to the server
+<<forms/overview.adoc#,Forms>>:: Submitting data to the server
 
 <<ajax.adoc#,Ajax>>:: Easy async operations
 

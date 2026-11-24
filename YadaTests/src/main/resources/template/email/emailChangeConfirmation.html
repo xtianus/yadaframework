@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8"/>
+</head>
+<body>
+	<!--/* Sent by YadaSecurityEmailService.sendEmailChangeConfirmation(): fullLink is a template parameter */-->
+	<p>Confirm your new email address</p>
+	<p><a th:href="${fullLink}" th:text="${fullLink}" href="#" data-testid="link">Confirm</a></p>
+	<p><img th:src="'cid:logosmall'" alt="YadaTests"/></p>
+</body>
+</html>

@@ -5,8 +5,8 @@ import java.util.HashMap;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * This is a map because Spring wouldn't map it from the request otherwise
- *
+ * A column of a DataTables request. This is a map because Spring wouldn't map it from the request otherwise.
+ * All values are sent by the browser and untrusted: YadaDataTableQueryPolicy decides which paths can be queried or returned.
  */
 @SuppressWarnings("serial")
 public class YadaDatatablesColumn extends HashMap<String, Object> {

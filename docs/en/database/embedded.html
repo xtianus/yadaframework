@@ -131,7 +131,12 @@ window.onscroll = function() {
 <li><a href="#_introduction">Introduction</a></li>
 <li><a href="#_mariadb">MariaDB</a></li>
 <li><a href="#_configuration">Configuration</a></li>
-<li><a href="#_start_and_stop">Start and Stop</a></li>
+<li><a href="#_start_and_stop">Start and Stop</a>
+<ul class="sectlevel2">
+<li><a href="#_ownership_and_attachment">Ownership and attachment</a></li>
+<li><a href="#_tests">Tests</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -257,6 +262,32 @@ not be what the application needs</p>
 </tr>
 </table>
 </div>
+<div class="paragraph">
+<p>Hibernate uses <code>MariaDBDialect</code> automatically when the embedded database is enabled:
+see <a href="overview.html#_hibernate_dialect">Hibernate Dialect</a>.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>On Linux and macOS the folders can&#8217;t contain whitespace: MariaDB4j can&#8217;t start MariaDB in such folders,
+so the application fails at startup with a message that names the folder. Windows is not affected.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The <code>sourceSql</code> file is loaded only when the schema is created, which happens the first time the database
+starts on an empty data folder. After a successful load the file is renamed with a <code>.loaded</code> suffix so that it
+is never loaded twice. A file that can&#8217;t be read or that contains invalid SQL is only logged as an error: the
+application starts anyway, so check the data after the first start. Treat the file as a disposable seed and
+keep schema changes in Flyway migrations.</p>
+</div>
 <div class="admonitionblock important">
 <table>
 <tr>
@@ -305,13 +336,37 @@ recreated with the usual means (<code>drop database</code> etc.) but in case a q
 folder can be deleted before starting the application server. The database
 process must be killed first though because it might be locking some files preventing deletion.</p>
 </div>
+<div class="sect2">
+<h3 id="_ownership_and_attachment">Ownership and attachment</h3>
+<div class="paragraph">
+<p>When the configured port is free, Yada starts the MariaDB process and owns it. When something already answers on
+the port, Yada attaches to it instead, but only after checking that the running server uses the configured data
+folder: a server with a different data folder (for example another application, or a database of another developer,
+on the same port) is refused at startup with an error that suggests configuring a different port. Nothing is created
+in, or changed on, a server that has been refused.</p>
+</div>
+<div class="paragraph">
+<p>The process is not stopped when the application stops. To stop it from code, for example at the end of a test,
+call <code>stopOwnedDatabase()</code> on the <code>yadaMariaDBServer</code> bean. It stops only a process that this instance started:
+it does nothing on an instance that attached to an already running process, and calling it twice is harmless.
+If the startup fails after the process has been launched, the process is stopped before the error is reported.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tests">Tests</h3>
+<div class="paragraph">
+<p>The framework tests in the <code>YadaTests</code> project start one embedded database per test run, each with its own folders
+under <code>YadaTests/build/runs</code>, a free port and its own schema, so that test runs never share data with each other or
+with a development database. See <code>YadaTests/README.md</code> for details.</p>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.9<br>
-Last updated 2026-09-17 19:09:05 +0200
+Last updated 2026-10-14 05:10:42 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

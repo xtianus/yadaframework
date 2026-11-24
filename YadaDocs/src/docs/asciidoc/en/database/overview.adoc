@@ -22,6 +22,25 @@ This section and subsections deal with all things related to using a database in
 
 TO DO
 
+=== Hibernate Dialect
+
+By default Hibernate detects the dialect from the database: with MySQL it picks `MySQLDialect`.
+Yada sets it only in two cases:
+
+* when `<database><dialect>` is configured, that dialect is used;
+* otherwise, when the <<embedded.adoc#,embedded database>> is enabled, `org.hibernate.dialect.MariaDBDialect` is used,
+because the embedded database is MariaDB 11, which Hibernate can't recognize through the MySQL Connector/J driver.
+
+Applications that run on a MariaDB server through MySQL Connector/J should set the dialect explicitly
+(with the MariaDB JDBC driver, Hibernate detects MariaDB by itself):
+
+[source,xml]
+----
+<database>
+	<dialect>org.hibernate.dialect.MariaDBDialect</dialect>
+</database>
+----
+
 == Entities
 
 TO DO

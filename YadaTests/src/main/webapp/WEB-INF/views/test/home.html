@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{/test/fragments/head :: head(title='YadaTests')}"></head>
+<body>
+	<h1 data-testid="title">YadaTests home</h1>
+	<p data-testid="adminNickname" th:text="${adminUser?.nickname}">nickname</p>
+	<th:block th:with="loggedIn=${@yadaSecurityUtil.loggedIn()}">
+		<p th:if="${loggedIn}" data-testid="loggedAs" th:text="#{yts.home.loggedAs(${@yadaSecurityUtil.username})}">Logged in as</p>
+		<form th:if="${loggedIn}" th:action="@{/logout}" method="post" data-testid="logoutForm">
+			<button type="submit" th:text="#{yts.logout}">Log out</button>
+		</form>
+		<a th:unless="${loggedIn}" th:href="@{/login}" data-testid="loginLink" th:text="#{yts.login.title}">Login</a>
+	</th:block>
+	<form th:action="@{/test/echo}" method="post" data-testid="csrfForm">
+		<input type="text" name="message" value="hello" aria-label="Message">
+		<button type="submit">Submit</button>
+	</form>
+	<div th:replace="~{/test/fragments/scripts :: body}"></div>
+</body>
+</html>

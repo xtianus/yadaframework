@@ -36,10 +36,13 @@
 
 <header th:with="loggedIn=${@yadaSecurityUtil.loggedIn()}">
 	<div th:if="${loggedIn and @userSession.impersonationActive}" class="yadaImpersonationBanner">
-		<a th:href="@{/dashboard/user/deimpersonate}">
-			<span>Impersonating <strong th:text="${@userSession.currentUserProfile.userCredentials.username}">John Doe</strong></span>
-		    <button type="button" class="btn-close" aria-label="Close Impersonation"></button>
-		</a>
+		<!--/* Deimpersonation changes the session user so it needs a POST with the CSRF token that th:action adds */-->
+		<form th:action="@{/dashboard/user/deimpersonate}" method="post">
+			<button type="submit" aria-label="Close Impersonation">
+				<span>Impersonating <strong th:text="${@userSession.currentUserProfile.userCredentials.username}">John Doe</strong></span>
+				<span class="btn-close" aria-hidden="true"></span>
+			</button>
+		</form>
 	</div>
 
 	<div class="container">

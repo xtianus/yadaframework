@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{/test/fragments/head :: head(title='Received')}"></head>
+<body>
+	<span data-testid="method" th:text="${method}">method</span>
+	<span data-testid="id" th:text="${id}">id</span>
+	<span data-testid="currentLocation" th:text="${currentLocation}">location</span>
+</body>
+</html>

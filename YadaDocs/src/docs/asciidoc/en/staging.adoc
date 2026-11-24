@@ -96,7 +96,7 @@ public void addToMyList(String data) {
 <1> Initializing a list with a simple api
 <2> Initializing an object with a constructor without arguments
 <3> Initializing an object with a constructor with arguments
-<3> Initializing an object with a constructor with arguments
+<4> Initializing a list with a specific implementation
 
 CAUTION: In a multithreaded scenario there may be race conditions with unpredictable results. This is why the method is called "lazyUnsafeInit".
 
@@ -280,7 +280,7 @@ h|Language
 
 Executing some javascript after the document has been fully loaded requires some lines of code that
 check the state of the document and register an event handler. This has already been implemented
-and inserted in the `header.html` file by the <<newEclipseProject#_code_generation_just_a_bit,yadaInit>> task 
+and inserted in the `header.html` file by the <<setup/gettingStarted.adoc#_code_generation_just_a_bit,yadaInit>> task 
 used to create the initial project skeleton.
 Example:
 

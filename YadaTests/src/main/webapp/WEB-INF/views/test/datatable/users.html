@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{/test/fragments/head :: head(title='DataTable users')}"></head>
+<body>
+	<h1 data-testid="area">Users</h1>
+	<!--/* The tables are configured by the controller but not rendered with <yada:datatable>: its template needs a
+		"userSession" bean that the test application does not define, and DataTables is not served locally.
+		The tests send the requests that DataTables would send. */-->
+	<ul>
+		<li th:each="table : ${ {configuredTable, customTable} }" th:attr="data-testid=${table.id}" th:text="|${table.id} ${table.ajaxUrl}|">table</li>
+	</ul>
+	<div th:replace="~{/test/fragments/scripts :: body}"></div>
+</body>
+</html>

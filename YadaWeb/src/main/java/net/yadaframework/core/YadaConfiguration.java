@@ -917,11 +917,52 @@ public abstract class YadaConfiguration {
 	}
 
 	/**
-	 *
-	 * @return
+	 * The IP addresses of the reverse proxies that are allowed to set the X-Forwarded-For header, from
+	 * &lt;security>&lt;trustedProxies>&lt;proxy>. Only plain IP addresses are accepted: other entries (e.g. "*", host names) are ignored,
+	 * so there is no way to trust every peer. The default is an empty list: the client address is the address of the TCP peer.
+	 * Prefer Tomcat's RemoteIpValve to this setting.
+	 * @return the configured addresses, empty when none is configured
+	 * @see net.yadaframework.components.YadaClientAddress
+	 */
+	public List<String> getTrustedProxies() {
+		List<String> result = new ArrayList<>();
+		for (String proxy : configuration.getList(String.class, "config/security/trustedProxies/proxy", Collections.emptyList())) {
+			if (proxy!=null && !proxy.isBlank()) {
+				result.add(proxy.trim());
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * @return the lifetime of new autologin links in hours, from &lt;security>&lt;autologinExpirationHours>, default 10
 	 */
 	public int getAutologinExpirationHours() {
 		return configuration.getInt("config/security/autologinExpirationHours", 10);
+	}
+
+	/**
+	 * @return the lifetime of new password recovery links in minutes, from
+	 * 	&lt;security>&lt;passwordReset>&lt;expirationMinutes>, default 30
+	 */
+	public int getPasswordResetExpirationMinutes() {
+		return configuration.getInt("config/security/passwordReset/expirationMinutes", 30);
+	}
+
+	/**
+	 * @return the lifetime of new email change confirmation links in minutes, from
+	 * 	&lt;security>&lt;emailChange>&lt;expirationMinutes>, default 30
+	 */
+	public int getEmailChangeExpirationMinutes() {
+		return configuration.getInt("config/security/emailChange/expirationMinutes", 30);
+	}
+
+	/**
+	 * @return the lifetime of new registration confirmation links in hours, from
+	 * 	&lt;security>&lt;registration>&lt;expirationHours>, default 24
+	 */
+	public int getRegistrationExpirationHours() {
+		return configuration.getInt("config/security/registration/expirationHours", 24);
 	}
 
 	/**
@@ -1646,6 +1687,16 @@ public abstract class YadaConfiguration {
 
 	public boolean getShowSql() {
 		return configuration.getBoolean("config/database/showSql", false);
+	}
+
+	/**
+	 * The Hibernate dialect configured in &lt;database>&lt;dialect>, used by YadaJpaConfig.
+	 * When missing, Hibernate detects the dialect from the database, except with the embedded database (see YadaJpaConfig).
+	 * Set it for a MariaDB server reached through MySQL Connector/J, which Hibernate can't recognize as MariaDB.
+	 * @return the dialect class name, or null when not configured
+	 */
+	public String getDbDialect() {
+		return configuration.getString("config/database/dialect", null);
 	}
 
 	/**

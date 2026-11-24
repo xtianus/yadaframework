@@ -61,6 +61,21 @@ The full configuration for the embedded database is shown below with default val
 <4> Temp folder used by the database
 <5> sql to run when first creating the database. There is no default value here.
 
+Hibernate uses `MariaDBDialect` automatically when the embedded database is enabled:
+see <<overview.adoc#_hibernate_dialect,Hibernate Dialect>>.
+
+[WARNING]
+====
+On Linux and macOS the folders can't contain whitespace: MariaDB4j can't start MariaDB in such folders,
+so the application fails at startup with a message that names the folder. Windows is not affected.
+====
+
+The `sourceSql` file is loaded only when the schema is created, which happens the first time the database
+starts on an empty data folder. After a successful load the file is renamed with a `.loaded` suffix so that it
+is never loaded twice. A file that can't be read or that contains invalid SQL is only logged as an error: the
+application starts anyway, so check the data after the first start. Treat the file as a disposable seed and
+keep schema changes in Flyway migrations.
+
 [IMPORTANT]
 ====
 In the above example the database configuration is set in `conf.webapp.dev.xml` so that
@@ -102,3 +117,22 @@ process must be killed first though because it might be locking some files preve
 
 
 
+
+=== Ownership and attachment
+
+When the configured port is free, Yada starts the MariaDB process and owns it. When something already answers on
+the port, Yada attaches to it instead, but only after checking that the running server uses the configured data
+folder: a server with a different data folder (for example another application, or a database of another developer,
+on the same port) is refused at startup with an error that suggests configuring a different port. Nothing is created
+in, or changed on, a server that has been refused.
+
+The process is not stopped when the application stops. To stop it from code, for example at the end of a test,
+call `stopOwnedDatabase()` on the `yadaMariaDBServer` bean. It stops only a process that this instance started:
+it does nothing on an instance that attached to an already running process, and calling it twice is harmless.
+If the startup fails after the process has been launched, the process is stopped before the error is reported.
+
+=== Tests
+
+The framework tests in the `YadaTests` project start one embedded database per test run, each with its own folders
+under `YadaTests/build/runs`, a free port and its own schema, so that test runs never share data with each other or
+with a development database. See `YadaTests/README.md` for details.

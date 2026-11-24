@@ -1,0 +1,2 @@
+USE `@SCHEMA@`;
+CREATE TABLE broken_item (id INT PRIMARY KEY;

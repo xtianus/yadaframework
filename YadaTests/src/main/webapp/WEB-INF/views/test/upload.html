@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{/test/fragments/head :: head(title=#{yts.upload.title})}"></head>
+<body>
+	<h1 th:text="#{yts.upload.title}">Upload</h1>
+	<p th:if="${uploadedName!=null}" data-testid="uploaded" th:text="#{yts.upload.done(${uploadedName}, ${uploadedSize})}">Received</p>
+	<p th:if="${tooLarge}" data-testid="tooLarge" th:text="#{yts.upload.tooLarge}">Too large</p>
+	<form th:action="@{/test/upload}" method="post" enctype="multipart/form-data" data-testid="uploadForm">
+		<label for="upfile">File</label>
+		<input type="file" id="upfile" name="upfile">
+		<button type="submit" th:text="#{yts.upload.submit}">Upload</button>
+	</form>
+	<div th:replace="~{/test/fragments/scripts :: body}"></div>
+</body>
+</html>

@@ -12,6 +12,7 @@ import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_ERR
 import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_INFO;
 import static net.yadaframework.core.YadaConstants.VAL_NOTIFICATION_SEVERITY_OK;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -23,6 +24,9 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -629,6 +633,149 @@ public class YadaWebUtil {
 		}
 		String enhancedUrl = enhanceUrl(url, locale, params);
 		return "redirect:" + enhancedUrl;
+	}
+
+	/**
+	 * Validates a redirect target that comes from the client (a request parameter, a stored "current location", etc.)
+	 * so that a redirect can't leave the site.
+	 * <p>
+	 * The candidate is accepted unchanged only when it is an absolute local path like "/dashboard?tab=users#top":
+	 * it starts with a single "/", contains no backslash, no "{" or "}" (RedirectView would expand them as URI template
+	 * variables), no whitespace, control or invisible format character anywhere, and its path has no "." or ".." segment.
+	 * The path is also percent-decoded, up to {@value #SAFE_REDIRECT_DECODING_ROUNDS} times, and every decoded form must
+	 * satisfy the same rules and contain no encoded "/" or "\", so that double-encoded values like
+	 * "/%252F%252Fevil.example" are rejected too. Malformed or too deeply nested encodings are rejected. By design this
+	 * also rejects a path with an encoded "%" whose decoded form is not a valid escape, such as "/100%25" ("/100%"),
+	 * because it can't be told apart from a partial double encoding. The query string and the fragment are kept as they are.
+	 * <p>
+	 * The result is never decoded or re-encoded: it is meant to be used as it is, as {@code "redirect:" + safeLocalRedirect(target)}.
+	 * This is the only correct use for raw or already encoded values, like a stored {@code request.getRequestURI()} or a
+	 * request parameter carrying a path with a locale segment.
+	 * Do not pass the result to {@link #redirectString(String, Locale, String...)}: that method percent-encodes the path
+	 * again ("/caf%C3%A9" becomes "/caf%25C3%25A9") and, when the locale path variable is enabled, prepends the request
+	 * locale unless the path already starts with that same locale ("/en/x" becomes "/it/en/x" for an Italian request).
+	 * redirectString is only for decoded, locale-less application paths written in code.
+	 * Unlike {@link #sanitizeUrl(String)}, which produces external urls, this method never returns a value that leaves the site.
+	 * @param candidate the requested target, can be null
+	 * @return the candidate when it is a safe local path, otherwise "/"
+	 */
+	public String safeLocalRedirect(String candidate) {
+		if (isSafeLocalRedirect(candidate)) {
+			return candidate;
+		}
+		// The value is not logged: it can be long, forged or carry a token
+		log.debug("Unsafe redirect target replaced with \"/\"");
+		return "/";
+	}
+
+	/**
+	 * Escapes a value for use inside a JSON string literal, without the enclosing quotes, in a document that may also be
+	 * read as HTML or JavaScript, like the YadaViews.AJAX_REDIRECT answer. Besides the quote, the backslash and the control
+	 * characters, also "&lt;", "&gt;", "&amp;", "'" and the U+2028/U+2029 separators become JSON unicode escapes (a backslash,
+	 * "u" and four hex digits), so the value can't end the string, add JSON properties, or open or close an HTML element or
+	 * a script. JSON.parse() returns the original value.
+	 * @param value the text to escape, can be null
+	 * @return the escaped text, an empty string for null
+	 */
+	public static String escapeJsonString(String value) {
+		if (value==null) {
+			return "";
+		}
+		StringBuilder result = new StringBuilder(value.length() + 16);
+		for (int i = 0; i < value.length(); i++) {
+			char character = value.charAt(i);
+			if (character=='"') {
+				result.append("\\\"");
+			} else if (character=='\\') {
+				result.append("\\\\");
+			} else if (character<0x20 || character==0x7f || character=='<' || character=='>' || character=='&' || character=='\'' || character=='\u2028' || character=='\u2029') {
+				result.append(String.format("\\u%04x", (int) character));
+			} else {
+				result.append(character);
+			}
+		}
+		return result.toString();
+	}
+
+	/** How many times safeLocalRedirect() decodes a path before rejecting it as too deeply encoded */
+	private static final int SAFE_REDIRECT_DECODING_ROUNDS = 3;
+	private static final Pattern ENCODED_SEPARATOR = Pattern.compile("%(2f|5c)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern PERCENT_ESCAPE = Pattern.compile("%[0-9A-Fa-f]{2}");
+
+	/**
+	 * Tells if a url is an absolute local path that can't reach another origin, with the same rules as
+	 * {@link #safeLocalRedirect(String)}. Use it to decide whether a url may receive data that must stay on the site,
+	 * like a CSRF token.
+	 * @param candidate the url to check, can be null
+	 * @return true when {@link #safeLocalRedirect(String)} would return the candidate unchanged
+	 */
+	public boolean isSafeLocalRedirect(String candidate) {
+		if (candidate==null || !hasOnlySafeRedirectCharacters(candidate)) {
+			return false;
+		}
+		int pathEnd = StringUtils.indexOfAny(candidate, '?', '#');
+		String path = pathEnd<0 ? candidate : candidate.substring(0, pathEnd);
+		for (int round = 0; ; round++) {
+			if (!path.startsWith("/") || path.startsWith("//") || !hasOnlySafeRedirectCharacters(path) || hasDotSegment(path) || ENCODED_SEPARATOR.matcher(path).find()) {
+				return false;
+			}
+			if (path.indexOf('%')<0) {
+				return true;
+			}
+			if (round>=SAFE_REDIRECT_DECODING_ROUNDS) {
+				return false; // Still encoded after the allowed rounds
+			}
+			path = strictPercentDecode(path);
+			if (path==null) {
+				return false;
+			}
+		}
+	}
+
+	private boolean hasOnlySafeRedirectCharacters(String value) {
+		for (int i = 0; i < value.length(); i++) {
+			char character = value.charAt(i);
+			if (character=='\\' || character=='{' || character=='}' || Character.isWhitespace(character) || Character.isSpaceChar(character) || Character.isISOControl(character) || Character.getType(character)==Character.FORMAT) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean hasDotSegment(String path) {
+		for (String segment : path.split("/", -1)) {
+			if (segment.equals(".") || segment.equals("..")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Decodes the %XX escapes of a path as UTF-8, without turning "+" into a space
+	 * @return the decoded path, or null when an escape is malformed or the bytes are not valid UTF-8
+	 */
+	private String strictPercentDecode(String path) {
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream(path.length());
+		int position = 0;
+		while (position < path.length()) {
+			int escapePosition = path.indexOf('%', position);
+			int plainEnd = escapePosition<0 ? path.length() : escapePosition;
+			bytes.writeBytes(path.substring(position, plainEnd).getBytes(StandardCharsets.UTF_8));
+			if (escapePosition<0) {
+				break;
+			}
+			if (escapePosition+3>path.length() || !PERCENT_ESCAPE.matcher(path.substring(escapePosition, escapePosition+3)).matches()) {
+				return null; // A "%" that doesn't start a valid escape
+			}
+			bytes.write(Integer.parseInt(path.substring(escapePosition+1, escapePosition+3), 16));
+			position = escapePosition+3;
+		}
+		try {
+			return StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes.toByteArray())).toString();
+		} catch (CharacterCodingException e) {
+			return null;
+		}
 	}
 
 	/**
@@ -1389,30 +1536,28 @@ public class YadaWebUtil {
 
 	/**
 	 * Returns the browser's remote ip address.
-	 * If the connection uses a proxy that sets the "X-Forwarded-For" header, the result is taken from that header.
+	 * The result is the address of the TCP peer ({@code request.getRemoteAddr()}). The "X-Forwarded-For" header is believed only when
+	 * the peer is one of the proxies listed in &lt;security>&lt;trustedProxies>&lt;proxy> (empty by default), and then the client is the
+	 * first address from the right-hand end of the chain that is not a trusted proxy. The header is never trusted otherwise.
+	 * When the application runs behind a proxy it is better to configure Tomcat's RemoteIpValve so that
+	 * {@code getRemoteAddr()} is already the client address.
 	 * @param request
-	 * @return The client IP address, ignoring any proxy address when possible
+	 * @return The client IP address, ignoring any trusted proxy address when possible
+	 * @see YadaClientAddress
 	 */
 	public String getClientAddress(HttpServletRequest request) {
-		String forwardedFor = request.getHeader("X-Forwarded-For"); // X-Forwarded-For: 203.0.113.195, 70.41.3.18, 150.172.238.178
-		if (!StringUtils.isBlank(forwardedFor)) {
-			return forwardedFor.split(",", 2)[0].trim();
-		}
-		return request.getRemoteAddr();
+		return YadaClientAddress.resolve(request.getRemoteAddr(), Collections.list(request.getHeaders("X-Forwarded-For")), config.getTrustedProxies());
 	}
 
-	@Deprecated // Quite useless because of the format of the result
+	/**
+	 * Returns the same address as {@link #getClientAddress(HttpServletRequest)}, or "?" when it is not available.
+	 * A forwarded header is never part of the result.
+	 * @deprecated use {@link #getClientAddress(HttpServletRequest)}
+	 */
+	@Deprecated
 	public String getClientIp(HttpServletRequest request) {
-		String remoteAddr = request.getRemoteAddr();
-		String forwardedFor = request.getHeader("X-Forwarded-For");
-		String remoteIp = "?";
-		if (!StringUtils.isBlank(remoteAddr)) {
-			remoteIp = remoteAddr;
-		}
-		if (!StringUtils.isBlank(forwardedFor)) {
-			remoteIp = "[for " + forwardedFor + "]";
-		}
-		return remoteIp;
+		String clientAddress = getClientAddress(request);
+		return StringUtils.isBlank(clientAddress)?"?":clientAddress;
 	}
 
 	/**

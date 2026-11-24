@@ -130,7 +130,11 @@ window.onscroll = function() {
 <ul class="sectlevel1">
 <li><a href="#_subsections">Subsections</a></li>
 <li><a href="#_description">Description</a></li>
-<li><a href="#_setup">Setup</a></li>
+<li><a href="#_setup">Setup</a>
+<ul class="sectlevel2">
+<li><a href="#client-address">Client address behind a reverse proxy</a></li>
+</ul>
+</li>
 <li><a href="#_user_profile">User Profile</a></li>
 <li><a href="#_root_user">Root user</a></li>
 <li><a href="#_authorization">Authorization</a></li>
@@ -260,7 +264,7 @@ public class WebConfig extends YadaWebSecurityConfig {</code></pre>
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>the validity time of autologin links</td>
+<td>the validity time of autologin links, which must have an expiration. Registration confirmation links expire after <code>&lt;registration&gt;&lt;expirationHours&gt;</code> (24), password recovery and email change links after <code>&lt;passwordReset&gt;&lt;expirationMinutes&gt;</code> and <code>&lt;emailChange&gt;&lt;expirationMinutes&gt;</code> (30 each)</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="7"></i><b>7</b></td>
@@ -278,6 +282,57 @@ Role names should be specific to the application domain. For example, a "MANAGER
 limited access, a "TEACHER" could see the score editing form.
 It&#8217;s important not to change either the id or the key once the application goes to production because
 these values are stored in the database.</p>
+</div>
+<div class="sect2">
+<h3 id="client-address">Client address behind a reverse proxy</h3>
+<div class="paragraph">
+<p>The address written by <code>AuditFilter</code> in the <code>remoteIp</code> logback MDC field, and returned by <code>YadaWebUtil.getClientAddress()</code>, is the address of the TCP peer, <code>request.getRemoteAddr()</code>.
+The <code>X-Forwarded-For</code> header is written by whoever sends the request, so it is never believed by default: a client connected directly to Tomcat can not choose the address that ends up in the audit log.
+The raw header text, with control characters replaced and a length limit, is available in the separate <code>forwardedFor</code> MDC field (<code>%X{forwardedFor}</code>) for diagnostics only.</p>
+</div>
+<div class="paragraph">
+<p>When the application is behind a reverse proxy or load balancer, configure Tomcat&#8217;s <code>RemoteIpValve</code> so that <code>getRemoteAddr()</code> already is the real client address:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;Valve className="org.apache.catalina.valves.RemoteIpValve"
+	remoteIpHeader="X-Forwarded-For"
+	internalProxies="10\.0\.0\.1|10\.0\.0\.2"
+	trustedProxies="" /&gt;</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>internalProxies</code> (and <code>trustedProxies</code>) must list exactly the addresses of the ingress. The Tomcat default for <code>internalProxies</code> covers all private networks, which is too wide if other hosts of those networks can reach Tomcat directly.</p>
+</li>
+<li>
+<p>The ingress must overwrite client-supplied <code>X-Forwarded-For</code> (and <code>X-Forwarded-Proto</code>, <code>X-Forwarded-Host</code>) with what it observed, not append to them. A header passed on unchanged lets a client forge the left part of the chain, and a misconfigured valve would then believe it.</p>
+</li>
+<li>
+<p>Tomcat must not be reachable except through the ingress.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Without a valve, the framework can read the header itself, but only from an explicit list of proxy addresses:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;config&gt;
+	&lt;security&gt;
+		&lt;trustedProxies&gt;
+			&lt;proxy&gt;10.0.0.1&lt;/proxy&gt;
+			&lt;proxy&gt;10.0.0.2&lt;/proxy&gt;
+		&lt;/trustedProxies&gt;
+	&lt;/security&gt;
+&lt;/config&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Only IP addresses are accepted (entries such as <code>*</code>, a host name or a network range are ignored, so there is no way to trust everybody). The header is considered only when the peer is in the list; the chain is then read from the right-hand end and the first address that is not a listed proxy is the client. A malformed address in the chain makes the peer address the result.
+When the valve is used, leave the list empty.</p>
+</div>
 </div>
 </div>
 </div>
@@ -422,7 +477,7 @@ to access the <code>/user</code> path. This can of course be changed as needed.<
 <div id="footer">
 <div id="footer-text">
 Version 0.7.9<br>
-Last updated 2026-09-17 19:09:05 +0200
+Last updated 2026-10-14 05:14:12 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{/test/fragments/head :: head(title=#{yts.articles.title})}"></head>
+<body>
+	<h1 data-testid="articleTitle" th:text="${article.localName}">Name</h1>
+	<form th:action="@{/test/articles/{id}(id=${article.id})}" method="post" data-testid="articleForm">
+		<label for="name" th:text="#{yts.articles.name}">Name</label>
+		<input type="text" id="name" name="name" th:value="${article.localName}">
+		<button type="submit" th:text="#{yts.articles.save}">Save</button>
+	</form>
+	<div th:replace="~{/test/fragments/scripts :: body}"></div>
+</body>
+</html>

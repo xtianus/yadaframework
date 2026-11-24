@@ -58,11 +58,11 @@ function impersonate(rowOrApi, idsOptional) {
 	const url = /*[[@{/dashboard/user/impersonate}]]*/ "dummy";
 	if (idsOptional?.length > 0) {
 		// Toolbar button
-		yada.impersonate(url, idsOptional[0]);
+		yada.impersonate(url, idsOptional[0], "POST");
 	} else {
 		// Command button
 		const id = rowOrApi.id;
-		yada.impersonate(url, id);
+		yada.impersonate(url, id, "POST");
 	}
 }
 

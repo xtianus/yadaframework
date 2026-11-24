@@ -1,5 +1,7 @@
 package net.yadaframework.example.persistence.repository;
 
+import java.util.function.Function;
+
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +51,21 @@ public class UserProfileDao extends YadaUserProfileDao<UserProfile> {
     		.nativeQuery(em).executeUpdate();
     }
     
+    /**
+     * Loads a user profile and passes it to the editor in one read-write transaction: the changes that the editor makes
+     * to the profile and its credentials are committed when it returns. The editor must check everything before changing
+     * anything, because an editor that returns without changes leaves nothing to commit.
+     * The identity of the profile comes only from the database, so ids and relationships can't be swapped by the caller.
+     * @param userProfileId the profile to load
+     * @param editor receives the managed profile, or null when it doesn't exist
+     * @return the result of the editor
+     */
+    @Transactional(readOnly = false)
+    public <R> R editInTransaction(long userProfileId, Function<UserProfile, R> editor) {
+    	UserProfile userProfile = em.find(UserProfile.class, userProfileId);
+    	return editor.apply(userProfile);
+    }
+
     /**
      * Find a userProfile from its id
      * @param userProfileId

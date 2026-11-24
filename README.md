@@ -5,19 +5,24 @@ Latest documentation: https://yadaframework.net/
 
 ## Gradle builds
 
-The repository root is the `yadaframework` build, using Gradle 8.14.3 and Java 21. It includes `YadaWeb`, `YadaWebSecurity`, `YadaWebCMS`, `YadaWebCommerce`, `YadaAi`, `YadaTools`, and `YadaDocs`. There is no application project in this build; `YadaExamples` is independent and `YadaBones` has no Gradle build.
+The repository root is the `yadaframework` build, using Gradle 8.14.3 and Java 21. It includes `YadaWeb`, `YadaWebSecurity`, `YadaWebCMS`, `YadaWebCommerce`, `YadaAi`, `YadaTools`, `YadaDocs`, and `YadaTests`. There is no application project in this build; `YadaExamples` is independent and `YadaBones` has no Gradle build.
 
 | Working directory | Command | Purpose |
 |---|---|---|
-| Repository root | `./gradlew projects` | List the seven framework projects |
-| Repository root | `./gradlew test` | Run all framework test suites |
-| Repository root | `./gradlew build` | Build all framework projects |
-| Repository root | `./gradlew :YadaWebSecurity:test` | Run security tests and compile their dependencies and fixtures |
+| Repository root | `./gradlew projects` | List the eight framework projects |
+| Repository root | `./gradlew test` | Run the unit tests (`:YadaTests:test`; no server or database) |
+| Repository root | `./gradlew build` | Build all framework projects and run the unit tests |
+| Repository root | `./gradlew :YadaTests:integrationTest` | Run the database and HTTP tests on native embedded MariaDB and Tomcat |
+| Repository root | `./gradlew :YadaTests:installBrowsers` | Install Chromium for the browser tests, once |
+| Repository root | `./gradlew :YadaTests:e2eTest` | Run the Playwright browser tests |
+| Repository root | `./gradlew :YadaTests:frameworkCheck :YadaTests:frameworkCoverage` | Full verification: all suites, documentation, coverage reports |
 | Repository root | `./gradlew :YadaDocs:asciidoctor` | Generate documentation under `docs/` |
-| `YadaWebSecurity` | `../gradlew test` | Run the security suite from its module directory |
+| `YadaTests` | `../gradlew integrationTest` | Run a YadaTests suite from its module directory |
 | `YadaExamples` | `./gradlew build` | Build the independent example application and its four framework source dependencies |
 
 On Windows, use `gradlew.bat` with the equivalent relative path. Framework build and test graphs exclude application Sass, schema, initialization, and deployment tasks. Explicit framework tasks remain available through module-qualified names.
+
+All framework tests live in `YadaTests`; the other modules have no tests of their own. See [YadaTests/README.md](YadaTests/README.md) for the suites, prerequisites, reports and cleanup rules.
 
 `shared.gradle.properties`, `loadSharedProperties.gradle`, and `eclipseSetup.gradle` live at the repository root. Module build scripts apply the shared scripts through project-relative paths (`../loadSharedProperties.gradle` and `../eclipseSetup.gradle`); the loader reads `../shared.gradle.properties` relative to the applying project. This also supports applications that include framework source directories in their own settings, such as `LumiligoSite`. Because the loader reads `../shared.gradle.properties` next to the applying project, a sibling application cannot apply it directly; applications get the shared properties by including the framework modules. `eclipseSetup.gradle` must be applied after the loader, since it reads `java_version`.
 

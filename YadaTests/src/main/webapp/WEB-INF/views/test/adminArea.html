@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{/test/fragments/head :: head(title=#{yts.area.admin})}"></head>
+<body>
+	<h1 data-testid="area" th:text="#{yts.area.admin}">Area</h1>
+	<div th:replace="~{/test/fragments/scripts :: body}"></div>
+</body>
+</html>

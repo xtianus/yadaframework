@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:yada="http://www.yadaframework.net">
+<body th:remove="tag">
+	<!--/* The real framework scripts, served by the framework resource handlers. No network access is needed. */-->
+	<script th:src="@{/static/jquery-3.7.1.min.js}"></script>
+	<script th:src="@{/static/bootstrap-5.3.3/js/bootstrap.bundle.min.js}"></script>
+	<!--/* yada:src adds the framework version to /yadares, as the resource handler expects */-->
+	<script yada:src="@{/yadares/js/yada.js}"></script>
+	<script yada:src="@{/yadares/js/yada.ajax.js}"></script>
+	<script type="text/javascript" th:inline="javascript">
+		//<![CDATA[
+			yada.devMode = /*[[${@config.isDevelopmentEnvironment()}]]*/ "unset";
+			yada.baseUrl = /*[[@{/}]]*/ "unset";
+			yada.resourceDir = /*[[${@config.versionedResourceDir}]]*/ "unset";
+		//]]>
+	</script>
+
+	<div th:insert="~{${@yadaWebUtil.modalConfirmViewName} :: modalBlock}" id="yada-confirm"></div>
+
+	<!--/* Notify modal */-->
+	<div th:insert="~{${@yadaNotify.viewName} :: modal}" class="modal fade" th:classappend="|B${@config.bootstrapVersion}|" id="yada-notification" role="dialog"></div>
+	<script th:if="${YADA_NBODY!=null}" type="text/javascript">
+		$(function() {
+			$('#yada-notification').modal('show');
+		});
+	</script>
+</body>
+</html>

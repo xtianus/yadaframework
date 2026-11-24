@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>YadaTests error</title>
+</head>
+<body>
+	<h1 data-testid="errorStatus" th:text="${yadaHttpStatus}">500</h1>
+	<p data-testid="errorMessage" th:text="${yadaHttpMessage}">message</p>
+</body>
+</html>

@@ -45,7 +45,7 @@ Rewrite the intro when finished.
 
 == Prerequisites
 This tutorial assumes that you have a development environment available and configured by following
-the instructions in the <<../newEclipseProject.adoc#,Getting Started>> chapter. 
+the instructions in the <<../setup/gettingStarted.adoc#,Getting Started>> chapter. 
 
 [.todo]
 ----
@@ -70,7 +70,7 @@ structure in order to provide the information needed to store its values in the 
   
 The developer can choose either to start from the class and derive the table, or start defining the table then
 derive the class. In the Yada Framework, the schema creation gradle task can create a schema from the java classes,
-as explained in the <<../newEclipseProject.adoc#Database Layer,Database Layer>> section below.
+as explained in the <<_database_layer,Database Layer>> section below.
 
 Following the official Java Bookstore tutorial, the Book entity class is as follows:
 

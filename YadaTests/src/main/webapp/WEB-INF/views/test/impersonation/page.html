@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:yada="http://www.yadaframework.net">
+<head th:replace="~{/test/fragments/head :: head(title='Impersonation')}"></head>
+<body>
+	<h1>Impersonation</h1>
+	<button type="button" data-testid="impersonateButton" th:data-url="@{/test/impersonation/start}"
+		onclick="yada.impersonate(this.dataset.url, 7, 'POST')">Impersonate</button>
+
+	<!--/* A legacy table: hidden control column, checkbox column, one data column, command column */-->
+	<table id="legacyTable" data-testid="legacyTable">
+		<thead><tr><th></th><th></th><th>Name</th><th></th></tr></thead>
+	</table>
+
+	<div th:replace="~{/test/fragments/scripts :: body}"></div>
+	<!--/* DataTables is not part of the test application: the browser test serves it */-->
+	<script th:src="@{/test/impersonation/vendor/datatables.min.js}"></script>
+	<script yada:src="@{/yadares/js/yada.datatablesLegacy.js}"></script>
+	<script th:inline="javascript">
+		const dataUrl = /*[[@{/test/impersonation/tableData}]]*/ "unset";
+		const startUrl = /*[[@{/test/impersonation/start}]]*/ "unset";
+		yada.dataTableCrud($('#legacyTable'), dataUrl, ['name'], null, null, [ [ 2, 'asc' ] ], 10, null, [
+			{
+				"url": startUrl,
+				"title": "Impersonate",
+				"icon": '<span data-testid="legacyImpersonate">I</span>',
+				"idName": "id",
+				"ajax": false,
+				"method": "POST"
+			}
+		]);
+	</script>
+</body>
+</html>

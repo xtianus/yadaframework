@@ -8,6 +8,15 @@ Yada ajax requests use CSRF data exposed in the HTML page `<head>`. Pages that r
 
 `yada.ajax.js` reads those meta tags at script load. When `_csrf` and `_csrf_header` are present, it adds the configured CSRF header to same-origin jQuery ajax requests that use unsafe HTTP methods.
 
+## Multipart uploads
+
+The CSRF token of a multipart form is never put in the action URL. The `MultipartFilter` runs before Spring Security,
+so `CsrfFilter` reads the hidden `_csrf` field of a parsed multipart body, or the header sent by `yada.ajax.js` for
+ajax uploads. A body over `maxFileUploadSizeBytes` is not parsed: a plain form fails CSRF validation and gets 413 from
+`YadaUploadLimitAccessDeniedHandler` without reaching a controller, while an upload with a valid CSRF header reaches the
+controller with `YadaCommonsMultipartResolver.limitExceeded(request)` true. See `YadaMultipartFormTagProcessor` in the
+YadaWebSecurity dictionary.
+
 ## Forcing the HTTP method of an ajax request
 
 `makeAjaxCall` sends GET unless the request is multipart or the element belongs to a `yadaFormGroup` whose first
@@ -19,7 +28,8 @@ anchor, a button or an input. A multipart upload still forces `POST` and a `yada
 
 `yada.dataTableCrud` of `yada.datatablesLegacy.js` sends its row commands with GET as well. The `deleteDef` and the
 `extraButtons` definitions accept an optional `method` property for the same reason; it is opt-in, so tables that do
-not set it keep the previous behaviour.
+not set it keep the previous behaviour. An extra button with `ajax: false` and a method other than GET navigates
+through `yada.postNavigate`, in `windowName` when set.
 
 The table command buttons of `yada.datatables.js` send GET unless the button declares `dtMethod("POST")` in
 `YadaDataTableButton`. The method is passed to `yada.ajax` for ajax buttons; a non-ajax button with a method other
@@ -27,4 +37,9 @@ than GET navigates through `yada.postNavigate`.
 
 `yada.postNavigate(url, data, windowTarget)` in `yada.ajax.js` submits a hidden POST form carrying the CSRF token
 from the page meta tags, so a full-page navigation that changes state can be CSRF-validated. `yada.impersonate`
-accepts an optional third `method` argument and uses it when the method is not GET.
+accepts an optional third `method` argument and uses it when the method is not GET. It sends `currentLocation` as the
+local path and query string of the page (`location.pathname + location.search`), not a full url. The path includes
+the servlet context path, while `"redirect:"` adds it again, so the server validates the value with
+`YadaWebUtil.safeLocalRedirect`, removes `request.getContextPath()` and replays it as
+`"redirect:" + safeLocalRedirect(saved)`; the example's `UserProfileController` impersonation and user delete endpoints are POST-only
+and work this way (`contextRelativeLocation`).

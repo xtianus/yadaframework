@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{/test/fragments/head :: head(title=#{yts.articles.title})}"></head>
+<body>
+	<h1 th:text="#{yts.articles.title}">Articles</h1>
+	<ul data-testid="articleList">
+		<li th:each="article : ${articles}" data-testid="article">
+			<span data-testid="articleSku" th:text="${article.sku}">SKU</span>
+			<span data-testid="articleName" th:text="${article.localName}">Name</span>
+			<a th:href="@{/test/articles/{id}(id=${article.id})}" th:text="#{yts.articles.edit}">Edit</a>
+		</li>
+	</ul>
+	<a th:unless="${articles.first}" data-testid="previousPage" th:href="@{/test/articles(page=${articles.page-1},size=${articles.pageSize},sort=${param.sort})}">Previous</a>
+	<a th:unless="${articles.last}" data-testid="nextPage" th:href="@{/test/articles(page=${articles.nextPage},size=${articles.pageSize},sort=${param.sort})}">Next</a>
+	<div th:replace="~{/test/fragments/scripts :: body}"></div>
+</body>
+</html>

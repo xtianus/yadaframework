@@ -149,11 +149,32 @@ public class YadaPageRequest {
 	public YadaPageSort getPageSort() {
 		if (parsedSort==null) {
 			parsedSort = new YadaPageSort();
-			for (String requestParam : sort) {
+			for (String requestParam : rejoinSplitSortParameters(sort)) {
 				parsedSort.add(requestParam);
 			}
 		}
 		return parsedSort;
+	}
+
+	/**
+	 * Undoes the split that Spring performs when a single "sort" request parameter is bound to {@link #setSort(List)}:
+	 * "sort=name,desc" arrives as ["name", "desc"], while two parameters arrive unsplit as ["name,desc", "id"].
+	 * A direction or case keyword can't be a sort parameter on its own, so it is joined back to the previous element.
+	 * @param sortParameters the bound sort parameters
+	 * @return the sort parameters as they were in the request
+	 */
+	private static List<String> rejoinSplitSortParameters(List<String> sortParameters) {
+		List<String> result = new ArrayList<>();
+		for (String sortParameter : sortParameters) {
+			String trimmed = sortParameter==null ? "" : sortParameter.trim();
+			boolean keyword = YadaPageSort.KEYWORD_ASC.equalsIgnoreCase(trimmed) || YadaPageSort.KEYWORD_DESC.equalsIgnoreCase(trimmed) || YadaPageSort.KEYWORD_IGNORECASE.equalsIgnoreCase(trimmed);
+			if (keyword && !result.isEmpty()) {
+				result.set(result.size()-1, result.get(result.size()-1) + "," + trimmed);
+			} else {
+				result.add(sortParameter);
+			}
+		}
+		return result;
 	}
 
 	/**

@@ -662,11 +662,11 @@ anything that can&#8217;t be done in Java can be done in javascript using pre- a
 </tr>
 <tr>
 <td><i class="conum" data-value="20"></i><b>20</b></td>
-<td>The URL is provided by a javascript function</td>
+<td>The URL is provided by a javascript function. Here it calls <code>yada.impersonate(url, userId, "POST")</code>: impersonation must be a POST, and the function sends the current page as a local path, see <a href="upgrade.html#_impersonation">Impersonation</a></td>
 </tr>
 <tr>
 <td><i class="conum" data-value="21"></i><b>21</b></td>
-<td>The click does not perform an ajax call, it just follows the link</td>
+<td>The click does not perform an ajax call. A legacy <code>yada.dataTableCrud</code> button with <code>ajax: false</code> and <code>method: "POST"</code> submits a POST form</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="22"></i><b>22</b></td>
@@ -726,10 +726,15 @@ file with the resulting data for the current page.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@RequestMapping(value ="/user/userProfileTablePage", produces = MediaType.APPLICATION_JSON_VALUE) <i class="conum" data-value="1"></i><b>(1)</b>
-@ResponseBody public Map&lt;String, Object&gt; userProfileTablePage(YadaDatatablesRequest yadaDatatablesRequest, Locale locale) { <i class="conum" data-value="2"></i><b>(2)</b>
-	Map&lt;String, Object&gt; result = yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale);	<i class="conum" data-value="3"></i><b>(3)</b>
-	return result;	<i class="conum" data-value="4"></i><b>(4)</b>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">private static final YadaDataTableQueryPolicy USER_TABLE_POLICY = YadaDataTableQueryPolicy.forEntity(UserProfile.class) <i class="conum" data-value="1"></i><b>(1)</b>
+	.column("id").column("nickname").column("userCredentials.username")
+	.column("userCredentials.lastSuccessfulLogin", false, true) // not searchable, orderable
+	.build();
+
+@RequestMapping(value ="/user/userProfileTablePage", produces = MediaType.APPLICATION_JSON_VALUE) <i class="conum" data-value="2"></i><b>(2)</b>
+@ResponseBody public Map&lt;String, Object&gt; userProfileTablePage(YadaDatatablesRequest yadaDatatablesRequest, Locale locale) { <i class="conum" data-value="3"></i><b>(3)</b>
+	Map&lt;String, Object&gt; result = yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale, USER_TABLE_POLICY);	<i class="conum" data-value="4"></i><b>(4)</b>
+	return result;	<i class="conum" data-value="5"></i><b>(5)</b>
 }</code></pre>
 </div>
 </div>
@@ -737,21 +742,64 @@ file with the resulting data for the current page.</p>
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Any type of mapping can be used, not just @RequestMapping</td>
+<td>The server-side policy lists the entity paths that the table may return, search and sort</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>YadaDatatablesRequest is initialized with the metadata sent by DataTables, like the current page number, the value paths and the search/sort options</td>
+<td>Any type of mapping can be used, not just @RequestMapping</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>yadaDataTableDao.getConvertedJsonPage() receives the request data and the @Entity class to perform all needed operations</td>
+<td>YadaDatatablesRequest is initialized with the metadata sent by DataTables, like the current page number, the value paths and the search/sort options</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>yadaDataTableDao.getConvertedJsonPage() checks the request against the policy, then performs all needed operations on the @Entity class</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
 <td>The result is a "map tree" (i.e. nested maps) that is automatically converted to json</td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>Everything in YadaDatatablesRequest is sent by the browser and can be tampered with. The policy decides what is queried
+and returned: a request with a column that is not in the policy, an order on a column that is not orderable, an order
+direction other than <code>asc</code>/<code>desc</code>, an invalid order index or an undeclared extra attribute is rejected before any query
+with a <code>yadaError</code> and no data. A column is searched only when both the policy and the browser flag allow it.
+Paths are checked against the entity class when the policy is built:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>searchable or orderable paths must be persistent fields of that class (map keys included, e.g. <code>"title.en"</code>; the key
+is bound as a query parameter of the map key type, like <code>Locale</code>);</p>
+</li>
+<li>
+<p>output-only columns (<code>column(path, false, false)</code>) and <code>extraOutput</code> paths can also end with a getter that returns
+no entity, collection or map;</p>
+</li>
+<li>
+<p>paths that would return a credential (<code>password</code>, <code>token</code>, &#8230;&#8203; in any segment, map keys included), a whole entity
+or an embeddable are always refused.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>A policy built with <code>YadaDataTableQueryPolicy.forEntity()</code> for a custom endpoint fails in <code>build()</code> when a searchable
+or orderable path is not a persistent field of the class, e.g. a getter, a computed value or an attribute that only
+exists in a subclass. Declare getters and computed values with <code>column(path, false, false)</code>, and build the policy for
+the concrete subclass when the table shows subclass attributes.</p>
+</div>
+<div class="paragraph">
+<p>The default <code>/yadaDataTableData</code> endpoint, used when a table has <code>dtEntityClass()</code> and no <code>dtAjaxUrl()</code>, derives the
+policy from the table columns: each column name (or data path) is searchable and orderable unless switched off with
+<code>dtSearchableOff()</code>/<code>dtOrderableOff()</code>. A column that is not a persistent field of the <code>dtEntityClass()</code> class (a getter,
+a computed value, a subclass-only attribute) becomes output-only: it is shown but never searched or sorted, a sort
+request on it is rejected, and a warning is logged once when the policy is built. A subclass-only value is read from
+each row at runtime. To search or sort such a column, pass the subclass to <code>dtEntityClass()</code>. A custom endpoint that serves a configured table can reuse that policy with
+<code>yadaDataTableFactory.getSingleton(tableId, locale).getQueryPolicy()</code> once the table page has been rendered, but a
+policy constant like the one above is simpler and also serves tables that are not configured in Java.</p>
 </div>
 <div class="paragraph">
 <p>Using a custom endpoint for table data allows to manipulate both the query and the result, for example
@@ -1017,8 +1065,9 @@ On the backend, <code>YadaDataTableDao.getPage()</code> reads it automatically a
 <div class="sect2">
 <h3 id="_returning_extra_data">Returning extra data</h3>
 <div class="paragraph">
-<p>The call to yadaDataTableDao.getConvertedJsonPage() returns all data that was requested, but sometimes some other attributes
-may be required to compute a row value. In order to retrieve this data, use <code>yadaDatatablesRequest.addExtraJsonAttribute("attributePath")</code> before calling <code>getConvertedJsonPage()</code>.
+<p>The call to yadaDataTableDao.getConvertedJsonPage() returns the policy columns that were requested, but sometimes some other attributes
+may be required to compute a row value. In order to retrieve this data, declare the path in the policy with <code>.extraOutput("attributePath")</code>:
+it is returned for every row.
 A use case could be to fetch the "enabled" attribute of the user credentials to show a different icon based on that value.</p>
 </div>
 </div>
@@ -1058,7 +1107,7 @@ i18n is automatic by using keys instead of words</pre>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.9<br>
-Last updated 2026-09-27 23:19:03 +0200
+Last updated 2026-10-14 05:14:15 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

@@ -1,6 +1,6 @@
 package net.yadaframework.example.web.dashboard;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -15,8 +15,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ValidationUtils;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -35,6 +38,7 @@ import net.yadaframework.example.persistence.entity.UserProfile;
 import net.yadaframework.example.persistence.repository.UserProfileDao;
 import net.yadaframework.example.web.UserSession;
 import net.yadaframework.persistence.YadaDataTableDao;
+import net.yadaframework.persistence.YadaDataTableQueryPolicy;
 import net.yadaframework.persistence.YadaSql;
 import net.yadaframework.security.components.YadaSecurityUtil;
 import net.yadaframework.security.persistence.entity.YadaUserCredentials;
@@ -59,96 +63,147 @@ public class UserProfileController {
 	@Autowired private YadaSecurityUtil yadaSecurityUtil;
 	@Autowired private YadaDataTableFactory yadaDataTableFactory;
 
-	@ModelAttribute("userProfile")
-	public UserProfile addUserProfile(@RequestParam(value="userProfileId", required=false) Long id) {
-		UserProfile toEdit = null;
-		Exception exception = null;
-		if (id!=null) {
-			try {
-				toEdit = userProfileDao.find(id);
-			} catch (Exception e) {
-				exception = e;
-			}
-			if (toEdit==null) {
-				log.error("Can't find UserProfile with id={} - (creating new)", id, exception);
-			} else {
-				log.debug("UserProfile {}-{} fetched from DB as ModelAttribute", id, toEdit.getEmail());
-			}
-		}
-		if (toEdit==null) {
-			toEdit = new UserProfile();
-			YadaUserCredentials yadaUserCredentials = new YadaUserCredentials();
-			yadaUserCredentials.setNewPassword(yadaSecurityUtil.generateClearPassword(8));
-			yadaUserCredentials.setChangePassword(true);
-			yadaUserCredentials.setEnabled(true);
-			toEdit.setUserCredentials(yadaUserCredentials);
-		}
-		return toEdit;
+	/**
+	 * The only request parameters that the add/edit user form may bind. The failed attempts counter is not bound: it
+	 * can only be reset, see {@link #ajaxAddOrUpdateUserProfileConfirmed}.
+	 */
+	private static final String[] EDITABLE_FIELDS = { "userCredentials.username", "userCredentials.enabled", "userCredentials.roles", "userCredentials.changePassword", "userCredentials.newPassword", "inviteEmail" };
+
+	private enum EditOutcomeEnum { SAVED, MISSING, FORBIDDEN, INVALID }
+
+	/**
+	 * The add/edit user form binds a new, never persisted UserProfile and only the editable fields: ids, versions,
+	 * password hashes, timestamps and relationships can't be set from the request.
+	 */
+	@InitBinder("userProfile")
+	public void initUserProfileBinder(WebDataBinder binder) {
+		binder.setAllowedFields(EDITABLE_FIELDS);
 	}
-	
-	@RequestMapping(value="/userwrite/ajaxAddOrUpdateUserProfile")
-	public String ajaxAddOrUpdateUserProfileConfirmed(UserProfile editedUserProfile, BindingResult userProfileBinding, Model model) {
-		boolean inviteEmail = editedUserProfile.isInviteEmail(); // Save it before is overwritten
-		// The "user" role is forced
-		editedUserProfile.getUserCredentials().ensureRole(config.getRoleId("user"));
-		// Check permission to edit
-		UserProfile currentUserProfile = userSession.getCurrentUserProfile();
-		UserProfile uneditedUserProfile = userProfileDao.find(editedUserProfile.getId()); // The user before changing its roles, or null
-		List<Integer> oldRoles = uneditedUserProfile!=null?uneditedUserProfile.getUserCredentials().getRoles():null;
-		List<Integer> newRoles = editedUserProfile.getUserCredentials().getRoles();
-		boolean userCanEditUser = yadaSecurityUtil.userCanEditUser(currentUserProfile, oldRoles, newRoles);
-		if (!userCanEditUser) {
-			if (editedUserProfile.getId()==null) {
-				return yadaNotify.title("Error Adding User", model).error().message("You don't have permission to add users with the given roles").add();
-			}
-			return yadaNotify.title("Error Editing User", model).error().message("You don't have permission to edit user {}", editedUserProfile).add();
+
+	/**
+	 * Adds a user when userProfileId is missing, otherwise edits that user. The profile and its credentials are loaded
+	 * from the database by userProfileId alone; the stored and the requested roles are authorized before the submitted
+	 * fields are copied onto them in one transaction.
+	 * @param userProfileId the user to edit, null to add a user
+	 * @param editedUserProfile the submitted form, holding only the {@link #EDITABLE_FIELDS}
+	 * @param failedAttempts optional: 0 resets the failed login attempts of the user, any other change is rejected
+	 */
+	@PostMapping("/userwrite/ajaxAddOrUpdateUserProfile")
+	public String ajaxAddOrUpdateUserProfileConfirmed(Long userProfileId, @ModelAttribute("userProfile") UserProfile editedUserProfile, BindingResult userProfileBinding, @RequestParam(name = "userCredentials.failedAttempts", required = false) Integer failedAttempts, Model model, Locale locale) {
+		boolean inviteEmail = userProfileId==null && editedUserProfile.isInviteEmail();
+		YadaUserCredentials submittedCredentials = editedUserProfile.getUserCredentials();
+		if (submittedCredentials==null) {
+			submittedCredentials = new YadaUserCredentials();
+			editedUserProfile.setUserCredentials(submittedCredentials);
 		}
-		String editedUsername = editedUserProfile.getUserCredentials().getUsername().trim();
+		// The "user" role is forced
+		submittedCredentials.ensureRole(config.getRoleId("user"));
 		// Validation
 		ValidationUtils.rejectIfEmptyOrWhitespace(userProfileBinding, "userCredentials.username", "validation.value.empty");
 		ValidationUtils.rejectIfEmpty(userProfileBinding, "userCredentials.roles", "validation.value.empty");
-
-		// Check if username already exists with a different id
-		YadaUserCredentials existing = yadaUserCredentialsDao.findFirstByUsername(editedUsername);
-		if (existing!=null && !existing.getId().equals(editedUserProfile.getUserCredentials().getId())) {
-			userProfileBinding.rejectValue("userCredentials.username", "validation.value.existing");
-		}
-		if (userProfileBinding.hasErrors()) {
-			return ajaxEditUserProfileForm(editedUserProfile);
-		}
-		// Credentials
-		YadaUserCredentials editedUserCredentials = editedUserProfile.getUserCredentials();
-		editedUserCredentials.setUsername(editedUsername); // Trimmed
-		String newPassword = StringUtils.trimToNull(editedUserCredentials.getNewPassword());
-		if (newPassword!=null) {
-			yadaSecurityUtil.changePassword(editedUserProfile, newPassword);
-		}
-		
-		// When failedAttempts have changed, set the timestamp too
-		int editedFailedAttempts = editedUserProfile.getUserCredentials().getFailedAttempts();
-		if (uneditedUserProfile!=null && uneditedUserProfile.getUserCredentials().getFailedAttempts() != editedFailedAttempts) {
-			Date timestamp = null;
-			if (editedFailedAttempts>0) {
-				timestamp = new Date();
+		String newPassword = StringUtils.trimToNull(submittedCredentials.getNewPassword());
+		UserProfile currentUserProfile = userSession.getCurrentUserProfile();
+		UserProfile savedUserProfile;
+		EditOutcomeEnum outcome;
+		if (userProfileId==null) {
+			if (newPassword==null) {
+				newPassword = yadaSecurityUtil.generateClearPassword(8);
 			}
-			editedUserProfile.getUserCredentials().setLastFailedAttempt(timestamp);
+			savedUserProfile = new UserProfile();
+			savedUserProfile.setUserCredentials(new YadaUserCredentials());
+			outcome = applyEdit(currentUserProfile, savedUserProfile, editedUserProfile, newPassword, failedAttempts, userProfileBinding);
+			if (outcome==EditOutcomeEnum.SAVED) {
+				savedUserProfile = userProfileDao.save(savedUserProfile);
+			}
+		} else {
+			final String password = newPassword;
+			outcome = userProfileDao.editInTransaction(userProfileId, stored -> stored==null ? EditOutcomeEnum.MISSING : applyEdit(currentUserProfile, stored, editedUserProfile, password, failedAttempts, userProfileBinding));
+			savedUserProfile = userProfileDao.find(userProfileId);
 		}
-		
-		// All other values have already been set on the editedUserProfile
-		editedUserProfile = userProfileDao.save(editedUserProfile);
-		
+		switch (outcome) {
+		case MISSING:
+			log.warn("Can't edit missing UserProfile with id={}", userProfileId);
+			return yadaNotify.titleKey(model, "user.edit.error.title").error().messageKey("user.edit.missing.message").add();
+		case FORBIDDEN:
+			if (userProfileId==null) {
+				return yadaNotify.titleKey(model, "user.add.error.title").error().messageKey("user.add.forbidden.message").add();
+			}
+			return yadaNotify.titleKey(model, "user.edit.error.title").error().messageKey("user.edit.forbidden.message", String.valueOf(savedUserProfile)).add();
+		case INVALID:
+			if (userProfileId!=null) {
+				// Values shown but not editable in the form
+				editedUserProfile.setId(savedUserProfile.getId());
+				editedUserProfile.setNickname(savedUserProfile.getNickname());
+				submittedCredentials.setCreationDate(savedUserProfile.getUserCredentials().getCreationDate());
+				submittedCredentials.setLastSuccessfulLogin(savedUserProfile.getUserCredentials().getLastSuccessfulLogin());
+				submittedCredentials.setFailedAttempts(failedAttempts!=null ? failedAttempts : savedUserProfile.getUserCredentials().getFailedAttempts());
+			}
+			return ajaxEditUserProfileForm(editedUserProfile, model);
+		default:
+			break;
+		}
+
 		// Send invitation email
 		if (inviteEmail) {
 			HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
-			Locale locale = currentUserProfile.getLocale(); // Eventually should be a choice in the add form
-			boolean invited = yexEmailService.sendInvitation(editedUserProfile, newPassword, request, locale);
+			Locale invitationLocale = currentUserProfile.getLocale()!=null ? currentUserProfile.getLocale() : locale; // Eventually should be a choice in the add form
+			boolean invited = yexEmailService.sendInvitation(savedUserProfile, newPassword, request, invitationLocale);
 			if (!invited) {
 				yadaNotify.titleKey(model, "user.invitation.error.title").error().messageKey("user.invitation.error.message").add();
 			} else {
 				yadaNotify.titleKey(model, "user.invitation.ok.title").ok().messageKey("user.invitation.ok.message").add();
 			}
 		}
-		return yadaNotify.titleKey(model, "user.addedit.ok.title").ok().messageKey("user.addedit.ok.message", editedUserProfile.getEmail()).add();
+		return yadaNotify.titleKey(model, "user.addedit.ok.title").ok().messageKey("user.addedit.ok.message", savedUserProfile.getEmail()).add();
+	}
+
+	/**
+	 * Authorizes the stored and the requested roles, validates the submitted values and only then copies the editable
+	 * fields onto the stored user. Nothing is changed unless the result is SAVED.
+	 * @param actingUser the current user
+	 * @param stored the user to change: loaded from the database, or new
+	 * @param submitted the bound form
+	 * @param newPassword the new clear password, or null to keep the current one
+	 * @param failedAttempts the submitted failed attempts counter, or null
+	 */
+	private EditOutcomeEnum applyEdit(UserProfile actingUser, UserProfile stored, UserProfile submitted, String newPassword, Integer failedAttempts, BindingResult binding) {
+		YadaUserCredentials storedCredentials = stored.getUserCredentials();
+		YadaUserCredentials submittedCredentials = submitted.getUserCredentials();
+		List<Integer> oldRoles = stored.getId()!=null ? new ArrayList<>(storedCredentials.getRoles()) : null;
+		List<Integer> newRoles = submittedCredentials.getRoles();
+		if (!yadaSecurityUtil.userCanEditUser(actingUser, oldRoles, newRoles)) {
+			return EditOutcomeEnum.FORBIDDEN;
+		}
+		String username = StringUtils.trimToNull(submittedCredentials.getUsername());
+		// Check if username already exists with a different id
+		YadaUserCredentials existing = username!=null ? yadaUserCredentialsDao.findFirstByUsername(username) : null;
+		if (existing!=null && !existing.getId().equals(storedCredentials.getId())) {
+			binding.rejectValue("userCredentials.username", "validation.value.existing");
+		}
+		// The only change allowed to the failed attempts is a reset, to unlock the user
+		boolean resetFailedAttempts = failedAttempts!=null && failedAttempts==0 && storedCredentials.getFailedAttempts()>0;
+		if (failedAttempts!=null && failedAttempts!=0 && failedAttempts!=storedCredentials.getFailedAttempts()) {
+			binding.rejectValue("userCredentials.failedAttempts", "validation.failedAttempts.resetOnly");
+		}
+		if (binding.hasErrors()) {
+			return EditOutcomeEnum.INVALID;
+		}
+		storedCredentials.setUsername(username);
+		storedCredentials.setEnabled(submittedCredentials.isEnabled());
+		storedCredentials.setChangePassword(submittedCredentials.isChangePassword());
+		if (storedCredentials.getRoles()==null) {
+			storedCredentials.setRoles(new ArrayList<>());
+		}
+		storedCredentials.getRoles().clear();
+		storedCredentials.getRoles().addAll(newRoles);
+		if (newPassword!=null) {
+			yadaSecurityUtil.changePassword(stored, newPassword); // Also resets the failed attempts
+		}
+		if (resetFailedAttempts) {
+			storedCredentials.setFailedAttempts(0);
+			storedCredentials.setLastFailedAttempt(null);
+		}
+		return EditOutcomeEnum.SAVED;
 	}
 
 	/**
@@ -161,7 +216,10 @@ public class UserProfileController {
 		userSession.clearCaches();
 	}
 
-	@RequestMapping("/userwrite/ajaxDeleteUserProfile")
+	/**
+	 * Deletes the users with the given ids. POST only, so that the CSRF token is checked.
+	 */
+	@PostMapping("/userwrite/ajaxDeleteUserProfile")
 	public String ajaxDeleteUserProfile(Long[] id, Model model) {
 		// Extra security by checking isManager
 		if (userSession.isAdmin() && id!=null && id.length>0) {
@@ -183,11 +241,47 @@ public class UserProfileController {
 		return yadaNotify.getViewName();
 	}
 
+	/**
+	 * The add/edit user form
+	 * @param userProfileId the user to edit, null to add a user
+	 */
 	@RequestMapping("/userwrite/ajaxEditUserProfileForm")
-	public String ajaxEditUserProfileForm(UserProfile userProfile) {
+	public String ajaxEditUserProfileForm(Long userProfileId, Model model) {
+		UserProfile userProfile;
+		if (userProfileId!=null) {
+			userProfile = userProfileDao.find(userProfileId);
+			if (userProfile==null) {
+				log.warn("Can't find UserProfile with id={}", userProfileId);
+				return yadaNotify.titleKey(model, "user.edit.error.title").error().messageKey("user.edit.missing.message").add();
+			}
+		} else {
+			userProfile = new UserProfile();
+			YadaUserCredentials yadaUserCredentials = new YadaUserCredentials();
+			yadaUserCredentials.setNewPassword(yadaSecurityUtil.generateClearPassword(8));
+			yadaUserCredentials.setChangePassword(true);
+			yadaUserCredentials.setEnabled(true);
+			userProfile.setUserCredentials(yadaUserCredentials);
+		}
+		return ajaxEditUserProfileForm(userProfile, model);
+	}
+
+	private String ajaxEditUserProfileForm(UserProfile userProfile, Model model) {
+		model.addAttribute("userProfile", userProfile);
 		return "/dashboard/userProfileEditForm";
 	}
 	
+	/**
+	 * What userProfileTablePage may query and return: the columns of both the "userTable" and the legacy "usersTable".
+	 * Anything else that the browser asks for is rejected.
+	 */
+	private static final YadaDataTableQueryPolicy USER_TABLE_POLICY = YadaDataTableQueryPolicy.forEntity(UserProfile.class)
+		.column("id")
+		.column("userCredentials.enabled")
+		.column("nickname")
+		.column("userCredentials.username")
+		.column("userCredentials.lastSuccessfulLogin")
+		.build();
+
 	@RequestMapping(value ="/user/userProfileTablePage", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody public Map<String, Object> userProfileTablePage(YadaDatatablesRequest yadaDatatablesRequest, Locale locale) {//		boolean usersSuspended = yadaDatatablesRequest.getExtraParam().get("usersSuspendedSet")!=null;
 	YadaSql yadaSql = yadaDatatablesRequest.getYadaSql();
@@ -215,26 +309,33 @@ public class UserProfileController {
 		}
 	}
 	
-	Map<String, Object> result = yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale);
+	Map<String, Object> result = yadaDataTableDao.getConvertedJsonPage(yadaDatatablesRequest, UserProfile.class, locale, USER_TABLE_POLICY);
 		return result;
 	}
 	
-	@RequestMapping(value="/user/deimpersonate")
-	public String deimpersonate(RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response, Locale locale) {
+	/**
+	 * Ends the impersonation and goes back to the local path where it was started, or to the home page
+	 */
+	@PostMapping("/user/deimpersonate")
+	public String deimpersonate(HttpServletRequest request, HttpServletResponse response) {
+		changeSessionId(request);
 		String previousLocation = userSession.deimpersonate(request, response);
-		if (previousLocation==null) {
-			previousLocation = "/";
-		}
-		return yadaWebUtil.redirectString(previousLocation, locale);
+		// Validated again because it could have been saved by other code
+		return "redirect:" + yadaWebUtil.safeLocalRedirect(previousLocation);
 	}
 
-	@RequestMapping(value="/user/impersonate")
-	public String impersonate(String id, @RequestParam(name = "currentLocation", required = false) String currentLocation, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response, Locale locale){
+	@PostMapping("/user/impersonate")
+	public String impersonate(String id, String currentLocation, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response, Locale locale){
 		return impersonate(Long.parseLong(id), currentLocation, redirectAttributes, request, response, locale);
 	}
 
-	@RequestMapping("/user/impersonate/{id}")
-	public String impersonate(@PathVariable long id, @RequestParam(name = "currentLocation", required = false) String currentLocation, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response, Locale locale) {
+	/**
+	 * Starts impersonating a user that the current user is allowed to impersonate
+	 * @param id the user to impersonate
+	 * @param currentLocation the local path to return to when the impersonation ends; any other value is replaced by "/"
+	 */
+	@PostMapping("/user/impersonate/{id}")
+	public String impersonate(@PathVariable long id, String currentLocation, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response, Locale locale) {
 		UserProfile theUser = userProfileDao.find(id);
 		if (theUser==null) {
 			yadaNotify.titleKey(redirectAttributes, "user.impersonate.error.title").error().messageKey("user.impersonate.missing.message").add();
@@ -243,14 +344,49 @@ public class UserProfileController {
 			if (!yadaSecurityUtil.userCanImpersonate(userSession.getCurrentUserProfile(), theUser)) {
 				yadaNotify.titleKey(redirectAttributes, "user.impersonate.error.title").error().messageKey("user.impersonate.noauth.message").add();
 			} else {
-				userSession.impersonate(theUser.getId(), currentLocation, request, response);
+				changeSessionId(request);
+				userSession.impersonate(theUser.getId(), contextRelativeLocation(currentLocation, request), request, response);
 				yadaNotify.titleKey(redirectAttributes, "user.impersonate.ok.title").ok().messageKey("user.impersonate.ok.message", theUser.getEmail()).add();
 			}
 		}
 		// model.addAttribute(YadaViews.AJAX_REDIRECT_URL, "/user/dashboard");
 		return yadaWebUtil.redirectString("/", locale);
 	}
-	
+
+	/**
+	 * The location where impersonation started, as a safe local path relative to the servlet context.
+	 * yada.impersonate() sends location.pathname, which includes the context path, while "redirect:" adds the context
+	 * path again, so it is removed here. The result is validated with safeLocalRedirect both before and after.
+	 * @param currentLocation the location sent by the browser, can be null
+	 * @return a local path that "redirect:" can use, "/" when the location is not safe
+	 */
+	private String contextRelativeLocation(String currentLocation, HttpServletRequest request) {
+		String location = yadaWebUtil.safeLocalRedirect(currentLocation);
+		String contextPath = request.getContextPath();
+		if (StringUtils.isEmpty(contextPath) || !location.startsWith(contextPath)) {
+			return location;
+		}
+		String rest = location.substring(contextPath.length());
+		if (rest.isEmpty() || rest.startsWith("?")) {
+			return yadaWebUtil.safeLocalRedirect("/" + rest);
+		}
+		if (rest.startsWith("/")) {
+			return yadaWebUtil.safeLocalRedirect(rest);
+		}
+		return location; // Another path with the same prefix, like "/ctxother" for "/ctx"
+	}
+
+	/**
+	 * A new session id when the authenticated user changes, against session fixation
+	 */
+	private void changeSessionId(HttpServletRequest request) {
+		try {
+			request.changeSessionId();
+		} catch (IllegalStateException e) {
+			log.debug("No session to change at impersonation (ignored)");
+		}
+	}
+
 	@RequestMapping("/user")
 	public String users(Model model, Locale locale) {
 		//////////////////////////////
@@ -288,7 +424,7 @@ public class UserProfileController {
 					.dtButtonObj("button.impersonate").dtUrlProvider("impersonate").dtNoAjax().dtIcon("<i class='bi bi-mortarboard'></i>").dtRole("ADMIN").dtRole("supervisor").back()
 					.dtButtonObj("button.edit").dtUrl("@{/dashboard/userwrite/ajaxEditUserProfileForm}").dtElementLoader("#userTable").dtIcon("<i class='bi bi-pencil'></i>").dtIdName("userProfileId").back()
 					.dtButtonObj("button.delete").dtUrl("@{/dashboard/userwrite/ajaxDeleteUserProfile}").dtIcon("<i class='bi bi-trash'></i>")
-						.dtRole("ADMIN").dtMultiRow().dtToolbarCssClass("btn-danger")
+						.dtRole("ADMIN").dtMultiRow().dtToolbarCssClass("btn-danger").dtMethod("POST")
 						.dtConfirmDialogObj()
 							.dtTitle("Delete User")
 							.dtMessageSingular("usertable.delete.confirm.singular")

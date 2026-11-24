@@ -44,9 +44,12 @@ public class YadaDatatablesRequest {
 	private YadaSql yadaSql = YadaSql.instance();
 	
 	/**
-	 * Add any entity attribute you need to return in the json object. Can be a path.
+	 * Adds an attribute path to the extra attributes of the request. The DataTable DAO rejects the request unless the
+	 * path is declared in the table policy, and returns the policy extra outputs anyway.
 	 * @param attributePath
+	 * @deprecated declare the path with {@link net.yadaframework.persistence.YadaDataTableQueryPolicy.Builder#extraOutput(String)} instead
 	 */
+	@Deprecated
 	public void addExtraJsonAttribute(String attributePath) {
 		extraJsonAttributes.add(attributePath);
 	}
@@ -148,6 +151,10 @@ public class YadaDatatablesRequest {
 		this.extraParam = extraParam;
 	}
 
+	/**
+	 * @return the extra attributes asked by the request. They can be sent by the browser, so they are untrusted:
+	 * 	the DataTable DAO rejects any that the table policy does not declare.
+	 */
 	public List<String> getExtraJsonAttributes() {
 		return extraJsonAttributes;
 	}

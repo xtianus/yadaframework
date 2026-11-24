@@ -44,7 +44,8 @@
 	 * - icon for the button, like '<i class="fa fa-power-off" aria-hidden="true"></i>'
 	 * - idName the name of the id request parameter (optional - defaults to "id")
 	 * - ajax (optional) false to make a normal page transition to the target link
-	 * - method the HTTP method of the request (optional - defaults to GET); use 'POST' when the endpoint is CSRF-protected
+	 * - method the HTTP method of the request (optional - defaults to GET); use 'POST' when the endpoint is CSRF-protected.
+	 *   With ajax false and a method other than GET the page is submitted with yada.postNavigate, in windowName when set
 	 * - confirmTitle (optional)
 	 * - confirmOneMessage (optional)
 	 * - confirmNameColumn the index of the column holding the element name, will replace the {0} placeholder in the message
@@ -526,6 +527,15 @@
 			var idName = extraButtonDef.idName==null ? "id" : extraButtonDef.idName;
 			var param = (ids.length>1?ids:ids[0]); // Either send one id or all of them
 			if (extraButtonDef.ajax === false) {
+				if (extraButtonDef.method && extraButtonDef.method.toUpperCase()!=="GET") {
+					// A full page POST with the CSRF token
+					const postData = {};
+					if (idName!="") {
+						postData[idName] = param;
+					}
+					yada.postNavigate(buttonUrl, postData, extraButtonDef.windowName);
+					return;
+				}
 				if (typeof extraButtonDef.url != "function") {
 					buttonUrl = yada.addOrUpdateUrlParameter(buttonUrl, idName, param);
 				}

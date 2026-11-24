@@ -221,6 +221,20 @@ public String registerPage(MyRegistrationRequest myRegistrationRequest) {
 </div>
 </div>
 <div class="paragraph">
+<p>The registration request is bound from user input, so the @Controller that receives the form must restrict the bound fields
+with an <code>@InitBinder</code> for its model attribute. Only <code>email</code>, <code>password</code> and <code>confirmPassword</code>, plus the listed fields of the
+subclass, are bound; anything else sent by the browser (such as an id or a user) is ignored, and
+<code>handleRegistrationRequest</code> throws <code>YadaInvalidUsageException</code> if the request already has an id or a user:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@InitBinder("myRegistrationRequest")
+void initBinder(WebDataBinder binder) {
+	YadaRegistrationController.setRegistrationAllowedFields(binder, "name", "surname");
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p>The registration form can use a hidden "antispam" field that would be filled by spam
 scripts only, so that the most basic spam attacks can be easily prevented. In the
 example implementation the field "username" must be left blank in order for registration
@@ -324,7 +338,9 @@ It will receive the email timestamp as parameter 0 (can be omitted). Example:</p
 <div class="sectionbody">
 <div class="paragraph">
 <p>The default link in the confirmation email has the format <code>/registrationConfirmation/{token}</code> where
-<code>{token}</code> is a unique identifier saved in the database. This can be overridden with the
+<code>{token}</code> is an opaque single-use secret of the form <code>&lt;id&gt;-&lt;64 hex characters&gt;</code>: the database keeps only its SHA-256 digest,
+and the link expires after <code>config/security/registration/expirationHours</code> (24 by default). The link can be used once;
+opening it creates the user. This can be overridden with the
 <code>config/security/registration/confirmationLink</code> configuration entry:</p>
 </div>
 <div class="listingblock">
@@ -380,7 +396,7 @@ user profile.</p>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.9<br>
-Last updated 2026-09-17 19:09:05 +0200
+Last updated 2026-10-14 05:13:55 +0200
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

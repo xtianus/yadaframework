@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:yada="http://www.yadaframework.net">
+<head th:replace="~{/test/fragments/head :: head(title=#{yts.ajax.title})}"></head>
+<body>
+	<h1 th:text="#{yts.ajax.title}">Ajax</h1>
+	<div id="ajaxTarget" data-testid="ajaxTarget">
+		<span data-testid="refreshCount" th:text="${refreshCount}">0</span>
+	</div>
+	<a th:href="@{/test/ajax/fragment}" class="yadaAjax" yada:updateOnSuccess="'#ajaxTarget'" data-testid="refreshLink" th:text="#{yts.ajax.refresh}">Refresh</a>
+	<a th:href="@{/test/ajax/notify}" class="yadaAjax" data-testid="notifyLink" th:text="#{yts.ajax.notify}">Notify</a>
+	<div th:replace="~{/test/fragments/scripts :: body}"></div>
+</body>
+</html>

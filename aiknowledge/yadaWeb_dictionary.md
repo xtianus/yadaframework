@@ -23,15 +23,14 @@
 |---|---|
 | [YadaAppConfig](yadaWeb/YadaAppConfig.md) | Builds the root Yada Spring configuration and loads the combined `configuration.xml` tree, including optional system-property overrides used by tests and custom launchers. |
 | [YadaConfiguration](yadaWeb/YadaConfiguration.md) | Exposes framework configuration values resolved from properties and setup data. Use when code needs environment-specific Yada settings. |
-| [YadaEmbeddedTomcatTestServer](yadaWeb/YadaEmbeddedTomcatTestServer.md) | Starts an in-process Tomcat instance for servlet integration tests without blocking the JVM. Use it when tests need a real servlet container instead of `MockMvc`. |
 | [YadaRegistrationType](yadaWeb/YadaRegistrationType.md) | Enumerates the purposes of a YadaRegistrationRequest, such as registration, password recovery, email change, and social signup. Use it to distinguish security-link workflows. |
-| [YadaTestConfigurationScope](yadaWeb/YadaTestConfigurationScope.md) | Applies a specific `configuration.xml` file to Yada static startup code for the lifetime of a test scope. Use it to isolate integration tests that need different startup configuration. |
 
 ## `net.yadaframework.persistence`
 
 | Class | Description |
 |---|---|
-| [YadaDataTableDao](yadaWeb/YadaDataTableDao.md) | Executes paged queries and converts the results to DataTables JSON payloads. Use behind server-side Yada DataTable endpoints. |
+| [YadaDataTableDao](yadaWeb/YadaDataTableDao.md) | Executes paged queries and converts the results to DataTables JSON payloads, within a server-side `YadaDataTableQueryPolicy`. Use behind server-side Yada DataTable endpoints. |
+| [YadaDataTableQueryPolicy](yadaWeb/YadaDataTableQueryPolicy.md) | Immutable server-side allowlist of the entity paths a DataTable may return, search and sort, plus extra outputs. Required by every `getConvertedJsonPage` call; the default endpoint derives it from the YadaDataTable configuration. |
 | [YadaMoney](yadaWeb/YadaMoney.md) | Wraps money amounts as integer minor units and exposes safe arithmetic helpers. Use instead of floating-point math for prices and totals. |
 | [YadaSql](yadaWeb/YadaSql.md) | Builds SQL or JPQL fragments incrementally with conditional joins, filters, grouping, ordering, unions, and parameters. Use when dynamic queries are clearer than Criteria or manual string concatenation. |
 
@@ -81,9 +80,11 @@
 
 | Class | Description |
 |---|---|
+| [YadaController](yadaWeb/YadaController.md) | Handles the servlet error dispatch (`/yadaError`): logs the details, shows only the HTTP reason phrase to the user and leaves committed responses truncated. |
 | [YadaCropImage](yadaWeb/YadaCropImage.md) | Stores one pending crop operation, including the source upload, target file metadata, and desktop, mobile, or PDF crop settings. Use it inside a YadaCropQueue during upload flows. |
 | [YadaCropQueue](yadaWeb/YadaCropQueue.md) | Keeps the session-scoped queue of images that still need cropping, together with the crop and destination redirects. Use it to drive multi-image crop workflows across requests. |
 | [YadaDatatablesRequest](yadaWeb/YadaDatatablesRequest.md) | Represents the server-side request parameters sent by DataTables, including paging, ordering, search, and extra JSON attributes. Use it in controller or DAO code that serves Yada tables. |
+| [YadaGlobalExceptionHandler](yadaWeb/YadaGlobalExceptionHandler.md) | `@ControllerAdvice` that logs exceptions leaving a controller and answers with the generic HTTP reason phrase, in Ajax modals and error pages. |
 | [YadaPageRequest](yadaWeb/YadaPageRequest.md) | Represents a pageable request with page, size, sort, and load-previous options. Use it to drive Yada pagination and bookmark-friendly scrolling. |
 | [YadaPublicSuffix](yadaWeb/YadaPublicSuffix.md) | Parses public-suffix data to split hostnames into registrable domains and subdomains. Use when cookies or multi-tenant domains depend on the effective top-level domain. |
 

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--/* Ajax login fragment: shows the request attributes set by YadaAuthenticationFailureHandler */-->
+<body>
+	<div data-testid="ajaxLoginForm">
+		<span th:if="${loginErrorFlag!=null}" data-testid="ajaxLoginError" th:text="${loginErrorFlag}">flag</span>
+		<span th:if="${passwordError!=null}" data-testid="passwordError" th:text="${passwordError}">flag</span>
+		<span th:if="${usernameNotFound!=null}" data-testid="usernameNotFound" th:text="${usernameNotFound}">flag</span>
+		<span th:if="${userDisabled!=null}" data-testid="userDisabled" th:text="${userDisabled}">flag</span>
+		<span th:if="${lockoutMinutes!=null}" data-testid="lockoutMinutes" th:text="${lockoutMinutes}">0</span>
+		<span th:if="${password!=null}" data-testid="passwordAttribute" th:text="${password}">password</span>
+		<span data-testid="username" th:text="${username}">username</span>
+	</div>
+</body>
+</html>

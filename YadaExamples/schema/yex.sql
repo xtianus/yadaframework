@@ -8,7 +8,7 @@ create table YadaArticle_silhouetteImages (YadaArticle_id bigint not null, silho
 create table YadaAttachedFile (height integer, heightDesktop integer, heightMobile integer, heightPdf integer, published bit not null, width integer, widthDesktop integer, widthMobile integer, widthPdf integer, id bigint not null auto_increment, modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, sortOrder bigint not null, uploadTimestamp TIMESTAMP NULL null, version bigint not null, metadata varchar(1024), clientFilename varchar(255), filename varchar(255), filenameDesktop varchar(255), filenameMobile varchar(255), filenamePdf varchar(255), forLocale varchar(255), relativeFolderPath varchar(255), primary key (id)) engine=InnoDB;
 create table YadaAttachedFile_description (YadaAttachedFile_id bigint not null, locale varchar(32) not null, description varchar(8192), primary key (YadaAttachedFile_id, locale)) engine=InnoDB;
 create table YadaAttachedFile_title (YadaAttachedFile_id bigint not null, locale varchar(32) not null, title varchar(1024), primary key (YadaAttachedFile_id, locale)) engine=InnoDB;
-create table YadaAutoLoginToken (expiration TIMESTAMP NULL null, id bigint not null auto_increment, timestamp TIMESTAMP NULL null, token bigint not null, version bigint not null, yadaUserCredentials_id bigint, primary key (id)) engine=InnoDB;
+create table YadaAutoLoginToken (expiration TIMESTAMP NULL null, id bigint not null auto_increment, timestamp TIMESTAMP NULL null, version bigint not null, yadaUserCredentials_id bigint, tokenHash varchar(64) not null, primary key (id)) engine=InnoDB;
 create table YadaBrowserId (id bigint not null auto_increment, leastSigBits bigint, mostSigBits bigint, version bigint not null, primary key (id)) engine=InnoDB;
 create table YadaCart (creationTimestamp TIMESTAMP NULL null, id bigint not null auto_increment, modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, owner_id bigint, version bigint not null, primary key (id)) engine=InnoDB;
 create table YadaCartItem (quantity integer not null, article_id bigint, cart_id bigint, id bigint not null auto_increment, modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, version bigint not null, primary key (id)) engine=InnoDB;
@@ -34,7 +34,7 @@ create table YadaProduct_materials (YadaProduct_id bigint not null, locale varch
 create table YadaProduct_name (YadaProduct_id bigint not null, locale varchar(32) not null, name varchar(64), primary key (YadaProduct_id, locale)) engine=InnoDB;
 create table YadaProduct_subcategories (YadaProduct_id bigint not null, subcategories_id bigint not null) engine=InnoDB;
 create table YadaProduct_subtitle (YadaProduct_id bigint not null, locale varchar(32) not null, subtitle varchar(128), primary key (YadaProduct_id, locale)) engine=InnoDB;
-create table YadaRegistrationRequest (registrationType tinyint check ((registrationType between 0 and 3)), id bigint not null auto_increment, timestamp TIMESTAMP NULL null, token bigint not null, trattamentoDati_id bigint, version bigint not null, yadaUserCredentials_id bigint, email varchar(64) not null, timezone varchar(64), password varchar(128) not null, primary key (id)) engine=InnoDB;
+create table YadaRegistrationRequest (registrationType tinyint check ((registrationType between 0 and 3)), expiration TIMESTAMP NULL null, id bigint not null auto_increment, timestamp TIMESTAMP NULL null, trattamentoDati_id bigint, version bigint not null, yadaUserCredentials_id bigint, email varchar(64) not null, timezone varchar(64), tokenHash varchar(64) not null, password varchar(128) not null, primary key (id)) engine=InnoDB;
 create table YadaSocialCredentials (type integer not null, id bigint not null auto_increment, version bigint not null, yadaUserCredentials_id bigint not null, email varchar(128) not null, socialId varchar(128) not null, primary key (id)) engine=InnoDB;
 create table YadaTicket (priority integer not null, assigned_id bigint, creationDate TIMESTAMP NULL null, id bigint not null auto_increment, owner_id bigint not null, status_id bigint, type_id bigint, version bigint not null, title varchar(80), primary key (id)) engine=InnoDB;
 create table YadaTicketMessage (id bigint not null, yadaTicket_id bigint not null, primary key (id)) engine=InnoDB;
@@ -51,7 +51,6 @@ alter table YadaArticle add constraint UKnhcjr5g5me98n5drrkfg1p7rc unique (sku);
 alter table YadaArticle_attachments add constraint UKckp9t4579t7mov1miiu8fql4f unique (attachments_id);
 alter table YadaArticle_galleryImages add constraint UKrl1gkdyfrt43m5jw3u598olgk unique (galleryImages_id);
 alter table YadaArticle_silhouetteImages add constraint UKsq5igv7krtxe04nyyhlx4djeg unique (silhouetteImages_id);
-alter table YadaAutoLoginToken add constraint UKgpwvvntka6p2tjtnut6qiokyi unique (yadaUserCredentials_id);
 alter table YadaBrowserId add constraint UKlvfuna79iqujxpkn0l6xvirh4 unique (mostSigBits, leastSigBits);
 alter table YadaClause add constraint UKek0brxiv78vf6idvd6dv8v69d unique (name, clauseVersion);
 alter table YadaJob add constraint UKdv98ftndf2nyk42cjoe50i36v unique (jobStateObject_id);
@@ -62,8 +61,6 @@ alter table YadaProduct_attachments add constraint UKfsu5mkfbdh7dvoq619df26n50 u
 alter table YadaProduct_categories add constraint UK1cmx2j13ct60yhcy0ef59lny1 unique (YadaProduct_id, categories_id);
 alter table YadaProduct_galleryImages add constraint UKpaqmx4kvpgkaxj40cxlbxnv9h unique (galleryImages_id);
 alter table YadaProduct_subcategories add constraint UKamh3k42m45dww09m7a27b2qer unique (YadaProduct_id, subcategories_id);
-alter table YadaRegistrationRequest add constraint UK66pbcq6oohrfjqwr1o7wslucn unique (trattamentoDati_id);
-alter table YadaRegistrationRequest add constraint UKb0i98ixarlwa54gkxws9ykxae unique (yadaUserCredentials_id);
 alter table YadaSocialCredentials add constraint UK1uppa4u7bksphbjwm4i2c8re9 unique (socialId);
 alter table YadaTicket add constraint UKbbcda6270hf9977unmh0rt3ua unique (status_id);
 alter table YadaTicket add constraint UKcp5v1tqelobdtcaoeus3lr2r7 unique (type_id);
