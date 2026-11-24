@@ -6,6 +6,6 @@
 /.classpath
 /.project
 !gradle-wrapper.jar
-/.sass/
+/.sass*/
 **/res/css/*.min.*
 **/res/js/*.min.*
