@@ -1435,14 +1435,21 @@
 			var $button = $(this);
 			var confirmText = $button.attr("data-yadaConfirm") || $button.attr("data-confirm");
 			if (confirmText!=null && confirmText!="") {
-				var title = $button.attr("data-yadaTitle");
+	    		$button.click(handleFormConfirm);
+	    	}
+	    });
+		$form.not('.'+markerClass).addClass(markerClass);
+	};
+	
+	function handleFormConfirm() {
+		var $button = $(this); // Needed otherwise $button could be stale (from a previous ajax replacement) 
+		var title = $button.attr("data-yadaTitle");
+		var confirmText = $button.attr("data-yadaConfirm") || $button.attr("data-confirm");
 				var okButton = $button.attr("data-yadaOkButton") || $button.attr("data-okButton") || yada.messages.confirmButtons.ok;
 				var cancelButton = $button.attr("data-yadaCancelButton") || $button.attr("data-cancelButton") || yada.messages.confirmButtons.cancel;
-				$button.click(function() {
-					$button = $(this); // Needed otherwise $button could be stale (from a previous ajax replacement) 
 					yada.confirm(title, confirmText, function(result) {
 						if (result==true) {
-							$button.off("click");
+							$button.off("click", handleFormConfirm);
 							$button.click();
 							// No $form.submit(); because of the button name that has to be preserved (see clickedButton above)
 							// TODO/BUG if the submit button contains an <input>, that value will not be included in $(form).serializeArray() and will not be sent
@@ -1451,11 +1458,7 @@
 						}
 					}, okButton, cancelButton);
 					return false; // Stop form submission
-				});
 			}
-		});
-		$form.not('.'+markerClass).addClass(markerClass);
-	};
 	
 	function showFullPage(html) {
 		document.open();
