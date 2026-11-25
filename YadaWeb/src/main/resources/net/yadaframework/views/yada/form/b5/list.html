@@ -48,7 +48,7 @@ Example:
 <div th:replace="/yada/form/b5/list::field(fieldName='building',options=${buildingEnumList},addHeader='UNKNOWN')"></div> where 'UNKNOWN' is an enum name to use for the header value
 
 */-->
-<body th:remove="tag">
+<body th:fragment="field" th:remove="tag">
 <div class="form-group mb-3" 
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')},idPrefix=${idPrefix?:'fieldId'}" 
 	th:classappend="${inline==true}?form-inline">

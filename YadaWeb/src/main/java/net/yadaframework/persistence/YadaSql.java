@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +33,7 @@ import net.yadaframework.web.YadaPageSort.Order;
 public class YadaSql implements CloneableDeep {
 	private final transient Logger log = LoggerFactory.getLogger(getClass());
 
+	private static final Pattern FROM_KEYWORD = Pattern.compile("\\bfrom\\b");
 	private final static String MYSQL_IGNORECASE="COLLATE utf8_general_ci";
 
 	protected YadaSql parent = null; // Used for subexpressions
@@ -259,8 +262,6 @@ public class YadaSql implements CloneableDeep {
 	 * @return
 	 */
 	public YadaSql selectFrom(String selectFrom) {
-		// String currentQuery = queryBuffer.toString().toLowerCase();
-		// boolean alreadyThere = currentQuery.startsWith("from ") || currentQuery.indexOf(" from ")>-1;
 		if (this.selectFrom==null) {
 			this.selectFrom = selectFrom;
 			return appendQuery(selectFrom);
@@ -268,18 +269,22 @@ public class YadaSql implements CloneableDeep {
 		// The selectFrom is already in the query, so add the new one before the from
 		// but strip any existing "select"
 		selectFrom = selectFrom.replaceFirst("(?i)^select\\s+", "");
-		int pos = queryBuffer.indexOf("from");
-		int pos2 = this.selectFrom.indexOf("from");
-		if (pos>-1) { // if there is a "from" already
-			queryBuffer.insert(pos, ", " + selectFrom + " ");
-			pos = queryBuffer.indexOf("from"); // new position of "from"
-			this.selectFrom = queryBuffer.substring(0, pos) + this.selectFrom.substring(pos2);
+		int pos = fromKeywordIndex();
+		if (pos >= 0) {
+			String additionalColumn = ", " + selectFrom + " ";
+			queryBuffer.insert(pos, additionalColumn);
+			this.selectFrom = queryBuffer.substring(0, this.selectFrom.length() + additionalColumn.length());
 		} else {
 			queryBuffer.append(", " + selectFrom + " ");
 			this.selectFrom = queryBuffer.toString();
 		}
 		lastSkipped = false;
 		return this;
+	}
+
+	private int fromKeywordIndex() {
+		Matcher matcher = FROM_KEYWORD.matcher(queryBuffer);
+		return matcher.find() ? matcher.start() : -1;
 	}
 
 	/**
@@ -804,7 +809,7 @@ public class YadaSql implements CloneableDeep {
 	 * @param sql null for "select count(*)", or something like "select count(distinct e)"
 	 */
 	public YadaSql toCount(String sql) {
-		int pos = queryBuffer.indexOf("from");
+		int pos = fromKeywordIndex();
 		queryBuffer.delete(0, pos);
 		if (sql!=null) {
 			queryBuffer.insert(0, sql + " ");
@@ -900,6 +905,9 @@ public class YadaSql implements CloneableDeep {
 		String regexp = ".*:"+parameter+"\\b.*";
 		if (whereConditions.toString().matches(regexp)) {
 			return true;
+		}
+		if (joins.toString().matches(regexp)) {
+			return true; // for cases like "left join e.labels label on key(label) = :locale"
 		}
 		if (orderBy.toString().matches(regexp)) {
 			return true;

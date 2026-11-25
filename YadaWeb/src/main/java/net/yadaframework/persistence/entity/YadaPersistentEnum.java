@@ -127,11 +127,26 @@ public class YadaPersistentEnum<E extends Enum<E>> {
 	/**
 	 * Returns the localized value in the current locale
 	 * @return
+	 * @see #getLocalText(Locale)
 	 */
 	@Transient
 	public String getLocalText() {
-		Locale locale = LocaleContextHolder.getLocale();
-		return langToText.get(locale.getLanguage());
+		return getLocalText(LocaleContextHolder.getLocale());
+	}
+
+	/**
+	 * Returns the localized value in the given locale: the text stored for the full locale (e.g. "fr_CA") when present,
+	 * otherwise the text stored for its language (e.g. "fr").
+	 * @param locale the locale to use, null for the current locale
+	 * @return the localized text, or null when there is none for the locale nor its language
+	 */
+	@Transient
+	public String getLocalText(Locale locale) {
+		if (locale==null) {
+			locale = LocaleContextHolder.getLocale();
+		}
+		String text = langToText.get(locale.toString());
+		return text!=null ? text : langToText.get(locale.getLanguage());
 	}
 
 	/**

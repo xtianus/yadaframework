@@ -71,6 +71,7 @@ class YadaDataTableSecurityTest {
 		private List<String> tags;
 		private Kind kind;
 		private YadaPersistentEnum<Kind> status;
+		private YadaPersistentEnum<Kind> fromStatus;
 		private int count;
 		private String password;
 		private String tokenHash;
@@ -380,6 +381,22 @@ class YadaDataTableSecurityTest {
 		List<Map<String, Object>> data = (List<Map<String, Object>>) json.get("data");
 		assertEquals(1, data.size(), json.toString());
 		assertEquals("1", data.get(0).get("id"));
+	}
+
+	@Test
+	void sortingByFromStatusAndOwnerProjectsBothSortKeys() {
+		YadaDataTableQueryPolicy policy = YadaDataTableQueryPolicy.forEntity(Item.class).column("fromStatus").column("owner.name").build();
+		YadaDatatablesRequest request = new YadaDatatablesRequest();
+		request.setDataTableId("itemTable");
+		request.setColumns(List.of(column("fromStatus", "fromStatus", false, true), column("owner.name", "owner.name", false, true)));
+		request.setOrder(List.of(order("0", "asc"), order("1", "desc")));
+
+		Map<String, Object> json = dao.getConvertedJsonPage(request, Item.class, Locale.ENGLISH, policy);
+
+		assertNull(json.get("yadaError"), json.toString());
+		String hql = hqlCaptor.getAllValues().getFirst();
+		assertTrue(hql.replaceAll("\\s*,\\s*", ", ").startsWith("select distinct e, fromStatus_langToText, e_owner.name from Item e "), hql);
+		assertTrue(hql.contains("order by fromStatus_langToText asc, e_owner.name desc"), hql);
 	}
 
 	@Test

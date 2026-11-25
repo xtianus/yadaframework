@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,7 +79,7 @@ public class YadaDataTableDao {
 		}
 		try {
 			List<T> entityPage = getPage(yadaDatatablesRequest, entityClass, locale, resolved);
-			List<Map<String, Object>> jsonData = convertToJson(entityPage, yadaDatatablesRequest, entityClass, resolved);
+			List<Map<String, Object>> jsonData = convertToJson(entityPage, yadaDatatablesRequest, entityClass, locale, resolved);
 			json.put("draw", yadaDatatablesRequest.getDraw());
 			json.put("recordsTotal", yadaDatatablesRequest.getRecordsTotal());
 			json.put("recordsFiltered", yadaDatatablesRequest.getRecordsFiltered());
@@ -100,7 +99,7 @@ public class YadaDataTableDao {
 	 * Retrieve all values allowed by the policy and put them in a json-like structure
 	 * @return never null
 	 */
-	private <T> List<Map<String, Object>> convertToJson(List<T> entityPage, YadaDatatablesRequest yadaDatatablesRequest, Class<?> entityClass, YadaDataTableQueryPolicy.Resolved resolved) {
+	private <T> List<Map<String, Object>> convertToJson(List<T> entityPage, YadaDatatablesRequest yadaDatatablesRequest, Class<?> entityClass, Locale locale, YadaDataTableQueryPolicy.Resolved resolved) {
 		Field idField = yadaUtil.getFieldNoTraversing(entityClass, "id");
 		idField.setAccessible(true);
 		//
@@ -110,10 +109,10 @@ public class YadaDataTableDao {
 			json.add(entityJson);
 			// Conversion from java to map, only for the paths allowed by the policy
 			for (String attributePath : resolved.outputPaths()) {
-				addAttributeValue(entity, entityJson, attributePath);
+				addAttributeValue(entity, entityJson, attributePath, locale);
 			}
 			// Add DT_RowClass to the value returned by getDT_RowClass() if any
-			addAttributeValue(entity, entityJson, "DT_RowClass"); // See YadaUserMessage for an example
+			addAttributeValue(entity, entityJson, "DT_RowClass", locale); // See YadaUserMessage for an example
 			// Add DT_RowId for DataTables id
 			String dataTableId = yadaDatatablesRequest.getDataTableId();
 			try {
@@ -137,7 +136,7 @@ public class YadaDataTableDao {
 	 * @param entityJson the map that will be populated with values
 	 * @param attributePath the path in the entity that contains the value. Can be an attribute path or a method path
 	 */
-	private <entityClass> void addAttributeValue(entityClass entity, Map<String, Object> entityJson, String attributePath) {
+	private <entityClass> void addAttributeValue(entityClass entity, Map<String, Object> entityJson, String attributePath, Locale locale) {
 		try {
 			if (entity==null) {
 				return;
@@ -212,7 +211,7 @@ public class YadaDataTableDao {
 						ParameterizedType type = (ParameterizedType) field.getGenericType();
 						log.debug("null value for {}.{} - did you add enum {} to the YadaSetup.setupApplication() method?", entity.getClass().getSimpleName(), field.getName(), type.getActualTypeArguments()[0]);
 					} else {
-						value = ((YadaPersistentEnum)value).getLocalText();
+						value = ((YadaPersistentEnum)value).getLocalText(locale);
 					}
 				}
 				// The old version
@@ -240,7 +239,7 @@ public class YadaDataTableDao {
 				jsonValue = new HashMap<>();
 				entityJson.put(attributeName, jsonValue);
 			}
-			addAttributeValue(value, jsonValue, parts[1] /*, keyType*/);
+			addAttributeValue(value, jsonValue, parts[1], locale);
 		} catch (Exception e) {
 			log.error("Can't get value of {} for entity {} - ignored", attributePath, entity, e);
 		}
@@ -312,7 +311,7 @@ public class YadaDataTableDao {
 				|| attributeType == Double.class || attributeType == double.class
 				|| attributeType == Short.class || attributeType == short.class;
 			// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
-			String attributeName = addLeftJoins(attributePath, yadaSql, targetClass);
+			String attributeName = addLeftJoins(attributePath, yadaSql, targetClass, locale);
 			if (isCollection) {
 				// Collections require "member of" operator in JPQL
 				if (attributeType == String.class) {
@@ -321,7 +320,7 @@ public class YadaDataTableDao {
 					// For any numeric collection element type, use the parsed number
 					searchSql.where(":globalSearchNumber member of " + attributeName).or();
 				}
-			} else if (attributeType == String.class) {
+			} else if (attributeType == String.class || attributeType == YadaPersistentEnum.class) {
 				searchSql.where(attributeName + " like :globalSearchString").or();
 			} else if (attributeType == Boolean.class || attributeType == boolean.class) {
 				if ("true".indexOf(globalSearchString)>-1) {
@@ -329,10 +328,6 @@ public class YadaDataTableDao {
 				} else if ("false".indexOf(globalSearchString)>-1) {
 					searchSql.where(attributeName + " = false").or();
 				}
-			} else if (attributeType == YadaPersistentEnum.class) {
-				// No need for KEY(" + attributeName + ") = :yadalang because it's added by addLeftJoins()
-				searchSql.where(attributeName + " like :globalSearchString").or();
-				searchSql.setParameter("yadalang", LocaleContextHolder.getLocale().getLanguage());
 			} else if (attributeType.isEnum()) {
 				// Loop on all enum constants to find the ones that contain the search key
 				List<Integer> enumValues = new ArrayList<Integer>();
@@ -368,7 +363,7 @@ public class YadaDataTableDao {
 				needsOrderById = false; // No need to add it twice
 			}
 			// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
-			String sortColumn = addLeftJoins(attributeName, yadaSql, targetClass);
+			String sortColumn = addLeftJoins(attributeName, yadaSql, targetClass, locale);
 			yadaSql.orderBy(sortColumn + " " + direction);
 			// When the sort column is not a direct attribute of the root entity it lives on a join (association paths,
 			// localized map entries, persistent enum texts), so it must be selected to avoid
@@ -425,14 +420,14 @@ public class YadaDataTableDao {
 	 * Joins are inserted for all elements before the last dot: "location" and "company" in the example.
 	 * The path must have been validated by {@link YadaDataTableQueryPolicy}.
 	 */
-	private String addLeftJoins(String attributePath, YadaSql yadaSqlBuilder, Class targetClass) {
+	private String addLeftJoins(String attributePath, YadaSql yadaSqlBuilder, Class targetClass, Locale locale) {
 		if (attributePath==null) {
 			return null;
 		}
-		return addLeftJoinsRecurse(attributePath, "e", yadaSqlBuilder, targetClass);
+		return addLeftJoinsRecurse(attributePath, "e", yadaSqlBuilder, targetClass, locale);
 	}
 
-	private String addLeftJoinsRecurse(String attributePath, String context, YadaSql yadaSql, Class<?> contextClass) {
+	private String addLeftJoinsRecurse(String attributePath, String context, YadaSql yadaSql, Class<?> contextClass, Locale locale) {
 		String[] parts = attributePath.split("\\.");
 		String current = parts[0]; // location
 		Field currentField = yadaUtil.getFieldNoTraversing(contextClass, current);
@@ -465,19 +460,22 @@ public class YadaDataTableDao {
 					return alias;
 				}
 			}
-			return addLeftJoinsRecurse(StringUtils.substringAfter(attributePath, "."), alias, yadaSql, currentClass);
+			return addLeftJoinsRecurse(StringUtils.substringAfter(attributePath, "."), alias, yadaSql, currentClass, locale);
 		} else {
 			// Last element of the path - if it's a YadaPersistentEnum we still need a join for the map
 			if (YadaPersistentEnum.class.equals(currentClass)) {
 				String alias = attributePath + "_langToText";
-				yadaSql.join("left join " + context + "." + attributePath + " " + attributePath); 	// left join user.status status
-				yadaSql.join("left join " + attributePath + ".langToText " + alias);	// left join status.langToText status_langToText
-				String whereToAdd = "(KEY("+alias+") is null or KEY("+alias+")=:yadalang)";
-				if (yadaSql.getWhere().indexOf(whereToAdd)<0) {
-					yadaSql.where(whereToAdd).and();
-					yadaSql.setParameter("yadalang", LocaleContextHolder.getLocale().getLanguage());
+				yadaSql.join("left join " + context + "." + attributePath + " " + attributePath);
+				yadaSql.join("left join " + attributePath + ".langToText " + alias + " on key(" + alias + ") = :yadaLocale");
+				yadaSql.setParameter("yadaLocale", locale.toString());
+				if (locale.toString().equals(locale.getLanguage())) {
+					return alias;
 				}
-				return alias;
+				// Match the language fallback used by YadaPersistentEnum.getLocalText(locale).
+				String languageAlias = alias + "_language";
+				yadaSql.join("left join " + attributePath + ".langToText " + languageAlias + " on key(" + languageAlias + ") = :yadaLanguage");
+				yadaSql.setParameter("yadaLanguage", locale.getLanguage());
+				return "coalesce(" + alias + ", " + languageAlias + ")";
 			}
 			return context + "." + attributePath; // e.phone, company.name
 		}

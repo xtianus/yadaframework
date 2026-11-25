@@ -23,7 +23,7 @@ Example:
 <div th:replace="/yada/form/b5/radio-values::body(fieldName='type',values=${ {'notifyEventMilan','notifyEventOther','newsletterUnaTantum'} },labelPrefix='form.label.',helpPrefix='form.help.')"></div>
 
 */-->
-<body th:remove="tag">
+<body th:fragment="field" th:remove="tag">
 <!--/* The default id (inputId) is a sequence derived from the current URI, so that ajax-loaded modals get a different id from the
 	 * main page. This doesn't work when many page elements are ajax-loaded from the same url of course, in which
 	 * case you need to pass a specific id.

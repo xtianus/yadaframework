@@ -27,7 +27,7 @@ Example:
 Also for compatibility with future bootstrap versions: <div th:replace="~{${@yadaWebUtil.getFormFragment('fileUpload')}::body(fieldName='...
 
 */-->
-<body th:remove="tag">
+<body th:fragment="field" th:remove="tag">
 <div class="yadaFileUpload mb-3" 
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')}">
 <th:block th:with="tmp=${fieldName+'seqName'},seqName=${#strings.replace(#strings.replace(tmp,']',''),'[','')}">

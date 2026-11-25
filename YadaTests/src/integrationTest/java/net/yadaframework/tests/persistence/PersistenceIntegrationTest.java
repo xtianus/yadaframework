@@ -17,7 +17,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.MariaDBDialect;
@@ -35,8 +38,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import net.yadaframework.cms.persistence.entity.YadaArticle;
+import net.yadaframework.commerce.persistence.entity.YadaOrder;
 import net.yadaframework.commerce.persistence.entity.YadaOrderStatus;
 import net.yadaframework.core.YadaConfiguration;
+import net.yadaframework.persistence.YadaDataTableDao;
+import net.yadaframework.persistence.YadaDataTableQueryPolicy;
 import net.yadaframework.persistence.YadaMoney;
 import net.yadaframework.persistence.YadaSavedPropertyCodecs;
 import net.yadaframework.persistence.YadaSavedPropertyKey;
@@ -49,6 +55,9 @@ import net.yadaframework.tests.persistence.repository.ArticleDao;
 import net.yadaframework.tests.persistence.repository.UserProfileDao;
 import net.yadaframework.tests.support.ApplicationSession;
 import net.yadaframework.tests.support.TestRun;
+import net.yadaframework.web.YadaDatatablesColumn;
+import net.yadaframework.web.YadaDatatablesOrder;
+import net.yadaframework.web.YadaDatatablesRequest;
 import net.yadaframework.web.YadaPageRequest;
 import net.yadaframework.web.YadaPageRows;
 
@@ -147,6 +156,40 @@ class PersistenceIntegrationTest {
 		YadaPersistentEnumDao yadaPersistentEnumDao = bean(YadaPersistentEnumDao.class);
 		assertEquals(YadaOrderStatus.values().length, session.fixtures().countRows("YadaPersistentEnum"));
 		assertEquals("Paid", yadaPersistentEnumDao.find(YadaOrderStatus.PAID).getLangToText().get("en"));
+	}
+
+	@Test
+	void orderStatusSortAndSearchUseTheDisplayedLocaleAndKeepUntranslatedOrders() throws SQLException {
+		executeSql("insert into YadaOrder (version, orderStatus_id) select 0, id from YadaPersistentEnum where enumName in ('PAID', 'UNPAID', 'SHIPPED')");
+		executeSql("insert into YadaPersistentEnum_langToText select id, 'fr_CA', 'Acquitte' from YadaPersistentEnum where enumName = 'PAID'");
+		executeSql("insert into YadaPersistentEnum_langToText select id, 'fr', 'Solde' from YadaPersistentEnum where enumName = 'PAID'");
+		executeSql("insert into YadaPersistentEnum_langToText select id, 'fr', 'Impaye' from YadaPersistentEnum where enumName = 'UNPAID'");
+
+		assertOrderStatusPage(Locale.CANADA_FRENCH, "", Arrays.asList(null, "Acquitte", "Impaye"));
+		assertOrderStatusPage(Locale.CANADA_FRENCH, "acquitte", List.of("Acquitte"));
+		assertOrderStatusPage(Locale.CANADA_FRENCH, "impaye", List.of("Impaye"));
+		assertOrderStatusPage(Locale.CANADA_FRENCH, "solde", List.of());
+		assertOrderStatusPage(Locale.FRENCH, "solde", List.of("Solde"));
+	}
+
+	@SuppressWarnings("unchecked")
+	private void assertOrderStatusPage(Locale locale, String search, List<String> expectedLabels) {
+		YadaDatatablesColumn column = new YadaDatatablesColumn();
+		column.putAll(Map.of("data", "orderStatus", "name", "orderStatus", "orderable", "true", "searchable", "true"));
+		YadaDatatablesOrder order = new YadaDatatablesOrder();
+		order.putAll(Map.of("column", "0", "dir", "asc"));
+		YadaDatatablesRequest request = new YadaDatatablesRequest();
+		request.setColumns(List.of(column));
+		request.setOrder(List.of(order));
+		request.setLength(10);
+		request.getSearch().put("value", search);
+		YadaDataTableQueryPolicy policy = YadaDataTableQueryPolicy.forEntity(YadaOrder.class).column("orderStatus").build();
+		Map<String, Object> page = bean(YadaDataTableDao.class).getConvertedJsonPage(request, YadaOrder.class, locale, policy);
+		assertNull(page.get("yadaError"), page.toString());
+		assertEquals(3L, page.get("recordsTotal"));
+		assertEquals((long) expectedLabels.size(), page.get("recordsFiltered"));
+		List<Map<String, String>> rows = (List<Map<String, String>>) page.get("data");
+		assertEquals(expectedLabels, rows.stream().map(row -> row.get("orderStatus")).toList());
 	}
 
 	@Test

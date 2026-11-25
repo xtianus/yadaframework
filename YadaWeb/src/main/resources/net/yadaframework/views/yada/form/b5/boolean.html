@@ -23,7 +23,7 @@ Note: you can't set a default value using thymeleaf, must do it in the controlle
 - NO: help = testo per il pulsante di help (optional) Can be localised with: help=#{form.help.notifyCommentMyStory}
 
 */-->
-<body th:remove="tag">
+<body th:fragment="field" th:remove="tag">
 <!--/* The default id (inputId) is a sequence derived from the current URI, so that ajax-loaded modals get a different id from the
 	 * main page. This doesn't work when many page elements are ajax-loaded from the same url of course, in which
 	 * case you need to pass a specific id.

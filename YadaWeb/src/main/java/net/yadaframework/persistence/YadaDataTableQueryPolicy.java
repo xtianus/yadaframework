@@ -4,6 +4,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
 import net.yadaframework.persistence.entity.YadaPersistentEnum;
 import net.yadaframework.web.YadaDatatablesColumn;
@@ -95,8 +97,8 @@ public final class YadaDataTableQueryPolicy {
 	}
 
 	/**
-	 * Thrown by the path validation when a segment is neither a field nor (for output) a getter of the declared class:
-	 * a computed value, a subclass-only attribute or a typo. Any other validation failure means the path is unsafe.
+	 * Thrown by path validation when a segment has no persistent field for querying, or no field or getter for
+	 * output. Any other validation failure means the path is unsafe.
 	 */
 	static final class UnresolvedPathException extends YadaInvalidUsageException {
 		private static final long serialVersionUID = 1L;
@@ -123,7 +125,7 @@ public final class YadaDataTableQueryPolicy {
 	/**
 	 * Starts the policy of a table configured with YadaDataTable, as used by the default /yadaDataTableData endpoint.
 	 * It differs from {@link #forEntity(Class)} only for columns whose path is not a persistent field of the declared
-	 * entity class (a getter, a computed value, a subclass-only attribute): instead of failing, build() makes them
+	 * entity class (a getter, a transient field, a subclass-only attribute): instead of failing, build() makes them
 	 * output-only (never searched or sorted) and logs a warning. Their value is still read on each row with the
 	 * output safeguards, and a path that is unsafe (credential name, whole entity, invalid syntax) still fails.
 	 * @param tableId the table id, used in the log
@@ -397,6 +399,9 @@ public final class YadaDataTableQueryPolicy {
 					return;
 				}
 				throw new UnresolvedPathException("DataTable path '{}' does not resolve to {} field '{}' of {}", path, queryable ? "a persistent" : "a", segment, currentClass.getName());
+			}
+			if (queryable && (field.isAnnotationPresent(Transient.class) || Modifier.isTransient(field.getModifiers()))) {
+				throw new UnresolvedPathException("DataTable path '{}' cannot query transient field '{}' of {}", path, segment, field.getDeclaringClass().getName());
 			}
 			currentClass = field.getType();
 			currentType = field.getGenericType();

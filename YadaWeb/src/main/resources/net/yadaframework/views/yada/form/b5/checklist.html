@@ -33,7 +33,7 @@ Example:
 <div th:replace="/yada/form/b5/checklist::field(fieldName='type',options=${@config.typeMap},idPrefix=${username},onclick=clicked)"></div>
 
 */-->
-<body th:remove="tag">
+<body th:fragment="field" th:remove="tag">
 <div class="form-group" 
 	th:with="hasError=${#fields.hasErrors('__${fieldName}__')},
 		type=${type?:'checkbox'},

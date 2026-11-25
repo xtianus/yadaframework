@@ -53,7 +53,7 @@ Example:
 
 
 */-->
-<body th:remove="tag">
+<body th:fragment="field" th:remove="tag">
 <!--/* TODO see boolean.html for how to set a unique default id when fields in a modal have the same name as fields in the main page */-->
 <th:block th:with="tmp=${fieldName+'seqName'},seqName=${#strings.replace(#strings.replace(tmp,']',''),'[','')}">
 <input th:if="${#strings.equals(type,'hidden')}" th:field="*{{__${fieldName}__}}" th:disabled="${disabled}" th:type="hidden" th:id="${id}?:${#ids.seq(seqName)}" />
