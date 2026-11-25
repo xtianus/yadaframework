@@ -370,8 +370,11 @@ public class YadaDataTableDao {
 			// Add left joins otherwise Hibernate creates cross joins hence it doesn't return rows with null values
 			String sortColumn = addLeftJoins(attributeName, yadaSql, targetClass);
 			yadaSql.orderBy(sortColumn + " " + direction);
-			if (attributeName.indexOf('.')>-1) {
-				yadaSql.selectFrom(sortColumn); // Needed to avoid "ORDER BY clause is not in SELECT list"
+			// When the sort column is not a direct attribute of the root entity it lives on a join (association paths,
+			// localized map entries, persistent enum texts), so it must be selected to avoid
+			// "ORDER BY clause is not in SELECT list ... incompatible with DISTINCT" on MySQL
+			if (!sortColumn.equals("e." + attributeName)) {
+				yadaSql.selectFrom(sortColumn);
 				needsExtraction = true;
 			}
 		}

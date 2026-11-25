@@ -66,6 +66,10 @@ through MySQL Connector/J. See <<database/overview.adoc#_hibernate_dialect,Hiber
 A single `sort=property,direction` request parameter bound to `YadaPageRequest` works: it was split at the comma
 by Spring and rejected with "No sort column specified".
 
+Sorting a DataTables column whose path ends in a `YadaPersistentEnum` works on MySQL: it failed with
+"ORDER BY clause is not in SELECT list ... incompatible with DISTINCT", because the localized text it was sorted on
+was not selected.
+
 === Bootstrap-versioned views
 
 The Bootstrap version of a framework view is now carried by a folder, selected by `<bootstrapVersion>` in the configuration, instead of a suffix or no marker at all: `/yada/modalConfirmB4` is now `/yada/b4/modalConfirm`, `/yada/form/text` is now `/yada/form/b3/text` and `/yadacms/imageSorter` is now `/yadacms/b3/imageSorter`. The old names fail at runtime with a template-not-found error, and the `YadaViews` constants `AJAX_NOTIFY_B3/B4/B5` and `CONFIRM_B3/B4/B5` are removed.

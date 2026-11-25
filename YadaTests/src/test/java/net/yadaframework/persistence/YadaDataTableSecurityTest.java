@@ -32,6 +32,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import net.yadaframework.components.YadaUtil;
 import net.yadaframework.exceptions.YadaInvalidUsageException;
+import net.yadaframework.persistence.entity.YadaPersistentEnum;
 import net.yadaframework.web.YadaDatatablesColumn;
 import net.yadaframework.web.YadaDatatablesOrder;
 import net.yadaframework.web.YadaDatatablesRequest;
@@ -69,6 +70,7 @@ class YadaDataTableSecurityTest {
 		private List<Owner> owners;
 		private List<String> tags;
 		private Kind kind;
+		private YadaPersistentEnum<Kind> status;
 		private int count;
 		private String password;
 		private String tokenHash;
@@ -353,6 +355,31 @@ class YadaDataTableSecurityTest {
 		assertFalse(hql.contains("'en'"), hql);
 		// Bound with the key type of the map (Locale), on the page query and on the filtered count query
 		verify(query, org.mockito.Mockito.times(2)).setParameter("yadaKey_e_title_656e", Locale.ENGLISH);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	void sortingOnAPersistentEnumSelectsItsJoinAlias() {
+		// A YadaPersistentEnum path has no dot, but sorting joins its langToText map and orders by that alias:
+		// without selecting it, MySQL fails with "ORDER BY clause is not in SELECT list ... incompatible with DISTINCT"
+		YadaDataTableQueryPolicy policy = YadaDataTableQueryPolicy.forEntity(Item.class).column("id").column("status").build();
+		List<Object[]> rows = new ArrayList<>();
+		rows.add(new Object[] { item(1, "first"), "Red" });
+		when(query.getResultList()).thenReturn(rows);
+		YadaDatatablesRequest request = new YadaDatatablesRequest();
+		request.setDataTableId("itemTable");
+		request.setLength(10);
+		request.setColumns(new ArrayList<>(List.of(column("id", "id", true, true), column("status", "status", false, true))));
+		request.setOrder(new ArrayList<>(List.of(order("1", "asc"))));
+		Map<String, Object> json = dao.getConvertedJsonPage(request, Item.class, Locale.ENGLISH, policy);
+		assertNull(json.get("yadaError"), json.toString());
+		String hql = hqlCaptor.getAllValues().get(0);
+		assertTrue(hql.contains("select distinct e , status_langToText from Item e"), hql);
+		assertTrue(hql.contains("order by status_langToText asc"), hql);
+		// Object[] rows are unwrapped: only the entity is returned in data
+		List<Map<String, Object>> data = (List<Map<String, Object>>) json.get("data");
+		assertEquals(1, data.size(), json.toString());
+		assertEquals("1", data.get(0).get("id"));
 	}
 
 	@Test
