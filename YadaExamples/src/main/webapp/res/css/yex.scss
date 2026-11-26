@@ -1,8 +1,8 @@
-@import './_variables.scss';
-@import './_bootstrapFix.scss';
+@use 'variables' as v;
+@use 'bootstrapFix';
 
 html {
-	font-size: $font-size-base;
+	font-size: v.$font-size-base;
 }
 
 header, footer {

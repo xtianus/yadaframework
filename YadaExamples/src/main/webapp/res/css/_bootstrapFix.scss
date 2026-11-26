@@ -1,3 +1,5 @@
+@use 'variables' as v;
+
 // Fix for Bootstrap classes
 
 // This one breaks the layout with validated input groups (e.g. password)
@@ -53,9 +55,9 @@ modal-content.card, .resetPassword .card {
 }
 
 .invalid-feedback {
-	color: $c-error;
+	color: v.$c-error;
 	a, a:hover, a:visited {
-		color: $c-error !important;
+		color: v.$c-error !important;
 	}
 }
 
