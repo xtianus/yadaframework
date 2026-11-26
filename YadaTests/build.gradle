@@ -164,6 +164,12 @@ def failWhenNoTestsDiscovered = { Test testTask ->
 
 def configureSuite = { Test testTask ->
 	testTask.useJUnitPlatform()
+	// Suites run on the project toolchain unless a different runtime is requested:
+	// -PtestRuntimeVersion=25 runs the tests on JDK 25 while java_version is still 21
+	def testRuntimeVersion = project.findProperty('testRuntimeVersion') ?: java_version
+	testTask.javaLauncher = javaToolchains.launcherFor {
+		languageVersion = JavaLanguageVersion.of(testRuntimeVersion.toInteger())
+	}
 	testTask.testLogging {
 		events "passed", "skipped", "failed"
 		exceptionFormat = 'full'
