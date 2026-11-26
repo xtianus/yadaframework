@@ -32,6 +32,9 @@ ext {
 java {
 	sourceCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
 	targetCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(java_version)
+	}
 }
 
 tasks.withType(JavaCompile).configureEach {

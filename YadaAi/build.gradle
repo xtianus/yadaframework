@@ -18,9 +18,9 @@ if (!project.hasProperty('repoPath')) {
 java {
 	sourceCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
 	targetCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
-	// toolchain {
-	// 	languageVersion = JavaLanguageVersion.of(java_version)
-	// }
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(java_version)
+	}
 	// https://docs.gradle.org/6.0/userguide/java_plugin.html#sec:java-extension
 	withSourcesJar()
 	withJavadocJar() // https://stackoverflow.com/a/75710366/587641

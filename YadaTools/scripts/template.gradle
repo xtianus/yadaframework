@@ -42,17 +42,17 @@ configureDartSass(sources: sassSourceTree, outputDir: file("src/main/webapp/res/
 war.dependsOn 'sassCompile'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(25)
 	}
 }
 
 eclipse {
     jdt {
-	    sourceCompatibility = JavaVersion.VERSION_21
-	    targetCompatibility = JavaVersion.VERSION_21
+	    sourceCompatibility = JavaVersion.VERSION_25
+	    targetCompatibility = JavaVersion.VERSION_25
         // https://stackoverflow.com/a/35302104/587641
         file {
                 File dir = file('.settings')
