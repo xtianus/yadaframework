@@ -401,9 +401,10 @@ war.dependsOn 'sassCompile'
 ----
 * ignore the downloaded toolchain with `/.sass*/`; generated `.min.*` files stay ignored by `**/res/css/*.min.*`;
 * in the SCSS sources, replace `@import` of partials with `@use`, which namespaces members
-(`@use 'variables' as v;` then `v.$name`) and loads the file at the directive position, preserving cascade order.
-Where the old `@import` inserted content in place for a reason, like a mixin needed at a specific point, put a `@use`
-at that position instead of assuming the file is always loaded at the top.
+(`@use 'variables' as v;` then `v.$name`). `@use` rules must appear at the top of a stylesheet (before any rule other
+than `@forward` and variable declarations), and a used module's CSS is emitted once, at the beginning: a partial whose
+CSS was imported in the middle of a file would move earlier and change the cascade. In that case turn the partial's
+rules into a mixin, `@use` it at the top and `@include` the mixin at the original `@import` position.
 
 === Vibur 26.0 statement cache
 
