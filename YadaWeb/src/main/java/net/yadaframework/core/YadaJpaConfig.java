@@ -187,7 +187,7 @@ public class YadaJpaConfig {
 				jdbcUrl = jdbcUrl.replaceAll("//[^:/]+(:\\d+)?/", "//localhost:" + port + "/");
 			}
 			
-			ViburDBCPDataSource ds = new ViburDBCPDataSource();
+			ViburDBCPDataSource ds = new YadaViburDBCPDataSource();
 			ds.setJdbcUrl(jdbcUrl);
 			ds.setUsername(datasourceConfig.getString("username"));
 			ds.setPassword(datasourceConfig.getString("password"));
