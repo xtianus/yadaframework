@@ -179,6 +179,11 @@ def configureSuite = { Test testTask ->
 	}
 	testTask.systemProperty 'yts.buildDir', layout.buildDirectory.get().asFile.absolutePath
 	testTask.systemProperty 'yts.projectDir', projectDir.absolutePath
+	// Run folders can live outside the build directory, e.g. on the Linux filesystem in WSL: -PyadaTestRunDir=/home/you/yts-runs or in ~/.gradle/gradle.properties.
+	// Never inside the system temporary directory (/tmp): MariaDB4j deletes database files in there, so TestRun refuses it
+	if (project.hasProperty('yadaTestRunDir')) {
+		testTask.systemProperty 'yadaTestRunDir', project.property('yadaTestRunDir')
+	}
 	// Mockito as an explicit java agent: no Byte Buddy dynamic self-attachment warning on recent JDKs
 	def mockitoAgentFiles = configurations.mockitoAgent
 	testTask.jvmArgumentProviders.add(new CommandLineArgumentProvider() {
@@ -198,10 +203,12 @@ test {
 	configureSuite(it)
 }
 
-// Stateful suites run serially in one fork, without JUnit parallel execution
+// Stateful suites run serially in one fork, without JUnit parallel execution.
+// Parallel JVMs are safe because every run has its own ports, folders, database server and schema:
+// use -PyadaTestForks=3 (or yadaTestForks in ~/.gradle/gradle.properties) to run classes in that many JVMs
 def configureStatefulSuite = { Test testTask ->
 	configureSuite(testTask)
-	testTask.maxParallelForks = 1
+	testTask.maxParallelForks = (project.findProperty('yadaTestForks') ?: '1').toInteger()
 	testTask.forkEvery = 0
 	testTask.systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'
 }

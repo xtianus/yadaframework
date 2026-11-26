@@ -199,7 +199,15 @@ public abstract class YadaConfiguration {
 	public String getEmbeddedDatabaseTmpDir() {
 		return configuration.getString("config/database/embedded/tmpDir", getBasePathString() + "/embeddedDB/tmp");
 	}
-	
+
+	/**
+	 * @return the extra command line arguments for the embedded mariadbd process, from repeated
+	 * {@code <database><embedded><arg>} elements; empty when none is configured
+	 */
+	public List<String> getEmbeddedDatabaseArgs() {
+		return configuration.getList(String.class, "config/database/embedded/arg", Collections.emptyList());
+	}
+
 	/**
 	 * Returns a pointer to the sql file configured for loading the embedded database at startup
 	 * @return the File to use for reading or null if the file is not configured or not readable

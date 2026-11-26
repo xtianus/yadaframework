@@ -31,6 +31,17 @@ From the `YadaTests` folder, `../gradlew integrationTest` selects the same task.
 
 `:YadaTests:installBrowsersCi` also installs the Chromium system packages and needs root: it is meant for CI.
 
+Two Gradle project properties tune the stateful suites (`integrationTest`, `e2eTest`), on the command line or per machine in `~/.gradle/gradle.properties` (`C:\Users\<you>\.gradle\gradle.properties` on Windows):
+
+```properties
+# Run database/application classes in 3 parallel JVMs instead of one (each fork needs roughly 1 GB)
+yadaTestForks=3
+# Put the run folders on a fast disk instead of <project>/build/runs: on WSL the project usually sits on the very slow
+# Windows-mounted drive, so a Linux filesystem folder cuts the suite time by more than half.
+# Never use a folder inside the system temporary directory (/tmp): MariaDB4j deletes database files in there.
+yadaTestRunDir=/home/you/yts-runs
+```
+
 Each production module still builds on its own, for example `./gradlew :YadaWeb:build`: no production module depends on YadaTests.
 
 ## Prerequisites
@@ -52,7 +63,9 @@ All files stay in the ignored `YadaTests/build` folder:
 
 ## Run isolation and cleanup
 
-Each test run gets its own folder `build/runs/<run-id>` with the MariaDB binaries, data and temporary files, a free database port (never 3306 or 63306) and its own schema `yts_<run-id>`. The harness writes a dedicated Yada configuration for the run, so no developer configuration or credential is read. Two invocations at the same time don't share anything.
+Each test run gets its own folder `<runs>/<run-id>` (`build/runs` by default, the `yadaTestRunDir` folder when set) with the MariaDB binaries, data and temporary files, a free database port (never 3306 or 63306) and its own schema, always named `yts`. The harness writes a dedicated Yada configuration for the run, so no developer configuration or credential is read. Two invocations at the same time share only the read-only database template described below.
+
+To skip the database installation and the Flyway migration of every application start, the first start that finds no template boots once into a throwaway run and saves its cleanly stopped database, binaries included, as a template in `<runs>/template-db-<hash>`, beside the run that needed it. Later starts copy the template files instead (the schema name is constant for this reason). The hash covers the application migrations and the MariaDB4j version, so a changed migration or a MariaDB4j upgrade builds a new template; delete the folder or run `clean` when in doubt, for example after a framework change that alters the schema without a migration. Runs that don't migrate at startup, runs with a `sourceSql` seed, and restarts on a non-empty data folder don't use the template. With `yadaTestForks` and no template yet, every fork builds one at the same time and only the first published copy is kept. If the template can't be built, the runs of that JVM install and migrate as usual without trying again. The template databases are throwaway, so every run configures mariadbd with `--innodb-flush-log-at-trx-commit=0` and `--innodb-doublewrite=0` for speed.
 
 The harness stops only the processes it started, through `YadaMariaDBServer.stopOwnedDatabase()`, and deletes a run folder only after its database port is free. If a run is killed, its folder stays in `build/runs`: check that no `mariadbd` process uses it any more, then delete it or run `./gradlew :YadaTests:clean`. Never kill database processes that don't belong to a YadaTests run folder.
 

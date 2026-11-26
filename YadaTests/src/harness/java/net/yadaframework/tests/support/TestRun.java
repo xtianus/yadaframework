@@ -29,10 +29,11 @@ import org.slf4j.LoggerFactory;
 import net.yadaframework.core.YadaConfiguration;
 
 /**
- * One isolated test run: a unique directory, a free embedded database port, a unique schema name
+ * One isolated test run: a unique directory, a free embedded database port, its own database server
  * and a generated Yada configuration file that points at them.
  * <p>
- * Every invocation gets its own directory under {@code build/runs}, so concurrent and repeated runs never share state.
+ * Every invocation gets its own directory under {@code build/runs} (or the {@code yadaTestRunDir} system property
+ * when set), so concurrent and repeated runs never share state.
  * The embedded database never uses the default MySQL/MariaDB port or the default Yada embedded port.
  * Closing the run deletes its files only when the database port has been released.
  */
@@ -60,9 +61,17 @@ public final class TestRun implements AutoCloseable {
 	/** Per-run application settings, written to conf.settings.xml: element path relative to &lt;config> → values */
 	private final Map<String, List<String>> settings = new LinkedHashMap<>();
 
-	private TestRun(Path buildDirectory) throws IOException {
+	private TestRun(Path runsParentDirectory) throws IOException {
+		Path runsParent = runsParentDirectory.toAbsolutePath().normalize();
+		Path systemTempDirectory = Path.of(System.getProperty("java.io.tmpdir")).toAbsolutePath().normalize();
+		if (runsParent.startsWith(systemTempDirectory)) {
+			// MariaDB4j deletes the data directory on startup, and the base/data/tmp folders in a shutdown hook,
+			// when they are inside the system temporary directory: a restart would lose every table
+			throw new IOException("The test run folder can't be inside the system temporary directory " + systemTempDirectory
+				+ ": MariaDB4j deletes the data of a database in a temporary directory on startup and at JVM exit. Choose another fast local folder instead.");
+		}
 		this.runId = LocalDateTime.now().format(ID_FORMAT) + "_" + Long.toString(ProcessHandle.current().pid(), 36) + Integer.toString(ThreadLocalRandom.current().nextInt(36*36*36, 36*36*36*36), 36);
-		this.directory = buildDirectory.toAbsolutePath().normalize().resolve("runs").resolve(runId);
+		this.directory = runsParent.resolve(runId);
 		Files.createDirectories(directory);
 		this.configurationFile = directory.resolve("configuration.xml");
 		this.runConfigurationFile = directory.resolve("conf.run.xml");
@@ -86,19 +95,33 @@ public final class TestRun implements AutoCloseable {
 	 * @return the new run
 	 */
 	public static TestRun create(Path buildDirectory) {
+		return createIn(buildDirectory.resolve("runs"));
+	}
+
+	/**
+	 * Creates a new run directly below the given folder of run folders, e.g. beside an existing run.
+	 * @param runsParentDirectory the folder that holds the run folders
+	 * @return the new run
+	 */
+	static TestRun createIn(Path runsParentDirectory) {
 		try {
-			return new TestRun(buildDirectory);
+			return new TestRun(runsParentDirectory);
 		} catch (IOException e) {
-			throw new UncheckedIOException("Can't create the test run directory in " + buildDirectory, e);
+			throw new UncheckedIOException("Can't create the test run directory in " + runsParentDirectory, e);
 		}
 	}
 
 	/**
-	 * Creates a run in the YadaTests build directory, as passed by Gradle in the "yts.buildDir" system property.
+	 * Creates a run in the folder of the {@code yadaTestRunDir} system property when set, otherwise in the
+	 * YadaTests build directory as passed by Gradle in the "yts.buildDir" system property.
+	 * Gradle forwards the {@code yadaTestRunDir} project property, so it can be set per machine in
+	 * {@code ~/.gradle/gradle.properties}: useful on WSL, where the project usually sits on the very slow
+	 * Windows-mounted drive and the run folders should be on the Linux filesystem instead.
 	 * @return the new run
 	 */
 	public static TestRun create() {
-		return create(buildDirectory());
+		String configuredRunsDirectory = System.getProperty("yadaTestRunDir");
+		return createIn(configuredRunsDirectory != null ? Path.of(configuredRunsDirectory) : buildDirectory().resolve("runs"));
 	}
 
 	/**
@@ -166,11 +189,25 @@ public final class TestRun implements AutoCloseable {
 	}
 
 	/**
+	 * @return the sql file that the embedded database loads when the schema is first created, or null for none
+	 */
+	public synchronized Path sourceSql() {
+		return sourceSql;
+	}
+
+	/**
 	 * Enables or disables the Flyway migration at application startup (enabled by default)
 	 */
 	public synchronized void setMigrationAtStartup(boolean migrationAtStartup) {
 		this.migrationAtStartup = migrationAtStartup;
 		writeConfiguration();
+	}
+
+	/**
+	 * @return true when the application will run the Flyway migration at startup (the default)
+	 */
+	public synchronized boolean migrationAtStartup() {
+		return migrationAtStartup;
 	}
 
 	/**
@@ -336,6 +373,8 @@ public final class TestRun implements AutoCloseable {
 						<baseDir>%s</baseDir>
 						<datadir>%s</datadir>
 						<tmpDir>%s</tmpDir>
+						<arg>--innodb-flush-log-at-trx-commit=0</arg>
+						<arg>--innodb-doublewrite=0</arg>
 			%s		</embedded>
 					<databaseMigrationAtStartup>%s</databaseMigrationAtStartup>
 					<showSql>false</showSql>
@@ -416,9 +455,13 @@ public final class TestRun implements AutoCloseable {
 		return databasePort;
 	}
 
-	/** @return the schema used by the application, e.g. "yts_20261011120000_abc123" */
+	/**
+	 * @return the schema used by the application, "yts". The name is constant so that a test database
+	 * can be created by copying the files of a reference database: see {@link TemplateDatabase}. Isolation
+	 * between runs doesn't depend on it because every run has its own database server.
+	 */
 	public String schemaName() {
-		return "yts_" + runId;
+		return "yts";
 	}
 
 	/** @return the folder holding the MariaDB binaries, data and tmp folders */

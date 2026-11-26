@@ -78,6 +78,9 @@ public class YadaMariaDBServer {
 			configBuilder.setDataDir(embeddedDatabaseDataDirFile);
 			configBuilder.setTmpDir(tmpDir);
 			configBuilder.setPort(port);
+			for (String arg : config.getEmbeddedDatabaseArgs()) {
+				configBuilder.addArg(arg);
+			}
 			// If the base folder is empty install the db, otherwise open it
 			String[] filesInBaseDir = baseDirFile.list();
 			boolean install = filesInBaseDir == null || filesInBaseDir.length == 0; // No files

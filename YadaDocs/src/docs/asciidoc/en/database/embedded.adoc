@@ -53,6 +53,7 @@ The full configuration for the embedded database is shown below with default val
 	<datadir>${config/paths/basePath}/embeddedDB/data</datadir> # <3>
 	<tmpDir>${config/paths/basePath}/embeddedDB/tmp</tmpDir> # <4>
 	<sourceSql>${config/paths/basePath}/embeddedDB/source.sql</sourceSql> # <5>
+	<arg>--innodb-flush-log-at-trx-commit=2</arg> # <6>
 </embedded>
 ----
 <1> Ports below 1024 require root privilege, above 65535 are invalid
@@ -60,6 +61,9 @@ The full configuration for the embedded database is shown below with default val
 <3> Database data is stored here
 <4> Temp folder used by the database
 <5> sql to run when first creating the database. There is no default value here.
+<6> extra command line argument for the mariadbd process. Repeat the element for more arguments.
+There is no default value: the server runs with its own defaults. Arguments that trade durability for speed,
+like the one in the example, are meant for throwaway test databases and should not be used otherwise.
 
 Hibernate uses `MariaDBDialect` automatically when the embedded database is enabled:
 see <<overview.adoc#_hibernate_dialect,Hibernate Dialect>>.

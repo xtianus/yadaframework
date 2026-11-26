@@ -146,6 +146,9 @@ class EmbeddedDatabaseLifecycleTest {
 		YadaMariaDBServer owner = startServer(ownerRun.loadConfiguration());
 		TestRun intruderRun = newRun();
 		intruderRun.setDatabasePort(ownerRun.databasePort());
+		// Every run uses the same schema name, so the intruder gets its own to detect a schema created in the foreign server
+		String intruderSchema = "yts_intruder";
+		intruderRun.setConfiguredJdbcUrl(intruderRun.configuredJdbcUrl().replace("/" + intruderRun.schemaName() + "?", "/" + intruderSchema + "?"));
 		// A non-empty binaries folder selects the reopen-or-attach path
 		Files.createDirectories(intruderRun.databaseBaseDirectory());
 		Files.writeString(intruderRun.databaseBaseDirectory().resolve("placeholder"), "not empty");
@@ -153,7 +156,7 @@ class EmbeddedDatabaseLifecycleTest {
 		assertTrue(rootMessage(failure).contains("data directory"), rootMessage(failure));
 		// Nothing was created in, and nothing stopped, the foreign server
 		assertTrue(TestRun.isListening(ownerRun.databasePort()));
-		assertFalse(schemaExists(ownerRun, intruderRun.schemaName()));
+		assertFalse(schemaExists(ownerRun, intruderSchema));
 		assertFalse(Files.exists(intruderRun.dataDirectory()) && Files.list(intruderRun.dataDirectory()).findAny().isPresent(), "Files written in the intruder data directory");
 		owner.stopOwnedDatabase();
 		intruderRun.setDatabasePort(TestRun.findFreePort());
@@ -214,8 +217,8 @@ class EmbeddedDatabaseLifecycleTest {
 		}
 		assertTrue(queryString(first.serverJdbcUrl(), "SELECT @@datadir").startsWith(first.dataDirectory().toString()));
 		assertTrue(queryString(second.serverJdbcUrl(), "SELECT @@datadir").startsWith(second.dataDirectory().toString()));
-		assertFalse(schemaExists(first, second.schemaName()));
-		assertFalse(schemaExists(second, first.schemaName()));
+		assertTrue(schemaExists(first, first.schemaName()));
+		assertTrue(schemaExists(second, second.schemaName()));
 	}
 
 	/**

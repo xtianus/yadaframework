@@ -67,6 +67,7 @@ public final class TestApplication implements AutoCloseable {
 			throw new IllegalStateException("Another test application or database is still registered: close it first");
 		}
 		assertMariaDB4jPresent();
+		TemplateDatabase.prepareDataDirectory(run);
 		YadaTestConfigurationScope configurationScope = new YadaTestConfigurationScope(run.configurationFile());
 		YadaEmbeddedTomcatTestServer server = null;
 		try {
