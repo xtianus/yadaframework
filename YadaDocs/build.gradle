@@ -66,14 +66,6 @@ jar {
 	}
 }
 
-// Set the yada version in the properties file
-// Not used for docs
-processResources {
-	doLast {
-		ant.replace(file: "${sourceSets.main.output.resourcesDir}/net.yadaframework.yadaweb.properties", token: '@YADA_VERSION@', value: version)
-	}
-}
-
 import java.nio.file.Files
 import java.nio.file.Paths
 
