@@ -318,7 +318,7 @@ Finally edit `.gitignore` in the root of your project to make it look like the f
 /.classpath
 /.project
 !gradle-wrapper.jar
-/.sass/
+/.sass*/
 **/res/css/*.min.*
 **/res/js/*.min.*
 ----

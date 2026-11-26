@@ -213,7 +213,8 @@ Use `rootProject.name = 'YadaBookstore'` for the bookstore tutorial.
 
 More information on the wtp syntax https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpComponent.html[here^] and https://docs.gradle.org/current/dsl/org.gradle.plugins.ide.eclipse.model.EclipseWtpFacet.html[here^].
 
-Copy the `/YadaTools/scripts/sass.properties` file into the project folder.
+The template applies `/YadaTools/scripts/dart-sass.gradle`, which downloads the pinned Dart Sass automatically into an
+OS-specific `.sass-<platform>-<arch>` folder (git-ignored), so no Sass installation or properties file is needed.
 
 == Code Generation (just a bit)
 Ensure you have these folders in your project before the next step, and create them when missing:

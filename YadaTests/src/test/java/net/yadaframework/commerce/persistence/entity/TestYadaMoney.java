@@ -23,6 +23,15 @@ public class TestYadaMoney {
 			pow = pow * 10;
 		}
 		assertEquals(yadaMoney.toString(Locale.ENGLISH), "12345.68");
+
+		// An explicit Unicode numbering-system extension is the stable choice on every JDK
+		assertEquals(yadaMoney.toString(Locale.forLanguageTag("ar-u-nu-arab")), "١٢٣٤٥٫٦٨");
+		assertEquals(yadaMoney.toString(Locale.forLanguageTag("ar-u-nu-latn")), "12345.68");
+
+		// CLDR changed the default numbering system of the plain "ar" locale in JDK 24:
+		// Arabic-Indic digits before, Latin digits since
+		String expectedPlainArabic = Runtime.version().feature() >= 24 ? "12345.68" : "١٢٣٤٥٫٦٨";
+		assertEquals(yadaMoney.toString(Locale.forLanguageTag("ar")), expectedPlainArabic);
 //		yadaMoney.setAmount(1230000);
 //		System.out.println(yadaMoney);
 //		yadaMoney.setAmount(123000);

@@ -644,3 +644,13 @@ userProfile.setTimezone(userTimezone);
 TO BE CONTINUED...
 ----
 
+
+==  Formatting numbers and money
+
+`YadaMoney.toString(Locale)` is number formatting through `NumberFormat.getNumberInstance(locale)` with the decimal
+pattern `0.00`: it formats the amount, it is not currency-symbol formatting and does no currency conversion.
+
+The default numbering system of the plain `ar` locale changed in the CLDR data of Java 24: the same amount produces
+Arabic-Indic digits (`١٢٣٤٥٫٦٨`) on Java 21 and Latin digits (`12345.68`) on Java 25. Applications that need Arabic-Indic
+digits on every JDK must use an explicit Unicode numbering-system extension, `Locale.forLanguageTag("ar-u-nu-arab")`;
+`ar-u-nu-latn` selects Latin digits explicitly. Relying on the plain `ar` locale is JDK-version dependent.

@@ -43,6 +43,13 @@ is for that version.
 |Bootstrap 3-5
 |Tomcat 11
 
+|0.8.0
+|JDK 25
+|Spring 6
+|Hibernate 7
+|Bootstrap 3-5
+|Tomcat 11
+
 |===
 
 == Changes in 0.7.9
@@ -363,3 +370,52 @@ and not installed again. Windows is unchanged: the original MariaDB4j command ru
 `YadaMariaDB` copies the MariaDB4j install command: when upgrading MariaDB4j, compare `createUnixInstallProcessBuilder()` with
 the new `DB.createDBInstallProcess()`.
 
+
+== Changes in 0.8.0
+
+=== Java 25 and Gradle 9.9.2
+
+The framework and the project template are built with Gradle 9.9.2 and compile with a Java 25 toolchain. Java 25
+bytecode is a breaking runtime requirement: build machines, embedded servers and application servers must run JDK 25
+or newer, and the Eclipse project metadata selects `JavaSE-25`. Compilation keeps `-parameters`, which Spring MVC
+still requires.
+
+=== Sass
+
+Sass compilation no longer uses the unmaintained `com.meiuwa.gradle.sass` plugin. The shared script
+`YadaTools/scripts/dart-sass.gradle` downloads a pinned Dart Sass for the current OS and architecture into the
+git-ignored `$rootDir/.sass-<platform>-<arch>` folder, verifies its SHA-256 checksum and compiles every non-partial
+input to a flattened `<basename>.min.css` plus its source map with `--style=compressed --source-map`.
+
+To migrate an application:
+
+* remove the `com.meiuwa.gradle.sass` plugin, the `sass {}` block, the old `sassCompile {}` task and `sass.properties`;
+* apply the script through the framework checkout path and call `configureDartSass` on the complete source tree,
+partials included:
++
+[source,groovy]
+----
+apply from: "$projectDir/../../yadaframework/YadaTools/scripts/dart-sass.gradle"
+configureDartSass(sources: sassSourceTree, outputDir: file("src/main/webapp/res/css"))
+war.dependsOn 'sassCompile'
+----
+* ignore the downloaded toolchain with `/.sass*/`; generated `.min.*` files stay ignored by `**/res/css/*.min.*`;
+* in the SCSS sources, replace `@import` of partials with `@use`, which namespaces members
+(`@use 'variables' as v;` then `v.$name`) and loads the file at the directive position, preserving cascade order.
+Where the old `@import` inserted content in place for a reason, like a mixin needed at a specific point, put a `@use`
+at that position instead of assuming the file is always loaded at the top.
+
+=== Vibur 26.0 statement cache
+
+The connection pool is `org.vibur:vibur-dbcp:26.0`: the statement cache now uses Caffeine instead of
+`concurrentlinkedhashmap-lru`, which was calling `sun.misc.Unsafe`. The Caffeine jar comes transitively from YadaWeb,
+so applications need no dependency change. `YadaViburDBCPDataSource` keeps the validation error of an invalid pool
+configuration visible, where Vibur 26.0 would raise a `NullPointerException` instead when connection tracking is
+enabled.
+
+=== Arabic money formatting
+
+`YadaMoney.toString(Locale)` is number formatting only: it is not currency-symbol formatting and does no currency
+conversion. The default numbering system of the plain `ar` locale changed in the CLDR data of Java 24, from
+Arabic-Indic to Latin digits: use `ar-u-nu-arab` or `ar-u-nu-latn` explicitly when the digit set matters. See
+<<internationalization.adoc#_formatting_numbers_and_money,Formatting numbers and money>>.
