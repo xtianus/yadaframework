@@ -86,6 +86,11 @@ configurations {
 		canBeResolved = true
 		canBeConsumed = false
 	}
+	// The mockito-core jar alone, passed to every test JVM as -javaagent instead of relying on dynamic self-attachment
+	mockitoAgent {
+		canBeResolved = true
+		canBeConsumed = false
+	}
 	// The unit suite compiles against the harness (e.g. path resolution of the Tomcat fixture) without starting it
 	testImplementation.extendsFrom harnessImplementation
 	configureEach { exclude group: 'commons-logging', module: 'commons-logging' }
@@ -101,6 +106,9 @@ dependencies {
 	testCommon 'org.junit.platform:junit-platform-launcher'
 	testCommon "org.mockito:mockito-core:${mockitoVersion}"
 	testCommon "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+	mockitoAgent("org.mockito:mockito-core:${mockitoVersion}") {
+		transitive = false
+	}
 
 	// The application under test
 	implementation project(':YadaWeb'), project(':YadaWebSecurity'), project(':YadaWebCMS'), project(':YadaWebCommerce')
@@ -160,6 +168,18 @@ def configureSuite = { Test testTask ->
 	}
 	testTask.systemProperty 'yts.buildDir', layout.buildDirectory.get().asFile.absolutePath
 	testTask.systemProperty 'yts.projectDir', projectDir.absolutePath
+	// Mockito as an explicit java agent: no Byte Buddy dynamic self-attachment warning on recent JDKs
+	def mockitoAgentFiles = configurations.mockitoAgent
+	testTask.jvmArgumentProviders.add(new CommandLineArgumentProvider() {
+		@Classpath
+		FileCollection getMockitoAgent() {
+			return mockitoAgentFiles
+		}
+		@Override
+		Iterable<String> asArguments() {
+			return Collections.singletonList("-javaagent:${mockitoAgentFiles.singleFile.absolutePath}".toString())
+		}
+	})
 	failWhenNoTestsDiscovered(testTask)
 }
 
