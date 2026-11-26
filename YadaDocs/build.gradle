@@ -101,7 +101,7 @@ asciidoctorPdf {
 	dependsOn copyDocInfoHeader
 	baseDirFollowsSourceFile();
 	languages 'en'
-	outputDir file('../docs')
+	outputDir = file('../docs')
 	attributes(
 		// Override imagesdir for PDF generation
 		'imagesdir': "$projectDir/src/docs/resources/img"
@@ -203,7 +203,7 @@ asciidoctor {
 		attribute 'linkcss', 'linkcss'
 	}
 	languages 'en'
-	outputDir file('../docs')
+	outputDir = file('../docs')
 
 	resources {
 		from('src/docs/resources') {
@@ -227,18 +227,18 @@ tasks.register('stageAsciidocForVerification') {
 	outputs.dir(stagingDir)
 	doLast {
 		def target = stagingDir.get().asFile
-		project.delete(target)
-		project.copy {
-			from sourceRoot
-			into target
+		target.deleteDir()
+		target.mkdirs()
+		def sourceRootPath = sourceRoot.toPath()
+		sourceRoot.eachFileRecurse(groovy.io.FileType.FILES) { sourceFile ->
+			def destination = target.toPath().resolve(sourceRootPath.relativize(sourceFile.toPath()).toString())
+			destination.parent?.toFile()?.mkdirs()
+			java.nio.file.Files.copy(sourceFile.toPath(), destination, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
 		}
 		// The same placement as copyDocInfoHeader, applied to the staged copy
 		target.eachDirRecurse { dir ->
 			if (dir.name != 'common') {
-				project.copy {
-					from docinfoHeader
-					into dir
-				}
+				java.nio.file.Files.copy(docinfoHeader.toPath(), dir.toPath().resolve(docinfoHeader.name), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
 			}
 		}
 	}
@@ -249,7 +249,7 @@ tasks.register('verifyAsciidoc', org.asciidoctor.gradle.jvm.AsciidoctorTask) {
 	group = 'verification'
 	dependsOn 'stageAsciidocForVerification'
 	sourceDir docsVerificationDir.dir('src')
-	outputDir docsVerificationDir.dir('html')
+	outputDir = docsVerificationDir.dir('html')
 	baseDirFollowsSourceFile()
 	languages 'en'
 	asciidoctorj {

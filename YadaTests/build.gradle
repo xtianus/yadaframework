@@ -147,11 +147,13 @@ dependencies {
  */
 def failWhenNoTestsDiscovered = { Test testTask ->
 	def executedTests = 0L
-	testTask.afterSuite { descriptor, result ->
-		if (descriptor.parent == null) {
-			executedTests = result.testCount
+	testTask.addTestListener([
+		afterSuite: { descriptor, result ->
+			if (descriptor.parent == null) {
+				executedTests = result.testCount
+			}
 		}
-	}
+	] as TestListener)
 	testTask.doLast {
 		boolean filtered = !testTask.filter.includePatterns.isEmpty() || !testTask.filter.commandLineIncludePatterns.isEmpty()
 		if (executedTests == 0 && !filtered) {
@@ -164,7 +166,7 @@ def configureSuite = { Test testTask ->
 	testTask.useJUnitPlatform()
 	testTask.testLogging {
 		events "passed", "skipped", "failed"
-		exceptionFormat "full"
+		exceptionFormat = 'full'
 	}
 	testTask.systemProperty 'yts.buildDir', layout.buildDirectory.get().asFile.absolutePath
 	testTask.systemProperty 'yts.projectDir', projectDir.absolutePath

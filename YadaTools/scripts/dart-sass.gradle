@@ -40,7 +40,7 @@ ext.configureDartSass = { Map config ->
 	def sassOsName = System.getProperty('os.name', 'unknown').toLowerCase(Locale.ROOT)
 	def sassOsArch = System.getProperty('os.arch', 'unknown').toLowerCase(Locale.ROOT)
 	def sassPlatform
-	if (sassOsName.contains('win')) {
+	if (sassOsName.startsWith('windows')) {
 		sassPlatform = 'windows'
 	} else if (sassOsName.contains('mac') || sassOsName.contains('darwin')) {
 		sassPlatform = 'macos'

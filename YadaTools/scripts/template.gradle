@@ -155,5 +155,3 @@ task dbSchema(dependsOn: [classes], type: JavaExec) {
         delete layout.buildDirectory.dir('classes/java/main/META-INF')
     }
 }
-
-

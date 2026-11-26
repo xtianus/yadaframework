@@ -156,7 +156,7 @@ test {
 	useJUnitPlatform()
 	testLogging {
 		events "passed", "skipped", "failed"
-		exceptionFormat "full"
+		exceptionFormat = 'full'
 	}
 	// The test configuration replaces src/main/resources/configuration.xml (see src/test/resources)
 	systemProperty 'yada.configurationFile', file('src/test/resources/yex-test-configuration.xml').absolutePath
@@ -191,11 +191,13 @@ test {
 	}
 	// Fails a test task that discovers no test at all, as in YadaTests, so a wiring mistake can't pass silently
 	def executedTests = 0L
-	afterSuite { descriptor, result ->
-		if (descriptor.parent == null) {
-			executedTests = result.testCount
+	addTestListener([
+		afterSuite: { descriptor, result ->
+			if (descriptor.parent == null) {
+				executedTests = result.testCount
+			}
 		}
-	}
+	] as TestListener)
 	doLast {
 		boolean filtered = !filter.includePatterns.isEmpty() || !filter.commandLineIncludePatterns.isEmpty()
 		if (executedTests == 0 && !filtered) {
@@ -244,5 +246,3 @@ task dbSchema(dependsOn: [classes], type: JavaExec) {
         delete "build/classes/java/main/META-INF"
     }
 }
-
-
