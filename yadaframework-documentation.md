@@ -205,16 +205,16 @@ dependencies {
 ## Version Compatibility
 
 ### Requirements
-- Java 17+
-- Spring Framework 5+
-- Hibernate 5+
+- Java 25+
+- Spring Framework 6.2+
+- Hibernate 7+
 - MySQL 8+ (recommended)
-- Tomcat 8.5+
+- Tomcat 11+
 
 ### Module Versions
 Always use matching versions across Yada modules to ensure compatibility:
 ```gradle
-def yadaVersion = '0.7.5'
+def yadaVersion = '0.8.0'
 implementation "net.yadaframework:yadaweb:${yadaVersion}"
 implementation "net.yadaframework:yadawebcms:${yadaVersion}"
 implementation "net.yadaframework:yadawebsecurity:${yadaVersion}"

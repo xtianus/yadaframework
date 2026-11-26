@@ -5,7 +5,7 @@ Latest documentation: https://yadaframework.net/
 
 ## Gradle builds
 
-The repository root is the `yadaframework` build, using Gradle 8.14.3 and Java 21. It includes `YadaWeb`, `YadaWebSecurity`, `YadaWebCMS`, `YadaWebCommerce`, `YadaAi`, `YadaTools`, `YadaDocs`, and `YadaTests`. There is no application project in this build; `YadaExamples` is independent and `YadaBones` has no Gradle build.
+The repository root is the `yadaframework` build, using Gradle 9.9.2 and a Java 25 toolchain: Gradle compiles with a JDK 25 found among the installed toolchains, while the Gradle daemon itself can run on Java 17 or newer. It includes `YadaWeb`, `YadaWebSecurity`, `YadaWebCMS`, `YadaWebCommerce`, `YadaAi`, `YadaTools`, `YadaDocs`, and `YadaTests`. There is no application project in this build; `YadaExamples` is independent and `YadaBones` has no Gradle build.
 
 | Working directory | Command | Purpose |
 |---|---|---|

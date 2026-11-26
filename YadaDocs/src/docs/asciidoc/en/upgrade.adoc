@@ -43,6 +43,13 @@ is for that version.
 |Bootstrap 3-5
 |Tomcat 11
 
+|0.7.9
+|JDK 21
+|Spring 6
+|Hibernate 7
+|Bootstrap 3-5
+|Tomcat 11
+
 |0.8.0
 |JDK 25
 |Spring 6

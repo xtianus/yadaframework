@@ -23,17 +23,18 @@ You should have https://www.oracle.com/java/technologies/javase-downloads.html[J
 and a working copy of either https://code.visualstudio.com/[Visual Studio Code] or https://www.eclipse.org/downloads/packages/[Eclipse IDE^]. Check the notes in this section before installing anything.
 
 ===  Java SDK
-The more robust way to install Java is to download and uncompress the zip archive of the needed SDK in some folder like `C:\Local\Javas\jdk-21.0.8` and
-make a symbolic link to it with a generic name, like `C:\Local\jdk21`. 
+The more robust way to install Java is to download and uncompress the zip archive of the needed SDK in some folder like `C:\Local\Javas\jdk-25.0.1` and
+make a symbolic link to it with a generic name, like `C:\Local\jdk25`. 
 
 [source,dos]
 ----
-mklink /D /J C:\Local\jdk21 C:\Local\Javas\jdk-21.0.8
+mklink /D /J C:\Local\jdk25 C:\Local\Javas\jdk-25.0.1
 ----
 
-Now you can refer to `C:\Local\jdk21` in your scripts and when you update the java (minor) version you just change the link, not the scripts.
+Now you can refer to `C:\Local\jdk25` in your scripts and when you update the java (minor) version you just change the link, not the scripts.
 
-Currently the Yada Framework source is **tested with Java 21**. Running on an untested version might give weird errors.
+Currently the Yada Framework source is **tested with Java 25**. Running on an untested version might give weird errors.
+Since version 0.8.0 the framework classes are compiled for Java 25, so applications using it must be built and run on Java 25 or newer.
 
 
 ===  GIT

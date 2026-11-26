@@ -45,7 +45,7 @@ Update your installation with "Help > Check for Updates" and follow the instruct
 you from adding a Tomcat server later.
 
 From the "Window > Preferences > Gradle" dialog set the "Java home" entry to your JDK installation,
-which would be `C:\Local\jdk21` if you followed the instructions above. 
+which would be `C:\Local\jdk25` if you followed the instructions above. 
 
 [CAUTION]
 .Setting Gradle Java Home
@@ -72,7 +72,7 @@ image::newEclipseProject/java-properties-utf8.png[Eclipse file encoding]
 
 
 Add the <<gettingStarted.adoc#_java_sdk,previously downloaded>> JRE as a new Runtime in "Window > Preferences > Java > Installed JREs" and set it as the default.
-Also set the "Window > Preferences > Java > Compiler > JDK Compliance" accordingly (that would be "21" for Java 21). You should also set "Store information about method parameters (usable via reflection)" to use simpler method signatures in Spring controllers (no @RequestParam is needed).
+Also set the "Window > Preferences > Java > Compiler > JDK Compliance" accordingly (that would be "25" for Java 25). You should also set "Store information about method parameters (usable via reflection)" to use simpler method signatures in Spring controllers (no @RequestParam is needed).
 
 In order to better spot errors and stack traces, you should considerably increase the console output buffer or remove the limit altogether
 using the "Window > Preferences > Run/Debug > Console" options:
@@ -214,7 +214,7 @@ also installs a bash executable.
 After the project has been fixed, select the old projects in Eclipse and do a "refresh" accepting to delete the `lib` project when prompted.
 
 Optional: edit the `/MySiteProject/gradle/wrapper/gradle-wrapper.properties` file changing the `distributionUrl` to match the version of
-Gradle that you want to use. For example `distributionUrl=https\://services.gradle.org/distributions/gradle-7.6-bin.zip`.
+Gradle that you want to use. For example `distributionUrl=https\://services.gradle.org/distributions/gradle-9.9.2-bin.zip`.
 This is only needed if the gradle you want to use is not yet available in Eclipse. Right-click the project and choose "Gradle > Refresh Gradle Project" to update the version of Gradle used.
 
 You can choose to add an external Tomcat server or use the embedded version. In the first case, you should be using the "Enterprise" version of Eclipse.
