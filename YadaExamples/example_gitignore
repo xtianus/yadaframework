@@ -1,5 +1,5 @@
 /.gradle/
-/.sass/
+/.sass*/
 /build/
 /bin/
 /.settings/

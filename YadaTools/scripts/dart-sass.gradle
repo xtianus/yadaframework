@@ -1,0 +1,187 @@
+// Shared Dart Sass download/extract/compile build logic for Gradle 9+
+//
+// Usage contract for applications (YadaExamples, generated projects, downstream apps):
+//	apply from: '<path-to>/YadaTools/scripts/dart-sass.gradle'
+//	def sassSources = project.files(fileTree("src/main/webapp/res/css"), fileTree("$YadaWebLib/src/main/resources/net/yadaframework/views/yada/css"), fileTree("$YadaWebCmsLib/src/main/resources/net/yadaframework/views/yada/css"))
+//	configureDartSass(sources: sassSources, outputDir: file("src/main/webapp/res/css"))
+// Required keys:
+//	sources   - the complete source tree, including _*.scss/_*.sass partials (partials are declared
+//	            as task inputs but are never compiler entry points)
+//	outputDir - the directory receiving the flattened <basename>.min.css and .min.css.map files
+// Optional keys:
+//	version   - the Dart Sass release to use, default 1.108.2
+// Registers exactly these tasks: downloadDartSass, verifyDartSass, unpackDartSass, sassCompile.
+// The Dart Sass binary is downloaded once per OS/arch into $rootDir/.sass-<platform>-<arch>/ and
+// extracted into the <version> subfolder, so Windows and WSL builds never overwrite each other.
+
+// The download plugin classes are not visible to applied scripts from the applying build's
+// plugins {} block, so this script declares its own classpath
+buildscript {
+	repositories {
+		gradlePluginPortal()
+	}
+	dependencies {
+		classpath 'de.undercouch:gradle-download-task:5.7.0'
+	}
+}
+
+ext.configureDartSass = { Map config ->
+	if (!config.sources) {
+		throw new GradleException("configureDartSass requires a 'sources' file collection (the complete source tree, including partials)")
+	}
+	if (!config.outputDir) {
+		throw new GradleException("configureDartSass requires an 'outputDir'")
+	}
+	def sassSources = config.sources
+	def sassOutputDir = project.file(config.outputDir)
+	def sassVersion = config.version ?: '1.108.2'
+
+	// Platform and architecture normalization: Dart Sass publishes windows/macos/linux artifacts for x64/arm64
+	def sassOsName = System.getProperty('os.name', 'unknown').toLowerCase(Locale.ROOT)
+	def sassOsArch = System.getProperty('os.arch', 'unknown').toLowerCase(Locale.ROOT)
+	def sassPlatform
+	if (sassOsName.contains('win')) {
+		sassPlatform = 'windows'
+	} else if (sassOsName.contains('mac') || sassOsName.contains('darwin')) {
+		sassPlatform = 'macos'
+	} else if (sassOsName.contains('linux')) {
+		sassPlatform = 'linux'
+	} else {
+		throw new GradleException("Dart Sass is not available for operating system '${sassOsName}'")
+	}
+	def sassArch
+	if (sassOsArch in ['x86_64', 'amd64', 'x64']) {
+		sassArch = 'x64'
+	} else if (sassOsArch in ['aarch64', 'arm64']) {
+		sassArch = 'arm64'
+	} else {
+		throw new GradleException("Dart Sass is not available for architecture '${sassOsArch}' on ${sassPlatform}")
+	}
+	// Select the musl artifact only when the host is positively identified as musl-based
+	def muslSuffix = ''
+	if (sassPlatform == 'linux') {
+		def muslLoader = new File('/lib').listFiles()?.any { it.name.startsWith('ld-musl-') } ?: false
+		if (muslLoader) {
+			muslSuffix = '-musl'
+		}
+	}
+	def sassPlatformArch = "${sassPlatform}-${sassArch}${muslSuffix}"
+	def archiveExtension = (sassPlatform == 'windows') ? 'zip' : 'tar.gz'
+	def archiveName = "dart-sass-${sassVersion}-${sassPlatformArch}.${archiveExtension}"
+	def archiveUrl = "https://github.com/sass/dart-sass/releases/download/${sassVersion}/${archiveName}"
+
+	// SHA-256 of the immutable GitHub release assets (Dart Sass publishes no checksum file)
+	def dartSassChecksums = [
+		'windows-x64'      : '8c9f35ac5a82090b36df59d3f411fe4403ce04332dff5abbfc633c91b5e3fe13',
+		'windows-arm64'    : 'dbf45de59a696d6a741f8edf25ec5e55fb49c1db8b24e64a42dd72976337fa9c',
+		'macos-x64'        : '8822d1f3715d84126a6adfe7053559a64e69687bb6e1b5da0d7f854b0c6ba2fa',
+		'macos-arm64'      : '95b1bbb13f0b38ba8aacefae45ef23f11271231d24fb57b1593c9e2adf65481c',
+		'linux-x64'        : '32d2eb5b83cbc180fce9657ff3c57401a9006c59eccfe0bfdde0aa755a66d42f',
+		'linux-arm64'      : '1c7a587c81467e8f7551d71e5d62845b53270033c5cc3d36aa8fa07330a5d2a9',
+		'linux-x64-musl'   : 'a5519557dac62fbe468428d0025043e0cf4344bda2f7f6e3c3cb2fccc1f37b62',
+		'linux-arm64-musl': '4931bc8b31dcbf0dbf28ad5e390c275625b430ac8d8c006bbcd6fe58c8a3248b',
+	]
+	def sassChecksum = dartSassChecksums[sassPlatformArch]
+	if (sassChecksum == null) {
+		throw new GradleException("No pinned SHA-256 checksum for Dart Sass ${sassVersion} on ${sassPlatformArch}")
+	}
+
+	// One download/extraction folder per OS/arch/version, so different operating systems don't overwrite each other
+	def sassDownloadRoot = project.file("$rootDir/.sass-${sassPlatformArch}")
+	def sassArchiveFile = new File(sassDownloadRoot, archiveName)
+	def sassInstallDir = new File(sassDownloadRoot, sassVersion)
+	def sassExecutable = new File(sassInstallDir, sassPlatform == 'windows' ? 'dart-sass/sass.bat' : 'dart-sass/sass')
+
+	def downloadDartSass = tasks.register('downloadDartSass', de.undercouch.gradle.tasks.download.Download) {
+		src archiveUrl
+		dest sassArchiveFile
+		overwrite false
+	}
+
+	def verifyDartSass = tasks.register('verifyDartSass', de.undercouch.gradle.tasks.download.Verify) {
+		dependsOn downloadDartSass
+		src sassArchiveFile
+		algorithm 'SHA-256'
+		checksum sassChecksum
+	}
+
+	def unpackDartSass = tasks.register('unpackDartSass', Copy) {
+		dependsOn verifyDartSass
+		from(sassPlatform == 'windows' ? zipTree(sassArchiveFile) : tarTree(sassArchiveFile))
+		into sassInstallDir
+		doLast {
+			// tarTree can lose the executable bit: restore it on the entry script and the embedded Dart runtime
+			if (sassPlatform != 'windows') {
+				['dart-sass/sass', 'dart-sass/src/dart'].each { relativePath ->
+					def executableFile = new File(sassInstallDir, relativePath)
+					if (executableFile.exists()) {
+						executableFile.setExecutable(true, false)
+					}
+				}
+			}
+		}
+	}
+
+	// One output mapping per non-partial input: <basename>.min.css flattened into outputDir, plus its .map
+	def sassEntryPoints = sassSources.files.findAll { sourceFile ->
+		def fileName = sourceFile.name
+		!fileName.startsWith('_') && !fileName.contains('.min.') &&
+			(fileName.endsWith('.scss') || fileName.endsWith('.sass') || fileName.endsWith('.css'))
+	}
+	def outputByInput = [:]
+	def sassOutputFiles = []
+	sassEntryPoints.each { sourceFile ->
+		def baseName = sourceFile.name.replaceAll(/\.(scss|sass|css)$/, '')
+		def cssOutput = new File(sassOutputDir, "${baseName}.min.css")
+		def mapOutput = new File(sassOutputDir, "${baseName}.min.css.map")
+		if (outputByInput.containsValue(cssOutput)) {
+			throw new GradleException("Duplicate Sass output '${cssOutput}': more than one input maps to '${baseName}.min.css'")
+		}
+		outputByInput[sourceFile] = cssOutput
+		sassOutputFiles.addAll([cssOutput, mapOutput])
+	}
+
+	// Dart Sass misparses a Windows drive-letter colon inside input:output arguments, so every path is
+	// passed relative (forward slashes) to the common ancestor of all inputs and outputDir; the
+	// relative paths may contain '..' when framework CSS lives outside the application project root
+	def allPaths = (sassEntryPoints + [sassOutputDir]).collect { it.toPath().toAbsolutePath().normalize() }
+	def commonAncestor = allPaths.inject(null) { ancestor, path ->
+		if (ancestor == null) {
+			return path
+		}
+		if (ancestor.root != path.root) {
+			throw new GradleException("Cannot compile Sass: '${ancestor}' and '${path}' share no common root (different drive?)")
+		}
+		while (!path.startsWith(ancestor)) {
+			ancestor = ancestor.parent
+			if (ancestor == null) {
+				throw new GradleException("Cannot compile Sass: no common ancestor for '${path}'")
+			}
+		}
+		return ancestor
+	}
+	def relativeToAncestor = { path -> commonAncestor.relativize(path).toString().replace('\\', '/') }
+	def sassMappings = sassEntryPoints.collect { sourceFile ->
+		"${relativeToAncestor(sourceFile.toPath().toAbsolutePath().normalize())}:${relativeToAncestor(outputByInput[sourceFile].toPath().toAbsolutePath().normalize())}"
+	}
+
+	tasks.register('sassCompile', Exec) {
+		dependsOn unpackDartSass
+		// The complete unfiltered source tree (partials included), the compiler and its version are inputs;
+		// partials are filtered out only when building the compiler entry points above
+		inputs.files sassSources
+		inputs.files sassExecutable
+		inputs.property 'dartSassVersion', sassVersion
+		outputs.files sassOutputFiles
+		workingDir commonAncestor.toFile()
+		if (sassPlatform == 'windows') {
+			executable 'cmd'
+			args '/c', sassExecutable.absolutePath
+		} else {
+			executable sassExecutable.absolutePath
+		}
+		// No --update: Gradle inputs/outputs decide when compilation is needed
+		args '--style=compressed', '--source-map'
+		args sassMappings
+	}
+}

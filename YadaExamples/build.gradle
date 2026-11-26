@@ -11,8 +11,6 @@ buildscript {
 plugins {
     id 'application' // for the "run" task
 	id 'org.hidetake.ssh' version '2.12.0'
-	id 'com.meiuwa.gradle.sass' version "1.0.0"	// Only when using SASS !!! v2.0.0 may not work
-	id("com.github.node-gradle.node") version "3.5.1"
 }
 
 apply from: '../loadSharedProperties.gradle'
@@ -25,6 +23,7 @@ apply plugin: 'war'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'net.yadaframework.tools'
 apply plugin: 'org.hidetake.ssh'        // https://gradle-ssh-plugin.github.io
+apply from: '../YadaTools/scripts/dart-sass.gradle' // Only when using SASS !!!
 
 // Reading the gradle.local.properties file
 def yadaSourceRepoPath = null;
@@ -46,27 +45,14 @@ if (!project.hasProperty('env')) {
 	ext.env="envUnset"
 }
 
-sassCompile {
-    source = project.files(fileTree("src/main/webapp/res/css"), fileTree("$YadaWebLib/src/main/resources/net/yadaframework/views/yada/css"), fileTree("$YadaWebCmsLib/src/main/resources/net/yadaframework/views/yada/css")) 
-    include("**/*.sass", "**/*.scss", "**/*.css")
-    exclude("**/*.min.*", "**/_*.sass", "**/_*.scss")
-    output = file("src/main/webapp/res/css")
-}
-
-def sassOsName = System.getProperty('os.name', 'unknown').toLowerCase(Locale.ROOT)
-def sassArchName = System.getProperty('os.arch', 'unknown').toLowerCase(Locale.ROOT)
-def sassPlatformKey
-if (sassOsName.contains('win')) {
-	sassPlatformKey = 'windows'
-} else if (sassOsName.contains('mac') || sassOsName.contains('darwin')) {
-	sassPlatformKey = 'macos'
-} else if (sassOsName.contains('linux')) {
-	sassPlatformKey = 'linux'
-} else {
-	sassPlatformKey = sassOsName.replaceAll(/[^a-z0-9]+/, '-')
-}
-// One Dart Sass download per platform, so that Windows (Eclipse) and WSL/Linux builds don't overwrite each other
-def sassDownloadDir = "$rootDir/.sass-${sassPlatformKey}-${sassArchName.replaceAll(/[^a-z0-9]+/, '-')}"
+// The complete source tree, partials (_*.scss/_*.sass) included: they are task inputs but never compiler entry points
+def sassSourceTree = project.files(
+	fileTree("src/main/webapp/res/css") { include("**/*.sass", "**/*.scss", "**/*.css"); exclude("**/*.min.*") },
+	fileTree("$YadaWebLib/src/main/resources/net/yadaframework/views/yada/css") { include("**/*.sass", "**/*.scss", "**/*.css"); exclude("**/*.min.*") },
+	fileTree("$YadaWebCmsLib/src/main/resources/net/yadaframework/views/yada/css") { include("**/*.sass", "**/*.scss", "**/*.css"); exclude("**/*.min.*") })
+configureDartSass(sources: sassSourceTree, outputDir: file("src/main/webapp/res/css"))
+// Generated CSS lives under src/main/webapp, so packaging must build it first
+war.dependsOn 'sassCompile'
 
 java {
     sourceCompatibility = JavaVersion.valueOf("VERSION_${java_version}")
@@ -259,11 +245,4 @@ task dbSchema(dependsOn: [classes], type: JavaExec) {
     }
 }
 
-sass {
-	properties = "$rootDir/sass.properties"
-    download {
-		version = "1.58.2"
-		output = sassDownloadDir
-    }
-}
 
