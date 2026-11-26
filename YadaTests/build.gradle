@@ -88,7 +88,7 @@ configurations {
 	}
 	// The unit suite compiles against the harness (e.g. path resolution of the Tomcat fixture) without starting it
 	testImplementation.extendsFrom harnessImplementation
-	all*.exclude group: 'commons-logging', module: 'commons-logging'
+	configureEach { exclude group: 'commons-logging', module: 'commons-logging' }
 }
 
 dependencyLocking {
